@@ -1,0 +1,14 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Protocol.ChannelStreaming",	
+	"name": "ChannelDelete",
+	"messageType": "8",
+	"protocol": "1",
+	"senderRole": "producer",
+	"protocolRoles": "producer,consumer",
+	"fields":
+	[
+		{ "name": "channelId", "type": "long" },
+		{ "name": "deleteReason", "type": ["null", "string"] }
+	]
+}
