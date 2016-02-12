@@ -1,0 +1,18 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Protocol.Core",	
+	"name": "OpenSession",
+	"messageType": "2",
+	"protocol": "0",
+	"senderRole": "server",
+	"protocolRoles": "client,server",
+	"fields":
+	[
+		{ "name": "applicationName", "type": "string" },
+		{ "name": "sessionId", "type": "string" },
+		{ 
+		"name": "supportedProtocols", 
+		"type": { "type": "array", "items": "Energistics.Datatypes.SupportedProtocol" } 
+	}
+	]
+}

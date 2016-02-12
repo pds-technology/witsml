@@ -1,0 +1,18 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Datatypes.ChannelData",	
+	"name": "DataItem",
+	"fields":
+	[
+		{ 
+		"name": "indexes", 
+		"type": { "type": "array", "items": "Energistics.Datatypes.ChannelData.IndexValue" } 
+	},
+		{ "name": "channelId", "type": "long" },
+		{ "name": "value", "type": "Energistics.Datatypes.DataValue" },
+		{ 
+		"name": "valueAttributes", 
+		"type": { "type": "array", "items": "Energistics.Datatypes.DataAttribute" } 
+	}
+	]
+}

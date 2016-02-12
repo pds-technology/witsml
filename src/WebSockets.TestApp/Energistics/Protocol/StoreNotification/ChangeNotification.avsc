@@ -1,0 +1,13 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Protocol.StoreNotification",	
+	"name": "ChangeNotification",
+	"messageType": "2",
+	"protocol": "5",
+	"senderRole": "store",
+	"protocolRoles": "store,customer",
+	"fields":
+	[
+		{ "name": "change", "type": "Energistics.Datatypes.Object.ObjectChange" }
+	]
+}

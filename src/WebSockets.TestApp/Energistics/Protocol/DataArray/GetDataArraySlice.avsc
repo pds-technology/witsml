@@ -1,0 +1,21 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Protocol.DataArray",	
+	"name": "GetDataArraySlice",
+	"messageType": "3",
+	"protocol": "7",
+	"senderRole": "customer",
+	"protocolRoles": "store,customer",
+	"fields":
+	[
+		{ "name": "uri", "type": "string" },
+		{ 
+		"name": "start", 
+		"type": { "type": "array", "items": "long" } 
+	},
+		{ 
+		"name": "count", 
+		"type": { "type": "array", "items": "long" } 
+	}
+	]
+}

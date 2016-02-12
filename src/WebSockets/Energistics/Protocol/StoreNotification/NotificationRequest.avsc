@@ -1,0 +1,13 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Protocol.StoreNotification",	
+	"name": "NotificationRequest",
+	"messageType": "1",
+	"protocol": "5",
+	"senderRole": "customer",
+	"protocolRoles": "store,customer",
+	"fields":
+	[
+		{ "name": "request", "type": "Energistics.Datatypes.Object.NotificationRequestRecord" }
+	]
+}

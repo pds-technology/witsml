@@ -1,0 +1,3275 @@
+{
+  "namespace": "Energistics",
+  "protocol": "Etp",
+  "version": "1.0",
+  "types": [
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes",
+      "name": "ArrayOfBoolean",
+      "fields": [
+        {
+          "name": "values",
+          "type": {
+            "type": "array",
+            "items": "boolean"
+          }
+        }
+      ],
+      "fullName": "Energistics.Datatypes.ArrayOfBoolean",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes",
+      "name": "ArrayOfDouble",
+      "fields": [
+        {
+          "name": "values",
+          "type": {
+            "type": "array",
+            "items": "double"
+          }
+        }
+      ],
+      "fullName": "Energistics.Datatypes.ArrayOfDouble",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes",
+      "name": "ArrayOfFloat",
+      "fields": [
+        {
+          "name": "values",
+          "type": {
+            "type": "array",
+            "items": "float"
+          }
+        }
+      ],
+      "fullName": "Energistics.Datatypes.ArrayOfFloat",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes",
+      "name": "ArrayOfInt",
+      "fields": [
+        {
+          "name": "values",
+          "type": {
+            "type": "array",
+            "items": "int"
+          }
+        }
+      ],
+      "fullName": "Energistics.Datatypes.ArrayOfInt",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes",
+      "name": "ArrayOfLong",
+      "fields": [
+        {
+          "name": "values",
+          "type": {
+            "type": "array",
+            "items": "long"
+          }
+        }
+      ],
+      "fullName": "Energistics.Datatypes.ArrayOfLong",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes",
+      "name": "AnyArray",
+      "fields": [
+        {
+          "name": "item",
+          "type": [
+            "null",
+            "Energistics.Datatypes.ArrayOfBoolean",
+            "bytes",
+            "Energistics.Datatypes.ArrayOfInt",
+            "Energistics.Datatypes.ArrayOfLong",
+            "Energistics.Datatypes.ArrayOfFloat",
+            "Energistics.Datatypes.ArrayOfDouble"
+          ]
+        }
+      ],
+      "fullName": "Energistics.Datatypes.AnyArray",
+      "depends": [
+        "Energistics.Datatypes.ArrayOfBoolean",
+        "Energistics.Datatypes.ArrayOfInt",
+        "Energistics.Datatypes.ArrayOfLong",
+        "Energistics.Datatypes.ArrayOfFloat",
+        "Energistics.Datatypes.ArrayOfDouble"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes",
+      "name": "DateTime",
+      "aliases": [
+        "etp.dt"
+      ],
+      "fields": [
+        {
+          "name": "time",
+          "type": "long"
+        },
+        {
+          "name": "offset",
+          "type": "float"
+        }
+      ],
+      "fullName": "Energistics.Datatypes.DateTime",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes",
+      "name": "DataValue",
+      "fields": [
+        {
+          "name": "item",
+          "type": [
+            "null",
+            "double",
+            "float",
+            "int",
+            "long",
+            "string",
+            "Energistics.Datatypes.DateTime",
+            "Energistics.Datatypes.ArrayOfDouble",
+            "boolean",
+            "bytes"
+          ]
+        }
+      ],
+      "fullName": "Energistics.Datatypes.DataValue",
+      "depends": [
+        "Energistics.Datatypes.DateTime",
+        "Energistics.Datatypes.ArrayOfDouble"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes",
+      "name": "DataAttribute",
+      "fields": [
+        {
+          "name": "attributeId",
+          "type": "int"
+        },
+        {
+          "name": "attributeValue",
+          "type": "Energistics.Datatypes.DataValue"
+        }
+      ],
+      "fullName": "Energistics.Datatypes.DataAttribute",
+      "depends": [
+        "Energistics.Datatypes.DataValue"
+      ]
+    },
+    {
+      "type": "enum",
+      "namespace": "Energistics.Datatypes",
+      "name": "ErrorCodes",
+      "symbols": [
+        "ENOROLE",
+        "ENOSUPPORTEDPROTOCOLS",
+        "EINVALID_MESSAGETYPE",
+        "EUNSUPPORTED_PROTOCOL"
+      ],
+      "fullName": "Energistics.Datatypes.ErrorCodes",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes",
+      "name": "MessageHeader",
+      "fields": [
+        {
+          "name": "protocol",
+          "type": "int"
+        },
+        {
+          "name": "messageType",
+          "type": "int"
+        },
+        {
+          "name": "correlationId",
+          "type": "long"
+        },
+        {
+          "name": "messageId",
+          "type": "long"
+        },
+        {
+          "name": "messageFlags",
+          "type": "int"
+        }
+      ],
+      "fullName": "Energistics.Datatypes.MessageHeader",
+      "depends": []
+    },
+    {
+      "type": "enum",
+      "namespace": "Energistics.Datatypes",
+      "name": "Protocols",
+      "symbols": [
+        "Core",
+        "ChannelStreaming",
+        "ChannelDataFrame",
+        "Discovery",
+        "Store",
+        "StoreNotification",
+        "GrowingObject",
+        "DataArray"
+      ],
+      "fullName": "Energistics.Datatypes.Protocols",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes",
+      "name": "Version",
+      "fields": [
+        {
+          "name": "major",
+          "type": "int"
+        },
+        {
+          "name": "minor",
+          "type": "int"
+        },
+        {
+          "name": "revision",
+          "type": "int"
+        },
+        {
+          "name": "patch",
+          "type": "int"
+        }
+      ],
+      "fullName": "Energistics.Datatypes.Version",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes",
+      "name": "SupportedProtocol",
+      "fields": [
+        {
+          "name": "protocol",
+          "type": "int"
+        },
+        {
+          "name": "protocolVersion",
+          "type": "Energistics.Datatypes.Version"
+        },
+        {
+          "name": "role",
+          "type": "string"
+        },
+        {
+          "name": "protocolCapabilities",
+          "type": {
+            "type": "map",
+            "values": "Energistics.Datatypes.DataValue"
+          }
+        }
+      ],
+      "fullName": "Energistics.Datatypes.SupportedProtocol",
+      "depends": [
+        "Energistics.Datatypes.Version",
+        "Energistics.Datatypes.DataValue"
+      ]
+    },
+    {
+      "type": "enum",
+      "namespace": "Energistics.Datatypes.ChannelData",
+      "name": "ChannelIndexTypes",
+      "symbols": [
+        "Time",
+        "Depth",
+        "ElapsedTime"
+      ],
+      "fullName": "Energistics.Datatypes.ChannelData.ChannelIndexTypes",
+      "depends": []
+    },
+    {
+      "type": "enum",
+      "namespace": "Energistics.Datatypes.ChannelData",
+      "name": "ChannelStatuses",
+      "symbols": [
+        "Active",
+        "Inactive",
+        "Closed"
+      ],
+      "fullName": "Energistics.Datatypes.ChannelData.ChannelStatuses",
+      "depends": []
+    },
+    {
+      "type": "enum",
+      "namespace": "Energistics.Datatypes.ChannelData",
+      "name": "ErrorCodes",
+      "symbols": [
+        "EINVALID_URI",
+        "EINVALID_CHANNELID"
+      ],
+      "fullName": "Energistics.Datatypes.ChannelData.ErrorCodes",
+      "depends": []
+    },
+    {
+      "type": "enum",
+      "namespace": "Energistics.Datatypes.ChannelData",
+      "name": "IndexDirections",
+      "symbols": [
+        "Increasing",
+        "Decreasing"
+      ],
+      "fullName": "Energistics.Datatypes.ChannelData.IndexDirections",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes.ChannelData",
+      "name": "IndexMetadataRecord",
+      "fields": [
+        {
+          "name": "indexType",
+          "type": "Energistics.Datatypes.ChannelData.ChannelIndexTypes"
+        },
+        {
+          "name": "uom",
+          "type": "string"
+        },
+        {
+          "name": "datum",
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        {
+          "name": "direction",
+          "type": "Energistics.Datatypes.ChannelData.IndexDirections"
+        },
+        {
+          "name": "mnemonic",
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        {
+          "name": "description",
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        {
+          "name": "uri",
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        {
+          "name": "customData",
+          "type": {
+            "type": "map",
+            "values": "Energistics.Datatypes.DataValue"
+          }
+        }
+      ],
+      "fullName": "Energistics.Datatypes.ChannelData.IndexMetadataRecord",
+      "depends": [
+        "Energistics.Datatypes.ChannelData.ChannelIndexTypes",
+        "Energistics.Datatypes.ChannelData.IndexDirections",
+        "Energistics.Datatypes.DataValue"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes.ChannelData",
+      "name": "IndexValue",
+      "fields": [
+        {
+          "name": "item",
+          "type": [
+            "Energistics.Datatypes.DateTime",
+            "double",
+            "long"
+          ]
+        }
+      ],
+      "fullName": "Energistics.Datatypes.ChannelData.IndexValue",
+      "depends": [
+        "Energistics.Datatypes.DateTime"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes.ChannelData",
+      "name": "ChannelMetadataRecord",
+      "fields": [
+        {
+          "name": "channelUri",
+          "type": "string"
+        },
+        {
+          "name": "channelId",
+          "type": "long"
+        },
+        {
+          "name": "indexes",
+          "type": {
+            "type": "array",
+            "items": "Energistics.Datatypes.ChannelData.IndexMetadataRecord"
+          }
+        },
+        {
+          "name": "mnemonic",
+          "type": "string"
+        },
+        {
+          "name": "dataType",
+          "type": "string"
+        },
+        {
+          "name": "uom",
+          "type": "string"
+        },
+        {
+          "name": "startIndex",
+          "type": [
+            "null",
+            "Energistics.Datatypes.ChannelData.IndexValue"
+          ]
+        },
+        {
+          "name": "endIndex",
+          "type": [
+            "null",
+            "Energistics.Datatypes.ChannelData.IndexValue"
+          ]
+        },
+        {
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "Energistics.Datatypes.ChannelData.ChannelStatuses"
+        },
+        {
+          "name": "contentType",
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        {
+          "name": "source",
+          "type": "string"
+        },
+        {
+          "name": "measureClass",
+          "type": "string"
+        },
+        {
+          "name": "uuid",
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      ],
+      "fullName": "Energistics.Datatypes.ChannelData.ChannelMetadataRecord",
+      "depends": [
+        "Energistics.Datatypes.ChannelData.IndexMetadataRecord",
+        "Energistics.Datatypes.ChannelData.IndexValue",
+        "Energistics.Datatypes.ChannelData.IndexValue",
+        "Energistics.Datatypes.ChannelData.ChannelStatuses"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes.ChannelData",
+      "name": "ChannelRangeInfo",
+      "fields": [
+        {
+          "name": "channelId",
+          "type": {
+            "type": "array",
+            "items": "long"
+          }
+        },
+        {
+          "name": "startIndex",
+          "type": "Energistics.Datatypes.ChannelData.IndexValue"
+        },
+        {
+          "name": "endIndex",
+          "type": "Energistics.Datatypes.ChannelData.IndexValue"
+        }
+      ],
+      "fullName": "Energistics.Datatypes.ChannelData.ChannelRangeInfo",
+      "depends": [
+        "Energistics.Datatypes.ChannelData.IndexValue",
+        "Energistics.Datatypes.ChannelData.IndexValue"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes.ChannelData",
+      "name": "DataFrame",
+      "fields": [
+        {
+          "name": "index",
+          "type": {
+            "type": "array",
+            "items": "Energistics.Datatypes.ChannelData.IndexValue"
+          }
+        },
+        {
+          "name": "data",
+          "type": {
+            "type": "array",
+            "items": "Energistics.Datatypes.DataValue"
+          }
+        }
+      ],
+      "fullName": "Energistics.Datatypes.ChannelData.DataFrame",
+      "depends": [
+        "Energistics.Datatypes.ChannelData.IndexValue",
+        "Energistics.Datatypes.DataValue"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes.ChannelData",
+      "name": "DataItem",
+      "fields": [
+        {
+          "name": "indexes",
+          "type": {
+            "type": "array",
+            "items": "Energistics.Datatypes.ChannelData.IndexValue"
+          }
+        },
+        {
+          "name": "channelId",
+          "type": "long"
+        },
+        {
+          "name": "value",
+          "type": "Energistics.Datatypes.DataValue"
+        },
+        {
+          "name": "valueAttributes",
+          "type": {
+            "type": "array",
+            "items": "Energistics.Datatypes.DataAttribute"
+          }
+        }
+      ],
+      "fullName": "Energistics.Datatypes.ChannelData.DataItem",
+      "depends": [
+        "Energistics.Datatypes.ChannelData.IndexValue",
+        "Energistics.Datatypes.DataValue",
+        "Energistics.Datatypes.DataAttribute"
+      ]
+    },
+    {
+      "type": "enum",
+      "namespace": "Energistics.Datatypes.ChannelData",
+      "name": "Roles",
+      "symbols": [
+        "Producer",
+        "Consumer"
+      ],
+      "fullName": "Energistics.Datatypes.ChannelData.Roles",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes.ChannelData",
+      "name": "StreamingStartIndex",
+      "fields": [
+        {
+          "name": "item",
+          "type": [
+            "null",
+            "int",
+            "Energistics.Datatypes.ChannelData.IndexValue"
+          ]
+        }
+      ],
+      "fullName": "Energistics.Datatypes.ChannelData.StreamingStartIndex",
+      "depends": [
+        "Energistics.Datatypes.ChannelData.IndexValue"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes.ChannelData",
+      "name": "ChannelStreamingInfo",
+      "fields": [
+        {
+          "name": "channelId",
+          "type": "long"
+        },
+        {
+          "name": "startIndex",
+          "type": "Energistics.Datatypes.ChannelData.StreamingStartIndex"
+        },
+        {
+          "name": "receiveChangeNotification",
+          "type": "boolean"
+        }
+      ],
+      "fullName": "Energistics.Datatypes.ChannelData.ChannelStreamingInfo",
+      "depends": [
+        "Energistics.Datatypes.ChannelData.StreamingStartIndex"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes.Object",
+      "name": "NotificationRequestRecord",
+      "fields": [
+        {
+          "name": "uri",
+          "type": "string"
+        },
+        {
+          "name": "uuid",
+          "type": "string"
+        },
+        {
+          "name": "includeObjectData",
+          "type": "boolean"
+        },
+        {
+          "name": "startTime",
+          "type": "Energistics.Datatypes.DateTime"
+        },
+        {
+          "name": "objectTypes",
+          "type": {
+            "type": "array",
+            "items": "string"
+          }
+        }
+      ],
+      "fullName": "Energistics.Datatypes.Object.NotificationRequestRecord",
+      "depends": [
+        "Energistics.Datatypes.DateTime"
+      ]
+    },
+    {
+      "type": "enum",
+      "namespace": "Energistics.Datatypes.Object",
+      "name": "ObjectChangeTypes",
+      "symbols": [
+        "Upsert",
+        "Delete"
+      ],
+      "fullName": "Energistics.Datatypes.Object.ObjectChangeTypes",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes.Object",
+      "name": "Resource",
+      "fields": [
+        {
+          "name": "uri",
+          "type": "string"
+        },
+        {
+          "name": "contentType",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "channelSubscribable",
+          "type": "boolean"
+        },
+        {
+          "name": "customData",
+          "type": {
+            "type": "map",
+            "values": "string"
+          }
+        },
+        {
+          "name": "resourceType",
+          "type": "string"
+        },
+        {
+          "name": "hasChildren",
+          "type": "int"
+        },
+        {
+          "name": "uuid",
+          "type": [
+            "null",
+            "string"
+          ]
+        },
+        {
+          "name": "lastChanged",
+          "type": "Energistics.Datatypes.DateTime"
+        },
+        {
+          "name": "objectNotifiable",
+          "type": "boolean"
+        }
+      ],
+      "fullName": "Energistics.Datatypes.Object.Resource",
+      "depends": [
+        "Energistics.Datatypes.DateTime"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes.Object",
+      "name": "DataObject",
+      "fields": [
+        {
+          "name": "resource",
+          "type": "Energistics.Datatypes.Object.Resource"
+        },
+        {
+          "name": "contentEncoding",
+          "type": "string"
+        },
+        {
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "fullName": "Energistics.Datatypes.Object.DataObject",
+      "depends": [
+        "Energistics.Datatypes.Object.Resource"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Datatypes.Object",
+      "name": "ObjectChange",
+      "fields": [
+        {
+          "name": "changeType",
+          "type": "Energistics.Datatypes.Object.ObjectChangeTypes"
+        },
+        {
+          "name": "changeTime",
+          "type": "Energistics.Datatypes.DateTime"
+        },
+        {
+          "name": "dataObject",
+          "type": "Energistics.Datatypes.Object.DataObject"
+        }
+      ],
+      "fullName": "Energistics.Datatypes.Object.ObjectChange",
+      "depends": [
+        "Energistics.Datatypes.Object.ObjectChangeTypes",
+        "Energistics.Datatypes.DateTime",
+        "Energistics.Datatypes.Object.DataObject"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.ChannelDataFrame",
+      "name": "ChannelDataFrameSet",
+      "messageType": "4",
+      "protocol": "2",
+      "senderRole": "producer",
+      "protocolRoles": "producer,consumer",
+      "fields": [
+        {
+          "name": "channels",
+          "type": {
+            "type": "array",
+            "items": "long"
+          }
+        },
+        {
+          "name": "data",
+          "type": {
+            "type": "array",
+            "items": "Energistics.Datatypes.ChannelData.DataFrame"
+          }
+        }
+      ],
+      "fullName": "Energistics.Protocol.ChannelDataFrame.ChannelDataFrameSet",
+      "depends": [
+        "Energistics.Datatypes.ChannelData.DataFrame"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.ChannelDataFrame",
+      "name": "ChannelMetadata",
+      "messageType": "3",
+      "protocol": "2",
+      "senderRole": "producer",
+      "protocolRoles": "producer,consumer",
+      "fields": [
+        {
+          "name": "indexes",
+          "type": {
+            "type": "array",
+            "items": "Energistics.Datatypes.ChannelData.IndexMetadataRecord"
+          }
+        },
+        {
+          "name": "channels",
+          "type": {
+            "type": "array",
+            "items": "Energistics.Datatypes.ChannelData.ChannelMetadataRecord"
+          }
+        }
+      ],
+      "fullName": "Energistics.Protocol.ChannelDataFrame.ChannelMetadata",
+      "depends": [
+        "Energistics.Datatypes.ChannelData.IndexMetadataRecord",
+        "Energistics.Datatypes.ChannelData.ChannelMetadataRecord"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.ChannelDataFrame",
+      "name": "RequestChannelData",
+      "messageType": "1",
+      "protocol": "2",
+      "senderRole": "consumer",
+      "protocolRoles": "producer,consumer",
+      "fields": [
+        {
+          "name": "uri",
+          "type": "string"
+        },
+        {
+          "name": "fromIndex",
+          "type": [
+            "null",
+            "Energistics.Datatypes.ChannelData.IndexValue"
+          ]
+        },
+        {
+          "name": "toIndex",
+          "type": [
+            "null",
+            "Energistics.Datatypes.ChannelData.IndexValue"
+          ]
+        }
+      ],
+      "fullName": "Energistics.Protocol.ChannelDataFrame.RequestChannelData",
+      "depends": [
+        "Energistics.Datatypes.ChannelData.IndexValue",
+        "Energistics.Datatypes.ChannelData.IndexValue"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.ChannelStreaming",
+      "name": "ChannelData",
+      "messageType": "3",
+      "protocol": "1",
+      "senderRole": "producer",
+      "protocolRoles": "producer,consumer",
+      "fields": [
+        {
+          "name": "data",
+          "type": {
+            "type": "array",
+            "items": "Energistics.Datatypes.ChannelData.DataItem"
+          }
+        }
+      ],
+      "fullName": "Energistics.Protocol.ChannelStreaming.ChannelData",
+      "depends": [
+        "Energistics.Datatypes.ChannelData.DataItem"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.ChannelStreaming",
+      "name": "ChannelDataChange",
+      "messageType": "6",
+      "protocol": "1",
+      "senderRole": "producer",
+      "protocolRoles": "producer,consumer",
+      "fields": [
+        {
+          "name": "channelId",
+          "type": "long"
+        },
+        {
+          "name": "startIndex",
+          "type": "Energistics.Datatypes.ChannelData.IndexValue"
+        },
+        {
+          "name": "endIndex",
+          "type": "Energistics.Datatypes.ChannelData.IndexValue"
+        },
+        {
+          "name": "data",
+          "type": {
+            "type": "array",
+            "items": "Energistics.Datatypes.ChannelData.DataItem"
+          }
+        }
+      ],
+      "fullName": "Energistics.Protocol.ChannelStreaming.ChannelDataChange",
+      "depends": [
+        "Energistics.Datatypes.ChannelData.IndexValue",
+        "Energistics.Datatypes.ChannelData.IndexValue",
+        "Energistics.Datatypes.ChannelData.DataItem"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.ChannelStreaming",
+      "name": "ChannelDelete",
+      "messageType": "8",
+      "protocol": "1",
+      "senderRole": "producer",
+      "protocolRoles": "producer,consumer",
+      "fields": [
+        {
+          "name": "channelId",
+          "type": "long"
+        },
+        {
+          "name": "deleteReason",
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      ],
+      "fullName": "Energistics.Protocol.ChannelStreaming.ChannelDelete",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.ChannelStreaming",
+      "name": "ChannelDescribe",
+      "messageType": "1",
+      "protocol": "1",
+      "senderRole": "consumer",
+      "protocolRoles": "producer,consumer",
+      "fields": [
+        {
+          "name": "uris",
+          "type": {
+            "type": "array",
+            "items": "string"
+          }
+        }
+      ],
+      "fullName": "Energistics.Protocol.ChannelStreaming.ChannelDescribe",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.ChannelStreaming",
+      "name": "ChannelMetadata",
+      "messageType": "2",
+      "protocol": "1",
+      "senderRole": "producer",
+      "protocolRoles": "producer,consumer",
+      "fields": [
+        {
+          "name": "channels",
+          "type": {
+            "type": "array",
+            "items": "Energistics.Datatypes.ChannelData.ChannelMetadataRecord"
+          }
+        }
+      ],
+      "fullName": "Energistics.Protocol.ChannelStreaming.ChannelMetadata",
+      "depends": [
+        "Energistics.Datatypes.ChannelData.ChannelMetadataRecord"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.ChannelStreaming",
+      "name": "ChannelRangeRequest",
+      "messageType": "9",
+      "protocol": "1",
+      "senderRole": "consumer",
+      "protocolRoles": "producer,consumer",
+      "fields": [
+        {
+          "name": "channelRanges",
+          "type": {
+            "type": "array",
+            "items": "Energistics.Datatypes.ChannelData.ChannelRangeInfo"
+          }
+        }
+      ],
+      "fullName": "Energistics.Protocol.ChannelStreaming.ChannelRangeRequest",
+      "depends": [
+        "Energistics.Datatypes.ChannelData.ChannelRangeInfo"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.ChannelStreaming",
+      "name": "ChannelStatusChange",
+      "messageType": "10",
+      "protocol": "1",
+      "senderRole": "producer",
+      "protocolRoles": "producer,consumer",
+      "fields": [
+        {
+          "name": "channelId",
+          "type": "long"
+        },
+        {
+          "name": "status",
+          "type": "Energistics.Datatypes.ChannelData.ChannelStatuses"
+        }
+      ],
+      "fullName": "Energistics.Protocol.ChannelStreaming.ChannelStatusChange",
+      "depends": [
+        "Energistics.Datatypes.ChannelData.ChannelStatuses"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.ChannelStreaming",
+      "name": "ChannelStreamingStart",
+      "messageType": "4",
+      "protocol": "1",
+      "senderRole": "consumer",
+      "protocolRoles": "producer,consumer",
+      "fields": [
+        {
+          "name": "channels",
+          "type": {
+            "type": "array",
+            "items": "Energistics.Datatypes.ChannelData.ChannelStreamingInfo"
+          }
+        }
+      ],
+      "fullName": "Energistics.Protocol.ChannelStreaming.ChannelStreamingStart",
+      "depends": [
+        "Energistics.Datatypes.ChannelData.ChannelStreamingInfo"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.ChannelStreaming",
+      "name": "ChannelStreamingStop",
+      "messageType": "5",
+      "protocol": "1",
+      "senderRole": "consumer",
+      "protocolRoles": "producer,consumer",
+      "fields": [
+        {
+          "name": "channels",
+          "type": {
+            "type": "array",
+            "items": "int"
+          }
+        }
+      ],
+      "fullName": "Energistics.Protocol.ChannelStreaming.ChannelStreamingStop",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.ChannelStreaming",
+      "name": "Start",
+      "messageType": "0",
+      "protocol": "1",
+      "senderRole": "consumer",
+      "protocolRoles": "producer,consumer",
+      "fields": [
+        {
+          "name": "maxMessageRate",
+          "type": "int"
+        },
+        {
+          "name": "maxDataItems",
+          "type": "int"
+        }
+      ],
+      "fullName": "Energistics.Protocol.ChannelStreaming.Start",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.DataArray",
+      "name": "DataArray",
+      "messageType": "1",
+      "protocol": "7",
+      "senderRole": "store",
+      "protocolRoles": "store,customer",
+      "fields": [
+        {
+          "name": "dimensions",
+          "type": {
+            "type": "array",
+            "items": "long"
+          }
+        },
+        {
+          "name": "data",
+          "type": "Energistics.Datatypes.AnyArray"
+        }
+      ],
+      "fullName": "Energistics.Protocol.DataArray.DataArray",
+      "depends": [
+        "Energistics.Datatypes.AnyArray"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.DataArray",
+      "name": "GetDataArray",
+      "messageType": "2",
+      "protocol": "7",
+      "senderRole": "customer",
+      "protocolRoles": "store,customer",
+      "fields": [
+        {
+          "name": "uri",
+          "type": "string"
+        }
+      ],
+      "fullName": "Energistics.Protocol.DataArray.GetDataArray",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.DataArray",
+      "name": "GetDataArraySlice",
+      "messageType": "3",
+      "protocol": "7",
+      "senderRole": "customer",
+      "protocolRoles": "store,customer",
+      "fields": [
+        {
+          "name": "uri",
+          "type": "string"
+        },
+        {
+          "name": "start",
+          "type": {
+            "type": "array",
+            "items": "long"
+          }
+        },
+        {
+          "name": "count",
+          "type": {
+            "type": "array",
+            "items": "long"
+          }
+        }
+      ],
+      "fullName": "Energistics.Protocol.DataArray.GetDataArraySlice",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.Core",
+      "name": "Acknowledge",
+      "messageType": "1001",
+      "protocol": "0",
+      "senderRole": "*",
+      "protocolRoles": "client,server",
+      "fields": [],
+      "fullName": "Energistics.Protocol.Core.Acknowledge",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.Core",
+      "name": "CloseSession",
+      "messageType": "5",
+      "protocol": "0",
+      "senderRole": "client,server",
+      "protocolRoles": "client,server",
+      "fields": [
+        {
+          "name": "reason",
+          "type": [
+            "null",
+            "string"
+          ]
+        }
+      ],
+      "fullName": "Energistics.Protocol.Core.CloseSession",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.Core",
+      "name": "OpenSession",
+      "messageType": "2",
+      "protocol": "0",
+      "senderRole": "server",
+      "protocolRoles": "client,server",
+      "fields": [
+        {
+          "name": "applicationName",
+          "type": "string"
+        },
+        {
+          "name": "sessionId",
+          "type": "string"
+        },
+        {
+          "name": "supportedProtocols",
+          "type": {
+            "type": "array",
+            "items": "Energistics.Datatypes.SupportedProtocol"
+          }
+        }
+      ],
+      "fullName": "Energistics.Protocol.Core.OpenSession",
+      "depends": [
+        "Energistics.Datatypes.SupportedProtocol"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.Core",
+      "name": "ProtocolException",
+      "messageType": "1000",
+      "protocol": "0",
+      "senderRole": "*",
+      "protocolRoles": "client,server",
+      "fields": [
+        {
+          "name": "errorCode",
+          "type": "int"
+        },
+        {
+          "name": "errorMessage",
+          "type": "string"
+        }
+      ],
+      "fullName": "Energistics.Protocol.Core.ProtocolException",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.Core",
+      "name": "RequestSession",
+      "messageType": "1",
+      "protocol": "0",
+      "senderRole": "client",
+      "protocolRoles": "client,server",
+      "fields": [
+        {
+          "name": "applicationName",
+          "type": "string"
+        },
+        {
+          "name": "requestedProtocols",
+          "type": {
+            "type": "array",
+            "items": "Energistics.Datatypes.SupportedProtocol"
+          }
+        }
+      ],
+      "fullName": "Energistics.Protocol.Core.RequestSession",
+      "depends": [
+        "Energistics.Datatypes.SupportedProtocol"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.Discovery",
+      "name": "GetResources",
+      "messageType": "1",
+      "protocol": "3",
+      "senderRole": "customer",
+      "protocolRoles": "store,customer",
+      "fields": [
+        {
+          "name": "uri",
+          "type": "string"
+        }
+      ],
+      "fullName": "Energistics.Protocol.Discovery.GetResources",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.Discovery",
+      "name": "GetResourcesResponse",
+      "messageType": "2",
+      "protocol": "3",
+      "senderRole": "store",
+      "protocolRoles": "store,customer",
+      "fields": [
+        {
+          "name": "resource",
+          "type": "Energistics.Datatypes.Object.Resource"
+        }
+      ],
+      "fullName": "Energistics.Protocol.Discovery.GetResourcesResponse",
+      "depends": [
+        "Energistics.Datatypes.Object.Resource"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.GrowingObject",
+      "name": "GrowingObjectDelete",
+      "messageType": "1",
+      "protocol": "6",
+      "senderRole": "customer",
+      "protocolRoles": "store,customer",
+      "fields": [
+        {
+          "name": "uuid",
+          "type": "string"
+        },
+        {
+          "name": "uid",
+          "type": "string"
+        }
+      ],
+      "fullName": "Energistics.Protocol.GrowingObject.GrowingObjectDelete",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.GrowingObject",
+      "name": "GrowingObjectDeleteRange",
+      "messageType": "2",
+      "protocol": "6",
+      "senderRole": "customer",
+      "protocolRoles": "store,customer",
+      "fields": [
+        {
+          "name": "uuid",
+          "type": "string"
+        },
+        {
+          "name": "startIndex",
+          "type": "Energistics.Datatypes.ChannelData.IndexValue"
+        },
+        {
+          "name": "endIndex",
+          "type": "Energistics.Datatypes.ChannelData.IndexValue"
+        }
+      ],
+      "fullName": "Energistics.Protocol.GrowingObject.GrowingObjectDeleteRange",
+      "depends": [
+        "Energistics.Datatypes.ChannelData.IndexValue",
+        "Energistics.Datatypes.ChannelData.IndexValue"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.GrowingObject",
+      "name": "GrowingObjectGet",
+      "messageType": "3",
+      "protocol": "6",
+      "senderRole": "customer",
+      "protocolRoles": "store,customer",
+      "fields": [
+        {
+          "name": "uuid",
+          "type": "string"
+        },
+        {
+          "name": "uid",
+          "type": "string"
+        }
+      ],
+      "fullName": "Energistics.Protocol.GrowingObject.GrowingObjectGet",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.GrowingObject",
+      "name": "GrowingObjectGetRange",
+      "messageType": "4",
+      "protocol": "6",
+      "senderRole": "customer",
+      "protocolRoles": "store,customer",
+      "fields": [
+        {
+          "name": "uuid",
+          "type": "string"
+        },
+        {
+          "name": "startIndex",
+          "type": "Energistics.Datatypes.ChannelData.IndexValue"
+        },
+        {
+          "name": "endIndex",
+          "type": "Energistics.Datatypes.ChannelData.IndexValue"
+        }
+      ],
+      "fullName": "Energistics.Protocol.GrowingObject.GrowingObjectGetRange",
+      "depends": [
+        "Energistics.Datatypes.ChannelData.IndexValue",
+        "Energistics.Datatypes.ChannelData.IndexValue"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.GrowingObject",
+      "name": "GrowingObjectPut",
+      "messageType": "5",
+      "protocol": "6",
+      "senderRole": "customer",
+      "protocolRoles": "store,customer",
+      "fields": [
+        {
+          "name": "uuid",
+          "type": "string"
+        },
+        {
+          "name": "contentType",
+          "type": "string"
+        },
+        {
+          "name": "contentEncoding",
+          "type": "string"
+        },
+        {
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "fullName": "Energistics.Protocol.GrowingObject.GrowingObjectPut",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.GrowingObject",
+      "name": "ObjectFragment",
+      "messageType": "6",
+      "protocol": "6",
+      "senderRole": "store",
+      "protocolRoles": "store,customer",
+      "fields": [
+        {
+          "name": "uuid",
+          "type": "string"
+        },
+        {
+          "name": "contentType",
+          "type": "string"
+        },
+        {
+          "name": "contentEncoding",
+          "type": "string"
+        },
+        {
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "fullName": "Energistics.Protocol.GrowingObject.ObjectFragment",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.Store",
+      "name": "DeleteObject",
+      "messageType": "3",
+      "protocol": "4",
+      "senderRole": "customer",
+      "protocolRoles": "store,customer",
+      "fields": [
+        {
+          "name": "uri",
+          "type": {
+            "type": "array",
+            "items": "string"
+          }
+        }
+      ],
+      "fullName": "Energistics.Protocol.Store.DeleteObject",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.Store",
+      "name": "GetObject",
+      "messageType": "1",
+      "protocol": "4",
+      "senderRole": "customer",
+      "protocolRoles": "store,customer",
+      "fields": [
+        {
+          "name": "uri",
+          "type": "string"
+        }
+      ],
+      "fullName": "Energistics.Protocol.Store.GetObject",
+      "depends": []
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.Store",
+      "name": "Object",
+      "messageType": "4",
+      "protocol": "4",
+      "senderRole": "store",
+      "protocolRoles": "store,customer",
+      "fields": [
+        {
+          "name": "dataObject",
+          "type": "Energistics.Datatypes.Object.DataObject"
+        }
+      ],
+      "fullName": "Energistics.Protocol.Store.Object",
+      "depends": [
+        "Energistics.Datatypes.Object.DataObject"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.Store",
+      "name": "PutObject",
+      "messageType": "2",
+      "protocol": "4",
+      "senderRole": "customer",
+      "protocolRoles": "store,customer",
+      "fields": [
+        {
+          "name": "data",
+          "type": "Energistics.Datatypes.Object.DataObject"
+        }
+      ],
+      "fullName": "Energistics.Protocol.Store.PutObject",
+      "depends": [
+        "Energistics.Datatypes.Object.DataObject"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.StoreNotification",
+      "name": "ChangeNotification",
+      "messageType": "2",
+      "protocol": "5",
+      "senderRole": "store",
+      "protocolRoles": "store,customer",
+      "fields": [
+        {
+          "name": "change",
+          "type": "Energistics.Datatypes.Object.ObjectChange"
+        }
+      ],
+      "fullName": "Energistics.Protocol.StoreNotification.ChangeNotification",
+      "depends": [
+        "Energistics.Datatypes.Object.ObjectChange"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.StoreNotification",
+      "name": "DeleteNotification",
+      "messageType": "3",
+      "protocol": "5",
+      "senderRole": "store",
+      "protocolRoles": "store,customer",
+      "fields": [
+        {
+          "name": "delete",
+          "type": "Energistics.Datatypes.Object.ObjectChange"
+        }
+      ],
+      "fullName": "Energistics.Protocol.StoreNotification.DeleteNotification",
+      "depends": [
+        "Energistics.Datatypes.Object.ObjectChange"
+      ]
+    },
+    {
+      "type": "record",
+      "namespace": "Energistics.Protocol.StoreNotification",
+      "name": "NotificationRequest",
+      "messageType": "1",
+      "protocol": "5",
+      "senderRole": "customer",
+      "protocolRoles": "store,customer",
+      "fields": [
+        {
+          "name": "request",
+          "type": "Energistics.Datatypes.Object.NotificationRequestRecord"
+        }
+      ],
+      "fullName": "Energistics.Protocol.StoreNotification.NotificationRequest",
+      "depends": [
+        "Energistics.Datatypes.Object.NotificationRequestRecord"
+      ]
+    }
+  ],
+  "Energistics": {
+    "Datatypes": {
+      "ArrayOfBoolean": {
+        "type": "record",
+        "namespace": "Energistics.Datatypes",
+        "name": "ArrayOfBoolean",
+        "fields": [
+          {
+            "name": "values",
+            "type": {
+              "type": "array",
+              "items": "boolean"
+            }
+          }
+        ],
+        "fullName": "Energistics.Datatypes.ArrayOfBoolean",
+        "depends": []
+      },
+      "ArrayOfDouble": {
+        "type": "record",
+        "namespace": "Energistics.Datatypes",
+        "name": "ArrayOfDouble",
+        "fields": [
+          {
+            "name": "values",
+            "type": {
+              "type": "array",
+              "items": "double"
+            }
+          }
+        ],
+        "fullName": "Energistics.Datatypes.ArrayOfDouble",
+        "depends": []
+      },
+      "ArrayOfFloat": {
+        "type": "record",
+        "namespace": "Energistics.Datatypes",
+        "name": "ArrayOfFloat",
+        "fields": [
+          {
+            "name": "values",
+            "type": {
+              "type": "array",
+              "items": "float"
+            }
+          }
+        ],
+        "fullName": "Energistics.Datatypes.ArrayOfFloat",
+        "depends": []
+      },
+      "ArrayOfInt": {
+        "type": "record",
+        "namespace": "Energistics.Datatypes",
+        "name": "ArrayOfInt",
+        "fields": [
+          {
+            "name": "values",
+            "type": {
+              "type": "array",
+              "items": "int"
+            }
+          }
+        ],
+        "fullName": "Energistics.Datatypes.ArrayOfInt",
+        "depends": []
+      },
+      "ArrayOfLong": {
+        "type": "record",
+        "namespace": "Energistics.Datatypes",
+        "name": "ArrayOfLong",
+        "fields": [
+          {
+            "name": "values",
+            "type": {
+              "type": "array",
+              "items": "long"
+            }
+          }
+        ],
+        "fullName": "Energistics.Datatypes.ArrayOfLong",
+        "depends": []
+      },
+      "AnyArray": {
+        "type": "record",
+        "namespace": "Energistics.Datatypes",
+        "name": "AnyArray",
+        "fields": [
+          {
+            "name": "item",
+            "type": [
+              "null",
+              "Energistics.Datatypes.ArrayOfBoolean",
+              "bytes",
+              "Energistics.Datatypes.ArrayOfInt",
+              "Energistics.Datatypes.ArrayOfLong",
+              "Energistics.Datatypes.ArrayOfFloat",
+              "Energistics.Datatypes.ArrayOfDouble"
+            ]
+          }
+        ],
+        "fullName": "Energistics.Datatypes.AnyArray",
+        "depends": [
+          "Energistics.Datatypes.ArrayOfBoolean",
+          "Energistics.Datatypes.ArrayOfInt",
+          "Energistics.Datatypes.ArrayOfLong",
+          "Energistics.Datatypes.ArrayOfFloat",
+          "Energistics.Datatypes.ArrayOfDouble"
+        ]
+      },
+      "DateTime": {
+        "type": "record",
+        "namespace": "Energistics.Datatypes",
+        "name": "DateTime",
+        "aliases": [
+          "etp.dt"
+        ],
+        "fields": [
+          {
+            "name": "time",
+            "type": "long"
+          },
+          {
+            "name": "offset",
+            "type": "float"
+          }
+        ],
+        "fullName": "Energistics.Datatypes.DateTime",
+        "depends": []
+      },
+      "DataValue": {
+        "type": "record",
+        "namespace": "Energistics.Datatypes",
+        "name": "DataValue",
+        "fields": [
+          {
+            "name": "item",
+            "type": [
+              "null",
+              "double",
+              "float",
+              "int",
+              "long",
+              "string",
+              "Energistics.Datatypes.DateTime",
+              "Energistics.Datatypes.ArrayOfDouble",
+              "boolean",
+              "bytes"
+            ]
+          }
+        ],
+        "fullName": "Energistics.Datatypes.DataValue",
+        "depends": [
+          "Energistics.Datatypes.DateTime",
+          "Energistics.Datatypes.ArrayOfDouble"
+        ]
+      },
+      "DataAttribute": {
+        "type": "record",
+        "namespace": "Energistics.Datatypes",
+        "name": "DataAttribute",
+        "fields": [
+          {
+            "name": "attributeId",
+            "type": "int"
+          },
+          {
+            "name": "attributeValue",
+            "type": "Energistics.Datatypes.DataValue"
+          }
+        ],
+        "fullName": "Energistics.Datatypes.DataAttribute",
+        "depends": [
+          "Energistics.Datatypes.DataValue"
+        ]
+      },
+      "ErrorCodes": {
+        "type": "enum",
+        "namespace": "Energistics.Datatypes",
+        "name": "ErrorCodes",
+        "symbols": [
+          "ENOROLE",
+          "ENOSUPPORTEDPROTOCOLS",
+          "EINVALID_MESSAGETYPE",
+          "EUNSUPPORTED_PROTOCOL"
+        ],
+        "fullName": "Energistics.Datatypes.ErrorCodes",
+        "depends": []
+      },
+      "MessageHeader": {
+        "type": "record",
+        "namespace": "Energistics.Datatypes",
+        "name": "MessageHeader",
+        "fields": [
+          {
+            "name": "protocol",
+            "type": "int"
+          },
+          {
+            "name": "messageType",
+            "type": "int"
+          },
+          {
+            "name": "correlationId",
+            "type": "long"
+          },
+          {
+            "name": "messageId",
+            "type": "long"
+          },
+          {
+            "name": "messageFlags",
+            "type": "int"
+          }
+        ],
+        "fullName": "Energistics.Datatypes.MessageHeader",
+        "depends": []
+      },
+      "Protocols": {
+        "type": "enum",
+        "namespace": "Energistics.Datatypes",
+        "name": "Protocols",
+        "symbols": [
+          "Core",
+          "ChannelStreaming",
+          "ChannelDataFrame",
+          "Discovery",
+          "Store",
+          "StoreNotification",
+          "GrowingObject",
+          "DataArray"
+        ],
+        "fullName": "Energistics.Datatypes.Protocols",
+        "depends": []
+      },
+      "Version": {
+        "type": "record",
+        "namespace": "Energistics.Datatypes",
+        "name": "Version",
+        "fields": [
+          {
+            "name": "major",
+            "type": "int"
+          },
+          {
+            "name": "minor",
+            "type": "int"
+          },
+          {
+            "name": "revision",
+            "type": "int"
+          },
+          {
+            "name": "patch",
+            "type": "int"
+          }
+        ],
+        "fullName": "Energistics.Datatypes.Version",
+        "depends": []
+      },
+      "SupportedProtocol": {
+        "type": "record",
+        "namespace": "Energistics.Datatypes",
+        "name": "SupportedProtocol",
+        "fields": [
+          {
+            "name": "protocol",
+            "type": "int"
+          },
+          {
+            "name": "protocolVersion",
+            "type": "Energistics.Datatypes.Version"
+          },
+          {
+            "name": "role",
+            "type": "string"
+          },
+          {
+            "name": "protocolCapabilities",
+            "type": {
+              "type": "map",
+              "values": "Energistics.Datatypes.DataValue"
+            }
+          }
+        ],
+        "fullName": "Energistics.Datatypes.SupportedProtocol",
+        "depends": [
+          "Energistics.Datatypes.Version",
+          "Energistics.Datatypes.DataValue"
+        ]
+      },
+      "ChannelData": {
+        "ChannelIndexTypes": {
+          "type": "enum",
+          "namespace": "Energistics.Datatypes.ChannelData",
+          "name": "ChannelIndexTypes",
+          "symbols": [
+            "Time",
+            "Depth",
+            "ElapsedTime"
+          ],
+          "fullName": "Energistics.Datatypes.ChannelData.ChannelIndexTypes",
+          "depends": []
+        },
+        "ChannelStatuses": {
+          "type": "enum",
+          "namespace": "Energistics.Datatypes.ChannelData",
+          "name": "ChannelStatuses",
+          "symbols": [
+            "Active",
+            "Inactive",
+            "Closed"
+          ],
+          "fullName": "Energistics.Datatypes.ChannelData.ChannelStatuses",
+          "depends": []
+        },
+        "ErrorCodes": {
+          "type": "enum",
+          "namespace": "Energistics.Datatypes.ChannelData",
+          "name": "ErrorCodes",
+          "symbols": [
+            "EINVALID_URI",
+            "EINVALID_CHANNELID"
+          ],
+          "fullName": "Energistics.Datatypes.ChannelData.ErrorCodes",
+          "depends": []
+        },
+        "IndexDirections": {
+          "type": "enum",
+          "namespace": "Energistics.Datatypes.ChannelData",
+          "name": "IndexDirections",
+          "symbols": [
+            "Increasing",
+            "Decreasing"
+          ],
+          "fullName": "Energistics.Datatypes.ChannelData.IndexDirections",
+          "depends": []
+        },
+        "IndexMetadataRecord": {
+          "type": "record",
+          "namespace": "Energistics.Datatypes.ChannelData",
+          "name": "IndexMetadataRecord",
+          "fields": [
+            {
+              "name": "indexType",
+              "type": "Energistics.Datatypes.ChannelData.ChannelIndexTypes"
+            },
+            {
+              "name": "uom",
+              "type": "string"
+            },
+            {
+              "name": "datum",
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "name": "direction",
+              "type": "Energistics.Datatypes.ChannelData.IndexDirections"
+            },
+            {
+              "name": "mnemonic",
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "name": "description",
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "name": "uri",
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "name": "customData",
+              "type": {
+                "type": "map",
+                "values": "Energistics.Datatypes.DataValue"
+              }
+            }
+          ],
+          "fullName": "Energistics.Datatypes.ChannelData.IndexMetadataRecord",
+          "depends": [
+            "Energistics.Datatypes.ChannelData.ChannelIndexTypes",
+            "Energistics.Datatypes.ChannelData.IndexDirections",
+            "Energistics.Datatypes.DataValue"
+          ]
+        },
+        "IndexValue": {
+          "type": "record",
+          "namespace": "Energistics.Datatypes.ChannelData",
+          "name": "IndexValue",
+          "fields": [
+            {
+              "name": "item",
+              "type": [
+                "Energistics.Datatypes.DateTime",
+                "double",
+                "long"
+              ]
+            }
+          ],
+          "fullName": "Energistics.Datatypes.ChannelData.IndexValue",
+          "depends": [
+            "Energistics.Datatypes.DateTime"
+          ]
+        },
+        "ChannelMetadataRecord": {
+          "type": "record",
+          "namespace": "Energistics.Datatypes.ChannelData",
+          "name": "ChannelMetadataRecord",
+          "fields": [
+            {
+              "name": "channelUri",
+              "type": "string"
+            },
+            {
+              "name": "channelId",
+              "type": "long"
+            },
+            {
+              "name": "indexes",
+              "type": {
+                "type": "array",
+                "items": "Energistics.Datatypes.ChannelData.IndexMetadataRecord"
+              }
+            },
+            {
+              "name": "mnemonic",
+              "type": "string"
+            },
+            {
+              "name": "dataType",
+              "type": "string"
+            },
+            {
+              "name": "uom",
+              "type": "string"
+            },
+            {
+              "name": "startIndex",
+              "type": [
+                "null",
+                "Energistics.Datatypes.ChannelData.IndexValue"
+              ]
+            },
+            {
+              "name": "endIndex",
+              "type": [
+                "null",
+                "Energistics.Datatypes.ChannelData.IndexValue"
+              ]
+            },
+            {
+              "name": "description",
+              "type": "string"
+            },
+            {
+              "name": "status",
+              "type": "Energistics.Datatypes.ChannelData.ChannelStatuses"
+            },
+            {
+              "name": "contentType",
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "name": "source",
+              "type": "string"
+            },
+            {
+              "name": "measureClass",
+              "type": "string"
+            },
+            {
+              "name": "uuid",
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          ],
+          "fullName": "Energistics.Datatypes.ChannelData.ChannelMetadataRecord",
+          "depends": [
+            "Energistics.Datatypes.ChannelData.IndexMetadataRecord",
+            "Energistics.Datatypes.ChannelData.IndexValue",
+            "Energistics.Datatypes.ChannelData.IndexValue",
+            "Energistics.Datatypes.ChannelData.ChannelStatuses"
+          ]
+        },
+        "ChannelRangeInfo": {
+          "type": "record",
+          "namespace": "Energistics.Datatypes.ChannelData",
+          "name": "ChannelRangeInfo",
+          "fields": [
+            {
+              "name": "channelId",
+              "type": {
+                "type": "array",
+                "items": "long"
+              }
+            },
+            {
+              "name": "startIndex",
+              "type": "Energistics.Datatypes.ChannelData.IndexValue"
+            },
+            {
+              "name": "endIndex",
+              "type": "Energistics.Datatypes.ChannelData.IndexValue"
+            }
+          ],
+          "fullName": "Energistics.Datatypes.ChannelData.ChannelRangeInfo",
+          "depends": [
+            "Energistics.Datatypes.ChannelData.IndexValue",
+            "Energistics.Datatypes.ChannelData.IndexValue"
+          ]
+        },
+        "DataFrame": {
+          "type": "record",
+          "namespace": "Energistics.Datatypes.ChannelData",
+          "name": "DataFrame",
+          "fields": [
+            {
+              "name": "index",
+              "type": {
+                "type": "array",
+                "items": "Energistics.Datatypes.ChannelData.IndexValue"
+              }
+            },
+            {
+              "name": "data",
+              "type": {
+                "type": "array",
+                "items": "Energistics.Datatypes.DataValue"
+              }
+            }
+          ],
+          "fullName": "Energistics.Datatypes.ChannelData.DataFrame",
+          "depends": [
+            "Energistics.Datatypes.ChannelData.IndexValue",
+            "Energistics.Datatypes.DataValue"
+          ]
+        },
+        "DataItem": {
+          "type": "record",
+          "namespace": "Energistics.Datatypes.ChannelData",
+          "name": "DataItem",
+          "fields": [
+            {
+              "name": "indexes",
+              "type": {
+                "type": "array",
+                "items": "Energistics.Datatypes.ChannelData.IndexValue"
+              }
+            },
+            {
+              "name": "channelId",
+              "type": "long"
+            },
+            {
+              "name": "value",
+              "type": "Energistics.Datatypes.DataValue"
+            },
+            {
+              "name": "valueAttributes",
+              "type": {
+                "type": "array",
+                "items": "Energistics.Datatypes.DataAttribute"
+              }
+            }
+          ],
+          "fullName": "Energistics.Datatypes.ChannelData.DataItem",
+          "depends": [
+            "Energistics.Datatypes.ChannelData.IndexValue",
+            "Energistics.Datatypes.DataValue",
+            "Energistics.Datatypes.DataAttribute"
+          ]
+        },
+        "Roles": {
+          "type": "enum",
+          "namespace": "Energistics.Datatypes.ChannelData",
+          "name": "Roles",
+          "symbols": [
+            "Producer",
+            "Consumer"
+          ],
+          "fullName": "Energistics.Datatypes.ChannelData.Roles",
+          "depends": []
+        },
+        "StreamingStartIndex": {
+          "type": "record",
+          "namespace": "Energistics.Datatypes.ChannelData",
+          "name": "StreamingStartIndex",
+          "fields": [
+            {
+              "name": "item",
+              "type": [
+                "null",
+                "int",
+                "Energistics.Datatypes.ChannelData.IndexValue"
+              ]
+            }
+          ],
+          "fullName": "Energistics.Datatypes.ChannelData.StreamingStartIndex",
+          "depends": [
+            "Energistics.Datatypes.ChannelData.IndexValue"
+          ]
+        },
+        "ChannelStreamingInfo": {
+          "type": "record",
+          "namespace": "Energistics.Datatypes.ChannelData",
+          "name": "ChannelStreamingInfo",
+          "fields": [
+            {
+              "name": "channelId",
+              "type": "long"
+            },
+            {
+              "name": "startIndex",
+              "type": "Energistics.Datatypes.ChannelData.StreamingStartIndex"
+            },
+            {
+              "name": "receiveChangeNotification",
+              "type": "boolean"
+            }
+          ],
+          "fullName": "Energistics.Datatypes.ChannelData.ChannelStreamingInfo",
+          "depends": [
+            "Energistics.Datatypes.ChannelData.StreamingStartIndex"
+          ]
+        }
+      },
+      "Object": {
+        "NotificationRequestRecord": {
+          "type": "record",
+          "namespace": "Energistics.Datatypes.Object",
+          "name": "NotificationRequestRecord",
+          "fields": [
+            {
+              "name": "uri",
+              "type": "string"
+            },
+            {
+              "name": "uuid",
+              "type": "string"
+            },
+            {
+              "name": "includeObjectData",
+              "type": "boolean"
+            },
+            {
+              "name": "startTime",
+              "type": "Energistics.Datatypes.DateTime"
+            },
+            {
+              "name": "objectTypes",
+              "type": {
+                "type": "array",
+                "items": "string"
+              }
+            }
+          ],
+          "fullName": "Energistics.Datatypes.Object.NotificationRequestRecord",
+          "depends": [
+            "Energistics.Datatypes.DateTime"
+          ]
+        },
+        "ObjectChangeTypes": {
+          "type": "enum",
+          "namespace": "Energistics.Datatypes.Object",
+          "name": "ObjectChangeTypes",
+          "symbols": [
+            "Upsert",
+            "Delete"
+          ],
+          "fullName": "Energistics.Datatypes.Object.ObjectChangeTypes",
+          "depends": []
+        },
+        "Resource": {
+          "type": "record",
+          "namespace": "Energistics.Datatypes.Object",
+          "name": "Resource",
+          "fields": [
+            {
+              "name": "uri",
+              "type": "string"
+            },
+            {
+              "name": "contentType",
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "channelSubscribable",
+              "type": "boolean"
+            },
+            {
+              "name": "customData",
+              "type": {
+                "type": "map",
+                "values": "string"
+              }
+            },
+            {
+              "name": "resourceType",
+              "type": "string"
+            },
+            {
+              "name": "hasChildren",
+              "type": "int"
+            },
+            {
+              "name": "uuid",
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "name": "lastChanged",
+              "type": "Energistics.Datatypes.DateTime"
+            },
+            {
+              "name": "objectNotifiable",
+              "type": "boolean"
+            }
+          ],
+          "fullName": "Energistics.Datatypes.Object.Resource",
+          "depends": [
+            "Energistics.Datatypes.DateTime"
+          ]
+        },
+        "DataObject": {
+          "type": "record",
+          "namespace": "Energistics.Datatypes.Object",
+          "name": "DataObject",
+          "fields": [
+            {
+              "name": "resource",
+              "type": "Energistics.Datatypes.Object.Resource"
+            },
+            {
+              "name": "contentEncoding",
+              "type": "string"
+            },
+            {
+              "name": "data",
+              "type": "bytes"
+            }
+          ],
+          "fullName": "Energistics.Datatypes.Object.DataObject",
+          "depends": [
+            "Energistics.Datatypes.Object.Resource"
+          ]
+        },
+        "ObjectChange": {
+          "type": "record",
+          "namespace": "Energistics.Datatypes.Object",
+          "name": "ObjectChange",
+          "fields": [
+            {
+              "name": "changeType",
+              "type": "Energistics.Datatypes.Object.ObjectChangeTypes"
+            },
+            {
+              "name": "changeTime",
+              "type": "Energistics.Datatypes.DateTime"
+            },
+            {
+              "name": "dataObject",
+              "type": "Energistics.Datatypes.Object.DataObject"
+            }
+          ],
+          "fullName": "Energistics.Datatypes.Object.ObjectChange",
+          "depends": [
+            "Energistics.Datatypes.Object.ObjectChangeTypes",
+            "Energistics.Datatypes.DateTime",
+            "Energistics.Datatypes.Object.DataObject"
+          ]
+        }
+      }
+    },
+    "Protocol": {
+      "ChannelDataFrame": {
+        "ChannelDataFrameSet": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.ChannelDataFrame",
+          "name": "ChannelDataFrameSet",
+          "messageType": "4",
+          "protocol": "2",
+          "senderRole": "producer",
+          "protocolRoles": "producer,consumer",
+          "fields": [
+            {
+              "name": "channels",
+              "type": {
+                "type": "array",
+                "items": "long"
+              }
+            },
+            {
+              "name": "data",
+              "type": {
+                "type": "array",
+                "items": "Energistics.Datatypes.ChannelData.DataFrame"
+              }
+            }
+          ],
+          "fullName": "Energistics.Protocol.ChannelDataFrame.ChannelDataFrameSet",
+          "depends": [
+            "Energistics.Datatypes.ChannelData.DataFrame"
+          ]
+        },
+        "ChannelMetadata": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.ChannelDataFrame",
+          "name": "ChannelMetadata",
+          "messageType": "3",
+          "protocol": "2",
+          "senderRole": "producer",
+          "protocolRoles": "producer,consumer",
+          "fields": [
+            {
+              "name": "indexes",
+              "type": {
+                "type": "array",
+                "items": "Energistics.Datatypes.ChannelData.IndexMetadataRecord"
+              }
+            },
+            {
+              "name": "channels",
+              "type": {
+                "type": "array",
+                "items": "Energistics.Datatypes.ChannelData.ChannelMetadataRecord"
+              }
+            }
+          ],
+          "fullName": "Energistics.Protocol.ChannelDataFrame.ChannelMetadata",
+          "depends": [
+            "Energistics.Datatypes.ChannelData.IndexMetadataRecord",
+            "Energistics.Datatypes.ChannelData.ChannelMetadataRecord"
+          ]
+        },
+        "RequestChannelData": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.ChannelDataFrame",
+          "name": "RequestChannelData",
+          "messageType": "1",
+          "protocol": "2",
+          "senderRole": "consumer",
+          "protocolRoles": "producer,consumer",
+          "fields": [
+            {
+              "name": "uri",
+              "type": "string"
+            },
+            {
+              "name": "fromIndex",
+              "type": [
+                "null",
+                "Energistics.Datatypes.ChannelData.IndexValue"
+              ]
+            },
+            {
+              "name": "toIndex",
+              "type": [
+                "null",
+                "Energistics.Datatypes.ChannelData.IndexValue"
+              ]
+            }
+          ],
+          "fullName": "Energistics.Protocol.ChannelDataFrame.RequestChannelData",
+          "depends": [
+            "Energistics.Datatypes.ChannelData.IndexValue",
+            "Energistics.Datatypes.ChannelData.IndexValue"
+          ]
+        }
+      },
+      "ChannelStreaming": {
+        "ChannelData": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.ChannelStreaming",
+          "name": "ChannelData",
+          "messageType": "3",
+          "protocol": "1",
+          "senderRole": "producer",
+          "protocolRoles": "producer,consumer",
+          "fields": [
+            {
+              "name": "data",
+              "type": {
+                "type": "array",
+                "items": "Energistics.Datatypes.ChannelData.DataItem"
+              }
+            }
+          ],
+          "fullName": "Energistics.Protocol.ChannelStreaming.ChannelData",
+          "depends": [
+            "Energistics.Datatypes.ChannelData.DataItem"
+          ]
+        },
+        "ChannelDataChange": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.ChannelStreaming",
+          "name": "ChannelDataChange",
+          "messageType": "6",
+          "protocol": "1",
+          "senderRole": "producer",
+          "protocolRoles": "producer,consumer",
+          "fields": [
+            {
+              "name": "channelId",
+              "type": "long"
+            },
+            {
+              "name": "startIndex",
+              "type": "Energistics.Datatypes.ChannelData.IndexValue"
+            },
+            {
+              "name": "endIndex",
+              "type": "Energistics.Datatypes.ChannelData.IndexValue"
+            },
+            {
+              "name": "data",
+              "type": {
+                "type": "array",
+                "items": "Energistics.Datatypes.ChannelData.DataItem"
+              }
+            }
+          ],
+          "fullName": "Energistics.Protocol.ChannelStreaming.ChannelDataChange",
+          "depends": [
+            "Energistics.Datatypes.ChannelData.IndexValue",
+            "Energistics.Datatypes.ChannelData.IndexValue",
+            "Energistics.Datatypes.ChannelData.DataItem"
+          ]
+        },
+        "ChannelDelete": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.ChannelStreaming",
+          "name": "ChannelDelete",
+          "messageType": "8",
+          "protocol": "1",
+          "senderRole": "producer",
+          "protocolRoles": "producer,consumer",
+          "fields": [
+            {
+              "name": "channelId",
+              "type": "long"
+            },
+            {
+              "name": "deleteReason",
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          ],
+          "fullName": "Energistics.Protocol.ChannelStreaming.ChannelDelete",
+          "depends": []
+        },
+        "ChannelDescribe": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.ChannelStreaming",
+          "name": "ChannelDescribe",
+          "messageType": "1",
+          "protocol": "1",
+          "senderRole": "consumer",
+          "protocolRoles": "producer,consumer",
+          "fields": [
+            {
+              "name": "uris",
+              "type": {
+                "type": "array",
+                "items": "string"
+              }
+            }
+          ],
+          "fullName": "Energistics.Protocol.ChannelStreaming.ChannelDescribe",
+          "depends": []
+        },
+        "ChannelMetadata": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.ChannelStreaming",
+          "name": "ChannelMetadata",
+          "messageType": "2",
+          "protocol": "1",
+          "senderRole": "producer",
+          "protocolRoles": "producer,consumer",
+          "fields": [
+            {
+              "name": "channels",
+              "type": {
+                "type": "array",
+                "items": "Energistics.Datatypes.ChannelData.ChannelMetadataRecord"
+              }
+            }
+          ],
+          "fullName": "Energistics.Protocol.ChannelStreaming.ChannelMetadata",
+          "depends": [
+            "Energistics.Datatypes.ChannelData.ChannelMetadataRecord"
+          ]
+        },
+        "ChannelRangeRequest": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.ChannelStreaming",
+          "name": "ChannelRangeRequest",
+          "messageType": "9",
+          "protocol": "1",
+          "senderRole": "consumer",
+          "protocolRoles": "producer,consumer",
+          "fields": [
+            {
+              "name": "channelRanges",
+              "type": {
+                "type": "array",
+                "items": "Energistics.Datatypes.ChannelData.ChannelRangeInfo"
+              }
+            }
+          ],
+          "fullName": "Energistics.Protocol.ChannelStreaming.ChannelRangeRequest",
+          "depends": [
+            "Energistics.Datatypes.ChannelData.ChannelRangeInfo"
+          ]
+        },
+        "ChannelStatusChange": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.ChannelStreaming",
+          "name": "ChannelStatusChange",
+          "messageType": "10",
+          "protocol": "1",
+          "senderRole": "producer",
+          "protocolRoles": "producer,consumer",
+          "fields": [
+            {
+              "name": "channelId",
+              "type": "long"
+            },
+            {
+              "name": "status",
+              "type": "Energistics.Datatypes.ChannelData.ChannelStatuses"
+            }
+          ],
+          "fullName": "Energistics.Protocol.ChannelStreaming.ChannelStatusChange",
+          "depends": [
+            "Energistics.Datatypes.ChannelData.ChannelStatuses"
+          ]
+        },
+        "ChannelStreamingStart": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.ChannelStreaming",
+          "name": "ChannelStreamingStart",
+          "messageType": "4",
+          "protocol": "1",
+          "senderRole": "consumer",
+          "protocolRoles": "producer,consumer",
+          "fields": [
+            {
+              "name": "channels",
+              "type": {
+                "type": "array",
+                "items": "Energistics.Datatypes.ChannelData.ChannelStreamingInfo"
+              }
+            }
+          ],
+          "fullName": "Energistics.Protocol.ChannelStreaming.ChannelStreamingStart",
+          "depends": [
+            "Energistics.Datatypes.ChannelData.ChannelStreamingInfo"
+          ]
+        },
+        "ChannelStreamingStop": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.ChannelStreaming",
+          "name": "ChannelStreamingStop",
+          "messageType": "5",
+          "protocol": "1",
+          "senderRole": "consumer",
+          "protocolRoles": "producer,consumer",
+          "fields": [
+            {
+              "name": "channels",
+              "type": {
+                "type": "array",
+                "items": "int"
+              }
+            }
+          ],
+          "fullName": "Energistics.Protocol.ChannelStreaming.ChannelStreamingStop",
+          "depends": []
+        },
+        "Start": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.ChannelStreaming",
+          "name": "Start",
+          "messageType": "0",
+          "protocol": "1",
+          "senderRole": "consumer",
+          "protocolRoles": "producer,consumer",
+          "fields": [
+            {
+              "name": "maxMessageRate",
+              "type": "int"
+            },
+            {
+              "name": "maxDataItems",
+              "type": "int"
+            }
+          ],
+          "fullName": "Energistics.Protocol.ChannelStreaming.Start",
+          "depends": []
+        }
+      },
+      "DataArray": {
+        "DataArray": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.DataArray",
+          "name": "DataArray",
+          "messageType": "1",
+          "protocol": "7",
+          "senderRole": "store",
+          "protocolRoles": "store,customer",
+          "fields": [
+            {
+              "name": "dimensions",
+              "type": {
+                "type": "array",
+                "items": "long"
+              }
+            },
+            {
+              "name": "data",
+              "type": "Energistics.Datatypes.AnyArray"
+            }
+          ],
+          "fullName": "Energistics.Protocol.DataArray.DataArray",
+          "depends": [
+            "Energistics.Datatypes.AnyArray"
+          ]
+        },
+        "GetDataArray": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.DataArray",
+          "name": "GetDataArray",
+          "messageType": "2",
+          "protocol": "7",
+          "senderRole": "customer",
+          "protocolRoles": "store,customer",
+          "fields": [
+            {
+              "name": "uri",
+              "type": "string"
+            }
+          ],
+          "fullName": "Energistics.Protocol.DataArray.GetDataArray",
+          "depends": []
+        },
+        "GetDataArraySlice": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.DataArray",
+          "name": "GetDataArraySlice",
+          "messageType": "3",
+          "protocol": "7",
+          "senderRole": "customer",
+          "protocolRoles": "store,customer",
+          "fields": [
+            {
+              "name": "uri",
+              "type": "string"
+            },
+            {
+              "name": "start",
+              "type": {
+                "type": "array",
+                "items": "long"
+              }
+            },
+            {
+              "name": "count",
+              "type": {
+                "type": "array",
+                "items": "long"
+              }
+            }
+          ],
+          "fullName": "Energistics.Protocol.DataArray.GetDataArraySlice",
+          "depends": []
+        }
+      },
+      "Core": {
+        "Acknowledge": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.Core",
+          "name": "Acknowledge",
+          "messageType": "1001",
+          "protocol": "0",
+          "senderRole": "*",
+          "protocolRoles": "client,server",
+          "fields": [],
+          "fullName": "Energistics.Protocol.Core.Acknowledge",
+          "depends": []
+        },
+        "CloseSession": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.Core",
+          "name": "CloseSession",
+          "messageType": "5",
+          "protocol": "0",
+          "senderRole": "client,server",
+          "protocolRoles": "client,server",
+          "fields": [
+            {
+              "name": "reason",
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          ],
+          "fullName": "Energistics.Protocol.Core.CloseSession",
+          "depends": []
+        },
+        "OpenSession": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.Core",
+          "name": "OpenSession",
+          "messageType": "2",
+          "protocol": "0",
+          "senderRole": "server",
+          "protocolRoles": "client,server",
+          "fields": [
+            {
+              "name": "applicationName",
+              "type": "string"
+            },
+            {
+              "name": "sessionId",
+              "type": "string"
+            },
+            {
+              "name": "supportedProtocols",
+              "type": {
+                "type": "array",
+                "items": "Energistics.Datatypes.SupportedProtocol"
+              }
+            }
+          ],
+          "fullName": "Energistics.Protocol.Core.OpenSession",
+          "depends": [
+            "Energistics.Datatypes.SupportedProtocol"
+          ]
+        },
+        "ProtocolException": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.Core",
+          "name": "ProtocolException",
+          "messageType": "1000",
+          "protocol": "0",
+          "senderRole": "*",
+          "protocolRoles": "client,server",
+          "fields": [
+            {
+              "name": "errorCode",
+              "type": "int"
+            },
+            {
+              "name": "errorMessage",
+              "type": "string"
+            }
+          ],
+          "fullName": "Energistics.Protocol.Core.ProtocolException",
+          "depends": []
+        },
+        "RequestSession": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.Core",
+          "name": "RequestSession",
+          "messageType": "1",
+          "protocol": "0",
+          "senderRole": "client",
+          "protocolRoles": "client,server",
+          "fields": [
+            {
+              "name": "applicationName",
+              "type": "string"
+            },
+            {
+              "name": "requestedProtocols",
+              "type": {
+                "type": "array",
+                "items": "Energistics.Datatypes.SupportedProtocol"
+              }
+            }
+          ],
+          "fullName": "Energistics.Protocol.Core.RequestSession",
+          "depends": [
+            "Energistics.Datatypes.SupportedProtocol"
+          ]
+        }
+      },
+      "Discovery": {
+        "GetResources": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.Discovery",
+          "name": "GetResources",
+          "messageType": "1",
+          "protocol": "3",
+          "senderRole": "customer",
+          "protocolRoles": "store,customer",
+          "fields": [
+            {
+              "name": "uri",
+              "type": "string"
+            }
+          ],
+          "fullName": "Energistics.Protocol.Discovery.GetResources",
+          "depends": []
+        },
+        "GetResourcesResponse": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.Discovery",
+          "name": "GetResourcesResponse",
+          "messageType": "2",
+          "protocol": "3",
+          "senderRole": "store",
+          "protocolRoles": "store,customer",
+          "fields": [
+            {
+              "name": "resource",
+              "type": "Energistics.Datatypes.Object.Resource"
+            }
+          ],
+          "fullName": "Energistics.Protocol.Discovery.GetResourcesResponse",
+          "depends": [
+            "Energistics.Datatypes.Object.Resource"
+          ]
+        }
+      },
+      "GrowingObject": {
+        "GrowingObjectDelete": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.GrowingObject",
+          "name": "GrowingObjectDelete",
+          "messageType": "1",
+          "protocol": "6",
+          "senderRole": "customer",
+          "protocolRoles": "store,customer",
+          "fields": [
+            {
+              "name": "uuid",
+              "type": "string"
+            },
+            {
+              "name": "uid",
+              "type": "string"
+            }
+          ],
+          "fullName": "Energistics.Protocol.GrowingObject.GrowingObjectDelete",
+          "depends": []
+        },
+        "GrowingObjectDeleteRange": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.GrowingObject",
+          "name": "GrowingObjectDeleteRange",
+          "messageType": "2",
+          "protocol": "6",
+          "senderRole": "customer",
+          "protocolRoles": "store,customer",
+          "fields": [
+            {
+              "name": "uuid",
+              "type": "string"
+            },
+            {
+              "name": "startIndex",
+              "type": "Energistics.Datatypes.ChannelData.IndexValue"
+            },
+            {
+              "name": "endIndex",
+              "type": "Energistics.Datatypes.ChannelData.IndexValue"
+            }
+          ],
+          "fullName": "Energistics.Protocol.GrowingObject.GrowingObjectDeleteRange",
+          "depends": [
+            "Energistics.Datatypes.ChannelData.IndexValue",
+            "Energistics.Datatypes.ChannelData.IndexValue"
+          ]
+        },
+        "GrowingObjectGet": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.GrowingObject",
+          "name": "GrowingObjectGet",
+          "messageType": "3",
+          "protocol": "6",
+          "senderRole": "customer",
+          "protocolRoles": "store,customer",
+          "fields": [
+            {
+              "name": "uuid",
+              "type": "string"
+            },
+            {
+              "name": "uid",
+              "type": "string"
+            }
+          ],
+          "fullName": "Energistics.Protocol.GrowingObject.GrowingObjectGet",
+          "depends": []
+        },
+        "GrowingObjectGetRange": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.GrowingObject",
+          "name": "GrowingObjectGetRange",
+          "messageType": "4",
+          "protocol": "6",
+          "senderRole": "customer",
+          "protocolRoles": "store,customer",
+          "fields": [
+            {
+              "name": "uuid",
+              "type": "string"
+            },
+            {
+              "name": "startIndex",
+              "type": "Energistics.Datatypes.ChannelData.IndexValue"
+            },
+            {
+              "name": "endIndex",
+              "type": "Energistics.Datatypes.ChannelData.IndexValue"
+            }
+          ],
+          "fullName": "Energistics.Protocol.GrowingObject.GrowingObjectGetRange",
+          "depends": [
+            "Energistics.Datatypes.ChannelData.IndexValue",
+            "Energistics.Datatypes.ChannelData.IndexValue"
+          ]
+        },
+        "GrowingObjectPut": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.GrowingObject",
+          "name": "GrowingObjectPut",
+          "messageType": "5",
+          "protocol": "6",
+          "senderRole": "customer",
+          "protocolRoles": "store,customer",
+          "fields": [
+            {
+              "name": "uuid",
+              "type": "string"
+            },
+            {
+              "name": "contentType",
+              "type": "string"
+            },
+            {
+              "name": "contentEncoding",
+              "type": "string"
+            },
+            {
+              "name": "data",
+              "type": "bytes"
+            }
+          ],
+          "fullName": "Energistics.Protocol.GrowingObject.GrowingObjectPut",
+          "depends": []
+        },
+        "ObjectFragment": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.GrowingObject",
+          "name": "ObjectFragment",
+          "messageType": "6",
+          "protocol": "6",
+          "senderRole": "store",
+          "protocolRoles": "store,customer",
+          "fields": [
+            {
+              "name": "uuid",
+              "type": "string"
+            },
+            {
+              "name": "contentType",
+              "type": "string"
+            },
+            {
+              "name": "contentEncoding",
+              "type": "string"
+            },
+            {
+              "name": "data",
+              "type": "bytes"
+            }
+          ],
+          "fullName": "Energistics.Protocol.GrowingObject.ObjectFragment",
+          "depends": []
+        }
+      },
+      "Store": {
+        "DeleteObject": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.Store",
+          "name": "DeleteObject",
+          "messageType": "3",
+          "protocol": "4",
+          "senderRole": "customer",
+          "protocolRoles": "store,customer",
+          "fields": [
+            {
+              "name": "uri",
+              "type": {
+                "type": "array",
+                "items": "string"
+              }
+            }
+          ],
+          "fullName": "Energistics.Protocol.Store.DeleteObject",
+          "depends": []
+        },
+        "GetObject": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.Store",
+          "name": "GetObject",
+          "messageType": "1",
+          "protocol": "4",
+          "senderRole": "customer",
+          "protocolRoles": "store,customer",
+          "fields": [
+            {
+              "name": "uri",
+              "type": "string"
+            }
+          ],
+          "fullName": "Energistics.Protocol.Store.GetObject",
+          "depends": []
+        },
+        "Object": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.Store",
+          "name": "Object",
+          "messageType": "4",
+          "protocol": "4",
+          "senderRole": "store",
+          "protocolRoles": "store,customer",
+          "fields": [
+            {
+              "name": "dataObject",
+              "type": "Energistics.Datatypes.Object.DataObject"
+            }
+          ],
+          "fullName": "Energistics.Protocol.Store.Object",
+          "depends": [
+            "Energistics.Datatypes.Object.DataObject"
+          ]
+        },
+        "PutObject": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.Store",
+          "name": "PutObject",
+          "messageType": "2",
+          "protocol": "4",
+          "senderRole": "customer",
+          "protocolRoles": "store,customer",
+          "fields": [
+            {
+              "name": "data",
+              "type": "Energistics.Datatypes.Object.DataObject"
+            }
+          ],
+          "fullName": "Energistics.Protocol.Store.PutObject",
+          "depends": [
+            "Energistics.Datatypes.Object.DataObject"
+          ]
+        }
+      },
+      "StoreNotification": {
+        "ChangeNotification": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.StoreNotification",
+          "name": "ChangeNotification",
+          "messageType": "2",
+          "protocol": "5",
+          "senderRole": "store",
+          "protocolRoles": "store,customer",
+          "fields": [
+            {
+              "name": "change",
+              "type": "Energistics.Datatypes.Object.ObjectChange"
+            }
+          ],
+          "fullName": "Energistics.Protocol.StoreNotification.ChangeNotification",
+          "depends": [
+            "Energistics.Datatypes.Object.ObjectChange"
+          ]
+        },
+        "DeleteNotification": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.StoreNotification",
+          "name": "DeleteNotification",
+          "messageType": "3",
+          "protocol": "5",
+          "senderRole": "store",
+          "protocolRoles": "store,customer",
+          "fields": [
+            {
+              "name": "delete",
+              "type": "Energistics.Datatypes.Object.ObjectChange"
+            }
+          ],
+          "fullName": "Energistics.Protocol.StoreNotification.DeleteNotification",
+          "depends": [
+            "Energistics.Datatypes.Object.ObjectChange"
+          ]
+        },
+        "NotificationRequest": {
+          "type": "record",
+          "namespace": "Energistics.Protocol.StoreNotification",
+          "name": "NotificationRequest",
+          "messageType": "1",
+          "protocol": "5",
+          "senderRole": "customer",
+          "protocolRoles": "store,customer",
+          "fields": [
+            {
+              "name": "request",
+              "type": "Energistics.Datatypes.Object.NotificationRequestRecord"
+            }
+          ],
+          "fullName": "Energistics.Protocol.StoreNotification.NotificationRequest",
+          "depends": [
+            "Energistics.Datatypes.Object.NotificationRequestRecord"
+          ]
+        }
+      }
+    }
+  }
+}

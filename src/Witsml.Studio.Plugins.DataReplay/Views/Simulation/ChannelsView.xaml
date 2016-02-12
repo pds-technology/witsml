@@ -1,0 +1,110 @@
+﻿<UserControl x:Class="PDS.Witsml.Studio.Plugins.DataReplay.Views.Simulation.ChannelsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:cal="http://www.caliburnproject.org"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:xcdg="http://schemas.xceed.com/wpf/xaml/datagrid"
+             xmlns:local="clr-namespace:PDS.Witsml.Studio.Plugins.DataReplay.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800">
+    
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <xcdg:DataGridControl Grid.Row="0" ItemsSource="{Binding Model.Channels}" AutoCreateColumns="False">
+            <xcdg:DataGridControl.View>
+                <xcdg:TableView UseDefaultHeadersFooters="False" ColumnStretchMode="Last">
+                    <xcdg:TableView.FixedHeaders>
+                        <DataTemplate>
+                            <xcdg:ColumnManagerRow />
+                        </DataTemplate>
+                    </xcdg:TableView.FixedHeaders>
+                    <xcdg:TableView.Theme>
+                        <xcdg:AeroNormalColorTheme />
+                    </xcdg:TableView.Theme>
+                </xcdg:TableView>
+            </xcdg:DataGridControl.View>
+            <xcdg:DataGridControl.Columns>
+                <xcdg:Column FieldName="Uuid" Title="Uuid" Width="250" ReadOnly="True" />
+                <xcdg:Column FieldName="ChannelId" Title="ChannelId" Width="80" ReadOnly="True" />
+                <xcdg:Column FieldName="Description" Title="Description" MinWidth="150" ReadOnly="True" />
+                <xcdg:Column FieldName="Mnemonic" Title="Mnemonic" Width="100" ReadOnly="True" />
+                <xcdg:Column FieldName="DataType" Title="DataType" Width="100" ReadOnly="True" />
+                <xcdg:Column FieldName="Uom" Title="Uom" Width="60" ReadOnly="True" />
+                <!--<xcdg:Column FieldName="ChannelUri" Title="ChannelUri" MinWidth="150" ReadOnly="True" />-->
+                <xcdg:UnboundColumn FieldName="Empty" Title="" />
+            </xcdg:DataGridControl.Columns>
+        </xcdg:DataGridControl>
+        
+        <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="5" Background="Transparent" />
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Height="40">
+            <Button x:Name="Import" Content="Import" Width="80" Margin="5,5,0,5" />
+            <Button Content="Add" Width="80" Margin="5,5,0,5" IsEnabled="False" />
+            <Button Content="Delete" Width="80" Margin="5,5,0,5" IsEnabled="False" />
+        </StackPanel>
+
+        <TabControl Grid.Row="1" Margin="0,20,0,0">
+            <TabItem Header="Log Data">
+                <DockPanel Margin="5">
+                    <StackPanel DockPanel.Dock="Bottom" Height="35" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="StartLogData" Content="Start" Width="80" Height="30" Margin="5,5,0,0" />
+                    </StackPanel>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="50"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="40" />
+                            <RowDefinition Height="40" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Column="0" Grid.Row="0" Text="Connection:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                        <TextBox Text="{Binding Model.Connection.Uri}" Grid.Column="1" Grid.Row="0" Margin="5" Padding="5" VerticalContentAlignment="Center" IsReadOnly="True" />
+                        <Button x:Name="ShowConnectionDialog" Grid.Column="2" Grid.Row="0" Margin="5" Content="..." Width="40" HorizontalAlignment="Right" />
+
+                        <!--
+                        <TextBlock Grid.Column="0" Grid.Row="1" Text="Log File:" Margin="10,5,10,5" VerticalAlignment="Center" />
+                        <TextBox Text="{Binding Model.LogFileName}" Grid.Column="1" Grid.Row="1" Margin="5" Padding="5" VerticalContentAlignment="Center" />
+                        <Button Grid.Column="2" Grid.Row="1" Margin="5" Content="..." Width="40" HorizontalAlignment="Right" />
+                        -->
+                    </Grid>
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="Channel Streaming">
+                <DockPanel Margin="5">
+                    <StackPanel DockPanel.Dock="Bottom" Height="35" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="StartChannelStreaming" Content="Start" Width="80" Height="30" Margin="5,5,0,0" />
+                        <Button x:Name="StopChannelStreaming" Content="Stop" Width="80" Height="30" Margin="5,5,0,0" />
+                    </StackPanel>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="50"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="40" />
+                            <RowDefinition Height="40" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Column="0" Grid.Row="0" Text="Port Number:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                        <xctk:IntegerUpDown Value="{Binding Model.PortNumber}" Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" />
+                    </Grid>
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="Output">
+                <TextBox x:Name="Output" AcceptsReturn="True" IsReadOnly="True" VerticalScrollBarVisibility="Auto" Margin="5" />
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>

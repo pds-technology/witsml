@@ -1,0 +1,19 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Protocol.ChannelStreaming",	
+	"name": "ChannelDataChange",
+	"messageType": "6",
+	"protocol": "1",
+	"senderRole": "producer",
+	"protocolRoles": "producer,consumer",
+	"fields":
+	[
+		{ "name": "channelId", "type": "long" },
+		{ "name": "startIndex", "type": "Energistics.Datatypes.ChannelData.IndexValue" },
+		{ "name": "endIndex", "type": "Energistics.Datatypes.ChannelData.IndexValue" },
+		{ 
+		"name": "data", 
+		"type": { "type": "array", "items": "Energistics.Datatypes.ChannelData.DataItem" } 
+	}
+	]
+}

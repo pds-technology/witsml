@@ -1,0 +1,11 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Datatypes.Object",	
+	"name": "ObjectChange",
+	"fields":
+	[
+		{ "name": "changeType", "type": "Energistics.Datatypes.Object.ObjectChangeTypes" },
+		{ "name": "changeTime", "type": "Energistics.Datatypes.DateTime" },
+		{ "name": "dataObject", "type": "Energistics.Datatypes.Object.DataObject" }
+	]
+}

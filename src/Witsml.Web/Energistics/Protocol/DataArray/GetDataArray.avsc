@@ -1,0 +1,13 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Protocol.DataArray",	
+	"name": "GetDataArray",
+	"messageType": "2",
+	"protocol": "7",
+	"senderRole": "customer",
+	"protocolRoles": "store,customer",
+	"fields":
+	[
+		{ "name": "uri", "type": "string" }
+	]
+}

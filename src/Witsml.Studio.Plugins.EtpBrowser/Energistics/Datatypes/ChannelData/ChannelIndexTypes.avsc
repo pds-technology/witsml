@@ -1,0 +1,11 @@
+{
+	"type": "enum",
+	"namespace": "Energistics.Datatypes.ChannelData",
+	"name": "ChannelIndexTypes",
+	"symbols":
+	[
+		"Time",
+		"Depth",
+		"ElapsedTime"
+	]
+}

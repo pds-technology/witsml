@@ -1,0 +1,17 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Protocol.Core",	
+	"name": "RequestSession",
+	"messageType": "1",
+	"protocol": "0",
+	"senderRole": "client",
+	"protocolRoles": "client,server",
+	"fields":
+	[
+		{ "name": "applicationName", "type": "string" },
+		{ 
+		"name": "requestedProtocols", 
+		"type": { "type": "array", "items": "Energistics.Datatypes.SupportedProtocol" } 
+	}
+	]
+}

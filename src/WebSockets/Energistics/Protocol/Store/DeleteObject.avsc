@@ -1,0 +1,16 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Protocol.Store",	
+	"name": "DeleteObject",
+	"messageType": "3",
+	"protocol": "4",
+	"senderRole": "customer",
+	"protocolRoles": "store,customer",
+	"fields":
+	[
+		{ 
+		"name": "uri", 
+		"type": { "type": "array", "items": "string" } 
+	}
+	]
+}

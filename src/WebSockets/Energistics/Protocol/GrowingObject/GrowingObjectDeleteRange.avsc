@@ -1,0 +1,15 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Protocol.GrowingObject",	
+	"name": "GrowingObjectDeleteRange",
+	"messageType": "2",
+	"protocol": "6",
+	"senderRole": "customer",
+	"protocolRoles": "store,customer",
+	"fields":
+	[
+		{ "name": "uuid", "type": "string" },
+		{ "name": "startIndex", "type": "Energistics.Datatypes.ChannelData.IndexValue" },
+		{ "name": "endIndex", "type": "Energistics.Datatypes.ChannelData.IndexValue" }
+	]
+}

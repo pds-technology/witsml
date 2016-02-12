@@ -1,0 +1,25 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Datatypes.ChannelData",	
+	"name": "ChannelMetadataRecord",
+	"fields":
+	[
+		{ "name": "channelUri", "type": "string" },
+		{ "name": "channelId", "type": "long" },
+		{ 
+		"name": "indexes", 
+		"type": { "type": "array", "items": "Energistics.Datatypes.ChannelData.IndexMetadataRecord" } 
+	},
+		{ "name": "mnemonic", "type": "string" },
+		{ "name": "dataType", "type": "string" },
+		{ "name": "uom", "type": "string" },
+		{ "name": "startIndex", "type": ["null", "Energistics.Datatypes.ChannelData.IndexValue"] },
+		{ "name": "endIndex", "type": ["null", "Energistics.Datatypes.ChannelData.IndexValue"] },
+		{ "name": "description", "type": "string" },
+		{ "name": "status", "type": "Energistics.Datatypes.ChannelData.ChannelStatuses" },
+		{ "name": "contentType", "type": ["null", "string"] },
+		{ "name": "source", "type": "string" },
+		{ "name": "measureClass", "type": "string" },
+		{ "name": "uuid", "type": ["null", "string"] }
+	]
+}

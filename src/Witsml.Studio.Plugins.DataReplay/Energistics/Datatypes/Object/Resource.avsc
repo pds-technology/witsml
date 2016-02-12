@@ -1,0 +1,18 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Datatypes.Object",	
+	"name": "Resource",
+	"fields":
+	[
+		{ "name": "uri", "type": "string" },
+		{ "name": "contentType", "type": "string" },
+		{ "name": "name", "type": "string" },
+		{ "name": "channelSubscribable", "type": "boolean" },
+		{ "name": "customData", "type": { "type": "map", "values": "string" } },
+		{ "name": "resourceType", "type": "string" },
+		{ "name": "hasChildren", "type": "int" },
+		{ "name": "uuid", "type": ["null", "string"] },
+		{ "name": "lastChanged", "type": "Energistics.Datatypes.DateTime" },
+		{ "name": "objectNotifiable", "type": "boolean" }
+	]
+}

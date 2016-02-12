@@ -1,0 +1,38 @@
+﻿[
+  {
+    "uuid": "6caf92e8-a55e-40be-8344-3bc549621d94",
+    "channelId": 1,
+    "channelUri": "",
+    "description": "Measured Depth",
+    "mnemonic": "MD",
+    "dataType": "double",
+    "uom": "m",
+    "measureClass": "Length",
+    "source": "MWD",
+    "indexes": [ ]
+  },
+  {
+    "uuid": "2e92d912-3976-4963-9a1e-1704ae7a5ad9",
+    "channelId": 2,
+    "channelUri": "",
+    "description": "Rate of Penetration",
+    "mnemonic": "ROP",
+    "dataType": "double",
+    "uom": "m/h",
+    "measureClass": "Velocity",
+    "source": "MWD",
+    "indexes": [ ]
+  },
+  {
+    "uuid": "5c6faa81-3ec6-4b67-ad1c-5ed9a3eeb4f2",
+    "channelId": 3,
+    "channelUri": "",
+    "description": "Hookload",
+    "mnemonic": "HKLD",
+    "dataType": "double",
+    "uom": "klbf",
+    "measureClass": "Weight",
+    "source": "MWD",
+    "indexes": [ ]
+  }
+]

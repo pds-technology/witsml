@@ -1,0 +1,6 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Datatypes.ChannelData",	
+	"name": "IndexValue",
+	"fields": [{"name": "item", "type": [ "Energistics.Datatypes.DateTime",  "double",  "long"] }]
+}

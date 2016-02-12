@@ -1,0 +1,15 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Protocol.ChannelDataFrame",	
+	"name": "RequestChannelData",
+	"messageType": "1",
+	"protocol": "2",
+	"senderRole": "consumer",
+	"protocolRoles": "producer,consumer",
+	"fields":
+	[
+		{ "name": "uri", "type": "string" },
+		{ "name": "fromIndex", "type": ["null", "Energistics.Datatypes.ChannelData.IndexValue"] },
+		{ "name": "toIndex", "type": ["null", "Energistics.Datatypes.ChannelData.IndexValue"] }
+	]
+}

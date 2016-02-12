@@ -1,0 +1,14 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Protocol.GrowingObject",	
+	"name": "GrowingObjectGet",
+	"messageType": "3",
+	"protocol": "6",
+	"senderRole": "customer",
+	"protocolRoles": "store,customer",
+	"fields":
+	[
+		{ "name": "uuid", "type": "string" },
+		{ "name": "uid", "type": "string" }
+	]
+}

@@ -1,0 +1,16 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Datatypes.Object",	
+	"name": "NotificationRequestRecord",
+	"fields":
+	[
+		{ "name": "uri", "type": "string" },
+		{ "name": "uuid", "type": "string" },
+		{ "name": "includeObjectData", "type": "boolean" },
+		{ "name": "startTime", "type": "Energistics.Datatypes.DateTime" },
+		{ 
+		"name": "objectTypes", 
+		"type": { "type": "array", "items": "string" } 
+	}
+	]
+}
