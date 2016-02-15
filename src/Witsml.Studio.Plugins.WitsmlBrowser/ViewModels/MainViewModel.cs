@@ -1,6 +1,5 @@
-﻿using System.Linq;
-using System.Windows;
-using Caliburn.Micro;
+﻿using Caliburn.Micro;
+using Energistics.DataAccess;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.Properties;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result;
@@ -12,13 +11,17 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
     {
         public MainViewModel()
         {
+            Model = new Models.Browser();
+            Proxy = new WITSMLWebServiceConnection(Model.Connection.Uri, WMLSVersion.WITSML141);
+
             RequestControl = new RequestViewModel();
             ResultControl = new ResultViewModel();
-            DisplayName = Settings.Default.PluginDisplayName;
-            Model = new Models.Browser();
 
+            DisplayName = Settings.Default.PluginDisplayName;
             Model.PropertyChanged += Model_PropertyChanged;
         }
+
+        public WITSMLWebServiceConnection Proxy { get; private set; }
 
         public int DisplayOrder
         {

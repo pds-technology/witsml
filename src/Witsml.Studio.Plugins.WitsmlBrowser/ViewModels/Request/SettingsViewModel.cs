@@ -12,12 +12,20 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             DisplayName = "Settings";
         }
 
-        public Models.Browser Model
+        public RequestViewModel ParentViewModel
         {
-            get { return ((RequestViewModel)Parent).Model; }
+            get { return (RequestViewModel)Parent; }
         }
 
-        public WITSMLWebServiceConnection Proxy { get; private set; }
+        public WITSMLWebServiceConnection Proxy
+        {
+            get { return ((RequestViewModel)Parent).Proxy; }
+        }
+
+        public Models.Browser Model
+        {
+            get { return ParentViewModel.Model; }
+        }
 
         public void ShowConnectionDialog()
         {
@@ -42,7 +50,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             try
             {
                 Model.WitsmlVersions.Clear();
-                Proxy = new WITSMLWebServiceConnection(Model.Connection.Uri, WMLSVersion.WITSML141);
+                Proxy.Url = Model.Connection.Uri;
                 var versions = Proxy.GetVersion();
                 if (!string.IsNullOrEmpty(versions))
                 {

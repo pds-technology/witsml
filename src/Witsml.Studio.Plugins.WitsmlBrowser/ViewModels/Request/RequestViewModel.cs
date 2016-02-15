@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using Caliburn.Micro;
+using Energistics.DataAccess;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 {
@@ -12,6 +9,11 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         public Models.Browser Model
         {
             get { return ((MainViewModel)Parent).Model; }
+        }
+
+        public WITSMLWebServiceConnection Proxy
+        {
+            get { return ((MainViewModel)Parent).Proxy; }
         }
 
         protected override void OnInitialize()
