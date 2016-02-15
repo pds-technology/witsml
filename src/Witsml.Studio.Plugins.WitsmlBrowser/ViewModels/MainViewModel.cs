@@ -12,26 +12,17 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
     {
         public MainViewModel()
         {
+            RequestControl = new RequestViewModel();
+            ResultControl = new ResultViewModel();
             DisplayName = Settings.Default.PluginDisplayName;
             Model = new Models.Browser();
 
             Model.PropertyChanged += Model_PropertyChanged;
         }
 
-        private void Model_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        public int DisplayOrder
         {
-            // TODO: Fix.  Not working!
-            if (e.PropertyName.Equals("WitsmlVersion"))
-            {
-                if (Model.HasWitsmlVersion)
-                {
-                    ((Conductor<IScreen>.Collection.OneActive)this.Parent).DisplayName = string.Format("{0}/{1}", Settings.Default.PluginDisplayName, Model.WitsmlVersion);
-                }
-                else
-                {
-                    ((Conductor<IScreen>.Collection.OneActive)this.Parent).DisplayName = Settings.Default.PluginDisplayName;
-                }
-            }
+            get { return Settings.Default.PluginDisplayOrder; }
         }
 
         private Models.Browser _model;
@@ -48,68 +39,44 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             }
         }
 
-        private RequestViewModel _requestControl;
-        public RequestViewModel RequestControl
-        {
-            get
-            {
-                return _requestControl;
-            }
-            set
-            {
-                if (!ReferenceEquals(_requestControl, value))
-                {
-                    _requestControl = value;
-                    NotifyOfPropertyChange(() => RequestControl);
-                }
-            }
-        }
+        public RequestViewModel RequestControl { get; set; }
 
-        private ResultViewModel _resultControl;
-        public ResultViewModel ResultControl
-        {
-            get
-            {
-                return _resultControl;
-            }
-            set
-            {
-                if (!ReferenceEquals(_resultControl, value))
-                {
-                    _resultControl = value;
-                    NotifyOfPropertyChange(() => ResultControl);
-                }
-            }
-        }
+        public ResultViewModel ResultControl { get; set; }
 
         protected override void OnInitialize()
         {
             base.OnInitialize();
 
-            ActivateItem(new RequestViewModel());
-            Items.Add(new ResultViewModel());
-
-            RequestControl = (RequestViewModel)Items[0];
-            ResultControl = (ResultViewModel)Items[1];
+            Items.Add(RequestControl);
+            Items.Add(ResultControl);
         }
 
         protected override void OnDeactivate(bool close)
         {
             if (close)
             {
-                foreach (var child in Items.ToArray())
+                foreach (var item in Items)
                 {
-                    this.CloseItem(child);
+                    this.CloseItem(item);
                 }
             }
 
             base.OnDeactivate(close);
         }
 
-
-        public int DisplayOrder
+        private void Model_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            get { return Settings.Default.PluginDisplayOrder; }
+            if (e.PropertyName.Equals("WitsmlVersion"))
+            {
+                if (Model.HasWitsmlVersion)
+                {
+                    ((IShellViewModel)this.Parent).BreadcrumbText = string.Format("{0}/{1}", Settings.Default.PluginDisplayName, Model.WitsmlVersion);
+                }
+                else
+                {
+                    ((IShellViewModel)this.Parent).BreadcrumbText = Settings.Default.PluginDisplayName;
+                }
+            }
         }
     }
 }

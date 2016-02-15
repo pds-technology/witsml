@@ -6,5 +6,6 @@ namespace PDS.Witsml.Studio.ViewModels
     public interface IShellViewModel
     {
         string StatusBarText { get; set; }
+        string BreadcrumbText { get; set; }
     }
 }

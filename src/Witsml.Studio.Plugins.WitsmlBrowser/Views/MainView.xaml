@@ -8,15 +8,15 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="500">
 
-    <Grid>
+    <Grid Margin="5">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition />
+            <ColumnDefinition Width="375" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <ContentControl x:Name="RequestControl" Grid.Column="0" Margin="5,0,5,5" />
+        <ContentControl x:Name="RequestControl" Grid.Column="0" />
 
-        <ContentControl x:Name="ResultControl" Grid.Column="1" Margin="5,0,5,5" />
+        <ContentControl x:Name="ResultControl" Grid.Column="1" Margin="5,0,0,0" />
         
         <GridSplitter Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="5" Background="Transparent" />
     </Grid>

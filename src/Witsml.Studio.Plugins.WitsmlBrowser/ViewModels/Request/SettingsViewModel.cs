@@ -23,6 +23,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         {
             var viewModel = new ConnectionViewModel();
 
+            // TODO: Move to App Extension so we don't have to resolve WindowManager each time.  
+            //... Return boolean instead of nullable to avoid GetValueOrDefault()
             if (Model.WindowManager.ShowDialog(viewModel).GetValueOrDefault())
             {
                 Model.Connection = viewModel.Connection;
@@ -52,7 +54,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
                 }
                 Model.NotifyOfPropertyChange(() => Model.HasWitsmlVersions);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 App.Current.ShowError("The connection URL entered may not be valid. Re-enter a new connection.", ex);
             }
