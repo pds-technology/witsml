@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic;
+using log4net;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
@@ -9,6 +10,8 @@ namespace PDS.Witsml.Server.Data
 {
     public abstract class MongoDbDataAdapter<T> : WitsmlDataAdapter<T>
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(MongoDbDataAdapter<T>));
+
         public MongoDbDataAdapter(IDatabaseProvider databaseProvider)
         {
             DatabaseProvider = databaseProvider;
@@ -18,15 +21,24 @@ namespace PDS.Witsml.Server.Data
 
         public T GetEntity(string uid, string dbCollectionName)
         {
-            var entities = new List<T>();
-            var database = DatabaseProvider.GetDatabase();
-            var collection = database.GetCollection<T>(dbCollectionName);
+            try
+            {
+                _log.DebugFormat("Query WITSML object: {0}; uid: {1}", dbCollectionName, uid);
+                var entities = new List<T>();
+                var database = DatabaseProvider.GetDatabase();
+                var collection = database.GetCollection<T>(dbCollectionName);
 
-            // Default to return all entities
-            var query = collection.AsQueryable()
-                .Where(string.Format("Uid = \"{0}\"", uid));
+                // Default to return all entities
+                var query = collection.AsQueryable()
+                    .Where(string.Format("Uid = \"{0}\"", uid));
 
-            return query.FirstOrDefault();
+                return query.FirstOrDefault();
+            }
+            catch (MongoQueryException ex)
+            {
+                _log.ErrorFormat("Error querying {0}{1}{2}", dbCollectionName, Environment.NewLine, ex.Message);
+                throw;
+            }
         }
 
         protected List<T> QueryEntities(WitsmlQueryParser parser, string dbCollectionName, List<string> names)
@@ -60,10 +72,19 @@ namespace PDS.Witsml.Server.Data
         {
             if (entity != null)
             {
-                var database = DatabaseProvider.GetDatabase();
-                var collection = database.GetCollection<T>(dbCollectionName);
+                try
+                {
+                    _log.DebugFormat("Insert WITSML object: {0}", dbCollectionName);
+                    var database = DatabaseProvider.GetDatabase();
+                    var collection = database.GetCollection<T>(dbCollectionName);
 
-                collection.InsertOne(entity);
+                    collection.InsertOne(entity);
+                }
+                catch (MongoWriteException ex)
+                {
+                    _log.ErrorFormat("Error inserting {0}{1}{2}", dbCollectionName, Environment.NewLine, ex.Message);
+                    throw;
+                }
             }
         }
 
