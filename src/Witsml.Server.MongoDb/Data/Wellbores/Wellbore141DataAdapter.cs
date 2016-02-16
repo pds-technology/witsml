@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
+using log4net;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
@@ -11,6 +12,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class Wellbore141DataAdapter : MongoDbDataAdapter<Wellbore>, IWitsml141Configuration
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(Wellbore141DataAdapter));
         private static readonly string DbDocumentName = ObjectNames.Wellbore141;
 
         [ImportingConstructor]
@@ -20,6 +22,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
         public void GetCapabilities(CapServer capServer)
         {
+            _log.DebugFormat("Version: {0}; Functions: {1}; {2}", capServer.Version, nameof(Functions.GetFromStore), nameof(Functions.AddToStore));
+
             capServer.Add(Functions.GetFromStore, ObjectTypes.Wellbore);
             capServer.Add(Functions.AddToStore, ObjectTypes.Wellbore);
             //capServer.Add(Functions.UpdateInStore, ObjectTypes.Wellbore);
@@ -28,6 +32,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
         public override WitsmlResult<List<Wellbore>> Query(WitsmlQueryParser parser)
         {
+            _log.DebugFormat("Type: {0}; Options: {1}; Query:{3}{2}{3}", parser.WitsmlType, parser.Options, parser.Query, Environment.NewLine);
+
             return new WitsmlResult<List<Wellbore>>(
                 ErrorCodes.Success,
                 QueryEntities(parser, DbDocumentName, new List<string>() { "nameWell,NameWell", "name,Name" }));
@@ -50,6 +56,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
             try
             {
+                _log.DebugFormat("uidWell: {0}; uid: {1}", entity.UidWell, entity.Uid);
+
                 CreateEntity(entity, DbDocumentName);
                 var result = GetEntity(entity.Uid, DbDocumentName);
                 if (result != null)
