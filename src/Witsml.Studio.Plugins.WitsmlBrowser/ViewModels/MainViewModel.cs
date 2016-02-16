@@ -58,9 +58,9 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         {
             if (close)
             {
-                foreach (var item in Items)
+                while (Items.Count > 0)
                 {
-                    this.CloseItem(item);
+                    this.CloseItem(Items[0]);
                 }
             }
 
@@ -71,7 +71,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         {
             if (e.PropertyName.Equals("WitsmlVersion"))
             {
-                if (Model.HasWitsmlVersion)
+                if (!string.IsNullOrEmpty(Model.WitsmlVersion))
                 {
                     ((IShellViewModel)this.Parent).BreadcrumbText = string.Format("{0}/{1}", Settings.Default.PluginDisplayName, Model.WitsmlVersion);
                 }

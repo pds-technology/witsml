@@ -60,7 +60,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
                 {
                     App.Current.ShowError("The Witsml server does not support any versions.");
                 }
-                Model.NotifyOfPropertyChange(() => Model.HasWitsmlVersions);
             }
             catch (Exception ex)
             {

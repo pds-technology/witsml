@@ -134,19 +134,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
                 {
                     _witsmlVersion = value;
                     NotifyOfPropertyChange(() => WitsmlVersion);
-                    NotifyOfPropertyChange(() => HasWitsmlVersion);
                 }
             }
-        }
-
-        public bool HasWitsmlVersions
-        {
-            get { return WitsmlVersions.Count > 0; }
-        }
-
-        public bool HasWitsmlVersion
-        {
-            get { return !string.IsNullOrEmpty(WitsmlVersion); }
         }
 
         private int _maxDataRows;
