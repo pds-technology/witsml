@@ -28,6 +28,17 @@ namespace PDS.Witsml
             public static readonly ReturnElements StationLocationOnly = new ReturnElements("station-location-only");
             public static readonly ReturnElements LatestChangeOnly = new ReturnElements("latest-change-only");
             public static readonly ReturnElements Requested = new ReturnElements("requested");
+
+            public static IEnumerable<ReturnElements> GetValues()
+            {
+                yield return All;
+                yield return IdOnly;
+                yield return HeaderOnly;
+                yield return DataOnly;
+                yield return StationLocationOnly;
+                yield return LatestChangeOnly;
+                yield return Requested;
+            }
         }
 
         public OptionsIn(string key, string value)

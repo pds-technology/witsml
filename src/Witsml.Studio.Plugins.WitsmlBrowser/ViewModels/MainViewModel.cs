@@ -1,4 +1,5 @@
-﻿using Caliburn.Micro;
+﻿using System.Windows;
+using Caliburn.Micro;
 using Energistics.DataAccess;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.Properties;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request;
@@ -22,6 +23,22 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         }
 
         public WITSMLWebServiceConnection Proxy { get; private set; }
+
+        private IWindowManager _windowManager;
+        public IWindowManager WindowManager
+        {
+            get
+            {
+                if (_windowManager == null)
+                {
+                    _windowManager = Application
+                        .Current
+                        .Container()
+                        .Resolve<IWindowManager>();
+                }
+                return _windowManager;
+            }
+        }
 
         public int DisplayOrder
         {

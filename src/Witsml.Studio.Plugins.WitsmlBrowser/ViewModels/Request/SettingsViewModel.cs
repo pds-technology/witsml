@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Caliburn.Micro;
 using Energistics.DataAccess;
 using PDS.Witsml.Studio.ViewModels;
@@ -10,6 +11,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         public SettingsViewModel()
         {
             DisplayName = "Settings";
+            WitsmlVersions = new BindableCollection<string>();
         }
 
         public RequestViewModel ParentViewModel
@@ -22,9 +24,24 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             get { return ((RequestViewModel)Parent).Proxy; }
         }
 
+        public IWindowManager WindowManager
+        {
+            get { return ((RequestViewModel)Parent).WindowManager; }
+        }
+
         public Models.Browser Model
         {
             get { return ParentViewModel.Model; }
+        }
+
+        public BindableCollection<string> WitsmlVersions { get; }
+
+        public IEnumerable<OptionsIn.ReturnElements> ReturnElements
+        {
+            get
+            {
+                return OptionsIn.ReturnElements.GetValues();
+            }
         }
 
         public void ShowConnectionDialog()
@@ -33,7 +50,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 
             // TODO: Move to App Extension so we don't have to resolve WindowManager each time.  
             //... Return boolean instead of nullable to avoid GetValueOrDefault()
-            if (Model.WindowManager.ShowDialog(viewModel).GetValueOrDefault())
+            if (WindowManager.ShowDialog(viewModel).GetValueOrDefault())
             {
                 Model.Connection = viewModel.Connection;
 
@@ -49,12 +66,12 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         {
             try
             {
-                Model.WitsmlVersions.Clear();
+                WitsmlVersions.Clear();
                 Proxy.Url = Model.Connection.Uri;
                 var versions = Proxy.GetVersion();
                 if (!string.IsNullOrEmpty(versions))
                 {
-                    Model.WitsmlVersions.AddRange(versions.Split(','));
+                    WitsmlVersions.AddRange(versions.Split(','));
                 }
                 else
                 {
