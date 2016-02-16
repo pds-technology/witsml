@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
+using log4net;
 using MongoDB.Driver;
 
 namespace PDS.Witsml.Server.Data.Wells
@@ -13,6 +14,7 @@ namespace PDS.Witsml.Server.Data.Wells
     public class Well141DataAdapter : MongoDbDataAdapter<Well>, IWitsml141Configuration
     {
         private static readonly string DbDocumentName = ObjectNames.Well141;
+        private static readonly ILog _log = LogManager.GetLogger(typeof(Well141DataAdapter));
 
         [ImportingConstructor]
         public Well141DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider)
@@ -34,6 +36,11 @@ namespace PDS.Witsml.Server.Data.Wells
                 QueryEntities(parser, DbDocumentName, new List<string>() { "name,Name" }));
         }
 
+        /// <summary>
+        /// Override of abstract method for adding a WITSML well object
+        /// </summary>
+        /// <param name="entity">A WITSML well object to be added</param>
+        /// <returns>A WITSML result object that includes return code and/or message for adding a WITSML well</returns>
         public override WitsmlResult Add(Well entity)
         {
             var validationResults = new Dictionary<ErrorCodes, string>();
@@ -51,6 +58,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             try
             {
+                _log.DebugFormat("Add new well with uid: {0}", entity.Uid);
                 CreateEntity(entity, DbDocumentName);
                 var result = GetEntity(entity.Uid, DbDocumentName);
                 if (result != null)

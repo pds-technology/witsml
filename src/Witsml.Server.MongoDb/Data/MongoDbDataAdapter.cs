@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic;
+using log4net;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
@@ -9,6 +10,8 @@ namespace PDS.Witsml.Server.Data
 {
     public abstract class MongoDbDataAdapter<T> : WitsmlDataAdapter<T>
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(MongoDbDataAdapter<T>));
+
         public MongoDbDataAdapter(IDatabaseProvider databaseProvider)
         {
             DatabaseProvider = databaseProvider;
@@ -16,17 +19,32 @@ namespace PDS.Witsml.Server.Data
 
         protected IDatabaseProvider DatabaseProvider { get; private set; }
 
+        /// <summary>
+        /// Get an object from Mongo database by uid
+        /// </summary>
+        /// <param name="uid">uid of the object</param>
+        /// <param name="dbCollectionName">The Mongo database collection for the object</param>
+        /// <returns>A single object that has the value of uid</returns>
         public T GetEntity(string uid, string dbCollectionName)
         {
-            var entities = new List<T>();
-            var database = DatabaseProvider.GetDatabase();
-            var collection = database.GetCollection<T>(dbCollectionName);
+            try
+            {
+                _log.DebugFormat("Query WITSML object: {0}; uid: {1}", dbCollectionName, uid);
+                var entities = new List<T>();
+                var database = DatabaseProvider.GetDatabase();
+                var collection = database.GetCollection<T>(dbCollectionName);
 
-            // Default to return all entities
-            var query = collection.AsQueryable()
-                .Where(string.Format("Uid = \"{0}\"", uid));
+                // Default to return all entities
+                var query = collection.AsQueryable()
+                    .Where(string.Format("Uid = \"{0}\"", uid));
 
-            return query.FirstOrDefault();
+                return query.FirstOrDefault();
+            }
+            catch (MongoQueryException ex)
+            {
+                _log.ErrorFormat("Error querying {0}{1}{2}", dbCollectionName, Environment.NewLine, ex.Message);
+                throw;
+            }
         }
 
         protected List<T> QueryEntities(WitsmlQueryParser parser, string dbCollectionName, List<string> names)
@@ -56,17 +74,36 @@ namespace PDS.Witsml.Server.Data
             return entities;
         }
 
+        /// <summary>
+        /// Insert a WITSML object into Mongo database
+        /// </summary>
+        /// <param name="entity">A WITSML object to be inserted</param>
+        /// <param name="dbCollectionName">Mongo database collection to insert the object</param>
         protected void CreateEntity(T entity, string dbCollectionName)
         {
             if (entity != null)
             {
-                var database = DatabaseProvider.GetDatabase();
-                var collection = database.GetCollection<T>(dbCollectionName);
+                try
+                {
+                    _log.DebugFormat("Insert WITSML object: {0}", dbCollectionName);
+                    var database = DatabaseProvider.GetDatabase();
+                    var collection = database.GetCollection<T>(dbCollectionName);
 
-                collection.InsertOne(entity);
+                    collection.InsertOne(entity);
+                }
+                catch (MongoWriteException ex)
+                {
+                    _log.ErrorFormat("Error inserting {0}{1}{2}", dbCollectionName, Environment.NewLine, ex.Message);
+                    throw;
+                }
             }
         }
 
+        /// <summary>
+        /// Create new uid value if not supplied
+        /// </summary>
+        /// <param name="uid">Supplied uid (default value null)</param>
+        /// <returns>supplied uid if not null or generated uid</returns>
         protected string NewUid(string uid = null)
         {
             if (string.IsNullOrEmpty(uid))
