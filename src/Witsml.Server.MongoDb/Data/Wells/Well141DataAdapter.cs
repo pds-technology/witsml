@@ -37,9 +37,9 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         /// <summary>
-        /// Override of abstract method for adding a WITSML well object
+        /// Adds a WITSML well object to data store
         /// </summary>
-        /// <param name="entity">A WITSML well object to be added</param>
+        /// <param name="entity">WITSML well object to be added</param>
         /// <returns>A WITSML result object that includes return code and/or message for adding a WITSML well</returns>
         public override WitsmlResult Add(Well entity)
         {

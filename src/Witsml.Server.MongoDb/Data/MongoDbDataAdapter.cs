@@ -42,7 +42,7 @@ namespace PDS.Witsml.Server.Data
             }
             catch (MongoQueryException ex)
             {
-                _log.ErrorFormat("Error querying {0}{1}{2}", dbCollectionName, Environment.NewLine, ex.Message);
+                _log.ErrorFormat("Error querying {0}: {1}", dbCollectionName, ex.Message);
                 throw;
             }
         }
@@ -93,7 +93,7 @@ namespace PDS.Witsml.Server.Data
                 }
                 catch (MongoWriteException ex)
                 {
-                    _log.ErrorFormat("Error inserting {0}{1}{2}", dbCollectionName, Environment.NewLine, ex.Message);
+                    _log.ErrorFormat("Error inserting {0}: {1}", dbCollectionName, ex.Message);
                     throw;
                 }
             }
