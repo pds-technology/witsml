@@ -7,9 +7,9 @@ namespace PDS.Witsml.Server.Data
         WitsmlResult<List<T>> Query(WitsmlQueryParser parser);
 
         /// <summary>
-        /// Interface for Adding typed WITSML object
+        /// Adds a WITSML object into data store
         /// </summary>
-        /// <param name="entity">Typed WITSML object to be added</param>
+        /// <param name="entity">WITSML object to be added</param>
         /// <returns>A WITSML result object that includes return code and/or message</returns>
         WitsmlResult Add(T entity);
 

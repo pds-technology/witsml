@@ -9,9 +9,9 @@ namespace PDS.Witsml.Server.Data
         public abstract WitsmlResult<List<T>> Query(WitsmlQueryParser parser);
 
         /// <summary>
-        /// Abstract method implemenation of interface for adding a typed WITSML object
+        /// Adds a WITSML object into data store
         /// </summary>
-        /// <param name="entity">Typed WITSML object to be added</param>
+        /// <param name="entity">WITSML object to be added</param>
         /// <returns>A WITSML result object that includes return code and/or message</returns>
         public abstract WitsmlResult Add(T entity);
 

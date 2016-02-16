@@ -41,7 +41,7 @@ namespace PDS.Witsml.Server.Data
             catch (Exception ex)
             {
                 var message = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
-                _log.ErrorFormat("Error converting XMLIn to Engergistic object: {0}{1}{2}", witsmlType, Environment.NewLine, message);
+                _log.ErrorFormat("Error converting XMLIn to Engergistic object: {0}: {1}", witsmlType, message);
                 return new WitsmlResult(ErrorCodes.Unset, message);
             }
         }
