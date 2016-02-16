@@ -39,6 +39,11 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 QueryEntities(parser, DbDocumentName, new List<string>() { "nameWell,NameWell", "name,Name" }));
         }
 
+        /// <summary>
+        /// Adds a WITSML wellbore object to data store.
+        /// </summary>
+        /// <param name="entity">WITSML wellbore object to be added</param>
+        /// <returns>A WitsmlResult object that contains a return code and the UID of the new wellbore object if successful or an error message if otherwise.</returns>
         public override WitsmlResult Add(Wellbore entity)
         {
             var validationResults = new Dictionary<ErrorCodes, string>();
