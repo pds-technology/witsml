@@ -36,6 +36,11 @@ namespace PDS.Witsml.Server.Data.Wells
                 QueryEntities(parser, DbDocumentName, new List<string>() { "name,Name" }));
         }
 
+        /// <summary>
+        /// Override of abstract method for adding a WITSML well object
+        /// </summary>
+        /// <param name="entity">A WITSML well object to be added</param>
+        /// <returns>A WITSML result object that includes return code and/or message for adding a WITSML well</returns>
         public override WitsmlResult Add(Well entity)
         {
             var validationResults = new Dictionary<ErrorCodes, string>();
