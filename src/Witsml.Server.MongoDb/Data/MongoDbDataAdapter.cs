@@ -19,6 +19,12 @@ namespace PDS.Witsml.Server.Data
 
         protected IDatabaseProvider DatabaseProvider { get; private set; }
 
+        /// <summary>
+        /// Get an object from Mongo database by uid
+        /// </summary>
+        /// <param name="uid">uid of the object</param>
+        /// <param name="dbCollectionName">The Mongo database collection for the object</param>
+        /// <returns>A single object that has the value of uid</returns>
         public T GetEntity(string uid, string dbCollectionName)
         {
             try
@@ -68,6 +74,11 @@ namespace PDS.Witsml.Server.Data
             return entities;
         }
 
+        /// <summary>
+        /// Insert a WITSML object into Mongo database
+        /// </summary>
+        /// <param name="entity">A WITSML object to be inserted</param>
+        /// <param name="dbCollectionName">Mongo database collection to insert the object</param>
         protected void CreateEntity(T entity, string dbCollectionName)
         {
             if (entity != null)
@@ -88,6 +99,11 @@ namespace PDS.Witsml.Server.Data
             }
         }
 
+        /// <summary>
+        /// Create new uid value if not supplied
+        /// </summary>
+        /// <param name="uid">Supplied uid (default value null)</param>
+        /// <returns>supplied uid if not null or generated uid</returns>
         protected string NewUid(string uid = null)
         {
             if (string.IsNullOrEmpty(uid))
