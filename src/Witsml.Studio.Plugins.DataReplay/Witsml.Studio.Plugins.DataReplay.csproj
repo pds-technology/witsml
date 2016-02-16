@@ -211,6 +211,7 @@
     <None Include="Energistics\Protocol\Store\Object.avsc" />
     <None Include="Energistics\Protocol\Store\PutObject.avsc" />
     <None Include="etp.avpr" />
+    <None Include="log4net.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
