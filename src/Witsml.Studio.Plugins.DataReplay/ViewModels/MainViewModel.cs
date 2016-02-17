@@ -17,6 +17,9 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels
             DisplayName = Settings.Default.PluginDisplayName;
         }
 
+        /// <summary>
+        /// The ascending display order of a plugin tab
+        /// </summary>
         public int DisplayOrder
         {
             get { return Settings.Default.PluginDisplayOrder; }

@@ -22,6 +22,9 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             Model = new EtpSettings();
         }
 
+        /// <summary>
+        /// The ascending display order of a plugin tab
+        /// </summary>
         public int DisplayOrder
         {
             get { return Settings.Default.PluginDisplayOrder; }

@@ -1,9 +1,13 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Windows;
 using Caliburn.Micro;
 
 namespace PDS.Witsml.Studio.ViewModels
 {
+    /// <summary>
+    /// The view model for the application shell.
+    /// </summary>
     public class ShellViewModel : Conductor<IScreen>.Collection.OneActive, IShellViewModel
     {
         // TODO: Figure out why log4net is not logging for a Conductor class.
@@ -12,6 +16,9 @@ namespace PDS.Witsml.Studio.ViewModels
         private string _breadcrumbText;
         private string _statusBarText;
 
+        /// <summary>
+        /// Initialize an instance of the ShellViewModel
+        /// </summary>
         public ShellViewModel()
         {
             _log.Debug("Loading Shell");
@@ -20,6 +27,9 @@ namespace PDS.Witsml.Studio.ViewModels
             StatusBarText = "Ready.";
         }
 
+        /// <summary>
+        /// Gets or sets the breadcrumb path for the application shell
+        /// </summary>
         public string BreadcrumbText
         {
             get { return _breadcrumbText; }
@@ -33,6 +43,9 @@ namespace PDS.Witsml.Studio.ViewModels
             }
         }
 
+        /// <summary>
+        /// Gets or sets the status bar text for the application shell
+        /// </summary>
         public string StatusBarText
         {
             get { return _statusBarText; }
@@ -48,15 +61,16 @@ namespace PDS.Witsml.Studio.ViewModels
 
         protected override void OnViewReady(object view)
         {
-            _log.Debug("Loading Plugins");
-
             base.OnViewReady(view);
 
             Items.AddRange(Application.Current.Container()
                 .ResolveAll<IPluginViewModel>()
                 .OrderBy(x => x.DisplayOrder));
 
-            Items.ToList().ForEach(x => _log.Debug(x.DisplayName));
+            if (_log.IsDebugEnabled)
+            {
+                _log.DebugFormat("{0}{1}{2}", "Plugins Loaded:", Environment.NewLine, string.Join(Environment.NewLine, Items.Select(x => x.DisplayName)));
+            }
 
             ActivateItem(Items.FirstOrDefault());
         }
