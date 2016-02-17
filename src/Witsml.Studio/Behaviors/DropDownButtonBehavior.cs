@@ -8,11 +8,15 @@ namespace PDS.Witsml.Studio.Behaviors
 {
     public class DropDownButtonBehavior : Behavior<Button>
     {
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(DropDownButtonBehavior));
+
         private long _attachedCount;
         private bool _isContextMenuOpen;
 
         protected override void OnAttached()
         {
+            _log.DebugFormat("Attached to '{0}' button.", AssociatedObject.Name);
+
             base.OnAttached();
             AssociatedObject.AddHandler(Button.ClickEvent, new RoutedEventHandler(AssociatedObject_Click), true);
         }
