@@ -6,7 +6,7 @@ using Caliburn.Micro;
 namespace PDS.Witsml.Studio.ViewModels
 {
     /// <summary>
-    /// The view model for the application shell.
+    /// Manages the main application user interface
     /// </summary>
     public class ShellViewModel : Conductor<IScreen>.Collection.OneActive, IShellViewModel
     {
@@ -17,7 +17,7 @@ namespace PDS.Witsml.Studio.ViewModels
         private string _statusBarText;
 
         /// <summary>
-        /// Initialize an instance of the ShellViewModel
+        /// Initializes an instance of the ShellViewModel
         /// </summary>
         public ShellViewModel()
         {

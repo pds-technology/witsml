@@ -4,14 +4,14 @@ using Caliburn.Micro;
 namespace PDS.Witsml.Studio.Models
 {
     /// <summary>
-    /// A data object of connection properties
+    /// Connection details for a connection
     /// </summary>
     [DataContract]
     public class Connection : PropertyChangedBase
     {
         private string _name;
         /// <summary>
-        /// The name of the connection
+        /// Gets or sets the name of the connection
         /// </summary>
         [DataMember]
         public string Name
@@ -29,7 +29,7 @@ namespace PDS.Witsml.Studio.Models
 
         private string _uri;
         /// <summary>
-        /// The uri to acces the connection
+        /// Gets or sets the uri to access the connection
         /// </summary>
         [DataMember]
         public string Uri
@@ -47,7 +47,7 @@ namespace PDS.Witsml.Studio.Models
 
         private string _username;
         /// <summary>
-        /// The username to authenticate the connection
+        /// Gets or sets the username to authenticate the connection
         /// </summary>
         [DataMember]
         public string Username
@@ -65,7 +65,7 @@ namespace PDS.Witsml.Studio.Models
 
         private string _password;
         /// <summary>
-        /// The password to authenticate the connection
+        /// Gets or sets the password to authenticate the connection
         /// </summary>
         [DataMember]
         public string Password

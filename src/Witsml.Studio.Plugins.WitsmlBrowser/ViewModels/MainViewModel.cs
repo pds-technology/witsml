@@ -42,7 +42,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         }
 
         /// <summary>
-        /// The ascending display order of a plugin tab
+        /// Gets the display order of the plug-in when loaded by the main application shell
         /// </summary>
         public int DisplayOrder
         {

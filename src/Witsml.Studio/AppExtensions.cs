@@ -6,12 +6,12 @@ using PDS.Witsml.Studio.ViewModels;
 namespace PDS.Witsml.Studio
 {
     /// <summary>
-    /// Static extension class to reference application level properties and functionality.
+    /// Provides application level properties and functionality.
     /// </summary>
     public static class AppExtensions
     {
         /// <summary>
-        /// An extension method to reference the application IoC container
+        /// Provides a reference the application dependecy injection container
         /// </summary>
         /// <param name="app">The reference to the application</param>
         /// <returns>The application IoC container</returns>
@@ -21,7 +21,7 @@ namespace PDS.Witsml.Studio
         }
 
         /// <summary>
-        /// An extension method to reference the application shell
+        /// Provides a reference the root application shell
         /// </summary>
         /// <param name="app">The reference to the application</param>
         /// <returns>The application shell</returns>
@@ -31,7 +31,7 @@ namespace PDS.Witsml.Studio
         }
 
         /// <summary>
-        /// An extension method to display an error message in a Windows MessageBox
+        /// Displays an error message using a MessageBox
         /// </summary>
         /// <param name="app">The reference to the application</param>
         /// <param name="message">The error message to be displayed</param>
@@ -48,7 +48,7 @@ namespace PDS.Witsml.Studio
         }
 
         /// <summary>
-        /// An extension method to display a confirmation message in a Windows MessageBox
+        /// Displays a confirmation message using a MessageBox
         /// </summary>
         /// <param name="app">The reference to the application</param>
         /// <param name="message">The confirmation message to be displayed</param>

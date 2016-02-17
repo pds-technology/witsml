@@ -3,7 +3,7 @@
 namespace PDS.Witsml.Studio.ViewModels
 {
     /// <summary>
-    /// Interface to the application shell
+    /// Provides access to the main application user interface
     /// </summary>
     [InheritedExport]
     public interface IShellViewModel

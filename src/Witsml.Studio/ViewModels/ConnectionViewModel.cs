@@ -4,14 +4,14 @@ using PDS.Witsml.Studio.Models;
 namespace PDS.Witsml.Studio.ViewModels
 {
     /// <summary>
-    /// The view model for the connection view used to enter ETP or WITSML connection details.
+    /// Manages the data entry for connection details.
     /// </summary>
     public class ConnectionViewModel : Screen
     {
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(ConnectionViewModel));
 
         /// <summary>
-        /// Creates an instance of the ConnectionViewModel and initializes it.
+        /// Initializes an instance of the ConnectionViewModel.
         /// </summary>
         public ConnectionViewModel()
         {
@@ -28,7 +28,7 @@ namespace PDS.Witsml.Studio.ViewModels
         }
 
         /// <summary>
-        /// The connection details for a connection
+        /// Gets and sets the connection details for a connection
         /// </summary>
         public Connection Connection { get; set; }
     }
