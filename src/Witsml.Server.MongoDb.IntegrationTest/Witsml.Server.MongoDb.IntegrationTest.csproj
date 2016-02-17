@@ -92,6 +92,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="log4net.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Choose>
