@@ -76,14 +76,9 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         {
             if (e.PropertyName.Equals("WitsmlVersion"))
             {
-                if (!string.IsNullOrEmpty(Model.WitsmlVersion))
-                {
-                    ((IShellViewModel)this.Parent).BreadcrumbText = string.Format("{0}/{1}", Settings.Default.PluginDisplayName, Model.WitsmlVersion);
-                }
-                else
-                {
-                    ((IShellViewModel)this.Parent).BreadcrumbText = Settings.Default.PluginDisplayName;
-                }
+                App.Current.Shell().BreadcrumbText = !string.IsNullOrEmpty(Model.WitsmlVersion)
+                    ? string.Format("{0}/{1}", Settings.Default.PluginDisplayName, Model.WitsmlVersion)
+                    : App.Current.Shell().BreadcrumbText = Settings.Default.PluginDisplayName;
             }
         }
     }
