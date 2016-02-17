@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Linq;
+using System.Windows;
 using Caliburn.Micro;
 using Energistics.DataAccess;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.Properties;
@@ -75,9 +76,9 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         {
             if (close)
             {
-                while (Items.Count > 0)
+                foreach (var child in Items.ToArray())
                 {
-                    this.CloseItem(Items[0]);
+                    this.CloseItem(child);
                 }
             }
 

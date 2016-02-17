@@ -8,6 +8,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 {
     public class SettingsViewModel : Screen
     {
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(SettingsViewModel));
+
         public SettingsViewModel()
         {
             DisplayName = "Settings";
@@ -72,15 +74,21 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
                 if (!string.IsNullOrEmpty(versions))
                 {
                     WitsmlVersions.AddRange(versions.Split(','));
+                    _log.DebugFormat("WitsmlVersions fetched {0}", versions);
                 }
                 else
                 {
-                    App.Current.ShowError("The Witsml server does not support any versions.");
+                    var msg = "The Witsml server does not support any versions.";
+                    _log.Warn(msg);
+                    App.Current.ShowError(msg);
                 }
             }
             catch (Exception ex)
             {
-                App.Current.ShowError("The connection URL entered may not be valid. Re-enter a new connection.", ex);
+                var errorMessage = "The connection URL entered may not be valid. Re-enter a new connection.";
+
+                _log.Error(errorMessage, ex);
+                App.Current.ShowError(errorMessage, ex);
             }
         }
     }
