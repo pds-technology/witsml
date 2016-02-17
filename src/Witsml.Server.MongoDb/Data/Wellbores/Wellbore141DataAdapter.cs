@@ -22,7 +22,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
         public void GetCapabilities(CapServer capServer)
         {
-            _log.DebugFormat("Version: {0}; Functions: {1}; {2}", capServer.Version, nameof(Functions.GetFromStore), nameof(Functions.AddToStore));
+            _log.DebugFormat("Version: {0}; Functions: {1}; {2}", capServer.Version, Functions.GetFromStore, Functions.AddToStore);
 
             capServer.Add(Functions.GetFromStore, ObjectTypes.Wellbore);
             capServer.Add(Functions.AddToStore, ObjectTypes.Wellbore);
@@ -32,9 +32,14 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
         public override WitsmlResult<List<Wellbore>> Query(WitsmlQueryParser parser)
         {
-            _log.DebugFormat("Type: {0}; Options: {1}; Query:{3}{2}{3}", parser.WitsmlType, parser.Options, parser.Query, Environment.NewLine);
+            if (_log.IsDebugEnabled)
+            {
+                string options = string.Join(";", parser.Options.Select(x => string.Format("{0}={1}", x.Key, x.Value)));
+                _log.DebugFormat("{3}Type: {0} {3}Options: {1} {3}Query: {2}{3}", parser.WitsmlType, options, parser.Query, Environment.NewLine);
+            }
 
             return new WitsmlResult<List<Wellbore>>(
+
                 ErrorCodes.Success,
                 QueryEntities(parser, DbDocumentName, new List<string>() { "nameWell,NameWell", "name,Name" }));
         }
