@@ -22,18 +22,5 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
             Items.Add(new PropertyViewModel());
             Items.Add(new RawViewModel());
         }
-
-        protected override void OnDeactivate(bool close)
-        {
-            if (close)
-            {
-                foreach (var child in Items.ToArray())
-                {
-                    this.CloseItem(child);
-                }
-            }
-
-            base.OnDeactivate(close);
-        }
     }
 }

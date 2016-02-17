@@ -72,19 +72,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             Items.Add(ResultControl);
         }
 
-        protected override void OnDeactivate(bool close)
-        {
-            if (close)
-            {
-                foreach (var child in Items.ToArray())
-                {
-                    this.CloseItem(child);
-                }
-            }
-
-            base.OnDeactivate(close);
-        }
-
         private void Model_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName.Equals("WitsmlVersion"))
