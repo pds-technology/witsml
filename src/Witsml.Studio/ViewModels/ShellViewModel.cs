@@ -6,11 +6,16 @@ namespace PDS.Witsml.Studio.ViewModels
 {
     public class ShellViewModel : Conductor<IScreen>.Collection.OneActive, IShellViewModel
     {
+        // TODO: Figure out why log4net is not logging for a Conductor class.
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(ShellViewModel));
+
         private string _breadcrumbText;
         private string _statusBarText;
 
         public ShellViewModel()
         {
+            _log.Debug("Loading Shell");
+
             DisplayName = "WITSML Studio";
             StatusBarText = "Ready.";
         }
@@ -43,11 +48,15 @@ namespace PDS.Witsml.Studio.ViewModels
 
         protected override void OnViewReady(object view)
         {
+            _log.Debug("Loading Plugins");
+
             base.OnViewReady(view);
 
             Items.AddRange(Application.Current.Container()
                 .ResolveAll<IPluginViewModel>()
                 .OrderBy(x => x.DisplayOrder));
+
+            Items.ToList().ForEach(x => _log.Debug(x.DisplayName));
 
             ActivateItem(Items.FirstOrDefault());
         }

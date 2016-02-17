@@ -13,6 +13,9 @@ namespace PDS.Witsml.Studio
 {
     public class Bootstrapper : BootstrapperBase
     {
+        // TODO: Figure out why log4net is not logging for a Bootstrapper class.
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(Bootstrapper));
+
         public Bootstrapper()
         {
             Initialize();
@@ -54,10 +57,15 @@ namespace PDS.Witsml.Studio
         protected override IEnumerable<Assembly> SelectAssemblies()
         {
             var path = Path.Combine(Environment.CurrentDirectory, "Plugins");
+            _log.DebugFormat("Bootstrapper Assembly Path: {0}", path);
 
-            return new[] { GetType().Assembly }
+            IEnumerable<Assembly> assemblies = new[] { GetType().Assembly }
                 .Union(Directory.GetFiles(path, "*.dll")
                 .Select(x => Assembly.LoadFrom(x)));
+
+            assemblies.Select(x => x.FullName).ToList().ForEach(x => _log.Debug(x));
+
+            return assemblies;
         }
 
         protected override void OnStartup(object sender, StartupEventArgs e)

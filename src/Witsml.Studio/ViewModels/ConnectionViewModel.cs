@@ -5,8 +5,12 @@ namespace PDS.Witsml.Studio.ViewModels
 {
     public class ConnectionViewModel : Screen
     {
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(ConnectionViewModel));
+
         public ConnectionViewModel()
         {
+            _log.Debug("Creating View Model");
+
             DisplayName = "Connection";
             Connection = new Connection()
             {
