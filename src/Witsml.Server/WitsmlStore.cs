@@ -127,10 +127,10 @@ namespace PDS.Witsml.Server
         }
 
         /// <summary>
-        /// WITSML store service method for adding one WITSML data-object to the server
+        /// Returns the response for adding one WITSML data-object to the server
         /// </summary>
-        /// <param name="request">An object that encapsulates parameters for AddToStore WITSML request</param>
-        /// <returns>A WITSML response that includes return code and/or message</returns>
+        /// <param name="request">The request object encapsulating the method input parameters.</param>
+        /// <returns>A positive value indicates a success; a negative value indicates an error.</returns>
         public WMLS_AddToStoreResponse WMLS_AddToStore(WMLS_AddToStoreRequest request)
         {
             var version = ObjectTypes.GetVersion(request.XMLin);
