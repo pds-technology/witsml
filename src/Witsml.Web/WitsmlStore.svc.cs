@@ -3,21 +3,39 @@ using PDS.Witsml.Server;
 
 namespace PDS.Witsml.Web
 {
+    /// <summary>
+    /// A wrapper for the WITSML Store API that can be hosted as a WCF service.
+    /// </summary>
+    /// <seealso cref="PDS.Witsml.Server.IWitsmlStore" />
     public class WitsmlStore : IWitsmlStore
     {
         private readonly IWitsmlStore _store;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WitsmlStore"/> class.
+        /// </summary>
+        /// <param name="store">A WITSML store instance.</param>
         [ImportingConstructor]
         public WitsmlStore(IWitsmlStore store)
         {
             _store = store;
         }
 
+        /// <summary>
+        /// Returns a string containing the Data Schema Version(s) that a server supports.
+        /// </summary>
+        /// <param name="request">The request object containing the method input parameters.</param>
+        /// <returns>A comma-separated list of Data Schema Versions (without spaces) that the server supports.</returns>
         public WMLS_GetVersionResponse WMLS_GetVersion(WMLS_GetVersionRequest request)
         {
             return _store.WMLS_GetVersion(request);
         }
 
+        /// <summary>
+        /// Returns the capServer object that describes the capabilities of the server for one Data Schema Version.
+        /// </summary>
+        /// <param name="request">The request object containing the method input parameters.</param>
+        /// <returns>A positive value indicates a success; a negative value indicates an error.</returns>
         public WMLS_GetCapResponse WMLS_GetCap(WMLS_GetCapRequest request)
         {
             return _store.WMLS_GetCap(request);
