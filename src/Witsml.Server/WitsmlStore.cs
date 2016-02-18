@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using System.Xml.Linq;
-using System.Xml.XPath;
 using Energistics.DataAccess;
 using log4net;
 using PDS.Framework;
@@ -19,14 +17,12 @@ namespace PDS.Witsml.Server
         private static readonly ILog _log = LogManager.GetLogger(typeof(WitsmlStore));
         private static readonly string DefaultDataSchemaVersion = Settings.Default.DefaultDataSchemaVersion;
 
-        private readonly IDictionary<string, XDocument> _capServerDoc;
-        private readonly IDictionary<string, string> _capServerXml;
+        private readonly IDictionary<string, ICapServerProvider> _capServer;
         private string _supportedVersions;
 
         public WitsmlStore()
         {
-            _capServerDoc = new Dictionary<string, XDocument>();
-            _capServerXml = new Dictionary<string, string>();
+            _capServer = new Dictionary<string, ICapServerProvider>();
         }
 
         [Import]
@@ -34,7 +30,7 @@ namespace PDS.Witsml.Server
 
         public WMLS_GetVersionResponse WMLS_GetVersion(WMLS_GetVersionRequest request)
         {
-            EnsureCapServerXml();
+            EnsureCapServerProviders();
 
             _log.DebugFormat("Supported Versions: {0}", _supportedVersions);
 
@@ -43,15 +39,15 @@ namespace PDS.Witsml.Server
 
         public WMLS_GetCapResponse WMLS_GetCap(WMLS_GetCapRequest request)
         {
-            _log.DebugFormat("Options: {0}", request.OptionsIn);
+            EnsureCapServerProviders();
 
-            EnsureCapServerXml();
+            _log.DebugFormat("Options: {0}", request.OptionsIn);
 
             var options = OptionsIn.Parse(request.OptionsIn);
             var version = OptionsIn.GetValue(options, new OptionsIn.DataVersion(DefaultDataSchemaVersion));
 
             // return error if WITSML 1.3.1 not supported AND dataVersion not specified (required in WITSML 1.4.1)
-            if (!_capServerXml.ContainsKey(OptionsIn.DataVersion.Version131.Value) && !options.ContainsKey(OptionsIn.DataVersion.Keyword))
+            if (!_capServer.ContainsKey(OptionsIn.DataVersion.Version131.Value) && !options.ContainsKey(OptionsIn.DataVersion.Keyword))
             {
                 return new WMLS_GetCapResponse(
                     (short)ErrorCodes.MissingDataVersion,
@@ -59,11 +55,11 @@ namespace PDS.Witsml.Server
                     ErrorCodes.MissingDataVersion.GetDescription());
             }
 
-            if (_capServerXml.ContainsKey(version))
+            if (_capServer.ContainsKey(version))
             {
                 return new WMLS_GetCapResponse(
                     (short)ErrorCodes.Success,
-                    _capServerXml[version],
+                    _capServer[version].ToXml(),
                     String.Empty);
             }
 
@@ -81,7 +77,7 @@ namespace PDS.Witsml.Server
             {
                 _log.DebugFormat("Type: {0}; Options: {1}; Query:{3}{2}{3}", request.WMLtypeIn, request.OptionsIn, request.QueryIn, Environment.NewLine);
 
-                ValidateObjectType(Functions.GetFromStore, version, request.WMLtypeIn);
+                ValidateObjectType(request.WMLtypeIn);
                 ValidateInputTemplate(request.QueryIn);
 
                 var dataProvider = Container.Resolve<IWitsmlDataProvider>(new ObjectName(request.WMLtypeIn, version));
@@ -103,7 +99,7 @@ namespace PDS.Witsml.Server
             }
             catch (WitsmlException ex)
             {
-                return new WMLS_GetFromStoreResponse((short)ex.ErrorCode, string.Empty, ex.ErrorCode.GetDescription());
+                return new WMLS_GetFromStoreResponse((short)ex.ErrorCode, string.Empty, ex.Message);
             }
         }
 
@@ -120,7 +116,7 @@ namespace PDS.Witsml.Server
             {
                 _log.DebugFormat("Type: {0}; Options: {1}; XML:{3}{2}{3}", request.WMLtypeIn, request.OptionsIn, request.XMLin, Environment.NewLine);
 
-                ValidateObjectType(Functions.AddToStore, version, request.WMLtypeIn, ObjectTypes.GetObjectType(request.XMLin));
+                ValidateObjectType(version, request.WMLtypeIn, ObjectTypes.GetObjectType(request.XMLin));
                 ValidateInputTemplate(request.XMLin);
 
                 var dataWriter = Container.Resolve<IWitsmlDataWriter>(new ObjectName(request.WMLtypeIn, version));
@@ -136,7 +132,7 @@ namespace PDS.Witsml.Server
             }
             catch (WitsmlException ex)
             {
-                return new WMLS_AddToStoreResponse((short)ex.ErrorCode, ex.ErrorCode.GetDescription());
+                return new WMLS_AddToStoreResponse((short)ex.ErrorCode, ex.Message);
             }
         }
 
@@ -148,7 +144,7 @@ namespace PDS.Witsml.Server
             {
                 _log.DebugFormat("Type: {0}; Options: {1}; XML:{3}{2}{3}", request.WMLtypeIn, request.OptionsIn, request.XMLin, Environment.NewLine);
 
-                ValidateObjectType(Functions.UpdateInStore, version, request.WMLtypeIn);
+                ValidateObjectType(request.WMLtypeIn);
                 ValidateInputTemplate(request.XMLin);
 
                 var dataWriter = Container.Resolve<IWitsmlDataWriter>(new ObjectName(request.WMLtypeIn, version));
@@ -164,7 +160,7 @@ namespace PDS.Witsml.Server
             }
             catch (WitsmlException ex)
             {
-                return new WMLS_UpdateInStoreResponse((short)ex.ErrorCode, ex.ErrorCode.GetDescription());
+                return new WMLS_UpdateInStoreResponse((short)ex.ErrorCode, ex.Message);
             }
         }
 
@@ -176,7 +172,7 @@ namespace PDS.Witsml.Server
             {
                 _log.DebugFormat("Type: {0}; Options: {1}; Query:{3}{2}{3}", request.WMLtypeIn, request.OptionsIn, request.QueryIn, Environment.NewLine);
 
-                ValidateObjectType(Functions.DeleteFromStore, version, request.WMLtypeIn);
+                ValidateObjectType(request.WMLtypeIn);
                 ValidateInputTemplate(request.QueryIn);
 
                 var dataWriter = Container.Resolve<IWitsmlDataWriter>(new ObjectName(request.WMLtypeIn, version));
@@ -192,7 +188,7 @@ namespace PDS.Witsml.Server
             }
             catch (WitsmlException ex)
             {
-                return new WMLS_DeleteFromStoreResponse((short)ex.ErrorCode, ex.ErrorCode.GetDescription());
+                return new WMLS_DeleteFromStoreResponse((short)ex.ErrorCode, ex.Message);
             }
         }
 
@@ -216,36 +212,27 @@ namespace PDS.Witsml.Server
             return new WMLS_GetBaseMsgResponse(message);
         }
 
-        private void ValidateObjectType(Functions function, string version, string objectType, string xmlType = null)
+        private void ValidateObjectType(string version, string objectType, string xmlType)
         {
-            EnsureCapServerXml();
+            EnsureCapServerProviders();
+            ValidateObjectType(objectType);
 
+            if (!objectType.Equals(xmlType))
+            {
+                throw new WitsmlException(ErrorCodes.DataObjectTypesDontMatch);
+            }
+
+            if (_capServer.ContainsKey(version) && !_capServer[version].IsSupported(Functions.AddToStore, objectType))
+            {
+                throw new WitsmlException(ErrorCodes.DataObjectTypeNotSupported);
+            }
+        }
+
+        private void ValidateObjectType(string objectType)
+        {
             if (string.IsNullOrWhiteSpace(objectType))
             {
                 throw new WitsmlException(ErrorCodes.MissingWMLtypeIn);
-            }
-
-            if (!string.IsNullOrWhiteSpace(xmlType))
-            {
-                if (!xmlType.Equals(objectType))
-                {
-                    throw new WitsmlException(ErrorCodes.DataObjectTypesDontMatch);
-                }
-            }
-
-            if (_capServerDoc.ContainsKey(version))
-            {
-                var capServer = _capServerDoc[version];
-                var ns = XNamespace.Get(capServer.Root.CreateNavigator().GetNamespace(string.Empty));
-
-                var element = capServer.Descendants(ns + "dataObject")
-                    .Where(x => x.Value == objectType && x.Parent.Attribute("name").Value == "WMLS_" + function)
-                    .FirstOrDefault();
-
-                if (element == null)
-                {
-                    throw new WitsmlException(ErrorCodes.DataObjectTypeNotSupported);
-                }
             }
         }
 
@@ -257,9 +244,9 @@ namespace PDS.Witsml.Server
             }
         }
 
-        private void EnsureCapServerXml()
+        private void EnsureCapServerProviders()
         {
-            if (_capServerXml.Any())
+            if (_capServer.Any())
                 return;
 
             var providers = Container.ResolveAll<ICapServerProvider>();
@@ -270,12 +257,11 @@ namespace PDS.Witsml.Server
 
                 if (!string.IsNullOrWhiteSpace(capServerXml))
                 {
-                    _capServerDoc[provider.DataSchemaVersion] = XDocument.Parse(capServerXml);
-                    _capServerXml[provider.DataSchemaVersion] = capServerXml;
+                    _capServer[provider.DataSchemaVersion] = provider;
                 }
             }
 
-            var versions = _capServerXml.Keys.ToList();
+            var versions = _capServer.Keys.ToList();
             versions.Sort();
 
             _supportedVersions = string.Join(",", versions);

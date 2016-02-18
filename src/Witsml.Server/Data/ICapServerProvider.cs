@@ -5,5 +5,7 @@
         string DataSchemaVersion { get; }
 
         string ToXml();
+
+        bool IsSupported(Functions function, string objectType);
     }
 }

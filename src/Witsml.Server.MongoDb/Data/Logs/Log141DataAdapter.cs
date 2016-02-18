@@ -29,14 +29,14 @@ namespace PDS.Witsml.Server.Data.Logs
 
         public void GetCapabilities(CapServer capServer)
         {
-            capServer.Add(Functions.GetFromStore, new ObjectWithConstraint(ObjectTypes.Log)
-            {
-                MaxDataNodes = 5000,
-                MaxDataPoints = 10000
-            });
+            //capServer.Add(Functions.GetFromStore, new ObjectWithConstraint(ObjectTypes.Log)
+            //{
+            //    MaxDataNodes = 5000,
+            //    MaxDataPoints = 10000
+            //});
 
-            capServer.Add(Functions.AddToStore, ObjectTypes.Log);
-            capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);
+            //capServer.Add(Functions.AddToStore, ObjectTypes.Log);
+            //capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);
             //capServer.Add(Functions.DeleteFromStore, ObjectTypes.Well);
         }
 

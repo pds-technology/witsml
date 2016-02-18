@@ -1,20 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using Energistics.DataAccess;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 
 namespace PDS.Witsml.Server.Data.CapServers
 {
     [Export(typeof(ICapServerProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class CapServer131Provider : ICapServerProvider
+    public class CapServer131Provider : CapServerProvider<Witsml131.CapServers>
     {
-        public CapServer131Provider()
-        {
-        }
-
-        public string DataSchemaVersion
+        public override string DataSchemaVersion
         {
             get { return OptionsIn.DataVersion.Version131.Value; }
         }
@@ -22,11 +17,11 @@ namespace PDS.Witsml.Server.Data.CapServers
         [ImportMany]
         public IEnumerable<IWitsml131Configuration> Providers { get; set; }
 
-        public string ToXml()
+        protected override Witsml131.CapServers CreateCapServer()
         {
             if (!Providers.Any())
             {
-                return string.Empty;
+                return null;
             }
 
             var capServer = new Witsml131.CapServer();
@@ -44,11 +39,10 @@ namespace PDS.Witsml.Server.Data.CapServers
             capServer.Vendor = "PDS";
             capServer.Version = "1.0";
 
-            return EnergisticsConverter.ObjectToXml(
-                new Witsml131.CapServers()
-                {
-                    CapServer = capServer
-                });
+            return new Witsml131.CapServers()
+            {
+                CapServer = capServer
+            };
         }
     }
 }

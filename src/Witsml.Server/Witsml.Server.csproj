@@ -56,6 +56,7 @@
   <ItemGroup>
     <Compile Include="Data\CapServers\CapServer141Provider.cs" />
     <Compile Include="Data\CapServers\CapServer131Provider.cs" />
+    <Compile Include="Data\CapServers\CapServerProvider.cs" />
     <Compile Include="Data\ICapServerProvider.cs" />
     <Compile Include="Data\IWitsmlDataAdapter.cs" />
     <Compile Include="Data\Logs\Log131DataProvider.cs" />
