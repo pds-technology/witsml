@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows;
+using Caliburn.Micro;
 using PDS.Framework;
 using PDS.Witsml.Studio.ViewModels;
 
@@ -31,6 +32,16 @@ namespace PDS.Witsml.Studio
         }
 
         /// <summary>
+        /// Provides a reference to a Caliburn WindowManager
+        /// </summary>
+        /// <param name="app">The reference to the application</param>
+        /// <returns>A reference to a WindowManager</returns>
+        public static IWindowManager WindowManager(this Application app)
+        {
+            return app.Container().Resolve<IWindowManager>();
+        }
+
+        /// <summary>
         /// Displays an error message using a MessageBox
         /// </summary>
         /// <param name="app">The reference to the application</param>
@@ -58,6 +69,17 @@ namespace PDS.Witsml.Studio
         {
             var result = MessageBox.Show(Application.Current.MainWindow, message, "Confirm", buttons, MessageBoxImage.Question);
             return (result == MessageBoxResult.OK || result == MessageBoxResult.Yes);
+        }
+
+        /// <summary>
+        /// Displays a dialog for the view represented by the viewModel
+        /// </summary>
+        /// <param name="app">The reference to the application</param>
+        /// <param name="viewModel">The view model for the view displayed in the dialog</param>
+        /// <returns>The dialog result</returns>
+        public static bool ShowDialog(this Application app, object viewModel)
+        {
+            return app.WindowManager().ShowDialog(viewModel).GetValueOrDefault();
         }
     }
 }

@@ -26,11 +26,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             get { return ((RequestViewModel)Parent).Proxy; }
         }
 
-        public IWindowManager WindowManager
-        {
-            get { return ((RequestViewModel)Parent).WindowManager; }
-        }
-
         public Models.Browser Model
         {
             get { return ParentViewModel.Model; }
@@ -52,7 +47,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 
             // TODO: Move to App Extension so we don't have to resolve WindowManager each time.  
             //... Return boolean instead of nullable to avoid GetValueOrDefault()
-            if (WindowManager.ShowDialog(viewModel).GetValueOrDefault())
+            if (App.Current.ShowDialog(viewModel))
             {
                 Model.Connection = viewModel.Connection;
 
