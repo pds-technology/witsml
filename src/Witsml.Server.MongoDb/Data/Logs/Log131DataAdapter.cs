@@ -29,9 +29,9 @@ namespace PDS.Witsml.Server.Data.Logs
 
         public void GetCapabilities(CapServer capServer)
         {
-            capServer.Add(Functions.GetFromStore, ObjectTypes.Log);
-            capServer.Add(Functions.AddToStore, ObjectTypes.Log);
-            capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);
+            //capServer.Add(Functions.GetFromStore, ObjectTypes.Log);
+            //capServer.Add(Functions.AddToStore, ObjectTypes.Log);
+            //capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);
             //capServer.Add(Functions.DeleteFromStore, ObjectTypes.Well);
         }
 
