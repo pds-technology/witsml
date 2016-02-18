@@ -6,7 +6,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 {
     public class RequestViewModel : Conductor<IScreen>.Collection.OneActive
     {
-        // TODO: Figure out why log4net is not logging for a Conductor class.
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(RequestViewModel));
 
         public Models.Browser Model

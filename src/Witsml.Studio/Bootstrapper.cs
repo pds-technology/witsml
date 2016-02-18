@@ -16,7 +16,6 @@ namespace PDS.Witsml.Studio
     /// </summary>
     public class Bootstrapper : BootstrapperBase
     {
-        // TODO: Figure out why log4net is not logging for a Bootstrapper class.
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(Bootstrapper));
 
         /// <summary>
