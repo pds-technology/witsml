@@ -11,6 +11,7 @@ namespace PDS.Witsml
     {
         private static readonly string DefaultDataSchemaVersion = Settings.Default.DefaultDataSchemaVersion;
 
+        public const string Unknown = "unknown";
         public const string CapClient = "capClient";
         public const string CapServer = "capServer";
 
@@ -37,6 +38,21 @@ namespace PDS.Witsml
                 .OfType<XmlRootAttribute>()
                 .Select(x => x.ElementName.Substring(0, x.ElementName.Length - 1))
                 .FirstOrDefault();
+        }
+
+        public static string GetObjectType(string xml)
+        {
+            try
+            {
+                var doc = XDocument.Parse(xml);
+                return doc.Root.Elements()
+                    .Select(x => x.Name.LocalName)
+                    .FirstOrDefault();
+            }
+            catch (Exception)
+            {
+                return Unknown;
+            }
         }
 
         public static string GetVersion(string xml)

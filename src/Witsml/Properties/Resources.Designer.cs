@@ -61,6 +61,24 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to In WMLS_AddToStore, the objectType being added in WMLtypeIn must be an objectType supported by the server. The server does not support the object type trying to be added..
+        /// </summary>
+        internal static string DataObjectTypeNotSupported {
+            get {
+                return ResourceManager.GetString("DataObjectTypeNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to In WMLS_AddToStore, the WMLtypeIn objectType must match the XMLin objectType. Currently, they do not match..
+        /// </summary>
+        internal static string DataObjectTypesDontMatch {
+            get {
+                return ResourceManager.GetString("DataObjectTypesDontMatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to For WMLS_GetCap, the OptionsIn keyword ‘dataVersion’ must specify a Data Schema Version that is supported by the server as defined by WMLS_GetVersion..
         /// </summary>
         internal static string DataVersionNotSupported {
@@ -79,11 +97,29 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A non-empty value must be defined for the input template..
+        /// </summary>
+        internal static string MissingInputTemplate {
+            get {
+                return ResourceManager.GetString("MissingInputTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The input template MUST contain a plural root element..
         /// </summary>
         internal static string MissingPluralRootElement {
             get {
                 return ResourceManager.GetString("MissingPluralRootElement", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A non-empty value must be defined for WMLtypeIn..
+        /// </summary>
+        internal static string MissingWMLtypeIn {
+            get {
+                return ResourceManager.GetString("MissingWMLtypeIn", resourceCulture);
             }
         }
         

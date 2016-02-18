@@ -33,6 +33,7 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.Composition.Registration" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Reflection.Context" />
@@ -41,6 +42,7 @@
     <Compile Include="ContainerException.cs" />
     <Compile Include="Container.cs" />
     <Compile Include="ContainerFactory.cs" />
+    <Compile Include="EntityValidator.cs" />
     <Compile Include="FrameworkExtensions.cs" />
     <Compile Include="IContainer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

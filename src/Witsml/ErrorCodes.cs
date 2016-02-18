@@ -61,6 +61,7 @@
         /// <summary>
         /// -408 A non-empty value must be defined for the input template.
         /// </summary>
+        MissingInputTemplate = -408,
 
         /// <summary>
         /// -409 The input template must conform to the appropriate derived schema.
@@ -419,13 +420,14 @@
         /// </summary>
 
         /// <summary>
-        /// -486 In WMLS_AddToStore, the WMLtypeIn objectType must match the XMLin objectType. Currently, they do
-        /// not match.
+        /// -486 In WMLS_AddToStore, the WMLtypeIn objectType must match the XMLin objectType. Currently, they do not match.
         /// </summary>
+        DataObjectTypesDontMatch = -486,
 
         /// <summary>
         /// -487 In WMLS_AddToStore, the objectType being added in WMLtypeIn must be an objectType supported by
         /// the server.The server does not support the object type trying to be added.
         /// </summary>
+        DataObjectTypeNotSupported = -487
     }
 }

@@ -117,6 +117,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="DataObjectTypeNotSupported" xml:space="preserve">
+    <value>In WMLS_AddToStore, the objectType being added in WMLtypeIn must be an objectType supported by the server. The server does not support the object type trying to be added.</value>
+    <comment>-487</comment>
+  </data>
+  <data name="DataObjectTypesDontMatch" xml:space="preserve">
+    <value>In WMLS_AddToStore, the WMLtypeIn objectType must match the XMLin objectType. Currently, they do not match.</value>
+    <comment>-486</comment>
+  </data>
   <data name="DataVersionNotSupported" xml:space="preserve">
     <value>For WMLS_GetCap, the OptionsIn keyword ‘dataVersion’ must specify a Data Schema Version that is supported by the server as defined by WMLS_GetVersion.</value>
     <comment>-423</comment>
@@ -125,9 +133,17 @@
     <value>For WMLS_GetCap, the OptionsIn keyword ‘dataVersion’ must be specified.</value>
     <comment>-424</comment>
   </data>
+  <data name="MissingInputTemplate" xml:space="preserve">
+    <value>A non-empty value must be defined for the input template.</value>
+    <comment>-408</comment>
+  </data>
   <data name="MissingPluralRootElement" xml:space="preserve">
     <value>The input template MUST contain a plural root element.</value>
     <comment>-401</comment>
+  </data>
+  <data name="MissingWMLtypeIn" xml:space="preserve">
+    <value>A non-empty value must be defined for WMLtypeIn.</value>
+    <comment>-407</comment>
   </data>
   <data name="ParialSuccess" xml:space="preserve">
     <value>Partial success: Function completed successfully but some growing data-object data-nodes were not returned.</value>
