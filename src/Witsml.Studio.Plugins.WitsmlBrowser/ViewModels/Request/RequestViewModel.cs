@@ -19,11 +19,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             get { return ((MainViewModel)Parent).Proxy; }
         }
 
-        public IWindowManager WindowManager
-        {
-            get { return ((MainViewModel)Parent).WindowManager; }
-        }
-
         protected override void OnInitialize()
         {
             _log.Debug("Loading Request View Models");

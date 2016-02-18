@@ -25,22 +25,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
 
         public WITSMLWebServiceConnection Proxy { get; private set; }
 
-        private IWindowManager _windowManager;
-        public IWindowManager WindowManager
-        {
-            get
-            {
-                if (_windowManager == null)
-                {
-                    _windowManager = Application
-                        .Current
-                        .Container()
-                        .Resolve<IWindowManager>();
-                }
-                return _windowManager;
-            }
-        }
-
         /// <summary>
         /// Gets the display order of the plug-in when loaded by the main application shell
         /// </summary>
