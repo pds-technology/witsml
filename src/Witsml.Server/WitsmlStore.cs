@@ -12,6 +12,9 @@ using PDS.Witsml.Server.Data;
 
 namespace PDS.Witsml.Server
 {
+    /// <summary>
+    /// WITSML store class that encapsulates service call methods.
+    /// </summary>
     [Export(typeof(IWitsmlStore))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class WitsmlStore : IWitsmlStore
@@ -108,10 +111,12 @@ namespace PDS.Witsml.Server
         }
 
         /// <summary>
-        /// WITSML store service method for adding one WITSML data-object to the server
+        /// Service call method for adding one data-object to the data store.
         /// </summary>
-        /// <param name="request">An object that encapsulates parameters for AddToStore WITSML request</param>
-        /// <returns>A WITSML response that includes return code and/or message</returns>
+        /// <param name="request">The request that encapsulates parameters for adding the object.</param>
+        /// <returns>
+        /// A WITSML response that includes return code and/or message
+        /// </returns>
         public WMLS_AddToStoreResponse WMLS_AddToStore(WMLS_AddToStoreRequest request)
         {
             var version = ObjectTypes.GetVersion(request.XMLin);
