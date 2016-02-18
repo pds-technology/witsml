@@ -8,6 +8,11 @@ using MongoDB.Driver;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
+    /// <summary>.
+    /// Data adapter that encapsulates CRUD functionality on <see cref="Well" />
+    /// </summary>
+    /// <seealso cref="Data.MongoDbDataAdapter{Well}" />
+    /// <seealso cref="IWitsml141Configuration" />
     [Export(typeof(IWitsml141Configuration))]
     [Export(typeof(IWitsmlDataAdapter<Well>))]
     [PartCreationPolicy(CreationPolicy.Shared)]
@@ -36,11 +41,14 @@ namespace PDS.Witsml.Server.Data.Wells
                 QueryEntities(parser, DbDocumentName, new List<string>() { "name,Name" }));
         }
 
+
         /// <summary>
-        /// Adds a WITSML well object to data store
+        /// Adds a <see cref="Well"/> to the data store.
         /// </summary>
-        /// <param name="entity">WITSML well object to be added</param>
-        /// <returns>A WITSML result object that includes return code and/or message for adding a WITSML well</returns>
+        /// <param name="entity">The <see cref="Well"/> to be added.</param>
+        /// <returns>
+        /// A WITSML result that includes return code and/or message.
+        /// </returns>
         public override WitsmlResult Add(Well entity)
         {
             var validationResults = new Dictionary<ErrorCodes, string>();
