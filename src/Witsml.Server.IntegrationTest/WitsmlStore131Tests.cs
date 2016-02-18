@@ -19,8 +19,8 @@ namespace PDS.Witsml.Server
         [TestInitialize]
         public void TestSetUp()
         {
-            //var url = "http://localhost/Witsml.Web/WitsmlStore.svc"; // IIS
-            var url = "http://localhost:5050/WitsmlStore.svc"; // TestApp
+            var url = "http://localhost/Witsml.Web/WitsmlStore.svc"; // IIS
+            //var url = "http://localhost:5050/WitsmlStore.svc"; // TestApp
             DevKit = new DevKit131Aspect(url);
 
             Well1 = new Well() { Name = DevKit.Name("Well 01"), TimeZone = DevKit.TimeZone, Uid = DevKit.Uid() };

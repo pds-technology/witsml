@@ -10,6 +10,10 @@ using PDS.Witsml.Server.Data;
 
 namespace PDS.Witsml.Server
 {
+    /// <summary>
+    /// The WISML Store API server implementation.
+    /// </summary>
+    /// <seealso cref="PDS.Witsml.Server.IWitsmlStore" />
     [Export(typeof(IWitsmlStore))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class WitsmlStore : IWitsmlStore
@@ -20,14 +24,28 @@ namespace PDS.Witsml.Server
         private readonly IDictionary<string, ICapServerProvider> _capServer;
         private string _supportedVersions;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WitsmlStore"/> class.
+        /// </summary>
         public WitsmlStore()
         {
             _capServer = new Dictionary<string, ICapServerProvider>();
         }
 
+        /// <summary>
+        /// Gets or sets the composition container used for dependency injection.
+        /// </summary>
+        /// <value>
+        /// The composition container.
+        /// </value>
         [Import]
         public IContainer Container { get; set; }
 
+        /// <summary>
+        /// Returns a string containing the Data Schema Version(s) that a server supports.
+        /// </summary>
+        /// <param name="request">The request object encapsulating the method input parameters.</param>
+        /// <returns>A comma-separated list of Data Schema Versions (without spaces) that the server supports.</returns>
         public WMLS_GetVersionResponse WMLS_GetVersion(WMLS_GetVersionRequest request)
         {
             EnsureCapServerProviders();
@@ -37,6 +55,11 @@ namespace PDS.Witsml.Server
             return new WMLS_GetVersionResponse(_supportedVersions);
         }
 
+        /// <summary>
+        /// Returns the capServer object that describes the capabilities of the server for one Data Schema Version.
+        /// </summary>
+        /// <param name="request">The request object encapsulating the method input parameters.</param>
+        /// <returns>A positive value indicates a success; a negative value indicates an error.</returns>
         public WMLS_GetCapResponse WMLS_GetCap(WMLS_GetCapRequest request)
         {
             EnsureCapServerProviders();
@@ -192,6 +215,11 @@ namespace PDS.Witsml.Server
             }
         }
 
+        /// <summary>
+        /// Returns a string containing only the fixed (base) message text associated with a defined Return Value.
+        /// </summary>
+        /// <param name="request">The request object encapsulating the method input parameters.</param>
+        /// <returns>The fixed descriptive message text associated with the Return Value.</returns>
         public WMLS_GetBaseMsgResponse WMLS_GetBaseMsg(WMLS_GetBaseMsgRequest request)
         {
             var message = string.Empty;
@@ -205,13 +233,20 @@ namespace PDS.Witsml.Server
             }
             else
             {
-                message = "Unknown WITSML error code: " + request.ReturnValueIn;
-                _log.Warn(message);
+                _log.Warn("Unknown WITSML error code: " + request.ReturnValueIn);
+                message = null;
             }
 
             return new WMLS_GetBaseMsgResponse(message);
         }
 
+        /// <summary>
+        /// Validates the required WITSML object type parameter for the WMLS_AddToStore method.
+        /// </summary>
+        /// <param name="version">The data schema version.</param>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="xmlType">Type of the object in the XML.</param>
+        /// <exception cref="WitsmlException"></exception>
         private void ValidateObjectType(string version, string objectType, string xmlType)
         {
             EnsureCapServerProviders();
@@ -228,6 +263,11 @@ namespace PDS.Witsml.Server
             }
         }
 
+        /// <summary>
+        /// Validates the required WITSML object type parameter.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <exception cref="WitsmlException"></exception>
         private void ValidateObjectType(string objectType)
         {
             if (string.IsNullOrWhiteSpace(objectType))
@@ -236,6 +276,11 @@ namespace PDS.Witsml.Server
             }
         }
 
+        /// <summary>
+        /// Validates the required WITSML input template.
+        /// </summary>
+        /// <param name="xml">The XML input template.</param>
+        /// <exception cref="WitsmlException"></exception>
         private void ValidateInputTemplate(string xml)
         {
             if (string.IsNullOrWhiteSpace(xml))
@@ -244,6 +289,9 @@ namespace PDS.Witsml.Server
             }
         }
 
+        /// <summary>
+        /// Ensures the <see cref="ICapServerProvider"/>s are loaded.
+        /// </summary>
         private void EnsureCapServerProviders()
         {
             if (_capServer.Any())

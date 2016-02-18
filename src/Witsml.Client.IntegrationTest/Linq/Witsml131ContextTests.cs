@@ -10,8 +10,8 @@ namespace PDS.Witsml.Client.Linq
     [TestClass]
     public class Witsml131ContextTests
     {
-        //private const string WitsmlStoreUrl = "http://localhost/Witsml.Web/WitsmlStore.svc";
-        private const string WitsmlStoreUrl = "http://localhost:5050/WitsmlStore.svc";
+        private const string WitsmlStoreUrl = "http://localhost/Witsml.Web/WitsmlStore.svc";
+        //private const string WitsmlStoreUrl = "http://localhost:5050/WitsmlStore.svc";
 
         private Witsml131Context _context;
 
