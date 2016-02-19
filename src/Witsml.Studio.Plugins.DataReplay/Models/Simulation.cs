@@ -12,7 +12,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.Models
         public Simulation()
         {
             Channels = new BindableCollection<ChannelMetadataRecord>();
-            Connection = new Connection() { ConnectionType = ConnectionTypes.Witsml.Value };
+            Connection = new Connection();
             LogIndexType = LogIndexType.measureddepth;
             PortNumber = 9000;
         }

@@ -9,36 +9,23 @@ namespace PDS.Witsml.Studio.ViewModels
     public class ConnectionViewModel : Screen
     {
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(ConnectionViewModel));
+        private string _connectionType;
 
         /// <summary>
         /// Initializes an instance of the ConnectionViewModel.
         /// </summary>
-        public ConnectionViewModel()
+        public ConnectionViewModel(ConnectionTypes connectionType)
         {
             _log.Debug("Creating View Model");
 
-            Connection = new Connection()
-            {
-                ConnectionType = ConnectionTypes.Witsml.Value // default
-            };
+            _connectionType = connectionType.ToString();
+            DisplayName = string.Format("{0} Connection", _connectionType);
+            Connection = new Connection();
         }
 
-        private Connection _connection;
         /// <summary>
         /// Gets and sets the connection details for a connection
         /// </summary>
-        public Connection Connection
-        {
-            get { return _connection; }
-            set
-            {
-                if (!ReferenceEquals(_connection, value))
-                {
-                    _connection = value;
-                    DisplayName = string.Format("{0} Connection", _connection.ConnectionType);
-                    NotifyOfPropertyChange(() => Connection);
-                }
-            }
-        }
+        public Connection Connection { get; set; }
     }
 }

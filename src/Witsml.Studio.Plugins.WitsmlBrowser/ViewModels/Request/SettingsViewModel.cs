@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Caliburn.Micro;
 using Energistics.DataAccess;
+using PDS.Witsml.Studio.Models;
 using PDS.Witsml.Studio.ViewModels;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
@@ -43,7 +44,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 
         public void ShowConnectionDialog()
         {
-            var viewModel = new ConnectionViewModel()
+            var viewModel = new ConnectionViewModel(ConnectionTypes.Witsml)
             {
                 Connection = Model.Connection
             };
