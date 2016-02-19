@@ -1,4 +1,6 @@
-﻿using Caliburn.Micro;
+﻿using System;
+using System.Windows;
+using Caliburn.Micro;
 using PDS.Witsml.Studio.Models;
 
 namespace PDS.Witsml.Studio.ViewModels
@@ -27,5 +29,31 @@ namespace PDS.Witsml.Studio.ViewModels
         /// Gets and sets the connection details for a connection
         /// </summary>
         public Connection Connection { get; set; }
+
+        private Func<Connection, bool> _connectionTest;
+        public Func<Connection, bool> ConnectionTest
+        {
+            get { return _connectionTest; }
+            set
+            {
+                if (!ReferenceEquals(_connectionTest, value))
+                {
+                    _connectionTest = value;
+                    NotifyOfPropertyChange(() => ConnectionTest);
+                }
+            }
+        }
+
+        public void TestConnection()
+        {
+            if (_connectionTest(Connection))
+            {
+                MessageBox.Show("Connection successful", "Connection Status", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else
+            {
+                MessageBox.Show("Connection failed", "Connection Status", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
     }
 }
