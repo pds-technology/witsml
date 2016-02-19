@@ -428,6 +428,26 @@
         /// -487 In WMLS_AddToStore, the objectType being added in WMLtypeIn must be an objectType supported by
         /// the server.The server does not support the object type trying to be added.
         /// </summary>
-        DataObjectTypeNotSupported = -487
+        DataObjectTypeNotSupported = -487,
+
+        /// <summary>
+        /// -1001 Error adding to data store
+        /// </summary>
+        ErrorAddingToDataStore = -1001,
+
+        /// <summary>
+        /// -1002 Error reading from data store
+        /// </summary>
+        ErrorReadingFromDataStore = -1002,
+
+        /// <summary>
+        /// -1003 Error updating in data store
+        /// </summary>
+        ErrorUpdatingInDataStore = -1003,
+
+        /// <summary>
+        /// -1004 Error deleting from data store
+        /// </summary>
+        ErrorDeletingFromDataStore = -1004,
     }
 }

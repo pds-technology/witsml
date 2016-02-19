@@ -53,11 +53,18 @@ namespace PDS.Witsml.Server.Data
             }
             catch (MongoQueryException ex)
             {
-                _log.ErrorFormat("Error querying {0}: {1}", dbCollectionName, ex.Message);
-                throw;
+                _log.Error("Error querying " + dbCollectionName, ex);
+                throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, ex);
             }
         }
 
+        /// <summary>
+        /// Queries the entities.
+        /// </summary>
+        /// <param name="parser">The parser.</param>
+        /// <param name="dbCollectionName">Name of the database collection.</param>
+        /// <param name="names">The names.</param>
+        /// <returns></returns>
         protected List<T> QueryEntities(WitsmlQueryParser parser, string dbCollectionName, List<string> names)
         {
             var entities = new List<T>();
@@ -92,21 +99,18 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dbCollectionName">The name of the database collection.</param>
         protected void CreateEntity(T entity, string dbCollectionName)
         {
-            if (entity != null)
+            try
             {
-                try
-                {
-                    _log.DebugFormat("Insert WITSML object: {0}", dbCollectionName);
-                    var database = DatabaseProvider.GetDatabase();
-                    var collection = database.GetCollection<T>(dbCollectionName);
+                _log.DebugFormat("Insert WITSML object: {0}", dbCollectionName);
+                var database = DatabaseProvider.GetDatabase();
+                var collection = database.GetCollection<T>(dbCollectionName);
 
-                    collection.InsertOne(entity);
-                }
-                catch (MongoWriteException ex)
-                {
-                    _log.ErrorFormat("Error inserting {0}: {1}", dbCollectionName, ex.Message);
-                    throw;
-                }
+                collection.InsertOne(entity);
+            }
+            catch (MongoWriteException ex)
+            {
+                _log.Error("Error inserting " + dbCollectionName, ex);
+                throw new WitsmlException(ErrorCodes.ErrorAddingToDataStore, ex);
             }
         }
 
