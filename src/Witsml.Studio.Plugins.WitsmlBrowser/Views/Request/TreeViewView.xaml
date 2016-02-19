@@ -4,16 +4,18 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-             xmlns:beh="clr-namespace:PDS.Witsml.Studio.Plugins.WitsmlBrowser.Behaviors"
+             xmlns:conv="clr-namespace:PDS.Witsml.Studio.Converters;assembly=PDS.Witsml.Studio"
              xmlns:local="clr-namespace:PDS.Witsml.Studio.Plugins.WitsmlBrowser.Views.Request"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
+
+    <UserControl.Resources>
+        <conv:NullToBooleanConverter x:Key="NullToBooleanConverter" />
+    </UserControl.Resources>
+
     <Grid>
         <!-- TODO: Bind TreeView to data in Browser class -->
-        <TreeView Margin="5" beh:StringValueEnabledBehavior.StringValue="{Binding Model.WitsmlVersion}">
-            <!--<i:Interaction.Behaviors>
-                <beh:StringValueEnabledBehavior StringValue="{Binding Model.WitsmlVersion}" />
-            </i:Interaction.Behaviors>-->
+        <TreeView Margin="5" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}">
             <TreeViewItem Header="Test Well 1" IsExpanded="True">
                 <TreeViewItem Header="Test Wellbore 1" IsExpanded="True">
                     <TreeViewItem Header="log" />

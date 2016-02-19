@@ -138,6 +138,8 @@
     <Compile Include="AppExtensions.cs" />
     <Compile Include="Behaviors\DropDownButtonBehavior.cs" />
     <Compile Include="Bootstrapper.cs" />
+    <Compile Include="Converters\NullToBooleanConverter.cs" />
+    <Compile Include="Converters\NullToVisibilityConverter.cs" />
     <Compile Include="Models\Connection.cs" />
     <Compile Include="Models\ConnectionTypes.cs" />
     <Compile Include="ViewModels\ConnectionViewModel.cs" />
