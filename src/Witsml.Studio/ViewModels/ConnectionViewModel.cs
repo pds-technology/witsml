@@ -17,19 +17,28 @@ namespace PDS.Witsml.Studio.ViewModels
         {
             _log.Debug("Creating View Model");
 
-            DisplayName = "Connection";
             Connection = new Connection()
             {
-                //Uri = "http://localhost:5000",
-                //Name = "Name",
-                //Username = "username",
-                //Password = "password"
+                ConnectionType = ConnectionTypes.Witsml.Value // default
             };
         }
 
+        private Connection _connection;
         /// <summary>
         /// Gets and sets the connection details for a connection
         /// </summary>
-        public Connection Connection { get; set; }
+        public Connection Connection
+        {
+            get { return _connection; }
+            set
+            {
+                if (!ReferenceEquals(_connection, value))
+                {
+                    _connection = value;
+                    DisplayName = string.Format("{0} Connection", _connection.ConnectionType);
+                    NotifyOfPropertyChange(() => Connection);
+                }
+            }
+        }
     }
 }

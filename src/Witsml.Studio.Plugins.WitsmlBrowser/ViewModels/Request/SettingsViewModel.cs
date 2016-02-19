@@ -43,10 +43,12 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 
         public void ShowConnectionDialog()
         {
-            var viewModel = new ConnectionViewModel();
+            var viewModel = new ConnectionViewModel()
+            {
+                Connection = Model.Connection
+            };
 
-            // TODO: Move to App Extension so we don't have to resolve WindowManager each time.  
-            //... Return boolean instead of nullable to avoid GetValueOrDefault()
+
             if (App.Current.ShowDialog(viewModel))
             {
                 Model.Connection = viewModel.Connection;
@@ -55,7 +57,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
                 GetVersions();
 
                 // TODO: GetCap
-                // TODO: GetWells
+                // TODO: GetWells for the TreeView
             }
         }
 

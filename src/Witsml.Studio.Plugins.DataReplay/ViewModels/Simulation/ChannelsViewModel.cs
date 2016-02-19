@@ -61,7 +61,11 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
         public void ShowConnectionDialog()
         {
             var windowManager = Application.Current.Container().Resolve<IWindowManager>();
-            var viewModel = new ConnectionViewModel();
+            var viewModel = new ConnectionViewModel()
+            {
+                Connection = Model.Connection
+            };
+
 
             if (windowManager.ShowDialog(viewModel).GetValueOrDefault())
             {

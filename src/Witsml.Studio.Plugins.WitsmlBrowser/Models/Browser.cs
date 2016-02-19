@@ -8,7 +8,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
     {
         public Browser()
         {
-            Connection = new Connection();
+            Connection = new Connection() { ConnectionType = ConnectionTypes.Witsml.Value };
             MaxDataRows = 1000;
 
             // TODO: Remove after testing

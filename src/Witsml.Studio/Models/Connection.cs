@@ -27,6 +27,24 @@ namespace PDS.Witsml.Studio.Models
             }
         }
 
+        private string _connectionType;
+        /// <summary>
+        /// Gets or sets the name of the connection
+        /// </summary>
+        [DataMember]
+        public string ConnectionType
+        {
+            get { return _connectionType; }
+            set
+            {
+                if (!string.Equals(_connectionType, value))
+                {
+                    _connectionType = value;
+                    NotifyOfPropertyChange(() => ConnectionType);
+                }
+            }
+        }
+
         private string _uri;
         /// <summary>
         /// Gets or sets the uri to access the connection

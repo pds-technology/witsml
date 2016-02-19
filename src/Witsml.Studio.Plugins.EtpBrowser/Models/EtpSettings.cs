@@ -9,7 +9,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.Models
     {
         public EtpSettings()
         {
-            Connection = new Connection();
+            Connection = new Connection() { ConnectionType = ConnectionTypes.Etp.Value };
         }
 
         private Connection _connection;

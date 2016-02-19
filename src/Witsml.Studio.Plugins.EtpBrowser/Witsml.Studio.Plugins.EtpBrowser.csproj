@@ -219,6 +219,10 @@
       <Project>{e7531da0-51bd-4c58-b020-ffce2dfbced6}</Project>
       <Name>Witsml.Studio</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Witsml\Witsml.csproj">
+      <Project>{0ef1d73f-e7a0-40b0-803b-7ce4b6b27112}</Project>
+      <Name>Witsml</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
