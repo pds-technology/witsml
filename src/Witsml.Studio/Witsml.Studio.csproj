@@ -139,6 +139,7 @@
     <Compile Include="Behaviors\DropDownButtonBehavior.cs" />
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="Models\Connection.cs" />
+    <Compile Include="Models\ConnectionTypes.cs" />
     <Compile Include="ViewModels\ConnectionViewModel.cs" />
     <Compile Include="ViewModels\IPluginViewModel.cs" />
     <Compile Include="ViewModels\IShellViewModel.cs" />

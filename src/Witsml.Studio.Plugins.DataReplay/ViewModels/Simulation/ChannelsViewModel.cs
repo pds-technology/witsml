@@ -11,6 +11,7 @@ using Energistics.Protocol.ChannelStreaming;
 using Energistics.Protocol.Discovery;
 using Microsoft.Win32;
 using Newtonsoft.Json;
+using PDS.Witsml.Studio.Models;
 using PDS.Witsml.Studio.Plugins.DataReplay.Providers;
 using PDS.Witsml.Studio.ViewModels;
 
@@ -60,9 +61,15 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
 
         public void ShowConnectionDialog()
         {
+            // TODO: Remove (Task 4465)
             var windowManager = Application.Current.Container().Resolve<IWindowManager>();
-            var viewModel = new ConnectionViewModel();
+            var viewModel = new ConnectionViewModel(ConnectionTypes.Witsml)
+            {
+                Connection = Model.Connection
+            };
 
+
+            // TODO: Replace with App.ShowDialog (Task 4465)
             if (windowManager.ShowDialog(viewModel).GetValueOrDefault())
             {
                 Model.Connection = viewModel.Connection;

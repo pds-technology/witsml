@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Caliburn.Micro;
 using Energistics.DataAccess;
+using PDS.Witsml.Studio.Models;
 using PDS.Witsml.Studio.ViewModels;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
@@ -43,10 +44,12 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 
         public void ShowConnectionDialog()
         {
-            var viewModel = new ConnectionViewModel();
+            var viewModel = new ConnectionViewModel(ConnectionTypes.Witsml)
+            {
+                Connection = Model.Connection
+            };
 
-            // TODO: Move to App Extension so we don't have to resolve WindowManager each time.  
-            //... Return boolean instead of nullable to avoid GetValueOrDefault()
+
             if (App.Current.ShowDialog(viewModel))
             {
                 Model.Connection = viewModel.Connection;
@@ -55,7 +58,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
                 GetVersions();
 
                 // TODO: GetCap
-                // TODO: GetWells
+                // TODO: GetWells for the TreeView
             }
         }
 

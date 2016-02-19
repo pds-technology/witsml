@@ -12,7 +12,7 @@ using PDS.Witsml.Studio.ViewModels;
 namespace PDS.Witsml.Studio
 {
     /// <summary>
-    /// Application Bootstrapper class derived from the Caliburn Micro BootstrapperBase
+    /// Configures the composition container to be used for dependecy injection.
     /// </summary>
     public class Bootstrapper : BootstrapperBase
     {
@@ -21,7 +21,11 @@ namespace PDS.Witsml.Studio
         /// <summary>
         /// Initializes a new instance of the application Bootstrapper
         /// </summary>
-        public Bootstrapper()
+        public Bootstrapper():this(true)
+        {
+        }
+
+        public Bootstrapper(bool useApplication = true):base(useApplication)
         {
             Initialize();
         }
@@ -47,9 +51,11 @@ namespace PDS.Witsml.Studio
 
         protected override object GetInstance(Type service, string key)
         {
-            return string.IsNullOrWhiteSpace(key)
+            object instance = string.IsNullOrWhiteSpace(key)
                 ? Container.Resolve(service)
                 : Container.Resolve(service, key);
+
+            return instance;
         }
 
         protected override IEnumerable<object> GetAllInstances(Type service)
@@ -72,7 +78,7 @@ namespace PDS.Witsml.Studio
             var path = Path.Combine(Environment.CurrentDirectory, "Plugins");
             _log.DebugFormat("Bootstrapper Assembly Path: {0}", path);
 
-            IEnumerable<Assembly> assemblies = new[] { GetType().Assembly }
+            IEnumerable<Assembly> assemblies = new[] { typeof(Bootstrapper).Assembly }
                 .Union(Directory.GetFiles(path, "*.dll")
                 .Select(x => Assembly.LoadFrom(x)));
 
