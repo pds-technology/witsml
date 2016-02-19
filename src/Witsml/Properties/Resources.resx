@@ -129,6 +129,22 @@
     <value>For WMLS_GetCap, the OptionsIn keyword ‘dataVersion’ must specify a Data Schema Version that is supported by the server as defined by WMLS_GetVersion.</value>
     <comment>-423</comment>
   </data>
+  <data name="ErrorAddingToDataStore" xml:space="preserve">
+    <value>Error adding to data store</value>
+    <comment>-1001</comment>
+  </data>
+  <data name="ErrorDeletingFromDataStore" xml:space="preserve">
+    <value>Error deleting from data store</value>
+    <comment>-1004</comment>
+  </data>
+  <data name="ErrorReadingFromDataStore" xml:space="preserve">
+    <value>Error reading from data store</value>
+    <comment>-1002</comment>
+  </data>
+  <data name="ErrorUpdatingInDataStore" xml:space="preserve">
+    <value>Error updating in data store</value>
+    <comment>-1003</comment>
+  </data>
   <data name="MissingDataVersion" xml:space="preserve">
     <value>For WMLS_GetCap, the OptionsIn keyword ‘dataVersion’ must be specified.</value>
     <comment>-424</comment>

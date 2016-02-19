@@ -56,17 +56,8 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         public virtual WitsmlResult AddToStore(string witsmlType, string xml, string options, string capabilities)
         {
-            try
-            {
-                var list = EnergisticsConverter.XmlToObject<TList>(xml);
-                return _dataAdapter.Add(list.Items.Cast<TObject>().Single());
-            }
-            catch (Exception ex)
-            {
-                var message = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
-                _log.ErrorFormat("Error converting XMLIn to Engergistic object: {0}: {1}", witsmlType, message);
-                return new WitsmlResult(ErrorCodes.Unset, message);
-            }
+            var list = EnergisticsConverter.XmlToObject<TList>(xml);
+            return _dataAdapter.Add(list.Items.Cast<TObject>().Single());
         }
 
         /// <summary>

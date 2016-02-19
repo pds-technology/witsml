@@ -88,6 +88,42 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error adding to data store.
+        /// </summary>
+        internal static string ErrorAddingToDataStore {
+            get {
+                return ResourceManager.GetString("ErrorAddingToDataStore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error deleting from data store.
+        /// </summary>
+        internal static string ErrorDeletingFromDataStore {
+            get {
+                return ResourceManager.GetString("ErrorDeletingFromDataStore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error reading from data store.
+        /// </summary>
+        internal static string ErrorReadingFromDataStore {
+            get {
+                return ResourceManager.GetString("ErrorReadingFromDataStore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error updating in data store.
+        /// </summary>
+        internal static string ErrorUpdatingInDataStore {
+            get {
+                return ResourceManager.GetString("ErrorUpdatingInDataStore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to For WMLS_GetCap, the OptionsIn keyword ‘dataVersion’ must be specified..
         /// </summary>
         internal static string MissingDataVersion {
