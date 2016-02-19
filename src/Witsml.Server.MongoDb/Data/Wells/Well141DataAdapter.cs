@@ -71,24 +71,9 @@ namespace PDS.Witsml.Server.Data.Wells
                 return new WitsmlResult(validationResults.Keys.First(), validationResults.Values.First());
             }
 
-            try
-            {
-                _log.DebugFormat("Add new well with uid: {0}", entity.Uid);
-                CreateEntity(entity, DbDocumentName);
-                var result = GetEntity(entity.Uid, DbDocumentName);
-                if (result != null)
-                {
-                    return new WitsmlResult(ErrorCodes.Success, result.Uid);
-                }
-                else
-                {
-                    return new WitsmlResult(ErrorCodes.Unset, "Error adding well");
-                }
-            }
-            catch (Exception ex)
-            {
-                return new WitsmlResult(ErrorCodes.Unset, ex.Message + "\n" + ex.StackTrace);
-            }
+            _log.DebugFormat("Add new well with uid: {0}", entity.Uid);
+            CreateEntity(entity, DbDocumentName);
+            return new WitsmlResult(ErrorCodes.Success, entity.Uid);
         }
 
         public override WitsmlResult Update(Well entity)
