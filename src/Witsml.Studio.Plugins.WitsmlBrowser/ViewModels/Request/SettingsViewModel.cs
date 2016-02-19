@@ -47,10 +47,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             var viewModel = new ConnectionViewModel(ConnectionTypes.Witsml)
             {
                 Connection = Model.Connection,
-
-                // TODO: Implement and resolve an IConnectionTest for Witsml or Etp 
-                //... ConnectionType and pass in to ConnectionViewModel (Task 4373)
-                ConnectionTest = TestWitsmlConnection
             };
 
 
@@ -64,12 +60,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
                 // TODO: GetCap
                 // TODO: GetWells for the TreeView
             }
-        }
-
-        // TODO: Remove after IConnectionTests are created and resolved for use (Task 4373)
-        private bool TestWitsmlConnection(Connection connection)
-        {
-            return !string.IsNullOrEmpty(connection.Uri);
         }
 
         private void GetVersions()

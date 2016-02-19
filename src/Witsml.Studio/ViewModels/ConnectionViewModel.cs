@@ -11,7 +11,6 @@ namespace PDS.Witsml.Studio.ViewModels
     public class ConnectionViewModel : Screen
     {
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(ConnectionViewModel));
-        private string _connectionType;
 
         /// <summary>
         /// Initializes an instance of the ConnectionViewModel.
@@ -20,28 +19,45 @@ namespace PDS.Witsml.Studio.ViewModels
         {
             _log.Debug("Creating View Model");
 
-            _connectionType = connectionType.ToString();
-            DisplayName = string.Format("{0} Connection", _connectionType);
+            // TODO: Remove (Task 4373)
+            _connectionTest = TestWitsmlConnection;
+
+            ConnectionType = connectionType;
+            DisplayName = string.Format("{0} Connection", ConnectionType.ToString().ToUpper());
             Connection = new Connection();
         }
+
+        /// <summary>
+        /// Gets the connection type
+        /// </summary>
+        public ConnectionTypes ConnectionType { get; private set; }
 
         /// <summary>
         /// Gets and sets the connection details for a connection
         /// </summary>
         public Connection Connection { get; set; }
 
+
+        // TODO: Implement and resolve an IConnectionTest for Witsml or Etp 
+        //... ConnectionType assign (Task 4373)
         private Func<Connection, bool> _connectionTest;
-        public Func<Connection, bool> ConnectionTest
+        //public Func<Connection, bool> ConnectionTest
+        //{
+        //    get { return _connectionTest; }
+        //    set
+        //    {
+        //        if (!ReferenceEquals(_connectionTest, value))
+        //        {
+        //            _connectionTest = value;
+        //            NotifyOfPropertyChange(() => ConnectionTest);
+        //        }
+        //    }
+        //}
+
+        // TODO: Remove after IConnectionTests are created and resolved for use (Task 4373)
+        private bool TestWitsmlConnection(Connection connection)
         {
-            get { return _connectionTest; }
-            set
-            {
-                if (!ReferenceEquals(_connectionTest, value))
-                {
-                    _connectionTest = value;
-                    NotifyOfPropertyChange(() => ConnectionTest);
-                }
-            }
+            return !string.IsNullOrEmpty(connection.Uri);
         }
 
         public void TestConnection()

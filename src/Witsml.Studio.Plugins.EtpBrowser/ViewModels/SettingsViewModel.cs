@@ -20,16 +20,12 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
 
         public void ShowConnectionDialog()
         {
-            // TODO: Remove (Task 4465)
-            var windowManager = Application.Current.Container().Resolve<IWindowManager>();
-
             var viewModel = new ConnectionViewModel(ConnectionTypes.Etp)
             {
                 Connection = Model.Connection
             };
 
-            // TODO: Replace with App.ShowDialog (Task 4465)
-            if (windowManager.ShowDialog(viewModel).GetValueOrDefault())
+            if (App.Current.ShowDialog(viewModel))
             {
                 Model.Connection = viewModel.Connection;
 

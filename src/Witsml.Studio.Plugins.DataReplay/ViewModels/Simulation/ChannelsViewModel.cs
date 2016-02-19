@@ -61,16 +61,13 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
 
         public void ShowConnectionDialog()
         {
-            // TODO: Remove (Task 4465)
-            var windowManager = Application.Current.Container().Resolve<IWindowManager>();
             var viewModel = new ConnectionViewModel(ConnectionTypes.Witsml)
             {
                 Connection = Model.Connection
             };
 
 
-            // TODO: Replace with App.ShowDialog (Task 4465)
-            if (windowManager.ShowDialog(viewModel).GetValueOrDefault())
+            if (App.Current.ShowDialog(viewModel))
             {
                 Model.Connection = viewModel.Connection;
             }
