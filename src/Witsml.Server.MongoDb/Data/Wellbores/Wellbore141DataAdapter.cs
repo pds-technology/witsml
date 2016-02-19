@@ -22,8 +22,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
         public void GetCapabilities(CapServer capServer)
         {
-            _log.DebugFormat("Version: {0}; Functions: {1}; {2}", capServer.Version, Functions.GetFromStore, Functions.AddToStore);
-
             capServer.Add(Functions.GetFromStore, ObjectTypes.Wellbore);
             capServer.Add(Functions.AddToStore, ObjectTypes.Wellbore);
             //capServer.Add(Functions.UpdateInStore, ObjectTypes.Wellbore);

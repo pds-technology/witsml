@@ -2,6 +2,7 @@
 using System.Xml.Linq;
 using System.Xml.XPath;
 using Energistics.DataAccess;
+using log4net;
 
 namespace PDS.Witsml.Server.Data.CapServers
 {
@@ -12,6 +13,8 @@ namespace PDS.Witsml.Server.Data.CapServers
     /// <seealso cref="PDS.Witsml.Server.Data.ICapServerProvider" />
     public abstract class CapServerProvider<T> : ICapServerProvider
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(CapServer131Provider));
+
         private T _capServer;
         private XDocument _capServerDoc;
         private string _capServerXml;
@@ -56,9 +59,13 @@ namespace PDS.Witsml.Server.Data.CapServers
             var capServerDoc = GetCapServerDocument();
             var ns = XNamespace.Get(capServerDoc.Root.CreateNavigator().GetNamespace(string.Empty));
 
-            return capServerDoc.Descendants(ns + "dataObject")
+            var supported = capServerDoc.Descendants(ns + "dataObject")
                 .Where(x => x.Value == objectType && x.Parent.Attribute("name").Value == "WMLS_" + function)
                 .Any();
+
+            _log.DebugFormat("Function: {0}; Data Object: {1}; IsSupported: {2}", function, objectType, supported);
+
+            return supported;
         }
 
         /// <summary>

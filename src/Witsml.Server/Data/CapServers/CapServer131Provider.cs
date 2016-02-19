@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using log4net;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 
 namespace PDS.Witsml.Server.Data.CapServers
@@ -13,6 +14,8 @@ namespace PDS.Witsml.Server.Data.CapServers
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class CapServer131Provider : CapServerProvider<Witsml131.CapServers>
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(CapServer131Provider));
+
         /// <summary>
         /// Gets the data schema version.
         /// </summary>
@@ -37,6 +40,7 @@ namespace PDS.Witsml.Server.Data.CapServers
         {
             if (!Providers.Any())
             {
+                _log.WarnFormat("No WITSML configuration providers loaded for data schema version {0}", DataSchemaVersion);
                 return null;
             }
 

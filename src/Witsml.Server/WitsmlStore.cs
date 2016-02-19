@@ -7,6 +7,7 @@ using log4net;
 using PDS.Framework;
 using PDS.Witsml.Properties;
 using PDS.Witsml.Server.Data;
+using PDS.Witsml.Server.Logging;
 
 namespace PDS.Witsml.Server
 {
@@ -49,10 +50,11 @@ namespace PDS.Witsml.Server
         public WMLS_GetVersionResponse WMLS_GetVersion(WMLS_GetVersionRequest request)
         {
             EnsureCapServerProviders();
+            _log.Debug(request.ToLogMessage());
 
-            _log.DebugFormat("Supported Versions: {0}", _supportedVersions);
-
-            return new WMLS_GetVersionResponse(_supportedVersions);
+            var response = new WMLS_GetVersionResponse(_supportedVersions);
+            _log.Debug(response.ToLogMessage());
+            return response;
         }
 
         /// <summary>
@@ -63,8 +65,7 @@ namespace PDS.Witsml.Server
         public WMLS_GetCapResponse WMLS_GetCap(WMLS_GetCapRequest request)
         {
             EnsureCapServerProviders();
-
-            _log.DebugFormat("Options: {0}", request.OptionsIn);
+            _log.Debug(request.ToLogMessage());
 
             var options = OptionsIn.Parse(request.OptionsIn);
             var version = OptionsIn.GetValue(options, new OptionsIn.DataVersion(DefaultDataSchemaVersion));
@@ -72,24 +73,24 @@ namespace PDS.Witsml.Server
             // return error if WITSML 1.3.1 not supported AND dataVersion not specified (required in WITSML 1.4.1)
             if (!_capServer.ContainsKey(OptionsIn.DataVersion.Version131.Value) && !options.ContainsKey(OptionsIn.DataVersion.Keyword))
             {
-                return new WMLS_GetCapResponse(
-                    (short)ErrorCodes.MissingDataVersion,
-                    string.Empty,
-                    ErrorCodes.MissingDataVersion.GetDescription());
+                var response = new WMLS_GetCapResponse((short)ErrorCodes.MissingDataVersion, string.Empty, ErrorCodes.MissingDataVersion.GetDescription());
+                _log.Warn(response.ToLogMessage(_log.IsWarnEnabled));
+                return response;
             }
 
             if (_capServer.ContainsKey(version))
             {
-                return new WMLS_GetCapResponse(
-                    (short)ErrorCodes.Success,
-                    _capServer[version].ToXml(),
-                    String.Empty);
+                var response = new WMLS_GetCapResponse((short)ErrorCodes.Success, _capServer[version].ToXml(), string.Empty);
+                _log.Debug(response.ToLogMessage());
+                return response;
             }
 
-            return new WMLS_GetCapResponse(
-                (short)ErrorCodes.DataVersionNotSupported,
-                string.Empty,
+            var error = new WMLS_GetCapResponse((short)ErrorCodes.DataVersionNotSupported, string.Empty,
                 ErrorCodes.DataVersionNotSupported.GetDescription() + " Data schema version not supported: " + version);
+
+            _log.Warn(error.ToLogMessage(_log.IsWarnEnabled));
+
+            return error;
         }
 
         public WMLS_GetFromStoreResponse WMLS_GetFromStore(WMLS_GetFromStoreRequest request)
@@ -98,7 +99,7 @@ namespace PDS.Witsml.Server
 
             try
             {
-                _log.DebugFormat("Type: {0}; Options: {1}; Query:{3}{2}{3}", request.WMLtypeIn, request.OptionsIn, request.QueryIn, Environment.NewLine);
+                _log.Debug(request.ToLogMessage());
 
                 ValidateObjectType(request.WMLtypeIn);
                 ValidateInputTemplate(request.QueryIn);
@@ -106,23 +107,31 @@ namespace PDS.Witsml.Server
                 var dataProvider = Container.Resolve<IWitsmlDataProvider>(new ObjectName(request.WMLtypeIn, version));
                 var result = dataProvider.GetFromStore(request.WMLtypeIn, request.QueryIn, request.OptionsIn, request.CapabilitiesIn);
 
-                return new WMLS_GetFromStoreResponse(
+                var response = new WMLS_GetFromStoreResponse(
                     (short)result.Code,
                     result.Results != null
                         ? EnergisticsConverter.ObjectToXml(result.Results)
-                        : String.Empty,
+                        : string.Empty,
                     result.Message);
+
+                _log.Debug(response.ToLogMessage());
+
+                return response;
             }
             catch (ContainerException)
             {
-                return new WMLS_GetFromStoreResponse(
-                    (short)ErrorCodes.DataObjectNotSupported,
-                    String.Empty,
+                var response = new WMLS_GetFromStoreResponse((short)ErrorCodes.DataObjectNotSupported, string.Empty,
                     "WITSML object type not supported: " + request.WMLtypeIn + "; Version: " + version);
+
+                _log.Warn(response.ToLogMessage(_log.IsWarnEnabled));
+
+                return response;
             }
             catch (WitsmlException ex)
             {
-                return new WMLS_GetFromStoreResponse((short)ex.ErrorCode, string.Empty, ex.Message);
+                var response = new WMLS_GetFromStoreResponse((short)ex.ErrorCode, string.Empty, ex.Message);
+                _log.Warn(response.ToLogMessage(_log.IsWarnEnabled));
+                return response;
             }
         }
 
@@ -137,7 +146,7 @@ namespace PDS.Witsml.Server
 
             try
             {
-                _log.DebugFormat("Type: {0}; Options: {1}; XML:{3}{2}{3}", request.WMLtypeIn, request.OptionsIn, request.XMLin, Environment.NewLine);
+                _log.Debug(request.ToLogMessage());
 
                 ValidateObjectType(version, request.WMLtypeIn, ObjectTypes.GetObjectType(request.XMLin));
                 ValidateInputTemplate(request.XMLin);
@@ -145,17 +154,24 @@ namespace PDS.Witsml.Server
                 var dataWriter = Container.Resolve<IWitsmlDataWriter>(new ObjectName(request.WMLtypeIn, version));
                 var result = dataWriter.AddToStore(request.WMLtypeIn, request.XMLin, request.OptionsIn, request.CapabilitiesIn);
 
-                return new WMLS_AddToStoreResponse((short)result.Code, result.Message);
+                var response = new WMLS_AddToStoreResponse((short)result.Code, result.Message);
+                _log.Debug(response.ToLogMessage());
+                return response;
             }
             catch (ContainerException)
             {
-                return new WMLS_AddToStoreResponse(
-                    (short)ErrorCodes.DataObjectNotSupported,
+                var response = new WMLS_AddToStoreResponse((short)ErrorCodes.DataObjectNotSupported,
                     "WITSML object type not supported: " + request.WMLtypeIn + "; Version: " + version);
+
+                _log.Warn(response.ToLogMessage(_log.IsWarnEnabled));
+
+                return response;
             }
             catch (WitsmlException ex)
             {
-                return new WMLS_AddToStoreResponse((short)ex.ErrorCode, ex.Message);
+                var response = new WMLS_AddToStoreResponse((short)ex.ErrorCode, ex.Message);
+                _log.Warn(response.ToLogMessage(_log.IsWarnEnabled));
+                return response;
             }
         }
 
