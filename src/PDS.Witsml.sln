@@ -45,6 +45,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSockets", "WebSockets\We
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSockets.TestApp", "WebSockets.TestApp\WebSockets.TestApp.csproj", "{6DCD4AA3-AA28-49A8-BCA9-99D534B34864}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Studio.UnitTest", "Witsml.Studio.UnitTest\Witsml.Studio.UnitTest.csproj", "{F3143AD1-3139-4449-B07C-68D834E4EE36}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -123,6 +125,10 @@ Global
 		{6DCD4AA3-AA28-49A8-BCA9-99D534B34864}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6DCD4AA3-AA28-49A8-BCA9-99D534B34864}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6DCD4AA3-AA28-49A8-BCA9-99D534B34864}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3143AD1-3139-4449-B07C-68D834E4EE36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3143AD1-3139-4449-B07C-68D834E4EE36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3143AD1-3139-4449-B07C-68D834E4EE36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3143AD1-3139-4449-B07C-68D834E4EE36}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
