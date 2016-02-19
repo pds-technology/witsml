@@ -13,7 +13,7 @@
         /// <param name="options">The options.</param>
         /// <param name="capabilities">The client’s Capabilities Object (capClient).</param>
         /// <returns>
-        /// A WITSML result that includes return code and/or message.
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
         WitsmlResult AddToStore(string witsmlType, string xml, string options, string capabilities);
 
@@ -25,7 +25,7 @@
         /// <param name="options">The options.</param>
         /// <param name="capabilities">The client’s Capabilities Object (capClient).</param>
         /// <returns>
-        /// A WITSML result that includes return code and/or message.
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
         WitsmlResult UpdateInStore(string witsmlType, string xml, string options, string capabilities);
 
@@ -37,7 +37,7 @@
         /// <param name="options">The options.</param>
         /// <param name="capabilities">The client’s Capabilities Object (capClient).</param>
         /// <returns>
-        /// A WITSML result that includes return code and/or message.
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
         WitsmlResult DeleteFromStore(string witsmlType, string xml, string options, string capabilities);
     }

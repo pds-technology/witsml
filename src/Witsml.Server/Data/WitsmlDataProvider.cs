@@ -18,6 +18,10 @@ namespace PDS.Witsml.Server.Data
         protected readonly IWitsmlDataAdapter<TObject> _dataAdapter;
         private static readonly ILog _log = LogManager.GetLogger(typeof(WitsmlDataProvider<TList, TObject>));
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WitsmlDataProvider{TList, TObject}"/> class.
+        /// </summary>
+        /// <param name="dataAdapter">The data adapter.</param>
         protected WitsmlDataProvider(IWitsmlDataAdapter<TObject> dataAdapter)
         {
             _dataAdapter = dataAdapter;
@@ -48,7 +52,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="options">The options.</param>
         /// <param name="capabilities">The client’s Capabilities Object (capClient).</param>
         /// <returns>
-        /// A WITSML result that includes return code and/or message.
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
         public virtual WitsmlResult AddToStore(string witsmlType, string xml, string options, string capabilities)
         {
@@ -73,7 +77,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="options">The options.</param>
         /// <param name="capabilities">The client’s Capabilities Object (capClient).</param>
         /// <returns>
-        /// A WITSML result that includes return code and/or message.
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
         public virtual WitsmlResult UpdateInStore(string witsmlType, string xml, string options, string capabilities)
         {
@@ -89,7 +93,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="options">The options.</param>
         /// <param name="capabilities">The client’s Capabilities Object (capClient).</param>
         /// <returns>
-        /// A WITSML result that includes return code and/or message.
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
         public virtual WitsmlResult DeleteFromStore(string witsmlType, string xml, string options, string capabilities)
         {

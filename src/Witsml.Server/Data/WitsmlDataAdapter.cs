@@ -25,7 +25,7 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="entity">The object.</param>
         /// <returns>
-        /// A WITSML result that includes return code and/or message.
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
         public abstract WitsmlResult Add(T entity);
 
@@ -34,7 +34,7 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="entity">The object.</param>
         /// <returns>
-        /// A WITSML result that includes return code and/or message.
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
         public abstract WitsmlResult Update(T entity);
 
@@ -43,7 +43,7 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="parser">The parser that specifies the object.</param>
         /// <returns>
-        /// A WITSML result that includes return code and/or message.
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
         public abstract WitsmlResult Delete(WitsmlQueryParser parser);
         // TODO: Move to common project to be shared 
