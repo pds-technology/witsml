@@ -21,11 +21,19 @@ namespace PDS.Witsml.Server.Data.Wells
         private static readonly string DbDocumentName = ObjectNames.Well141;
         private static readonly ILog _log = LogManager.GetLogger(typeof(Well141DataAdapter));
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Well141DataAdapter"/> class.
+        /// </summary>
+        /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
         public Well141DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider)
         {
         }
 
+        /// <summary>
+        /// Gets the supported <see cref="Well"/> functionalities for the capServer object.
+        /// </summary>
+        /// <param name="capServer">The capServer object.</param>
         public void GetCapabilities(CapServer capServer)
         {
             capServer.Add(Functions.GetFromStore, ObjectTypes.Well);
@@ -41,13 +49,12 @@ namespace PDS.Witsml.Server.Data.Wells
                 QueryEntities(parser, DbDocumentName, new List<string>() { "name,Name" }));
         }
 
-
         /// <summary>
         /// Adds a <see cref="Well"/> to the data store.
         /// </summary>
         /// <param name="entity">The <see cref="Well"/> to be added.</param>
         /// <returns>
-        /// A WITSML result that includes return code and/or message.
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
         public override WitsmlResult Add(Well entity)
         {

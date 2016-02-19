@@ -17,6 +17,10 @@ namespace PDS.Witsml.Server.Data
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(MongoDbDataAdapter<T>));
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MongoDbDataAdapter{T}"/> class.
+        /// </summary>
+        /// <param name="databaseProvider">The database provider.</param>
         public MongoDbDataAdapter(IDatabaseProvider databaseProvider)
         {
             DatabaseProvider = databaseProvider;
