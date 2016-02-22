@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -12,9 +13,12 @@ namespace PDS.Witsml.Studio
 
         public IEnumerable<Assembly> CallSelectAssemblies()
         {
-            //this.OnStartup()
-
             return SelectAssemblies();
+        }
+
+        public object CallGetInstance(Type objectType)
+        {
+            return GetInstance(objectType, null);
         }
 
         public void CallOnStartup()

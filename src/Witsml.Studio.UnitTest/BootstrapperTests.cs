@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
+﻿using System.Linq;
 using Caliburn.Micro;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Witsml.Studio;
 using PDS.Witsml.Studio.ViewModels;
 
 namespace PDS.Witsml.Studio
@@ -33,38 +29,28 @@ namespace PDS.Witsml.Studio
         [TestMethod]
         public void Bootstrapper_registered_window_manager()
         {
-            bootstrapper.CallOnStartup();
+            // Get instance of IWindowManager from bootstrapper's GetInstance
+            var windownManager = bootstrapper.CallGetInstance(typeof(IWindowManager));
 
-
-            Assert.IsNotNull(bootstrapper);
+            Assert.IsNotNull(windownManager);
         }
 
         [TestMethod]
         public void Bootstrapper_registered_event_aggregator()
         {
-            bootstrapper.CallOnStartup();
+            // Get instance of IEventAggregator from bootstrapper's GetInstance
+            var eventAggregator = bootstrapper.CallGetInstance(typeof(IEventAggregator));
 
-            Assert.IsNotNull(bootstrapper);
+            Assert.IsNotNull(eventAggregator);
         }
 
         [TestMethod]
         public void Bootstrapper_can_resolve_shell_view_model()
         {
             // Get instance of IShellViewModel from bootstrapper's GetInstance
+            var eventAggregator = bootstrapper.CallGetInstance(typeof(IShellViewModel));
 
             Assert.IsNotNull(bootstrapper);
-        }
-
-        // TODO: Move to a ShellViewModelTests
-        [TestMethod]
-        public void ShellViewModel_test()
-        {
-            // Get instance of IShellViewModel from bootstrapper's GetInstance
-            var viewModel = new ShellViewModel();
-            var app = new App();
-            app.Resources["bootstrapper"] = bootstrapper;
-
-            Assert.IsNotNull(app);
         }
     }
 }
