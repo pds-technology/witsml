@@ -58,10 +58,8 @@ namespace PDS.Witsml.Studio.ViewModels
             }
         }
 
-        protected override void OnViewReady(object view)
+        internal void LoadPlugins()
         {
-            base.OnViewReady(view);
-
             Items.AddRange(Application.Current.Container()
                 .ResolveAll<IPluginViewModel>()
                 .OrderBy(x => x.DisplayOrder));
@@ -72,6 +70,12 @@ namespace PDS.Witsml.Studio.ViewModels
             }
 
             ActivateItem(Items.FirstOrDefault());
+        }
+
+        protected override void OnViewReady(object view)
+        {
+            base.OnViewReady(view);
+            LoadPlugins();
         }
 
         protected override void OnActivationProcessed(IScreen item, bool success)
