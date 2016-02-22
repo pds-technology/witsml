@@ -56,7 +56,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
             entity.Uid = NewUid(entity.Uid);
 
             ICollection<ValidationResult> validationResults;
-            //var validator = Container.Resolve<AddWellboreValidator>(new ObjectName("wellbore", Version141));
             var validator = Container.Resolve<DataObjectValidator<Wellbore>>(new ObjectName("wellbore", Version141));
             validator.DataObject = entity;      
             var success = EntityValidator.TryValidate(validator, out validationResults);
