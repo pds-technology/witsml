@@ -9,18 +9,19 @@ namespace PDS.Witsml.Studio
     [TestClass]
     public class BootstrapperTests
     {
-        private BootstrapperHarness bootstrapper;
+        private BootstrapperHarness _bootstrapper;
 
         [TestInitialize]
         public void TestSetUp()
         {
-            bootstrapper = new BootstrapperHarness();
+            AssemblySource.Instance.Clear();
+            _bootstrapper = new BootstrapperHarness();
         }
 
         [TestMethod]
         public void Bootstrapper_can_load_assemblies()
         {
-            var thisAssembly = bootstrapper.CallSelectAssemblies()
+            var thisAssembly = _bootstrapper.CallSelectAssemblies()
                 .FirstOrDefault(a => a == GetType().Assembly);
             
             Assert.IsNotNull(thisAssembly);
@@ -30,7 +31,7 @@ namespace PDS.Witsml.Studio
         public void Bootstrapper_registered_window_manager()
         {
             // Get instance of IWindowManager from bootstrapper's GetInstance
-            var windownManager = bootstrapper.CallGetInstance(typeof(IWindowManager));
+            var windownManager = _bootstrapper.CallGetInstance(typeof(IWindowManager));
 
             Assert.IsNotNull(windownManager);
         }
@@ -39,7 +40,7 @@ namespace PDS.Witsml.Studio
         public void Bootstrapper_registered_event_aggregator()
         {
             // Get instance of IEventAggregator from bootstrapper's GetInstance
-            var eventAggregator = bootstrapper.CallGetInstance(typeof(IEventAggregator));
+            var eventAggregator = _bootstrapper.CallGetInstance(typeof(IEventAggregator));
 
             Assert.IsNotNull(eventAggregator);
         }
@@ -48,9 +49,9 @@ namespace PDS.Witsml.Studio
         public void Bootstrapper_can_resolve_shell_view_model()
         {
             // Get instance of IShellViewModel from bootstrapper's GetInstance
-            var eventAggregator = bootstrapper.CallGetInstance(typeof(IShellViewModel));
+            var eventAggregator = _bootstrapper.CallGetInstance(typeof(IShellViewModel));
 
-            Assert.IsNotNull(bootstrapper);
+            Assert.IsNotNull(_bootstrapper);
         }
     }
 }

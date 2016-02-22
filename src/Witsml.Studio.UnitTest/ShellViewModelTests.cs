@@ -1,4 +1,7 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Linq;
+using System.Windows;
+using Caliburn.Micro;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Witsml.Studio.ViewModels;
 
 namespace PDS.Witsml.Studio
@@ -6,57 +9,51 @@ namespace PDS.Witsml.Studio
     [TestClass]
     public class ShellViewModelTests
     {
-        private BootstrapperHarness bootstrapper;
+        private static Application _application;
+
+        [AssemblyInitialize]
+        public static void AssemblySetUp(TestContext context)
+        {
+            _application = new App();
+        }
+
+        [AssemblyCleanup]
+        public static void AssemblyCleanUp()
+        {
+            _application.Shutdown();
+        }
 
         [TestInitialize]
         public void TestSetUp()
         {
-            bootstrapper = new BootstrapperHarness();
+            AssemblySource.Instance.Clear();
+            _application.Resources["bootstrapper"] = new BootstrapperHarness();
         }
 
         [TestMethod]
-        public void ShellViewModel_test_shell_created()
+        public void TestShellViewModelLoadsAllPlugins()
         {
-            var app = new App();
-            app.Resources["bootstrapper"] = bootstrapper;
+            var viewModel = new ShellViewModel();
+            viewModel.LoadPlugins();
 
-            bootstrapper.CallOnStartup();
-
-            // Test if Shell exists?
-            var shell = app.Shell() as ShellViewModel;
-            Assert.IsNotNull(shell);
+            Assert.AreEqual(3, viewModel.Items.Count);
         }
 
         [TestMethod]
-        public void ShellViewModel_test_all_view_models_loaded()
+        public void TestLoadedPluginsDisplayInAscendingOrder()
         {
-            var totalScreens = 3;
+            var viewModel = new ShellViewModel();
+            viewModel.LoadPlugins();
 
-            var app = new App();
-            app.Resources["bootstrapper"] = bootstrapper;
+            var actual = viewModel.Items.ToArray();
 
-            bootstrapper.CallOnStartup();
+            var expected = viewModel.Items.Cast<IPluginViewModel>()
+                .OrderBy(x => x.DisplayOrder)
+                .ToArray();
 
-            // Test that all unit test IPluginViewModels are loaded
-            var shell = app.Shell() as ShellViewModel;
-            var screenCount = shell.Items.Count;
-            Assert.AreEqual(totalScreens, screenCount);
-        }
-
-        [TestMethod]
-        public void ShellViewModel_test_view_model_order()
-        {
-            var app = new App();
-            app.Resources["bootstrapper"] = bootstrapper;
-
-            bootstrapper.CallOnStartup();
-
-            // Verify that the view models are in the expected order.
-            var shell = app.Shell() as ShellViewModel;
-            var screenCount = shell.Items.Count;
-            for (var i = 0; i < screenCount; i++)
+            for (int i=0; i<actual.Length; i++)
             {
-                Assert.AreEqual(((i + 1) * 100).ToString(), shell.Items[i].DisplayName);
+                Assert.AreEqual(expected[i], actual[i]);
             }
         }
     }
