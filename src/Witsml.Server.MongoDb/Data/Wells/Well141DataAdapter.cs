@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using log4net;
 using MongoDB.Driver;
 
@@ -62,14 +63,15 @@ namespace PDS.Witsml.Server.Data.Wells
 
             // Initialize the Uid if one has not been supplied.
             entity.Uid = NewUid(entity.Uid);
+            entity.CommonData = UpdateLastChangeTime(entity.CommonData);
 
             // TODO: Move existing well validation to a central place.
             //Validate(entity, validationResults);
 
-            if (validationResults.Keys.Any())
-            {
-                return new WitsmlResult(validationResults.Keys.First(), validationResults.Values.First());
-            }
+            //if (validationResults.Keys.Any())
+            //{
+            //    return new WitsmlResult(validationResults.Keys.First(), validationResults.Values.First());
+            //}
 
             _log.DebugFormat("Add new well with uid: {0}", entity.Uid);
             CreateEntity(entity, DbDocumentName);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using log4net;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
@@ -51,7 +52,7 @@ namespace PDS.Witsml.Server.Data
 
                 return query.FirstOrDefault();
             }
-            catch (MongoQueryException ex)
+            catch (MongoException ex)
             {
                 _log.Error("Error querying " + dbCollectionName, ex);
                 throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, ex);
@@ -107,7 +108,7 @@ namespace PDS.Witsml.Server.Data
 
                 collection.InsertOne(entity);
             }
-            catch (MongoWriteException ex)
+            catch (MongoException ex)
             {
                 _log.Error("Error inserting " + dbCollectionName, ex);
                 throw new WitsmlException(ErrorCodes.ErrorAddingToDataStore, ex);
@@ -128,6 +129,20 @@ namespace PDS.Witsml.Server.Data
                 uid = Guid.NewGuid().ToString();
             }
             return uid;
+        }
+
+        /// <summary>
+        /// Update last change time for the object.
+        /// </summary>
+        /// <param name="commonData">The common data property for the object.</param>
+        /// <returns>The common data with updated last change time</returns>
+        protected CommonData UpdateLastChangeTime(CommonData commonData)
+        {
+            if (commonData == null)
+                commonData = new CommonData();
+            commonData.DateTimeLastChange = DateTime.UtcNow;
+
+            return commonData;
         }
     }
 }
