@@ -5,53 +5,52 @@ using System.Reflection;
 
 namespace PDS.Witsml.Studio
 {
+    /// <summary>
+    /// Exposes protected bootstrapper methods for unit testing.
+    /// </summary>
+    /// <seealso cref="PDS.Witsml.Studio.Bootstrapper" />
     public class BootstrapperHarness : Bootstrapper
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BootstrapperHarness"/> class.
+        /// </summary>
         public BootstrapperHarness() : base(false)
         {
         }
 
+        /// <summary>
+        /// Exposes the SelectAssemblies method.
+        /// </summary>
+        /// <returns>An IEnumerable of Assemblies</returns>
         public IEnumerable<Assembly> CallSelectAssemblies()
         {
             return SelectAssemblies();
         }
 
+        /// <summary>
+        /// Exposes the GetInstance method.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <returns>The instance for the given objectType</returns>
         public object CallGetInstance(Type objectType)
         {
             return GetInstance(objectType, null);
         }
 
+        /// <summary>
+        /// Exposes the OnStartup method.
+        /// </summary>
         public void CallOnStartup()
         {
-            //SelectAssemblies();
-            //this.StartDesignTime();
-            //this.StartRuntime();
-            //var windowsManager = this.GetInstance(typeof(IWindowManager), string.Empty);
-            //var shellVm = this.GetInstance(typeof(IShellViewModel), string.Empty);
-
-            //var shellVm = new ShellViewModel();
             OnStartup(null, null);
         }
 
-        //public T GetInstance<T>()
-        //{
-        //    try
-        //    {
-        //        return (T)base.GetInstance(typeof(T), string.Empty);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        //this.WhatDoIHave();
-        //        throw;
-        //    }
-        //}
-
-        //protected override void StartRuntime()
-        //{
-        //    this.Configure();
-        //    //this.SelectAssemblies();
-        //}
-
+        /// <summary>
+        /// Overrides the SelectAssemblies() to include the assembly for the unit tests.
+        /// </summary>
+        /// <returns>
+        /// An IEnumerable of the Assemblies found in the Plugins folder and the unit test assembly.
+        /// </returns>
         protected override IEnumerable<Assembly> SelectAssemblies()
         {
             return base.SelectAssemblies()

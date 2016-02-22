@@ -5,18 +5,26 @@ using PDS.Witsml.Studio.ViewModels;
 
 namespace PDS.Witsml.Studio
 {
-
+    /// <summary>
+    /// Unit tests for Witsml Studio Bootstrapper
+    /// </summary>
     [TestClass]
     public class BootstrapperTests
     {
         private BootstrapperHarness bootstrapper;
 
+        /// <summary>
+        /// Initialization before each test
+        /// </summary>
         [TestInitialize]
         public void TestSetUp()
         {
             bootstrapper = new BootstrapperHarness();
         }
 
+        /// <summary>
+        /// Test that all Bootstrapper assemblieses can be loaded.
+        /// </summary>
         [TestMethod]
         public void Bootstrapper_can_load_assemblies()
         {
@@ -26,6 +34,9 @@ namespace PDS.Witsml.Studio
             Assert.IsNotNull(thisAssembly);
         }
 
+        /// <summary>
+        /// Test that an IWindowManager instance was registered.
+        /// </summary>
         [TestMethod]
         public void Bootstrapper_registered_window_manager()
         {
@@ -35,6 +46,9 @@ namespace PDS.Witsml.Studio
             Assert.IsNotNull(windownManager);
         }
 
+        /// <summary>
+        /// Test that an IEventAggregator instance was registered.
+        /// </summary>
         [TestMethod]
         public void Bootstrapper_registered_event_aggregator()
         {
@@ -44,6 +58,9 @@ namespace PDS.Witsml.Studio
             Assert.IsNotNull(eventAggregator);
         }
 
+        /// <summary>
+        /// Test that an IShellViewModel instance was registered.
+        /// </summary>
         [TestMethod]
         public void Bootstrapper_can_resolve_shell_view_model()
         {
