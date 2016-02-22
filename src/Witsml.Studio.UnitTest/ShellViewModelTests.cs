@@ -15,14 +15,20 @@ namespace PDS.Witsml.Studio
         }
 
         [TestMethod]
-        public void ShellViewModel_test()
+        public void ShellViewModel_test_view_model_order()
         {
-            // Get instance of IShellViewModel from bootstrapper's GetInstance
-            //var viewModel = new ShellViewModel();
-            //var app = new App();
-            //app.Resources["bootstrapper"] = bootstrapper;
+            var firstViewText = "100";
 
-            //Assert.IsNotNull(app);
+            var app = new App();
+            app.Resources["bootstrapper"] = bootstrapper;
+
+            bootstrapper.CallOnStartup();
+
+            var shell = app.Shell();
+            Assert.IsNotNull(shell);
+
+            var breadcrumbText = shell.BreadcrumbText;
+            Assert.AreEqual(firstViewText, breadcrumbText);
         }
     }
 }
