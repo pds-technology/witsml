@@ -79,6 +79,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to For WMLS_AddToStore, a data-object with the same type and unique identifier(s) must NOT already exist in the persistent store.
+        /// </summary>
+        internal static string DataObjectUidAlreadyExists {
+            get {
+                return ResourceManager.GetString("DataObjectUidAlreadyExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to For WMLS_GetCap, the OptionsIn keyword ‘dataVersion’ must specify a Data Schema Version that is supported by the server as defined by WMLS_GetVersion..
         /// </summary>
         internal static string DataVersionNotSupported {
@@ -138,6 +147,15 @@ namespace PDS.Witsml.Properties {
         internal static string MissingInputTemplate {
             get {
                 return ResourceManager.GetString("MissingInputTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Parent does not exist.
+        /// </summary>
+        internal static string MissingParentDataObject {
+            get {
+                return ResourceManager.GetString("MissingParentDataObject", resourceCulture);
             }
         }
         

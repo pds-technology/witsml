@@ -43,5 +43,13 @@ namespace PDS.Witsml.Server.Data
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
         WitsmlResult Delete(WitsmlQueryParser parser);
+
+        /// <summary>
+        /// Determines whether the entity existed.
+        /// </summary>
+        /// <param name="uid">The uid.</param>
+        /// <param name="dbCollectionName">Name of the database collection.</param>
+        /// <returns></returns>
+        bool IsEntityExisted(string uid, string dbCollectionName);
     }
 }

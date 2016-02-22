@@ -125,6 +125,10 @@
     <value>In WMLS_AddToStore, the WMLtypeIn objectType must match the XMLin objectType. Currently, they do not match.</value>
     <comment>-486</comment>
   </data>
+  <data name="DataObjectUidAlreadyExists" xml:space="preserve">
+    <value>For WMLS_AddToStore, a data-object with the same type and unique identifier(s) must NOT already exist in the persistent store</value>
+    <comment>-405</comment>
+  </data>
   <data name="DataVersionNotSupported" xml:space="preserve">
     <value>For WMLS_GetCap, the OptionsIn keyword ‘dataVersion’ must specify a Data Schema Version that is supported by the server as defined by WMLS_GetVersion.</value>
     <comment>-423</comment>
@@ -152,6 +156,10 @@
   <data name="MissingInputTemplate" xml:space="preserve">
     <value>A non-empty value must be defined for the input template.</value>
     <comment>-408</comment>
+  </data>
+  <data name="MissingParentDataObject" xml:space="preserve">
+    <value>Parent does not exist</value>
+    <comment>-481</comment>
   </data>
   <data name="MissingPluralRootElement" xml:space="preserve">
     <value>The input template MUST contain a plural root element.</value>

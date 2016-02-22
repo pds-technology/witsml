@@ -48,6 +48,14 @@ namespace PDS.Witsml.Server.Data
         public abstract WitsmlResult Delete(WitsmlQueryParser parser);
         // TODO: Move to common project to be shared 
 
+        /// <summary>
+        /// Determines whether the entity existed.
+        /// </summary>
+        /// <param name="uid">The uid.</param>
+        /// <param name="dbCollectionName">Name of the database collection.</param>
+        /// <returns></returns>
+        public abstract bool IsEntityExisted(string uid, string dbCollectionName);
+
         public static IQueryable<T> FilterQuery(WitsmlQueryParser parser, IQueryable<T> query, List<string> names)
         {
             // For entity property name and its value

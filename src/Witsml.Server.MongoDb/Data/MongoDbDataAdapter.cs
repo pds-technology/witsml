@@ -30,7 +30,27 @@ namespace PDS.Witsml.Server.Data
         protected IDatabaseProvider DatabaseProvider { get; private set; }
 
         /// <summary>
-        /// Get an object from Mongo database by uid.
+        /// Determines whether the entity existed.
+        /// </summary>
+        /// <param name="uid">The uid.</param>
+        /// <param name="dbCollectionName">Name of the database collection.</param>
+        /// <returns></returns>
+        public override bool IsEntityExisted(string uid, string dbCollectionName)
+        {
+            try
+            {
+                IQueryable<T> query = GetEntityByUid(uid, dbCollectionName);
+                return query.Any();
+            }
+            catch (MongoQueryException ex)
+            {
+                _log.ErrorFormat("Error querying {0}: {1}", dbCollectionName, ex.Message);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get an object from Mongo database by uid
         /// </summary>
         /// <param name="uid">The uid of the object.</param>
         /// <param name="dbCollectionName">The naame of the database collection.</param>
@@ -42,14 +62,8 @@ namespace PDS.Witsml.Server.Data
             try
             {
                 _log.DebugFormat("Query WITSML object: {0}; uid: {1}", dbCollectionName, uid);
-                var entities = new List<T>();
-                var database = DatabaseProvider.GetDatabase();
-                var collection = database.GetCollection<T>(dbCollectionName);
 
-                // Default to return all entities
-                var query = collection.AsQueryable()
-                    .Where(string.Format("Uid = \"{0}\"", uid));
-
+                IQueryable<T> query = GetEntityByUid(uid, dbCollectionName);
                 return query.FirstOrDefault();
             }
             catch (MongoException ex)
@@ -57,6 +71,18 @@ namespace PDS.Witsml.Server.Data
                 _log.Error("Error querying " + dbCollectionName, ex);
                 throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, ex);
             }
+        }
+
+        private IQueryable<T> GetEntityByUid(string uid, string dbCollectionName)
+        {
+            var entities = new List<T>();
+            var database = DatabaseProvider.GetDatabase();
+            var collection = database.GetCollection<T>(dbCollectionName);
+
+            // Default to return all entities
+            var query = collection.AsQueryable()
+                .Where(string.Format("Uid = \"{0}\"", uid));
+            return query;
         }
 
         /// <summary>
@@ -100,16 +126,16 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dbCollectionName">The name of the database collection.</param>
         protected void CreateEntity(T entity, string dbCollectionName)
         {
-            try
-            {
-                _log.DebugFormat("Insert WITSML object: {0}", dbCollectionName);
-                var database = DatabaseProvider.GetDatabase();
-                var collection = database.GetCollection<T>(dbCollectionName);
+                try
+                {
+                    _log.DebugFormat("Insert WITSML object: {0}", dbCollectionName);
+                    var database = DatabaseProvider.GetDatabase();
+                    var collection = database.GetCollection<T>(dbCollectionName);
 
-                collection.InsertOne(entity);
-            }
+                    collection.InsertOne(entity);
+                }
             catch (MongoException ex)
-            {
+                {
                 _log.Error("Error inserting " + dbCollectionName, ex);
                 throw new WitsmlException(ErrorCodes.ErrorAddingToDataStore, ex);
             }
