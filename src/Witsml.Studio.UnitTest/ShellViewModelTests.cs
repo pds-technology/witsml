@@ -15,20 +15,49 @@ namespace PDS.Witsml.Studio
         }
 
         [TestMethod]
-        public void ShellViewModel_test_view_model_order()
+        public void ShellViewModel_test_shell_created()
         {
-            var firstViewText = "100";
+            var app = new App();
+            app.Resources["bootstrapper"] = bootstrapper;
+
+            bootstrapper.CallOnStartup();
+
+            // Test if Shell exists?
+            var shell = app.Shell() as ShellViewModel;
+            Assert.IsNotNull(shell);
+        }
+
+        [TestMethod]
+        public void ShellViewModel_test_all_view_models_loaded()
+        {
+            var totalScreens = 3;
 
             var app = new App();
             app.Resources["bootstrapper"] = bootstrapper;
 
             bootstrapper.CallOnStartup();
 
-            var shell = app.Shell();
-            Assert.IsNotNull(shell);
+            // Test that all unit test IPluginViewModels are loaded
+            var shell = app.Shell() as ShellViewModel;
+            var screenCount = shell.Items.Count;
+            Assert.AreEqual(totalScreens, screenCount);
+        }
 
-            var breadcrumbText = shell.BreadcrumbText;
-            Assert.AreEqual(firstViewText, breadcrumbText);
+        [TestMethod]
+        public void ShellViewModel_test_view_model_order()
+        {
+            var app = new App();
+            app.Resources["bootstrapper"] = bootstrapper;
+
+            bootstrapper.CallOnStartup();
+
+            // Verify that the view models are in the expected order.
+            var shell = app.Shell() as ShellViewModel;
+            var screenCount = shell.Items.Count;
+            for (var i = 0; i < screenCount; i++)
+            {
+                Assert.AreEqual(((i + 1) * 100).ToString(), shell.Items[i].DisplayName);
+            }
         }
     }
 }
