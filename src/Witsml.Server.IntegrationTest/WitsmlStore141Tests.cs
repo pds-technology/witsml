@@ -17,13 +17,13 @@ namespace PDS.Witsml.Server
         [TestInitialize]
         public void TestSetUp()
         {
-            _witsmlStore = new WitsmlStore();
-            _witsmlStore.Container = ContainerFactory.Create();
         }
 
         [TestMethod]
         public void Test_can_add_well_without_validation()
         {
+            _witsmlStore = new WitsmlStore();
+            _witsmlStore.Container = ContainerFactory.Create();
             var well = new Well { Name = "Well-to-add-01", Uid = Uid() };
             var wells = new WellList { Well = new List<Well>() };
             wells.Well.Add(well);
@@ -38,7 +38,9 @@ namespace PDS.Witsml.Server
         [TestMethod]
         public void Test_add_well_mongo_database_error()
         {
-            var well = new Well { Name = "Well-to-add-01", Uid = Uid() };
+            _witsmlStore = new WitsmlStore();
+            _witsmlStore.Container = ContainerFactory.Create();
+            var well = new Well { Name = "Well-to-test_add_error", Uid = Uid() };
             var wells = new WellList { Well = new List<Well>() };
             wells.Well.Add(well);
             var xmlIn = EnergisticsConverter.ObjectToXml(wells);
