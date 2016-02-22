@@ -177,6 +177,7 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
+    <Compile Include="Controllers\EtpController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Global.asax.cs">
@@ -213,6 +214,11 @@
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\Api.cshtml" />
     <Content Include="WitsmlStore.svc" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
     <Compile Include="WitsmlStore.svc.cs">
       <DependentUpon>WitsmlStore.svc</DependentUpon>
     </Compile>
@@ -289,13 +295,19 @@
     <Content Include="Energistics\Datatypes\ArrayOfBoolean.avsc" />
     <Content Include="Energistics\Datatypes\AnyArray.avsc" />
     <None Include="Properties\PublishProfiles\pds-witsml.pubxml" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
@@ -319,6 +331,10 @@
     <ProjectReference Include="..\Framework\Framework.csproj">
       <Project>{fae228aa-4917-4b02-b239-0a24df883898}</Project>
       <Name>Framework</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WebSockets\WebSockets.csproj">
+      <Project>{30de888b-a6b7-4528-ad89-324a7f9b0f4c}</Project>
+      <Name>WebSockets</Name>
     </ProjectReference>
     <ProjectReference Include="..\Witsml.Server.MongoDb\Witsml.Server.MongoDb.csproj">
       <Project>{692d27d9-2f4c-44a6-8d71-8b291e0dc1a3}</Project>
