@@ -36,23 +36,21 @@ namespace PDS.Witsml.Server
         }
 
         [TestMethod]
-        public void Test_mongo_database_exception()
+        public void Test_add_well_mongo_database_error()
         {
-            var dbProvider = new DatabaseProvider(new Mapper());
-            var wellProvider = new Well141DataAdapter(dbProvider);
-            dbProvider.ResetConnection(string.Empty);
             var well = new Well { Name = "Well-to-add-01", Uid = Uid() };
-            var caught = false;
-            try
-            {
-                var result = wellProvider.Add(well);
-            }
-            catch (WitsmlException)
-            {
-                caught = true;
-            }
+            var wells = new WellList { Well = new List<Well>() };
+            wells.Well.Add(well);
+            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
+            var request = new WMLS_AddToStoreRequest { WMLtypeIn = "well", XMLin = xmlIn };
+            var response = _witsmlStore.WMLS_AddToStore(request);
 
-            Assert.IsTrue(caught);
+            Assert.IsNotNull(response);
+            Assert.AreEqual(response.Result, (short)ErrorCodes.Success);
+
+            response = _witsmlStore.WMLS_AddToStore(request);
+            Assert.IsNotNull(response);
+            Assert.AreEqual(response.Result, (short)ErrorCodes.ErrorAddingToDataStore);
         }
 
         private string Uid()
