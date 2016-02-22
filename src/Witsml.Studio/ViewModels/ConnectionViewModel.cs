@@ -60,6 +60,9 @@ namespace PDS.Witsml.Studio.ViewModels
             return !string.IsNullOrEmpty(connection.Uri);
         }
 
+        /// <summary>
+        /// Executes a connection test and reports the result to the user.
+        /// </summary>
         public void TestConnection()
         {
             if (_connectionTest(Connection))
