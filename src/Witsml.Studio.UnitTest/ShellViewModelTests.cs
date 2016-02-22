@@ -3,17 +3,26 @@ using PDS.Witsml.Studio.ViewModels;
 
 namespace PDS.Witsml.Studio
 {
+    /// <summary>
+    /// Unit tests for the Witsml Studio application shell.
+    /// </summary>
     [TestClass]
     public class ShellViewModelTests
     {
         private BootstrapperHarness bootstrapper;
 
+        /// <summary>
+        /// Initialization before each test.
+        /// </summary>
         [TestInitialize]
         public void TestSetUp()
         {
             bootstrapper = new BootstrapperHarness();
         }
 
+        /// <summary>
+        /// Tests that the ShellViewModel was created.
+        /// </summary>
         [TestMethod]
         public void ShellViewModel_test_shell_created()
         {
@@ -27,6 +36,9 @@ namespace PDS.Witsml.Studio
             Assert.IsNotNull(shell);
         }
 
+        /// <summary>
+        /// Tests that all of the expected IPluginViewModels were loaded.
+        /// </summary>
         [TestMethod]
         public void ShellViewModel_test_all_view_models_loaded()
         {
@@ -43,6 +55,9 @@ namespace PDS.Witsml.Studio
             Assert.AreEqual(totalScreens, screenCount);
         }
 
+        /// <summary>
+        /// Tests that all of the IPluginViewModels were loaded in the correct display order.
+        /// </summary>
         [TestMethod]
         public void ShellViewModel_test_view_model_order()
         {
