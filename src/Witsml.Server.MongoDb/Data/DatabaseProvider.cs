@@ -13,7 +13,6 @@ namespace PDS.Witsml.Server.Data
         internal static readonly string DefaultConnectionString = Settings.Default.DefaultConnectionString;
         internal static readonly string DefaultDatabaseName = Settings.Default.DefaultDatabaseName;
         private Lazy<IMongoClient> _client;
-        private string _connection;
 
         [ImportingConstructor]
         public DatabaseProvider(Mapper mapper)
@@ -37,17 +36,6 @@ namespace PDS.Witsml.Server.Data
             var settings = ConfigurationManager.ConnectionStrings["MongoDbConnection"];
             var connection = settings == null ? DefaultConnectionString : settings.ConnectionString;
             return new MongoClient(connection);
-        }
-
-        private IMongoClient ResetMongoClient()
-        {
-            return new MongoClient(_connection);
-        }
-
-        public void ResetConnection(string connection)
-        {
-            _connection = connection;
-            _client = new Lazy<IMongoClient>(ResetMongoClient);
         }
     }
 }
