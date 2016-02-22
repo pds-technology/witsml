@@ -16,5 +16,13 @@ namespace PDS.Witsml.Server.Data
         WitsmlResult Update(T entity);
 
         WitsmlResult Delete(WitsmlQueryParser parser);
+
+        /// <summary>
+        /// Determines whether the entity existed.
+        /// </summary>
+        /// <param name="uid">The uid.</param>
+        /// <param name="dbCollectionName">Name of the database collection.</param>
+        /// <returns></returns>
+        bool IsEntityExisted(string uid, string dbCollectionName);
     }
 }
