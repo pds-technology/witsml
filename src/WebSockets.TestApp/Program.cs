@@ -12,7 +12,8 @@ namespace Energistics
         private const string ServerAppName = "org.energistics.server";
         private const string ClientAppName = "org.energistics.client";
 
-        private const string WebSocketUri = "ws://localhost:9000";
+        private const string WebSocketUri = "ws://localhost/Witsml.Web/api/etp"; // IIS
+        //private const string WebSocketUri = "ws://localhost:9000"; // TestApp
         private const int WebSocketPort = 9000;
 
         public static void Main(string[] args)
