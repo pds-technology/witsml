@@ -10,7 +10,7 @@ using MongoDB.Driver.Linq;
 namespace PDS.Witsml.Server.Data
 {
     /// <summary>
-    /// Mongo database adapter that encapsulates CRUD functionalities on WITSML objects.
+    /// MongoDb data adapter that encapsulates CRUD functionality for WITSML objects.
     /// </summary>
     /// <typeparam name="T">Type of the object</typeparam>
     /// <seealso cref="Data.WitsmlDataAdapter{T}" />
@@ -27,6 +27,10 @@ namespace PDS.Witsml.Server.Data
             DatabaseProvider = databaseProvider;
         }
 
+        /// <summary>
+        /// Gets the database provider used for accessing MongoDb.
+        /// </summary>
+        /// <value>The database provider.</value>
         protected IDatabaseProvider DatabaseProvider { get; private set; }
 
         /// <summary>
@@ -42,6 +46,7 @@ namespace PDS.Witsml.Server.Data
             try
             {
                 _log.DebugFormat("Query WITSML object: {0}; uid: {1}", dbCollectionName, uid);
+
                 var entities = new List<T>();
                 var database = DatabaseProvider.GetDatabase();
                 var collection = database.GetCollection<T>(dbCollectionName);
@@ -103,6 +108,7 @@ namespace PDS.Witsml.Server.Data
             try
             {
                 _log.DebugFormat("Insert WITSML object: {0}", dbCollectionName);
+
                 var database = DatabaseProvider.GetDatabase();
                 var collection = database.GetCollection<T>(dbCollectionName);
 
@@ -128,18 +134,22 @@ namespace PDS.Witsml.Server.Data
             {
                 uid = Guid.NewGuid().ToString();
             }
+
             return uid;
         }
 
         /// <summary>
-        /// Update last change time for the object.
+        /// Update last change date/time for the object.
         /// </summary>
         /// <param name="commonData">The common data property for the object.</param>
         /// <returns>The common data with updated last change time</returns>
         protected CommonData UpdateLastChangeTime(CommonData commonData)
         {
             if (commonData == null)
+            {
                 commonData = new CommonData();
+            }
+
             commonData.DateTimeLastChange = DateTime.UtcNow;
 
             return commonData;

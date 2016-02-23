@@ -1,26 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
 using Energistics.DataAccess.WITSML141;
-using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using log4net;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
-    /// <summary>.
-    /// Data adapter that encapsulates CRUD functionality on <see cref="Well" />
+    /// <summary>
+    /// Data adapter that encapsulates CRUD functionality for <see cref="Well" />
     /// </summary>
-    /// <seealso cref="Data.MongoDbDataAdapter{Well}" />
-    /// <seealso cref="IWitsml141Configuration" />
+    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML141.Well}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.IEtpDataAdapter{Energistics.DataAccess.WITSML141.Well}" />
+    /// <seealso cref="PDS.Witsml.Server.IWitsml141Configuration" />
     [Export(typeof(IWitsml141Configuration))]
     [Export(typeof(IWitsmlDataAdapter<Well>))]
+    [Export(typeof(IEtpDataAdapter<Well>))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Well141DataAdapter : MongoDbDataAdapter<Well>, IWitsml141Configuration
+    public class Well141DataAdapter : MongoDbDataAdapter<Well>, IEtpDataAdapter<Well>, IWitsml141Configuration
     {
-        private static readonly string DbDocumentName = ObjectNames.Well141;
         private static readonly ILog _log = LogManager.GetLogger(typeof(Well141DataAdapter));
+        private static readonly string DbDocumentName = ObjectNames.Well141;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Well141DataAdapter"/> class.
@@ -75,6 +76,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             _log.DebugFormat("Add new well with uid: {0}", entity.Uid);
             CreateEntity(entity, DbDocumentName);
+
             return new WitsmlResult(ErrorCodes.Success, entity.Uid);
         }
 
@@ -86,6 +88,21 @@ namespace PDS.Witsml.Server.Data.Wells
         public override WitsmlResult Delete(WitsmlQueryParser parser)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets a collection of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        public List<Well> GetAll(string parentUri = null)
+        {
+            var database = DatabaseProvider.GetDatabase();
+            var collection = database.GetCollection<Well>(DbDocumentName);
+
+            return collection.AsQueryable()
+                .OrderBy(x => x.Name)
+                .ToList();
         }
     }
 }
