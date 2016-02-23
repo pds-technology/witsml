@@ -67,9 +67,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Data\AddWellboreValidator.cs" />
     <Compile Include="Data\DatabaseProvider.cs" />
-    <Compile Include="Data\DataObjectValidator.cs" />
     <Compile Include="Data\IDatabaseProvider.cs" />
     <Compile Include="Data\Logs\Log131DataAdapter.cs" />
     <Compile Include="Data\Logs\Log141DataAdapter.cs" />
