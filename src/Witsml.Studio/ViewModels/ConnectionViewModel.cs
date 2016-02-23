@@ -44,6 +44,7 @@ namespace PDS.Witsml.Studio.ViewModels
 
             if (connectionTest != null)
             {
+                UiServices.SetBusyState();
                 if (connectionTest.CanConnect(Connection))
                 {
                     MessageBox.Show("Connection successful", "Connection Status", MessageBoxButton.OK, MessageBoxImage.Information);

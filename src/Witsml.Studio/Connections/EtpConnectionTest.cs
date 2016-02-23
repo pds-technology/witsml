@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.Composition;
+using Energistics;
 
 namespace PDS.Witsml.Studio.Connections
 {
@@ -7,8 +8,16 @@ namespace PDS.Witsml.Studio.Connections
     {
         public bool CanConnect(Connection connection)
         {
-            // TODO: Make an Etp connection and test by fetching version information.
-            return true;
+            try
+            {
+                var client = new EtpClient(connection.Uri, "ETP Browser");
+                client.Open();
+                return client.IsOpen;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

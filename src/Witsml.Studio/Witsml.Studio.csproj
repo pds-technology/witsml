@@ -145,6 +145,7 @@
     <Compile Include="Converters\NullToVisibilityConverter.cs" />
     <Compile Include="Connections\Connection.cs" />
     <Compile Include="Connections\ConnectionTypes.cs" />
+    <Compile Include="UiServices.cs" />
     <Compile Include="ViewModels\ConnectionViewModel.cs" />
     <Compile Include="ViewModels\IPluginViewModel.cs" />
     <Compile Include="ViewModels\IShellViewModel.cs" />
