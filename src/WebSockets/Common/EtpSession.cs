@@ -107,8 +107,18 @@ namespace Energistics.Common
 
         protected void HandleMessage(MessageHeader header, Decoder decoder)
         {
-            Handler(header.Protocol)
-                .HandleMessage(header, decoder);
+            if (Handlers.ContainsKey(header.Protocol))
+            {
+                Handler(header.Protocol)
+                    .HandleMessage(header, decoder);
+            }
+            else
+            {
+                var message = string.Format("Protocol handler not registed for protocol {0}.", header.Protocol);
+
+                Handler((int)Protocols.Core)
+                    .ProtocolException((int)ErrorCodes.EUNSUPPORTED_PROTOCOL, message, header.MessageId);
+            }
         }
 
         protected override void Register(Type contractType, Type handlerType)
@@ -133,7 +143,7 @@ namespace Energistics.Common
             }
 
             Logger.ErrorFormat("[{0}] Protocol handler not registed for protocol {1}.", SessionId, protocol);
-            throw new NotSupportedException(String.Format("Protocol handler not registed for protocol {0}.", protocol));
+            throw new NotSupportedException(string.Format("Protocol handler not registed for protocol {0}.", protocol));
         }
     }
 }

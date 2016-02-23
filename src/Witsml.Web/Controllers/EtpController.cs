@@ -1,10 +1,13 @@
-﻿using System.Net;
+﻿using System.ComponentModel.Composition;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using System.Web.WebSockets;
 using Energistics;
+using Energistics.Protocol.Discovery;
+using PDS.Framework;
 using PDS.Witsml.Web.Properties;
 
 namespace PDS.Witsml.Web.Controllers
@@ -13,9 +16,18 @@ namespace PDS.Witsml.Web.Controllers
     /// Defines the Web API method used to initiate an ETP Web Socket connection.
     /// </summary>
     /// <seealso cref="System.Web.Http.ApiController" />
+    [Export]
+    [PartCreationPolicy(CreationPolicy.NonShared)]
     public class EtpController : ApiController
     {
         private static readonly string EtpSocketServerName = Settings.Default.EtpSocketServerName;
+        private readonly IContainer _container;
+
+        [ImportingConstructor]
+        public EtpController(IContainer container)
+        {
+            _container = container;
+        }
 
         // GET: api/etp
         public HttpResponseMessage Get()
@@ -28,9 +40,13 @@ namespace PDS.Witsml.Web.Controllers
                 {
                     SubProtocol = Energistics.Properties.Settings.Default.EtpSubProtocolName
                 });
+
+                return Request.CreateResponse(HttpStatusCode.SwitchingProtocols);
             }
 
-            return Request.CreateResponse(HttpStatusCode.SwitchingProtocols);
+            return Request.CreateResponse(
+                HttpStatusCode.UpgradeRequired,
+                new { error = "Invalid web socket request" });
         }
 
         private async Task AcceptWebSocketRequest(AspNetWebSocketContext context)
@@ -38,7 +54,7 @@ namespace PDS.Witsml.Web.Controllers
             var socket = context.WebSocket as AspNetWebSocket;
             var handler = new EtpServerHandler(socket, EtpSocketServerName);
 
-            //handler.Register<IDiscoveryStore, DiscoveryStoreHandler>();
+            handler.Register(() => _container.Resolve<IDiscoveryStore>());
 
             await handler.Accept(context);
         }

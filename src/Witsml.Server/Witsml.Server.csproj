@@ -30,8 +30,16 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Avro, Version=0.9.0.0, Culture=neutral, PublicKeyToken=b1248d7eeb9d0814, processorArchitecture=MSIL">
+      <HintPath>..\packages\Apache.Avro.1.7.7.2\lib\Avro.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Energistics.DataAccess">
       <HintPath>..\External\DevKit\Energistics.DataAccess.dll</HintPath>
+    </Reference>
+    <Reference Include="ETP.Messages, Version=0.0.0.0, Culture=neutral, PublicKeyToken=10cba23b8f544b64, processorArchitecture=MSIL">
+      <HintPath>..\packages\ETP.1.2.0-BUILD50\lib\ETP.Messages.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="FluentValidationNA, Version=1.2.16.24816, Culture=neutral, PublicKeyToken=0950390b87309e14, processorArchitecture=MSIL">
       <HintPath>..\packages\FluentValidationNA.1.2.16\lib\net40\FluentValidationNA.dll</HintPath>
@@ -39,6 +47,10 @@
     </Reference>
     <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -59,6 +71,7 @@
     <Compile Include="Data\CapServers\CapServer131Provider.cs" />
     <Compile Include="Data\CapServers\CapServerProvider.cs" />
     <Compile Include="Data\ICapServerProvider.cs" />
+    <Compile Include="Data\IEtpDataAdapter.cs" />
     <Compile Include="Data\IWitsmlDataAdapter.cs" />
     <Compile Include="Data\Logs\Log131DataProvider.cs" />
     <Compile Include="Data\Logs\Log141DataProvider.cs" />
@@ -81,6 +94,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Providers\Discovery\DiscoveryStore141Provider.cs" />
     <Compile Include="WitsmlExtensions.cs" />
     <Compile Include="WitsmlResult.cs" />
     <Compile Include="WitsmlStore.cs" />
@@ -89,6 +103,10 @@
     <ProjectReference Include="..\Framework\Framework.csproj">
       <Project>{fae228aa-4917-4b02-b239-0a24df883898}</Project>
       <Name>Framework</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WebSockets\WebSockets.csproj">
+      <Project>{30de888b-a6b7-4528-ad89-324a7f9b0f4c}</Project>
+      <Name>WebSockets</Name>
     </ProjectReference>
     <ProjectReference Include="..\Witsml\Witsml.csproj">
       <Project>{0ef1d73f-e7a0-40b0-803b-7ce4b6b27112}</Project>
@@ -102,6 +120,75 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="Energistics\Datatypes\AnyArray.avsc" />
+    <None Include="Energistics\Datatypes\ArrayOfBoolean.avsc" />
+    <None Include="Energistics\Datatypes\ArrayOfDouble.avsc" />
+    <None Include="Energistics\Datatypes\ArrayOfFloat.avsc" />
+    <None Include="Energistics\Datatypes\ArrayOfInt.avsc" />
+    <None Include="Energistics\Datatypes\ArrayOfLong.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\ChannelIndexTypes.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\ChannelMetadataRecord.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\ChannelRangeInfo.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\ChannelStatuses.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\ChannelStreamingInfo.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\DataFrame.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\DataItem.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\ErrorCodes.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\IndexDirections.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\IndexMetadataRecord.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\IndexValue.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\Roles.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\StreamingStartIndex.avsc" />
+    <None Include="Energistics\Datatypes\DataAttribute.avsc" />
+    <None Include="Energistics\Datatypes\DataValue.avsc" />
+    <None Include="Energistics\Datatypes\DateTime.avsc" />
+    <None Include="Energistics\Datatypes\ErrorCodes.avsc" />
+    <None Include="Energistics\Datatypes\MessageHeader.avsc" />
+    <None Include="Energistics\Datatypes\Object\DataObject.avsc" />
+    <None Include="Energistics\Datatypes\Object\NotificationRequestRecord.avsc" />
+    <None Include="Energistics\Datatypes\Object\ObjectChange.avsc" />
+    <None Include="Energistics\Datatypes\Object\ObjectChangeTypes.avsc" />
+    <None Include="Energistics\Datatypes\Object\Resource.avsc" />
+    <None Include="Energistics\Datatypes\Protocols.avsc" />
+    <None Include="Energistics\Datatypes\SupportedProtocol.avsc" />
+    <None Include="Energistics\Datatypes\Version.avsc" />
+    <None Include="Energistics\Protocol\ChannelDataFrame\ChannelDataFrameSet.avsc" />
+    <None Include="Energistics\Protocol\ChannelDataFrame\ChannelMetadata.avsc" />
+    <None Include="Energistics\Protocol\ChannelDataFrame\RequestChannelData.avsc" />
+    <None Include="Energistics\Protocol\ChannelStreaming\ChannelData.avsc" />
+    <None Include="Energistics\Protocol\ChannelStreaming\ChannelDataChange.avsc" />
+    <None Include="Energistics\Protocol\ChannelStreaming\ChannelDelete.avsc" />
+    <None Include="Energistics\Protocol\ChannelStreaming\ChannelDescribe.avsc" />
+    <None Include="Energistics\Protocol\ChannelStreaming\ChannelMetadata.avsc" />
+    <None Include="Energistics\Protocol\ChannelStreaming\ChannelRangeRequest.avsc" />
+    <None Include="Energistics\Protocol\ChannelStreaming\ChannelStatusChange.avsc" />
+    <None Include="Energistics\Protocol\ChannelStreaming\ChannelStreamingStart.avsc" />
+    <None Include="Energistics\Protocol\ChannelStreaming\ChannelStreamingStop.avsc" />
+    <None Include="Energistics\Protocol\ChannelStreaming\Start.avsc" />
+    <None Include="Energistics\Protocol\Core\Acknowledge.avsc" />
+    <None Include="Energistics\Protocol\Core\CloseSession.avsc" />
+    <None Include="Energistics\Protocol\Core\OpenSession.avsc" />
+    <None Include="Energistics\Protocol\Core\ProtocolException.avsc" />
+    <None Include="Energistics\Protocol\Core\RequestSession.avsc" />
+    <None Include="Energistics\Protocol\DataArray\DataArray.avsc" />
+    <None Include="Energistics\Protocol\DataArray\GetDataArray.avsc" />
+    <None Include="Energistics\Protocol\DataArray\GetDataArraySlice.avsc" />
+    <None Include="Energistics\Protocol\Discovery\GetResources.avsc" />
+    <None Include="Energistics\Protocol\Discovery\GetResourcesResponse.avsc" />
+    <None Include="Energistics\Protocol\GrowingObject\GrowingObjectDelete.avsc" />
+    <None Include="Energistics\Protocol\GrowingObject\GrowingObjectDeleteRange.avsc" />
+    <None Include="Energistics\Protocol\GrowingObject\GrowingObjectGet.avsc" />
+    <None Include="Energistics\Protocol\GrowingObject\GrowingObjectGetRange.avsc" />
+    <None Include="Energistics\Protocol\GrowingObject\GrowingObjectPut.avsc" />
+    <None Include="Energistics\Protocol\GrowingObject\ObjectFragment.avsc" />
+    <None Include="Energistics\Protocol\StoreNotification\ChangeNotification.avsc" />
+    <None Include="Energistics\Protocol\StoreNotification\DeleteNotification.avsc" />
+    <None Include="Energistics\Protocol\StoreNotification\NotificationRequest.avsc" />
+    <None Include="Energistics\Protocol\Store\DeleteObject.avsc" />
+    <None Include="Energistics\Protocol\Store\GetObject.avsc" />
+    <None Include="Energistics\Protocol\Store\Object.avsc" />
+    <None Include="Energistics\Protocol\Store\PutObject.avsc" />
+    <None Include="etp.avpr" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

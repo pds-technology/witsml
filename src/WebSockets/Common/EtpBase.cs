@@ -26,8 +26,8 @@ namespace Energistics.Common
 
         public virtual void Register<TContract>(Func<TContract> factory) where TContract : IProtocolHandler
         {
-            Register(typeof(TContract), typeof(TContract));
             RegisteredFactories[typeof(TContract)] = () => factory();
+            Register(typeof(TContract), typeof(TContract));
         }
 
         protected virtual void Register(Type contractType, Type handlerType)

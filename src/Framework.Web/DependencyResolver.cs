@@ -15,8 +15,6 @@ namespace PDS.Framework.Web
 
         public IDependencyScope BeginScope()
         {
-            //var container = _Container.CreateChildContainer();
-            //return new DependencyResolver(container);
             return this;
         }
 
@@ -32,10 +30,7 @@ namespace PDS.Framework.Web
 
         public void Dispose()
         {
-            if (_container != null)
-            {
-                _container.Dispose();
-            }
+            // DO NOT dispose IContainer!
         }
     }
 }

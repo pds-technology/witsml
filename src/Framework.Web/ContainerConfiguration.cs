@@ -2,6 +2,7 @@
 using System.IO;
 using System.Web;
 using System.Web.Http;
+using System.Web.Mvc;
 
 namespace PDS.Framework.Web
 {
@@ -17,6 +18,9 @@ namespace PDS.Framework.Web
 
             // Install dependency resolver for Web API
             GlobalConfiguration.Configuration.DependencyResolver = resolver;
+
+            // Install custom Web API controller factory
+            ControllerBuilder.Current.SetControllerFactory(new ControllerFactory(container));
         }
 
         public static string MapWorkingDirectory(string path)
