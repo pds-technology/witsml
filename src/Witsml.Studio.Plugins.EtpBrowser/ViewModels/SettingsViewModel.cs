@@ -1,6 +1,5 @@
-﻿using System.Windows;
-using Caliburn.Micro;
-using PDS.Witsml.Studio.Models;
+﻿using Caliburn.Micro;
+using PDS.Witsml.Studio.Connections;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Models;
 using PDS.Witsml.Studio.ViewModels;
 

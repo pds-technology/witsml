@@ -1,7 +1,6 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using Caliburn.Micro;
-using PDS.Witsml.Studio.Models;
+using PDS.Witsml.Studio.Connections;
 
 namespace PDS.Witsml.Studio.ViewModels
 {
@@ -19,9 +18,6 @@ namespace PDS.Witsml.Studio.ViewModels
         {
             _log.Debug("Creating View Model");
 
-            // TODO: Remove (Task 4373)
-            _connectionTest = TestWitsmlConnection;
-
             ConnectionType = connectionType;
             DisplayName = string.Format("{0} Connection", ConnectionType.ToString().ToUpper());
             Connection = new Connection();
@@ -38,34 +34,13 @@ namespace PDS.Witsml.Studio.ViewModels
         public Connection Connection { get; set; }
 
 
-        // TODO: Implement and resolve an IConnectionTest for Witsml or Etp 
-        //... ConnectionType assign (Task 4373)
-        private Func<Connection, bool> _connectionTest;
-        //public Func<Connection, bool> ConnectionTest
-        //{
-        //    get { return _connectionTest; }
-        //    set
-        //    {
-        //        if (!ReferenceEquals(_connectionTest, value))
-        //        {
-        //            _connectionTest = value;
-        //            NotifyOfPropertyChange(() => ConnectionTest);
-        //        }
-        //    }
-        //}
-
-        // TODO: Remove after IConnectionTests are created and resolved for use (Task 4373)
-        private bool TestWitsmlConnection(Connection connection)
-        {
-            return !string.IsNullOrEmpty(connection.Uri);
-        }
-
         /// <summary>
         /// Executes a connection test and reports the result to the user.
         /// </summary>
         public void TestConnection()
         {
-            if (_connectionTest(Connection))
+            var connectionTest = App.Current.Container().Resolve<IConnectionTest>(ConnectionType.ToString());
+            if (connectionTest.CanConnect(Connection))
             {
                 MessageBox.Show("Connection successful", "Connection Status", MessageBoxButton.OK, MessageBoxImage.Information);
             }

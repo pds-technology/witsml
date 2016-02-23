@@ -11,7 +11,7 @@ using Energistics.Protocol.ChannelStreaming;
 using Energistics.Protocol.Discovery;
 using Microsoft.Win32;
 using Newtonsoft.Json;
-using PDS.Witsml.Studio.Models;
+using PDS.Witsml.Studio.Connections;
 using PDS.Witsml.Studio.Plugins.DataReplay.Providers;
 using PDS.Witsml.Studio.ViewModels;
 
