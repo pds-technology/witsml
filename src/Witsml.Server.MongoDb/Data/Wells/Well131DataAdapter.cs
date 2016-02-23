@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
 using Energistics.DataAccess.WITSML131;
-using MongoDB.Driver;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
@@ -12,10 +10,8 @@ namespace PDS.Witsml.Server.Data.Wells
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class MongoDbWellDataAdapter : MongoDbDataAdapter<Well>, IWitsml131Configuration
     {
-        private static readonly string DbDocumentName = ObjectNames.Well131;
-
         [ImportingConstructor]
-        public MongoDbWellDataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider)
+        public MongoDbWellDataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Well131)
         {
         }
 
@@ -31,41 +27,16 @@ namespace PDS.Witsml.Server.Data.Wells
         {
             return new WitsmlResult<List<Well>>(
                 ErrorCodes.Success,
-                QueryEntities(parser, DbDocumentName, new List<string>() { "name,Name" }));
+                QueryEntities(parser, new List<string>() { "name,Name" }));
         }
 
         public override WitsmlResult Add(Well entity)
         {
-            var validationResults = new Dictionary<ErrorCodes, string>();
-
-            // Initialize the Uid if one has not been supplied.
             entity.Uid = NewUid(entity.Uid);
 
-            // TODO: Move existing well validation to a central place.
-            //Validate(entity, validationResults);
+            InsertEntity(entity, DbCollectionName);
 
-            if (validationResults.Keys.Any())
-            {
-                return new WitsmlResult(validationResults.Keys.First(), validationResults.Values.First());
-            }
-
-            try
-            {
-                CreateEntity(entity, DbDocumentName);
-                var result = GetEntity(entity.Uid, DbDocumentName);
-                if (result != null)
-                {
-                    return new WitsmlResult(ErrorCodes.Success, result.Uid);
-                }
-                else
-                {
-                    return new WitsmlResult(ErrorCodes.Unset, "Error adding well");
-                }
-            }
-            catch (Exception ex)
-            {
-                return new WitsmlResult(ErrorCodes.Unset, ex.Message + "\n" + ex.StackTrace);
-            }
+            return new WitsmlResult(ErrorCodes.Success, entity.Uid);
         }
 
         public override WitsmlResult Update(Well entity)

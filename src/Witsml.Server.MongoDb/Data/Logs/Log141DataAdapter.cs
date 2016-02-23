@@ -18,12 +18,11 @@ namespace PDS.Witsml.Server.Data.Logs
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class Log141DataAdapter : MongoDbDataAdapter<Log>, IWitsml141Configuration
     {
-        private static readonly string DbDocumentName = ObjectNames.Log141;
-        private static readonly string DbLogDataValuesDocumentName = "logDataValues";
+        private static readonly string DbCollectionNameLogDataValues = "logDataValues";
         private static readonly int LogIndexRangeSize = Settings.Default.LogIndexRangeSize;
 
         [ImportingConstructor]
-        public Log141DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider)
+        public Log141DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Log141)
         {
         }
 
@@ -42,7 +41,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
         public override WitsmlResult<List<Log>> Query(WitsmlQueryParser parser)
         {
-            var logs = QueryEntities(parser, DbDocumentName, new List<string>() { "nameWell,NameWell", "nameWellbore,NameWellbore", "name,Name" });
+            var logs = QueryEntities(parser, new List<string>() { "nameWell,NameWell", "nameWellbore,NameWellbore", "name,Name" });
 
             // Support OptionsIn returnElements=: all, header-only, data-only
             var logsOut = new List<Log>();
@@ -69,7 +68,6 @@ namespace PDS.Witsml.Server.Data.Logs
                 logsOut);
         }
 
-        // TODO: Duplicated in RavenDbLogDataAdapter.  Move to a central location
         private IEnumerable<Log> GetLogHeaderRequired(List<Log> logs)
         {
             var logsRequired = new List<Log>();
@@ -126,11 +124,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private IMongoQueryable<LogDataValues> QueryLogDataValues(Log log, double? startIndex, double? endIndex, bool inclusiveEnd = true)
         {
-            var database = DatabaseProvider.GetDatabase();
-            var collection = database.GetCollection<LogDataValues>(DbLogDataValuesDocumentName);
-
             // Default to return all entities
-            var query = collection.AsQueryable()
+            var query = GetQuery<LogDataValues>(DbCollectionNameLogDataValues)
                 .Where(x => x.UidLog == log.Uid);
 
             // Filter by index ranges
@@ -202,16 +197,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
         public override WitsmlResult Add(Log entity)
         {
-            var validationResults = new Dictionary<ErrorCodes, string>();
             entity.Uid = NewUid(entity.Uid);
-
-            // TODO: Validation
-            //Validate(entity, validationResults);
-
-            if (validationResults.Keys.Any())
-            {
-                return new WitsmlResult(validationResults.Keys.First(), validationResults.Values.First());
-            }
+            entity.CommonData = UpdateLastChangeTime(entity.CommonData);
 
             try
             {
@@ -219,19 +206,15 @@ namespace PDS.Witsml.Server.Data.Logs
                 var logData = ExtractLogData(entity);
 
                 // Save the log and verify
-                CreateEntity(entity, DbDocumentName);
-                var result = GetEntity(entity.Uid, DbDocumentName);
-                if (result == null)
-                {
-                    return new WitsmlResult(ErrorCodes.Unset, "Error adding log");
-                }
+                InsertEntity(entity);
 
                 // If there is any LogData.Data then save it.
                 if (logData.Any())
                 {
-                    WriteLogDataValues(result, ToChunks(GetSequence(string.Empty, logData)));
+                    WriteLogDataValues(entity, ToChunks(GetSequence(string.Empty, logData)));
                 }
-                return new WitsmlResult(ErrorCodes.Success, result.Uid);
+
+                return new WitsmlResult(ErrorCodes.Success, entity.Uid);
             }
             catch (Exception ex)
             {
@@ -342,8 +325,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private void WriteLogDataValues(Log log, IEnumerable<LogDataValues> logDataValuesList)
         {
-            var database = DatabaseProvider.GetDatabase();
-            var collection = database.GetCollection<LogDataValues>(DbLogDataValuesDocumentName);
+            var collection = GetCollection<LogDataValues>(DbCollectionNameLogDataValues);
 
             collection.BulkWrite(logDataValuesList
                 .Select(x =>
@@ -393,10 +375,12 @@ namespace PDS.Witsml.Server.Data.Logs
             // TODO: Fix later
             //UpdateLogHeaderRanges(entity);
 
-            return new WitsmlResult(ErrorCodes.Success, ErrorCodes.Success.GetDescription());
+            return new WitsmlResult(ErrorCodes.Success);
         }
 
-        private IEnumerable<Tuple<string, double, string>> MergeSequence(IEnumerable<Tuple<string, double, string>> existingLogDataSequence, IEnumerable<Tuple<string, double, string>> updateLogDataSequence)
+        private IEnumerable<Tuple<string, double, string>> MergeSequence(
+            IEnumerable<Tuple<string, double, string>> existingLogDataSequence,
+            IEnumerable<Tuple<string, double, string>> updateLogDataSequence)
         {
             string uid = string.Empty;
 
@@ -538,7 +522,6 @@ namespace PDS.Witsml.Server.Data.Logs
         //    endIndex = max;
         //}
 
-        // TODO: Duplicate with Raven implementation.  Move to a central location
         private GenericMeasure UpdateGenericMeasure(GenericMeasure gmObject, double gmValue)
         {
             if (gmObject == null)
