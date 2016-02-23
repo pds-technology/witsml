@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System;
+using System.Threading.Tasks;
+using System.Windows;
 using Caliburn.Micro;
 using PDS.Witsml.Studio.Connections;
 
@@ -21,6 +23,7 @@ namespace PDS.Witsml.Studio.ViewModels
             ConnectionType = connectionType;
             DisplayName = string.Format("{0} Connection", ConnectionType.ToString().ToUpper());
             Connection = new Connection();
+            CanTestConnection = true;
         }
 
         /// <summary>
@@ -33,6 +36,25 @@ namespace PDS.Witsml.Studio.ViewModels
         /// </summary>
         public Connection Connection { get; set; }
 
+        private bool _canTestConnection;
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance can execute a connection test.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance can test connection; otherwise, <c>false</c>.
+        /// </value>
+        public bool CanTestConnection
+        {
+            get { return _canTestConnection; }
+            set
+            {
+                if (_canTestConnection != value)
+                {
+                    _canTestConnection = value;
+                    NotifyOfPropertyChange(() => CanTestConnection);
+                }
+            }
+        }
 
         /// <summary>
         /// Executes a connection test and reports the result to the user.
@@ -45,14 +67,27 @@ namespace PDS.Witsml.Studio.ViewModels
             if (connectionTest != null)
             {
                 UiServices.SetBusyState();
-                if (connectionTest.CanConnect(Connection))
+                CanTestConnection = false;
+
+                Task.Run(async() =>
                 {
-                    MessageBox.Show("Connection successful", "Connection Status", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                else
-                {
-                    MessageBox.Show("Connection failed", "Connection Status", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                    var result = await connectionTest.CanConnect(Connection);
+                    await App.Current.Dispatcher.BeginInvoke(new Action<bool>(ShowTestResult), result);
+                });
+            }
+        }
+
+        private void ShowTestResult(bool result)
+        {
+            CanTestConnection = true;
+
+            if (result)
+            {
+                MessageBox.Show(Application.Current.MainWindow, "Connection successful", "Connection Status", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else
+            {
+                MessageBox.Show(Application.Current.MainWindow, "Connection failed", "Connection Status", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }

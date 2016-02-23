@@ -1,7 +1,9 @@
-﻿namespace PDS.Witsml.Studio.Connections
+﻿using System.Threading.Tasks;
+
+namespace PDS.Witsml.Studio.Connections
 {
     public interface IConnectionTest
     {
-        bool CanConnect(Connection connection);
+        Task<bool> CanConnect(Connection connection);
     }
 }
