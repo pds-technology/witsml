@@ -101,8 +101,8 @@ namespace PDS.Witsml.Server
             {
                 _log.Debug(request.ToLogMessage());
 
-                ValidateObjectType(request.WMLtypeIn);
                 ValidateInputTemplate(request.QueryIn);
+                ValidateObjectType(request.WMLtypeIn);
 
                 var dataProvider = Container.Resolve<IWitsmlDataProvider>(new ObjectName(request.WMLtypeIn, version));
                 var result = dataProvider.GetFromStore(request.WMLtypeIn, request.QueryIn, request.OptionsIn, request.CapabilitiesIn);
@@ -148,8 +148,8 @@ namespace PDS.Witsml.Server
             {
                 _log.Debug(request.ToLogMessage());
 
-                ValidateObjectType(version, request.WMLtypeIn, ObjectTypes.GetObjectType(request.XMLin));
                 ValidateInputTemplate(request.XMLin);
+                ValidateObjectType(version, request.WMLtypeIn, ObjectTypes.GetObjectType(request.XMLin));
 
                 var dataWriter = Container.Resolve<IWitsmlDataWriter>(new ObjectName(request.WMLtypeIn, version));
                 var result = dataWriter.AddToStore(request.WMLtypeIn, request.XMLin, request.OptionsIn, request.CapabilitiesIn);
@@ -183,8 +183,8 @@ namespace PDS.Witsml.Server
             {
                 _log.DebugFormat("Type: {0}; Options: {1}; XML:{3}{2}{3}", request.WMLtypeIn, request.OptionsIn, request.XMLin, Environment.NewLine);
 
-                ValidateObjectType(request.WMLtypeIn);
                 ValidateInputTemplate(request.XMLin);
+                ValidateObjectType(request.WMLtypeIn);
 
                 var dataWriter = Container.Resolve<IWitsmlDataWriter>(new ObjectName(request.WMLtypeIn, version));
                 var result = dataWriter.UpdateInStore(request.WMLtypeIn, request.XMLin, request.OptionsIn, request.CapabilitiesIn);
@@ -211,8 +211,8 @@ namespace PDS.Witsml.Server
             {
                 _log.DebugFormat("Type: {0}; Options: {1}; Query:{3}{2}{3}", request.WMLtypeIn, request.OptionsIn, request.QueryIn, Environment.NewLine);
 
-                ValidateObjectType(request.WMLtypeIn);
                 ValidateInputTemplate(request.QueryIn);
+                ValidateObjectType(request.WMLtypeIn);
 
                 var dataWriter = Container.Resolve<IWitsmlDataWriter>(new ObjectName(request.WMLtypeIn, version));
                 var result = dataWriter.DeleteFromStore(request.WMLtypeIn, request.QueryIn, request.OptionsIn, request.CapabilitiesIn);
