@@ -25,21 +25,27 @@ namespace PDS.Witsml.Server.Data
 
             // Custom
             if (!BsonClassMap.IsClassMapRegistered(typeof(LogDataValues)))
+            {
                 BsonClassMap.RegisterClassMap<LogDataValues>(cm =>
                 {
                     cm.AutoMap();
                     cm.MapIdMember(x => x.Uid).SetIdGenerator(UidGenerator.Instance);
                 });
+            }
         }
 
         private void Register<T>() where T : IDataObject
         {
-            if (!BsonClassMap.IsClassMapRegistered(typeof(T)))
-                BsonClassMap.RegisterClassMap<T>(cm =>
-                {
-                    cm.AutoMap();
-                    cm.MapIdMember(x => x.Uid).SetIdGenerator(UidGenerator.Instance);
-                });
+            if (BsonClassMap.IsClassMapRegistered(typeof(T)))
+            {
+                return;
+            }
+
+            BsonClassMap.RegisterClassMap<T>(cm =>
+            {
+                cm.AutoMap();
+                cm.MapIdMember(x => x.Uid).SetIdGenerator(UidGenerator.Instance);
+            });
         }
     }
 }
