@@ -39,14 +39,19 @@ namespace PDS.Witsml.Studio.ViewModels
         /// </summary>
         public void TestConnection()
         {
+            // Resolve a connection test specific to the current ConnectionType
             var connectionTest = App.Current.Container().Resolve<IConnectionTest>(ConnectionType.ToString());
-            if (connectionTest.CanConnect(Connection))
+
+            if (connectionTest != null)
             {
-                MessageBox.Show("Connection successful", "Connection Status", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            else
-            {
-                MessageBox.Show("Connection failed", "Connection Status", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (connectionTest.CanConnect(Connection))
+                {
+                    MessageBox.Show("Connection successful", "Connection Status", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Connection failed", "Connection Status", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
     }
