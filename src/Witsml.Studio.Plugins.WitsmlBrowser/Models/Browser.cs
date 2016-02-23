@@ -1,5 +1,5 @@
 ﻿using Caliburn.Micro;
-using PDS.Witsml.Studio.Models;
+using PDS.Witsml.Studio.Connections;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
 {

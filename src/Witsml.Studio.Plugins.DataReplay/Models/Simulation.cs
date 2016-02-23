@@ -2,7 +2,7 @@
 using Caliburn.Micro;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Energistics.Datatypes.ChannelData;
-using PDS.Witsml.Studio.Models;
+using PDS.Witsml.Studio.Connections;
 
 namespace PDS.Witsml.Studio.Plugins.DataReplay.Models
 {

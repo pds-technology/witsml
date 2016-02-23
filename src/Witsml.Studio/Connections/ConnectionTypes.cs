@@ -1,4 +1,4 @@
-﻿namespace PDS.Witsml.Studio.Models
+﻿namespace PDS.Witsml.Studio.Connections
 {
     /// <summary>
     /// An enumeration of available Connection types.

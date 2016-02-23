@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Caliburn.Micro;
 using Energistics.DataAccess;
-using PDS.Witsml.Studio.Models;
+using PDS.Witsml.Studio.Connections;
 using PDS.Witsml.Studio.ViewModels;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
