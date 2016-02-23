@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.Composition;
+using Energistics.DataAccess;
 
 namespace PDS.Witsml.Studio.Connections
 {
@@ -7,8 +8,16 @@ namespace PDS.Witsml.Studio.Connections
     {
         public bool CanConnect(Connection connection)
         {
-            // TODO: Make a Witsml connection and test by fetching version information.
-            return true;
+            try
+            {
+                var proxy = new WITSMLWebServiceConnection(connection.Uri, WMLSVersion.WITSML141);
+                var versions = proxy.GetVersion();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }
