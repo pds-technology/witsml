@@ -19,7 +19,7 @@ namespace PDS.Witsml.Web
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
-            XmlConfigurator.ConfigureAndWatch(new FileInfo("log4net.config"));
+            XmlConfigurator.ConfigureAndWatch(new FileInfo(Server.MapPath("~/log4net.config")));
             ContainerConfiguration.Register(Server.MapPath("~/bin"));
 
             // pre-init IWitsmlStore dependencies

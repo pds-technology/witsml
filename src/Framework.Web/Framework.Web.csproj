@@ -91,6 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ContainerConfiguration.cs" />
+    <Compile Include="ControllerFactory.cs" />
     <Compile Include="DependencyResolver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\ServiceContractBehavior.cs" />
