@@ -12,7 +12,7 @@ using PDS.Witsml.Server.Logging;
 namespace PDS.Witsml.Server
 {
     /// <summary>
-    /// The WISML Store API server implementation.
+    /// The WITSML Store API server implementation.
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.IWitsmlStore" />
     [Export(typeof(IWitsmlStore))]
