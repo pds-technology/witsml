@@ -5,20 +5,33 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using log4net;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
+    /// <summary>
+    /// Data adapter that encapsulates CRUD functionality for <see cref="Wellbore" />
+    /// </summary>
+    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML141.Wellbore}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.IEtpDataAdapter{Energistics.DataAccess.WITSML141.Wellbore}" />
+    /// <seealso cref="PDS.Witsml.Server.IWitsml141Configuration" />
     [Export(typeof(IWitsml141Configuration))]
     [Export(typeof(IWitsmlDataAdapter<Wellbore>))]
+    [Export(typeof(IEtpDataAdapter<Wellbore>))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Wellbore141DataAdapter : MongoDbDataAdapter<Wellbore>, IWitsml141Configuration
+    public class Wellbore141DataAdapter : MongoDbDataAdapter<Wellbore>, IEtpDataAdapter<Wellbore>, IWitsml141Configuration
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(Wellbore141DataAdapter));
         private static readonly string ParentDbDocumentName = ObjectNames.Well141;
         private static readonly string DbDocumentName = ObjectNames.Wellbore141;
         private static readonly string Version141 = "1.4.1.1";
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Wellbore141DataAdapter"/> class.
+        /// </summary>
+        /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
         public Wellbore141DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider)
         {
@@ -90,6 +103,23 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public override WitsmlResult Update(Wellbore entity)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets a collection of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        public List<Wellbore> GetAll(string parentUri = null)
+        {
+            var database = DatabaseProvider.GetDatabase();
+            var collection = database.GetCollection<Wellbore>(DbDocumentName);
+            var uidWell = parentUri.Split(new[] { '(', ')' }, StringSplitOptions.RemoveEmptyEntries).Last();
+
+            return collection.AsQueryable()
+                .Where(x => x.UidWell == uidWell)
+                .OrderBy(x => x.Name)
+                .ToList();
         }
     }
 }
