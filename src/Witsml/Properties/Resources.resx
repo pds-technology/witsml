@@ -149,6 +149,10 @@
     <value>Error updating in data store</value>
     <comment>-1003</comment>
   </data>
+  <data name="MissingClientUserAgent" xml:space="preserve">
+    <value>The client product name and/or product version number are missing in the HTTP user-agent field.</value>
+    <comment>-472</comment>
+  </data>
   <data name="InvalidKeywordValue" xml:space="preserve">
     <value>The value specified with an OptionsIn keyword must be a recognized value for that keyword.</value>
     <comment>-441</comment>
