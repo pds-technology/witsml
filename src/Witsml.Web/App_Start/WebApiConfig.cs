@@ -1,7 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Net.Http.Formatting;
 using System.Web.Http;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using PDS.Framework.Web.Services;
 
 namespace PDS.Witsml.Web
 {
@@ -19,6 +20,15 @@ namespace PDS.Witsml.Web
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
+
+            config.Filters.Add(new UnhandledExceptionHandler());
+
+            config.Formatters.JsonFormatter.MediaTypeMappings.Add(new QueryStringMapping("json", "true", "application/json"));
+
+            config.Formatters.JsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+#if DEBUG
+            config.Formatters.JsonFormatter.SerializerSettings.Formatting = Formatting.Indented;
+#endif
         }
     }
 }

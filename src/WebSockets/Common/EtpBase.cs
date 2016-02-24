@@ -13,11 +13,28 @@ namespace Energistics.Common
             RegisteredFactories = new Dictionary<Type, Func<object>>();
         }
 
+        public Action<string> Output { get; set; }
+
         public ILog Logger { get; private set; }
 
         protected IDictionary<Type, Type> RegisteredHandlers { get; private set; }
 
         protected IDictionary<Type, Func<object>> RegisteredFactories { get; private set; }
+
+        public string Format(string message, params object[] args)
+        {
+            return Format(string.Format(message, args));
+        }
+
+        public string Format(string message)
+        {
+            if (Output != null)
+            {
+                Output(message);
+            }
+
+            return message;
+        }
 
         public virtual void Register<TContract, THandler>() where TContract : IProtocolHandler where THandler : TContract
         {

@@ -7,6 +7,9 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.Views
     /// </summary>
     public partial class MainView : UserControl
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MainView"/> class.
+        /// </summary>
         public MainView()
         {
             InitializeComponent();

@@ -4,15 +4,26 @@ using PDS.Witsml.Studio.Connections;
 
 namespace PDS.Witsml.Studio.Plugins.EtpBrowser.Models
 {
+    /// <summary>
+    /// Defines all of the properties needed to comunicate via ETP.
+    /// </summary>
+    /// <seealso cref="Caliburn.Micro.PropertyChangedBase" />
     [DataContract]
     public class EtpSettings : PropertyChangedBase
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EtpSettings"/> class.
+        /// </summary>
         public EtpSettings()
         {
             Connection = new Connection();
         }
 
         private Connection _connection;
+        /// <summary>
+        /// Gets or sets the connection.
+        /// </summary>
+        /// <value>The connection.</value>
         [DataMember]
         public Connection Connection
         {
@@ -23,21 +34,6 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.Models
                 {
                     _connection = value;
                     NotifyOfPropertyChange(() => Connection);
-                }
-            }
-        }
-
-        private string _version;
-        [DataMember]
-        public string Version
-        {
-            get { return _version; }
-            set
-            {
-                if (!string.Equals(_version, value))
-                {
-                    _version = value;
-                    NotifyOfPropertyChange(() => Version);
                 }
             }
         }

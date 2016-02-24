@@ -124,10 +124,9 @@ namespace Energistics.Protocol.ChannelStreaming
 
         protected virtual void HandleStart(MessageHeader header, Start start)
         {
-            Notify(OnStart, header, start);
-
             MaxDataItems = start.MaxDataItems;
             MaxMessageRate = start.MaxMessageRate;
+            Notify(OnStart, header, start);
         }
 
         protected virtual void HandleChannelDescribe(MessageHeader header, ChannelDescribe channelDescribe)

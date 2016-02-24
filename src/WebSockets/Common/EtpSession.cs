@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using Avro.IO;
 using Avro.Specific;
@@ -33,8 +34,8 @@ namespace Energistics.Common
                 return (T)handler;
             }
 
-            Logger.ErrorFormat("[{0}] Protocol handler not registered for {1}.", SessionId, typeof(T).FullName);
-            throw new NotSupportedException(String.Format("Protocol handler not registered for {0}.", typeof(T).FullName));
+            Logger.Error(Format("[{0}] Protocol handler not registered for {1}.", SessionId, typeof(T).FullName));
+            throw new NotSupportedException(string.Format("Protocol handler not registered for {0}.", typeof(T).FullName));
         }
 
         public virtual void OnDataReceived(byte[] data)
@@ -46,11 +47,7 @@ namespace Energistics.Common
         {
             var data = body.Encode(header);
             Send(data, 0, data.Length);
-
-            if (Logger.IsDebugEnabled)
-            {
-                Logger.DebugFormat("[{0}] Message sent: {1}", SessionId, this.Serialize(header));
-            }
+            Sent(header, body);
         }
 
         public IList<SupportedProtocol> GetSupportedProtocols()
@@ -64,6 +61,11 @@ namespace Energistics.Common
 
             foreach (var handler in Handlers.Values)
             {
+                if (supportedProtocols.Any(x => x.Protocol == handler.Protocol))
+                {
+                    continue;
+                }
+
                 supportedProtocols.Add(new SupportedProtocol()
                 {
                     Protocol = handler.Protocol,
@@ -142,8 +144,23 @@ namespace Energistics.Common
                 return Handlers[protocol];
             }
 
-            Logger.ErrorFormat("[{0}] Protocol handler not registed for protocol {1}.", SessionId, protocol);
+            Logger.Error(Format("[{0}] Protocol handler not registed for protocol {1}.", SessionId, protocol));
             throw new NotSupportedException(string.Format("Protocol handler not registed for protocol {0}.", protocol));
+        }
+
+        protected void Sent<T>(MessageHeader header, T body)
+        {
+            if (Output != null)
+            {
+                Format("[{0}] Message sent at {1}", SessionId, System.DateTime.Now);
+                Format(this.Serialize(header));
+                Format(this.Serialize(body, true));
+            }
+
+            if (Logger.IsDebugEnabled)
+            {
+                Logger.DebugFormat("[{0}] Message sent: {1}", SessionId, this.Serialize(header));
+            }
         }
     }
 }

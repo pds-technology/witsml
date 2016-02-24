@@ -34,7 +34,7 @@ namespace Energistics
             {
                 _socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, reason, CancellationToken.None);
 
-                Logger.DebugFormat("[{0}] Socket session closed.", SessionId);
+                Logger.Debug(Format("[{0}] Socket session closed.", SessionId));
             }
         }
 
@@ -42,7 +42,7 @@ namespace Energistics
         {
             SessionId = Guid.NewGuid().ToString();
 
-            Logger.DebugFormat("[{0}] Socket session connected.", SessionId);
+            Logger.Debug(Format("[{0}] Socket session connected.", SessionId));
 
             using (var stream = new MemoryStream())
             {
@@ -71,6 +71,7 @@ namespace Energistics
                 }
                 catch (Exception ex)
                 {
+                    Format("Error: {0}", ex.Message);
                     Logger.Error(ex);
                     throw;
                 }

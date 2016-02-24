@@ -64,10 +64,9 @@ namespace Energistics.Protocol.Core
 
         protected virtual void HandleOpenSession(MessageHeader header, OpenSession openSession)
         {
-            Notify(OnOpenSession, header, openSession);
-
             ServerProtocols = openSession.SupportedProtocols;
             Session.SessionId = openSession.SessionId;
+            Notify(OnOpenSession, header, openSession);
         }
 
         protected virtual void HandleCloseSession(MessageHeader header, CloseSession closeSession)

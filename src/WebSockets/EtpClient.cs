@@ -42,6 +42,7 @@ namespace Energistics
         {
             if (!IsOpen)
             {
+                Logger.Debug(Format("Opening web socket connection..."));
                 _socket.Open();
             }
         }
@@ -50,6 +51,7 @@ namespace Energistics
         {
             if (IsOpen)
             {
+                Logger.Debug(Format("Closing web socket connection: {0}", reason));
                 _socket.Close(reason);
             }
         }
@@ -74,7 +76,7 @@ namespace Energistics
 
         private void OnWebSocketOpened(object sender, EventArgs e)
         {
-            Logger.DebugFormat("[{0}] Socket opened.", SessionId);
+            Logger.Debug(Format("[{0}] Socket opened.", SessionId));
 
             var requestedProtocols = GetSupportedProtocols();
 
@@ -84,7 +86,7 @@ namespace Energistics
 
         private void OnWebSocketClosed(object sender, EventArgs e)
         {
-            Logger.DebugFormat("[{0}] Socket closed.", SessionId);
+            Logger.Debug(Format("[{0}] Socket closed.", SessionId));
             SessionId = null;
         }
 

@@ -19,7 +19,7 @@
         <Grid Grid.Column="1" Margin="5,0,0,0">
             <TabControl>
                 <TabItem Header="Response">
-                    <TextBox x:Name="Output" AcceptsReturn="True" IsReadOnly="True" VerticalScrollBarVisibility="Auto" Margin="5" />
+                    <TextBox Text="{Binding Output}" AcceptsReturn="True" IsReadOnly="True" VerticalScrollBarVisibility="Auto" Margin="5" />
                 </TabItem>
             </TabControl>
         </Grid>

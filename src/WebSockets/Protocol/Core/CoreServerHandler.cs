@@ -66,13 +66,11 @@ namespace Energistics.Protocol.Core
 
         protected virtual void HandleRequestSession(MessageHeader header, RequestSession requestSession)
         {
+            ClientApplicationName = requestSession.ApplicationName;
+            RequestedProtocols = requestSession.RequestedProtocols;
             Notify(OnRequestSession, header, requestSession);
 
             var supportedProtocols = Session.GetSupportedProtocols();
-
-            ClientApplicationName = requestSession.ApplicationName;
-            RequestedProtocols = requestSession.RequestedProtocols;
-
             OpenSession(header, supportedProtocols);
         }
 

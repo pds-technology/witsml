@@ -95,6 +95,8 @@ namespace Energistics.Common
         {
             var args = new ProtocolEventArgs<T>(header, message);
 
+            Received(header, message);
+
             if (handler != null)
             {
                 handler(this, args);
@@ -107,12 +109,24 @@ namespace Energistics.Common
         {
             var args = new ProtocolEventArgs<T, V>(header, message, context);
 
+            Received(header, message);
+
             if (handler != null)
             {
                 handler(this, args);
             }
 
             return args;
+        }
+
+        protected void Received<T>(MessageHeader header, T message)
+        {
+            if (Session.Output != null)
+            {
+                Session.Format("[{0}] Message received at {1}", Session.SessionId, System.DateTime.Now);
+                Session.Format(this.Serialize(header));
+                Session.Format(this.Serialize(message, true));
+            }
         }
 
         protected MessageHeader CreateMessageHeader<TEnum>(Protocols protocol, TEnum messageType, long correlationId = 0, MessageFlags messageFlags = MessageFlags.None) where TEnum : IConvertible

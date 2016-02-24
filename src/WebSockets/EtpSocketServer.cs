@@ -68,7 +68,7 @@ namespace Energistics
 
         private void OnNewSessionConnected(WebSocketSession session)
         {
-            Logger.DebugFormat("[{0}] Socket session connected.", session.SessionID);
+            Logger.Debug(Format("[{0}] Socket session connected.", session.SessionID));
 
             var etpServer = new EtpServer(session, ApplicationName);
             RegisterAll(etpServer);
@@ -78,7 +78,7 @@ namespace Energistics
 
         private void OnSessionClosed(WebSocketSession session, CloseReason value)
         {
-            Logger.DebugFormat("[{0}] Socket session closed.", session.SessionID);
+            Logger.Debug(Format("[{0}] Socket session closed.", session.SessionID));
 
             var etpSession = GetEtpSession(session);
 

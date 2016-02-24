@@ -5,7 +5,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace Energistics.Common
 {
-    public class EtpContractResolver : DefaultContractResolver
+    public class EtpContractResolver : CamelCasePropertyNamesContractResolver
     {
         protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
         {

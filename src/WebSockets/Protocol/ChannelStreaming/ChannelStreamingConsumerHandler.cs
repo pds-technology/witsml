@@ -120,9 +120,8 @@ namespace Energistics.Protocol.ChannelStreaming
 
         protected virtual void HandleChannelMetadata(MessageHeader header, ChannelMetadata channelMetadata)
         {
-            Notify(OnChannelMetadata, header, channelMetadata);
-
             ChannelMetadataRecords = channelMetadata.Channels;
+            Notify(OnChannelMetadata, header, channelMetadata);
         }
 
         protected virtual void HandleChannelData(MessageHeader header, ChannelData channelData)

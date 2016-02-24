@@ -32,7 +32,7 @@ namespace PDS.Witsml.Studio.ViewModels
         public ConnectionTypes ConnectionType { get; private set; }
 
         /// <summary>
-        /// Gets and sets the connection details for a connection
+        /// Gets or sets the connection details for a connection
         /// </summary>
         public Connection Connection { get; set; }
 
@@ -79,8 +79,6 @@ namespace PDS.Witsml.Studio.ViewModels
 
         private void ShowTestResult(bool result)
         {
-            CanTestConnection = true;
-
             if (result)
             {
                 MessageBox.Show(Application.Current.MainWindow, "Connection successful", "Connection Status", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -89,6 +87,8 @@ namespace PDS.Witsml.Studio.ViewModels
             {
                 MessageBox.Show(Application.Current.MainWindow, "Connection failed", "Connection Status", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+
+            CanTestConnection = true;
         }
     }
 }

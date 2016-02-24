@@ -101,6 +101,7 @@
     <Compile Include="Services\ServiceInstanceProvider.cs" />
     <Compile Include="Services\ServiceHost.cs" />
     <Compile Include="Services\ServiceHostFactory.cs" />
+    <Compile Include="Services\UnhandledExceptionHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Framework\Framework.csproj">
