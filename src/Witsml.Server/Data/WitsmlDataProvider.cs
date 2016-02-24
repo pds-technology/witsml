@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess;
 using log4net;
@@ -15,8 +15,8 @@ namespace PDS.Witsml.Server.Data
     /// <seealso cref="IWitsmlDataWriter" />
     public abstract class WitsmlDataProvider<TList, TObject> : IWitsmlDataProvider, IWitsmlDataWriter where TList : IEnergisticsCollection
     {
-        protected readonly IWitsmlDataAdapter<TObject> _dataAdapter;
         private static readonly ILog _log = LogManager.GetLogger(typeof(WitsmlDataProvider<TList, TObject>));
+        private readonly IWitsmlDataAdapter<TObject> _dataAdapter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WitsmlDataProvider{TList, TObject}"/> class.
@@ -26,6 +26,13 @@ namespace PDS.Witsml.Server.Data
         {
             _dataAdapter = dataAdapter;
         }
+
+        /// <summary>
+        /// Gets or sets the cap server providers.
+        /// </summary>
+        /// <value>The cap server providers.</value>
+        [ImportMany]
+        public IEnumerable<ICapServerProvider> CapServerProviders { get; set; }
 
         /// <summary>
         /// Gets object(s) from store.
@@ -56,6 +63,10 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         public virtual WitsmlResult AddToStore(string witsmlType, string xml, string options, string capabilities)
         {
+            var version = ObjectTypes.GetVersion(xml);
+            var capServerProvider = CapServerProviders.FirstOrDefault(x => x.DataSchemaVersion == version);
+            capServerProvider.Validate(Functions.AddToStore, witsmlType, xml, options, capabilities);
+
             var list = EnergisticsConverter.XmlToObject<TList>(xml);
             return _dataAdapter.Add(list.Items.Cast<TObject>().Single());
         }

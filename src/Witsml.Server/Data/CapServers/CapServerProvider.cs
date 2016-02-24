@@ -69,6 +69,20 @@ namespace PDS.Witsml.Server.Data.CapServers
         }
 
         /// <summary>
+        /// Performs validation for the specified function and supplied parameters.
+        /// </summary>
+        /// <param name="function">The WITSML Store API function.</param>
+        /// <param name="witsmlType">The type of the data object.</param>
+        /// <param name="xml">The XML string for the data object.</param>
+        /// <param name="options">The options.</param>
+        /// <param name="capabilities">The client's capabilities object (capClient).</param>
+        public virtual void Validate(Functions function, string witsmlType, string xml, string options, string capabilities)
+        {
+            //ValidateRootElement(witsmlType, xml);
+            //ValidateChildElement(witsmlType, xml);
+        }
+
+        /// <summary>
         /// Creates the capServers instance for a specific data schema version.
         /// </summary>
         /// <returns>The capServers instance.</returns>
