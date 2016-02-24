@@ -11,7 +11,7 @@
         MinWidth="600">
 
     <Window.Resources>
-        <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+        <conv:NullToBooleanConverter x:Key="NullToBooleanConverter" />
     </Window.Resources>
     
     <Grid Margin="10">
@@ -34,7 +34,7 @@
         <TextBox Grid.Row="1" Grid.Column="1" Margin="5" Padding="5" Text="{Binding EditItem.Name}" VerticalAlignment="Center" />
         
         <TextBlock Grid.Row="2" Text="URL:" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Right" />
-        <TextBox Grid.Row="2" Grid.Column="1" Margin="5" Padding="5" Text="{Binding EditItem.Uri}" VerticalAlignment="Center" />
+        <TextBox Grid.Row="2" Grid.Column="1" Margin="5" Padding="5" Text="{Binding EditItem.Uri, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" />
         
         <TextBlock Grid.Row="3" Text="User Name:" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Right" />
         <TextBox Grid.Row="3" Grid.Column="1" Margin="5" Padding="5" Text="{Binding EditItem.Username}" VerticalAlignment="Center" />
@@ -42,10 +42,10 @@
         <TextBlock Grid.Row="4" Text="Password:" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Right" />
         <TextBox Grid.Row="4" Grid.Column="1" Margin="5" Padding="5" Text="{Binding EditItem.Password}" VerticalAlignment="Center" />
 
-        <Button x:Name="TestConnection" Grid.Row="6" Grid.Column="0" Margin="5" Content="Test" Width="80" Visibility="{Binding ConnectionTest, Converter={StaticResource NullToVisibilityConverter}}" />
+        <Button x:Name="TestConnection" Grid.Row="6" Grid.Column="0" Margin="5" Content="Test" Width="80" />
         <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button x:Name="AcceptEdit" Margin="5" Content="OK" Width="80" />
-            <Button x:Name="CancelEdit" Margin="5" Content="Cancel" Width="80" />
+            <Button x:Name="Accept" Margin="5" Content="OK" Width="80" IsEnabled="{Binding EditItem.Uri, Converter={StaticResource NullToBooleanConverter}}" />
+            <Button x:Name="Cancel" Margin="5" Content="Cancel" Width="80" />
         </StackPanel>
     </Grid>
 </Window>
