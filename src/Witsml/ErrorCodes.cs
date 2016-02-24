@@ -351,13 +351,14 @@
         /// </summary>
 
         /// <summary>
-        /// -471 <Not Assigned>
+        /// -471 (Not Assigned)
         /// </summary>
 
         /// <summary>
         /// -472 The client product name and/or product version number are missing in the HTTP user-agent field.
         /// WITSML requires this information for each function call.
         /// </summary>
+        MissingClientUserAgent = -472,
 
         /// <summary>
         /// -473 For the capClient object, the values of schemaVersion must match the version attribute used in the plural

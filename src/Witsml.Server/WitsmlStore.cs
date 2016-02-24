@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.ServiceModel.Web;
 using Energistics.DataAccess;
 using log4net;
 using PDS.Framework;
@@ -48,6 +49,8 @@ namespace PDS.Witsml.Server
         public WMLS_GetVersionResponse WMLS_GetVersion(WMLS_GetVersionRequest request)
         {
             EnsureCapServerProviders();
+
+            _log.Debug(WebOperationContext.Current.ToLogMessage());
             _log.Debug(request.ToLogMessage());
 
             var response = new WMLS_GetVersionResponse(_supportedVersions);
@@ -62,33 +65,39 @@ namespace PDS.Witsml.Server
         /// <returns>A positive value indicates a success; a negative value indicates an error.</returns>
         public WMLS_GetCapResponse WMLS_GetCap(WMLS_GetCapRequest request)
         {
-            EnsureCapServerProviders();
-            _log.Debug(request.ToLogMessage());
-
-            var options = OptionsIn.Parse(request.OptionsIn);
-            var version = OptionsIn.GetValue(options, new OptionsIn.DataVersion(DefaultDataSchemaVersion));
-
-            // return error if WITSML 1.3.1 not supported AND dataVersion not specified (required in WITSML 1.4.1)
-            if (!_capServer.ContainsKey(OptionsIn.DataVersion.Version131.Value) && !options.ContainsKey(OptionsIn.DataVersion.Keyword))
+            try
             {
-                var response = new WMLS_GetCapResponse((short)ErrorCodes.MissingDataVersion, string.Empty, ErrorCodes.MissingDataVersion.GetDescription());
+                EnsureCapServerProviders();
+
+                _log.Debug(WebOperationContext.Current.ToLogMessage());
+                _log.Debug(request.ToLogMessage());
+
+                ValidateUserAgent(WebOperationContext.Current);
+
+                var options = OptionsIn.Parse(request.OptionsIn);
+                var version = OptionsIn.GetValue(options, new OptionsIn.DataVersion(DefaultDataSchemaVersion));
+
+                // return error if WITSML 1.3.1 not supported AND dataVersion not specified (required in WITSML 1.4.1)
+                if (!_capServer.ContainsKey(OptionsIn.DataVersion.Version131.Value) && !options.ContainsKey(OptionsIn.DataVersion.Keyword))
+                {
+                    throw new WitsmlException(ErrorCodes.MissingDataVersion);
+                }
+
+                if (_capServer.ContainsKey(version))
+                {
+                    var response = new WMLS_GetCapResponse((short)ErrorCodes.Success, _capServer[version].ToXml(), string.Empty);
+                    _log.Debug(response.ToLogMessage());
+                    return response;
+                }
+
+                throw new WitsmlException(ErrorCodes.DataVersionNotSupported, "Data schema version not supported: " + version);
+            }
+            catch (WitsmlException ex)
+            {
+                var response = new WMLS_GetCapResponse((short)ex.ErrorCode, string.Empty, ex.Message);
                 _log.Warn(response.ToLogMessage(_log.IsWarnEnabled));
                 return response;
             }
-
-            if (_capServer.ContainsKey(version))
-            {
-                var response = new WMLS_GetCapResponse((short)ErrorCodes.Success, _capServer[version].ToXml(), string.Empty);
-                _log.Debug(response.ToLogMessage());
-                return response;
-            }
-
-            var error = new WMLS_GetCapResponse((short)ErrorCodes.DataVersionNotSupported, string.Empty,
-                ErrorCodes.DataVersionNotSupported.GetDescription() + " Data schema version not supported: " + version);
-
-            _log.Warn(error.ToLogMessage(_log.IsWarnEnabled));
-
-            return error;
         }
 
         public WMLS_GetFromStoreResponse WMLS_GetFromStore(WMLS_GetFromStoreRequest request)
@@ -97,8 +106,10 @@ namespace PDS.Witsml.Server
 
             try
             {
+                _log.Debug(WebOperationContext.Current.ToLogMessage());
                 _log.Debug(request.ToLogMessage());
 
+                ValidateUserAgent(WebOperationContext.Current);
                 ValidateInputTemplate(request.QueryIn);
                 ValidateObjectType(request.WMLtypeIn);
 
@@ -144,8 +155,10 @@ namespace PDS.Witsml.Server
 
             try
             {
+                _log.Debug(WebOperationContext.Current.ToLogMessage());
                 _log.Debug(request.ToLogMessage());
 
+                ValidateUserAgent(WebOperationContext.Current);
                 ValidateInputTemplate(request.XMLin);
                 ValidateObjectType(version, request.WMLtypeIn, ObjectTypes.GetObjectType(request.XMLin));
 
@@ -179,8 +192,10 @@ namespace PDS.Witsml.Server
 
             try
             {
+                _log.Debug(WebOperationContext.Current.ToLogMessage());
                 _log.DebugFormat("Type: {0}; Options: {1}; XML:{3}{2}{3}", request.WMLtypeIn, request.OptionsIn, request.XMLin, Environment.NewLine);
 
+                ValidateUserAgent(WebOperationContext.Current);
                 ValidateInputTemplate(request.XMLin);
                 ValidateObjectType(request.WMLtypeIn);
 
@@ -207,8 +222,10 @@ namespace PDS.Witsml.Server
 
             try
             {
+                _log.Debug(WebOperationContext.Current.ToLogMessage());
                 _log.DebugFormat("Type: {0}; Options: {1}; Query:{3}{2}{3}", request.WMLtypeIn, request.OptionsIn, request.QueryIn, Environment.NewLine);
 
+                ValidateUserAgent(WebOperationContext.Current);
                 ValidateInputTemplate(request.QueryIn);
                 ValidateObjectType(request.WMLtypeIn);
 
@@ -236,6 +253,10 @@ namespace PDS.Witsml.Server
         /// <returns>The fixed descriptive message text associated with the Return Value.</returns>
         public WMLS_GetBaseMsgResponse WMLS_GetBaseMsg(WMLS_GetBaseMsgRequest request)
         {
+            _log.Debug(WebOperationContext.Current.ToLogMessage());
+
+            ValidateUserAgent(WebOperationContext.Current);
+
             var message = string.Empty;
 
             if (Enum.IsDefined(typeof(ErrorCodes), request.ReturnValueIn))
@@ -252,6 +273,19 @@ namespace PDS.Witsml.Server
             }
 
             return new WMLS_GetBaseMsgResponse(message);
+        }
+
+        /// <summary>
+        /// Validates the required User-Agent header is supplied by the client.
+        /// </summary>
+        /// <param name="context">The web operation context.</param>
+        /// <exception cref="WitsmlException">Thrown if the User-Agent header is missing.</exception>
+        private void ValidateUserAgent(WebOperationContext context)
+        {
+            if (context != null && context.IncomingRequest != null && string.IsNullOrWhiteSpace(context.IncomingRequest.UserAgent))
+            {
+                throw new WitsmlException(ErrorCodes.MissingClientUserAgent);
+            }
         }
 
         /// <summary>

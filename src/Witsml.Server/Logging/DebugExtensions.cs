@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ServiceModel.Web;
 using System.Xml.Linq;
 using log4net;
 
@@ -10,6 +11,25 @@ namespace PDS.Witsml.Server.Logging
     public static class DebugExtensions
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(WitsmlStore));
+
+        /// <summary>
+        /// Formats request information into a message suitable for logging.
+        /// </summary>
+        /// <param name="context">The web operation context.</param>
+        /// <param name="isEnabled">if set to <c>true</c> the message is created.</param>
+        /// <returns>The string representation of the request.</returns>
+        public static string ToLogMessage(this WebOperationContext context, bool isEnabled = false)
+        {
+            if (context == null || context.IncomingRequest == null)
+                return string.Empty;
+
+            if (!_log.IsDebugEnabled && !isEnabled)
+                return string.Empty;
+
+            return string.Format(
+                "UserAgent: {1}",
+                context.IncomingRequest.UserAgent);
+        }
 
         /// <summary>
         /// Converts the request to a message suitable for logging.

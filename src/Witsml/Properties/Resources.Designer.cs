@@ -133,6 +133,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The client product name and/or product version number are missing in the HTTP user-agent field..
+        /// </summary>
+        internal static string MissingClientUserAgent {
+            get {
+                return ResourceManager.GetString("MissingClientUserAgent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to For WMLS_GetCap, the OptionsIn keyword ‘dataVersion’ must be specified..
         /// </summary>
         internal static string MissingDataVersion {

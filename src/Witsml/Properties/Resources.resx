@@ -149,6 +149,10 @@
     <value>Error updating in data store</value>
     <comment>-1003</comment>
   </data>
+  <data name="MissingClientUserAgent" xml:space="preserve">
+    <value>The client product name and/or product version number are missing in the HTTP user-agent field.</value>
+    <comment>-472</comment>
+  </data>
   <data name="MissingDataVersion" xml:space="preserve">
     <value>For WMLS_GetCap, the OptionsIn keyword ‘dataVersion’ must be specified.</value>
     <comment>-424</comment>
