@@ -6,7 +6,9 @@
         xmlns:cal="http://www.caliburnproject.org"
         xmlns:conv="clr-namespace:PDS.Witsml.Studio.Converters"
         xmlns:local="clr-namespace:PDS.Witsml.Studio.Views"
-        mc:Ignorable="d" Height="300" Width="600">
+        mc:Ignorable="d" Height="300" Width="600"
+        MinHeight="300"
+        MinWidth="600">
 
     <Window.Resources>
         <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />

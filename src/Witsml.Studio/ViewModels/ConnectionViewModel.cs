@@ -15,6 +15,8 @@ namespace PDS.Witsml.Studio.ViewModels
     public class ConnectionViewModel : Screen
     {
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(ConnectionViewModel));
+        private readonly string PersistedDataFolderSetting = Settings.Default.PersistedDataFolder;
+        private readonly string ConnectionBaseFileNameSetting = Settings.Default.ConnectionBaseFileName;
 
         /// <summary>
         /// Initializes an instance of the ConnectionViewModel.
@@ -27,6 +29,11 @@ namespace PDS.Witsml.Studio.ViewModels
             DisplayName = string.Format("{0} Connection", ConnectionType.ToString().ToUpper());
             CanTestConnection = true;
         }
+
+        /// <summary>
+        /// Gets the connection type
+        /// </summary>
+        public ConnectionTypes ConnectionType { get; private set; }
 
         private Connection _editItem;
 
@@ -50,16 +57,12 @@ namespace PDS.Witsml.Studio.ViewModels
         }
 
         /// <summary>
-        /// Gets the connection type
-        /// </summary>
-        public ConnectionTypes ConnectionType { get; private set; }
-
-        /// <summary>
         /// Gets or sets the connection details for a connection
         /// </summary>
         public Connection DataItem { get; set; }
 
         private bool _canTestConnection;
+
         /// <summary>
         /// Gets or sets a value indicating whether this instance can execute a connection test.
         /// </summary>
@@ -98,20 +101,6 @@ namespace PDS.Witsml.Studio.ViewModels
                     await App.Current.Dispatcher.BeginInvoke(new Action<bool>(ShowTestResult), result);
                 });
             }
-        }
-
-        private void ShowTestResult(bool result)
-        {
-            if (result)
-            {
-                MessageBox.Show(Application.Current.MainWindow, "Connection successful", "Connection Status", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            else
-            {
-                MessageBox.Show("Connection failed", "Connection Status", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-
-            CanTestConnection = true;
         }
 
 
@@ -165,11 +154,18 @@ namespace PDS.Witsml.Studio.ViewModels
         {
             return string.Format("{0}/{1}/{2}{3}", 
                 Environment.CurrentDirectory, 
-                Settings.Default.PersistedDataFolder, 
-                ConnectionType.ToString(), 
-                Settings.Default.ConnectionBaseFileName);
+                PersistedDataFolderSetting, 
+                ConnectionType, 
+                ConnectionBaseFileNameSetting);
         }
 
+        /// <summary>
+        /// When the screen is activated the following initializations are done.
+        ///     1) Clones the incoming DataItem, if provided, to the EditItem to use as a working copy.
+        ///     2) If a DataItem was not provided the EditItem is set using the persisted connection
+        ///     data for the current connection type.
+        ///     3) If there is no persisted connection data then the EditItem is set to a blank connection.
+        /// </summary>
         protected override void OnActivate()
         {
             base.OnActivate();
@@ -184,13 +180,34 @@ namespace PDS.Witsml.Studio.ViewModels
             }
         }
 
-        private static void EnsureDataFolder()
+        /// <summary>
+        /// Checks for the existance of the data folder and creates it if necessary.
+        /// </summary>
+        private void EnsureDataFolder()
         {
-            var dataFolder = string.Format("{0}/{1}", Environment.CurrentDirectory, Settings.Default.PersistedDataFolder);
+            var dataFolder = string.Format("{0}/{1}", Environment.CurrentDirectory, PersistedDataFolderSetting);
             if (!Directory.Exists(dataFolder))
             {
                 Directory.CreateDirectory(dataFolder);
             }
+        }
+
+        /// <summary>
+        /// Shows the test result for the connection test.
+        /// </summary>
+        /// <param name="result">if set to <c>true</c> [result].</param>
+        private void ShowTestResult(bool result)
+        {
+            if (result)
+            {
+                App.Current.ShowInfo("Connection successful");
+            }
+            else
+            {
+                App.Current.ShowError("Connection failed");
+            }
+
+            CanTestConnection = true;
         }
     }
 }

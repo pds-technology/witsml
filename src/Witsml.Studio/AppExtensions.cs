@@ -72,6 +72,16 @@ namespace PDS.Witsml.Studio
         }
 
         /// <summary>
+        /// Displays an information message using a MessageBox
+        /// </summary>
+        /// <param name="app">The reference to the application</param>
+        /// <param name="message">The information message to be displayed</param>
+        public static void ShowInfo(this Application app, string message)
+        {
+            MessageBox.Show(Application.Current.MainWindow, message, "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        /// <summary>
         /// Displays a dialog for the view represented by the viewModel
         /// </summary>
         /// <param name="app">The reference to the application</param>
