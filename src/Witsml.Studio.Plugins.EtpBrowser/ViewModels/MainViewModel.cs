@@ -169,8 +169,11 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 this.CloseItem(Items[1]);
             }
 
-            ActivateItem(new HierarchyViewModel());
-            InitEtpClient();
+            if (!string.IsNullOrWhiteSpace(Model.Connection.Uri))
+            {
+                ActivateItem(new HierarchyViewModel());
+                InitEtpClient();
+            }
         }
 
         /// <summary>
