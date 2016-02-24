@@ -1,4 +1,6 @@
-﻿namespace PDS.Witsml.Server.Data
+﻿using System.Collections.Generic;
+
+namespace PDS.Witsml.Server.Data
 {
     /// <summary>
     /// Defines properties and methods used for retrieving WITSML Store capabilities. 
@@ -24,5 +26,11 @@
         /// <param name="objectType">Type of the object.</param>
         /// <returns>true if the WITSML Store supports the function for the specified object type, otherwise, false</returns>
         bool IsSupported(Functions function, string objectType);
+
+        /// <summary>
+        /// Validates the add to store configuration.
+        /// </summary>
+        /// <param name="options">The OptionsIn parameters.</param>
+        void ValidateAddToStoreConfiguration(Dictionary<string, string> options);
     }
 }

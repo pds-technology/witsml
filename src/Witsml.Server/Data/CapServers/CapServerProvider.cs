@@ -3,6 +3,7 @@ using System.Xml.Linq;
 using System.Xml.XPath;
 using Energistics.DataAccess;
 using log4net;
+using System.Collections.Generic;
 
 namespace PDS.Witsml.Server.Data.CapServers
 {
@@ -67,6 +68,8 @@ namespace PDS.Witsml.Server.Data.CapServers
 
             return supported;
         }
+
+        public abstract void ValidateAddToStoreConfiguration(Dictionary<string, string> options);
 
         /// <summary>
         /// Creates the capServers instance for a specific data schema version.

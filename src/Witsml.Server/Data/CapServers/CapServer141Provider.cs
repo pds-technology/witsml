@@ -3,6 +3,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using log4net;
 using Witsml141 = Energistics.DataAccess.WITSML141;
+using System.Reflection;
 
 namespace PDS.Witsml.Server.Data.CapServers
 {
@@ -15,6 +16,8 @@ namespace PDS.Witsml.Server.Data.CapServers
     public class CapServer141Provider : CapServerProvider<Witsml141.CapServers>
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(CapServer141Provider));
+        private Witsml141.CapServer _capServer;
+        private PropertyInfo[] PropertyInfo;
 
         /// <summary>
         /// Gets the data schema version.
@@ -31,6 +34,65 @@ namespace PDS.Witsml.Server.Data.CapServers
         /// <value>The collection of providers.</value>
         [ImportMany]
         public IEnumerable<IWitsml141Configuration> Providers { get; set; }
+
+        /// <summary>
+        /// Validates the add to store configuration parameters
+        /// </summary>
+        /// <param name="options">The options.</param>
+        /// <exception cref="WitsmlException">
+        /// </exception>
+        public override void ValidateAddToStoreConfiguration(Dictionary<string, string> options)
+        {
+            ValidateConfiguration(options);
+
+            PropertyInfo[] propertyInfo = GetPropertyInfo();         
+            foreach (KeyValuePair<string, string> entry in options)
+            {
+                string name = entry.Key;
+                switch (name)
+                {
+                    case "compressionMethod":
+                        {
+                            var property = PropertyInfo.Where(x => x.Name.Equals("CompressionMethod")).FirstOrDefault();
+                            string v = property.GetValue(_capServer) as string;
+                            if (string.IsNullOrWhiteSpace(v) && !string.IsNullOrWhiteSpace(entry.Value))
+                            {
+                                throw new WitsmlException(ErrorCodes.InvalidKeywordValue, ErrorCodes.InvalidKeywordValue.GetDescription());
+                            }
+                        }
+                        break;
+                    default:
+                        throw new WitsmlException(ErrorCodes.KeywordNotSupportedByFunction, name);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Validates the server support the capabilities.
+        /// </summary>
+        /// <param name="options">The options.</param>
+        /// <exception cref="WitsmlException"></exception>
+        private void ValidateConfiguration(Dictionary<string, string> options)
+        {
+            PropertyInfo[] propertyInfo = GetPropertyInfo();
+            foreach (KeyValuePair<string, string> entry in options)
+            {
+                var property = propertyInfo.Where(x => x.Name.Equals(entry.Key)).FirstOrDefault();
+                if (property == null)
+                    throw new WitsmlException(ErrorCodes.KeywordNotSupportedByServer, ErrorCodes.KeywordNotSupportedByServer.GetDescription());
+            }
+        }
+
+        private PropertyInfo[] GetPropertyInfo()
+        {
+            if (PropertyInfo == null)
+            {
+                if (_capServer == null)
+                    CreateCapServer();
+                PropertyInfo = _capServer.GetType().GetProperties();
+            }
+            return PropertyInfo;
+        }
 
         /// <summary>
         /// Creates the capServers instance for a specific data schema version.
@@ -59,6 +121,8 @@ namespace PDS.Witsml.Server.Data.CapServers
             capServer.Name = "PDS Witsml Server";
             capServer.Vendor = "PDS";
             capServer.Version = "1.0";
+
+            _capServer = capServer;
 
             return new Witsml141.CapServers()
             {

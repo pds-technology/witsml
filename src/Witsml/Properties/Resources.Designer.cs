@@ -133,6 +133,33 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The value specified with an OptionsIn keyword must be a recognized value for that keyword..
+        /// </summary>
+        internal static string InvalidKeywordValue {
+            get {
+                return ResourceManager.GetString("InvalidKeywordValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The OptionsIn value must be a recognized keyword for that function..
+        /// </summary>
+        internal static string KeywordNotSupportedByFunction {
+            get {
+                return ResourceManager.GetString("KeywordNotSupportedByFunction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A client must not specify an OptionsIn keyword that is not supported by the server..
+        /// </summary>
+        internal static string KeywordNotSupportedByServer {
+            get {
+                return ResourceManager.GetString("KeywordNotSupportedByServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to For WMLS_GetCap, the OptionsIn keyword ‘dataVersion’ must be specified..
         /// </summary>
         internal static string MissingDataVersion {
@@ -174,6 +201,16 @@ namespace PDS.Witsml.Properties {
         internal static string MissingWMLtypeIn {
             get {
                 return ResourceManager.GetString("MissingWMLtypeIn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The OptionsIn parameter string must be encoded utilizing a subset (semicolon separators and no
+        /// whitespace) of the encoding rules for HTML form content type application/x-www-form-urlencoded..
+        /// </summary>
+        internal static string ParametersNotEncodedByRules {
+            get {
+                return ResourceManager.GetString("ParametersNotEncodedByRules", resourceCulture);
             }
         }
         

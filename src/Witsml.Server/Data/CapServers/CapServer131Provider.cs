@@ -3,6 +3,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using log4net;
 using Witsml131 = Energistics.DataAccess.WITSML131;
+using System.Reflection;
 
 namespace PDS.Witsml.Server.Data.CapServers
 {
@@ -31,6 +32,10 @@ namespace PDS.Witsml.Server.Data.CapServers
         /// <value>The collection of providers.</value>
         [ImportMany]
         public IEnumerable<IWitsml131Configuration> Providers { get; set; }
+
+        public override void ValidateAddToStoreConfiguration(Dictionary<string, string> options)
+        {
+        }
 
         /// <summary>
         /// Creates the capServers instance for a specific data schema version.

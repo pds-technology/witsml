@@ -150,6 +150,7 @@ namespace PDS.Witsml.Server
 
                 ValidateObjectType(version, request.WMLtypeIn, ObjectTypes.GetObjectType(request.XMLin));
                 ValidateInputTemplate(request.XMLin);
+                _capServer[version].ValidateAddToStoreConfiguration(OptionsIn.Parse(request.OptionsIn));
 
                 var dataWriter = Container.Resolve<IWitsmlDataWriter>(new ObjectName(request.WMLtypeIn, version));
                 var result = dataWriter.AddToStore(request.WMLtypeIn, request.XMLin, request.OptionsIn, request.CapabilitiesIn);
