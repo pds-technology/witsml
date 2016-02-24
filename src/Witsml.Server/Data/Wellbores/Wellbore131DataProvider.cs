@@ -11,7 +11,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
     public class Wellbore131DataProvider : WitsmlDataProvider<WellboreList, Wellbore>
     {
         [ImportingConstructor]
-        public Wellbore131DataProvider(IWitsmlDataAdapter<Wellbore> dataAdapter) : base(dataAdapter)
+        public Wellbore131DataProvider(IWitsmlDataAdapter<Wellbore> dataAdapter) : base(dataAdapter, OptionsIn.DataVersion.Version131.Value)
         {
         }
 

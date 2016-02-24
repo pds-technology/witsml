@@ -11,7 +11,7 @@ namespace PDS.Witsml.Server.Data.Logs
     public class Log131DataProvider : WitsmlDataProvider<LogList, Log>
     {
         [ImportingConstructor]
-        public Log131DataProvider(IWitsmlDataAdapter<Log> dataAdapter) : base(dataAdapter)
+        public Log131DataProvider(IWitsmlDataAdapter<Log> dataAdapter) : base(dataAdapter, OptionsIn.DataVersion.Version131.Value)
         {
         }
 

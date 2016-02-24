@@ -36,9 +36,7 @@ namespace PDS.Witsml.Server
         /// <summary>
         /// Gets or sets the composition container used for dependency injection.
         /// </summary>
-        /// <value>
-        /// The composition container.
-        /// </value>
+        /// <value>The composition container.</value>
         [Import]
         public IContainer Container { get; set; }
 

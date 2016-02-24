@@ -17,14 +17,16 @@ namespace PDS.Witsml.Server.Data
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(WitsmlDataProvider<TList, TObject>));
         private readonly IWitsmlDataAdapter<TObject> _dataAdapter;
+        private readonly string _dataSchemaVersion;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WitsmlDataProvider{TList, TObject}"/> class.
         /// </summary>
         /// <param name="dataAdapter">The data adapter.</param>
-        protected WitsmlDataProvider(IWitsmlDataAdapter<TObject> dataAdapter)
+        protected WitsmlDataProvider(IWitsmlDataAdapter<TObject> dataAdapter, string dataSchemaVersion)
         {
             _dataAdapter = dataAdapter;
+            _dataSchemaVersion = dataSchemaVersion;
         }
 
         /// <summary>
@@ -63,8 +65,7 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         public virtual WitsmlResult AddToStore(string witsmlType, string xml, string options, string capabilities)
         {
-            var version = ObjectTypes.GetVersion(xml);
-            var capServerProvider = CapServerProviders.FirstOrDefault(x => x.DataSchemaVersion == version);
+            var capServerProvider = CapServerProviders.FirstOrDefault(x => x.DataSchemaVersion == _dataSchemaVersion);
             capServerProvider.Validate(Functions.AddToStore, witsmlType, xml, options, capabilities);
 
             var list = EnergisticsConverter.XmlToObject<TList>(xml);
