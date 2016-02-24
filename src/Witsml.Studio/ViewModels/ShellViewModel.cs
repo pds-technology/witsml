@@ -12,9 +12,6 @@ namespace PDS.Witsml.Studio.ViewModels
     {
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(ShellViewModel));
 
-        private string _breadcrumbText;
-        private string _statusBarText;
-
         /// <summary>
         /// Initializes an instance of the ShellViewModel
         /// </summary>
@@ -25,6 +22,8 @@ namespace PDS.Witsml.Studio.ViewModels
             DisplayName = "WITSML Studio";
             StatusBarText = "Ready.";
         }
+
+        private string _breadcrumbText;
 
         /// <summary>
         /// Gets or sets the breadcrumb path for the application shell
@@ -42,6 +41,8 @@ namespace PDS.Witsml.Studio.ViewModels
             }
         }
 
+        private string _statusBarText;
+
         /// <summary>
         /// Gets or sets the status bar text for the application shell
         /// </summary>
@@ -58,6 +59,25 @@ namespace PDS.Witsml.Studio.ViewModels
             }
         }
 
+        /// <summary>
+        /// Exits the application.
+        /// </summary>
+        public void Exit()
+        {
+            App.Current.Shutdown();
+        }
+
+        /// <summary>
+        /// Shows the About dialog for the application.
+        /// </summary>
+        public void About()
+        {
+            App.Current.ShowInfo("WITSML Studio v0.1");
+        }
+
+        /// <summary>
+        /// Loads the plug-ins.
+        /// </summary>
         internal void LoadPlugins()
         {
             Items.AddRange(Application.Current.Container()
@@ -72,12 +92,21 @@ namespace PDS.Witsml.Studio.ViewModels
             ActivateItem(Items.FirstOrDefault());
         }
 
+        /// <summary>
+        /// Called the first time the page's LayoutUpdated event fires after it is navigated to.
+        /// </summary>
+        /// <param name="view">The view attached to the current view model.</param>
         protected override void OnViewReady(object view)
         {
             base.OnViewReady(view);
             LoadPlugins();
         }
 
+        /// <summary>
+        /// Called by a subclass when an activation needs processing.
+        /// </summary>
+        /// <param name="item">The item on which activation was attempted.</param>
+        /// <param name="success">if set to <c>true</c> activation was successful.</param>
         protected override void OnActivationProcessed(IScreen item, bool success)
         {
             base.OnActivationProcessed(item, success);
