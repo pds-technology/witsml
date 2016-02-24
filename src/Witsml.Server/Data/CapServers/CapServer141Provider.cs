@@ -3,6 +3,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using log4net;
 using Witsml141 = Energistics.DataAccess.WITSML141;
+using System.Reflection;
 
 namespace PDS.Witsml.Server.Data.CapServers
 {
@@ -15,6 +16,8 @@ namespace PDS.Witsml.Server.Data.CapServers
     public class CapServer141Provider : CapServerProvider<Witsml141.CapServers>
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(CapServer141Provider));
+        private Witsml141.CapServer _capServer;
+        private PropertyInfo[] PropertyInfo;
 
         /// <summary>
         /// Gets the data schema version.
@@ -33,17 +36,85 @@ namespace PDS.Witsml.Server.Data.CapServers
         public IEnumerable<IWitsml141Configuration> Providers { get; set; }
 
         /// <summary>
-        /// Performs validation for the specified function and supplied parameters.
+        /// Validates the specified function.
         /// </summary>
-        /// <param name="function">The WITSML Store API function.</param>
-        /// <param name="witsmlType">The type of the data object.</param>
-        /// <param name="xml">The XML string for the data object.</param>
-        /// <param name="options">The options.</param>
-        /// <param name="capabilities">The client's capabilities object (capClient).</param>
-        public override void Validate(Functions function, string witsmlType, string xml, string options, string capabilities)
+        /// <param name="function">The function.</param>
+        /// <param name="witsmlType">Type of the witsml.</param>
+        /// <param name="xml">The XML.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <param name="capabilities">The capabilities.</param>
+        public override void Validate(Functions function, string witsmlType, string xml, string optionsIn, string capabilities)
         {
-            base.Validate(function, witsmlType, xml, options, capabilities);
-            //ValidateOptionsIn(function, options);
+            base.Validate(function, witsmlType, xml, optionsIn, capabilities);
+
+            Dictionary<string, string> options = OptionsIn.Parse(optionsIn);
+
+            // Validate options are supported
+            ValidateConfiguration(options);
+
+            // Validate options for AddToStore
+            if (Functions.AddToStore.Equals(function))
+            {
+                ValidateAddToStoreConfiguration(options);
+            }
+        }
+
+        /// <summary>
+        /// Validates the add to store configuration parameters
+        /// </summary>
+        /// <param name="options">The options.</param>
+        /// <exception cref="WitsmlException">
+        /// </exception>
+        private void ValidateAddToStoreConfiguration(Dictionary<string, string> options)
+        {
+            PropertyInfo[] propertyInfo = GetPropertyInfo();         
+            foreach (KeyValuePair<string, string> entry in options)
+            {
+                string name = entry.Key;
+                switch (name)
+                {
+                    case "compressionMethod":
+                        {
+                            var property = PropertyInfo.Where(x => x.Name.Equals("CompressionMethod")).FirstOrDefault();
+                            string v = property.GetValue(_capServer) as string;
+                            if (string.IsNullOrWhiteSpace(v) && !string.IsNullOrWhiteSpace(entry.Value))
+                            {
+                                throw new WitsmlException(ErrorCodes.InvalidKeywordValue, ErrorCodes.InvalidKeywordValue.GetDescription());
+                            }
+                        }
+                        break;
+                    default:
+                        throw new WitsmlException(ErrorCodes.KeywordNotSupportedByFunction, name);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Validates the server support the capabilities.
+        /// </summary>
+        /// <param name="options">The options.</param>
+        /// <exception cref="WitsmlException"></exception>
+        private void ValidateConfiguration(Dictionary<string, string> options)
+        {
+            PropertyInfo[] propertyInfo = GetPropertyInfo();
+            foreach (KeyValuePair<string, string> entry in options)
+            {
+                var name = char.ToUpper(entry.Key[0]) + entry.Key.Substring(1);
+                var property = propertyInfo.Where(x => x.Name.Equals(name)).FirstOrDefault();
+                if (property == null)
+                    throw new WitsmlException(ErrorCodes.KeywordNotSupportedByServer, ErrorCodes.KeywordNotSupportedByServer.GetDescription());
+            }
+        }
+
+        private PropertyInfo[] GetPropertyInfo()
+        {
+            if (PropertyInfo == null)
+            {
+                if (_capServer == null)
+                    CreateCapServer();
+                PropertyInfo = _capServer.GetType().GetProperties();
+            }
+            return PropertyInfo;
         }
 
         /// <summary>
@@ -73,6 +144,8 @@ namespace PDS.Witsml.Server.Data.CapServers
             capServer.Name = "PDS Witsml Server";
             capServer.Vendor = "PDS";
             capServer.Version = "1.0";
+
+            _capServer = capServer;
 
             return new Witsml141.CapServers()
             {

@@ -75,6 +75,7 @@
         /// -411 The OptionsIn parameter string must be encoded utilizing a subset (semicolon separators and no
         /// whitespace) of the encoding rules for HTML form content type application/x-www-form-urlencoded.
         /// </summary>
+        ParametersNotEncodedByRules = -411,
 
         /// <summary>
         /// -412 The result of an add, update, or delete operation must be compliant with the derived write schema after
@@ -210,14 +211,17 @@
         /// <summary>
         /// -440 The OptionsIn value must be a recognized keyword for that function.
         /// </summary>
+        KeywordNotSupportedByFunction = -440,
 
         /// <summary>
         /// -441 The value specified with an OptionsIn keyword must be a recognized value for that keyword.
         /// </summary>
+        InvalidKeywordValue = -441,
 
         /// <summary>
         /// -442 A client must not specify an OptionsIn keyword that is not supported by the server.
         /// </summary>
+        KeywordNotSupportedByServer = -442,
 
         /// <summary>
         /// -443 The value of the uom attribute is must match an ‘annotation’ attribute from the WITSML Units Dictionary
