@@ -5,6 +5,7 @@ using System.Windows;
 using Caliburn.Micro;
 using Newtonsoft.Json;
 using PDS.Witsml.Studio.Connections;
+using PDS.Witsml.Studio.Properties;
 
 namespace PDS.Witsml.Studio.ViewModels
 {
@@ -24,7 +25,6 @@ namespace PDS.Witsml.Studio.ViewModels
 
             ConnectionType = connectionType;
             DisplayName = string.Format("{0} Connection", ConnectionType.ToString().ToUpper());
-            //Connection = new Connection();
             CanTestConnection = true;
         }
 
@@ -103,17 +103,17 @@ namespace PDS.Witsml.Studio.ViewModels
         private void ShowTestResult(bool result)
         {
             if (result)
-                {
+            {
                 MessageBox.Show(Application.Current.MainWindow, "Connection successful", "Connection Status", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                else
-                {
-                    MessageBox.Show("Connection failed", "Connection Status", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+            }
+            else
+            {
+                MessageBox.Show("Connection failed", "Connection Status", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
 
             CanTestConnection = true;
         }
-    
+
 
         /// <summary>
         /// Accepts the edited connection
@@ -152,6 +152,7 @@ namespace PDS.Witsml.Studio.ViewModels
         /// </summary>
         internal void SaveConnectionFile(Connection connection)
         {
+            EnsureDataFolder();
             string filename = GetConnectionFilename();
             File.WriteAllText(filename, JsonConvert.SerializeObject(connection));
         }
@@ -162,7 +163,11 @@ namespace PDS.Witsml.Studio.ViewModels
         /// <returns>The path and filename for the connection file with format "[data-folder]/[connection-type]ConnectionData.json".</returns>
         internal string GetConnectionFilename()
         {
-            return string.Format("{0}/{1}ConnectionData.json", Environment.CurrentDirectory, ConnectionType.ToString());
+            return string.Format("{0}/{1}/{2}{3}", 
+                Environment.CurrentDirectory, 
+                Settings.Default.PersistedDataFolder, 
+                ConnectionType.ToString(), 
+                Settings.Default.ConnectionBaseFileName);
         }
 
         protected override void OnActivate()
@@ -176,6 +181,15 @@ namespace PDS.Witsml.Studio.ViewModels
             else
             {
                 _editItem = OpenConnectionFile() ?? new Connection();
+            }
+        }
+
+        private static void EnsureDataFolder()
+        {
+            var dataFolder = string.Format("{0}/{1}", Environment.CurrentDirectory, Settings.Default.PersistedDataFolder);
+            if (!Directory.Exists(dataFolder))
+            {
+                Directory.CreateDirectory(dataFolder);
             }
         }
     }

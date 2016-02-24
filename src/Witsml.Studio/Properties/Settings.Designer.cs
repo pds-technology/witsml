@@ -22,5 +22,23 @@ namespace PDS.Witsml.Studio.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data")]
+        public string PersistedDataFolder {
+            get {
+                return ((string)(this["PersistedDataFolder"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("ConnectionData.json")]
+        public string ConnectionBaseFileName {
+            get {
+                return ((string)(this["ConnectionBaseFileName"]));
+            }
+        }
     }
 }
