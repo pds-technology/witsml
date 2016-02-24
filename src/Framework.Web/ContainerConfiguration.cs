@@ -6,8 +6,15 @@ using System.Web.Mvc;
 
 namespace PDS.Framework.Web
 {
+    /// <summary>
+    /// Provides helper methods for configuring dependency injection for web applications.
+    /// </summary>
     public static class ContainerConfiguration
     {
+        /// <summary>
+        /// Registers a dependency resolver using the specified assembly path.
+        /// </summary>
+        /// <param name="assemblyPath">The assembly path.</param>
         public static void Register(string assemblyPath)
         {
             var container = ContainerFactory.Create(assemblyPath);
@@ -23,6 +30,11 @@ namespace PDS.Framework.Web
             ControllerBuilder.Current.SetControllerFactory(new ControllerFactory(container));
         }
 
+        /// <summary>
+        /// Maps the specified path relative to the current working directory.
+        /// </summary>
+        /// <param name="path">The relative path.</param>
+        /// <returns>The absolute path.</returns>
         public static string MapWorkingDirectory(string path)
         {
             if (HttpContext.Current == null)
