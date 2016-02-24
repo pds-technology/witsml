@@ -80,5 +80,22 @@ namespace PDS.Witsml.Studio.Connections
                 }
             }
         }
+
+        // TODO: Use AutoMapper (Task 4569)
+        public Connection Clone()
+        {
+            return MemberwiseClone() as Connection;
+        }
+
+        // TODO: Use AutoMapper (Task 4569)
+        public Connection Assign(Connection connection)
+        {
+            Name = connection.Name;
+            Uri = connection.Uri;
+            Username = connection.Username;
+            Password = connection.Password;
+
+            return this;
+        }
     }
 }

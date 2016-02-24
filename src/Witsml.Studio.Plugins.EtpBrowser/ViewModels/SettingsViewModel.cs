@@ -21,12 +21,12 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         {
             var viewModel = new ConnectionViewModel(ConnectionTypes.Etp)
             {
-                Connection = Model.Connection
+                DataItem = Model.Connection
             };
 
             if (App.Current.ShowDialog(viewModel))
             {
-                Model.Connection = viewModel.Connection;
+                Model.Connection = viewModel.DataItem;
 
                 ((MainViewModel)Parent).OnConnectionChanged();
             }
