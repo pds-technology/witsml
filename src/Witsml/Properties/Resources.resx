@@ -149,6 +149,18 @@
     <value>Error updating in data store</value>
     <comment>-1003</comment>
   </data>
+  <data name="InvalidKeywordValue" xml:space="preserve">
+    <value>The value specified with an OptionsIn keyword must be a recognized value for that keyword.</value>
+    <comment>-441</comment>
+  </data>
+  <data name="KeywordNotSupportedByFunction" xml:space="preserve">
+    <value>The OptionsIn value must be a recognized keyword for that function.</value>
+    <comment>-440</comment>
+  </data>
+  <data name="KeywordNotSupportedByServer" xml:space="preserve">
+    <value>A client must not specify an OptionsIn keyword that is not supported by the server.</value>
+    <comment>-442</comment>
+  </data>
   <data name="MissingDataVersion" xml:space="preserve">
     <value>For WMLS_GetCap, the OptionsIn keyword ‘dataVersion’ must be specified.</value>
     <comment>-424</comment>
@@ -168,6 +180,11 @@
   <data name="MissingWMLtypeIn" xml:space="preserve">
     <value>A non-empty value must be defined for WMLtypeIn.</value>
     <comment>-407</comment>
+  </data>
+  <data name="ParametersNotEncodedByRules" xml:space="preserve">
+    <value>The OptionsIn parameter string must be encoded utilizing a subset (semicolon separators and no
+ whitespace) of the encoding rules for HTML form content type application/x-www-form-urlencoded.</value>
+    <comment>-411</comment>
   </data>
   <data name="ParialSuccess" xml:space="preserve">
     <value>Partial success: Function completed successfully but some growing data-object data-nodes were not returned.</value>

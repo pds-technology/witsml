@@ -66,7 +66,14 @@ namespace PDS.Witsml.Server.Data
         public virtual WitsmlResult AddToStore(string witsmlType, string xml, string options, string capabilities)
         {
             var capServerProvider = CapServerProviders.FirstOrDefault(x => x.DataSchemaVersion == _dataSchemaVersion);
-            capServerProvider.Validate(Functions.AddToStore, witsmlType, xml, options, capabilities);
+            try
+            {
+                capServerProvider.Validate(Functions.AddToStore, witsmlType, xml, options, capabilities);
+            }
+            catch (WitsmlException ex)
+            {
+                return new WitsmlResult(ex.ErrorCode, ex.Message);
+            }
 
             var list = EnergisticsConverter.XmlToObject<TList>(xml);
             return _dataAdapter.Add(list.Items.Cast<TObject>().Single());
