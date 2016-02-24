@@ -26,9 +26,9 @@ namespace PDS.Witsml.Studio.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("Data")]
-        public string PersistedDataFolder {
+        public string PersistedDataFolderName {
             get {
-                return ((string)(this["PersistedDataFolder"]));
+                return ((string)(this["PersistedDataFolderName"]));
             }
         }
         
@@ -44,9 +44,9 @@ namespace PDS.Witsml.Studio.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("Plugins")]
-        public string PluginsFolder {
+        public string PluginsFolderName {
             get {
-                return ((string)(this["PluginsFolder"]));
+                return ((string)(this["PluginsFolderName"]));
             }
         }
     }

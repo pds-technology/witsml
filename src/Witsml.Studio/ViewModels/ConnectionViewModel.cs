@@ -15,8 +15,8 @@ namespace PDS.Witsml.Studio.ViewModels
     public class ConnectionViewModel : Screen
     {
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(ConnectionViewModel));
-        private readonly string PersistedDataFolderSetting = Settings.Default.PersistedDataFolder;
-        private readonly string ConnectionBaseFileNameSetting = Settings.Default.ConnectionBaseFileName;
+        private static readonly string PersistedDataFolderName = Settings.Default.PersistedDataFolderName;
+        private static readonly string ConnectionBaseFileName = Settings.Default.ConnectionBaseFileName;
 
         /// <summary>
         /// Initializes an instance of the ConnectionViewModel.
@@ -154,9 +154,9 @@ namespace PDS.Witsml.Studio.ViewModels
         {
             return string.Format("{0}/{1}/{2}{3}", 
                 Environment.CurrentDirectory, 
-                PersistedDataFolderSetting, 
+                PersistedDataFolderName, 
                 ConnectionType, 
-                ConnectionBaseFileNameSetting);
+                ConnectionBaseFileName);
         }
 
         /// <summary>
@@ -185,7 +185,7 @@ namespace PDS.Witsml.Studio.ViewModels
         /// </summary>
         private void EnsureDataFolder()
         {
-            var dataFolder = string.Format("{0}/{1}", Environment.CurrentDirectory, PersistedDataFolderSetting);
+            var dataFolder = string.Format("{0}/{1}", Environment.CurrentDirectory, PersistedDataFolderName);
             if (!Directory.Exists(dataFolder))
             {
                 Directory.CreateDirectory(dataFolder);

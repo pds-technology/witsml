@@ -18,7 +18,7 @@ namespace PDS.Witsml.Studio
     public class Bootstrapper : BootstrapperBase
     {
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(Bootstrapper));
-        private readonly string PluginsFolderSetting = Settings.Default.PluginsFolder;
+        private static readonly string PluginsFolderName = Settings.Default.PluginsFolderName;
 
         /// <summary>
         /// Initializes a new instance of the application Bootstrapper
@@ -77,11 +77,14 @@ namespace PDS.Witsml.Studio
         /// <returns>An IEnumerable of the Assemblies found in the Plugins folder</returns>
         protected override IEnumerable<Assembly> SelectAssemblies()
         {
-            var path = Path.Combine(Environment.CurrentDirectory, PluginsFolderSetting);
+            var path = Path.Combine(Environment.CurrentDirectory, PluginsFolderName);
             _log.DebugFormat("Bootstrapper Assembly Path: {0}", path);
 
+            // Ensure that the plugins folder exists so we don't get an error
+            Directory.CreateDirectory(path);
+
             IEnumerable<Assembly> assemblies = new[] { typeof(Bootstrapper).Assembly }
-                .Union((Directory.Exists(path) ? Directory.GetFiles(path, "*.dll") : new string[] { })
+                .Union(Directory.GetFiles(path, "*.dll")
                 .Select(x => Assembly.LoadFrom(x)));
 
             if (_log.IsDebugEnabled)
