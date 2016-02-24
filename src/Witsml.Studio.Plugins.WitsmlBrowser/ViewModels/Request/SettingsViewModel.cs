@@ -46,13 +46,13 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         {
             var viewModel = new ConnectionViewModel(ConnectionTypes.Witsml)
             {
-                Connection = Model.Connection,
+                DataItem = Model.Connection,
             };
 
 
             if (App.Current.ShowDialog(viewModel))
             {
-                Model.Connection = viewModel.Connection;
+                Model.Connection = viewModel.DataItem;
 
                 // TODO: Make connection and get version
                 GetVersions();

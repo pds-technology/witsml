@@ -63,13 +63,13 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
         {
             var viewModel = new ConnectionViewModel(ConnectionTypes.Witsml)
             {
-                Connection = Model.Connection
+                DataItem = Model.Connection
             };
 
 
             if (App.Current.ShowDialog(viewModel))
             {
-                Model.Connection = viewModel.Connection;
+                Model.Connection = viewModel.DataItem;
             }
         }
 
