@@ -26,9 +26,9 @@ namespace PDS.Witsml.Studio.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("Data")]
-        public string PersistedDataFolder {
+        public string PersistedDataFolderName {
             get {
-                return ((string)(this["PersistedDataFolder"]));
+                return ((string)(this["PersistedDataFolderName"]));
             }
         }
         
