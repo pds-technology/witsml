@@ -229,7 +229,10 @@ namespace PDS.Witsml.Server.Data
         {
             if (commonData == null)
             {
-                commonData = new CommonData();
+                commonData = new CommonData()
+                {
+                    DateTimeCreation = DateTime.UtcNow
+                };                
             }
 
             commonData.DateTimeLastChange = DateTime.UtcNow;
