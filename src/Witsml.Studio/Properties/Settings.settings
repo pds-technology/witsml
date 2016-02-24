@@ -8,5 +8,8 @@
     <Setting Name="ConnectionBaseFileName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">ConnectionData.json</Value>
     </Setting>
+    <Setting Name="PluginsFolder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Plugins</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

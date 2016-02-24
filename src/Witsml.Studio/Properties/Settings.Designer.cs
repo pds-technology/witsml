@@ -40,5 +40,14 @@ namespace PDS.Witsml.Studio.Properties {
                 return ((string)(this["ConnectionBaseFileName"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Plugins")]
+        public string PluginsFolder {
+            get {
+                return ((string)(this["PluginsFolder"]));
+            }
+        }
     }
 }
