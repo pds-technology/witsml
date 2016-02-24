@@ -61,7 +61,8 @@ namespace PDS.Witsml.Server.Data.CapServers
 
             return new Witsml131.CapServers()
             {
-                CapServer = capServer
+                CapServer = capServer,
+                Version = capServer.ApiVers
             };
         }
     }

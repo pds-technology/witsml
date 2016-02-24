@@ -7,7 +7,7 @@ using Witsml141 = Energistics.DataAccess.WITSML141;
 namespace PDS.Witsml.Server.Data.CapServers
 {
     /// <summary>
-    /// Provides common WTISML server capabilities for data schema version 1.4.1.1.
+    /// Provides common WITSML server capabilities for data schema version 1.4.1.1.
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.CapServers.CapServerProvider{Energistics.DataAccess.WITSML141.CapServers}" />
     [Export(typeof(ICapServerProvider))]
@@ -62,7 +62,8 @@ namespace PDS.Witsml.Server.Data.CapServers
 
             return new Witsml141.CapServers()
             {
-                CapServer = capServer
+                CapServer = capServer,
+                Version = capServer.ApiVers
             };
         }
     }
