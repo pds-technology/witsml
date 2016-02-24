@@ -103,18 +103,22 @@ namespace PDS.Witsml.Studio.ViewModels
             }
         }
 
-
         /// <summary>
-        /// Accepts the edited connection
+        /// Accepts the edited connection by assigning all changes 
+        /// from the EditItem to the DataItem and persisting the changes.
         /// </summary>
-        public void AcceptEdit()
+        public void Accept()
         {
             DataItem.Assign(EditItem);
             SaveConnectionFile(DataItem);
             TryClose(true);
         }
 
-        public void CancelEdit()
+        /// <summary>
+        /// Cancels the edited connection.  
+        /// Changes are not persisted or passed back to the caller.
+        /// </summary>
+        public void Cancel()
         {
             TryClose(false);
         }
