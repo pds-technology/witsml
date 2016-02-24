@@ -27,7 +27,7 @@ namespace PDS.Witsml.Server.Logging
                 return string.Empty;
 
             return string.Format(
-                "UserAgent: {1}",
+                "UserAgent: {0}",
                 context.IncomingRequest.UserAgent);
         }
 
