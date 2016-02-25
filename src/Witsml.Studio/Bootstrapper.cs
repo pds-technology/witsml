@@ -21,13 +21,17 @@ namespace PDS.Witsml.Studio
         private static readonly string PluginsFolderName = Settings.Default.PluginsFolderName;
 
         /// <summary>
-        /// Initializes a new instance of the application Bootstrapper
+        /// Initializes a new instance of the <see cref="Bootstrapper"/> class.
         /// </summary>
-        public Bootstrapper():this(true)
+        public Bootstrapper() : this(true)
         {
         }
 
-        public Bootstrapper(bool useApplication = true):base(useApplication)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Bootstrapper"/> class.
+        /// </summary>
+        /// <param name="useApplication">Set this to false when hosting Caliburn.Micro inside and Office or WinForms application. The default is true.</param>
+        public Bootstrapper(bool useApplication = true) : base(useApplication)
         {
             Initialize();
         }

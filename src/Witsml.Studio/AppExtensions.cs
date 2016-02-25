@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Windows;
-using AutoMapper;
 using Caliburn.Micro;
 using PDS.Framework;
-using PDS.Witsml.Studio.Connections;
 using PDS.Witsml.Studio.ViewModels;
 
 namespace PDS.Witsml.Studio
@@ -13,8 +11,6 @@ namespace PDS.Witsml.Studio
     /// </summary>
     public static class AppExtensions
     {
-        private static readonly IMapper _connectionMapper = new MapperConfiguration(cfg => cfg.CreateMap<Connection, Connection>()).CreateMapper();
-
         /// <summary>
         /// Provides a reference the application dependecy injection container
         /// </summary>
@@ -43,18 +39,6 @@ namespace PDS.Witsml.Studio
         public static IWindowManager WindowManager(this Application app)
         {
             return app.Container().Resolve<IWindowManager>();
-        }
-
-        /// <summary>
-        /// Maps a source Connection instance to a destination Connection instance.
-        /// </summary>
-        /// <param name="app">The reference to the application</param>
-        /// <param name="source">The source Connection instance.</param>
-        /// <param name="destination">The destination Connection instance.</param>
-        /// <returns>The descination Connection instance.</returns>
-        public static Connection MapConnection(this Application app, Connection source, Connection destination)
-        {
-            return _connectionMapper.Map(source, destination) as Connection;
         }
 
         /// <summary>

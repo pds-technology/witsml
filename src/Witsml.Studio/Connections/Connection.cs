@@ -9,6 +9,14 @@ namespace PDS.Witsml.Studio.Connections
     [DataContract]
     public class Connection : PropertyChangedBase
     {
+        /// <summary>
+        /// Initializes the <see cref="Connection"/> class.
+        /// </summary>
+        static Connection()
+        {
+            AutoMapper.Mapper.Initialize(x => x.CreateMap<Connection, Connection>());
+        }
+
         private string _name;
         /// <summary>
         /// Gets or sets the name of the connection
