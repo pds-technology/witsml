@@ -112,6 +112,74 @@ namespace PDS.Witsml.Studio
             Assert.AreEqual(_etpConnection, etpRead);
         }
 
+        [TestMethod]
+        public void TestInitialeEditItemNoDataItem()
+        {
+            var emptyConnection = new Connection();
+            _witsmlConnectionVm.InitializeEditItem();
+
+            Assert.AreEqual(emptyConnection, _witsmlConnectionVm.EditItem);
+        }
+
+        [TestMethod]
+        public void TestInitialeEditItemWithDataItem()
+        {
+            _witsmlConnectionVm.DataItem = _witsmlConnection;
+            _witsmlConnectionVm.InitializeEditItem();
+
+            Assert.AreEqual(_witsmlConnection, _witsmlConnectionVm.EditItem);
+        }
+
+        [TestMethod]
+        public void TestInitialeEditItemWithPersistedConnection()
+        {
+            _witsmlConnectionVm.SaveConnectionFile(_witsmlConnection);
+            _witsmlConnectionVm.InitializeEditItem();
+
+            Assert.AreEqual(_witsmlConnection, _witsmlConnectionVm.EditItem);
+        }
+
+        [TestMethod]
+        public void TestAcceptWithDataItem()
+        {
+            var newName = "xxx";
+
+            // Initialze the Edit Item by setting the DataItem
+            _witsmlConnectionVm.DataItem = _witsmlConnection;
+            _witsmlConnectionVm.InitializeEditItem();
+
+            // Make a change to the edit item
+            _witsmlConnectionVm.EditItem.Name = newName;
+
+            // Accept the changes
+            _witsmlConnectionVm.Accept();
+
+            // Test that the DataItem has the new name.
+            Assert.AreEqual(newName, _witsmlConnectionVm.DataItem.Name);
+        }
+
+        [TestMethod]
+        public void TestCancelWithDataItem()
+        {
+            var newName = "xxx";
+
+            // Initialze the Edit Item by setting the DataItem
+            _witsmlConnectionVm.DataItem = _witsmlConnection;
+            _witsmlConnectionVm.InitializeEditItem();
+
+            // Make a change to the edit item
+            _witsmlConnectionVm.EditItem.Name = newName;
+
+            // Accept the changes
+            _witsmlConnectionVm.Cancel();
+
+            // Test that the newName was not assigned
+            Assert.AreNotEqual(newName, _witsmlConnectionVm.DataItem.Name);
+
+            // Test that the Name is unchanged
+            Assert.AreEqual(_witsmlConnection.Name, _witsmlConnectionVm.DataItem.Name);
+        }
+
         private static void DeletePersistenceFolder()
         {
             var path = string.Format("{0}/{1}", Environment.CurrentDirectory, PersistedDataFolderName);

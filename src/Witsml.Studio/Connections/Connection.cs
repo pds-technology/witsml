@@ -104,10 +104,10 @@ namespace PDS.Witsml.Studio.Connections
             if (connection != null)
             {
                 return (
-                    Name.Equals(connection.Name) &&
-                    Uri.Equals(connection.Uri) &&
-                    Username.Equals(connection.Username) &&
-                    Password.Equals(connection.Password));
+                    Name == connection.Name &&
+                    Uri == connection.Uri &&
+                    Username == connection.Username &&
+                    Password == connection.Password);
             }
             return false;
         }

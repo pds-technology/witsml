@@ -4,6 +4,10 @@ using Energistics;
 
 namespace PDS.Witsml.Studio.Connections
 {
+    /// <summary>
+    /// Provides a connection test against an Ept Connection instance.
+    /// </summary>
+    /// <seealso cref="PDS.Witsml.Studio.Connections.IConnectionTest" />
     [Export("Etp", typeof(IConnectionTest))]
     public class EtpConnectionTest : IConnectionTest
     {

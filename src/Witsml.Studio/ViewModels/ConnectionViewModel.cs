@@ -109,6 +109,7 @@ namespace PDS.Witsml.Studio.ViewModels
         /// </summary>
         public void Accept()
         {
+            // TODO: Try to unit test
             Mapper.Map(EditItem, DataItem);
             SaveConnectionFile(DataItem);
             TryClose(true);
@@ -120,6 +121,7 @@ namespace PDS.Witsml.Studio.ViewModels
         /// </summary>
         public void Cancel()
         {
+            // TODO: Try to test
             TryClose(false);
         }
 
@@ -163,6 +165,18 @@ namespace PDS.Witsml.Studio.ViewModels
                 ConnectionBaseFileName);
         }
 
+        internal void InitializeEditItem()
+        {
+            if (DataItem != null && !string.IsNullOrWhiteSpace(DataItem.Uri))
+            {
+                EditItem = Mapper.Map(DataItem, new Connection());
+            }
+            else
+            {
+                EditItem = OpenConnectionFile() ?? new Connection();
+            }
+        }
+
         /// <summary>
         /// When the screen is activated the following initializations are done.
         ///     1) Clones the incoming DataItem, if provided, to the EditItem to use as a working copy.
@@ -174,14 +188,7 @@ namespace PDS.Witsml.Studio.ViewModels
         {
             base.OnActivate();
 
-            if (DataItem != null && !string.IsNullOrWhiteSpace(DataItem.Uri))
-            {
-                _editItem = Mapper.Map(DataItem, new Connection());
-            }
-            else
-            {
-                _editItem = OpenConnectionFile() ?? new Connection();
-            }
+            InitializeEditItem();
         }
 
         /// <summary>
