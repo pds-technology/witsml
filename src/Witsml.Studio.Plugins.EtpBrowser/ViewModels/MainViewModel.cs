@@ -181,14 +181,21 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         private void InitEtpClient()
         {
-            _client = new EtpClient(Model.Connection.Uri, "ETP Browser");
-            _client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();
+            try
+            {
+                _client = new EtpClient(Model.Connection.Uri, "ETP Browser");
+                _client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();
 
-            _client.Handler<ICoreClient>().OnOpenSession += OnOpenSession;
-            _client.Handler<IDiscoveryCustomer>().OnGetResourcesResponse += OnGetResourcesResponse;
+                _client.Handler<ICoreClient>().OnOpenSession += OnOpenSession;
+                _client.Handler<IDiscoveryCustomer>().OnGetResourcesResponse += OnGetResourcesResponse;
 
-            _client.Output = LogClientOutput;
-            _client.Open();
+                _client.Output = LogClientOutput;
+                _client.Open();
+            }
+            catch (Exception ex)
+            {
+                App.Current.ShowError("Error connecting to server.", ex);
+            }
         }
 
         /// <summary>
