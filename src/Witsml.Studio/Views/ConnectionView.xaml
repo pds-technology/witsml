@@ -40,7 +40,7 @@
         <TextBox Grid.Row="3" Grid.Column="1" Margin="5" Padding="5" Text="{Binding EditItem.Username}" VerticalAlignment="Center" />
         
         <TextBlock Grid.Row="4" Text="Password:" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Right" />
-        <TextBox Grid.Row="4" Grid.Column="1" Margin="5" Padding="5" Text="{Binding EditItem.Password}" VerticalAlignment="Center" />
+        <PasswordBox x:Name="ConnectionPassword" Grid.Row="4" Grid.Column="1" Margin="5" Padding="5" PasswordChar="*" VerticalAlignment="Center" cal:Message.Attach="[Event PasswordChanged] = [Action OnPasswordChanged($source)]" />
 
         <Button x:Name="TestConnection" Grid.Row="6" Grid.Column="0" Margin="5" Content="Test" Width="80" />
         <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Security;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Witsml.Studio.Connections;
 using PDS.Witsml.Studio.Properties;
@@ -34,16 +35,14 @@ namespace PDS.Witsml.Studio
             {
                 Name = "Witsml",
                 Uri = "http://localhost/Witsml.Web/WitsmlStore.svc",
-                Username = "WitsmlUser",
-                Password = "WitsmlPassword"
+                Username = "WitsmlUser"
             };
 
             _etpConnection = new Connection()
             {
                 Name = "Etp",
                 Uri = "ws://localhost/witsml.web/api/etp",
-                Username = "EtpUser",
-                Password = "EtpPassword"
+                Username = "EtpUser"
             };
 
             _witsmlConnectionVm = new ConnectionViewModel(ConnectionTypes.Witsml);
@@ -106,10 +105,10 @@ namespace PDS.Witsml.Studio
             _etpConnectionVm.SaveConnectionFile(_etpConnection);
 
             var witsmlRead = _witsmlConnectionVm.OpenConnectionFile();
-            Assert.AreEqual(_witsmlConnection, witsmlRead);
+            Assert.AreEqual(_witsmlConnection.Uri, witsmlRead.Uri);
 
             var etpRead = _etpConnectionVm.OpenConnectionFile();
-            Assert.AreEqual(_etpConnection, etpRead);
+            Assert.AreEqual(_etpConnection.Uri, etpRead.Uri);
         }
 
         [TestMethod]
@@ -118,7 +117,7 @@ namespace PDS.Witsml.Studio
             var emptyConnection = new Connection();
             _witsmlConnectionVm.InitializeEditItem();
 
-            Assert.AreEqual(emptyConnection, _witsmlConnectionVm.EditItem);
+            Assert.AreEqual(emptyConnection.Uri, _witsmlConnectionVm.EditItem.Uri);
         }
 
         [TestMethod]
@@ -127,7 +126,7 @@ namespace PDS.Witsml.Studio
             _witsmlConnectionVm.DataItem = _witsmlConnection;
             _witsmlConnectionVm.InitializeEditItem();
 
-            Assert.AreEqual(_witsmlConnection, _witsmlConnectionVm.EditItem);
+            Assert.AreEqual(_witsmlConnection.Uri, _witsmlConnectionVm.EditItem.Uri);
         }
 
         [TestMethod]
@@ -136,7 +135,7 @@ namespace PDS.Witsml.Studio
             _witsmlConnectionVm.SaveConnectionFile(_witsmlConnection);
             _witsmlConnectionVm.InitializeEditItem();
 
-            Assert.AreEqual(_witsmlConnection, _witsmlConnectionVm.EditItem);
+            Assert.AreEqual(_witsmlConnection.Uri, _witsmlConnectionVm.EditItem.Uri);
         }
 
         [TestMethod]

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using AutoMapper;
 using Caliburn.Micro;
 using Newtonsoft.Json;
@@ -101,6 +102,11 @@ namespace PDS.Witsml.Studio.ViewModels
                     await App.Current.Dispatcher.BeginInvoke(new Action<bool>(ShowTestResult), result);
                 });
             }
+        }
+
+        public void OnPasswordChanged(PasswordBox control)
+        {
+            EditItem.SecurePassword = control.SecurePassword;
         }
 
         /// <summary>
