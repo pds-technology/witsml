@@ -92,7 +92,7 @@ namespace PDS.Witsml.Server.Data.CapServers
         /// Gets the cached capServers instance or creates a new one.
         /// </summary>
         /// <returns>The capServers instance.</returns>
-        private T GetCapServer()
+        protected T GetCapServer()
         {
             if (_capServer != null)
             {
