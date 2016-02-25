@@ -5,12 +5,17 @@ using Energistics;
 namespace PDS.Witsml.Studio.Connections
 {
     /// <summary>
-    /// Provides a connection test against an Ept Connection instance.
+    /// Provides a connection test for an Ept Connection instance.
     /// </summary>
     /// <seealso cref="PDS.Witsml.Studio.Connections.IConnectionTest" />
     [Export("Etp", typeof(IConnectionTest))]
     public class EtpConnectionTest : IConnectionTest
     {
+        /// <summary>
+        /// Determines whether this Connection instance can connect to the specified connection Uri.
+        /// </summary>
+        /// <param name="connection">The connection instanace being tested.</param>
+        /// <returns>The boolean result from the asynchronous operation.</returns>
         public async Task<bool> CanConnect(Connection connection)
         {
             try

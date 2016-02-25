@@ -109,7 +109,6 @@ namespace PDS.Witsml.Studio.ViewModels
         /// </summary>
         public void Accept()
         {
-            // TODO: Try to unit test
             Mapper.Map(EditItem, DataItem);
             SaveConnectionFile(DataItem);
             TryClose(true);
@@ -121,7 +120,6 @@ namespace PDS.Witsml.Studio.ViewModels
         /// </summary>
         public void Cancel()
         {
-            // TODO: Try to test
             TryClose(false);
         }
 
@@ -165,6 +163,13 @@ namespace PDS.Witsml.Studio.ViewModels
                 ConnectionBaseFileName);
         }
 
+        /// <summary>
+        /// Initializes the EditItem property.
+        ///     1) Clones the incoming DataItem, if provided, to the EditItem to use as a working copy.
+        ///     2) If a DataItem was not provided the EditItem is set using the persisted connection
+        ///     data for the current connection type.
+        ///     3) If there is no persisted connection data then the EditItem is set to a blank connection.
+        /// </summary>
         internal void InitializeEditItem()
         {
             if (DataItem != null && !string.IsNullOrWhiteSpace(DataItem.Uri))
@@ -178,11 +183,7 @@ namespace PDS.Witsml.Studio.ViewModels
         }
 
         /// <summary>
-        /// When the screen is activated the following initializations are done.
-        ///     1) Clones the incoming DataItem, if provided, to the EditItem to use as a working copy.
-        ///     2) If a DataItem was not provided the EditItem is set using the persisted connection
-        ///     data for the current connection type.
-        ///     3) If there is no persisted connection data then the EditItem is set to a blank connection.
+        /// When the screen is activated the EditItem is initialized.
         /// </summary>
         protected override void OnActivate()
         {

@@ -8,7 +8,7 @@ namespace PDS.Witsml.Studio.Connections
     public interface IConnectionTest
     {
         /// <summary>
-        /// Determines whether this Connection instance can connect the specified connection Uri.
+        /// Determines whether this Connection instance can connect to the specified connection Uri.
         /// </summary>
         /// <param name="connection">The connection instanace being tested.</param>
         /// <returns>The boolean result from the asynchronous operation.</returns>
