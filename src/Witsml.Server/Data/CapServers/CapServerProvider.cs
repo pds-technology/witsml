@@ -78,8 +78,17 @@ namespace PDS.Witsml.Server.Data.CapServers
         /// <param name="capabilities">The client's capabilities object (capClient).</param>
         public virtual void Validate(Functions function, string witsmlType, string xml, string options, string capabilities)
         {
-            //ValidateRootElement(witsmlType, xml);
+            ValidateRootElement(witsmlType, xml);
             //ValidateChildElement(witsmlType, xml);
+        }
+
+        private void ValidateRootElement(string witsmlType, string xml)
+        {
+            var objectGroupType = ObjectTypes.GetObjectGroupType(xml);
+            bool a = string.Equals(objectGroupType.Substring(0, objectGroupType.Length - 1), witsmlType);
+            bool b = objectGroupType[objectGroupType.Length - 1].Equals('s');
+            if (!(string.Equals(objectGroupType.Substring(0, objectGroupType.Length - 1), witsmlType) && objectGroupType[objectGroupType.Length - 1].Equals('s')))
+                throw new WitsmlException(ErrorCodes.MissingPluralRootElement);
         }
 
         /// <summary>
