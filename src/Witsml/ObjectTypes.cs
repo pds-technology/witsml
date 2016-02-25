@@ -72,6 +72,24 @@ namespace PDS.Witsml
         }
 
         /// <summary>
+        /// Gets the type of the object group.
+        /// </summary>
+        /// <param name="xml">The XML.</param>
+        /// <returns>The WITSML data object group type, as a string.</returns>
+        public static string GetObjectGroupType(string xml)
+        {
+            try
+            {
+                var doc = XDocument.Parse(xml);
+                return doc.Root.Name.LocalName;
+            }
+            catch (Exception)
+            {
+                return Unknown;
+            }
+        }
+
+        /// <summary>
         /// Gets the data schema version.
         /// </summary>
         /// <param name="xml">The XML string.</param>
