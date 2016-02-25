@@ -20,6 +20,62 @@ namespace PDS.Witsml.Server
         }
 
         [TestMethod]
+        public void Can_get_version()
+        {
+            var request = new WMLS_GetVersionRequest();
+            var response = DevKit.Store.WMLS_GetVersion(request);
+
+            Assert.IsNotNull(response);
+            if (!string.IsNullOrEmpty(response.Result))
+            {
+                var versions = response.Result.Split(',');
+                Assert.IsNotNull(versions);
+                Assert.IsTrue(versions.Length > 0);
+                foreach (var version in versions)
+                    Assert.IsFalse(string.IsNullOrEmpty(version));
+            }
+        }
+
+        [TestMethod]
+        public void Version_order_oldest_first()
+        {
+            var request = new WMLS_GetVersionRequest();
+            var response = DevKit.Store.WMLS_GetVersion(request);
+
+            Assert.IsNotNull(response);
+            var ordered = true;
+            if (!string.IsNullOrEmpty(response.Result))
+            {
+                var versions = response.Result.Split(',');
+                Assert.IsNotNull(versions);
+                Assert.IsTrue(versions.Length > 0);
+                var version = versions[0];
+                Assert.IsFalse(string.IsNullOrEmpty(version));
+                for (var i = 1; i < versions.Length; i++)
+                {
+                    if (string.Compare(version, versions[i]) >= 0)
+                    {
+                        ordered = false;
+                        break;
+                    }
+                    version = versions[i];
+                }
+            }
+
+            Assert.IsTrue(ordered);
+        }
+
+        [TestMethod]
+        public void Can_get_cap_server()
+        {
+            var request = new WMLS_GetCapRequest { OptionsIn= "dataVersion=1.4.1.1" };
+            var response = DevKit.Store.WMLS_GetCap(request);
+
+            Assert.IsNotNull(response);
+            Assert.IsFalse(string.IsNullOrEmpty(response.CapabilitiesOut));
+        }
+
+        [TestMethod]
         public void Can_add_well_without_validation()
         {
             var well = new Well { Name = "Well-to-add-01" };
@@ -151,6 +207,19 @@ namespace PDS.Witsml.Server
         }
 
         [TestMethod]
+        public void Test_error_code_404_invalid_schema_version()
+        {
+            var client = new CapClient { ApiVers = "1.4.1.1", SchemaVersion = "1.4.1.1,1.3.1.1" };
+            var clients = new CapClients { Version = "1.4.1.1", CapClient = client };
+            var capabilitiesIn = EnergisticsConverter.ObjectToXml(clients);
+            var well = new Well { Name = "Well-to-add-invalid-schema-version" };
+            var response = DevKit.AddWell(well, capClient: capabilitiesIn);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.InvalidClientSchemaVersion, response.Result);
+        }
+
+        [TestMethod]
         public void Test_error_code_407_missing_witsml_object_type()
         {
             var well = new Well { Name = "Well-to-add-missing-witsml-type" };
@@ -203,6 +272,26 @@ namespace PDS.Witsml.Server
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.DataObjectNotSupported, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_423_unsupported_data_version()
+        {
+            var request = new WMLS_GetCapRequest { OptionsIn = "dataVersion=1.6.1.1" };
+            var response = DevKit.Store.WMLS_GetCap(request);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.DataVersionNotSupported, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_424_data_version_not_supplies()
+        {
+            var request = new WMLS_GetCapRequest();
+            var response = DevKit.Store.WMLS_GetCap(request);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingDataVersion, response.Result);
         }
 
         [TestMethod]
@@ -264,6 +353,19 @@ namespace PDS.Witsml.Server
         }
 
         [TestMethod]
+        public void Test_error_code_465_api_version_not_match()
+        {
+            var client = new CapClient { ApiVers = "1.3.1.1", SchemaVersion = "1.3.1.1" };
+            var clients = new CapClients { Version = "1.4.1.1", CapClient = client };
+            var capabilitiesIn = EnergisticsConverter.ObjectToXml(clients);
+            var well = new Well { Name = "Well-to-add-apiVers-not-match" };
+            var response = DevKit.AddWell(well, capClient: capabilitiesIn);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.ApiVersionNotMatch, response.Result);
+        }
+
+        [TestMethod]
         public void Test_error_code_466_non_conforming_capabilities_in()
         {
             var well = new Well { Name = "Well-to-add-invalid-capabilitiesIn" };
@@ -271,6 +373,19 @@ namespace PDS.Witsml.Server
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.CapabilitiesInNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_467_unsupported_data_schema_version()
+        {
+            var client = new CapClient { ApiVers = "1.4.1.1"};
+            var clients = new CapClients { Version = "1.4.x.y", CapClient = client };
+            var capabilitiesIn = EnergisticsConverter.ObjectToXml(clients);
+            var well = new Well { Name = "Well-to-add-unsupported-schema-version" };
+            var response = DevKit.AddWell(well, capClient: capabilitiesIn);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.ApiVersionNotSupported, response.Result);
         }
 
         [TestMethod]
@@ -287,6 +402,19 @@ namespace PDS.Witsml.Server
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_473_schema_version_not_match()
+        {
+            var client = new CapClient { ApiVers = "1.4.1.1", SchemaVersion = "1.3.1.1" };
+            var clients = new CapClients { Version = "1.4.1.1", CapClient = client };
+            var capabilitiesIn = EnergisticsConverter.ObjectToXml(clients);
+            var well = new Well { Name = "Well-to-add-schema-version-not-match" };
+            var response = DevKit.AddWell(well, capClient: capabilitiesIn);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.SchemaVersionNotMatch, response.Result);
         }
 
         [TestMethod]

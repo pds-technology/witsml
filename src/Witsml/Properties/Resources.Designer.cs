@@ -61,6 +61,24 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The capClient apiVers value must match the API schema version..
+        /// </summary>
+        internal static string ApiVersionNotMatch {
+            get {
+                return ResourceManager.GetString("ApiVersionNotMatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The server does not support the API Version provided by the client..
+        /// </summary>
+        internal static string ApiVersionNotSupported {
+            get {
+                return ResourceManager.GetString("ApiVersionNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The CapabilitiesIn XML MUST conform to the API capClient schema..
         /// </summary>
         internal static string CapabilitiesInNonConforming {
@@ -337,6 +355,15 @@ namespace PDS.Witsml.Properties {
         internal static string ParialSuccess {
             get {
                 return ResourceManager.GetString("ParialSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to For the capClient object, the values of schemaVersion must match the version attribute used in the plura data-objects..
+        /// </summary>
+        internal static string SchemaVersionNotMatch {
+            get {
+                return ResourceManager.GetString("SchemaVersionNotMatch", resourceCulture);
             }
         }
         

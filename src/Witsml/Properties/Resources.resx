@@ -226,6 +226,10 @@
     <value>A QueryIn template must include a version attribute in the plural data-object that defines the Data Schema Version of the data-object.</value>
     <comment>-468</comment>
   </data>
+  <data name="ApiVersionNotSupported" xml:space="preserve">
+    <value>The server does not support the API Version provided by the client.</value>
+    <comment>-467</comment>
+  </data>
   <data name="InvalidClientSchemaVersion" xml:space="preserve">
     <value>In the value of the capClient schemaVersion, the oldest Data Schema Version must be listed first, followed by the next oldest, etc.</value>
     <comment>-404</comment>
@@ -245,5 +249,13 @@
   <data name="MissingRequiredData" xml:space="preserve">
     <value>A mandatory write schema item is missing.</value>
     <comment>-484</comment>
+  </data>
+  <data name="ApiVersionNotMatch" xml:space="preserve">
+    <value>The capClient apiVers value must match the API schema version.</value>
+    <comment>-465</comment>
+  </data>
+  <data name="SchemaVersionNotMatch" xml:space="preserve">
+    <value>For the capClient object, the values of schemaVersion must match the version attribute used in the plura data-objects.</value>
+    <comment>-473</comment>
   </data>
 </root>
