@@ -65,5 +65,24 @@ namespace PDS.Witsml.Studio
                 Assert.AreEqual(expected[i], actual[i]);
             }
         }
+
+        [TestMethod]
+        public void TestShellStatus()
+        {
+            var viewModel = new ShellViewModel();
+            viewModel.LoadPlugins();
+
+            Assert.AreEqual("Ready.", viewModel.StatusBarText);
+        }
+
+        [TestMethod]
+        public void TestShellBreadcrumb()
+        {
+            var viewModel = new ShellViewModel();
+            viewModel.LoadPlugins();
+           
+            // Test that the Shell breadcrumb is the same as the first plugin
+            Assert.AreEqual(viewModel.Items[0].DisplayName, viewModel.BreadcrumbText);
+        }
     }
 }

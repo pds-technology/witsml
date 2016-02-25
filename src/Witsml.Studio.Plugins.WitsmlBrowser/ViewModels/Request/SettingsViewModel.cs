@@ -54,7 +54,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             {
                 Model.Connection = viewModel.DataItem;
 
-                // TODO: Make connection and get version
+                // Make connection and get version
                 GetVersions();
 
                 // TODO: GetCap
