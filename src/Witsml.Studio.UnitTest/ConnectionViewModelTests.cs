@@ -116,16 +116,16 @@ namespace PDS.Witsml.Studio
         {
             var path = string.Format("{0}/{1}", Environment.CurrentDirectory, PersistedDataFolderName);
 
-            // Delete all files in the Persistence Folder
-            DirectoryInfo di = new DirectoryInfo(path);
-            foreach (FileInfo file in di.GetFiles())
-            {
-                file.Delete();
-            }
-
             // Delete the Persistence Folder
             if (Directory.Exists(path))
             {
+                // Delete all files in the Persistence Folder
+                DirectoryInfo di = new DirectoryInfo(path);
+                foreach (FileInfo file in di.GetFiles())
+                {
+                    file.Delete();
+                }
+
                 Directory.Delete(path);
             }
         }
