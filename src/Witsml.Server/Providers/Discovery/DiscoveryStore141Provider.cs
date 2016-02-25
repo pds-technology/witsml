@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Energistics.Common;
 using Energistics.DataAccess.WITSML141;
@@ -10,15 +9,22 @@ using PDS.Witsml.Server.Data;
 
 namespace PDS.Witsml.Server.Providers.Discovery
 {
-    [Export(typeof(IDiscoveryStore))]
+    /// <summary>
+    /// Provides information about resources available in a WITSML store for version 1.4.1.1.
+    /// </summary>
+    /// <seealso cref="PDS.Witsml.Server.Providers.Discovery.IDiscoveryStoreProvider" />
+    [Export(typeof(IDiscoveryStoreProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class DiscoveryStore141Provider : DiscoveryStoreHandler
+    public class DiscoveryStore141Provider : IDiscoveryStoreProvider
     {
-        private const string RootUri = "/";
-
         private readonly IEtpDataAdapter<Well> _wellDataAdapter;
         private readonly IEtpDataAdapter<Wellbore> _wellboreDataAdapter;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DiscoveryStore141Provider"/> class.
+        /// </summary>
+        /// <param name="wellDataAdapter">The well data adapter.</param>
+        /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
         [ImportingConstructor]
         public DiscoveryStore141Provider(
             IEtpDataAdapter<Well> wellDataAdapter,
@@ -28,16 +34,30 @@ namespace PDS.Witsml.Server.Providers.Discovery
             _wellboreDataAdapter = wellboreDataAdapter;
         }
 
-        protected override void HandleGetResources(ProtocolEventArgs<GetResources, IList<Resource>> args)
+        /// <summary>
+        /// Gets the data schema version supported by the provider.
+        /// </summary>
+        /// <value>The data schema version.</value>
+        public string DataSchemaVersion
         {
-            if (RootUri.Equals(args.Message.Uri))
+            get { return OptionsIn.DataVersion.Version141.Value; }
+        }
+
+        /// <summary>
+        /// Gets a collection of resources associated to the specified URI.
+        /// </summary>
+        /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList{Resource}}"/> instance containing the event data.</param>
+        public void GetResources(ProtocolEventArgs<GetResources, IList<Resource>> args)
+        {
+            if (DiscoveryStoreProvider.RootUri.Equals(args.Message.Uri))
             {
-                args.Context.Add(New(
-                    uri: UriFormats.Witsml141.Root,
-                    contentType: ContentTypes.Witsml141,
-                    resourceType: ResourceTypes.UriProtocol,
-                    name: "WITSML Store (1.4.1.1)",
-                    count: -1));
+                args.Context.Add(
+                    DiscoveryStoreProvider.New(
+                        uri: UriFormats.Witsml141.Root,
+                        contentType: ContentTypes.Witsml141,
+                        resourceType: ResourceTypes.UriProtocol,
+                        name: "WITSML Store (1.4.1.1)",
+                        count: -1));
             }
             else if (args.Message.Uri == UriFormats.Witsml141.Root)
             {
@@ -53,41 +73,22 @@ namespace PDS.Witsml.Server.Providers.Discovery
 
         private Resource ToResource(Well entity)
         {
-            return New(
+            return DiscoveryStoreProvider.New(
                 uri: string.Format(UriFormats.Witsml141.Well, entity.Uid),
                 resourceType: ResourceTypes.DataObject,
-                contentType: ContentTypes.Witsml141 + "type=obj_Well",
+                contentType: ContentTypes.Witsml141 + "type=" + ObjectTypes.Well,
                 name: entity.Name,
                 count: -1);
         }
 
         private Resource ToResource(Wellbore entity)
         {
-            return New(
+            return DiscoveryStoreProvider.New(
                 uri: string.Format(UriFormats.Witsml141.Wellbore, entity.UidWell, entity.Uid),
                 resourceType: ResourceTypes.DataObject,
-                contentType: ContentTypes.Witsml141 + "type=obj_Wellbore",
+                contentType: ContentTypes.Witsml141 + "type=" + ObjectTypes.Wellbore,
                 name: entity.Name,
                 count: -1);
-        }
-
-        private Resource New(string uri, ResourceTypes resourceType, string contentType, string name, int count = 0)
-        {
-            return new Resource()
-            {
-                Uuid = Guid.NewGuid().ToString(),
-                Uri = uri,
-                Name = name,
-                HasChildren = count,
-                ContentType = contentType,
-                ResourceType = resourceType.ToString(),
-                CustomData = new Dictionary<string, string>(),
-                LastChanged = new Energistics.Datatypes.DateTime()
-                {
-                    Offset = 0,
-                    Time = 0
-                }
-            };
         }
     }
 }

@@ -3,8 +3,16 @@ using System.Linq;
 
 namespace PDS.Witsml
 {
+    /// <summary>
+    /// Defines the set of well known configuration options that can be used 
+    /// when requesting information from a WITSML store.
+    /// </summary>
     public class OptionsIn
     {
+        /// <summary>
+        /// Defines the list of supported data schema versions.
+        /// </summary>
+        /// <seealso cref="PDS.Witsml.OptionsIn" />
         public class DataVersion : OptionsIn
         {
             public DataVersion(string value) : base(Keyword, value) { }
@@ -13,8 +21,13 @@ namespace PDS.Witsml
 
             public static readonly DataVersion Version131 = new DataVersion("1.3.1.1");
             public static readonly DataVersion Version141 = new DataVersion("1.4.1.1");
+            public static readonly DataVersion Version200 = new DataVersion("2.0");
         }
 
+        /// <summary>
+        /// Defines the list of returnElements configuration option values.
+        /// </summary>
+        /// <seealso cref="PDS.Witsml.OptionsIn" />
         public class ReturnElements : OptionsIn
         {
             public ReturnElements(string value) : base(Keyword, value) { }
@@ -29,6 +42,10 @@ namespace PDS.Witsml
             public static readonly ReturnElements LatestChangeOnly = new ReturnElements("latest-change-only");
             public static readonly ReturnElements Requested = new ReturnElements("requested");
 
+            /// <summary>
+            /// Gets a collection of returnElements option values.
+            /// </summary>
+            /// <returns>A collection of all returnElements option values.</returns>
             public static IEnumerable<ReturnElements> GetValues()
             {
                 yield return All;
@@ -41,21 +58,43 @@ namespace PDS.Witsml
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OptionsIn"/> class.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="value">The value.</param>
         public OptionsIn(string key, string value)
         {
             Key = key;
             Value = value;
         }
 
+        /// <summary>
+        /// Gets the option's key.
+        /// </summary>
+        /// <value>The option key.</value>
         public string Key { get; private set; }
 
+        /// <summary>
+        /// Gets the option's value.
+        /// </summary>
+        /// <value>The option value.</value>
         public string Value { get; private set; }
 
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>A <see cref="System.String" /> that represents this instance.</returns>
         public override string ToString()
         {
             return string.Format("{0}={1}", Key, Value);
         }
 
+        /// <summary>
+        /// Parses the specified options.
+        /// </summary>
+        /// <param name="options">The options.</param>
+        /// <returns>A collection of name-value pairs.</returns>
         public static Dictionary<string, string> Parse(string options)
         {
             if (string.IsNullOrWhiteSpace(options))
@@ -68,6 +107,12 @@ namespace PDS.Witsml
                 .ToDictionary(x => x.First(), x => x.Last());
         }
 
+        /// <summary>
+        /// Gets the value for the specified option.
+        /// </summary>
+        /// <param name="options">The options.</param>
+        /// <param name="defaultValue">The default value.</param>
+        /// <returns>The option value, if specified; otherwise, the default value.</returns>
         public static string GetValue(Dictionary<string, string> options, OptionsIn defaultValue)
         {
             string value;
@@ -78,6 +123,11 @@ namespace PDS.Witsml
             return value;
         }
 
+        /// <summary>
+        /// Performs an implicit conversion from <see cref="OptionsIn"/> to <see cref="Dictionary{System.String, System.String}"/>.
+        /// </summary>
+        /// <param name="option">The option.</param>
+        /// <returns>The result of the conversion.</returns>
         public static implicit operator Dictionary<string, string>(OptionsIn option)
         {
             return new Dictionary<string, string>()

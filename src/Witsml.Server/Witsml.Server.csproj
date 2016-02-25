@@ -99,6 +99,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="Providers\Discovery\DiscoveryStore141Provider.cs" />
+    <Compile Include="Providers\Discovery\DiscoveryStore200Provider.cs" />
+    <Compile Include="Providers\Discovery\DiscoveryStoreProvider.cs" />
+    <Compile Include="Providers\Discovery\IDiscoveryStoreProvider.cs" />
     <Compile Include="WitsmlExtensions.cs" />
     <Compile Include="WitsmlResult.cs" />
     <Compile Include="WitsmlStore.cs" />
