@@ -1,5 +1,8 @@
 ﻿namespace PDS.Witsml
 {
+    /// <summary>
+    /// An enumeration of WITSML error codes.
+    /// </summary>
     public enum ErrorCodes : short
     {
         // TODO: finish defining enum members
@@ -342,9 +345,9 @@
         /// </summary>
 
         /// <summary>
-        /// -468 A QueryIn template must include a version attribute in the plural data-object that defines the Data
-        /// Schema Version of the data-object.
+        /// -468 A QueryIn template must include a version attribute in the plural data-object that defines the Data Schema Version of the data-object.
         /// </summary>
+        MissingDataSchemaVersion = -468,
 
         /// <summary>
         /// -469 The query template is does not conform to the data schema for this data-object.

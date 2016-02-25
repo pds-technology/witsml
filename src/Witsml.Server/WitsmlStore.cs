@@ -110,6 +110,7 @@ namespace PDS.Witsml.Server
                 _log.Debug(request.ToLogMessage());
 
                 ValidateUserAgent(WebOperationContext.Current);
+                ValidateDataSchemaVersion(version);
                 ValidateInputTemplate(request.QueryIn);
                 ValidateObjectType(request.WMLtypeIn);
 
@@ -159,6 +160,7 @@ namespace PDS.Witsml.Server
                 _log.Debug(request.ToLogMessage());
 
                 ValidateUserAgent(WebOperationContext.Current);
+                ValidateDataSchemaVersion(version);
                 ValidateInputTemplate(request.XMLin);
                 ValidateObjectType(version, request.WMLtypeIn, ObjectTypes.GetObjectType(request.XMLin));
 
@@ -196,6 +198,7 @@ namespace PDS.Witsml.Server
                 _log.DebugFormat("Type: {0}; Options: {1}; XML:{3}{2}{3}", request.WMLtypeIn, request.OptionsIn, request.XMLin, Environment.NewLine);
 
                 ValidateUserAgent(WebOperationContext.Current);
+                ValidateDataSchemaVersion(version);
                 ValidateInputTemplate(request.XMLin);
                 ValidateObjectType(request.WMLtypeIn);
 
@@ -226,6 +229,7 @@ namespace PDS.Witsml.Server
                 _log.DebugFormat("Type: {0}; Options: {1}; Query:{3}{2}{3}", request.WMLtypeIn, request.OptionsIn, request.QueryIn, Environment.NewLine);
 
                 ValidateUserAgent(WebOperationContext.Current);
+                ValidateDataSchemaVersion(version);
                 ValidateInputTemplate(request.QueryIn);
                 ValidateObjectType(request.WMLtypeIn);
 
@@ -285,6 +289,19 @@ namespace PDS.Witsml.Server
             if (context != null && context.IncomingRequest != null && string.IsNullOrWhiteSpace(context.IncomingRequest.UserAgent))
             {
                 throw new WitsmlException(ErrorCodes.MissingClientUserAgent);
+            }
+        }
+
+        /// <summary>
+        /// Validates the required data schema version has been specified.
+        /// </summary>
+        /// <param name="version">The version.</param>
+        /// <exception cref="WitsmlException"></exception>
+        private void ValidateDataSchemaVersion(string version)
+        {
+            if (string.IsNullOrWhiteSpace(version))
+            {
+                throw new WitsmlException(ErrorCodes.MissingDataSchemaVersion);
             }
         }
 
