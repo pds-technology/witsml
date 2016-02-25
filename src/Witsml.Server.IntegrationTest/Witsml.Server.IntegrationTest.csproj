@@ -69,8 +69,6 @@
     <Compile Include="DevKit141Aspect.cs" />
     <Compile Include="DevKit200Aspect.cs" />
     <Compile Include="DevKitAspect.cs" />
-    <Compile Include="Data\ValidationTests.cs" />
-    <Compile Include="TestDatabaseProvider.cs" />
     <Compile Include="WitsmlStore131ProxyTests.cs" />
     <Compile Include="WitsmlStore141ProxyTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

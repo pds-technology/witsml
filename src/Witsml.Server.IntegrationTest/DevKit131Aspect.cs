@@ -9,7 +9,7 @@ namespace PDS.Witsml.Server
 {
     public class DevKit131Aspect : DevKitAspect
     {
-        public DevKit131Aspect(string url) : base(url, WMLSVersion.WITSML131)
+        public DevKit131Aspect(string url = null) : base(url, WMLSVersion.WITSML131)
         {
         }
 

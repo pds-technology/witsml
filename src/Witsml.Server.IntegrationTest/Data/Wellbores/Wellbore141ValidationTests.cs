@@ -15,7 +15,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestInitialize]
         public void TestSetUp()
         {
-            DevKit = new DevKit141Aspect(null);
+            DevKit = new DevKit141Aspect();
         }
 
         [TestCleanup]

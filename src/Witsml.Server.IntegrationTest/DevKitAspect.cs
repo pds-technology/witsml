@@ -9,7 +9,6 @@ namespace PDS.Witsml.Server
     {
         public readonly string TimestampFormat = "yyMMdd-HHmmss-fff";
         public readonly string TimeZone = "-06:00";
-        public WitsmlStore Store;
 
         public DevKitAspect(string url, WMLSVersion version)
         {
@@ -20,6 +19,8 @@ namespace PDS.Witsml.Server
         }
 
         public WITSMLWebServiceConnection Proxy { get; private set; }
+
+        public WitsmlStore Store { get; private set; }
 
         public abstract string DataSchemaVersion { get; }
 
@@ -67,6 +68,41 @@ namespace PDS.Witsml.Server
             var instance = Activator.CreateInstance<T>();
             action(instance);
             return List(instance);
+        }
+
+        public WMLS_AddToStoreResponse Add<TList, TObject>(TObject entity, string wmlTypeIn = null, string capClient = null, string optionsIn = null) where TList : IEnergisticsCollection
+        {
+            var info = typeof(TList).GetProperty(typeof(TObject).Name);
+            var list = New<TList>(x => info.SetValue(x, List(entity)));
+            var typeIn = wmlTypeIn ?? ObjectTypes.GetObjectType<TList>();
+            var xmlIn = EnergisticsConverter.ObjectToXml(list);
+
+            return AddToStore(typeIn, xmlIn, capClient, optionsIn);
+        }
+
+        public List<TObject> Query<TList, TObject>(TObject entity, string wmlTypeIn = null, string capClient = null, string optionsIn = null) where TList : IEnergisticsCollection
+        {
+            var info = typeof(TList).GetProperty(typeof(TObject).Name);
+            var list = New<TList>(x => info.SetValue(x, List(entity)));
+            var typeIn = wmlTypeIn ?? ObjectTypes.GetObjectType<TList>();
+            var queryIn = EnergisticsConverter.ObjectToXml(list);
+
+            var response = GetFromStore(typeIn, queryIn, capClient, optionsIn);
+            var results = EnergisticsConverter.XmlToObject<TList>(response.XMLout);
+
+            return (List<TObject>)results.Items;
+        }
+
+        public WMLS_AddToStoreResponse AddToStore(string wmlTypeIn, string xmlIn, string capClient, string optionsIn)
+        {
+            var request = new WMLS_AddToStoreRequest { WMLtypeIn = wmlTypeIn, XMLin = xmlIn, CapabilitiesIn = capClient, OptionsIn = optionsIn };
+            return Store.WMLS_AddToStore(request);
+        }
+
+        public WMLS_GetFromStoreResponse GetFromStore(string wmlTypeIn, string queryIn, string capClient, string optionsIn)
+        {
+            var request = new WMLS_GetFromStoreRequest { WMLtypeIn = wmlTypeIn, QueryIn = queryIn, CapabilitiesIn = capClient, OptionsIn = optionsIn };
+            return Store.WMLS_GetFromStore(request);
         }
     }
 }

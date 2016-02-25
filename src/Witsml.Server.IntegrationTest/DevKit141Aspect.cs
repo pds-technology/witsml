@@ -10,7 +10,7 @@ namespace PDS.Witsml.Server
 {
     public class DevKit141Aspect : DevKitAspect
     {
-        public DevKit141Aspect(string url) : base(url, WMLSVersion.WITSML141)
+        public DevKit141Aspect(string url = null) : base(url, WMLSVersion.WITSML141)
         {
         }
 
@@ -137,18 +137,6 @@ namespace PDS.Witsml.Server
             var wellbores = new WellboreList { Wellbore = List(wellbore) };
             var xmlIn = EnergisticsConverter.ObjectToXml(wellbores);
             return AddToStore(wmlTypeIn, xmlIn, capClient, optionsIn);
-        }
-
-        public WMLS_AddToStoreResponse AddToStore(string wmlTypeIn, string xmlIn, string capClient, string optionsIn)
-        {
-            var request = new WMLS_AddToStoreRequest { WMLtypeIn = wmlTypeIn, XMLin = xmlIn, CapabilitiesIn = capClient, OptionsIn = optionsIn };
-            return Store.WMLS_AddToStore(request);
-        }
-
-        public WMLS_GetFromStoreResponse GetFromStore(string wmlTypeIn, string queryIn, string capClient, string optionsIn)
-        {
-            var request = new WMLS_GetFromStoreRequest { WMLtypeIn = wmlTypeIn, QueryIn = queryIn, CapabilitiesIn = capClient, OptionsIn = optionsIn };
-            return Store.WMLS_GetFromStore(request);
         }
     }
 }

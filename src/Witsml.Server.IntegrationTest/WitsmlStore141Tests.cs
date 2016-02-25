@@ -12,7 +12,7 @@ namespace PDS.Witsml.Server
     [TestClass]
     public class WitsmlStore141Tests
     {
-        private static readonly DevKit141Aspect DevKit = new DevKit141Aspect(null);
+        private static readonly DevKit141Aspect DevKit = new DevKit141Aspect();
 
         [TestInitialize]
         public void TestSetUp()
@@ -116,7 +116,7 @@ namespace PDS.Witsml.Server
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            var dbProvider = new TestDatabaseProvider(new MongoDbClassMapper(), string.Empty);
+            var dbProvider = new DatabaseProvider(new MongoDbClassMapper(), string.Empty);
             var wellboreAdapter = new Wellbore141DataAdapter(dbProvider);
             wellboreAdapter.Container = ContainerFactory.Create();
 
