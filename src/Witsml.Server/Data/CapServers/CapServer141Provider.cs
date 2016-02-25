@@ -4,6 +4,7 @@ using System.Linq;
 using log4net;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using System.Reflection;
+using System;
 
 namespace PDS.Witsml.Server.Data.CapServers
 {
@@ -16,7 +17,6 @@ namespace PDS.Witsml.Server.Data.CapServers
     public class CapServer141Provider : CapServerProvider<Witsml141.CapServers>
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(CapServer141Provider));
-        private Witsml141.CapServer _capServer;
         private PropertyInfo[] PropertyInfo;
 
         /// <summary>
@@ -49,60 +49,48 @@ namespace PDS.Witsml.Server.Data.CapServers
 
             Dictionary<string, string> options = OptionsIn.Parse(optionsIn);
 
-            // Validate options are supported
-            ValidateConfiguration(options);
-
             // Validate options for AddToStore
             if (Functions.AddToStore.Equals(function))
             {
-                ValidateAddToStoreConfiguration(options);
+                ValidateKeywords(options, "compressionMethod");
+                ValidateCompressionMethod(options);
             }
         }
 
         /// <summary>
-        /// Validates the add to store configuration parameters
+        /// Validates the options are supported.
         /// </summary>
         /// <param name="options">The options.</param>
-        /// <exception cref="WitsmlException">
-        /// </exception>
-        private void ValidateAddToStoreConfiguration(Dictionary<string, string> options)
-        {
-            PropertyInfo[] propertyInfo = GetPropertyInfo();         
-            foreach (KeyValuePair<string, string> entry in options)
-            {
-                string name = entry.Key;
-                switch (name)
-                {
-                    case "compressionMethod":
-                        {
-                            var property = PropertyInfo.Where(x => x.Name.Equals("CompressionMethod")).FirstOrDefault();
-                            string v = property.GetValue(_capServer) as string;
-                            if (string.IsNullOrWhiteSpace(v) && !string.IsNullOrWhiteSpace(entry.Value))
-                            {
-                                throw new WitsmlException(ErrorCodes.InvalidKeywordValue, ErrorCodes.InvalidKeywordValue.GetDescription());
-                            }
-                        }
-                        break;
-                    default:
-                        throw new WitsmlException(ErrorCodes.KeywordNotSupportedByFunction, name);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Validates the server support the capabilities.
-        /// </summary>
-        /// <param name="options">The options.</param>
+        /// <param name="keywords">The supported keywords.</param>
         /// <exception cref="WitsmlException"></exception>
-        private void ValidateConfiguration(Dictionary<string, string> options)
+        private void ValidateKeywords(Dictionary<string, string> options, params string[] keywords)
         {
-            PropertyInfo[] propertyInfo = GetPropertyInfo();
-            foreach (KeyValuePair<string, string> entry in options)
+            foreach (var option in options.Where(x => !keywords.Contains(x.Key)))
             {
-                var name = char.ToUpper(entry.Key[0]) + entry.Key.Substring(1);
-                var property = propertyInfo.Where(x => x.Name.Equals(name)).FirstOrDefault();
-                if (property == null)
-                    throw new WitsmlException(ErrorCodes.KeywordNotSupportedByServer, ErrorCodes.KeywordNotSupportedByServer.GetDescription());
+                throw new WitsmlException(ErrorCodes.KeywordNotSupportedByFunction, "Option not supported: " + option.Key);
+            }
+        }
+
+        private void ValidateCompressionMethod(Dictionary<string, string> options)
+        {
+            string optionKey = "compressionMethod";
+            string value;
+            if (!options.TryGetValue(optionKey, out value))
+                return;
+
+            // Validate compression method
+            string optionValue = value.ToLower();
+            if (!optionValue.Equals("none") && !optionValue.Equals("gzip"))
+            {
+                throw new WitsmlException(ErrorCodes.InvalidKeywordValue);
+            }
+
+            // Validate method is supported
+            var property = GetPropertyInfo().Where(x => x.Name.Equals(optionKey, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+            string propertyValue = property.GetValue(GetCapServer().CapServer) as string;
+            if (propertyValue == string.Empty && !optionValue.Equals("none"))
+            {
+                throw new WitsmlException(ErrorCodes.KeywordNotSupportedByServer);
             }
         }
 
@@ -110,9 +98,7 @@ namespace PDS.Witsml.Server.Data.CapServers
         {
             if (PropertyInfo == null)
             {
-                if (_capServer == null)
-                    CreateCapServer();
-                PropertyInfo = _capServer.GetType().GetProperties();
+                PropertyInfo = GetCapServer().CapServer.GetType().GetProperties();
             }
             return PropertyInfo;
         }
@@ -139,13 +125,12 @@ namespace PDS.Witsml.Server.Data.CapServers
             capServer.ApiVers = "1.4.1";
             capServer.SchemaVersion = DataSchemaVersion;
             capServer.SupportUomConversion = false; // TODO: update after UoM conversion implemented
+            capServer.CompressionMethod = string.Empty; // TODO: update when compression is supported
 
             // TODO: move these to Settings
             capServer.Name = "PDS Witsml Server";
             capServer.Vendor = "PDS";
             capServer.Version = "1.0";
-
-            _capServer = capServer;
 
             return new Witsml141.CapServers()
             {
