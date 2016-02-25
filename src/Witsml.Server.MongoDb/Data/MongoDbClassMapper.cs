@@ -1,17 +1,23 @@
 ﻿using System.ComponentModel.Composition;
+using Energistics.DataAccess;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
 using MongoDB.Bson.Serialization;
 using PDS.Witsml.Server.Models;
-using Energistics.DataAccess;
 
 namespace PDS.Witsml.Server.Data
 {
+    /// <summary>
+    /// Initializes MongoDb class and member mappings.
+    /// </summary>
     [Export]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class MongoDbClassMapper
     {
+        /// <summary>
+        /// Registers all supported class and member mappings.
+        /// </summary>
         public void Register()
         {
             // WITSML 1.3.1.1

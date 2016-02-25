@@ -18,7 +18,7 @@ namespace PDS.Witsml.Server.Data
         public void TestSetUp()
         {
             Provider = new DatabaseProvider(new MongoDbClassMapper());
-            DevKit = new DevKit141Aspect(null);
+            DevKit = new DevKit141Aspect();
 
             Well1 = new Well() { Name = DevKit.Name("Mongo Well 01"), TimeZone = DevKit.TimeZone, Uid = DevKit.Uid() };
             Well2 = new Well() { Name = DevKit.Name("Mongo Well 02"), TimeZone = DevKit.TimeZone };
