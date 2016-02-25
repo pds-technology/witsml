@@ -374,8 +374,7 @@
         MissingClientUserAgent = -472,
 
         /// <summary>
-        /// -473 For the capClient object, the values of schemaVersion must match the version attribute used in the plural
-        /// data-objects.
+        /// -473 For the capClient object, the values of schemaVersion must match the version attribute used in the plural data-objects.
         /// </summary>
         SchemaVersionNotMatch = -473,
 
@@ -385,7 +384,7 @@
         /// </summary>
 
         /// <summary>
-        /// -475 No subset of a growing data-object is specified.A query must specify a subset of one growing dataobject
+        /// -475 No subset of a growing data-object is specified.A query must specify a subset of one growing data-object
         /// per query, but multiple individual queries may be included inside the query plural data-object.
         /// </summary>
 
