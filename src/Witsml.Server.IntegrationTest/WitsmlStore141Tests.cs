@@ -66,6 +66,16 @@ namespace PDS.Witsml.Server
         }
 
         [TestMethod]
+        public void Can_get_cap_server()
+        {
+            var request = new WMLS_GetCapRequest { OptionsIn= "dataVersion=1.4.1.1" };
+            var response = DevKit.Store.WMLS_GetCap(request);
+
+            Assert.IsNotNull(response);
+            Assert.IsFalse(string.IsNullOrEmpty(response.CapabilitiesOut));
+        }
+
+        [TestMethod]
         public void Can_add_well_without_validation()
         {
             var well = new Well { Name = "Well-to-add-01" };
@@ -262,6 +272,26 @@ namespace PDS.Witsml.Server
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.DataObjectNotSupported, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_423_unsupported_data_version()
+        {
+            var request = new WMLS_GetCapRequest { OptionsIn = "dataVersion=1.6.1.1" };
+            var response = DevKit.Store.WMLS_GetCap(request);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.DataVersionNotSupported, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_424_data_version_not_supplies()
+        {
+            var request = new WMLS_GetCapRequest();
+            var response = DevKit.Store.WMLS_GetCap(request);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingDataVersion, response.Result);
         }
 
         [TestMethod]
