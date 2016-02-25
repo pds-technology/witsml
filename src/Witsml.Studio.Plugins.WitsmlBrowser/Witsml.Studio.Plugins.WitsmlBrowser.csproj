@@ -88,7 +88,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\Browser.cs" />
+    <Compile Include="Models\WitsmlSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

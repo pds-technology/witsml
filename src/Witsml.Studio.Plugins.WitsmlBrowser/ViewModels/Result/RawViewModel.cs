@@ -9,7 +9,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
             DisplayName = "Raw";
         }
 
-        public Models.Browser Model
+        public Models.WitsmlSettings Model
         {
             get { return ((ResultViewModel)Parent).Model; }
         }

@@ -27,7 +27,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             get { return ((RequestViewModel)Parent).Proxy; }
         }
 
-        public Models.Browser Model
+        public Models.WitsmlSettings Model
         {
             get { return ParentViewModel.Model; }
         }

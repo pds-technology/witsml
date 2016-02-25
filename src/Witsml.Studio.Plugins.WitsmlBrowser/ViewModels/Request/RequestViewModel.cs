@@ -8,7 +8,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
     {
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(RequestViewModel));
 
-        public Models.Browser Model
+        public Models.WitsmlSettings Model
         {
             get { return ((MainViewModel)Parent).Model; }
         }

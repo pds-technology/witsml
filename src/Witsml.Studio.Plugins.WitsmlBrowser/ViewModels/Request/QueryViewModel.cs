@@ -10,7 +10,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             DisplayName = "Query";
         }
 
-        public Models.Browser Model
+        public Models.WitsmlSettings Model
         {
             get { return ((RequestViewModel)Parent).Model; }
         }
