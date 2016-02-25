@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using System.Windows;
 using Caliburn.Micro;
 using Newtonsoft.Json;
 using PDS.Witsml.Studio.Connections;
@@ -109,7 +108,7 @@ namespace PDS.Witsml.Studio.ViewModels
         /// </summary>
         public void Accept()
         {
-            DataItem.Assign(EditItem);
+            App.Current.MapConnection(EditItem, DataItem);
             SaveConnectionFile(DataItem);
             TryClose(true);
         }
@@ -176,7 +175,7 @@ namespace PDS.Witsml.Studio.ViewModels
 
             if (DataItem != null && !string.IsNullOrWhiteSpace(DataItem.Uri))
             {
-                _editItem = DataItem.Clone();
+                _editItem = App.Current.MapConnection(DataItem, new Connection());
             }
             else
             {
