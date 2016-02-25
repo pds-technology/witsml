@@ -133,15 +133,6 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The client product name and/or product version number are missing in the HTTP user-agent field..
-        /// </summary>
-        internal static string MissingClientUserAgent {
-            get {
-                return ResourceManager.GetString("MissingClientUserAgent", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The value specified with an OptionsIn keyword must be a recognized value for that keyword..
         /// </summary>
         internal static string InvalidKeywordValue {
@@ -165,6 +156,24 @@ namespace PDS.Witsml.Properties {
         internal static string KeywordNotSupportedByServer {
             get {
                 return ResourceManager.GetString("KeywordNotSupportedByServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The client product name and/or product version number are missing in the HTTP user-agent field..
+        /// </summary>
+        internal static string MissingClientUserAgent {
+            get {
+                return ResourceManager.GetString("MissingClientUserAgent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A QueryIn template must include a version attribute in the plural data-object that defines the Data Schema Version of the data-object..
+        /// </summary>
+        internal static string MissingDataSchemaVersion {
+            get {
+                return ResourceManager.GetString("MissingDataSchemaVersion", resourceCulture);
             }
         }
         

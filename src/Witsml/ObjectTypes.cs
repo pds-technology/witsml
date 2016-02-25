@@ -3,14 +3,14 @@ using System.Linq;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using Energistics.DataAccess;
-using PDS.Witsml.Properties;
 
 namespace PDS.Witsml
 {
+    /// <summary>
+    /// Defines properties and methods for specifying or determining a WITSML data object's type.
+    /// </summary>
     public static class ObjectTypes
     {
-        private static readonly string DefaultDataSchemaVersion = Settings.Default.DefaultDataSchemaVersion;
-
         public const string Unknown = "unknown";
         public const string CapClient = "capClient";
         public const string CapServer = "capServer";
@@ -22,11 +22,22 @@ namespace PDS.Witsml
         public const string Trajectory = "trajectory";
         public const string ChangeLog = "changeLog";
 
+        /// <summary>
+        /// Gets the type of the data object.
+        /// </summary>
+        /// <typeparam name="T">The type of object.</typeparam>
+        /// <returns>The WITSML data object type, as a string.</returns>
         public static string GetObjectType<T>() where T : IEnergisticsCollection
         {
             return GetObjectType(typeof(T));
         }
 
+        /// <summary>
+        /// Gets the type of the object.
+        /// </summary>
+        /// <param name="type">The type of object.</param>
+        /// <returns>The WITSML data object type, as a string.</returns>
+        /// <exception cref="System.ArgumentException">Invalid WITSML object type, does not implement IEnergisticsCollection</exception>
         public static string GetObjectType(Type type)
         {
             if (!typeof(IEnergisticsCollection).IsAssignableFrom(type))
@@ -40,6 +51,11 @@ namespace PDS.Witsml
                 .FirstOrDefault();
         }
 
+        /// <summary>
+        /// Gets the type of the object.
+        /// </summary>
+        /// <param name="xml">The XML string.</param>
+        /// <returns>The WITSML data object type, as a string.</returns>
         public static string GetObjectType(string xml)
         {
             try
@@ -55,6 +71,11 @@ namespace PDS.Witsml
             }
         }
 
+        /// <summary>
+        /// Gets the data schema version.
+        /// </summary>
+        /// <param name="xml">The XML string.</param>
+        /// <returns>The data schema version.</returns>
         public static string GetVersion(string xml)
         {
             try
@@ -64,7 +85,7 @@ namespace PDS.Witsml
             }
             catch (Exception)
             {
-                return DefaultDataSchemaVersion;
+                return string.Empty;
             }
         }
     }

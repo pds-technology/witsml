@@ -198,4 +198,8 @@
     <value>Function completed successfully</value>
     <comment>1</comment>
   </data>
+  <data name="MissingDataSchemaVersion" xml:space="preserve">
+    <value>A QueryIn template must include a version attribute in the plural data-object that defines the Data Schema Version of the data-object.</value>
+    <comment>-468</comment>
+  </data>
 </root>
