@@ -66,6 +66,7 @@
         /// <summary>
         /// -409 The input template must conform to the appropriate derived schema.
         /// </summary>
+        InputTemplateNonConforming = -409,
 
         /// <summary>
         /// -410 A template containing empty values must otherwise conform to the appropriate derived schema.
@@ -75,6 +76,7 @@
         /// -411 The OptionsIn parameter string must be encoded utilizing a subset (semicolon separators and no
         /// whitespace) of the encoding rules for HTML form content type application/x-www-form-urlencoded.
         /// </summary>
+        OptionsInInvalidFormat = 411,
 
         /// <summary>
         /// -412 The result of an add, update, or delete operation must be compliant with the derived write schema after
@@ -210,14 +212,17 @@
         /// <summary>
         /// -440 The OptionsIn value must be a recognized keyword for that function.
         /// </summary>
+        OptionsInKeywordNotRecognized = -440,
 
         /// <summary>
         /// -441 The value specified with an OptionsIn keyword must be a recognized value for that keyword.
         /// </summary>
+        OptionsInValueNotRecognized = -441,
 
         /// <summary>
         /// -442 A client must not specify an OptionsIn keyword that is not supported by the server.
         /// </summary>
+        OptionsInKeywordNotSupported = -442,
 
         /// <summary>
         /// -443 The value of the uom attribute is must match an ‘annotation’ attribute from the WITSML Units Dictionary
@@ -227,6 +232,7 @@
         /// <summary>
         /// -444 The input template must not specify more than one data-object.
         /// </summary>
+        InputTemplateMultipleDataObjects = -444,
 
         /// <summary>
         /// -445 For WMLS_UpdateInStore, new elements or attributes must not be empty.
@@ -269,6 +275,7 @@
         /// -453 For WMLS_AddToStore and WMLS_UpdateInStore, the client must always specify the unit for all
         /// measure data.
         /// </summary>
+        MissingUnitForMeasureData = -453,
 
         /// <summary>
         /// -454 For a particular WMLS_AddToStore call, a client must specify all growing data-object index data in the
@@ -332,6 +339,7 @@
         /// <summary>
         /// -466 The CapabilitiesIn XML MUST conform to the API capClient schema.
         /// </summary>
+        CapabilitiesInNonConforming = -466,
 
         /// <summary>
         /// -467 The server does not support the API Version provided by the client.
@@ -341,6 +349,7 @@
         /// -468 A QueryIn template must include a version attribute in the plural data-object that defines the Data
         /// Schema Version of the data-object.
         /// </summary>
+        MissingVersionAttribute = 468,
 
         /// <summary>
         /// -469 The query template is does not conform to the data schema for this data-object.
@@ -387,6 +396,7 @@
         /// <summary>
         /// -478 Incorrect case on parent uid.
         /// </summary>
+        IncorrectCaseParentUid = -478,
 
         /// <summary>
         /// -479 Unable to decompress query.

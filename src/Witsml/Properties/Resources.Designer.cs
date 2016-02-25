@@ -61,6 +61,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The CapabilitiesIn XML MUST conform to the API capClient schema..
+        /// </summary>
+        internal static string CapabilitiesInNonConforming {
+            get {
+                return ResourceManager.GetString("CapabilitiesInNonConforming", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to In WMLS_AddToStore, the objectType being added in WMLtypeIn must be an objectType supported by the server. The server does not support the object type trying to be added..
         /// </summary>
         internal static string DataObjectTypeNotSupported {
@@ -133,6 +142,33 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Incorrect case on parent uid..
+        /// </summary>
+        internal static string IncorrectCaseParentUid {
+            get {
+                return ResourceManager.GetString("IncorrectCaseParentUid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The input template must not specify more than one data-object..
+        /// </summary>
+        internal static string InputTemplateMultipleDataObjects {
+            get {
+                return ResourceManager.GetString("InputTemplateMultipleDataObjects", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The input template must conform to the appropriate derived schema..
+        /// </summary>
+        internal static string InputTemplateNonConforming {
+            get {
+                return ResourceManager.GetString("InputTemplateNonConforming", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to For WMLS_GetCap, the OptionsIn keyword ‘dataVersion’ must be specified..
         /// </summary>
         internal static string MissingDataVersion {
@@ -169,11 +205,65 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to For WMLS_AddToStore and WMLS_UpdateInStore, the client must always specify the unit for all measure data..
+        /// </summary>
+        internal static string MissingUnitForMeasureData {
+            get {
+                return ResourceManager.GetString("MissingUnitForMeasureData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A QueryIn template must include a version attribute in the plural data-object that defines the Data Schema Version of the data-object..
+        /// </summary>
+        internal static string MissingVersionAttribute {
+            get {
+                return ResourceManager.GetString("MissingVersionAttribute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A non-empty value must be defined for WMLtypeIn..
         /// </summary>
         internal static string MissingWMLtypeIn {
             get {
                 return ResourceManager.GetString("MissingWMLtypeIn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The OptionsIn parameter string must be encoded utilizing a subset (semicolon separators and no whitespace) of the encoding rules for HTML form content type application/x-www-form-urlencoded..
+        /// </summary>
+        internal static string OptionsInInvalidFormat {
+            get {
+                return ResourceManager.GetString("OptionsInInvalidFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The OptionsIn value must be a recognized keyword for that function..
+        /// </summary>
+        internal static string OptionsInKeywordNotRecognized {
+            get {
+                return ResourceManager.GetString("OptionsInKeywordNotRecognized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A client must not specify an OptionsIn keyword that is not supported by the server..
+        /// </summary>
+        internal static string OptionsInKeywordNotSupported {
+            get {
+                return ResourceManager.GetString("OptionsInKeywordNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The value specified with an OptionsIn keyword must be a recognized value for that keyword..
+        /// </summary>
+        internal static string OptionsInValueNotRecognized {
+            get {
+                return ResourceManager.GetString("OptionsInValueNotRecognized", resourceCulture);
             }
         }
         

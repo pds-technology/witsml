@@ -117,6 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="CapabilitiesInNonConforming" xml:space="preserve">
+    <value>The CapabilitiesIn XML MUST conform to the API capClient schema.</value>
+    <comment>-466</comment>
+  </data>
   <data name="DataObjectTypeNotSupported" xml:space="preserve">
     <value>In WMLS_AddToStore, the objectType being added in WMLtypeIn must be an objectType supported by the server. The server does not support the object type trying to be added.</value>
     <comment>-487</comment>
@@ -149,6 +153,18 @@
     <value>Error updating in data store</value>
     <comment>-1003</comment>
   </data>
+  <data name="IncorrectCaseParentUid" xml:space="preserve">
+    <value>Incorrect case on parent uid.</value>
+    <comment>-478</comment>
+  </data>
+  <data name="InputTemplateMultipleDataObjects" xml:space="preserve">
+    <value>The input template must not specify more than one data-object.</value>
+    <comment>-444</comment>
+  </data>
+  <data name="InputTemplateNonConforming" xml:space="preserve">
+    <value>The input template must conform to the appropriate derived schema.</value>
+    <comment>-409</comment>
+  </data>
   <data name="MissingDataVersion" xml:space="preserve">
     <value>For WMLS_GetCap, the OptionsIn keyword ‘dataVersion’ must be specified.</value>
     <comment>-424</comment>
@@ -165,9 +181,33 @@
     <value>The input template MUST contain a plural root element.</value>
     <comment>-401</comment>
   </data>
+  <data name="MissingUnitForMeasureData" xml:space="preserve">
+    <value>For WMLS_AddToStore and WMLS_UpdateInStore, the client must always specify the unit for all measure data.</value>
+    <comment>-453</comment>
+  </data>
+  <data name="MissingVersionAttribute" xml:space="preserve">
+    <value>A QueryIn template must include a version attribute in the plural data-object that defines the Data Schema Version of the data-object.</value>
+    <comment>-468</comment>
+  </data>
   <data name="MissingWMLtypeIn" xml:space="preserve">
     <value>A non-empty value must be defined for WMLtypeIn.</value>
     <comment>-407</comment>
+  </data>
+  <data name="OptionsInInvalidFormat" xml:space="preserve">
+    <value>The OptionsIn parameter string must be encoded utilizing a subset (semicolon separators and no whitespace) of the encoding rules for HTML form content type application/x-www-form-urlencoded.</value>
+    <comment>-411</comment>
+  </data>
+  <data name="OptionsInKeywordNotRecognized" xml:space="preserve">
+    <value>The OptionsIn value must be a recognized keyword for that function.</value>
+    <comment>-440</comment>
+  </data>
+  <data name="OptionsInKeywordNotSupported" xml:space="preserve">
+    <value>A client must not specify an OptionsIn keyword that is not supported by the server.</value>
+    <comment>-442</comment>
+  </data>
+  <data name="OptionsInValueNotRecognized" xml:space="preserve">
+    <value>The value specified with an OptionsIn keyword must be a recognized value for that keyword.</value>
+    <comment>-441</comment>
   </data>
   <data name="ParialSuccess" xml:space="preserve">
     <value>Partial success: Function completed successfully but some growing data-object data-nodes were not returned.</value>
