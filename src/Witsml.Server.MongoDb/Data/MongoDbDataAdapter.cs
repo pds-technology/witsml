@@ -19,14 +19,16 @@ namespace PDS.Witsml.Server.Data
         private static readonly ILog _log = LogManager.GetLogger(typeof(MongoDbDataAdapter<T>));
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MongoDbDataAdapter{T}"/> class.
+        /// Initializes a new instance of the <see cref="MongoDbDataAdapter{T}" /> class.
         /// </summary>
         /// <param name="databaseProvider">The database provider.</param>
         /// <param name="dbCollectionName">The database collection name.</param>
-        public MongoDbDataAdapter(IDatabaseProvider databaseProvider, string dbCollectionName)
+        /// <param name="idPropertyName">The name of the identifier property.</param>
+        public MongoDbDataAdapter(IDatabaseProvider databaseProvider, string dbCollectionName, string idPropertyName = ObjectTypes.Uid)
         {
             DatabaseProvider = databaseProvider;
             DbCollectionName = dbCollectionName;
+            IdPropertyName = idPropertyName;
         }
 
         /// <summary>
@@ -40,6 +42,52 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <value>The database collection name.</value>
         protected string DbCollectionName { get; private set; }
+
+        /// <summary>
+        /// Gets the name of the identifier property.
+        /// </summary>
+        /// <value>The name of the identifier property.</value>
+        protected string IdPropertyName { get; private set; }
+
+        /// <summary>
+        /// Gets a data object by the specified UUID.
+        /// </summary>
+        /// <param name="uuid">The UUID.</param>
+        /// <returns>The data object instance.</returns>
+        public override T Get(string uuid)
+        {
+            return GetEntity(uuid);
+        }
+
+        /// <summary>
+        /// Determines whether the entity exists in the data store.
+        /// </summary>
+        /// <param name="uid">The uid.</param>
+        /// <returns>true if the entity exists; otherwise, false</returns>
+        public override bool Exists(string uid)
+        {
+            return Exists<T>(uid, DbCollectionName);
+        }
+
+        /// <summary>
+        /// Determines whether the entity exists in the data store.
+        /// </summary>
+        /// <param name="uid">The uid.</param>
+        /// <param name="dbCollectionName">The name of the database collection.</param>
+        /// <typeparam name="TObject">The data object type.</typeparam>
+        /// <returns>true if the entity exists; otherwise, false</returns>
+        protected bool Exists<TObject>(string uid, string dbCollectionName)
+        {
+            try
+            {
+                return GetEntityByUidQuery<TObject>(uid, dbCollectionName).Any();
+            }
+            catch (MongoException ex)
+            {
+                _log.Error("Error querying " + dbCollectionName, ex);
+                throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, ex);
+            }
+        }
 
         protected IMongoCollection<T> GetCollection()
         {
@@ -101,39 +149,9 @@ namespace PDS.Witsml.Server.Data
         protected IQueryable<TObject> GetEntityByUidQuery<TObject>(string uid, string dbCollectionName)
         {
             var query = GetQuery<TObject>(dbCollectionName)
-                .Where("Uid = @0", uid);
+                .Where(IdPropertyName + " = @0", uid);
 
             return query;
-        }
-
-        /// <summary>
-        /// Determines whether the entity exists in the data store.
-        /// </summary>
-        /// <param name="uid">The uid.</param>
-        /// <returns>true if the entity exists; otherwise, false</returns>
-        public override bool Exists(string uid)
-        {
-            return Exists<T>(uid, DbCollectionName);
-        }
-
-        /// <summary>
-        /// Determines whether the entity exists in the data store.
-        /// </summary>
-        /// <param name="uid">The uid.</param>
-        /// <param name="dbCollectionName">The name of the database collection.</param>
-        /// <typeparam name="TObject">The data object type.</typeparam>
-        /// <returns>true if the entity exists; otherwise, false</returns>
-        protected bool Exists<TObject>(string uid, string dbCollectionName)
-        {
-            try
-            {
-                return GetEntityByUidQuery<TObject>(uid, dbCollectionName).Any();
-            }
-            catch (MongoException ex)
-            {
-                _log.Error("Error querying " + dbCollectionName, ex);
-                throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, ex);
-            }
         }
 
         /// <summary>
@@ -218,26 +236,6 @@ namespace PDS.Witsml.Server.Data
             }
 
             return uid;
-        }
-
-        /// <summary>
-        /// Updates the last change date/time for the object.
-        /// </summary>
-        /// <param name="commonData">The common data property for the object.</param>
-        /// <returns>The common data with updated last change time</returns>
-        protected CommonData UpdateLastChangeTime(CommonData commonData)
-        {
-            if (commonData == null)
-            {
-                commonData = new CommonData()
-                {
-                    DateTimeCreation = DateTime.UtcNow
-                };                
-            }
-
-            commonData.DateTimeLastChange = DateTime.UtcNow;
-
-            return commonData;
         }
 
         protected IQueryable<TObject> FilterQuery<TObject>(WitsmlQueryParser parser, IQueryable<TObject> query, List<string> names)

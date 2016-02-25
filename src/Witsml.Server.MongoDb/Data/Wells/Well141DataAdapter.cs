@@ -11,13 +11,12 @@ namespace PDS.Witsml.Server.Data.Wells
     /// Data adapter that encapsulates CRUD functionality for <see cref="Well" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML141.Well}" />
-    /// <seealso cref="PDS.Witsml.Server.Data.IEtpDataAdapter{Energistics.DataAccess.WITSML141.Well}" />
     /// <seealso cref="PDS.Witsml.Server.IWitsml141Configuration" />
     [Export(typeof(IWitsml141Configuration))]
     [Export(typeof(IWitsmlDataAdapter<Well>))]
     [Export(typeof(IEtpDataAdapter<Well>))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Well141DataAdapter : MongoDbDataAdapter<Well>, IEtpDataAdapter<Well>, IWitsml141Configuration
+    public class Well141DataAdapter : MongoDbDataAdapter<Well>, IWitsml141Configuration
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(Well141DataAdapter));
 
@@ -59,7 +58,7 @@ namespace PDS.Witsml.Server.Data.Wells
         public override WitsmlResult Add(Well entity)
         {
             entity.Uid = NewUid(entity.Uid);
-            entity.CommonData = UpdateLastChangeTime(entity.CommonData);
+            entity.CommonData = entity.CommonData.Update();
 
             _log.DebugFormat("Add new well with uid: {0}", entity.Uid);
             InsertEntity(entity);
@@ -82,7 +81,7 @@ namespace PDS.Witsml.Server.Data.Wells
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
         /// <returns>A collection of data objects.</returns>
-        public List<Well> GetAll(string parentUri = null)
+        public override List<Well> GetAll(string parentUri = null)
         {
             return GetQuery()
                 .OrderBy(x => x.Name)

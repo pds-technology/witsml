@@ -12,13 +12,12 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// Data adapter that encapsulates CRUD functionality for <see cref="Wellbore" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML141.Wellbore}" />
-    /// <seealso cref="PDS.Witsml.Server.Data.IEtpDataAdapter{Energistics.DataAccess.WITSML141.Wellbore}" />
     /// <seealso cref="PDS.Witsml.Server.IWitsml141Configuration" />
     [Export(typeof(IWitsml141Configuration))]
     [Export(typeof(IWitsmlDataAdapter<Wellbore>))]
     [Export(typeof(IEtpDataAdapter<Wellbore>))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Wellbore141DataAdapter : MongoDbDataAdapter<Wellbore>, IEtpDataAdapter<Wellbore>, IWitsml141Configuration
+    public class Wellbore141DataAdapter : MongoDbDataAdapter<Wellbore>, IWitsml141Configuration
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(Wellbore141DataAdapter));
 
@@ -61,7 +60,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public override WitsmlResult Add(Wellbore entity)
         {
             entity.Uid = NewUid(entity.Uid);
-            entity.CommonData = UpdateLastChangeTime(entity.CommonData);
+            entity.CommonData = entity.CommonData.Update();
 
             var validator = Container.Resolve<IDataObjectValidator<Wellbore>>();
             var results = validator.Validate(Functions.AddToStore, entity);

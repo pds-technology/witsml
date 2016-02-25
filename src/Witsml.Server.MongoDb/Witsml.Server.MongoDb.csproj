@@ -71,13 +71,15 @@
     <Compile Include="Data\IDatabaseProvider.cs" />
     <Compile Include="Data\Logs\Log131DataAdapter.cs" />
     <Compile Include="Data\Logs\Log141DataAdapter.cs" />
-    <Compile Include="Data\Mapper.cs" />
+    <Compile Include="Data\MongoDbClassMapper.cs" />
     <Compile Include="Data\MongoDbDataAdapter.cs" />
     <Compile Include="Data\UidGenerator.cs" />
+    <Compile Include="Data\Wellbores\Wellbore200DataAdapter.cs" />
     <Compile Include="Data\Wellbores\Wellbore131DataAdapter.cs" />
     <Compile Include="Data\Wellbores\Wellbore141DataAdapter.cs" />
     <Compile Include="Data\Wells\Well131DataAdapter.cs" />
     <Compile Include="Data\Wells\Well141DataAdapter.cs" />
+    <Compile Include="Data\Wells\Well200DataAdapter.cs" />
     <Compile Include="Models\LogDataValues.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">

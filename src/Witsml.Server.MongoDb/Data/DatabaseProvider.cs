@@ -15,7 +15,7 @@ namespace PDS.Witsml.Server.Data
         private Lazy<IMongoClient> _client;
 
         [ImportingConstructor]
-        public DatabaseProvider(Mapper mapper)
+        public DatabaseProvider(MongoDbClassMapper mapper)
         {
             _client = new Lazy<IMongoClient>(CreateMongoClient);
             mapper.Register();
