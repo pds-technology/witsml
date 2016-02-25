@@ -338,6 +338,7 @@
         /// <summary>
         /// -465 The capClient apiVers value must match the API schema version.
         /// </summary>
+        ApiVersionNotMatch = -465,
 
         /// <summary>
         /// -466 The CapabilitiesIn XML MUST conform to the API capClient schema.
@@ -347,6 +348,7 @@
         /// <summary>
         /// -467 The server does not support the API Version provided by the client.
         /// </summary>
+        ApiVersionNotSupported = -467,
 
         /// <summary>
         /// -468 A QueryIn template must include a version attribute in the plural data-object that defines the Data Schema Version of the data-object.
@@ -375,6 +377,7 @@
         /// -473 For the capClient object, the values of schemaVersion must match the version attribute used in the plural
         /// data-objects.
         /// </summary>
+        SchemaVersionNotMatch = -473,
 
         /// <summary>
         /// -474 For growing data-objects in a query, if a node-index value is to be returned, then the client must explicitly
