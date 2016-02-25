@@ -163,6 +163,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             CloseEtpClient();
             Resources.Clear();
             Messages = null;
+            Details = null;
 
             while (Items.Count > 1)
             {
