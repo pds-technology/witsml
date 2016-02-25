@@ -88,5 +88,28 @@ namespace PDS.Witsml.Studio.Connections
                 }
             }
         }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance 
+        /// by testing that all of the public properties are equal (Name, Uri, Username, Password).
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool Equals(object obj)
+        {
+            var connection = obj as Connection;
+
+            if (connection != null)
+            {
+                return (
+                    Name.Equals(connection.Name) &&
+                    Uri.Equals(connection.Uri) &&
+                    Username.Equals(connection.Username) &&
+                    Password.Equals(connection.Password));
+            }
+            return false;
+        }
     }
 }
