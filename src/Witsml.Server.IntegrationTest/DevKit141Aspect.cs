@@ -114,5 +114,25 @@ namespace PDS.Witsml.Server
                 ? String.Join(",", log.LogCurveInfo.Select(x => x.Mnemonic))
                 : string.Empty;
         }
+
+        public WMLS_AddToStoreResponse AddWell(Well well, string wmlTypeIn = ObjectTypes.Well, string capClient = null, string optionsIn = null)
+        {
+            var wells = new WellList { Well = List(well) };
+            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
+            return AddToStore(wmlTypeIn, xmlIn, capClient, optionsIn);
+        }
+
+        public WMLS_AddToStoreResponse AddWellbore(Wellbore wellbore, string wmlTypeIn = ObjectTypes.Wellbore, string capClient = null, string optionsIn = null)
+        {
+            var wellbores = new WellboreList { Wellbore = List(wellbore) };
+            var xmlIn = EnergisticsConverter.ObjectToXml(wellbores);
+            return AddToStore(wmlTypeIn, xmlIn, capClient, optionsIn);
+        }
+
+        public WMLS_AddToStoreResponse AddToStore(string wmlTypeIn, string xmlIn, string capClient, string optionsIn)
+        {
+            var request = new WMLS_AddToStoreRequest { WMLtypeIn = wmlTypeIn, XMLin = xmlIn, CapabilitiesIn = capClient, OptionsIn = optionsIn };
+            return Store.WMLS_AddToStore(request);
+        }
     }
 }

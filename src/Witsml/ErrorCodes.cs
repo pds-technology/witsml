@@ -69,6 +69,7 @@
         /// <summary>
         /// -409 The input template must conform to the appropriate derived schema.
         /// </summary>
+        InputTemplateNonConforming = -409,
 
         /// <summary>
         /// -410 A template containing empty values must otherwise conform to the appropriate derived schema.
@@ -234,6 +235,7 @@
         /// <summary>
         /// -444 The input template must not specify more than one data-object.
         /// </summary>
+        InputTemplateMultipleDataObjects = -444,
 
         /// <summary>
         /// -445 For WMLS_UpdateInStore, new elements or attributes must not be empty.
@@ -276,6 +278,7 @@
         /// -453 For WMLS_AddToStore and WMLS_UpdateInStore, the client must always specify the unit for all
         /// measure data.
         /// </summary>
+        MissingUnitForMeasureData = -453,
 
         /// <summary>
         /// -454 For a particular WMLS_AddToStore call, a client must specify all growing data-object index data in the
@@ -339,6 +342,7 @@
         /// <summary>
         /// -466 The CapabilitiesIn XML MUST conform to the API capClient schema.
         /// </summary>
+        CapabilitiesInNonConforming = -466,
 
         /// <summary>
         /// -467 The server does not support the API Version provided by the client.
@@ -395,6 +399,7 @@
         /// <summary>
         /// -478 Incorrect case on parent uid.
         /// </summary>
+        IncorrectCaseParentUid = -478,
 
         /// <summary>
         /// -479 Unable to decompress query.

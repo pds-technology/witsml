@@ -1,7 +1,10 @@
 ﻿using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Framework;
+using PDS.Witsml.Server.Data;
+using PDS.Witsml.Server.Data.Wellbores;
 
 namespace PDS.Witsml.Server
 {
@@ -9,24 +12,17 @@ namespace PDS.Witsml.Server
     public class WitsmlStore141Tests
     {
         private static readonly DevKit141Aspect DevKit = new DevKit141Aspect(null);
-        private WitsmlStore _store;
 
         [TestInitialize]
         public void TestSetUp()
         {
-            _store = new WitsmlStore();
-            _store.Container = ContainerFactory.Create();
         }
 
         [TestMethod]
         public void Can_add_well_without_validation()
         {
             var well = new Well { Name = "Well-to-add-01" };
-            var wells = new WellList { Well = DevKit.List(well) };
-
-            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
-            var request = new WMLS_AddToStoreRequest { WMLtypeIn = ObjectTypes.Well, XMLin = xmlIn };
-            var response = _store.WMLS_AddToStore(request);
+            var response = DevKit.AddWell(well);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
@@ -36,85 +32,236 @@ namespace PDS.Witsml.Server
         public void Adding_duplicate_well_uid_causes_database_error()
         {
             var well = new Well { Name = "Well-to-test-add-error", Uid = DevKit.Uid() };
-            var wells = new WellList { Well = DevKit.List(well) };
-
-            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
-            var request = new WMLS_AddToStoreRequest { WMLtypeIn = ObjectTypes.Well, XMLin = xmlIn };
-            var response = _store.WMLS_AddToStore(request);
+            var response = DevKit.AddWell(well);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            response = _store.WMLS_AddToStore(request);
+            response = DevKit.AddWell(well);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.ErrorAddingToDataStore, response.Result);
         }
 
         [TestMethod]
-        public void Using_invalid_version_causes_unsupported_error()
+        public void Can_add_wellbore_without_validation()
         {
-            var well = new Well { Name = "Well-to-test-unsupported-error" };
-            var wells = new WellList { Well = DevKit.List(well) };
-
-            // update Version property to an unsupported data schema version
-            wells.Version = "1.4.x.y";
-
-            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
-            var request = new WMLS_AddToStoreRequest { WMLtypeIn = ObjectTypes.Well, XMLin = xmlIn };
-            var response = _store.WMLS_AddToStore(request);
+            var well = new Well { Name = "Well-to-add-01" };
+            var response = DevKit.AddWell(well);
 
             Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.DataObjectNotSupported, response.Result);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var wellbore = new Wellbore { Name = "Wellbore-to-add-01", NameWell = well.Name, UidWell = response.SuppMsgOut };
+            response = DevKit.AddWellbore(wellbore);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
         }
 
         [TestMethod]
-        public void Using_invalid_object_type_causes_data_types_dont_match_error()
+        public void Adding_wellbore_database_configuration_error()
         {
-            var well = new Well { Name = "Well-to-test-no-match-error" };
-            var wells = new WellList { Well = DevKit.List(well) };
-
-            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
-            var request = new WMLS_AddToStoreRequest { WMLtypeIn = ObjectTypes.Wellbore, XMLin = xmlIn };
-            var response = _store.WMLS_AddToStore(request);
+            var well = new Well { Name = "Well-to-add-02" };
+            var response = DevKit.AddWell(well);
 
             Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var dbProvider = new TestDatabaseProvider(new MongoDbClassMapper(), string.Empty);
+            var wellboreAdapter = new Wellbore141DataAdapter(dbProvider);
+            wellboreAdapter.Container = ContainerFactory.Create();
+
+            var caught = false;
+            WitsmlException exception = null;
+
+            try
+            {
+                var wellbore = new Wellbore { Name = "Wellbore-to-test-add-error", NameWell = well.Name, UidWell = response.SuppMsgOut };
+                wellboreAdapter.Add(wellbore);
+            }
+            catch (WitsmlException ex)
+            {
+                caught = true;
+                exception = ex;
+            }
+
+            Assert.IsTrue(caught);
+            Assert.IsNotNull(exception);
+            Assert.AreEqual(ErrorCodes.ErrorAddingToDataStore, exception.ErrorCode);
         }
 
         [TestMethod]
-        public void Passing_null_object_type_causes_missing_type_error()
+        public void Test_error_code_401_missing_plural_root_element_xmlIn()
         {
-            var well = new Well { Name = "Well-to-test-missing-type-error" };
-            var wells = new WellList { Well = DevKit.List(well) };
+            var well = new Well { Name = "Well-to-add-missing-plural-root" };
+            var xmlIn = EnergisticsConverter.ObjectToXml(well);
+            var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
 
-            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
-            var request = new WMLS_AddToStoreRequest { WMLtypeIn = null, XMLin = xmlIn };
-            var response = _store.WMLS_AddToStore(request);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingPluralRootElement, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_407_missing_witsml_object_type()
+        {
+            var well = new Well { Name = "Well-to-add-missing-witsml-type" };
+            var response = DevKit.AddWell(well, string.Empty);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.MissingWMLtypeIn, response.Result);
         }
 
         [TestMethod]
-        public void Passing_null_xml_causes_invalid_input_template_error()
+        public void Test_error_code_408_missing_input_template()
         {
-            var request = new WMLS_AddToStoreRequest { WMLtypeIn = ObjectTypes.Well, XMLin = null };
-            var response = _store.WMLS_AddToStore(request);
+            var response = DevKit.AddToStore(ObjectTypes.Well, null, null, null);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.MissingInputTemplate, response.Result);
         }
 
         [TestMethod]
-        public void Unknown_object_causes_data_type_not_supported_error()
+        public void Test_error_code_409_non_conforming_input_template()
+        {
+            var well = new Well { Name = "Well-to-add-invalid-input-template" };
+            var response = DevKit.AddWell(well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_411_optionsIn_invalid_format()
+        {
+            var well = new Well { Name = "Well-to-add-invalid-optionsIn-format" };
+            var response = DevKit.AddWell(well, optionsIn: "compressionMethod:gzip");
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.ParametersNotEncodedByRules, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_413_unsupported_data_object()
+        {
+            var well = new Well { Name = "Well-to-add-unsupported-error" };
+            var wells = new WellList { Well = DevKit.List(well) };
+
+            // update Version property to an unsupported data schema version
+            wells.Version = "1.4.x.y";
+
+            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
+            var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.DataObjectNotSupported, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_440_optionsIn_keyword_not_recognized()
+        {
+            var well = new Well { Name = "Well-to-add-invalid-optionsIn-keyword" };
+            var response = DevKit.AddWell(well, optionsIn: "returnElements=all");
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.KeywordNotSupportedByFunction, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_441_optionsIn_value_not_recognized()
+        {
+            var well = new Well { Name = "Well-to-add-invalid-optionsIn-value" };
+            var response = DevKit.AddWell(well, optionsIn: "compressionMethod=7zip");
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.InvalidKeywordValue, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_442_optionsIn_keyword_not_supported()
+        {
+            var well = new Well { Name = "Well-to-add-optionsIn-keyword-not-supported" };
+            var response = DevKit.AddWell(well, optionsIn: "intervalRangeInclusion=any-part");
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.KeywordNotSupportedByServer, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_444_mulitple_data_objects_error()
+        {
+            var well1 = new Well { Name = "Well-to-01", Uid = DevKit.Uid() };
+            var well2 = new Well { Name = "Well-to-02", Uid = DevKit.Uid() };
+            var wells = new WellList { Well = DevKit.List(well1, well2) };
+
+            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
+            var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateMultipleDataObjects, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_453_missing_unit_for_measure_data()
+        {
+            var well = new Well
+            {
+                Name = "Well-to-add-missing-unit",
+                WellheadElevation = new WellElevationCoord { Value = 12.0 }
+            };
+            var response = DevKit.AddWell(well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingUnitForMeasureData, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_466_non_conforming_capabilities_in()
+        {
+            var well = new Well { Name = "Well-to-add-invalid-capabilitiesIn" };
+            var response = DevKit.AddWell(well, ObjectTypes.Well, "<capClients />");
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.CapabilitiesInNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_468_missing_version_attribute()
+        {
+            var well = new Well { Name = "Well-to-add-missing-version-attribute" };
+            var wells = new WellList { Well = DevKit.List(well) };
+
+            // update Version property to an unsupported data schema version
+            wells.Version = null;
+
+            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
+            var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_486_data_object_types_dont_match()
+        {
+            var well = new Well { Name = "Well-to-add-data-type-not-match" };
+            var wells = new WellList { Well = DevKit.List(well) };
+
+            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
+            var response = DevKit.AddToStore(ObjectTypes.Wellbore, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_487_data_object_not_supported()
         {
             var entity = new Target { Name = "Entity-to-test-unsupported-error" };
             var list = new TargetList { Target = DevKit.List(entity) };
 
             var xmlIn = EnergisticsConverter.ObjectToXml(list);
-            var request = new WMLS_AddToStoreRequest { WMLtypeIn = "target", XMLin = xmlIn };
-            var response = _store.WMLS_AddToStore(request);
+            var response = DevKit.AddToStore("target", xmlIn, null, null);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.DataObjectTypeNotSupported, response.Result);

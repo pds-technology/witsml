@@ -61,6 +61,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The CapabilitiesIn XML MUST conform to the API capClient schema..
+        /// </summary>
+        internal static string CapabilitiesInNonConforming {
+            get {
+                return ResourceManager.GetString("CapabilitiesInNonConforming", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to In WMLS_AddToStore, the objectType being added in WMLtypeIn must be an objectType supported by the server. The server does not support the object type trying to be added..
         /// </summary>
         internal static string DataObjectTypeNotSupported {
@@ -133,11 +142,56 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Incorrect case on parent uid..
+        /// </summary>
+        internal static string IncorrectCaseParentUid {
+            get {
+                return ResourceManager.GetString("IncorrectCaseParentUid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The input template must not specify more than one data-object..
+        /// </summary>
+        internal static string InputTemplateMultipleDataObjects {
+            get {
+                return ResourceManager.GetString("InputTemplateMultipleDataObjects", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The input template must conform to the appropriate derived schema..
+        /// </summary>
+        internal static string InputTemplateNonConforming {
+            get {
+                return ResourceManager.GetString("InputTemplateNonConforming", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to In the value of the capClient schemaVersion, the oldest Data Schema Version must be listed first, followed by the next oldest, etc..
+        /// </summary>
+        internal static string InvalidClientSchemaVersion {
+            get {
+                return ResourceManager.GetString("InvalidClientSchemaVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The value specified with an OptionsIn keyword must be a recognized value for that keyword..
         /// </summary>
         internal static string InvalidKeywordValue {
             get {
                 return ResourceManager.GetString("InvalidKeywordValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The value of the OptionsIn keyword of ‘maxReturnNodes’ MUST be greater than zero..
+        /// </summary>
+        internal static string InvalidMaxReturnNodes {
+            get {
+                return ResourceManager.GetString("InvalidMaxReturnNodes", resourceCulture);
             }
         }
         
@@ -187,6 +241,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A template must include a default namespace declaration for the WITSML namespace..
+        /// </summary>
+        internal static string MissingDefaultWitsmlNamespace {
+            get {
+                return ResourceManager.GetString("MissingDefaultWitsmlNamespace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A non-empty value must be defined for the input template..
         /// </summary>
         internal static string MissingInputTemplate {
@@ -205,11 +268,47 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to For WMLS_AddToStore, all parentage-pointers and lower level(child) uid values must be defined in the XMLin file..
+        /// </summary>
+        internal static string MissingParentUid {
+            get {
+                return ResourceManager.GetString("MissingParentUid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The input template MUST contain a plural root element..
         /// </summary>
         internal static string MissingPluralRootElement {
             get {
                 return ResourceManager.GetString("MissingPluralRootElement", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A mandatory write schema item is missing..
+        /// </summary>
+        internal static string MissingRequiredData {
+            get {
+                return ResourceManager.GetString("MissingRequiredData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to For WMLS_AddToStore and WMLS_UpdateInStore, the client must always specify the unit for all measure data..
+        /// </summary>
+        internal static string MissingUnitForMeasureData {
+            get {
+                return ResourceManager.GetString("MissingUnitForMeasureData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A QueryIn template must include a version attribute in the plural data-object that defines the Data Schema Version of the data-object..
+        /// </summary>
+        internal static string MissingVersionAttribute {
+            get {
+                return ResourceManager.GetString("MissingVersionAttribute", resourceCulture);
             }
         }
         

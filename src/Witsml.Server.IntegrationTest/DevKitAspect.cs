@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Energistics.DataAccess;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server
 {
@@ -8,11 +9,14 @@ namespace PDS.Witsml.Server
     {
         public readonly string TimestampFormat = "yyMMdd-HHmmss-fff";
         public readonly string TimeZone = "-06:00";
+        public WitsmlStore Store;
 
         public DevKitAspect(string url, WMLSVersion version)
         {
             Proxy = new WITSMLWebServiceConnection(url, version);
             Proxy.Timeout *= 5;
+            Store = new WitsmlStore();
+            Store.Container = ContainerFactory.Create();
         }
 
         public WITSMLWebServiceConnection Proxy { get; private set; }

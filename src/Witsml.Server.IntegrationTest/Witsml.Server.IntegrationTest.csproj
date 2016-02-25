@@ -63,13 +63,14 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Data\Wellbores\Wellbore200DataAdapterTests.cs" />
-    <Compile Include="Data\Wellbores\Wellbore141ValidatorTest.cs" />
     <Compile Include="Data\Wells\Well200DataAdapterTests.cs" />
+    <Compile Include="Data\Wellbores\Wellbore141ValidationTests.cs" />
     <Compile Include="DevKit131Aspect.cs" />
     <Compile Include="DevKit141Aspect.cs" />
     <Compile Include="DevKit200Aspect.cs" />
     <Compile Include="DevKitAspect.cs" />
     <Compile Include="Data\ValidationTests.cs" />
+    <Compile Include="TestDatabaseProvider.cs" />
     <Compile Include="WitsmlStore131ProxyTests.cs" />
     <Compile Include="WitsmlStore141ProxyTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
