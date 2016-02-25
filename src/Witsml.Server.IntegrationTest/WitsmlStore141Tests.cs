@@ -1,4 +1,5 @@
-﻿using Energistics.DataAccess;
+﻿using System.Linq;
+using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -41,6 +42,53 @@ namespace PDS.Witsml.Server
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.ErrorAddingToDataStore, response.Result);
+        }
+
+        [TestMethod]
+        public void Uid_returned_add_well()
+        {
+            var well = new Well { Name = "Well-to-add-01" };
+            var response = DevKit.AddWell(well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uid = response.SuppMsgOut;
+            var valid = !string.IsNullOrEmpty(uid);
+            Assert.IsTrue(valid);
+
+            well = new Well { Uid = uid };
+            var result = DevKit.QueryWell(well);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count);
+
+            well = result.FirstOrDefault();
+            Assert.IsNotNull(well);
+            Assert.AreEqual(uid, well.Uid);
+        }
+
+        [TestMethod]
+        public void Case_preserved_add_well()
+        {
+            var nameLegal = "Well Legal Name";
+            var well = new Well { Name = "Well-to-add-01", NameLegal = nameLegal };
+            var response = DevKit.AddWell(well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uid = response.SuppMsgOut;
+            var valid = !string.IsNullOrEmpty(uid);
+            Assert.IsTrue(valid);
+
+            well = new Well { Uid = uid };
+            var result = DevKit.QueryWell(well);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count);
+
+            well = result.FirstOrDefault();
+            Assert.IsNotNull(well);
+            Assert.AreEqual(nameLegal, well.NameLegal);
         }
 
         [TestMethod]
