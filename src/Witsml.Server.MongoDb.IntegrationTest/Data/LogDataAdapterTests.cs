@@ -6,7 +6,7 @@ namespace PDS.Witsml.Server.Data
     [TestClass]
     public class LogDataAdapterTests
     {
-        private Log141DataAdapter _logDataAdapter = new Log141DataAdapter(new DatabaseProvider(new Mapper()));
+        private Log141DataAdapter _logDataAdapter = new Log141DataAdapter(new DatabaseProvider(new MongoDbClassMapper()));
 
         [TestMethod]
         public void index_range_test()

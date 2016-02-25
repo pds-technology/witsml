@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Energistics.Datatypes.Object;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -16,18 +15,25 @@ namespace PDS.Witsml.Server.Data
         /// <returns>A collection of data objects.</returns>
         List<T> GetAll(string parentUri = null);
 
-        //IList<string> GetUris();
+        /// <summary>
+        /// Gets a data object by the specified UUID.
+        /// </summary>
+        /// <param name="uuid">The UUID.</param>
+        /// <returns>The data object instance.</returns>
+        T Get(string uuid);
 
-        //IList<T> GetAll();
+        /// <summary>
+        /// Puts the specified data object into the data store.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <returns>A WITSML result.</returns>
+        WitsmlResult Put(T entity);
 
-        //T GetByUri(string uri);
-
-        //T GetById(string uuid);
-
-        //void Put(T entity);
-
-        //void DeleteByUri(string uri);
-
-        //void DeleteById(string uuid);
+        /// <summary>
+        /// Deletes a data object by the specified UUID.
+        /// </summary>
+        /// <param name="uuid">The UUID.</param>
+        /// <returns>A WITSML result.</returns>
+        WitsmlResult Delete(string uuid);
     }
 }

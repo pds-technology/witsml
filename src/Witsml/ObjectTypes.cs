@@ -11,6 +11,9 @@ namespace PDS.Witsml
     /// </summary>
     public static class ObjectTypes
     {
+        public const string Uid = "Uid";
+        public const string Uuid = "Uuid";
+
         public const string Unknown = "unknown";
         public const string CapClient = "capClient";
         public const string CapServer = "capServer";

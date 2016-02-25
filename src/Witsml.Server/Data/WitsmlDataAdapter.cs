@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -6,8 +7,9 @@ namespace PDS.Witsml.Server.Data
     /// Data adapter that encapsulates CRUD functionalities on WITSML objects.
     /// </summary>
     /// <typeparam name="T">Type of the object.</typeparam>
-    /// <seealso cref="Data.IWitsmlDataAdapter{T}" />
-    public abstract class WitsmlDataAdapter<T> : IWitsmlDataAdapter<T>
+    /// <seealso cref="PDS.Witsml.Server.Data.IWitsmlDataAdapter{T}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.IEtpDataAdapter{T}" />
+    public abstract class WitsmlDataAdapter<T> : IWitsmlDataAdapter<T>, IEtpDataAdapter<T>
     {
         /// <summary>
         /// Queries the object(s) specified by the parser.
@@ -16,7 +18,10 @@ namespace PDS.Witsml.Server.Data
         /// <returns>
         /// Queried objects.
         /// </returns>
-        public abstract WitsmlResult<List<T>> Query(WitsmlQueryParser parser);
+        public virtual WitsmlResult<List<T>> Query(WitsmlQueryParser parser)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Adds an object to the data store.
@@ -25,7 +30,10 @@ namespace PDS.Witsml.Server.Data
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        public abstract WitsmlResult Add(T entity);
+        public virtual WitsmlResult Add(T entity)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Updates the specified object.
@@ -34,7 +42,10 @@ namespace PDS.Witsml.Server.Data
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        public abstract WitsmlResult Update(T entity);
+        public virtual WitsmlResult Update(T entity)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Deletes or partially updates the specified object by uid.
@@ -43,13 +54,59 @@ namespace PDS.Witsml.Server.Data
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        public abstract WitsmlResult Delete(WitsmlQueryParser parser);
+        public virtual WitsmlResult Delete(WitsmlQueryParser parser)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Determines whether the entity exists in the data store.
         /// </summary>
         /// <param name="uid">The uid.</param>
         /// <returns>true if the entity exists; otherwise, false</returns>
-        public abstract bool Exists(string uid);
+        public virtual bool Exists(string uid)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets a collection of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        public virtual List<T> GetAll(string parentUri = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets a data object by the specified UUID.
+        /// </summary>
+        /// <param name="uuid">The UUID.</param>
+        /// <returns>The data object instance.</returns>
+        public virtual T Get(string uuid)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Puts the specified data object into the data store.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <returns>A WITSML result.</returns>
+        public virtual WitsmlResult Put(T entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Deletes a data object by the specified UUID.
+        /// </summary>
+        /// <param name="uuid">The UUID.</param>
+        /// <returns>A WITSML result.</returns>
+        public virtual WitsmlResult Delete(string uuid)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

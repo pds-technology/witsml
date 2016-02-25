@@ -62,9 +62,12 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Data\Wellbores\Wellbore200DataAdapterTests.cs" />
     <Compile Include="Data\Wellbores\Wellbore141ValidatorTest.cs" />
+    <Compile Include="Data\Wells\Well200DataAdapterTests.cs" />
     <Compile Include="DevKit131Aspect.cs" />
     <Compile Include="DevKit141Aspect.cs" />
+    <Compile Include="DevKit200Aspect.cs" />
     <Compile Include="DevKitAspect.cs" />
     <Compile Include="Data\ValidationTests.cs" />
     <Compile Include="WitsmlStore131ProxyTests.cs" />

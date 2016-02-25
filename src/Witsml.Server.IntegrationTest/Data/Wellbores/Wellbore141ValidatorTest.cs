@@ -16,7 +16,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         private static readonly string ParentDbDocumentName = ObjectNames.Well141;
         private static readonly string DbDocumentName = ObjectNames.Wellbore141;
 
-        private Mapper Mapper = new Mapper();
+        private MongoDbClassMapper Mapper = new MongoDbClassMapper();
         private IDatabaseProvider Provider;
         private DevKit141Aspect DevKit;
         private Wellbore141DataAdapter DataAdaptor;
