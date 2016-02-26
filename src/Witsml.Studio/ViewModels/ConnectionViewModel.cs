@@ -20,8 +20,9 @@ namespace PDS.Witsml.Studio.ViewModels
         private static readonly string ConnectionBaseFileName = Settings.Default.ConnectionBaseFileName;
 
         /// <summary>
-        /// Initializes an instance of the ConnectionViewModel.
+        /// Initializes a new instance of the <see cref="ConnectionViewModel"/> class.
         /// </summary>
+        /// <param name="connectionType">Type of the connection.</param>
         public ConnectionViewModel(ConnectionTypes connectionType)
         {
             _log.Debug("Creating View Model");
@@ -149,6 +150,7 @@ namespace PDS.Witsml.Studio.ViewModels
         /// <summary>
         /// Saves a Connection instance to a JSON file for the current connection type.
         /// </summary>
+        /// <param name="connection">The connection instance being saved.</param>
         internal void SaveConnectionFile(Connection connection)
         {
             EnsureDataFolder();
