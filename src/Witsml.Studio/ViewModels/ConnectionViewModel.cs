@@ -84,11 +84,56 @@ namespace PDS.Witsml.Studio.ViewModels
             }
         }
 
+        private bool _isTestSuccess;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether a connection test was successful.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if a connection test was executed and successful; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsTestSuccess
+        {
+            get { return _isTestSuccess; }
+            set
+            {
+                if (_isTestSuccess != value)
+                {
+                    _isTestSuccess = value;
+                    NotifyOfPropertyChange(() => IsTestSuccess);
+                }
+            }
+        }
+
+        private bool _isTestFailure;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether a connection test was a failure.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if a connection test was executed and failed; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsTestFailure
+        {
+            get { return _isTestFailure; }
+            set
+            {
+                if (_isTestFailure != value)
+                {
+                    _isTestFailure = value;
+                    NotifyOfPropertyChange(() => IsTestFailure);
+                }
+            }
+        }
+
         /// <summary>
         /// Executes a connection test and reports the result to the user.
         /// </summary>
-        public void TestConnection()
+        public void TestConnection(System.Action callback = null)
         {
+            IsTestSuccess = false;
+            IsTestFailure = false;
+
             _log.DebugFormat("Testing a {0} connection", ConnectionType);
 
             // Resolve a connection test specific to the current ConnectionType
@@ -103,13 +148,30 @@ namespace PDS.Witsml.Studio.ViewModels
                 {
                     var result = await connectionTest.CanConnect(EditItem);
                     await App.Current.Dispatcher.BeginInvoke(new Action<bool>(ShowTestResult), result);
+                    if (callback != null)
+                    {
+                        callback();
+                    }
                 });
             }
         }
 
+        /// <summary>
+        /// Called when [password changed].
+        /// </summary>
+        /// <param name="control">The control.</param>
         public void OnPasswordChanged(PasswordBox control)
         {
             EditItem.SecurePassword = control.SecurePassword;
+        }
+
+        /// <summary>
+        /// Called when [URL changed] to trim the start of the Uri string.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        public void OnUrlChanged(string uri)
+        {
+            EditItem.Uri = uri.TrimStart();
         }
 
         /// <summary>
@@ -118,10 +180,16 @@ namespace PDS.Witsml.Studio.ViewModels
         /// </summary>
         public void Accept()
         {
-            _log.Debug("Connection changes accepted");
-            Mapper.Map(EditItem, DataItem);
-            SaveConnectionFile(DataItem);
-            TryClose(true);
+            TestConnection(() => 
+            {
+                if (IsTestSuccess)
+                {
+                    _log.Debug("Connection changes accepted");
+                    Mapper.Map(EditItem, DataItem);
+                    SaveConnectionFile(DataItem);
+                    TryClose(true);
+                }
+            });
         }
 
         /// <summary>
@@ -224,16 +292,15 @@ namespace PDS.Witsml.Studio.ViewModels
         /// <param name="result">if set to <c>true</c> [result].</param>
         private void ShowTestResult(bool result)
         {
-            var message = result ? "Connection successful" : "Connection failed";
-            _log.Debug(message);
+            _log.Debug(result ? "Connection successful" : "Connection failed");
 
             if (result)
             {
-                App.Current.ShowInfo(message);
+                IsTestSuccess = true;
             }
             else
             {
-                App.Current.ShowError(message);
+                IsTestFailure = true;
             }
 
             CanTestConnection = true;
