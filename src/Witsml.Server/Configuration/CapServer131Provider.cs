@@ -7,7 +7,7 @@ using Witsml131 = Energistics.DataAccess.WITSML131;
 namespace PDS.Witsml.Server.Configuration
 {
     /// <summary>
-    /// Provides common WTISML server capabilities for data schema version 1.3.1.1.
+    /// Provides common WITSML server capabilities for data schema version 1.3.1.1.
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Configuration.CapServerProvider{Energistics.DataAccess.WITSML131.CapServers}" />
     [Export(typeof(ICapServerProvider))]
