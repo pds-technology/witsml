@@ -83,10 +83,10 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             }
             catch (Exception ex)
             {
-                var errorMessage = "The connection URL entered may not be valid. Re-enter a new connection.";
-
+                var errorMessage = string.Format("{0}{1}{1}{2}", "Error connecting to server.", Environment.NewLine, "Invalid URL");
+                
                 _log.Error(errorMessage, ex);
-                App.Current.ShowError(errorMessage, ex);
+                App.Current.ShowError(errorMessage);
             }
         }
     }
