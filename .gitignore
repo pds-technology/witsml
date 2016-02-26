@@ -210,3 +210,9 @@ FakesAssemblies/
 GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
+
+# Witsml.Studio
+/src/Witsml.Studio/Plugins/PDS.Witsml.Studio.Plugins.WitsmlBrowser.dll.config
+/src/Witsml.Studio/Plugins/PDS.Witsml.Studio.Plugins.EtpBrowser.dll.config
+/src/Witsml.Studio/Plugins/PDS.Witsml.Studio.Plugins.DataReplay.dll.config
+/src/Witsml.Web/Studio
