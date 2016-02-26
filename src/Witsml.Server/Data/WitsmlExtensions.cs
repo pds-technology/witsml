@@ -83,6 +83,24 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="commonData">The common data.</param>
         /// <returns>The instance of common data.</returns>
+        public static Witsml131Schemas.CommonData Update(this Witsml131Schemas.CommonData commonData)
+        {
+            if (commonData == null)
+                commonData = new Witsml131Schemas.CommonData();
+
+            if (commonData.DateTimeCreation == null)
+                commonData.DateTimeCreation = DateTime.UtcNow;
+
+            commonData.DateTimeLastChange = DateTime.UtcNow;
+
+            return commonData;
+        }
+
+        /// <summary>
+        /// Updates the dTimCreation and dTimLastChange properties in common data.
+        /// </summary>
+        /// <param name="commonData">The common data.</param>
+        /// <returns>The instance of common data.</returns>
         public static Witsml141Schemas.CommonData Update(this Witsml141Schemas.CommonData commonData)
         {
             if (commonData == null)

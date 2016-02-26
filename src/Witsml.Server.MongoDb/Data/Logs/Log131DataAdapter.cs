@@ -195,6 +195,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public override WitsmlResult Add(Log entity)
         {
             entity.Uid = NewUid(entity.Uid);
+            entity.CommonData = entity.CommonData.Update();
 
             try
             {

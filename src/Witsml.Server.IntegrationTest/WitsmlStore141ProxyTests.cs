@@ -2,6 +2,8 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ReferenceData;
+using System;
+using Energistics.DataAccess;
 
 namespace PDS.Witsml.Server
 {
@@ -40,6 +42,7 @@ namespace PDS.Witsml.Server
         public void WitsmlStore_can_get_version()
         {
             var response = DevKit.Proxy.GetVersion();
+            Console.WriteLine("DataSchemaVersions: {0}", response);
             Assert.IsNotNull(response);
         }
 
@@ -47,6 +50,7 @@ namespace PDS.Witsml.Server
         public void WitsmlStore_can_get_capabilities()
         {
             var response = DevKit.Proxy.GetCap<CapServers>(OptionsIn.DataVersion.Version141);
+            Console.WriteLine(EnergisticsConverter.ObjectToXml(response));
             Assert.IsNotNull(response);
         }
 

@@ -35,7 +35,6 @@ namespace PDS.Witsml.Server.Data.Wells
             if (_wellDataAdapter.Exists(DataObject.Uid))
             {
                 yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
-                yield break;
             }
         }
     }

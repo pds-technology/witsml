@@ -81,6 +81,8 @@
     <Compile Include="Data\IWitsmlDataAdapter.cs" />
     <Compile Include="Data\Logs\Log131DataProvider.cs" />
     <Compile Include="Data\Logs\Log141DataProvider.cs" />
+    <Compile Include="Data\Logs\Log200Validator.cs" />
+    <Compile Include="Data\Logs\Log141Validator.cs" />
     <Compile Include="Data\Wellbores\Wellbore200Validator.cs" />
     <Compile Include="Data\Wellbores\Wellbore141Validator.cs" />
     <Compile Include="Data\Wellbores\Wellbore131DataProvider.cs" />

@@ -3,27 +3,30 @@ using System.ComponentModel.DataAnnotations;
 using Energistics.DataAccess.WITSML141;
 using System.ComponentModel.Composition;
 
-namespace PDS.Witsml.Server.Data.Wellbores
+namespace PDS.Witsml.Server.Data.Logs
 {
     /// <summary>
-    /// Provides validation for <see cref="Wellbore" /> data objects.
+    /// Provides validation for <see cref="Log" /> data objects.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Energistics.DataAccess.WITSML141.Wellbore}" />
-    [Export(typeof(IDataObjectValidator<Wellbore>))]
+    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Energistics.DataAccess.WITSML141.Log}" />
+    [Export(typeof(IDataObjectValidator<Log>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public class Wellbore141Validator : DataObjectValidator<Wellbore>
+    public class Log141Validator : DataObjectValidator<Log>
     {
+        private readonly IWitsmlDataAdapter<Log> _logDataAdapter;
         private readonly IWitsmlDataAdapter<Wellbore> _wellboreDataAdapter;
         private readonly IWitsmlDataAdapter<Well> _wellDataAdapter;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Wellbore141Validator"/> class.
+        /// Initializes a new instance of the <see cref="Log141Validator" /> class.
         /// </summary>
+        /// <param name="logDataAdapter">The log data adapter.</param>
         /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
         /// <param name="wellDataAdapter">The well data adapter.</param>
         [ImportingConstructor]
-        public Wellbore141Validator(IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter)
+        public Log141Validator(IWitsmlDataAdapter<Log> logDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter)
         {
+            _logDataAdapter = logDataAdapter;
             _wellboreDataAdapter = wellboreDataAdapter;
             _wellDataAdapter = wellDataAdapter;
         }
@@ -39,15 +42,25 @@ namespace PDS.Witsml.Server.Data.Wellbores
             {
                 yield return new ValidationResult(ErrorCodes.MissingParentUid.ToString(), new[] { "UidWell" });
             }
+            // Validate parent uid property
+            else if (string.IsNullOrWhiteSpace(DataObject.UidWellbore))
+            {
+                yield return new ValidationResult(ErrorCodes.MissingParentUid.ToString(), new[] { "UidWellbore" });
+            }
 
             // Validate parent exists
             else if (!_wellDataAdapter.Exists(DataObject.UidWell))
             {
                 yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWell" });
             }
+            // Validate parent exists
+            else if (_wellboreDataAdapter.Exists(DataObject.UidWellbore))
+            {
+                yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWellbore" });
+            }
 
             // Validate UID does not exist
-            else if (_wellboreDataAdapter.Exists(DataObject.Uid))
+            else if (_logDataAdapter.Exists(DataObject.Uid))
             {
                 yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
             }

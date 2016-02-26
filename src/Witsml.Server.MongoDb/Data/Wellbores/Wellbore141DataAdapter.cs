@@ -51,7 +51,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         }
 
         /// <summary>
-        /// Adds a WITSML wellbore object to data store.
+        /// Adds a <see cref="Wellbore"/> to the data store.
         /// </summary>
         /// <param name="entity">WITSML wellbore object to be added</param>
         /// <returns>A WitsmlResult object that contains a return code and the UID of the new wellbore object if successful or an error message 
@@ -64,19 +64,9 @@ namespace PDS.Witsml.Server.Data.Wellbores
             validator.Validate(Functions.AddToStore, entity);
 
             _log.DebugFormat("Add new wellbore with uidWell: {0}; uid: {1}", entity.UidWell, entity.Uid);
-            InsertEntity(entity, DbCollectionName);
+            InsertEntity(entity);
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uid);
-        }
-
-        public override WitsmlResult Delete(WitsmlQueryParser parser)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override WitsmlResult Update(Wellbore entity)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -92,6 +82,22 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 .Where(x => x.UidWell == uidWell)
                 .OrderBy(x => x.Name)
                 .ToList();
+        }
+
+        /// <summary>
+        /// Puts the specified data object into the data store.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        public override WitsmlResult Put(Wellbore entity)
+        {
+            if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.Uid))
+            {
+                return Update(entity);
+            }
+            else
+            {
+                return Add(entity);
+            }
         }
     }
 }

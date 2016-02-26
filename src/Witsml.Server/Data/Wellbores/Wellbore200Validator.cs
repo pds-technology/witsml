@@ -38,14 +38,12 @@ namespace PDS.Witsml.Server.Data.Wellbores
             //if (!_wellDataAdapter.Exists(DataObject.UidWell))
             //{
             //    yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWell" });
-            //    yield break;
             //}
 
             // Validate UID does not exist
-            //if (_wellboreDataAdapter.Exists(DataObject.Uid))
+            //else if (_wellboreDataAdapter.Exists(DataObject.Uid))
             //{
             //    yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
-            //    yield break;
             //}
 
             yield break;
