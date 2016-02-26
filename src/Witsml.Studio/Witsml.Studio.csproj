@@ -145,6 +145,7 @@
     <Compile Include="Connections\EtpConnectionTest.cs" />
     <Compile Include="Connections\IConnectionTest.cs" />
     <Compile Include="Connections\WitsmlConnectionTest.cs" />
+    <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\NullToBooleanConverter.cs" />
     <Compile Include="Converters\NullToVisibilityConverter.cs" />
     <Compile Include="Connections\Connection.cs" />
@@ -179,6 +180,8 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <Resource Include="Images\StatusInvalid_16x.png" />
+    <Resource Include="Images\StatusOK_16x.png" />
     <Content Include="Samples\ChannelMetadataRecords.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
