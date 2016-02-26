@@ -89,6 +89,8 @@ namespace PDS.Witsml.Studio.ViewModels
         /// </summary>
         public void TestConnection()
         {
+            _log.DebugFormat("Testing a {0} connection", ConnectionType);
+
             // Resolve a connection test specific to the current ConnectionType
             var connectionTest = App.Current.Container().Resolve<IConnectionTest>(ConnectionType.ToString());
 
@@ -116,6 +118,7 @@ namespace PDS.Witsml.Studio.ViewModels
         /// </summary>
         public void Accept()
         {
+            _log.Debug("Connection changes accepted");
             Mapper.Map(EditItem, DataItem);
             SaveConnectionFile(DataItem);
             TryClose(true);
@@ -127,6 +130,7 @@ namespace PDS.Witsml.Studio.ViewModels
         /// </summary>
         public void Cancel()
         {
+            _log.Debug("Connection changes canceled");
             TryClose(false);
         }
 
@@ -140,6 +144,7 @@ namespace PDS.Witsml.Studio.ViewModels
 
             if (File.Exists(filename))
             {
+                _log.DebugFormat("Reading persisted Connection from '{0}'", filename);
                 var json = File.ReadAllText(filename);
                 return JsonConvert.DeserializeObject<Connection>(json);
             }
@@ -155,6 +160,7 @@ namespace PDS.Witsml.Studio.ViewModels
         {
             EnsureDataFolder();
             string filename = GetConnectionFilename();
+            _log.DebugFormat("Persisting Connection to '{0}'", filename);
             File.WriteAllText(filename, JsonConvert.SerializeObject(connection));
         }
 
@@ -218,13 +224,16 @@ namespace PDS.Witsml.Studio.ViewModels
         /// <param name="result">if set to <c>true</c> [result].</param>
         private void ShowTestResult(bool result)
         {
+            var message = result ? "Connection successful" : "Connection failed";
+            _log.Debug(message);
+
             if (result)
             {
-                App.Current.ShowInfo("Connection successful");
+                App.Current.ShowInfo(message);
             }
             else
             {
-                App.Current.ShowError("Connection failed");
+                App.Current.ShowError(message);
             }
 
             CanTestConnection = true;

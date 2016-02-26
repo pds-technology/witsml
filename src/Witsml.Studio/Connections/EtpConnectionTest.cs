@@ -11,6 +11,8 @@ namespace PDS.Witsml.Studio.Connections
     [Export("Etp", typeof(IConnectionTest))]
     public class EtpConnectionTest : IConnectionTest
     {
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(EtpConnectionTest));
+
         /// <summary>
         /// Determines whether this Connection instance can connect to the specified connection Uri.
         /// </summary>
@@ -31,11 +33,15 @@ namespace PDS.Witsml.Studio.Connections
                         count++;
                     }
 
-                    return !string.IsNullOrWhiteSpace(client.SessionId);
+                    var result = !string.IsNullOrWhiteSpace(client.SessionId);
+                    _log.DebugFormat("Etp connection test {0}", result ? "passed" : "failed");
+
+                    return result;
                 }
             }
             catch
             {
+                _log.Debug("Etp connection test failed");
                 return false;
             }
         }
