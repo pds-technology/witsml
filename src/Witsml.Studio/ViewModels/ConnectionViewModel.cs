@@ -166,6 +166,18 @@ namespace PDS.Witsml.Studio.ViewModels
         }
 
         /// <summary>
+        /// Called when [URL changed] to trim the start of the Uri string.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        public void OnUrlChanged(string uri)
+        {
+            if (EditItem.Uri != uri.TrimStart())
+            {
+                EditItem.Uri = uri.TrimStart();
+            }
+        }
+
+        /// <summary>
         /// Accepts the edited connection by assigning all changes 
         /// from the EditItem to the DataItem and persisting the changes.
         /// </summary>
