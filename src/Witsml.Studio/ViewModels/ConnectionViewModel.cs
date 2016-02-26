@@ -171,10 +171,7 @@ namespace PDS.Witsml.Studio.ViewModels
         /// <param name="uri">The URI.</param>
         public void OnUrlChanged(string uri)
         {
-            if (EditItem.Uri != uri.TrimStart())
-            {
-                EditItem.Uri = uri.TrimStart();
-            }
+            EditItem.Uri = uri.TrimStart();
         }
 
         /// <summary>
