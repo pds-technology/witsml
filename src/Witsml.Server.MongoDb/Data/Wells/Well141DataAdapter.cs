@@ -70,16 +70,6 @@ namespace PDS.Witsml.Server.Data.Wells
             return new WitsmlResult(ErrorCodes.Success, entity.Uid);
         }
 
-        public override WitsmlResult Update(Well entity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override WitsmlResult Delete(WitsmlQueryParser parser)
-        {
-            throw new NotImplementedException();
-        }
-
         /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>
@@ -90,6 +80,22 @@ namespace PDS.Witsml.Server.Data.Wells
             return GetQuery()
                 .OrderBy(x => x.Name)
                 .ToList();
+        }
+
+        /// <summary>
+        /// Puts the specified data object into the data store.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        public override WitsmlResult Put(Well entity)
+        {
+            if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.Uid))
+            {
+                return Update(entity);
+            }
+            else
+            {
+                return Add(entity);
+            }
         }
     }
 }
