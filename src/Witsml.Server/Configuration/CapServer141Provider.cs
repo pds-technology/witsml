@@ -35,37 +35,33 @@ namespace PDS.Witsml.Server.Configuration
         /// <summary>
         /// Performs validation for the specified function and supplied parameters.
         /// </summary>
-        /// <param name="function">The WITSML Store API function.</param>
-        /// <param name="objectType">The type of the data object.</param>
-        /// <param name="xml">The XML string for the data object.</param>
-        /// <param name="options">The options.</param>
-        /// <param name="capabilities">The client's capabilities object (capClient).</param>
-        public override void ValidateRequest(Functions function, string objectType, string xml, string options, string capabilities)
+        /// <param name="context">The request context.</param>
+        public override void ValidateRequest(RequestContext context)
         {
-            base.ValidateRequest(function, objectType, xml, options, capabilities);
+            base.ValidateRequest(context);
 
-            var optionsIn = OptionsIn.Parse(options);
+            var optionsIn = OptionsIn.Parse(context.Options);
 
-            if (function == Functions.GetFromStore)
+            if (context.Function == Functions.GetFromStore)
             {
             }
-            else if (function == Functions.AddToStore)
+            else if (context.Function == Functions.AddToStore)
             {
                 ValidateKeywords(optionsIn, OptionsIn.CompressionMethod.Keyword);
                 ValidateCompressionMethod(optionsIn, GetCapServer().CapServer.CompressionMethod);
-                ValidateSingleChildElement(objectType, xml);
+                ValidateSingleChildElement(context.ObjectType, context.Xml);
             }
-            else if (function == Functions.UpdateInStore)
+            else if (context.Function == Functions.UpdateInStore)
             {
                 ValidateKeywords(optionsIn, OptionsIn.CompressionMethod.Keyword);
                 ValidateCompressionMethod(optionsIn, GetCapServer().CapServer.CompressionMethod);
-                ValidateSingleChildElement(objectType, xml);
+                ValidateSingleChildElement(context.ObjectType, context.Xml);
             }
-            else if (function == Functions.UpdateInStore)
+            else if (context.Function == Functions.UpdateInStore)
             {
                 //ValidateKeywords(optionsIn, OptionsIn.CascadedDelete.Keyword);
                 //ValidateCascadedDelete(optionsIn, GetCapServer().CapServer.CascadedDelete.GetValueOrDefault());
-                ValidateSingleChildElement(objectType, xml);
+                ValidateSingleChildElement(context.ObjectType, context.Xml);
             }
         }
 

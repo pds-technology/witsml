@@ -2,6 +2,7 @@
 using System.Linq;
 using Energistics.DataAccess;
 using log4net;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -29,14 +30,11 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Gets object(s) from store.
         /// </summary>
-        /// <param name="witsmlType">Type of the data-object.</param>
-        /// <param name="query">The XML query string.</param>
-        /// <param name="options">The options.</param>
-        /// <param name="capabilities">The client’s Capabilities Object (capClient).</param>
+        /// <param name="context">The request context.</param>
         /// <returns>Queried objects.</returns>
-        public virtual WitsmlResult<IEnergisticsCollection> GetFromStore(string witsmlType, string query, string options, string capabilities)
+        public virtual WitsmlResult<IEnergisticsCollection> GetFromStore(RequestContext context)
         {
-            var parser = new WitsmlQueryParser(witsmlType, query, options, capabilities);
+            var parser = new WitsmlQueryParser(context);
             var result = _dataAdapter.Query(parser);
             return FormatResponse(parser, result);
         }
@@ -44,48 +42,39 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Adds an object to the data store.
         /// </summary>
-        /// <param name="witsmlType">Type of the data-object.</param>
-        /// <param name="xml">The XML string for the data-object.</param>
-        /// <param name="options">The options.</param>
-        /// <param name="capabilities">The client’s Capabilities Object (capClient).</param>
+        /// <param name="context">The request context.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        public virtual WitsmlResult AddToStore(string witsmlType, string xml, string options, string capabilities)
+        public virtual WitsmlResult AddToStore(RequestContext context)
         {
-            var list = EnergisticsConverter.XmlToObject<TList>(xml);
+            var list = EnergisticsConverter.XmlToObject<TList>(context.Xml);
             return _dataAdapter.Add(list.Items.Cast<TObject>().Single());
         }
 
         /// <summary>
         /// Updates an object in the data store.
         /// </summary>
-        /// <param name="witsmlType">Type of the data-object.</param>
-        /// <param name="xml">The XML string for the data-object.</param>
-        /// <param name="options">The options.</param>
-        /// <param name="capabilities">The client’s Capabilities Object (capClient).</param>
+        /// <param name="context">The request context.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        public virtual WitsmlResult UpdateInStore(string witsmlType, string xml, string options, string capabilities)
+        public virtual WitsmlResult UpdateInStore(RequestContext context)
         {
-            var list = EnergisticsConverter.XmlToObject<TList>(xml);
+            var list = EnergisticsConverter.XmlToObject<TList>(context.Xml);
             return _dataAdapter.Update(list.Items.Cast<TObject>().Single());
         }
 
         /// <summary>
         /// Deletes or partially update object from store.
         /// </summary>
-        /// <param name="witsmlType">Type of the data-object.</param>
-        /// <param name="xml">The XML string for the delete query.</param>
-        /// <param name="options">The options.</param>
-        /// <param name="capabilities">The client’s Capabilities Object (capClient).</param>
+        /// <param name="context">The request context.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        public virtual WitsmlResult DeleteFromStore(string witsmlType, string xml, string options, string capabilities)
+        public virtual WitsmlResult DeleteFromStore(RequestContext context)
         {
-            var parser = new WitsmlQueryParser(witsmlType, xml, options, capabilities);
+            var parser = new WitsmlQueryParser(context);
             return _dataAdapter.Delete(parser);
         }
         

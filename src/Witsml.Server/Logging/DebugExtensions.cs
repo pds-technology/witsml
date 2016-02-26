@@ -181,7 +181,7 @@ namespace PDS.Witsml.Server.Logging
                 response.SuppMsgOut);
         }
 
-        private static string Format(string xml)
+        public static string Format(string xml)
         {
             if (string.IsNullOrWhiteSpace(xml))
                 return string.Empty;

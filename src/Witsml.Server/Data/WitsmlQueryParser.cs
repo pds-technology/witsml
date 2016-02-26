@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -10,23 +11,17 @@ namespace PDS.Witsml.Server.Data
         private readonly XNamespace _namespace;
         private readonly XDocument _document;
 
-        public WitsmlQueryParser(string witsmlType, string query, string options, string capabilities)
+        public WitsmlQueryParser(RequestContext context)
         {
-            WitsmlType = witsmlType;
-            Query = query;
-            Options = OptionsIn.Parse(options);
-            Capabilities = Capabilities;
-            _document = XDocument.Parse(Query);
+            Context = context;
+            Options = OptionsIn.Parse(context.Options);
+            _document = XDocument.Parse(context.Xml);
             _namespace = _document.Root.GetDefaultNamespace();
         }
 
-        public string WitsmlType { get; private set; }
-
-        public string Query { get; private set; }
+        public RequestContext Context { get; private set; }
 
         public Dictionary<string, string> Options { get; private set; }
-
-        public string Capabilities { get; private set; }
 
         public string ReturnElements()
         {
@@ -35,7 +30,7 @@ namespace PDS.Witsml.Server.Data
 
         public IEnumerable<XElement> Elements()
         {
-            return _document.Root.Elements(_namespace + WitsmlType);
+            return _document.Root.Elements(_namespace + Context.ObjectType);
         }
 
         public XElement Element()

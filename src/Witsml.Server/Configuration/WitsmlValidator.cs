@@ -15,29 +15,25 @@ namespace PDS.Witsml.Server.Configuration
         /// Validates the WITSML Store API request.
         /// </summary>
         /// <param name="providers">The capServer providers.</param>
-        /// <param name="function">The WITSML Store API function.</param>
-        /// <param name="objectType">The type of the data object.</param>
-        /// <param name="xml">The XML string for the data object.</param>
-        /// <param name="options">The options.</param>
-        /// <param name="capabilities">The client's capabilities object (capClient).</param>
+        /// <param name="context">The request context.</param>
         /// <param name="version">The data schema version.</param>
         /// <exception cref="WitsmlException"></exception>
-        public static void ValidateRequest(IEnumerable<ICapServerProvider> providers, Functions function, string objectType, string xml, string options, string capabilities, out string version)
+        public static void ValidateRequest(IEnumerable<ICapServerProvider> providers, RequestContext context, out string version)
         {
             ValidateUserAgent(WebOperationContext.Current);
-            ValidateInputTemplate(xml);
+            ValidateInputTemplate(context.Xml);
 
-            var dataSchemaVersion = ObjectTypes.GetVersion(xml);
+            var dataSchemaVersion = ObjectTypes.GetVersion(context.Xml);
             ValidateDataSchemaVersion(dataSchemaVersion);
 
             var capServerProvider = providers.FirstOrDefault(x => x.DataSchemaVersion == dataSchemaVersion);
             if (capServerProvider == null)
             {
                 throw new WitsmlException(ErrorCodes.DataObjectNotSupported,
-                    "WITSML object type not supported: " + objectType + "; Version: " + dataSchemaVersion);
+                    "WITSML object type not supported: " + context.ObjectType + "; Version: " + dataSchemaVersion);
             }
 
-            capServerProvider.ValidateRequest(function, objectType, xml, options, capabilities);
+            capServerProvider.ValidateRequest(context);
             version = dataSchemaVersion;
         }
 
@@ -54,15 +50,11 @@ namespace PDS.Witsml.Server.Configuration
         /// <summary>
         /// Performs validation for the specified function and supplied parameters.
         /// </summary>
-        /// <param name="function">The WITSML Store API function.</param>
-        /// <param name="objectType">The type of the data object.</param>
-        /// <param name="xml">The XML string for the data object.</param>
-        /// <param name="options">The options.</param>
-        /// <param name="capabilities">The client's capabilities object (capClient).</param>
-        public virtual void ValidateRequest(Functions function, string objectType, string xml, string options, string capabilities)
+        /// <param name="context">The request context.</param>
+        public virtual void ValidateRequest(RequestContext context)
         {
-            ValidateObjectType(function, objectType, ObjectTypes.GetObjectType(xml));
-            ValidatePluralRootElement(objectType, xml);
+            ValidateObjectType(context.Function, context.ObjectType, ObjectTypes.GetObjectType(context.Xml));
+            ValidatePluralRootElement(context.ObjectType, context.Xml);
         }
 
         /// <summary>
