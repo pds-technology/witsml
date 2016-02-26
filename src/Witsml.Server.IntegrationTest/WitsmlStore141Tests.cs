@@ -229,11 +229,10 @@ namespace PDS.Witsml.Server
             Assert.AreEqual((short)ErrorCodes.MissingInputTemplate, response.Result);
         }
 
-        [Ignore]
         [TestMethod]
         public void Test_error_code_409_non_conforming_input_template()
         {
-            var well = new Well { Name = "Well-to-add-invalid-input-template", TimeZone = DevKit.TimeZone };
+            var well = new Well { Name = "Well-to-add-invalid-input-template" }; // <-- Missing required TimeZone
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);

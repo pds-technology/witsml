@@ -79,9 +79,11 @@ namespace PDS.Witsml.Server.Data
             // Validate object properties
             if (!EntityValidator.TryValidate(DataObject, out results))
             {
-                foreach (var result in results)
-                    yield return result;
+                throw new WitsmlException(ErrorCodes.InputTemplateNonConforming,
+                    string.Join("; ", results.Select(x => x.ErrorMessage)));
             }
+
+            yield break;
         }
 
         /// <summary>
