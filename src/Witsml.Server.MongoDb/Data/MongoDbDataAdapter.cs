@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic;
-using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using log4net;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;

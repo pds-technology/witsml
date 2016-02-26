@@ -1,10 +1,9 @@
-﻿using PDS.Framework;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Energistics.DataAccess.WITSML141;
 using System.ComponentModel.Composition;
 
-namespace PDS.Witsml.Server.Data
+namespace PDS.Witsml.Server.Data.Wellbores
 {
     /// <summary>
     /// Provides validation for <see cref="Wellbore" /> data objects.
@@ -35,7 +34,12 @@ namespace PDS.Witsml.Server.Data
         /// <returns>A collection of validation results.</returns>
         protected override IEnumerable<ValidationResult> ValidateForInsert()
         {
-            IList<ValidationResult> results;
+            // Validate parent uid property
+            if (string.IsNullOrWhiteSpace(DataObject.UidWell))
+            {
+                yield return new ValidationResult(ErrorCodes.MissingParentUid.ToString(), new[] { "UidWell" });
+                yield break;
+            }
 
             // Validate parent exists
             if (!_wellDataAdapter.Exists(DataObject.UidWell))
@@ -48,15 +52,6 @@ namespace PDS.Witsml.Server.Data
             if (_wellboreDataAdapter.Exists(DataObject.Uid))
             {
                 yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
-                yield break;
-            }
-
-            // Validate object properties
-            if (!EntityValidator.TryValidate(DataObject, out results))
-            {
-                foreach (var result in results)
-                    yield return result;
-
                 yield break;
             }
         }

@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-
-namespace PDS.Witsml.Server.Data
+﻿namespace PDS.Witsml.Server.Data
 {
     /// <summary>
     /// Defines a method that can be used to validate WITSML data objects.
@@ -16,17 +13,16 @@ namespace PDS.Witsml.Server.Data
         T DataObject { get; }
 
         /// <summary>
-        /// Gets the WITSML Store API method being executed.
+        /// Gets the WITSML API method being executed.
         /// </summary>
         /// <value>The method being executed.</value>
         Functions Function { get; }
 
         /// <summary>
-        /// Validates the specified data object while executing a WITSML Store API method.
+        /// Validates the specified data object while executing a WITSML API method.
         /// </summary>
-        /// <param name="function">The WITSML Store API method.</param>
+        /// <param name="function">The WITSML API method.</param>
         /// <param name="dataObject">The data object.</param>
-        /// <returns>A collection of validation results.</returns>
-        IList<ValidationResult> Validate(Functions function, T dataObject);
+        void Validate(Functions function, T dataObject);
     }
 }

@@ -22,16 +22,13 @@ namespace PDS.Witsml.Server.Data.Wellbores
         private static readonly ILog _log = LogManager.GetLogger(typeof(Wellbore141DataAdapter));
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Wellbore141DataAdapter"/> class.
+        /// Initializes a new instance of the <see cref="Wellbore141DataAdapter" /> class.
         /// </summary>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
         public Wellbore141DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Wellbore141)
         {
         }
-
-        [Import]
-        public IContainer Container { get; set; }
 
         /// <summary>
         /// Gets the supported capabilities for the <see cref="Wellbore"/> object.
@@ -63,14 +60,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             entity.CommonData = entity.CommonData.Update();
 
             var validator = Container.Resolve<IDataObjectValidator<Wellbore>>();
-            var results = validator.Validate(Functions.AddToStore, entity);
-
-            if (results.Any())
-            {
-                var errorCode = ErrorCodes.Unset;
-                Enum.TryParse(results.First().ErrorMessage, out errorCode);
-                return new WitsmlResult(errorCode);
-            }
+            validator.Validate(Functions.AddToStore, entity);
 
             _log.DebugFormat("Add new wellbore with uidWell: {0}; uid: {1}", entity.UidWell, entity.Uid);
             InsertEntity(entity, DbCollectionName);
@@ -93,7 +83,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
         /// <returns>A collection of data objects.</returns>
-        public List<Wellbore> GetAll(string parentUri = null)
+        public override List<Wellbore> GetAll(string parentUri = null)
         {
             var uidWell = parentUri.Split(new[] { '(', ')' }, StringSplitOptions.RemoveEmptyEntries).Last();
 

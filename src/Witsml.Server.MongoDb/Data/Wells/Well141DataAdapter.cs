@@ -60,6 +60,9 @@ namespace PDS.Witsml.Server.Data.Wells
             entity.Uid = NewUid(entity.Uid);
             entity.CommonData = entity.CommonData.Update();
 
+            var validator = Container.Resolve<IDataObjectValidator<Well>>();
+            validator.Validate(Functions.AddToStore, entity);
+
             _log.DebugFormat("Add new well with uid: {0}", entity.Uid);
             InsertEntity(entity);
 

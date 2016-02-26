@@ -22,6 +22,15 @@
         public static class Witsml200
         {
             public const string Root = "eml://witsml20";
+
+            public const string Wells = Root + "/well";
+            public const string Well = Root + "/well({0})";
+
+            public const string Wellbores = Root + "/wellbore";
+            public const string Wellbore = Root + "/wellbore({0})";
+
+            public const string Logs = Root + "/log";
+            public const string Log = Root + "/log({0})";
         }
     }
 }

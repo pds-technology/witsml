@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -11,6 +13,13 @@ namespace PDS.Witsml.Server.Data
     /// <seealso cref="PDS.Witsml.Server.Data.IEtpDataAdapter{T}" />
     public abstract class WitsmlDataAdapter<T> : IWitsmlDataAdapter<T>, IEtpDataAdapter<T>
     {
+        /// <summary>
+        /// Gets or sets the composition container.
+        /// </summary>
+        /// <value>The composition container.</value>
+        [Import]
+        public IContainer Container { get; set; }
+
         /// <summary>
         /// Queries the object(s) specified by the parser.
         /// </summary>

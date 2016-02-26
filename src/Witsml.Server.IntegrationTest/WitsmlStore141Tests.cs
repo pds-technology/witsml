@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Framework;
 using PDS.Witsml.Server.Data;
 using PDS.Witsml.Server.Data.Wellbores;
+using PDS.Witsml.Server.Data.Wells;
 
 namespace PDS.Witsml.Server
 {
@@ -68,7 +69,7 @@ namespace PDS.Witsml.Server
         [TestMethod]
         public void Can_get_cap_server()
         {
-            var request = new WMLS_GetCapRequest { OptionsIn= "dataVersion=1.4.1.1" };
+            var request = new WMLS_GetCapRequest { OptionsIn = "dataVersion=1.4.1.1" };
             var response = DevKit.Store.WMLS_GetCap(request);
 
             Assert.IsNotNull(response);

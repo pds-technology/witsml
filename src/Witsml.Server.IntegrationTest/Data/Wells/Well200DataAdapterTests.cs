@@ -3,6 +3,7 @@ using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
@@ -10,8 +11,9 @@ namespace PDS.Witsml.Server.Data.Wells
     public class Well200DataAdapterTests
     {
         private DevKit200Aspect DevKit;
-        private IDatabaseProvider _provider;
-        private IEtpDataAdapter<Well> _adapter;
+        private IContainer Container;
+        private IDatabaseProvider Provider;
+        private IEtpDataAdapter<Well> WellAdapter;
 
         private Well Well1;
         private Well Well2;
@@ -19,29 +21,34 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestInitialize]
         public void TestSetUp()
         {
-            _provider = new DatabaseProvider(new MongoDbClassMapper());
-            _adapter = new Well200DataAdapter(_provider);
-
             DevKit = new DevKit200Aspect();
+            Container = ContainerFactory.Create();
+            Provider = new DatabaseProvider(new MongoDbClassMapper());
+
+            WellAdapter = new Well200DataAdapter(Provider) { Container = Container };
 
             Well1 = new Well()
             {
-                Uuid = DevKit.Uid(),
                 Citation = new Citation { Title = DevKit.Name("Well 01") },
+                GeographicLocationWGS84 = new GeodeticWellLocation(),
+                TimeZone = DevKit.TimeZone,
+                Uuid = DevKit.Uid(),
             };
 
             Well2 = new Well()
             {
                 Citation = new Citation { Title = DevKit.Name("Well 02") },
+                GeographicLocationWGS84 = new GeodeticWellLocation(),
+                TimeZone = DevKit.TimeZone,
             };
         }
 
         [TestMethod]
         public void CanAddAndGetSingleWellWithUuid()
         {
-            _adapter.Put(Well1);
+            WellAdapter.Put(Well1);
 
-            var well1 = _adapter.Get(Well1.Uuid);
+            var well1 = WellAdapter.Get(Well1.Uuid);
 
             Assert.AreEqual(Well1.Citation.Title, well1.Citation.Title);
         }
@@ -49,9 +56,9 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void CanAddAndGetSingleWellWithoutUuid()
         {
-            _adapter.Put(Well2);
+            WellAdapter.Put(Well2);
 
-            var well2 = _provider.GetDatabase().GetCollection<Well>(ObjectNames.Well200).AsQueryable()
+            var well2 = Provider.GetDatabase().GetCollection<Well>(ObjectNames.Well200).AsQueryable()
                 .Where(x => x.Citation.Title == Well2.Citation.Title)
                 .FirstOrDefault();
 

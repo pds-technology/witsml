@@ -1,8 +1,11 @@
 ﻿using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Energistics.Datatypes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
+using PDS.Framework;
+using PDS.Witsml.Server.Data.Wells;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
@@ -10,38 +13,51 @@ namespace PDS.Witsml.Server.Data.Wellbores
     public class Wellbore200DataAdapterTests
     {
         private DevKit200Aspect DevKit;
-        private IDatabaseProvider _provider;
-        private IEtpDataAdapter<Wellbore> _adapter;
+        private IContainer Container;
+        private IDatabaseProvider Provider;
+        private IEtpDataAdapter<Well> WellAdapter;
+        private IEtpDataAdapter<Wellbore> WellboreAdapter;
 
+        private Well Well1;
+        private Well Well2;
         private Wellbore Wellbore1;
         private Wellbore Wellbore2;
+        private DataObjectReference WellReference;
 
         [TestInitialize]
         public void TestSetUp()
         {
-            _provider = new DatabaseProvider(new MongoDbClassMapper());
-            _adapter = new Wellbore200DataAdapter(_provider);
-
             DevKit = new DevKit200Aspect();
+            Container = ContainerFactory.Create();
+            Provider = new DatabaseProvider(new MongoDbClassMapper());
 
-            Wellbore1 = new Wellbore()
+            WellAdapter = new Well200DataAdapter(Provider) { Container = Container };
+            WellboreAdapter = new Wellbore200DataAdapter(Provider) { Container = Container };
+
+            Well1 = new Well() { Citation = new Citation { Title = DevKit.Name("Well 01") }, TimeZone = DevKit.TimeZone, Uuid = DevKit.Uid() };
+            Well2 = new Well() { Citation = new Citation { Title = DevKit.Name("Well 02") }, TimeZone = DevKit.TimeZone, Uuid = DevKit.Uid() };
+
+            Well1.GeographicLocationWGS84 = new GeodeticWellLocation();
+            Well2.GeographicLocationWGS84 = new GeodeticWellLocation();
+
+            WellReference = new DataObjectReference
             {
-                Uuid = DevKit.Uid(),
-                Citation = new Citation { Title = DevKit.Name("Wellbore 01") },
+                ContentType = ContentTypes.Witsml200 + "type=" + ObjectTypes.Well,
+                Title = Well1.Citation.Title,
+                Uuid = Well1.Uuid
             };
 
-            Wellbore2 = new Wellbore()
-            {
-                Citation = new Citation { Title = DevKit.Name("Wellbore 02") },
-            };
+            Wellbore1 = new Wellbore() { Citation = new Citation { Title = DevKit.Name("Wellbore 01") }, ReferenceWell = WellReference, Uuid = DevKit.Uid() };
+            Wellbore2 = new Wellbore() { Citation = new Citation { Title = DevKit.Name("Wellbore 02") }, ReferenceWell = WellReference };
         }
 
         [TestMethod]
         public void CanAddAndGetSingleWellboreWithUuid()
         {
-            _adapter.Put(Wellbore1);
+            WellAdapter.Put(Well1);
+            WellboreAdapter.Put(Wellbore1);
 
-            var wellbore1 = _adapter.Get(Wellbore1.Uuid);
+            var wellbore1 = WellboreAdapter.Get(Wellbore1.Uuid);
 
             Assert.AreEqual(Wellbore1.Citation.Title, wellbore1.Citation.Title);
         }
@@ -49,9 +65,10 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod]
         public void CanAddAndGetSingleWellboreWithoutUuid()
         {
-            _adapter.Put(Wellbore2);
+            WellAdapter.Put(Well1);
+            WellboreAdapter.Put(Wellbore2);
 
-            var wellbore2 = _provider.GetDatabase().GetCollection<Wellbore>(ObjectNames.Wellbore200).AsQueryable()
+            var wellbore2 = Provider.GetDatabase().GetCollection<Wellbore>(ObjectNames.Wellbore200).AsQueryable()
                 .Where(x => x.Citation.Title == Wellbore2.Citation.Title)
                 .FirstOrDefault();
 

@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data
@@ -18,25 +20,31 @@ namespace PDS.Witsml.Server.Data
         public T DataObject { get; private set; }
 
         /// <summary>
-        /// Gets the WITSML Store API method being executed.
+        /// Gets the WITSML API method being executed.
         /// </summary>
         /// <value>The function.</value>
         public Functions Function { get; private set; }
 
         /// <summary>
-        /// Validates the specified data object while executing a WITSML Store API method.
+        /// Validates the specified data object while executing a WITSML API method.
         /// </summary>
-        /// <param name="function">The WITSML Store API method.</param>
+        /// <param name="function">The WITSML API method.</param>
         /// <param name="dataObject">The data object.</param>
-        /// <returns>A collection of validation results.</returns>
-        public IList<ValidationResult> Validate(Functions function, T dataObject)
+        /// <exception cref="PDS.Witsml.WitsmlException">If any validation errors are detected.</exception>
+        public void Validate(Functions function, T dataObject)
         {
             DataObject = dataObject;
             Function = function;
 
             IList<ValidationResult> results;
             EntityValidator.TryValidate(this, out results);
-            return results;
+
+            if (results.Any())
+            {
+                var errorCode = ErrorCodes.Unset;
+                Enum.TryParse(results.First().ErrorMessage, out errorCode);
+                throw new WitsmlException(errorCode);
+            }
         }
 
         /// <summary>
@@ -49,9 +57,30 @@ namespace PDS.Witsml.Server.Data
             switch (Function)
             {
                 case Functions.AddToStore:
-                    foreach (var result in ValidateForInsert())
+                    foreach (var result in ValidateProperties().Union(ValidateForInsert()))
                         yield return result;
                     break;
+
+                case Functions.PutObject:
+                    foreach (var result in ValidateProperties().Union(ValidateForPutObject()))
+                        yield return result;
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Validates the data object properties using .NET validation attributes.
+        /// </summary>
+        /// <returns>A collection of validation results.</returns>
+        protected virtual IEnumerable<ValidationResult> ValidateProperties()
+        {
+            IList<ValidationResult> results;
+
+            // Validate object properties
+            if (!EntityValidator.TryValidate(DataObject, out results))
+            {
+                foreach (var result in results)
+                    yield return result;
             }
         }
 
@@ -60,6 +89,15 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <returns>A collection of validation results.</returns>
         protected virtual IEnumerable<ValidationResult> ValidateForInsert()
+        {
+            yield break;
+        }
+
+        /// <summary>
+        /// Validates the data object while executing PutObject.
+        /// </summary>
+        /// <returns>A collection of validation results.</returns>
+        protected virtual IEnumerable<ValidationResult> ValidateForPutObject()
         {
             yield break;
         }

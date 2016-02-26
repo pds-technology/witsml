@@ -30,9 +30,15 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// <returns>A collection of data objects.</returns>
         public override List<Wellbore> GetAll(string parentUri = null)
         {
-            //Energistics.DataAccess.WITSML200.ComponentSchemas.RefWellWellbore
+            var uidWell = parentUri.Split(new[] { '(', ')' }, StringSplitOptions.RemoveEmptyEntries).Last();
+            var query = GetQuery().AsQueryable();
 
-            return GetQuery()
+            if (!string.IsNullOrWhiteSpace(uidWell))
+            {
+                query = query.Where(x => x.ReferenceWell.Uuid == uidWell);
+            }
+
+            return query
                 .OrderBy(x => x.Citation.Title)
                 .ToList();
         }
@@ -51,6 +57,9 @@ namespace PDS.Witsml.Server.Data.Wellbores
             {
                 entity.Uuid = NewUid(entity.Uuid);
                 entity.Citation = entity.Citation.Update();
+
+                var validator = Container.Resolve<IDataObjectValidator<Wellbore>>();
+                validator.Validate(Functions.PutObject, entity);
 
                 InsertEntity(entity);
             }

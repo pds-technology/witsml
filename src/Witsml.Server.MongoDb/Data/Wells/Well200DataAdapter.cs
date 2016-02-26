@@ -50,6 +50,9 @@ namespace PDS.Witsml.Server.Data.Wells
                 entity.Uuid = NewUid(entity.Uuid);
                 entity.Citation = entity.Citation.Update();
 
+                var validator = Container.Resolve<IDataObjectValidator<Well>>();
+                validator.Validate(Functions.PutObject, entity);
+
                 InsertEntity(entity);
             }
 

@@ -13,7 +13,7 @@ namespace PDS.Witsml.Server.Data.CapServers
     /// <seealso cref="PDS.Witsml.Server.Data.ICapServerProvider" />
     public abstract class CapServerProvider<T> : ICapServerProvider
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(CapServer131Provider));
+        private static readonly ILog _log = LogManager.GetLogger(typeof(CapServerProvider<T>));
 
         private T _capServer;
         private XDocument _capServerDoc;
