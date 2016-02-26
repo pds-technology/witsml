@@ -20,12 +20,13 @@ namespace PDS.Witsml.Studio.Converters
         }
 
         /// <summary>Converts a Null value to a <see cref="T:System.Boolean" />.</summary>
-        /// <returns>
-        /// true is returned if <paramref name="value" /> is not null or if the value is a non-empty string; otherwise, false.</returns>
         /// <param name="value">The object that is Null tested to convert.</param>
         /// <param name="targetType">This parameter is not used.</param>
         /// <param name="parameter">This parameter is not used.</param>
         /// <param name="culture">This parameter is not used.</param>
+        /// <returns>
+        /// true is returned if <paramref name="value" /> is not null or if the value is a non-empty string; otherwise, false.
+        /// </returns>
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value == null)
