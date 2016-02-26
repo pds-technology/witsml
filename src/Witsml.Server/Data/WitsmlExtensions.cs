@@ -8,10 +8,19 @@ using Witsml141Schemas = Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Witsml200Schemas = Energistics.DataAccess.WITSML200.ComponentSchemas;
 using System;
 
-namespace PDS.Witsml.Server
+namespace PDS.Witsml.Server.Data
 {
+    /// <summary>
+    /// Provides extension methods for common WITSML data objects.
+    /// </summary>
     public static class WitsmlExtensions
     {
+        /// <summary>
+        /// Adds support for the specified function and data object to the capServer instance.
+        /// </summary>
+        /// <param name="capServer">The capServer instance.</param>
+        /// <param name="function">The WITSML Store API function.</param>
+        /// <param name="dataObject">The data object.</param>
         public static void Add(this Witsml131.CapServer capServer, Functions function, string dataObject)
         {
             if (capServer.Function == null)
@@ -32,11 +41,23 @@ namespace PDS.Witsml.Server
             func.DataObject.Add(dataObject);
         }
 
+        /// <summary>
+        /// Adds support for the specified function and data object to the capServer instance.
+        /// </summary>
+        /// <param name="capServer">The capServer instance.</param>
+        /// <param name="function">The WITSML Store API function.</param>
+        /// <param name="dataObject">The data object.</param>
         public static void Add(this Witsml141.CapServer capServer, Functions function, string dataObject)
         {
             Add(capServer, function, new Witsml141Schemas.ObjectWithConstraint(dataObject));
         }
 
+        /// <summary>
+        /// Adds support for the specified function and data object to the capServer instance.
+        /// </summary>
+        /// <param name="capServer">The capServer instance.</param>
+        /// <param name="function">The WITSML Store API function.</param>
+        /// <param name="dataObject">The data object.</param>
         public static void Add(this Witsml141.CapServer capServer, Functions function, Witsml141Schemas.ObjectWithConstraint dataObject)
         {
             if (capServer.Function == null)

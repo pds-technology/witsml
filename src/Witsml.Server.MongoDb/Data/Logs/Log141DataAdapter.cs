@@ -8,6 +8,7 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
+using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Models;
 using PDS.Witsml.Server.Properties;
 

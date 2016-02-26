@@ -59,6 +59,20 @@ namespace PDS.Witsml
         }
 
         /// <summary>
+        /// Defines the list of compressionMethod configuration option values.
+        /// </summary>
+        /// <seealso cref="PDS.Witsml.OptionsIn" />
+        public class CompressionMethod : OptionsIn
+        {
+            public CompressionMethod(string value) : base(Keyword, value) { }
+
+            public const string Keyword = "compressionMethod";
+
+            public static readonly CompressionMethod None = new CompressionMethod("None");
+            public static readonly CompressionMethod Gzip = new CompressionMethod("gzip");
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="OptionsIn"/> class.
         /// </summary>
         /// <param name="key">The key.</param>

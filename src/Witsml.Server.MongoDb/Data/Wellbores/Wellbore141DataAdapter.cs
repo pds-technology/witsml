@@ -5,6 +5,7 @@ using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using log4net;
 using PDS.Framework;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
@@ -12,7 +13,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// Data adapter that encapsulates CRUD functionality for <see cref="Wellbore" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML141.Wellbore}" />
-    /// <seealso cref="PDS.Witsml.Server.IWitsml141Configuration" />
+    /// <seealso cref="PDS.Witsml.Server.Configuration.IWitsml141Configuration" />
     [Export(typeof(IWitsml141Configuration))]
     [Export(typeof(IWitsmlDataAdapter<Wellbore>))]
     [Export(typeof(IEtpDataAdapter<Wellbore>))]

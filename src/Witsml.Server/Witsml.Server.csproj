@@ -68,11 +68,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Data\CapServers\CapServer141Provider.cs" />
-    <Compile Include="Data\CapServers\CapServer131Provider.cs" />
-    <Compile Include="Data\CapServers\CapServerProvider.cs" />
+    <Compile Include="Configuration\CapServer141Provider.cs" />
+    <Compile Include="Configuration\CapServer131Provider.cs" />
+    <Compile Include="Configuration\CapServerProvider.cs" />
+    <Compile Include="Configuration\WitsmlValidator.cs" />
     <Compile Include="Data\DataObjectValidator.cs" />
-    <Compile Include="Data\ICapServerProvider.cs" />
+    <Compile Include="Configuration\ICapServerProvider.cs" />
     <Compile Include="Data\IDataObjectValidator.cs" />
     <Compile Include="Data\IEtpDataAdapter.cs" />
     <Compile Include="Data\IWitsmlDataAdapter.cs" />
@@ -91,8 +92,8 @@
     <Compile Include="Data\WitsmlQueryParser.cs" />
     <Compile Include="Data\Wells\Well141DataProvider.cs" />
     <Compile Include="Data\WitsmlDataProvider.cs" />
-    <Compile Include="IWitsml131Configuration.cs" />
-    <Compile Include="IWitsml141Configuration.cs" />
+    <Compile Include="Configuration\IWitsml131Configuration.cs" />
+    <Compile Include="Configuration\IWitsml141Configuration.cs" />
     <Compile Include="IWitsmlStore.cs" />
     <Compile Include="Logging\DebugExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -105,7 +106,7 @@
     <Compile Include="Providers\Discovery\DiscoveryStore200Provider.cs" />
     <Compile Include="Providers\Discovery\DiscoveryStoreProvider.cs" />
     <Compile Include="Providers\Discovery\IDiscoveryStoreProvider.cs" />
-    <Compile Include="WitsmlExtensions.cs" />
+    <Compile Include="Data\WitsmlExtensions.cs" />
     <Compile Include="WitsmlResult.cs" />
     <Compile Include="WitsmlStore.cs" />
   </ItemGroup>

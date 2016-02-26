@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
@@ -114,29 +113,6 @@ namespace PDS.Witsml.Server
             return log.LogCurveInfo != null
                 ? String.Join(",", log.LogCurveInfo.Select(x => x.Mnemonic))
                 : string.Empty;
-        }
-
-        public WMLS_AddToStoreResponse AddWell(Well well, string wmlTypeIn = ObjectTypes.Well, string capClient = null, string optionsIn = null)
-        {
-            var wells = new WellList { Well = List(well) };
-            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
-            return AddToStore(wmlTypeIn, xmlIn, capClient, optionsIn);
-        }
-
-        public List<Well> QueryWell(Well well, string wmlTypeIn = ObjectTypes.Well, string capClient = null, string optionsIn = null)
-        {
-            var wells = new WellList { Well = List(well) };
-            var queryIn = EnergisticsConverter.ObjectToXml(wells);
-            var response = GetFromStore(wmlTypeIn, queryIn, capClient, optionsIn);
-            var results = EnergisticsConverter.XmlToObject<WellList>(response.XMLout);
-            return results.Well;
-        }
-
-        public WMLS_AddToStoreResponse AddWellbore(Wellbore wellbore, string wmlTypeIn = ObjectTypes.Wellbore, string capClient = null, string optionsIn = null)
-        {
-            var wellbores = new WellboreList { Wellbore = List(wellbore) };
-            var xmlIn = EnergisticsConverter.ObjectToXml(wellbores);
-            return AddToStore(wmlTypeIn, xmlIn, capClient, optionsIn);
         }
     }
 }

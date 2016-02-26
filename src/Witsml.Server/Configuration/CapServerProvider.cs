@@ -4,14 +4,14 @@ using System.Xml.XPath;
 using Energistics.DataAccess;
 using log4net;
 
-namespace PDS.Witsml.Server.Data.CapServers
+namespace PDS.Witsml.Server.Configuration
 {
     /// <summary>
     /// Provides common WTISML server capabilities for any data schema version.
     /// </summary>
     /// <typeparam name="T">The capServers type.</typeparam>
-    /// <seealso cref="PDS.Witsml.Server.Data.ICapServerProvider" />
-    public abstract class CapServerProvider<T> : ICapServerProvider
+    /// <seealso cref="PDS.Witsml.Server.Configuration.ICapServerProvider" />
+    public abstract class CapServerProvider<T> : WitsmlValidator, ICapServerProvider
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(CapServerProvider<T>));
 
@@ -54,7 +54,7 @@ namespace PDS.Witsml.Server.Data.CapServers
         /// <returns>
         /// true if the WITSML Store supports the function for the specified object type, otherwise, false
         /// </returns>
-        public bool IsSupported(Functions function, string objectType)
+        public override bool IsSupported(Functions function, string objectType)
         {
             var capServerDoc = GetCapServerDocument();
             var ns = XNamespace.Get(capServerDoc.Root.CreateNavigator().GetNamespace(string.Empty));
@@ -66,29 +66,6 @@ namespace PDS.Witsml.Server.Data.CapServers
             _log.DebugFormat("Function: {0}; Data Object: {1}; IsSupported: {2}", function, objectType, supported);
 
             return supported;
-        }
-
-        /// <summary>
-        /// Performs validation for the specified function and supplied parameters.
-        /// </summary>
-        /// <param name="function">The WITSML Store API function.</param>
-        /// <param name="witsmlType">The type of the data object.</param>
-        /// <param name="xml">The XML string for the data object.</param>
-        /// <param name="options">The options.</param>
-        /// <param name="capabilities">The client's capabilities object (capClient).</param>
-        public virtual void Validate(Functions function, string witsmlType, string xml, string options, string capabilities)
-        {
-            ValidateRootElement(witsmlType, xml);
-            //ValidateChildElement(witsmlType, xml);
-        }
-
-        private void ValidateRootElement(string witsmlType, string xml)
-        {
-            var objectGroupType = ObjectTypes.GetObjectGroupType(xml);
-            bool a = string.Equals(objectGroupType.Substring(0, objectGroupType.Length - 1), witsmlType);
-            bool b = objectGroupType[objectGroupType.Length - 1].Equals('s');
-            if (!(string.Equals(objectGroupType.Substring(0, objectGroupType.Length - 1), witsmlType) && objectGroupType[objectGroupType.Length - 1].Equals('s')))
-                throw new WitsmlException(ErrorCodes.MissingPluralRootElement);
         }
 
         /// <summary>
@@ -117,7 +94,7 @@ namespace PDS.Witsml.Server.Data.CapServers
         /// Gets the cached capServers object as an <see cref="XDocument"/>.
         /// </summary>
         /// <returns>The <see cref="XDocument"/> instance.</returns>
-        private XDocument GetCapServerDocument()
+        protected XDocument GetCapServerDocument()
         {
             if (_capServerDoc != null)
             {

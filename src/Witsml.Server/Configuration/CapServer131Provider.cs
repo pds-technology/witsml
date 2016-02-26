@@ -4,12 +4,12 @@ using System.Linq;
 using log4net;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 
-namespace PDS.Witsml.Server.Data.CapServers
+namespace PDS.Witsml.Server.Configuration
 {
     /// <summary>
     /// Provides common WTISML server capabilities for data schema version 1.3.1.1.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.CapServers.CapServerProvider{Energistics.DataAccess.WITSML131.CapServers}" />
+    /// <seealso cref="PDS.Witsml.Server.Configuration.CapServerProvider{Energistics.DataAccess.WITSML131.CapServers}" />
     [Export(typeof(ICapServerProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class CapServer131Provider : CapServerProvider<Witsml131.CapServers>

@@ -11,7 +11,7 @@ namespace PDS.Witsml.Server.Data.Wells
     public class Well131DataProvider : WitsmlDataProvider<WellList, Well>
     {
         [ImportingConstructor]
-        public Well131DataProvider(IWitsmlDataAdapter<Well> dataAdapter) : base(dataAdapter, OptionsIn.DataVersion.Version131.Value)
+        public Well131DataProvider(IWitsmlDataAdapter<Well> dataAdapter) : base(dataAdapter)
         {
         }
 

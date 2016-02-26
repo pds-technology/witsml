@@ -16,6 +16,7 @@ namespace PDS.Witsml.Server
             Proxy.Timeout *= 5;
             Store = new WitsmlStore();
             Store.Container = ContainerFactory.Create();
+            Store.Container.BuildUp(Store);
         }
 
         public WITSMLWebServiceConnection Proxy { get; private set; }

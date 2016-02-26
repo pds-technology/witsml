@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess;
 using log4net;
@@ -11,30 +10,21 @@ namespace PDS.Witsml.Server.Data
     /// </summary>
     /// <typeparam name="TList">Type of the object list.</typeparam>
     /// <typeparam name="TObject">Type of the object.</typeparam>
-    /// <seealso cref="IWitsmlDataProvider" />
-    /// <seealso cref="IWitsmlDataWriter" />
+    /// <seealso cref="PDS.Witsml.Server.Data.IWitsmlDataProvider" />
+    /// <seealso cref="PDS.Witsml.Server.Data.IWitsmlDataWriter" />
     public abstract class WitsmlDataProvider<TList, TObject> : IWitsmlDataProvider, IWitsmlDataWriter where TList : IEnergisticsCollection
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(WitsmlDataProvider<TList, TObject>));
         private readonly IWitsmlDataAdapter<TObject> _dataAdapter;
-        private readonly string _dataSchemaVersion;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WitsmlDataProvider{TList, TObject}"/> class.
         /// </summary>
         /// <param name="dataAdapter">The data adapter.</param>
-        protected WitsmlDataProvider(IWitsmlDataAdapter<TObject> dataAdapter, string dataSchemaVersion)
+        protected WitsmlDataProvider(IWitsmlDataAdapter<TObject> dataAdapter)
         {
             _dataAdapter = dataAdapter;
-            _dataSchemaVersion = dataSchemaVersion;
         }
-
-        /// <summary>
-        /// Gets or sets the cap server providers.
-        /// </summary>
-        /// <value>The cap server providers.</value>
-        [ImportMany]
-        public IEnumerable<ICapServerProvider> CapServerProviders { get; set; }
 
         /// <summary>
         /// Gets object(s) from store.
@@ -43,9 +33,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="query">The XML query string.</param>
         /// <param name="options">The options.</param>
         /// <param name="capabilities">The client’s Capabilities Object (capClient).</param>
-        /// <returns>
-        /// Queried objects.
-        /// </returns>
+        /// <returns>Queried objects.</returns>
         public virtual WitsmlResult<IEnergisticsCollection> GetFromStore(string witsmlType, string query, string options, string capabilities)
         {
             var parser = new WitsmlQueryParser(witsmlType, query, options, capabilities);
@@ -65,9 +53,6 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         public virtual WitsmlResult AddToStore(string witsmlType, string xml, string options, string capabilities)
         {
-            var capServerProvider = CapServerProviders.FirstOrDefault(x => x.DataSchemaVersion == _dataSchemaVersion);
-            capServerProvider.Validate(Functions.AddToStore, witsmlType, xml, options, capabilities);
-
             var list = EnergisticsConverter.XmlToObject<TList>(xml);
             return _dataAdapter.Add(list.Items.Cast<TObject>().Single());
         }

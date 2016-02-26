@@ -1,4 +1,4 @@
-﻿namespace PDS.Witsml.Server.Data
+﻿namespace PDS.Witsml.Server.Configuration
 {
     /// <summary>
     /// Defines properties and methods used for retrieving WITSML Store capabilities. 
@@ -29,10 +29,10 @@
         /// Performs validation for the specified function and supplied parameters.
         /// </summary>
         /// <param name="function">The WITSML Store API function.</param>
-        /// <param name="witsmlType">The type of the data object.</param>
+        /// <param name="objectType">The type of the data object.</param>
         /// <param name="xml">The XML string for the data object.</param>
         /// <param name="options">The options.</param>
         /// <param name="capabilities">The client's capabilities object (capClient).</param>
-        void Validate(Functions function, string witsmlType, string xml, string options, string capabilities);
+        void ValidateRequest(Functions function, string objectType, string xml, string options, string capabilities);
     }
 }
