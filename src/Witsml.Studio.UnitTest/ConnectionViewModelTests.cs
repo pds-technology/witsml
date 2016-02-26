@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Security;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Witsml.Studio.Connections;
 using PDS.Witsml.Studio.Properties;
@@ -34,16 +35,14 @@ namespace PDS.Witsml.Studio
             {
                 Name = "Witsml",
                 Uri = "http://localhost/Witsml.Web/WitsmlStore.svc",
-                Username = "WitsmlUser",
-                Password = "WitsmlPassword"
+                Username = "WitsmlUser"
             };
 
             _etpConnection = new Connection()
             {
                 Name = "Etp",
                 Uri = "ws://localhost/witsml.web/api/etp",
-                Username = "EtpUser",
-                Password = "EtpPassword"
+                Username = "EtpUser"
             };
 
             _witsmlConnectionVm = new ConnectionViewModel(ConnectionTypes.Witsml);
@@ -106,10 +105,78 @@ namespace PDS.Witsml.Studio
             _etpConnectionVm.SaveConnectionFile(_etpConnection);
 
             var witsmlRead = _witsmlConnectionVm.OpenConnectionFile();
-            Assert.AreEqual(_witsmlConnection, witsmlRead);
+            Assert.AreEqual(_witsmlConnection.Uri, witsmlRead.Uri);
 
             var etpRead = _etpConnectionVm.OpenConnectionFile();
-            Assert.AreEqual(_etpConnection, etpRead);
+            Assert.AreEqual(_etpConnection.Uri, etpRead.Uri);
+        }
+
+        [TestMethod]
+        public void TestInitialeEditItemNoDataItem()
+        {
+            var emptyConnection = new Connection();
+            _witsmlConnectionVm.InitializeEditItem();
+
+            Assert.AreEqual(emptyConnection.Uri, _witsmlConnectionVm.EditItem.Uri);
+        }
+
+        [TestMethod]
+        public void TestInitialeEditItemWithDataItem()
+        {
+            _witsmlConnectionVm.DataItem = _witsmlConnection;
+            _witsmlConnectionVm.InitializeEditItem();
+
+            Assert.AreEqual(_witsmlConnection.Uri, _witsmlConnectionVm.EditItem.Uri);
+        }
+
+        [TestMethod]
+        public void TestInitialeEditItemWithPersistedConnection()
+        {
+            _witsmlConnectionVm.SaveConnectionFile(_witsmlConnection);
+            _witsmlConnectionVm.InitializeEditItem();
+
+            Assert.AreEqual(_witsmlConnection.Uri, _witsmlConnectionVm.EditItem.Uri);
+        }
+
+        [TestMethod]
+        public void TestAcceptWithDataItem()
+        {
+            var newName = "xxx";
+
+            // Initialze the Edit Item by setting the DataItem
+            _witsmlConnectionVm.DataItem = _witsmlConnection;
+            _witsmlConnectionVm.InitializeEditItem();
+
+            // Make a change to the edit item
+            _witsmlConnectionVm.EditItem.Name = newName;
+
+            // Accept the changes
+            _witsmlConnectionVm.Accept();
+
+            // Test that the DataItem has the new name.
+            Assert.AreEqual(newName, _witsmlConnectionVm.DataItem.Name);
+        }
+
+        [TestMethod]
+        public void TestCancelWithDataItem()
+        {
+            var newName = "xxx";
+
+            // Initialze the Edit Item by setting the DataItem
+            _witsmlConnectionVm.DataItem = _witsmlConnection;
+            _witsmlConnectionVm.InitializeEditItem();
+
+            // Make a change to the edit item
+            _witsmlConnectionVm.EditItem.Name = newName;
+
+            // Accept the changes
+            _witsmlConnectionVm.Cancel();
+
+            // Test that the newName was not assigned
+            Assert.AreNotEqual(newName, _witsmlConnectionVm.DataItem.Name);
+
+            // Test that the Name is unchanged
+            Assert.AreEqual(_witsmlConnection.Name, _witsmlConnectionVm.DataItem.Name);
         }
 
         private static void DeletePersistenceFolder()

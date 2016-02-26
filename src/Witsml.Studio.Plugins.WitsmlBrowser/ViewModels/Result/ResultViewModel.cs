@@ -9,7 +9,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
 {
     public class ResultViewModel : Conductor<IScreen>.Collection.OneActive
     {
-        public Models.Browser Model
+        public Models.WitsmlSettings Model
         {
             get { return ((MainViewModel)Parent).Model; }
         }

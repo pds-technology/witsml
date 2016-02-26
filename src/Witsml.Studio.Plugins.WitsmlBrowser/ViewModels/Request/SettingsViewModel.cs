@@ -27,7 +27,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             get { return ((RequestViewModel)Parent).Proxy; }
         }
 
-        public Models.Browser Model
+        public Models.WitsmlSettings Model
         {
             get { return ParentViewModel.Model; }
         }
@@ -54,7 +54,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             {
                 Model.Connection = viewModel.DataItem;
 
-                // TODO: Make connection and get version
+                // Make connection and get version
                 GetVersions();
 
                 // TODO: GetCap
@@ -83,10 +83,10 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             }
             catch (Exception ex)
             {
-                var errorMessage = "The connection URL entered may not be valid. Re-enter a new connection.";
-
+                var errorMessage = string.Format("{0}{1}{1}{2}", "Error connecting to server.", Environment.NewLine, "Invalid URL");
+                
                 _log.Error(errorMessage, ex);
-                App.Current.ShowError(errorMessage, ex);
+                App.Current.ShowError(errorMessage);
             }
         }
     }

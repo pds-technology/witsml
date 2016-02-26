@@ -55,6 +55,14 @@ namespace PDS.Witsml.Studio
             Container.Register<IEventAggregator>(new EventAggregator());
         }
 
+        /// <summary>
+        /// Resolves an instance for a given type or type and contract name.
+        /// </summary>
+        /// <param name="service">The type of the instance to locate.</param>
+        /// <param name="key">The key name of the instance to locate.</param>
+        /// <returns>
+        /// The located instance or null if not found.
+        /// </returns>
         protected override object GetInstance(Type service, string key)
         {
             object instance = string.IsNullOrWhiteSpace(key)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using AutoMapper;
 using Caliburn.Micro;
 using Newtonsoft.Json;
@@ -19,8 +20,9 @@ namespace PDS.Witsml.Studio.ViewModels
         private static readonly string ConnectionBaseFileName = Settings.Default.ConnectionBaseFileName;
 
         /// <summary>
-        /// Initializes an instance of the ConnectionViewModel.
+        /// Initializes a new instance of the <see cref="ConnectionViewModel"/> class.
         /// </summary>
+        /// <param name="connectionType">Type of the connection.</param>
         public ConnectionViewModel(ConnectionTypes connectionType)
         {
             _log.Debug("Creating View Model");
@@ -103,6 +105,11 @@ namespace PDS.Witsml.Studio.ViewModels
             }
         }
 
+        public void OnPasswordChanged(PasswordBox control)
+        {
+            EditItem.SecurePassword = control.SecurePassword;
+        }
+
         /// <summary>
         /// Accepts the edited connection by assigning all changes 
         /// from the EditItem to the DataItem and persisting the changes.
@@ -143,6 +150,7 @@ namespace PDS.Witsml.Studio.ViewModels
         /// <summary>
         /// Saves a Connection instance to a JSON file for the current connection type.
         /// </summary>
+        /// <param name="connection">The connection instance being saved.</param>
         internal void SaveConnectionFile(Connection connection)
         {
             EnsureDataFolder();
@@ -164,24 +172,32 @@ namespace PDS.Witsml.Studio.ViewModels
         }
 
         /// <summary>
-        /// When the screen is activated the following initializations are done.
+        /// Initializes the EditItem property.
         ///     1) Clones the incoming DataItem, if provided, to the EditItem to use as a working copy.
         ///     2) If a DataItem was not provided the EditItem is set using the persisted connection
         ///     data for the current connection type.
         ///     3) If there is no persisted connection data then the EditItem is set to a blank connection.
         /// </summary>
+        internal void InitializeEditItem()
+        {
+            if (DataItem != null && !string.IsNullOrWhiteSpace(DataItem.Uri))
+            {
+                EditItem = Mapper.Map(DataItem, new Connection());
+            }
+            else
+            {
+                EditItem = OpenConnectionFile() ?? new Connection();
+            }
+        }
+
+        /// <summary>
+        /// When the screen is activated the EditItem is initialized.
+        /// </summary>
         protected override void OnActivate()
         {
             base.OnActivate();
 
-            if (DataItem != null && !string.IsNullOrWhiteSpace(DataItem.Uri))
-            {
-                _editItem = Mapper.Map(DataItem, new Connection());
-            }
-            else
-            {
-                _editItem = OpenConnectionFile() ?? new Connection();
-            }
+            InitializeEditItem();
         }
 
         /// <summary>

@@ -3,10 +3,9 @@ using PDS.Witsml.Studio.Connections;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
 {
-    // TODO: Rename class to what the data is related to, i.e., WitsmlSettings
-    public class Browser : PropertyChangedBase
+    public class WitsmlSettings : PropertyChangedBase
     {
-        public Browser()
+        public WitsmlSettings()
         {
             Connection = new Connection();
             MaxDataRows = 1000;

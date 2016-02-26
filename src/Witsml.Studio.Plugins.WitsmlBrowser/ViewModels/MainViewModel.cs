@@ -13,7 +13,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
     {
         public MainViewModel()
         {
-            Model = new Models.Browser();
+            Model = new Models.WitsmlSettings();
             Proxy = new WITSMLWebServiceConnection(Model.Connection.Uri, WMLSVersion.WITSML141);
 
             RequestControl = new RequestViewModel();
@@ -33,8 +33,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             get { return Settings.Default.PluginDisplayOrder; }
         }
 
-        private Models.Browser _model;
-        public Models.Browser Model
+        private Models.WitsmlSettings _model;
+        public Models.WitsmlSettings Model
         {
             get { return _model; }
             set

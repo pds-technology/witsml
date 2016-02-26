@@ -9,7 +9,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             DisplayName = "Templates";
         }
 
-        public Models.Browser Model
+        public Models.WitsmlSettings Model
         {
             get { return ((RequestViewModel)Parent).Model; }
         }

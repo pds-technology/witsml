@@ -1,4 +1,5 @@
 ﻿using System.Runtime.Serialization;
+using System.Security;
 using Caliburn.Micro;
 
 namespace PDS.Witsml.Studio.Connections
@@ -71,45 +72,15 @@ namespace PDS.Witsml.Studio.Connections
             }
         }
 
-        private string _password;
         /// <summary>
-        /// Gets or sets the password to authenticate the connection
+        /// Gets or sets the password.
         /// </summary>
         [DataMember]
-        public string Password
-        {
-            get { return _password; }
-            set
-            {
-                if (!string.Equals(_password, value))
-                {
-                    _password = value;
-                    NotifyOfPropertyChange(() => Password);
-                }
-            }
-        }
+        public string Password { get; set; }
 
         /// <summary>
-        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance 
-        /// by testing that all of the public properties are equal (Name, Uri, Username, Password).
+        /// Gets or sets the SecureString password to authenticate the connection.
         /// </summary>
-        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
-        public override bool Equals(object obj)
-        {
-            var connection = obj as Connection;
-
-            if (connection != null)
-            {
-                return (
-                    Name.Equals(connection.Name) &&
-                    Uri.Equals(connection.Uri) &&
-                    Username.Equals(connection.Username) &&
-                    Password.Equals(connection.Password));
-            }
-            return false;
-        }
+        public SecureString SecurePassword { get; set; }
     }
 }
