@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows;
+using System.Windows.Threading;
 using Caliburn.Micro;
 using PDS.Framework;
 using PDS.Witsml.Studio.ViewModels;
@@ -90,6 +91,17 @@ namespace PDS.Witsml.Studio
         public static bool ShowDialog(this Application app, object viewModel)
         {
             return app.WindowManager().ShowDialog(viewModel).GetValueOrDefault();
+        }
+
+        /// <summary>
+        /// Invokes the specified action on the application's UI thread.
+        /// </summary>
+        /// <param name="app">The application instance.</param>
+        /// <param name="action">The action.</param>
+        /// <param name="priority">The priority.</param>
+        public static void Invoke(this Application app, System.Action action, DispatcherPriority priority = DispatcherPriority.Normal)
+        {
+            app.Dispatcher.BeginInvoke(action, priority);
         }
     }
 }

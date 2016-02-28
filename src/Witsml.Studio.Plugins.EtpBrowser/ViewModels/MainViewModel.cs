@@ -6,9 +6,10 @@ using Avro.Specific;
 using Caliburn.Micro;
 using Energistics;
 using Energistics.Common;
-using Energistics.Protocol;
 using Energistics.Protocol.Core;
 using Energistics.Protocol.Discovery;
+using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Document;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Models;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Properties;
 using PDS.Witsml.Studio.ViewModels;
@@ -32,6 +33,8 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         {
             DisplayName = Settings.Default.PluginDisplayName;
             Resources = new BindableCollection<ResourceViewModel>();
+            Details = new TextDocument();
+            Messages = new TextDocument();
             Model = new EtpSettings();
         }
 
@@ -55,12 +58,12 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// <value>The collection of resources.</value>
         public BindableCollection<ResourceViewModel> Resources { get; private set; }
 
-        private string _details;
+        private TextDocument _details;
         /// <summary>
-        /// Gets or sets the details.
+        /// Gets or sets the details document.
         /// </summary>
         /// <value>The output.</value>
-        public string Details
+        public TextDocument Details
         {
             get { return _details; }
             set
@@ -73,12 +76,12 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             }
         }
 
-        private string _messages;
+        private TextDocument _messages;
         /// <summary>
-        /// Gets or sets the messages.
+        /// Gets or sets the messages document.
         /// </summary>
         /// <value>The output.</value>
-        public string Messages
+        public TextDocument Messages
         {
             get { return _messages; }
             set
@@ -96,7 +99,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public void CopyDetails()
         {
-            Clipboard.SetText(Details);
+            App.Current.Invoke(() => Clipboard.SetText(Details.Text));
         }
 
         /// <summary>
@@ -104,7 +107,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public void ClearDetails()
         {
-            Details = string.Empty;
+            App.Current.Invoke(() => Details.Text = string.Empty);
         }
 
         /// <summary>
@@ -112,7 +115,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public void CopyMessages()
         {
-            Clipboard.SetText(Messages);
+            App.Current.Invoke(() => Clipboard.SetText(Messages.Text));
         }
 
         /// <summary>
@@ -120,14 +123,14 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public void ClearMessages()
         {
-            Messages = string.Empty;
+            App.Current.Invoke(() => Messages.Text = string.Empty);
         }
 
         /// <summary>
         /// Scrolls to the bottom of the current text content.
         /// </summary>
         /// <param name="control">The control.</param>
-        public void ScrollToBottom(TextBox control)
+        public void ScrollToBottom(TextEditor control)
         {
             control.ScrollToEnd();
         }
@@ -162,8 +165,12 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         {
             CloseEtpClient();
             Resources.Clear();
-            Messages = null;
-            Details = null;
+
+            App.Current.Invoke(() =>
+            {
+                Messages.Text = string.Empty;
+                Details.Text = string.Empty;
+            });
 
             while (Items.Count > 1)
             {
@@ -287,11 +294,14 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// <param name="e">The <see cref="ProtocolEventArgs{T}"/> instance containing the event data.</param>
         private void LogObjectDetails<T>(ProtocolEventArgs<T> e) where T : ISpecificRecord
         {
-            Details = string.Format(
-                "Header:{3}{0}{3}{3}Body:{3}{1}{3}",
-                _client.Serialize(e.Header, true),
-                _client.Serialize(e.Message, true),
-                Environment.NewLine);
+            App.Current.Invoke(() =>
+            {
+                Details.Text = string.Format(
+                    "// Header:{3}{0}{3}{3}// Body:{3}{1}{3}",
+                    _client.Serialize(e.Header, true),
+                    _client.Serialize(e.Message, true),
+                    Environment.NewLine);
+            });
         }
 
         /// <summary>
@@ -302,12 +312,15 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// <param name="e">The <see cref="ProtocolEventArgs{T, V}"/> instance containing the event data.</param>
         private void LogObjectDetails<T, V>(ProtocolEventArgs<T, V> e) where T : ISpecificRecord
         {
-            Details = string.Format(
-                "Header:{3}{0}{3}{3}Body:{3}{1}{3}{3}Context:{3}{2}{3}",
-                _client.Serialize(e.Header, true),
-                _client.Serialize(e.Message, true),
-                _client.Serialize(e.Context, true),
-                Environment.NewLine);
+            App.Current.Invoke(() =>
+            {
+                Details.Text = string.Format(
+                    "// Header:{3}{0}{3}{3}// Body:{3}{1}{3}{3}// Context:{3}{2}{3}",
+                    _client.Serialize(e.Header, true),
+                    _client.Serialize(e.Message, true),
+                    _client.Serialize(e.Context, true),
+                    Environment.NewLine);
+            });
         }
 
         /// <summary>
@@ -321,7 +334,15 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 return;
             }
 
-            Messages = string.Concat(Messages ?? string.Empty, message, Environment.NewLine);
+            App.Current.Invoke(() =>
+            {
+                Messages.Insert(Messages.TextLength,
+                    string.Concat(
+                        message.StartsWith("{") ? string.Empty : "// ",
+                        message,
+                        Environment.NewLine),
+                    AnchorMovementType.AfterInsertion);
+            });
         }
     }
 }

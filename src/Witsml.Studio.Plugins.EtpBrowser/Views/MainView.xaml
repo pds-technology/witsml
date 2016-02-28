@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:avalon="http://icsharpcode.net/sharpdevelop/avalonedit"
              xmlns:cal="http://www.caliburnproject.org"
              xmlns:local="clr-namespace:PDS.Witsml.Studio.Plugins.EtpBrowser.Views"
              mc:Ignorable="d" d:DesignHeight="400" d:DesignWidth="800">
@@ -20,26 +21,27 @@
         <Grid Grid.Column="1" Margin="5,0,0,0">
             <TabControl>
                 <TabItem Header="Details">
-                    <TextBox Text="{Binding Details}" cal:Message.Attach="[Event TextChanged] = [Action ScrollToBottom($source)]"
-                             AcceptsReturn="True" IsReadOnly="True" VerticalScrollBarVisibility="Auto" Margin="5">
-                        <TextBox.ContextMenu>
+                    <avalon:TextEditor Document="{Binding Details}" Padding="5" IsReadOnly="True"
+                                       SyntaxHighlighting="JavaScript" FontFamily="Consolas" FontSize="10pt">
+                        <avalon:TextEditor.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="Copy" cal:Message.Attach="CopyDetails" />
                                 <MenuItem Header="Clear" cal:Message.Attach="ClearDetails" />
                             </ContextMenu>
-                        </TextBox.ContextMenu>
-                    </TextBox>
+                        </avalon:TextEditor.ContextMenu>
+                    </avalon:TextEditor>
                 </TabItem>
                 <TabItem Header="Messages">
-                    <TextBox Text="{Binding Messages}" cal:Message.Attach="[Event TextChanged] = [Action ScrollToBottom($source)]"
-                             AcceptsReturn="True" IsReadOnly="True" VerticalScrollBarVisibility="Auto" Margin="5">
-                        <TextBox.ContextMenu>
+                    <avalon:TextEditor Document="{Binding Messages}" Padding="5" IsReadOnly="True"
+                                       SyntaxHighlighting="JavaScript" FontFamily="Consolas" FontSize="10pt"
+                                       cal:Message.Attach="[Event TextChanged] = [Action ScrollToBottom($source)]">
+                        <avalon:TextEditor.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="Copy" cal:Message.Attach="CopyMessages" />
                                 <MenuItem Header="Clear" cal:Message.Attach="ClearMessages" />
                             </ContextMenu>
-                        </TextBox.ContextMenu>
-                    </TextBox>
+                        </avalon:TextEditor.ContextMenu>
+                    </avalon:TextEditor>
                 </TabItem>
             </TabControl>
         </Grid>
