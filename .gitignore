@@ -212,7 +212,7 @@ _Pvt_Extensions/
 ModelManifest.xml
 
 # Witsml.Studio
-/src/Witsml.Studio/Plugins/PDS.Witsml.Studio.Plugins.WitsmlBrowser.dll.config
-/src/Witsml.Studio/Plugins/PDS.Witsml.Studio.Plugins.EtpBrowser.dll.config
-/src/Witsml.Studio/Plugins/PDS.Witsml.Studio.Plugins.DataReplay.dll.config
+/src/Witsml.Studio/Plugins/PDS.Witsml.Studio.Plugins.WitsmlBrowser.*
+/src/Witsml.Studio/Plugins/PDS.Witsml.Studio.Plugins.EtpBrowser.*
+/src/Witsml.Studio/Plugins/PDS.Witsml.Studio.Plugins.DataReplay.*
 /src/Witsml.Web/Studio
