@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using Avro.Specific;
@@ -8,8 +10,10 @@ using Energistics;
 using Energistics.Common;
 using Energistics.Protocol.Core;
 using Energistics.Protocol.Discovery;
+using Energistics.Protocol.Store;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
+using PDS.Framework;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Models;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Properties;
 using PDS.Witsml.Studio.ViewModels;
@@ -91,6 +95,19 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                     _messages = value;
                     NotifyOfPropertyChange(() => Messages);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Gets the selected resource's details using the Store protocol.
+        /// </summary>
+        public void GetObject()
+        {
+            var resource = FindResource(Resources, x => x.IsSelected);
+            if (resource != null)
+            {
+                _client.Handler<IStoreCustomer>()
+                    .GetObject(resource.Resource.Uri);
             }
         }
 
@@ -193,9 +210,11 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             {
                 _client = new EtpClient(Model.Connection.Uri, "ETP Browser");
                 _client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();
+                _client.Register<IStoreCustomer, StoreCustomerHandler>();
 
                 _client.Handler<ICoreClient>().OnOpenSession += OnOpenSession;
                 _client.Handler<IDiscoveryCustomer>().OnGetResourcesResponse += OnGetResourcesResponse;
+                _client.Handler<IStoreCustomer>().OnObject += OnObject;
 
                 _client.Output = LogClientOutput;
                 _client.Open();
@@ -251,6 +270,8 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
 
             if (e.Context == RootUri)
             {
+                Resources.ForEach(x => x.IsSelected = false);
+                viewModel.IsSelected = true;
                 Resources.Add(viewModel);
                 return;
             }
@@ -271,12 +292,23 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// <returns>A <see cref="ResourceViewModel"/> instance.</returns>
         private ResourceViewModel FindResource(IEnumerable<ResourceViewModel> resources, string uri)
         {
+            return FindResource(resources, x => x.Resource.Uri == uri);
+        }
+
+        /// <summary>
+        /// Finds a resource by evaluating the specified predicate on each item in the collection.
+        /// </summary>
+        /// <param name="resources">The resources.</param>
+        /// <param name="predicate">The predicate.</param>
+        /// <returns>A <see cref="ResourceViewModel" /> instance.</returns>
+        private ResourceViewModel FindResource(IEnumerable<ResourceViewModel> resources, Func<ResourceViewModel, bool> predicate)
+        {
             foreach (var resource in resources)
             {
-                if (resource.Resource.Uri == uri)
+                if (predicate(resource))
                     return resource;
 
-                var found = FindResource(resource.Children, uri);
+                var found = FindResource(resource.Children, predicate);
 
                 if (found != null)
                 {
@@ -285,6 +317,24 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Called when the GetObject response is received.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="ProtocolEventArgs{Energistics.Protocol.Store.Object}"/> instance containing the event data.</param>
+        private void OnObject(object sender, ProtocolEventArgs<Energistics.Protocol.Store.Object> e)
+        {
+            App.Current.Invoke(() =>
+            {
+                Details.Text = string.Format(
+                    "// Header:{3}{0}{3}{3}// Body:{3}{1}{3}{3}/* XML:{3}{2}{3}*/{3}",
+                    _client.Serialize(e.Header, true),
+                    _client.Serialize(e.Message, true),
+                    Encoding.UTF8.GetString(e.Message.DataObject.Data),
+                    Environment.NewLine);
+            });
         }
 
         /// <summary>
@@ -297,7 +347,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             App.Current.Invoke(() =>
             {
                 Details.Text = string.Format(
-                    "// Header:{3}{0}{3}{3}// Body:{3}{1}{3}",
+                    "// Header:{2}{0}{2}{2}// Body:{2}{1}{2}",
                     _client.Serialize(e.Header, true),
                     _client.Serialize(e.Message, true),
                     Environment.NewLine);

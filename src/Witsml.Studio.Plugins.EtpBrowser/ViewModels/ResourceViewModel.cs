@@ -80,5 +80,23 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 }
             }
         }
+
+        private bool _isSelected;
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is selected.
+        /// </summary>
+        /// <value><c>true</c> if this instance is selected; otherwise, <c>false</c>.</value>
+        public bool IsSelected
+        {
+            get { return _isSelected; }
+            set
+            {
+                if (_isSelected != value)
+                {
+                    _isSelected = value;
+                    NotifyOfPropertyChange(() => IsSelected);
+                }
+            }
+        }
     }
 }

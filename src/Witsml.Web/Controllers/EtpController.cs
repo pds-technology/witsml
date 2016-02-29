@@ -7,6 +7,7 @@ using System.Web.Http;
 using System.Web.WebSockets;
 using Energistics;
 using Energistics.Protocol.Discovery;
+using Energistics.Protocol.Store;
 using PDS.Framework;
 using PDS.Witsml.Web.Properties;
 
@@ -55,6 +56,7 @@ namespace PDS.Witsml.Web.Controllers
             var handler = new EtpServerHandler(socket, EtpSocketServerName);
 
             handler.Register(() => _container.Resolve<IDiscoveryStore>());
+            handler.Register(() => _container.Resolve<IStoreStore>());
 
             await handler.Accept(context);
         }

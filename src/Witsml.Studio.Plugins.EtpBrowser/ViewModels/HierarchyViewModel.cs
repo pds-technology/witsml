@@ -33,5 +33,13 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         {
             get { return Parent.Model; }
         }
+
+        /// <summary>
+        /// Gets the selected resource's details using the Store protocol.
+        /// </summary>
+        public void GetObject()
+        {
+            Parent.GetObject();
+        }
     }
 }

@@ -1,4 +1,6 @@
-﻿using Energistics.DataAccess.WITSML200;
+﻿using System;
+using Energistics.DataAccess;
+using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Driver;
@@ -41,6 +43,14 @@ namespace PDS.Witsml.Server.Data.Wells
                 GeographicLocationWGS84 = new GeodeticWellLocation(),
                 TimeZone = DevKit.TimeZone,
             };
+        }
+
+        [TestMethod]
+        public void CanSerializeWellToXml()
+        {
+            var xml = EnergisticsConverter.ObjectToXml(Well1);
+            Console.WriteLine(xml);
+            Assert.IsNotNull(xml);
         }
 
         [TestMethod]

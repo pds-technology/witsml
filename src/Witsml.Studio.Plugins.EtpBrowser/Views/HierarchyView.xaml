@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:cal="http://www.caliburnproject.org"
              xmlns:local="clr-namespace:PDS.Witsml.Studio.Plugins.EtpBrowser.Views"
              xmlns:vm="clr-namespace:PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels"
              mc:Ignorable="d" d:DesignHeight="400" d:DesignWidth="300">
@@ -11,6 +12,7 @@
             <TreeView.ItemContainerStyle>
                 <Style TargetType="{x:Type TreeViewItem}">
                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
                 </Style>
             </TreeView.ItemContainerStyle>
             <TreeView.Resources>
@@ -18,6 +20,11 @@
                     <TextBlock Text="{Binding Resource.Name}" />
                 </HierarchicalDataTemplate>
             </TreeView.Resources>
+            <TreeView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Get Object" cal:Message.Attach="GetObject" />
+                </ContextMenu>
+            </TreeView.ContextMenu>
         </TreeView>
     </Grid>
 </UserControl>

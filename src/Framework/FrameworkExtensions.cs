@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace PDS.Framework
 {
@@ -19,6 +20,21 @@ namespace PDS.Framework
         public static bool EqualsIgnoreCase(this string a, string b)
         {
             return string.Equals(a, b, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        /// <summary>
+        /// Performs the specified action on each item in the collection.
+        /// </summary>
+        /// <typeparam name="T">The item type.</typeparam>
+        /// <param name="collection">The collection.</param>
+        /// <param name="action">The action to perform on each item in the collection.</param>
+        /// <returns>The source collection, for chaining.</returns>
+        public static IEnumerable<T> ForEach<T>(this IEnumerable<T> collection, Action<T> action)
+        {
+            foreach (var item in collection)
+                action(item);
+            
+            return collection;
         }
     }
 }

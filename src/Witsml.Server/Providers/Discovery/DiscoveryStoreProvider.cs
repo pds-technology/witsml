@@ -9,15 +9,27 @@ using Energistics.Protocol.Discovery;
 
 namespace PDS.Witsml.Server.Providers.Discovery
 {
+    /// <summary>
+    /// Process messages received for the Store role of the Discovery protocol.
+    /// </summary>
+    /// <seealso cref="Energistics.Protocol.Discovery.DiscoveryStoreHandler" />
     [Export(typeof(IDiscoveryStore))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class DiscoveryStoreProvider : DiscoveryStoreHandler
     {
         public const string RootUri = "/";
 
+        /// <summary>
+        /// Gets or sets the collection of providers implementing the <see cref="IDiscoveryStoreProvider"/> interface.
+        /// </summary>
+        /// <value>The collection of providers.</value>
         [ImportMany]
         public IEnumerable<IDiscoveryStoreProvider> Providers { get; set; }
 
+        /// <summary>
+        /// Handles the GetResources message of the Discovery protocol.
+        /// </summary>
+        /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList{Resource}}"/> instance containing the event data.</param>
         protected override void HandleGetResources(ProtocolEventArgs<GetResources, IList<Resource>> args)
         {
             foreach (var provider in Providers.OrderBy(x => x.DataSchemaVersion))
@@ -26,6 +38,15 @@ namespace PDS.Witsml.Server.Providers.Discovery
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="Resource"/> using the spefieced parameters.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="resourceType">Type of the resource.</param>
+        /// <param name="contentType">Type of the content.</param>
+        /// <param name="name">The name.</param>
+        /// <param name="count">The count.</param>
+        /// <returns>The resource instance.</returns>
         public static Resource New(string uri, ResourceTypes resourceType, string contentType, string name, int count = 0)
         {
             return new Resource()

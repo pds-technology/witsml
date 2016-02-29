@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="ErrorCodes.cs" />
     <Compile Include="Export131Attribute.cs" />
+    <Compile Include="Export200Attribute.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Functions.cs" />
     <Compile Include="ObjectId.cs" />
