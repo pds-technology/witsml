@@ -69,6 +69,9 @@
   <PropertyGroup>
     <SignManifests>true</SignManifests>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Images\WitsmlStudio.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="AutoMapper, Version=4.2.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
       <HintPath>..\packages\AutoMapper.4.2.1\lib\net45\AutoMapper.dll</HintPath>
@@ -222,6 +225,7 @@
     <None Include="Witsml.Studio_TemporaryKey.pfx" />
     <Resource Include="Images\StatusInvalid_16x.png" />
     <Resource Include="Images\StatusOK_16x.png" />
+    <Resource Include="Images\WitsmlStudio.ico" />
     <Content Include="Plugins\PDS.Witsml.Studio.Plugins.DataReplay.dll" />
     <Content Include="Plugins\PDS.Witsml.Studio.Plugins.EtpBrowser.dll" />
     <Content Include="Plugins\PDS.Witsml.Studio.Plugins.WitsmlBrowser.dll" />
