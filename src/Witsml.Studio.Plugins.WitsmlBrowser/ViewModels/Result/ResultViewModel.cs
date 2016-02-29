@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Caliburn.Micro;
+﻿using Caliburn.Micro;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
 {
@@ -19,8 +14,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
             base.OnInitialize();
 
             ActivateItem(new ResponseViewModel());
-            Items.Add(new PropertyViewModel());
-            Items.Add(new RawViewModel());
+            //Items.Add(new PropertyViewModel());
+            //Items.Add(new RawViewModel());
         }
     }
 }

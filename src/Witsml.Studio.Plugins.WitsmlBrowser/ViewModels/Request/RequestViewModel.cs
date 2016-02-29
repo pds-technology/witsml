@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Caliburn.Micro;
+﻿using Caliburn.Micro;
 using Energistics.DataAccess;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
@@ -25,8 +24,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             base.OnInitialize();
 
             ActivateItem(new SettingsViewModel());
-            Items.Add(new TreeViewViewModel());
-            Items.Add(new TemplatesViewModel());
+            //Items.Add(new TreeViewViewModel());
+            //Items.Add(new TemplatesViewModel());
             Items.Add(new QueryViewModel());
         }
     }
