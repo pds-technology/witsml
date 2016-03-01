@@ -154,6 +154,20 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Queries the first entity.
+        /// </summary>
+        /// <returns>The first entity found.</returns>
+        protected T QueryFirstEntity()
+        {
+            return GetFirstEntity<T>(DbCollectionName);
+        }
+
+        protected TObject GetFirstEntity<TObject>(string dbCollectionName)
+        {
+            return GetQuery<TObject>(dbCollectionName).FirstOrDefault() ;
+        }
+    
+        /// <summary>
         /// Queries the data store.
         /// </summary>
         /// <param name="parser">The query parser.</param>
