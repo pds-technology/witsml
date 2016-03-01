@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using Energistics.DataAccess;
+using Energistics.DataAccess.WITSML141.WMLS;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 {
@@ -15,6 +16,20 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         public WITSMLWebServiceConnection Proxy
         {
             get { return ((MainViewModel)Parent).Proxy; }
+        }
+
+        public void SubmitQuery()
+        {
+            // TODO: Create the correct version of the WMLS instance
+            using (var wmls = new WMLS() { Url = Model.Connection.Uri })
+            {
+                string xmlOut;
+                string suppMsgOut;
+
+                wmls.WMLS_GetFromStore(ObjectTypes.Well, Model.XmlQuery.Text, null, null, out xmlOut, out suppMsgOut);
+
+                Model.QueryResults.Text = string.IsNullOrEmpty(suppMsgOut) ? xmlOut : suppMsgOut;
+            }
         }
 
         protected override void OnInitialize()
