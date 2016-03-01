@@ -4,6 +4,8 @@ using Energistics.DataAccess.WITSML141.WMLS;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 {
+    public enum RequestTypes { Get, Add, Update, Delete };
+
     public class RequestViewModel : Conductor<IScreen>.Collection.OneActive
     {
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(RequestViewModel));
@@ -18,8 +20,10 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             get { return ((MainViewModel)Parent).Proxy; }
         }
 
-        public void SubmitQuery()
+        public void SubmitQuery(RequestTypes requestType)
         {
+            Model.QueryResults.Text = string.Empty;
+
             // TODO: Create the correct version of the WMLS instance
             //... We may want to change the DevKit to expose a "CreateClient()" method
             //... e.g., Proxy.CreateClient();
@@ -27,9 +31,20 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             {                
                 string xmlOut;
                 string suppMsgOut;
-                
-                wmls.WMLS_GetFromStore(ObjectTypes.Well, Model.XmlQuery.Text, null, null, out xmlOut, out suppMsgOut);
-                Model.QueryResults.Text = string.IsNullOrEmpty(suppMsgOut) ? xmlOut : suppMsgOut;
+
+                switch (requestType)
+                {
+                    case RequestTypes.Add:
+                        break;
+                    case RequestTypes.Update:
+                        break;
+                    case RequestTypes.Delete:
+                        break;
+                    default:
+                        wmls.WMLS_GetFromStore(ObjectTypes.Well, Model.XmlQuery.Text, null, null, out xmlOut, out suppMsgOut);
+                        Model.QueryResults.Text = string.IsNullOrEmpty(suppMsgOut) ? xmlOut : suppMsgOut;
+                        break;
+                }
             }
         }
 
