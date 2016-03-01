@@ -15,9 +15,24 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             get { return ((RequestViewModel)Parent).Model; }
         }
 
-        public void ExecuteQuery(object sender, RoutedEventArgs e)
+        public void GetFromStore()
         {
-            (Parent as RequestViewModel).SubmitQuery();
+            (Parent as RequestViewModel).SubmitQuery(RequestTypes.Get);
+        }
+
+        public void AddToStore()
+        {
+            MessageBox.Show("Add coming soon");
+        }
+
+        public void UpdateInStore()
+        {
+            MessageBox.Show("Update coming soon");
+        }
+
+        public void DeleteFromStore()
+        {
+            MessageBox.Show("Delete coming soon");
         }
 
         public void SaveQuery(object sender, RoutedEventArgs e)
