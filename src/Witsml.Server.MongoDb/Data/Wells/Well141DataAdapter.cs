@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using log4net;
 using PDS.Witsml.Server.Configuration;
+using System.Reflection;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
@@ -44,6 +44,26 @@ namespace PDS.Witsml.Server.Data.Wells
 
         public override WitsmlResult<List<Well>> Query(WitsmlQueryParser parser)
         {
+            if (parser.RequestObjectSelectionCapability() == OptionsIn.RequestObjectSelectionCapability.True.Value)
+            {
+                PropertyInfo[] propertyInfo = typeof(Well).GetProperties();
+
+                Well well = QueryFirstEntity();
+                if (well == null)
+                    well = new Well();
+
+                foreach (PropertyInfo property in propertyInfo)
+                {
+                    object value = property.GetValue(well);
+                    if (value == null && property.PropertyType==typeof(string))
+                        property.SetValue(well, " "); // TODO: To handle null property values.
+                }
+
+                return new WitsmlResult<List<Well>>(
+                    ErrorCodes.Success,
+                    new List<Well>() { well });
+            }
+
             return new WitsmlResult<List<Well>>(
                 ErrorCodes.Success,
                 QueryEntities(parser, new List<string>() { "name,Name" }));

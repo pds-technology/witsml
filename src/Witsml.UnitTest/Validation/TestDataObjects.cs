@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Energistics.DataAccess;
 
 namespace PDS.Witsml.Validation
 {
@@ -38,7 +39,7 @@ namespace PDS.Witsml.Validation
     /// <summary>
     /// Property class to test <see cref="CollectionAttribute"/> custom validation attribute
     /// </summary>
-    public class WellDatum
+    public class WellDatum : IDataObject
     {
         [Required]
         public string Name { get; set; }

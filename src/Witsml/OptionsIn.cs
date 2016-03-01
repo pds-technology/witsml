@@ -73,6 +73,20 @@ namespace PDS.Witsml
         }
 
         /// <summary>
+        /// Defines the choice of requestObjectSelectionCapability configuration option values.
+        /// </summary>
+        /// <seealso cref="PDS.Witsml.OptionsIn" />
+        public class RequestObjectSelectionCapability : OptionsIn
+        {
+            public RequestObjectSelectionCapability(string value) : base(Keyword, value) { }
+
+            public const string Keyword = "RequestObjectSelectionCapability";
+
+            public static readonly RequestObjectSelectionCapability None = new RequestObjectSelectionCapability("none");
+            public static readonly RequestObjectSelectionCapability True = new RequestObjectSelectionCapability("true");
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="OptionsIn"/> class.
         /// </summary>
         /// <param name="key">The key.</param>

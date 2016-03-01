@@ -37,10 +37,14 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
                 switch (requestType)
                 {
                     case RequestTypes.Add:
+                        wmls.WMLS_AddToStore(objectType, Model.XmlQuery.Text, null, null, out suppMsgOut);
+                        Model.QueryResults.Text = suppMsgOut;
                         break;
                     case RequestTypes.Update:
+                        App.Current.ShowInfo("Coming soon.");
                         break;
                     case RequestTypes.Delete:
+                        App.Current.ShowInfo("Coming soon.");
                         break;
                     default:
                         wmls.WMLS_GetFromStore(objectType, Model.XmlQuery.Text, null, null, out xmlOut, out suppMsgOut);
