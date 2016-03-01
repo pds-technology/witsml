@@ -32,6 +32,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
                 string xmlOut;
                 string suppMsgOut;
 
+                var objectType = ObjectTypes.GetObjectTypeFromGroup(Model.XmlQuery.Text);
+
                 switch (requestType)
                 {
                     case RequestTypes.Add:
@@ -41,11 +43,13 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
                     case RequestTypes.Delete:
                         break;
                     default:
-                        wmls.WMLS_GetFromStore(ObjectTypes.Well, Model.XmlQuery.Text, null, null, out xmlOut, out suppMsgOut);
+                        wmls.WMLS_GetFromStore(objectType, Model.XmlQuery.Text, null, null, out xmlOut, out suppMsgOut);
                         Model.QueryResults.Text = string.IsNullOrEmpty(suppMsgOut) ? xmlOut : suppMsgOut;
                         break;
                 }
             }
+
+            // TODO: Add exception handling.  We don't want the app to crash because of a bad query.
         }
 
         protected override void OnInitialize()

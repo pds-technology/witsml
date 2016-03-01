@@ -22,17 +22,17 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 
         public void AddToStore()
         {
-            MessageBox.Show("Add coming soon");
+            (Parent as RequestViewModel).SubmitQuery(RequestTypes.Add);
         }
 
         public void UpdateInStore()
         {
-            MessageBox.Show("Update coming soon");
+            (Parent as RequestViewModel).SubmitQuery(RequestTypes.Update);
         }
 
         public void DeleteFromStore()
         {
-            MessageBox.Show("Delete coming soon");
+            (Parent as RequestViewModel).SubmitQuery(RequestTypes.Delete);
         }
 
         public void SaveQuery(object sender, RoutedEventArgs e)

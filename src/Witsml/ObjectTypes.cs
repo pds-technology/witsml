@@ -75,6 +75,23 @@ namespace PDS.Witsml
         }
 
         /// <summary>
+        /// Gets the object type from group (plural) name.
+        /// </summary>
+        /// <param name="xml">The XML.</param>
+        /// <returns>The WITSML Object Type In</returns>
+        public static string GetObjectTypeFromGroup(string xml)
+        {
+            try
+            {
+                return PluralToSingle(GetObjectGroupType(xml));
+            }
+            catch
+            {
+                return Unknown;
+            }
+        }
+
+        /// <summary>
         /// Gets the type of the object group.
         /// </summary>
         /// <param name="xml">The XML.</param>
@@ -108,6 +125,13 @@ namespace PDS.Witsml
             {
                 return string.Empty;
             }
+        }
+
+        private static string PluralToSingle(string pluralString)
+        {
+            return pluralString.EndsWith("s")
+                ? pluralString.Substring(0, pluralString.Length - 1)
+                : pluralString;
         }
     }
 }
