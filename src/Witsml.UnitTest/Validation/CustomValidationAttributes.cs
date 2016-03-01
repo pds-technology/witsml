@@ -32,6 +32,7 @@ namespace PDS.Witsml.Validation
     {
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
+            var uids = new List<string>();
             var list = (IEnumerable)value;
             foreach (var obj in list)
             {
@@ -39,6 +40,12 @@ namespace PDS.Witsml.Validation
                 EntityValidator.TryValidate(obj, out results);
                 if (results.Count > 0)
                     return results.FirstOrDefault();
+
+                var pUid = obj.GetType().GetProperties().FirstOrDefault(p => p.Name == "Uid");
+                var uid = pUid.GetValue(obj).ToString();
+                if (uids.Contains(uid))
+                    return new ValidationResult("Uid for recurring element must be unique", new string[] { "Uid" });
+                uids.Add(uid);
             }
             return null;
         }
