@@ -21,13 +21,14 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         public void SubmitQuery()
         {
             // TODO: Create the correct version of the WMLS instance
+            //... We may want to change the DevKit to expose a "CreateClient()" method
+            //... e.g., Proxy.CreateClient();
             using (var wmls = new WMLS() { Url = Model.Connection.Uri })
-            {
+            {                
                 string xmlOut;
                 string suppMsgOut;
-
+                
                 wmls.WMLS_GetFromStore(ObjectTypes.Well, Model.XmlQuery.Text, null, null, out xmlOut, out suppMsgOut);
-
                 Model.QueryResults.Text = string.IsNullOrEmpty(suppMsgOut) ? xmlOut : suppMsgOut;
             }
         }
