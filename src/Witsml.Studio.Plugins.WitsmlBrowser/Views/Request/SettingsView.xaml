@@ -35,7 +35,7 @@
             <Border Grid.Row="2" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="0,1,0,0" VerticalAlignment="Center" />
 
             <TextBlock Grid.Column="0" Grid.Row="3" Text="Return Elements:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
-            <ComboBox SelectedItem="{Binding Model.ReturnElementType}" DisplayMemberPath="Value" ItemsSource="{Binding ReturnElements}" Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2" Margin="5" VerticalContentAlignment="Center" />
+            <ComboBox SelectedItem="{Binding Model.ReturnElementType, Mode=TwoWay}" DisplayMemberPath="Value" ItemsSource="{Binding ReturnElements}" Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2" Margin="5" VerticalContentAlignment="Center" />
 
             <TextBlock Grid.Column="0" Grid.Row="4" Text="Max Data Rows:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
             <xctk:IntegerUpDown Value="{Binding Model.MaxDataRows}" Grid.Column="1" Grid.Row="4" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" />

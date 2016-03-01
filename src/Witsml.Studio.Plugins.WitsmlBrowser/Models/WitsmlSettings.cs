@@ -34,8 +34,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
             }
         }
 
-        private string _returnElementType;
-        public string ReturnElementType
+        private OptionsIn.ReturnElements _returnElementType;
+        public OptionsIn.ReturnElements ReturnElementType
         {
             get { return _returnElementType; }
             set
