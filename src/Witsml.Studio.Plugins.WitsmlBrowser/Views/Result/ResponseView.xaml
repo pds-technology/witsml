@@ -4,9 +4,13 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PDS.Witsml.Studio.Plugins.WitsmlBrowser.Views.Result"
+             xmlns:avalon="http://icsharpcode.net/sharpdevelop/avalonedit"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
-        <TextBlock Text="Results" />
+        <avalon:TextEditor 
+            Document="{Binding Model.QueryResults}" Padding="5" IsReadOnly="True"
+            SyntaxHighlighting="XML" FontFamily="Consolas" FontSize="10pt">
+        </avalon:TextEditor>
     </Grid>
 </UserControl>
