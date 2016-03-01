@@ -105,6 +105,20 @@ namespace PDS.Witsml.Server
         }
 
         [TestMethod]
+        public void WitsmlStore_can_get_well_RequestObjectSelectionCapability()
+        {
+            // Add Well
+            DevKit.Proxy.Write(DevKit.New<WellList>(x => x.Well = DevKit.List(Well1)));
+            DevKit.Proxy.Write(DevKit.New<WellList>(x => x.Well = DevKit.List(Well2)));
+
+            // Get Well by Name
+            var query = DevKit.Query<WellList>();
+            var result = DevKit.Proxy.Read(query, OptionsIn.RequestObjectSelectionCapability.True);
+
+            Assert.AreEqual(1, result.Well.Count);
+        }
+
+        [TestMethod]
         public void WitsmlStore_can_add_and_get_all_wellbores()
         {
             // Add Well

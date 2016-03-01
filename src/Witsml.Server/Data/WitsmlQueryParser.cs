@@ -28,6 +28,15 @@ namespace PDS.Witsml.Server.Data
             return OptionsIn.GetValue(Options, OptionsIn.ReturnElements.Requested);
         }
 
+        /// <summary>
+        /// Requests the object selection capability.
+        /// </summary>
+        /// <returns>The capability value.</returns>
+        public string RequestObjectSelectionCapability()
+        {
+            return OptionsIn.GetValue(Options, OptionsIn.RequestObjectSelectionCapability.None);
+        }
+
         public IEnumerable<XElement> Elements()
         {
             return _document.Root.Elements(_namespace + Context.ObjectType);
