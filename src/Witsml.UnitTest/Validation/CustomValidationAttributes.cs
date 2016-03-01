@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using Energistics.DataAccess;
 
 namespace PDS.Witsml.Validation
 {
@@ -40,11 +41,14 @@ namespace PDS.Witsml.Validation
                 if (results.Count > 0)
                     return results.FirstOrDefault();
 
-                var pUid = obj.GetType().GetProperties().FirstOrDefault(p => p.Name == "Uid");
-                var uid = pUid.GetValue(obj).ToString();
-                if (uids.Contains(uid))
-                    return new ValidationResult("Uid for recurring element must be unique", new string[] { "Uid" });
-                uids.Add(uid);
+                var dataObj = obj as IDataObject;
+                if (dataObj != null)
+                {
+                    var uid = dataObj.Uid;
+                    if (uids.Contains(uid))
+                        return new ValidationResult("Uid for recurring element must be unique", new string[] { "Uid" });
+                    uids.Add(uid);
+                }
             }
             return null;
         }
