@@ -1,4 +1,6 @@
-﻿using Caliburn.Micro;
+﻿using System;
+using Caliburn.Micro;
+using ICSharpCode.AvalonEdit.Document;
 using PDS.Witsml.Studio.Connections;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
@@ -9,15 +11,13 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
         {
             Connection = new Connection();
             MaxDataRows = 1000;
+            XmlQuery = new TextDocument();
+            QueryResults = new TextDocument();
 
             // TODO: Remove after testing
-            XmlQuery =
-        "<? xml version = \"1.0\" encoding = \"utf-8\" standalone = \"yes\" ?>\n" +
-        "< wells version = \"1.4.1.1\" xmlns = \"http://www.witsml.org/schemas/1series\" >\n" +
-        "    < well uid = \"uid1\" >\n" +
-        "        <name>Test Well 1</name>\n" +
-        "    </ well >\n" +
-        "</ wells > \n";
+            XmlQuery.Text = 
+                "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" + Environment.NewLine +
+                "<wells version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\" />";
         }
 
         private Connection _connection;
@@ -34,8 +34,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
             }
         }
 
-        private string _returnElementType;
-        public string ReturnElementType
+        private OptionsIn.ReturnElements _returnElementType;
+        public OptionsIn.ReturnElements ReturnElementType
         {
             get { return _returnElementType; }
             set
@@ -76,9 +76,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
             }
         }
 
-        // TODO: Remove after testing
-        private string _xmlQuery;
-        public string XmlQuery
+        private TextDocument _xmlQuery;
+        public TextDocument XmlQuery
         {
             get { return _xmlQuery; }
             set
@@ -87,6 +86,20 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
                 {
                     _xmlQuery = value;
                     NotifyOfPropertyChange(() => XmlQuery);
+                }
+            }
+        }
+
+        private TextDocument _queryResults;
+        public TextDocument QueryResults
+        {
+            get { return _queryResults; }
+            set
+            {
+                if (!string.Equals(_queryResults, value))
+                {
+                    _queryResults = value;
+                    NotifyOfPropertyChange(() => QueryResults);
                 }
             }
         }

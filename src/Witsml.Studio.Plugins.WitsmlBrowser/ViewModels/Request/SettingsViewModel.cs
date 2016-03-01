@@ -62,6 +62,13 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             }
         }
 
+        protected override void OnInitialize()
+        {
+            base.OnInitialize();
+
+            Model.ReturnElementType = OptionsIn.ReturnElements.All;
+        }
+
         private void GetVersions()
         {
             try

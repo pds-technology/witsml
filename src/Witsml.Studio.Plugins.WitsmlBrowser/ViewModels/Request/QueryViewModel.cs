@@ -17,7 +17,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 
         public void ExecuteQuery(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Execute coming soon");
+            (Parent as RequestViewModel).SubmitQuery();
         }
 
         public void SaveQuery(object sender, RoutedEventArgs e)
