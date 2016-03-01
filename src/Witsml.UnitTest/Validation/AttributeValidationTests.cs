@@ -48,5 +48,28 @@ namespace PDS.Witsml.Validation
 
             Assert.IsFalse(valid);
         }
+
+        /// <summary>
+        /// Test <see cref="CollectionAttribute"/> validation attribute for Uid uniqueness of recurring elements
+        /// </summary>
+        [TestMethod]
+        public void Test_Recurring_Elements_Validation()
+        {
+            var dtoWell = new DtoWell
+            {
+                Name = "Well-1",
+                Elevation = new Elevation { Uom = "m" },
+                WellDatum = new List<WellDatum>
+                {
+                    new WellDatum { Name = "Sea Level", Code = "SL", Uid = "SL" },
+                    new WellDatum { Name = "Sea Level", Code = "SL", Uid = "SL" }
+                }
+            };
+
+            IList<ValidationResult> results;
+            var valid = EntityValidator.TryValidate(dtoWell, out results);
+
+            Assert.IsFalse(valid);
+        }
     }
 }
