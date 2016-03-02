@@ -62,6 +62,11 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             }
         }
 
+        public void GetCapabilities()
+        {
+            Parent.Parent.GetCapabilities();
+        }
+
         protected override void OnInitialize()
         {
             base.OnInitialize();

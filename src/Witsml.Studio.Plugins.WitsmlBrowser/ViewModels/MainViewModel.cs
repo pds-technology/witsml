@@ -13,22 +13,24 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
     {
         public MainViewModel()
         {
+            // Create the model for our witsml settings
             Model = new Models.WitsmlSettings();
+
+            // Create documents used by Avalon Editors used on query/result tabs.
             XmlQuery = new TextDocument();
             QueryResults = new TextDocument();
             Messages = new TextDocument();
 
-            // TODO: Remove after testing
-            XmlQuery.Text =
-                "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" + Environment.NewLine +
-                "<wells version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\" />";
-
+            // Create a default client proxy object.
             Proxy = CreateProxy();
 
+            // Create view models displayed within this view model.
             RequestControl = new RequestViewModel();
             ResultControl = new ResultViewModel();
 
             DisplayName = Settings.Default.PluginDisplayName;
+
+            // Handle notifications for our witsml settings model changes
             Model.PropertyChanged += Model_PropertyChanged;
         }
 
@@ -116,6 +118,49 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             return new WITSMLWebServiceConnection(Model.Connection.Uri, GetWitsmlVersionEnum());
         }
 
+        public void SubmitQuery(Functions functionType)
+        {
+            QueryResults.Text = string.Empty;
+
+            using (var client = Proxy.CreateClientProxy())
+            {
+                var wmls = client as IWitsmlClient;
+
+                string xmlOut = string.Empty;
+                string suppMsgOut = string.Empty;
+
+                var objectType = ObjectTypes.GetObjectTypeFromGroup(XmlQuery.Text);
+
+                switch (functionType)
+                {
+                    case Functions.GetCap:
+                        wmls.WMLS_GetCap(null, out xmlOut, out suppMsgOut);
+                        break;
+                    case Functions.AddToStore:
+                        wmls.WMLS_AddToStore(objectType, XmlQuery.Text, null, null, out suppMsgOut);
+                        break;
+                    case Functions.UpdateInStore:
+                        App.Current.ShowInfo("Coming soon.");
+                        break;
+                    case Functions.DeleteFromStore:
+                        App.Current.ShowInfo("Coming soon.");
+                        break;
+                    default:
+                        wmls.WMLS_GetFromStore(objectType, XmlQuery.Text, Model.ReturnElementType.ToString(), null, out xmlOut, out suppMsgOut);
+                        break;
+                }
+                OutputResults(xmlOut, suppMsgOut);
+                OutputMessages(functionType, XmlQuery.Text, xmlOut, suppMsgOut);
+            }
+
+            // TODO: Add exception handling.  We don't want the app to crash because of a bad query.
+        }
+
+        public void GetCapabilities()
+        {
+            SubmitQuery(Functions.GetCap);
+        }
+
         protected override void OnInitialize()
         {
             base.OnInitialize();
@@ -134,6 +179,9 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
 
                 // Reset the Proxy when the version changes
                 Proxy = CreateProxy();
+
+                // Get the server capabilities for the newly selected version.
+                GetCapabilities();
             }
         }
 
@@ -149,6 +197,28 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             return Model.WitsmlVersion != null && Model.WitsmlVersion.Equals(OptionsIn.DataVersion.Version131.Value) 
                 ? WMLSVersion.WITSML131 
                 : WMLSVersion.WITSML141;
+        }
+
+        private void OutputResults(string xmlOut, string suppMsgOut)
+        {
+            QueryResults.Text = string.IsNullOrEmpty(suppMsgOut) ? xmlOut : suppMsgOut;
+        }
+
+        private void OutputMessages(Functions functionType, string queryText, string xmlOut, string suppMsgOut)
+        {
+            var none = "<!-- None -->";
+            var now = DateTime.Now.ToString("G");
+
+            Messages.Insert(
+                Messages.TextLength,
+                string.Format(
+                    "<!-- {5}: {4} -->{3}{0}{3}{3}<!-- Message: {4} -->{3}<!-- {1} -->{3}{3}<!-- Output: {4} -->{3}{2}{3}{3}",
+                    queryText == null ? string.Empty : queryText,
+                    string.IsNullOrEmpty(suppMsgOut) ? "None" : suppMsgOut,
+                    string.IsNullOrEmpty(xmlOut) ? none : xmlOut,
+                    Environment.NewLine,
+                    now,
+                    functionType.ToDescription()));
         }
     }
 }

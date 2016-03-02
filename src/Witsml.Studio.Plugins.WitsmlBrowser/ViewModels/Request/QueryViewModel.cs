@@ -15,6 +15,11 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             get { return (RequestViewModel)base.Parent; }
         }
 
+        public MainViewModel MainViewModel
+        {
+            get { return (MainViewModel)Parent.Parent; }
+        }
+
         public Models.WitsmlSettings Model
         {
             get { return Parent.Model; }
@@ -37,27 +42,27 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 
         public string QueryWrappedText
         {
-            get { return Parent.Parent.GetWrappedText(QueryWrapped); }
+            get { return MainViewModel.GetWrappedText(QueryWrapped); }
         }
 
         public void GetFromStore()
-        {           
-            (Parent as RequestViewModel).SubmitQuery(Functions.GetFromStore);
+        {
+            MainViewModel.SubmitQuery(Functions.GetFromStore);
         }
 
         public void AddToStore()
         {
-            (Parent as RequestViewModel).SubmitQuery(Functions.AddToStore);
+            MainViewModel.SubmitQuery(Functions.AddToStore);
         }
 
         public void UpdateInStore()
         {
-            (Parent as RequestViewModel).SubmitQuery(Functions.UpdateInStore);
+            MainViewModel.SubmitQuery(Functions.UpdateInStore);
         }
 
         public void DeleteFromStore()
         {
-            (Parent as RequestViewModel).SubmitQuery(Functions.DeleteFromStore);
+            MainViewModel.SubmitQuery(Functions.DeleteFromStore);
         }
 
         public void SaveQuery(object sender, RoutedEventArgs e)
