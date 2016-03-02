@@ -1,4 +1,5 @@
-﻿using Caliburn.Micro;
+﻿using System;
+using Caliburn.Micro;
 using Energistics.DataAccess;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
@@ -30,8 +31,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             {
                 var wmls = client as IWitsmlClient;
 
-                string xmlOut;
-                string suppMsgOut;
+                string xmlOut = string.Empty;
+                string suppMsgOut = string.Empty;
 
                 var objectType = ObjectTypes.GetObjectTypeFromGroup(Parent.XmlQuery.Text);
 
@@ -39,7 +40,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
                 {
                     case Functions.AddToStore:
                         wmls.WMLS_AddToStore(objectType, Parent.XmlQuery.Text, null, null, out suppMsgOut);
-                        Parent.QueryResults.Text = suppMsgOut;
                         break;
                     case Functions.UpdateInStore:
                         App.Current.ShowInfo("Coming soon.");
@@ -48,10 +48,11 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
                         App.Current.ShowInfo("Coming soon.");
                         break;
                     default:
-                        wmls.WMLS_GetFromStore(objectType, Parent.XmlQuery.Text, null, null, out xmlOut, out suppMsgOut);
-                        Parent.QueryResults.Text = string.IsNullOrEmpty(suppMsgOut) ? xmlOut : suppMsgOut;
+                        wmls.WMLS_GetFromStore(objectType, Parent.XmlQuery.Text, Model.ReturnElementType.ToString(), null, out xmlOut, out suppMsgOut);
                         break;
                 }
+                OutputResults(xmlOut, suppMsgOut);
+                OutputMessages(functionType, Parent.XmlQuery.Text, xmlOut, suppMsgOut);
             }
 
             // TODO: Add exception handling.  We don't want the app to crash because of a bad query.
@@ -67,6 +68,28 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             //Items.Add(new TreeViewViewModel());
             //Items.Add(new TemplatesViewModel());
             Items.Add(new QueryViewModel());
+        }
+
+        private void OutputResults(string xmlOut, string suppMsgOut)
+        {
+            Parent.QueryResults.Text = string.IsNullOrEmpty(suppMsgOut) ? xmlOut : suppMsgOut;
+        }
+
+        private void OutputMessages(Functions functionType, string queryText, string xmlOut, string suppMsgOut)
+        {
+            var none = "<!-- None -->";
+            var now = DateTime.Now.ToString("G");
+
+            Parent.Messages.Insert(
+                Parent.Messages.TextLength, 
+                string.Format(
+                    "<!-- {5}: {4} -->{3}{0}{3}{3}<!-- Message: {4} -->{3}<!-- {1} -->{3}{3}<!-- Output: {4} -->{3}{2}{3}{3}",
+                    queryText == null ? string.Empty : queryText,
+                    string.IsNullOrEmpty(suppMsgOut) ? "None" : suppMsgOut,
+                    string.IsNullOrEmpty(xmlOut) ? none : xmlOut,
+                    Environment.NewLine,
+                    now,
+                    functionType.ToDescription()));
         }
     }
 }
