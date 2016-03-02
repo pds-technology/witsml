@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using Energistics.Datatypes;
 using ICSharpCode.AvalonEdit.Document;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Models;
 
@@ -15,7 +16,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public StoreViewModel()
         {
-            DisplayName = "Store";
+            DisplayName = string.Format("{0:D} - {0}", Protocols.Store);
             Data = new TextDocument();
         }
 

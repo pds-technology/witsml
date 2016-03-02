@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using Energistics.Datatypes;
 using PDS.Witsml.Studio.Connections;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Models;
 using PDS.Witsml.Studio.ViewModels;
@@ -16,7 +17,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public SettingsViewModel()
         {
-            DisplayName = "Settings";
+            DisplayName =  string.Format("{0:D} - {0}", Protocols.Core);
         }
 
         /// <summary>

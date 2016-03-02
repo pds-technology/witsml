@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using Energistics.Datatypes;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Models;
 
 namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
@@ -14,7 +15,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public HierarchyViewModel()
         {
-            DisplayName = "Tree View";
+            DisplayName = string.Format("{0:D} - {0}", Protocols.Discovery);
         }
 
         /// <summary>
