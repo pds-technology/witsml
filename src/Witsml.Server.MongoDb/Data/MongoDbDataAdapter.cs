@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic;
 using System.Reflection;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 using log4net;
 using MongoDB.Bson;
@@ -223,8 +224,11 @@ namespace PDS.Witsml.Server.Data
             foreach (var entity in tList)
             {
                 var filter = BuildFilter(parser, entity);
+                var projection = BuildProjection(parser);
 
-                var results = collection.Find(filter ?? "{}").ToList();
+                var results = collection.Find(filter ?? "{}");
+                if (projection != null)
+                    results = results.Project<T>(projection);
                 entities.AddRange(results.ToList());
             }
 
@@ -409,6 +413,60 @@ namespace PDS.Witsml.Server.Data
         private IEnumerable<PropertyInfo> GetPropertyInfo(object obj)
         {
             return obj.GetType().GetProperties().Where(p => p.IsDefined(typeof(XmlElementAttribute), false) || p.IsDefined(typeof(XmlAttributeAttribute), false));
+        }
+
+        private ProjectionDefinition<T> BuildProjection(WitsmlQueryParser parser)
+        {
+            var fields = new List<string>();
+            var element = parser.Element();
+            if (element == null)
+                return null;
+
+            foreach (var child in element.Elements())
+                BuildProjectionForAnElement(child, null, fields);
+
+            if (fields.Count == 0)
+                return null;
+            else {
+                var projection = Builders<T>.Projection.Include(fields[0]);
+                for (var i = 1; i < fields.Count; i++)
+                    projection = projection.Include(fields[i]);
+                return projection;
+            }
+        }
+
+        private void BuildProjectionForAnElement(XElement element, string fieldPath, List<string> fields)
+        {
+            var prefix = string.IsNullOrEmpty(fieldPath) ? string.Empty : string.Format("{0}.", fieldPath);
+            var path = string.Format("{0}{1}", prefix, CaptalizeString(element.Name.LocalName));
+            if (!element.HasElements && !element.HasElements)
+            {
+                fields.Add(path);
+                return;
+            }
+
+            if (element.HasElements)
+            {
+                foreach (var child in element.Elements())
+                    BuildProjectionForAnElement(child, path, fields);
+            }
+            if (element.HasAttributes)
+            {
+                foreach (var attribute in element.Attributes())
+                    fields.Add(string.Format("{0}.{1}", path, CaptalizeString(attribute.Name.LocalName)));
+            }
+        }
+
+        private string CaptalizeString(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return input;
+
+            var result = Char.ToUpper(input[0]).ToString();
+            if (input.Length > 1)
+                result += input.Substring(1);
+
+            return result;
         }
     }
 }
