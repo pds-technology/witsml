@@ -131,6 +131,9 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
 
                 switch (functionType)
                 {
+                    case Functions.GetCap:
+                        wmls.WMLS_GetCap(null, out xmlOut, out suppMsgOut);
+                        break;
                     case Functions.AddToStore:
                         wmls.WMLS_AddToStore(objectType, XmlQuery.Text, null, null, out suppMsgOut);
                         break;
@@ -169,6 +172,9 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
 
                 // Reset the Proxy when the version changes
                 Proxy = CreateProxy();
+
+                // Get the server capabilities for the newly selected version.
+                SubmitQuery(Functions.GetCap);
             }
         }
 
