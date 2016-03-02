@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Windows;
 using Caliburn.Micro;
 using Energistics.DataAccess;
@@ -14,7 +15,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         public MainViewModel()
         {
             Model = new Models.WitsmlSettings();
-            Proxy = new WITSMLWebServiceConnection(Model.Connection.Uri, WMLSVersion.WITSML141);
+            Proxy = CreateProxy();
 
             RequestControl = new RequestViewModel();
             ResultControl = new ResultViewModel();
@@ -51,6 +52,15 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
 
         public ResultViewModel ResultControl { get; set; }
 
+        /// <summary>
+        /// Creates a WITSMLWebServiceConnection for the current connection uri and witsml version.
+        /// </summary>
+        /// <returns></returns>
+        internal WITSMLWebServiceConnection CreateProxy()
+        {
+            return new WITSMLWebServiceConnection(Model.Connection.Uri, GetWitsmlVersionEnum());
+        }
+
         protected override void OnInitialize()
         {
             base.OnInitialize();
@@ -66,7 +76,24 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                 App.Current.Shell().BreadcrumbText = !string.IsNullOrEmpty(Model.WitsmlVersion)
                     ? string.Format("{0}/{1}", Settings.Default.PluginDisplayName, Model.WitsmlVersion)
                     : App.Current.Shell().BreadcrumbText = Settings.Default.PluginDisplayName;
+
+                // Reset the Proxy when the version changes
+                Proxy = CreateProxy();
             }
+        }
+
+        /// <summary>
+        /// Gets the witsml version enum.
+        /// </summary>
+        /// <returns>
+        /// The WMLSVersion enum value based on the current value of Model.WitsmlVersion.
+        /// If Model.WitsmlVersion has not been established the the default is WMLSVersion.WITSML141.
+        /// </returns>
+        private WMLSVersion GetWitsmlVersionEnum()
+        {
+            return Model.WitsmlVersion != null && Model.WitsmlVersion.Equals("1.3.1.1") 
+                ? WMLSVersion.WITSML131 
+                : WMLSVersion.WITSML141;
         }
     }
 }

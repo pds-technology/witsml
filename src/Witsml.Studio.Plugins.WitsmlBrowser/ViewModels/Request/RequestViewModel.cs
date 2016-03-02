@@ -24,11 +24,10 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         {
             Model.QueryResults.Text = string.Empty;
 
-            // TODO: Create the correct version of the WMLS instance
-            //... We may want to change the DevKit to expose a "CreateClient()" method
-            //... e.g., Proxy.CreateClient();
-            using (var wmls = new WMLS() { Url = Model.Connection.Uri })
-            {                
+            using (var client = Proxy.CreateClientProxy())
+            {
+                var wmls = client as IWitsmlClient;
+
                 string xmlOut;
                 string suppMsgOut;
 
