@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PDS.Witsml.Studio.Plugins.WitsmlBrowser.Views.Result"
+             xmlns:cal="http://www.caliburnproject.org"
              xmlns:avalon="http://icsharpcode.net/sharpdevelop/avalonedit"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
@@ -13,7 +14,15 @@
                 <Grid>
                     <avalon:TextEditor 
                         Document="{Binding Parent.QueryResults}" Padding="5" IsReadOnly="True"
-                        SyntaxHighlighting="XML" FontFamily="Consolas" FontSize="10pt">
+                        SyntaxHighlighting="XML" FontFamily="Consolas" FontSize="10pt" WordWrap="{Binding ResultsWrapped}">
+
+                        <avalon:TextEditor.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Copy" cal:Message.Attach="CopyResults" />
+                                <MenuItem Header="Clear" cal:Message.Attach="ClearResults" />
+                                <MenuItem Header="{Binding ResultsWrappedText}" cal:Message.Attach="WrapResults()" />
+                            </ContextMenu>
+                        </avalon:TextEditor.ContextMenu>
                     </avalon:TextEditor>
                 </Grid>
             </TabItem>
@@ -21,8 +30,16 @@
             <TabItem Header="Messages">
                 <Grid>
                     <avalon:TextEditor 
-                        Document="{Binding Parent.Messages}" Padding="5" IsReadOnly="True"
-                        SyntaxHighlighting="XML" FontFamily="Consolas" FontSize="10pt">
+                        x:Name="MessagesEditor" Document="{Binding Parent.Messages}" Padding="5" IsReadOnly="True"
+                        SyntaxHighlighting="XML" FontFamily="Consolas" FontSize="10pt" WordWrap="{Binding MessagesWrapped}">
+
+                        <avalon:TextEditor.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Copy" cal:Message.Attach="CopyMessages" />
+                                <MenuItem Header="Clear" cal:Message.Attach="ClearMessages" />
+                                <MenuItem Header="{Binding MessagesWrappedText}" cal:Message.Attach="WrapMessages()" />
+                            </ContextMenu>
+                        </avalon:TextEditor.ContextMenu>
                     </avalon:TextEditor>
                 </Grid>
             </TabItem>

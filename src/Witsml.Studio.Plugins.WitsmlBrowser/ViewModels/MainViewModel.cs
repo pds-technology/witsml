@@ -102,6 +102,11 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             }
         }
 
+        internal string GetWrappedText(bool isWrapped)
+        {
+            return isWrapped ? "No Wrap" : "Wrap";
+        }
+
         /// <summary>
         /// Creates a WITSMLWebServiceConnection for the current connection uri and witsml version.
         /// </summary>
