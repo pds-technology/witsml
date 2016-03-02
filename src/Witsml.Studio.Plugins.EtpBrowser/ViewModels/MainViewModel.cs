@@ -106,9 +106,28 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             var resource = FindResource(Resources, x => x.IsSelected);
             if (resource != null)
             {
-                _client.Handler<IStoreCustomer>()
-                    .GetObject(resource.Resource.Uri);
+                SendGetObject(resource.Resource.Uri);
             }
+        }
+
+        /// <summary>
+        /// Sends the <see cref="Energistics.Protocol.Store.GetObject"/> message with the specified URI.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        public void SendGetObject(string uri)
+        {
+            _client.Handler<IStoreCustomer>()
+                .GetObject(uri);
+        }
+
+        /// <summary>
+        /// Sends the <see cref="Energistics.Protocol.Store.DeleteObject"/> message with the specified URI.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        public void SendDeleteObject(string uri)
+        {
+            _client.Handler<IStoreCustomer>()
+                .DeleteObject(new List<string>() { uri });
         }
 
         /// <summary>
@@ -197,6 +216,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             if (!string.IsNullOrWhiteSpace(Model.Connection.Uri))
             {
                 ActivateItem(new HierarchyViewModel());
+                Items.Add(new StoreViewModel());
                 InitEtpClient();
             }
         }
@@ -208,6 +228,8 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         {
             try
             {
+                App.Current.Shell().StatusBarText = "Connecting...";
+
                 _client = new EtpClient(Model.Connection.Uri, "ETP Browser");
                 _client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();
                 _client.Register<IStoreCustomer, StoreCustomerHandler>();
@@ -253,6 +275,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// <param name="e">The <see cref="ProtocolEventArgs{OpenSession}"/> instance containing the event data.</param>
         private void OnOpenSession(object sender, ProtocolEventArgs<OpenSession> e)
         {
+            App.Current.Invoke(() => App.Current.Shell().StatusBarText = "Connected");
             GetResources(RootUri);
         }
 
@@ -329,7 +352,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             App.Current.Invoke(() =>
             {
                 Details.Text = string.Format(
-                    "// Header:{3}{0}{3}{3}// Body:{3}{1}{3}{3}/* XML:{3}{2}{3}*/{3}",
+                    "// Header:{3}{0}{3}{3}// Body:{3}{1}{3}{3}/* Data:{3}{2}{3}*/{3}",
                     _client.Serialize(e.Header, true),
                     _client.Serialize(e.Message, true),
                     Encoding.UTF8.GetString(e.Message.DataObject.Data),

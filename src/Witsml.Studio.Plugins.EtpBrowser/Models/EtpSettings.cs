@@ -17,6 +17,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.Models
         public EtpSettings()
         {
             Connection = new Connection();
+            Store = new StoreSettings();
         }
 
         private Connection _connection;
@@ -34,6 +35,25 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.Models
                 {
                     _connection = value;
                     NotifyOfPropertyChange(() => Connection);
+                }
+            }
+        }
+
+        private StoreSettings _store;
+        /// <summary>
+        /// Gets or sets the Store settings.
+        /// </summary>
+        /// <value>The Store settings.</value>
+        [DataMember]
+        public StoreSettings Store
+        {
+            get { return _store; }
+            set
+            {
+                if (!ReferenceEquals(_store, value))
+                {
+                    _store = value;
+                    NotifyOfPropertyChange(() => Store);
                 }
             }
         }
