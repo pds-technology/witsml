@@ -10,6 +10,9 @@ using log4net;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
+using System.Reflection;
+using Energistics.DataAccess.WITSML141.ReferenceData;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -158,20 +161,111 @@ namespace PDS.Witsml.Server.Data
             return query;
         }
 
-        /// <summary>
-        /// Queries the first entity.
-        /// </summary>
-        /// <returns>The first entity found.</returns>
-        protected T QueryFirstEntity()
+        protected void FillObjectTemplateValues(Type objectType, object dataObject)
         {
-            return GetFirstEntity<T>(DbCollectionName);
+            PropertyInfo[] propertyInfo = objectType.GetProperties();
+            foreach (PropertyInfo property in propertyInfo)
+            {
+                Type propertyType = property.PropertyType;
+                if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                {
+                    Type type = propertyType.GetGenericArguments()[0];
+                    FillObjectTypeValues(dataObject, objectType, property, type);
+                    string specifiedPropertyName = property.Name + "Specified";
+                    PropertyInfo specifiedProperty = objectType.GetProperty(specifiedPropertyName);
+                    if (specifiedProperty!=null)
+                    {
+                        specifiedProperty.SetValue(dataObject, true);
+                    }
+                }
+                else if (property.Name.ToLower().Equals("TimeZone".ToLower()))
+                    property.SetValue(dataObject, "Z");
+                else if (property.Name.ToLower().Equals("Date".ToLower()))
+                    property.SetValue(dataObject, "1900-01-01");
+                else if (property.Name.ToLower().Equals("CalendarYear".ToLower()))
+                    property.SetValue(dataObject, "1000");
+                else if (property.Name.ToLower().Equals("iadcBearingWearCode".ToLower()))
+                    property.SetValue(dataObject, "E");
+                else if (property.Name.ToLower().Equals("geodeticZoneString".ToLower()))
+                    property.SetValue(dataObject, "60N");
+                else if (property.Name.ToLower().Equals("sectionNumber".ToLower()))
+                    property.SetValue(dataObject, "36");
+                else if (property.Name.ToLower().Equals("publicLandSurveySystemQuarterTownship".ToLower()))
+                    property.SetValue(dataObject, "NE");
+                else if (property.Name.ToLower().Equals("publicLandSurveySystemQuarterSection".ToLower()))
+                    property.SetValue(dataObject, "NE");
+                else if (property.Name.ToLower().Equals("number".ToLower()))
+                    property.SetValue(dataObject, 1);
+                else
+                    FillObjectTypeValues(dataObject, objectType, property, property.PropertyType);
+            }
         }
 
-        protected TObject GetFirstEntity<TObject>(string dbCollectionName)
+        private void FillObjectTypeValues(object dataObject, Type objectType, PropertyInfo property, Type propertyType)
         {
-            return GetQuery<TObject>(dbCollectionName).FirstOrDefault() ;
+            if (propertyType == typeof(string))
+                property.SetValue(dataObject, "abc");
+            else if (propertyType == typeof(bool))
+            {
+                int index = property.Name.LastIndexOf("Specified");
+                if (index < 0)
+                    property.SetValue(dataObject, false);
+                else
+                {
+                    string specifiedNameSubstring = property.Name.Substring(index, property.Name.Length - index);
+                    bool isSpecifiedProperty = specifiedNameSubstring.Equals("Specified");
+                    if (!isSpecifiedProperty)
+                        property.SetValue(dataObject, false);
+                }
+            }
+            else if (propertyType == typeof(DateTime))
+                property.SetValue(dataObject, Convert.ToDateTime("1900-01-01T00:00:00.000Z"));
+            else if (propertyType == typeof(WellStatus))
+                property.SetValue(dataObject, WellStatus.unknown);
+            else if (propertyType == typeof(WellPurpose))
+                property.SetValue(dataObject, WellPurpose.unknown);
+            else if (propertyType == typeof(WellFluid))
+                property.SetValue(dataObject, WellFluid.unknown);
+            else if (propertyType == typeof(WellDirection))
+                property.SetValue(dataObject, WellDirection.unknown);
+            else if (propertyType == typeof(LengthUom))
+                property.SetValue(dataObject, LengthUom.ft);
+            else if (propertyType == typeof(LengthMeasure))
+                property.SetValue(dataObject, new LengthMeasure(1.0, LengthUom.ft));
+            else if (propertyType == typeof(DimensionlessMeasure))
+                property.SetValue(dataObject, new DimensionlessMeasure(1.0, DimensionlessUom.Item));
+            else if (propertyType == typeof(List<WellDatum>))
+            {
+                WellDatum datum = new WellDatum();
+                FillObjectTemplateValues(typeof(WellDatum), datum);
+                property.SetValue(dataObject, new List<WellDatum>() { datum });
+            }
+            else if (propertyType == typeof(List<Location>))
+            {
+                Location location = new Location();
+                location.Easting = new LengthMeasure(1.0, LengthUom.ft);
+                property.SetValue(dataObject, new List<Location>() { location });
+            }
+            else if (propertyType == typeof(List<ReferencePoint>))
+            {
+                ReferencePoint referencePoint = new ReferencePoint();
+                FillObjectTemplateValues(typeof(ReferencePoint), referencePoint);
+                property.SetValue(dataObject, new List<ReferencePoint>() { referencePoint });
+            }
+            else if (propertyType == typeof(List<WellCRS>))
+            {
+                WellCRS wellCRS = new WellCRS();
+                FillObjectTemplateValues(typeof(WellCRS), wellCRS);
+                property.SetValue(dataObject, new List<WellCRS>() { wellCRS });
+            }
+            else if (propertyType == typeof(CommonData))
+            {
+                CommonData commonData = new CommonData();
+                FillObjectTemplateValues(typeof(CommonData), commonData);
+                property.SetValue(dataObject, commonData);
+            }
         }
-    
+
         /// <summary>
         /// Queries the data store.
         /// </summary>
