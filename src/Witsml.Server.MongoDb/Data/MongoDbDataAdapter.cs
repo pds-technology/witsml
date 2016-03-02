@@ -51,7 +51,7 @@ namespace PDS.Witsml.Server.Data
         /// Gets the name of the identifier property.
         /// </summary>
         /// <value>The name of the identifier property.</value>
-        protected string IdPropertyName { get; private set; }
+        protected string IdPropertyName { get; private set; }   
 
         /// <summary>
         /// Gets a data object by the specified UUID.
@@ -215,21 +215,27 @@ namespace PDS.Witsml.Server.Data
         /// <param name="parser">The parser.</param>
         /// <param name="tList">List of query for object T.</param>
         /// <returns></returns>
-        protected List<T> QueryEntities(WitsmlQueryParser parser, List<T> tList)
+        protected List<T> QueryEntities(WitsmlQueryParser parser, List<T> tList, List<string> fields = null)
         {
             var entities = new List<T>();
             var database = DatabaseProvider.GetDatabase();
             var collection = database.GetCollection<T>(DbCollectionName);
+            var returnElements = parser.ReturnElements();
 
             foreach (var entity in tList)
             {
                 var filter = BuildFilter(parser, entity);
-                var projection = BuildProjection(parser);
-
                 var results = collection.Find(filter ?? "{}");
-                if (projection != null)
-                    results = results.Project<T>(projection);
-                entities.AddRange(results.ToList());
+
+                if (returnElements == OptionsIn.ReturnElements.All.Value)
+                    entities.AddRange(results.ToList());
+                else if (returnElements == OptionsIn.ReturnElements.IdOnly.Value || returnElements == OptionsIn.ReturnElements.Requested.Value)
+                {
+                    var projection = BuildProjection(parser, entity, fields ?? new List<string>());
+                    if (projection != null)
+                        results = results.Project<T>(projection);
+                    entities.AddRange(results.ToList());
+                }
             }
 
             return entities;
@@ -322,7 +328,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The filter object that for the selection criteria for the queried entity.</returns>
         private FilterDefinition<T> BuildFilter(WitsmlQueryParser parser, T entity)
         {
-            var properties = GetPropertyInfo(entity);
+            var properties = GetPropertyInfo(entity.GetType());
             var filters = new List<FilterDefinition<T>>();
 
             foreach (var property in properties)
@@ -354,7 +360,7 @@ namespace PDS.Witsml.Server.Data
             var fieldName = propertyInfo.Name;
             if (!string.IsNullOrEmpty(path))
                 fieldName = string.Format("{0}.{1}", path, fieldName);
-            var properties = GetPropertyInfo(propertyValue).ToList();
+            var properties = GetPropertyInfo(propertyValue.GetType()).ToList();
             var filters = new List<FilterDefinition<T>>();
 
             if (properties.Count > 0)
@@ -385,7 +391,7 @@ namespace PDS.Witsml.Server.Data
                     foreach (var item in list)
                     {
                         var itemFilters = new List<FilterDefinition<T>>();
-                        var itemProperties = GetPropertyInfo(item);
+                        var itemProperties = GetPropertyInfo(item.GetType());
                         foreach (var itemProperty in itemProperties)
                         {
                             var itemFilter = BuildFilterForAProperty(itemProperty, item, fieldName);
@@ -400,7 +406,10 @@ namespace PDS.Witsml.Server.Data
                 }
                 else
                 {
-                    return Builders<T>.Filter.Eq(fieldName, propertyValue);
+                    if (propertyInfo.Name == "DateTimeCreation" || propertyInfo.Name == "DateTimeLastChange")
+                        return Builders<T>.Filter.Gte(fieldName, propertyValue);
+                    else
+                        return Builders<T>.Filter.Eq(fieldName, propertyValue);
                 }
             }
 
@@ -410,9 +419,9 @@ namespace PDS.Witsml.Server.Data
                 return null;
         }
 
-        private IEnumerable<PropertyInfo> GetPropertyInfo(object obj)
+        private IEnumerable<PropertyInfo> GetPropertyInfo(Type t)
         {
-            return obj.GetType().GetProperties().Where(p => p.IsDefined(typeof(XmlElementAttribute), false) || p.IsDefined(typeof(XmlAttributeAttribute), false));
+            return t.GetProperties().Where(p => p.IsDefined(typeof(XmlElementAttribute), false) || p.IsDefined(typeof(XmlAttributeAttribute), false));
         }
 
         /// <summary>
@@ -420,15 +429,20 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="parser">The parser.</param>
         /// <returns>The projection object that contains the fields to be selected.</returns>
-        private ProjectionDefinition<T> BuildProjection(WitsmlQueryParser parser)
+        private ProjectionDefinition<T> BuildProjection(WitsmlQueryParser parser, T entity, List<string> fields)
         {
-            var fields = new List<string>();
             var element = parser.Element();
             if (element == null)
                 return null;
 
+            var properties = GetPropertyInfo(typeof(T));
+
             foreach (var child in element.Elements())
-                BuildProjectionForAnElement(child, null, fields);
+            {
+                var property = GetPropertyInfoForAnElement(properties, child);
+                var value = property.GetValue(entity);
+                BuildProjectionForAnElement(child, null, fields, property, value);
+            }
 
             if (fields.Count == 0)
                 return null;
@@ -446,26 +460,64 @@ namespace PDS.Witsml.Server.Data
         /// <param name="element">The element.</param>
         /// <param name="fieldPath">The field path to the top level property of the queried entity.</param>
         /// <param name="fields">The list of fields to be selecte for the element.</param>
-        private void BuildProjectionForAnElement(XElement element, string fieldPath, List<string> fields)
+        private void BuildProjectionForAnElement(XElement element, string fieldPath, List<string> fields, PropertyInfo propertyInfo, object propertyValue)
         {
             var prefix = string.IsNullOrEmpty(fieldPath) ? string.Empty : string.Format("{0}.", fieldPath);
-            var path = string.Format("{0}{1}", prefix, CaptalizeString(element.Name.LocalName));
-            if (!element.HasElements && !element.HasElements)
+            var path = string.Format("{0}{1}", prefix, CaptalizeString(propertyInfo.Name));
+            if (!element.HasElements && !element.HasAttributes)
             {
-                fields.Add(path);
+                if (!fields.Contains(path))
+                    fields.Add(path);
                 return;
             }
+
+            var properties = GetPropertyInfo(propertyValue.GetType());
 
             if (element.HasElements)
             {
                 foreach (var child in element.Elements())
-                    BuildProjectionForAnElement(child, path, fields);
+                {
+                    var property = GetPropertyInfoForAnElement(properties, child);
+                    var value = property.GetValue(propertyValue);
+                    BuildProjectionForAnElement(child, path, fields, property, value);
+                }
             }
             if (element.HasAttributes)
             {
                 foreach (var attribute in element.Attributes())
-                    fields.Add(string.Format("{0}.{1}", path, CaptalizeString(attribute.Name.LocalName)));
+                {
+                    var attributePath = string.Format("{0}.{1}", path, CaptalizeString(attribute.Name.LocalName));
+                    if (!fields.Contains(attributePath))
+                        fields.Add(attributePath);
+                }
             }
+        }
+
+        /// <summary>
+        /// Gets the property information for an element, for some element name is not the same as property name, i.e. Mongo field name.
+        /// </summary>
+        /// <param name="properties">The properties.</param>
+        /// <param name="element">The element.</param>
+        /// <returns>The found property for the serialization element.</returns>
+        private PropertyInfo GetPropertyInfoForAnElement(IEnumerable<PropertyInfo> properties, XElement element)
+        {
+            foreach (var prop in properties)
+            {
+                var elementAttribute = prop.GetCustomAttribute(typeof(XmlElementAttribute), false) as XmlElementAttribute;
+                if (elementAttribute != null)
+                {
+                    if (elementAttribute.ElementName == element.Name.LocalName)
+                        return prop;
+                }
+
+                var attributeAttribute = prop.GetCustomAttribute(typeof(XmlAttributeAttribute), false) as XmlAttributeAttribute;
+                if (attributeAttribute != null)
+                {
+                    if (attributeAttribute.AttributeName == element.Name.LocalName)
+                        return prop;
+                }
+            }
+            return null;
         }
 
         private string CaptalizeString(string input)
