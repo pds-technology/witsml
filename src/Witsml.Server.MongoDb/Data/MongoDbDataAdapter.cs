@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic;
+using System.Reflection;
+using System.Xml.Serialization;
 using log4net;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
@@ -205,6 +209,29 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Queries the data store with Mongo Bson filter.
+        /// </summary>
+        /// <param name="parser">The parser.</param>
+        /// <param name="tList">List of query for object T.</param>
+        /// <returns></returns>
+        protected List<T> QueryEntities(WitsmlQueryParser parser, List<T> tList)
+        {
+            var entities = new List<T>();
+            var database = DatabaseProvider.GetDatabase();
+            var collection = database.GetCollection<T>(DbCollectionName);
+
+            foreach (var entity in tList)
+            {
+                var filter = BuildFilter(parser, entity);
+
+                var results = collection.Find(filter ?? "{}").ToList();
+                entities.AddRange(results.ToList());
+            }
+
+            return entities;
+        }
+
+        /// <summary>
         /// Inserts an object into the data store.
         /// </summary>
         /// <param name="entity">The object to be inserted.</param>
@@ -281,6 +308,107 @@ namespace PDS.Witsml.Server.Data
             }
 
             return query;
+        }
+
+        /// <summary>
+        /// Builds the query filter.
+        /// </summary>
+        /// <param name="parser">The parser.</param>
+        /// <param name="entity">The entity to be queried.</param>
+        /// <returns></returns>
+        private FilterDefinition<T> BuildFilter(WitsmlQueryParser parser, T entity)
+        {
+            var properties = GetPropertyInfo(entity);
+            var filters = new List<FilterDefinition<T>>();
+
+            foreach (var property in properties)
+            {
+                var filter = BuildFilterForAProperty(property, entity);
+                if (filter != null)
+                    filters.Add(filter);
+            }
+
+            if (filters.Count > 0)
+                return Builders<T>.Filter.And(filters);
+            else
+                return null;
+        }
+
+        /// <summary>
+        /// Builds the query filter for a property.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="obj">The object that contains the property.</param>
+        /// <param name="path">The path of the property to the entity to be queried in the data store.</param>
+        /// <returns></returns>
+        private FilterDefinition<T> BuildFilterForAProperty(PropertyInfo propertyInfo, object obj, string path = null)
+        {
+            var propertyValue = propertyInfo.GetValue(obj);
+            if (propertyValue == null)
+                return null;
+
+            var fieldName = propertyInfo.Name;
+            if (!string.IsNullOrEmpty(path))
+                fieldName = string.Format("{0}.{1}", path, fieldName);
+            var properties = GetPropertyInfo(propertyValue).ToList();
+            var filters = new List<FilterDefinition<T>>();
+
+            if (properties.Count > 0)
+            {
+                foreach (var property in properties)
+                {
+                    var filter = BuildFilterForAProperty(property, propertyValue, fieldName);
+                    if (filter != null)
+                        filters.Add(filter);
+                }
+            }
+            else
+            {
+                var propertyType = propertyInfo.PropertyType;
+
+                if (propertyType == typeof(string))
+                {
+                    var strValue = propertyValue.ToString();
+                    if (string.IsNullOrEmpty(strValue))
+                        return null;
+
+                    return Builders<T>.Filter.Regex(fieldName, new BsonRegularExpression("/^" + strValue + "$/i"));
+                }
+                else if (propertyValue is IEnumerable)
+                {
+                    var listFilters = new List<FilterDefinition<T>>();
+                    var list = (IEnumerable)propertyValue;              
+                    foreach (var item in list)
+                    {
+                        var itemFilters = new List<FilterDefinition<T>>();
+                        var itemProperties = GetPropertyInfo(item);
+                        foreach (var itemProperty in itemProperties)
+                        {
+                            var itemFilter = BuildFilterForAProperty(itemProperty, item, fieldName);
+                            if (itemFilter != null)
+                                itemFilters.Add(itemFilter);
+                        }
+                        if (itemFilters.Count > 0)
+                            listFilters.Add(Builders<T>.Filter.And(itemFilters));
+                    }
+                    if (listFilters.Count > 0)
+                        filters.Add(Builders<T>.Filter.Or(listFilters));
+                }
+                else
+                {
+                    return Builders<T>.Filter.Eq(fieldName, propertyValue);
+                }
+            }
+
+            if (filters.Count > 0)
+                return Builders<T>.Filter.And(filters);
+            else
+                return null;
+        }
+
+        private IEnumerable<PropertyInfo> GetPropertyInfo(object obj)
+        {
+            return obj.GetType().GetProperties().Where(p => p.IsDefined(typeof(XmlElementAttribute), false) || p.IsDefined(typeof(XmlAttributeAttribute), false));
         }
     }
 }
