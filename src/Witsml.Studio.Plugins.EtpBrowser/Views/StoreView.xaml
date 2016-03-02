@@ -1,0 +1,73 @@
+﻿<UserControl x:Class="PDS.Witsml.Studio.Plugins.EtpBrowser.Views.StoreView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:avalon="http://icsharpcode.net/sharpdevelop/avalonedit"
+             xmlns:cal="http://www.caliburnproject.org"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:app="clr-namespace:PDS.Witsml.Studio.Behaviors;assembly=PDS.Witsml.Studio"
+             xmlns:local="clr-namespace:PDS.Witsml.Studio.Plugins.EtpBrowser.Views"
+             mc:Ignorable="d" d:DesignHeight="400" d:DesignWidth="300">
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40" />
+            <RowDefinition Height="40" />
+            <RowDefinition Height="40" />
+            <RowDefinition Height="40" />
+            <RowDefinition />
+            <RowDefinition Height="40" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Column="0" Grid.Row="0" Text="URI:" Margin="10,5,5,5" HorizontalAlignment="Right" VerticalAlignment="Center" />
+        <TextBox Text="{Binding Model.Store.Uri}" Grid.Column="1" Grid.Row="0" Margin="5" Padding="5" VerticalContentAlignment="Center" />
+
+        <TextBlock Grid.Column="0" Grid.Row="1" Text="UUID:" Margin="10,5,5,5" HorizontalAlignment="Right" VerticalAlignment="Center" />
+        <TextBox Text="{Binding Model.Store.Uuid}" Grid.Column="1" Grid.Row="1" Margin="5" Padding="5" VerticalContentAlignment="Center" />
+
+        <TextBlock Grid.Column="0" Grid.Row="2" Text="Name:" Margin="10,5,5,5" HorizontalAlignment="Right" VerticalAlignment="Center" />
+        <TextBox Text="{Binding Model.Store.Name}" Grid.Column="1" Grid.Row="2" Margin="5" Padding="5" VerticalContentAlignment="Center" />
+
+        <TextBlock Grid.Column="0" Grid.Row="3" Text="Content Type:" Margin="10,5,5,5" HorizontalAlignment="Right" VerticalAlignment="Center" />
+        <TextBox Text="{Binding Model.Store.ContentType}" Grid.Column="1" Grid.Row="3" Margin="5" Padding="5" VerticalContentAlignment="Center" />
+
+        <Border Grid.Row="4" Grid.ColumnSpan="2" Margin="5" BorderThickness="1" BorderBrush="#FFABADB3">
+            <avalon:TextEditor Document="{Binding Data}" Margin="1" Padding="5" SyntaxHighlighting="XML" FontFamily="Consolas" FontSize="10pt">
+                <avalon:TextEditor.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Copy" cal:Message.Attach="CopyDetails" />
+                        <MenuItem Header="Clear" cal:Message.Attach="ClearDetails" />
+                    </ContextMenu>
+                </avalon:TextEditor.ContextMenu>
+            </avalon:TextEditor>
+        </Border>
+        
+        <Grid Grid.Row="5" Grid.ColumnSpan="2" Margin="5,0,5,5" HorizontalAlignment="Left">
+            <Button Width="80">
+                <i:Interaction.Behaviors>
+                    <app:DropDownButtonBehavior />
+                </i:Interaction.Behaviors>
+                <Button.Content>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Execute" />
+                        <Path Margin="2" HorizontalAlignment="Right" VerticalAlignment="Center" Width="6" Fill="#FF527DB5" Stretch="Uniform"
+                              Data="F1 M 301.14,-189.041L 311.57,-189.041L 306.355,-182.942L 301.14,-189.041 Z "/>
+                    </StackPanel>
+                </Button.Content>
+                <Button.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Get" cal:Message.Attach="GetObject" />
+                        <MenuItem Header="Put" cal:Message.Attach="PutObject" />
+                        <MenuItem Header="Delete" cal:Message.Attach="DeleteObject" />
+                    </ContextMenu>
+                </Button.ContextMenu>
+            </Button>
+        </Grid>
+
+    </Grid>
+</UserControl>
