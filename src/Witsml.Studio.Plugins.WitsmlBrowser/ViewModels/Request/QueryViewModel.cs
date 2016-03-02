@@ -20,6 +20,26 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             get { return Parent.Model; }
         }
 
+        private bool _queryWrapped;
+        public bool QueryWrapped
+        {
+            get { return _queryWrapped; }
+            set
+            {
+                if (_queryWrapped != value)
+                {
+                    _queryWrapped = value;
+                    NotifyOfPropertyChange(() => QueryWrapped);
+                    NotifyOfPropertyChange(() => QueryWrappedText);
+                }
+            }
+        }
+
+        public string QueryWrappedText
+        {
+            get { return Parent.Parent.GetWrappedText(QueryWrapped); }
+        }
+
         public void GetFromStore()
         {           
             (Parent as RequestViewModel).SubmitQuery(Functions.GetFromStore);
@@ -48,6 +68,27 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         public void OpenQuery(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Open coming soon");
+        }
+
+        /// <summary>
+        /// Copies the query to the clipboard.
+        /// </summary>
+        public void CopyQuery()
+        {
+            App.Current.Invoke(() => Clipboard.SetText(Parent.Parent.XmlQuery.Text));
+        }
+
+        /// <summary>
+        /// Clears the query.
+        /// </summary>
+        public void ClearQuery()
+        {
+            App.Current.Invoke(() => Parent.Parent.XmlQuery.Text = string.Empty);
+        }
+
+        public void WrapQuery()
+        {
+            QueryWrapped = !QueryWrapped;
         }
     }
 }

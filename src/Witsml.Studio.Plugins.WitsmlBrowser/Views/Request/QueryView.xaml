@@ -23,7 +23,16 @@
         </Grid.RowDefinitions>
 
         <avalon:TextEditor 
-            Document="{Binding Parent.Parent.XmlQuery, Mode=TwoWay}" Padding="5,5,5,0" SyntaxHighlighting="XML" FontFamily="Consolas" FontSize="10pt">
+            Document="{Binding Parent.Parent.XmlQuery, Mode=TwoWay}" Padding="5,5,5,0" 
+            SyntaxHighlighting="XML" FontFamily="Consolas" FontSize="10pt" WordWrap="{Binding QueryWrapped}">
+
+            <avalon:TextEditor.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Copy" cal:Message.Attach="CopyQuery" />
+                    <MenuItem Header="Clear" cal:Message.Attach="ClearQuery" />
+                    <MenuItem Header="{Binding QueryWrappedText}" cal:Message.Attach="WrapQuery()" />
+                </ContextMenu>
+            </avalon:TextEditor.ContextMenu>
         </avalon:TextEditor>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal">
