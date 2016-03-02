@@ -113,9 +113,6 @@
     <Compile Include="ViewModels\Request\SettingsViewModel.cs" />
     <Compile Include="ViewModels\Request\TemplatesViewModel.cs" />
     <Compile Include="ViewModels\Request\TreeViewViewModel.cs" />
-    <Compile Include="ViewModels\Result\PropertyViewModel.cs" />
-    <Compile Include="ViewModels\Result\RawViewModel.cs" />
-    <Compile Include="ViewModels\Result\ResponseViewModel.cs" />
     <Compile Include="ViewModels\Result\ResultViewModel.cs" />
     <Compile Include="Views\MainView.xaml.cs">
       <DependentUpon>MainView.xaml</DependentUpon>
@@ -134,15 +131,6 @@
     </Compile>
     <Compile Include="Views\Request\TreeViewView.xaml.cs">
       <DependentUpon>TreeViewView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Result\PropertyView.xaml.cs">
-      <DependentUpon>PropertyView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Result\RawView.xaml.cs">
-      <DependentUpon>RawView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Result\ResponseView.xaml.cs">
-      <DependentUpon>ResponseView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Result\ResultView.xaml.cs">
       <DependentUpon>ResultView.xaml</DependentUpon>
@@ -200,18 +188,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Request\TreeViewView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Result\PropertyView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Result\RawView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Result\ResponseView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

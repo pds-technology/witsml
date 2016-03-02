@@ -2,7 +2,7 @@
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
 {
-    public class ResultViewModel : Conductor<IScreen>.Collection.OneActive
+    public class ResultViewModel : Screen
     {
         public new MainViewModel Parent
         {
@@ -12,15 +12,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
         public Models.WitsmlSettings Model
         {
             get { return Parent.Model; }
-        }
-
-        protected override void OnInitialize()
-        {
-            base.OnInitialize();
-
-            ActivateItem(new ResponseViewModel());
-            //Items.Add(new PropertyViewModel());
-            //Items.Add(new RawViewModel());
         }
     }
 }

@@ -16,6 +16,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             Model = new Models.WitsmlSettings();
             XmlQuery = new TextDocument();
             QueryResults = new TextDocument();
+            Messages = new TextDocument();
 
             // TODO: Remove after testing
             XmlQuery.Text =
@@ -83,6 +84,20 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                 {
                     _queryResults = value;
                     NotifyOfPropertyChange(() => QueryResults);
+                }
+            }
+        }
+
+        private TextDocument _messages;
+        public TextDocument Messages
+        {
+            get { return _messages; }
+            set
+            {
+                if (!string.Equals(_messages, value))
+                {
+                    _messages = value;
+                    NotifyOfPropertyChange(() => Messages);
                 }
             }
         }
