@@ -44,21 +44,10 @@ namespace PDS.Witsml.Server.Data.Wells
 
         public override WitsmlResult<List<Well>> Query(WitsmlQueryParser parser)
         {
-            if (parser.RequestObjectSelectionCapability() == OptionsIn.RequestObjectSelectionCapability.True.Value)
+            if (parser.RequestObjectSelectionCapability().ToLower().Equals(OptionsIn.RequestObjectSelectionCapability.True.Value.ToLower()))
             {
-                PropertyInfo[] propertyInfo = typeof(Well).GetProperties();
-
-                Well well = QueryFirstEntity();
-                if (well == null)
-                    well = new Well();
-
-                foreach (PropertyInfo property in propertyInfo)
-                {
-                    object value = property.GetValue(well);
-                    if (value == null && property.PropertyType==typeof(string))
-                        property.SetValue(well, " "); // TODO: To handle null property values.
-                }
-
+                Well well = new Well();
+                FillObjectTemplateValues(typeof(Well), well);                
                 return new WitsmlResult<List<Well>>(
                     ErrorCodes.Success,
                     new List<Well>() { well });
@@ -68,6 +57,8 @@ namespace PDS.Witsml.Server.Data.Wells
                 ErrorCodes.Success,
                 QueryEntities(parser, new List<string>() { "name,Name" }));
         }
+
+        
 
         /// <summary>
         /// Adds a <see cref="Well"/> to the data store.
@@ -116,6 +107,6 @@ namespace PDS.Witsml.Server.Data.Wells
             {
                 return Add(entity);
             }
-        }
+        }    
     }
 }
