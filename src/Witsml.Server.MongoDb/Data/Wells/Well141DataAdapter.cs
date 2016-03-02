@@ -5,6 +5,7 @@ using Energistics.DataAccess.WITSML141;
 using log4net;
 using PDS.Witsml.Server.Configuration;
 using System.Reflection;
+using Energistics.DataAccess;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
@@ -64,9 +65,11 @@ namespace PDS.Witsml.Server.Data.Wells
                     new List<Well>() { well });
             }
 
+            var wellList = EnergisticsConverter.XmlToObject<WellList>(parser.Context.Xml);
+
             return new WitsmlResult<List<Well>>(
                 ErrorCodes.Success,
-                QueryEntities(parser, new List<string>() { "name,Name" }));
+                QueryEntities(parser, wellList.Well));
         }
 
         /// <summary>
