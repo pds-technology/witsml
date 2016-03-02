@@ -13,22 +13,24 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
     {
         public MainViewModel()
         {
+            // Create the model for our witsml settings
             Model = new Models.WitsmlSettings();
+
+            // Create documents used by Avalon Editors used on query/result tabs.
             XmlQuery = new TextDocument();
             QueryResults = new TextDocument();
             Messages = new TextDocument();
 
-            // TODO: Remove after testing
-            XmlQuery.Text =
-                "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" + Environment.NewLine +
-                "<wells version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\" />";
-
+            // Create a default client proxy object.
             Proxy = CreateProxy();
 
+            // Create view models displayed within this view model.
             RequestControl = new RequestViewModel();
             ResultControl = new ResultViewModel();
 
             DisplayName = Settings.Default.PluginDisplayName;
+
+            // Handle notifications for our witsml settings model changes
             Model.PropertyChanged += Model_PropertyChanged;
         }
 
@@ -154,6 +156,11 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             // TODO: Add exception handling.  We don't want the app to crash because of a bad query.
         }
 
+        public void GetCapabilities()
+        {
+            SubmitQuery(Functions.GetCap);
+        }
+
         protected override void OnInitialize()
         {
             base.OnInitialize();
@@ -174,7 +181,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                 Proxy = CreateProxy();
 
                 // Get the server capabilities for the newly selected version.
-                SubmitQuery(Functions.GetCap);
+                GetCapabilities();
             }
         }
 
