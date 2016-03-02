@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Linq;
-using System.Windows;
 using Caliburn.Micro;
 using Energistics.DataAccess;
+using ICSharpCode.AvalonEdit.Document;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.Properties;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result;
@@ -15,6 +14,14 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         public MainViewModel()
         {
             Model = new Models.WitsmlSettings();
+            XmlQuery = new TextDocument();
+            QueryResults = new TextDocument();
+
+            // TODO: Remove after testing
+            XmlQuery.Text =
+                "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" + Environment.NewLine +
+                "<wells version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\" />";
+
             Proxy = CreateProxy();
 
             RequestControl = new RequestViewModel();
@@ -52,6 +59,34 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
 
         public ResultViewModel ResultControl { get; set; }
 
+        private TextDocument _xmlQuery;
+        public TextDocument XmlQuery
+        {
+            get { return _xmlQuery; }
+            set
+            {
+                if (!string.Equals(_xmlQuery, value))
+                {
+                    _xmlQuery = value;
+                    NotifyOfPropertyChange(() => XmlQuery);
+                }
+            }
+        }
+
+        private TextDocument _queryResults;
+        public TextDocument QueryResults
+        {
+            get { return _queryResults; }
+            set
+            {
+                if (!string.Equals(_queryResults, value))
+                {
+                    _queryResults = value;
+                    NotifyOfPropertyChange(() => QueryResults);
+                }
+            }
+        }
+
         /// <summary>
         /// Creates a WITSMLWebServiceConnection for the current connection uri and witsml version.
         /// </summary>
@@ -75,7 +110,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             {
                 App.Current.Shell().BreadcrumbText = !string.IsNullOrEmpty(Model.WitsmlVersion)
                     ? string.Format("{0}/{1}", Settings.Default.PluginDisplayName, Model.WitsmlVersion)
-                    : App.Current.Shell().BreadcrumbText = Settings.Default.PluginDisplayName;
+                    : Settings.Default.PluginDisplayName;
 
                 // Reset the Proxy when the version changes
                 Proxy = CreateProxy();
@@ -91,7 +126,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// </returns>
         private WMLSVersion GetWitsmlVersionEnum()
         {
-            return Model.WitsmlVersion != null && Model.WitsmlVersion.Equals("1.3.1.1") 
+            return Model.WitsmlVersion != null && Model.WitsmlVersion.Equals(OptionsIn.DataVersion.Version131.Value) 
                 ? WMLSVersion.WITSML131 
                 : WMLSVersion.WITSML141;
         }

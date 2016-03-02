@@ -10,29 +10,34 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             DisplayName = "Query";
         }
 
+        public new RequestViewModel Parent
+        {
+            get { return (RequestViewModel)base.Parent; }
+        }
+
         public Models.WitsmlSettings Model
         {
-            get { return ((RequestViewModel)Parent).Model; }
+            get { return Parent.Model; }
         }
 
         public void GetFromStore()
-        {
-            (Parent as RequestViewModel).SubmitQuery(RequestTypes.Get);
+        {           
+            (Parent as RequestViewModel).SubmitQuery(Functions.GetFromStore);
         }
 
         public void AddToStore()
         {
-            (Parent as RequestViewModel).SubmitQuery(RequestTypes.Add);
+            (Parent as RequestViewModel).SubmitQuery(Functions.AddToStore);
         }
 
         public void UpdateInStore()
         {
-            (Parent as RequestViewModel).SubmitQuery(RequestTypes.Update);
+            (Parent as RequestViewModel).SubmitQuery(Functions.UpdateInStore);
         }
 
         public void DeleteFromStore()
         {
-            (Parent as RequestViewModel).SubmitQuery(RequestTypes.Delete);
+            (Parent as RequestViewModel).SubmitQuery(Functions.DeleteFromStore);
         }
 
         public void SaveQuery(object sender, RoutedEventArgs e)

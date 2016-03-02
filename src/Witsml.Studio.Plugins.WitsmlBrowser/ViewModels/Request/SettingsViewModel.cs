@@ -17,19 +17,19 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             WitsmlVersions = new BindableCollection<string>();
         }
 
-        public RequestViewModel ParentViewModel
+        public new RequestViewModel Parent
         {
-            get { return (RequestViewModel)Parent; }
+            get { return (RequestViewModel)base.Parent; }
         }
 
         public WITSMLWebServiceConnection Proxy
         {
-            get { return ((RequestViewModel)Parent).Proxy; }
+            get { return Parent.Proxy; }
         }
 
         public Models.WitsmlSettings Model
         {
-            get { return ParentViewModel.Model; }
+            get { return Parent.Model; }
         }
 
         public BindableCollection<string> WitsmlVersions { get; }

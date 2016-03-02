@@ -9,7 +9,7 @@
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
         <avalon:TextEditor 
-            Document="{Binding Model.QueryResults}" Padding="5" IsReadOnly="True"
+            Document="{Binding Parent.Parent.QueryResults}" Padding="5" IsReadOnly="True"
             SyntaxHighlighting="XML" FontFamily="Consolas" FontSize="10pt">
         </avalon:TextEditor>
     </Grid>

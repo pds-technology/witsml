@@ -1,6 +1,4 @@
-﻿using System;
-using Caliburn.Micro;
-using ICSharpCode.AvalonEdit.Document;
+﻿using Caliburn.Micro;
 using PDS.Witsml.Studio.Connections;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
@@ -11,13 +9,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
         {
             Connection = new Connection();
             MaxDataRows = 1000;
-            XmlQuery = new TextDocument();
-            QueryResults = new TextDocument();
-
-            // TODO: Remove after testing
-            XmlQuery.Text = 
-                "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" + Environment.NewLine +
-                "<wells version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\" />";
         }
 
         private Connection _connection;
@@ -72,34 +63,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
                 {
                     _maxDataRows = value;
                     NotifyOfPropertyChange(() => MaxDataRows);
-                }
-            }
-        }
-
-        private TextDocument _xmlQuery;
-        public TextDocument XmlQuery
-        {
-            get { return _xmlQuery; }
-            set
-            {
-                if (!string.Equals(_xmlQuery, value))
-                {
-                    _xmlQuery = value;
-                    NotifyOfPropertyChange(() => XmlQuery);
-                }
-            }
-        }
-
-        private TextDocument _queryResults;
-        public TextDocument QueryResults
-        {
-            get { return _queryResults; }
-            set
-            {
-                if (!string.Equals(_queryResults, value))
-                {
-                    _queryResults = value;
-                    NotifyOfPropertyChange(() => QueryResults);
                 }
             }
         }

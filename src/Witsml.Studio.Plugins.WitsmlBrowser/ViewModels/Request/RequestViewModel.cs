@@ -1,28 +1,30 @@
 ﻿using Caliburn.Micro;
 using Energistics.DataAccess;
-using Energistics.DataAccess.WITSML141.WMLS;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 {
-    public enum RequestTypes { Get, Add, Update, Delete };
-
     public class RequestViewModel : Conductor<IScreen>.Collection.OneActive
     {
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(RequestViewModel));
 
+        public new MainViewModel Parent
+        {
+            get { return (MainViewModel)base.Parent; }
+        }
+
         public Models.WitsmlSettings Model
         {
-            get { return ((MainViewModel)Parent).Model; }
+            get { return Parent.Model; }
         }
 
         public WITSMLWebServiceConnection Proxy
         {
-            get { return ((MainViewModel)Parent).Proxy; }
+            get { return Parent.Proxy; }
         }
 
-        public void SubmitQuery(RequestTypes requestType)
+        public void SubmitQuery(Functions functionType)
         {
-            Model.QueryResults.Text = string.Empty;
+            Parent.QueryResults.Text = string.Empty;
 
             using (var client = Proxy.CreateClientProxy())
             {
@@ -31,23 +33,23 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
                 string xmlOut;
                 string suppMsgOut;
 
-                var objectType = ObjectTypes.GetObjectTypeFromGroup(Model.XmlQuery.Text);
+                var objectType = ObjectTypes.GetObjectTypeFromGroup(Parent.XmlQuery.Text);
 
-                switch (requestType)
+                switch (functionType)
                 {
-                    case RequestTypes.Add:
-                        wmls.WMLS_AddToStore(objectType, Model.XmlQuery.Text, null, null, out suppMsgOut);
-                        Model.QueryResults.Text = suppMsgOut;
+                    case Functions.AddToStore:
+                        wmls.WMLS_AddToStore(objectType, Parent.XmlQuery.Text, null, null, out suppMsgOut);
+                        Parent.QueryResults.Text = suppMsgOut;
                         break;
-                    case RequestTypes.Update:
+                    case Functions.UpdateInStore:
                         App.Current.ShowInfo("Coming soon.");
                         break;
-                    case RequestTypes.Delete:
+                    case Functions.DeleteFromStore:
                         App.Current.ShowInfo("Coming soon.");
                         break;
                     default:
-                        wmls.WMLS_GetFromStore(objectType, Model.XmlQuery.Text, null, null, out xmlOut, out suppMsgOut);
-                        Model.QueryResults.Text = string.IsNullOrEmpty(suppMsgOut) ? xmlOut : suppMsgOut;
+                        wmls.WMLS_GetFromStore(objectType, Parent.XmlQuery.Text, null, null, out xmlOut, out suppMsgOut);
+                        Parent.QueryResults.Text = string.IsNullOrEmpty(suppMsgOut) ? xmlOut : suppMsgOut;
                         break;
                 }
             }

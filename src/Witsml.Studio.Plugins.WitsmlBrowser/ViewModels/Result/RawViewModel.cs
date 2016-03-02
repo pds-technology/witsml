@@ -9,9 +9,14 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
             DisplayName = "Raw";
         }
 
+        public new ResultViewModel Parent
+        {
+            get { return (ResultViewModel)base.Parent; }
+        }
+
         public Models.WitsmlSettings Model
         {
-            get { return ((ResultViewModel)Parent).Model; }
+            get { return Parent.Model; }
         }
     }
 }
