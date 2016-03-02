@@ -319,7 +319,7 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="parser">The parser.</param>
         /// <param name="entity">The entity to be queried.</param>
-        /// <returns></returns>
+        /// <returns>The filter object that for the selection criteria for the queried entity.</returns>
         private FilterDefinition<T> BuildFilter(WitsmlQueryParser parser, T entity)
         {
             var properties = GetPropertyInfo(entity);
@@ -339,12 +339,12 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Builds the query filter for a property.
+        /// Builds the query filter for a property recursively.
         /// </summary>
         /// <param name="propertyInfo">The property information.</param>
         /// <param name="obj">The object that contains the property.</param>
         /// <param name="path">The path of the property to the entity to be queried in the data store.</param>
-        /// <returns></returns>
+        /// <returns>The filter object that for the selection criteria for a property.</returns>
         private FilterDefinition<T> BuildFilterForAProperty(PropertyInfo propertyInfo, object obj, string path = null)
         {
             var propertyValue = propertyInfo.GetValue(obj);
@@ -415,6 +415,11 @@ namespace PDS.Witsml.Server.Data
             return obj.GetType().GetProperties().Where(p => p.IsDefined(typeof(XmlElementAttribute), false) || p.IsDefined(typeof(XmlAttributeAttribute), false));
         }
 
+        /// <summary>
+        /// Builds the projection for the query.
+        /// </summary>
+        /// <param name="parser">The parser.</param>
+        /// <returns>The projection object that contains the fields to be selected.</returns>
         private ProjectionDefinition<T> BuildProjection(WitsmlQueryParser parser)
         {
             var fields = new List<string>();
@@ -435,6 +440,12 @@ namespace PDS.Witsml.Server.Data
             }
         }
 
+        /// <summary>
+        /// Builds the projection for an element in the QueryIn XML recursively.
+        /// </summary>
+        /// <param name="element">The element.</param>
+        /// <param name="fieldPath">The field path to the top level property of the queried entity.</param>
+        /// <param name="fields">The list of fields to be selecte for the element.</param>
         private void BuildProjectionForAnElement(XElement element, string fieldPath, List<string> fields)
         {
             var prefix = string.IsNullOrEmpty(fieldPath) ? string.Empty : string.Format("{0}.", fieldPath);
