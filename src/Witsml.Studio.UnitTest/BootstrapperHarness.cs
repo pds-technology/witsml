@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Caliburn.Micro;
 
 namespace PDS.Witsml.Studio
 {
@@ -16,6 +17,7 @@ namespace PDS.Witsml.Studio
         /// </summary>
         public BootstrapperHarness() : base(false)
         {
+            AssemblySource.Instance.Clear();
         }
 
         /// <summary>

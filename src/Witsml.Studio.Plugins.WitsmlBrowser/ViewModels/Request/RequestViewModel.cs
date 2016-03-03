@@ -1,12 +1,21 @@
-﻿using System;
-using Caliburn.Micro;
+﻿using Caliburn.Micro;
 using Energistics.DataAccess;
+using PDS.Witsml.Studio.Runtime;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 {
     public class RequestViewModel : Conductor<IScreen>.Collection.OneActive
     {
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(RequestViewModel));
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RequestViewModel"/> class.
+        /// </summary>
+        /// <param name="runtime">The runtime service.</param>
+        public RequestViewModel(IRuntimeService runtime)
+        {
+            Runtime = runtime;
+        }
 
         public new MainViewModel Parent
         {
@@ -23,16 +32,22 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             get { return Parent.Proxy; }
         }
 
+        /// <summary>
+        /// Gets the runtime service.
+        /// </summary>
+        /// <value>The runtime.</value>
+        public IRuntimeService Runtime { get; private set; }
+
         protected override void OnInitialize()
         {
             _log.Debug("Loading Request View Models");
 
             base.OnInitialize();
 
-            ActivateItem(new SettingsViewModel());
+            ActivateItem(new SettingsViewModel(Runtime));
             //Items.Add(new TreeViewViewModel());
             //Items.Add(new TemplatesViewModel());
-            Items.Add(new QueryViewModel());
+            Items.Add(new QueryViewModel(Runtime));
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -17,6 +18,7 @@ using ICSharpCode.AvalonEdit.Document;
 using PDS.Framework;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Models;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Properties;
+using PDS.Witsml.Studio.Runtime;
 using PDS.Witsml.Studio.ViewModels;
 
 namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
@@ -31,10 +33,13 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         private EtpClient _client;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MainViewModel"/> class.
+        /// Initializes a new instance of the <see cref="MainViewModel" /> class.
         /// </summary>
-        public MainViewModel()
+        /// <param name="runtime">The runtime service.</param>
+        [ImportingConstructor]
+        public MainViewModel(IRuntimeService runtime)
         {
+            Runtime = runtime;
             DisplayName = Settings.Default.PluginDisplayName;
             Resources = new BindableCollection<ResourceViewModel>();
             Details = new TextDocument();
@@ -49,6 +54,12 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         {
             get { return Settings.Default.PluginDisplayOrder; }
         }
+
+        /// <summary>
+        /// Gets the runtime service.
+        /// </summary>
+        /// <value>The runtime.</value>
+        public IRuntimeService Runtime { get; private set; }
 
         /// <summary>
         /// Gets the model.
@@ -135,7 +146,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public void CopyDetails()
         {
-            App.Current.Invoke(() => Clipboard.SetText(Details.Text));
+            Runtime.Invoke(() => Clipboard.SetText(Details.Text));
         }
 
         /// <summary>
@@ -143,7 +154,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public void ClearDetails()
         {
-            App.Current.Invoke(() => Details.Text = string.Empty);
+            Runtime.Invoke(() => Details.Text = string.Empty);
         }
 
         /// <summary>
@@ -151,7 +162,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public void CopyMessages()
         {
-            App.Current.Invoke(() => Clipboard.SetText(Messages.Text));
+            Runtime.Invoke(() => Clipboard.SetText(Messages.Text));
         }
 
         /// <summary>
@@ -159,7 +170,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public void ClearMessages()
         {
-            App.Current.Invoke(() => Messages.Text = string.Empty);
+            Runtime.Invoke(() => Messages.Text = string.Empty);
         }
 
         /// <summary>
@@ -177,7 +188,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         protected override void OnInitialize()
         {
             base.OnInitialize();
-            ActivateItem(new SettingsViewModel());
+            ActivateItem(new SettingsViewModel(Runtime));
         }
 
         /// <summary>
@@ -202,7 +213,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             CloseEtpClient();
             Resources.Clear();
 
-            App.Current.Invoke(() =>
+            Runtime.Invoke(() =>
             {
                 Messages.Text = string.Empty;
                 Details.Text = string.Empty;
@@ -226,7 +237,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         {
             try
             {
-                App.Current.Shell().StatusBarText = "Connecting...";
+                Runtime.Shell.StatusBarText = "Connecting...";
 
                 _client = new EtpClient(Model.Connection.Uri, "ETP Browser");
                 _client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();
@@ -241,7 +252,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             }
             catch (Exception ex)
             {
-                App.Current.ShowError("Error connecting to server.", ex);
+                Runtime.ShowError("Error connecting to server.", ex);
             }
         }
 
@@ -273,7 +284,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// <param name="e">The <see cref="ProtocolEventArgs{OpenSession}"/> instance containing the event data.</param>
         private void OnOpenSession(object sender, ProtocolEventArgs<OpenSession> e)
         {
-            App.Current.Invoke(() => App.Current.Shell().StatusBarText = "Connected");
+            Runtime.Invoke(() => Runtime.Shell.StatusBarText = "Connected");
 
             if (e.Message.SupportedProtocols.Any(x => x.Protocol == (int)Protocols.Discovery))
             {
@@ -356,7 +367,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// <param name="e">The <see cref="ProtocolEventArgs{Energistics.Protocol.Store.Object}"/> instance containing the event data.</param>
         private void OnObject(object sender, ProtocolEventArgs<Energistics.Protocol.Store.Object> e)
         {
-            App.Current.Invoke(() =>
+            Runtime.Invoke(() =>
             {
                 Details.Text = string.Format(
                     "// Header:{3}{0}{3}{3}// Body:{3}{1}{3}{3}/* Data:{3}{2}{3}*/{3}",
@@ -374,7 +385,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// <param name="e">The <see cref="ProtocolEventArgs{T}"/> instance containing the event data.</param>
         private void LogObjectDetails<T>(ProtocolEventArgs<T> e) where T : ISpecificRecord
         {
-            App.Current.Invoke(() =>
+            Runtime.Invoke(() =>
             {
                 Details.Text = string.Format(
                     "// Header:{2}{0}{2}{2}// Body:{2}{1}{2}",
@@ -392,7 +403,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// <param name="e">The <see cref="ProtocolEventArgs{T, V}"/> instance containing the event data.</param>
         private void LogObjectDetails<T, V>(ProtocolEventArgs<T, V> e) where T : ISpecificRecord
         {
-            App.Current.Invoke(() =>
+            Runtime.Invoke(() =>
             {
                 Details.Text = string.Format(
                     "// Header:{3}{0}{3}{3}// Body:{3}{1}{3}{3}// Context:{3}{2}{3}",
@@ -414,7 +425,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 return;
             }
 
-            App.Current.Invoke(() =>
+            Runtime.Invoke(() =>
             {
                 Messages.Insert(Messages.TextLength,
                     string.Concat(

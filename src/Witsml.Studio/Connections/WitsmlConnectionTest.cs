@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.Composition;
+﻿using System;
+using System.ComponentModel.Composition;
 using System.Threading.Tasks;
 using Energistics.DataAccess;
 
@@ -20,20 +21,18 @@ namespace PDS.Witsml.Studio.Connections
         /// <returns>The boolean result from the asynchronous operation.</returns>
         public async Task<bool> CanConnect(Connection connection)
         {
-            await Task.Yield();
-
             try
             {
                 var proxy = new WITSMLWebServiceConnection(connection.Uri, WMLSVersion.WITSML141);
                 var versions = proxy.GetVersion();
-                _log.Debug("Witsml connection test passed");
 
-                return true;
+                _log.Debug("Witsml connection test passed");
+                return await Task.FromResult(true);
             }
-            catch
+            catch (Exception ex)
             {
-                _log.Debug("Witsml connection test failed");
-                return false;
+                _log.Debug("Witsml connection test failed: {0}", ex);
+                return await Task.FromResult(false);
             }
         }
     }

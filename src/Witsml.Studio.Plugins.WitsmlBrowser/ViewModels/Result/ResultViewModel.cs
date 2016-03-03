@@ -1,10 +1,20 @@
 ﻿using System.Windows;
 using Caliburn.Micro;
+using PDS.Witsml.Studio.Runtime;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
 {
     public class ResultViewModel : Screen
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ResultViewModel"/> class.
+        /// </summary>
+        /// <param name="runtime">The runtime service.</param>
+        public ResultViewModel(IRuntimeService runtime)
+        {
+            Runtime = runtime;
+        }
+
         public new MainViewModel Parent
         {
             get { return (MainViewModel)base.Parent; }
@@ -14,6 +24,12 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
         {
             get { return Parent.Model; }
         }
+
+        /// <summary>
+        /// Gets the runtime service.
+        /// </summary>
+        /// <value>The runtime.</value>
+        public IRuntimeService Runtime { get; private set; }
 
         private bool _messagesWrapped;
         public bool MessagesWrapped
@@ -66,7 +82,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
         /// </summary>
         public void CopyResults()
         {
-            App.Current.Invoke(() => Clipboard.SetText(Parent.QueryResults.Text));
+            Runtime.Invoke(() => Clipboard.SetText(Parent.QueryResults.Text));
         }
 
         /// <summary>
@@ -74,7 +90,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
         /// </summary>
         public void ClearResults()
         {
-            App.Current.Invoke(() => Parent.QueryResults.Text = string.Empty);
+            Runtime.Invoke(() => Parent.QueryResults.Text = string.Empty);
         }
 
         /// <summary>
@@ -82,7 +98,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
         /// </summary>
         public void CopyMessages()
         {
-            App.Current.Invoke(() => Clipboard.SetText(Parent.Messages.Text));
+            Runtime.Invoke(() => Clipboard.SetText(Parent.Messages.Text));
         }
 
         /// <summary>
@@ -90,7 +106,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
         /// </summary>
         public void ClearMessages()
         {
-            App.Current.Invoke(() => Parent.Messages.Text = string.Empty);
+            Runtime.Invoke(() => Parent.Messages.Text = string.Empty);
         }
 
         public void WrapMessages()

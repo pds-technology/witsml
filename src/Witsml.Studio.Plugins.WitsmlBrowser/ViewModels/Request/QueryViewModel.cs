@@ -1,12 +1,18 @@
 ﻿using System.Windows;
 using Caliburn.Micro;
+using PDS.Witsml.Studio.Runtime;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 {
     public class QueryViewModel : Screen
     {
-        public QueryViewModel()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="QueryViewModel"/> class.
+        /// </summary>
+        /// <param name="runtime">The runtime.</param>
+        public QueryViewModel(IRuntimeService runtime)
         {
+            Runtime = runtime;
             DisplayName = "Query";
         }
 
@@ -24,6 +30,12 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         {
             get { return Parent.Model; }
         }
+
+        /// <summary>
+        /// Gets the runtime service.
+        /// </summary>
+        /// <value>The runtime.</value>
+        public IRuntimeService Runtime { get; private set; }
 
         private bool _queryWrapped;
         public bool QueryWrapped
@@ -80,7 +92,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         /// </summary>
         public void CopyQuery()
         {
-            App.Current.Invoke(() => Clipboard.SetText(Parent.Parent.XmlQuery.Text));
+            Runtime.Invoke(() => Clipboard.SetText(Parent.Parent.XmlQuery.Text));
         }
 
         /// <summary>
@@ -88,7 +100,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         /// </summary>
         public void ClearQuery()
         {
-            App.Current.Invoke(() => Parent.Parent.XmlQuery.Text = string.Empty);
+            Runtime.Invoke(() => Parent.Parent.XmlQuery.Text = string.Empty);
         }
 
         public void WrapQuery()

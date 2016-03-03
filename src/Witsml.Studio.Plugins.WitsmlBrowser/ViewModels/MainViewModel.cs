@@ -1,18 +1,27 @@
 ﻿using System;
+using System.ComponentModel.Composition;
 using Caliburn.Micro;
 using Energistics.DataAccess;
 using ICSharpCode.AvalonEdit.Document;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.Properties;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result;
+using PDS.Witsml.Studio.Runtime;
 using PDS.Witsml.Studio.ViewModels;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
 {
     public class MainViewModel : Conductor<IScreen>.Collection.AllActive, IPluginViewModel
     {
-        public MainViewModel()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MainViewModel"/> class.
+        /// </summary>
+        /// <param name="runtime">The runtime service.</param>
+        [ImportingConstructor]
+        public MainViewModel(IRuntimeService runtime)
         {
+            Runtime = runtime;
+
             // Create the model for our witsml settings
             Model = new Models.WitsmlSettings();
 
@@ -25,8 +34,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             Proxy = CreateProxy();
 
             // Create view models displayed within this view model.
-            RequestControl = new RequestViewModel();
-            ResultControl = new ResultViewModel();
+            RequestControl = new RequestViewModel(Runtime);
+            ResultControl = new ResultViewModel(Runtime);
 
             DisplayName = Settings.Default.PluginDisplayName;
 
@@ -43,6 +52,12 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         {
             get { return Settings.Default.PluginDisplayOrder; }
         }
+
+        /// <summary>
+        /// Gets the runtime service.
+        /// </summary>
+        /// <value>The runtime.</value>
+        public IRuntimeService Runtime { get; private set; }
 
         private Models.WitsmlSettings _model;
         public Models.WitsmlSettings Model
@@ -140,10 +155,10 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                         wmls.WMLS_AddToStore(objectType, XmlQuery.Text, null, null, out suppMsgOut);
                         break;
                     case Functions.UpdateInStore:
-                        App.Current.ShowInfo("Coming soon.");
+                        Runtime.ShowInfo("Coming soon.");
                         break;
                     case Functions.DeleteFromStore:
-                        App.Current.ShowInfo("Coming soon.");
+                        Runtime.ShowInfo("Coming soon.");
                         break;
                     default:
                         wmls.WMLS_GetFromStore(objectType, XmlQuery.Text, Model.ReturnElementType.ToString(), null, out xmlOut, out suppMsgOut);
@@ -173,7 +188,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         {
             if (e.PropertyName.Equals("WitsmlVersion"))
             {
-                App.Current.Shell().BreadcrumbText = !string.IsNullOrEmpty(Model.WitsmlVersion)
+                Runtime.Shell.BreadcrumbText = !string.IsNullOrEmpty(Model.WitsmlVersion)
                     ? string.Format("{0}/{1}", Settings.Default.PluginDisplayName, Model.WitsmlVersion)
                     : Settings.Default.PluginDisplayName;
 
