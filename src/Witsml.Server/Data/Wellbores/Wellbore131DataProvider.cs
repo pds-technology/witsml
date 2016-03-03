@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using Energistics.DataAccess;
+﻿using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML131;
 
 namespace PDS.Witsml.Server.Data.Wellbores
@@ -13,18 +11,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [ImportingConstructor]
         public Wellbore131DataProvider(IWitsmlDataAdapter<Wellbore> dataAdapter) : base(dataAdapter)
         {
-        }
-
-        protected override WitsmlResult<IEnergisticsCollection> FormatResponse(WitsmlQueryParser parser, WitsmlResult<List<Wellbore>> result)
-        {
-            // TODO: format response according to OptionsIn
-
-            return new WitsmlResult<IEnergisticsCollection>(
-                ErrorCodes.Success,
-                new WellboreList()
-                {
-                    Wellbore = result.Results
-                });
         }
     }
 }

@@ -35,8 +35,7 @@ namespace PDS.Witsml.Server.Data
         public virtual WitsmlResult<IEnergisticsCollection> GetFromStore(RequestContext context)
         {
             var parser = new WitsmlQueryParser(context);
-            var result = _dataAdapter.Query(parser);
-            return FormatResponse(parser, result);
+            return _dataAdapter.Query(parser);
         }
 
         /// <summary>
@@ -79,7 +78,5 @@ namespace PDS.Witsml.Server.Data
             var parser = new WitsmlQueryParser(context);
             return _dataAdapter.Delete(parser);
         }
-        
-        protected abstract WitsmlResult<IEnergisticsCollection> FormatResponse(WitsmlQueryParser parser, WitsmlResult<List<TObject>> result);
     }
 }
