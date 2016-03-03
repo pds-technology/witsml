@@ -23,11 +23,12 @@ namespace PDS.Witsml.Server.Data
         /// <param name="databaseProvider">The database provider.</param>
         /// <param name="dbCollectionName">The database collection name.</param>
         /// <param name="idPropertyName">The name of the identifier property.</param>
-        public MongoDbDataAdapter(IDatabaseProvider databaseProvider, string dbCollectionName, string idPropertyName = ObjectTypes.Uid)
+        public MongoDbDataAdapter(IDatabaseProvider databaseProvider, string dbCollectionName, string idPropertyName = ObjectTypes.Uid, string namePropertyName = ObjectTypes.NameProperty)
         {
             DatabaseProvider = databaseProvider;
             DbCollectionName = dbCollectionName;
             IdPropertyName = idPropertyName;
+            NamePropertyName = namePropertyName;
         }
 
         /// <summary>
@@ -47,6 +48,8 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <value>The name of the identifier property.</value>
         protected string IdPropertyName { get; private set; }   
+
+        protected string NamePropertyName { get; private set; }
 
         /// <summary>
         /// Gets a data object by the specified UUID.

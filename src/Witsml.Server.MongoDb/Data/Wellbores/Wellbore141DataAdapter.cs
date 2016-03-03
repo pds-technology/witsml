@@ -54,7 +54,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         {
             List<string> fields = null;
             if (parser.ReturnElements() == OptionsIn.ReturnElements.IdOnly.Value)
-                fields = new List<string> { IdPropertyName, "name", "uidWell", "nameWell" };
+                fields = new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell" };
 
             return new WitsmlResult<IEnergisticsCollection>(
                 ErrorCodes.Success,
