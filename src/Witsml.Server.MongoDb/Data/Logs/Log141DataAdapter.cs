@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Linq.Dynamic;
 using System.Text;
+using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.Datatypes;
@@ -44,7 +45,12 @@ namespace PDS.Witsml.Server.Data.Logs
 
         public override WitsmlResult<List<Log>> Query(WitsmlQueryParser parser)
         {
-            var logs = QueryEntities(parser, new List<string>() { "nameWell,NameWell", "nameWellbore,NameWellbore", "name,Name" });
+            var logList = EnergisticsConverter.XmlToObject<LogList>(parser.Context.Xml);
+            List<string> fields = null;
+            if (parser.ReturnElements() == OptionsIn.ReturnElements.IdOnly.Value)
+                fields = new List<string> { IdPropertyName, "name", "uidWell", "nameWell", "uidWellbore", "nameWellbore" };
+
+            var logs = QueryEntities(parser, logList.Log, fields);
 
             // Support OptionsIn returnElements=: all, header-only, data-only
             var logsOut = new List<Log>();

@@ -54,16 +54,5 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
 
             Assert.AreEqual(2, requestViewModel.Items.Count);
         }
-
-        [TestMethod]
-        public void TestQueryViewModelFunctionTextToEnum()
-        {
-            var queryViewModel = new QueryViewModel(_runtime);
-
-            Assert.AreEqual(Functions.AddToStore, queryViewModel.FunctionTextToEnum("Add"));
-            Assert.AreEqual(Functions.UpdateInStore, queryViewModel.FunctionTextToEnum("Update"));
-            Assert.AreEqual(Functions.DeleteFromStore, queryViewModel.FunctionTextToEnum("Delete"));
-            Assert.AreEqual(Functions.GetFromStore, queryViewModel.FunctionTextToEnum("Get"));
-        }
     }
 }

@@ -303,7 +303,7 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Queries the data store with Mongo Bson filter.
+        /// Queries the data store with Mongo Bson filter and projection.
         /// </summary>
         /// <param name="parser">The parser.</param>
         /// <param name="tList">List of query for object T.</param>
@@ -317,6 +317,7 @@ namespace PDS.Witsml.Server.Data
 
             foreach (var entity in tList)
             {
+                // Build Mongo filter
                 var filter = BuildFilter(parser, entity);
                 var results = collection.Find(filter ?? "{}");
 
@@ -544,6 +545,8 @@ namespace PDS.Witsml.Server.Data
                 var projection = Builders<T>.Projection.Include(fields[0]);
                 for (var i = 1; i < fields.Count; i++)
                     projection = projection.Include(fields[i]);
+                if (!fields.Contains(IdPropertyName))
+                    projection = projection.Exclude(IdPropertyName);
                 return projection;
             }
         }
@@ -619,7 +622,7 @@ namespace PDS.Witsml.Server.Data
             if (string.IsNullOrEmpty(input))
                 return input;
 
-            var result = Char.ToUpper(input[0]).ToString();
+            var result = char.ToUpper(input[0]).ToString();
             if (input.Length > 1)
                 result += input.Substring(1);
 

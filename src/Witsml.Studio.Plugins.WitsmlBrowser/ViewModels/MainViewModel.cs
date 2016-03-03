@@ -125,7 +125,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             string xmlOut = string.Empty;
             string suppMsgOut = string.Empty;
 
-            SubmitQuery(functionType, ref xmlOut, ref suppMsgOut);
+            SubmitQuery(functionType, XmlQuery.Text, ref xmlOut, ref suppMsgOut);
 
             OutputResults(xmlOut, suppMsgOut);
             OutputMessages(functionType, XmlQuery.Text, xmlOut, suppMsgOut);
@@ -138,32 +138,32 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             SubmitQuery(Functions.GetCap);
         }
 
-        internal void SubmitQuery(Functions functionType, ref string xmlOut, ref string suppMsgOut)
+        internal void SubmitQuery(Functions functionType, string xmlIn, ref string xmlOut, ref string suppMsgOut)
         {
             using (var client = Proxy.CreateClientProxy())
             {
                 var wmls = client as IWitsmlClient;
 
-                var objectType = ObjectTypes.GetObjectTypeFromGroup(XmlQuery.Text);
+                var objectType = ObjectTypes.GetObjectTypeFromGroup(xmlIn);
 
                 switch (functionType)
                 {
                     case Functions.GetCap:
                         // Set options in for the selected WitsmlVersion.
-                        var optionsIn = string.Format("dataVersion={0}", Model.WitsmlVersion);
+                        var optionsIn = new OptionsIn.DataVersion(Model.WitsmlVersion).ToString();
                         wmls.WMLS_GetCap(optionsIn, out xmlOut, out suppMsgOut);
                         break;
                     case Functions.AddToStore:
-                        wmls.WMLS_AddToStore(objectType, XmlQuery.Text, null, null, out suppMsgOut);
+                        wmls.WMLS_AddToStore(objectType, xmlIn, null, null, out suppMsgOut);
                         break;
                     case Functions.UpdateInStore:
-                        Runtime.ShowInfo("Coming soon.");
+                        //Runtime.ShowInfo("Coming soon.");
                         break;
                     case Functions.DeleteFromStore:
-                        Runtime.ShowInfo("Coming soon.");
+                        //Runtime.ShowInfo("Coming soon.");
                         break;
                     default:
-                        wmls.WMLS_GetFromStore(objectType, XmlQuery.Text, Model.ReturnElementType.ToString(), null, out xmlOut, out suppMsgOut);
+                        wmls.WMLS_GetFromStore(objectType, xmlIn, Model.ReturnElementType.ToString(), null, out xmlOut, out suppMsgOut);
                         break;
                 }
             }

@@ -60,7 +60,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 
         public void SubmitQuery(string functionText)
         {
-            MainViewModel.SubmitQuery(FunctionTextToEnum(functionText));
+            MainViewModel.SubmitQuery((Functions)Enum.Parse(typeof(Functions), functionText));
         }
 
         public void SaveQuery(object sender, RoutedEventArgs e)
@@ -92,21 +92,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         public void WrapQuery()
         {
             QueryWrapped = !QueryWrapped;
-        }
-
-        internal Functions FunctionTextToEnum(string functionText)
-        {
-            switch (functionText)
-            {
-                case "Add":
-                    return Functions.AddToStore;
-                case "Update":
-                    return Functions.UpdateInStore;
-                case "Delete":
-                    return Functions.DeleteFromStore;
-                default:
-                    return Functions.GetFromStore;
-            }
         }
     }
 }
