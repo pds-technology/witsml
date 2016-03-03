@@ -324,6 +324,7 @@ namespace PDS.Witsml.Server.Data
                 var filter = BuildFilter(parser, entity);
                 var results = collection.Find(filter ?? "{}");
 
+                // Format response using MongoDb projection, i.e. selecting specified fields only
                 if (returnElements == OptionsIn.ReturnElements.All.Value)
                     entities.AddRange(results.ToList());
                 else if (returnElements == OptionsIn.ReturnElements.IdOnly.Value || returnElements == OptionsIn.ReturnElements.Requested.Value)
@@ -542,7 +543,7 @@ namespace PDS.Witsml.Server.Data
             }
 
             if (fields.Count == 0)
-                return null;
+                return Builders<T>.Projection.Exclude(IdPropertyName).Include(string.Empty);
             else {
                 var projection = Builders<T>.Projection.Include(fields[0]);
                 for (var i = 1; i < fields.Count; i++)
@@ -627,6 +628,6 @@ namespace PDS.Witsml.Server.Data
                 result += input.Substring(1);
 
             return result;
-        }
+        }        
     }
 }
