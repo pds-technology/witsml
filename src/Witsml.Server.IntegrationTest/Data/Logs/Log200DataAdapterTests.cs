@@ -1,27 +1,31 @@
 ﻿using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Energistics.DataAccess.WITSML200.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using PDS.Framework;
+using PDS.Witsml.Server.Data.Wellbores;
 using PDS.Witsml.Server.Data.Wells;
 
-namespace PDS.Witsml.Server.Data.Wellbores
+namespace PDS.Witsml.Server.Data.Logs
 {
     [TestClass]
-    public class Wellbore200DataAdapterTests
+    public class Log200DataAdapterTests
     {
         private DevKit200Aspect DevKit;
         private IContainer Container;
         private IDatabaseProvider Provider;
         private IEtpDataAdapter<Well> WellAdapter;
         private IEtpDataAdapter<Wellbore> WellboreAdapter;
+        private IEtpDataAdapter<Log> LogAdapter;
 
         private Well Well1;
-        private Well Well2;
         private Wellbore Wellbore1;
-        private Wellbore Wellbore2;
+        private Log Log1;
+        private Log Log2;
         private DataObjectReference WellReference;
+        private DataObjectReference WellboreReference;
 
         [TestInitialize]
         public void TestSetUp()
@@ -32,12 +36,11 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
             WellAdapter = new Well200DataAdapter(Provider) { Container = Container };
             WellboreAdapter = new Wellbore200DataAdapter(Provider) { Container = Container };
+            LogAdapter = new Log200DataAdapter(Provider) { Container = Container };
 
             Well1 = new Well() { Citation = new Citation { Title = DevKit.Name("Well 01") }, TimeZone = DevKit.TimeZone, Uuid = DevKit.Uid() };
-            Well2 = new Well() { Citation = new Citation { Title = DevKit.Name("Well 02") }, TimeZone = DevKit.TimeZone, Uuid = DevKit.Uid() };
 
             Well1.GeographicLocationWGS84 = new GeodeticWellLocation();
-            Well2.GeographicLocationWGS84 = new GeodeticWellLocation();
 
             WellReference = new DataObjectReference
             {
@@ -47,31 +50,45 @@ namespace PDS.Witsml.Server.Data.Wellbores
             };
 
             Wellbore1 = new Wellbore() { Citation = new Citation { Title = DevKit.Name("Wellbore 01") }, ReferenceWell = WellReference, Uuid = DevKit.Uid() };
-            Wellbore2 = new Wellbore() { Citation = new Citation { Title = DevKit.Name("Wellbore 02") }, ReferenceWell = WellReference };
+
+            WellboreReference = new DataObjectReference
+            {
+                ContentType = EtpContentTypes.Witsml200.For(ObjectTypes.Wellbore),
+                Title = Wellbore1.Citation.Title,
+                Uuid = Wellbore1.Uuid
+            };
+
+            Log1 = new Log() { Citation = new Citation { Title = DevKit.Name("Log 01") }, Wellbore = WellboreReference, Uuid = DevKit.Uid() };
+            Log2 = new Log() { Citation = new Citation { Title = DevKit.Name("Log 02") }, Wellbore = WellboreReference };
+
+            DevKit.InitHeader(Log1, LoggingMethod.MWD, ChannelIndexType.measureddepth);
+            DevKit.InitHeader(Log2, LoggingMethod.Surface, ChannelIndexType.datetime);
         }
 
         [TestMethod]
-        public void CanAddAndGetSingleWellboreWithUuid()
+        public void CanAddAndGetSingleLogWithUuid()
         {
             WellAdapter.Put(Well1);
             WellboreAdapter.Put(Wellbore1);
+            LogAdapter.Put(Log1);
 
-            var wellbore1 = WellboreAdapter.Get(Wellbore1.Uuid);
+            var log1 = LogAdapter.Get(Log1.Uuid);
 
-            Assert.AreEqual(Wellbore1.Citation.Title, wellbore1.Citation.Title);
+            Assert.AreEqual(Log1.Citation.Title, log1.Citation.Title);
         }
 
         [TestMethod]
-        public void CanAddAndGetSingleWellboreWithoutUuid()
+        public void CanAddAndGetSingleLogWithoutUuid()
         {
             WellAdapter.Put(Well1);
-            WellboreAdapter.Put(Wellbore2);
+            WellboreAdapter.Put(Wellbore1);
+            LogAdapter.Put(Log2);
 
-            var wellbore2 = Provider.GetDatabase().GetCollection<Wellbore>(ObjectNames.Wellbore200).AsQueryable()
-                .Where(x => x.Citation.Title == Wellbore2.Citation.Title)
+            var log2 = Provider.GetDatabase().GetCollection<Log>(ObjectNames.Log200).AsQueryable()
+                .Where(x => x.Citation.Title == Log2.Citation.Title)
                 .FirstOrDefault();
 
-            Assert.AreEqual(Wellbore2.Citation.Title, wellbore2.Citation.Title);
+            Assert.AreEqual(Log2.Citation.Title, log2.Citation.Title);
         }
     }
 }

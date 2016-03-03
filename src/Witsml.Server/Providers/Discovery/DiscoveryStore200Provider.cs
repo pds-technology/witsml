@@ -84,6 +84,11 @@ namespace PDS.Witsml.Server.Providers.Discovery
                 _logDataAdapter.GetAll(uri)
                     .ForEach(x => args.Context.Add(ToResource(x)));
             }
+            //else if (uri.ObjectType == ObjectTypes.Log)
+            //{
+            //    var log = _logDataAdapter.Get(uri.ObjectId);
+            //    log.LogCurveInfo.ForEach(x => args.Context.Add(ToResource(log, x)));
+            //}
         }
 
         private Resource ToResource(Well entity)

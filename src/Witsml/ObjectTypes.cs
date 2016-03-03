@@ -21,6 +21,7 @@ namespace PDS.Witsml
         public const string Well = "well";
         public const string Wellbore = "wellbore";
         public const string Log = "log";
+        public const string LogCurveInfo = "logCurveInfo";
         public const string Rig = "rig";
         public const string Trajectory = "trajectory";
         public const string ChangeLog = "changeLog";

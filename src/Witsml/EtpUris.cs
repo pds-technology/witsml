@@ -30,6 +30,12 @@ namespace PDS.Witsml
                 .Append(ObjectTypes.Log, entity.Uid);
         }
 
+        public static EtpUri ToUri(this Witsml141.ComponentSchemas.LogCurveInfo entity, Witsml141.Log log)
+        {
+            return log.ToUri()
+                .Append(ObjectTypes.LogCurveInfo, entity.Mnemonic.Value);
+        }
+
         public static EtpUri ToUri(this Witsml200.Well entity)
         {
             return Witsml200.Append(ObjectTypes.Well, entity.Uuid);

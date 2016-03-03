@@ -7,6 +7,7 @@ using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using Energistics.Protocol.Discovery;
 using PDS.Witsml.Server.Data;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
 
 namespace PDS.Witsml.Server.Providers.Discovery
 {
@@ -84,6 +85,11 @@ namespace PDS.Witsml.Server.Providers.Discovery
                 _logDataAdapter.GetAll(uri)
                     .ForEach(x => args.Context.Add(ToResource(x)));
             }
+            else if (uri.ObjectType == ObjectTypes.Log)
+            {
+                var log = _logDataAdapter.Get(uri.ObjectId);
+                log.LogCurveInfo.ForEach(x => args.Context.Add(ToResource(log, x)));
+            }
         }
 
         private Resource ToResource(Well entity)
@@ -114,6 +120,16 @@ namespace PDS.Witsml.Server.Providers.Discovery
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Name,
                 count: -1);
+        }
+
+        private Resource ToResource(Log log, LogCurveInfo curve)
+        {
+            return DiscoveryStoreProvider.New(
+                uuid: curve.Uid,
+                uri: curve.ToUri(log),
+                resourceType: ResourceTypes.DataObject,
+                name: curve.Mnemonic.Value,
+                count: 0);
         }
     }
 }
