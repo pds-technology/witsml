@@ -61,7 +61,7 @@ namespace PDS.Witsml.Server.Data
                     entities.AddRange(results.ToList());
                 else if (returnElements == OptionsIn.ReturnElements.IdOnly.Value || returnElements == OptionsIn.ReturnElements.Requested.Value)
                 {
-                    var projection = BuildProjection(_parser, entity, _fields ?? new List<string>());
+                    var projection = BuildProjection(_parser, entity);
                     if (projection != null)
                         results = results.Project<T>(projection);
                     entities.AddRange(results.ToList());
@@ -179,12 +179,16 @@ namespace PDS.Witsml.Server.Data
         /// Builds the projection for the query.
         /// </summary>
         /// <param name="parser">The parser.</param>
+        /// <param name="entity">The query entity</param>
         /// <returns>The projection object that contains the fields to be selected.</returns>
-        private ProjectionDefinition<T> BuildProjection(WitsmlQueryParser parser, T entity, List<string> fields)
+        private ProjectionDefinition<T> BuildProjection(WitsmlQueryParser parser, T entity)
         {
             var element = parser.Element();
             if (element == null)
                 return null;
+
+            if (_fields == null)
+                _fields = new List<string>();
 
             var properties = GetPropertyInfo(typeof(T));
 
@@ -192,16 +196,16 @@ namespace PDS.Witsml.Server.Data
             {
                 var property = GetPropertyInfoForAnElement(properties, child);
                 var value = property.GetValue(entity);
-                BuildProjectionForAnElement(child, null, fields, property, value);
+                BuildProjectionForAnElement(child, null, property, value);
             }
 
-            if (fields.Count == 0)
+            if (_fields.Count == 0)
                 return Builders<T>.Projection.Exclude(_idPropertyName).Include(string.Empty);
             else {
-                var projection = Builders<T>.Projection.Include(fields[0]);
-                for (var i = 1; i < fields.Count; i++)
-                    projection = projection.Include(fields[i]);
-                if (!fields.Contains(_idPropertyName))
+                var projection = Builders<T>.Projection.Include(_fields[0]);
+                for (var i = 1; i < _fields.Count; i++)
+                    projection = projection.Include(_fields[i]);
+                if (!_fields.Contains(_idPropertyName))
                     projection = projection.Exclude(_idPropertyName);
                 return projection;
             }
@@ -212,15 +216,16 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="element">The element.</param>
         /// <param name="fieldPath">The field path to the top level property of the queried entity.</param>
-        /// <param name="fields">The list of fields to be selecte for the element.</param>
-        private void BuildProjectionForAnElement(XElement element, string fieldPath, List<string> fields, PropertyInfo propertyInfo, object propertyValue)
+        /// <param name="propertyInfo">The property information for the field.</param>
+        /// <param name="propertyValue">The property value for the field.</param>
+        private void BuildProjectionForAnElement(XElement element, string fieldPath, PropertyInfo propertyInfo, object propertyValue)
         {
             var prefix = string.IsNullOrEmpty(fieldPath) ? string.Empty : string.Format("{0}.", fieldPath);
             var path = string.Format("{0}{1}", prefix, CaptalizeString(propertyInfo.Name));
             if (!element.HasElements && !element.HasAttributes)
             {
-                if (!fields.Contains(path))
-                    fields.Add(path);
+                if (!_fields.Contains(path))
+                    _fields.Add(path);
                 return;
             }
 
@@ -232,7 +237,7 @@ namespace PDS.Witsml.Server.Data
                 {
                     var property = GetPropertyInfoForAnElement(properties, child);
                     var value = property.GetValue(propertyValue);
-                    BuildProjectionForAnElement(child, path, fields, property, value);
+                    BuildProjectionForAnElement(child, path, property, value);
                 }
             }
             if (element.HasAttributes)
@@ -240,8 +245,8 @@ namespace PDS.Witsml.Server.Data
                 foreach (var attribute in element.Attributes())
                 {
                     var attributePath = string.Format("{0}.{1}", path, CaptalizeString(attribute.Name.LocalName));
-                    if (!fields.Contains(attributePath))
-                        fields.Add(attributePath);
+                    if (!_fields.Contains(attributePath))
+                        _fields.Add(attributePath);
                 }
             }
         }
