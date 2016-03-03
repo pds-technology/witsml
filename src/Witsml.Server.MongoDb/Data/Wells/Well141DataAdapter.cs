@@ -54,7 +54,7 @@ namespace PDS.Witsml.Server.Data.Wells
         {
             List<string> fields = null;
             if (parser.ReturnElements() == OptionsIn.ReturnElements.IdOnly.Value)
-                fields = new List<string> { IdPropertyName, "name" };
+                fields = new List<string> { IdPropertyName, NamePropertyName };
 
             return new WitsmlResult<IEnergisticsCollection>(
                 ErrorCodes.Success,
