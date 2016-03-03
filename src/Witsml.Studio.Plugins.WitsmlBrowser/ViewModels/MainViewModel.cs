@@ -124,11 +124,12 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             QueryResults.Text = string.Empty;
             string xmlOut = string.Empty;
             string suppMsgOut = string.Empty;
+            string optionsIn = null;
 
-            SubmitQuery(functionType, XmlQuery.Text, ref xmlOut, ref suppMsgOut);
+            SubmitQuery(functionType, XmlQuery.Text, ref xmlOut, ref suppMsgOut, ref optionsIn);
 
             OutputResults(xmlOut, suppMsgOut);
-            OutputMessages(functionType, XmlQuery.Text, xmlOut, suppMsgOut);
+            OutputMessages(functionType, XmlQuery.Text, xmlOut, suppMsgOut, optionsIn);
 
             // TODO: Add exception handling.  We don't want the app to crash because of a bad query.
         }
@@ -138,7 +139,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             SubmitQuery(Functions.GetCap);
         }
 
-        internal void SubmitQuery(Functions functionType, string xmlIn, ref string xmlOut, ref string suppMsgOut)
+        internal void SubmitQuery(Functions functionType, string xmlIn, ref string xmlOut, ref string suppMsgOut, ref string optionsIn)
         {
             using (var client = Proxy.CreateClientProxy())
             {
@@ -150,7 +151,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                 {
                     case Functions.GetCap:
                         // Set options in for the selected WitsmlVersion.
-                        var optionsIn = new OptionsIn.DataVersion(Model.WitsmlVersion).ToString();
+                        optionsIn = new OptionsIn.DataVersion(Model.WitsmlVersion);
                         wmls.WMLS_GetCap(optionsIn, out xmlOut, out suppMsgOut);
                         break;
                     case Functions.AddToStore:
@@ -163,7 +164,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                         //Runtime.ShowInfo("Coming soon.");
                         break;
                     default:
-                        wmls.WMLS_GetFromStore(objectType, xmlIn, Model.ReturnElementType.ToString(), null, out xmlOut, out suppMsgOut);
+                        optionsIn = GetGetFromStoreOptionsIn();
+                        wmls.WMLS_GetFromStore(objectType, xmlIn, optionsIn, null, out xmlOut, out suppMsgOut);
                         break;
                 }
             }
@@ -231,7 +233,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             QueryResults.Text = string.IsNullOrEmpty(suppMsgOut) ? xmlOut : suppMsgOut;
         }
 
-        private void OutputMessages(Functions functionType, string queryText, string xmlOut, string suppMsgOut)
+        private void OutputMessages(Functions functionType, string queryText, string xmlOut, string suppMsgOut, string optionsIn)
         {
             var none = "<!-- None -->";
             var now = DateTime.Now.ToString("G");
@@ -239,13 +241,24 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             Messages.Insert(
                 Messages.TextLength,
                 string.Format(
-                    "<!-- {5}: {4} -->{3}{0}{3}{3}<!-- Message: {4} -->{3}<!-- {1} -->{3}{3}<!-- Output: {4} -->{3}{2}{3}{3}",
+                    "<!-- {5}: {4} -->{3}<!-- OptionsIn: {6} -->{3}{0}{3}{3}<!-- Message: {4} -->{3}<!-- {1} -->{3}{3}<!-- Output: {4} -->{3}{2}{3}{3}",
                     queryText == null ? string.Empty : queryText,
                     string.IsNullOrEmpty(suppMsgOut) ? "None" : suppMsgOut,
                     string.IsNullOrEmpty(xmlOut) ? none : xmlOut,
                     Environment.NewLine,
                     now,
-                    functionType.ToDescription()));
+                    functionType.ToDescription(),
+                    string.IsNullOrEmpty(optionsIn) ? "None" : optionsIn));
+        }
+
+        private string GetGetFromStoreOptionsIn()
+        {
+            return
+                string.Concat(
+                    Model.ReturnElementType,
+                    Model.IsRequestObjectSelectionCapability ? ";" + OptionsIn.RequestObjectSelectionCapability.True : string.Empty,
+                    Model.IsRequestPrivateGroupOnly ? ";" + OptionsIn.RequestPrivateGroupOnly.True : string.Empty
+                    );
         }
     }
 }

@@ -39,6 +39,10 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
             }
         }
 
+        public bool IsRequestObjectSelectionCapability { get; set; }
+
+        public bool IsRequestPrivateGroupOnly { get; set; }
+
         private string _witsmlVersion;
         public string WitsmlVersion
         {

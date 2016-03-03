@@ -37,7 +37,7 @@
                             <ContextMenu>
                                 <MenuItem Header="Copy" cal:Message.Attach="CopyMessages" />
                                 <MenuItem Header="Clear" cal:Message.Attach="ClearMessages" />
-                                <MenuItem Header="{Binding MessagesWrappedText}" cal:Message.Attach="WrapMessages()" />
+                                <MenuItem Header="{Binding MessagesWrappedText}" cal:Message.Attach="WrapMessages" />
                             </ContextMenu>
                         </avalon:TextEditor.ContextMenu>
                     </avalon:TextEditor>

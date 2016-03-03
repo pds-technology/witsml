@@ -61,7 +61,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
             // Submit the query
             string xmlOut = string.Empty;
             string suppMsgOut = string.Empty;
-            vm.SubmitQuery(Functions.AddToStore, xmlIn, ref xmlOut, ref suppMsgOut);
+            string optionsIn = null;
+            vm.SubmitQuery(Functions.AddToStore, xmlIn, ref xmlOut, ref suppMsgOut, ref optionsIn);
 
             // The same uid should be returned as the results.
             Assert.AreEqual(expectedUid, suppMsgOut);
@@ -81,17 +82,18 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
 
             string xmlOut = string.Empty;
             string suppMsgOut = string.Empty;
+            string optionsIn = null;
 
             // Add a well to the store
             var xmlIn = string.Format(
                 _addWellTemplate,
                 expectedUid,
                 DateTime.Now.ToString("yyyyMMdd-HHmmss"));
-            vm.SubmitQuery(Functions.AddToStore, xmlIn, ref xmlOut, ref suppMsgOut);
+            vm.SubmitQuery(Functions.AddToStore, xmlIn, ref xmlOut, ref suppMsgOut, ref optionsIn);
 
             // Retrieve the same well from the store
             xmlIn = string.Format(_getWellTemplate, expectedUid);
-            vm.SubmitQuery(Functions.GetFromStore, xmlIn, ref xmlOut, ref suppMsgOut);
+            vm.SubmitQuery(Functions.GetFromStore, xmlIn, ref xmlOut, ref suppMsgOut, ref optionsIn);
 
             // The same uid should be returned as the results.
             Assert.IsNotNull(xmlOut);

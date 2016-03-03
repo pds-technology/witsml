@@ -84,6 +84,16 @@ namespace PDS.Witsml
 
             public static readonly RequestObjectSelectionCapability None = new RequestObjectSelectionCapability("none");
             public static readonly RequestObjectSelectionCapability True = new RequestObjectSelectionCapability("true");
+
+            /// <summary>
+            /// Gets a collection of RequestObjectSelectionCapability option values.
+            /// </summary>
+            /// <returns>A collection of all RequestObjectSelectionCapability option values.</returns>
+            public static IEnumerable<RequestObjectSelectionCapability> GetValues()
+            {
+                yield return None;
+                yield return True;
+            }
         }
 
         /// <summary>
@@ -98,6 +108,16 @@ namespace PDS.Witsml
 
             public static readonly RequestPrivateGroupOnly False = new RequestPrivateGroupOnly("false");
             public static readonly RequestPrivateGroupOnly True = new RequestPrivateGroupOnly("true");
+
+            /// <summary>
+            /// Gets a collection of RequestObjectSelectionCapability option values.
+            /// </summary>
+            /// <returns>A collection of all RequestObjectSelectionCapability option values.</returns>
+            public static IEnumerable<RequestPrivateGroupOnly> GetValues()
+            {
+                yield return False;
+                yield return True;
+            }
         }
 
         /// <summary>
@@ -163,6 +183,28 @@ namespace PDS.Witsml
                 value = defaultValue.Value;
             }
             return value;
+        }
+
+        /// <summary>
+        /// Concatenates the specified options separated by a semicolon. 
+        /// </summary>
+        /// <param name="options">The OptionsIn params.</param>
+        /// <returns>A concatenated list of OptionsIn strings separated by a semicolon.</returns>
+        public static string Join(params OptionsIn[] options)
+        {
+            return string.Join(";", options.Select(x => x));
+        }
+
+        /// <summary>
+        /// Performs an implicit conversion from <see cref="OptionsIn"/> to <see cref="System.String"/>.
+        /// </summary>
+        /// <param name="option">The option.</param>
+        /// <returns>
+        /// The result of the conversion.
+        /// </returns>
+        public static implicit operator string(OptionsIn option)
+        {
+            return option.ToString();
         }
 
         /// <summary>

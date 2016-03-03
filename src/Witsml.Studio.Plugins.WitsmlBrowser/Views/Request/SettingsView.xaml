@@ -22,6 +22,7 @@
                 <RowDefinition Height="30" />
                 <RowDefinition Height="40" />
                 <RowDefinition Height="40" />
+                <RowDefinition Height="30" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
@@ -45,8 +46,12 @@
             <TextBlock Grid.Column="0" Grid.Row="4" Text="Return Elements:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
             <ComboBox SelectedItem="{Binding Model.ReturnElementType, Mode=TwoWay}" DisplayMemberPath="Value" ItemsSource="{Binding ReturnElements}" Grid.Column="1" Grid.Row="4" Grid.ColumnSpan="2" Margin="5" VerticalContentAlignment="Center" />
 
-            <TextBlock Grid.Column="0" Grid.Row="5" Text="Max Data Rows:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
-            <xctk:IntegerUpDown Value="{Binding Model.MaxDataRows}" Grid.Column="1" Grid.Row="5" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" />
+            <CheckBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" Margin="5,10,5,5" Content="Request Object Selection" VerticalAlignment="Center" IsChecked="{Binding Model.IsRequestObjectSelectionCapability}" />
+            <CheckBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" Content="Request Private Group Only" VerticalAlignment="Center" IsChecked="{Binding Model.IsRequestPrivateGroupOnly}" />
+
+            <!-- TODO: Implement with Logs -->
+            <!--<TextBlock Grid.Column="0" Grid.Row="6" Text="Max Data Rows:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
+            <xctk:IntegerUpDown Value="{Binding Model.MaxDataRows}" Grid.Column="1" Grid.Row="6" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" />-->
         </Grid>
     </DockPanel>
 </UserControl>
