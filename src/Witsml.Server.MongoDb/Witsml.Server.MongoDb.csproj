@@ -74,6 +74,7 @@
     <Compile Include="Data\Logs\Log200DataAdapter.cs" />
     <Compile Include="Data\MongoDbClassMapper.cs" />
     <Compile Include="Data\MongoDbDataAdapter.cs" />
+    <Compile Include="Data\MongoDbQuery.cs" />
     <Compile Include="Data\UidGenerator.cs" />
     <Compile Include="Data\Wellbores\Wellbore200DataAdapter.cs" />
     <Compile Include="Data\Wellbores\Wellbore131DataAdapter.cs" />
