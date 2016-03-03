@@ -548,6 +548,8 @@ namespace PDS.Witsml.Server.Data
                 var projection = Builders<T>.Projection.Include(fields[0]);
                 for (var i = 1; i < fields.Count; i++)
                     projection = projection.Include(fields[i]);
+                if (!fields.Contains(IdPropertyName))
+                    projection = projection.Exclude(IdPropertyName);
                 return projection;
             }
         }
@@ -623,7 +625,7 @@ namespace PDS.Witsml.Server.Data
             if (string.IsNullOrEmpty(input))
                 return input;
 
-            var result = Char.ToUpper(input[0]).ToString();
+            var result = char.ToUpper(input[0]).ToString();
             if (input.Length > 1)
                 result += input.Substring(1);
 
