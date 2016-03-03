@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using Caliburn.Micro;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
@@ -45,24 +46,9 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             get { return MainViewModel.GetWrappedText(QueryWrapped); }
         }
 
-        public void GetFromStore()
+        public void SubmitQuery(string functionText)
         {
-            MainViewModel.SubmitQuery(Functions.GetFromStore);
-        }
-
-        public void AddToStore()
-        {
-            MainViewModel.SubmitQuery(Functions.AddToStore);
-        }
-
-        public void UpdateInStore()
-        {
-            MainViewModel.SubmitQuery(Functions.UpdateInStore);
-        }
-
-        public void DeleteFromStore()
-        {
-            MainViewModel.SubmitQuery(Functions.DeleteFromStore);
+            MainViewModel.SubmitQuery(FunctionTextToEnum(functionText));
         }
 
         public void SaveQuery(object sender, RoutedEventArgs e)
@@ -94,6 +80,21 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         public void WrapQuery()
         {
             QueryWrapped = !QueryWrapped;
+        }
+
+        internal Functions FunctionTextToEnum(string functionText)
+        {
+            switch (functionText)
+            {
+                case "Add":
+                    return Functions.AddToStore;
+                case "Update":
+                    return Functions.UpdateInStore;
+                case "Delete":
+                    return Functions.DeleteFromStore;
+                default:
+                    return Functions.GetFromStore;
+            }
         }
     }
 }

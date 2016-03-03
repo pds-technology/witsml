@@ -104,37 +104,39 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             }
         }
 
-        internal string GetWrappedText(bool isWrapped)
-        {
-            return isWrapped ? "No Wrap" : "Wrap";
-        }
-
-        /// <summary>
-        /// Creates a WITSMLWebServiceConnection for the current connection uri and witsml version.
-        /// </summary>
-        /// <returns></returns>
-        internal WITSMLWebServiceConnection CreateProxy()
-        {
-            return new WITSMLWebServiceConnection(Model.Connection.Uri, GetWitsmlVersionEnum());
-        }
-
         public void SubmitQuery(Functions functionType)
         {
             QueryResults.Text = string.Empty;
+            string xmlOut = string.Empty;
+            string suppMsgOut = string.Empty;
 
+            SubmitQuery(functionType, ref xmlOut, ref suppMsgOut);
+
+            OutputResults(xmlOut, suppMsgOut);
+            OutputMessages(functionType, XmlQuery.Text, xmlOut, suppMsgOut);
+
+            // TODO: Add exception handling.  We don't want the app to crash because of a bad query.
+        }
+
+        public void GetCapabilities()
+        {
+            SubmitQuery(Functions.GetCap);
+        }
+
+        internal void SubmitQuery(Functions functionType, ref string xmlOut, ref string suppMsgOut)
+        {
             using (var client = Proxy.CreateClientProxy())
             {
                 var wmls = client as IWitsmlClient;
-
-                string xmlOut = string.Empty;
-                string suppMsgOut = string.Empty;
 
                 var objectType = ObjectTypes.GetObjectTypeFromGroup(XmlQuery.Text);
 
                 switch (functionType)
                 {
                     case Functions.GetCap:
-                        wmls.WMLS_GetCap(null, out xmlOut, out suppMsgOut);
+                        // Set options in for the selected WitsmlVersion.
+                        var optionsIn = string.Format("dataVersion={0}", Model.WitsmlVersion);
+                        wmls.WMLS_GetCap(optionsIn, out xmlOut, out suppMsgOut);
                         break;
                     case Functions.AddToStore:
                         wmls.WMLS_AddToStore(objectType, XmlQuery.Text, null, null, out suppMsgOut);
@@ -149,40 +151,27 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                         wmls.WMLS_GetFromStore(objectType, XmlQuery.Text, Model.ReturnElementType.ToString(), null, out xmlOut, out suppMsgOut);
                         break;
                 }
-                OutputResults(xmlOut, suppMsgOut);
-                OutputMessages(functionType, XmlQuery.Text, xmlOut, suppMsgOut);
             }
-
-            // TODO: Add exception handling.  We don't want the app to crash because of a bad query.
         }
 
-        public void GetCapabilities()
+        internal void LoadScreens()
         {
-            SubmitQuery(Functions.GetCap);
-        }
-
-        protected override void OnInitialize()
-        {
-            base.OnInitialize();
-
             Items.Add(RequestControl);
             Items.Add(ResultControl);
         }
 
-        private void Model_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        internal string GetWrappedText(bool isWrapped)
         {
-            if (e.PropertyName.Equals("WitsmlVersion"))
-            {
-                App.Current.Shell().BreadcrumbText = !string.IsNullOrEmpty(Model.WitsmlVersion)
-                    ? string.Format("{0}/{1}", Settings.Default.PluginDisplayName, Model.WitsmlVersion)
-                    : Settings.Default.PluginDisplayName;
+            return isWrapped ? "No Wrap" : "Wrap";
+        }
 
-                // Reset the Proxy when the version changes
-                Proxy = CreateProxy();
-
-                // Get the server capabilities for the newly selected version.
-                GetCapabilities();
-            }
+        /// <summary>
+        /// Creates a WITSMLWebServiceConnection for the current connection uri and witsml version.
+        /// </summary>
+        /// <returns></returns>
+        internal WITSMLWebServiceConnection CreateProxy()
+        {
+            return new WITSMLWebServiceConnection(Model.Connection.Uri, GetWitsmlVersionEnum(Model.WitsmlVersion));
         }
 
         /// <summary>
@@ -192,11 +181,37 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// The WMLSVersion enum value based on the current value of Model.WitsmlVersion.
         /// If Model.WitsmlVersion has not been established the the default is WMLSVersion.WITSML141.
         /// </returns>
-        private WMLSVersion GetWitsmlVersionEnum()
+        internal WMLSVersion GetWitsmlVersionEnum(string witsmlVersion)
         {
-            return Model.WitsmlVersion != null && Model.WitsmlVersion.Equals(OptionsIn.DataVersion.Version131.Value) 
-                ? WMLSVersion.WITSML131 
+            return witsmlVersion != null && witsmlVersion.Equals(OptionsIn.DataVersion.Version131.Value)
+                ? WMLSVersion.WITSML131
                 : WMLSVersion.WITSML141;
+        }
+
+        protected override void OnInitialize()
+        {
+            base.OnInitialize();
+
+            LoadScreens();
+        }
+
+        private void Model_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName.Equals("WitsmlVersion"))
+            {
+                if (App.Current != null && App.Current.Shell() != null)
+                {
+                    App.Current.Shell().BreadcrumbText = !string.IsNullOrEmpty(Model.WitsmlVersion)
+                        ? string.Format("{0}/{1}", Settings.Default.PluginDisplayName, Model.WitsmlVersion)
+                        : Settings.Default.PluginDisplayName;
+                }
+
+                // Reset the Proxy when the version changes
+                Proxy = CreateProxy();
+
+                // Get the server capabilities for the newly selected version.
+                GetCapabilities();
+            }
         }
 
         private void OutputResults(string xmlOut, string suppMsgOut)

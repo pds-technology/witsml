@@ -61,7 +61,9 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
+          <Private>False</Private>
+        </Reference>
       </ItemGroup>
     </Otherwise>
   </Choose>
@@ -74,6 +76,7 @@
     <Compile Include="ViewModels\ASecondViewModel.cs" />
     <Compile Include="ViewModels\AThirdViewModel.cs" />
     <Compile Include="ViewModels\TestViewModel.cs" />
+    <Compile Include="Plugins\WitsmlBrowser\WitsmlBrowserPluginTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Framework\Framework.csproj">
@@ -84,9 +87,17 @@
       <Project>{30de888b-a6b7-4528-ad89-324a7f9b0f4c}</Project>
       <Name>WebSockets</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Witsml.Studio.Plugins.WitsmlBrowser\Witsml.Studio.Plugins.WitsmlBrowser.csproj">
+      <Project>{7522280e-7550-493d-8cea-2e73c623e93d}</Project>
+      <Name>Witsml.Studio.Plugins.WitsmlBrowser</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Witsml.Studio\Witsml.Studio.csproj">
       <Project>{e7531da0-51bd-4c58-b020-ffce2dfbced6}</Project>
       <Name>Witsml.Studio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Witsml\Witsml.csproj">
+      <Project>{0ef1d73f-e7a0-40b0-803b-7ce4b6b27112}</Project>
+      <Name>Witsml</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

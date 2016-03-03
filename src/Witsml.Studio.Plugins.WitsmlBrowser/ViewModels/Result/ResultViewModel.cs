@@ -61,6 +61,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
 
             MessagesWrapped = false;
         }
+
         /// <summary>
         /// Copies the results to the clipboard.
         /// </summary>
