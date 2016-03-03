@@ -51,7 +51,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
             vm.Model.Connection = new Connections.Connection() { Uri = _validWitsmlUri };
             vm.Proxy.Url = vm.Model.Connection.Uri;
 
-            vm.XmlQuery.Text = string.Format(
+            var xmlIn = string.Format(
                 _addWellTemplate,
                 expectedUid,
                 DateTime.Now.ToString("yyyyMMdd-HHmmss"));
@@ -61,7 +61,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
             // Submit the query
             string xmlOut = string.Empty;
             string suppMsgOut = string.Empty;
-            vm.SubmitQuery(Functions.AddToStore, ref xmlOut, ref suppMsgOut);
+            vm.SubmitQuery(Functions.AddToStore, xmlIn, ref xmlOut, ref suppMsgOut);
 
             // The same uid should be returned as the results.
             Assert.AreEqual(expectedUid, suppMsgOut);
@@ -79,18 +79,19 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
             vm.Proxy.Url = vm.Model.Connection.Uri;
             vm.Model.ReturnElementType = OptionsIn.ReturnElements.All;
 
+            string xmlOut = string.Empty;
+            string suppMsgOut = string.Empty;
+
             // Add a well to the store
-            vm.XmlQuery.Text = string.Format(
+            var xmlIn = string.Format(
                 _addWellTemplate,
                 expectedUid,
                 DateTime.Now.ToString("yyyyMMdd-HHmmss"));
-            vm.SubmitQuery(Functions.AddToStore);
+            vm.SubmitQuery(Functions.AddToStore, xmlIn, ref xmlOut, ref suppMsgOut);
 
             // Retrieve the same well from the store
-            string xmlOut = string.Empty;
-            string suppMsgOut = string.Empty;
-            vm.XmlQuery.Text = string.Format(_getWellTemplate, expectedUid);
-            vm.SubmitQuery(Functions.GetFromStore, ref xmlOut, ref suppMsgOut);
+            xmlIn = string.Format(_getWellTemplate, expectedUid);
+            vm.SubmitQuery(Functions.GetFromStore, xmlIn, ref xmlOut, ref suppMsgOut);
 
             // The same uid should be returned as the results.
             Assert.IsNotNull(xmlOut);
