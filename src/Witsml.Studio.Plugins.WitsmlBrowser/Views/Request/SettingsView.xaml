@@ -38,7 +38,7 @@
             <TextBlock Grid.Column="0" Grid.Row="1" Text="Version:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
             <ComboBox x:Name="WitsmlVersionControl" SelectedItem="{Binding Model.WitsmlVersion}" ItemsSource="{Binding WitsmlVersions}" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" Margin="5" VerticalContentAlignment="Center" IsEnabled="{Binding ElementName=WitsmlVersionControl, Path=HasItems}" />
 
-            <Button x:Name="GetCapabilities" Grid.Row="2" Width="80" Margin="5,5,0,5" Content="Get Cap" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" />
+            <Button x:Name="GetCapabilities" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Width="80" Margin="5" Content="Get Cap" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" HorizontalAlignment="Right" />
 
             <Border Grid.Row="3" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="0,1,0,0" VerticalAlignment="Center" />
 

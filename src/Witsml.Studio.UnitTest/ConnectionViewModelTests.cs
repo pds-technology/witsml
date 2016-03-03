@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Witsml.Studio.Connections;
 using PDS.Witsml.Studio.Properties;
@@ -161,6 +162,8 @@ namespace PDS.Witsml.Studio
 
             // Test that the DataItem has the new name.
             Assert.AreEqual(newName, _witsmlConnectionVm.DataItem.Name);
+
+            await Task.Yield();
         }
 
         [TestMethod]
