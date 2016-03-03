@@ -13,14 +13,16 @@ using Microsoft.Win32;
 using Newtonsoft.Json;
 using PDS.Witsml.Studio.Connections;
 using PDS.Witsml.Studio.Plugins.DataReplay.Providers;
+using PDS.Witsml.Studio.Runtime;
 using PDS.Witsml.Studio.ViewModels;
 
 namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
 {
     public class ChannelsViewModel : Screen
     {
-        public ChannelsViewModel()
+        public ChannelsViewModel(IRuntimeService runtime)
         {
+            Runtime = runtime;
             DisplayName = "Channels";
         }
 
@@ -28,6 +30,8 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
         {
             get { return ((SimulationViewModel)Parent).Model; }
         }
+
+        public IRuntimeService Runtime { get; private set; }
 
         private string _output;
         public string Output
@@ -61,13 +65,13 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
 
         public void ShowConnectionDialog()
         {
-            var viewModel = new ConnectionViewModel(ConnectionTypes.Witsml)
+            var viewModel = new ConnectionViewModel(Runtime, ConnectionTypes.Witsml)
             {
                 DataItem = Model.Connection
             };
 
 
-            if (App.Current.ShowDialog(viewModel))
+            if (Runtime.ShowDialog(viewModel))
             {
                 Model.Connection = viewModel.DataItem;
             }
@@ -92,7 +96,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
                 }
                 catch (Exception ex)
                 {
-                    Application.Current.ShowError("Error importing Channel Metadata", ex);
+                    Runtime.ShowError("Error importing Channel Metadata", ex);
                 }
             }
         }

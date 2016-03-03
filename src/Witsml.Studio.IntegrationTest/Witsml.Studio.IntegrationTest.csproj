@@ -36,7 +36,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Caliburn.Micro, Version=2.0.2.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f" />
+    <Reference Include="Caliburn.Micro, Version=2.0.2.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL">
+      <HintPath>..\packages\Caliburn.Micro.Core.2.0.2\lib\net45\Caliburn.Micro.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Energistics.DataAccess">
       <HintPath>..\External\DevKit\Energistics.DataAccess.dll</HintPath>
     </Reference>
@@ -66,6 +69,10 @@
     <Compile Include="Plugins\WitsmlBrowser\WitsmlBrowserViewModelTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Framework\Framework.csproj">
+      <Project>{fae228aa-4917-4b02-b239-0a24df883898}</Project>
+      <Name>Framework</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WebSockets\WebSockets.csproj">
       <Project>{30de888b-a6b7-4528-ad89-324a7f9b0f4c}</Project>
       <Name>WebSockets</Name>
@@ -73,6 +80,10 @@
     <ProjectReference Include="..\Witsml.Studio.Plugins.WitsmlBrowser\Witsml.Studio.Plugins.WitsmlBrowser.csproj">
       <Project>{7522280e-7550-493d-8cea-2e73c623e93d}</Project>
       <Name>Witsml.Studio.Plugins.WitsmlBrowser</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Witsml.Studio.UnitTest\Witsml.Studio.UnitTest.csproj">
+      <Project>{f3143ad1-3139-4449-b07c-68d834e4ee36}</Project>
+      <Name>Witsml.Studio.UnitTest</Name>
     </ProjectReference>
     <ProjectReference Include="..\Witsml.Studio\Witsml.Studio.csproj">
       <Project>{e7531da0-51bd-4c58-b020-ffce2dfbced6}</Project>

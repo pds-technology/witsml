@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
-using System.Security;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Witsml.Studio.Connections;
 using PDS.Witsml.Studio.Properties;
+using PDS.Witsml.Studio.Runtime;
 using PDS.Witsml.Studio.ViewModels;
 
 namespace PDS.Witsml.Studio
@@ -16,6 +16,9 @@ namespace PDS.Witsml.Studio
     {
         private static readonly string PersistedDataFolderName = Settings.Default.PersistedDataFolderName;
         private static readonly string ConnectionBaseFileName = Settings.Default.ConnectionBaseFileName;
+
+        private BootstrapperHarness _bootstrapper;
+        private TestRuntimeService _runtime;
 
         private ConnectionViewModel _witsmlConnectionVm;
         private ConnectionViewModel _etpConnectionVm;
@@ -31,6 +34,9 @@ namespace PDS.Witsml.Studio
         [TestInitialize]
         public void TestSetUp()
         {
+            _bootstrapper = new BootstrapperHarness();
+            _runtime = new TestRuntimeService(_bootstrapper.Container);
+
             _witsmlConnection = new Connection()
             {
                 Name = "Witsml",
@@ -45,8 +51,8 @@ namespace PDS.Witsml.Studio
                 Username = "EtpUser"
             };
 
-            _witsmlConnectionVm = new ConnectionViewModel(ConnectionTypes.Witsml);
-            _etpConnectionVm = new ConnectionViewModel(ConnectionTypes.Etp);
+            _witsmlConnectionVm = new ConnectionViewModel(_runtime, ConnectionTypes.Witsml);
+            _etpConnectionVm = new ConnectionViewModel(_runtime, ConnectionTypes.Etp);
 
             DeletePersistenceFolder();
         }
@@ -139,7 +145,7 @@ namespace PDS.Witsml.Studio
         }
 
         [TestMethod]
-        public void TestAcceptWithDataItem()
+        public async void TestAcceptWithDataItem()
         {
             var newName = "xxx";
 

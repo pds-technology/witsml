@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Windows;
-using Caliburn.Micro;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Witsml.Studio.Runtime;
 using PDS.Witsml.Studio.ViewModels;
 
 namespace PDS.Witsml.Studio
@@ -12,25 +12,16 @@ namespace PDS.Witsml.Studio
     [TestClass]
     public class ShellViewModelTests
     {
-        private static Application _application;
-
-        [AssemblyInitialize]
-        public static void AssemblySetUp(TestContext context)
-        {
-            _application = new App();
-        }
-
-        [AssemblyCleanup]
-        public static void AssemblyCleanUp()
-        {
-            _application.Shutdown();
-        }
+        private BootstrapperHarness _bootstrapper;
+        private TestRuntimeService _runtime;
+        private ShellViewModel _viewModel;
 
         [TestInitialize]
         public void TestSetUp()
         {
-            AssemblySource.Instance.Clear();
-            _application.Resources["bootstrapper"] = new BootstrapperHarness();
+            _bootstrapper = new BootstrapperHarness();
+            _runtime = new TestRuntimeService(_bootstrapper.Container);
+            _viewModel = new ShellViewModel(_runtime);
         }
 
         /// <summary>
@@ -39,10 +30,9 @@ namespace PDS.Witsml.Studio
         [TestMethod]
         public void TestShellViewModelLoadsAllPlugins()
         {
-            var viewModel = new ShellViewModel();
-            viewModel.LoadPlugins();
+            _viewModel.LoadPlugins();
 
-            Assert.AreEqual(3, viewModel.Items.Count);
+            Assert.AreEqual(3, _viewModel.Items.Count);
         }
 
         /// <summary>
@@ -51,12 +41,11 @@ namespace PDS.Witsml.Studio
         [TestMethod]
         public void TestLoadedPluginsDisplayInAscendingOrder()
         {
-            var viewModel = new ShellViewModel();
-            viewModel.LoadPlugins();
+            _viewModel.LoadPlugins();
 
-            var actual = viewModel.Items.ToArray();
+            var actual = _viewModel.Items.ToArray();
 
-            var expected = viewModel.Items.Cast<IPluginViewModel>()
+            var expected = _viewModel.Items.Cast<IPluginViewModel>()
                 .OrderBy(x => x.DisplayOrder)
                 .ToArray();
 
@@ -69,20 +58,18 @@ namespace PDS.Witsml.Studio
         [TestMethod]
         public void TestShellStatus()
         {
-            var viewModel = new ShellViewModel();
-            viewModel.LoadPlugins();
+            _viewModel.LoadPlugins();
 
-            Assert.AreEqual("Ready.", viewModel.StatusBarText);
+            Assert.AreEqual("Ready.", _viewModel.StatusBarText);
         }
 
         [TestMethod]
         public void TestShellBreadcrumb()
         {
-            var viewModel = new ShellViewModel();
-            viewModel.LoadPlugins();
+            _viewModel.LoadPlugins();
            
             // Test that the Shell breadcrumb is the same as the first plugin
-            Assert.AreEqual(viewModel.Items[0].DisplayName, viewModel.BreadcrumbText);
+            Assert.AreEqual(_viewModel.Items[0].DisplayName, _viewModel.BreadcrumbText);
         }
     }
 }

@@ -1,7 +1,8 @@
 ﻿using System;
+using System.ComponentModel.Composition;
 using System.Linq;
-using System.Windows;
 using Caliburn.Micro;
+using PDS.Witsml.Studio.Runtime;
 
 namespace PDS.Witsml.Studio.ViewModels
 {
@@ -15,13 +16,21 @@ namespace PDS.Witsml.Studio.ViewModels
         /// <summary>
         /// Initializes an instance of the ShellViewModel
         /// </summary>
-        public ShellViewModel()
+        [ImportingConstructor]
+        public ShellViewModel(IRuntimeService runtime)
         {
             _log.Debug("Loading Shell");
 
+            Runtime = runtime;
             DisplayName = "WITSML Studio";
             StatusBarText = "Ready.";
         }
+
+        /// <summary>
+        /// Gets the runtime service.
+        /// </summary>
+        /// <value>The runtime service instance.</value>
+        public IRuntimeService Runtime { get; private set; }
 
         private string _breadcrumbText;
 
@@ -72,7 +81,7 @@ namespace PDS.Witsml.Studio.ViewModels
         /// </summary>
         public void About()
         {
-            App.Current.ShowInfo("WITSML Studio v0.1");
+            Runtime.ShowInfo("WITSML Studio v0.1");
         }
 
         /// <summary>
@@ -80,7 +89,7 @@ namespace PDS.Witsml.Studio.ViewModels
         /// </summary>
         internal void LoadPlugins()
         {
-            Items.AddRange(Application.Current.Container()
+            Items.AddRange(Runtime.Container
                 .ResolveAll<IPluginViewModel>()
                 .OrderBy(x => x.DisplayOrder));
 

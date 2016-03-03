@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Caliburn.Micro;
 using Energistics.DataAccess;
 using PDS.Witsml.Studio.Connections;
+using PDS.Witsml.Studio.Runtime;
 using PDS.Witsml.Studio.ViewModels;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
@@ -11,8 +12,9 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
     {
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(SettingsViewModel));
 
-        public SettingsViewModel()
+        public SettingsViewModel(IRuntimeService runtime)
         {
+            Runtime = runtime;
             DisplayName = "Settings";
             WitsmlVersions = new BindableCollection<string>();
         }
@@ -32,6 +34,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             get { return Parent.Model; }
         }
 
+        public IRuntimeService Runtime { get; private set; }
+
         public BindableCollection<string> WitsmlVersions { get; }
 
         public IEnumerable<OptionsIn.ReturnElements> ReturnElements
@@ -44,13 +48,13 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 
         public void ShowConnectionDialog()
         {
-            var viewModel = new ConnectionViewModel(ConnectionTypes.Witsml)
+            var viewModel = new ConnectionViewModel(Runtime, ConnectionTypes.Witsml)
             {
                 DataItem = Model.Connection,
             };
 
 
-            if (App.Current.ShowDialog(viewModel))
+            if (Runtime.ShowDialog(viewModel))
             {
                 Model.Connection = viewModel.DataItem;
 
@@ -95,7 +99,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
                 {
                     var msg = "The Witsml server does not support any versions.";
                     _log.Warn(msg);
-                    App.Current.ShowError(msg);
+                    Runtime.ShowError(msg);
                 }
             }
             catch (Exception ex)
@@ -103,7 +107,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
                 var errorMessage = string.Format("{0}{1}{1}{2}", "Error connecting to server.", Environment.NewLine, "Invalid URL");
                 
                 _log.Error(errorMessage, ex);
-                App.Current.ShowError(errorMessage);
+                Runtime.ShowError(errorMessage);
             }
         }
     }

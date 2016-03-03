@@ -8,6 +8,7 @@ using System.Windows;
 using Caliburn.Micro;
 using PDS.Framework;
 using PDS.Witsml.Studio.Properties;
+using PDS.Witsml.Studio.Runtime;
 using PDS.Witsml.Studio.ViewModels;
 
 namespace PDS.Witsml.Studio
@@ -53,6 +54,7 @@ namespace PDS.Witsml.Studio
 
             Container.Register<IWindowManager>(new WindowManager());
             Container.Register<IEventAggregator>(new EventAggregator());
+            Container.Register<IRuntimeService>(new DesktopRuntimeService(Container));
         }
 
         /// <summary>

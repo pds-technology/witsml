@@ -5,15 +5,19 @@ using System.Windows;
 using Caliburn.Micro;
 using Energistics.Common;
 using Microsoft.Win32;
+using PDS.Witsml.Studio.Runtime;
 
 namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
 {
     public class SimulationViewModel : Conductor<IScreen>.Collection.OneActive
     {
-        public SimulationViewModel()
+        public SimulationViewModel(IRuntimeService runtime)
         {
+            Runtime = runtime;
             Model = new Models.Simulation();
         }
+
+        public IRuntimeService Runtime { get; private set; }
 
         private Models.Simulation _model;
 
@@ -35,7 +39,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
             base.OnInitialize();
 
             ActivateItem(new GeneralViewModel());
-            Items.Add(new ChannelsViewModel());
+            Items.Add(new ChannelsViewModel(Runtime));
         }
 
         protected override void OnDeactivate(bool close)
@@ -72,7 +76,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
                 }
                 catch (Exception ex)
                 {
-                    App.Current.ShowError("Error saving configuration settings.", ex);
+                    Runtime.ShowError("Error saving configuration settings.", ex);
                 }
             }
         }

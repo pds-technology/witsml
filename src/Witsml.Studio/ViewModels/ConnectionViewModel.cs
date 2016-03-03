@@ -7,6 +7,7 @@ using Caliburn.Micro;
 using Newtonsoft.Json;
 using PDS.Witsml.Studio.Connections;
 using PDS.Witsml.Studio.Properties;
+using PDS.Witsml.Studio.Runtime;
 
 namespace PDS.Witsml.Studio.ViewModels
 {
@@ -23,14 +24,21 @@ namespace PDS.Witsml.Studio.ViewModels
         /// Initializes a new instance of the <see cref="ConnectionViewModel"/> class.
         /// </summary>
         /// <param name="connectionType">Type of the connection.</param>
-        public ConnectionViewModel(ConnectionTypes connectionType)
+        public ConnectionViewModel(IRuntimeService runtime, ConnectionTypes connectionType)
         {
             _log.Debug("Creating View Model");
 
+            Runtime = runtime;
             ConnectionType = connectionType;
             DisplayName = string.Format("{0} Connection", ConnectionType.ToString().ToUpper());
             CanTestConnection = true;
         }
+
+        /// <summary>
+        /// Gets the runtime service.
+        /// </summary>
+        /// <value>The runtime.</value>
+        public IRuntimeService Runtime { get; private set; }
 
         /// <summary>
         /// Gets the connection type
@@ -137,7 +145,7 @@ namespace PDS.Witsml.Studio.ViewModels
             _log.DebugFormat("Testing a {0} connection", ConnectionType);
 
             // Resolve a connection test specific to the current ConnectionType
-            var connectionTest = App.Current.Container().Resolve<IConnectionTest>(ConnectionType.ToString());
+            var connectionTest = Runtime.Container.Resolve<IConnectionTest>(ConnectionType.ToString());
 
             if (connectionTest != null)
             {
@@ -147,7 +155,8 @@ namespace PDS.Witsml.Studio.ViewModels
                 Task.Run(async() =>
                 {
                     var result = await connectionTest.CanConnect(EditItem);
-                    await App.Current.Dispatcher.BeginInvoke(new Action<bool>(ShowTestResult), result);
+                    await Runtime.InvokeAsync(() => ShowTestResult(result));
+
                     if (callback != null)
                     {
                         callback();
@@ -157,7 +166,7 @@ namespace PDS.Witsml.Studio.ViewModels
         }
 
         /// <summary>
-        /// Called when [password changed].
+        /// Called when the password changed.
         /// </summary>
         /// <param name="control">The control.</param>
         public void OnPasswordChanged(PasswordBox control)
@@ -166,12 +175,12 @@ namespace PDS.Witsml.Studio.ViewModels
         }
 
         /// <summary>
-        /// Called when [URL changed] to trim the start of the Uri string.
+        /// Called when the URL has changed, to trim leading and trailing white space.
         /// </summary>
         /// <param name="uri">The URI.</param>
         public void OnUrlChanged(string uri)
         {
-            EditItem.Uri = uri.TrimStart();
+            EditItem.Uri = uri.Trim();
         }
 
         /// <summary>

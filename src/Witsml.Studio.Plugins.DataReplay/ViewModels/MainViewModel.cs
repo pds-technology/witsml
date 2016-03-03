@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.Composition;
 using System.IO;
 using System.Windows;
 using Caliburn.Micro;
@@ -6,14 +7,21 @@ using Microsoft.Win32;
 using Newtonsoft.Json;
 using PDS.Witsml.Studio.Plugins.DataReplay.Properties;
 using PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation;
+using PDS.Witsml.Studio.Runtime;
 using PDS.Witsml.Studio.ViewModels;
 
 namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels
 {
     public class MainViewModel : Conductor<IScreen>.Collection.OneActive, IPluginViewModel
     {
-        public MainViewModel()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MainViewModel"/> class.
+        /// </summary>
+        /// <param name="runtime">The runtime service.</param>
+        [ImportingConstructor]
+        public MainViewModel(IRuntimeService runtime)
         {
+            Runtime = runtime;
             DisplayName = Settings.Default.PluginDisplayName;
         }
 
@@ -24,6 +32,12 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels
         {
             get { return Settings.Default.PluginDisplayOrder; }
         }
+
+        /// <summary>
+        /// Gets the runtime service.
+        /// </summary>
+        /// <value>The runtime.</value>
+        public IRuntimeService Runtime { get; private set; }
 
         public void NewDataReplay()
         {
@@ -37,7 +51,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels
 
         public void NewSimulation()
         {
-            var viewModel = new SimulationViewModel()
+            var viewModel = new SimulationViewModel(Runtime)
             {
                 DisplayName = string.Format("Simulation {0:yyMMdd-HHmmss}", DateTime.Now)
             };
@@ -64,7 +78,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels
                     var json = File.ReadAllText(dialog.FileName);
                     var model = JsonConvert.DeserializeObject<Models.Simulation>(json);
 
-                    var viewModel = new SimulationViewModel()
+                    var viewModel = new SimulationViewModel(Runtime)
                     {
                         Model = model,
                         DisplayName = model.Name
@@ -74,7 +88,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    Application.Current.ShowError("Error opening file.", ex);
+                    Runtime.ShowError("Error opening file.", ex);
                 }
             }
         }

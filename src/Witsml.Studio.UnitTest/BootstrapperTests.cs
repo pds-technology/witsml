@@ -19,7 +19,6 @@ namespace PDS.Witsml.Studio
         [TestInitialize]
         public void TestSetUp()
         {
-            AssemblySource.Instance.Clear();
             _bootstrapper = new BootstrapperHarness();
         }
 

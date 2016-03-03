@@ -5,6 +5,8 @@ using Energistics.DataAccess.WITSML141;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request;
+using PDS.Witsml.Studio.Runtime;
+using PDS.Witsml.Studio.ViewModels;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
 {
@@ -27,6 +29,16 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
             "<well uid=\"{0}\" />" + Environment.NewLine +
             "</wells>";
 
+        private BootstrapperHarness _bootstrapper;
+        private TestRuntimeService _runtime;
+
+        [TestInitialize]
+        public void TestSetUp()
+        {
+            _bootstrapper = new BootstrapperHarness();
+            _runtime = new TestRuntimeService(_bootstrapper.Container);
+            _runtime.Shell = new ShellViewModel(_runtime);
+        }
 
         [TestMethod]
         public void TestSubmitAddToStoreForWell()
@@ -35,7 +47,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
             var expectedUid = Guid.NewGuid().ToString();
 
             // Create the view model and initialize data to add a well to the store
-            var vm = new MainViewModel();
+            var vm = new MainViewModel(_runtime);
             vm.Model.Connection = new Connections.Connection() { Uri = _validWitsmlUri };
             vm.Proxy.Url = vm.Model.Connection.Uri;
 
@@ -62,7 +74,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
             var expectedUid = Guid.NewGuid().ToString();
 
             // Create the view model and initialize data to add a well to the store
-            var vm = new MainViewModel();
+            var vm = new MainViewModel(_runtime);
             vm.Model.Connection = new Connections.Connection() { Uri = _validWitsmlUri };
             vm.Proxy.Url = vm.Model.Connection.Uri;
             vm.Model.ReturnElementType = OptionsIn.ReturnElements.All;
@@ -92,7 +104,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
         [TestMethod]
         public void TestMainViewModelGetCapabilities()
         {
-            var vm = new MainViewModel();
+            var vm = new MainViewModel(_runtime);
             vm.Model.Connection = new Connections.Connection() { Uri = _validWitsmlUri };
             vm.Proxy.Url = vm.Model.Connection.Uri;
             vm.Model.WitsmlVersion = OptionsIn.DataVersion.Version141.Value;
@@ -108,7 +120,14 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
         public void TestSettingsViewModelGetVersions()
         {
             WITSMLWebServiceConnection proxy = new WITSMLWebServiceConnection(_validWitsmlUri, WMLSVersion.WITSML141);
-            var vm = new SettingsViewModel();
+
+            var vm = new SettingsViewModel(_runtime);
+            //var requestVm = new RequestViewModel(_runtime);
+            //var mainVm = new MainViewModel(_runtime);
+
+            //mainVm.Items.Add(requestVm);
+            //requestVm.Items.Add(vm);
+
             var versions = vm.GetVersions(proxy, _validWitsmlUri);
             Assert.IsTrue(!string.IsNullOrEmpty(versions));
         }

@@ -2,18 +2,23 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request;
+using PDS.Witsml.Studio.Runtime;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
 {
     [TestClass]
     public class WitsmlBrowserPluginTests
     {
+        private BootstrapperHarness _bootstrapper;
+        private TestRuntimeService _runtime;
         private MainViewModel _mainViewModel;
 
         [TestInitialize]
         public void TestSetup()
         {
-            _mainViewModel = new MainViewModel();
+            _bootstrapper = new BootstrapperHarness();
+            _runtime = new TestRuntimeService(_bootstrapper.Container);
+            _mainViewModel = new MainViewModel(_runtime);
         }
 
         [TestMethod]
@@ -43,7 +48,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
         [TestMethod]
         public void TestRequestViewModelScreensLoaded()
         {
-            var requestViewModel = new RequestViewModel();
+            var requestViewModel = new RequestViewModel(_runtime);
 
             requestViewModel.LoadScreens();
 
@@ -53,7 +58,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
         [TestMethod]
         public void TestQueryViewModelFunctionTextToEnum()
         {
-            var queryViewModel = new QueryViewModel();
+            var queryViewModel = new QueryViewModel(_runtime);
 
             Assert.AreEqual(Functions.AddToStore, queryViewModel.FunctionTextToEnum("Add"));
             Assert.AreEqual(Functions.UpdateInStore, queryViewModel.FunctionTextToEnum("Update"));

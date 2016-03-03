@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.Composition;
+using PDS.Witsml.Studio.Runtime;
 
 namespace PDS.Witsml.Studio.ViewModels
 {
@@ -8,6 +9,12 @@ namespace PDS.Witsml.Studio.ViewModels
     [InheritedExport]
     public interface IShellViewModel
     {
+        /// <summary>
+        /// Gets the runtime service.
+        /// </summary>
+        /// <value>The runtime service instance.</value>
+        IRuntimeService Runtime { get; }
+
         /// <summary>
         /// Gets or sets the status bar text for the application shell
         /// </summary>
