@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic;
-using System.Reflection;
-using System.Xml.Linq;
-using System.Xml.Serialization;
 using log4net;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
@@ -159,49 +154,12 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Queries the data store.
-        /// </summary>
-        /// <param name="parser">The query parser.</param>
-        /// <param name="names">The property names.</param>
-        /// <returns>A collection of data objects.</returns>
-        protected List<T> QueryEntities(WitsmlQueryParser parser, List<string> names)
-        {
-            return QueryEntities<T>(parser, DbCollectionName, names);
-        }
-
-        /// <summary>
-        /// Queries the data store.
-        /// </summary>
-        /// <param name="parser">The query parser.</param>
-        /// <param name="dbCollectionName">Name of the database collection.</param>
-        /// <param name="names">The property names.</param>
-        /// <typeparam name="TObject">The data object type.</typeparam>
-        /// <returns>A collection of data objects.</returns>
-        protected List<TObject> QueryEntities<TObject>(WitsmlQueryParser parser, string dbCollectionName, List<string> names)
-        {
-            // Find a unique entity by Uid if one was provided
-            var uid = parser.Attribute("uid");
-
-            if (!string.IsNullOrEmpty(uid))
-            {
-                return GetEntityByUidQuery<TObject>(uid, dbCollectionName).ToList();
-            }
-
-            // Default to return all entities
-            var query = GetQuery<TObject>(dbCollectionName);
-
-            //... filter by unique name list if values for 
-            //... each name can be parsed from the Witsml query.
-            return FilterQuery(parser, query, names).ToList();
-        }
-
-        /// <summary>
         /// Queries the data store with Mongo Bson filter and projection.
         /// </summary>
         /// <param name="parser">The parser.</param>
         /// <param name="tList">List of query for object T.</param>
         /// <returns></returns>
-        protected List<T> QueryEntities(WitsmlQueryParser parser, List<T> tList, List<string> fields = null)
+        protected List<T> QueryEntities<TList>(WitsmlQueryParser parser, List<string> fields = null)
         {
             if (parser.RequestObjectSelectionCapability().ToLower().Equals(OptionsIn.RequestObjectSelectionCapability.True.Value.ToLower()))
             {
@@ -210,30 +168,11 @@ namespace PDS.Witsml.Server.Data
                 return new List<T>() { dataObject };
             }
 
-            var entities = new List<T>();
             var database = DatabaseProvider.GetDatabase();
             var collection = database.GetCollection<T>(DbCollectionName);
-            var returnElements = parser.ReturnElements();
 
-            foreach (var entity in tList)
-            {
-                // Build Mongo filter
-                var filter = BuildFilter(parser, entity);
-                var results = collection.Find(filter ?? "{}");
-
-                // Format response using MongoDb projection, i.e. selecting specified fields only
-                if (returnElements == OptionsIn.ReturnElements.All.Value)
-                    entities.AddRange(results.ToList());
-                else if (returnElements == OptionsIn.ReturnElements.IdOnly.Value || returnElements == OptionsIn.ReturnElements.Requested.Value)
-                {
-                    var projection = BuildProjection(parser, entity, fields ?? new List<string>());
-                    if (projection != null)
-                        results = results.Project<T>(projection);
-                    entities.AddRange(results.ToList());
-                }
-            }
-
-            return entities;
+            var query = new MongoDbQuery<TList, T>(collection, parser, fields, IdPropertyName);          
+            return query.Execute();
         }
 
         /// <summary>
@@ -313,220 +252,6 @@ namespace PDS.Witsml.Server.Data
             }
 
             return query;
-        }
-
-        /// <summary>
-        /// Builds the query filter.
-        /// </summary>
-        /// <param name="parser">The parser.</param>
-        /// <param name="entity">The entity to be queried.</param>
-        /// <returns>The filter object that for the selection criteria for the queried entity.</returns>
-        private FilterDefinition<T> BuildFilter(WitsmlQueryParser parser, T entity)
-        {
-            var properties = GetPropertyInfo(entity.GetType());
-            var filters = new List<FilterDefinition<T>>();
-
-            foreach (var property in properties)
-            {
-                var filter = BuildFilterForAProperty(property, entity);
-                if (filter != null)
-                    filters.Add(filter);
-            }
-
-            if (filters.Count > 0)
-                return Builders<T>.Filter.And(filters);
-            else
-                return null;
-        }
-
-        /// <summary>
-        /// Builds the query filter for a property recursively.
-        /// </summary>
-        /// <param name="propertyInfo">The property information.</param>
-        /// <param name="obj">The object that contains the property.</param>
-        /// <param name="path">The path of the property to the entity to be queried in the data store.</param>
-        /// <returns>The filter object that for the selection criteria for a property.</returns>
-        private FilterDefinition<T> BuildFilterForAProperty(PropertyInfo propertyInfo, object obj, string path = null)
-        {
-            var propertyValue = propertyInfo.GetValue(obj);
-            if (propertyValue == null)
-                return null;
-
-            var fieldName = propertyInfo.Name;
-            if (!string.IsNullOrEmpty(path))
-                fieldName = string.Format("{0}.{1}", path, fieldName);
-            var properties = GetPropertyInfo(propertyValue.GetType()).ToList();
-            var filters = new List<FilterDefinition<T>>();
-
-            if (properties.Count > 0)
-            {
-                foreach (var property in properties)
-                {
-                    var filter = BuildFilterForAProperty(property, propertyValue, fieldName);
-                    if (filter != null)
-                        filters.Add(filter);
-                }
-            }
-            else
-            {
-                var propertyType = propertyInfo.PropertyType;
-
-                if (propertyType == typeof(string))
-                {
-                    var strValue = propertyValue.ToString();
-                    if (string.IsNullOrEmpty(strValue))
-                        return null;
-
-                    return Builders<T>.Filter.Regex(fieldName, new BsonRegularExpression("/^" + strValue + "$/i"));
-                }
-                else if (propertyValue is IEnumerable)
-                {
-                    var listFilters = new List<FilterDefinition<T>>();
-                    var list = (IEnumerable)propertyValue;              
-                    foreach (var item in list)
-                    {
-                        var itemFilters = new List<FilterDefinition<T>>();
-                        var itemProperties = GetPropertyInfo(item.GetType());
-                        foreach (var itemProperty in itemProperties)
-                        {
-                            var itemFilter = BuildFilterForAProperty(itemProperty, item, fieldName);
-                            if (itemFilter != null)
-                                itemFilters.Add(itemFilter);
-                        }
-                        if (itemFilters.Count > 0)
-                            listFilters.Add(Builders<T>.Filter.And(itemFilters));
-                    }
-                    if (listFilters.Count > 0)
-                        filters.Add(Builders<T>.Filter.Or(listFilters));
-                }
-                else
-                {
-                    if (propertyInfo.Name == "DateTimeCreation" || propertyInfo.Name == "DateTimeLastChange")
-                        return Builders<T>.Filter.Gte(fieldName, propertyValue);
-                    else
-                        return Builders<T>.Filter.Eq(fieldName, propertyValue);
-                }
-            }
-
-            if (filters.Count > 0)
-                return Builders<T>.Filter.And(filters);
-            else
-                return null;
-        }
-
-        private IEnumerable<PropertyInfo> GetPropertyInfo(Type t)
-        {
-            return t.GetProperties().Where(p => p.IsDefined(typeof(XmlElementAttribute), false) || p.IsDefined(typeof(XmlAttributeAttribute), false));
-        }
-
-        /// <summary>
-        /// Builds the projection for the query.
-        /// </summary>
-        /// <param name="parser">The parser.</param>
-        /// <returns>The projection object that contains the fields to be selected.</returns>
-        private ProjectionDefinition<T> BuildProjection(WitsmlQueryParser parser, T entity, List<string> fields)
-        {
-            var element = parser.Element();
-            if (element == null)
-                return null;
-
-            var properties = GetPropertyInfo(typeof(T));
-
-            foreach (var child in element.Elements())
-            {
-                var property = GetPropertyInfoForAnElement(properties, child);
-                var value = property.GetValue(entity);
-                BuildProjectionForAnElement(child, null, fields, property, value);
-            }
-
-            if (fields.Count == 0)
-                return Builders<T>.Projection.Exclude(IdPropertyName).Include(string.Empty);
-            else {
-                var projection = Builders<T>.Projection.Include(fields[0]);
-                for (var i = 1; i < fields.Count; i++)
-                    projection = projection.Include(fields[i]);
-                if (!fields.Contains(IdPropertyName))
-                    projection = projection.Exclude(IdPropertyName);
-                return projection;
-            }
-        }
-
-        /// <summary>
-        /// Builds the projection for an element in the QueryIn XML recursively.
-        /// </summary>
-        /// <param name="element">The element.</param>
-        /// <param name="fieldPath">The field path to the top level property of the queried entity.</param>
-        /// <param name="fields">The list of fields to be selecte for the element.</param>
-        private void BuildProjectionForAnElement(XElement element, string fieldPath, List<string> fields, PropertyInfo propertyInfo, object propertyValue)
-        {
-            var prefix = string.IsNullOrEmpty(fieldPath) ? string.Empty : string.Format("{0}.", fieldPath);
-            var path = string.Format("{0}{1}", prefix, CaptalizeString(propertyInfo.Name));
-            if (!element.HasElements && !element.HasAttributes)
-            {
-                if (!fields.Contains(path))
-                    fields.Add(path);
-                return;
-            }
-
-            var properties = GetPropertyInfo(propertyValue.GetType());
-
-            if (element.HasElements)
-            {
-                foreach (var child in element.Elements())
-                {
-                    var property = GetPropertyInfoForAnElement(properties, child);
-                    var value = property.GetValue(propertyValue);
-                    BuildProjectionForAnElement(child, path, fields, property, value);
-                }
-            }
-            if (element.HasAttributes)
-            {
-                foreach (var attribute in element.Attributes())
-                {
-                    var attributePath = string.Format("{0}.{1}", path, CaptalizeString(attribute.Name.LocalName));
-                    if (!fields.Contains(attributePath))
-                        fields.Add(attributePath);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the property information for an element, for some element name is not the same as property name, i.e. Mongo field name.
-        /// </summary>
-        /// <param name="properties">The properties.</param>
-        /// <param name="element">The element.</param>
-        /// <returns>The found property for the serialization element.</returns>
-        private PropertyInfo GetPropertyInfoForAnElement(IEnumerable<PropertyInfo> properties, XElement element)
-        {
-            foreach (var prop in properties)
-            {
-                var elementAttribute = prop.GetCustomAttribute(typeof(XmlElementAttribute), false) as XmlElementAttribute;
-                if (elementAttribute != null)
-                {
-                    if (elementAttribute.ElementName == element.Name.LocalName)
-                        return prop;
-                }
-
-                var attributeAttribute = prop.GetCustomAttribute(typeof(XmlAttributeAttribute), false) as XmlAttributeAttribute;
-                if (attributeAttribute != null)
-                {
-                    if (attributeAttribute.AttributeName == element.Name.LocalName)
-                        return prop;
-                }
-            }
-            return null;
-        }
-
-        private string CaptalizeString(string input)
-        {
-            if (string.IsNullOrEmpty(input))
-                return input;
-
-            var result = char.ToUpper(input[0]).ToString();
-            if (input.Length > 1)
-                result += input.Substring(1);
-
-            return result;
-        }        
+        }            
     }
 }
