@@ -6,6 +6,7 @@ using System.Linq.Dynamic;
 using System.Text;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.Datatypes;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using PDS.Witsml.Server.Configuration;
@@ -16,6 +17,7 @@ namespace PDS.Witsml.Server.Data.Logs
 {
     [Export(typeof(IWitsml141Configuration))]
     [Export(typeof(IWitsmlDataAdapter<Log>))]
+    [Export(typeof(IEtpDataAdapter<Log>))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class Log141DataAdapter : MongoDbDataAdapter<Log>, IWitsml141Configuration
     {
@@ -67,6 +69,29 @@ namespace PDS.Witsml.Server.Data.Logs
             return new WitsmlResult<List<Log>>(
                 ErrorCodes.Success,
                 logsOut);
+        }
+
+        /// <summary>
+        /// Gets a collection of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        public override List<Log> GetAll(EtpUri? parentUri = null)
+        {
+            var query = GetQuery().AsQueryable();
+
+            if (parentUri != null)
+            {
+                var ids = parentUri.Value.GetObjectIds().ToDictionary(x => x.Key, y => y.Value);
+                var uidWellbore = ids[ObjectTypes.Wellbore];
+                var uidWell = ids[ObjectTypes.Well];
+
+                query = query.Where(x => x.UidWell == uidWell && x.UidWellbore == uidWellbore);
+            }
+
+            return query
+                .OrderBy(x => x.Name)
+                .ToList();
         }
 
         private IEnumerable<Log> GetLogHeaderRequired(List<Log> logs)
@@ -537,10 +562,5 @@ namespace PDS.Witsml.Server.Data.Logs
             return gmObject;
         }
         #endregion
-
-        public override WitsmlResult Delete(WitsmlQueryParser parser)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

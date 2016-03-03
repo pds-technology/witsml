@@ -71,6 +71,7 @@
     <Compile Include="Data\IDatabaseProvider.cs" />
     <Compile Include="Data\Logs\Log131DataAdapter.cs" />
     <Compile Include="Data\Logs\Log141DataAdapter.cs" />
+    <Compile Include="Data\Logs\Log200DataAdapter.cs" />
     <Compile Include="Data\MongoDbClassMapper.cs" />
     <Compile Include="Data\MongoDbDataAdapter.cs" />
     <Compile Include="Data\UidGenerator.cs" />
@@ -92,6 +93,10 @@
     <ProjectReference Include="..\Framework\Framework.csproj">
       <Project>{fae228aa-4917-4b02-b239-0a24df883898}</Project>
       <Name>Framework</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WebSockets\WebSockets.csproj">
+      <Project>{30de888b-a6b7-4528-ad89-324a7f9b0f4c}</Project>
+      <Name>WebSockets</Name>
     </ProjectReference>
     <ProjectReference Include="..\Witsml.Server\Witsml.Server.csproj">
       <Project>{93faae2f-13aa-46df-a94b-36155b51ebfa}</Project>
