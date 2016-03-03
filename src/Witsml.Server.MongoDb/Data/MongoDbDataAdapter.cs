@@ -23,6 +23,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="databaseProvider">The database provider.</param>
         /// <param name="dbCollectionName">The database collection name.</param>
         /// <param name="idPropertyName">The name of the identifier property.</param>
+        /// <param name="namePropertyName">The name of the object name property</param>
         public MongoDbDataAdapter(IDatabaseProvider databaseProvider, string dbCollectionName, string idPropertyName = ObjectTypes.Uid, string namePropertyName = ObjectTypes.NameProperty)
         {
             DatabaseProvider = databaseProvider;

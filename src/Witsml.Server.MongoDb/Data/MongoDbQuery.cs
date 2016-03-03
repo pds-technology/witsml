@@ -81,6 +81,10 @@ namespace PDS.Witsml.Server.Data
         {
             var properties = GetPropertyInfo(entity.GetType());
             var filters = new List<FilterDefinition<T>>();
+            var privateGroupOnly = parser.RequestPrivateGroupOnly();
+            var privateGroupOnlyFilter = privateGroupOnly ? Builders<T>.Filter.Eq("CommonData.PrivateGroupOnly", privateGroupOnly) :
+                Builders<T>.Filter.Ne("CommonData.PrivateGroupOnly", !privateGroupOnly);
+            filters.Add(privateGroupOnlyFilter);
 
             foreach (var property in properties)
             {
