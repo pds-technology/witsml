@@ -54,7 +54,7 @@ namespace PDS.Witsml.Server.Data.Wells
                     new List<Well>() { well });
             }
 
-            var wellList = EnergisticsConverter.XmlToObject<WellList>(parser.Context.Xml);
+            var wellList = parser.Parse<WellList>(parser.Context.Xml);
             List<string> fields = null;
             if (parser.ReturnElements() == OptionsIn.ReturnElements.IdOnly.Value)
                 fields = new List<string> { "uid", "name" };
