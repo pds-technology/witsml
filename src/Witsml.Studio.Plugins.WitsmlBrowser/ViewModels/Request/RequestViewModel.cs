@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Caliburn.Micro;
 using Energistics.DataAccess;
 
@@ -23,16 +24,23 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             get { return Parent.Proxy; }
         }
 
+        internal void LoadScreens()
+        {
+            Items.Add(new SettingsViewModel());
+            //Items.Add(new TreeViewViewModel());
+            //Items.Add(new TemplatesViewModel());
+            Items.Add(new QueryViewModel());
+
+            ActivateItem(Items.FirstOrDefault());
+        }
+
         protected override void OnInitialize()
         {
             _log.Debug("Loading Request View Models");
 
             base.OnInitialize();
 
-            ActivateItem(new SettingsViewModel());
-            //Items.Add(new TreeViewViewModel());
-            //Items.Add(new TemplatesViewModel());
-            Items.Add(new QueryViewModel());
+            LoadScreens();
         }
     }
 }

@@ -67,6 +67,12 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             Parent.Parent.GetCapabilities();
         }
 
+        internal string GetVersions(WITSMLWebServiceConnection proxy, string uri)
+        {
+            proxy.Url = uri;
+            return proxy.GetVersion();
+        }
+
         protected override void OnInitialize()
         {
             base.OnInitialize();
@@ -79,8 +85,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             try
             {
                 WitsmlVersions.Clear();
-                Proxy.Url = Model.Connection.Uri;
-                var versions = Proxy.GetVersion();
+                var versions = GetVersions(Proxy, Model.Connection.Uri);
                 if (!string.IsNullOrEmpty(versions))
                 {
                     WitsmlVersions.AddRange(versions.Split(','));

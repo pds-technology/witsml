@@ -8,6 +8,10 @@ namespace PDS.Witsml
     [TestClass]
     public class ObjectTypesTests
     {
+        private string _wellsXml =
+                "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" + Environment.NewLine +
+                "<wells version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\" />";
+
         [TestMethod]
         public void GetObjectType_returns_valid_witsml_type_for_Well()
         {
@@ -35,6 +39,22 @@ namespace PDS.Witsml
             {
                 ObjectTypes.GetObjectType(typeof(Well));
             });
+        }
+
+        [TestMethod]
+        public void GetObjectTypeFromGroup_returns_type_for_valid_xml()
+        {
+            var typeFound = ObjectTypes.GetObjectTypeFromGroup(_wellsXml);
+
+            Assert.AreEqual(ObjectTypes.Well, typeFound);
+        }
+
+        [TestMethod]
+        public void GetObjectTypeFromGroup_returns_unknown_for_invalid_xml()
+        {
+            var typeFound = ObjectTypes.GetObjectTypeFromGroup(string.Empty);
+
+            Assert.AreEqual(ObjectTypes.Unknown, typeFound);
         }
     }
 }

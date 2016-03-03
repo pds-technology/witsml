@@ -84,7 +84,9 @@ namespace PDS.Witsml
         {
             try
             {
-                return PluralToSingle(GetObjectGroupType(xml));
+                return string.IsNullOrEmpty(xml) 
+                    ? Unknown 
+                    : PluralToSingle(GetObjectGroupType(xml));
             }
             catch
             {

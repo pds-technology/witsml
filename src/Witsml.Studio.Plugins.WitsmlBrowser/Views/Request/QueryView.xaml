@@ -49,10 +49,10 @@
                 </Button.Content>
                 <Button.ContextMenu>
                     <ContextMenu>
-                        <MenuItem cal:Message.Attach="GetFromStore" Header="Get" />
-                        <MenuItem cal:Message.Attach="AddToStore" Header="Add" />
-                        <MenuItem cal:Message.Attach="UpdateInStore" Header="Update" />
-                        <MenuItem cal:Message.Attach="DeleteFromStore" Header="Delete" />
+                        <MenuItem cal:Message.Attach="SubmitQuery('Get')" Header="Get" />
+                        <MenuItem cal:Message.Attach="SubmitQuery('Add')" Header="Add" />
+                        <MenuItem cal:Message.Attach="SubmitQuery('Update')" Header="Update" />
+                        <MenuItem cal:Message.Attach="SubmitQuery('Delete')" Header="Delete" />
                     </ContextMenu>
                 </Button.ContextMenu>
             </Button>
