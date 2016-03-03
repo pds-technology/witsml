@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Energistics.Common;
 using Energistics.DataAccess.WITSML141;
@@ -19,19 +20,23 @@ namespace PDS.Witsml.Server.Providers.Discovery
     {
         private readonly IEtpDataAdapter<Well> _wellDataAdapter;
         private readonly IEtpDataAdapter<Wellbore> _wellboreDataAdapter;
+        private readonly IEtpDataAdapter<Log> _logDataAdapter;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DiscoveryStore141Provider"/> class.
+        /// Initializes a new instance of the <see cref="DiscoveryStore141Provider" /> class.
         /// </summary>
         /// <param name="wellDataAdapter">The well data adapter.</param>
         /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
+        /// <param name="logDataAdapter">The log data adapter.</param>
         [ImportingConstructor]
         public DiscoveryStore141Provider(
             IEtpDataAdapter<Well> wellDataAdapter,
-            IEtpDataAdapter<Wellbore> wellboreDataAdapter)
+            IEtpDataAdapter<Wellbore> wellboreDataAdapter,
+            IEtpDataAdapter<Log> logDataAdapter)
         {
             _wellDataAdapter = wellDataAdapter;
             _wellboreDataAdapter = wellboreDataAdapter;
+            _logDataAdapter = logDataAdapter;
         }
 
         /// <summary>
@@ -49,24 +54,34 @@ namespace PDS.Witsml.Server.Providers.Discovery
         /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList{Resource}}"/> instance containing the event data.</param>
         public void GetResources(ProtocolEventArgs<GetResources, IList<Resource>> args)
         {
-            if (DiscoveryStoreProvider.RootUri.Equals(args.Message.Uri))
+            if (EtpUri.IsRoot(args.Message.Uri))
             {
                 args.Context.Add(
                     DiscoveryStoreProvider.New(
-                        uri: UriFormats.Witsml141.Root,
-                        contentType: ContentTypes.Witsml141,
+                        uuid: Guid.NewGuid().ToString(),
+                        uri: EtpUris.Witsml141,
                         resourceType: ResourceTypes.UriProtocol,
                         name: "WITSML Store (1.4.1.1)",
                         count: -1));
+
+                return;
             }
-            else if (args.Message.Uri == UriFormats.Witsml141.Root)
+
+            var uri = new EtpUri(args.Message.Uri);
+
+            if (args.Message.Uri == EtpUris.Witsml141)
             {
                 _wellDataAdapter.GetAll()
                     .ForEach(x => args.Context.Add(ToResource(x)));
             }
-            else if (args.Message.Uri.StartsWith(UriFormats.Witsml141.Wells))
+            else if (uri.ObjectType == ObjectTypes.Well)
             {
-                _wellboreDataAdapter.GetAll(args.Message.Uri)
+                _wellboreDataAdapter.GetAll(uri)
+                    .ForEach(x => args.Context.Add(ToResource(x)));
+            }
+            else if (uri.ObjectType == ObjectTypes.Wellbore)
+            {
+                _logDataAdapter.GetAll(uri)
                     .ForEach(x => args.Context.Add(ToResource(x)));
             }
         }
@@ -74,9 +89,9 @@ namespace PDS.Witsml.Server.Providers.Discovery
         private Resource ToResource(Well entity)
         {
             return DiscoveryStoreProvider.New(
-                uri: string.Format(UriFormats.Witsml141.Well, entity.Uid),
+                uuid: entity.Uid,
+                uri: entity.ToUri(),
                 resourceType: ResourceTypes.DataObject,
-                contentType: ContentTypes.Witsml141 + "type=" + ObjectTypes.Well,
                 name: entity.Name,
                 count: -1);
         }
@@ -84,9 +99,19 @@ namespace PDS.Witsml.Server.Providers.Discovery
         private Resource ToResource(Wellbore entity)
         {
             return DiscoveryStoreProvider.New(
-                uri: string.Format(UriFormats.Witsml141.Wellbore, entity.UidWell, entity.Uid),
+                uuid: entity.Uid,
+                uri: entity.ToUri(),
                 resourceType: ResourceTypes.DataObject,
-                contentType: ContentTypes.Witsml141 + "type=" + ObjectTypes.Wellbore,
+                name: entity.Name,
+                count: -1);
+        }
+
+        private Resource ToResource(Log entity)
+        {
+            return DiscoveryStoreProvider.New(
+                uuid: entity.Uid,
+                uri: entity.ToUri(),
+                resourceType: ResourceTypes.DataObject,
                 name: entity.Name,
                 count: -1);
         }

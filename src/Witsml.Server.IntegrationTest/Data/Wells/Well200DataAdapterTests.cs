@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Energistics.Datatypes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;

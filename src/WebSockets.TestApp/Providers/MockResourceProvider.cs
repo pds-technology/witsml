@@ -9,17 +9,19 @@ namespace Energistics.Providers
 {
     public class MockResourceProvider : DiscoveryStoreHandler
     {
+        private const string BaseUri = "eml://witsml1411";
+
         protected override void HandleGetResources(ProtocolEventArgs<GetResources, IList<Resource>> args)
         {
-            if (args.Message.Uri == "/")
+            if (EtpUri.IsRoot(args.Message.Uri))
             {
                 args.Context.Add(New(
-                    x => UriFormats.Witsml141.Root,
+                    x => BaseUri,
                     contentType: ContentTypes.Witsml141,
                     resourceType: ResourceTypes.UriProtocol,
                     name: "WITSML Store"));
             }
-            else if (args.Message.Uri == UriFormats.Witsml141.Root)
+            else if (EtpUri.IsRoot(args.Message.Uri))
             {
                 args.Context.Add(New(
                     uuid => string.Format("{0}/well({1})", args.Message.Uri, uuid),

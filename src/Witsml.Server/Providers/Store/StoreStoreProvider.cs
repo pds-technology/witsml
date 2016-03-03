@@ -40,13 +40,10 @@ namespace PDS.Witsml.Server.Providers.Store
         /// <param name="args">The <see cref="ProtocolEventArgs{GetObject, DataObject}"/> instance containing the event data.</param>
         protected override void HandleGetObject(ProtocolEventArgs<GetObject, DataObject> args)
         {
-            var version = args.Message.Uri.StartsWith(UriFormats.Witsml141.Root)
-                ? OptionsIn.DataVersion.Version141.Value
-                : OptionsIn.DataVersion.Version200.Value;
-
             try
             {
-                var provider = Container.Resolve<IStoreStoreProvider>(version);
+                var uri = new EtpUri(args.Message.Uri);
+                var provider = Container.Resolve<IStoreStoreProvider>(uri.Version);
                 provider.GetObject(args);
             }
             catch (ContainerException ex)
@@ -62,11 +59,9 @@ namespace PDS.Witsml.Server.Providers.Store
         /// <typeparam name="T">The type of entity.</typeparam>
         /// <param name="dataObject">The data object.</param>
         /// <param name="entity">The entity.</param>
-        /// <param name="name">The name.</param>
         /// <param name="uri">The URI.</param>
-        /// <param name="uid">The uid.</param>
-        /// <param name="contentType">Type of the content.</param>
-        public static void SetDataObject<T>(DataObject dataObject, T entity, string name, string uri, string uid, string contentType)
+        /// <param name="name">The name.</param>
+        public static void SetDataObject<T>(DataObject dataObject, T entity, EtpUri uri, string name)
         {
             var xml = EnergisticsConverter.ObjectToXml(entity);
 
@@ -75,10 +70,10 @@ namespace PDS.Witsml.Server.Providers.Store
             dataObject.Resource = new Resource()
             {
                 Uri = uri,
-                Uuid = uid,
+                Uuid = uri.ObjectId,
                 Name = name,
                 HasChildren = -1,
-                ContentType = contentType,
+                ContentType = uri.ContentType,
                 ResourceType = ResourceTypes.DataObject.ToString(),
                 CustomData = new Dictionary<string, string>(),
                 LastChanged = new Energistics.Datatypes.DateTime()

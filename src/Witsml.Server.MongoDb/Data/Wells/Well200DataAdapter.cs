@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
+using Energistics.Datatypes;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
@@ -28,7 +29,7 @@ namespace PDS.Witsml.Server.Data.Wells
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
         /// <returns>A collection of data objects.</returns>
-        public override List<Well> GetAll(string parentUri = null)
+        public override List<Well> GetAll(EtpUri? parentUri = null)
         {
             return GetQuery()
                 .OrderBy(x => x.Citation.Title)

@@ -19,52 +19,52 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.Providers
 
         protected override void HandleGetResources(ProtocolEventArgs<GetResources, IList<Resource>> args)
         {
-            if (args.Message.Uri == "/")
+            if (EtpUri.IsRoot(args.Message.Uri))
             {
                 args.Context.Add(New(
                     Guid.NewGuid().ToString(),
-                    UriFormats.Witsml141.Root,
-                    contentType: ContentTypes.Witsml141,
+                    EtpUris.Witsml141,
+                    contentType: EtpContentTypes.Witsml141,
                     resourceType: ResourceTypes.UriProtocol,
                     name: "WITSML 1.4.1.1 Store"));
             }
-            else if (UriFormats.Witsml141.Root.EqualsIgnoreCase(args.Message.Uri))
+            else if (args.Message.Uri == EtpUris.Witsml141)
             {
                 args.Context.Add(New(
                     Simulation.WellUid,
-                    string.Format("{0}/well({1})", UriFormats.Witsml141.Root, Simulation.WellUid),
-                    contentType: ContentTypes.Witsml141 + "type=obj_Well",
+                    string.Format("{0}/well({1})", EtpUris.Witsml141, Simulation.WellUid),
+                    contentType: EtpContentTypes.Witsml141.For(ObjectTypes.Well),
                     resourceType: ResourceTypes.DataObject,
                     name: Simulation.WellName));
             }
-            else if (string.Format("{0}/well({1})", UriFormats.Witsml141.Root, Simulation.WellUid).EqualsIgnoreCase(args.Message.Uri))
+            else if (string.Format("{0}/well({1})", EtpUris.Witsml141, Simulation.WellUid).EqualsIgnoreCase(args.Message.Uri))
             {
                 args.Context.Add(New(
                     Simulation.WellboreUid,
-                    string.Format("{0}/well({1})/wellbore({2})", UriFormats.Witsml141.Root, Simulation.WellUid, Simulation.WellboreUid),
-                    contentType: ContentTypes.Witsml141 + "type=obj_Wellbore",
+                    string.Format("{0}/well({1})/wellbore({2})", EtpUris.Witsml141, Simulation.WellUid, Simulation.WellboreUid),
+                    contentType: EtpContentTypes.Witsml141.For(ObjectTypes.Wellbore),
                     resourceType: ResourceTypes.DataObject,
                     name: Simulation.WellboreName));
             }
-            else if (string.Format("{0}/well({1})/wellbore({2})", UriFormats.Witsml141.Root, Simulation.WellUid, Simulation.WellboreUid).EqualsIgnoreCase(args.Message.Uri))
+            else if (string.Format("{0}/well({1})/wellbore({2})", EtpUris.Witsml141, Simulation.WellUid, Simulation.WellboreUid).EqualsIgnoreCase(args.Message.Uri))
             {
                 args.Context.Add(New(
                     Simulation.LogUid,
-                    string.Format("{0}/well({1})/wellbore({2})/log({3})", UriFormats.Witsml141.Root, Simulation.WellUid, Simulation.WellboreUid, Simulation.LogUid),
-                    contentType: ContentTypes.Witsml141 + "type=obj_Log",
+                    string.Format("{0}/well({1})/wellbore({2})/log({3})", EtpUris.Witsml141, Simulation.WellUid, Simulation.WellboreUid, Simulation.LogUid),
+                    contentType: EtpContentTypes.Witsml141.For(ObjectTypes.Log),
                     resourceType: ResourceTypes.DataObject,
                     name: Simulation.LogName));
             }
-            else if (string.Format("{0}/well({1})/wellbore({2})/log({3})", UriFormats.Witsml141.Root, Simulation.WellUid, Simulation.WellboreUid, Simulation.LogUid).EqualsIgnoreCase(args.Message.Uri))
+            else if (string.Format("{0}/well({1})/wellbore({2})/log({3})", EtpUris.Witsml141, Simulation.WellUid, Simulation.WellboreUid, Simulation.LogUid).EqualsIgnoreCase(args.Message.Uri))
             {
                 foreach (var channel in Simulation.Channels)
                 {
-                    channel.ChannelUri = string.Format("{0}/well({1})/wellbore({2})/log({3})/curve({4})", UriFormats.Witsml141.Root, Simulation.WellUid, Simulation.WellboreUid, Simulation.LogUid, channel.Uuid);
+                    channel.ChannelUri = string.Format("{0}/well({1})/wellbore({2})/log({3})/curve({4})", EtpUris.Witsml141, Simulation.WellUid, Simulation.WellboreUid, Simulation.LogUid, channel.Uuid);
 
                     args.Context.Add(New(
                         channel.Uuid,
                         channel.ChannelUri,
-                        contentType: ContentTypes.Witsml141 + "type=obj_LogCurveInfo",
+                        contentType: EtpContentTypes.Witsml141.For("logCurveInfo"),
                         resourceType: ResourceTypes.DataObject,
                         name: channel.Mnemonic,
                         count: 0));

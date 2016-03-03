@@ -41,7 +41,7 @@ namespace PDS.Witsml.Server.Data.Logs
             //}
 
             // Validate parent exists
-            //else if (_wellboreDataAdapter.Exists(DataObject.UidWellbore))
+            //else if (!_wellboreDataAdapter.Exists(DataObject.UidWellbore))
             //{
             //    yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWellbore" });
             //}
