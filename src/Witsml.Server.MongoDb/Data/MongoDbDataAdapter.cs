@@ -170,12 +170,6 @@ namespace PDS.Witsml.Server.Data
                 {
                     Type type = propertyType.GetGenericArguments()[0];
                     FillObjectTypeValues(dataObject, objectType, property, type);
-                    string specifiedPropertyName = property.Name + "Specified";
-                    PropertyInfo specifiedProperty = objectType.GetProperty(specifiedPropertyName);
-                    if (specifiedProperty!=null)
-                    {
-                        specifiedProperty.SetValue(dataObject, true);
-                    }
                 }
                 else if (property.Name.ToLower().Equals("TimeZone".ToLower()))
                     property.SetValue(dataObject, "Z");
@@ -260,7 +254,9 @@ namespace PDS.Witsml.Server.Data
                         dObjectList.Add(dObject);
                         property.SetValue(dataObject, dObjectList);
                     }
-                }
+                    else if (propertyType == typeof(List<string>))
+                        property.SetValue(dataObject, new List<string>() { "abc" });
+            }
                 else if (propertyType == typeof(CommonData))
                 {
                     CommonData commonData = new CommonData();
