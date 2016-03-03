@@ -57,7 +57,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var wellList = EnergisticsConverter.XmlToObject<WellList>(parser.Context.Xml);
             List<string> fields = null;
             if (parser.ReturnElements() == OptionsIn.ReturnElements.IdOnly.Value)
-                fields = new List<string> { "uid", "name" };
+                fields = new List<string> { IdPropertyName, "name" };
   
             return new WitsmlResult<List<Well>>(
                 ErrorCodes.Success,
