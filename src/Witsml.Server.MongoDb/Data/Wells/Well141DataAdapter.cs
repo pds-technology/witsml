@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using System.Reflection;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.Datatypes;
@@ -59,21 +58,11 @@ namespace PDS.Witsml.Server.Data.Wells
             List<string> fields = null;
             if (parser.ReturnElements() == OptionsIn.ReturnElements.IdOnly.Value)
                 fields = new List<string> { "uid", "name" };
-
-            var results = QueryEntities(parser, wellList.Well, fields);
-            var wells = new List<Well>();
-            foreach (var well in results)
-                {
-                if (!wells.Any(w => w.Uid == well.Uid))
-                    wells.Add(well);
-                }
-
-                return new WitsmlResult<List<Well>>(
-                    ErrorCodes.Success,
-                wells);
-            }
-
-        
+  
+            return new WitsmlResult<List<Well>>(
+                ErrorCodes.Success,
+                QueryEntities(parser, wellList.Well, fields));
+        }     
 
         /// <summary>
         /// Adds a <see cref="Well"/> to the data store.
