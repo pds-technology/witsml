@@ -13,6 +13,7 @@ namespace PDS.Witsml
     {
         public const string Uid = "Uid";
         public const string Uuid = "Uuid";
+        public const string NameProperty = "Name";
 
         public const string Unknown = "unknown";
         public const string CapClient = "capClient";
