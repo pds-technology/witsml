@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
 using PDS.Witsml.Server.Configuration;
 
@@ -38,9 +39,14 @@ namespace PDS.Witsml.Server.Data.Wells
 
         public override WitsmlResult<List<Well>> Query(WitsmlQueryParser parser)
         {
+            var wellList = EnergisticsConverter.XmlToObject<WellList>(parser.Context.Xml);
+            List<string> fields = null;
+            if (parser.ReturnElements() == OptionsIn.ReturnElements.IdOnly.Value)
+                fields = new List<string> { IdPropertyName, "name" };
+
             return new WitsmlResult<List<Well>>(
                 ErrorCodes.Success,
-                QueryEntities(parser, new List<string>() { "name,Name" }));
+                QueryEntities(parser, wellList.Well, fields));
         }
 
         /// <summary>
