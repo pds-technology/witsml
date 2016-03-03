@@ -17,15 +17,15 @@ namespace PDS.Witsml.Server.Data
     /// <typeparam name="T">The type of queried data object.</typeparam>
     public class MongoDbQuery<TList, T>
     {
-        private IMongoCollection<T> _collection;
-        private WitsmlQueryParser _parser;
+        private readonly IMongoCollection<T> _collection;
+        private readonly WitsmlQueryParser _parser;    
+        private readonly string _idPropertyName;
         private List<string> _fields;
-        private string _idPropertyName;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDbQuery{TList, T}"/> class.
         /// </summary>
-        /// <param name="collection">The name of database collection.</param>
+        /// <param name="collection">The Mongo database collection.</param>
         /// <param name="parser">The parser.</param>
         /// <param name="fields">The fields of the data object to be selected.</param>
         /// <param name="idPropertyName">Name of the identifier property.</param>
