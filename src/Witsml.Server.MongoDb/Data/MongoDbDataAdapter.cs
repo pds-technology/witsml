@@ -303,7 +303,7 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Queries the data store with Mongo Bson filter.
+        /// Queries the data store with Mongo Bson filter and projection.
         /// </summary>
         /// <param name="parser">The parser.</param>
         /// <param name="tList">List of query for object T.</param>
@@ -317,6 +317,7 @@ namespace PDS.Witsml.Server.Data
 
             foreach (var entity in tList)
             {
+                // Build Mongo filter
                 var filter = BuildFilter(parser, entity);
                 var results = collection.Find(filter ?? "{}");
 
