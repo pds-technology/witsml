@@ -10,7 +10,6 @@ using log4net;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
-using System.Reflection;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 

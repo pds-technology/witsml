@@ -215,8 +215,6 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
 
             if (!string.IsNullOrWhiteSpace(Model.Connection.Uri))
             {
-                ActivateItem(new HierarchyViewModel());
-                Items.Add(new StoreViewModel());
                 InitEtpClient();
             }
         }
@@ -276,7 +274,16 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         private void OnOpenSession(object sender, ProtocolEventArgs<OpenSession> e)
         {
             App.Current.Invoke(() => App.Current.Shell().StatusBarText = "Connected");
-            GetResources(EtpUri.RootUri);
+
+            if (e.Message.SupportedProtocols.Any(x => x.Protocol == (int)Protocols.Discovery))
+            {
+                ActivateItem(new HierarchyViewModel());
+                GetResources(EtpUri.RootUri);
+            }
+            if (e.Message.SupportedProtocols.Any(x => x.Protocol == (int)Protocols.Store))
+            {
+                Items.Add(new StoreViewModel());
+            }
         }
 
         /// <summary>

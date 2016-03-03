@@ -21,7 +21,7 @@ namespace PDS.Witsml
 
             public static readonly DataVersion Version131 = new DataVersion("1.3.1.1");
             public static readonly DataVersion Version141 = new DataVersion("1.4.1.1");
-            public static readonly DataVersion Version200 = new DataVersion("2.0.0.0");
+            public static readonly DataVersion Version200 = new DataVersion("2.0");
         }
 
         /// <summary>

@@ -17,7 +17,7 @@
             Name = name;
             Version = version;
 
-            _value = string.Format("{0}_{1}", Name, Version.Replace(".", string.Empty).Substring(0, 3));
+            _value = string.Format("{0}_{1}", Name, Version.Replace(".", string.Empty).Substring(0, 2));
         }
 
         /// <summary>
