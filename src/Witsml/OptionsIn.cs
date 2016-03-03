@@ -80,10 +80,24 @@ namespace PDS.Witsml
         {
             public RequestObjectSelectionCapability(string value) : base(Keyword, value) { }
 
-            public const string Keyword = "RequestObjectSelectionCapability";
+            public const string Keyword = "requestObjectSelectionCapability";
 
             public static readonly RequestObjectSelectionCapability None = new RequestObjectSelectionCapability("none");
             public static readonly RequestObjectSelectionCapability True = new RequestObjectSelectionCapability("true");
+        }
+
+        /// <summary>
+        /// Defines the choice of RequestPrivateGroupOnly configuration option values.
+        /// </summary>
+        /// <seealso cref="PDS.Witsml.OptionsIn" />
+        public class RequestPrivateGroupOnly : OptionsIn
+        {
+            public RequestPrivateGroupOnly(string value) : base(Keyword, value) { }
+
+            public const string Keyword = "requestPrivateGroupOnly";
+
+            public static readonly RequestPrivateGroupOnly False = new RequestPrivateGroupOnly("false");
+            public static readonly RequestPrivateGroupOnly True = new RequestPrivateGroupOnly("true");
         }
 
         /// <summary>

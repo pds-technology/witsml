@@ -37,6 +37,21 @@ namespace PDS.Witsml.Server.Data
             return OptionsIn.GetValue(Options, OptionsIn.RequestObjectSelectionCapability.None);
         }
 
+        /// <summary>
+        /// Requests the private group only.
+        /// </summary>
+        /// <returns></returns>
+        public bool RequestPrivateGroupOnly()
+        {
+            string value = OptionsIn.GetValue(Options, OptionsIn.RequestPrivateGroupOnly.False);
+            bool result;
+            bool success = bool.TryParse(value, out result);
+            if (success)
+                return result;
+            else
+                return false;
+        }
+
         public IEnumerable<XElement> Elements()
         {
             return _document.Root.Elements(_namespace + Context.ObjectType);
