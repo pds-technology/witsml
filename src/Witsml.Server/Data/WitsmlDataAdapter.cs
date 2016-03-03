@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using Energistics.Datatypes;
 using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data
@@ -83,7 +84,7 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
         /// <returns>A collection of data objects.</returns>
-        public virtual List<T> GetAll(string parentUri = null)
+        public virtual List<T> GetAll(EtpUri? parentUri = null)
         {
             throw new NotImplementedException();
         }

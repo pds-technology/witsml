@@ -1,6 +1,4 @@
-﻿using System;
-using System.ComponentModel.Composition;
-using System.Linq;
+﻿using System.ComponentModel.Composition;
 using Energistics.Common;
 using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
@@ -20,6 +18,7 @@ namespace PDS.Witsml.Server.Providers.Store
     {
         private readonly IEtpDataAdapter<Well> _wellDataAdapter;
         private readonly IEtpDataAdapter<Wellbore> _wellboreDataAdapter;
+        private readonly IEtpDataAdapter<Log> _logDataAdapter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StoreStore200Provider"/> class.
@@ -29,10 +28,12 @@ namespace PDS.Witsml.Server.Providers.Store
         [ImportingConstructor]
         public StoreStore200Provider(
             IEtpDataAdapter<Well> wellDataAdapter, 
-            IEtpDataAdapter<Wellbore> wellboreDataAdapter)
+            IEtpDataAdapter<Wellbore> wellboreDataAdapter,
+            IEtpDataAdapter<Log> logDataAdapter)
         {
             _wellDataAdapter = wellDataAdapter;
             _wellboreDataAdapter = wellboreDataAdapter;
+            _logDataAdapter = logDataAdapter;
         }
 
         /// <summary>
@@ -51,20 +52,25 @@ namespace PDS.Witsml.Server.Providers.Store
         /// <exception cref="System.NotImplementedException"></exception>
         public void GetObject(ProtocolEventArgs<GetObject, DataObject> args)
         {
-            var uri = args.Message.Uri;
-            var uid = uri.Split(new[] { '(', ')' }, StringSplitOptions.RemoveEmptyEntries).Last();
+            var uri = new EtpUri(args.Message.Uri);
 
-            if (uri.StartsWith(UriFormats.Witsml200.Wellbores))
+            if (uri.ObjectType == ObjectTypes.Well)
             {
-                var entity = _wellboreDataAdapter.Get(uid);
-                StoreStoreProvider.SetDataObject(args.Context, entity, entity.Citation.Title, uri, uid,
-                    ContentTypes.Witsml200 + "type=" + ObjectTypes.Wellbore);
+                var entity = _wellDataAdapter.Get(uri.ObjectId);
+
+                StoreStoreProvider.SetDataObject(args.Context, entity, uri, entity.Citation.Title);
             }
-            else if (uri.StartsWith(UriFormats.Witsml200.Wells))
+            else if (uri.ObjectType == ObjectTypes.Wellbore)
             {
-                var entity = _wellDataAdapter.Get(uid);
-                StoreStoreProvider.SetDataObject(args.Context, entity, entity.Citation.Title, uri, uid,
-                    ContentTypes.Witsml200 + "type=" + ObjectTypes.Well);
+                var entity = _wellboreDataAdapter.Get(uri.ObjectId);
+
+                StoreStoreProvider.SetDataObject(args.Context, entity, uri, entity.Citation.Title);
+            }
+            else if (uri.ObjectType == ObjectTypes.Log)
+            {
+                var entity = _logDataAdapter.Get(uri.ObjectId);
+
+                StoreStoreProvider.SetDataObject(args.Context, entity, uri, entity.Citation.Title);
             }
         }
     }

@@ -20,19 +20,23 @@ namespace PDS.Witsml.Server.Providers.Store
     {
         private readonly IEtpDataAdapter<Well> _wellDataAdapter;
         private readonly IEtpDataAdapter<Wellbore> _wellboreDataAdapter;
+        private readonly IEtpDataAdapter<Log> _logDataAdapter;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StoreStore141Provider"/> class.
+        /// Initializes a new instance of the <see cref="StoreStore141Provider" /> class.
         /// </summary>
         /// <param name="wellDataAdapter">The well data adapter.</param>
         /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
+        /// <param name="logDataAdapter">The log data adapter.</param>
         [ImportingConstructor]
         public StoreStore141Provider(
             IEtpDataAdapter<Well> wellDataAdapter, 
-            IEtpDataAdapter<Wellbore> wellboreDataAdapter)
+            IEtpDataAdapter<Wellbore> wellboreDataAdapter,
+            IEtpDataAdapter<Log> logDataAdapter)
         {
             _wellDataAdapter = wellDataAdapter;
             _wellboreDataAdapter = wellboreDataAdapter;
+            _logDataAdapter = logDataAdapter;
         }
 
         /// <summary>
@@ -51,24 +55,28 @@ namespace PDS.Witsml.Server.Providers.Store
         /// <exception cref="System.NotImplementedException"></exception>
         public void GetObject(ProtocolEventArgs<GetObject, DataObject> args)
         {
-            var uri = args.Message.Uri;
-            var uid = uri.Split(new[] { '(', ')' }, StringSplitOptions.RemoveEmptyEntries).Last();
+            var uri = new EtpUri(args.Message.Uri);
 
-            if (uri.StartsWith(UriFormats.Witsml141.Wellbores))
+            if (uri.ObjectType == ObjectTypes.Well)
             {
-                var entity = _wellboreDataAdapter.Get(uid);
-                var list = new WellboreList() { Wellbore = entity.AsList() };
-
-                StoreStoreProvider.SetDataObject(args.Context, list, entity.Name, uri, uid,
-                    ContentTypes.Witsml141 + "type=" + ObjectTypes.Wellbore);
-            }
-            else if (uri.StartsWith(UriFormats.Witsml141.Wells))
-            {
-                var entity = _wellDataAdapter.Get(uid);
+                var entity = _wellDataAdapter.Get(uri.ObjectId);
                 var list = new WellList() { Well = entity.AsList() };
 
-                StoreStoreProvider.SetDataObject(args.Context, list, entity.Name, uri, uid,
-                    ContentTypes.Witsml141 + "type=" + ObjectTypes.Well);
+                StoreStoreProvider.SetDataObject(args.Context, list, uri, entity.Name);
+            }
+            else if (uri.ObjectType == ObjectTypes.Wellbore)
+            {
+                var entity = _wellboreDataAdapter.Get(uri.ObjectId);
+                var list = new WellboreList() { Wellbore = entity.AsList() };
+
+                StoreStoreProvider.SetDataObject(args.Context, list, uri, entity.Name);
+            }
+            else if (uri.ObjectType == ObjectTypes.Log)
+            {
+                var entity = _logDataAdapter.Get(uri.ObjectId);
+                var list = new LogList() { Log = entity.AsList() };
+
+                StoreStoreProvider.SetDataObject(args.Context, list, uri, entity.Name);
             }
         }
     }

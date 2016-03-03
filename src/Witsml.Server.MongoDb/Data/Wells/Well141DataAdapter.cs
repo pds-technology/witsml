@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using Energistics.DataAccess.WITSML141;
-using log4net;
-using PDS.Witsml.Server.Configuration;
 using System.Reflection;
 using Energistics.DataAccess;
+using Energistics.DataAccess.WITSML141;
+using Energistics.Datatypes;
+using log4net;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
@@ -62,15 +63,15 @@ namespace PDS.Witsml.Server.Data.Wells
             var results = QueryEntities(parser, wellList.Well, fields);
             var wells = new List<Well>();
             foreach (var well in results)
-            {
+                {
                 if (!wells.Any(w => w.Uid == well.Uid))
                     wells.Add(well);
-            }
+                }
 
-            return new WitsmlResult<List<Well>>(
-                ErrorCodes.Success,
+                return new WitsmlResult<List<Well>>(
+                    ErrorCodes.Success,
                 wells);
-        }
+            }
 
         
 
@@ -100,7 +101,7 @@ namespace PDS.Witsml.Server.Data.Wells
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
         /// <returns>A collection of data objects.</returns>
-        public override List<Well> GetAll(string parentUri = null)
+        public override List<Well> GetAll(EtpUri? parentUri = null)
         {
             return GetQuery()
                 .OrderBy(x => x.Name)
@@ -121,6 +122,6 @@ namespace PDS.Witsml.Server.Data.Wells
             {
                 return Add(entity);
             }
-        }    
+        }
     }
 }

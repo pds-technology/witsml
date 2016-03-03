@@ -78,11 +78,11 @@
     <Compile Include="Common\EtpExtensions.cs" />
     <Compile Include="Common\EtpProtocolHandler.cs" />
     <Compile Include="Common\EtpSession.cs" />
+    <Compile Include="Datatypes\EtpContentType.cs" />
+    <Compile Include="Datatypes\EtpUri.cs" />
     <Compile Include="Common\IEtpSession.cs" />
     <Compile Include="Common\ProtocolEventArgs.cs" />
     <Compile Include="Common\ProtocolEventHandler.cs" />
-    <Compile Include="Datatypes\ContentTypes.cs" />
-    <Compile Include="Datatypes\UriFormats.cs" />
     <Compile Include="EtpServer.cs" />
     <Compile Include="EtpServerHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -112,9 +112,6 @@
     <Compile Include="Datatypes\ResourceTypes.cs" />
     <Compile Include="Protocol\MessageFlags.cs" />
     <Compile Include="Protocol\MessageTypes.cs" />
-    <Compile Include="Datatypes\ProtocolAttribute.cs" />
-    <Compile Include="Datatypes\RoleAttribute.cs" />
-    <Compile Include="Datatypes\RolesAttribute.cs" />
     <Compile Include="Protocol\Store\IStoreCustomer.cs" />
     <Compile Include="Protocol\Store\IStoreStore.cs" />
     <Compile Include="EtpClient.cs" />

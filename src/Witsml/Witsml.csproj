@@ -40,6 +40,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EtpContentTypes.cs" />
     <Compile Include="ErrorCodes.cs" />
     <Compile Include="Export131Attribute.cs" />
     <Compile Include="Export200Attribute.cs" />
@@ -62,12 +63,17 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="EtpUris.cs" />
     <Compile Include="WitsmlException.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Framework\Framework.csproj">
       <Project>{fae228aa-4917-4b02-b239-0a24df883898}</Project>
       <Name>Framework</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WebSockets\WebSockets.csproj">
+      <Project>{30de888b-a6b7-4528-ad89-324a7f9b0f4c}</Project>
+      <Name>WebSockets</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

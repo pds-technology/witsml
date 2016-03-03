@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
+using Energistics.Datatypes;
 using log4net;
-using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wellbores
@@ -74,12 +73,17 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
         /// <returns>A collection of data objects.</returns>
-        public override List<Wellbore> GetAll(string parentUri = null)
+        public override List<Wellbore> GetAll(EtpUri? parentUri = null)
         {
-            var uidWell = parentUri.Split(new[] { '(', ')' }, StringSplitOptions.RemoveEmptyEntries).Last();
+            var query = GetQuery().AsQueryable();
 
-            return GetQuery()
-                .Where(x => x.UidWell == uidWell)
+            if (parentUri != null)
+            {
+                var uidWell = parentUri.Value.ObjectId;
+                query = query.Where(x => x.UidWell == uidWell);
+            }
+
+            return query
                 .OrderBy(x => x.Name)
                 .ToList();
         }

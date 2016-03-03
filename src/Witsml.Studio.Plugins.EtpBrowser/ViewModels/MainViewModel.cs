@@ -8,6 +8,7 @@ using Avro.Specific;
 using Caliburn.Micro;
 using Energistics;
 using Energistics.Common;
+using Energistics.Datatypes;
 using Energistics.Protocol.Core;
 using Energistics.Protocol.Discovery;
 using Energistics.Protocol.Store;
@@ -27,7 +28,6 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
     /// <seealso cref="PDS.Witsml.Studio.ViewModels.IPluginViewModel" />
     public class MainViewModel : Conductor<IScreen>.Collection.OneActive, IPluginViewModel
     {
-        private const string RootUri = "/";
         private EtpClient _client;
 
         /// <summary>
@@ -276,7 +276,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         private void OnOpenSession(object sender, ProtocolEventArgs<OpenSession> e)
         {
             App.Current.Invoke(() => App.Current.Shell().StatusBarText = "Connected");
-            GetResources(RootUri);
+            GetResources(EtpUri.RootUri);
         }
 
         /// <summary>
@@ -291,7 +291,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
 
             LogObjectDetails(e);
 
-            if (e.Context == RootUri)
+            if (EtpUri.IsRoot(e.Context))
             {
                 Resources.ForEach(x => x.IsSelected = false);
                 viewModel.IsSelected = true;

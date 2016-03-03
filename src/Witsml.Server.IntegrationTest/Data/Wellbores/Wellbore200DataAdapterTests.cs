@@ -42,7 +42,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
             WellReference = new DataObjectReference
             {
-                ContentType = ContentTypes.Witsml200 + "type=" + ObjectTypes.Well,
+                ContentType = EtpContentTypes.Witsml200.For(ObjectTypes.Well),
                 Title = Well1.Citation.Title,
                 Uuid = Well1.Uuid
             };
