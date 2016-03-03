@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Energistics.DataAccess;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -15,7 +16,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>
         /// Queried objects.
         /// </returns>
-        WitsmlResult<List<T>> Query(WitsmlQueryParser parser);
+        WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser);
 
         /// <summary>
         /// Adds an object to the data store.

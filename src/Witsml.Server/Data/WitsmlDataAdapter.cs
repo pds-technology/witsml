@@ -8,6 +8,7 @@ using System.Linq;
 using System.Collections;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.DataAccess;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -33,7 +34,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>
         /// Queried objects.
         /// </returns>
-        public virtual WitsmlResult<List<T>> Query(WitsmlQueryParser parser)
+        public virtual WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
         {
             throw new NotImplementedException();
         }

@@ -14,17 +14,5 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public Wellbore141DataProvider(IWitsmlDataAdapter<Wellbore> dataAdapter) : base(dataAdapter)
         {
         }
-
-        protected override WitsmlResult<IEnergisticsCollection> FormatResponse(WitsmlQueryParser parser, WitsmlResult<List<Wellbore>> result)
-        {
-            // TODO: format response according to OptionsIn
-
-            return new WitsmlResult<IEnergisticsCollection>(
-                ErrorCodes.Success,
-                new WellboreList()
-                {
-                    Wellbore = result.Results
-                });
-        }
     }
 }

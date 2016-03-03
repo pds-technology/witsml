@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
 using PDS.Witsml.Server.Configuration;
 
@@ -36,15 +37,25 @@ namespace PDS.Witsml.Server.Data.Wells
             //capServer.Add(Functions.DeleteFromStore, ObjectTypes.Well);
         }
 
-        public override WitsmlResult<List<Well>> Query(WitsmlQueryParser parser)
+        /// <summary>
+        /// Queries the object(s) specified by the parser.
+        /// </summary>
+        /// <param name="parser">The parser that specifies the query parameters.</param>
+        /// <returns>
+        /// Queried objects.
+        /// </returns>
+        public override WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
         {
             List<string> fields = null;
             if (parser.ReturnElements() == OptionsIn.ReturnElements.IdOnly.Value)
                 fields = new List<string> { IdPropertyName, "name" };
 
-            return new WitsmlResult<List<Well>>(
+            return new WitsmlResult<IEnergisticsCollection>(
                 ErrorCodes.Success,
-                QueryEntities<WellList>(parser, fields));
+                new WellList()
+                {
+                    Well = QueryEntities<WellList>(parser, fields)
+                });
         }
 
         /// <summary>

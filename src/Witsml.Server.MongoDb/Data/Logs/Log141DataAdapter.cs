@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Linq.Dynamic;
 using System.Text;
+using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.Datatypes;
@@ -42,7 +43,14 @@ namespace PDS.Witsml.Server.Data.Logs
             //capServer.Add(Functions.DeleteFromStore, ObjectTypes.Well);
         }
 
-        public override WitsmlResult<List<Log>> Query(WitsmlQueryParser parser)
+        /// <summary>
+        /// Queries the object(s) specified by the parser.
+        /// </summary>
+        /// <param name="parser">The parser that specifies the query parameters.</param>
+        /// <returns>
+        /// Queried objects.
+        /// </returns>
+        public override WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
         {
             List<string> fields = null;
             if (parser.ReturnElements() == OptionsIn.ReturnElements.IdOnly.Value)
@@ -70,9 +78,12 @@ namespace PDS.Witsml.Server.Data.Logs
                 });
             }
 
-            return new WitsmlResult<List<Log>>(
+            return new WitsmlResult<IEnergisticsCollection>(
                 ErrorCodes.Success,
-                logsOut);
+                new LogList()
+                {
+                    Log = logsOut
+                });
         }
 
         /// <summary>
