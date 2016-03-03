@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Reflection;
 using Energistics.DataAccess.WITSML141;
+using Energistics.Datatypes;
 using log4net;
 using PDS.Witsml.Server.Configuration;
-using System.Reflection;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
@@ -95,7 +96,7 @@ namespace PDS.Witsml.Server.Data.Wells
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
         /// <returns>A collection of data objects.</returns>
-        public override List<Well> GetAll(string parentUri = null)
+        public override List<Well> GetAll(EtpUri? parentUri = null)
         {
             return GetQuery()
                 .OrderBy(x => x.Name)

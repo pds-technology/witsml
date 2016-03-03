@@ -5,22 +5,22 @@ using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
 
-namespace PDS.Witsml.Server.Data.Wellbores
+namespace PDS.Witsml.Server.Data.Logs
 {
     /// <summary>
-    /// Data adapter that encapsulates CRUD functionality for <see cref="Wellbore" />
+    /// Data adapter that encapsulates CRUD functionality for <see cref="Log" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML200.Wellbore}" />
-    [Export(typeof(IEtpDataAdapter<Wellbore>))]
+    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML200.Log}" />
+    [Export(typeof(IEtpDataAdapter<Log>))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Wellbore200DataAdapter : MongoDbDataAdapter<Wellbore>
+    public class Log200DataAdapter : MongoDbDataAdapter<Log>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Wellbore200DataAdapter"/> class.
+        /// Initializes a new instance of the <see cref="Log200DataAdapter"/> class.
         /// </summary>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public Wellbore200DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Wellbore200, ObjectTypes.Uuid)
+        public Log200DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Log200, ObjectTypes.Uuid)
         {
         }
 
@@ -29,14 +29,14 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
         /// <returns>A collection of data objects.</returns>
-        public override List<Wellbore> GetAll(EtpUri? parentUri = null)
+        public override List<Log> GetAll(EtpUri? parentUri = null)
         {
             var query = GetQuery().AsQueryable();
 
             if (parentUri != null)
             {
-                var uidWell = parentUri.Value.ObjectId;
-                query = query.Where(x => x.ReferenceWell.Uuid == uidWell);
+                var uidWellbore = parentUri.Value.ObjectId;
+                query = query.Where(x => x.Wellbore.Uuid == uidWellbore);
             }
 
             return query
@@ -48,7 +48,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// Puts the specified data object into the data store.
         /// </summary>
         /// <param name="entity">The entity.</param>
-        public override WitsmlResult Put(Wellbore entity)
+        public override WitsmlResult Put(Log entity)
         {
             if (!string.IsNullOrWhiteSpace(entity.Uuid) && Exists(entity.Uuid))
             {
@@ -59,7 +59,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 entity.Uuid = NewUid(entity.Uuid);
                 entity.Citation = entity.Citation.Update();
 
-                var validator = Container.Resolve<IDataObjectValidator<Wellbore>>();
+                var validator = Container.Resolve<IDataObjectValidator<Log>>();
                 validator.Validate(Functions.PutObject, entity);
 
                 InsertEntity(entity);
