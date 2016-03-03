@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using Energistics.DataAccess;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data
@@ -22,6 +23,18 @@ namespace PDS.Witsml.Server.Data
         public RequestContext Context { get; private set; }
 
         public Dictionary<string, string> Options { get; private set; }
+
+        public T Parse<T>(string xml)
+        {
+            try
+            {
+                return EnergisticsConverter.XmlToObject<T>(xml);
+            }
+            catch (Exception ex)
+            {
+                throw new WitsmlException(ErrorCodes.InputTemplateNonConforming, ex);
+            }
+        }
 
         public string ReturnElements()
         {
