@@ -114,6 +114,63 @@ namespace PDS.Witsml.Server
         }
 
         [TestMethod]
+        public void Query_OptionsIn_requestObjectSelectionCapability()
+        {
+            var well = new Well { Name = "Well-to-add-01", TimeZone = DevKit.TimeZone};
+            var response = DevKit.Add<WellList, Well>(well);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            well = new Well { Name = "Well-to-add-02", TimeZone = DevKit.TimeZone };
+            response = DevKit.Add<WellList, Well>(well);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            well = new Well();
+            var result = DevKit.Query<WellList, Well>(well, optionsIn: "requestObjectSelectionCapability=true");
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Count);
+
+            well = result.FirstOrDefault();
+            Assert.IsNotNull(well);
+            Assert.AreEqual("abc", well.Uid);
+        }
+
+        [TestMethod]
+        public void Query_OptionsIn_privateGroupOnly()
+        {
+            var well = new Well { Name = "Well-to-add-01", TimeZone = DevKit.TimeZone };
+            var response = DevKit.Add<WellList, Well>(well);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            CommonData commonData = new CommonData();
+            commonData.PrivateGroupOnly = true;
+            well = new Well { Name = "Well-to-add-01", TimeZone = DevKit.TimeZone, CommonData=commonData };
+            response = DevKit.Add<WellList, Well>(well);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uid = response.SuppMsgOut;
+            var valid = !string.IsNullOrEmpty(uid);
+            Assert.IsTrue(valid);
+
+            well = new Well();
+            var result = DevKit.Query<WellList, Well>(well, optionsIn: "returnElements=all;requestPrivateGroupOnly=true");
+            Assert.IsNotNull(result);
+
+            var notPrivateGroupWells = result.Where(x =>
+                {
+                    bool isPrivate = x.CommonData.PrivateGroupOnly ?? false;
+                    return !isPrivate;
+                });
+            Assert.IsFalse(notPrivateGroupWells.Any());
+
+            well = result.Where(x => uid.Equals(x.Uid)).FirstOrDefault();
+            Assert.IsNotNull(well);
+        }
+
+        [TestMethod]
         public void Case_preserved_add_well()
         {
             var nameLegal = "Well Legal Name";
