@@ -45,15 +45,6 @@ namespace PDS.Witsml.Server.Data.Wells
 
         public override WitsmlResult<List<Well>> Query(WitsmlQueryParser parser)
         {
-            if (parser.RequestObjectSelectionCapability().ToLower().Equals(OptionsIn.RequestObjectSelectionCapability.True.Value.ToLower()))
-            {
-                Well well = new Well();
-                FillObjectTemplateValues(typeof(Well), well);                
-                return new WitsmlResult<List<Well>>(
-                    ErrorCodes.Success,
-                    new List<Well>() { well });
-            }
-
             var wellList = parser.Parse<WellList>(parser.Context.Xml);
             List<string> fields = null;
             if (parser.ReturnElements() == OptionsIn.ReturnElements.IdOnly.Value)
