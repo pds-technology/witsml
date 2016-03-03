@@ -201,69 +201,73 @@ namespace PDS.Witsml.Server.Data
             }
         }
 
+        private bool IsIList(Type type)
+        {
+            bool isIList = type.GetInterfaces()
+                .Any(t => t == typeof(IList));
+            return isIList;
+        }
+
         private void FillObjectTypeValues(object dataObject, Type objectType, PropertyInfo property, Type propertyType)
         {
-            if (propertyType == typeof(string))
-                property.SetValue(dataObject, "abc");
-            else if (propertyType == typeof(bool))
-            {
-                int index = property.Name.LastIndexOf("Specified");
-                if (index < 0)
-                    property.SetValue(dataObject, false);
-                else
+                if (propertyType == typeof(string))
+                    property.SetValue(dataObject, "abc");
+                else if (propertyType == typeof(bool))
                 {
-                    string specifiedNameSubstring = property.Name.Substring(index, property.Name.Length - index);
-                    bool isSpecifiedProperty = specifiedNameSubstring.Equals("Specified");
-                    if (!isSpecifiedProperty)
+                    int index = property.Name.LastIndexOf("Specified");
+                    if (index < 0)
                         property.SetValue(dataObject, false);
+                    else
+                    {
+                        string specifiedNameSubstring = property.Name.Substring(index, property.Name.Length - index);
+                        bool isSpecifiedProperty = specifiedNameSubstring.Equals("Specified");
+                        if (!isSpecifiedProperty)
+                            property.SetValue(dataObject, false);
+                    }
                 }
-            }
-            else if (propertyType == typeof(DateTime))
-                property.SetValue(dataObject, Convert.ToDateTime("1900-01-01T00:00:00.000Z"));
-            else if (propertyType == typeof(WellStatus))
-                property.SetValue(dataObject, WellStatus.unknown);
-            else if (propertyType == typeof(WellPurpose))
-                property.SetValue(dataObject, WellPurpose.unknown);
-            else if (propertyType == typeof(WellFluid))
-                property.SetValue(dataObject, WellFluid.unknown);
-            else if (propertyType == typeof(WellDirection))
-                property.SetValue(dataObject, WellDirection.unknown);
-            else if (propertyType == typeof(LengthUom))
-                property.SetValue(dataObject, LengthUom.ft);
-            else if (propertyType == typeof(LengthMeasure))
-                property.SetValue(dataObject, new LengthMeasure(1.0, LengthUom.ft));
-            else if (propertyType == typeof(DimensionlessMeasure))
-                property.SetValue(dataObject, new DimensionlessMeasure(1.0, DimensionlessUom.Item));
-            else if (propertyType == typeof(List<WellDatum>))
-            {
-                WellDatum datum = new WellDatum();
-                FillObjectTemplateValues(typeof(WellDatum), datum);
-                property.SetValue(dataObject, new List<WellDatum>() { datum });
-            }
-            else if (propertyType == typeof(List<Location>))
-            {
-                Location location = new Location();
-                location.Easting = new LengthMeasure(1.0, LengthUom.ft);
-                property.SetValue(dataObject, new List<Location>() { location });
-            }
-            else if (propertyType == typeof(List<ReferencePoint>))
-            {
-                ReferencePoint referencePoint = new ReferencePoint();
-                FillObjectTemplateValues(typeof(ReferencePoint), referencePoint);
-                property.SetValue(dataObject, new List<ReferencePoint>() { referencePoint });
-            }
-            else if (propertyType == typeof(List<WellCRS>))
-            {
-                WellCRS wellCRS = new WellCRS();
-                FillObjectTemplateValues(typeof(WellCRS), wellCRS);
-                property.SetValue(dataObject, new List<WellCRS>() { wellCRS });
-            }
-            else if (propertyType == typeof(CommonData))
-            {
-                CommonData commonData = new CommonData();
-                FillObjectTemplateValues(typeof(CommonData), commonData);
-                property.SetValue(dataObject, commonData);
-            }
+                else if (propertyType == typeof(DateTime))
+                    property.SetValue(dataObject, Convert.ToDateTime("1900-01-01T00:00:00.000Z"));
+                else if (propertyType == typeof(WellStatus))
+                    property.SetValue(dataObject, WellStatus.unknown);
+                else if (propertyType == typeof(WellPurpose))
+                    property.SetValue(dataObject, WellPurpose.unknown);
+                else if (propertyType == typeof(WellFluid))
+                    property.SetValue(dataObject, WellFluid.unknown);
+                else if (propertyType == typeof(WellDirection))
+                    property.SetValue(dataObject, WellDirection.unknown);
+                else if (propertyType == typeof(LengthUom))
+                    property.SetValue(dataObject, LengthUom.ft);
+                else if (propertyType == typeof(LengthMeasure))
+                {
+                    try
+                    {
+                        property.SetValue(dataObject, new LengthMeasure(1.0, LengthUom.ft));
+                    }
+                    catch (Exception)
+                    { }
+                }
+                else if (propertyType == typeof(DimensionlessMeasure))
+                    property.SetValue(dataObject, new DimensionlessMeasure(1.0, DimensionlessUom.Item));
+                else if (IsIList(propertyType))
+                {
+                    Type type = propertyType.GetGenericArguments()[0];
+                    Type[] typeList = new Type[0];
+                    ConstructorInfo constructorInfo = type.GetConstructor(typeList);
+                    if (constructorInfo != null)
+                    {
+                        object dObject = Activator.CreateInstance(type);
+                        FillObjectTemplateValues(type, dObject);
+                        IList dObjectList = Activator.CreateInstance(propertyType) as IList;
+                        dObjectList.Add(dObject);
+                        property.SetValue(dataObject, dObjectList);
+                    }
+                }
+                else if (propertyType == typeof(CommonData))
+                {
+                    CommonData commonData = new CommonData();
+                    FillObjectTemplateValues(typeof(CommonData), commonData);
+                    property.SetValue(dataObject, commonData);
+                }
         }
 
         /// <summary>
