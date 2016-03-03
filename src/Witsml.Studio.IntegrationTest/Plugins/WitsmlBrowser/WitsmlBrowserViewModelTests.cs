@@ -118,21 +118,5 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
             Assert.IsNotNull(capServerList);
             Assert.AreEqual(OptionsIn.DataVersion.Version141.Value, capServerList.CapServer.SchemaVersion);
         }
-
-        [TestMethod]
-        public void TestSettingsViewModelGetVersions()
-        {
-            WITSMLWebServiceConnection proxy = new WITSMLWebServiceConnection(_validWitsmlUri, WMLSVersion.WITSML141);
-
-            var vm = new SettingsViewModel(_runtime);
-            //var requestVm = new RequestViewModel(_runtime);
-            //var mainVm = new MainViewModel(_runtime);
-
-            //mainVm.Items.Add(requestVm);
-            //requestVm.Items.Add(vm);
-
-            var versions = vm.GetVersions(proxy, _validWitsmlUri);
-            Assert.IsTrue(!string.IsNullOrEmpty(versions));
-        }
     }
 }
