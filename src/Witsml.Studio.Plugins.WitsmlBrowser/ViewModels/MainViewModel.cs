@@ -125,25 +125,39 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
 
         public void SubmitQuery(Functions functionType)
         {
-            _log.DebugFormat("Query submitted for function {0}", functionType);
-
-            QueryResults.Text = string.Empty;
             string xmlOut = string.Empty;
             string suppMsgOut = string.Empty;
             string optionsIn = null;
 
-            SubmitQuery(functionType, XmlQuery.Text, ref xmlOut, ref suppMsgOut, ref optionsIn);
+            try
+            {
+                _log.DebugFormat("Query submitted for function '{0}'", functionType);
 
-            _log.DebugFormat("Query returned with{3}{3}xmlOut: {0}{3}{3}suppMsgOut: {1}{3}{3}optionsIn: {2}{3}{3}",
-                GetLogStringText(xmlOut), 
-                GetLogStringText(suppMsgOut), 
-                GetLogStringText(optionsIn),
-                Environment.NewLine);
+                QueryResults.Text = string.Empty;
 
-            OutputResults(xmlOut, suppMsgOut);
-            OutputMessages(functionType, XmlQuery.Text, xmlOut, suppMsgOut, optionsIn);
+                SubmitQuery(functionType, XmlQuery.Text, ref xmlOut, ref suppMsgOut, ref optionsIn);
 
-            // TODO: Add exception handling.  We don't want the app to crash because of a bad query.
+                _log.DebugFormat("Query returned with{3}{3}xmlOut: {0}{3}{3}suppMsgOut: {1}{3}{3}optionsIn: {2}{3}{3}",
+                    GetLogStringText(xmlOut),
+                    GetLogStringText(suppMsgOut),
+                    GetLogStringText(optionsIn),
+                    Environment.NewLine);
+
+                OutputResults(xmlOut, suppMsgOut);
+                OutputMessages(functionType, XmlQuery.Text, xmlOut, suppMsgOut, optionsIn);
+            }
+            catch (Exception ex)
+            {
+                var message = string.Format("Error submitting query for function '{0}'{3}{3}Error Message: {1}{3}{3}Stack Trace:{3}{2}{3}",
+                    functionType, ex.Message, ex.StackTrace, Environment.NewLine);
+
+                // Log the error message
+                _log.Error(message);
+
+                // Output the error to the user
+                OutputResults(null, message);
+                OutputMessages(functionType, XmlQuery.Text, null, message, optionsIn);
+            }
         }
 
         public void GetCapabilities()
