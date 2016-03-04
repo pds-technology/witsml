@@ -167,8 +167,7 @@ namespace PDS.Witsml.Server.Data
         {
             if (OptionsIn.RequestObjectSelectionCapability.True.Equals(parser.RequestObjectSelectionCapability()))
             {
-                var dataObject = Activator.CreateInstance<T>();
-                FillObjectTemplateValues(dataObject);
+                T dataObject = (T)CreateObjectSelectionTemplate(typeof(T));
                 return new List<T>() { dataObject };
             }
 
