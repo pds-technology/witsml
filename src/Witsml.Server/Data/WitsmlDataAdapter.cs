@@ -125,9 +125,11 @@ namespace PDS.Witsml.Server.Data
             throw new NotImplementedException();
         }
 
-        protected void FillObjectTemplateValues(Type objectType, object dataObject)
+        protected void FillObjectTemplateValues(object dataObject)
         {
+            Type objectType = dataObject.GetType();
             PropertyInfo[] propertyInfo = objectType.GetProperties();
+
             foreach (PropertyInfo property in propertyInfo)
             {
                 Type propertyType = property.PropertyType;
@@ -208,13 +210,15 @@ namespace PDS.Witsml.Server.Data
                 property.SetValue(dataObject, new DimensionlessMeasure(1.0, DimensionlessUom.Item));
             else if (IsIList(propertyType))
             {
+                //typeof(IList).IsAssignableFrom(propertyType);
+
                 Type type = propertyType.GetGenericArguments()[0];
                 Type[] typeList = new Type[0];
                 ConstructorInfo constructorInfo = type.GetConstructor(typeList);
                 if (constructorInfo != null)
                 {
                     object dObject = Activator.CreateInstance(type);
-                    FillObjectTemplateValues(type, dObject);
+                    FillObjectTemplateValues(dObject);
                     IList dObjectList = Activator.CreateInstance(propertyType) as IList;
                     dObjectList.Add(dObject);
                     property.SetValue(dataObject, dObjectList);
@@ -225,7 +229,7 @@ namespace PDS.Witsml.Server.Data
             else if (propertyType == typeof(CommonData))
             {
                 CommonData commonData = new CommonData();
-                FillObjectTemplateValues(typeof(CommonData), commonData);
+                FillObjectTemplateValues(commonData);
                 property.SetValue(dataObject, commonData);
             }
         }

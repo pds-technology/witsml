@@ -13,7 +13,7 @@ namespace PDS.Witsml.Server.Data
     /// </summary>
     /// <typeparam name="T">Type of the object</typeparam>
     /// <seealso cref="Data.WitsmlDataAdapter{T}" />
-    public abstract class MongoDbDataAdapter<T> : WitsmlDataAdapter<T> where T : new()
+    public abstract class MongoDbDataAdapter<T> : WitsmlDataAdapter<T>
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(MongoDbDataAdapter<T>));
 
@@ -162,20 +162,17 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="parser">The parser.</param>
         /// <param name="tList">List of query for object T.</param>
-        /// <returns></returns>
-        protected List<T> QueryEntities<TList>(WitsmlQueryParser parser, List<string> fields = null)
+        /// <returns>The query results collection.</returns>
+        protected List<T> QueryEntities<TList>(WitsmlQueryParser parser, List<string> fields)
         {
-            if (parser.RequestObjectSelectionCapability().ToLower().Equals(OptionsIn.RequestObjectSelectionCapability.True.Value.ToLower()))
+            if (OptionsIn.RequestObjectSelectionCapability.True.Equals(parser.RequestObjectSelectionCapability()))
             {
-                T dataObject = new T();
-                FillObjectTemplateValues(typeof(T), dataObject);
+                var dataObject = Activator.CreateInstance<T>();
+                FillObjectTemplateValues(dataObject);
                 return new List<T>() { dataObject };
             }
 
-            var database = DatabaseProvider.GetDatabase();
-            var collection = database.GetCollection<T>(DbCollectionName);
-
-            var query = new MongoDbQuery<TList, T>(collection, parser, fields, IdPropertyName);          
+            var query = new MongoDbQuery<TList, T>(GetCollection(), parser, fields, IdPropertyName);          
             return query.Execute();
         }
 
