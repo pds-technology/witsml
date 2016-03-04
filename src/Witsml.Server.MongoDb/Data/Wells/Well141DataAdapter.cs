@@ -47,14 +47,12 @@ namespace PDS.Witsml.Server.Data.Wells
         /// Queries the object(s) specified by the parser.
         /// </summary>
         /// <param name="parser">The parser that specifies the query parameters.</param>
-        /// <returns>
-        /// Queried objects.
-        /// </returns>
+        /// <returns>Queried objects.</returns>
         public override WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
         {
-            List<string> fields = null;
-            if (parser.ReturnElements() == OptionsIn.ReturnElements.IdOnly.Value)
-                fields = new List<string> { IdPropertyName, NamePropertyName };
+            var fields = (OptionsIn.ReturnElements.IdOnly.Equals(parser.ReturnElements()))
+                ? new List<string> { IdPropertyName, NamePropertyName }
+                : null;
 
             return new WitsmlResult<IEnergisticsCollection>(
                 ErrorCodes.Success,
