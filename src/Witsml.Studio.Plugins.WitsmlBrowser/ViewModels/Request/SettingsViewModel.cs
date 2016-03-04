@@ -8,10 +8,18 @@ using PDS.Witsml.Studio.ViewModels;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 {
+    /// <summary>
+    /// Manages the behavior for the Settings view UI elements.
+    /// </summary>
+    /// <seealso cref="Caliburn.Micro.Screen" />
     public class SettingsViewModel : Screen
     {
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(SettingsViewModel));
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SettingsViewModel"/> class.
+        /// </summary>
+        /// <param name="runtime">The runtime.</param>
         public SettingsViewModel(IRuntimeService runtime)
         {
             _log.Debug("Creating view model instance");
@@ -20,33 +28,64 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             WitsmlVersions = new BindableCollection<string>();
         }
 
+        /// <summary>
+        /// Gets the Parent <see cref="T:Caliburn.Micro.IConductor" /> for this view model
+        /// </summary>
         public new RequestViewModel Parent
         {
             get { return (RequestViewModel)base.Parent; }
         }
 
+        /// <summary>
+        /// Gets the proxy for the WITSML web service.
+        /// </summary>
+        /// <value>
+        /// The WITSML seb service proxy.
+        /// </value>
         public WITSMLWebServiceConnection Proxy
         {
             get { return Parent.Proxy; }
         }
 
+        /// <summary>
+        /// Gets or sets the data model.
+        /// </summary>
+        /// <value>
+        /// The WitsmlSettings data model.
+        /// </value>
         public Models.WitsmlSettings Model
         {
             get { return Parent.Model; }
         }
 
+        /// <summary>
+        /// Gets the runtime service.
+        /// </summary>
+        /// <value>The runtime.</value>
         public IRuntimeService Runtime { get; private set; }
 
+        /// <summary>
+        /// Gets the witsml versions retrieved from the server.
+        /// </summary>
+        /// <value>
+        /// The server's supported witsml versions.
+        /// </value>
         public BindableCollection<string> WitsmlVersions { get; }
 
+        /// <summary>
+        /// Gets the options in return elements.
+        /// </summary>
+        /// <value>
+        /// The options in return elements.
+        /// </value>
         public IEnumerable<OptionsIn.ReturnElements> ReturnElements
         {
-            get
-            {
-                return OptionsIn.ReturnElements.GetValues();
-            }
+            get { return OptionsIn.ReturnElements.GetValues(); }
         }
 
+        /// <summary>
+        /// Shows the connection dialog to add or update connection settings.
+        /// </summary>
         public void ShowConnectionDialog()
         {
             var viewModel = new ConnectionViewModel(Runtime, ConnectionTypes.Witsml)
@@ -66,11 +105,20 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             }
         }
 
+        /// <summary>
+        /// Gets the capabilities from the server.
+        /// </summary>
         public void GetCapabilities()
         {
             Parent.Parent.GetCapabilities();
         }
 
+        /// <summary>
+        /// Gets the supported versions crom the server.
+        /// </summary>
+        /// <param name="proxy">The proxy.</param>
+        /// <param name="uri">The URI.</param>
+        /// <returns></returns>
         internal string GetVersions(WITSMLWebServiceConnection proxy, string uri)
         {
             proxy.Url = uri;
@@ -80,6 +128,9 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             return supportedVersions;
         }
 
+        /// <summary>
+        /// Called when initializing the SettingsViewModel.
+        /// </summary>
         protected override void OnInitialize()
         {
             _log.Debug("Initializing screen");
@@ -87,6 +138,9 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             Model.ReturnElementType = OptionsIn.ReturnElements.All;
         }
 
+        /// <summary>
+        /// Gets the supported versions from the server and initializes the UI element for version selection.
+        /// </summary>
         private void GetVersions()
         {
             _log.Debug("Selecting supported versions from WITSML server.");
