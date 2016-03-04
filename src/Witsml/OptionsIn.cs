@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using PDS.Framework;
 
 namespace PDS.Witsml
 {
@@ -150,6 +151,16 @@ namespace PDS.Witsml
         public override string ToString()
         {
             return string.Format("{0}={1}", Key, Value);
+        }
+
+        /// <summary>
+        /// Determines whether the specified value is equal to the current value, ignoring case.
+        /// </summary>
+        /// <param name="value">The other value.</param>
+        /// <returns><c>true</c> if the values are equal; otherwise, <c>false</c>.</returns>
+        public bool Equals(string value)
+        {
+            return Value.EqualsIgnoreCase(value);
         }
 
         /// <summary>

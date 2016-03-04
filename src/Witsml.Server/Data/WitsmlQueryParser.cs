@@ -58,11 +58,11 @@ namespace PDS.Witsml.Server.Data
         {
             string value = OptionsIn.GetValue(Options, OptionsIn.RequestPrivateGroupOnly.False);
             bool result;
-            bool success = bool.TryParse(value, out result);
-            if (success)
-                return result;
-            else
-                return false;
+
+            if (!bool.TryParse(value, out result))
+                result = false;
+
+            return result;
         }
 
         public IEnumerable<XElement> Elements()
