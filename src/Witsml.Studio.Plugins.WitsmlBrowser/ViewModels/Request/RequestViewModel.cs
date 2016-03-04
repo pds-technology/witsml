@@ -16,6 +16,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         /// <param name="runtime">The runtime service.</param>
         public RequestViewModel(IRuntimeService runtime)
         {
+            _log.Debug("Creating view model instance");
             Runtime = runtime;
         }
 
@@ -42,6 +43,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 
         internal void LoadScreens()
         {
+            _log.Debug("Loading RequestViewModel screens");
             Items.Add(new SettingsViewModel(Runtime));
             //Items.Add(new TreeViewViewModel());
             //Items.Add(new TemplatesViewModel());
@@ -52,10 +54,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 
         protected override void OnInitialize()
         {
-            _log.Debug("Loading Request View Models");
-
+            _log.Debug("Initializing screen");
             base.OnInitialize();
-
             LoadScreens();
         }
     }

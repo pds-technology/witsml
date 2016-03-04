@@ -14,6 +14,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 
         public SettingsViewModel(IRuntimeService runtime)
         {
+            _log.Debug("Creating view model instance");
             Runtime = runtime;
             DisplayName = "Settings";
             WitsmlVersions = new BindableCollection<string>();
@@ -53,16 +54,15 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
                 DataItem = Model.Connection,
             };
 
-
+            _log.Debug("Opening connection dialog");
             if (Runtime.ShowDialog(viewModel))
             {
                 Model.Connection = viewModel.DataItem;
+                _log.DebugFormat("Connection details updated from dialog:{3}Name: {0}{3}Uri: {1}{3}Username: {2}{3}{3}", 
+                    Model.Connection.Name, Model.Connection.Uri, Model.Connection.Username, Environment.NewLine);
 
                 // Make connection and get version
                 GetVersions();
-
-                // TODO: GetCap
-                // TODO: GetWells for the TreeView
             }
         }
 
@@ -74,18 +74,22 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         internal string GetVersions(WITSMLWebServiceConnection proxy, string uri)
         {
             proxy.Url = uri;
-            return proxy.GetVersion();
+            var supportedVersions = proxy.GetVersion();
+            _log.DebugFormat("Supported versions '{0}' found on WITSML server with uri '{1}'", supportedVersions, uri);
+
+            return supportedVersions;
         }
 
         protected override void OnInitialize()
         {
+            _log.Debug("Initializing screen");
             base.OnInitialize();
-
             Model.ReturnElementType = OptionsIn.ReturnElements.All;
         }
 
         private void GetVersions()
         {
+            _log.Debug("Selecting supported versions from WITSML server.");
             try
             {
                 WitsmlVersions.Clear();
@@ -93,7 +97,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
                 if (!string.IsNullOrEmpty(versions))
                 {
                     WitsmlVersions.AddRange(versions.Split(','));
-                    _log.DebugFormat("WitsmlVersions fetched {0}", versions);
                 }
                 else
                 {

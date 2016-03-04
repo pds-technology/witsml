@@ -4,8 +4,11 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 {
     public class TemplatesViewModel : Screen
     {
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(TemplatesViewModel));
+
         public TemplatesViewModel()
         {
+            _log.Debug("Creating view model instance");
             DisplayName = "Templates";
         }
 

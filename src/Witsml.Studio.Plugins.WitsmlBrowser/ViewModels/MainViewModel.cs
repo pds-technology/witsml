@@ -13,6 +13,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
 {
     public class MainViewModel : Conductor<IScreen>.Collection.AllActive, IPluginViewModel
     {
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MainViewModel));
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MainViewModel"/> class.
         /// </summary>
@@ -20,6 +22,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         [ImportingConstructor]
         public MainViewModel(IRuntimeService runtime)
         {
+            _log.Debug("Creating view model instance");
+
             Runtime = runtime;
 
             // Create the model for our witsml settings
@@ -121,17 +125,39 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
 
         public void SubmitQuery(Functions functionType)
         {
-            QueryResults.Text = string.Empty;
             string xmlOut = string.Empty;
             string suppMsgOut = string.Empty;
             string optionsIn = null;
 
-            SubmitQuery(functionType, XmlQuery.Text, ref xmlOut, ref suppMsgOut, ref optionsIn);
+            try
+            {
+                _log.DebugFormat("Query submitted for function '{0}'", functionType);
 
-            OutputResults(xmlOut, suppMsgOut);
-            OutputMessages(functionType, XmlQuery.Text, xmlOut, suppMsgOut, optionsIn);
+                QueryResults.Text = string.Empty;
 
-            // TODO: Add exception handling.  We don't want the app to crash because of a bad query.
+                SubmitQuery(functionType, XmlQuery.Text, ref xmlOut, ref suppMsgOut, ref optionsIn);
+
+                _log.DebugFormat("Query returned with{3}{3}xmlOut: {0}{3}{3}suppMsgOut: {1}{3}{3}optionsIn: {2}{3}{3}",
+                    GetLogStringText(xmlOut),
+                    GetLogStringText(suppMsgOut),
+                    GetLogStringText(optionsIn),
+                    Environment.NewLine);
+
+                OutputResults(xmlOut, suppMsgOut);
+                OutputMessages(functionType, XmlQuery.Text, xmlOut, suppMsgOut, optionsIn);
+            }
+            catch (Exception ex)
+            {
+                var message = string.Format("Error submitting query for function '{0}'{3}{3}Error Message: {1}{3}{3}Stack Trace:{3}{2}{3}",
+                    functionType, ex.Message, ex.StackTrace, Environment.NewLine);
+
+                // Log the error message
+                _log.Error(message);
+
+                // Output the error to the user
+                OutputResults(null, message);
+                OutputMessages(functionType, XmlQuery.Text, null, message, optionsIn);
+            }
         }
 
         public void GetCapabilities()
@@ -173,6 +199,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
 
         internal void LoadScreens()
         {
+            _log.Debug("Loading MainViewModel screens");
             Items.Add(RequestControl);
             Items.Add(ResultControl);
         }
@@ -188,6 +215,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// <returns></returns>
         internal WITSMLWebServiceConnection CreateProxy()
         {
+            _log.DebugFormat("A new Proxy is being created with {2}{2}uri: {0}{2}{2}WitsmlVersion: {1}{2}{2}", Model.Connection.Uri, Model.WitsmlVersion, Environment.NewLine);
             return new WITSMLWebServiceConnection(Model.Connection.Uri, GetWitsmlVersionEnum(Model.WitsmlVersion));
         }
 
@@ -207,8 +235,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
 
         protected override void OnInitialize()
         {
+            _log.Debug("Initializing screen");
             base.OnInitialize();
-
             LoadScreens();
         }
 
@@ -216,6 +244,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         {
             if (e.PropertyName.Equals("WitsmlVersion"))
             {
+                _log.Debug("WitsmlVersion property changed");
+
                 Runtime.Shell.BreadcrumbText = !string.IsNullOrEmpty(Model.WitsmlVersion)
                     ? string.Format("{0}/{1}", Settings.Default.PluginDisplayName, Model.WitsmlVersion)
                     : Settings.Default.PluginDisplayName;
@@ -225,6 +255,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
 
                 // Get the server capabilities for the newly selected version.
                 GetCapabilities();
+
+                // TODO: GetWells for the TreeView
             }
         }
 
@@ -259,6 +291,11 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                     Model.IsRequestObjectSelectionCapability ? ";" + OptionsIn.RequestObjectSelectionCapability.True : string.Empty,
                     Model.IsRequestPrivateGroupOnly ? ";" + OptionsIn.RequestPrivateGroupOnly.True : string.Empty
                     );
+        }
+
+        private string GetLogStringText(string logString)
+        {
+            return string.IsNullOrEmpty(logString) ? "<None>" : logString;
         }
     }
 }
