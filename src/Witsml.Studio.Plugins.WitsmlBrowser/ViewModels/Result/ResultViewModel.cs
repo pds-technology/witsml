@@ -6,12 +6,15 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
 {
     public class ResultViewModel : Screen
     {
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(ResultViewModel));
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ResultViewModel"/> class.
         /// </summary>
         /// <param name="runtime">The runtime service.</param>
         public ResultViewModel(IRuntimeService runtime)
         {
+            _log.Debug("Creating view model instance");
             Runtime = runtime;
         }
 

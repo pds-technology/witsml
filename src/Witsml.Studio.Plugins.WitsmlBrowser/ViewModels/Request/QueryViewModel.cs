@@ -7,12 +7,15 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 {
     public class QueryViewModel : Screen
     {
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(QueryViewModel));
+
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryViewModel"/> class.
         /// </summary>
         /// <param name="runtime">The runtime.</param>
         public QueryViewModel(IRuntimeService runtime)
         {
+            _log.Debug("Creating view model instance");
             Runtime = runtime;
             DisplayName = "Query";
         }
@@ -60,6 +63,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 
         public void SubmitQuery(string functionText)
         {
+            _log.DebugFormat("Submitting a query for '{0}'", functionText);
+
             MainViewModel.SubmitQuery((Functions)Enum.Parse(typeof(Functions), functionText));
         }
 
