@@ -167,8 +167,8 @@ namespace PDS.Witsml.Server.Data
         {
             if (OptionsIn.RequestObjectSelectionCapability.True.Equals(parser.RequestObjectSelectionCapability()))
             {
-                T dataObject = (T)CreateObjectSelectionTemplate(typeof(T));
-                return new List<T>() { dataObject };
+                var queryTemplate = CreateQueryTemplate();
+                return queryTemplate.AsList();
             }
 
             var query = new MongoDbQuery<TList, T>(GetCollection(), parser, fields, IdPropertyName);          
