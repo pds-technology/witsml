@@ -98,6 +98,7 @@
     <Compile Include="Data\WitsmlDataProvider.cs" />
     <Compile Include="Configuration\IWitsml131Configuration.cs" />
     <Compile Include="Configuration\IWitsml141Configuration.cs" />
+    <Compile Include="Data\WitsmlQueryTemplate.cs" />
     <Compile Include="IWitsmlStore.cs" />
     <Compile Include="Logging\DebugExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
