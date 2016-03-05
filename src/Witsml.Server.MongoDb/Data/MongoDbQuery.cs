@@ -57,13 +57,17 @@ namespace PDS.Witsml.Server.Data
                 var results = _collection.Find(filter ?? "{}");
 
                 // Format response using MongoDb projection, i.e. selecting specified fields only
-                if (returnElements == OptionsIn.ReturnElements.All.Value)
+                if (OptionsIn.ReturnElements.All.Equals(returnElements))
+                {
                     entities.AddRange(results.ToList());
-                else if (returnElements == OptionsIn.ReturnElements.IdOnly.Value || returnElements == OptionsIn.ReturnElements.Requested.Value)
+                }
+                else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElements) || OptionsIn.ReturnElements.Requested.Equals(returnElements))
                 {
                     var projection = BuildProjection(_parser, entity);
+
                     if (projection != null)
                         results = results.Project<T>(projection);
+
                     entities.AddRange(results.ToList());
                 }
             }
@@ -82,13 +86,16 @@ namespace PDS.Witsml.Server.Data
             var properties = GetPropertyInfo(entity.GetType());
             var filters = new List<FilterDefinition<T>>();
             var privateGroupOnly = parser.RequestPrivateGroupOnly();
-            var privateGroupOnlyFilter = privateGroupOnly ? Builders<T>.Filter.Eq("CommonData.PrivateGroupOnly", privateGroupOnly) :
-                Builders<T>.Filter.Ne("CommonData.PrivateGroupOnly", !privateGroupOnly);
+            var privateGroupOnlyFilter = privateGroupOnly
+                ? Builders<T>.Filter.Eq("CommonData.PrivateGroupOnly", privateGroupOnly)
+                : Builders<T>.Filter.Ne("CommonData.PrivateGroupOnly", !privateGroupOnly);
+
             filters.Add(privateGroupOnlyFilter);
 
             foreach (var property in properties)
             {
                 var filter = BuildFilterForAProperty(property, entity);
+
                 if (filter != null)
                     filters.Add(filter);
             }
@@ -188,30 +195,60 @@ namespace PDS.Witsml.Server.Data
         private ProjectionDefinition<T> BuildProjection(WitsmlQueryParser parser, T entity)
         {
             var element = parser.Element();
+
             if (element == null)
                 return null;
 
             if (_fields == null)
                 _fields = new List<string>();
 
-            var properties = GetPropertyInfo(typeof(T));
-
-            foreach (var child in element.Elements())
-            {
-                var property = GetPropertyInfoForAnElement(properties, child);
-                var value = property.GetValue(entity);
-                BuildProjectionForAnElement(child, null, property, value);
-            }
+            BuildProjectionForAnElement(element, null, entity);
 
             if (_fields.Count == 0)
+            {
                 return Builders<T>.Projection.Exclude(_idPropertyName).Include(string.Empty);
-            else {
+            }
+            else
+            {
                 var projection = Builders<T>.Projection.Include(_fields[0]);
+
                 for (var i = 1; i < _fields.Count; i++)
                     projection = projection.Include(_fields[i]);
+
                 if (!_fields.Contains(_idPropertyName))
                     projection = projection.Exclude(_idPropertyName);
+
                 return projection;
+            }
+        }
+
+        /// <summary>
+        /// Builds the projection for an element in the QueryIn XML recursively.
+        /// </summary>
+        /// <param name="element">The element.</param>
+        /// <param name="fieldPath">The field path to the top level property of the queried entity.</param>
+        /// <param name="propertyValue">The property value for the field.</param>
+        private void BuildProjectionForAnElement(XElement element, string fieldPath, object propertyValue)
+        {
+            var properties = GetPropertyInfo(propertyValue.GetType());
+
+            if (element.HasElements)
+            {
+                foreach (var child in element.Elements())
+                {
+                    var property = GetPropertyInfoForAnElement(properties, child);
+                    var value = property.GetValue(propertyValue);
+
+                    BuildProjectionForAnElement(child, fieldPath, property, value);
+                }
+            }
+            if (element.HasAttributes)
+            {
+                foreach (var attribute in element.Attributes())
+                {
+                    var attributePath = GetPropertyPath(fieldPath, attribute.Name.LocalName);
+                    AddProjectionProperty(attributePath);
+                }
             }
         }
 
@@ -224,35 +261,15 @@ namespace PDS.Witsml.Server.Data
         /// <param name="propertyValue">The property value for the field.</param>
         private void BuildProjectionForAnElement(XElement element, string fieldPath, PropertyInfo propertyInfo, object propertyValue)
         {
-            var prefix = string.IsNullOrEmpty(fieldPath) ? string.Empty : string.Format("{0}.", fieldPath);
-            var path = string.Format("{0}{1}", prefix, CaptalizeString(propertyInfo.Name));
+            var path = GetPropertyPath(fieldPath, propertyInfo.Name);
+
             if (!element.HasElements && !element.HasAttributes)
             {
-                if (!_fields.Contains(path))
-                    _fields.Add(path);
+                AddProjectionProperty(path);
                 return;
             }
 
-            var properties = GetPropertyInfo(propertyValue.GetType());
-
-            if (element.HasElements)
-            {
-                foreach (var child in element.Elements())
-                {
-                    var property = GetPropertyInfoForAnElement(properties, child);
-                    var value = property.GetValue(propertyValue);
-                    BuildProjectionForAnElement(child, path, property, value);
-                }
-            }
-            if (element.HasAttributes)
-            {
-                foreach (var attribute in element.Attributes())
-                {
-                    var attributePath = string.Format("{0}.{1}", path, CaptalizeString(attribute.Name.LocalName));
-                    if (!_fields.Contains(attributePath))
-                        _fields.Add(attributePath);
-                }
-            }
+            BuildProjectionForAnElement(element, path, propertyValue);
         }
 
         /// <summary>
@@ -282,12 +299,27 @@ namespace PDS.Witsml.Server.Data
             return null;
         }
 
+        private void AddProjectionProperty(string propertyPath)
+        {
+            if (_fields.Contains(propertyPath) || OptionsIn.ReturnElements.IdOnly.Equals(_parser.ReturnElements()))
+                return;
+
+            _fields.Add(propertyPath);
+        }
+
+        private string GetPropertyPath(string parentPath, string propertyName)
+        {
+            var prefix = string.IsNullOrEmpty(parentPath) ? string.Empty : string.Format("{0}.", parentPath);
+            return string.Format("{0}{1}", prefix, CaptalizeString(propertyName));
+        }
+
         private string CaptalizeString(string input)
         {
             if (string.IsNullOrEmpty(input))
                 return input;
 
             var result = char.ToUpper(input[0]).ToString();
+
             if (input.Length > 1)
                 result += input.Substring(1);
 
