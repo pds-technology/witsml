@@ -212,7 +212,7 @@ namespace PDS.Witsml.Server.Data
                         }
                     }
                 }
-                else if (propertyType == typeof(Energistics.Datatypes.DateTime))
+                else if (propertyType == typeof(System.DateTime))
                 {
                     property.SetValue(dataObject, Convert.ToDateTime("1900-01-01T00:00:00.000Z"));
                 }
