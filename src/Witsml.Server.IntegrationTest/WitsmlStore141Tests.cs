@@ -116,24 +116,18 @@ namespace PDS.Witsml.Server
         [TestMethod]
         public void Query_OptionsIn_requestObjectSelectionCapability()
         {
-            var well = new Well { Name = "Well-to-add-01", TimeZone = DevKit.TimeZone};
-            var response = DevKit.Add<WellList, Well>(well);
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            well = new Well { Name = "Well-to-add-02", TimeZone = DevKit.TimeZone };
-            response = DevKit.Add<WellList, Well>(well);
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            well = new Well();
-            var result = DevKit.Query<WellList, Well>(well, optionsIn: "requestObjectSelectionCapability=true");
+            Well well = new Well();
+            var result = DevKit.Query<WellList, Well>(well, optionsIn: OptionsIn.RequestObjectSelectionCapability.True);
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);
 
             well = result.FirstOrDefault();
             Assert.IsNotNull(well);
             Assert.AreEqual("abc", well.Uid);
+            Assert.IsNotNull(well.StatusWell);
+            Assert.IsTrue(well.WellLocation.Count == 1);
+            Assert.AreEqual(1, well.PercentInterest.Value);
+            Assert.IsNotNull(well.CommonData.DateTimeLastChange);
         }
 
         [TestMethod]
@@ -156,7 +150,7 @@ namespace PDS.Witsml.Server
             Assert.IsTrue(valid);
 
             well = new Well();
-            var result = DevKit.Query<WellList, Well>(well, optionsIn: "returnElements=all;requestPrivateGroupOnly=true");
+            var result = DevKit.Query<WellList, Well>(well, optionsIn: OptionsIn.ReturnElements.All + ";" + OptionsIn.RequestPrivateGroupOnly.True);
             Assert.IsNotNull(result);
 
             var notPrivateGroupWells = result.Where(x =>
