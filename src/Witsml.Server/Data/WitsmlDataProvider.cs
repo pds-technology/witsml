@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Energistics.DataAccess;
 using log4net;
 using PDS.Witsml.Server.Configuration;

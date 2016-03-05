@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using Energistics.Datatypes;
-using PDS.Framework;
 using Energistics.DataAccess;
+using Energistics.Datatypes;
 using log4net;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data
 {
