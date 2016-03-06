@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Composition;
+using System.Threading.Tasks;
 using Caliburn.Micro;
 using Energistics.DataAccess;
 using ICSharpCode.AvalonEdit.Document;
@@ -174,50 +175,25 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         }
 
         /// <summary>
-        /// Submits a query to the WITSML server for a given function type.
+        /// Submits an asynchronous query to the WITSML server for a given function type.
         /// The results of a query are displayed in the Results and Messages tabs.
         /// </summary>
         /// <param name="functionType">Type of the function.</param>
         public void SubmitQuery(Functions functionType)
         {
-            string xmlOut = string.Empty;
-            string suppMsgOut = string.Empty;
-            string optionsIn = null;
+            string xmlIn = XmlQuery.Text;
 
-            try
+            _log.DebugFormat("Query submitted for function '{0}'", functionType);
+
+            // Clear any previous query results
+            QueryResults.Text = string.Empty;
+
+            Task.Run(async () =>
             {
-                _log.DebugFormat("Query submitted for function '{0}'", functionType);
-
-                // Clear any previous query results
-                QueryResults.Text = string.Empty;
-
                 // Call internal SubmitQuery method with references to all inputs and outputs.
-                SubmitQuery(functionType, XmlQuery.Text, ref xmlOut, ref suppMsgOut, ref optionsIn);
-
-                _log.DebugFormat("Query returned with{3}{3}xmlOut: {0}{3}{3}suppMsgOut: {1}{3}{3}optionsIn: {2}{3}{3}",
-                    GetLogStringText(xmlOut),
-                    GetLogStringText(suppMsgOut),
-                    GetLogStringText(optionsIn),
-                    Environment.NewLine);
-
-                // Output query results to the Results tab
-                OutputResults(xmlOut, suppMsgOut);
-
-                // Append these results to the Messages tab
-                OutputMessages(functionType, XmlQuery.Text, xmlOut, suppMsgOut, optionsIn);
-            }
-            catch (Exception ex)
-            {
-                var message = string.Format("Error submitting query for function '{0}'{3}{3}Error Message: {1}{3}{3}Stack Trace:{3}{2}{3}",
-                    functionType, ex.Message, ex.StackTrace, Environment.NewLine);
-
-                // Log the error message
-                _log.Error(message);
-
-                // Output the error to the user
-                OutputResults(null, message);
-                OutputMessages(functionType, XmlQuery.Text, null, message, optionsIn);
-            }
+                var result = await SubmitQuery(functionType, xmlIn);
+                await Runtime.InvokeAsync(() => ShowSubmitResult(functionType, result));
+            });
         }
 
         /// <summary>
@@ -233,40 +209,59 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// </summary>
         /// <param name="functionType">Type of the function to execute.</param>
         /// <param name="xmlIn">The XML in.</param>
-        /// <param name="xmlOut">The XML out.</param>
-        /// <param name="suppMsgOut">The supplemental message out.</param>
-        /// <param name="optionsIn">The server OptionsIn.</param>
-        internal void SubmitQuery(Functions functionType, string xmlIn, ref string xmlOut, ref string suppMsgOut, ref string optionsIn)
+        /// <returns>
+        /// A string arrary of three result strings in the following order: xmlOut, suppMsgOut and optionsIn.
+        /// </returns>
+        internal async Task<string[]> SubmitQuery(Functions functionType, string xmlIn)
         {
-            using (var client = Proxy.CreateClientProxy())
+            string xmlOut = null;
+            string suppMsgOut = null;
+            string optionsIn = null;
+
+            try
             {
-                var wmls = client as IWitsmlClient;
-
-                // Compute the object type of the incoming xml.
-                var objectType = ObjectTypes.GetObjectTypeFromGroup(xmlIn);
-
-                // Execute the WITSML server function for the given functionType
-                switch (functionType)
+                using (var client = Proxy.CreateClientProxy())
                 {
-                    case Functions.GetCap:
-                        // Set options in for the selected WitsmlVersion.
-                        optionsIn = new OptionsIn.DataVersion(Model.WitsmlVersion);
-                        wmls.WMLS_GetCap(optionsIn, out xmlOut, out suppMsgOut);
-                        break;
-                    case Functions.AddToStore:
-                        wmls.WMLS_AddToStore(objectType, xmlIn, null, null, out suppMsgOut);
-                        break;
-                    case Functions.UpdateInStore:
-                        //Runtime.ShowInfo("Coming soon.");
-                        break;
-                    case Functions.DeleteFromStore:
-                        //Runtime.ShowInfo("Coming soon.");
-                        break;
-                    default:
-                        optionsIn = GetGetFromStoreOptionsIn();
-                        wmls.WMLS_GetFromStore(objectType, xmlIn, optionsIn, null, out xmlOut, out suppMsgOut);
-                        break;
+                    var wmls = client as IWitsmlClient;
+
+                    // Compute the object type of the incoming xml.
+                    var objectType = ObjectTypes.GetObjectTypeFromGroup(xmlIn);
+
+                    // Execute the WITSML server function for the given functionType
+                    switch (functionType)
+                    {
+                        case Functions.GetCap:
+                            // Set options in for the selected WitsmlVersion.
+                            optionsIn = new OptionsIn.DataVersion(Model.WitsmlVersion);
+                            wmls.WMLS_GetCap(optionsIn, out xmlOut, out suppMsgOut);
+                            break;
+                        case Functions.AddToStore:
+                            wmls.WMLS_AddToStore(objectType, xmlIn, null, null, out suppMsgOut);
+                            break;
+                        case Functions.UpdateInStore:
+                            //Runtime.ShowInfo("Coming soon.");
+                            break;
+                        case Functions.DeleteFromStore:
+                            //Runtime.ShowInfo("Coming soon.");
+                            break;
+                        default:
+                            optionsIn = GetGetFromStoreOptionsIn();
+                            wmls.WMLS_GetFromStore(objectType, xmlIn, optionsIn, null, out xmlOut, out suppMsgOut);
+                            break;
+                    }
+
+                    return await Task.FromResult(new string[] { xmlOut, suppMsgOut, optionsIn });
                 }
+            }
+            catch (Exception ex)
+            {
+                var message = string.Format("Error submitting query for function '{0}'{3}{3}Error Message: {1}{3}{3}Stack Trace:{3}{2}{3}",
+                    functionType, ex.Message, ex.StackTrace, Environment.NewLine);
+
+                // Log the error message
+                _log.Error(message);
+
+                return await Task.FromResult(new string[] { xmlOut, message, optionsIn });
             }
         }
 
@@ -323,6 +318,26 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             _log.Debug("Initializing screen");
             base.OnInitialize();
             LoadScreens();
+        }
+
+        /// <summary>
+        /// Logs and displays the results of a WITSML submitted query.
+        /// </summary>
+        /// <param name="functionType">Type of the function.</param>
+        /// <param name="result">A string array of three result: xmlOut, suppMsgOut and optionsIn.</param>
+        private void ShowSubmitResult(Functions functionType, string[] result)
+        {
+            _log.DebugFormat("Query returned with{3}{3}xmlOut: {0}{3}{3}suppMsgOut: {1}{3}{3}optionsIn: {2}{3}{3}",
+                GetLogStringText(result[0]), // xmlOut
+                GetLogStringText(result[1]), // suppMsgOut
+                GetLogStringText(result[2]), // optionsIn
+                Environment.NewLine);
+
+            // Output query results to the Results tab
+            OutputResults(result[0], result[1]); // xmlOut, suppMsgOut
+
+            // Append these results to the Messages tab
+            OutputMessages(functionType, XmlQuery.Text, result[0], result[1], result[2]); // xmlOut, suppMsgOut, optionsIn
         }
 
         /// <summary>

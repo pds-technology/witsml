@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -41,7 +42,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
         }
 
         [TestMethod]
-        public void TestSubmitAddToStoreForWell()
+        public async Task TestSubmitAddToStoreForWell()
         {
             // The expected result
             var expectedUid = Guid.NewGuid().ToString();
@@ -59,17 +60,15 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
             vm.Model.ReturnElementType = OptionsIn.ReturnElements.All;
 
             // Submit the query
-            string xmlOut = string.Empty;
-            string suppMsgOut = string.Empty;
-            string optionsIn = null;
-            vm.SubmitQuery(Functions.AddToStore, xmlIn, ref xmlOut, ref suppMsgOut, ref optionsIn);
+            var result = await vm.SubmitQuery(Functions.AddToStore, xmlIn);
+            var suppMsgOut = result[1];
 
             // The same uid should be returned as the results.
             Assert.AreEqual(expectedUid, suppMsgOut);
         }
 
         [TestMethod]
-        public void TestSubmitGetFromStoreForWell()
+        public async Task TestSubmitGetFromStoreForWell()
         {
             // The expected result
             var expectedUid = Guid.NewGuid().ToString();
@@ -80,20 +79,18 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
             vm.Proxy.Url = vm.Model.Connection.Uri;
             vm.Model.ReturnElementType = OptionsIn.ReturnElements.All;
 
-            string xmlOut = string.Empty;
-            string suppMsgOut = string.Empty;
-            string optionsIn = null;
-
             // Add a well to the store
             var xmlIn = string.Format(
                 _addWellTemplate,
                 expectedUid,
                 DateTime.Now.ToString("yyyyMMdd-HHmmss"));
-            vm.SubmitQuery(Functions.AddToStore, xmlIn, ref xmlOut, ref suppMsgOut, ref optionsIn);
+            var result = await vm.SubmitQuery(Functions.AddToStore, xmlIn);
 
             // Retrieve the same well from the store
             xmlIn = string.Format(_getWellTemplate, expectedUid);
-            vm.SubmitQuery(Functions.GetFromStore, xmlIn, ref xmlOut, ref suppMsgOut, ref optionsIn);
+            result = await vm.SubmitQuery(Functions.GetFromStore, xmlIn);
+
+            string xmlOut = result[0];
 
             // The same uid should be returned as the results.
             Assert.IsNotNull(xmlOut);
