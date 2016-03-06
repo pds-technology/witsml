@@ -30,6 +30,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             _log.Debug("Creating view model instance");
 
             Runtime = runtime;
+            DisplayName = Settings.Default.PluginDisplayName;
 
             // Create the model for our witsml settings
             Model = new Models.WitsmlSettings();
@@ -45,8 +46,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             // Create view models displayed within this view model.
             RequestControl = new RequestViewModel(Runtime);
             ResultControl = new ResultViewModel(Runtime);
-
-            DisplayName = Settings.Default.PluginDisplayName;
 
             // Handle notifications for our witsml settings model changes
             Model.PropertyChanged += Model_PropertyChanged;
@@ -338,9 +337,9 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             {
                 _log.Debug("WitsmlVersion property changed");
 
-                Runtime.Shell.BreadcrumbText = !string.IsNullOrEmpty(Model.WitsmlVersion)
-                    ? string.Format("{0}/{1}", Settings.Default.PluginDisplayName, Model.WitsmlVersion)
-                    : Settings.Default.PluginDisplayName;
+                Runtime.Shell.SetBreadcrumb(!string.IsNullOrEmpty(Model.WitsmlVersion)
+                    ? string.Format("{0} / {1}", Settings.Default.PluginDisplayName, Model.WitsmlVersion)
+                    : Settings.Default.PluginDisplayName);
 
                 // Reset the Proxy when the version changes
                 Proxy = CreateProxy();

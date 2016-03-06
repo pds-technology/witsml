@@ -1,7 +1,8 @@
 ﻿using Caliburn.Micro;
 using Energistics.Datatypes;
-using ICSharpCode.AvalonEdit.Document;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Models;
+using PDS.Witsml.Studio.Runtime;
+using PDS.Witsml.Studio.ViewModels;
 
 namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
 {
@@ -14,10 +15,10 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// <summary>
         /// Initializes a new instance of the <see cref="StoreViewModel"/> class.
         /// </summary>
-        public StoreViewModel()
+        public StoreViewModel(IRuntimeService runtime)
         {
             DisplayName = string.Format("{0:D} - {0}", Protocols.Store);
-            Data = new TextDocument();
+            Data = new TextEditorViewModel(runtime, "XML");
         }
 
         /// <summary>
@@ -37,12 +38,13 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             get { return Parent.Model; }
         }
 
-        private TextDocument _data;
+        private TextEditorViewModel _data;
+
         /// <summary>
-        /// Gets or sets the data document.
+        /// Gets or sets the data editor.
         /// </summary>
-        /// <value>The output.</value>
-        public TextDocument Data
+        /// <value>The text editor view model.</value>
+        public TextEditorViewModel Data
         {
             get { return _data; }
             set
@@ -60,7 +62,10 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public void GetObject()
         {
-            Parent.SendGetObject(Model.Store.Uri);
+            if (!string.IsNullOrWhiteSpace(Model.Store.Uri))
+            {
+                Parent.SendGetObject(Model.Store.Uri);
+            }
         }
 
         /// <summary>
@@ -76,7 +81,10 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public void DeleteObject()
         {
-            Parent.SendDeleteObject(Model.Store.Uri);
+            if (!string.IsNullOrWhiteSpace(Model.Store.Uri))
+            {
+                Parent.SendDeleteObject(Model.Store.Uri);
+            }
         }
     }
 }

@@ -24,5 +24,11 @@ namespace PDS.Witsml.Studio.ViewModels
         /// Gets or sets the breadcrumb path for the application shell
         /// </summary>
         string BreadcrumbText { get; set; }
+
+        /// <summary>
+        /// Sets the breadcrumb text.
+        /// </summary>
+        /// <param name="values">The values.</param>
+        void SetBreadcrumb(params object[] values);
     }
 }

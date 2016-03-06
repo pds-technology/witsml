@@ -3,13 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:avalon="http://icsharpcode.net/sharpdevelop/avalonedit"
              xmlns:cal="http://www.caliburnproject.org"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:app="clr-namespace:PDS.Witsml.Studio.Behaviors;assembly=PDS.Witsml.Studio"
-             xmlns:local="clr-namespace:PDS.Witsml.Studio.Plugins.EtpBrowser.Views"
              mc:Ignorable="d" d:DesignHeight="400" d:DesignWidth="300">
-    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
@@ -37,14 +34,7 @@
         <TextBox Text="{Binding Model.Store.ContentType}" Grid.Column="1" Grid.Row="3" Margin="5" Padding="5" VerticalContentAlignment="Center" />
 
         <Border Grid.Row="4" Grid.ColumnSpan="2" Margin="5" BorderThickness="1" BorderBrush="#FFABADB3">
-            <avalon:TextEditor Document="{Binding Data}" Margin="1" Padding="5" SyntaxHighlighting="XML" FontFamily="Consolas" FontSize="10pt">
-                <avalon:TextEditor.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="Copy" cal:Message.Attach="CopyDetails" />
-                        <MenuItem Header="Clear" cal:Message.Attach="ClearDetails" />
-                    </ContextMenu>
-                </avalon:TextEditor.ContextMenu>
-            </avalon:TextEditor>
+            <ContentControl x:Name="Data" />
         </Border>
         
         <Grid Grid.Row="5" Grid.ColumnSpan="2" Margin="5,0,5,5" HorizontalAlignment="Left">

@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
-using System.Windows;
-using System.Windows.Controls;
 using Avro.Specific;
 using Caliburn.Micro;
 using Energistics;
@@ -13,8 +11,6 @@ using Energistics.Datatypes;
 using Energistics.Protocol.Core;
 using Energistics.Protocol.Discovery;
 using Energistics.Protocol.Store;
-using ICSharpCode.AvalonEdit;
-using ICSharpCode.AvalonEdit.Document;
 using PDS.Framework;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Models;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Properties;
@@ -42,9 +38,13 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             Runtime = runtime;
             DisplayName = Settings.Default.PluginDisplayName;
             Resources = new BindableCollection<ResourceViewModel>();
-            Details = new TextDocument();
-            Messages = new TextDocument();
             Model = new EtpSettings();
+
+            Details = new TextEditorViewModel(runtime, "JavaScript", true);
+            Messages = new TextEditorViewModel(runtime, "JavaScript", true)
+            {
+                IsScrollingEnabled = true
+            };
         }
 
         /// <summary>
@@ -73,12 +73,13 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// <value>The collection of resources.</value>
         public BindableCollection<ResourceViewModel> Resources { get; private set; }
 
-        private TextDocument _details;
+        private TextEditorViewModel _details;
+
         /// <summary>
         /// Gets or sets the details document.
         /// </summary>
         /// <value>The output.</value>
-        public TextDocument Details
+        public TextEditorViewModel Details
         {
             get { return _details; }
             set
@@ -91,12 +92,13 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             }
         }
 
-        private TextDocument _messages;
+        private TextEditorViewModel _messages;
+
         /// <summary>
         /// Gets or sets the messages document.
         /// </summary>
         /// <value>The output.</value>
-        public TextDocument Messages
+        public TextEditorViewModel Messages
         {
             get { return _messages; }
             set
@@ -142,53 +144,14 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         }
 
         /// <summary>
-        /// Copies the details to the clipboard.
-        /// </summary>
-        public void CopyDetails()
-        {
-            Runtime.Invoke(() => Clipboard.SetText(Details.Text));
-        }
-
-        /// <summary>
-        /// Clears the details.
-        /// </summary>
-        public void ClearDetails()
-        {
-            Runtime.Invoke(() => Details.Text = string.Empty);
-        }
-
-        /// <summary>
-        /// Copies the messages to the clipboard.
-        /// </summary>
-        public void CopyMessages()
-        {
-            Runtime.Invoke(() => Clipboard.SetText(Messages.Text));
-        }
-
-        /// <summary>
-        /// Clears the messages.
-        /// </summary>
-        public void ClearMessages()
-        {
-            Runtime.Invoke(() => Messages.Text = string.Empty);
-        }
-
-        /// <summary>
-        /// Scrolls to the bottom of the current text content.
-        /// </summary>
-        /// <param name="control">The control.</param>
-        public void ScrollToBottom(TextEditor control)
-        {
-            control.ScrollToEnd();
-        }
-
-        /// <summary>
         /// Called when initializing.
         /// </summary>
         protected override void OnInitialize()
         {
             base.OnInitialize();
             ActivateItem(new SettingsViewModel(Runtime));
+            Items.Add(new HierarchyViewModel());
+            Items.Add(new StoreViewModel(Runtime));
         }
 
         /// <summary>
@@ -206,23 +169,29 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         }
 
         /// <summary>
+        /// Called by a subclass when an activation needs processing.
+        /// </summary>
+        /// <param name="item">The item on which activation was attempted.</param>
+        /// <param name="success">if set to <c>true</c> activation was successful.</param>
+        protected override void OnActivationProcessed(IScreen item, bool success)
+        {
+            base.OnActivationProcessed(item, success);
+
+            Runtime.Invoke(() =>
+            {
+                Runtime.Shell.SetBreadcrumb(DisplayName, item.DisplayName);
+            });
+        }
+
+        /// <summary>
         /// Called when the connection has changed.
         /// </summary>
         public void OnConnectionChanged()
         {
             CloseEtpClient();
             Resources.Clear();
-
-            Runtime.Invoke(() =>
-            {
-                Messages.Text = string.Empty;
-                Details.Text = string.Empty;
-            });
-
-            while (Items.Count > 1)
-            {
-                this.CloseItem(Items[1]);
-            }
+            Messages.Clear();
+            Details.Clear();
 
             if (!string.IsNullOrWhiteSpace(Model.Connection.Uri))
             {
@@ -237,7 +206,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         {
             try
             {
-                Runtime.Shell.StatusBarText = "Connecting...";
+                Runtime.Invoke(() => Runtime.Shell.StatusBarText = "Connecting...");
 
                 _client = new EtpClient(Model.Connection.Uri, "ETP Browser");
                 _client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();
@@ -288,12 +257,8 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
 
             if (e.Message.SupportedProtocols.Any(x => x.Protocol == (int)Protocols.Discovery))
             {
-                ActivateItem(new HierarchyViewModel());
+                ActivateItem(Items[1]);
                 GetResources(EtpUri.RootUri);
-            }
-            if (e.Message.SupportedProtocols.Any(x => x.Protocol == (int)Protocols.Store))
-            {
-                Items.Add(new StoreViewModel());
             }
         }
 
@@ -367,15 +332,12 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// <param name="e">The <see cref="ProtocolEventArgs{Energistics.Protocol.Store.Object}"/> instance containing the event data.</param>
         private void OnObject(object sender, ProtocolEventArgs<Energistics.Protocol.Store.Object> e)
         {
-            Runtime.Invoke(() =>
-            {
-                Details.Text = string.Format(
-                    "// Header:{3}{0}{3}{3}// Body:{3}{1}{3}{3}/* Data:{3}{2}{3}*/{3}",
-                    _client.Serialize(e.Header, true),
-                    _client.Serialize(e.Message, true),
-                    Encoding.UTF8.GetString(e.Message.DataObject.Data),
-                    Environment.NewLine);
-            });
+            Details.SetText(string.Format(
+                "// Header:{3}{0}{3}{3}// Body:{3}{1}{3}{3}/* Data:{3}{2}{3}*/{3}",
+                _client.Serialize(e.Header, true),
+                _client.Serialize(e.Message, true),
+                Encoding.UTF8.GetString(e.Message.DataObject.Data),
+                Environment.NewLine));
         }
 
         /// <summary>
@@ -385,14 +347,11 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// <param name="e">The <see cref="ProtocolEventArgs{T}"/> instance containing the event data.</param>
         private void LogObjectDetails<T>(ProtocolEventArgs<T> e) where T : ISpecificRecord
         {
-            Runtime.Invoke(() =>
-            {
-                Details.Text = string.Format(
-                    "// Header:{2}{0}{2}{2}// Body:{2}{1}{2}",
-                    _client.Serialize(e.Header, true),
-                    _client.Serialize(e.Message, true),
-                    Environment.NewLine);
-            });
+            Details.SetText(string.Format(
+                "// Header:{2}{0}{2}{2}// Body:{2}{1}{2}",
+                _client.Serialize(e.Header, true),
+                _client.Serialize(e.Message, true),
+                Environment.NewLine));
         }
 
         /// <summary>
@@ -403,15 +362,12 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// <param name="e">The <see cref="ProtocolEventArgs{T, V}"/> instance containing the event data.</param>
         private void LogObjectDetails<T, V>(ProtocolEventArgs<T, V> e) where T : ISpecificRecord
         {
-            Runtime.Invoke(() =>
-            {
-                Details.Text = string.Format(
-                    "// Header:{3}{0}{3}{3}// Body:{3}{1}{3}{3}// Context:{3}{2}{3}",
-                    _client.Serialize(e.Header, true),
-                    _client.Serialize(e.Message, true),
-                    _client.Serialize(e.Context, true),
-                    Environment.NewLine);
-            });
+            Details.SetText(string.Format(
+                "// Header:{3}{0}{3}{3}// Body:{3}{1}{3}{3}// Context:{3}{2}{3}",
+                _client.Serialize(e.Header, true),
+                _client.Serialize(e.Message, true),
+                _client.Serialize(e.Context, true),
+                Environment.NewLine));
         }
 
         /// <summary>
@@ -425,15 +381,10 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 return;
             }
 
-            Runtime.Invoke(() =>
-            {
-                Messages.Insert(Messages.TextLength,
-                    string.Concat(
-                        message.StartsWith("{") ? string.Empty : "// ",
-                        message,
-                        Environment.NewLine),
-                    AnchorMovementType.AfterInsertion);
-            });
+            Messages.Append(string.Concat(
+                message.StartsWith("{") ? string.Empty : "// ",
+                message,
+                Environment.NewLine));
         }
     }
 }

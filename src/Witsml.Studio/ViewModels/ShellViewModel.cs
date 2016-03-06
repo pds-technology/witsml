@@ -85,6 +85,15 @@ namespace PDS.Witsml.Studio.ViewModels
         }
 
         /// <summary>
+        /// Sets the breadcrumb text.
+        /// </summary>
+        /// <param name="values">The values.</param>
+        public void SetBreadcrumb(params object[] values)
+        {
+            BreadcrumbText = string.Join(" / ", values);
+        }
+
+        /// <summary>
         /// Loads the plug-ins.
         /// </summary>
         internal void LoadPlugins()
