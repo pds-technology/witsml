@@ -16,6 +16,8 @@ namespace PDS.Witsml.Server.Data
 
             Console.WriteLine(xml);
             Assert.IsNotNull(xml);
+
+            Assert.IsTrue(xml.Contains("<statusWell>abandoned</statusWell>"));
         }
 
         [TestMethod]
@@ -26,6 +28,8 @@ namespace PDS.Witsml.Server.Data
 
             Console.WriteLine(xml);
             Assert.IsNotNull(xml);
+
+            Assert.IsTrue(xml.Contains("<statusWellbore>abandoned</statusWellbore>"));
         }
 
         [TestMethod]
@@ -36,6 +40,8 @@ namespace PDS.Witsml.Server.Data
 
             Console.WriteLine(xml);
             Assert.IsNotNull(xml);
+
+            Assert.IsTrue(xml.Contains("<direction>decreasing</direction>"));
         }
 
         [TestMethod]
@@ -46,6 +52,8 @@ namespace PDS.Witsml.Server.Data
 
             Console.WriteLine(xml);
             Assert.IsNotNull(xml);
+
+            Assert.IsTrue(xml.Contains("<statusWell>abandoned</statusWell>"));
         }
 
         [TestMethod]
@@ -56,6 +64,8 @@ namespace PDS.Witsml.Server.Data
 
             Console.WriteLine(xml);
             Assert.IsNotNull(xml);
+
+            Assert.IsTrue(xml.Contains("<statusWellbore>abandoned</statusWellbore>"));
         }
 
         [TestMethod]
@@ -66,6 +76,8 @@ namespace PDS.Witsml.Server.Data
 
             Console.WriteLine(xml);
             Assert.IsNotNull(xml);
+
+            Assert.IsTrue(xml.Contains("<direction>decreasing</direction>"));
         }
     }
 }

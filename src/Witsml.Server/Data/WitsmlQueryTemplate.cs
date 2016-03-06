@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Xml.Serialization;
 using Energistics.DataAccess;
 using log4net;
 using Witsml131 = Energistics.DataAccess.WITSML131;
@@ -109,7 +111,7 @@ namespace PDS.Witsml.Server.Data
             {
                 try
                 {
-                    if (property.CanWrite)
+                    if (property.CanWrite && !IsIgnored(property))
                     {
                         property.SetValue(dataObject, CreateTemplate(property.PropertyType));
                     }
@@ -121,6 +123,11 @@ namespace PDS.Witsml.Server.Data
             }
 
             return dataObject;
+        }
+
+        private bool IsIgnored(PropertyInfo property)
+        {
+            return property.GetCustomAttributes<XmlIgnoreAttribute>().Any();
         }
     }
 }
