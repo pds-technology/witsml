@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Windows;
 using Caliburn.Micro;
+using ICSharpCode.AvalonEdit.Document;
 using PDS.Witsml.Studio.Runtime;
+using PDS.Witsml.Studio.ViewModels;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 {
@@ -17,11 +19,16 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         /// Initializes a new instance of the <see cref="QueryViewModel"/> class.
         /// </summary>
         /// <param name="runtime">The runtime.</param>
-        public QueryViewModel(IRuntimeService runtime)
+        public QueryViewModel(IRuntimeService runtime, TextDocument xmlQuery)
         {
             _log.Debug("Creating view model instance");
             Runtime = runtime;
             DisplayName = "Query";
+
+            XmlQuery = new TextEditorViewModel(runtime, "XML")
+            {
+                Document = xmlQuery
+            };
         }
 
         /// <summary>
@@ -60,37 +67,23 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         /// <value>The runtime.</value>
         public IRuntimeService Runtime { get; private set; }
 
-        private bool _queryWrapped;
+        private TextEditorViewModel _xmlQuery;
 
         /// <summary>
-        /// Gets or sets a value indicating whether query document text is wrapped.
+        /// Gets or sets the XML query editor.
         /// </summary>
-        /// <value>
-        ///   <c>true</c> if query document text is wrapped; otherwise, <c>false</c>.
-        /// </value>
-        public bool QueryWrapped
+        /// <value>The XML query editor.</value>
+        public TextEditorViewModel XmlQuery
         {
-            get { return _queryWrapped; }
+            get { return _xmlQuery; }
             set
             {
-                if (_queryWrapped != value)
+                if (!ReferenceEquals(_xmlQuery, value))
                 {
-                    _queryWrapped = value;
-                    NotifyOfPropertyChange(() => QueryWrapped);
-                    NotifyOfPropertyChange(() => QueryWrappedText);
+                    _xmlQuery = value;
+                    NotifyOfPropertyChange(() => XmlQuery);
                 }
             }
-        }
-
-        /// <summary>
-        /// Gets the query wrapped context menu text.
-        /// </summary>
-        /// <value>
-        /// The query wrapped menu text.
-        /// </value>
-        public string QueryWrappedText
-        {
-            get { return MainViewModel.GetWrappedText(QueryWrapped); }
         }
 
         /// <summary>
@@ -122,30 +115,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         public void OpenQuery(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Open coming soon");
-        }
-
-        /// <summary>
-        /// Copies the query to the clipboard.
-        /// </summary>
-        public void CopyQuery()
-        {
-            Runtime.Invoke(() => Clipboard.SetText(Parent.Parent.XmlQuery.Text));
-        }
-
-        /// <summary>
-        /// Clears the query.
-        /// </summary>
-        public void ClearQuery()
-        {
-            Runtime.Invoke(() => Parent.Parent.XmlQuery.Text = string.Empty);
-        }
-
-        /// <summary>
-        /// Toggles the XML Query document text wrapping flag.
-        /// </summary>
-        public void WrapQuery()
-        {
-            QueryWrapped = !QueryWrapped;
         }
     }
 }

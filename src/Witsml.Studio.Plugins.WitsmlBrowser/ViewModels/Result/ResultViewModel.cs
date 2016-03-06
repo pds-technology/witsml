@@ -1,6 +1,7 @@
-﻿using System.Windows;
-using Caliburn.Micro;
+﻿using Caliburn.Micro;
+using ICSharpCode.AvalonEdit.Document;
 using PDS.Witsml.Studio.Runtime;
+using PDS.Witsml.Studio.ViewModels;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
 {
@@ -16,10 +17,19 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
         /// Initializes a new instance of the <see cref="ResultViewModel"/> class.
         /// </summary>
         /// <param name="runtime">The runtime service.</param>
-        public ResultViewModel(IRuntimeService runtime)
+        public ResultViewModel(IRuntimeService runtime, TextDocument queryResults, TextDocument messages)
         {
             _log.Debug("Creating view model instance");
             Runtime = runtime;
+
+            QueryResults = new TextEditorViewModel(runtime, "XML", true)
+            {
+                Document = queryResults
+            };
+            Messages = new TextEditorViewModel(runtime, "XML", true)
+            {
+                Document = messages
+            };
         }
 
         /// <summary>
@@ -47,128 +57,42 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
         /// <value>The runtime.</value>
         public IRuntimeService Runtime { get; private set; }
 
-        private bool _messagesWrapped;
+        private TextEditorViewModel _queryResults;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the Messages document text is wrapped.
+        /// Gets or sets the query results editor.
         /// </summary>
-        /// <value>
-        ///   <c>true</c> if text is wrapped; otherwise, <c>false</c>.
-        /// </value>
-        public bool MessagesWrapped
+        /// <value>The query results editor.</value>
+        public TextEditorViewModel QueryResults
         {
-            get { return _messagesWrapped; }
+            get { return _queryResults; }
             set
             {
-                if (_messagesWrapped != value)
+                if (!ReferenceEquals(_queryResults, value))
                 {
-                    _messagesWrapped = value;
-                    NotifyOfPropertyChange(() => MessagesWrapped);
-                    NotifyOfPropertyChange(() => MessagesWrappedText);
+                    _queryResults = value;
+                    NotifyOfPropertyChange(() => QueryResults);
                 }
             }
         }
 
-        private bool _resultsWrapped;
+        private TextEditorViewModel _messages;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the Results document text is wrapped.
+        /// Gets or sets the messages editor.
         /// </summary>
-        /// <value>
-        ///   <c>true</c> if text is wrapped; otherwise, <c>false</c>.
-        /// </value>
-        public bool ResultsWrapped
+        /// <value>The messages editor.</value>
+        public TextEditorViewModel Messages
         {
-            get { return _resultsWrapped; }
+            get { return _messages; }
             set
             {
-                if (_resultsWrapped != value)
+                if (!string.Equals(_messages, value))
                 {
-                    _resultsWrapped = value;
-                    NotifyOfPropertyChange(() => ResultsWrapped);
-                    NotifyOfPropertyChange(() => ResultsWrappedText);
+                    _messages = value;
+                    NotifyOfPropertyChange(() => Messages);
                 }
             }
-        }
-
-        /// <summary>
-        /// Gets the messages wrapped context menu text.
-        /// </summary>
-        /// <value>
-        /// The messages wrapped menu text.
-        /// </value>
-        public string MessagesWrappedText
-        {
-            get { return Parent.GetWrappedText(MessagesWrapped); }
-        }
-
-        /// <summary>
-        /// Gets the results wrapped context menu text.
-        /// </summary>
-        /// <value>
-        /// The results wrapped menu text.
-        /// </value>
-        public string ResultsWrappedText
-        {
-            get { return Parent.GetWrappedText(ResultsWrapped); }
-        }
-
-        /// <summary>
-        /// Copies the results to the clipboard.
-        /// </summary>
-        public void CopyResults()
-        {
-            Runtime.Invoke(() => Clipboard.SetText(Parent.QueryResults.Text));
-        }
-
-        /// <summary>
-        /// Clears the results.
-        /// </summary>
-        public void ClearResults()
-        {
-            Runtime.Invoke(() => Parent.QueryResults.Text = string.Empty);
-        }
-
-        /// <summary>
-        /// Copies the Results to the clipboard.
-        /// </summary>
-        public void CopyMessages()
-        {
-            Runtime.Invoke(() => Clipboard.SetText(Parent.Messages.Text));
-        }
-
-        /// <summary>
-        /// Clears the messages.
-        /// </summary>
-        public void ClearMessages()
-        {
-            Runtime.Invoke(() => Parent.Messages.Text = string.Empty);
-        }
-
-        /// <summary>
-        /// Toggles the Messages document text wrapping flag.
-        /// </summary>
-        public void WrapMessages()
-        {
-            MessagesWrapped = !MessagesWrapped;
-        }
-
-        /// <summary>
-        /// Toggles the Results document text wrapping flag.
-        /// </summary>
-        public void WrapResults()
-        {
-            ResultsWrapped = !ResultsWrapped;
-        }
-
-        /// <summary>
-        /// Called when activating the Results screen.
-        /// </summary>
-        protected override void OnActivate()
-        {
-            base.OnActivate();
-
-            MessagesWrapped = false;
         }
     }
 }

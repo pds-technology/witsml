@@ -6,7 +6,6 @@
              xmlns:local="clr-namespace:PDS.Witsml.Studio.Plugins.WitsmlBrowser.Views.Request"
              xmlns:cal="http://www.caliburnproject.org"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
-             xmlns:avalon="http://icsharpcode.net/sharpdevelop/avalonedit"
              xmlns:app="clr-namespace:PDS.Witsml.Studio.Behaviors;assembly=PDS.Witsml.Studio"
              xmlns:conv="clr-namespace:PDS.Witsml.Studio.Converters;assembly=PDS.Witsml.Studio"
              mc:Ignorable="d" 
@@ -22,18 +21,7 @@
             <RowDefinition Height="40" />
         </Grid.RowDefinitions>
 
-        <avalon:TextEditor 
-            Document="{Binding Parent.Parent.XmlQuery, Mode=TwoWay}" Padding="5,5,5,0" 
-            SyntaxHighlighting="XML" FontFamily="Consolas" FontSize="10pt" WordWrap="{Binding QueryWrapped}">
-
-            <avalon:TextEditor.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Copy" cal:Message.Attach="CopyQuery" />
-                    <MenuItem Header="Clear" cal:Message.Attach="ClearQuery" />
-                    <MenuItem Header="{Binding QueryWrappedText}" cal:Message.Attach="WrapQuery()" />
-                </ContextMenu>
-            </avalon:TextEditor.ContextMenu>
-        </avalon:TextEditor>
+        <ContentControl x:Name="XmlQuery" />
 
         <StackPanel Grid.Row="1" Orientation="Horizontal">
             <Button Width="80" Margin="5,5,0,5" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" >
@@ -44,7 +32,7 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBox IsReadOnly="True" Cursor="Arrow" Focusable="False" BorderThickness="0" Background="Transparent" Text="Execute" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" />
                         <Path Margin="2" VerticalAlignment="Center" Width="6" Fill="#FF527DB5" Stretch="Uniform"
-				  Data="F1 M 301.14,-189.041L 311.57,-189.041L 306.355,-182.942L 301.14,-189.041 Z " HorizontalAlignment="Right"/>
+				              Data="F1 M 301.14,-189.041L 311.57,-189.041L 306.355,-182.942L 301.14,-189.041 Z " HorizontalAlignment="Right"/>
                     </StackPanel>
                 </Button.Content>
                 <Button.ContextMenu>

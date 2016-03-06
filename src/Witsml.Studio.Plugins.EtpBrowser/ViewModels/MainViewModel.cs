@@ -76,9 +76,9 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         private TextEditorViewModel _details;
 
         /// <summary>
-        /// Gets or sets the details document.
+        /// Gets or sets the details editor.
         /// </summary>
-        /// <value>The output.</value>
+        /// <value>The details editor.</value>
         public TextEditorViewModel Details
         {
             get { return _details; }
@@ -95,9 +95,9 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         private TextEditorViewModel _messages;
 
         /// <summary>
-        /// Gets or sets the messages document.
+        /// Gets or sets the messages editor.
         /// </summary>
-        /// <value>The output.</value>
+        /// <value>The messages editor.</value>
         public TextEditorViewModel Messages
         {
             get { return _messages; }

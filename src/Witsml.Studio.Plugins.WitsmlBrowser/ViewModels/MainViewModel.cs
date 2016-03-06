@@ -45,7 +45,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
 
             // Create view models displayed within this view model.
             RequestControl = new RequestViewModel(Runtime);
-            ResultControl = new ResultViewModel(Runtime);
+            ResultControl = new ResultViewModel(Runtime, QueryResults, Messages);
 
             // Handle notifications for our witsml settings model changes
             Model.PropertyChanged += Model_PropertyChanged;

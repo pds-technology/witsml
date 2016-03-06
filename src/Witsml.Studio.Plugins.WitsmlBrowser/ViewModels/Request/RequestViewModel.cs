@@ -68,7 +68,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             Items.Add(new SettingsViewModel(Runtime));
             //Items.Add(new TreeViewViewModel());
             //Items.Add(new TemplatesViewModel());
-            Items.Add(new QueryViewModel(Runtime));
+            Items.Add(new QueryViewModel(Runtime, Parent.XmlQuery));
 
             ActivateItem(Items.FirstOrDefault());
         }
