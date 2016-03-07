@@ -18,6 +18,7 @@ namespace PDS.Witsml.Studio.ViewModels
             Runtime = runtime;
             Language = language;
             IsReadOnly = isReadOnly;
+            IsPasteEnabled = !IsReadOnly;
             Document = new TextDocument();
         }
 
@@ -107,6 +108,14 @@ namespace PDS.Witsml.Studio.ViewModels
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether this instance is paste enabled.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is paste enabled; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsPasteEnabled { get; private set; }
+
         private bool _isWordWrapEnabled;
 
         /// <summary>
@@ -175,6 +184,14 @@ namespace PDS.Witsml.Studio.ViewModels
         public void Copy()
         {
             Runtime.Invoke(() => Clipboard.SetText(Document.Text));
+        }
+
+        /// <summary>
+        /// Pastes the clipboard text to the Document text.
+        /// </summary>
+        public void Paste()
+        {
+            Runtime.Invoke(() => Document.Text = Clipboard.GetText());
         }
 
         /// <summary>
