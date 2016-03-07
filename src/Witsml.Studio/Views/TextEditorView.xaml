@@ -4,9 +4,15 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:avalon="http://icsharpcode.net/sharpdevelop/avalonedit"
+             xmlns:conv="clr-namespace:PDS.Witsml.Studio.Converters"
              xmlns:local="clr-namespace:PDS.Witsml.Studio.Views"
              xmlns:cal="http://www.caliburnproject.org"
              mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300">
+
+    <UserControl.Resources>
+        <conv:BooleanInverseConverter x:Key="BooleanInverseConverter" />
+    </UserControl.Resources>
+    
     <Grid>
         <avalon:TextEditor Padding="5" FontFamily="Consolas" FontSize="10pt"
                            Document="{Binding Document}" 
@@ -17,7 +23,7 @@
             <avalon:TextEditor.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Copy" cal:Message.Attach="Copy" />
-                    <MenuItem Header="Paste" cal:Message.Attach="Paste" IsEnabled="{Binding IsPasteEnabled}" />
+                    <MenuItem Header="Paste" cal:Message.Attach="Paste" IsEnabled="{Binding IsReadOnly, Converter={StaticResource BooleanInverseConverter}}" />
                     <MenuItem Header="Clear" cal:Message.Attach="Clear" />
                     <MenuItem Header="Word Wrap" IsChecked="{Binding IsWordWrapEnabled}" IsCheckable="True" />
                 </ContextMenu>
