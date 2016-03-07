@@ -94,6 +94,17 @@ namespace PDS.Witsml.Server
             return (List<TObject>)results.Items;
         }
 
+        public WMLS_GetFromStoreResponse Get<TList, TObject>(TObject entity, string wmlTypeIn = null, string capClient = null, string optionsIn = null) where TList : IEnergisticsCollection
+        {
+            var info = typeof(TList).GetProperty(typeof(TObject).Name);
+            var list = New<TList>(x => info.SetValue(x, List(entity)));
+            var typeIn = wmlTypeIn ?? ObjectTypes.GetObjectType<TList>();
+            var queryIn = EnergisticsConverter.ObjectToXml(list);
+
+            var response = GetFromStore(typeIn, queryIn, capClient, optionsIn);
+            return response;
+        }
+
         public WMLS_AddToStoreResponse AddToStore(string wmlTypeIn, string xmlIn, string capClient, string optionsIn)
         {
             var request = new WMLS_AddToStoreRequest { WMLtypeIn = wmlTypeIn, XMLin = xmlIn, CapabilitiesIn = capClient, OptionsIn = optionsIn };

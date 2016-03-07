@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Xml;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
@@ -6,6 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Framework;
 using PDS.Witsml.Server.Data;
 using PDS.Witsml.Server.Data.Wellbores;
+using System;
 
 namespace PDS.Witsml.Server
 {
@@ -162,6 +164,73 @@ namespace PDS.Witsml.Server
 
             well = result.Where(x => uid.Equals(x.Uid)).FirstOrDefault();
             Assert.IsNotNull(well);
+        }
+
+        [TestMethod]
+        public void Query_OptionsIn_ReturnElements_IdOnly()
+        {
+            var well = new Well { Name = "Well-to-add-01", TimeZone = DevKit.TimeZone, NameLegal = "Company Legal Name", Field = "Big Field" };
+            var response = DevKit.Add<WellList, Well>(well);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var queryWell = new Well { Name = "Well-to-add-01", NameLegal = "", Field = ""};
+            var result = DevKit.Get<WellList, Well>(queryWell, optionsIn: OptionsIn.ReturnElements.IdOnly);
+            Assert.IsNotNull(result);
+
+            var xmlout = result.XMLout;
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(xmlout);
+            XmlElement wells = doc.DocumentElement;
+
+            bool uidExists = false;
+            foreach (XmlNode node in wells.ChildNodes)
+            {
+                uidExists = true;
+                Assert.IsTrue(node.Attributes.Count == 1);
+                Assert.IsTrue(node.HasChildNodes);
+                Assert.AreEqual(1, node.ChildNodes.Count);
+                Assert.AreEqual("name", node.ChildNodes[0].Name);
+            }
+            Assert.IsTrue(uidExists);
+        }
+
+        [TestMethod]
+        public void Query_OptionsIn_ReturnElements_Requested()
+        {
+            var well = new Well { Name = "Well-to-add-01", TimeZone = DevKit.TimeZone, NameLegal = "Company Legal Name", Field = "Big Field" };
+            var response = DevKit.Add<WellList, Well>(well);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+            string uid = response.SuppMsgOut;
+
+            var queryWell = new Well { Uid="", Name = "Well-to-add-01", NameLegal = "", Field = "" };
+            var result = DevKit.Get<WellList, Well>(queryWell, optionsIn: OptionsIn.ReturnElements.Requested);
+            Assert.IsNotNull(result);
+
+            var xmlout = result.XMLout;
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(xmlout);
+            XmlElement wells= doc.DocumentElement;
+
+            bool uidExists = false;
+            foreach (XmlNode node in wells.ChildNodes)
+            {
+                Assert.AreEqual(1, node.Attributes.Count);
+                Assert.IsTrue(node.HasChildNodes);
+                Assert.IsTrue(node.ChildNodes.Count <= 3);
+                Assert.AreEqual("name", node.ChildNodes[0].Name);
+                Assert.AreEqual("Well-to-add-01", node.ChildNodes[0].InnerText);
+                if (uid.Equals(node.Attributes[0].InnerText))
+                {
+                    uidExists = true;
+                    Assert.AreEqual("nameLegal", node.ChildNodes[1].Name);
+                    Assert.AreEqual("Company Legal Name", node.ChildNodes[1].InnerText);
+                    Assert.AreEqual("field", node.ChildNodes[2].Name);
+                    Assert.AreEqual("Big Field", node.ChildNodes[2].InnerText);
+                }
+            }
+            Assert.IsTrue(uidExists);
         }
 
         [TestMethod]
