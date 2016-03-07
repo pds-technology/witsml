@@ -186,6 +186,7 @@
     <Compile Include="Connections\EtpConnectionTest.cs" />
     <Compile Include="Connections\IConnectionTest.cs" />
     <Compile Include="Connections\WitsmlConnectionTest.cs" />
+    <Compile Include="Converters\BooleanInverseConverter.cs" />
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\NullToBooleanConverter.cs" />
     <Compile Include="Converters\NullToVisibilityConverter.cs" />
