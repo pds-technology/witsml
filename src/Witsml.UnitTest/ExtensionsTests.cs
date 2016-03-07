@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Framework;
 
 namespace PDS.Witsml
 {
@@ -21,6 +22,15 @@ namespace PDS.Witsml
             const string expected = null;
 
             var actual = ErrorCodes.Unset.GetDescription();
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void Functions_GetDescription_returns_DescriptionAttribute_value()
+        {
+            var expected = "Get From Store";
+            var actual = Functions.GetFromStore.GetDescription();
 
             Assert.AreEqual(expected, actual);
         }

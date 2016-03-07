@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 
 namespace PDS.Framework
 {
@@ -35,6 +37,34 @@ namespace PDS.Framework
                 action(item);
             
             return collection;
+        }
+
+        /// <summary>
+        /// Gets the description for the specified enumeration member.
+        /// </summary>
+        /// <param name="value">The enumeration value.</param>
+        /// <returns>
+        /// The description from the <see cref="DescriptionAttribute"/> when available;
+        /// otherwise, the value's ToString() representation.
+        /// </returns>
+        public static string GetDescription(this Enum value)
+        {
+            var enumType = value.GetType();
+            var fieldInfo = enumType.GetField(Enum.GetName(enumType, value));
+
+            if (fieldInfo != null)
+            {
+                var attribute = fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false)
+                    .Cast<DescriptionAttribute>()
+                    .FirstOrDefault();
+
+                if (attribute != null)
+                {
+                    return attribute.Description;
+                }
+            }
+
+            return value.ToString();
         }
     }
 }
