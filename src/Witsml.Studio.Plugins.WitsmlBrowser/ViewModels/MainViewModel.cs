@@ -211,13 +211,14 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// <param name="functionType">Type of the function to execute.</param>
         /// <param name="xmlIn">The XML in.</param>
         /// <returns>
-        /// A string arrary of three result strings in the following order: xmlOut, suppMsgOut and optionsIn.
+        /// A tuple of four result values in the following order: xmlOut, suppMsgOut, optionsIn and returnCode.
         /// </returns>
-        internal async Task<Tuple<string, string, string>> SubmitQuery(Functions functionType, string xmlIn)
+        internal async Task<Tuple<string, string, string, short>> SubmitQuery(Functions functionType, string xmlIn)
         {
             string xmlOut = null;
             string suppMsgOut = null;
             string optionsIn = null;
+            short returnCode = 0;
 
             try
             {
@@ -234,10 +235,10 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                         case Functions.GetCap:
                             // Set options in for the selected WitsmlVersion.
                             optionsIn = new OptionsIn.DataVersion(Model.WitsmlVersion);
-                            wmls.WMLS_GetCap(optionsIn, out xmlOut, out suppMsgOut);
+                            returnCode = wmls.WMLS_GetCap(optionsIn, out xmlOut, out suppMsgOut);
                             break;
                         case Functions.AddToStore:
-                            wmls.WMLS_AddToStore(objectType, xmlIn, null, null, out suppMsgOut);
+                            returnCode = wmls.WMLS_AddToStore(objectType, xmlIn, null, null, out suppMsgOut);
                             break;
                         case Functions.UpdateInStore:
                             //Runtime.ShowInfo("Coming soon.");
@@ -247,11 +248,11 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                             break;
                         default:
                             optionsIn = GetGetFromStoreOptionsIn();
-                            wmls.WMLS_GetFromStore(objectType, xmlIn, optionsIn, null, out xmlOut, out suppMsgOut);
+                            returnCode = wmls.WMLS_GetFromStore(objectType, xmlIn, optionsIn, null, out xmlOut, out suppMsgOut);
                             break;
                     }
 
-                    return await Task.FromResult(Tuple.Create(xmlOut, suppMsgOut, optionsIn));
+                    return await Task.FromResult(Tuple.Create(xmlOut, suppMsgOut, optionsIn, returnCode));
                 }
             }
             catch (Exception ex)
@@ -262,7 +263,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                 // Log the error message
                 _log.Error(message);
 
-                return await Task.FromResult(Tuple.Create(xmlOut, message, optionsIn));
+                return await Task.FromResult(Tuple.Create(xmlOut, message, optionsIn, returnCode));
             }
         }
 
@@ -325,8 +326,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// Logs and displays the results of a WITSML submitted query.
         /// </summary>
         /// <param name="functionType">Type of the function.</param>
-        /// <param name="result">A tuple of three results: xmlOut, suppMsgOut and optionsIn.</param>
-        private void ShowSubmitResult(Functions functionType, Tuple<string, string, string> result)
+        /// <param name="result">A tuple of four results: xmlOut, suppMsgOut, optionsIn and returnCode.</param>
+        private void ShowSubmitResult(Functions functionType, Tuple<string, string, string, short> result)
         {
             _log.DebugFormat("Query returned with{3}{3}xmlOut: {0}{3}{3}suppMsgOut: {1}{3}{3}optionsIn: {2}{3}{3}",
                 GetLogStringText(result.Item1), // xmlOut
@@ -338,7 +339,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             OutputResults(result.Item1, result.Item2); // xmlOut, suppMsgOut
 
             // Append these results to the Messages tab
-            OutputMessages(functionType, XmlQuery.Text, result.Item1, result.Item2, result.Item3); // xmlOut, suppMsgOut, optionsIn
+            OutputMessages(functionType, XmlQuery.Text, result.Item1, result.Item2, result.Item3, result.Item4); // xmlOut, suppMsgOut, optionsIn, returnCode
         }
 
         /// <summary>
@@ -385,7 +386,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// <param name="xmlOut">The XML output text.</param>
         /// <param name="suppMsgOut">The supplemental message out.</param>
         /// <param name="optionsIn">The OptionsIn settings to the server.</param>
-        private void OutputMessages(Functions functionType, string queryText, string xmlOut, string suppMsgOut, string optionsIn)
+        private void OutputMessages(Functions functionType, string queryText, string xmlOut, string suppMsgOut, string optionsIn, short returnCode)
         {
             var none = "<!-- None -->";
             var now = DateTime.Now.ToString("G");
@@ -393,14 +394,15 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             Messages.Insert(
                 Messages.TextLength,
                 string.Format(
-                    "<!-- {5}: {4} -->{3}<!-- OptionsIn: {6} -->{3}{0}{3}{3}<!-- Message: {4} -->{3}<!-- {1} -->{3}{3}<!-- Output: {4} -->{3}{2}{3}{3}",
+                    "<!-- {5}: {4} -->{3}<!-- Return Code: {7} -->{3}<!-- OptionsIn: {6} -->{3}{0}{3}{3}<!-- Message: {4} -->{3}<!-- {1} -->{3}{3}<!-- Output: {4} -->{3}{2}{3}{3}",
                     queryText == null ? string.Empty : queryText,
                     string.IsNullOrEmpty(suppMsgOut) ? "None" : suppMsgOut,
                     string.IsNullOrEmpty(xmlOut) ? none : xmlOut,
                     Environment.NewLine,
                     now,
                     functionType.GetDescription(),
-                    string.IsNullOrEmpty(optionsIn) ? "None" : optionsIn));
+                    string.IsNullOrEmpty(optionsIn) ? "None" : optionsIn,
+                    returnCode));
         }
 
         /// <summary>
