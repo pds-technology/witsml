@@ -357,10 +357,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             {
                 _log.Debug("WitsmlVersion property changed");
 
-                Runtime.Shell.SetBreadcrumb(!string.IsNullOrEmpty(Model.WitsmlVersion)
-                    ? string.Format("{0} / {1}", Settings.Default.PluginDisplayName, Model.WitsmlVersion)
-                    : Settings.Default.PluginDisplayName);
-
                 // Reset the Proxy when the version changes
                 Proxy = CreateProxy();
 
