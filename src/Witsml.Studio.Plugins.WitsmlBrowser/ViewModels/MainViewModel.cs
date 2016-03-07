@@ -338,8 +338,11 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             // Output query results to the Results tab
             OutputResults(result.Item1, result.Item2); // xmlOut, suppMsgOut
 
+            // Don't display query contents when GetCap is executed.
+            var xmlIn = functionType == Functions.GetCap ? string.Empty : XmlQuery.Text;
+
             // Append these results to the Messages tab
-            OutputMessages(functionType, XmlQuery.Text, result.Item1, result.Item2, result.Item3, result.Item4); // xmlOut, suppMsgOut, optionsIn, returnCode
+            OutputMessages(functionType, xmlIn, result.Item1, result.Item2, result.Item3, result.Item4); // xmlOut, suppMsgOut, optionsIn, returnCode
         }
 
         /// <summary>
