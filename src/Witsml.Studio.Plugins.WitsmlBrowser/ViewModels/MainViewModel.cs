@@ -395,7 +395,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             Messages.Insert(
                 Messages.TextLength,
                 string.Format(
-                    "<!-- {5}: {4} -->{3}<!-- Return Code: {7} -->{3}<!-- OptionsIn: {6} -->{3}{0}{3}{3}<!-- Message: {4} -->{3}<!-- {1} -->{3}{3}<!-- Output: {4} -->{3}{2}{3}{3}",
+                    "<!-- {5}: {4} -->{3}<!-- OptionsIn: {6} -->{3}{0}{3}{3}<!-- Message: {4} -->{3}<!-- {1} -->{3}{3}<!-- Output: {4} -->{3}<!-- Return Code: {7} -->{3}{2}{3}{3}",
                     queryText == null ? string.Empty : queryText,
                     string.IsNullOrEmpty(suppMsgOut) ? "None" : suppMsgOut,
                     string.IsNullOrEmpty(xmlOut) ? none : xmlOut,
