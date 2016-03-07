@@ -378,7 +378,9 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// <param name="suppMsgOut">The supplemental message out.</param>
         private void OutputResults(string xmlOut, string suppMsgOut)
         {
-            QueryResults.Text = string.IsNullOrEmpty(suppMsgOut) ? xmlOut : suppMsgOut;
+            QueryResults.Text = string.IsNullOrEmpty(suppMsgOut) 
+                ? xmlOut ?? string.Empty 
+                : suppMsgOut;
         }
 
         /// <summary>
