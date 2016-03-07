@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Caliburn.Micro;
 using Energistics.DataAccess;
 using ICSharpCode.AvalonEdit.Document;
+using PDS.Framework;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.Properties;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result;
@@ -212,7 +213,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// <returns>
         /// A string arrary of three result strings in the following order: xmlOut, suppMsgOut and optionsIn.
         /// </returns>
-        internal async Task<string[]> SubmitQuery(Functions functionType, string xmlIn)
+        internal async Task<Tuple<string, string, string>> SubmitQuery(Functions functionType, string xmlIn)
         {
             string xmlOut = null;
             string suppMsgOut = null;
@@ -250,7 +251,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                             break;
                     }
 
-                    return await Task.FromResult(new string[] { xmlOut, suppMsgOut, optionsIn });
+                    return await Task.FromResult(Tuple.Create(xmlOut, suppMsgOut, optionsIn));
                 }
             }
             catch (Exception ex)
@@ -261,7 +262,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                 // Log the error message
                 _log.Error(message);
 
-                return await Task.FromResult(new string[] { xmlOut, message, optionsIn });
+                return await Task.FromResult(Tuple.Create(xmlOut, message, optionsIn));
             }
         }
 
@@ -324,20 +325,20 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// Logs and displays the results of a WITSML submitted query.
         /// </summary>
         /// <param name="functionType">Type of the function.</param>
-        /// <param name="result">A string array of three result: xmlOut, suppMsgOut and optionsIn.</param>
-        private void ShowSubmitResult(Functions functionType, string[] result)
+        /// <param name="result">A tuple of three results: xmlOut, suppMsgOut and optionsIn.</param>
+        private void ShowSubmitResult(Functions functionType, Tuple<string, string, string> result)
         {
             _log.DebugFormat("Query returned with{3}{3}xmlOut: {0}{3}{3}suppMsgOut: {1}{3}{3}optionsIn: {2}{3}{3}",
-                GetLogStringText(result[0]), // xmlOut
-                GetLogStringText(result[1]), // suppMsgOut
-                GetLogStringText(result[2]), // optionsIn
+                GetLogStringText(result.Item1), // xmlOut
+                GetLogStringText(result.Item2), // suppMsgOut
+                GetLogStringText(result.Item3), // optionsIn
                 Environment.NewLine);
 
             // Output query results to the Results tab
-            OutputResults(result[0], result[1]); // xmlOut, suppMsgOut
+            OutputResults(result.Item1, result.Item2); // xmlOut, suppMsgOut
 
             // Append these results to the Messages tab
-            OutputMessages(functionType, XmlQuery.Text, result[0], result[1], result[2]); // xmlOut, suppMsgOut, optionsIn
+            OutputMessages(functionType, XmlQuery.Text, result.Item1, result.Item2, result.Item3); // xmlOut, suppMsgOut, optionsIn
         }
 
         /// <summary>
@@ -398,7 +399,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                     string.IsNullOrEmpty(xmlOut) ? none : xmlOut,
                     Environment.NewLine,
                     now,
-                    functionType.ToDescription(),
+                    functionType.GetDescription(),
                     string.IsNullOrEmpty(optionsIn) ? "None" : optionsIn));
         }
 

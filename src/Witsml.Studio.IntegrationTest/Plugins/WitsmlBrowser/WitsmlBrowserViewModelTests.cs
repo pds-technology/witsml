@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels;
-using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request;
 using PDS.Witsml.Studio.Runtime;
 using PDS.Witsml.Studio.ViewModels;
 
@@ -15,6 +13,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
     public class WitsmlMainViewModelTests
     {
         const string _validWitsmlUri = "http://localhost/Witsml.Web/WitsmlStore.svc";
+
         private static string _addWellTemplate =
                 "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" + Environment.NewLine +
                 "<wells version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\" >" + Environment.NewLine +
@@ -61,7 +60,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
 
             // Submit the query
             var result = await vm.SubmitQuery(Functions.AddToStore, xmlIn);
-            var suppMsgOut = result[1];
+            var suppMsgOut = result.Item2;
 
             // The same uid should be returned as the results.
             Assert.AreEqual(expectedUid, suppMsgOut);
@@ -90,7 +89,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
             xmlIn = string.Format(_getWellTemplate, expectedUid);
             result = await vm.SubmitQuery(Functions.GetFromStore, xmlIn);
 
-            string xmlOut = result[0];
+            string xmlOut = result.Item1;
 
             // The same uid should be returned as the results.
             Assert.IsNotNull(xmlOut);

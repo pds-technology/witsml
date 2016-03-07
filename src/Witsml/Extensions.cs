@@ -53,33 +53,5 @@ namespace PDS.Witsml
         {
             return new List<TObject>() { instance };
         }
-
-        public static string ToDescription(this Functions function)
-        {
-            var description = string.Empty;
-
-            switch (function)
-            {
-                case Functions.GetCap:
-                    return "Get Capabilities";
-                case Functions.GetVersion:
-                    return "Get Version";
-                case Functions.GetFromStore:
-                    return "Get From Store";
-                case Functions.AddToStore:
-                    return "Add To Store";
-                case Functions.UpdateInStore:
-                    return "Update In Store";
-                case Functions.DeleteFromStore:
-                    return "Delete From Store";
-                case Functions.GetObject:
-                    return "Get Object";
-                case Functions.PutObject:
-                    return "Put Object";
-                case Functions.DeleteObject:
-                    return "Delete Object";
-            }
-            return description;
-        }
     }
 }
