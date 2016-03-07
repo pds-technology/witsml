@@ -17,6 +17,7 @@
             <avalon:TextEditor.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Copy" cal:Message.Attach="Copy" />
+                    <MenuItem Header="Paste" cal:Message.Attach="Paste" IsEnabled="{Binding IsPasteEnabled}" />
                     <MenuItem Header="Clear" cal:Message.Attach="Clear" />
                     <MenuItem Header="Word Wrap" IsChecked="{Binding IsWordWrapEnabled}" IsCheckable="True" />
                 </ContextMenu>
