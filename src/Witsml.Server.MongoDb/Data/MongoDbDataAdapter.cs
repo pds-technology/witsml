@@ -165,14 +165,24 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The query results collection.</returns>
         protected List<T> QueryEntities<TList>(WitsmlQueryParser parser, List<string> fields)
         {
-            if (OptionsIn.RequestObjectSelectionCapability.True.Equals(parser.RequestObjectSelectionCapability()))
+            try
             {
-                var queryTemplate = CreateQueryTemplate();
-                return queryTemplate.AsList();
-            }
+                _log.DebugFormat("Querying WITSML object selection: {0}", DbCollectionName);
+                if (OptionsIn.RequestObjectSelectionCapability.True.Equals(parser.RequestObjectSelectionCapability()))
+                {
+                    var queryTemplate = CreateQueryTemplate();
+                    return queryTemplate.AsList();
+                }
 
-            var query = new MongoDbQuery<TList, T>(GetCollection(), parser, fields, IdPropertyName);          
-            return query.Execute();
+                _log.DebugFormat("Querying WITSML object: {0}", DbCollectionName);
+                var query = new MongoDbQuery<TList, T>(GetCollection(), parser, fields, IdPropertyName);
+                return query.Execute();
+            }
+            catch (MongoException ex)
+            {
+                _log.Error("Error querying " + DbCollectionName, ex);
+                throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, ex);
+            }
         }
 
         /// <summary>
