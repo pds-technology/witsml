@@ -359,6 +359,24 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to When multiple selection criteria is are included in a recurring pattern, an empty value must not be specified..
+        /// </summary>
+        internal static string RecurringItemsEmptySelection {
+            get {
+                return ResourceManager.GetString("RecurringItemsEmptySelection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to When multiple selection criteria is are included in a recurring element, the same selection items must exist in each recurring node..
+        /// </summary>
+        internal static string RecurringItemsInconsistentSelection {
+            get {
+                return ResourceManager.GetString("RecurringItemsInconsistentSelection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to For the capClient object, the values of schemaVersion must match the version attribute used in the plural data-objects..
         /// </summary>
         internal static string SchemaVersionNotMatch {
