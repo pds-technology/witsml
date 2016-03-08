@@ -149,7 +149,7 @@ namespace PDS.Witsml.Studio.ViewModels
 
             if (connectionTest != null)
             {
-                UiServices.SetBusyState();
+                Runtime.ShowBusy();
                 CanTestConnection = false;
 
                 Task.Run(async() =>
@@ -161,6 +161,10 @@ namespace PDS.Witsml.Studio.ViewModels
                     {
                         callback();
                     }
+                })
+                .ContinueWith(x =>
+                {
+                    Runtime.ShowBusy(false);
                 });
             }
         }

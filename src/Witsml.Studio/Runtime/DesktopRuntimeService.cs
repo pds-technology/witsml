@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Dynamic;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Threading;
 using Caliburn.Micro;
 using PDS.Framework;
@@ -68,6 +71,15 @@ namespace PDS.Witsml.Studio.Runtime
         }
 
         /// <summary>
+        /// Shows the busy indicator cursor.
+        /// </summary>
+        /// <param name="isBusy">if set to <c>true</c>, shows the busy indicator.</param>
+        public void ShowBusy(bool isBusy = true)
+        {
+            Invoke(() => Mouse.OverrideCursor = isBusy ? Cursors.Wait : null);
+        }
+
+        /// <summary>
         /// Shows the confirmation message.
         /// </summary>
         /// <param name="message">The message.</param>
@@ -86,7 +98,12 @@ namespace PDS.Witsml.Studio.Runtime
         /// <returns>The view model dialog's result.</returns>
         public bool ShowDialog(object viewModel)
         {
-            return WindowManager.ShowDialog(viewModel).GetValueOrDefault();
+            var settings = new Dictionary<string, object>()
+            {
+                { "WindowStartupLocation", WindowStartupLocation.CenterOwner }
+            };
+
+            return WindowManager.ShowDialog(viewModel, null, settings).GetValueOrDefault();
         }
 
         /// <summary>

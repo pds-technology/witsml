@@ -69,6 +69,16 @@ namespace PDS.Witsml.Studio.Runtime
         }
 
         /// <summary>
+        /// Shows the busy indicator cursor.
+        /// </summary>
+        /// <param name="isBusy">if set to <c>true</c>, shows the busy indicator.</param>
+        /// <returns></returns>
+        public void ShowBusy(bool isBusy = true)
+        {
+            Console.WriteLine("Busy: {0}", isBusy);
+        }
+
+        /// <summary>
         /// Shows the confirmation message.
         /// </summary>
         /// <param name="message">The message.</param>
