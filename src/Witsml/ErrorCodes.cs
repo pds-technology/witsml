@@ -206,11 +206,13 @@
         /// -438 When multiple selection criteria is are included in a recurring element, the same selection items must
         /// exist in each recurring node.
         /// </summary>
+        RecurringItemsInconsistentSelection = -438,
 
         /// <summary>
         /// -439 When multiple selection criteria is are included in a recurring pattern, an empty value must not be
         /// specified.
         /// </summary>
+        RecurringItemsEmptySelection = -439,
 
         /// <summary>
         /// -440 The OptionsIn value must be a recognized keyword for that function.
