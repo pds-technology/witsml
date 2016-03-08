@@ -146,7 +146,7 @@ namespace PDS.Witsml.Studio
         }
 
         [TestMethod]
-        public async void TestAcceptWithDataItem()
+        public async Task TestAcceptWithDataItem()
         {
             var newName = "xxx";
 

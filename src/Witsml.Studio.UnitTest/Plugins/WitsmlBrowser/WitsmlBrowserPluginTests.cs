@@ -48,8 +48,10 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
         [TestMethod]
         public void TestRequestViewModelScreensLoaded()
         {
+            var mainViewModel = new MainViewModel(_runtime);
             var requestViewModel = new RequestViewModel(_runtime);
 
+            mainViewModel.Items.Add(requestViewModel);
             requestViewModel.LoadScreens();
 
             Assert.AreEqual(2, requestViewModel.Items.Count);
