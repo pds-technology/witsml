@@ -78,6 +78,41 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
+        public void Test_return_element_id_only_with_additional_elements()
+        {
+            var well = CreateTestWell();
+            var response = DevKit.Add<WellList, Well>(well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uid = response.SuppMsgOut;
+
+            var query = new Well { Uid = uid };
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, "returnElements=all");
+
+            Assert.AreEqual(1, result.Count);
+            var returnWell = result.FirstOrDefault();
+            AssertTestWell(well, returnWell);
+
+            query = new Well { Uid = uid, Country = string.Empty, CommonData = new CommonData() };
+            var queryIn = EnergisticsConverter.ObjectToXml(new WellList { Well = new List<Well> { query } });
+            var xmlOut = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, "returnElements=id-only").XMLout;
+            var context = new RequestContext(Functions.GetFromStore, ObjectTypes.Well, xmlOut, null, null);
+            var parser = new WitsmlQueryParser(context);
+            Assert.IsFalse(parser.HasElements("country"));
+            Assert.IsFalse(parser.HasElements("wellDatum"));
+            Assert.IsFalse(parser.HasElements("commonData"));
+
+            var wellList = EnergisticsConverter.XmlToObject<WellList>(xmlOut);
+            Assert.AreEqual(1, wellList.Well.Count);
+            returnWell = wellList.Well.FirstOrDefault();
+
+            Assert.IsNull(returnWell.DateTimeSpud);
+            Assert.IsNull(returnWell.GroundElevation);
+        }
+
+        [TestMethod]
         public void Test_return_element_default()
         {
             var well = CreateTestWell();
