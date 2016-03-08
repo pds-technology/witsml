@@ -55,5 +55,6 @@ using System.Windows;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 [assembly: InternalsVisibleTo("PDS.Witsml.Studio.UnitTest")]
+[assembly: InternalsVisibleTo("PDS.Witsml.Studio.IntegrationTest")]
 
 [assembly: log4net.Config.XmlConfigurator(ConfigFile = "log4net.config", Watch = true)]

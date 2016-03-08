@@ -1,11 +1,6 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
+﻿using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Witsml.Studio.Connections;
-using PDS.Witsml.Studio.Properties;
-using PDS.Witsml.Studio.Runtime;
-using PDS.Witsml.Studio.ViewModels;
 
 namespace PDS.Witsml.Studio
 {
@@ -13,51 +8,8 @@ namespace PDS.Witsml.Studio
     /// Unit tests for the ConnectionViewModel
     /// </summary>
     [TestClass]
-    public class ConnectionViewModelTests
+    public class ConnectionViewModelTests : ConnectionViewModelTestBase
     {
-        private static readonly string PersistedDataFolderName = Settings.Default.PersistedDataFolderName;
-        private static readonly string ConnectionBaseFileName = Settings.Default.ConnectionBaseFileName;
-
-        private BootstrapperHarness _bootstrapper;
-        private TestRuntimeService _runtime;
-
-        private ConnectionViewModel _witsmlConnectionVm;
-        private ConnectionViewModel _etpConnectionVm;
-        private Connection _witsmlConnection;
-        private Connection _etpConnection;
-
-        /// <summary>
-        /// Sets up the environment for each test.  
-        /// ConnectionViewModels and Connections are created 
-        /// for ConnectionTypes Witsml and Etp.
-        /// In addition the persisence folder is cleard and deleted.
-        /// </summary>
-        [TestInitialize]
-        public void TestSetUp()
-        {
-            _bootstrapper = new BootstrapperHarness();
-            _runtime = new TestRuntimeService(_bootstrapper.Container);
-
-            _witsmlConnection = new Connection()
-            {
-                Name = "Witsml",
-                Uri = "http://localhost/Witsml.Web/WitsmlStore.svc",
-                Username = "WitsmlUser"
-            };
-
-            _etpConnection = new Connection()
-            {
-                Name = "Etp",
-                Uri = "ws://localhost/witsml.web/api/etp",
-                Username = "EtpUser"
-            };
-
-            _witsmlConnectionVm = new ConnectionViewModel(_runtime, ConnectionTypes.Witsml);
-            _etpConnectionVm = new ConnectionViewModel(_runtime, ConnectionTypes.Etp);
-
-            DeletePersistenceFolder();
-        }
-
         /// <summary>
         /// Tests the connection filename for each type of connection has the correct prefix.
         /// </summary>
@@ -146,27 +98,6 @@ namespace PDS.Witsml.Studio
         }
 
         [TestMethod]
-        public async Task TestAcceptWithDataItem()
-        {
-            var newName = "xxx";
-
-            // Initialze the Edit Item by setting the DataItem
-            _witsmlConnectionVm.DataItem = _witsmlConnection;
-            _witsmlConnectionVm.InitializeEditItem();
-
-            // Make a change to the edit item
-            _witsmlConnectionVm.EditItem.Name = newName;
-
-            // Accept the changes
-            _witsmlConnectionVm.Accept();
-
-            // Test that the DataItem has the new name.
-            Assert.AreEqual(newName, _witsmlConnectionVm.DataItem.Name);
-
-            await Task.Yield();
-        }
-
-        [TestMethod]
         public void TestCancelWithDataItem()
         {
             var newName = "xxx";
@@ -186,24 +117,6 @@ namespace PDS.Witsml.Studio
 
             // Test that the Name is unchanged
             Assert.AreEqual(_witsmlConnection.Name, _witsmlConnectionVm.DataItem.Name);
-        }
-
-        private static void DeletePersistenceFolder()
-        {
-            var path = string.Format("{0}/{1}", Environment.CurrentDirectory, PersistedDataFolderName);
-
-            // Delete the Persistence Folder
-            if (Directory.Exists(path))
-            {
-                // Delete all files in the Persistence Folder
-                DirectoryInfo di = new DirectoryInfo(path);
-                foreach (FileInfo file in di.GetFiles())
-                {
-                    file.Delete();
-                }
-
-                Directory.Delete(path);
-            }
         }
     }
 }

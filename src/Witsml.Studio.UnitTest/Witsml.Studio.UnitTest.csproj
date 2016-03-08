@@ -70,6 +70,7 @@
   <ItemGroup>
     <Compile Include="BootstrapperHarness.cs" />
     <Compile Include="BootstrapperTests.cs" />
+    <Compile Include="ConnectionViewModelTestBase.cs" />
     <Compile Include="ConnectionViewModelTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Runtime\TestRuntimeService.cs" />

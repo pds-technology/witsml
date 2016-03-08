@@ -100,6 +100,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
             Assert.AreEqual(expectedUid, (wellList.Items[0] as Well).Uid);
         }
 
+        [Ignore]
         [TestMethod]
         public void TestMainViewModelGetCapabilities()
         {
