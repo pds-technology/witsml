@@ -1,6 +1,4 @@
-﻿using System;
-using System.ComponentModel.Composition;
-using System.Linq;
+﻿using System.ComponentModel.Composition;
 using Energistics.Common;
 using Energistics.DataAccess.WITSML141;
 using Energistics.Datatypes;

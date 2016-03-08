@@ -10,6 +10,14 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="ObjectName"/> struct.
         /// </summary>
+        /// <param name="version">The version.</param>
+        public ObjectName(string version) : this(string.Empty, version)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ObjectName"/> struct.
+        /// </summary>
         /// <param name="name">The name.</param>
         /// <param name="version">The version.</param>
         public ObjectName(string name, string version)

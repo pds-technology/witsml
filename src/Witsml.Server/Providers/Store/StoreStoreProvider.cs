@@ -43,7 +43,7 @@ namespace PDS.Witsml.Server.Providers.Store
             try
             {
                 var uri = new EtpUri(args.Message.Uri);
-                var provider = Container.Resolve<IStoreStoreProvider>(uri.Version);
+                var provider = Container.Resolve<IStoreStoreProvider>(new ObjectName(uri.Version));
                 provider.GetObject(args);
             }
             catch (ContainerException ex)

@@ -6,7 +6,7 @@ namespace PDS.Witsml
 {
     public static class EtpUris
     {
-        public static readonly EtpUri Witsml141 = new EtpUri("eml://witsml1411");
+        public static readonly EtpUri Witsml141 = new EtpUri("eml://witsml141");
         public static readonly EtpUri Witsml200 = new EtpUri("eml://witsml20");
 
         public static EtpUri ToUri(this Witsml141.Well entity)

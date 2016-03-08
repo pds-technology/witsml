@@ -16,7 +16,7 @@ namespace PDS.Witsml
         /// Initializes a new instance of the <see cref="Export131Attribute"/> class.
         /// </summary>
         /// <param name="contractType">A type from which to derive the contract name that is used to export the type or member marked with this attribute, or null to use the default contract name.</param>
-        public Export131Attribute(Type contractType) : base(Version, contractType)
+        public Export131Attribute(Type contractType) : base(new ObjectName(Version), contractType)
         {
         }
 
