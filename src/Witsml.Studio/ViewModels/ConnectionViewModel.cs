@@ -197,12 +197,17 @@ namespace PDS.Witsml.Studio.ViewModels
             {
                 if (IsTestSuccess)
                 {
-                    _log.Debug("Connection changes accepted");
-                    Mapper.Map(EditItem, DataItem);
-                    SaveConnectionFile(DataItem);
-                    TryClose(true);
+                    AcceptConnectionChanges();
                 }
             });
+        }
+
+        internal void AcceptConnectionChanges()
+        {
+            _log.Debug("Connection changes accepted");
+            Mapper.Map(EditItem, DataItem);
+            SaveConnectionFile(DataItem);
+            TryClose(true);
         }
 
         /// <summary>

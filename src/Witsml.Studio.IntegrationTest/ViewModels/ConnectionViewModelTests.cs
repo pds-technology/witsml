@@ -6,9 +6,8 @@ namespace PDS.Witsml.Studio.ViewModels
     [TestClass]
     public class ConnectionViewModelTests : ConnectionViewModelTestBase
     {
-        [Ignore]
         [TestMethod]
-        public async Task TestAcceptWithDataItem()
+        public void TestAcceptConnectionChangesWithDataItem()
         {
             var newName = "xxx";
 
@@ -20,11 +19,9 @@ namespace PDS.Witsml.Studio.ViewModels
             _witsmlConnectionVm.EditItem.Name = newName;
 
             // Accept the changes
-            _witsmlConnectionVm.Accept();
+            _witsmlConnectionVm.AcceptConnectionChanges();
 
             Assert.AreEqual(newName, _witsmlConnectionVm.DataItem.Name);
-
-            await Task.Yield();
         }
     }
 }
