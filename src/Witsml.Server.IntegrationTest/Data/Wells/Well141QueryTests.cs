@@ -7,6 +7,7 @@ using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Witsml.Server.Configuration;
+using System.Xml;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
@@ -37,7 +38,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var uid = response.SuppMsgOut;
 
             var query = new Well { Uid = uid };
-            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, "returnElements=all");
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
 
             Assert.AreEqual(1, result.Count);
             var returnWell = result.FirstOrDefault();
@@ -56,7 +57,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var uid = response.SuppMsgOut;
 
             var query = new Well { Uid = uid };
-            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, "returnElements=all");
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
 
             Assert.AreEqual(1, result.Count);
             var returnWell = result.FirstOrDefault();
@@ -64,7 +65,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             query = new Well { Uid = uid };
             var queryIn = EnergisticsConverter.ObjectToXml(new WellList { Well = new List<Well> { query } });
-            var xmlOut = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, "returnElements=id-only").XMLout;
+            var xmlOut = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, optionsIn: OptionsIn.ReturnElements.IdOnly).XMLout;
             var context = new RequestContext(Functions.GetFromStore, ObjectTypes.Well, xmlOut, null, null);
             var parser = new WitsmlQueryParser(context);
             Assert.IsFalse(parser.HasElements("wellDatum"));
@@ -89,7 +90,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var uid = response.SuppMsgOut;
 
             var query = new Well { Uid = uid };
-            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, "returnElements=all");
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
 
             Assert.AreEqual(1, result.Count);
             var returnWell = result.FirstOrDefault();
@@ -97,7 +98,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             query = new Well { Uid = uid, Country = string.Empty, CommonData = new CommonData() };
             var queryIn = EnergisticsConverter.ObjectToXml(new WellList { Well = new List<Well> { query } });
-            var xmlOut = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, "returnElements=id-only").XMLout;
+            var xmlOut = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, optionsIn: OptionsIn.ReturnElements.IdOnly).XMLout;
             var context = new RequestContext(Functions.GetFromStore, ObjectTypes.Well, xmlOut, null, null);
             var parser = new WitsmlQueryParser(context);
             Assert.IsFalse(parser.HasElements("country"));
@@ -124,7 +125,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var uid = response.SuppMsgOut;
 
             var query = new Well { Uid = uid };
-            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, "returnElements=all");
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
 
             Assert.AreEqual(1, result.Count);
             var returnWell = result.FirstOrDefault();
@@ -164,7 +165,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var uid = response.SuppMsgOut;
 
             var query = new Well { Uid = uid };
-            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, "returnElements=all");
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
 
             Assert.AreEqual(1, result.Count);
             var returnWell = result.FirstOrDefault();
@@ -172,7 +173,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             query = new Well { Uid = uid, CommonData = new CommonData { Comments = string.Empty } };
             var queryIn = EnergisticsConverter.ObjectToXml(new WellList { Well = new List<Well> { query } });
-            var xmlOut = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, "returnElements=Requested").XMLout;
+            var xmlOut = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, optionsIn: OptionsIn.ReturnElements.Requested).XMLout;
             var context = new RequestContext(Functions.GetFromStore, ObjectTypes.Well, xmlOut, null, null);
             var parser = new WitsmlQueryParser(context);
             Assert.IsFalse(parser.HasElements("name"));
@@ -201,7 +202,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             var uid = response.SuppMsgOut;
             var query = new Well { Uid = uid };
-            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, "returnElements=all");
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
 
             Assert.AreEqual(1, result.Count);
             var returnWell = result.FirstOrDefault();
@@ -215,6 +216,29 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
+        public void Test_Well_Selection_Uid_Caseless_Compare()
+        {
+            var testUid = "test well for Test_Well_Selection_Uid_Caseless_Compare";
+            var query = new Well { Uid = testUid };
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.IdOnly);
+
+            if (result.Count == 0)
+            {
+                var well = CreateFullWell();
+                well.Uid = testUid;
+                var response = DevKit.Add<WellList, Well>(well);
+
+                Assert.IsNotNull(response);
+                Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+            }
+
+            query = new Well { Uid = testUid.ToUpper()};
+            result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+
+            Assert.IsTrue(result.ToList().Where(x => x.Uid == testUid).Any());
+        }
+
+        [TestMethod]
         public void Test_Well_Selection_Different_Case()
         {
             var well = CreateFullWell();
@@ -225,9 +249,172 @@ namespace PDS.Witsml.Server.Data.Wells
 
             var uid = response.SuppMsgOut;
             var query = new Well { Uid = "", Name = well.Name.ToLower(), NameLegal = well.NameLegal.ToUpper() };
-            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, "returnElements=all");
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
 
             Assert.IsTrue(result.ToList().Where(x => x.Uid == uid).Any());
+        }
+
+        [TestMethod]
+        public void Test_Well_Selection_Criteria_Not_Satisfied()
+        {
+            var dummy = "Dummy";
+            var datumKB = new WellDatum();
+            datumKB.Name = dummy;
+            var query = new Well { Uid = dummy, Name = dummy, NameLegal = dummy, Country=dummy, County=dummy, WellDatum = new List<WellDatum> { datumKB } };
+            var result = DevKit.Get<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.IsNotNull(result);
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(result.XMLout);
+            XmlElement wells = doc.DocumentElement;
+            Assert.IsFalse(wells.HasChildNodes);
+        }
+
+        [TestMethod]
+        public void Test_Well_Selection_MultiQueries_Same_Object_Returned()
+        {
+            var well_01 = CreateFullWell();
+            var response = DevKit.Add<WellList, Well>(well_01);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uid = response.SuppMsgOut;
+
+            var datumKB = new WellDatum();
+            datumKB.Name = "Kelly Bushing";           
+            var well_02 = new Well { Uid = "", WellDatum = new List<WellDatum> { datumKB } };
+
+            var wellList = new WellList();
+            well_01.Uid = uid;
+            wellList.Well = new List<Well>() { well_01, well_02 };
+            var result = DevKit.Get<WellList, Well>(wellList, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(result.XMLout);
+            XmlElement wells = doc.DocumentElement;
+            Assert.IsTrue(wells.HasChildNodes);
+
+            int uidCount = 0;
+            foreach (XmlNode node in wells.ChildNodes)
+            {
+                Assert.AreEqual(1, node.Attributes.Count);
+                if (uid.Equals(node.Attributes[0].InnerText))
+                {
+                    uidCount++;
+                }
+            }
+
+            // Section 6.6.4.1
+            Assert.IsTrue(uidCount > 1);
+        }
+
+        [TestMethod]
+        public void Test_Well_Selection_MultiQueries_One_Query_Fails()
+        {
+            var well = CreateFullWell();
+            var response = DevKit.Add<WellList, Well>(well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uid = response.SuppMsgOut;
+            
+            var datumKB = new WellDatum();
+            datumKB.Name = "Kelly Bushing";
+            var datumSL = new WellDatum();
+            datumSL.Code = ElevCodeEnum.SL;
+            var badWellQuery = new Well { Uid = "", WellDatum = new List<WellDatum> { datumKB, datumSL } };
+
+            var wellList = new WellList();
+            well.Uid = uid;
+            wellList.Well = new List<Well>() { well, badWellQuery };
+            var result = DevKit.Get<WellList, Well>(wellList, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+
+            // Section 6.6.4 
+            Assert.AreEqual(ErrorCodes.RecurringItemsInconsistentSelection, result.Result);
+        }
+
+        [TestMethod]
+        public void Test_Well_Selection_Not_Equal_Comparison_dTimCreation()
+        {
+            var well_01 = CreateFullWell();
+            var response = DevKit.Add<WellList, Well>(well_01);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uid_01 = response.SuppMsgOut;
+
+            var well_02 = CreateFullWell();
+            well_02.CommonData.DateTimeCreation = DateTime.UtcNow;
+            response = DevKit.Add<WellList, Well>(well_02);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uid_02 = response.SuppMsgOut;
+
+            var query = new Well { CommonData = new CommonData() };
+            query.CommonData.DateTimeCreation = well_01.CommonData.DateTimeCreation;
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+
+            // Section 6.6.4
+            Assert.IsTrue(result.ToList().Where(x => x.Uid == uid_02).Any());
+            Assert.IsFalse(result.ToList().Where(x => x.Uid == uid_01).Any());
+        }
+
+        [TestMethod]
+        public void Test_Well_Selection_Not_Equal_Comparison_dTimLastChange()
+        {
+            var well_01 = CreateFullWell();
+            var response = DevKit.Add<WellList, Well>(well_01);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+            var uid_01 = response.SuppMsgOut;
+
+            var query = new Well { Uid = uid_01 };
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual(uid_01, result[0].Uid);
+
+            var wellLastChangeTime = result[0].CommonData.DateTimeLastChange;
+
+            var well_02 = CreateFullWell();
+            well_02.CommonData.DateTimeCreation = DateTime.UtcNow;
+            response = DevKit.Add<WellList, Well>(well_02);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+            var uid_02 = response.SuppMsgOut;
+
+            query = new Well { CommonData = new CommonData() };
+            query.CommonData.DateTimeLastChange = wellLastChangeTime;
+            result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+            
+            // Section 6.6.4
+            Assert.IsTrue(result.ToList().Where(x => x.Uid == uid_02).Any());
+            Assert.IsFalse(result.ToList().Where(x => x.Uid == uid_01).Any());
+        }
+
+        [TestMethod]
+        public void Test_Well_Selection_Do_Not_Return_Empty_Values()
+        {
+            var well = CreateTestWell();
+            Assert.IsNull(well.WaterDepth);
+            var response = DevKit.Add<WellList, Well>(well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uid = response.SuppMsgOut;
+
+            var query = new Well { Uid = uid };
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, result.Count);
+
+            // Section 6.6.4.1 
+            Assert.IsNull(result[0].WaterDepth);
         }
 
         [TestMethod]
@@ -245,7 +432,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var datumSL = new WellDatum();
             datumSL.Name = "Sea Level";
             var query = new Well { Uid = "", WellDatum = new List<WellDatum> { datumKB,  datumSL} };
-            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, "returnElements=all");
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
 
             Assert.IsTrue(result.ToList().Where(x => x.Uid == uid).Any());
         }
@@ -275,7 +462,9 @@ namespace PDS.Witsml.Server.Data.Wells
             datumSL.Name = "Sea Level";
             var query = new Well { WellDatum = new List<WellDatum> { datumKB, datumSL } };
 
-            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, "returnElements=all");
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+
+            // Section 4.1.5
             Assert.IsTrue(result.ToList().Where(x => x.Uid == uid_01).Any());
             Assert.IsTrue(result.ToList().Where(x => x.Uid == uid_02).Any());
         }
@@ -295,8 +484,9 @@ namespace PDS.Witsml.Server.Data.Wells
             var datumSL = new WellDatum();
             datumSL.Code = ElevCodeEnum.SL;
             var query = new Well { Uid = "", WellDatum = new List<WellDatum> { datumKB, datumSL } };
-            var result = DevKit.Get<WellList, Well>(query, ObjectTypes.Well, null, "returnElements=all");
+            var result = DevKit.Get<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
 
+            // Section 4.1.5
             Assert.AreEqual(ErrorCodes.RecurringItemsInconsistentSelection, result.Result);
         }
 
@@ -313,9 +503,11 @@ namespace PDS.Witsml.Server.Data.Wells
             var datumKB = new WellDatum();
             datumKB.Name = "Kelly Bushing";
             var datumSL = new WellDatum();
+            datumSL.Name = "";
             var query = new Well { Uid = "", WellDatum = new List<WellDatum> { datumKB, datumSL } };
-            var result = DevKit.Get<WellList, Well>(query, ObjectTypes.Well, null, "returnElements=all");
+            var result = DevKit.Get<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
 
+            // Section 4.1.5
             Assert.AreEqual(ErrorCodes.RecurringItemsEmptySelection, result.Result);
         }
 
