@@ -34,6 +34,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
             Assert.IsTrue(!string.IsNullOrEmpty(versions));
         }
 
+        [Ignore]
         [TestMethod]
         public void TestSettingsViewModelGetCapabilities()
         {

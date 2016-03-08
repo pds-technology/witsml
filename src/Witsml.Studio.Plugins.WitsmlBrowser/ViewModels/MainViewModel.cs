@@ -336,7 +336,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                 Environment.NewLine);
 
             // Output query results to the Results tab
-            OutputResults(result.Item1, result.Item2); // xmlOut, suppMsgOut
+            OutputResults(result.Item1, result.Item2, result.Item4); // xmlOut, suppMsgOut
 
             // Don't display query contents when GetCap is executed.
             var xmlIn = functionType == Functions.GetCap ? string.Empty : XmlQuery.Text;
@@ -372,11 +372,12 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// </summary>
         /// <param name="xmlOut">The XML out.</param>
         /// <param name="suppMsgOut">The supplemental message out.</param>
-        private void OutputResults(string xmlOut, string suppMsgOut)
+        /// <param name="returnCode">The return code.</param>
+        private void OutputResults(string xmlOut, string suppMsgOut, short returnCode)
         {
-            QueryResults.Text = string.IsNullOrEmpty(suppMsgOut) 
-                ? xmlOut ?? string.Empty 
-                : suppMsgOut;
+            QueryResults.Text = string.IsNullOrEmpty(suppMsgOut)
+                ? xmlOut ?? string.Empty
+                : (returnCode < 0 ? suppMsgOut + "\nError Code: " + returnCode.ToString() : suppMsgOut);
         }
 
         /// <summary>
@@ -387,6 +388,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// <param name="xmlOut">The XML output text.</param>
         /// <param name="suppMsgOut">The supplemental message out.</param>
         /// <param name="optionsIn">The OptionsIn settings to the server.</param>
+        /// <param name="returnCode">The return code.</param>
         private void OutputMessages(Functions functionType, string queryText, string xmlOut, string suppMsgOut, string optionsIn, short returnCode)
         {
             var none = "<!-- None -->";
