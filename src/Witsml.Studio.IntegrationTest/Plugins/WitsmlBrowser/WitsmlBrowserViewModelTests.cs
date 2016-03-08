@@ -100,7 +100,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
             Assert.AreEqual(expectedUid, (wellList.Items[0] as Well).Uid);
         }
 
-        [Ignore]
         [TestMethod]
         public void TestMainViewModelGetCapabilities()
         {
@@ -110,10 +109,13 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
             vm.Model.WitsmlVersion = OptionsIn.DataVersion.Version141.Value;
 
             // Test that Cap Servers can be fetched
-            vm.GetCapabilities();
-            var capServerList = EnergisticsConverter.XmlToObject<CapServers>(vm.QueryResults.Text);
-            Assert.IsNotNull(capServerList);
-            Assert.AreEqual(OptionsIn.DataVersion.Version141.Value, capServerList.CapServer.SchemaVersion);
+            vm.GetCapabilities(() =>
+            {
+                var capServerList = EnergisticsConverter.XmlToObject<CapServers>(vm.QueryResults.Text);
+
+                Assert.IsNotNull(capServerList);
+                Assert.AreEqual(OptionsIn.DataVersion.Version141.Value, capServerList.CapServer.SchemaVersion);
+            });
         }
     }
 }

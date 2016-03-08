@@ -180,7 +180,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// The results of a query are displayed in the Results and Messages tabs.
         /// </summary>
         /// <param name="functionType">Type of the function.</param>
-        public void SubmitQuery(Functions functionType)
+        /// <param name="callback">The callback.</param>
+        public void SubmitQuery(Functions functionType, System.Action callback = null)
         {
             string xmlIn = XmlQuery.Text;
 
@@ -194,15 +195,21 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                 // Call internal SubmitQuery method with references to all inputs and outputs.
                 var result = await SubmitQuery(functionType, xmlIn);
                 await Runtime.InvokeAsync(() => ShowSubmitResult(functionType, result));
+
+                if (callback != null)
+                {
+                    callback();
+                }
             });
         }
 
         /// <summary>
         /// Submits a query to get the server capabilities.
         /// </summary>
-        public void GetCapabilities()
+        /// <param name="callback">The callback.</param>
+        public void GetCapabilities(System.Action callback = null)
         {
-            SubmitQuery(Functions.GetCap);
+            SubmitQuery(Functions.GetCap, callback);
         }
 
         /// <summary>
