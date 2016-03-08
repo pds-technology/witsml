@@ -174,7 +174,7 @@ namespace PDS.Witsml.Server.Data
                 else
                 {
                     if (propertyInfo.Name == "DateTimeCreation" || propertyInfo.Name == "DateTimeLastChange")
-                        return Builders<T>.Filter.Gte(fieldName, propertyValue);
+                        return Builders<T>.Filter.Gt(fieldName, propertyValue);
                     else
                         return Builders<T>.Filter.Eq(fieldName, propertyValue);
                 }
