@@ -101,7 +101,7 @@ namespace PDS.Witsml.Server.Configuration
                 return _capServerDoc;
             }
 
-            _capServerDoc = XDocument.Parse(ToXml());
+            _capServerDoc = WitsmlParser.Parse(ToXml());
 
             return _capServerDoc;
         }

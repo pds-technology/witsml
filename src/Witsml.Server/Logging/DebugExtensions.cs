@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ServiceModel.Web;
-using System.Xml.Linq;
 using log4net;
 
 namespace PDS.Witsml.Server.Logging
@@ -188,9 +187,9 @@ namespace PDS.Witsml.Server.Logging
 
             try
             {
-                return XDocument.Parse(xml).ToString();
+                return WitsmlParser.Parse(xml).ToString();
             }
-            catch (Exception)
+            catch
             {
                 return string.Empty;
             }

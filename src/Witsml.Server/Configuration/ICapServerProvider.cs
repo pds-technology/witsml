@@ -1,4 +1,6 @@
-﻿namespace PDS.Witsml.Server.Configuration
+﻿using System.Xml.Linq;
+
+namespace PDS.Witsml.Server.Configuration
 {
     /// <summary>
     /// Defines properties and methods used for retrieving WITSML Store capabilities. 
@@ -29,6 +31,7 @@
         /// Performs validation for the specified function and supplied parameters.
         /// </summary>
         /// <param name="context">The request context.</param>
-        void ValidateRequest(RequestContext context);
+        /// <param name="document">The XML document.</param>
+        void ValidateRequest(RequestContext context, XDocument document);
     }
 }

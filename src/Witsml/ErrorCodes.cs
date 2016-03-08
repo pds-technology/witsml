@@ -360,10 +360,12 @@
         /// <summary>
         /// -469 The query template is does not conform to the data schema for this data-object.
         /// </summary>
+        QueryTemplateNonConforming = -469,
 
         /// <summary>
         /// -470 Query not supported.
         /// </summary>
+        QueryNotSupported = -470,
 
         /// <summary>
         /// -471 (Not Assigned)
@@ -426,6 +428,7 @@
         /// <summary>
         /// -483 The XMLin document does not comply with the update schema.
         /// </summary>
+        UpdateTemplateNonConforming = -483,
 
         /// <summary>
         /// -484 A mandatory write schema item is missing.

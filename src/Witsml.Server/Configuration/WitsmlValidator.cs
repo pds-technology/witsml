@@ -21,9 +21,9 @@ namespace PDS.Witsml.Server.Configuration
         public static void ValidateRequest(IEnumerable<ICapServerProvider> providers, RequestContext context, out string version)
         {
             ValidateUserAgent(WebOperationContext.Current);
-            ValidateInputTemplate(context.Xml);
+            var document = ValidateInputTemplate(context.Xml);
 
-            var dataSchemaVersion = ObjectTypes.GetVersion(context.Xml);
+            var dataSchemaVersion = ObjectTypes.GetVersion(document);
             ValidateDataSchemaVersion(dataSchemaVersion);
 
             var capServerProvider = providers.FirstOrDefault(x => x.DataSchemaVersion == dataSchemaVersion);
@@ -33,7 +33,7 @@ namespace PDS.Witsml.Server.Configuration
                     "WITSML object type not supported: " + context.ObjectType + "; Version: " + dataSchemaVersion);
             }
 
-            capServerProvider.ValidateRequest(context);
+            capServerProvider.ValidateRequest(context, document);
             version = dataSchemaVersion;
         }
 
@@ -51,10 +51,11 @@ namespace PDS.Witsml.Server.Configuration
         /// Performs validation for the specified function and supplied parameters.
         /// </summary>
         /// <param name="context">The request context.</param>
-        public virtual void ValidateRequest(RequestContext context)
+        /// <param name="document">The XML document.</param>
+        public virtual void ValidateRequest(RequestContext context, XDocument document)
         {
-            ValidateObjectType(context.Function, context.ObjectType, ObjectTypes.GetObjectType(context.Xml));
-            ValidatePluralRootElement(context.ObjectType, context.Xml);
+            ValidateObjectType(context.Function, context.ObjectType, ObjectTypes.GetObjectType(document));
+            ValidatePluralRootElement(context.ObjectType, document);
         }
 
         /// <summary>
@@ -75,12 +76,14 @@ namespace PDS.Witsml.Server.Configuration
         /// </summary>
         /// <param name="xml">The XML input template.</param>
         /// <exception cref="WitsmlException"></exception>
-        public static void ValidateInputTemplate(string xml)
+        public static XDocument ValidateInputTemplate(string xml)
         {
             if (string.IsNullOrWhiteSpace(xml))
             {
                 throw new WitsmlException(ErrorCodes.MissingInputTemplate);
             }
+
+            return WitsmlParser.Parse(xml);
         }
 
         /// <summary>
@@ -100,11 +103,11 @@ namespace PDS.Witsml.Server.Configuration
         /// Validates the required plural root element.
         /// </summary>
         /// <param name="objectType">Type of the object.</param>
-        /// <param name="xml">The XML.</param>
+        /// <param name="document">The XML document.</param>
         /// <exception cref="WitsmlException"></exception>
-        public static void ValidatePluralRootElement(string objectType, string xml)
+        public static void ValidatePluralRootElement(string objectType, XDocument document)
         {
-            var objectGroupType = ObjectTypes.GetObjectGroupType(xml);
+            var objectGroupType = ObjectTypes.GetObjectGroupType(document);
             var pluralObjectType = objectType + "s";
 
             if (objectGroupType != pluralObjectType)
@@ -114,15 +117,28 @@ namespace PDS.Witsml.Server.Configuration
         }
 
         /// <summary>
+        /// Validates the non-empty root element.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="document">The XML document.</param>
+        /// <exception cref="WitsmlException"></exception>
+        public static void ValidateEmptyRootElement(string objectType, XDocument document)
+        {
+            if (!document.Root.Elements().Any())
+            {
+                throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
+            }
+        }
+
+        /// <summary>
         /// Validates the required singular root element.
         /// </summary>
         /// <param name="objectType">Type of the object.</param>
-        /// <param name="xml">The XML.</param>
+        /// <param name="document">The XML document.</param>
         /// <exception cref="WitsmlException"></exception>
-        public static void ValidateSingleChildElement(string objectType, string xml)
+        public static void ValidateSingleChildElement(string objectType, XDocument document)
         {
-            var doc = XDocument.Parse(xml);
-            if (doc.Root.Elements().Count() != 1)
+            if (document.Root.Elements().Count() > 1)
             {
                 throw new WitsmlException(ErrorCodes.InputTemplateMultipleDataObjects);
             }

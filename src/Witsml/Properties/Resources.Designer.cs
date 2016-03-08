@@ -359,6 +359,24 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Query not supported..
+        /// </summary>
+        internal static string QueryNotSupported {
+            get {
+                return ResourceManager.GetString("QueryNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The query template is does not conform to the data schema for this data-object..
+        /// </summary>
+        internal static string QueryTemplateNonConforming {
+            get {
+                return ResourceManager.GetString("QueryTemplateNonConforming", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to When multiple selection criteria is are included in a recurring pattern, an empty value must not be specified..
         /// </summary>
         internal static string RecurringItemsEmptySelection {
@@ -391,6 +409,15 @@ namespace PDS.Witsml.Properties {
         internal static string Success {
             get {
                 return ResourceManager.GetString("Success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The XMLin document does not comply with the update schema..
+        /// </summary>
+        internal static string UpdateTemplateNonConforming {
+            get {
+                return ResourceManager.GetString("UpdateTemplateNonConforming", resourceCulture);
             }
         }
     }

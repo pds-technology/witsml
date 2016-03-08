@@ -43,7 +43,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The list of queried data object.</returns>
         public List<T> Execute()
         {
-            var list = _parser.Parse<TList>(_parser.Context.Xml);
+            var list = WitsmlParser.Parse<TList>(_parser.Context.Xml);
             var info = typeof(TList).GetProperty(typeof(T).Name);
             var tList = info.GetValue(list) as List<T>;
 

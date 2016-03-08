@@ -63,14 +63,24 @@ namespace PDS.Witsml
         /// <returns>The WITSML data object type, as a string.</returns>
         public static string GetObjectType(string xml)
         {
+            var document = WitsmlParser.Parse(xml);
+            return GetObjectType(document);
+        }
+
+        /// <summary>
+        /// Gets the type of the object.
+        /// </summary>
+        /// <param name="xml">The XML document.</param>
+        /// <returns>The WITSML data object type, as a string.</returns>
+        public static string GetObjectType(XDocument document)
+        {
             try
             {
-                var doc = XDocument.Parse(xml);
-                return doc.Root.Elements()
+                return document.Root.Elements()
                     .Select(x => x.Name.LocalName)
                     .FirstOrDefault();
             }
-            catch (Exception)
+            catch
             {
                 return Unknown;
             }
@@ -79,7 +89,7 @@ namespace PDS.Witsml
         /// <summary>
         /// Gets the object type from group (plural) name.
         /// </summary>
-        /// <param name="xml">The XML.</param>
+        /// <param name="xml">The XML string.</param>
         /// <returns>The WITSML Object Type In</returns>
         public static string GetObjectTypeFromGroup(string xml)
         {
@@ -98,16 +108,26 @@ namespace PDS.Witsml
         /// <summary>
         /// Gets the type of the object group.
         /// </summary>
-        /// <param name="xml">The XML.</param>
+        /// <param name="xml">The XML string.</param>
         /// <returns>The WITSML data object group type, as a string.</returns>
         public static string GetObjectGroupType(string xml)
         {
+            var document = WitsmlParser.Parse(xml);
+            return GetObjectGroupType(document);
+        }
+
+        /// <summary>
+        /// Gets the type of the object group.
+        /// </summary>
+        /// <param name="xml">The XML document.</param>
+        /// <returns>The WITSML data object group type, as a string.</returns>
+        public static string GetObjectGroupType(XDocument document)
+        {
             try
             {
-                var doc = XDocument.Parse(xml);
-                return doc.Root.Name.LocalName;
+                return document.Root.Name.LocalName;
             }
-            catch (Exception)
+            catch
             {
                 return Unknown;
             }
@@ -120,12 +140,22 @@ namespace PDS.Witsml
         /// <returns>The data schema version.</returns>
         public static string GetVersion(string xml)
         {
+            var document = WitsmlParser.Parse(xml);
+            return GetVersion(document);
+        }
+
+        /// <summary>
+        /// Gets the data schema version.
+        /// </summary>
+        /// <param name="xml">The XML document.</param>
+        /// <returns>The data schema version.</returns>
+        public static string GetVersion(XDocument document)
+        {
             try
             {
-                var doc = XDocument.Parse(xml);
-                return (string)doc.Root.Attribute("version");
+                return (string)document.Root.Attribute("version");
             }
-            catch (Exception)
+            catch
             {
                 return string.Empty;
             }

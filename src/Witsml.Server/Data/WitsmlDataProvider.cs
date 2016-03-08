@@ -46,8 +46,7 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         public virtual WitsmlResult AddToStore(RequestContext context)
         {
-            var parser = new WitsmlQueryParser(context);
-            var list = parser.Parse<TList>(context.Xml);
+            var list = WitsmlParser.Parse<TList>(context.Xml);
             return _dataAdapter.Add(list.Items.Cast<TObject>().Single());
         }
 
@@ -60,8 +59,7 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         public virtual WitsmlResult UpdateInStore(RequestContext context)
         {
-            var parser = new WitsmlQueryParser(context);
-            var list = parser.Parse<TList>(context.Xml);
+            var list = WitsmlParser.Parse<TList>(context.Xml);
             return _dataAdapter.Update(list.Items.Cast<TObject>().Single());
         }
 

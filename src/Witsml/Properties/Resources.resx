@@ -266,4 +266,16 @@
     <value>When multiple selection criteria is are included in a recurring element, the same selection items must exist in each recurring node.</value>
     <comment>-438</comment>
   </data>
+  <data name="QueryNotSupported" xml:space="preserve">
+    <value>Query not supported.</value>
+    <comment>-470</comment>
+  </data>
+  <data name="QueryTemplateNonConforming" xml:space="preserve">
+    <value>The query template is does not conform to the data schema for this data-object.</value>
+    <comment>-469</comment>
+  </data>
+  <data name="UpdateTemplateNonConforming" xml:space="preserve">
+    <value>The XMLin document does not comply with the update schema.</value>
+    <comment>-483</comment>
+  </data>
 </root>

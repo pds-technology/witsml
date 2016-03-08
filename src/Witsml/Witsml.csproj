@@ -65,6 +65,7 @@
     </Compile>
     <Compile Include="EtpUris.cs" />
     <Compile Include="WitsmlException.cs" />
+    <Compile Include="WitsmlParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Framework\Framework.csproj">

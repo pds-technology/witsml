@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Xml.Linq;
 using log4net;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 
@@ -36,32 +37,37 @@ namespace PDS.Witsml.Server.Configuration
         /// Performs validation for the specified function and supplied parameters.
         /// </summary>
         /// <param name="context">The request context.</param>
-        public override void ValidateRequest(RequestContext context)
+        /// <param name="document">The XML document.</param>
+        public override void ValidateRequest(RequestContext context, XDocument document)
         {
-            base.ValidateRequest(context);
+            base.ValidateRequest(context, document);
 
             var optionsIn = OptionsIn.Parse(context.Options);
 
             if (context.Function == Functions.GetFromStore)
             {
+                ValidateEmptyRootElement(context.ObjectType, document);
             }
             else if (context.Function == Functions.AddToStore)
             {
                 ValidateKeywords(optionsIn, OptionsIn.CompressionMethod.Keyword);
                 ValidateCompressionMethod(optionsIn, GetCapServer().CapServer.CompressionMethod);
-                ValidateSingleChildElement(context.ObjectType, context.Xml);
+                ValidateEmptyRootElement(context.ObjectType, document);
+                ValidateSingleChildElement(context.ObjectType, document);
             }
             else if (context.Function == Functions.UpdateInStore)
             {
                 ValidateKeywords(optionsIn, OptionsIn.CompressionMethod.Keyword);
                 ValidateCompressionMethod(optionsIn, GetCapServer().CapServer.CompressionMethod);
-                ValidateSingleChildElement(context.ObjectType, context.Xml);
+                ValidateEmptyRootElement(context.ObjectType, document);
+                ValidateSingleChildElement(context.ObjectType, document);
             }
             else if (context.Function == Functions.UpdateInStore)
             {
                 //ValidateKeywords(optionsIn, OptionsIn.CascadedDelete.Keyword);
                 //ValidateCascadedDelete(optionsIn, GetCapServer().CapServer.CascadedDelete.GetValueOrDefault());
-                ValidateSingleChildElement(context.ObjectType, context.Xml);
+                ValidateEmptyRootElement(context.ObjectType, document);
+                ValidateSingleChildElement(context.ObjectType, document);
             }
         }
 
