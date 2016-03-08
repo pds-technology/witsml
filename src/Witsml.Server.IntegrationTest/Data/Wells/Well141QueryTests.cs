@@ -73,6 +73,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual(1, wellList.Well.Count);
             returnWell = wellList.Well.FirstOrDefault();
 
+            Assert.AreEqual(well.Name, returnWell.Name);
             Assert.IsNull(returnWell.DateTimeSpud);
             Assert.IsNull(returnWell.GroundElevation);
         }
@@ -108,6 +109,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual(1, wellList.Well.Count);
             returnWell = wellList.Well.FirstOrDefault();
 
+            Assert.AreEqual(well.Name, returnWell.Name);
             Assert.IsNull(returnWell.DateTimeSpud);
             Assert.IsNull(returnWell.GroundElevation);
         }
