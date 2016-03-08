@@ -107,6 +107,8 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Providers\ChannelStreaming\ChannelStreamingProducer.cs" />
+    <Compile Include="Providers\ChannelStreaming\ChannelStreamingConsumer.cs" />
     <Compile Include="Providers\Discovery\DiscoveryStore141Provider.cs" />
     <Compile Include="Providers\Discovery\DiscoveryStore200Provider.cs" />
     <Compile Include="Providers\Discovery\DiscoveryStoreProvider.cs" />
