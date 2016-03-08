@@ -33,22 +33,5 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
             var versions = _settingsViewModel.GetVersions(proxy, _validWitsmlUri);
             Assert.IsTrue(!string.IsNullOrEmpty(versions));
         }
-
-        [Ignore]
-        [TestMethod]
-        public void TestSettingsViewModelGetCapabilities()
-        {
-            var requestVm = new RequestViewModel(_runtime);
-            var mainVm = new MainViewModel(_runtime);
-            mainVm.Model.Connection = new Connections.Connection() { Uri = _validWitsmlUri };
-            mainVm.Model.WitsmlVersion = OptionsIn.DataVersion.Version141.Value;
-            mainVm.Items.Add(requestVm);
-            requestVm.Items.Add(_settingsViewModel);
-
-            _settingsViewModel.GetCapabilities();
-            var capServerList = EnergisticsConverter.XmlToObject<CapServers>(mainVm.QueryResults.Text);
-            Assert.IsNotNull(capServerList);
-            Assert.AreEqual(OptionsIn.DataVersion.Version141.Value, capServerList.CapServer.SchemaVersion);
-        }
     }
 }

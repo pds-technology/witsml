@@ -101,21 +101,21 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
         }
 
         [TestMethod]
-        public void TestMainViewModelGetCapabilities()
+        public async Task TestMainViewModelGetCapabilities()
         {
             var vm = new MainViewModel(_runtime);
             vm.Model.Connection = new Connections.Connection() { Uri = _validWitsmlUri };
             vm.Proxy.Url = vm.Model.Connection.Uri;
             vm.Model.WitsmlVersion = OptionsIn.DataVersion.Version141.Value;
 
-            // Test that Cap Servers can be fetched
-            vm.GetCapabilities(() =>
-            {
-                var capServerList = EnergisticsConverter.XmlToObject<CapServers>(vm.QueryResults.Text);
+            var result = await vm.SubmitQuery(Functions.GetCap, string.Empty);
 
-                Assert.IsNotNull(capServerList);
-                Assert.AreEqual(OptionsIn.DataVersion.Version141.Value, capServerList.CapServer.SchemaVersion);
-            });
+            // Test that the xmlOut is a Capserver List
+            var capServerList = EnergisticsConverter.XmlToObject<CapServers>(result.Item1);
+            Assert.IsNotNull(capServerList);
+
+            // Is this the version we're expecting
+            Assert.AreEqual(OptionsIn.DataVersion.Version141.Value, capServerList.CapServer.SchemaVersion);
         }
     }
 }
