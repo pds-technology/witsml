@@ -8,13 +8,29 @@ namespace Energistics.Protocol.ChannelStreaming
 {
     public class ChannelStreamingProducerHandler : EtpProtocolHandler, IChannelStreamingProducer
     {
+        private const string SimpleStreamer = "SimpleStreamer";
+
         public ChannelStreamingProducerHandler() : base(Protocols.ChannelStreaming, "producer")
         {
         }
 
+        public bool IsSimpleStreamer { get; protected set; }
+
         public int MaxDataItems { get; private set; }
 
         public int MaxMessageRate { get; private set; }
+
+        public override IDictionary<string, DataValue> GetCapabilities()
+        {
+            var capabilities = base.GetCapabilities();
+
+            if (IsSimpleStreamer)
+            {
+                capabilities[SimpleStreamer] = new DataValue() { Item = true };
+            }
+
+            return capabilities;
+        }
 
         public virtual void ChannelMetadata(MessageHeader request, IList<ChannelMetadataRecord> channelMetadataRecords)
         {

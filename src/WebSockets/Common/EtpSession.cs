@@ -45,7 +45,20 @@ namespace Energistics.Common
 
         public void SendMessage<T>(MessageHeader header, T body) where T : ISpecificRecord
         {
-            var data = body.Encode(header);
+            byte[] data = new byte[0];
+
+            try
+            {
+                data = body.Encode(header);
+            }
+            catch (Exception ex)
+            {
+                Handler(header.Protocol)
+                    .ProtocolException(1000, ex.Message, header.MessageId);
+
+                return;
+            }
+
             Send(data, 0, data.Length);
             Sent(header, body);
         }
@@ -53,7 +66,6 @@ namespace Energistics.Common
         public IList<SupportedProtocol> GetSupportedProtocols()
         {
             var supportedProtocols = new List<SupportedProtocol>();
-            var capabilities = new Dictionary<string, DataValue>();
             var version = new Energistics.Datatypes.Version()
             {
                 Major = 1
@@ -70,7 +82,7 @@ namespace Energistics.Common
                 {
                     Protocol = handler.Protocol,
                     ProtocolVersion = version,
-                    ProtocolCapabilities = capabilities,
+                    ProtocolCapabilities = handler.GetCapabilities(),
                     Role = handler.RequestedRole ?? handler.Role
                 });
             }

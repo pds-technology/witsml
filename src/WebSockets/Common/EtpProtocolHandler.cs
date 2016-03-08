@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Avro.IO;
 using Avro.Specific;
 using Energistics.Datatypes;
@@ -27,6 +28,11 @@ namespace Energistics.Common
 
         public string RequestedRole { get; protected set; }
 
+        public virtual IDictionary<string, DataValue> GetCapabilities()
+        {
+            return new Dictionary<string, DataValue>();
+        }
+
         public virtual void Acknowledge(int correlationId)
         {
             var header = CreateMessageHeader(Protocol, (int)MessageTypes.Core.Acknowledge, correlationId);
@@ -54,7 +60,7 @@ namespace Energistics.Common
 
         protected virtual void InvalidMessage(MessageHeader header)
         {
-            ProtocolException(2, "Invalid message type: " + header.MessageType, header.MessageId);
+            ProtocolException((int)ErrorCodes.EINVALID_MESSAGETYPE, "Invalid message type: " + header.MessageType, header.MessageId);
         }
 
         void IProtocolHandler.HandleMessage(MessageHeader header, Decoder decoder)

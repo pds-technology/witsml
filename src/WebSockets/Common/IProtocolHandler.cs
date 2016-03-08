@@ -1,4 +1,5 @@
-﻿using Avro.IO;
+﻿using System.Collections.Generic;
+using Avro.IO;
 using Energistics.Datatypes;
 using Energistics.Protocol.Core;
 
@@ -13,6 +14,8 @@ namespace Energistics.Common
         string Role { get; }
 
         string RequestedRole { get; }
+
+        IDictionary<string, DataValue> GetCapabilities();
 
         void Acknowledge(int correlationId);
 
