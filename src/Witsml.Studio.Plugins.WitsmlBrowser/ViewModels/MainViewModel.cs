@@ -385,11 +385,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             QueryResults.Text = string.IsNullOrEmpty(suppMsgOut)
                 ? xmlOut ?? string.Empty
                 : (returnCode < 0
-                    ? string.Format(
-                        "{0}{1}{1}Error Code: {2}",
-                        suppMsgOut,
-                        Environment.NewLine,
-                        returnCode)
+                    ? string.Format("{0}{1}{1}Error Code: {2}", suppMsgOut, Environment.NewLine, returnCode)
                     : suppMsgOut);
         }
 
