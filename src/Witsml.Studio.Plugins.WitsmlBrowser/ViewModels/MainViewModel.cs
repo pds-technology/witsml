@@ -343,7 +343,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                 Environment.NewLine);
 
             // Output query results to the Results tab
-            OutputResults(result.Item1, result.Item2, result.Item4); // xmlOut, suppMsgOut
+            OutputResults(result.Item1, result.Item2, result.Item4); // xmlOut, suppMsgOut, returnCode
 
             // Don't display query contents when GetCap is executed.
             var xmlIn = functionType == Functions.GetCap ? string.Empty : XmlQuery.Text;
@@ -384,7 +384,9 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         {
             QueryResults.Text = string.IsNullOrEmpty(suppMsgOut)
                 ? xmlOut ?? string.Empty
-                : (returnCode < 0 ? suppMsgOut + "\nError Code: " + returnCode.ToString() : suppMsgOut);
+                : (returnCode < 0
+                    ? string.Format("{0}{1}{1}Error Code: {2}", suppMsgOut, Environment.NewLine, returnCode)
+                    : suppMsgOut);
         }
 
         /// <summary>

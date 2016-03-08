@@ -105,6 +105,15 @@ namespace PDS.Witsml.Server
             return response;
         }
 
+        public WMLS_GetFromStoreResponse Get<TList, TObject>(TList entityList, string wmlTypeIn = null, string capClient = null, string optionsIn = null) where TList : IEnergisticsCollection
+        {
+            var typeIn = wmlTypeIn ?? ObjectTypes.GetObjectType<TList>();
+            var queryIn = EnergisticsConverter.ObjectToXml(entityList);
+
+            var response = GetFromStore(typeIn, queryIn, capClient, optionsIn);
+            return response;
+        }
+
         public WMLS_AddToStoreResponse AddToStore(string wmlTypeIn, string xmlIn, string capClient, string optionsIn)
         {
             var request = new WMLS_AddToStoreRequest { WMLtypeIn = wmlTypeIn, XMLin = xmlIn, CapabilitiesIn = capClient, OptionsIn = optionsIn };
