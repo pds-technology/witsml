@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.Composition;
 using Energistics.Common;
 using Energistics.DataAccess.WITSML200;
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using Energistics.Protocol.Store;
@@ -19,21 +20,26 @@ namespace PDS.Witsml.Server.Providers.Store
         private readonly IEtpDataAdapter<Well> _wellDataAdapter;
         private readonly IEtpDataAdapter<Wellbore> _wellboreDataAdapter;
         private readonly IEtpDataAdapter<Log> _logDataAdapter;
+        private readonly IEtpDataAdapter<ChannelSet> _channelSetDataAdapter;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StoreStore200Provider"/> class.
+        /// Initializes a new instance of the <see cref="StoreStore200Provider" /> class.
         /// </summary>
         /// <param name="wellDataAdapter">The well data adapter.</param>
         /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
+        /// <param name="logDataAdapter">The log data adapter.</param>
+        /// <param name="channelSetDataAdapter">The channel set data adapter.</param>
         [ImportingConstructor]
         public StoreStore200Provider(
             IEtpDataAdapter<Well> wellDataAdapter, 
             IEtpDataAdapter<Wellbore> wellboreDataAdapter,
-            IEtpDataAdapter<Log> logDataAdapter)
+            IEtpDataAdapter<Log> logDataAdapter,
+            IEtpDataAdapter<ChannelSet> channelSetDataAdapter)
         {
             _wellDataAdapter = wellDataAdapter;
             _wellboreDataAdapter = wellboreDataAdapter;
             _logDataAdapter = logDataAdapter;
+            _channelSetDataAdapter = channelSetDataAdapter;
         }
 
         /// <summary>
@@ -52,26 +58,33 @@ namespace PDS.Witsml.Server.Providers.Store
         /// <exception cref="System.NotImplementedException"></exception>
         public void GetObject(ProtocolEventArgs<GetObject, DataObject> args)
         {
+            AbstractObject entity = null;
+
             var uri = new EtpUri(args.Message.Uri);
 
             if (uri.ObjectType == ObjectTypes.Well)
             {
-                var entity = _wellDataAdapter.Get(uri.ObjectId);
-
-                StoreStoreProvider.SetDataObject(args.Context, entity, uri, entity.Citation.Title);
+                entity = _wellDataAdapter.Get(uri.ObjectId);
             }
             else if (uri.ObjectType == ObjectTypes.Wellbore)
             {
-                var entity = _wellboreDataAdapter.Get(uri.ObjectId);
-
-                StoreStoreProvider.SetDataObject(args.Context, entity, uri, entity.Citation.Title);
+                entity = _wellboreDataAdapter.Get(uri.ObjectId);
             }
             else if (uri.ObjectType == ObjectTypes.Log)
             {
-                var entity = _logDataAdapter.Get(uri.ObjectId);
-
-                StoreStoreProvider.SetDataObject(args.Context, entity, uri, entity.Citation.Title);
+                entity = _logDataAdapter.Get(uri.ObjectId);
             }
+            else if (uri.ObjectType == ObjectTypes.ChannelSet)
+            {
+                entity = _channelSetDataAdapter.Get(uri.ObjectId);
+            }
+
+            StoreStoreProvider.SetDataObject(args.Context, entity, uri, GetName(entity));
+        }
+
+        private string GetName(AbstractObject entity)
+        {
+            return entity == null ? string.Empty : entity.Citation.Title;
         }
     }
 }

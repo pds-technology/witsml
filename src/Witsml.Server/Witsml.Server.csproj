@@ -74,6 +74,7 @@
     <Compile Include="Configuration\RequestContext.cs" />
     <Compile Include="Configuration\RequestExtensions.cs" />
     <Compile Include="Configuration\WitsmlValidator.cs" />
+    <Compile Include="Data\Channels\ChannelSet200Validator.cs" />
     <Compile Include="Data\DataObjectValidator.cs" />
     <Compile Include="Configuration\ICapServerProvider.cs" />
     <Compile Include="Data\IDataObjectValidator.cs" />

@@ -26,6 +26,8 @@ namespace PDS.Witsml
         public const string Rig = "rig";
         public const string Trajectory = "trajectory";
         public const string ChangeLog = "changeLog";
+        public const string ChannelSet = "channelSet";
+        public const string Channel = "channel";
 
         /// <summary>
         /// Gets the type of the data object.

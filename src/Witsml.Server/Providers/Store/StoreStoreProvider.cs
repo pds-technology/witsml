@@ -63,10 +63,17 @@ namespace PDS.Witsml.Server.Providers.Store
         /// <param name="name">The name.</param>
         public static void SetDataObject<T>(DataObject dataObject, T entity, EtpUri uri, string name)
         {
-            var xml = EnergisticsConverter.ObjectToXml(entity);
+            if (entity == null)
+            {
+                dataObject.Data = new byte[0];
+            }
+            else
+            {
+                var xml = EnergisticsConverter.ObjectToXml(entity);
+                dataObject.Data = Encoding.UTF8.GetBytes(xml);
+            }
 
             dataObject.ContentEncoding = string.Empty;
-            dataObject.Data = Encoding.UTF8.GetBytes(xml);
             dataObject.Resource = new Resource()
             {
                 Uri = uri,
