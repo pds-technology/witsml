@@ -34,6 +34,12 @@ namespace PDS.Witsml.Server.Data
             Register2<Witsml200.Well>();
             Register2<Witsml200.Wellbore>();
             Register2<Witsml200.Log>();
+            Register2<Witsml200.ChannelSet>();
+            Register2<Witsml200.Channel>();
+
+            Register3<Witsml200.ComponentSchemas.IndexRangeContext>();
+            Register3<Witsml200.ComponentSchemas.DepthIndexValue>();
+            Register3<Witsml200.ComponentSchemas.TimeIndexValue>();
 
             // Custom
             if (!BsonClassMap.IsClassMapRegistered(typeof(LogDataValues)))
@@ -72,6 +78,17 @@ namespace PDS.Witsml.Server.Data
             if (!BsonClassMap.IsClassMapRegistered(typeof(T)))
             {
                 BsonClassMap.RegisterClassMap<T>();
+            }
+        }
+
+        private void Register3<T>()
+        {
+            if (!BsonClassMap.IsClassMapRegistered(typeof(T)))
+            {
+                BsonClassMap.RegisterClassMap<T>(cm =>
+                {
+                    cm.AutoMap();
+                });
             }
         }
     }
