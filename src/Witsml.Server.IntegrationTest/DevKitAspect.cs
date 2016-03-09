@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Xml;
 using Energistics.DataAccess;
 using PDS.Framework;
 
@@ -71,44 +72,38 @@ namespace PDS.Witsml.Server
             return List(instance);
         }
 
+        public bool HasChildNodes(XmlElement element)
+        {
+            return element != null ? element.HasChildNodes : false;
+        }
+
+        public T CreateWellDatum<T>(Action<T> action)
+        {
+            var instance = Activator.CreateInstance<T>();
+            action(instance);
+            return instance;
+        }
+
         public WMLS_AddToStoreResponse Add<TList, TObject>(TObject entity, string wmlTypeIn = null, string capClient = null, string optionsIn = null) where TList : IEnergisticsCollection
         {
-            var info = typeof(TList).GetProperty(typeof(TObject).Name);
-            var list = New<TList>(x => info.SetValue(x, List(entity)));
-            var typeIn = wmlTypeIn ?? ObjectTypes.GetObjectType<TList>();
-            var xmlIn = EnergisticsConverter.ObjectToXml(list);
+            string typeIn, xmlIn;
+            SetupParameters<TList, TObject>(List(entity), wmlTypeIn, out typeIn, out xmlIn);
 
             return AddToStore(typeIn, xmlIn, capClient, optionsIn);
         }
 
         public List<TObject> Query<TList, TObject>(TObject entity, string wmlTypeIn = null, string capClient = null, string optionsIn = null) where TList : IEnergisticsCollection
         {
-            var info = typeof(TList).GetProperty(typeof(TObject).Name);
-            var list = New<TList>(x => info.SetValue(x, List(entity)));
-            var typeIn = wmlTypeIn ?? ObjectTypes.GetObjectType<TList>();
-            var queryIn = EnergisticsConverter.ObjectToXml(list);
-
-            var response = GetFromStore(typeIn, queryIn, capClient, optionsIn);
+            var response = Get<TList, TObject>(List(entity), wmlTypeIn, capClient, optionsIn);
             var results = EnergisticsConverter.XmlToObject<TList>(response.XMLout);
 
             return (List<TObject>)results.Items;
         }
-
-        public WMLS_GetFromStoreResponse Get<TList, TObject>(TObject entity, string wmlTypeIn = null, string capClient = null, string optionsIn = null) where TList : IEnergisticsCollection
+        
+        public WMLS_GetFromStoreResponse Get<TList, TObject>(List<TObject> entityList, string wmlTypeIn = null, string capClient = null, string optionsIn = null) where TList : IEnergisticsCollection
         {
-            var info = typeof(TList).GetProperty(typeof(TObject).Name);
-            var list = New<TList>(x => info.SetValue(x, List(entity)));
-            var typeIn = wmlTypeIn ?? ObjectTypes.GetObjectType<TList>();
-            var queryIn = EnergisticsConverter.ObjectToXml(list);
-
-            var response = GetFromStore(typeIn, queryIn, capClient, optionsIn);
-            return response;
-        }
-
-        public WMLS_GetFromStoreResponse Get<TList, TObject>(TList entityList, string wmlTypeIn = null, string capClient = null, string optionsIn = null) where TList : IEnergisticsCollection
-        {
-            var typeIn = wmlTypeIn ?? ObjectTypes.GetObjectType<TList>();
-            var queryIn = EnergisticsConverter.ObjectToXml(entityList);
+            string typeIn, queryIn;
+            SetupParameters<TList, TObject>(entityList, wmlTypeIn, out typeIn, out queryIn);
 
             var response = GetFromStore(typeIn, queryIn, capClient, optionsIn);
             return response;
@@ -125,5 +120,14 @@ namespace PDS.Witsml.Server
             var request = new WMLS_GetFromStoreRequest { WMLtypeIn = wmlTypeIn, QueryIn = queryIn, CapabilitiesIn = capClient, OptionsIn = optionsIn };
             return Store.WMLS_GetFromStore(request);
         }
+
+        private void SetupParameters<TList, TObject>(List<TObject> entityList, string wmlTypeIn, out string typeIn, out string queryIn) where TList : IEnergisticsCollection
+        {
+            var info = typeof(TList).GetProperty(typeof(TObject).Name);
+            var list = New<TList>(x => info.SetValue(x, entityList));
+            typeIn = wmlTypeIn ?? ObjectTypes.GetObjectType<TList>();
+            queryIn = EnergisticsConverter.ObjectToXml(list);
+        }
+
     }
 }
