@@ -20,5 +20,8 @@
         public static readonly ObjectName Log131 = new ObjectName(ObjectTypes.Log, Version131);
         public static readonly ObjectName Log141 = new ObjectName(ObjectTypes.Log, Version141);
         public static readonly ObjectName Log200 = new ObjectName(ObjectTypes.Log, Version200);
+
+        public static readonly ObjectName ChannelSet200 = new ObjectName(ObjectTypes.ChannelSet, Version200);
+        public static readonly ObjectName Channel200 = new ObjectName(ObjectTypes.Channel, Version200);
     }
 }

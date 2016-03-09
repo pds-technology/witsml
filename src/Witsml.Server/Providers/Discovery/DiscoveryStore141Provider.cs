@@ -70,7 +70,11 @@ namespace PDS.Witsml.Server.Providers.Discovery
 
             var uri = new EtpUri(args.Message.Uri);
 
-            if (args.Message.Uri == EtpUris.Witsml141)
+            if (!uri.IsRelatedTo(EtpUris.Witsml141))
+            {
+                return;
+            }
+            else if (args.Message.Uri == EtpUris.Witsml141)
             {
                 _wellDataAdapter.GetAll()
                     .ForEach(x => args.Context.Add(ToResource(x)));

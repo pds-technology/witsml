@@ -10,7 +10,7 @@ using PDS.Witsml.Studio.ViewModels;
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
 {
     [TestClass]
-    public class WitsmlMainViewModelTests
+    public class WitsmlBrowserViewModelTests
     {
         const string _validWitsmlUri = "http://localhost/Witsml.Web/WitsmlStore.svc";
 
@@ -60,7 +60,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
 
             // Submit the query
             var result = await vm.SubmitQuery(Functions.AddToStore, xmlIn);
-            var suppMsgOut = result.Item2;
+            var suppMsgOut = result.MessageOut;
 
             // The same uid should be returned as the results.
             Assert.AreEqual(expectedUid, suppMsgOut);
@@ -89,7 +89,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
             xmlIn = string.Format(_getWellTemplate, expectedUid);
             result = await vm.SubmitQuery(Functions.GetFromStore, xmlIn);
 
-            string xmlOut = result.Item1;
+            string xmlOut = result.XmlOut;
 
             // The same uid should be returned as the results.
             Assert.IsNotNull(xmlOut);
@@ -101,7 +101,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
         }
 
         [TestMethod]
-        public async Task TestMainViewModelGetCapabilities()
+        public async Task TestMainViewModelSubmitQuery()
         {
             var vm = new MainViewModel(_runtime);
             vm.Model.Connection = new Connections.Connection() { Uri = _validWitsmlUri };
@@ -111,7 +111,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
             var result = await vm.SubmitQuery(Functions.GetCap, string.Empty);
 
             // Test that the xmlOut is a Capserver List
-            var capServerList = EnergisticsConverter.XmlToObject<CapServers>(result.Item1);
+            var capServerList = EnergisticsConverter.XmlToObject<CapServers>(result.XmlOut);
             Assert.IsNotNull(capServerList);
 
             // Is this the version we're expecting

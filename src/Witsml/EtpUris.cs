@@ -50,5 +50,17 @@ namespace PDS.Witsml
         {
             return Witsml200.Append(ObjectTypes.Log, entity.Uuid);
         }
+
+        public static EtpUri ToUri(this Witsml200.ChannelSet entity, Witsml200.Log log)
+        {
+            return log.ToUri()
+                .Append(ObjectTypes.ChannelSet, entity.Uuid);
+        }
+
+        public static EtpUri ToUri(this Witsml200.Channel entity, Witsml200.Log log, Witsml200.ChannelSet channelSet)
+        {
+            return channelSet.ToUri(log)
+                .Append(ObjectTypes.Channel, entity.Mnemonic);
+        }
     }
 }

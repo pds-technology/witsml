@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
 using Energistics.Common;
 using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
@@ -69,7 +70,11 @@ namespace PDS.Witsml.Server.Providers.Discovery
 
             var uri = new EtpUri(args.Message.Uri);
 
-            if (args.Message.Uri == EtpUris.Witsml200)
+            if (!uri.IsRelatedTo(EtpUris.Witsml200))
+            {
+                return;
+            }
+            else if (args.Message.Uri == EtpUris.Witsml200)
             {
                 _wellDataAdapter.GetAll()
                     .ForEach(x => args.Context.Add(ToResource(x)));
@@ -84,11 +89,23 @@ namespace PDS.Witsml.Server.Providers.Discovery
                 _logDataAdapter.GetAll(uri)
                     .ForEach(x => args.Context.Add(ToResource(x)));
             }
-            //else if (uri.ObjectType == ObjectTypes.Log)
-            //{
-            //    var log = _logDataAdapter.Get(uri.ObjectId);
-            //    log.LogCurveInfo.ForEach(x => args.Context.Add(ToResource(log, x)));
-            //}
+            else if (uri.ObjectType == ObjectTypes.Log)
+            {
+                var log = _logDataAdapter.Get(uri.ObjectId);
+                log.ChannelSet.ForEach(x => args.Context.Add(ToResource(log, x)));
+            }
+            else if (uri.ObjectType == ObjectTypes.ChannelSet)
+            {
+                var uid = uri.GetObjectIds()
+                    .Where(x => x.Key == ObjectTypes.Log)
+                    .Select(x => x.Value)
+                    .FirstOrDefault();
+
+                var log = _logDataAdapter.Get(uid);
+                var set = log.ChannelSet.FirstOrDefault(x => x.Uuid == uri.ObjectId);
+
+                set.Channel.ForEach(x => args.Context.Add(ToResource(log, set, x)));
+            }
         }
 
         private Resource ToResource(Well entity)
@@ -119,6 +136,26 @@ namespace PDS.Witsml.Server.Providers.Discovery
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Citation.Title,
                 count: -1);
+        }
+
+        private Resource ToResource(Log log, ChannelSet entity)
+        {
+            return DiscoveryStoreProvider.New(
+                uuid: entity.Uuid,
+                uri: entity.ToUri(log),
+                resourceType: ResourceTypes.DataObject,
+                name: entity.Citation.Title,
+                count: -1);
+        }
+
+        private Resource ToResource(Log log, ChannelSet channelSet, Channel entity)
+        {
+            return DiscoveryStoreProvider.New(
+                uuid: entity.Uuid,
+                uri: entity.ToUri(log, channelSet),
+                resourceType: ResourceTypes.DataObject,
+                name: entity.Mnemonic,
+                count: 0);
         }
     }
 }

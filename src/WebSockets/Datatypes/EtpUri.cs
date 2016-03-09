@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -96,6 +97,20 @@ namespace Energistics.Datatypes
                 return string.IsNullOrWhiteSpace(ObjectType)
                     && string.IsNullOrWhiteSpace(ObjectId);
             }
+        }
+
+        /// <summary>
+        /// Determines whether this instance is related to the specified <see cref="EtpUri"/>.
+        /// </summary>
+        /// <param name="other">The other URI.</param>
+        /// <returns>
+        ///   <c>true</c> if the two <see cref="EtpUri"/> instances share the same family and
+        ///   version; otherwise, <c>false</c>.
+        /// </returns>
+        public bool IsRelatedTo(EtpUri other)
+        {
+            return string.Equals(Family, other.Family, StringComparison.InvariantCultureIgnoreCase)
+                && string.Equals(Version, other.Version, StringComparison.InvariantCultureIgnoreCase);
         }
 
         /// <summary>
