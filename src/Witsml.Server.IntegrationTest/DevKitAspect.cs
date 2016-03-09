@@ -77,13 +77,6 @@ namespace PDS.Witsml.Server
             return element != null ? element.HasChildNodes : false;
         }
 
-        public T CreateWellDatum<T>(Action<T> action)
-        {
-            var instance = Activator.CreateInstance<T>();
-            action(instance);
-            return instance;
-        }
-
         public WMLS_AddToStoreResponse Add<TList, TObject>(TObject entity, string wmlTypeIn = null, string capClient = null, string optionsIn = null) where TList : IEnergisticsCollection
         {
             string typeIn, xmlIn;

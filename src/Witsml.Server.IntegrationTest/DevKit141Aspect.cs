@@ -114,5 +114,15 @@ namespace PDS.Witsml.Server
                 ? String.Join(",", log.LogCurveInfo.Select(x => x.Mnemonic))
                 : string.Empty;
         }
+
+        public WellDatum WellDatum(string name, ElevCodeEnum? code = null, string uid = null)
+        {
+            return new WellDatum()
+            {
+                Uid = uid,
+                Name = name,
+                Code = code,
+            };
+        }
     }
 }
