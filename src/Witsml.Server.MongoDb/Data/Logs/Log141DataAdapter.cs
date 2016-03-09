@@ -19,6 +19,7 @@ namespace PDS.Witsml.Server.Data.Logs
     [Export(typeof(IWitsml141Configuration))]
     [Export(typeof(IWitsmlDataAdapter<Log>))]
     [Export(typeof(IEtpDataAdapter<Log>))]
+    [Export141(ObjectTypes.Log, typeof(IEtpDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class Log141DataAdapter : MongoDbDataAdapter<Log>, IWitsml141Configuration
     {
@@ -577,5 +578,16 @@ namespace PDS.Witsml.Server.Data.Logs
             return gmObject;
         }
         #endregion
+
+        /// <summary>
+        /// Parses the specified XML string.
+        /// </summary>
+        /// <param name="xml">The XML string.</param>
+        /// <returns>An instance of <see cref="Log" />.</returns>
+        protected override Log Parse(string xml)
+        {
+            var list = WitsmlParser.Parse<LogList>(xml);
+            return list.Log.FirstOrDefault();
+        }
     }
 }

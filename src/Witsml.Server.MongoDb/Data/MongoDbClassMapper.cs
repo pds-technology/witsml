@@ -75,20 +75,14 @@ namespace PDS.Witsml.Server.Data
                 });
             }
 
-            if (!BsonClassMap.IsClassMapRegistered(typeof(T)))
-            {
-                BsonClassMap.RegisterClassMap<T>();
-            }
+            Register3<T>();
         }
 
         private void Register3<T>()
         {
             if (!BsonClassMap.IsClassMapRegistered(typeof(T)))
             {
-                BsonClassMap.RegisterClassMap<T>(cm =>
-                {
-                    cm.AutoMap();
-                });
+                BsonClassMap.RegisterClassMap<T>();
             }
         }
     }

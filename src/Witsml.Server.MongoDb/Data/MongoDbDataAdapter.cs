@@ -63,6 +63,16 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Deletes a data object by the specified UUID.
+        /// </summary>
+        /// <param name="uuid">The UUID.</param>
+        /// <returns>A WITSML result.</returns>
+        public override WitsmlResult Delete(string uuid)
+        {
+            return DeleteEntity(uuid);
+        }
+
+        /// <summary>
         /// Determines whether the entity exists in the data store.
         /// </summary>
         /// <param name="uid">The uid.</param>
@@ -144,6 +154,11 @@ namespace PDS.Witsml.Server.Data
             }
         }
 
+        /// <summary>
+        /// Gets the entity by uid query.
+        /// </summary>
+        /// <param name="uid">The uid.</param>
+        /// <returns></returns>
         protected IQueryable<T> GetEntityByUidQuery(string uid)
         {
             return GetEntityByUidQuery<T>(uid, DbCollectionName);
@@ -167,9 +182,9 @@ namespace PDS.Witsml.Server.Data
         {
             try
             {
-                _log.DebugFormat("Querying WITSML object selection: {0}", DbCollectionName);
                 if (OptionsIn.RequestObjectSelectionCapability.True.Equals(parser.RequestObjectSelectionCapability()))
                 {
+                    _log.DebugFormat("Querying WITSML object selection: {0}", DbCollectionName);
                     var queryTemplate = CreateQueryTemplate();
                     return queryTemplate.AsList();
                 }
@@ -262,6 +277,44 @@ namespace PDS.Witsml.Server.Data
             }
 
             return query;
-        }            
+        }
+
+        /// <summary>
+        /// Deletes a data object by the specified UUID.
+        /// </summary>
+        /// <param name="uuid">The UUID.</param>
+        /// <returns>A WITSML result.</returns>
+        /// <exception cref="WitsmlException"></exception>
+        protected WitsmlResult DeleteEntity(string uuid)
+        {
+            return DeleteEntity<T>(uuid, DbCollectionName);
+        }
+
+        /// <summary>
+        /// Deletes a data object by the specified UUID.
+        /// </summary>
+        /// <typeparam name="TObject">The type of data object.</typeparam>
+        /// <param name="uuid">The UUID.</param>
+        /// <param name="dbCollectionName">The name of the database collection.</param>
+        /// <returns>A WITSML result.</returns>
+        /// <exception cref="WitsmlException"></exception>
+        protected WitsmlResult DeleteEntity<TObject>(string uuid, string dbCollectionName)
+        {
+            try
+            {
+                _log.DebugFormat("Delete WITSML object: {0}", dbCollectionName);
+
+                var collection = GetCollection<TObject>(dbCollectionName);
+                var filter = Builders<TObject>.Filter.Eq(IdPropertyName, uuid);
+                var result = collection.DeleteOne(filter);
+
+                return new WitsmlResult(ErrorCodes.Success);
+            }
+            catch (MongoException ex)
+            {
+                _log.Error("Error deleting " + dbCollectionName, ex);
+                throw new WitsmlException(ErrorCodes.ErrorDeletingFromDataStore, ex);
+            }
+        }
     }
 }

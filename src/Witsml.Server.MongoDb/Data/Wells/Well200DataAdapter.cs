@@ -12,6 +12,7 @@ namespace PDS.Witsml.Server.Data.Wells
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML200.Well}" />
     [Export(typeof(IEtpDataAdapter<Well>))]
+    [Export200(ObjectTypes.Well, typeof(IEtpDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class Well200DataAdapter : MongoDbDataAdapter<Well>
     {

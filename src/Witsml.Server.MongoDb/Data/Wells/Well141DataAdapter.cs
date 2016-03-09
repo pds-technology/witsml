@@ -17,6 +17,7 @@ namespace PDS.Witsml.Server.Data.Wells
     [Export(typeof(IWitsml141Configuration))]
     [Export(typeof(IWitsmlDataAdapter<Well>))]
     [Export(typeof(IEtpDataAdapter<Well>))]
+    [Export141(ObjectTypes.Well, typeof(IEtpDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class Well141DataAdapter : MongoDbDataAdapter<Well>, IWitsml141Configuration
     {
@@ -109,6 +110,17 @@ namespace PDS.Witsml.Server.Data.Wells
             {
                 return Add(entity);
             }
+        }
+
+        /// <summary>
+        /// Parses the specified XML string.
+        /// </summary>
+        /// <param name="xml">The XML string.</param>
+        /// <returns>An instance of <see cref="Well" />.</returns>
+        protected override Well Parse(string xml)
+        {
+            var list = WitsmlParser.Parse<WellList>(xml);
+            return list.Well.FirstOrDefault();
         }
     }
 }
