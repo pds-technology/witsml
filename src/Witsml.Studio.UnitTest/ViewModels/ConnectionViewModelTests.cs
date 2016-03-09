@@ -2,7 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Witsml.Studio.Connections;
 
-namespace PDS.Witsml.Studio
+namespace PDS.Witsml.Studio.ViewModels
 {
     /// <summary>
     /// Unit tests for the ConnectionViewModel

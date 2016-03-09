@@ -1,10 +1,8 @@
 ﻿using System.Linq;
-using System.Windows;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Witsml.Studio.Runtime;
-using PDS.Witsml.Studio.ViewModels;
 
-namespace PDS.Witsml.Studio
+namespace PDS.Witsml.Studio.ViewModels
 {
     /// <summary>
     /// Unit tests for the Witsml Studio application shell.

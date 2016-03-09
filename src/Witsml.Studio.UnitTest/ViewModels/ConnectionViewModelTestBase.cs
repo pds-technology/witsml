@@ -4,9 +4,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Witsml.Studio.Connections;
 using PDS.Witsml.Studio.Properties;
 using PDS.Witsml.Studio.Runtime;
-using PDS.Witsml.Studio.ViewModels;
 
-namespace PDS.Witsml.Studio
+namespace PDS.Witsml.Studio.ViewModels
 {
     /// <summary>
     /// Base class for testing the ConnectionViewModel
