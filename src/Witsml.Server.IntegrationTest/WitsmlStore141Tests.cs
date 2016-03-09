@@ -175,7 +175,7 @@ namespace PDS.Witsml.Server
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             var queryWell = new Well { Name = "Well-to-add-01", NameLegal = "", Field = ""};
-            var result = DevKit.Get<WellList, Well>(queryWell, optionsIn: OptionsIn.ReturnElements.IdOnly);
+            var result = DevKit.Get<WellList, Well>(DevKit.List(queryWell), optionsIn: OptionsIn.ReturnElements.IdOnly);
             Assert.IsNotNull(result);
 
             var xmlout = result.XMLout;
@@ -205,7 +205,7 @@ namespace PDS.Witsml.Server
             string uid = response.SuppMsgOut;
 
             var queryWell = new Well { Uid="", Name = "Well-to-add-01", NameLegal = "", Field = "" };
-            var result = DevKit.Get<WellList, Well>(queryWell, optionsIn: OptionsIn.ReturnElements.Requested);
+            var result = DevKit.Get<WellList, Well>(DevKit.List(queryWell), optionsIn: OptionsIn.ReturnElements.Requested);
             Assert.IsNotNull(result);
 
             var xmlout = result.XMLout;

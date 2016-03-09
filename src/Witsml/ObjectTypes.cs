@@ -161,6 +161,16 @@ namespace PDS.Witsml
             }
         }
 
+        /// <summary>
+        /// Convert a singular string to plural.
+        /// </summary>
+        /// <param name="singleString">The single string.</param>
+        /// <returns></returns>
+        public static string SingleToPlural(string singleString)
+        {
+            return singleString + "s";
+        }
+
         private static string PluralToSingle(string pluralString)
         {
             return pluralString.EndsWith("s")
