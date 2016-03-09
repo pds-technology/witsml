@@ -309,7 +309,7 @@ namespace PDS.Witsml.Server.Data
 
         private void AddProjectionProperty(string propertyPath)
         {
-            if (_fields.Contains(propertyPath) || OptionsIn.ReturnElements.IdOnly.Equals(_parser.ReturnElements()))
+            if (_fields.Contains(propertyPath))
                 return;
 
             _fields.Add(propertyPath);
