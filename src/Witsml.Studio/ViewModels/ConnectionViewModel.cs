@@ -137,7 +137,7 @@ namespace PDS.Witsml.Studio.ViewModels
         /// <summary>
         /// Executes a connection test and reports the result to the user.
         /// </summary>
-        public void TestConnection(System.Action callback = null)
+        public Task<bool> TestConnection()
         {
             IsTestSuccess = false;
             IsTestFailure = false;
@@ -152,21 +152,20 @@ namespace PDS.Witsml.Studio.ViewModels
                 Runtime.ShowBusy();
                 CanTestConnection = false;
 
-                Task.Run(async() =>
+                return Task.Run<bool>(async() =>
                 {
                     var result = await connectionTest.CanConnect(EditItem);
                     await Runtime.InvokeAsync(() => ShowTestResult(result));
-
-                    if (callback != null)
-                    {
-                        callback();
-                    }
+                    return result;
                 })
                 .ContinueWith(x =>
                 {
                     Runtime.ShowBusy(false);
+                    return x.Result;
                 });
             }
+
+            return Task.FromResult(IsTestSuccess);
         }
 
         /// <summary>
@@ -193,13 +192,14 @@ namespace PDS.Witsml.Studio.ViewModels
         /// </summary>
         public void Accept()
         {
-            TestConnection(() => 
-            {
-                if (IsTestSuccess)
+            TestConnection()
+                .ContinueWith(x =>
                 {
-                    AcceptConnectionChanges();
-                }
-            });
+                    if (x.Result)
+                    {
+                        AcceptConnectionChanges();
+                    }
+                });
         }
 
         internal void AcceptConnectionChanges()

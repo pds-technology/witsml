@@ -101,7 +101,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
         }
 
         [TestMethod]
-        public async Task TestMainViewModelGetCapabilities()
+        public async Task TestMainViewModelSubmitQuery()
         {
             var vm = new MainViewModel(_runtime);
             vm.Model.Connection = new Connections.Connection() { Uri = _validWitsmlUri };
