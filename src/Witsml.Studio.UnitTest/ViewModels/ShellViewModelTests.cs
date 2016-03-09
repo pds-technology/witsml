@@ -1,10 +1,8 @@
 ﻿using System.Linq;
-using System.Windows;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Witsml.Studio.Runtime;
-using PDS.Witsml.Studio.ViewModels;
 
-namespace PDS.Witsml.Studio
+namespace PDS.Witsml.Studio.ViewModels
 {
     /// <summary>
     /// Unit tests for the Witsml Studio application shell.
@@ -28,7 +26,7 @@ namespace PDS.Witsml.Studio
         /// Tests that all of the expected IPluginViewModels were loaded.
         /// </summary>
         [TestMethod]
-        public void TestShellViewModelLoadsAllPlugins()
+        public void Can_load_shellViewModel_plugins()
         {
             _viewModel.LoadPlugins();
 
@@ -39,7 +37,7 @@ namespace PDS.Witsml.Studio
         /// Tests that all of the IPluginViewModels were loaded in the correct display order.
         /// </summary>
         [TestMethod]
-        public void TestLoadedPluginsDisplayInAscendingOrder()
+        public void ShellViewModel_plugins_are_displayed_in_ascending_order()
         {
             _viewModel.LoadPlugins();
 
@@ -56,7 +54,7 @@ namespace PDS.Witsml.Studio
         }
 
         [TestMethod]
-        public void TestShellStatus()
+        public void ShellViewModel_status_is_set()
         {
             _viewModel.LoadPlugins();
 
@@ -64,7 +62,7 @@ namespace PDS.Witsml.Studio
         }
 
         [TestMethod]
-        public void TestShellBreadcrumb()
+        public void ShellViewModel_breadcrumb_is_first_plugin_displayName()
         {
             _viewModel.LoadPlugins();
            

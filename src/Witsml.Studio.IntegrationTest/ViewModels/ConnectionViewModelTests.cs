@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Studio.ViewModels
 {
@@ -7,7 +6,7 @@ namespace PDS.Witsml.Studio.ViewModels
     public class ConnectionViewModelTests : ConnectionViewModelTestBase
     {
         [TestMethod]
-        public void TestAcceptConnectionChangesWithDataItem()
+        public void Can_accept_connection_changes_with_dataItem()
         {
             var newName = "xxx";
 
