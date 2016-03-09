@@ -1,8 +1,5 @@
-﻿using System;
-using Energistics.DataAccess;
-using Energistics.DataAccess.WITSML141;
+﻿using Energistics.DataAccess;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request;
 using PDS.Witsml.Studio.Runtime;
 using PDS.Witsml.Studio.ViewModels;
@@ -27,7 +24,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
         }
 
         [TestMethod]
-        public void TestSettingsViewModelGetVersions()
+        public void Can_get_supported_versions()
         {
             WITSMLWebServiceConnection proxy = new WITSMLWebServiceConnection(_validWitsmlUri, WMLSVersion.WITSML141);
             var versions = _settingsViewModel.GetVersions(proxy, _validWitsmlUri);
