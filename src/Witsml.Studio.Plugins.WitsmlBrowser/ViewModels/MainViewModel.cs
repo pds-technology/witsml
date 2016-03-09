@@ -368,7 +368,10 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                 Proxy = CreateProxy();
 
                 // Get the server capabilities for the newly selected version.
-                GetCapabilities();
+                if (!string.IsNullOrEmpty(Model.WitsmlVersion))
+                {
+                    GetCapabilities();
+                }
 
                 // TODO: GetWells for the TreeView
             }
