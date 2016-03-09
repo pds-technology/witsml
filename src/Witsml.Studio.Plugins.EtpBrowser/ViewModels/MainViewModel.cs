@@ -74,6 +74,15 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// <value>The collection of resources.</value>
         public BindableCollection<ResourceViewModel> Resources { get; private set; }
 
+        /// <summary>
+        /// Gets the selected resource.
+        /// </summary>
+        /// <value>The selected resource.</value>
+        public ResourceViewModel SelectedResource
+        {
+            get { return FindResource(Resources, x => x.IsSelected); }
+        }
+
         private TextEditorViewModel _details;
 
         /// <summary>
@@ -117,7 +126,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public void GetObject()
         {
-            var resource = FindResource(Resources, x => x.IsSelected);
+            var resource = SelectedResource;
             if (resource != null)
             {
                 SendGetObject(resource.Resource.Uri);
@@ -168,6 +177,19 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         }
 
         /// <summary>
+        /// Deletes the selected resource using the Store protocol.
+        /// </summary>
+        public void DeleteObject()
+        {
+            var resource = SelectedResource;
+            if (resource != null)
+            {
+                SendDeleteObject(resource.Resource.Uri);
+                resource.Parent.Children.Remove(resource);
+            }
+        }
+
+        /// <summary>
         /// Sends the <see cref="Energistics.Protocol.Store.DeleteObject"/> message with the specified URI.
         /// </summary>
         /// <param name="uri">The URI.</param>
@@ -178,13 +200,21 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         }
 
         /// <summary>
+        /// Refreshes the hierarchy.
+        /// </summary>
+        public void RefreshHierarchy()
+        {
+            OnConnectionChanged();
+        }
+
+        /// <summary>
         /// Called when initializing.
         /// </summary>
         protected override void OnInitialize()
         {
             base.OnInitialize();
             ActivateItem(new SettingsViewModel(Runtime));
-            Items.Add(new HierarchyViewModel());
+            Items.Add(new HierarchyViewModel(Runtime));
             Items.Add(new StoreViewModel(Runtime));
         }
 
@@ -320,6 +350,8 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
 
             if (parent != null)
             {
+                viewModel.Parent = parent;
+                viewModel.Level = parent.Level + 1;
                 parent.Children.Add(viewModel);
             }
         }
