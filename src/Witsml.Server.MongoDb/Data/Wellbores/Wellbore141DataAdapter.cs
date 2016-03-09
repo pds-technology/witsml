@@ -17,6 +17,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
     [Export(typeof(IWitsml141Configuration))]
     [Export(typeof(IWitsmlDataAdapter<Wellbore>))]
     [Export(typeof(IEtpDataAdapter<Wellbore>))]
+    [Export141(ObjectTypes.Wellbore, typeof(IEtpDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class Wellbore141DataAdapter : MongoDbDataAdapter<Wellbore>, IWitsml141Configuration
     {
@@ -117,6 +118,17 @@ namespace PDS.Witsml.Server.Data.Wellbores
             {
                 return Add(entity);
             }
+        }
+
+        /// <summary>
+        /// Parses the specified XML string.
+        /// </summary>
+        /// <param name="xml">The XML string.</param>
+        /// <returns>An instance of <see cref="Wellbore" />.</returns>
+        protected override Wellbore Parse(string xml)
+        {
+            var list = WitsmlParser.Parse<WellboreList>(xml);
+            return list.Wellbore.FirstOrDefault();
         }
     }
 }

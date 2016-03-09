@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Text;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
+using Energistics.Datatypes.Object;
 using log4net;
 using PDS.Framework;
 
@@ -14,7 +17,7 @@ namespace PDS.Witsml.Server.Data
     /// <typeparam name="T">Type of the object.</typeparam>
     /// <seealso cref="PDS.Witsml.Server.Data.IWitsmlDataAdapter{T}" />
     /// <seealso cref="PDS.Witsml.Server.Data.IEtpDataAdapter{T}" />
-    public abstract class WitsmlDataAdapter<T> : IWitsmlDataAdapter<T>, IEtpDataAdapter<T>
+    public abstract class WitsmlDataAdapter<T> : IWitsmlDataAdapter<T>, IEtpDataAdapter<T>, IEtpDataAdapter
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(WitsmlDataAdapter<T>));
 
@@ -121,6 +124,58 @@ namespace PDS.Witsml.Server.Data
         public virtual WitsmlResult Delete(string uuid)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets a collection of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        IList IEtpDataAdapter.GetAll(EtpUri? parentUri)
+        {
+            return GetAll(parentUri);
+        }
+
+        /// <summary>
+        /// Gets a data object by the specified UUID.
+        /// </summary>
+        /// <param name="uuid">The UUID.</param>
+        /// <returns>The data object instance.</returns>
+        object IEtpDataAdapter.Get(string uuid)
+        {
+            return Get(uuid);
+        }
+
+        /// <summary>
+        /// Puts the specified data object into the data store.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns>A WITSML result.</returns>
+        WitsmlResult IEtpDataAdapter.Put(DataObject dataObject)
+        {
+            var xml = Encoding.UTF8.GetString(dataObject.Data);
+            var entity = Parse(xml);
+            return Put(entity);
+        }
+
+        /// <summary>
+        /// Deletes a data object by the specified UUID.
+        /// </summary>
+        /// <param name="uuid">The UUID.</param>
+        /// <returns>A WITSML result.</returns>
+        WitsmlResult IEtpDataAdapter.Delete(string uuid)
+        {
+            return Delete(uuid);
+        }
+
+        /// <summary>
+        /// Parses the specified XML string.
+        /// </summary>
+        /// <param name="xml">The XML string.</param>
+        /// <returns>An instance of <see cref="T"/>.</returns>
+        protected virtual T Parse(string xml)
+        {
+            return WitsmlParser.Parse<T>(xml);
         }
 
         /// <summary>

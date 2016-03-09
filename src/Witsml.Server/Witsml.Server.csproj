@@ -79,6 +79,7 @@
     <Compile Include="Configuration\ICapServerProvider.cs" />
     <Compile Include="Data\IDataObjectValidator.cs" />
     <Compile Include="Data\IEtpDataAdapter.cs" />
+    <Compile Include="Data\IEtpDataAdapterOfT.cs" />
     <Compile Include="Data\IWitsmlDataAdapter.cs" />
     <Compile Include="Data\Logs\Log131DataProvider.cs" />
     <Compile Include="Data\Logs\Log141DataProvider.cs" />

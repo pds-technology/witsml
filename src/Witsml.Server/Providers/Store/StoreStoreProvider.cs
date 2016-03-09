@@ -7,6 +7,7 @@ using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using Energistics.Protocol.Store;
 using PDS.Framework;
+using PDS.Witsml.Server.Data;
 
 namespace PDS.Witsml.Server.Providers.Store
 {
@@ -33,25 +34,6 @@ namespace PDS.Witsml.Server.Providers.Store
         /// </summary>
         /// <value>The container.</value>
         public IContainer Container { get; private set; }
-
-        /// <summary>
-        /// Handles the GetObject message of the Store protocol.
-        /// </summary>
-        /// <param name="args">The <see cref="ProtocolEventArgs{GetObject, DataObject}"/> instance containing the event data.</param>
-        protected override void HandleGetObject(ProtocolEventArgs<GetObject, DataObject> args)
-        {
-            try
-            {
-                var uri = new EtpUri(args.Message.Uri);
-                var provider = Container.Resolve<IStoreStoreProvider>(new ObjectName(uri.Version));
-                provider.GetObject(args);
-            }
-            catch (ContainerException ex)
-            {
-                Logger.Error(ex);
-                ProtocolException(1000, "Unknown URI format: " + args.Message.Uri, args.Header.MessageId);
-            }
-        }
 
         /// <summary>
         /// Sets the properties of the <see cref="DataObject"/> instance.
@@ -89,6 +71,78 @@ namespace PDS.Witsml.Server.Providers.Store
                     Time = 0
                 }
             };
+        }
+
+        /// <summary>
+        /// Handles the GetObject message of the Store protocol.
+        /// </summary>
+        /// <param name="args">The <see cref="ProtocolEventArgs{GetObject, DataObject}"/> instance containing the event data.</param>
+        protected override void HandleGetObject(ProtocolEventArgs<GetObject, DataObject> args)
+        {
+            try
+            {
+                var uri = new EtpUri(args.Message.Uri);
+                var provider = Container.Resolve<IStoreStoreProvider>(new ObjectName(uri.Version));
+                provider.GetObject(args);
+            }
+            catch (ContainerException ex)
+            {
+                Logger.Error(ex);
+                ProtocolException(1000, "Data object not supported. URI: " + args.Message.Uri, args.Header.MessageId);
+            }
+        }
+
+        /// <summary>
+        /// Handles the PutObject message of the Store protocol.
+        /// </summary>
+        /// <param name="header">The message header.</param>
+        /// <param name="putObject">The put object message.</param>
+        protected override void HandlePutObject(MessageHeader header, PutObject putObject)
+        {
+            base.HandlePutObject(header, putObject);
+
+            var uri = new EtpUri(putObject.Data.Resource.Uri);
+
+            try
+            {
+                var dataAdapter = Container.Resolve<IEtpDataAdapter>(new ObjectName(uri.ObjectType, uri.Version));
+                dataAdapter.Put(putObject.Data);
+            }
+            catch (ContainerException ex)
+            {
+                Logger.Error(ex);
+                ProtocolException(1000, "Data object not supported. URI: " + uri, header.MessageId);
+            }
+        }
+
+        /// <summary>
+        /// Handles the DeleteObject message of the Store protocol.
+        /// </summary>
+        /// <param name="header">The message header.</param>
+        /// <param name="deleteObject">The delete object message.</param>
+        protected override void HandleDeleteObject(MessageHeader header, DeleteObject deleteObject)
+        {
+            base.HandleDeleteObject(header, deleteObject);
+            deleteObject.Uri.ForEach(x => DeleteObject(header, new EtpUri(x)));
+        }
+
+        /// <summary>
+        /// Deletes the object from the data store.
+        /// </summary>
+        /// <param name="header">The message header.</param>
+        /// <param name="uri">The URI.</param>
+        private void DeleteObject(MessageHeader header, EtpUri uri)
+        {
+            try
+            {
+                var dataAdapter = Container.Resolve<IEtpDataAdapter>(new ObjectName(uri.ObjectType, uri.Version));
+                dataAdapter.Delete(uri.ObjectId);
+            }
+            catch (ContainerException ex)
+            {
+                Logger.Error(ex);
+                ProtocolException(1000, "Data object not supported. URI: " + uri, header.MessageId);
+            }
         }
     }
 }

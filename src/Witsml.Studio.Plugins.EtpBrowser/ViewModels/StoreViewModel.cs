@@ -73,7 +73,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public void PutObject()
         {
-            //Parent.SendPutObject();
+            Parent.SendPutObject(Data.Document.Text);
         }
 
         /// <summary>

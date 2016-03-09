@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel.Composition;
 using Energistics.Common;
-using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using Energistics.Protocol.Store;
+using PDS.Framework;
 using PDS.Witsml.Server.Data;
 
 namespace PDS.Witsml.Server.Providers.Store
@@ -17,30 +17,21 @@ namespace PDS.Witsml.Server.Providers.Store
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class StoreStore200Provider : IStoreStoreProvider
     {
-        private readonly IEtpDataAdapter<Well> _wellDataAdapter;
-        private readonly IEtpDataAdapter<Wellbore> _wellboreDataAdapter;
-        private readonly IEtpDataAdapter<Log> _logDataAdapter;
-        private readonly IEtpDataAdapter<ChannelSet> _channelSetDataAdapter;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="StoreStore200Provider" /> class.
         /// </summary>
-        /// <param name="wellDataAdapter">The well data adapter.</param>
-        /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
-        /// <param name="logDataAdapter">The log data adapter.</param>
-        /// <param name="channelSetDataAdapter">The channel set data adapter.</param>
+        /// <param name="container">The composition container.</param>
         [ImportingConstructor]
-        public StoreStore200Provider(
-            IEtpDataAdapter<Well> wellDataAdapter, 
-            IEtpDataAdapter<Wellbore> wellboreDataAdapter,
-            IEtpDataAdapter<Log> logDataAdapter,
-            IEtpDataAdapter<ChannelSet> channelSetDataAdapter)
+        public StoreStore200Provider(IContainer container)
         {
-            _wellDataAdapter = wellDataAdapter;
-            _wellboreDataAdapter = wellboreDataAdapter;
-            _logDataAdapter = logDataAdapter;
-            _channelSetDataAdapter = channelSetDataAdapter;
+            Container = container;
         }
+
+        /// <summary>
+        /// Gets the composition container.
+        /// </summary>
+        /// <value>The container.</value>
+        public IContainer Container { get; private set; }
 
         /// <summary>
         /// Gets the data schema version supported by the provider.
@@ -58,26 +49,9 @@ namespace PDS.Witsml.Server.Providers.Store
         /// <exception cref="System.NotImplementedException"></exception>
         public void GetObject(ProtocolEventArgs<GetObject, DataObject> args)
         {
-            AbstractObject entity = null;
-
             var uri = new EtpUri(args.Message.Uri);
-
-            if (uri.ObjectType == ObjectTypes.Well)
-            {
-                entity = _wellDataAdapter.Get(uri.ObjectId);
-            }
-            else if (uri.ObjectType == ObjectTypes.Wellbore)
-            {
-                entity = _wellboreDataAdapter.Get(uri.ObjectId);
-            }
-            else if (uri.ObjectType == ObjectTypes.Log)
-            {
-                entity = _logDataAdapter.Get(uri.ObjectId);
-            }
-            else if (uri.ObjectType == ObjectTypes.ChannelSet)
-            {
-                entity = _channelSetDataAdapter.Get(uri.ObjectId);
-            }
+            var dataAdapter = Container.Resolve<IEtpDataAdapter>(new ObjectName(uri.ObjectType, uri.Version));
+            var entity = dataAdapter.Get(uri.ObjectId) as AbstractObject;
 
             StoreStoreProvider.SetDataObject(args.Context, entity, uri, GetName(entity));
         }

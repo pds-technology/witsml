@@ -12,6 +12,7 @@ namespace PDS.Witsml.Server.Data.Channels
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML200.ChannelSet}" />
     [Export(typeof(IEtpDataAdapter<ChannelSet>))]
+    [Export200(ObjectTypes.ChannelSet, typeof(IEtpDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class ChannelSet200DataAdapter : MongoDbDataAdapter<ChannelSet>
     {

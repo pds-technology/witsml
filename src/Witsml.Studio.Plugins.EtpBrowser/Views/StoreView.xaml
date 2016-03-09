@@ -6,7 +6,13 @@
              xmlns:cal="http://www.caliburnproject.org"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:app="clr-namespace:PDS.Witsml.Studio.Behaviors;assembly=PDS.Witsml.Studio"
+             xmlns:conv="clr-namespace:PDS.Witsml.Studio.Converters;assembly=PDS.Witsml.Studio"
              mc:Ignorable="d" d:DesignHeight="400" d:DesignWidth="300">
+    
+    <UserControl.Resources>
+        <conv:NullToBooleanConverter x:Key="NullToBooleanConverter" />
+    </UserControl.Resources>
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
@@ -51,9 +57,9 @@
                 </Button.Content>
                 <Button.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Get" cal:Message.Attach="GetObject" />
-                        <MenuItem Header="Put" cal:Message.Attach="PutObject" />
-                        <MenuItem Header="Delete" cal:Message.Attach="DeleteObject" />
+                        <MenuItem Header="Get" cal:Message.Attach="GetObject" IsEnabled="{Binding Model.Store.Uri, Converter={StaticResource NullToBooleanConverter}}" />
+                        <MenuItem Header="Put" cal:Message.Attach="PutObject" IsEnabled="{Binding Model.Store.Name, Converter={StaticResource NullToBooleanConverter}}" />
+                        <MenuItem Header="Delete" cal:Message.Attach="DeleteObject" IsEnabled="{Binding Model.Store.Uri, Converter={StaticResource NullToBooleanConverter}}" />
                     </ContextMenu>
                 </Button.ContextMenu>
             </Button>

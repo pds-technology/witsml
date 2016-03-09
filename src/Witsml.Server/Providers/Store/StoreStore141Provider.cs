@@ -1,9 +1,12 @@
-﻿using System.ComponentModel.Composition;
+﻿using System;
+using System.Collections;
+using System.ComponentModel.Composition;
 using Energistics.Common;
-using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using Energistics.Protocol.Store;
+using PDS.Framework;
 using PDS.Witsml.Server.Data;
 
 namespace PDS.Witsml.Server.Providers.Store
@@ -16,26 +19,21 @@ namespace PDS.Witsml.Server.Providers.Store
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class StoreStore141Provider : IStoreStoreProvider
     {
-        private readonly IEtpDataAdapter<Well> _wellDataAdapter;
-        private readonly IEtpDataAdapter<Wellbore> _wellboreDataAdapter;
-        private readonly IEtpDataAdapter<Log> _logDataAdapter;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="StoreStore141Provider" /> class.
         /// </summary>
-        /// <param name="wellDataAdapter">The well data adapter.</param>
-        /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
-        /// <param name="logDataAdapter">The log data adapter.</param>
+        /// <param name="container">The composition container.</param>
         [ImportingConstructor]
-        public StoreStore141Provider(
-            IEtpDataAdapter<Well> wellDataAdapter, 
-            IEtpDataAdapter<Wellbore> wellboreDataAdapter,
-            IEtpDataAdapter<Log> logDataAdapter)
+        public StoreStore141Provider(IContainer container)
         {
-            _wellDataAdapter = wellDataAdapter;
-            _wellboreDataAdapter = wellboreDataAdapter;
-            _logDataAdapter = logDataAdapter;
+            Container = container;
         }
+
+        /// <summary>
+        /// Gets the composition container.
+        /// </summary>
+        /// <value>The container.</value>
+        public IContainer Container { get; private set; }
 
         /// <summary>
         /// Gets the data schema version supported by the provider.
@@ -54,28 +52,31 @@ namespace PDS.Witsml.Server.Providers.Store
         public void GetObject(ProtocolEventArgs<GetObject, DataObject> args)
         {
             var uri = new EtpUri(args.Message.Uri);
+            var dataAdapter = Container.Resolve<IEtpDataAdapter>(new ObjectName(uri.ObjectType, uri.Version));
+            var entity = dataAdapter.Get(uri.ObjectId) as IDataObject;
+            var list = GetList(uri.ObjectType, entity);
 
-            if (uri.ObjectType == ObjectTypes.Well)
-            {
-                var entity = _wellDataAdapter.Get(uri.ObjectId);
-                var list = new WellList() { Well = entity.AsList() };
+            StoreStoreProvider.SetDataObject(args.Context, list, uri, GetName(entity));
+        }
 
-                StoreStoreProvider.SetDataObject(args.Context, list, uri, entity.Name);
-            }
-            else if (uri.ObjectType == ObjectTypes.Wellbore)
-            {
-                var entity = _wellboreDataAdapter.Get(uri.ObjectId);
-                var list = new WellboreList() { Wellbore = entity.AsList() };
+        private IEnergisticsCollection GetList(string objectType, IDataObject entity)
+        {
+            var entityType = entity.GetType();
+            var groupType = entityType.Assembly.GetType(entityType.FullName + "List");
+            var property = groupType.GetProperty(entityType.Name);
 
-                StoreStoreProvider.SetDataObject(args.Context, list, uri, entity.Name);
-            }
-            else if (uri.ObjectType == ObjectTypes.Log)
-            {
-                var entity = _logDataAdapter.Get(uri.ObjectId);
-                var list = new LogList() { Log = entity.AsList() };
+            var group = Activator.CreateInstance(groupType) as IEnergisticsCollection;
+            var list = Activator.CreateInstance(property.PropertyType) as IList;
 
-                StoreStoreProvider.SetDataObject(args.Context, list, uri, entity.Name);
-            }
+            list.Add(entity);
+            property.SetValue(group, list);
+
+            return group;
+        }
+
+        private string GetName(IDataObject entity)
+        {
+            return entity == null ? string.Empty : entity.Name;
         }
     }
 }
