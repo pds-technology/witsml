@@ -103,15 +103,18 @@ namespace PDS.Witsml.Server.Data.Wells
             var context = new RequestContext(Functions.GetFromStore, ObjectTypes.Well, xmlOut, null, null);
             var parser = new WitsmlQueryParser(context);
 
-            Assert.IsFalse(parser.HasElements("country"));
+            Assert.IsTrue(parser.HasElements("country"));
+            Assert.IsTrue(parser.HasElements("commonData"));
             Assert.IsFalse(parser.HasElements("wellDatum"));
-            Assert.IsFalse(parser.HasElements("commonData"));
-
+            
             var wellList = EnergisticsConverter.XmlToObject<WellList>(xmlOut);
             Assert.AreEqual(1, wellList.Well.Count);
             returnWell = wellList.Well.FirstOrDefault();
 
             Assert.AreEqual(well.Name, returnWell.Name);
+            Assert.AreEqual(well.Country, returnWell.Country);
+            Assert.AreEqual(well.CommonData.ItemState.ToString(), returnWell.CommonData.ItemState.ToString());
+            Assert.AreEqual(well.CommonData.Comments, returnWell.CommonData.Comments);
             Assert.IsNull(returnWell.DateTimeSpud);
             Assert.IsNull(returnWell.GroundElevation);
         }
