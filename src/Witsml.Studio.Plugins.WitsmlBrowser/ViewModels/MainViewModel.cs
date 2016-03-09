@@ -5,6 +5,7 @@ using Caliburn.Micro;
 using Energistics.DataAccess;
 using ICSharpCode.AvalonEdit.Document;
 using PDS.Framework;
+using PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.Properties;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result;
@@ -213,7 +214,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// <returns>
         /// A tuple of four result values in the following order: xmlOut, suppMsgOut, optionsIn and returnCode.
         /// </returns>
-        internal async Task<Tuple<string, string, string, short>> SubmitQuery(Functions functionType, string xmlIn)
+        internal async Task<WitsmlResult> SubmitQuery(Functions functionType, string xmlIn)
         {
             string xmlOut = null;
             string suppMsgOut = null;
@@ -252,18 +253,18 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                             break;
                     }
 
-                    return await Task.FromResult(Tuple.Create(xmlOut, suppMsgOut, optionsIn, returnCode));
+                    return await Task.FromResult(new WitsmlResult(xmlIn, optionsIn, null, xmlOut, suppMsgOut, returnCode));
                 }
             }
             catch (Exception ex)
             {
-                var message = string.Format("Error submitting query for function '{0}'{3}{3}Error Message: {1}{3}{3}Stack Trace:{3}{2}{3}",
+                var message = string.Format("Error calling WITSML Store API method '{0}'{3}{3}Error Message: {1}{3}{3}Stack Trace:{3}{2}{3}",
                     functionType, ex.Message, ex.StackTrace, Environment.NewLine);
 
                 // Log the error message
                 _log.Error(message);
 
-                return await Task.FromResult(Tuple.Create(xmlOut, message, optionsIn, returnCode));
+                return await Task.FromResult(new WitsmlResult(xmlIn, optionsIn, null, xmlOut, message, returnCode));
             }
         }
 
@@ -315,23 +316,23 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// Logs and displays the results of a WITSML submitted query.
         /// </summary>
         /// <param name="functionType">Type of the function.</param>
-        /// <param name="result">A tuple of four results: xmlOut, suppMsgOut, optionsIn and returnCode.</param>
-        private void ShowSubmitResult(Functions functionType, Tuple<string, string, string, short> result)
+        /// <param name="result">The WITSML Store API method result.</param>
+        private void ShowSubmitResult(Functions functionType, WitsmlResult result)
         {
             _log.DebugFormat("Query returned with{3}{3}xmlOut: {0}{3}{3}suppMsgOut: {1}{3}{3}optionsIn: {2}{3}{3}",
-                GetLogStringText(result.Item1), // xmlOut
-                GetLogStringText(result.Item2), // suppMsgOut
-                GetLogStringText(result.Item3), // optionsIn
+                GetLogStringText(result.XmlOut),
+                GetLogStringText(result.MessageOut),
+                GetLogStringText(result.OptionsIn),
                 Environment.NewLine);
 
             // Output query results to the Results tab
-            OutputResults(result.Item1, result.Item2, result.Item4); // xmlOut, suppMsgOut, returnCode
+            OutputResults(result.XmlOut, result.MessageOut, result.ReturnCode);
 
             // Don't display query contents when GetCap is executed.
             var xmlIn = functionType == Functions.GetCap ? string.Empty : XmlQuery.Text;
 
             // Append these results to the Messages tab
-            OutputMessages(functionType, xmlIn, result.Item1, result.Item2, result.Item3, result.Item4); // xmlOut, suppMsgOut, optionsIn, returnCode
+            OutputMessages(functionType, xmlIn, result.XmlOut, result.MessageOut, result.OptionsIn, result.ReturnCode);
         }
 
         /// <summary>
