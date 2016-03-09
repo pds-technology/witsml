@@ -284,17 +284,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             Items.Add(ResultControl);
         }
 
-        // TODO: Instead of modifying the text for the Wrap context menu item it would be better to toggle a blank or checked icon.
-        /// <summary>
-        /// Gets the text for the Wrap context menu.
-        /// </summary>
-        /// <param name="isWrapped">if set to <c>true</c> [is wrapped].</param>
-        /// <returns></returns>
-        internal string GetWrappedText(bool isWrapped)
-        {
-            return isWrapped ? "No Wrap" : "Wrap";
-        }
-
         /// <summary>
         /// Creates a WITSMLWebServiceConnection for the current connection uri and witsml version.
         /// </summary>
