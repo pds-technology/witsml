@@ -113,10 +113,20 @@ namespace PDS.Witsml.Server.Data
                     filters.Add(filter);
             }
 
-            if (filters.Count > 0)
-                return Builders<T>.Filter.And(filters);
-            else
+            if (filters.Count == 0)
+            {
                 return null;
+            }
+
+            var resultFilter = Builders<T>.Filter.And(filters);
+
+            if (Logger.IsDebugEnabled)
+            {
+                var filterJson = resultFilter.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
+                Logger.DebugFormat("Detected query filters: {0}", filterJson);
+            }
+
+            return resultFilter;
         }
 
         /// <summary>
@@ -220,10 +230,18 @@ namespace PDS.Witsml.Server.Data
 
             if (_fields.Count == 0)
             {
+                Logger.Warn("No fields projected.  Projection field count should never be zero.");
+
                 return Builders<T>.Projection.Exclude(_idPropertyName).Include(string.Empty);
             }
             else
             {
+                // Log projection fields if debug is enabled
+                if (Logger.IsDebugEnabled)
+                {
+                    Logger.DebugFormat("Fields projected: {0}", string.Join(",", _fields));
+                }
+
                 var projection = Builders<T>.Projection.Include(_fields[0]);
 
                 for (var i = 1; i < _fields.Count; i++)
