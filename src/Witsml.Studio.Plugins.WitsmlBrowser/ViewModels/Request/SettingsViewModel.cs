@@ -163,7 +163,10 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             {
                 var errorMessage = string.Format("{0}{1}{1}{2}", "Error connecting to server.", Environment.NewLine, "Invalid URL");
                 
+                // Log the error
                 _log.Error(errorMessage, ex);
+
+                // Show the user the error in a dialog.
                 Runtime.ShowError(errorMessage);
             }
         }
