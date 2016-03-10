@@ -81,7 +81,7 @@ namespace PDS.Witsml.Server.Configuration
         }
 
         [TestMethod]
-        public void WitsmlValidator_GetFromStore_Error_428_RequestObjectSelectionCapability_True_Minimum_Query_Template()
+        public void WitsmlValidator_GetFromStore_Error_428_RequestObjectSelectionCapability_True_With_Bad_Minimum_Query_Template()
         {
             string badQuery = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version = \"1.4.1.1\" >" + Environment.NewLine +
                               "</wells>";
