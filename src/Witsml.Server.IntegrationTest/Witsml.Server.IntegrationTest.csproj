@@ -63,6 +63,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Configuration\WitsmlValidator141Tests.cs" />
     <Compile Include="Data\Logs\Log200DataAdapterTests.cs" />
     <Compile Include="Data\Wellbores\Wellbore141ValidationTests.cs" />
     <Compile Include="Data\Wellbores\Wellbore200DataAdapterTests.cs" />
