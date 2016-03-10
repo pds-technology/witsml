@@ -3,6 +3,7 @@ using System.Linq;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using Energistics.DataAccess;
+using System.Collections.Generic;
 
 namespace PDS.Witsml
 {
@@ -25,9 +26,12 @@ namespace PDS.Witsml
         public const string LogCurveInfo = "logCurveInfo";
         public const string Rig = "rig";
         public const string Trajectory = "trajectory";
+        public const string MudLog = "mudLog";
         public const string ChangeLog = "changeLog";
         public const string ChannelSet = "channelSet";
         public const string Channel = "channel";
+
+        private static readonly string[] GrowingObjects = new [] { Log, MudLog, Trajectory };
 
         /// <summary>
         /// Gets the type of the data object.
@@ -161,6 +165,16 @@ namespace PDS.Witsml
             {
                 return string.Empty;
             }
+        }
+
+        /// <summary>
+        /// Determines whether the object type is a growing data object type.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <returns></returns>
+        public static bool IsGrowingDataObject(string objectType)
+        {
+            return GrowingObjects.Contains(objectType);
         }
 
         /// <summary>

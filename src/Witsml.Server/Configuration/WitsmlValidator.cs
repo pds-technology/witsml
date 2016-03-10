@@ -54,6 +54,7 @@ namespace PDS.Witsml.Server.Configuration
         /// <param name="document">The XML document.</param>
         public virtual void ValidateRequest(RequestContext context, XDocument document)
         {
+            ValidateNamespace(document);
             ValidateObjectType(context.Function, context.ObjectType, ObjectTypes.GetObjectType(document));
             ValidatePluralRootElement(context.ObjectType, document);
         }
@@ -83,7 +84,14 @@ namespace PDS.Witsml.Server.Configuration
                 throw new WitsmlException(ErrorCodes.MissingInputTemplate);
             }
 
-            return WitsmlParser.Parse(xml);
+            XDocument doc = WitsmlParser.Parse(xml);
+
+            if (string.IsNullOrEmpty(GetNamespace(doc)))
+            {
+                throw new WitsmlException(ErrorCodes.MissingDefaultWitsmlNamespace);
+            }
+
+            return doc;
         }
 
         /// <summary>
@@ -188,6 +196,79 @@ namespace PDS.Witsml.Server.Configuration
         }
 
         /// <summary>
+        /// Validates the requestObjectSelectionCapability option.
+        /// </summary>
+        /// <param name="options">The options.</param>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="document">The document.</param>
+        /// <exception cref="WitsmlException">
+        /// </exception>
+        public void ValidateRequestObjectSelectionCapability(Dictionary<string, string> options, string objectType, XDocument document)
+        {
+            string optionValue;
+            if (!options.TryGetValue(OptionsIn.RequestObjectSelectionCapability.Keyword, out optionValue))
+            {
+                return;
+            }
+
+            // Validate value 
+            if (!OptionsIn.RequestObjectSelectionCapability.None.Equals(optionValue) &&
+                !OptionsIn.RequestObjectSelectionCapability.True.Equals(optionValue))
+            {
+                throw new WitsmlException(ErrorCodes.InvalidKeywordValue);
+            }
+
+            // No other options should be specified if value is true
+            if (OptionsIn.RequestObjectSelectionCapability.True.Equals(optionValue))              
+            {
+                if (options.Count != 1)
+                {
+                    throw new WitsmlException(ErrorCodes.InvalidOptionsInCombination);
+                }
+
+                if (!document.Root.Elements().Any())
+                {
+                    throw new WitsmlException(ErrorCodes.InvalidMinimumQueryTemplate);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Validates the returnElements option.
+        /// </summary>
+        /// <param name="options">The options.</param>
+        /// <param name="objectType">Type of the object.</param>
+        /// <exception cref="WitsmlException">
+        /// </exception>
+        public void ValidateReturnElements(Dictionary<string, string> options, string objectType)
+        {
+            string optionValue;
+            if (!options.TryGetValue(OptionsIn.ReturnElements.Keyword, out optionValue))
+            {
+                return;
+            }
+
+            // Validate value 
+            if (!OptionsIn.ReturnElements.GetValues().Any(x => x.Equals(optionValue)))
+            {
+                throw new WitsmlException(ErrorCodes.InvalidKeywordValue);
+            }
+
+            // HeaderOnly and DataOnly options are for growing data object only
+            if ((OptionsIn.ReturnElements.HeaderOnly.Equals(optionValue) || OptionsIn.ReturnElements.DataOnly.Equals(optionValue))
+                && !ObjectTypes.IsGrowingDataObject(objectType))
+            {
+                throw new WitsmlException(ErrorCodes.InvalidOptionForGrowingObjectOnly);
+            }
+
+            // Latest-Change-Only option is for ChangeLog only
+            if ((OptionsIn.ReturnElements.LatestChangeOnly.Equals(optionValue) && !objectType.Equals(ObjectTypes.ChangeLog)))
+            {
+                throw new WitsmlException(ErrorCodes.InvalidOptionForChangeLogOnly);
+            }
+        }
+
+        /// <summary>
         /// Validates the required WITSML object type parameter for the WMLS_AddToStore method.
         /// </summary>
         /// <param name="function">The WITSML Store API function.</param>
@@ -215,5 +296,24 @@ namespace PDS.Witsml.Server.Configuration
                 }
             }
         }
+
+        /// <summary>
+        /// Validates the namespace for a specific WITSML data schema version.
+        /// </summary>
+        /// <param name="document">The document.</param>
+        protected virtual void ValidateNamespace(XDocument document)
+        {
+        }
+
+        /// <summary>
+        /// Gets the namespace.
+        /// </summary>
+        /// <param name="xml">The XML document.</param>
+        /// <returns>The namespace.</returns>
+        protected static string GetNamespace(XDocument document)
+        {
+            return document.Root.GetDefaultNamespace().NamespaceName;
+        }
+
     }
 }

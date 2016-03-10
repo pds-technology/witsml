@@ -147,6 +147,7 @@
         /// -425 For WMLS_GetFromStore, the OptionsIn keyword ‘returnElements’ must not specify a value of “headeronly”
         /// or “data-only” for a non-growing data-object.
         /// </summary>
+        InvalidOptionForGrowingObjectOnly = -425,
 
         /// <summary>
         /// -426 The input template must conform to the appropriate derived schema after uncompressing the string.
@@ -156,11 +157,13 @@
         /// -427 The OptionsIn keyword ‘requestObjectSelectionCapability’ with a value other than ‘none’ must not be
         /// specified with any other OptionsIn keyword.
         /// </summary>
+        InvalidOptionsInCombination = -427,
 
         /// <summary>
         /// -428 If the OptionsIn keyword ‘requestObjectSelectionCapability’ is specified with a value other than ‘none’
         /// then QueryIn must be the Minimum Query Template.
         /// </summary>
+        InvalidMinimumQueryTemplate = -428,
 
         /// <summary>
         /// -429 For WMLS_GetFromStore, the logData section must not recur when retrieving data.
@@ -396,6 +399,7 @@
         /// -476 For WMLS_GetFromStore: OptionsIn keyword returnsElements=latest-change-only can only be used for
         /// a changeLog object.
         /// </summary>
+        InvalidOptionForChangeLogOnly = -476,
 
         /// <summary>
         /// -477 For getting systematically growing data-objects, both column-description and data sections must be

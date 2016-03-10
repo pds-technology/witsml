@@ -214,6 +214,42 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to If the OptionsIn keyword ‘requestObjectSelectionCapability’ is specified with a value other than ‘none’ then QueryIn must be the Minimum Query Template.
+        /// </summary>
+        internal static string InvalidMinimumQueryTemplate {
+            get {
+                return ResourceManager.GetString("InvalidMinimumQueryTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to OptionsIn keyword returnsElements=latest-change-only can only be used for a changeLog object..
+        /// </summary>
+        internal static string InvalidOptionForChangeLogOnly {
+            get {
+                return ResourceManager.GetString("InvalidOptionForChangeLogOnly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The OptionsIn keyword ‘returnElements’ must not specify a value of “headeronly” or “data-only” for a non-growing data-object..
+        /// </summary>
+        internal static string InvalidOptionForGrowingObjectOnly {
+            get {
+                return ResourceManager.GetString("InvalidOptionForGrowingObjectOnly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The OptionsIn keyword ‘requestObjectSelectionCapability’ with a value other than ‘none’ must not be specified with any other OptionsIn keyword..
+        /// </summary>
+        internal static string InvalidOptionsInCombination {
+            get {
+                return ResourceManager.GetString("InvalidOptionsInCombination", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The OptionsIn value must be a recognized keyword for that function..
         /// </summary>
         internal static string KeywordNotSupportedByFunction {

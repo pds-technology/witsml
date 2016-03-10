@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Xml.Linq;
@@ -16,6 +17,8 @@ namespace PDS.Witsml.Server.Configuration
     public class CapServer141Provider : CapServerProvider<Witsml141.CapServers>
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(CapServer141Provider));
+
+        private const string Namespace141 = "http://www.witsml.org/schemas/1series";
 
         /// <summary>
         /// Gets the data schema version.
@@ -46,7 +49,10 @@ namespace PDS.Witsml.Server.Configuration
 
             if (context.Function == Functions.GetFromStore)
             {
+                ValidateKeywords(optionsIn, OptionsIn.ReturnElements.Keyword, OptionsIn.RequestObjectSelectionCapability.Keyword, OptionsIn.RequestPrivateGroupOnly.Keyword, OptionsIn.CompressionMethod.Keyword);  
+                ValidateRequestObjectSelectionCapability(optionsIn, context.ObjectType, document);
                 ValidateEmptyRootElement(context.ObjectType, document);
+                ValidateReturnElements(optionsIn, context.ObjectType);
             }
             else if (context.Function == Functions.AddToStore)
             {
@@ -68,6 +74,18 @@ namespace PDS.Witsml.Server.Configuration
                 //ValidateCascadedDelete(optionsIn, GetCapServer().CapServer.CascadedDelete.GetValueOrDefault());
                 ValidateEmptyRootElement(context.ObjectType, document);
                 ValidateSingleChildElement(context.ObjectType, document);
+            }
+        }
+
+        /// <summary>
+        /// Validates the namespace for a specific WITSML data schema version.
+        /// </summary>
+        /// <param name="document">The document.</param>
+        protected override void ValidateNamespace(XDocument document)
+        {
+            if (!Namespace141.Equals(GetNamespace(document)))
+            {
+                throw new WitsmlException(ErrorCodes.MissingDefaultWitsmlNamespace);
             }
         }
 

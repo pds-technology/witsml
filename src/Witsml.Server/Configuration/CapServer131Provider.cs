@@ -3,6 +3,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using log4net;
 using Witsml131 = Energistics.DataAccess.WITSML131;
+using System.Xml.Linq;
 
 namespace PDS.Witsml.Server.Configuration
 {
@@ -15,6 +16,8 @@ namespace PDS.Witsml.Server.Configuration
     public class CapServer131Provider : CapServerProvider<Witsml131.CapServers>
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(CapServer131Provider));
+
+        private const string Namespace131 = "http://www.witsml.org/schemas/131";
 
         /// <summary>
         /// Gets the data schema version.
@@ -31,6 +34,19 @@ namespace PDS.Witsml.Server.Configuration
         /// <value>The collection of providers.</value>
         [ImportMany]
         public IEnumerable<IWitsml131Configuration> Providers { get; set; }
+
+        /// <summary>
+        /// Validates the namespace for a specific WITSML data schema version.
+        /// </summary>
+        /// <param name="document">The document.</param>
+        /// <exception cref="WitsmlException"></exception>
+        protected override void ValidateNamespace(XDocument document)
+        {
+            if (!Namespace131.Equals(GetNamespace(document)))
+            {
+                throw new WitsmlException(ErrorCodes.MissingDefaultWitsmlNamespace);
+            }
+        }
 
         /// <summary>
         /// Creates the capServers instance for a specific data schema version.

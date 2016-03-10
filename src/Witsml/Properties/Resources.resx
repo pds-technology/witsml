@@ -278,4 +278,20 @@
     <value>The XMLin document does not comply with the update schema.</value>
     <comment>-483</comment>
   </data>
+  <data name="InvalidMinimumQueryTemplate" xml:space="preserve">
+    <value>If the OptionsIn keyword ‘requestObjectSelectionCapability’ is specified with a value other than ‘none’ then QueryIn must be the Minimum Query Template</value>
+    <comment>-428</comment>
+  </data>
+  <data name="InvalidOptionForChangeLogOnly" xml:space="preserve">
+    <value>OptionsIn keyword returnsElements=latest-change-only can only be used for a changeLog object.</value>
+    <comment>-476</comment>
+  </data>
+  <data name="InvalidOptionForGrowingObjectOnly" xml:space="preserve">
+    <value>The OptionsIn keyword ‘returnElements’ must not specify a value of “headeronly” or “data-only” for a non-growing data-object.</value>
+    <comment>-425</comment>
+  </data>
+  <data name="InvalidOptionsInCombination" xml:space="preserve">
+    <value>The OptionsIn keyword ‘requestObjectSelectionCapability’ with a value other than ‘none’ must not be specified with any other OptionsIn keyword.</value>
+    <comment>-427</comment>
+  </data>
 </root>
