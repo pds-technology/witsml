@@ -45,7 +45,17 @@ namespace PDS.Witsml.Server.Configuration
         }
 
         [TestMethod]
-        public void WitsmlValidator_GetFromStore_Error_425_ReturnElement_HeaderOnly_For_Growing_Object()
+        [Ignore]
+        public void WitsmlValidator_GetFromStore_ReturnElement_HeaderOnly_For_Growing_Object()
+        {
+            var query = new Log { Uid = "", Name = "" };
+            var response = DevKit.Get<LogList, Log>(DevKit.List(query), ObjectTypes.Log, optionsIn: OptionsIn.ReturnElements.HeaderOnly);
+
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_GetFromStore_Error_425_ReturnElement_HeaderOnly_Not_Growing_Object()
         {
             var query = new Well { Uid = "", Name = "" };
             var response = DevKit.Get<WellList, Well>(DevKit.List(query), ObjectTypes.Well, optionsIn: OptionsIn.ReturnElements.HeaderOnly);
@@ -54,7 +64,36 @@ namespace PDS.Witsml.Server.Configuration
         }
 
         [TestMethod]
-        public void WitsmlValidator_GetFromStore_Error_476_ReturnElement_LatestChangeOnly_For_ChangeLog()
+        [Ignore]
+        public void WitsmlValidator_GetFromStore_ReturnElement_StationLocationOnly_For_Trajectory()
+        {
+            var query = new Trajectory { Uid = "", Name = "" };
+            var response = DevKit.Get<TrajectoryList, Trajectory>(DevKit.List(query), ObjectTypes.Trajectory, optionsIn: OptionsIn.ReturnElements.StationLocationOnly);
+
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_GetFromStore_Error_425_ReturnElement_StationLocationOnly_Not_Trajectory()
+        {
+            var query = new Well { Uid = "", Name = "" };
+            var response = DevKit.Get<WellList, Well>(DevKit.List(query), ObjectTypes.Well, optionsIn: OptionsIn.ReturnElements.StationLocationOnly);
+
+            Assert.AreEqual((short)ErrorCodes.InvalidOptionForGrowingObjectOnly, response.Result);
+        }
+
+        [TestMethod]
+        [Ignore]
+        public void WitsmlValidator_GetFromStore_ReturnElement_LatestChangeOnly_For_ChangeLog()
+        {
+            var query = new ChangeLog { Uid = "", NameWell = ""};
+            var response = DevKit.Get<ChangeLogList, ChangeLog>(DevKit.List(query), ObjectTypes.ChangeLog, optionsIn: OptionsIn.ReturnElements.LatestChangeOnly);
+
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_GetFromStore_Error_476_ReturnElement_LatestChangeOnly_Not_ChangeLog()
         {
             var query = new Well { Uid = "", Name = "" };
             var response = DevKit.Get<WellList, Well>(DevKit.List(query), ObjectTypes.Well, optionsIn: OptionsIn.ReturnElements.LatestChangeOnly);
