@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic;
-using log4net;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
@@ -15,8 +14,6 @@ namespace PDS.Witsml.Server.Data
     /// <seealso cref="Data.WitsmlDataAdapter{T}" />
     public abstract class MongoDbDataAdapter<T> : WitsmlDataAdapter<T>
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(MongoDbDataAdapter<T>));
-
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDbDataAdapter{T}" /> class.
         /// </summary>
@@ -97,7 +94,7 @@ namespace PDS.Witsml.Server.Data
             }
             catch (MongoException ex)
             {
-                _log.Error("Error querying " + dbCollectionName, ex);
+                Logger.Error("Error querying " + dbCollectionName, ex);
                 throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, ex);
             }
         }
@@ -144,12 +141,12 @@ namespace PDS.Witsml.Server.Data
         {
             try
             {
-                _log.DebugFormat("Query WITSML object: {0}; uid: {1}", dbCollectionName, uid);
+                Logger.DebugFormat("Querying {0} MongoDb collection; uid: {1}", dbCollectionName, uid);
                 return GetEntityByUidQuery<TObject>(uid, dbCollectionName).FirstOrDefault();
             }
             catch (MongoException ex)
             {
-                _log.Error("Error querying " + dbCollectionName, ex);
+                Logger.ErrorFormat("Error querying {0} MongoDb collection:{1}{2}", dbCollectionName, Environment.NewLine, ex);
                 throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, ex);
             }
         }
@@ -184,18 +181,18 @@ namespace PDS.Witsml.Server.Data
             {
                 if (OptionsIn.RequestObjectSelectionCapability.True.Equals(parser.RequestObjectSelectionCapability()))
                 {
-                    _log.DebugFormat("Querying WITSML object selection: {0}", DbCollectionName);
+                    Logger.DebugFormat("Requesting {0} query template.", DbCollectionName);
                     var queryTemplate = CreateQueryTemplate();
                     return queryTemplate.AsList();
                 }
 
-                _log.DebugFormat("Querying WITSML object: {0}", DbCollectionName);
+                Logger.DebugFormat("Querying {0} MongoDb collection.", DbCollectionName);
                 var query = new MongoDbQuery<TList, T>(GetCollection(), parser, fields, IdPropertyName);
                 return query.Execute();
             }
             catch (MongoException ex)
             {
-                _log.Error("Error querying " + DbCollectionName, ex);
+                Logger.ErrorFormat("Error querying {0} MongoDb collection:{1}{2}", DbCollectionName, Environment.NewLine, ex);
                 throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, ex);
             }
         }
@@ -219,7 +216,7 @@ namespace PDS.Witsml.Server.Data
         {
             try
             {
-                _log.DebugFormat("Insert WITSML object: {0}", dbCollectionName);
+                Logger.DebugFormat("Inserting into {0} MongoDb collection.", dbCollectionName);
 
                 var collection = GetCollection<TObject>(dbCollectionName);
 
@@ -227,7 +224,7 @@ namespace PDS.Witsml.Server.Data
             }
             catch (MongoException ex)
             {
-                _log.Error("Error inserting " + dbCollectionName, ex);
+                Logger.ErrorFormat("Error inserting into {0} MongoDb collection:{1}{2}", dbCollectionName, Environment.NewLine, ex);
                 throw new WitsmlException(ErrorCodes.ErrorAddingToDataStore, ex);
             }
         }
@@ -302,7 +299,7 @@ namespace PDS.Witsml.Server.Data
         {
             try
             {
-                _log.DebugFormat("Delete WITSML object: {0}", dbCollectionName);
+                Logger.DebugFormat("Deleting from {0} MongoDb collection", dbCollectionName);
 
                 var collection = GetCollection<TObject>(dbCollectionName);
                 var filter = Builders<TObject>.Filter.Eq(IdPropertyName, uuid);
@@ -312,7 +309,7 @@ namespace PDS.Witsml.Server.Data
             }
             catch (MongoException ex)
             {
-                _log.Error("Error deleting " + dbCollectionName, ex);
+                Logger.ErrorFormat("Error deleting from {0} MongoDb collection:{1}{2}", dbCollectionName, Environment.NewLine, ex);
                 throw new WitsmlException(ErrorCodes.ErrorDeletingFromDataStore, ex);
             }
         }
