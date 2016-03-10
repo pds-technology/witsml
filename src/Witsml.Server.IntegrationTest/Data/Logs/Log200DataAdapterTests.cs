@@ -40,7 +40,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             Well1 = new Well() { Citation = new Citation { Title = DevKit.Name("Well 01") }, TimeZone = DevKit.TimeZone, Uuid = DevKit.Uid() };
 
-            Well1.GeographicLocationWGS84 = new GeodeticWellLocation();
+            Well1.GeographicLocationWGS84 = DevKit.Location();
 
             WellReference = new DataObjectReference
             {

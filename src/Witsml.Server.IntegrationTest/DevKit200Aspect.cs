@@ -20,9 +20,13 @@ namespace PDS.Witsml.Server
         public void InitHeader(Log log, LoggingMethod loggingMethod, ChannelIndexType indexType)
         {
             log.ChannelSet = new List<ChannelSet>();
+            log.LoggingCompanyName = "Service Co.";
+            log.CurveClass = "unknown";
 
             if (indexType == ChannelIndexType.measureddepth)
             {
+                log.TimeDepth = "depth";
+
                 var index = new List<ChannelIndex>()
                 {
                     new ChannelIndex()
@@ -52,8 +56,7 @@ namespace PDS.Witsml.Server
                             DataType = EtpDataType.@double,
                             Index = index,
                             StartIndex = new DepthIndexValue() { Depth = 0 },
-                            EndIndex = null, // new DepthIndexValue() { Depth = 1000 },
-                            TimeDepth = "depth",
+                            EndIndex = new DepthIndexValue() { Depth = 1000 },
                         },
                         new Channel()
                         {
@@ -65,8 +68,7 @@ namespace PDS.Witsml.Server
                             DataType = EtpDataType.@double,
                             Index = index,
                             StartIndex = new DepthIndexValue() { Depth = 0 },
-                            EndIndex = null, // new DepthIndexValue() { Depth = 1000 },
-                            TimeDepth = "depth",
+                            EndIndex = new DepthIndexValue() { Depth = 1000 },
                         }
                     },
 
@@ -83,6 +85,8 @@ namespace PDS.Witsml.Server
             }
             else if (indexType == ChannelIndexType.datetime)
             {
+                log.TimeDepth = "time";
+
                 var index = new List<ChannelIndex>()
                 {
                     new ChannelIndex()
@@ -111,8 +115,7 @@ namespace PDS.Witsml.Server
                             DataType = EtpDataType.@double,
                             Index = index,
                             StartIndex = new TimeIndexValue(),
-                            EndIndex = null, // new TimeIndexValue(),
-                            TimeDepth = "time",
+                            EndIndex = new TimeIndexValue(),
                         },
                         new Channel()
                         {
@@ -124,8 +127,7 @@ namespace PDS.Witsml.Server
                             DataType = EtpDataType.@double,
                             Index = index,
                             StartIndex = new TimeIndexValue(),
-                            EndIndex = null, // new TimeIndexValue(),
-                            TimeDepth = "time",
+                            EndIndex = new TimeIndexValue(),
                         }
                     },
 
@@ -140,6 +142,16 @@ namespace PDS.Witsml.Server
                     }
                 });
             }
+        }
+
+        public GeodeticWellLocation Location()
+        {
+            return new GeodeticWellLocation()
+            {
+                Crs = new GeodeticEpsgCrs() { EpsgCode = 26914 },
+                Latitude = 28.5597,
+                Longitude = -90.6671
+            };
         }
     }
 }
