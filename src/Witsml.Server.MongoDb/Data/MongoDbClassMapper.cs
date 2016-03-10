@@ -37,6 +37,8 @@ namespace PDS.Witsml.Server.Data
             Register2<Witsml200.ChannelSet>();
             Register2<Witsml200.Channel>();
 
+            Register3<Witsml200.ComponentSchemas.GeodeticWellLocation>();
+            Register3<Witsml200.ComponentSchemas.GeodeticEpsgCrs>();
             Register3<Witsml200.ComponentSchemas.IndexRangeContext>();
             Register3<Witsml200.ComponentSchemas.DepthIndexValue>();
             Register3<Witsml200.ComponentSchemas.TimeIndexValue>();

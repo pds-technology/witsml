@@ -57,6 +57,24 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// <value>The load children.</value>
         public Action<string> LoadChildren { get; set; }
 
+        private ResourceViewModel _parent;
+        /// <summary>
+        /// Gets or sets the parent.
+        /// </summary>
+        /// <value>The parent.</value>
+        public ResourceViewModel Parent
+        {
+            get { return _parent; }
+            set
+            {
+                if (!ReferenceEquals(_parent, value))
+                {
+                    _parent = value;
+                    NotifyOfPropertyChange(() => Parent);
+                }
+            }
+        }
+
         private bool _isExpanded;
         /// <summary>
         /// Gets or sets a value indicating whether this instance is expanded.
@@ -95,6 +113,24 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 {
                     _isSelected = value;
                     NotifyOfPropertyChange(() => IsSelected);
+                }
+            }
+        }
+
+        private int _level;
+        /// <summary>
+        /// Gets or sets the level.
+        /// </summary>
+        /// <value>The level.</value>
+        public int Level
+        {
+            get { return _level; }
+            set
+            {
+                if (_level != value)
+                {
+                    _level = value;
+                    NotifyOfPropertyChange(() => Level);
                 }
             }
         }

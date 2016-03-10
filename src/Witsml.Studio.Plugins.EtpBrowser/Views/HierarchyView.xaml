@@ -8,7 +8,7 @@
              xmlns:vm="clr-namespace:PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels"
              mc:Ignorable="d" d:DesignHeight="400" d:DesignWidth="300">
     <Grid Margin="5">
-        <TreeView ItemsSource="{Binding Parent.Resources}">
+        <TreeView ItemsSource="{Binding Parent.Resources}" cal:Message.Attach="[Event SelectedItemChanged] = [Action RefreshContextMenu()]">
             <TreeView.ItemContainerStyle>
                 <Style TargetType="{x:Type TreeViewItem}">
                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
@@ -23,6 +23,9 @@
             <TreeView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Get Object" cal:Message.Attach="GetObject" />
+                    <MenuItem Header="Delete Object" cal:Message.Attach="DeleteObject" />
+                    <Separator />
+                    <MenuItem Header="Refresh" cal:Message.Attach="RefreshHierarchy" />
                 </ContextMenu>
             </TreeView.ContextMenu>
         </TreeView>
