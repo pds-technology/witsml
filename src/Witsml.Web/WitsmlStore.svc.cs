@@ -41,6 +41,13 @@ namespace PDS.Witsml.Web
             return _store.WMLS_GetCap(request);
         }
 
+        /// <summary>
+        /// Returns one or more WITSML data-objects from the server.
+        /// </summary>
+        /// <param name="request">The request object encapsulating the method input parameters.</param>
+        /// <returns>
+        /// A positive value indicating success along with one or more WITSML data-objects from the server, or a negative value indicating an error.
+        /// </returns>
         public WMLS_GetFromStoreResponse WMLS_GetFromStore(WMLS_GetFromStoreRequest request)
         {
             return _store.WMLS_GetFromStore(request);
