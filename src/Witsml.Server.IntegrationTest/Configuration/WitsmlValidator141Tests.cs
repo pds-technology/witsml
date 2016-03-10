@@ -113,7 +113,7 @@ namespace PDS.Witsml.Server.Configuration
         [TestMethod]
         public void WitsmlValidator_GetFromStore_RequestObjectSelectionCapability_True_Minimum_Query_Template()
         {
-            var query = new Well { Uid = "", Name = "" };
+            var query = new Well {};
             var response = DevKit.Get<WellList, Well>(DevKit.List(query), ObjectTypes.Well, null, optionsIn: OptionsIn.RequestObjectSelectionCapability.True);
 
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
@@ -123,6 +123,57 @@ namespace PDS.Witsml.Server.Configuration
         public void WitsmlValidator_GetFromStore_Error_428_RequestObjectSelectionCapability_True_With_Bad_Minimum_Query_Template()
         {
             string badQuery = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version = \"1.4.1.1\" >" + Environment.NewLine +
+                              "</wells>";
+
+            var response = DevKit.GetFromStore(ObjectTypes.Well, badQuery, null, optionsIn: OptionsIn.RequestObjectSelectionCapability.True);
+
+            Assert.AreEqual((short)ErrorCodes.InvalidMinimumQueryTemplate, response.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_GetFromStore_Error_428_RequestObjectSelectionCapability_True_With_Bad_Minimum_Query_Template_MultiChild()
+        {
+            string badQuery = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version = \"1.4.1.1\" >" + Environment.NewLine +
+                              "   <well/>" + Environment.NewLine +
+                              "   <well/>" + Environment.NewLine +
+                              "</wells>";
+
+            var response = DevKit.GetFromStore(ObjectTypes.Well, badQuery, null, optionsIn: OptionsIn.RequestObjectSelectionCapability.True);
+
+            Assert.AreEqual((short)ErrorCodes.InvalidMinimumQueryTemplate, response.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_GetFromStore_Error_428_RequestObjectSelectionCapability_True_With_Bad_Minimum_Query_Template_Has_Attribute()
+        {
+            string badQuery = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version = \"1.4.1.1\" >" + Environment.NewLine +
+                              "   <well uid=\"PDS Test Wells\" />" + Environment.NewLine +
+                              "</wells>";
+
+            var response = DevKit.GetFromStore(ObjectTypes.Well, badQuery, null, optionsIn: OptionsIn.RequestObjectSelectionCapability.True);
+
+            Assert.AreEqual((short)ErrorCodes.InvalidMinimumQueryTemplate, response.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_GetFromStore_Error_428_RequestObjectSelectionCapability_True_With_Bad_Minimum_Query_Template_BadChild()
+        {
+            string badQuery = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version = \"1.4.1.1\" >" + Environment.NewLine +
+                              "   <log/>" + Environment.NewLine +
+                              "</wells>";
+
+            var response = DevKit.GetFromStore(ObjectTypes.Well, badQuery, null, optionsIn: OptionsIn.RequestObjectSelectionCapability.True);
+
+            Assert.AreEqual((short)ErrorCodes.InvalidMinimumQueryTemplate, response.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_GetFromStore_Error_428_RequestObjectSelectionCapability_True_With_Bad_Minimum_Query_Template_NonEmptyChild()
+        {
+            string badQuery = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version = \"1.4.1.1\" >" + Environment.NewLine +
+                              "   <well>" + Environment.NewLine +
+                              "       <name>PDS Test Wells</name>" + Environment.NewLine +
+                              "   </well>" + Environment.NewLine +
                               "</wells>";
 
             var response = DevKit.GetFromStore(ObjectTypes.Well, badQuery, null, optionsIn: OptionsIn.RequestObjectSelectionCapability.True);
