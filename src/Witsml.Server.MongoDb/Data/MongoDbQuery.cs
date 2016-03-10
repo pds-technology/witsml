@@ -18,8 +18,6 @@ namespace PDS.Witsml.Server.Data
     /// <typeparam name="T">The type of queried data object.</typeparam>
     public class MongoDbQuery<TList, T>
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(MongoDbQuery<TList, T>));
-
         private readonly IMongoCollection<T> _collection;
         private readonly WitsmlQueryParser _parser;    
         private readonly string _idPropertyName;
@@ -34,6 +32,8 @@ namespace PDS.Witsml.Server.Data
         /// <param name="idPropertyName">Name of the identifier property.</param>
         public MongoDbQuery(IMongoCollection<T> collection, WitsmlQueryParser parser, List<string> fields, string idPropertyName)
         {
+            Logger = LogManager.GetLogger(GetType());
+
             _collection = collection;
             _parser = parser;
             _fields = fields;
@@ -41,12 +41,20 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Gets the logger.
+        /// </summary>
+        /// <value>
+        /// The logger.
+        /// </value>
+        protected ILog Logger { get; private set; }
+
+        /// <summary>
         /// Executes this MongoDb query.
         /// </summary>
         /// <returns>The list of queried data object.</returns>
         public List<T> Execute()
         {
-            _log.DebugFormat("Executing query for entity: {0}", _parser.Context.ObjectType);
+            Logger.DebugFormat("Executing query for entity: {0}", _parser.Context.ObjectType);
 
             var list = WitsmlParser.Parse<TList>(_parser.Context.Xml);
             var info = typeof(TList).GetProperty(typeof(T).Name);
@@ -199,7 +207,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The projection object that contains the fields to be selected.</returns>
         private ProjectionDefinition<T> BuildProjection(WitsmlQueryParser parser, T entity)
         {
-            _log.DebugFormat("Building projection fields for entity: {0}", parser.Context.ObjectType);
+            Logger.DebugFormat("Building projection fields for entity: {0}", parser.Context.ObjectType);
             var element = parser.Element();
 
             if (element == null)
@@ -236,7 +244,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="propertyValue">The property value for the field.</param>
         private void BuildProjectionForAnElement(XElement element, string fieldPath, object propertyValue)
         {
-            _log.DebugFormat("Building projection fields for element: {0}", element.Name.LocalName);
+            Logger.DebugFormat("Building projection fields for element: {0}", element.Name.LocalName);
 
             var properties = GetPropertyInfo(propertyValue.GetType());
 
