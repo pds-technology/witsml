@@ -183,5 +183,24 @@ namespace PDS.Witsml.Server.Configuration
 
             Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
         }
+
+        [TestMethod]
+        public void WitsmlValidator_GetFromStore_Error_407_Missing_Witsml_Object_Type()
+        {
+            var well = new Well { Name = "Well-to-query-missing-witsml-type", TimeZone = DevKit.TimeZone };
+            var response = DevKit.Get<WellList, Well>(DevKit.List(well), string.Empty);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingWMLtypeIn, response.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_GetFromStore_Error_408_Missing_Input_Template()
+        {
+            var response = DevKit.GetFromStore(ObjectTypes.Well, null, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingInputTemplate, response.Result);
+        }
     }
 }
