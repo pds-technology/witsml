@@ -51,7 +51,10 @@ namespace PDS.Witsml.Server.Data.Wells
         /// <returns>Queried objects.</returns>
         public override WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
         {
-            var fields = (OptionsIn.ReturnElements.IdOnly.Equals(parser.ReturnElements()))
+            var returnElements = parser.ReturnElements();
+            _log.DebugFormat("Querying with return elements '{0}'", returnElements);
+
+            var fields = (OptionsIn.ReturnElements.IdOnly.Equals(returnElements))
                 ? new List<string> { IdPropertyName, NamePropertyName }
                 : null;
 
