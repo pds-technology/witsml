@@ -269,6 +269,17 @@ namespace PDS.Witsml.Server.Configuration
         }
 
         /// <summary>
+        /// Validates the selection criteria.
+        /// </summary>
+        /// <param name="document">The queryIn XML document.</param>
+        public static void ValidateSelectionCriteria(XDocument document)
+        {
+            var entities = document.Root.Elements();
+            foreach (var entity in entities)
+                ValidateSelectionCriteriaForAnEntity(entity);
+        }
+
+        /// <summary>
         /// Validates the required WITSML object type parameter for the WMLS_AddToStore method.
         /// </summary>
         /// <param name="function">The WITSML Store API function.</param>
@@ -313,6 +324,77 @@ namespace PDS.Witsml.Server.Configuration
         protected static string GetNamespace(XDocument document)
         {
             return document.Root.GetDefaultNamespace().NamespaceName;
+        }
+
+        /// <summary>
+        /// Recursively validates the selection criteria for an element.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        private static void ValidateSelectionCriteriaForAnEntity(XElement entity)
+        {
+            if (entity == null)
+                return;
+
+            var elements = entity.Elements();
+            if (elements == null)
+                return;
+
+            var groupings = elements.GroupBy(e => e.Name.LocalName);
+            foreach (var group in groupings)
+            {
+                var values = group.ToList();
+                var count = values.Count;
+
+                var selection = values[0];
+                if (count == 1)
+                    ValidateSelectionCriteriaForAnEntity(selection);
+                else
+                {
+                    IsRecurringElementValueEmpty(selection);
+                    for (var i = 1; i < values.Count; i++)
+                    {
+                        var match = values[i];
+                        IsRecurringElementValueEmpty(match);
+                        IsSelectionMatch(selection, match);
+                        ValidateSelectionCriteriaForAnEntity(match);
+                    }
+                }
+            }
+        }
+
+        private static void IsSelectionMatch(XElement source, XElement target)
+        {
+            foreach (var attribute in source.Attributes())
+            {
+                if (!target.Attributes().Any(a => a.Name.LocalName == attribute.Name.LocalName))
+                    throw new WitsmlException(ErrorCodes.RecurringItemsInconsistentSelection);
+            }
+
+            foreach (var attribute in target.Attributes())
+            {
+                if (!source.Attributes().Any(a => a.Name.LocalName == attribute.Name.LocalName))
+                    throw new WitsmlException(ErrorCodes.RecurringItemsInconsistentSelection);
+            }
+
+            foreach (var element in source.Elements())
+            {
+                if (!target.Elements().Any(e => e.Name.LocalName == element.Name.LocalName))
+                    throw new WitsmlException(ErrorCodes.RecurringItemsInconsistentSelection);
+            }
+
+            foreach (var element in target.Elements())
+            {
+                if (!source.Elements().Any(e => e.Name.LocalName == element.Name.LocalName))
+                    throw new WitsmlException(ErrorCodes.RecurringItemsInconsistentSelection);
+            }
+        }
+
+        private static void IsRecurringElementValueEmpty(XElement element)
+        {    
+            if (string.IsNullOrEmpty(element.Value) && !element.HasAttributes 
+                || element.Elements().Any(e => string.IsNullOrEmpty(e.Value)) 
+                || element.Attributes().Any(a => string.IsNullOrEmpty(a.Value)))
+                throw new WitsmlException(ErrorCodes.RecurringItemsEmptySelection);
         }
 
     }

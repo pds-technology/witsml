@@ -204,7 +204,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_Well_Selection_Uid_ReturnElement_All()
         {
-            var well = CreateFullWell();
+            var well = DevKit.CreateFullWell();
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
@@ -234,7 +234,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             if (result.Count == 0)
             {
-                var well = CreateFullWell();
+                var well = DevKit.CreateFullWell();
                 well.Uid = testUid;
                 var response = DevKit.Add<WellList, Well>(well);
 
@@ -251,7 +251,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_Well_Selection_Different_Case()
         {
-            var well = CreateFullWell();
+            var well = DevKit.CreateFullWell();
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
@@ -286,7 +286,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_Well_Selection_MultiQueries_Same_Object_Returned()
         {
-            var well = CreateFullWell();
+            var well = DevKit.CreateFullWell();
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
@@ -312,7 +312,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_Well_Selection_MultiQueries_One_Query_Fails()
         {
-            var well = CreateFullWell();
+            var well = DevKit.CreateFullWell();
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
@@ -335,7 +335,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_Well_Selection_Not_Equal_Comparison_dTimCreation()
         {
-            var well_01 = CreateFullWell();
+            var well_01 = DevKit.CreateFullWell();
             var response = DevKit.Add<WellList, Well>(well_01);
 
             Assert.IsNotNull(response);
@@ -343,7 +343,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             var uid_01 = response.SuppMsgOut;
 
-            var well_02 = CreateFullWell();
+            var well_02 = DevKit.CreateFullWell();
             well_02.CommonData.DateTimeCreation = DateTime.UtcNow;
             response = DevKit.Add<WellList, Well>(well_02);
 
@@ -364,7 +364,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_Well_Selection_Not_Equal_Comparison_dTimLastChange()
         {
-            var well_01 = CreateFullWell();
+            var well_01 = DevKit.CreateFullWell();
             var response = DevKit.Add<WellList, Well>(well_01);
 
             Assert.IsNotNull(response);
@@ -378,7 +378,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             var wellLastChangeTime = result[0].CommonData.DateTimeLastChange;
 
-            var well_02 = CreateFullWell();
+            var well_02 = DevKit.CreateFullWell();
             well_02.CommonData.DateTimeCreation = DateTime.UtcNow;
             response = DevKit.Add<WellList, Well>(well_02);
 
@@ -418,7 +418,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_Well_Selection_Recurring_Items()
         {
-            var well = CreateFullWell();
+            var well = DevKit.CreateFullWell();
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
@@ -426,8 +426,8 @@ namespace PDS.Witsml.Server.Data.Wells
 
             var uid = response.SuppMsgOut;
 
-            var datumKB = DevKit.WellDatum("Kelly Bushing");
-            var datumSL = DevKit.WellDatum("Sea Level");
+            var datumKB = DevKit.WellDatum("Kelly Bushing", ElevCodeEnum.KB);
+            var datumSL = DevKit.WellDatum("Sea Level", ElevCodeEnum.SL);
             var query = new Well { Uid = "", WellDatum = DevKit.List(datumKB,  datumSL) };
             var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
 
@@ -437,7 +437,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_Well_Selection_Recurring_Items_Criteria_OR()
         {
-            var well_01 = CreateFullWell();
+            var well_01 = DevKit.CreateFullWell();
             well_01.WellDatum.RemoveAt(0);            
             var response = DevKit.Add<WellList, Well>(well_01);
 
@@ -445,7 +445,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
             var uid_01 = response.SuppMsgOut;
 
-            var well_02 = CreateFullWell();
+            var well_02 = DevKit.CreateFullWell();
             well_02.WellDatum.RemoveAt(1);
             response = DevKit.Add<WellList, Well>(well_02);
 
@@ -453,159 +453,14 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
             var uid_02 = response.SuppMsgOut;
 
-            var datumKB = DevKit.WellDatum("Kelly Bushing");
-            var datumSL = DevKit.WellDatum("Sea Level");
+            var datumKB = DevKit.WellDatum("Kelly Bushing", ElevCodeEnum.KB);
+            var datumSL = DevKit.WellDatum("Sea Level", ElevCodeEnum.SL);
             var query = new Well { WellDatum = DevKit.List(datumKB, datumSL) };
             var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
 
             // Section 4.1.5
             Assert.IsTrue(result.Where(x => x.Uid == uid_01).Any());
             Assert.IsTrue(result.Where(x => x.Uid == uid_02).Any());
-        }
-
-        [TestMethod]
-        public void Test_Well_Selection_Recurring_Items_InconsistentSelection()
-        {
-            var well = CreateFullWell();
-            var response = DevKit.Add<WellList, Well>(well);
-
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uid = response.SuppMsgOut;
-            var datumKB = DevKit.WellDatum("Kelly Bushing");
-            var datumSL = DevKit.WellDatum(null, ElevCodeEnum.SL);
-            var query = new Well { Uid = "", WellDatum = DevKit.List(datumKB, datumSL) };
-            var result = DevKit.Get<WellList, Well>(DevKit.List(query), ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
-
-            // Section 4.1.5
-            Assert.AreEqual((short)ErrorCodes.RecurringItemsInconsistentSelection, result.Result);
-        }
-
-        [TestMethod]
-        public void Test_Well_Selection_Recurring_Items_EmptValue()
-        {
-            var well = CreateFullWell();
-            var response = DevKit.Add<WellList, Well>(well);
-
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uid = response.SuppMsgOut;
-            var datumKB = DevKit.WellDatum("Kelly Bushing");
-            var datumSL = DevKit.WellDatum("");
-            var query = new Well { Uid = "", WellDatum = DevKit.List(datumKB, datumSL) };
-            var result = DevKit.Get<WellList, Well>(DevKit.List(query), ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
-
-            // Section 4.1.5
-            Assert.AreEqual((short)ErrorCodes.RecurringItemsEmptySelection, result.Result);
-        }
-
-        private Well CreateFullWell()
-        {
-            string wellXml = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-            "<well>" + Environment.NewLine +
-            "<name>PDS Full Test Well</name>" + Environment.NewLine +
-            "<nameLegal>Company Legal Name</nameLegal>" + Environment.NewLine +
-            "<numLicense>Company License Number</numLicense>" + Environment.NewLine +
-            "<numGovt>Govt-Number</numGovt>" + Environment.NewLine +
-            "<dTimLicense>2001-05-15T13:20:00Z</dTimLicense>" + Environment.NewLine +
-            "<field>Big Field</field>" + Environment.NewLine +
-            "<country>US</country>" + Environment.NewLine +
-            "<state>TX</state>" + Environment.NewLine +
-            "<county>Montgomery</county>" + Environment.NewLine +
-            "<region>Region Name</region>" + Environment.NewLine +
-            "<district>District Name</district>" + Environment.NewLine +
-            "<block>Block Name</block>" + Environment.NewLine +
-            "<timeZone>-06:00</timeZone>" + Environment.NewLine +
-            "<operator>Operating Company</operator>" + Environment.NewLine +
-            "<operatorDiv>Division Name</operatorDiv>" + Environment.NewLine +
-            "<pcInterest uom=\"%\">65</pcInterest>" + Environment.NewLine +
-            "<numAPI>123-543-987AZ</numAPI>" + Environment.NewLine +
-            "<statusWell>drilling</statusWell>" + Environment.NewLine +
-            "<purposeWell>exploration</purposeWell>" + Environment.NewLine +
-            "<fluidWell>water</fluidWell>" + Environment.NewLine +
-            "<dTimSpud>2001-05-31T08:15:00Z</dTimSpud>" + Environment.NewLine +
-            "<dTimPa>2001-07-15T15:30:00Z</dTimPa>" + Environment.NewLine +
-            "<wellheadElevation uom=\"ft\">500</wellheadElevation>" + Environment.NewLine +
-            "<wellDatum uid=\"KB\">" + Environment.NewLine +
-            "<name>Kelly Bushing</name>" + Environment.NewLine +
-            "<code>KB</code>" + Environment.NewLine +
-            "<elevation uom=\"ft\" datum=\"SL\">78.5</elevation>" + Environment.NewLine +
-            "</wellDatum>" + Environment.NewLine +
-            "<wellDatum uid=\"SL\">" + Environment.NewLine +
-            "<name>Sea Level</name>" + Environment.NewLine +
-            "<code>SL</code>" + Environment.NewLine +
-            "<datumName namingSystem=\"EPSG\" code=\"5106\">Caspian Sea</datumName>" + Environment.NewLine +
-            "</wellDatum>" + Environment.NewLine +
-            "<groundElevation uom=\"ft\">250</groundElevation>" + Environment.NewLine +
-            "<waterDepth uom=\"ft\">520</waterDepth>" + Environment.NewLine +
-            "<wellLocation uid=\"loc-1\">" + Environment.NewLine +
-            "<wellCRS uidRef=\"proj1\">ED50 / UTM Zone 31N</wellCRS>" + Environment.NewLine +
-            "<easting uom=\"m\">425353.84</easting>" + Environment.NewLine +
-            "<northing uom=\"m\">6623785.69</northing>" + Environment.NewLine +
-            "<description>Location of well surface point in projected system.</description>" + Environment.NewLine +
-            "</wellLocation>" + Environment.NewLine +
-            "<referencePoint uid=\"SRP1\">" + Environment.NewLine +
-            "<name>Slot Bay Centre</name>" + Environment.NewLine +
-            "<type>Site Reference Point</type>" + Environment.NewLine +
-            "<location uid=\"loc-1\">" + Environment.NewLine +
-            "<wellCRS uidRef=\"proj1\">ED50 / UTM Zone 31N</wellCRS>" + Environment.NewLine +
-            "<easting uom=\"m\">425366.47</easting>" + Environment.NewLine +
-            "<northing uom=\"m\">6623781.95</northing>" + Environment.NewLine +
-            "</location>" + Environment.NewLine +
-            "<location uid=\"loc-2\">" + Environment.NewLine +
-            "<wellCRS uidRef=\"localWell1\">WellOneWSP</wellCRS>" + Environment.NewLine +
-            "<localX uom=\"m\">12.63</localX>" + Environment.NewLine +
-            "<localY uom=\"m\">-3.74</localY>" + Environment.NewLine +
-            "<description>Location of the Site Reference Point with respect to the well surface point</description>" + Environment.NewLine +
-            "</location>" + Environment.NewLine +
-            "</referencePoint>" + Environment.NewLine +
-            "<referencePoint uid=\"WRP2\">" + Environment.NewLine +
-            "<name>Sea Bed</name>" + Environment.NewLine +
-            "<type>Well Reference Point</type>" + Environment.NewLine +
-            "<elevation uom=\"ft\" datum=\"SL\">-118.4</elevation>" + Environment.NewLine +
-            "<measuredDepth uom=\"ft\" datum=\"KB\">173.09</measuredDepth>" + Environment.NewLine +
-            "<location uid=\"loc-1\">" + Environment.NewLine +
-            "<wellCRS uidRef=\"proj1\">ED50 / UTM Zone 31N</wellCRS>" + Environment.NewLine +
-            "<easting uom=\"m\">425353.84</easting>" + Environment.NewLine +
-            "<northing uom=\"m\">6623785.69</northing>" + Environment.NewLine +
-            "</location>" + Environment.NewLine +
-            "<location uid=\"loc-2\">" + Environment.NewLine +
-            "<wellCRS uidRef=\"geog1\">ED50</wellCRS>" + Environment.NewLine +
-            "<latitude uom=\"dega\">59.743844</latitude>" + Environment.NewLine +
-            "<longitude uom=\"dega\">1.67198083</longitude>" + Environment.NewLine +
-            "</location>" + Environment.NewLine +
-            "</referencePoint>" + Environment.NewLine +
-            "<wellCRS uid=\"geog1\">" + Environment.NewLine +
-            "<name>ED50</name>" + Environment.NewLine +
-            "<geodeticCRS uidRef=\"4230\">4230</geodeticCRS>" + Environment.NewLine +
-            "<description>ED50 system with EPSG code 4230.</description>" + Environment.NewLine +
-            "</wellCRS>" + Environment.NewLine +
-            "<wellCRS uid=\"proj1\">" + Environment.NewLine +
-            "<name>ED50 / UTM Zone 31N</name>" + Environment.NewLine +
-            "<mapProjectionCRS uidRef=\"23031\">ED50 / UTM Zone 31N</mapProjectionCRS>" + Environment.NewLine +
-            "</wellCRS>" + Environment.NewLine +
-            "<wellCRS uid=\"localWell1\">" + Environment.NewLine +
-            "<name>WellOneWSP</name>" + Environment.NewLine +
-            "<localCRS>" + Environment.NewLine +
-            "<usesWellAsOrigin>true</usesWellAsOrigin>" + Environment.NewLine +
-            "<yAxisAzimuth uom=\"dega\" northDirection=\"grid north\">0</yAxisAzimuth>" + Environment.NewLine +
-            "<xRotationCounterClockwise>false</xRotationCounterClockwise>" + Environment.NewLine +
-            "</localCRS>" + Environment.NewLine +
-            "</wellCRS>" + Environment.NewLine +
-            "<commonData>" + Environment.NewLine +
-            "<dTimCreation>2016-03-07T22:53:59.249Z</dTimCreation>" + Environment.NewLine +
-            "<dTimLastChange>2016-03-07T22:53:59.249Z</dTimLastChange > " + Environment.NewLine +
-            "<itemState>plan</itemState>" + Environment.NewLine +
-            "<comments>These are the comments associated with the Well data object.</comments>" + Environment.NewLine +
-            "<defaultDatum uidRef=\"KB\">Kelly Bushing</defaultDatum>" + Environment.NewLine +           
-            "</commonData>" + Environment.NewLine +
-            "</well>" + Environment.NewLine +
-            "</wells>";
-
-            WellList wells = EnergisticsConverter.XmlToObject<WellList>(wellXml);
-            return wells.Items[0] as Well;
         }
 
         private Well CreateTestWell()
@@ -617,8 +472,8 @@ namespace PDS.Witsml.Server.Data.Wells
                 Value = 40.0
             };
 
-            var datum1 = DevKit.WellDatum(null, code: ElevCodeEnum.KB, uid: ElevCodeEnum.KB.ToString());
-            var datum2 = DevKit.WellDatum(null, code: ElevCodeEnum.SL, uid: ElevCodeEnum.SL.ToString());
+            var datum1 = DevKit.WellDatum("Kelly Bushing", code: ElevCodeEnum.KB, uid: ElevCodeEnum.KB.ToString());
+            var datum2 = DevKit.WellDatum("Sea Level", code: ElevCodeEnum.SL, uid: ElevCodeEnum.SL.ToString());
 
             var commonData = new CommonData
             {

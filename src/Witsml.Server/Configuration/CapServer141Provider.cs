@@ -53,6 +53,7 @@ namespace PDS.Witsml.Server.Configuration
                 ValidateRequestObjectSelectionCapability(optionsIn, context.ObjectType, document);
                 ValidateEmptyRootElement(context.ObjectType, document);
                 ValidateReturnElements(optionsIn, context.ObjectType);
+                ValidateSelectionCriteria(document);
             }
             else if (context.Function == Functions.AddToStore)
             {
