@@ -181,14 +181,14 @@ namespace PDS.Witsml.Server.Configuration
             }
 
             // Validate compression method value
-            if (!optionValue.EqualsIgnoreCase(OptionsIn.CompressionMethod.None.Value) &&
-                !optionValue.EqualsIgnoreCase(OptionsIn.CompressionMethod.Gzip.Value))
+            if (!OptionsIn.CompressionMethod.None.Equals(optionValue) &&
+                !OptionsIn.CompressionMethod.Gzip.Equals(optionValue))
             {
                 throw new WitsmlException(ErrorCodes.InvalidKeywordValue);
             }
 
             // Validate compression method is supported
-            if (!optionValue.EqualsIgnoreCase(OptionsIn.CompressionMethod.None.Value) &&
+            if (!OptionsIn.CompressionMethod.None.Equals(optionValue) &&
                 !optionValue.EqualsIgnoreCase(compressionMethod))
             {
                 throw new WitsmlException(ErrorCodes.KeywordNotSupportedByServer);
