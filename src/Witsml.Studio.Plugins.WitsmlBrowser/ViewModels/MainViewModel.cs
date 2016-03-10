@@ -264,6 +264,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                 // Log the error message
                 _log.Error(message);
 
+                // Return the error to the caller so message and call stack can be displayed to the user
                 return await Task.FromResult(new WitsmlResult(xmlIn, optionsIn, null, xmlOut, message, returnCode));
             }
         }
