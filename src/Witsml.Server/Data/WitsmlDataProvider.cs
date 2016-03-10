@@ -14,7 +14,6 @@ namespace PDS.Witsml.Server.Data
     /// <seealso cref="PDS.Witsml.Server.Data.IWitsmlDataWriter" />
     public abstract class WitsmlDataProvider<TList, TObject> : IWitsmlDataProvider, IWitsmlDataWriter where TList : IEnergisticsCollection
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(WitsmlDataProvider<TList, TObject>));
         private readonly IWitsmlDataAdapter<TObject> _dataAdapter;
 
         /// <summary>
@@ -23,8 +22,15 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dataAdapter">The data adapter.</param>
         protected WitsmlDataProvider(IWitsmlDataAdapter<TObject> dataAdapter)
         {
+            Logger = LogManager.GetLogger(GetType());
             _dataAdapter = dataAdapter;
         }
+
+        /// <summary>
+        /// Gets the logger.
+        /// </summary>
+        /// <value>The logger.</value>
+        protected ILog Logger { get; private set; }
 
         /// <summary>
         /// Gets object(s) from store.
@@ -33,6 +39,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>Queried objects.</returns>
         public virtual WitsmlResult<IEnergisticsCollection> GetFromStore(RequestContext context)
         {
+            Logger.Debug("Executing query");
             var parser = new WitsmlQueryParser(context);
             return _dataAdapter.Query(parser);
         }
@@ -46,6 +53,7 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         public virtual WitsmlResult AddToStore(RequestContext context)
         {
+            Logger.Debug("Executing insert");
             var list = WitsmlParser.Parse<TList>(context.Xml);
             return _dataAdapter.Add(list.Items.Cast<TObject>().Single());
         }
@@ -59,6 +67,7 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         public virtual WitsmlResult UpdateInStore(RequestContext context)
         {
+            Logger.Debug("Executing update");
             var list = WitsmlParser.Parse<TList>(context.Xml);
             return _dataAdapter.Update(list.Items.Cast<TObject>().Single());
         }
@@ -72,6 +81,7 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         public virtual WitsmlResult DeleteFromStore(RequestContext context)
         {
+            Logger.Debug("Executing delete");
             var parser = new WitsmlQueryParser(context);
             return _dataAdapter.Delete(parser);
         }

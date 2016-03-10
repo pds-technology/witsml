@@ -4,7 +4,6 @@ using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.Datatypes;
-using log4net;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
@@ -21,8 +20,6 @@ namespace PDS.Witsml.Server.Data.Wells
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class Well141DataAdapter : MongoDbDataAdapter<Well>, IWitsml141Configuration
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(Well141DataAdapter));
-
         /// <summary>
         /// Initializes a new instance of the <see cref="Well141DataAdapter"/> class.
         /// </summary>
@@ -30,6 +27,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [ImportingConstructor]
         public Well141DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Well141)
         {
+            Logger.Debug("Instance created.");
         }
 
         /// <summary>
@@ -38,6 +36,8 @@ namespace PDS.Witsml.Server.Data.Wells
         /// <param name="capServer">The capServer object.</param>
         public void GetCapabilities(CapServer capServer)
         {
+            Logger.DebugFormat("Getting capabilities for server '{0}'.", capServer.Name);
+
             capServer.Add(Functions.GetFromStore, ObjectTypes.Well);
             capServer.Add(Functions.AddToStore, ObjectTypes.Well);
             //capServer.Add(Functions.UpdateInStore, ObjectTypes.Well);
@@ -52,7 +52,7 @@ namespace PDS.Witsml.Server.Data.Wells
         public override WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
         {
             var returnElements = parser.ReturnElements();
-            _log.DebugFormat("Querying with return elements '{0}'", returnElements);
+            Logger.DebugFormat("Querying with return elements '{0}'", returnElements);
 
             var fields = (OptionsIn.ReturnElements.IdOnly.Equals(returnElements))
                 ? new List<string> { IdPropertyName, NamePropertyName }
@@ -75,13 +75,15 @@ namespace PDS.Witsml.Server.Data.Wells
         /// </returns>
         public override WitsmlResult Add(Well entity)
         {
+            Logger.DebugFormat("Adding Well with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
+
             entity.Uid = NewUid(entity.Uid);
             entity.CommonData = entity.CommonData.Update();
 
             var validator = Container.Resolve<IDataObjectValidator<Well>>();
             validator.Validate(Functions.AddToStore, entity);
 
-            _log.DebugFormat("Add new well with uid: {0}", entity.Uid);
+            Logger.DebugFormat("Well with uid '{0}' and name {1} validated for Add", entity.Uid, entity.Name);
             InsertEntity(entity);
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uid);
@@ -94,6 +96,8 @@ namespace PDS.Witsml.Server.Data.Wells
         /// <returns>A collection of data objects.</returns>
         public override List<Well> GetAll(EtpUri? parentUri = null)
         {
+            Logger.Debug("Fetching all Wells.");
+
             return GetQuery()
                 .OrderBy(x => x.Name)
                 .ToList();
@@ -105,6 +109,8 @@ namespace PDS.Witsml.Server.Data.Wells
         /// <param name="entity">The entity.</param>
         public override WitsmlResult Put(Well entity)
         {
+            Logger.DebugFormat("Putting Well with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
+
             if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.Uid))
             {
                 return Update(entity);

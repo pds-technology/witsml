@@ -19,7 +19,18 @@ namespace PDS.Witsml.Server.Data
     /// <seealso cref="PDS.Witsml.Server.Data.IEtpDataAdapter{T}" />
     public abstract class WitsmlDataAdapter<T> : IWitsmlDataAdapter<T>, IEtpDataAdapter<T>, IEtpDataAdapter
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(WitsmlDataAdapter<T>));
+        protected WitsmlDataAdapter()
+        {
+            Logger = LogManager.GetLogger(GetType());
+        }
+
+        /// <summary>
+        /// Gets the logger.
+        /// </summary>
+        /// <value>
+        /// The logger.
+        /// </value>
+        protected ILog Logger { get; private set; }
 
         /// <summary>
         /// Gets or sets the composition container.
