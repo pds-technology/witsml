@@ -42,7 +42,6 @@
     <Compile Include="ContainerException.cs" />
     <Compile Include="Container.cs" />
     <Compile Include="ContainerFactory.cs" />
-    <Compile Include="EntityValidator.cs" />
     <Compile Include="FrameworkExtensions.cs" />
     <Compile Include="IContainer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

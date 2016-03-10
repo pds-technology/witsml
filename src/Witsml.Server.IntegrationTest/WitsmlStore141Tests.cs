@@ -174,7 +174,7 @@ namespace PDS.Witsml.Server
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            var queryWell = new Well { Name = "Well-to-add-01", NameLegal = "", Field = ""};
+            var queryWell = new Well { Name = "Well-to-add-01" };
             var result = DevKit.Get<WellList, Well>(DevKit.List(queryWell), optionsIn: OptionsIn.ReturnElements.IdOnly);
             Assert.IsNotNull(result);
 
@@ -247,7 +247,7 @@ namespace PDS.Witsml.Server
             var valid = !string.IsNullOrEmpty(uid);
             Assert.IsTrue(valid);
 
-            well = new Well { Uid = uid };
+            well = new Well { Uid = uid, NameLegal = string.Empty };
             var result = DevKit.Query<WellList, Well>(well);
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);

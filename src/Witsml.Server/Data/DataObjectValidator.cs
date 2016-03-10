@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using Energistics.DataAccess.Validation;
 using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data
@@ -37,12 +38,16 @@ namespace PDS.Witsml.Server.Data
             Function = function;
 
             IList<ValidationResult> results;
-            EntityValidator.TryValidate(this, out results);
+            DataObjectValidator.TryValidate(this, out results);
 
             if (results.Any())
             {
                 var errorCode = ErrorCodes.Unset;
-                Enum.TryParse(results.First().ErrorMessage, out errorCode);
+                var witsmlValidationResult = results.FirstOrDefault(r => r.GetType() == typeof(WitsmlValidationResult)) as WitsmlValidationResult;
+                if (witsmlValidationResult != null)
+                    Enum.TryParse(witsmlValidationResult.ErrorCode.ToString(), out errorCode);
+                else
+                    Enum.TryParse(results.First().ErrorMessage, out errorCode);
                 throw new WitsmlException(errorCode);
             }
         }
@@ -77,7 +82,7 @@ namespace PDS.Witsml.Server.Data
             IList<ValidationResult> results;
 
             // Validate object properties
-            if (!EntityValidator.TryValidate(DataObject, out results))
+            if (!DataObjectValidator.TryValidate(DataObject, out results))
             {
                 throw new WitsmlException(ErrorCodes.InputTemplateNonConforming,
                     string.Join("; ", results.Select(x => x.ErrorMessage)));
