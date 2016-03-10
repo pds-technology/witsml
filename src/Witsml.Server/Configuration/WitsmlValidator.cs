@@ -266,6 +266,12 @@ namespace PDS.Witsml.Server.Configuration
             {
                 throw new WitsmlException(ErrorCodes.InvalidOptionForChangeLogOnly);
             }
+
+            // Station-Location-Only option is for Trajectory only
+            if ((OptionsIn.ReturnElements.StationLocationOnly.Equals(optionValue) && !objectType.Equals(ObjectTypes.Trajectory)))
+            {
+                throw new WitsmlException(ErrorCodes.InvalidOptionForGrowingObjectOnly);
+            }
         }
 
         /// <summary>
