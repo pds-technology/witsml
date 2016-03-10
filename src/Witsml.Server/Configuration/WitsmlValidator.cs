@@ -233,13 +233,9 @@ namespace PDS.Witsml.Server.Configuration
         private static void ValidateMinimumQueryTemplate(string objectType, XDocument document)
         {
             XElement root = document.Root;
-            foreach (XElement element in root.Elements())
-            {
-                string name = element.Name.LocalName;
-            }
 
             if ( !(root.Elements().Count() == 1 &&
-                   root.Elements().All(x =>  objectType.Equals(x.Name.LocalName) && !x.HasAttributes && !x.HasElements )) )
+                   root.Elements().All(x =>  x.Name.LocalName.Equals(objectType) && !x.HasAttributes && !x.HasElements )) )
             {
                 throw new WitsmlException(ErrorCodes.InvalidMinimumQueryTemplate);
             }
