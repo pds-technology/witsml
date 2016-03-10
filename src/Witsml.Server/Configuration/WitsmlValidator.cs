@@ -217,19 +217,31 @@ namespace PDS.Witsml.Server.Configuration
             {
                 throw new WitsmlException(ErrorCodes.InvalidKeywordValue);
             }
-
-            // No other options should be specified if value is true
-            if (OptionsIn.RequestObjectSelectionCapability.True.Equals(optionValue))              
+          
+            if (OptionsIn.RequestObjectSelectionCapability.True.Equals(optionValue))
             {
+                // No other options should be specified if value is true
                 if (options.Count != 1)
                 {
                     throw new WitsmlException(ErrorCodes.InvalidOptionsInCombination);
                 }
 
-                if (!document.Root.Elements().Any())
-                {
-                    throw new WitsmlException(ErrorCodes.InvalidMinimumQueryTemplate);
-                }
+                ValidateMinimumQueryTemplate(objectType, document);
+            }
+        }
+
+        private static void ValidateMinimumQueryTemplate(string objectType, XDocument document)
+        {
+            XElement root = document.Root;
+            foreach (XElement element in root.Elements())
+            {
+                string name = element.Name.LocalName;
+            }
+
+            if ( !(root.Elements().Count() == 1 &&
+                   root.Elements().All(x =>  objectType.Equals(x.Name.LocalName) && !x.HasAttributes && !x.HasElements )) )
+            {
+                throw new WitsmlException(ErrorCodes.InvalidMinimumQueryTemplate);
             }
         }
 
