@@ -53,6 +53,14 @@ namespace PDS.Witsml.Web
             return _store.WMLS_GetFromStore(request);
         }
 
+        /// <summary>
+        /// Adds a WITSML data-object to the server.  
+        /// </summary>
+        /// <param name="request">The request object encapsulating the method input parameters.</param>
+        /// <returns>
+        /// A positive value indicating success along with one or more WITSML data-objects from the server, or a negative value indicating an error.
+        /// If successful the Uid of the inserted object is returned in the Response's SuppMsgOut.
+        /// </returns>
         public WMLS_AddToStoreResponse WMLS_AddToStore(WMLS_AddToStoreRequest request)
         {
             return _store.WMLS_AddToStore(request);
