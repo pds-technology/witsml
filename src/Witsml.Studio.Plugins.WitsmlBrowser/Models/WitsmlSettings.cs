@@ -1,4 +1,5 @@
-﻿using Caliburn.Micro;
+﻿using System;
+using Caliburn.Micro;
 using PDS.Witsml.Studio.Connections;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
@@ -48,14 +49,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
                 if (_isRequestObjectSelectionCapability != value)
                 {
                     _isRequestObjectSelectionCapability = value;
-
-                    ReturnElementType = IsRequestObjectSelectionCapability ? null : OptionsIn.ReturnElements.All;
-
-                    if (IsRequestObjectSelectionCapability && IsRequestPrivateGroupOnly)
-                    {
-                        IsRequestPrivateGroupOnly = false;
-                    }
-
+                    OnRequestObjectSelectionCapabilityChanged();
                     NotifyOfPropertyChange(() => IsRequestObjectSelectionCapability);
                 }
             }
@@ -100,6 +94,16 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
                     _maxDataRows = value;
                     NotifyOfPropertyChange(() => MaxDataRows);
                 }
+            }
+        }
+
+        private void OnRequestObjectSelectionCapabilityChanged()
+        {
+            ReturnElementType = IsRequestObjectSelectionCapability ? null : OptionsIn.ReturnElements.All;
+
+            if (IsRequestObjectSelectionCapability && IsRequestPrivateGroupOnly)
+            {
+                IsRequestPrivateGroupOnly = false;
             }
         }
     }
