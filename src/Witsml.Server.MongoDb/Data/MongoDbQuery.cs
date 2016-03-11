@@ -341,7 +341,7 @@ namespace PDS.Witsml.Server.Data
         /// Builds the projection for the query.
         /// </summary>
         /// <param name="parser">The parser.</param>
-        /// <param name="entity">The query entity</param>
+        /// <param name="type">The object type of the element.</param>
         /// <returns>The projection object that contains the fields to be selected.</returns>
         private ProjectionDefinition<T> BuildProjection(XElement element, Type type)
         {
@@ -385,7 +385,7 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="element">The element.</param>
         /// <param name="fieldPath">The field path to the top level property of the queried entity.</param>
-        /// <param name="propertyValue">The property value for the field.</param>
+        /// <param name="type">The object type of the element.</param>
         private void BuildProjectionForAnElement(XElement element, string fieldPath, Type type)
         {
             Logger.DebugFormat("Building projection fields for element: {0}", element.Name.LocalName);
@@ -416,7 +416,6 @@ namespace PDS.Witsml.Server.Data
         /// <param name="element">The element.</param>
         /// <param name="fieldPath">The field path to the top level property of the queried entity.</param>
         /// <param name="propertyInfo">The property information for the field.</param>
-        /// <param name="propertyValue">The property value for the field.</param>
         private void BuildProjectionForAnElement(XElement element, string fieldPath, PropertyInfo propertyInfo)
         {
             var path = GetPropertyPath(fieldPath, propertyInfo.Name);
