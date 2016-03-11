@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.Common;
@@ -7,6 +6,7 @@ using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using Energistics.Protocol.Discovery;
+using PDS.Framework;
 using PDS.Witsml.Server.Data;
 
 namespace PDS.Witsml.Server.Providers.Discovery
@@ -57,14 +57,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
         {
             if (EtpUri.IsRoot(args.Message.Uri))
             {
-                args.Context.Add(
-                    DiscoveryStoreProvider.New(
-                        uuid: Guid.NewGuid().ToString(),
-                        uri: EtpUris.Witsml200,
-                        resourceType: ResourceTypes.UriProtocol,
-                        name: "WITSML Store (2.0)",
-                        count: -1));
-
+                args.Context.Add(DiscoveryStoreProvider.NewProtocol(EtpUris.Witsml200, "WITSML Store (2.0)"));
                 return;
             }
 
@@ -79,6 +72,25 @@ namespace PDS.Witsml.Server.Providers.Discovery
                 _wellDataAdapter.GetAll()
                     .ForEach(x => args.Context.Add(ToResource(x)));
             }
+            else if (string.IsNullOrWhiteSpace(uri.ObjectId))
+            {
+                var parentUri = uri.Parent;
+
+                if (uri.ObjectType == ObjectFolders.Logs)
+                {
+                    args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Time));
+                    args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Depth));
+                }
+                else if (parentUri.ObjectType == ObjectFolders.Logs &&
+                    (uri.ObjectType == ObjectFolders.Time || uri.ObjectType == ObjectFolders.Depth))
+                {
+                    var wellboreUri = parentUri.Parent;
+
+                    _logDataAdapter.GetAll(wellboreUri)
+                        .Where(x => x.TimeDepth.EqualsIgnoreCase(uri.ObjectType))
+                        .ForEach(x => args.Context.Add(ToResource(x)));
+                }
+            }
             else if (uri.ObjectType == ObjectTypes.Well)
             {
                 _wellboreDataAdapter.GetAll(uri)
@@ -86,8 +98,10 @@ namespace PDS.Witsml.Server.Providers.Discovery
             }
             else if (uri.ObjectType == ObjectTypes.Wellbore)
             {
-                _logDataAdapter.GetAll(uri)
-                    .ForEach(x => args.Context.Add(ToResource(x)));
+                args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Logs));
+                args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.MudLog, ObjectFolders.MudLogs));
+                args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Rig, ObjectFolders.Rigs));
+                args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Trajectory, ObjectFolders.Trajectories));
             }
             else if (uri.ObjectType == ObjectTypes.Log)
             {

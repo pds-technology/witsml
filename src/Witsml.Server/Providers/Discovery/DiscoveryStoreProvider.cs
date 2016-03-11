@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.Common;
@@ -61,6 +62,43 @@ namespace PDS.Witsml.Server.Providers.Discovery
                     Time = 0
                 }
             };
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="Resource" /> using the spefieced parameters.
+        /// </summary>
+        /// <param name="protocolUri">The protocol URI.</param>
+        /// <param name="folderName">Name of the folder.</param>
+        /// <returns>The resource instance.</returns>
+        public static Resource NewProtocol(EtpUri protocolUri, string folderName)
+        {
+            return New(
+                uuid: Guid.NewGuid().ToString(),
+                uri: protocolUri,
+                resourceType: ResourceTypes.UriProtocol,
+                name: folderName,
+                count: -1);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="Resource" /> using the spefieced parameters.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="folderName">Name of the folder.</param>
+        /// <returns>The resource instance.</returns>
+        public static Resource NewFolder(EtpUri parentUri, string objectType, string folderName)
+        {
+            var resource = New(
+                uuid: Guid.NewGuid().ToString(),
+                uri: parentUri.Append(folderName),
+                resourceType: ResourceTypes.Folder,
+                name: folderName,
+                count: -1);
+
+            resource.ContentType = new EtpContentType(resource.ContentType).For(objectType);
+
+            return resource;
         }
     }
 }

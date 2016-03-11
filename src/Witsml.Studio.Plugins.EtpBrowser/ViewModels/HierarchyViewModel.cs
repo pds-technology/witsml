@@ -53,7 +53,9 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             get
             {
                 var resource = Parent.SelectedResource;
-                return resource != null && resource.Level > 0;
+
+                return resource != null && resource.Level > 0 && 
+                    !string.IsNullOrWhiteSpace(new EtpUri(resource.Resource.Uri).ObjectId);
             }
         }
 

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Energistics.Common;
 using Energistics.DataAccess.WITSML141;
@@ -57,14 +56,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
         {
             if (EtpUri.IsRoot(args.Message.Uri))
             {
-                args.Context.Add(
-                    DiscoveryStoreProvider.New(
-                        uuid: Guid.NewGuid().ToString(),
-                        uri: EtpUris.Witsml141,
-                        resourceType: ResourceTypes.UriProtocol,
-                        name: "WITSML Store (1.4.1.1)",
-                        count: -1));
-
+                args.Context.Add(DiscoveryStoreProvider.NewProtocol(EtpUris.Witsml141, "WITSML Store (1.4.1.1)"));
                 return;
             }
 

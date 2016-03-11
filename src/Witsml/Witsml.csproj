@@ -46,6 +46,7 @@
     <Compile Include="Export200Attribute.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Functions.cs" />
+    <Compile Include="ObjectFolders.cs" />
     <Compile Include="ObjectId.cs" />
     <Compile Include="ObjectName.cs" />
     <Compile Include="Export141Attribute.cs" />

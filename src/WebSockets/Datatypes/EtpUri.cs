@@ -100,6 +100,22 @@ namespace Energistics.Datatypes
         }
 
         /// <summary>
+        /// Gets the parent URI.
+        /// </summary>
+        /// <value>The parent URI.</value>
+        public EtpUri Parent
+        {
+            get
+            {
+                if (!IsValid || IsBaseUri)
+                    return this;
+
+                var index = Uri.LastIndexOf('/');
+                return new EtpUri(Uri.Substring(0, index));
+            }
+        }
+
+        /// <summary>
         /// Determines whether this instance is related to the specified <see cref="EtpUri"/>.
         /// </summary>
         /// <param name="other">The other URI.</param>

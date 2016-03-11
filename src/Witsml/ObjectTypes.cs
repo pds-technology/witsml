@@ -3,7 +3,6 @@ using System.Linq;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using Energistics.DataAccess;
-using System.Collections.Generic;
 
 namespace PDS.Witsml
 {
