@@ -5,12 +5,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              xmlns:conv="clr-namespace:PDS.Witsml.Studio.Converters;assembly=PDS.Witsml.Studio"
+             xmlns:cal="http://www.caliburnproject.org"
              xmlns:local="clr-namespace:PDS.Witsml.Studio.Plugins.WitsmlBrowser.Views.Request"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
 
     <UserControl.Resources>
         <conv:NullToBooleanConverter x:Key="NullToBooleanConverter" />
+        <conv:BooleanInverseConverter x:Key="BooleanInverseConverter" />
     </UserControl.Resources>
 
     <DockPanel Margin="5">
@@ -44,10 +46,10 @@
             <Border Grid.Row="3" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="0,1,0,0" VerticalAlignment="Center" />
 
             <TextBlock Grid.Column="0" Grid.Row="4" Text="Return Elements:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
-            <ComboBox SelectedItem="{Binding Model.ReturnElementType, Mode=TwoWay}" DisplayMemberPath="Value" ItemsSource="{Binding ReturnElements}" Grid.Column="1" Grid.Row="4" Grid.ColumnSpan="2" Margin="5" VerticalContentAlignment="Center" />
+            <ComboBox SelectedItem="{Binding Model.ReturnElementType, Mode=TwoWay}" DisplayMemberPath="Value" ItemsSource="{Binding ReturnElements}" Grid.Column="1" Grid.Row="4" Grid.ColumnSpan="2" Margin="5" VerticalContentAlignment="Center" IsEnabled="{Binding Model.IsRequestObjectSelectionCapability, Converter={StaticResource BooleanInverseConverter}}" />
 
             <CheckBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" Margin="5,10,5,5" Content="Request Object Selection" VerticalAlignment="Center" IsChecked="{Binding Model.IsRequestObjectSelectionCapability}" />
-            <CheckBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" Content="Request Private Group Only" VerticalAlignment="Center" IsChecked="{Binding Model.IsRequestPrivateGroupOnly}" />
+            <CheckBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" Content="Request Private Group Only" VerticalAlignment="Center" IsChecked="{Binding Model.IsRequestPrivateGroupOnly}" IsEnabled="{Binding Model.IsRequestObjectSelectionCapability, Converter={StaticResource BooleanInverseConverter}}" />
 
             <!-- TODO: Implement with Logs -->
             <!--<TextBlock Grid.Column="0" Grid.Row="6" Text="Max Data Rows:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
