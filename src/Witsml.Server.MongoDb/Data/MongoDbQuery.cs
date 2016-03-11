@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -56,17 +55,14 @@ namespace PDS.Witsml.Server.Data
         {
             Logger.DebugFormat("Executing query for entity: {0}", _parser.Context.ObjectType);
 
-            var list = WitsmlParser.Parse<TList>(_parser.Context.Xml);
-            var info = typeof(TList).GetProperty(typeof(T).Name);
-            var tList = info.GetValue(list) as List<T>;
-
             var entities = new List<T>();
             var returnElements = _parser.ReturnElements();
+            var privateGroupOnly = _parser.RequestPrivateGroupOnly();
 
-            foreach (var entity in tList)
+            foreach (var element in _parser.Elements())
             {
                 // Build Mongo filter
-                var filter = BuildFilter(_parser, entity);
+                var filter = BuildFilter(element, privateGroupOnly);
                 var results = _collection.Find(filter ?? "{}");
 
                 // Format response using MongoDb projection, i.e. selecting specified fields only
@@ -76,7 +72,7 @@ namespace PDS.Witsml.Server.Data
                 }
                 else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElements) || OptionsIn.ReturnElements.Requested.Equals(returnElements))
                 {
-                    var projection = BuildProjection(_parser, entity);
+                    var projection = BuildProjection(element, typeof(T));
 
                     if (projection != null)
                         results = results.Project<T>(projection);
@@ -91,31 +87,36 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Builds the query filter.
         /// </summary>
-        /// <param name="parser">The parser.</param>
-        /// <param name="entity">The entity to be queried.</param>
+        /// <param name="element">The element.</param>
+        /// <param name="privateGroupOnly">Flag to indicate whether query private group only data objects.</param>
         /// <returns>The filter object that for the selection criteria for the queried entity.</returns>
-        private FilterDefinition<T> BuildFilter(WitsmlQueryParser parser, T entity)
+        private FilterDefinition<T> BuildFilter(XElement element, bool privateGroupOnly)
         {
-            var properties = GetPropertyInfo(entity.GetType());
+            var properties = GetPropertyInfo(typeof(T));
             var filters = new List<FilterDefinition<T>>();
-            var privateGroupOnly = parser.RequestPrivateGroupOnly();
             var privateGroupOnlyFilter = privateGroupOnly
                 ? Builders<T>.Filter.Eq("CommonData.PrivateGroupOnly", privateGroupOnly)
                 : Builders<T>.Filter.Ne("CommonData.PrivateGroupOnly", !privateGroupOnly);
 
             filters.Add(privateGroupOnlyFilter);
 
-            foreach (var property in properties)
+            var groupings = element.Elements().GroupBy(e => e.Name.LocalName);
+            foreach (var group in groupings)
             {
-                var filter = BuildFilterForAProperty(property, entity);
-
+                var propertyInfo = GetPropertyInfoForAnElement(properties, group.Key);
+                var filter = BuildFilterForAnElementGroup(propertyInfo, group);
                 if (filter != null)
                     filters.Add(filter);
             }
-
-            if (filters.Count == 0)
+            foreach (var attribute in element.Attributes())
             {
-                return null;
+                if (string.Compare(attribute.Name.LocalName, "nil", true) == 0)
+                    continue;
+
+                var attributeProp = GetPropertyInfoForAnElement(properties, attribute.Name.LocalName);
+                var attributeFilter = BuildFilterForAttribute(attributeProp, attribute);
+                if (attributeFilter != null)
+                    filters.Add(attributeFilter);
             }
 
             var resultFilter = Builders<T>.Filter.And(filters);
@@ -130,78 +131,205 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Builds the query filter for a property recursively.
+        /// Builds the filter for a group of elements.
         /// </summary>
-        /// <param name="propertyInfo">The property information.</param>
-        /// <param name="obj">The object that contains the property.</param>
-        /// <param name="path">The path of the property to the entity to be queried in the data store.</param>
-        /// <returns>The filter object that for the selection criteria for a property.</returns>
-        private FilterDefinition<T> BuildFilterForAProperty(PropertyInfo propertyInfo, object obj, string path = null)
+        /// <param name="propertyInfo">The property information for the element group.</param>
+        /// <param name="group">The list of elements.</param>
+        /// <param name="path">The path of the element to the entity to be queried in the data store.</param>
+        /// <returns>The filter object that for the selection criteria for the group of elements.</returns>
+        private FilterDefinition<T> BuildFilterForAnElementGroup(PropertyInfo propertyInfo, IGrouping<string, XElement> group, string path = null)
         {
-            var propertyValue = propertyInfo.GetValue(obj);
-            if (propertyValue == null)
+            var values = group.ToList();
+            var count = values.Count;
+            var propType = propertyInfo.PropertyType;
+
+            var fieldName = propertyInfo.Name;
+            if (!string.IsNullOrEmpty(path))
+                fieldName = string.Format("{0}.{1}", path, fieldName);
+
+            if (count == 1)
+            {
+                var element = values.FirstOrDefault();
+                if (propType.IsGenericType)
+                {
+                    var genericType = propType.GetGenericTypeDefinition();
+                    if (genericType == typeof(Nullable<>))
+                    {
+                        var underlyingType = Nullable.GetUnderlyingType(propType);
+                        return BuildFilterForAnElementType(underlyingType, element, fieldName); ;
+                    }
+                    else if (genericType == typeof(List<>))
+                    {
+                        var childType = propType.GetGenericArguments()[0];
+                        return BuildFilterForAnElementType(childType, element, fieldName);
+                    }
+                    return null;
+                }
+                else
+                    return BuildFilterForAnElement(propertyInfo, element, path);
+            }
+            else
+            {
+                var childType = propType.GetGenericArguments()[0];
+                var listFilters = new List<FilterDefinition<T>>();
+                foreach (var value in values)
+                {
+                    var listFilter = BuildFilterForAnElementType(childType, value, fieldName);
+                    if (listFilter != null)
+                        listFilters.Add(listFilter);
+                }
+                if (listFilters.Count > 0)
+                    return Builders<T>.Filter.Or(listFilters);
+                else
+                    return null;
+            }
+        }
+
+        /// <summary>
+        /// Builds the filter for an element which is not of generic type.
+        /// </summary>
+        /// <param name="propertyInfo">The property information for the element.</param>
+        /// <param name="element">The element.</param>
+        /// <param name="path">The path of the element to the entity to be queried in the data store.</param>
+        /// <returns>The filter object that for the selection criteria for the element.</returns>
+        private FilterDefinition<T> BuildFilterForAnElement(PropertyInfo propertyInfo, XElement element, string path = null)
+        {
+            var fieldName = propertyInfo.Name;
+            if (!string.IsNullOrEmpty(path))
+                fieldName = string.Format("{0}.{1}", path, fieldName);
+            var propType = propertyInfo.PropertyType;
+
+            if (!element.HasElements && !element.HasAttributes)
+            {
+                var elementValue = element.Value;
+                var elementProps = GetPropertyInfo(propType).ToList();
+                if (string.IsNullOrEmpty(elementValue))
+                    return null;
+
+                if (propType == typeof(string))
+                    return Builders<T>.Filter.Regex(fieldName, new BsonRegularExpression("/^" + elementValue + "$/i"));
+                else
+                {
+                    if (propertyInfo.Name == "DateTimeCreation" || propertyInfo.Name == "DateTimeLastChange")
+                        return Builders<T>.Filter.Gt(fieldName, DateTime.Parse(elementValue));
+                    else
+                    {
+                        if (propType.IsEnum)
+                            return Builders<T>.Filter.Eq(fieldName, Enum.Parse(propType, elementValue));
+                        return Builders<T>.Filter.Eq(fieldName, elementValue);
+                    }
+                }
+            }
+            else
+            {
+                var childFilters = new List<FilterDefinition<T>>();
+                var childProps = GetPropertyInfo(propType).ToList();
+                var childGroupings = element.Elements().GroupBy(e => e.Name.LocalName);
+                foreach (var childGroup in childGroupings)
+                {
+                    var childPropertyInfo = GetPropertyInfoForAnElement(childProps, childGroup.Key);
+                    var childFilter = BuildFilterForAnElementGroup(childPropertyInfo, childGroup, fieldName);
+                    if (childFilter != null)
+                        childFilters.Add(childFilter);
+                }
+                foreach (var attribute in element.Attributes())
+                {
+                    if (string.Compare(attribute.Name.LocalName, "nil", true) == 0)
+                        continue;
+
+                    var attributeProp = GetPropertyInfoForAnElement(childProps, attribute.Name.LocalName);
+                    var attributeFilter = BuildFilterForAttribute(attributeProp, attribute, fieldName);
+                    if (attributeFilter != null)
+                        childFilters.Add(attributeFilter);
+                }
+                if (childFilters.Count > 0)
+                    return Builders<T>.Filter.And(childFilters);
+                else
+                    return null;
+            }
+        }
+
+        /// <summary>
+        /// Builds the type of the filter for an element of generic type.
+        /// </summary>
+        /// <param name="propType">Type of the element.</param>
+        /// <param name="element">The element.</param>
+        /// <param name="fieldName">Name of the field for the element.</param>
+        /// <returns>The filter object that for the selection criteria for the element.</returns>
+        private FilterDefinition<T> BuildFilterForAnElementType(Type propType, XElement element, string fieldName)
+        {
+            if (!element.HasElements && !element.HasAttributes)
+            {
+                var elementValue = element.Value;
+                var elementProps = GetPropertyInfo(propType).ToList();
+                if (string.IsNullOrEmpty(elementValue))
+                    return null;
+
+                if (propType == typeof(string))
+                    return Builders<T>.Filter.Regex(fieldName, new BsonRegularExpression("/^" + elementValue + "$/i"));
+                else
+                {
+                    if (fieldName.EndsWith(".DateTimeCreation") || fieldName.EndsWith(".DateTimeLastChange"))
+                        return Builders<T>.Filter.Gt(fieldName, DateTime.Parse(elementValue));
+                    else
+                    {
+                        if (propType.IsEnum)
+                            return Builders<T>.Filter.Eq(fieldName, Enum.Parse(propType, elementValue));
+                        return Builders<T>.Filter.Eq(fieldName, elementValue);
+                    }
+                }
+            }
+            else
+            {
+                var childFilters = new List<FilterDefinition<T>>();
+                var childProps = GetPropertyInfo(propType).ToList();
+                var childGroupings = element.Elements().GroupBy(e => e.Name.LocalName);
+                foreach (var childGroup in childGroupings)
+                {
+                    var childPropertyInfo = GetPropertyInfoForAnElement(childProps, childGroup.Key);
+                    var childFilter = BuildFilterForAnElementGroup(childPropertyInfo, childGroup, fieldName);
+                    if (childFilter != null)
+                        childFilters.Add(childFilter);
+                }
+                foreach (var attribute in element.Attributes())
+                {
+                    if (string.Compare(attribute.Name.LocalName, "nil", true) == 0)
+                        continue;
+
+                    var attributeProp = GetPropertyInfoForAnElement(childProps, attribute.Name.LocalName);
+                    var attributeFilter = BuildFilterForAttribute(attributeProp, attribute, fieldName);
+                    if (attributeFilter != null)
+                        childFilters.Add(attributeFilter);
+                }
+                if (childFilters.Count > 0)
+                    return Builders<T>.Filter.And(childFilters);
+                else
+                    return null;
+            }
+        }
+
+        /// <summary>
+        /// Builds the filter for attribute.
+        /// </summary>
+        /// <param name="propertyInfo">The property information for the attribute.</param>
+        /// <param name="attribute">The attribute.</param>
+        /// <param name="path">The path of the attribute to the entity to be queried in the data store.</param>
+        /// <returns>The filter object that for the selection criteria for the attribute.</returns>
+        private FilterDefinition<T> BuildFilterForAttribute(PropertyInfo propertyInfo, XAttribute attribute, string path = null)
+        {
+            var value = attribute.Value;
+            if (string.IsNullOrEmpty(value))
                 return null;
 
             var fieldName = propertyInfo.Name;
             if (!string.IsNullOrEmpty(path))
                 fieldName = string.Format("{0}.{1}", path, fieldName);
-            var properties = GetPropertyInfo(propertyValue.GetType()).ToList();
-            var filters = new List<FilterDefinition<T>>();
 
-            if (properties.Count > 0)
-            {
-                foreach (var property in properties)
-                {
-                    var filter = BuildFilterForAProperty(property, propertyValue, fieldName);
-                    if (filter != null)
-                        filters.Add(filter);
-                }
-            }
+            var propType = propertyInfo.PropertyType;
+            if (propType == typeof(string))
+                return Builders<T>.Filter.Regex(fieldName, new BsonRegularExpression("/^" + value + "$/i"));
             else
-            {
-                var propertyType = propertyInfo.PropertyType;
-
-                if (propertyType == typeof(string))
-                {
-                    var strValue = propertyValue.ToString();
-                    if (string.IsNullOrEmpty(strValue))
-                        return null;
-
-                    return Builders<T>.Filter.Regex(fieldName, new BsonRegularExpression("/^" + strValue + "$/i"));
-                }
-                else if (propertyValue is IEnumerable)
-                {
-                    var listFilters = new List<FilterDefinition<T>>();
-                    var list = (IEnumerable)propertyValue;
-                    foreach (var item in list)
-                    {
-                        var itemFilters = new List<FilterDefinition<T>>();
-                        var itemProperties = GetPropertyInfo(item.GetType());
-                        foreach (var itemProperty in itemProperties)
-                        {
-                            var itemFilter = BuildFilterForAProperty(itemProperty, item, fieldName);
-                            if (itemFilter != null)
-                                itemFilters.Add(itemFilter);
-                        }
-                        if (itemFilters.Count > 0)
-                            listFilters.Add(Builders<T>.Filter.And(itemFilters));
-                    }
-                    if (listFilters.Count > 0)
-                        filters.Add(Builders<T>.Filter.Or(listFilters));
-                }
-                else
-                {
-                    if (propertyInfo.Name == "DateTimeCreation" || propertyInfo.Name == "DateTimeLastChange")
-                        return Builders<T>.Filter.Gt(fieldName, propertyValue);
-                    else
-                        return Builders<T>.Filter.Eq(fieldName, propertyValue);
-                }
-            }
-
-            if (filters.Count > 0)
-                return Builders<T>.Filter.And(filters);
-            else
-                return null;
+                return Builders<T>.Filter.Eq(fieldName, value);
         }
 
         private IEnumerable<PropertyInfo> GetPropertyInfo(Type t)
@@ -215,10 +343,9 @@ namespace PDS.Witsml.Server.Data
         /// <param name="parser">The parser.</param>
         /// <param name="entity">The query entity</param>
         /// <returns>The projection object that contains the fields to be selected.</returns>
-        private ProjectionDefinition<T> BuildProjection(WitsmlQueryParser parser, T entity)
+        private ProjectionDefinition<T> BuildProjection(XElement element, Type type)
         {
-            Logger.DebugFormat("Building projection fields for entity: {0}", parser.Context.ObjectType);
-            var element = parser.Element();
+            Logger.DebugFormat("Building projection fields for entity: {0}", _parser.Context.ObjectType);
 
             if (element == null)
                 return null;
@@ -226,12 +353,11 @@ namespace PDS.Witsml.Server.Data
             if (_fields == null)
                 _fields = new List<string>();
 
-            BuildProjectionForAnElement(element, null, entity);
+            BuildProjectionForAnElement(element, null, type);
 
             if (_fields.Count == 0)
             {
                 Logger.Warn("No fields projected.  Projection field count should never be zero.");
-
                 return Builders<T>.Projection.Exclude(_idPropertyName).Include(string.Empty);
             }
             else
@@ -260,20 +386,18 @@ namespace PDS.Witsml.Server.Data
         /// <param name="element">The element.</param>
         /// <param name="fieldPath">The field path to the top level property of the queried entity.</param>
         /// <param name="propertyValue">The property value for the field.</param>
-        private void BuildProjectionForAnElement(XElement element, string fieldPath, object propertyValue)
+        private void BuildProjectionForAnElement(XElement element, string fieldPath, Type type)
         {
             Logger.DebugFormat("Building projection fields for element: {0}", element.Name.LocalName);
 
-            var properties = GetPropertyInfo(propertyValue.GetType());
+            var properties = GetPropertyInfo(type);
 
             if (element.HasElements)
             {
                 foreach (var child in element.Elements())
                 {
-                    var property = GetPropertyInfoForAnElement(properties, child);
-                    var value = property.GetValue(propertyValue);
-
-                    BuildProjectionForAnElement(child, fieldPath, property, value);
+                    var property = GetPropertyInfoForAnElement(properties, child.Name.LocalName);
+                    BuildProjectionForAnElement(child, fieldPath, property);
                 }
             }
             if (element.HasAttributes)
@@ -293,7 +417,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="fieldPath">The field path to the top level property of the queried entity.</param>
         /// <param name="propertyInfo">The property information for the field.</param>
         /// <param name="propertyValue">The property value for the field.</param>
-        private void BuildProjectionForAnElement(XElement element, string fieldPath, PropertyInfo propertyInfo, object propertyValue)
+        private void BuildProjectionForAnElement(XElement element, string fieldPath, PropertyInfo propertyInfo)
         {
             var path = GetPropertyPath(fieldPath, propertyInfo.Name);
 
@@ -303,7 +427,7 @@ namespace PDS.Witsml.Server.Data
                 return;
             }
 
-            BuildProjectionForAnElement(element, path, propertyValue);
+            BuildProjectionForAnElement(element, path, propertyInfo.PropertyType);
         }
 
         /// <summary>
@@ -312,21 +436,21 @@ namespace PDS.Witsml.Server.Data
         /// <param name="properties">The properties.</param>
         /// <param name="element">The element.</param>
         /// <returns>The found property for the serialization element.</returns>
-        private PropertyInfo GetPropertyInfoForAnElement(IEnumerable<PropertyInfo> properties, XElement element)
+        private PropertyInfo GetPropertyInfoForAnElement(IEnumerable<PropertyInfo> properties, string name)
         {
             foreach (var prop in properties)
             {
                 var elementAttribute = prop.GetCustomAttribute(typeof(XmlElementAttribute), false) as XmlElementAttribute;
                 if (elementAttribute != null)
                 {
-                    if (elementAttribute.ElementName == element.Name.LocalName)
+                    if (elementAttribute.ElementName == name)
                         return prop;
                 }
 
                 var attributeAttribute = prop.GetCustomAttribute(typeof(XmlAttributeAttribute), false) as XmlAttributeAttribute;
                 if (attributeAttribute != null)
                 {
-                    if (attributeAttribute.AttributeName == element.Name.LocalName)
+                    if (attributeAttribute.AttributeName == name)
                         return prop;
                 }
             }
