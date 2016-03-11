@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
 using System.Threading.Tasks;
 using Caliburn.Micro;
 using Energistics.DataAccess;
@@ -410,12 +412,13 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// <returns></returns>
         private string GetGetFromStoreOptionsIn()
         {
-            return
-                string.Concat(
-                    Model.ReturnElementType,
-                    Model.IsRequestObjectSelectionCapability ? ";" + OptionsIn.RequestObjectSelectionCapability.True : string.Empty,
-                    Model.IsRequestPrivateGroupOnly ? ";" + OptionsIn.RequestPrivateGroupOnly.True : string.Empty
-                    );
+            var optionsIn = new List<string>();
+
+            optionsIn.Add(Model.ReturnElementType ?? string.Empty);
+            optionsIn.Add(Model.IsRequestObjectSelectionCapability ? OptionsIn.RequestObjectSelectionCapability.True : string.Empty);
+            optionsIn.Add(Model.IsRequestPrivateGroupOnly ? OptionsIn.RequestPrivateGroupOnly.True : string.Empty);
+
+            return string.Join(";", optionsIn.Where(o => !string.IsNullOrEmpty(o)));
         }
 
         /// <summary>

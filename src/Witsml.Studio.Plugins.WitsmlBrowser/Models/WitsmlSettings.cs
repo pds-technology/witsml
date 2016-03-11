@@ -39,9 +39,41 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
             }
         }
 
-        public bool IsRequestObjectSelectionCapability { get; set; }
+        private bool _isRequestObjectSelectionCapability;
+        public bool IsRequestObjectSelectionCapability
+        {
+            get { return _isRequestObjectSelectionCapability; }
+            set
+            {
+                if (_isRequestObjectSelectionCapability != value)
+                {
+                    _isRequestObjectSelectionCapability = value;
 
-        public bool IsRequestPrivateGroupOnly { get; set; }
+                    ReturnElementType = IsRequestObjectSelectionCapability ? null : OptionsIn.ReturnElements.All;
+
+                    if (IsRequestObjectSelectionCapability && IsRequestPrivateGroupOnly)
+                    {
+                        IsRequestPrivateGroupOnly = false;
+                    }
+
+                    NotifyOfPropertyChange(() => IsRequestObjectSelectionCapability);
+                }
+            }
+        }
+
+        private bool _isRequestPrivateGroupOnly;
+        public bool IsRequestPrivateGroupOnly
+        {
+            get { return _isRequestPrivateGroupOnly; }
+            set
+            {
+                if (_isRequestPrivateGroupOnly != value)
+                {
+                    _isRequestPrivateGroupOnly = value;
+                    NotifyOfPropertyChange(() => IsRequestPrivateGroupOnly);
+                }
+            }
+        }
 
         private string _witsmlVersion;
         public string WitsmlVersion
