@@ -216,6 +216,8 @@ namespace PDS.Witsml.Server.Data
                     {
                         if (propType.IsEnum)
                             return Builders<T>.Filter.Eq(fieldName, Enum.Parse(propType, elementValue));
+                        else if (propType == typeof(DateTime))
+                            return Builders<T>.Filter.Eq(fieldName, DateTime.Parse(elementValue));
                         return Builders<T>.Filter.Eq(fieldName, elementValue);
                     }
                 }
@@ -275,6 +277,8 @@ namespace PDS.Witsml.Server.Data
                     {
                         if (propType.IsEnum)
                             return Builders<T>.Filter.Eq(fieldName, Enum.Parse(propType, elementValue));
+                        else if (propType == typeof(DateTime))
+                            return Builders<T>.Filter.Eq(fieldName, DateTime.Parse(elementValue));
                         return Builders<T>.Filter.Eq(fieldName, elementValue);
                     }
                 }
