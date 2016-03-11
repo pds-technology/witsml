@@ -33,8 +33,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
             WellAdapter = new Well200DataAdapter(Provider) { Container = Container };
             WellboreAdapter = new Wellbore200DataAdapter(Provider) { Container = Container };
 
-            Well1 = new Well() { Citation = new Citation { Title = DevKit.Name("Well 01") }, TimeZone = DevKit.TimeZone, Uuid = DevKit.Uid() };
-            Well2 = new Well() { Citation = new Citation { Title = DevKit.Name("Well 02") }, TimeZone = DevKit.TimeZone, Uuid = DevKit.Uid() };
+            Well1 = new Well() { Citation = DevKit.Citation("Well 01"), TimeZone = DevKit.TimeZone, Uuid = DevKit.Uid() };
+            Well2 = new Well() { Citation = DevKit.Citation("Well 02"), TimeZone = DevKit.TimeZone, Uuid = DevKit.Uid() };
 
             Well1.GeographicLocationWGS84 = DevKit.Location();
             Well2.GeographicLocationWGS84 = DevKit.Location();
@@ -46,8 +46,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 Uuid = Well1.Uuid
             };
 
-            Wellbore1 = new Wellbore() { Citation = new Citation { Title = DevKit.Name("Wellbore 01") }, ReferenceWell = WellReference, Uuid = DevKit.Uid() };
-            Wellbore2 = new Wellbore() { Citation = new Citation { Title = DevKit.Name("Wellbore 02") }, ReferenceWell = WellReference };
+            Wellbore1 = new Wellbore() { Citation = DevKit.Citation("Wellbore 01"), ReferenceWell = WellReference, Uuid = DevKit.Uid() };
+            Wellbore2 = new Wellbore() { Citation = DevKit.Citation("Wellbore 02"), ReferenceWell = WellReference };
         }
 
         [TestMethod]

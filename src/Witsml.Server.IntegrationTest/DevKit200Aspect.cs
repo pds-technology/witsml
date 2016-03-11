@@ -17,6 +17,27 @@ namespace PDS.Witsml.Server
             get { return OptionsIn.DataVersion.Version200.Value; }
         }
 
+        public Citation Citation(string name)
+        {
+            return new Citation()
+            {
+                Title = Name(name),
+                Originator = GetType().Name,
+                Format = GetType().Assembly.FullName,
+                Creation = System.DateTime.UtcNow,
+            };
+        }
+
+        public GeodeticWellLocation Location()
+        {
+            return new GeodeticWellLocation()
+            {
+                Crs = new GeodeticEpsgCrs() { EpsgCode = 26914 },
+                Latitude = 28.5597,
+                Longitude = -90.6671
+            };
+        }
+
         public void InitHeader(Log log, LoggingMethod loggingMethod, ChannelIndexType indexType)
         {
             log.ChannelSet = new List<ChannelSet>();
@@ -31,44 +52,58 @@ namespace PDS.Witsml.Server
                 {
                     new ChannelIndex()
                     {
+                        Direction = IndexDirection.increasing,
                         IndexType = ChannelIndexType.measureddepth,
                         Mnemonic = "MD",
-                        Uom = "m"
+                        Uom = "m",
+                        DatumReference = "MSL"
                     }
                 };
 
                 log.ChannelSet.Add(new ChannelSet()
                 {
                     Uuid = Uid(),
-                    Citation = new Citation() { Title = Name("Channel Set 01") },
+                    Citation = Citation("Channel Set 01"),
                     ExistenceKind = ExistenceKind.simulated,
                     Index = index,
+
+                    LoggingCompanyName = log.LoggingCompanyName,
+                    TimeDepth = log.TimeDepth,
+                    CurveClass = log.CurveClass,
 
                     Channel = new List<Channel>()
                     {
                         new Channel()
                         {
-                            Citation = new Citation() { Description = "Rate of Penetration" },
+                            Citation = Citation("Rate of Penetration"),
                             Mnemonic = "ROP",
                             UoM = "m/h",
+                            CurveClass = "Velocity",
                             LoggingMethod = loggingMethod,
+                            LoggingCompanyName = log.LoggingCompanyName,
                             Source = loggingMethod.ToString(),
                             DataType = EtpDataType.@double,
+                            Status = ChannelStatus.active,
                             Index = index,
                             StartIndex = new DepthIndexValue() { Depth = 0 },
                             EndIndex = new DepthIndexValue() { Depth = 1000 },
+                            TimeDepth = log.TimeDepth,
                         },
                         new Channel()
                         {
-                            Citation = new Citation() { Description = "Hookload" },
+                            Citation = Citation("Hookload"),
                             Mnemonic = "HKLD",
                             UoM = "klbf",
+                            CurveClass = "Force",
                             LoggingMethod = loggingMethod,
+                            LoggingCompanyName = log.LoggingCompanyName,
                             Source = loggingMethod.ToString(),
                             DataType = EtpDataType.@double,
+                            Status = ChannelStatus.active,
                             Index = index,
                             StartIndex = new DepthIndexValue() { Depth = 0 },
                             EndIndex = new DepthIndexValue() { Depth = 1000 },
+                            TimeDepth = log.TimeDepth,
                         }
                     },
 
@@ -78,9 +113,9 @@ namespace PDS.Witsml.Server
                         EndIndex = new DepthIndexValue() { Depth = 1000 },
                     },
 
-                    Data = new ChannelData()
-                    {
-                    }
+                    //Data = new ChannelData()
+                    //{
+                    //}
                 });
             }
             else if (indexType == ChannelIndexType.datetime)
@@ -91,43 +126,58 @@ namespace PDS.Witsml.Server
                 {
                     new ChannelIndex()
                     {
+                        Direction = IndexDirection.increasing,
                         IndexType = ChannelIndexType.datetime,
                         Mnemonic = "TIME",
+                        Uom = "s",
+                        DatumReference = "MSL"
                     }
                 };
 
                 log.ChannelSet.Add(new ChannelSet()
                 {
                     Uuid = Uid(),
-                    Citation = new Citation() { Title = Name("Channel Set 02") },
+                    Citation = Citation("Channel Set 02"),
                     ExistenceKind = ExistenceKind.simulated,
                     Index = index,
+
+                    LoggingCompanyName = log.LoggingCompanyName,
+                    TimeDepth = log.TimeDepth,
+                    CurveClass = log.CurveClass,
 
                     Channel = new List<Channel>()
                     {
                         new Channel()
                         {
-                            Citation = new Citation() { Description = "Rate of Penetration" },
+                            Citation = Citation("Rate of Penetration"),
                             Mnemonic = "ROP",
                             UoM = "m/h",
+                            CurveClass = "Velocity",
                             LoggingMethod = loggingMethod,
+                            LoggingCompanyName = log.LoggingCompanyName,
                             Source = loggingMethod.ToString(),
                             DataType = EtpDataType.@double,
+                            Status = ChannelStatus.active,
                             Index = index,
                             StartIndex = new TimeIndexValue(),
                             EndIndex = new TimeIndexValue(),
+                            TimeDepth = log.TimeDepth,
                         },
                         new Channel()
                         {
-                            Citation = new Citation() { Description = "Hookload" },
+                            Citation = Citation("Hookload"),
                             Mnemonic = "HKLD",
                             UoM = "klbf",
+                            CurveClass = "Force",
                             LoggingMethod = loggingMethod,
+                            LoggingCompanyName = log.LoggingCompanyName,
                             Source = loggingMethod.ToString(),
                             DataType = EtpDataType.@double,
+                            Status = ChannelStatus.active,
                             Index = index,
                             StartIndex = new TimeIndexValue(),
                             EndIndex = new TimeIndexValue(),
+                            TimeDepth = log.TimeDepth,
                         }
                     },
 
@@ -137,21 +187,11 @@ namespace PDS.Witsml.Server
                         EndIndex = new TimeIndexValue(),
                     },
 
-                    Data = new ChannelData()
-                    {
-                    }
+                    //Data = new ChannelData()
+                    //{
+                    //}
                 });
             }
-        }
-
-        public GeodeticWellLocation Location()
-        {
-            return new GeodeticWellLocation()
-            {
-                Crs = new GeodeticEpsgCrs() { EpsgCode = 26914 },
-                Latitude = 28.5597,
-                Longitude = -90.6671
-            };
         }
     }
 }

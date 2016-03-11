@@ -31,7 +31,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             Well1 = new Well()
             {
-                Citation = new Citation { Title = DevKit.Name("Well 01") },
+                Citation = DevKit.Citation("Well 01"),
                 GeographicLocationWGS84 = DevKit.Location(),
                 TimeZone = DevKit.TimeZone,
                 Uuid = DevKit.Uid(),
@@ -39,7 +39,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             Well2 = new Well()
             {
-                Citation = new Citation { Title = DevKit.Name("Well 02") },
+                Citation = DevKit.Citation("Well 02"),
                 GeographicLocationWGS84 = DevKit.Location(),
                 TimeZone = DevKit.TimeZone,
             };

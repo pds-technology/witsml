@@ -38,7 +38,7 @@ namespace PDS.Witsml.Server.Data.Logs
             WellboreAdapter = new Wellbore200DataAdapter(Provider) { Container = Container };
             LogAdapter = new Log200DataAdapter(Provider) { Container = Container };
 
-            Well1 = new Well() { Citation = new Citation { Title = DevKit.Name("Well 01") }, TimeZone = DevKit.TimeZone, Uuid = DevKit.Uid() };
+            Well1 = new Well() { Citation = DevKit.Citation("Well 01"), TimeZone = DevKit.TimeZone, Uuid = DevKit.Uid() };
 
             Well1.GeographicLocationWGS84 = DevKit.Location();
 
@@ -49,7 +49,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 Uuid = Well1.Uuid
             };
 
-            Wellbore1 = new Wellbore() { Citation = new Citation { Title = DevKit.Name("Wellbore 01") }, ReferenceWell = WellReference, Uuid = DevKit.Uid() };
+            Wellbore1 = new Wellbore() { Citation = DevKit.Citation("Wellbore 01"), ReferenceWell = WellReference, Uuid = DevKit.Uid() };
 
             WellboreReference = new DataObjectReference
             {
@@ -58,8 +58,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 Uuid = Wellbore1.Uuid
             };
 
-            Log1 = new Log() { Citation = new Citation { Title = DevKit.Name("Log 01") }, Wellbore = WellboreReference, Uuid = DevKit.Uid() };
-            Log2 = new Log() { Citation = new Citation { Title = DevKit.Name("Log 02") }, Wellbore = WellboreReference };
+            Log1 = new Log() { Citation = DevKit.Citation("Log 01"), Wellbore = WellboreReference, Uuid = DevKit.Uid() };
+            Log2 = new Log() { Citation = DevKit.Citation("Log 02"), Wellbore = WellboreReference };
 
             DevKit.InitHeader(Log1, LoggingMethod.MWD, ChannelIndexType.measureddepth);
             DevKit.InitHeader(Log2, LoggingMethod.Surface, ChannelIndexType.datetime);
