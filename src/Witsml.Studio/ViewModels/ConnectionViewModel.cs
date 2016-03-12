@@ -174,6 +174,7 @@ namespace PDS.Witsml.Studio.ViewModels
         /// <param name="control">The control.</param>
         public void OnPasswordChanged(PasswordBox control)
         {
+            EditItem.Password = control.Password;
             EditItem.SecurePassword = control.SecurePassword;
         }
 

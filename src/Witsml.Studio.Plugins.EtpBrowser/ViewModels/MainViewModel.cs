@@ -271,8 +271,9 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             try
             {
                 Runtime.Invoke(() => Runtime.Shell.StatusBarText = "Connecting...");
+                var headers = EtpClient.Authorization(Model.Connection.Username, Model.Connection.Password);
 
-                _client = new EtpClient(Model.Connection.Uri, "ETP Browser");
+                _client = new EtpClient(Model.Connection.Uri, "ETP Browser", headers);
                 _client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();
                 _client.Register<IStoreCustomer, StoreCustomerHandler>();
 

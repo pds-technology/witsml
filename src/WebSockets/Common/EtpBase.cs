@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using log4net;
 
 namespace Energistics.Common
@@ -20,6 +21,19 @@ namespace Energistics.Common
         protected IDictionary<Type, Type> RegisteredHandlers { get; private set; }
 
         protected IDictionary<Type, Func<object>> RegisteredFactories { get; private set; }
+
+        public static IDictionary<string, string> Authorization(string username, string password)
+        {
+            var encoded = Convert.ToBase64String(Encoding.Default.GetBytes(username + ":" + password));
+            var headers = new Dictionary<string, string>();
+
+            if (!string.IsNullOrWhiteSpace(username))
+            {
+                headers["Authorization"] = "Basic " + encoded;
+            }
+
+            return headers;
+        }
 
         public string Format(string message, params object[] args)
         {

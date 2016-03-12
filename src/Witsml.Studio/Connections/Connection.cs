@@ -75,7 +75,6 @@ namespace PDS.Witsml.Studio.Connections
         /// <summary>
         /// Gets or sets the password.
         /// </summary>
-        [DataMember]
         public string Password { get; set; }
 
         /// <summary>

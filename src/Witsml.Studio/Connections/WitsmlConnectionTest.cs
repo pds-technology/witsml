@@ -24,6 +24,13 @@ namespace PDS.Witsml.Studio.Connections
             try
             {
                 var proxy = new WITSMLWebServiceConnection(connection.Uri, WMLSVersion.WITSML141);
+
+                if (!string.IsNullOrWhiteSpace(connection.Username))
+                {
+                    proxy.Username = connection.Username;
+                    proxy.SetSecurePassword(connection.SecurePassword);
+                }
+
                 var versions = proxy.GetVersion();
 
                 _log.Debug("Witsml connection test passed");

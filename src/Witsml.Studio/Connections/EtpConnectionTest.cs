@@ -22,7 +22,9 @@ namespace PDS.Witsml.Studio.Connections
         {
             try
             {
-                using (var client = new EtpClient(connection.Uri, "ETP Browser"))
+                var headers = EtpClient.Authorization(connection.Username, connection.Password);
+
+                using (var client = new EtpClient(connection.Uri, "ETP Browser", headers))
                 {
                     var count = 0;
                     client.Open();

@@ -288,7 +288,15 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         internal WITSMLWebServiceConnection CreateProxy()
         {
             _log.DebugFormat("A new Proxy is being created with {2}{2}uri: {0}{2}{2}WitsmlVersion: {1}{2}{2}", Model.Connection.Uri, Model.WitsmlVersion, Environment.NewLine);
-            return new WITSMLWebServiceConnection(Model.Connection.Uri, GetWitsmlVersionEnum(Model.WitsmlVersion));
+            var proxy = new WITSMLWebServiceConnection(Model.Connection.Uri, GetWitsmlVersionEnum(Model.WitsmlVersion));
+
+            if (!string.IsNullOrWhiteSpace(Model.Connection.Username))
+            {
+                proxy.Username = Model.Connection.Username;
+                proxy.SetSecurePassword(Model.Connection.SecurePassword);
+            }
+
+            return proxy;
         }
 
         /// <summary>

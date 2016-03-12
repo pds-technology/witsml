@@ -94,9 +94,11 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             };
 
             _log.Debug("Opening connection dialog");
+
             if (Runtime.ShowDialog(viewModel))
             {
                 Model.Connection = viewModel.DataItem;
+
                 _log.DebugFormat("Connection details updated from dialog:{3}Name: {0}{3}Uri: {1}{3}Username: {2}{3}{3}", 
                     Model.Connection.Name, Model.Connection.Uri, Model.Connection.Username, Environment.NewLine);
 
@@ -117,13 +119,20 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         /// Gets the supported versions crom the server.
         /// </summary>
         /// <param name="proxy">The proxy.</param>
-        /// <param name="uri">The URI.</param>
+        /// <param name="connection">The connection.</param>
         /// <returns></returns>
-        internal string GetVersions(WITSMLWebServiceConnection proxy, string uri)
+        internal string GetVersions(WITSMLWebServiceConnection proxy, Connection connection)
         {
-            proxy.Url = uri;
+            proxy.Url = connection.Uri;
+
+            if (!string.IsNullOrWhiteSpace(Model.Connection.Username))
+            {
+                proxy.Username = connection.Username;
+                proxy.SetSecurePassword(connection.SecurePassword);
+            }
+
             var supportedVersions = proxy.GetVersion();
-            _log.DebugFormat("Supported versions '{0}' found on WITSML server with uri '{1}'", supportedVersions, uri);
+            _log.DebugFormat("Supported versions '{0}' found on WITSML server with uri '{1}'", supportedVersions, connection.Uri);
 
             return supportedVersions;
         }
@@ -147,7 +156,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             try
             {
                 WitsmlVersions.Clear();
-                var versions = GetVersions(Proxy, Model.Connection.Uri);
+                var versions = GetVersions(Proxy, Model.Connection);
+
                 if (!string.IsNullOrEmpty(versions))
                 {
                     WitsmlVersions.AddRange(versions.Split(','));
@@ -167,7 +177,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
                 _log.Error(errorMessage, ex);
 
                 // Show the user the error in a dialog.
-                Runtime.ShowError(errorMessage);
+                Runtime.ShowError(errorMessage, ex);
             }
         }
     }
