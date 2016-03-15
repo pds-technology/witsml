@@ -21,8 +21,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class Wellbore141DataAdapter : MongoDbDataAdapter<Wellbore>, IWitsml141Configuration
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(Wellbore141DataAdapter));
-
         /// <summary>
         /// Initializes a new instance of the <see cref="Wellbore141DataAdapter" /> class.
         /// </summary>
@@ -78,7 +76,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             var validator = Container.Resolve<IDataObjectValidator<Wellbore>>();
             validator.Validate(Functions.AddToStore, entity);
 
-            _log.DebugFormat("Add new wellbore with uidWell: {0}; uid: {1}", entity.UidWell, entity.Uid);
+            Logger.DebugFormat("Add new wellbore with uidWell: {0}; uid: {1}", entity.UidWell, entity.Uid);
             InsertEntity(entity);
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uid);
