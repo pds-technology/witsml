@@ -176,7 +176,8 @@ namespace PDS.Witsml.Server.Data
                     filters.Add(Builders<TObject>.Filter.Regex("UidWell", new BsonRegularExpression("/^" + ((WellboreObjectId)dataObjectId).UidWellbore + "$/i")));
             }
 
-            return GetCollection<TObject>(dbCollectionName).Find(Builders<TObject>.Filter.And(filters)).FirstOrDefault();
+            var exclude = Builders<TObject>.Projection.Exclude("_id");
+            return GetCollection<TObject>(dbCollectionName).Find(Builders<TObject>.Filter.And(filters)).Project<TObject>(exclude).FirstOrDefault();
         }
 
         /// <summary>
