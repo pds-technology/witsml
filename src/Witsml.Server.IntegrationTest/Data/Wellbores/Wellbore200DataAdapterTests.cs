@@ -56,7 +56,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             WellAdapter.Put(Well1);
             WellboreAdapter.Put(Wellbore1);
 
-            var wellbore1 = WellboreAdapter.Get(Wellbore1.Uuid);
+            var wellbore1 = WellboreAdapter.Get(Wellbore1.GetObjectId());
 
             Assert.AreEqual(Wellbore1.Citation.Title, wellbore1.Citation.Title);
         }

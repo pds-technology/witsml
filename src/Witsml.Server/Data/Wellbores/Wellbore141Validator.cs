@@ -41,13 +41,13 @@ namespace PDS.Witsml.Server.Data.Wellbores
             }
 
             // Validate parent exists
-            else if (!_wellDataAdapter.Exists(DataObject.UidWell))
+            else if (!_wellDataAdapter.Exists(new DataObjectId(DataObject.GetObjectId().UidWell, null)))
             {
                 yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWell" });
             }
 
             // Validate UID does not exist
-            else if (_wellboreDataAdapter.Exists(DataObject.Uid))
+            else if (_wellboreDataAdapter.Exists(DataObject.GetObjectId()))
             {
                 yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
             }

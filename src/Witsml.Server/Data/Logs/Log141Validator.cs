@@ -49,18 +49,18 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             // Validate parent exists
-            else if (!_wellDataAdapter.Exists(DataObject.UidWell))
+            else if (!_wellDataAdapter.Exists(new DataObjectId(DataObject.UidWell, null)))
             {
                 yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWell" });
             }
             // Validate parent exists
-            else if (!_wellboreDataAdapter.Exists(DataObject.UidWellbore))
+            else if (!_wellboreDataAdapter.Exists(new WellObjectId(DataObject.UidWellbore, DataObject.UidWell, null)))
             {
                 yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWellbore" });
             }
 
             // Validate UID does not exist
-            else if (_logDataAdapter.Exists(DataObject.Uid))
+            else if (_logDataAdapter.Exists(DataObject.GetObjectId()))
             {
                 yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
             }

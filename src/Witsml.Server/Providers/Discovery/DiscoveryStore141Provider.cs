@@ -83,7 +83,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
             }
             else if (uri.ObjectType == ObjectTypes.Log)
             {
-                var log = _logDataAdapter.Get(uri.ObjectId);
+                var log = _logDataAdapter.Get(new DataObjectId(uri.ObjectId, null));
                 log.LogCurveInfo.ForEach(x => args.Context.Add(ToResource(log, x)));
             }
         }

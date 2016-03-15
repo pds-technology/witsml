@@ -51,7 +51,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="entity">The entity.</param>
         public override WitsmlResult Put(ChannelSet entity)
         {
-            if (!string.IsNullOrWhiteSpace(entity.Uuid) && Exists(entity.Uuid))
+            if (!string.IsNullOrWhiteSpace(entity.Uuid) && Exists(entity.GetObjectId()))
             {
                 throw new NotImplementedException();
             }
