@@ -111,7 +111,7 @@ namespace PDS.Witsml.Server.Data.Wells
         {
             Logger.DebugFormat("Putting Well with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
 
-            if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.Uid))
+            if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.GetObjectId()))
             {
                 return Update(entity);
             }

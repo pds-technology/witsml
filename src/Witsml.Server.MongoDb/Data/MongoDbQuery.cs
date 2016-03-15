@@ -20,6 +20,7 @@ namespace PDS.Witsml.Server.Data
         private readonly IMongoCollection<T> _collection;
         private readonly WitsmlQueryParser _parser;    
         private readonly string _idPropertyName;
+        private readonly string _mongoDbIdField = "_id";
         private List<string> _fields;
 
         /// <summary>
@@ -62,17 +63,24 @@ namespace PDS.Witsml.Server.Data
                 var filter = BuildFilter(element);
                 var results = _collection.Find(filter ?? "{}");
 
+                var mongoId = Builders<T>.Projection.Exclude(_mongoDbIdField);
+
                 // Format response using MongoDb projection, i.e. selecting specified fields only
                 if (OptionsIn.ReturnElements.All.Equals(returnElements))
                 {
-                    entities.AddRange(results.ToList());
+                    entities.AddRange(results.Project<T>(mongoId).ToList());
                 }
                 else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElements) || OptionsIn.ReturnElements.Requested.Equals(returnElements))
                 {
                     var projection = BuildProjection(element);
 
                     if (projection != null)
+                    {
+                        projection = projection.Exclude(_mongoDbIdField);
                         results = results.Project<T>(projection);
+                    }
+                    else
+                        results = results.Project<T>(mongoId);
 
                     entities.AddRange(results.ToList());
                 }
@@ -331,7 +339,7 @@ namespace PDS.Witsml.Server.Data
             if (_fields.Count == 0)
             {
                 Logger.Warn("No fields projected.  Projection field count should never be zero.");
-                return Builders<T>.Projection.Exclude(_idPropertyName).Include(string.Empty);
+                return Builders<T>.Projection.Include(string.Empty);
             }
             else
             {
@@ -345,9 +353,6 @@ namespace PDS.Witsml.Server.Data
 
                 for (var i = 1; i < _fields.Count; i++)
                     projection = projection.Include(_fields[i]);
-
-                if (!_fields.Contains(_idPropertyName))
-                    projection = projection.Exclude(_idPropertyName);
 
                 return projection;
             }
