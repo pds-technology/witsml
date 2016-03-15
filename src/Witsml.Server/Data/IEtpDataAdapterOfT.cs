@@ -17,9 +17,9 @@ namespace PDS.Witsml.Server.Data
         List<T> GetAll(EtpUri? parentUri = null);
 
         /// <summary>
-        /// Gets a data object by the specified UUID.
+        /// Gets a data object by the specified identifier.
         /// </summary>
-        /// <param dataObjectId>The UUID object.</param>
+        /// <param dataObjectId>The data object identifier.</param>
         /// <returns>The data object instance.</returns>
         T Get(DataObjectId dataObjectId);
 
@@ -31,9 +31,9 @@ namespace PDS.Witsml.Server.Data
         WitsmlResult Put(T entity);
 
         /// <summary>
-        /// Deletes a data object by the specified UUID.
+        /// Deletes a data object by the specified identifier.
         /// </summary>
-        /// <param name="uuid">The UUID.</param>
+        /// <param name="uuid">The data object identifier.</param>
         /// <returns>A WITSML result.</returns>
         WitsmlResult Delete(string uuid);
     }

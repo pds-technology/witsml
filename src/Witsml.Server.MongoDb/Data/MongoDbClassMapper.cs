@@ -3,9 +3,9 @@ using Energistics.DataAccess;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using PDS.Witsml.Server.Models;
-using MongoDB.Bson;
 
 namespace PDS.Witsml.Server.Data
 {

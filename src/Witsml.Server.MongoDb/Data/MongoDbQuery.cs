@@ -20,8 +20,9 @@ namespace PDS.Witsml.Server.Data
         private readonly IMongoCollection<T> _collection;
         private readonly WitsmlQueryParser _parser;    
         private readonly string _idPropertyName;
-        private readonly string _mongoDbIdField = "_id";
         private List<string> _fields;
+
+        private const string _mongoDbIdField = "_id";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDbQuery{TList, T}"/> class.
@@ -54,8 +55,9 @@ namespace PDS.Witsml.Server.Data
         {
             Logger.DebugFormat("Executing query for entity: {0}", _parser.Context.ObjectType);
 
-            var entities = new List<T>();
+            var excludeMongoId = Builders<T>.Projection.Exclude(_mongoDbIdField);
             var returnElements = _parser.ReturnElements();
+            var entities = new List<T>();
 
             foreach (var element in _parser.Elements())
             {
@@ -63,12 +65,11 @@ namespace PDS.Witsml.Server.Data
                 var filter = BuildFilter(element);
                 var results = _collection.Find(filter ?? "{}");
 
-                var mongoId = Builders<T>.Projection.Exclude(_mongoDbIdField);
-
                 // Format response using MongoDb projection, i.e. selecting specified fields only
                 if (OptionsIn.ReturnElements.All.Equals(returnElements))
                 {
-                    entities.AddRange(results.Project<T>(mongoId).ToList());
+                    results = results.Project<T>(excludeMongoId);
+                    entities.AddRange(results.ToList());
                 }
                 else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElements) || OptionsIn.ReturnElements.Requested.Equals(returnElements))
                 {
@@ -80,7 +81,9 @@ namespace PDS.Witsml.Server.Data
                         results = results.Project<T>(projection);
                     }
                     else
-                        results = results.Project<T>(mongoId);
+                    {
+                        results = results.Project<T>(excludeMongoId);
+                    }
 
                     entities.AddRange(results.ToList());
                 }
@@ -282,7 +285,7 @@ namespace PDS.Witsml.Server.Data
             }
             else if (propertyType == typeof(string))
             {
-                return Builders<T>.Filter.Regex(propertyPath, new BsonRegularExpression("/^" + propertyValue + "$/i"));
+                return Builders<T>.Filter.EqIgnoreCase(propertyPath, propertyValue);
             }
             else if (propertyType.IsEnum)
             {
