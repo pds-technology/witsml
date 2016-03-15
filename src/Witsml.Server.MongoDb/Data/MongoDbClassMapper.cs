@@ -22,13 +22,13 @@ namespace PDS.Witsml.Server.Data
         {
             // WITSML 1.3.1.1
             Register<Witsml131.Well>();
-            Register<Witsml131.Wellbore>(false);
-            Register<Witsml131.Log>(false);
+            Register<Witsml131.Wellbore>();
+            Register<Witsml131.Log>();
 
             // WITSML 1.4.1.1
             Register<Witsml141.Well>();
-            Register<Witsml141.Wellbore>(false);
-            Register<Witsml141.Log>(false);
+            Register<Witsml141.Wellbore>();
+            Register<Witsml141.Log>();
 
             // WITSML 2.0
             Register2<Witsml200.Well>();
@@ -54,15 +54,13 @@ namespace PDS.Witsml.Server.Data
             }
         }
 
-        private void Register<T>(bool registerId = true) where T : IDataObject
+        private void Register<T>() where T : IDataObject
         {
             if (!BsonClassMap.IsClassMapRegistered(typeof(T)))
             {
                 BsonClassMap.RegisterClassMap<T>(cm =>
                 {
                     cm.AutoMap();
-                    if (registerId)
-                        cm.MapIdMember(x => x.Uid).SetIdGenerator(UidGenerator.Instance);
                 });
             }
         }
