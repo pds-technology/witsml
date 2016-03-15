@@ -171,7 +171,7 @@ namespace PDS.Witsml.Server
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
             string uid = response.SuppMsgOut;
 
-            var queryWell = new Well { Uid="", Name = "Well-to-add-01", NameLegal = "", Field = "" };
+            var queryWell = new Well { Uid = uid, Name = "Well-to-add-01", NameLegal = "", Field = "" };
             var result = DevKit.Get<WellList, Well>(DevKit.List(queryWell), optionsIn: OptionsIn.ReturnElements.Requested);
             Assert.IsNotNull(result);
 

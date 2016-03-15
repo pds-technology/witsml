@@ -1,5 +1,6 @@
 ﻿using Energistics.DataAccess.WITSML141;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
@@ -32,9 +33,9 @@ namespace PDS.Witsml.Server.Data
 
             collection.InsertMany(new[] { Well1, Well2 });
 
-            var result = collection.AsQueryable()
-                .Where(x => x.Uid == Well1.Uid)
-                .ToList();
+            var exclude = Builders<Well>.Projection.Exclude("_id");
+            var filter = Builders<Well>.Filter.Regex("Uid", new BsonRegularExpression("/^" + Well1.Uid + "$/i"));
+            var result = collection.Find(filter).Project<Well>(exclude).ToList();
 
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);

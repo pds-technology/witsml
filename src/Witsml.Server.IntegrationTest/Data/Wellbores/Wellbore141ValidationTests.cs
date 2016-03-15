@@ -146,5 +146,40 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.MissingParentDataObject, response.Result);
         }
+
+        [TestMethod]
+        public void Test_can_add_wellbore_with_same_uid_under_different_well()
+        {
+            var well1 = new Well { Name = "Well-to-add-01", TimeZone = DevKit.TimeZone };
+            var response = DevKit.Add<WellList, Well>(well1);
+
+            var wellbore1 = new Wellbore()
+            {
+                UidWell = response.SuppMsgOut,
+                NameWell = well1.Name,
+                Name = "Wellbore 01-01"
+            };
+            response = DevKit.Add<WellboreList, Wellbore>(wellbore1);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uid = response.SuppMsgOut;
+
+            var well2 = new Well { Name = "Well-to-add-02", TimeZone = DevKit.TimeZone };
+            response = DevKit.Add<WellList, Well>(well2);
+
+            var wellbore2 = new Wellbore()
+            {
+                Uid = uid,
+                UidWell = response.SuppMsgOut,
+                NameWell = well2.Name,
+                Name = "Wellbore 02-01"
+            };
+            response = DevKit.Add<WellboreList, Wellbore>(wellbore2);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+        }
     }
 }
