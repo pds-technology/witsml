@@ -2,6 +2,7 @@
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Linq;
 
 namespace PDS.Witsml.Server.Data.Wells
@@ -32,6 +33,22 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
+        public void Add_Well_Error_401_No_Plural_Root_Element()
+        {
+            string xmlIn = "<well xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                           "   <well>" + Environment.NewLine +
+                           "   <name>Test Add Well Plural Root Element</name>" + Environment.NewLine +
+                           "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
+                           "   </well>" + Environment.NewLine +
+                           "</well>";
+
+            var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingPluralRootElement, response.Result);
+        }
+
+        [TestMethod]
         public void Uid_returned_add_well()
         {
             var well = new Well { Name = "Well-to-add-01", TimeZone = DevKit.TimeZone };
@@ -52,6 +69,26 @@ namespace PDS.Witsml.Server.Data.Wells
             well = result.FirstOrDefault();
             Assert.IsNotNull(well);
             Assert.AreEqual(uid, well.Uid);
+        }
+
+        [TestMethod]
+        public void Add_Well_Error_405_Uid_Existed()
+        {
+            var well = new Well { Name = "Test Add Well - Uid Existed", TimeZone = DevKit.TimeZone };
+            var response = DevKit.Add<WellList, Well>(well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uid = response.SuppMsgOut;
+            var valid = !string.IsNullOrEmpty(uid);
+            Assert.IsTrue(valid);
+
+            var existedWell = new Well { Uid = uid, Name = "Test Add Well - Adding existed well", TimeZone = DevKit.TimeZone };
+            response = DevKit.Add<WellList, Well>(existedWell);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.DataObjectUidAlreadyExists, response.Result);
         }
 
         [TestMethod]
@@ -118,6 +155,22 @@ namespace PDS.Witsml.Server.Data.Wells
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.ParametersNotEncodedByRules, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_413_unsupported_data_object()
+        {
+            var well = new Well { Name = "Well-to-add-unsupported-error" };
+            var wells = new WellList { Well = DevKit.List(well) };
+
+            // update Version property to an unsupported data schema version
+            wells.Version = "1.4.x.y";
+
+            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
+            var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.DataObjectNotSupported, response.Result);
         }
 
         [TestMethod]
@@ -190,6 +243,22 @@ namespace PDS.Witsml.Server.Data.Wells
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.CapabilitiesInNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_468_missing_version_attribute()
+        {
+            var well = new Well { Name = "Well-to-add-missing-version-attribute" };
+            var wells = new WellList { Well = DevKit.List(well) };
+
+            // update Version property to an unsupported data schema version
+            wells.Version = null;
+
+            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
+            var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
         }
 
         [TestMethod]
