@@ -270,15 +270,7 @@ namespace PDS.Witsml.Server.Data
             }
             else if (propertyPath.EndsWith(".DateTimeCreation") || propertyPath.EndsWith(".DateTimeLastChange"))
             {
-                try
-                {
-                    return Builders<T>.Filter.Gt(propertyPath, DateTime.Parse(propertyValue));
-                }
-                catch (Exception ex)
-                {
-                    Logger.WarnFormat("Error parsing query filter for date type: {0}; value: {1}; Error: {2}", propertyType, propertyValue, ex);
-                    return null;
-                }
+                return Builders<T>.Filter.Gt(propertyPath, propertyValue);
             }
             else if (propertyType == typeof(string))
             {

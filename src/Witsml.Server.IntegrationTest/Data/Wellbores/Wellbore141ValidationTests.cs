@@ -64,7 +64,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 UidWell = response.SuppMsgOut,
                 NameWell = well.Name,
                 Name = "Wellbore 01-01",
-                DateTimeKickoff = DateTime.Now
+                DateTimeKickoff = DateTimeOffset.Now
             };
             response = DevKit.Add<WellboreList, Wellbore>(wellbore);
 

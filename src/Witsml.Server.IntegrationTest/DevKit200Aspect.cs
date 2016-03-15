@@ -88,6 +88,21 @@ namespace PDS.Witsml.Server
                             StartIndex = new DepthIndexValue() { Depth = 0 },
                             EndIndex = new DepthIndexValue() { Depth = 1000 },
                             TimeDepth = log.TimeDepth,
+                            PointMetadata = new List<PointMetadata>()
+                            {
+                                new PointMetadata()
+                                {
+                                    Name = "Value",
+                                    Description = "Value",
+                                    EtpDataType = EtpDataType.@double
+                                },
+                                new PointMetadata()
+                                {
+                                    Name = "Quality",
+                                    Description = "Quality",
+                                    EtpDataType = EtpDataType.boolean
+                                }
+                            }
                         },
                         new Channel()
                         {
@@ -113,9 +128,29 @@ namespace PDS.Witsml.Server
                         EndIndex = new DepthIndexValue() { Depth = 1000 },
                     },
 
-                    //Data = new ChannelData()
-                    //{
-                    //}
+                    Data = new ChannelData()
+                    {
+                        FileUri = "file://",
+
+                        //Data = @"[ 0.0, 1.0, 2.0, 3.0 ]"
+
+                        //Data = @"[
+                        //    [ 0.0, 1.0, 2.0, 3.0 ],
+                        //    [ 0.1, 1.1, 2.1, 3.1 ]
+                        //]"
+
+                        //Data = @"[
+                        //    [ [0.0, ""2016-01-01T00:00:00.0000Z"" ], 1.0, 2.0, 3.0 ],
+                        //    [ [0.1, ""2016-01-01T00:00:01.0000Z"" ], 1.1, null, 3.1 ]
+                        //]"
+
+                        Data = @"[
+                            [ [0.0, ""2016-01-01T00:00:00.0000Z"" ], [ 1.0, true ], 2.0, 3.0 ],
+                            [ [0.1, ""2016-01-01T00:00:01.0000Z"" ], [ 1.1, false ], null, 3.1 ],
+                            [ [0.2, ""2016-01-01T00:00:02.0000Z"" ], null, null, 3.2 ],
+                            [ [0.1, ""2016-01-01T00:00:03.0000Z"" ], [ 1.3, true ], 2.3, 3.3 ]
+                        ]"
+                    }
                 });
             }
             else if (indexType == ChannelIndexType.datetime)
