@@ -94,6 +94,7 @@
     <Compile Include="Data\Logs\Log200DataAdapter.cs" />
     <Compile Include="Data\MongoDbClassMapper.cs" />
     <Compile Include="Data\MongoDbDataAdapter.cs" />
+    <Compile Include="Data\MongoDbExtensions.cs" />
     <Compile Include="Data\MongoDbQuery.cs" />
     <Compile Include="Data\TimestampSerializer.cs" />
     <Compile Include="Data\UidGenerator.cs" />

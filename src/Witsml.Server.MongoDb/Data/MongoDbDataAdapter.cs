@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic;
-using Energistics.DataAccess.WITSML200.ComponentSchemas;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
@@ -47,8 +45,12 @@ namespace PDS.Witsml.Server.Data
         /// Gets the name of the identifier property.
         /// </summary>
         /// <value>The name of the identifier property.</value>
-        protected string IdPropertyName { get; private set; }   
+        protected string IdPropertyName { get; private set; }
 
+        /// <summary>
+        /// Gets the name of the Name property.
+        /// </summary>
+        /// <value>The name of the Name property.</value>
         protected string NamePropertyName { get; private set; }
 
         /// <summary>
@@ -138,7 +140,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dataObjectId">The data object identifier.</param>
         /// <param name="dbCollectionName">The naame of the database collection.</param>
         /// <typeparam name="TObject">The data object type.</typeparam>
-        /// <returns>The object represented by the UID.</returns>
+        /// <returns>The entity represented by the indentifier.</returns>
         protected TObject GetEntity<TObject>(DataObjectId dataObjectId, string dbCollectionName)
         {
             try
@@ -157,27 +159,40 @@ namespace PDS.Witsml.Server.Data
         /// Gets the entity by uid query.
         /// </summary>
         /// <param name="dataObjectId">The data object identifier.</param>
-        /// <returns></returns>
+        /// <returns>The entity represented by the indentifier.</returns>
         protected T GetEntityByUidQuery(DataObjectId dataObjectId)
         {
-            return GetEntityByUidQuery(dataObjectId);
+            return GetEntityByUidQuery<T>(dataObjectId, DbCollectionName);
         }
 
+        /// <summary>
+        /// Gets the entity by uid query.
+        /// </summary>
+        /// <typeparam name="TObject">The type of the object.</typeparam>
+        /// <param name="dataObjectId">The data object identifier.</param>
+        /// <param name="dbCollectionName">Name of the database collection.</param>
+        /// <returns></returns>
         protected TObject GetEntityByUidQuery<TObject>(DataObjectId dataObjectId, string dbCollectionName)
         {
             var filters = new List<FilterDefinition<TObject>>();
-            if (typeof(T).BaseType == typeof(AbstractObject))
-                filters.Add(Builders<TObject>.Filter.Regex("Uuid", new BsonRegularExpression("/^" + dataObjectId.Uid + "$/i")));
-            else{
-                filters.Add(Builders<TObject>.Filter.Regex("Uid", new BsonRegularExpression("/^" + dataObjectId.Uid + "$/i")));
-                if (dataObjectId is WellObjectId)
-                    filters.Add(Builders<TObject>.Filter.Regex("UidWell", new BsonRegularExpression("/^" + ((WellObjectId)dataObjectId).UidWell + "$/i")));
-                if (dataObjectId is WellboreObjectId)
-                    filters.Add(Builders<TObject>.Filter.Regex("UidWell", new BsonRegularExpression("/^" + ((WellboreObjectId)dataObjectId).UidWellbore + "$/i")));
+
+            filters.Add(Builders<TObject>.Filter.EqIgnoreCase(IdPropertyName, dataObjectId.Uid));
+
+            if (dataObjectId is WellObjectId)
+            {
+                filters.Add(Builders<TObject>.Filter.EqIgnoreCase("UidWell", ((WellObjectId)dataObjectId).UidWell));
+            }
+            if (dataObjectId is WellboreObjectId)
+            {
+                filters.Add(Builders<TObject>.Filter.EqIgnoreCase("UidWellbore", ((WellboreObjectId)dataObjectId).UidWellbore));
             }
 
             var exclude = Builders<TObject>.Projection.Exclude("_id");
-            return GetCollection<TObject>(dbCollectionName).Find(Builders<TObject>.Filter.And(filters)).Project<TObject>(exclude).FirstOrDefault();
+
+            return GetCollection<TObject>(dbCollectionName)
+                .Find(Builders<TObject>.Filter.And(filters))
+                .Project<TObject>(exclude)
+                .FirstOrDefault();
         }
 
         /// <summary>
@@ -253,38 +268,6 @@ namespace PDS.Witsml.Server.Data
             }
 
             return uid;
-        }
-
-        protected IQueryable<TObject> FilterQuery<TObject>(WitsmlQueryParser parser, IQueryable<TObject> query, List<string> names)
-        {
-            // For entity property name and its value
-            var nameValues = new Dictionary<string, string>();
-
-            // For each name pair ("<xml name>,<entity propety name>") 
-            //... create a dictionary of property names and corresponding values.
-            names.ForEach(n =>
-            {
-                // Split out the xml name and entity property names for ease of use.
-                var nameAndProperty = n.Split(',');
-                nameValues.Add(nameAndProperty[1], parser.PropertyValue(nameAndProperty[0]));
-            });
-
-            query = QueryByNames(query, nameValues);
-
-            return query;
-        }
-
-        protected IQueryable<TObject> QueryByNames<TObject>(IQueryable<TObject> query, Dictionary<string, string> nameValues)
-        {
-            if (nameValues.Values.ToList().TrueForAll(nameValue => !string.IsNullOrEmpty(nameValue)))
-            {
-                nameValues.Keys.ToList().ForEach(nameKey =>
-                {
-                    query = query.Where(string.Format("{0} = \"{1}\"", nameKey, nameValues[nameKey]));
-                });
-            }
-
-            return query;
         }
 
         /// <summary>
