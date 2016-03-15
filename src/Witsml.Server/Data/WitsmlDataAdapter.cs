@@ -90,9 +90,9 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Determines whether the entity exists in the data store.
         /// </summary>
-        /// <param name="uid">The uid.</param>
+        /// <param name="dataObjectId">The data object identifier.</param>
         /// <returns>true if the entity exists; otherwise, false</returns>
-        public virtual bool Exists(string uid)
+        public virtual bool Exists(DataObjectId dataObjectId)
         {
             throw new NotImplementedException();
         }
@@ -110,9 +110,9 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Gets a data object by the specified UUID.
         /// </summary>
-        /// <param name="uuid">The UUID.</param>
+        /// <param name="dataObjectId">The data object identifier.</param>
         /// <returns>The data object instance.</returns>
-        public virtual T Get(string uuid)
+        public virtual T Get(DataObjectId dataObjectId)
         {
             throw new NotImplementedException();
         }
@@ -150,11 +150,11 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Gets a data object by the specified UUID.
         /// </summary>
-        /// <param name="uuid">The UUID.</param>
+        /// <param name="dataObjectId">The data object identifier.</param>
         /// <returns>The data object instance.</returns>
-        object IEtpDataAdapter.Get(string uuid)
+        object IEtpDataAdapter.Get(DataObjectId dataObjectId)
         {
-            return Get(uuid);
+            return Get(dataObjectId);
         }
 
         /// <summary>

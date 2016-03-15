@@ -105,7 +105,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
             }
             else if (uri.ObjectType == ObjectTypes.Log)
             {
-                var log = _logDataAdapter.Get(uri.ObjectId);
+                var log = _logDataAdapter.Get(new DataObjectId(uri.ObjectId, null));
                 log.ChannelSet.ForEach(x => args.Context.Add(ToResource(log, x)));
             }
             else if (uri.ObjectType == ObjectTypes.ChannelSet)
@@ -115,7 +115,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
                     .Select(x => x.Value)
                     .FirstOrDefault();
 
-                var log = _logDataAdapter.Get(uid);
+                var log = _logDataAdapter.Get(new DataObjectId(uid, null));
                 var set = log.ChannelSet.FirstOrDefault(x => x.Uuid == uri.ObjectId);
 
                 set.Channel.ForEach(x => args.Context.Add(ToResource(log, set, x)));

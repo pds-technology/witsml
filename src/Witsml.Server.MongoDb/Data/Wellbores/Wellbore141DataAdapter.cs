@@ -110,7 +110,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// <param name="entity">The entity.</param>
         public override WitsmlResult Put(Wellbore entity)
         {
-            if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.Uid))
+            if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.GetObjectId()))
             {
                 return Update(entity);
             }

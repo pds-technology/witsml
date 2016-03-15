@@ -51,7 +51,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="entity">The entity.</param>
         public override WitsmlResult Put(Log entity)
         {
-            if (!string.IsNullOrWhiteSpace(entity.Uuid) && Exists(entity.Uuid))
+            if (!string.IsNullOrWhiteSpace(entity.Uuid) && Exists(entity.GetObjectId()))
             {
                 throw new NotImplementedException();
             }

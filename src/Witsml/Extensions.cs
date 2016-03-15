@@ -58,10 +58,9 @@ namespace PDS.Witsml
         /// <summary>
         /// Gets the data object identifier, i.e. uid.
         /// </summary>
-        /// <typeparam name="TObject">The type of the object.</typeparam>
         /// <param name="instance">The instance.</param>
         /// <returns>The identifier object.</returns>
-        public static DataObjectId GetDataObjectId<TObject>(this TObject instance) where TObject : IDataObject
+        public static DataObjectId GetObjectId(this IDataObject instance)
         {
             return new DataObjectId(instance.Uid, instance.Name);
         }
@@ -69,10 +68,9 @@ namespace PDS.Witsml
         /// <summary>
         /// Gets the well object identifier, i.e. uid and uidWell.
         /// </summary>
-        /// <typeparam name="TObject">The type of the well object.</typeparam>
         /// <param name="instance">The instance.</param>
         /// <returns>The identified object.</returns>
-        public static WellObjectId GetWellObjectId<TObject>(this TObject instance) where TObject : IWellObject
+        public static WellObjectId GetObjectId(this IWellObject instance)
         {
             return new WellObjectId(instance.Uid, instance.UidWell, instance.Name);
         }
@@ -80,10 +78,9 @@ namespace PDS.Witsml
         /// <summary>
         /// Gets the wellbore object identifier, i.e. uid, uidWell, and uidWellbore.
         /// </summary>
-        /// <typeparam name="TObject">The type of the wellbore object.</typeparam>
         /// <param name="instance">The instance.</param>
         /// <returns>The identified object.</returns>
-        public static WellboreObjectId GetWellboreObjectId<TObject>(this TObject instance) where TObject : IWellboreObject
+        public static WellboreObjectId GetObjectId(this IWellboreObject instance)
         {
             return new WellboreObjectId(instance.Uid, instance.UidWell, instance.UidWellbore, instance.Name);
         }
@@ -91,10 +88,9 @@ namespace PDS.Witsml
         /// <summary>
         /// Gets the  WITSML 2.0 data object identifier, i.e. uuid.
         /// </summary>
-        /// <typeparam name="TObject">The type of the object.</typeparam>
         /// <param name="instance">The instance.</param>
         /// <returns>The identified object.</returns>
-        public static DataObjectId GetAbstractDataObjectId<TObject>(this TObject instance) where TObject : AbstractObject
+        public static DataObjectId GetObjectId(this AbstractObject instance)
         {
             return new DataObjectId(instance.Uuid, null);
         }

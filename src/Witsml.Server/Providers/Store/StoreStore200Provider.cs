@@ -51,7 +51,7 @@ namespace PDS.Witsml.Server.Providers.Store
         {
             var uri = new EtpUri(args.Message.Uri);
             var dataAdapter = Container.Resolve<IEtpDataAdapter>(new ObjectName(uri.ObjectType, uri.Version));
-            var entity = dataAdapter.Get(uri.ObjectId) as AbstractObject;
+            var entity = dataAdapter.Get(new DataObjectId(uri.ObjectId, null)) as AbstractObject;
 
             StoreStoreProvider.SetDataObject(args.Context, entity, uri, GetName(entity));
         }

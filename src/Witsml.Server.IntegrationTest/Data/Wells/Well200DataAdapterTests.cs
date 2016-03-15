@@ -58,7 +58,7 @@ namespace PDS.Witsml.Server.Data.Wells
         {
             WellAdapter.Put(Well1);
 
-            var well1 = WellAdapter.Get(Well1.Uuid);
+            var well1 = WellAdapter.Get(Well1.GetObjectId());
 
             Assert.AreEqual(Well1.Citation.Title, well1.Citation.Title);
         }
