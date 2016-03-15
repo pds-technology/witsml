@@ -17,7 +17,7 @@ using PDS.Witsml.Server.Properties;
 namespace PDS.Witsml.Server.Data.Logs
 {
     /// <summary>
-    /// Data adapter that encapsulates CRUD functionality for <see cref="Log" />
+    /// Data adapter that encapsulates CRUD functionality for a 141 <see cref="Log" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML141.Log}" />
     /// <seealso cref="PDS.Witsml.Server.Configuration.IWitsml141Configuration" />
@@ -221,7 +221,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Gets a lists of logs with on the required log header properties.
+        /// Gets a list of logs with on the required log header properties.
         /// </summary>
         /// <param name="logs">The logs.</param>
         /// <returns>
@@ -494,7 +494,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="stringList">The string list to pull values from.</param>
         /// <param name="sliceIndexes">The indexes of the stringList we want values for.</param>
-        /// <returns></returns>
+        /// <returns>An <see cref="IEnumerable{string}"/> for the slice indexes.</returns>
         private IEnumerable<string> SliceStringList(IEnumerable<string> stringList, int[] sliceIndexes)
         {
             if (sliceIndexes != null)
