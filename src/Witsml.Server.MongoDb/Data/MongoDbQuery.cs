@@ -29,7 +29,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="parser">The parser.</param>
         /// <param name="fields">The fields of the data object to be selected.</param>
         /// <param name="idPropertyName">Name of the identifier property.</param>
-        public MongoDbQuery(IMongoCollection<T> collection, WitsmlQueryParser parser, List<string> fields, string idPropertyName)
+        public MongoDbQuery(IMongoCollection<T> collection, WitsmlQueryParser parser, List<string> fields, string idPropertyName = "_id")
         {
             Logger = LogManager.GetLogger(GetType());
 
