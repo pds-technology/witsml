@@ -181,6 +181,17 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.MissingUnitForMeasureData, response.Result);
         }
 
+        [Ignore]
+        [TestMethod]
+        public void Test_error_code_466_non_conforming_capabilities_in()
+        {
+            var well = new Well { Name = "Well-to-add-invalid-capabilitiesIn", TimeZone = DevKit.TimeZone };
+            var response = DevKit.Add<WellList, Well>(well, ObjectTypes.Well, "<capClients />");
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.CapabilitiesInNonConforming, response.Result);
+        }
+
         [TestMethod]
         public void Test_error_code_486_data_object_types_dont_match()
         {
