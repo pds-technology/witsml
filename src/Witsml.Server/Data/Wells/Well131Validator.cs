@@ -32,7 +32,7 @@ namespace PDS.Witsml.Server.Data.Wells
         protected override IEnumerable<ValidationResult> ValidateForInsert()
         {
             // Validate UID does not exist
-            if (_wellDataAdapter.Exists(DataObject.Uid))
+            if (_wellDataAdapter.Exists(DataObject.GetObjectId()))
             {
                 yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
             }
