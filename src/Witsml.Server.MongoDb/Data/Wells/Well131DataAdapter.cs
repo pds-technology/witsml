@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
+using Energistics.Datatypes;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
@@ -85,6 +87,49 @@ namespace PDS.Witsml.Server.Data.Wells
             InsertEntity(entity);
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uid);
+        }
+
+        /// <summary>
+        /// Gets a collection of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        public override List<Well> GetAll(EtpUri? parentUri = null)
+        {
+            Logger.Debug("Fetching all Wells.");
+
+            return GetQuery()
+                .OrderBy(x => x.Name)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Puts the specified data object into the data store.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        public override WitsmlResult Put(Well entity)
+        {
+            Logger.DebugFormat("Putting Well with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
+
+            if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.GetObjectId()))
+            {
+                return Update(entity);
+            }
+            else
+            {
+                return Add(entity);
+            }
+        }
+
+        /// <summary>
+        /// Parses the specified XML string.
+        /// </summary>
+        /// <param name="xml">The XML string.</param>
+        /// <returns>An instance of <see cref="Well" />.</returns>
+        protected override Well Parse(string xml)
+        {
+            var list = WitsmlParser.Parse<WellList>(xml);
+            return list.Well.FirstOrDefault();
         }
     }
 }
