@@ -19,9 +19,9 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Gets a data object by the specified UUID.
         /// </summary>
-        /// <param name="uuid">The UUID.</param>
+        /// <param dataObjectId>The UUID object.</param>
         /// <returns>The data object instance.</returns>
-        object Get(string uuid);
+        object Get(DataObjectId dataObjectId);
 
         /// <summary>
         /// Puts the specified data object into the data store.

@@ -72,7 +72,6 @@ namespace PDS.Witsml.Server.Data
                 BsonClassMap.RegisterClassMap<T>(cm =>
                 {
                     cm.AutoMap();
-                    cm.MapIdMember(x => x.Uid).SetIdGenerator(UidGenerator.Instance);
                 });
             }
         }

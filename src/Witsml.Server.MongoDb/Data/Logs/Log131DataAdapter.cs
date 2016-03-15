@@ -15,23 +15,36 @@ using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
+    /// <summary>
+    /// Data adapter that encapsulates CRUD functionality for a 131 <see cref="Log" />
+    /// </summary>
+    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML131.Log}" />
+    /// <seealso cref="PDS.Witsml.Server.Configuration.IWitsml131Configuration" />
     [Export(typeof(IWitsml131Configuration))]
     [Export(typeof(IWitsmlDataAdapter<Log>))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class MongoDbLogDataAdapter : MongoDbDataAdapter<Log>, IWitsml131Configuration
+    public class Log131DataAdapter : MongoDbDataAdapter<Log>, IWitsml131Configuration
     {
         private static readonly string DbCollectionNameLogDataValues = "logDataValues";
         private static readonly int LogIndexRangeSize = Settings.Default.LogIndexRangeSize;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Log131DataAdapter"/> class.
+        /// </summary>
+        /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public MongoDbLogDataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Log131)
+        public Log131DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Log131)
         {
         }
 
+        /// <summary>
+        /// Gets the supported capabilities for the <see cref="Log"/> object.
+        /// </summary>
+        /// <param name="capServer">The capServer instance.</param>
         public void GetCapabilities(CapServer capServer)
         {
-            //capServer.Add(Functions.GetFromStore, ObjectTypes.Log);
-            //capServer.Add(Functions.AddToStore, ObjectTypes.Log);
+            capServer.Add(Functions.GetFromStore, ObjectTypes.Log);
+            capServer.Add(Functions.AddToStore, ObjectTypes.Log);
             //capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);
             //capServer.Add(Functions.DeleteFromStore, ObjectTypes.Well);
         }
@@ -55,7 +68,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var logsOut = new List<Log>();
             if (parser.ReturnElements() == OptionsIn.ReturnElements.DataOnly.Value)
             {
-                logsOut.AddRange(GetLogHeaderRequired(logs));
+                logsOut.AddRange(GetLogHeaderRequiredProperties(logs));
             }
             else
             {
@@ -79,8 +92,100 @@ namespace PDS.Witsml.Server.Data.Logs
                 });
         }
 
-        // TODO: Duplicated in RavenDbLogDataAdapter.  Move to a central location
-        private IEnumerable<Log> GetLogHeaderRequired(List<Log> logs)
+        /// <summary>
+        /// Adds a <see cref="Log"/> entity to the data store.
+        /// </summary>
+        /// <param name="entity">The Log instance to add to the store.</param>
+        /// <returns>
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
+        /// </returns>
+        public override WitsmlResult Add(Log entity)
+        {
+            entity.Uid = NewUid(entity.Uid);
+            entity.CommonData = entity.CommonData.Update();
+
+            try
+            {
+                // Separate the LogData.Data from the Log
+                var logData = ExtractLogData(entity);
+
+                // Save the log and verify
+                InsertEntity(entity);
+
+                // If there is any LogData.Data then save it.
+                if (logData.Any())
+                {
+                    WriteLogDataValues(entity, ToChunks(GetSequence(string.Empty, logData)));
+                }
+
+                return new WitsmlResult(ErrorCodes.Success, entity.Uid);
+            }
+            catch (Exception ex)
+            {
+                return new WitsmlResult(ErrorCodes.Unset, ex.Message + "\n" + ex.StackTrace);
+            }
+        }
+
+        /// <summary>
+        /// Computes the range of the data chunk containing the given index value for a given rangeSize.
+        /// </summary>
+        /// <param name="index">The index value contained within the computed range.</param>
+        /// <param name="rangeSize">Size of the range.</param>
+        /// <returns>A <see cref="Tuple{int, int}"/> containing the computed range.</returns>
+        public Tuple<int, int> ComputeRange(double index, int rangeSize)
+        {
+            var rangeIndex = (int)(Math.Floor(index / rangeSize));
+            return new Tuple<int, int>(rangeIndex * rangeSize, rangeIndex * rangeSize + rangeSize);
+
+        }
+
+        /// <summary>
+        /// Updates the specified <see cref="Log"/> instance in the store.
+        /// </summary>
+        /// <param name="entity">The <see cref="Log"/> instance.</param>
+        /// <returns>
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
+        /// </returns>
+        public override WitsmlResult Update(Log entity)
+        {
+            //List<LogDataValues> logDataValuesList = null;
+
+            // Separate the LogData.Data from the Log
+            var logData = ExtractLogData(entity);
+
+            if (logData.Any())
+            {
+                // Start of the first range
+                var startIndex = ComputeRange(double.Parse(logData[0].Split(',')[0]), LogIndexRangeSize).Item1;
+
+                // End of the last range
+                var endIndex = ComputeRange(double.Parse(logData[logData.Count - 1].Split(',')[0]), LogIndexRangeSize).Item2;
+
+                // Merge with updateLogData sequence
+                WriteLogDataValues(entity,
+                    ToChunks(
+                        MergeSequence(
+                            ToSequence(QueryLogDataValues(entity, startIndex, endIndex, false)),
+                            GetSequence(string.Empty, logData))));
+            }
+
+            // TODO: Fix later
+            //UpdateLogHeaderRanges(entity);
+
+            return new WitsmlResult(ErrorCodes.Success);
+        }
+
+        public override WitsmlResult Delete(WitsmlQueryParser parser)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets a list of logs with on the required log header properties.
+        /// </summary>
+        /// <param name="logs">The logs.</param>
+        /// A <see cref="IEnumerable{Log}" /> with only the required Log header properties.
+        private IEnumerable<Log> GetLogHeaderRequiredProperties(List<Log> logs)
         {
             var logsRequired = new List<Log>();
 
@@ -134,6 +239,17 @@ namespace PDS.Witsml.Server.Data.Logs
         //    return logData;
         //}
 
+
+        /// <summary>
+        /// Queries the log data values as specified by the parser.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="startIndex">The start index.</param>
+        /// <param name="endIndex">The end index.</param>
+        /// <param name="inclusiveEnd">if set to <c>true</c> [inclusive end].</param>
+        /// <returns>
+        /// A <see cref="LogData" /> instance with the LogData.Data specified by the parser.
+        /// </returns>
         private IMongoQueryable<LogDataValues> QueryLogDataValues(Log log, double? startIndex, double? endIndex, bool inclusiveEnd = true)
         {
             // Default to return all entities
@@ -161,6 +277,12 @@ namespace PDS.Witsml.Server.Data.Logs
             return query;
         }
 
+        /// <summary>
+        /// Gets the mnemonic index positions of the "slice" the log data results.
+        /// </summary>
+        /// <param name="logMnemonics">An array of all log mnemonics.</param>
+        /// <param name="queryMnemonics">A comma separated list of mnemonics requested in the query.</param>
+        /// <returns>An integer array of the requested mnemonic indexes or null if all mnemonics are requested. </returns>
         private int[] GetSliceIndexes(string[] logMnemonics, string queryMnemonics)
         {
             if (logMnemonics != null && !string.IsNullOrEmpty(queryMnemonics))
@@ -184,11 +306,24 @@ namespace PDS.Witsml.Server.Data.Logs
             return null;
         }
 
+        /// <summary>
+        /// Converts a string to a nullable double.
+        /// </summary>
+        /// <param name="doubleStr">The double string.</param>
+        /// <returns>A <see cref="Nullable{double}"/> representation of the doubleStr parameter.</returns>
         private double? ToNullableDouble(string doubleStr)
         {
             return string.IsNullOrEmpty(doubleStr) ? (double?)null : double.Parse(doubleStr);
         }
 
+        /// <summary>
+        /// Extracts the reqeusted range and mnemonic slices of data from an <see cref="IEnumerable{LogDataValues}"/>.
+        /// </summary>
+        /// <param name="logDataValues">The log data values.</param>
+        /// <param name="startIndex">The start index of the requested range.</param>
+        /// <param name="endIndex">The end index of the requested range.</param>
+        /// <param name="sliceIndexes">The indexes positions of the mnemonics to slice the log data.</param>
+        /// <returns>An <see cref="IEnumerable{string}"/> of comma separated log data values for a given range and mnemonic slices.</returns>
         private IEnumerable<string> ToLogData(IEnumerable<LogDataValues> logDataValues, double? startIndex, double? endIndex, int[] sliceIndexes)
         {
             foreach (var ldv in logDataValues)
@@ -207,33 +342,11 @@ namespace PDS.Witsml.Server.Data.Logs
             }
         }
 
-        public override WitsmlResult Add(Log entity)
-        {
-            entity.Uid = NewUid(entity.Uid);
-            entity.CommonData = entity.CommonData.Update();
-
-            try
-            {
-                // Separate the LogData.Data from the Log
-                var logData = ExtractLogData(entity);
-
-                // Save the log and verify
-                InsertEntity(entity);
-
-                // If there is any LogData.Data then save it.
-                if (logData.Any())
-                {
-                    WriteLogDataValues(entity, ToChunks(GetSequence(string.Empty, logData)));
-                }
-
-                return new WitsmlResult(ErrorCodes.Success, entity.Uid);
-            }
-            catch (Exception ex)
-            {
-                return new WitsmlResult(ErrorCodes.Unset, ex.Message + "\n" + ex.StackTrace);
-            }
-        }
-
+        /// <summary>
+        /// Extracts the log data data from the Log.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns>A string list of comma separated data that is the LogData.Data from the first LogData element of the log</returns>
         private List<string> ExtractLogData(Log log)
         {
             var logDataList = new List<string>();
@@ -249,6 +362,11 @@ namespace PDS.Witsml.Server.Data.Logs
             return logDataList;
         }
 
+        /// <summary>
+        /// Combines a sequence of log data values into a "chunk" of data in a single <see cref="LogDataValues"/> instnace.
+        /// </summary>
+        /// <param name="sequence">An <see cref="IEnumerable{Tuple{string, double, string}}"/> containing a uid, the index value of the data and the row of data.</param>
+        /// <returns>An <see cref="IEnumerable{LogDataValues}"/> of "chunked" data.</returns>
         private IEnumerable<LogDataValues> ToChunks(IEnumerable<Tuple<string, double, string>> sequence)
         {
             Tuple<int, int> plannedRange = null;
@@ -293,6 +411,13 @@ namespace PDS.Witsml.Server.Data.Logs
             }
         }
 
+        /// <summary>
+        /// Builds a sequence of <see cref="Tuple{string, double, string}"/> from an <see cref="IEnumerable{string}"/> of log data.  
+        /// </summary>
+        /// <param name="uid">The uid.</param>
+        /// <param name="dataList">The data list.</param>
+        /// <param name="sliceIndexes">The menmonic indexes to slice the data for results.</param>
+        /// <returns>An <see cref="IEnumerable{Tuple{string,double,string}}"/> sonsisting of a uid, the index value of the current row of data and the row of log data.</returns>
         private IEnumerable<Tuple<string, double, string>> GetSequence(string uid, IEnumerable<string> dataList, int[] sliceIndexes = null)
         {
             foreach(var dataRow in dataList)
@@ -313,6 +438,12 @@ namespace PDS.Witsml.Server.Data.Logs
             }
         }
 
+        /// <summary>
+        /// Slices a string list for the index values in the sliceIndexes parameter
+        /// </summary>
+        /// <param name="stringList">The string list to pull values from.</param>
+        /// <param name="sliceIndexes">The indexes of the stringList we want values for.</param>
+        /// <returns>An <see cref="IEnumerable{string}"/> for the slice indexes.</returns>
         private IEnumerable<string> SliceStringList(IEnumerable<string> stringList, int[] sliceIndexes)
         {
             if (sliceIndexes != null)
@@ -322,13 +453,11 @@ namespace PDS.Witsml.Server.Data.Logs
             return stringList;
         }
 
-        public Tuple<int, int> ComputeRange(double index, int rangeSize)
-        {
-            var rangeIndex = (int)(Math.Floor(index / rangeSize));
-            return new Tuple<int, int>(rangeIndex * rangeSize, rangeIndex * rangeSize + rangeSize);
-
-        }
-
+        /// <summary>
+        /// Writes an <see cref="IEnumerable{LogDataValues}"/> to the database belonging to the given log.
+        /// </summary>
+        /// <param name="log">The log containing the <see cref="LogDataValues"/>.</param>
+        /// <param name="logDataValuesList">The log data values list.</param>
         private void WriteLogDataValues(Log log, IEnumerable<LogDataValues> logDataValuesList)
         {
             var collection = GetCollection<LogDataValues>(DbCollectionNameLogDataValues);
@@ -355,35 +484,12 @@ namespace PDS.Witsml.Server.Data.Logs
                }));
         }
 
-        public override WitsmlResult Update(Log entity)
-        {
-            //List<LogDataValues> logDataValuesList = null;
-
-            // Separate the LogData.Data from the Log
-            var logData = ExtractLogData(entity);
-
-            if (logData.Any())
-            {
-                // Start of the first range
-                var startIndex = ComputeRange(double.Parse(logData[0].Split(',')[0]), LogIndexRangeSize).Item1;
-
-                // End of the last range
-                var endIndex = ComputeRange(double.Parse(logData[logData.Count - 1].Split(',')[0]), LogIndexRangeSize).Item2;
-
-                // Merge with updateLogData sequence
-                WriteLogDataValues(entity, 
-                    ToChunks(
-                        MergeSequence(
-                            ToSequence(QueryLogDataValues(entity, startIndex, endIndex, false)), 
-                            GetSequence(string.Empty, logData))));
-            }
-
-            // TODO: Fix later
-            //UpdateLogHeaderRanges(entity);
-
-            return new WitsmlResult(ErrorCodes.Success);
-        }
-
+        /// <summary>
+        /// Merges two sequences of log data to update a log data value "chunk"
+        /// </summary>
+        /// <param name="existingLogDataSequence">The existing log data sequence.</param>
+        /// <param name="updateLogDataSequence">The update log data sequence.</param>
+        /// <returns>The merged sequence of data</returns>
         private IEnumerable<Tuple<string, double, string>> MergeSequence(
             IEnumerable<Tuple<string, double, string>> existingLogDataSequence,
             IEnumerable<Tuple<string, double, string>> updateLogDataSequence)
@@ -418,6 +524,11 @@ namespace PDS.Witsml.Server.Data.Logs
             }
         }
 
+        /// <summary>
+        /// Builds a sequence of <see cref="Tuple{string, double, string}"/> from an <see cref="IEnumerable{LogDataValues}"/>.
+        /// </summary>
+        /// <param name="logDataValues">The log data values.</param>
+        /// <returns>An <see cref="IEnumerable{Tuple{string, double, string}}"/> containing a uid, index value of the data row and a single data row of values.</returns>
         private IEnumerable<Tuple<string, double, string>> ToSequence(IEnumerable<LogDataValues> logDataValues)
         {
             foreach (var ldv in logDataValues)
@@ -540,10 +651,5 @@ namespace PDS.Witsml.Server.Data.Logs
             return gmObject;
         }
         #endregion
-
-        public override WitsmlResult Delete(WitsmlQueryParser parser)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

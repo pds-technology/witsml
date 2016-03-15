@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic;
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
@@ -52,11 +54,11 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Gets a data object by the specified UUID.
         /// </summary>
-        /// <param name="uuid">The UUID.</param>
+        /// <param name="dataObjectId">The data object identifier.</param>
         /// <returns>The data object instance.</returns>
-        public override T Get(string uuid)
+        public override T Get(DataObjectId dataObjectId)
         {
-            return GetEntity(uuid);
+            return GetEntity(dataObjectId);
         }
 
         /// <summary>
@@ -72,25 +74,25 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Determines whether the entity exists in the data store.
         /// </summary>
-        /// <param name="uid">The uid.</param>
+        /// <param name="dataObjectId">The data object identifier.</param>
         /// <returns>true if the entity exists; otherwise, false</returns>
-        public override bool Exists(string uid)
+        public override bool Exists(DataObjectId dataObjectId)
         {
-            return Exists<T>(uid, DbCollectionName);
+            return Exists<T>(dataObjectId, DbCollectionName);
         }
 
         /// <summary>
         /// Determines whether the entity exists in the data store.
         /// </summary>
-        /// <param name="uid">The uid.</param>
+        /// <param name="dataObjectId">The data object identifier.</param>
         /// <param name="dbCollectionName">The name of the database collection.</param>
         /// <typeparam name="TObject">The data object type.</typeparam>
         /// <returns>true if the entity exists; otherwise, false</returns>
-        protected bool Exists<TObject>(string uid, string dbCollectionName)
+        protected bool Exists<TObject>(DataObjectId dataObjectId, string dbCollectionName)
         {
             try
             {
-                return GetEntityByUidQuery<TObject>(uid, dbCollectionName).Any();
+                return GetEntityByUidQuery<TObject>(dataObjectId, dbCollectionName) != null;
             }
             catch (MongoException ex)
             {
@@ -123,26 +125,26 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Gets an object from the data store by uid
         /// </summary>
-        /// <param name="uid">The uid of the object.</param>
+        /// <param name="dataObjectId">The data object identifier.</param>
         /// <returns>The object represented by the UID.</returns>
-        protected T GetEntity(string uid)
+        protected T GetEntity(DataObjectId dataObjectId)
         {
-            return GetEntity<T>(uid, DbCollectionName);
+            return GetEntity<T>(dataObjectId, DbCollectionName);
         }
 
         /// <summary>
         /// Gets an object from the data store by uid
         /// </summary>
-        /// <param name="uid">The uid of the object.</param>
+        /// <param name="dataObjectId">The data object identifier.</param>
         /// <param name="dbCollectionName">The naame of the database collection.</param>
         /// <typeparam name="TObject">The data object type.</typeparam>
         /// <returns>The object represented by the UID.</returns>
-        protected TObject GetEntity<TObject>(string uid, string dbCollectionName)
+        protected TObject GetEntity<TObject>(DataObjectId dataObjectId, string dbCollectionName)
         {
             try
             {
-                Logger.DebugFormat("Querying {0} MongoDb collection; uid: {1}", dbCollectionName, uid);
-                return GetEntityByUidQuery<TObject>(uid, dbCollectionName).FirstOrDefault();
+                Logger.DebugFormat("Querying {0} MongoDb collection; uid: {1}", dbCollectionName, dataObjectId);
+                return GetEntityByUidQuery<TObject>(dataObjectId, dbCollectionName);
             }
             catch (MongoException ex)
             {
@@ -154,19 +156,28 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Gets the entity by uid query.
         /// </summary>
-        /// <param name="uid">The uid.</param>
+        /// <param name="dataObjectId">The data object identifier.</param>
         /// <returns></returns>
-        protected IQueryable<T> GetEntityByUidQuery(string uid)
+        protected T GetEntityByUidQuery(DataObjectId dataObjectId)
         {
-            return GetEntityByUidQuery<T>(uid, DbCollectionName);
+            return GetEntityByUidQuery(dataObjectId);
         }
 
-        protected IQueryable<TObject> GetEntityByUidQuery<TObject>(string uid, string dbCollectionName)
+        protected TObject GetEntityByUidQuery<TObject>(DataObjectId dataObjectId, string dbCollectionName)
         {
-            var query = GetQuery<TObject>(dbCollectionName)
-                .Where(IdPropertyName + " = @0", uid);
+            var filters = new List<FilterDefinition<TObject>>();
+            if (typeof(T).BaseType == typeof(AbstractObject))
+                filters.Add(Builders<TObject>.Filter.Regex("Uuid", new BsonRegularExpression("/^" + dataObjectId.Uid + "$/i")));
+            else{
+                filters.Add(Builders<TObject>.Filter.Regex("Uid", new BsonRegularExpression("/^" + dataObjectId.Uid + "$/i")));
+                if (dataObjectId is WellObjectId)
+                    filters.Add(Builders<TObject>.Filter.Regex("UidWell", new BsonRegularExpression("/^" + ((WellObjectId)dataObjectId).UidWell + "$/i")));
+                if (dataObjectId is WellboreObjectId)
+                    filters.Add(Builders<TObject>.Filter.Regex("UidWell", new BsonRegularExpression("/^" + ((WellboreObjectId)dataObjectId).UidWellbore + "$/i")));
+            }
 
-            return query;
+            var exclude = Builders<TObject>.Projection.Exclude("_id");
+            return GetCollection<TObject>(dbCollectionName).Find(Builders<TObject>.Filter.And(filters)).Project<TObject>(exclude).FirstOrDefault();
         }
 
         /// <summary>

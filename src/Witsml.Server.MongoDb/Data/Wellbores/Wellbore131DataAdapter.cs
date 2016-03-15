@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
+using Energistics.Datatypes;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wellbores
@@ -70,9 +72,60 @@ namespace PDS.Witsml.Server.Data.Wellbores
             entity.Uid = NewUid(entity.Uid);
             entity.CommonData = entity.CommonData.Update();
 
+            var validator = Container.Resolve<IDataObjectValidator<Wellbore>>();
+            validator.Validate(Functions.AddToStore, entity);
+
+            Logger.DebugFormat("Add new wellbore with uidWell: {0}; uid: {1}", entity.UidWell, entity.Uid);
             InsertEntity(entity);
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uid);
+        }
+
+        /// <summary>
+        /// Gets a collection of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        public override List<Wellbore> GetAll(EtpUri? parentUri = null)
+        {
+            var query = GetQuery().AsQueryable();
+
+            if (parentUri != null)
+            {
+                var uidWell = parentUri.Value.ObjectId;
+                query = query.Where(x => x.UidWell == uidWell);
+            }
+
+            return query
+                .OrderBy(x => x.Name)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Puts the specified data object into the data store.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        public override WitsmlResult Put(Wellbore entity)
+        {
+            if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.GetObjectId()))
+            {
+                return Update(entity);
+            }
+            else
+            {
+                return Add(entity);
+            }
+        }
+
+        /// <summary>
+        /// Parses the specified XML string.
+        /// </summary>
+        /// <param name="xml">The XML string.</param>
+        /// <returns>An instance of <see cref="Wellbore" />.</returns>
+        protected override Wellbore Parse(string xml)
+        {
+            var list = WitsmlParser.Parse<WellboreList>(xml);
+            return list.Wellbore.FirstOrDefault();
         }
     }
 }

@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
+using Energistics.Datatypes;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
@@ -23,6 +25,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [ImportingConstructor]
         public MongoDbWellDataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Well131)
         {
+            Logger.Debug("Instance created.");
         }
 
         /// <summary>
@@ -31,6 +34,8 @@ namespace PDS.Witsml.Server.Data.Wells
         /// <param name="capServer">The capServer instance.</param>
         public void GetCapabilities(CapServer capServer)
         {
+            Logger.DebugFormat("Getting capabilities for server '{0}'.", capServer.Name);
+
             capServer.Add(Functions.GetFromStore, ObjectTypes.Well);
             capServer.Add(Functions.AddToStore, ObjectTypes.Well);
             //capServer.Add(Functions.UpdateInStore, ObjectTypes.Well);
@@ -46,9 +51,12 @@ namespace PDS.Witsml.Server.Data.Wells
         /// </returns>
         public override WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
         {
-            List<string> fields = null;
-            if (parser.ReturnElements() == OptionsIn.ReturnElements.IdOnly.Value)
-                fields = new List<string> { IdPropertyName, NamePropertyName };
+            var returnElements = parser.ReturnElements();
+            Logger.DebugFormat("Querying with return elements '{0}'", returnElements);
+
+            var fields = (OptionsIn.ReturnElements.IdOnly.Equals(returnElements))
+                ? new List<string> { IdPropertyName, NamePropertyName }
+                : null;
 
             return new WitsmlResult<IEnergisticsCollection>(
                 ErrorCodes.Success,
@@ -67,12 +75,61 @@ namespace PDS.Witsml.Server.Data.Wells
         /// </returns>
         public override WitsmlResult Add(Well entity)
         {
+            Logger.DebugFormat("Adding Well with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
+
             entity.Uid = NewUid(entity.Uid);
             entity.CommonData = entity.CommonData.Update();
 
+            var validator = Container.Resolve<IDataObjectValidator<Well>>();
+            validator.Validate(Functions.AddToStore, entity);
+
+            Logger.DebugFormat("Well with uid '{0}' and name {1} validated for Add", entity.Uid, entity.Name);
             InsertEntity(entity);
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uid);
+        }
+
+        /// <summary>
+        /// Gets a collection of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        public override List<Well> GetAll(EtpUri? parentUri = null)
+        {
+            Logger.Debug("Fetching all Wells.");
+
+            return GetQuery()
+                .OrderBy(x => x.Name)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Puts the specified data object into the data store.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        public override WitsmlResult Put(Well entity)
+        {
+            Logger.DebugFormat("Putting Well with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
+
+            if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.GetObjectId()))
+            {
+                return Update(entity);
+            }
+            else
+            {
+                return Add(entity);
+            }
+        }
+
+        /// <summary>
+        /// Parses the specified XML string.
+        /// </summary>
+        /// <param name="xml">The XML string.</param>
+        /// <returns>An instance of <see cref="Well" />.</returns>
+        protected override Well Parse(string xml)
+        {
+            var list = WitsmlParser.Parse<WellList>(xml);
+            return list.Well.FirstOrDefault();
         }
     }
 }

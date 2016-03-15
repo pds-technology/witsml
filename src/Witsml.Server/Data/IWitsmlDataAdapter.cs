@@ -48,8 +48,8 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Determines whether the entity exists in the data store.
         /// </summary>
-        /// <param name="uid">The uid.</param>
+        /// <param name="dataObjectId">The data object identifier.</param>
         /// <returns>true if the entity exists; otherwise, false</returns>
-        bool Exists(string uid);
+        bool Exists(DataObjectId dataObjectId);
     }
 }
