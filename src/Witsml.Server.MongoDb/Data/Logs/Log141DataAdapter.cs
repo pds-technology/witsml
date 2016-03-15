@@ -124,6 +124,103 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
+        /// Adds a <see cref="Log"/> entity to the data store.
+        /// </summary>
+        /// <param name="entity">The Log instance to add to the store.</param>
+        /// <returns>
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
+        /// </returns>
+        public override WitsmlResult Add(Log entity)
+        {
+            entity.Uid = NewUid(entity.Uid);
+            entity.CommonData = entity.CommonData.Update();
+
+            var validator = Container.Resolve<IDataObjectValidator<Log>>();
+            validator.Validate(Functions.AddToStore, entity);
+
+            try
+            {
+                // Separate the LogData.Data from the Log
+                var logData = ExtractLogDataData(entity);
+
+                // Save the log and verify
+                InsertEntity(entity);
+
+                // If there is any LogData.Data then save it.
+                if (logData.Any())
+                {
+                    WriteLogDataValues(entity, ToChunks(GetSequence(string.Empty, logData)));
+                }
+
+                return new WitsmlResult(ErrorCodes.Success, entity.Uid);
+            }
+            catch (Exception ex)
+            {
+                return new WitsmlResult(ErrorCodes.Unset, ex.Message + "\n" + ex.StackTrace);
+            }
+        }
+
+        /// <summary>
+        /// Computes the range of the data chunk containing the given index value for a given rangeSize.
+        /// </summary>
+        /// <param name="index">The index value contained within the computed range.</param>
+        /// <param name="rangeSize">Size of the range.</param>
+        /// <returns>A <see cref="Tuple{int, int}"/> containing the computed range.</returns>
+        public Tuple<int, int> ComputeRange(double index, int rangeSize)
+        {
+            var rangeIndex = (int)(Math.Floor(index / rangeSize));
+            return new Tuple<int, int>(rangeIndex * rangeSize, rangeIndex * rangeSize + rangeSize);
+
+        }
+
+        /// <summary>
+        /// Updates the specified <see cref="Log"/> instance in the store.
+        /// </summary>
+        /// <param name="entity">The <see cref="Log"/> instance.</param>
+        /// <returns>
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
+        /// </returns>
+        public override WitsmlResult Update(Log entity)
+        {
+            //List<LogDataValues> logDataValuesList = null;
+
+            // Separate the LogData.Data from the Log
+            var logData = ExtractLogDataData(entity);
+
+            if (logData.Any())
+            {
+                // Start of the first range
+                var startIndex = ComputeRange(double.Parse(logData[0].Split(',')[0]), LogIndexRangeSize).Item1;
+
+                // End of the last range
+                var endIndex = ComputeRange(double.Parse(logData[logData.Count - 1].Split(',')[0]), LogIndexRangeSize).Item2;
+
+                // Merge with updateLogData sequence
+                WriteLogDataValues(entity,
+                    ToChunks(
+                        MergeSequence(
+                            ToSequence(QueryLogDataValues(entity, startIndex, endIndex, false)),
+                            GetSequence(string.Empty, logData))));
+            }
+
+            // TODO: Fix later
+            //UpdateLogHeaderRanges(entity);
+
+            return new WitsmlResult(ErrorCodes.Success);
+        }
+
+        /// <summary>
+        /// Parses the specified XML string.
+        /// </summary>
+        /// <param name="xml">The XML string.</param>
+        /// <returns>An instance of <see cref="Log" />.</returns>
+        protected override Log Parse(string xml)
+        {
+            var list = WitsmlParser.Parse<LogList>(xml);
+            return list.Log.FirstOrDefault();
+        }
+
+        /// <summary>
         /// Gets a lists of logs with on the required log header properties.
         /// </summary>
         /// <param name="logs">The logs.</param>
@@ -291,43 +388,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Adds a <see cref="Log"/> entity to the data store.
-        /// </summary>
-        /// <param name="entity">The Log instance to add to the store.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public override WitsmlResult Add(Log entity)
-        {
-            entity.Uid = NewUid(entity.Uid);
-            entity.CommonData = entity.CommonData.Update();
-
-            var validator = Container.Resolve<IDataObjectValidator<Log>>();
-            validator.Validate(Functions.AddToStore, entity);
-
-            try
-            {
-                // Separate the LogData.Data from the Log
-                var logData = ExtractLogDataData(entity);
-
-                // Save the log and verify
-                InsertEntity(entity);
-
-                // If there is any LogData.Data then save it.
-                if (logData.Any())
-                {
-                    WriteLogDataValues(entity, ToChunks(GetSequence(string.Empty, logData)));
-                }
-
-                return new WitsmlResult(ErrorCodes.Success, entity.Uid);
-            }
-            catch (Exception ex)
-            {
-                return new WitsmlResult(ErrorCodes.Unset, ex.Message + "\n" + ex.StackTrace);
-            }
-        }
-
-        /// <summary>
         /// Extracts the log data data from the Log.
         /// </summary>
         /// <param name="log">The log.</param>
@@ -445,19 +505,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Computes the range of the data chunk containing the given index value for a given rangeSize.
-        /// </summary>
-        /// <param name="index">The index value contained within the computed range.</param>
-        /// <param name="rangeSize">Size of the range.</param>
-        /// <returns>A <see cref="Tuple{int, int}"/> containing the computed range.</returns>
-        public Tuple<int, int> ComputeRange(double index, int rangeSize)
-        {
-            var rangeIndex = (int)(Math.Floor(index / rangeSize));
-            return new Tuple<int, int>(rangeIndex * rangeSize, rangeIndex * rangeSize + rangeSize);
-
-        }
-
-        /// <summary>
         /// Writes an <see cref="IEnumerable{LogDataValues}"/> to the database belonging to the given log.
         /// </summary>
         /// <param name="log">The log containing the <see cref="LogDataValues"/>.</param>
@@ -486,42 +533,6 @@ namespace PDS.Witsml.Server.Data.Logs
                            .Set(u => u.EndIndex, x.EndIndex)
                            .Set(u => u.Data, x.Data));
                }));
-        }
-
-        /// <summary>
-        /// Updates the specified <see cref="Log"/> instance in the store.
-        /// </summary>
-        /// <param name="entity">The <see cref="Log"/> instance.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public override WitsmlResult Update(Log entity)
-        {
-            //List<LogDataValues> logDataValuesList = null;
-
-            // Separate the LogData.Data from the Log
-            var logData = ExtractLogDataData(entity);
-
-            if (logData.Any())
-            {
-                // Start of the first range
-                var startIndex = ComputeRange(double.Parse(logData[0].Split(',')[0]), LogIndexRangeSize).Item1;
-
-                // End of the last range
-                var endIndex = ComputeRange(double.Parse(logData[logData.Count - 1].Split(',')[0]), LogIndexRangeSize).Item2;
-
-                // Merge with updateLogData sequence
-                WriteLogDataValues(entity, 
-                    ToChunks(
-                        MergeSequence(
-                            ToSequence(QueryLogDataValues(entity, startIndex, endIndex, false)), 
-                            GetSequence(string.Empty, logData))));
-            }
-
-            // TODO: Fix later
-            //UpdateLogHeaderRanges(entity);
-
-            return new WitsmlResult(ErrorCodes.Success);
         }
 
         /// <summary>
@@ -690,16 +701,5 @@ namespace PDS.Witsml.Server.Data.Logs
             return gmObject;
         }
         #endregion
-
-        /// <summary>
-        /// Parses the specified XML string.
-        /// </summary>
-        /// <param name="xml">The XML string.</param>
-        /// <returns>An instance of <see cref="Log" />.</returns>
-        protected override Log Parse(string xml)
-        {
-            var list = WitsmlParser.Parse<LogList>(xml);
-            return list.Log.FirstOrDefault();
-        }
     }
 }
