@@ -33,8 +33,8 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Deletes a data object by the specified identifier.
         /// </summary>
-        /// <param name="uuid">The data object identifier.</param>
+        /// <param name="dataObjectId">The data object identifier.</param>
         /// <returns>A WITSML result.</returns>
-        WitsmlResult Delete(string uuid);
+        WitsmlResult Delete(DataObjectId dataObjectId);
     }
 }

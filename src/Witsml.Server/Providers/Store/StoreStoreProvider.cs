@@ -136,7 +136,7 @@ namespace PDS.Witsml.Server.Providers.Store
             try
             {
                 var dataAdapter = Container.Resolve<IEtpDataAdapter>(new ObjectName(uri.ObjectType, uri.Version));
-                dataAdapter.Delete(uri.ObjectId);
+                dataAdapter.Delete(new DataObjectId(uri.ObjectId, null));
             }
             catch (ContainerException ex)
             {

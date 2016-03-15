@@ -64,13 +64,13 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Deletes a data object by the specified UUID.
+        /// Deletes a data object by the specified identifier.
         /// </summary>
-        /// <param name="uuid">The UUID.</param>
+        /// <param name="dataObjectId">The data object identifier.</param>
         /// <returns>A WITSML result.</returns>
-        public override WitsmlResult Delete(string uuid)
+        public override WitsmlResult Delete(DataObjectId dataObjectId)
         {
-            return DeleteEntity(uuid);
+            return DeleteEntity(dataObjectId);
         }
 
         /// <summary>
@@ -94,7 +94,7 @@ namespace PDS.Witsml.Server.Data
         {
             try
             {
-                return GetEntityByUidQuery<TObject>(dataObjectId, dbCollectionName) != null;
+                return GetEntityById<TObject>(dataObjectId, dbCollectionName) != null;
             }
             catch (MongoException ex)
             {
@@ -146,7 +146,7 @@ namespace PDS.Witsml.Server.Data
             try
             {
                 Logger.DebugFormat("Querying {0} MongoDb collection; uid: {1}", dbCollectionName, dataObjectId);
-                return GetEntityByUidQuery<TObject>(dataObjectId, dbCollectionName);
+                return GetEntityById<TObject>(dataObjectId, dbCollectionName);
             }
             catch (MongoException ex)
             {
@@ -156,41 +156,29 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Gets the entity by uid query.
+        /// Gets the entity by it's data object identifier.
         /// </summary>
         /// <param name="dataObjectId">The data object identifier.</param>
         /// <returns>The entity represented by the indentifier.</returns>
-        protected T GetEntityByUidQuery(DataObjectId dataObjectId)
+        protected T GetEntityById(DataObjectId dataObjectId)
         {
-            return GetEntityByUidQuery<T>(dataObjectId, DbCollectionName);
+            return GetEntityById<T>(dataObjectId, DbCollectionName);
         }
 
         /// <summary>
-        /// Gets the entity by uid query.
+        /// Gets the entity by it's data object identifier.
         /// </summary>
         /// <typeparam name="TObject">The type of the object.</typeparam>
         /// <param name="dataObjectId">The data object identifier.</param>
         /// <param name="dbCollectionName">Name of the database collection.</param>
         /// <returns></returns>
-        protected TObject GetEntityByUidQuery<TObject>(DataObjectId dataObjectId, string dbCollectionName)
+        protected TObject GetEntityById<TObject>(DataObjectId dataObjectId, string dbCollectionName)
         {
-            var filters = new List<FilterDefinition<TObject>>();
-
-            filters.Add(Builders<TObject>.Filter.EqIgnoreCase(IdPropertyName, dataObjectId.Uid));
-
-            if (dataObjectId is WellObjectId)
-            {
-                filters.Add(Builders<TObject>.Filter.EqIgnoreCase("UidWell", ((WellObjectId)dataObjectId).UidWell));
-            }
-            if (dataObjectId is WellboreObjectId)
-            {
-                filters.Add(Builders<TObject>.Filter.EqIgnoreCase("UidWellbore", ((WellboreObjectId)dataObjectId).UidWellbore));
-            }
-
+            var filter = GetEntityFilter<TObject>(dataObjectId);
             var exclude = Builders<TObject>.Projection.Exclude("_id");
 
             return GetCollection<TObject>(dbCollectionName)
-                .Find(Builders<TObject>.Filter.And(filters))
+                .Find(filter)
                 .Project<TObject>(exclude)
                 .FirstOrDefault();
         }
@@ -245,7 +233,6 @@ namespace PDS.Witsml.Server.Data
                 Logger.DebugFormat("Inserting into {0} MongoDb collection.", dbCollectionName);
 
                 var collection = GetCollection<TObject>(dbCollectionName);
-
                 collection.InsertOne(entity);
             }
             catch (MongoException ex)
@@ -271,32 +258,32 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Deletes a data object by the specified UUID.
+        /// Deletes a data object by the specified identifier.
         /// </summary>
-        /// <param name="uuid">The UUID.</param>
+        /// <param name="dataObjectId">The data object identifier.</param>
         /// <returns>A WITSML result.</returns>
         /// <exception cref="WitsmlException"></exception>
-        protected WitsmlResult DeleteEntity(string uuid)
+        protected WitsmlResult DeleteEntity(DataObjectId dataObjectId)
         {
-            return DeleteEntity<T>(uuid, DbCollectionName);
+            return DeleteEntity<T>(dataObjectId, DbCollectionName);
         }
 
         /// <summary>
-        /// Deletes a data object by the specified UUID.
+        /// Deletes a data object by the specified identifier.
         /// </summary>
         /// <typeparam name="TObject">The type of data object.</typeparam>
-        /// <param name="uuid">The UUID.</param>
+        /// <param name="dataObjectId">The data object identifier.</param>
         /// <param name="dbCollectionName">The name of the database collection.</param>
         /// <returns>A WITSML result.</returns>
         /// <exception cref="WitsmlException"></exception>
-        protected WitsmlResult DeleteEntity<TObject>(string uuid, string dbCollectionName)
+        protected WitsmlResult DeleteEntity<TObject>(DataObjectId dataObjectId, string dbCollectionName)
         {
             try
             {
                 Logger.DebugFormat("Deleting from {0} MongoDb collection", dbCollectionName);
 
                 var collection = GetCollection<TObject>(dbCollectionName);
-                var filter = Builders<TObject>.Filter.Eq(IdPropertyName, uuid);
+                var filter = GetEntityFilter<TObject>(dataObjectId);
                 var result = collection.DeleteOne(filter);
 
                 return new WitsmlResult(ErrorCodes.Success);
@@ -306,6 +293,31 @@ namespace PDS.Witsml.Server.Data
                 Logger.ErrorFormat("Error deleting from {0} MongoDb collection:{1}{2}", dbCollectionName, Environment.NewLine, ex);
                 throw new WitsmlException(ErrorCodes.ErrorDeletingFromDataStore, ex);
             }
+        }
+
+        /// <summary>
+        /// Creates a filter that can be used to find the unique entity represented by the specified <see cref="DataObjectId"/>.
+        /// </summary>
+        /// <typeparam name="TObject">The data object type.</typeparam>
+        /// <param name="dataObjectId">The data object identifier.</param>
+        /// <returns>The filter definition instance.</returns>
+        protected FilterDefinition<TObject> GetEntityFilter<TObject>(DataObjectId dataObjectId)
+        {
+            var builder = Builders<TObject>.Filter;
+            var filters = new List<FilterDefinition<TObject>>();
+
+            filters.Add(builder.EqIgnoreCase(IdPropertyName, dataObjectId.Uid));
+
+            if (dataObjectId is WellObjectId)
+            {
+                filters.Add(builder.EqIgnoreCase("UidWell", ((WellObjectId)dataObjectId).UidWell));
+            }
+            if (dataObjectId is WellboreObjectId)
+            {
+                filters.Add(builder.EqIgnoreCase("UidWellbore", ((WellboreObjectId)dataObjectId).UidWellbore));
+            }
+
+            return builder.And(filters);
         }
     }
 }
