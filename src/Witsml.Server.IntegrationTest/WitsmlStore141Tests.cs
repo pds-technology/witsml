@@ -274,22 +274,6 @@ namespace PDS.Witsml.Server
         }
 
         [TestMethod]
-        public void Test_error_code_413_unsupported_data_object()
-        {
-            var well = new Well { Name = "Well-to-add-unsupported-error" };
-            var wells = new WellList { Well = DevKit.List(well) };
-
-            // update Version property to an unsupported data schema version
-            wells.Version = "1.4.x.y";
-
-            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
-            var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
-
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.DataObjectNotSupported, response.Result);
-        }
-
-        [TestMethod]
         public void Test_error_code_423_unsupported_data_version()
         {
             var request = new WMLS_GetCapRequest { OptionsIn = "dataVersion=1.6.1.1" };
@@ -335,22 +319,6 @@ namespace PDS.Witsml.Server
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.ApiVersionNotSupported, response.Result);
-        }
-
-        [TestMethod]
-        public void Test_error_code_468_missing_version_attribute()
-        {
-            var well = new Well { Name = "Well-to-add-missing-version-attribute" };
-            var wells = new WellList { Well = DevKit.List(well) };
-
-            // update Version property to an unsupported data schema version
-            wells.Version = null;
-
-            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
-            var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
-
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
         }
 
         [Ignore]
