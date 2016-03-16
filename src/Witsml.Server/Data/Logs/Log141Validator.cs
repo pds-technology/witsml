@@ -49,12 +49,12 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             // Validate parent exists
-            else if (!_wellDataAdapter.Exists(new DataObjectId(DataObject.UidWell, null)))
+            else if (!_wellDataAdapter.Exists(new DataObjectId(DataObject.UidWell, DataObject.NameWell)))
             {
                 yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWell" });
             }
             // Validate parent exists
-            else if (!_wellboreDataAdapter.Exists(new WellObjectId(DataObject.UidWellbore, DataObject.UidWell, null)))
+            else if (!_wellboreDataAdapter.Exists(new WellObjectId(DataObject.UidWellbore, DataObject.UidWell, DataObject.NameWellbore)))
             {
                 yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWellbore" });
             }

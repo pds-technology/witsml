@@ -231,7 +231,7 @@ namespace PDS.Witsml.Server.Data.Wells
             string inputXml = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
                 "<well>" + Environment.NewLine +
                 "<name>PDS Full Test Well</name>" + Environment.NewLine +
-                "<dTimLicense>2001-05-15T13:20:00-06:00</dTimLicense>" + Environment.NewLine +
+                "<dTimLicense>2001-05-15T13:20:00-05:00</dTimLicense>" + Environment.NewLine +
                 "<timeZone>-06:00</timeZone>" + Environment.NewLine +
                 "</well>" + Environment.NewLine +
                 "</wells>";
@@ -377,7 +377,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var uid_01 = response.SuppMsgOut;
 
             var well_02 = DevKit.CreateFullWell();
-            well_02.CommonData.DateTimeCreation = DateTime.UtcNow;
+            well_02.CommonData.DateTimeCreation = DateTimeOffset.UtcNow;
             response = DevKit.Add<WellList, Well>(well_02);
 
             Assert.IsNotNull(response);
@@ -412,7 +412,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var wellLastChangeTime = result[0].CommonData.DateTimeLastChange;
 
             var well_02 = DevKit.CreateFullWell();
-            well_02.CommonData.DateTimeCreation = DateTime.UtcNow;
+            well_02.CommonData.DateTimeCreation = DateTimeOffset.UtcNow;
             response = DevKit.Add<WellList, Well>(well_02);
 
             Assert.IsNotNull(response);
@@ -498,7 +498,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
         private Well CreateTestWell()
         {
-            var dateTimeSpud = DateTime.UtcNow;
+            var dateTimeSpud = DateTimeOffset.UtcNow;
             var groundElevation = new WellElevationCoord
             {
                 Uom = WellVerticalCoordinateUom.m,

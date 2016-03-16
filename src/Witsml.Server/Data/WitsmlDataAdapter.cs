@@ -128,11 +128,11 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Deletes a data object by the specified UUID.
+        /// Deletes a data object by the specified identifier.
         /// </summary>
-        /// <param name="uuid">The UUID.</param>
+        /// <param name="dataObjectId">The data object identifier.</param>
         /// <returns>A WITSML result.</returns>
-        public virtual WitsmlResult Delete(string uuid)
+        public virtual WitsmlResult Delete(DataObjectId dataObjectId)
         {
             throw new NotImplementedException();
         }
@@ -148,7 +148,7 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Gets a data object by the specified UUID.
+        /// Gets a data object by the specified identifier.
         /// </summary>
         /// <param name="dataObjectId">The data object identifier.</param>
         /// <returns>The data object instance.</returns>
@@ -170,13 +170,13 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Deletes a data object by the specified UUID.
+        /// Deletes a data object by the specified identifier.
         /// </summary>
-        /// <param name="uuid">The UUID.</param>
+        /// <param name="dataObjectId">The data object identifier.</param>
         /// <returns>A WITSML result.</returns>
-        WitsmlResult IEtpDataAdapter.Delete(string uuid)
+        WitsmlResult IEtpDataAdapter.Delete(DataObjectId dataObjectId)
         {
-            return Delete(uuid);
+            return Delete(dataObjectId);
         }
 
         /// <summary>

@@ -3,6 +3,7 @@ using Energistics.DataAccess;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using PDS.Witsml.Server.Models;
 
@@ -51,6 +52,16 @@ namespace PDS.Witsml.Server.Data
                     cm.AutoMap();
                     cm.MapIdMember(x => x.Uid).SetIdGenerator(UidGenerator.Instance);
                 });
+            }
+
+            try
+            {
+                BsonSerializer.RegisterSerializer(new TimestampSerializer());
+            }
+            catch (BsonSerializationException)
+            {
+                // Ignoring exception because there is no clean way to check if a specific type of serializer is already registered. 
+                // Calling BsonSerializer.LookupSerializer<Timestamp>() will create the wrong default serializer.
             }
         }
 

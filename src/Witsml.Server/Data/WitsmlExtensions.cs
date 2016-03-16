@@ -107,9 +107,9 @@ namespace PDS.Witsml.Server.Data
                 commonData = new Witsml141Schemas.CommonData();
 
             if (commonData.DateTimeCreation == null)
-                commonData.DateTimeCreation = DateTime.UtcNow;
+                commonData.DateTimeCreation = DateTimeOffset.UtcNow;
 
-            commonData.DateTimeLastChange = DateTime.UtcNow;
+            commonData.DateTimeLastChange = DateTimeOffset.UtcNow;
 
             return commonData;
         }

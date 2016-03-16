@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic;
-using Energistics.DataAccess.WITSML200.ComponentSchemas;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
@@ -47,8 +45,12 @@ namespace PDS.Witsml.Server.Data
         /// Gets the name of the identifier property.
         /// </summary>
         /// <value>The name of the identifier property.</value>
-        protected string IdPropertyName { get; private set; }   
+        protected string IdPropertyName { get; private set; }
 
+        /// <summary>
+        /// Gets the name of the Name property.
+        /// </summary>
+        /// <value>The name of the Name property.</value>
         protected string NamePropertyName { get; private set; }
 
         /// <summary>
@@ -62,13 +64,13 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Deletes a data object by the specified UUID.
+        /// Deletes a data object by the specified identifier.
         /// </summary>
-        /// <param name="uuid">The UUID.</param>
+        /// <param name="dataObjectId">The data object identifier.</param>
         /// <returns>A WITSML result.</returns>
-        public override WitsmlResult Delete(string uuid)
+        public override WitsmlResult Delete(DataObjectId dataObjectId)
         {
-            return DeleteEntity(uuid);
+            return DeleteEntity(dataObjectId);
         }
 
         /// <summary>
@@ -92,7 +94,7 @@ namespace PDS.Witsml.Server.Data
         {
             try
             {
-                return GetEntityByUidQuery<TObject>(dataObjectId, dbCollectionName) != null;
+                return GetEntityById<TObject>(dataObjectId, dbCollectionName) != null;
             }
             catch (MongoException ex)
             {
@@ -138,13 +140,13 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dataObjectId">The data object identifier.</param>
         /// <param name="dbCollectionName">The naame of the database collection.</param>
         /// <typeparam name="TObject">The data object type.</typeparam>
-        /// <returns>The object represented by the UID.</returns>
+        /// <returns>The entity represented by the indentifier.</returns>
         protected TObject GetEntity<TObject>(DataObjectId dataObjectId, string dbCollectionName)
         {
             try
             {
                 Logger.DebugFormat("Querying {0} MongoDb collection; uid: {1}", dbCollectionName, dataObjectId);
-                return GetEntityByUidQuery<TObject>(dataObjectId, dbCollectionName);
+                return GetEntityById<TObject>(dataObjectId, dbCollectionName);
             }
             catch (MongoException ex)
             {
@@ -154,30 +156,31 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Gets the entity by uid query.
+        /// Gets the entity by it's data object identifier.
         /// </summary>
         /// <param name="dataObjectId">The data object identifier.</param>
-        /// <returns></returns>
-        protected T GetEntityByUidQuery(DataObjectId dataObjectId)
+        /// <returns>The entity represented by the indentifier.</returns>
+        protected T GetEntityById(DataObjectId dataObjectId)
         {
-            return GetEntityByUidQuery(dataObjectId);
+            return GetEntityById<T>(dataObjectId, DbCollectionName);
         }
 
-        protected TObject GetEntityByUidQuery<TObject>(DataObjectId dataObjectId, string dbCollectionName)
+        /// <summary>
+        /// Gets the entity by it's data object identifier.
+        /// </summary>
+        /// <typeparam name="TObject">The type of the object.</typeparam>
+        /// <param name="dataObjectId">The data object identifier.</param>
+        /// <param name="dbCollectionName">Name of the database collection.</param>
+        /// <returns></returns>
+        protected TObject GetEntityById<TObject>(DataObjectId dataObjectId, string dbCollectionName)
         {
-            var filters = new List<FilterDefinition<TObject>>();
-            if (typeof(T).BaseType == typeof(AbstractObject))
-                filters.Add(Builders<TObject>.Filter.Regex("Uuid", new BsonRegularExpression("/^" + dataObjectId.Uid + "$/i")));
-            else{
-                filters.Add(Builders<TObject>.Filter.Regex("Uid", new BsonRegularExpression("/^" + dataObjectId.Uid + "$/i")));
-                if (dataObjectId is WellObjectId)
-                    filters.Add(Builders<TObject>.Filter.Regex("UidWell", new BsonRegularExpression("/^" + ((WellObjectId)dataObjectId).UidWell + "$/i")));
-                if (dataObjectId is WellboreObjectId)
-                    filters.Add(Builders<TObject>.Filter.Regex("UidWell", new BsonRegularExpression("/^" + ((WellboreObjectId)dataObjectId).UidWellbore + "$/i")));
-            }
-
+            var filter = GetEntityFilter<TObject>(dataObjectId);
             var exclude = Builders<TObject>.Projection.Exclude("_id");
-            return GetCollection<TObject>(dbCollectionName).Find(Builders<TObject>.Filter.And(filters)).Project<TObject>(exclude).FirstOrDefault();
+
+            return GetCollection<TObject>(dbCollectionName)
+                .Find(filter)
+                .Project<TObject>(exclude)
+                .FirstOrDefault();
         }
 
         /// <summary>
@@ -230,7 +233,6 @@ namespace PDS.Witsml.Server.Data
                 Logger.DebugFormat("Inserting into {0} MongoDb collection.", dbCollectionName);
 
                 var collection = GetCollection<TObject>(dbCollectionName);
-
                 collection.InsertOne(entity);
             }
             catch (MongoException ex)
@@ -255,65 +257,33 @@ namespace PDS.Witsml.Server.Data
             return uid;
         }
 
-        protected IQueryable<TObject> FilterQuery<TObject>(WitsmlQueryParser parser, IQueryable<TObject> query, List<string> names)
-        {
-            // For entity property name and its value
-            var nameValues = new Dictionary<string, string>();
-
-            // For each name pair ("<xml name>,<entity propety name>") 
-            //... create a dictionary of property names and corresponding values.
-            names.ForEach(n =>
-            {
-                // Split out the xml name and entity property names for ease of use.
-                var nameAndProperty = n.Split(',');
-                nameValues.Add(nameAndProperty[1], parser.PropertyValue(nameAndProperty[0]));
-            });
-
-            query = QueryByNames(query, nameValues);
-
-            return query;
-        }
-
-        protected IQueryable<TObject> QueryByNames<TObject>(IQueryable<TObject> query, Dictionary<string, string> nameValues)
-        {
-            if (nameValues.Values.ToList().TrueForAll(nameValue => !string.IsNullOrEmpty(nameValue)))
-            {
-                nameValues.Keys.ToList().ForEach(nameKey =>
-                {
-                    query = query.Where(string.Format("{0} = \"{1}\"", nameKey, nameValues[nameKey]));
-                });
-            }
-
-            return query;
-        }
-
         /// <summary>
-        /// Deletes a data object by the specified UUID.
+        /// Deletes a data object by the specified identifier.
         /// </summary>
-        /// <param name="uuid">The UUID.</param>
+        /// <param name="dataObjectId">The data object identifier.</param>
         /// <returns>A WITSML result.</returns>
         /// <exception cref="WitsmlException"></exception>
-        protected WitsmlResult DeleteEntity(string uuid)
+        protected WitsmlResult DeleteEntity(DataObjectId dataObjectId)
         {
-            return DeleteEntity<T>(uuid, DbCollectionName);
+            return DeleteEntity<T>(dataObjectId, DbCollectionName);
         }
 
         /// <summary>
-        /// Deletes a data object by the specified UUID.
+        /// Deletes a data object by the specified identifier.
         /// </summary>
         /// <typeparam name="TObject">The type of data object.</typeparam>
-        /// <param name="uuid">The UUID.</param>
+        /// <param name="dataObjectId">The data object identifier.</param>
         /// <param name="dbCollectionName">The name of the database collection.</param>
         /// <returns>A WITSML result.</returns>
         /// <exception cref="WitsmlException"></exception>
-        protected WitsmlResult DeleteEntity<TObject>(string uuid, string dbCollectionName)
+        protected WitsmlResult DeleteEntity<TObject>(DataObjectId dataObjectId, string dbCollectionName)
         {
             try
             {
                 Logger.DebugFormat("Deleting from {0} MongoDb collection", dbCollectionName);
 
                 var collection = GetCollection<TObject>(dbCollectionName);
-                var filter = Builders<TObject>.Filter.Eq(IdPropertyName, uuid);
+                var filter = GetEntityFilter<TObject>(dataObjectId);
                 var result = collection.DeleteOne(filter);
 
                 return new WitsmlResult(ErrorCodes.Success);
@@ -323,6 +293,31 @@ namespace PDS.Witsml.Server.Data
                 Logger.ErrorFormat("Error deleting from {0} MongoDb collection:{1}{2}", dbCollectionName, Environment.NewLine, ex);
                 throw new WitsmlException(ErrorCodes.ErrorDeletingFromDataStore, ex);
             }
+        }
+
+        /// <summary>
+        /// Creates a filter that can be used to find the unique entity represented by the specified <see cref="DataObjectId"/>.
+        /// </summary>
+        /// <typeparam name="TObject">The data object type.</typeparam>
+        /// <param name="dataObjectId">The data object identifier.</param>
+        /// <returns>The filter definition instance.</returns>
+        protected FilterDefinition<TObject> GetEntityFilter<TObject>(DataObjectId dataObjectId)
+        {
+            var builder = Builders<TObject>.Filter;
+            var filters = new List<FilterDefinition<TObject>>();
+
+            filters.Add(builder.EqIgnoreCase(IdPropertyName, dataObjectId.Uid));
+
+            if (dataObjectId is WellObjectId)
+            {
+                filters.Add(builder.EqIgnoreCase("UidWell", ((WellObjectId)dataObjectId).UidWell));
+            }
+            if (dataObjectId is WellboreObjectId)
+            {
+                filters.Add(builder.EqIgnoreCase("UidWellbore", ((WellboreObjectId)dataObjectId).UidWellbore));
+            }
+
+            return builder.And(filters);
         }
     }
 }

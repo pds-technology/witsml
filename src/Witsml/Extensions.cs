@@ -92,7 +92,7 @@ namespace PDS.Witsml
         /// <returns>The identified object.</returns>
         public static DataObjectId GetObjectId(this AbstractObject instance)
         {
-            return new DataObjectId(instance.Uuid, null);
+            return new DataObjectId(instance.Uuid, instance.Citation == null ? null : instance.Citation.Title);
         }
     }
 }

@@ -15,6 +15,8 @@ namespace PDS.Witsml.Server.Data
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(WitsmlQueryTemplate<T>));
         private static readonly IList<Type> ExcludeTypes = new List<Type>();
+        private static readonly DateTime DefaultDateTime = new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        private static readonly DateTimeOffset DefaultDateTimeOffset = DateTimeOffset.MinValue.AddYears(1899);
 
         static WitsmlQueryTemplate()
         {
@@ -44,13 +46,13 @@ namespace PDS.Witsml.Server.Data
 
         public string AsXml()
         {
-            return EnergisticsConverter.ObjectToXml(AsObject());
+            return ToXml(AsObject());
         }
 
         public string AsXml<TList>() where TList : IEnergisticsCollection
         {
             var list = CreateTemplate(typeof(TList));
-            return EnergisticsConverter.ObjectToXml(list);
+            return ToXml(list);
         }
 
         protected object CreateTemplate(Type objectType)
@@ -72,9 +74,17 @@ namespace PDS.Witsml.Server.Data
             {
                 return Convert.ChangeType(1, objectType);
             }
-            if (typeof(DateTime).IsAssignableFrom(objectType))
+            if (objectType == typeof(DateTime))
             {
-                return DateTime.MinValue;
+                return DefaultDateTime;
+            }
+            if (objectType == typeof(DateTimeOffset))
+            {
+                return DefaultDateTimeOffset;
+            }
+            if (objectType == typeof(Timestamp))
+            {
+                return new Timestamp(DefaultDateTimeOffset);
             }
             if (objectType.IsEnum)
             {
@@ -128,6 +138,11 @@ namespace PDS.Witsml.Server.Data
         private bool IsIgnored(PropertyInfo property)
         {
             return property.GetCustomAttributes<XmlIgnoreAttribute>().Any();
+        }
+
+        private string ToXml(object instance)
+        {
+            return EnergisticsConverter.ObjectToXml(instance);
         }
     }
 }
