@@ -112,13 +112,15 @@ namespace PDS.Witsml.Server.Data
             {
                 throw new WitsmlException((ErrorCodes)witsmlValidationResult.ErrorCode);
             }
-            else if (!Enum.TryParse(results.First().ErrorMessage, out errorCode))
+            else if (Enum.TryParse(results.First().ErrorMessage, out errorCode))
+            {
+                throw new WitsmlException(errorCode);
+            }
+            else
             {
                 throw new WitsmlException(ErrorCodes.InputTemplateNonConforming,
                     string.Join("; ", results.Select(x => x.ErrorMessage)));
             }
-
-
         }
     }
 }
