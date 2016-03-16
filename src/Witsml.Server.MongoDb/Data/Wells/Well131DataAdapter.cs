@@ -90,38 +90,6 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         /// <summary>
-        /// Gets a collection of data objects related to the specified URI.
-        /// </summary>
-        /// <param name="parentUri">The parent URI.</param>
-        /// <returns>A collection of data objects.</returns>
-        public override List<Well> GetAll(EtpUri? parentUri = null)
-        {
-            Logger.Debug("Fetching all Wells.");
-
-            return GetQuery()
-                .OrderBy(x => x.Name)
-                .ToList();
-        }
-
-        /// <summary>
-        /// Puts the specified data object into the data store.
-        /// </summary>
-        /// <param name="entity">The entity.</param>
-        public override WitsmlResult Put(Well entity)
-        {
-            Logger.DebugFormat("Putting Well with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
-
-            if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.GetObjectId()))
-            {
-                return Update(entity);
-            }
-            else
-            {
-                return Add(entity);
-            }
-        }
-
-        /// <summary>
         /// Parses the specified XML string.
         /// </summary>
         /// <param name="xml">The XML string.</param>
