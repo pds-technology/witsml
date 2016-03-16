@@ -12,10 +12,8 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Queries the object(s) specified by the parser.
         /// </summary>
-        /// <param name="parser">The parser that specifies the query parameters.</param>
-        /// <returns>
-        /// Queried objects.
-        /// </returns>
+        /// <param name="parser">The query parser.</param>
+        /// <returns>Queried objects.</returns>
         WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser);
 
         /// <summary>
@@ -39,7 +37,7 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Deletes or partially updates the specified object by uid.
         /// </summary>
-        /// <param name="parser">The parser that specifies the object.</param>
+        /// <param name="parser">The query parser.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
@@ -51,5 +49,12 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dataObjectId">The data object identifier.</param>
         /// <returns>true if the entity exists; otherwise, false</returns>
         bool Exists(DataObjectId dataObjectId);
+
+        /// <summary>
+        /// Parses the specified XML string.
+        /// </summary>
+        /// <param name="parser">The query parser.</param>
+        /// <returns>An instance of <see cref="T"/>.</returns>
+        T Parse(WitsmlQueryParser parser);
     }
 }

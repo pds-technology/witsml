@@ -145,7 +145,6 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
         }
 
-
         [Ignore]
         [TestMethod]
         public void Test_error_code_411_optionsIn_invalid_format()
@@ -205,6 +204,23 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
+        public void Test_error_code_443_invalid_unit_of_measure_value()
+        {
+            string xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                           "   <well>" + Environment.NewLine +
+                           "     <name>Well-to-add-missing-unit</name>" + Environment.NewLine +
+                           "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
+                           "     <wellheadElevation uom=\"abc123\">1000</wellheadElevation>" + Environment.NewLine +
+                           "   </well>" + Environment.NewLine +
+                           "</wells>";
+
+            var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.InvalidUnitOfMeasure, response.Result);
+        }
+
+        [TestMethod]
         public void Test_error_code_444_mulitple_data_objects_error()
         {
             var well1 = new Well { Name = "Well-to-01", TimeZone = DevKit.TimeZone, Uid = DevKit.Uid() };
@@ -218,17 +234,18 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.InputTemplateMultipleDataObjects, response.Result);
         }
 
-        [Ignore]
         [TestMethod]
         public void Test_error_code_453_missing_unit_for_measure_data()
         {
-            var well = new Well
-            {
-                Name = "Well-to-add-missing-unit",
-                TimeZone = DevKit.TimeZone,
-                WellheadElevation = new WellElevationCoord { Value = 12.0 }
-            };
-            var response = DevKit.Add<WellList, Well>(well);
+            string xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                           "   <well>" + Environment.NewLine +
+                           "     <name>Well-to-add-missing-unit</name>" + Environment.NewLine +
+                           "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
+                           "     <wellheadElevation>1000</wellheadElevation>" + Environment.NewLine +
+                           "   </well>" + Environment.NewLine +
+                           "</wells>";
+
+            var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.MissingUnitForMeasureData, response.Result);

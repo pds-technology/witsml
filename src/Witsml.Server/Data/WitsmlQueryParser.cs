@@ -10,6 +10,7 @@ namespace PDS.Witsml.Server.Data
     {
         private readonly XNamespace _namespace;
         private readonly XDocument _document;
+        private readonly bool _hasPluralRoot;
 
         public WitsmlQueryParser(RequestContext context)
         {
@@ -17,6 +18,7 @@ namespace PDS.Witsml.Server.Data
             Options = OptionsIn.Parse(context.Options);
             _document = WitsmlParser.Parse(context.Xml);
             _namespace = _document.Root.GetDefaultNamespace();
+            _hasPluralRoot = _document.Root.Attributes("version").Any();
         }
 
         public RequestContext Context { get; private set; }
@@ -54,7 +56,10 @@ namespace PDS.Witsml.Server.Data
 
         public IEnumerable<XElement> Elements()
         {
-            return _document.Root.Elements(_namespace + Context.ObjectType);
+            if (_hasPluralRoot)
+                return _document.Root.Elements(_namespace + Context.ObjectType);
+
+            return _document.Elements();
         }
 
         public XElement Element()

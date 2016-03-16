@@ -1,11 +1,11 @@
 ﻿using System;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML200;
-using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using PDS.Framework;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
@@ -46,11 +46,40 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
-        public void CanSerializeWellToXml()
+        public void Well_can_be_serialized_to_xml()
         {
             var xml = EnergisticsConverter.ObjectToXml(Well1);
             Console.WriteLine(xml);
             Assert.IsNotNull(xml);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(WitsmlException))]
+        public void Well_can_be_parsed_and_validated()
+        {
+            const string xml = @"<?xml version=""1.0""?>
+                <Well xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" uuid=""81f60891-b69c-4515-870f-0d1954dcac11"" xmlns=""http://www.energistics.org/energyml/data/witsmlv2"">
+                    <Citation xmlns=""http://www.energistics.org/energyml/data/commonv2"">
+                        <Title>Well 01 - 160316-000508-840</Title>
+                        <Originator>DevKit200Aspect</Originator>
+                        <Creation>2016-03-16T05:05:08.8416296Z</Creation>
+                        <Format>PDS.Witsml.Server.IntegrationTest, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</Format>
+                    </Citation>
+                    <PcInterest>100</PcInterest>  <!-- Missing uom attribute should throw exception -->
+                    <TimeZone>-06:00</TimeZone>
+                    <GeographicLocationWGS84>
+                        <Latitude>28.5597</Latitude>
+                        <Longitude>-90.6671</Longitude>
+                        <Crs xmlns:q1=""http://www.energistics.org/energyml/data/commonv2"" xsi:type=""q1:GeodeticEpsgCrs"">
+                            <q1:EpsgCode>26914</q1:EpsgCode>
+                        </Crs>
+                    </GeographicLocationWGS84>
+                </Well>";
+
+            var parser = new WitsmlQueryParser(new RequestContext(Functions.AddToStore, ObjectTypes.Well, xml, null, null));
+            var well = WellAdapter.Parse(parser);
+
+            Assert.IsNotNull(well);
         }
 
         [TestMethod]

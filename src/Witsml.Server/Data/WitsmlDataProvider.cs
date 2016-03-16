@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Energistics.DataAccess;
+﻿using Energistics.DataAccess;
 using log4net;
 using PDS.Witsml.Server.Configuration;
 
@@ -54,8 +53,9 @@ namespace PDS.Witsml.Server.Data
         public virtual WitsmlResult AddToStore(RequestContext context)
         {
             Logger.Debug("Executing insert");
-            var list = WitsmlParser.Parse<TList>(context.Xml);
-            return _dataAdapter.Add(list.Items.Cast<TObject>().Single());
+            var parser = new WitsmlQueryParser(context);
+            var entity = _dataAdapter.Parse(parser);
+            return _dataAdapter.Add(entity);
         }
 
         /// <summary>
@@ -68,8 +68,9 @@ namespace PDS.Witsml.Server.Data
         public virtual WitsmlResult UpdateInStore(RequestContext context)
         {
             Logger.Debug("Executing update");
-            var list = WitsmlParser.Parse<TList>(context.Xml);
-            return _dataAdapter.Update(list.Items.Cast<TObject>().Single());
+            var parser = new WitsmlQueryParser(context);
+            var entity = _dataAdapter.Parse(parser);
+            return _dataAdapter.Update(entity);
         }
 
         /// <summary>

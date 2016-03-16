@@ -54,6 +54,20 @@ namespace PDS.Witsml.Server.Data
         protected string NamePropertyName { get; private set; }
 
         /// <summary>
+        /// Parses the specified XML string.
+        /// </summary>
+        /// <param name="parser">The query parser.</param>
+        /// <returns>An instance of <see cref="!:T" />.</returns>
+        public override T Parse(WitsmlQueryParser parser)
+        {
+            // TODO: for task #4895, need to make this work for WITSML 2.0 data objects with abstract property types (e.g. Well.GeographicLocationWGS84.Crs)
+            //var inputValidator = new MongoDbQuery<T>(GetCollection(), parser, null);
+            //inputValidator.Validate();
+
+            return Parse(parser.Context.Xml);
+        }
+
+        /// <summary>
         /// Gets a data object by the specified UUID.
         /// </summary>
         /// <param name="dataObjectId">The data object identifier.</param>
@@ -187,9 +201,8 @@ namespace PDS.Witsml.Server.Data
         /// Queries the data store with Mongo Bson filter and projection.
         /// </summary>
         /// <param name="parser">The parser.</param>
-        /// <param name="tList">List of query for object T.</param>
         /// <returns>The query results collection.</returns>
-        protected List<T> QueryEntities<TList>(WitsmlQueryParser parser, List<string> fields)
+        protected List<T> QueryEntities(WitsmlQueryParser parser, List<string> fields)
         {
             try
             {
@@ -201,7 +214,7 @@ namespace PDS.Witsml.Server.Data
                 }
 
                 Logger.DebugFormat("Querying {0} MongoDb collection.", DbCollectionName);
-                var query = new MongoDbQuery<TList, T>(GetCollection(), parser, fields, IdPropertyName);
+                var query = new MongoDbQuery<T>(GetCollection(), parser, fields);
                 return query.Execute();
             }
             catch (MongoException ex)

@@ -233,9 +233,9 @@
         KeywordNotSupportedByServer = -442,
 
         /// <summary>
-        /// -443 The value of the uom attribute is must match an ‘annotation’ attribute from the WITSML Units Dictionary
-        /// XML file.
+        /// -443 The value of the uom attribute is must match an ‘annotation’ attribute from the WITSML Units Dictionary XML file.
         /// </summary>
+        InvalidUnitOfMeasure = -443,
 
         /// <summary>
         /// -444 The input template must not specify more than one data-object.
@@ -280,8 +280,7 @@
         /// </summary>
 
         /// <summary>
-        /// -453 For WMLS_AddToStore and WMLS_UpdateInStore, the client must always specify the unit for all
-        /// measure data.
+        /// -453 For WMLS_AddToStore and WMLS_UpdateInStore, the client must always specify the unit for all measure data.
         /// </summary>
         MissingUnitForMeasureData = -453,
 

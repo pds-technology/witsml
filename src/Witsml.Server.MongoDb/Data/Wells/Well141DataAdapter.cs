@@ -62,7 +62,7 @@ namespace PDS.Witsml.Server.Data.Wells
                 ErrorCodes.Success,
                 new WellList()
                 {
-                    Well = QueryEntities<WellList>(parser, fields)
+                    Well = QueryEntities(parser, fields)
                 });
         }
 
@@ -110,7 +110,7 @@ namespace PDS.Witsml.Server.Data.Wells
         public override WitsmlResult Put(Well entity)
         {
             Logger.DebugFormat("Putting Well with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
-
+            
             if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.GetObjectId()))
             {
                 return Update(entity);

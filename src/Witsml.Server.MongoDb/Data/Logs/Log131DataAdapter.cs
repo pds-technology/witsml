@@ -53,30 +53,25 @@ namespace PDS.Witsml.Server.Data.Logs
         /// Queries the object(s) specified by the parser.
         /// </summary>
         /// <param name="parser">The parser that specifies the query parameters.</param>
-        /// <returns>
-        /// Queried objects.
-        /// </returns>
+        /// <returns>Queried objects.</returns>
         public override WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
         {
-            List<string> fields = null;
-            if (parser.ReturnElements() == OptionsIn.ReturnElements.IdOnly.Value)
-                fields = new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell", "UidWellbore", "NameWellbore" };
+            var returnElements = parser.ReturnElements();
+            Logger.DebugFormat("Querying with return elements '{0}'", returnElements);
 
-            var logs = QueryEntities<LogList>(parser, fields);
+            var fields = (OptionsIn.ReturnElements.IdOnly.Equals(returnElements))
+                ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell", "UidWellbore", "NameWellbore" }
+                : null;
 
-            // Support OptionsIn returnElements=: all, header-only, data-only
-            var logsOut = new List<Log>();
-            if (parser.ReturnElements() == OptionsIn.ReturnElements.DataOnly.Value)
-            {
-                logsOut.AddRange(GetLogHeaderRequiredProperties(logs));
-            }
-            else
-            {
-                logsOut.AddRange(logs);
-            }
+            var logs = QueryEntities(parser, fields);
+
+            // Support OptionsIn returnElements = all, header-only, data-only
+            var logsOut = (OptionsIn.ReturnElements.DataOnly.Equals(returnElements))
+                ? GetLogHeaderRequiredProperties(logs).ToList()
+                : logs;
 
             // Only get the LogData returnElements != "header-only"
-            if (parser.ReturnElements() != OptionsIn.ReturnElements.HeaderOnly.Value)
+            if (!OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements))
             {
                 //logsOut.ForEach(l =>
                 //{

@@ -250,6 +250,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The value of the uom attribute is must match an ‘annotation’ attribute from the WITSML Units Dictionary XML file..
+        /// </summary>
+        internal static string InvalidUnitOfMeasure {
+            get {
+                return ResourceManager.GetString("InvalidUnitOfMeasure", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The OptionsIn value must be a recognized keyword for that function..
         /// </summary>
         internal static string KeywordNotSupportedByFunction {

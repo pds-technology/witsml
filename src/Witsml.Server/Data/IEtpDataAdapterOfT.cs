@@ -36,5 +36,12 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dataObjectId">The data object identifier.</param>
         /// <returns>A WITSML result.</returns>
         WitsmlResult Delete(DataObjectId dataObjectId);
+
+        /// <summary>
+        /// Parses the specified XML string.
+        /// </summary>
+        /// <param name="parser">The query parser.</param>
+        /// <returns>An instance of <see cref="T"/>.</returns>
+        T Parse(WitsmlQueryParser parser);
     }
 }

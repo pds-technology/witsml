@@ -294,4 +294,8 @@
     <value>The OptionsIn keyword ‘requestObjectSelectionCapability’ with a value other than ‘none’ must not be specified with any other OptionsIn keyword.</value>
     <comment>-427</comment>
   </data>
+  <data name="InvalidUnitOfMeasure" xml:space="preserve">
+    <value>The value of the uom attribute is must match an ‘annotation’ attribute from the WITSML Units Dictionary XML file.</value>
+    <comment>-443</comment>
+  </data>
 </root>

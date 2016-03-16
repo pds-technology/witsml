@@ -138,6 +138,16 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Parses the specified XML string.
+        /// </summary>
+        /// <param name="parser">The query parser.</param>
+        /// <returns>An instance of <see cref="T"/>.</returns>
+        public virtual T Parse(WitsmlQueryParser parser)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>

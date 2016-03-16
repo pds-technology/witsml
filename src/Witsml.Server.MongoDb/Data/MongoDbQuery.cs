@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using log4net;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace PDS.Witsml.Server.Data
@@ -13,32 +12,27 @@ namespace PDS.Witsml.Server.Data
     /// <summary>
     /// Encloses MongoDb query method and its helper methods
     /// </summary>
-    /// <typeparam name="TList">The type of the parent object for the list of queried data object.</typeparam>
     /// <typeparam name="T">The type of queried data object.</typeparam>
-    public class MongoDbQuery<TList, T>
+    public class MongoDbQuery<T>
     {
+        private const string _mongoDbIdField = "_id";
         private readonly IMongoCollection<T> _collection;
         private readonly WitsmlQueryParser _parser;    
-        private readonly string _idPropertyName;
         private List<string> _fields;
 
-        private const string _mongoDbIdField = "_id";
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="MongoDbQuery{TList, T}"/> class.
+        /// Initializes a new instance of the <see cref="MongoDbQuery{T}"/> class.
         /// </summary>
         /// <param name="collection">The Mongo database collection.</param>
         /// <param name="parser">The parser.</param>
         /// <param name="fields">The fields of the data object to be selected.</param>
-        /// <param name="idPropertyName">Name of the identifier property.</param>
-        public MongoDbQuery(IMongoCollection<T> collection, WitsmlQueryParser parser, List<string> fields, string idPropertyName)
+        public MongoDbQuery(IMongoCollection<T> collection, WitsmlQueryParser parser, List<string> fields)
         {
             Logger = LogManager.GetLogger(GetType());
 
             _collection = collection;
             _parser = parser;
             _fields = fields;
-            _idPropertyName = idPropertyName;
         }
 
         /// <summary>
@@ -90,6 +84,20 @@ namespace PDS.Witsml.Server.Data
             }
 
             return entities;
+        }
+
+        /// <summary>
+        /// Validates the values provided in the input template to catch any errors that 
+        /// would be lost or hidden during data object deserialization.
+        /// </summary>
+        public void Validate()
+        {
+            Logger.DebugFormat("Validating input template for entity: {0}", _parser.Context.ObjectType);
+
+            foreach (var element in _parser.Elements())
+            {
+                BuildFilter(element);
+            }
         }
 
         /// <summary>
@@ -151,7 +159,7 @@ namespace PDS.Witsml.Server.Data
 
             foreach (var attribute in element.Attributes())
             {
-                if (string.Compare(attribute.Name.LocalName, "nil", true) == 0)
+                if (attribute.IsNamespaceDeclaration || string.Compare(attribute.Name.LocalName, "nil", true) == 0)
                     continue;
 
                 var attributeProp = GetPropertyInfoForAnElement(properties, attribute.Name.LocalName);
@@ -203,7 +211,7 @@ namespace PDS.Witsml.Server.Data
                 }
                 else
                 {
-                    return BuildFilterForAnElement(element, propType, fieldName);
+                    return BuildFilterForAnElementType(propType, element, fieldName);
                 }
             }
             else
@@ -238,8 +246,14 @@ namespace PDS.Witsml.Server.Data
 
             if (textProperty != null)
             {
+                var uomProperty = elementType.GetProperty("Uom");
                 var fieldName = GetPropertyPath(propertyPath, textProperty.Name);
                 var fieldType = textProperty.PropertyType;
+
+                if (uomProperty != null)
+                {
+                    ValidateMeasureUom(element, uomProperty, element.Value);
+                }
 
                 return BuildFilterForProperty(fieldType, fieldName, element.Value);
             }
@@ -322,6 +336,34 @@ namespace PDS.Witsml.Server.Data
             return t.GetProperties().Where(p => !p.IsDefined(typeof(XmlIgnoreAttribute), false));
         }
 
+        private void ValidateMeasureUom(XElement element, PropertyInfo uomProperty, string measureValue)
+        {
+            var xmlAttribute = uomProperty.GetCustomAttribute<XmlAttributeAttribute>();
+
+            // validation not needed if uom attribute is not defined
+            if (xmlAttribute == null)
+                return;
+
+            var uomValue = element.Attributes()
+                .Where(x => x.Name.LocalName == xmlAttribute.AttributeName)
+                .Select(x => x.Value)
+                .FirstOrDefault();
+
+            // uom is required when a measure value is specified
+            if (!string.IsNullOrWhiteSpace(measureValue) && string.IsNullOrWhiteSpace(uomValue))
+            {
+                throw new WitsmlException(ErrorCodes.MissingUnitForMeasureData);
+            }
+
+            var enumType = uomProperty.PropertyType;
+
+            // uom must be a valid enumeration member
+            if (enumType.IsEnum && !enumType.IsEnumDefined(uomValue))
+            {
+                throw new WitsmlException(ErrorCodes.InvalidUnitOfMeasure);
+            }
+        }
+
         /// <summary>
         /// Builds the projection for the query.
         /// </summary>
@@ -385,6 +427,9 @@ namespace PDS.Witsml.Server.Data
             {
                 foreach (var attribute in element.Attributes())
                 {
+                    if (attribute.IsNamespaceDeclaration)
+                        continue;
+
                     var attributePath = GetPropertyPath(fieldPath, attribute.Name.LocalName);
                     AddProjectionProperty(attributePath);
                 }
