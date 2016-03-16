@@ -54,6 +54,15 @@ namespace PDS.Witsml.Server.Data
                 });
             }
 
+            if (!BsonClassMap.IsClassMapRegistered(typeof(ChannelSetValues)))
+            {
+                BsonClassMap.RegisterClassMap<ChannelSetValues>(cm =>
+                {
+                    cm.AutoMap();
+                    cm.MapIdMember(x => x.Uid).SetIdGenerator(UidGenerator.Instance);
+                });
+            }
+
             try
             {
                 BsonSerializer.RegisterSerializer(new TimestampSerializer());
