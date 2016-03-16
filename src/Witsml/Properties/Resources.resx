@@ -294,6 +294,14 @@
     <value>The OptionsIn keyword ‘requestObjectSelectionCapability’ with a value other than ‘none’ must not be specified with any other OptionsIn keyword.</value>
     <comment>-427</comment>
   </data>
+  <data name="ChildUidNotUnique" xml:space="preserve">
+    <value>Each lower level child uid value must be unique within the context of its nearest recurring parent node.</value>
+    <comment>-464</comment>
+  </data>
+  <data name="InputDataObjectNotCompliant" xml:space="preserve">
+    <value>The result of an add, update, or delete operation must be compliant with the derived write schema after performing a retrieval of the complete data-object</value>
+    <comment>-412</comment>
+  </data>
   <data name="InvalidUnitOfMeasure" xml:space="preserve">
     <value>The value of the uom attribute is must match an ‘annotation’ attribute from the WITSML Units Dictionary XML file.</value>
     <comment>-443</comment>

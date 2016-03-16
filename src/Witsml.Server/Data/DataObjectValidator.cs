@@ -42,13 +42,7 @@ namespace PDS.Witsml.Server.Data
 
             if (results.Any())
             {
-                var errorCode = ErrorCodes.Unset;
-                var witsmlValidationResult = results.FirstOrDefault(r => r.GetType() == typeof(WitsmlValidationResult)) as WitsmlValidationResult;
-                if (witsmlValidationResult != null)
-                    Enum.TryParse(witsmlValidationResult.ErrorCode.ToString(), out errorCode);
-                else
-                    Enum.TryParse(results.First().ErrorMessage, out errorCode);
-                throw new WitsmlException(errorCode);
+                ValidateResults(results);
             }
         }
 
@@ -84,8 +78,7 @@ namespace PDS.Witsml.Server.Data
             // Validate object properties
             if (!DataObjectValidator.TryValidate(DataObject, out results))
             {
-                throw new WitsmlException(ErrorCodes.InputTemplateNonConforming,
-                    string.Join("; ", results.Select(x => x.ErrorMessage)));
+                ValidateResults(results);
             }
 
             yield break;
@@ -107,6 +100,25 @@ namespace PDS.Witsml.Server.Data
         protected virtual IEnumerable<ValidationResult> ValidateForPutObject()
         {
             yield break;
+        }
+
+        private static void ValidateResults(IList<ValidationResult> results)
+        {
+            var errorCode = ErrorCodes.Unset;
+
+            var witsmlValidationResult = results.OfType<WitsmlValidationResult>().FirstOrDefault();
+
+            if (witsmlValidationResult != null)
+            {
+                throw new WitsmlException((ErrorCodes)witsmlValidationResult.ErrorCode);
+            }
+            else if (!Enum.TryParse(results.First().ErrorMessage, out errorCode))
+            {
+                throw new WitsmlException(ErrorCodes.InputTemplateNonConforming,
+                    string.Join("; ", results.Select(x => x.ErrorMessage)));
+            }
+
+
         }
     }
 }

@@ -1,8 +1,10 @@
 ﻿using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace PDS.Witsml.Server.Data.Wells
@@ -249,6 +251,19 @@ namespace PDS.Witsml.Server.Data.Wells
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.MissingUnitForMeasureData, response.Result);
+        }
+
+        [TestMethod]
+        public void Add_well_error_464_Child_Uid_Not_Unique()
+        {
+            var well = DevKit.CreateFullWell();
+            var datumKB = DevKit.WellDatum("Kelly Bushing", ElevCodeEnum.KB, "This is WellDatum");
+            var datumSL = DevKit.WellDatum("Sea Level", ElevCodeEnum.SL, "This is WellDatum");
+            well.WellDatum = new List<WellDatum>() { datumKB, datumSL };
+            var response = DevKit.Add<WellList, Well>(well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.ChildUidNotUnique, response.Result);
         }
 
         [Ignore]

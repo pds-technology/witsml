@@ -85,6 +85,7 @@
         /// -412 The result of an add, update, or delete operation must be compliant with the derived write schema after
         /// performing a retrieval of the complete data-object.
         /// </summary>
+        InputDataObjectNotCompliant = -412,
 
         /// <summary>
         /// -413 : The data-object must be supported by the server as defined in its capability data-object.
@@ -338,6 +339,7 @@
         /// <summary>
         /// -464 Each lower level child uid value must be unique within the context of its nearest recurring parent node.
         /// </summary>
+        ChildUidNotUnique = -464,
 
         /// <summary>
         /// -465 The capClient apiVers value must match the API schema version.
