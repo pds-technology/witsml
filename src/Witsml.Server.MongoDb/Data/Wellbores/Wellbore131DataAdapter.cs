@@ -3,7 +3,6 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
-using Energistics.Datatypes;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wellbores
@@ -43,20 +42,21 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// Queries the object(s) specified by the parser.
         /// </summary>
         /// <param name="parser">The parser that specifies the query parameters.</param>
-        /// <returns>
-        /// Queried objects.
-        /// </returns>
+        /// <returns>Queried objects.</returns>
         public override WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
         {
-            List<string> fields = null;
-            if (parser.ReturnElements() == OptionsIn.ReturnElements.IdOnly.Value)
-                fields = new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell" };
+            var returnElements = parser.ReturnElements();
+            Logger.DebugFormat("Querying with return elements '{0}'", returnElements);
+
+            var fields = (OptionsIn.ReturnElements.IdOnly.Equals(returnElements))
+                ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell" }
+                : null;
 
             return new WitsmlResult<IEnergisticsCollection>(
                 ErrorCodes.Success,
                 new WellboreList()
                 {
-                    Wellbore = QueryEntities<WellboreList>(parser, fields)
+                    Wellbore = QueryEntities(parser, fields)
                 });
         }
 
@@ -79,42 +79,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
             InsertEntity(entity);
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uid);
-        }
-
-        /// <summary>
-        /// Gets a collection of data objects related to the specified URI.
-        /// </summary>
-        /// <param name="parentUri">The parent URI.</param>
-        /// <returns>A collection of data objects.</returns>
-        public override List<Wellbore> GetAll(EtpUri? parentUri = null)
-        {
-            var query = GetQuery().AsQueryable();
-
-            if (parentUri != null)
-            {
-                var uidWell = parentUri.Value.ObjectId;
-                query = query.Where(x => x.UidWell == uidWell);
-            }
-
-            return query
-                .OrderBy(x => x.Name)
-                .ToList();
-        }
-
-        /// <summary>
-        /// Puts the specified data object into the data store.
-        /// </summary>
-        /// <param name="entity">The entity.</param>
-        public override WitsmlResult Put(Wellbore entity)
-        {
-            if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.GetObjectId()))
-            {
-                return Update(entity);
-            }
-            else
-            {
-                return Add(entity);
-            }
         }
 
         /// <summary>

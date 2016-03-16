@@ -46,20 +46,21 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// Queries the object(s) specified by the parser.
         /// </summary>
         /// <param name="parser">The parser that specifies the query parameters.</param>
-        /// <returns>
-        /// Queried objects.
-        /// </returns>
+        /// <returns>Queried objects.</returns>
         public override WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
         {
-            List<string> fields = null;
-            if (parser.ReturnElements() == OptionsIn.ReturnElements.IdOnly.Value)
-                fields = new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell" };
+            var returnElements = parser.ReturnElements();
+            Logger.DebugFormat("Querying with return elements '{0}'", returnElements);
+
+            var fields = (OptionsIn.ReturnElements.IdOnly.Equals(returnElements))
+                ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell" }
+                : null;
 
             return new WitsmlResult<IEnergisticsCollection>(
                 ErrorCodes.Success,
                 new WellboreList()
                 {
-                    Wellbore = QueryEntities<WellboreList>(parser, fields)
+                    Wellbore = QueryEntities(parser, fields)
                 });
         }
 
