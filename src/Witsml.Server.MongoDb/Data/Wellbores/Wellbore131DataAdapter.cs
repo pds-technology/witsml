@@ -82,42 +82,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
         }
 
         /// <summary>
-        /// Gets a collection of data objects related to the specified URI.
-        /// </summary>
-        /// <param name="parentUri">The parent URI.</param>
-        /// <returns>A collection of data objects.</returns>
-        public override List<Wellbore> GetAll(EtpUri? parentUri = null)
-        {
-            var query = GetQuery().AsQueryable();
-
-            if (parentUri != null)
-            {
-                var uidWell = parentUri.Value.ObjectId;
-                query = query.Where(x => x.UidWell == uidWell);
-            }
-
-            return query
-                .OrderBy(x => x.Name)
-                .ToList();
-        }
-
-        /// <summary>
-        /// Puts the specified data object into the data store.
-        /// </summary>
-        /// <param name="entity">The entity.</param>
-        public override WitsmlResult Put(Wellbore entity)
-        {
-            if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.GetObjectId()))
-            {
-                return Update(entity);
-            }
-            else
-            {
-                return Add(entity);
-            }
-        }
-
-        /// <summary>
         /// Parses the specified XML string.
         /// </summary>
         /// <param name="xml">The XML string.</param>
