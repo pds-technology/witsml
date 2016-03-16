@@ -88,6 +88,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Each lower level child uid value must be unique within the context of its nearest recurring parent node..
+        /// </summary>
+        internal static string ChildUidNotUnique {
+            get {
+                return ResourceManager.GetString("ChildUidNotUnique", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to In WMLS_AddToStore, the objectType being added in WMLtypeIn must be an objectType supported by the server. The server does not support the object type trying to be added..
         /// </summary>
         internal static string DataObjectTypeNotSupported {
@@ -165,6 +174,15 @@ namespace PDS.Witsml.Properties {
         internal static string IncorrectCaseParentUid {
             get {
                 return ResourceManager.GetString("IncorrectCaseParentUid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The result of an add, update, or delete operation must be compliant with the derived write schema after performing a retrieval of the complete data-object.
+        /// </summary>
+        internal static string InputDataObjectNotCompliant {
+            get {
+                return ResourceManager.GetString("InputDataObjectNotCompliant", resourceCulture);
             }
         }
         
