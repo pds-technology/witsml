@@ -52,7 +52,13 @@ namespace PDS.Witsml.Server.Data.Logs
                 MaxDataPoints = 10000
             });
 
-            capServer.Add(Functions.AddToStore, ObjectTypes.Log);
+            capServer.Add(Functions.AddToStore, new ObjectWithConstraint(ObjectTypes.Log)
+            {
+                MaxDataNodes = 5000,
+                MaxDataPoints = 10000
+            });
+
+            //capServer.Add(Functions.AddToStore, ObjectTypes.Log);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);
             //capServer.Add(Functions.DeleteFromStore, ObjectTypes.Well);
         }

@@ -255,6 +255,7 @@
         /// <summary>
         /// -447 When adding or updating curves, column-identifiers must be unique.
         /// </summary>
+        DuplicateColumnIdentifiers = -447,
 
         /// <summary>
         /// -448 For WMLS_UpdateInStore, if an element with a unique identifier in the schema is specified then the
@@ -300,6 +301,7 @@
         /// -456 The client must not attempt to add or update more data than is allowed by the server’s maxDataNodes
         /// and maxDataPoints values.
         /// </summary>
+        MaxDataExceeded = -456,
 
         /// <summary>
         /// -457 If a column-identifier representing the index column is specified then it must be specified first in the datacolumn-

@@ -322,4 +322,12 @@
     <value>When updating data in a systematically growing data-object the indexCurve must be specified in the mnemonicList.</value>
     <comment>-449</comment>
   </data>
+  <data name="DuplicateColumnIdentifiers" xml:space="preserve">
+    <value>When adding or updating curves, column-identifiers must be unique.</value>
+    <comment>-447</comment>
+  </data>
+  <data name="MaxDataExceeded" xml:space="preserve">
+    <value>The client must not attempt to add or update more data than is allowed by the server’s maxDataNodes and maxDataPoints values.</value>
+    <comment>-456</comment>
+  </data>
 </root>

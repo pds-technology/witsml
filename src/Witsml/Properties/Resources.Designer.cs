@@ -142,6 +142,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to When adding or updating curves, column-identifiers must be unique..
+        /// </summary>
+        internal static string DuplicateColumnIdentifiers {
+            get {
+                return ResourceManager.GetString("DuplicateColumnIdentifiers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error adding to data store.
         /// </summary>
         internal static string ErrorAddingToDataStore {
@@ -318,6 +327,15 @@ namespace PDS.Witsml.Properties {
         internal static string KeywordNotSupportedByServer {
             get {
                 return ResourceManager.GetString("KeywordNotSupportedByServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The client must not attempt to add or update more data than is allowed by the server’s maxDataNodes and maxDataPoints values..
+        /// </summary>
+        internal static string MaxDataExceeded {
+            get {
+                return ResourceManager.GetString("MaxDataExceeded", resourceCulture);
             }
         }
         
