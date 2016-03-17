@@ -2,6 +2,9 @@
 
 namespace PDS.Witsml.Server.Models
 {
+    /// <summary>
+    /// Encapsulates the index information for unified log data chunk
+    /// </summary>
     [Serializable]
     public class ChannelIndexInfo
     {

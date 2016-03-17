@@ -80,6 +80,12 @@ namespace PDS.Witsml.Server.Data.Logs
             return new WitsmlResult(ErrorCodes.Success, entity.Uuid);
         }
 
+        /// <summary>
+        /// Saves the channel sets to its own collection in addition as a property for the log.
+        /// </summary>
+        /// <param name="entity">The log entity.</param>
+        /// <param name="channelData">The collection to extract the channel set data.</param>
+        /// <param name="indicesMap">The indices map for the list of channel set.</param>
         private void SaveChannelSets(Log entity, Dictionary<string, string> channelData, Dictionary<string, List<ChannelIndexInfo>> indicesMap)
         {
             var collection = GetCollection<ChannelSet>(ObjectNames.ChannelSet200);
@@ -98,6 +104,11 @@ namespace PDS.Witsml.Server.Data.Logs
                 }));
         }
 
+        /// <summary>
+        /// Creates the list of index info to be used for channel set values.
+        /// </summary>
+        /// <param name="indices">The original index list of a channel set.</param>
+        /// <returns>The list of index info.</returns>
         private List<ChannelIndexInfo> CreateChannelSetIndexInfo(List<ChannelIndex> indices)
         {
             var indicesInfo = new List<ChannelIndexInfo>();
