@@ -516,7 +516,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             var well = new Well
             {
-                Name = "Well-return-elements-all",
+                Name = DevKit.Name("Test Well"),
                 Country = "US",
                 DateTimeSpud = dateTimeSpud,
                 DirectionWell = WellDirection.unknown,

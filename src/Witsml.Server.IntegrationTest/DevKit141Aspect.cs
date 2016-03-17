@@ -139,7 +139,7 @@ namespace PDS.Witsml.Server
         {
             string wellXml = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
             "<well>" + Environment.NewLine +
-            "<name>PDS Full Test Well</name>" + Environment.NewLine +
+            "<name>" + Name("Test Full Well") + " </name>" + Environment.NewLine +
             "<nameLegal>Company Legal Name</nameLegal>" + Environment.NewLine +
             "<numLicense>Company License Number</numLicense>" + Environment.NewLine +
             "<numGovt>Govt-Number</numGovt>" + Environment.NewLine +
