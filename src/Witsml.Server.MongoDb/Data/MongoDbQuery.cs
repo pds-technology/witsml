@@ -15,7 +15,6 @@ namespace PDS.Witsml.Server.Data
     /// <typeparam name="T">The type of queried data object.</typeparam>
     public class MongoDbQuery<T>
     {
-        private const string _mongoDbIdField = "_id";
         private readonly IMongoCollection<T> _collection;
         private readonly WitsmlQueryParser _parser;    
         private List<string> _fields;
@@ -49,7 +48,6 @@ namespace PDS.Witsml.Server.Data
         {
             Logger.DebugFormat("Executing query for entity: {0}", _parser.Context.ObjectType);
 
-            var excludeMongoId = Builders<T>.Projection.Exclude(_mongoDbIdField);
             var returnElements = _parser.ReturnElements();
             var entities = new List<T>();
 
@@ -62,7 +60,6 @@ namespace PDS.Witsml.Server.Data
                 // Format response using MongoDb projection, i.e. selecting specified fields only
                 if (OptionsIn.ReturnElements.All.Equals(returnElements))
                 {
-                    results = results.Project<T>(excludeMongoId);
                     entities.AddRange(results.ToList());
                 }
                 else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElements) || OptionsIn.ReturnElements.Requested.Equals(returnElements))
@@ -71,12 +68,7 @@ namespace PDS.Witsml.Server.Data
 
                     if (projection != null)
                     {
-                        projection = projection.Exclude(_mongoDbIdField);
                         results = results.Project<T>(projection);
-                    }
-                    else
-                    {
-                        results = results.Project<T>(excludeMongoId);
                     }
 
                     entities.AddRange(results.ToList());

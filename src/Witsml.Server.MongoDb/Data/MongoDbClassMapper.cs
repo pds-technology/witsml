@@ -45,23 +45,8 @@ namespace PDS.Witsml.Server.Data
             Register3<Witsml200.ComponentSchemas.TimeIndexValue>();
 
             // Custom
-            if (!BsonClassMap.IsClassMapRegistered(typeof(LogDataValues)))
-            {
-                BsonClassMap.RegisterClassMap<LogDataValues>(cm =>
-                {
-                    cm.AutoMap();
-                    cm.MapIdMember(x => x.Uid).SetIdGenerator(UidGenerator.Instance);
-                });
-            }
-
-            if (!BsonClassMap.IsClassMapRegistered(typeof(ChannelSetValues)))
-            {
-                BsonClassMap.RegisterClassMap<ChannelSetValues>(cm =>
-                {
-                    cm.AutoMap();
-                    cm.MapIdMember(x => x.Uid).SetIdGenerator(UidGenerator.Instance);
-                });
-            }
+            RegisterId<LogDataValues>();
+            RegisterId<ChannelSetValues>();
 
             try
             {
@@ -81,6 +66,8 @@ namespace PDS.Witsml.Server.Data
                 BsonClassMap.RegisterClassMap<T>(cm =>
                 {
                     cm.AutoMap();
+                    // update mappings to ignore _id field
+                    cm.SetIgnoreExtraElements(true);
                 });
             }
         }
@@ -104,6 +91,18 @@ namespace PDS.Witsml.Server.Data
             if (!BsonClassMap.IsClassMapRegistered(typeof(T)))
             {
                 BsonClassMap.RegisterClassMap<T>();
+            }
+        }
+
+        private void RegisterId<T>(string propertyName = "Uid")
+        {
+            if (!BsonClassMap.IsClassMapRegistered(typeof(T)))
+            {
+                BsonClassMap.RegisterClassMap<T>(cm =>
+                {
+                    cm.AutoMap();
+                    cm.MapIdProperty(propertyName).SetIdGenerator(UidGenerator.Instance);
+                });
             }
         }
     }
