@@ -32,6 +32,10 @@ namespace PDS.Witsml.Server.Data.Logs
         private static readonly string DbCollectionNameLogDataValues = "logDataValues";
         private static readonly int LogIndexRangeSize = Settings.Default.LogIndexRangeSize;
 
+        private readonly int _maxDataNodes = Witsml.Properties.Settings.Default.MaxDataNodes;
+        private readonly int _maxDataPoints = Witsml.Properties.Settings.Default.MaxDataPoints;
+
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Log141DataAdapter"/> class.
         /// </summary>
@@ -49,17 +53,16 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             capServer.Add(Functions.GetFromStore, new ObjectWithConstraint(ObjectTypes.Log)
             {
-                MaxDataNodes = 5000,
-                MaxDataPoints = 10000
+                MaxDataNodes = _maxDataNodes,
+                MaxDataPoints = _maxDataPoints
             });
 
             capServer.Add(Functions.AddToStore, new ObjectWithConstraint(ObjectTypes.Log)
             {
-                MaxDataNodes = 5000,
-                MaxDataPoints = 10000
+                MaxDataNodes = _maxDataNodes,
+                MaxDataPoints = _maxDataPoints
             });
 
-            //capServer.Add(Functions.AddToStore, ObjectTypes.Log);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);
             //capServer.Add(Functions.DeleteFromStore, ObjectTypes.Well);
         }
