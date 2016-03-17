@@ -12,7 +12,7 @@ namespace PDS.Witsml.Server.Models
 
         public string UidChannelSet { get; set; }
 
-        public List<ChannelIndex> Indices { get; set; }
+        public List<ChannelIndexInfo> Indices { get; set; }
 
         public string Data { get; set; }
     }
