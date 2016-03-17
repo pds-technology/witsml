@@ -107,23 +107,5 @@ namespace PDS.Witsml.Server.Data.Logs
 
             Assert.AreEqual(Log1.Citation.Title, log1.Citation.Title);
         }
-
-        [TestMethod]
-        public void TestDeserializeData()
-        {
-            var data = @"[
-                            [ [0.0, ""2016-01-01T00:00:00.0000Z"" ], [ 1.0, true ], [ 2.0 ], [ 3.0 ] ],
-                            [ [0.1, ""2016-01-01T00:00:01.0000Z"" ], [ 1.1, false ], null, [ 3.1 ] ],
-                            [ [0.2, ""2016-01-01T00:00:02.0000Z"" ], null, null, [ 3.2 ] ],
-                            [ [0.3, ""2016-01-01T00:00:03.0000Z"" ], [ 1.3, true ], [ 2.3 ], [ 3.3 ] ]
-                        ]";
-
-            var parser = new ChannelDataAdapter(null);
-            var dataObject = parser.DeserializeChannelSetData(data);
-            Assert.IsNotNull(dataObject);
-
-            var sData = parser.SerializeChannelSetData(dataObject);
-            Assert.IsNotNull(sData);
-        }
     }
 }
