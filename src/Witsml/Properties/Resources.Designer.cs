@@ -331,6 +331,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The client must not attempt to add or update more data than is allowed by the server’s maxDataNodes and maxDataPoints values..
+        /// </summary>
+        internal static string MaxDataExceeded {
+            get {
+                return ResourceManager.GetString("MaxDataExceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The client product name and/or product version number are missing in the HTTP user-agent field..
         /// </summary>
         internal static string MissingClientUserAgent {

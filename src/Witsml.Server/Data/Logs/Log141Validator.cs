@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Energistics.DataAccess.WITSML141;
 using System.ComponentModel.Composition;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -17,6 +18,11 @@ namespace PDS.Witsml.Server.Data.Logs
         private readonly IWitsmlDataAdapter<Log> _logDataAdapter;
         private readonly IWitsmlDataAdapter<Wellbore> _wellboreDataAdapter;
         private readonly IWitsmlDataAdapter<Well> _wellDataAdapter;
+
+        // TODO: Find out how to read this from Log Capabilities for AddToStore
+        private readonly int _maxDataNodes = 5000;
+        private readonly int _maxDataPoints = 10000;
+
         private readonly string[] _illeagalColumnIdentifiers = new string[] { "'", "\"", "<", ">", "/", "\\", "&", "," };
 
         /// <summary>
@@ -32,6 +38,10 @@ namespace PDS.Witsml.Server.Data.Logs
             _wellboreDataAdapter = wellboreDataAdapter;
             _wellDataAdapter = wellDataAdapter;
         }
+
+
+        [ImportMany]
+        public IEnumerable<IWitsml141Configuration> Providers { get; set; }
 
         /// <summary>
         /// Validates the data object while executing AddToStore.
@@ -70,7 +80,7 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             // Validate that column-identifiers in LogCurveInfo are unique
-            else if (DataObject.LogCurveInfo != null 
+            else if (DataObject.LogCurveInfo != null
                 && DataObject.LogCurveInfo.GroupBy(lci => lci.Mnemonic.Value)
                 .Select(group => new { Menmonic = group.Key, Count = group.Count() })
                 .Any(g => g.Count > 1))
@@ -79,32 +89,48 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             // Validate that column-identifiers in all LogData MnemonicLists are unique.
-            else if (DataObject.LogData != null 
-                && DataObject.LogData.Count > 0 
+            else if (DataObject.LogData != null
+                && DataObject.LogData.Count > 0
                 && !DataObject.LogData.All(ld => ld.MnemonicList.Split(',').Count() == ld.MnemonicList.Split(',').Distinct().Count()))
             {
                 yield return new ValidationResult(ErrorCodes.DuplicateColumnIdentifiers.ToString(), new[] { "LogData", "MnemonicList" });
             }
 
             // Validate that IndexCurve exists in LogCurveInfo
-            else if (!string.IsNullOrEmpty(DataObject.IndexCurve) 
-                && DataObject.LogCurveInfo != null 
+            else if (!string.IsNullOrEmpty(DataObject.IndexCurve)
+                && DataObject.LogCurveInfo != null
                 && !DataObject.LogCurveInfo.Any(lci => lci.Mnemonic != null && lci.Mnemonic.Value == DataObject.IndexCurve))
             {
                 yield return new ValidationResult(ErrorCodes.IndexCurveNotFound.ToString(), new[] { "IndexCurve" });
             }
 
             // Validate that Index Curve exists in all LogData mnemonicLists
-            else if (!string.IsNullOrEmpty(DataObject.IndexCurve) 
-                && DataObject.LogData != null 
-                && DataObject.LogData.Count > 0 
+            else if (!string.IsNullOrEmpty(DataObject.IndexCurve)
+                && DataObject.LogData != null
+                && DataObject.LogData.Count > 0
                 && !DataObject.LogData.All(ld => !string.IsNullOrEmpty(ld.MnemonicList) && ld.MnemonicList.Split(',').Any(mnemonic => mnemonic == DataObject.IndexCurve)))
             {
                 yield return new ValidationResult(ErrorCodes.IndexCurveNotFound.ToString(), new[] { "IndexCurve" });
             }
 
+            // Validate if MaxDataNodes has been exceeded
+            else if (DataObject.LogData != null && DataObject.LogData.SelectMany(ld => ld.Data).Count() > _maxDataNodes)
+            {
+                yield return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "LogData", "Data" });
+            }
+
+            // Validate if MaxDataPoints has been exceeded
+            else if (DataObject.LogData != null 
+                && DataObject.LogData.Count > 0 
+                && DataObject.LogData.First().Data != null 
+                && DataObject.LogData.First().Data.Count > 0 
+                && (DataObject.LogData.SelectMany(ld => ld.Data).Count() * DataObject.LogData.First().Data[0].Split(',').Count()) > _maxDataPoints)
+            {
+                yield return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "LogData", "Data" });
+            }
+
             // Validate Index Mnemonic is first in LogCurveInfo list
-            else if (!string.IsNullOrEmpty(DataObject.IndexCurve) && (DataObject.LogCurveInfo == null || DataObject.LogCurveInfo.Count == 0 || DataObject.LogCurveInfo[0].Mnemonic.Value != DataObject.IndexCurve ))
+            else if (!string.IsNullOrEmpty(DataObject.IndexCurve) && (DataObject.LogCurveInfo == null || DataObject.LogCurveInfo.Count == 0 || DataObject.LogCurveInfo[0].Mnemonic.Value != DataObject.IndexCurve))
             {
                 yield return new ValidationResult(ErrorCodes.IndexNotFirstInDataColumnList.ToString(), new[] { "IndexCurve" });
             }
