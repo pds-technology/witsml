@@ -7,6 +7,7 @@ using System.Text;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.DataAccess.WITSML141.ReferenceData;
 using Energistics.Datatypes;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
@@ -142,15 +143,27 @@ namespace PDS.Witsml.Server.Data.Logs
             try
             {
                 // Separate the LogData.Data from the Log
-                var logData = ExtractLogDataData(entity);
+                LogData logData = null;
+                if (entity.LogData != null && entity.LogData.Count > 0)
+                {
+                    logData = entity.LogData.First();
+                    entity.LogData.Clear();
+                }
 
                 // Save the log and verify
                 InsertEntity(entity);
 
                 // If there is any LogData.Data then save it.
-                if (logData.Any())
+                if (logData != null)
                 {
-                    WriteLogDataValues(entity, ToChunks(GetSequence(string.Empty, logData)));
+                    var indexChannel = new ChannelIndexInfo
+                    {
+                        Mnemonic = entity.IndexCurve,
+                        Increasing = entity.Direction != LogIndexDirection.decreasing,
+                        IsTimeIndex = entity.IndexType == LogIndexType.datetime || entity.IndexType == LogIndexType.elapsedtime
+                    };
+                    var channelDataAdapter = new ChannelDataAdapter(DatabaseProvider);
+                    channelDataAdapter.WriteLogDataValues(entity.Uid, logData.Data, logData.MnemonicList, indexChannel);
                 }
 
                 return new WitsmlResult(ErrorCodes.Success, entity.Uid);

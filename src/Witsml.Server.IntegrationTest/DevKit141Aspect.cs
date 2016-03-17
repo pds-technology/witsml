@@ -73,11 +73,17 @@ namespace PDS.Witsml.Server
             }
         }
 
-        public void InitDataMany(Log log, string mnemonics, string units, int numRows, double factor = 1.0)
+        public void InitDataMany(Log log, string mnemonics, string units, int numRows, double factor = 1.0, bool isDepthLog = true)
         {
+            var start = DateTimeOffset.UtcNow.AddDays(-1);
             for (int i = 0; i < numRows; i++)
             {
-                InitData(log, mnemonics, units, i, null, i * factor);
+                if (isDepthLog)
+                    InitData(log, mnemonics, units, i, null, i * factor);
+                else
+                {
+                    InitData(log, mnemonics, units, start.AddSeconds(i).ToString(), null, i * factor);
+                }
             }
         }
 
