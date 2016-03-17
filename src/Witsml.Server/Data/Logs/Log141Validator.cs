@@ -18,10 +18,8 @@ namespace PDS.Witsml.Server.Data.Logs
         private readonly IWitsmlDataAdapter<Log> _logDataAdapter;
         private readonly IWitsmlDataAdapter<Wellbore> _wellboreDataAdapter;
         private readonly IWitsmlDataAdapter<Well> _wellDataAdapter;
-
-        // TODO: Find out how to read this from Log Capabilities for AddToStore
-        private readonly int _maxDataNodes = 5000;
-        private readonly int _maxDataPoints = 10000;
+        private readonly int _maxDataNodes = Witsml.Properties.Settings.Default.MaxDataNodes;
+        private readonly int _maxDataPoints = Witsml.Properties.Settings.Default.MaxDataPoints;
 
         private readonly string[] _illeagalColumnIdentifiers = new string[] { "'", "\"", "<", ">", "/", "\\", "&", "," };
 
