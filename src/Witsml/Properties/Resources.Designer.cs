@@ -142,6 +142,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to When adding or updating curves, column-identifiers must be unique..
+        /// </summary>
+        internal static string DuplicateColumnIdentifiers {
+            get {
+                return ResourceManager.GetString("DuplicateColumnIdentifiers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error adding to data store.
         /// </summary>
         internal static string ErrorAddingToDataStore {

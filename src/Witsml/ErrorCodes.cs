@@ -255,6 +255,7 @@
         /// <summary>
         /// -447 When adding or updating curves, column-identifiers must be unique.
         /// </summary>
+        DuplicateColumnIdentifiers = -447,
 
         /// <summary>
         /// -448 For WMLS_UpdateInStore, if an element with a unique identifier in the schema is specified then the

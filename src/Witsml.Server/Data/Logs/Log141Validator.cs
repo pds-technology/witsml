@@ -69,6 +69,23 @@ namespace PDS.Witsml.Server.Data.Logs
                 yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
             }
 
+            // Validate that column-identifiers in LogCurveInfo are unique
+            else if (DataObject.LogCurveInfo != null 
+                && DataObject.LogCurveInfo.GroupBy(lci => lci.Mnemonic.Value)
+                .Select(group => new { Menmonic = group.Key, Count = group.Count() })
+                .Any(g => g.Count > 1))
+            {
+                yield return new ValidationResult(ErrorCodes.DuplicateColumnIdentifiers.ToString(), new[] { "LogCurveInfo", "Mnemonic" });
+            }
+
+            // Validate that column-identifiers in all LogData MnemonicLists are unique.
+            else if (DataObject.LogData != null 
+                && DataObject.LogData.Count > 0 
+                && !DataObject.LogData.All(ld => ld.MnemonicList.Split(',').Count() == ld.MnemonicList.Split(',').Distinct().Count()))
+            {
+                yield return new ValidationResult(ErrorCodes.DuplicateColumnIdentifiers.ToString(), new[] { "LogData", "MnemonicList" });
+            }
+
             // Validate that IndexCurve exists in LogCurveInfo
             else if (!string.IsNullOrEmpty(DataObject.IndexCurve) 
                 && DataObject.LogCurveInfo != null 

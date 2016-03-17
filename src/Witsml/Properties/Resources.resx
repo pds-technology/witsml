@@ -322,4 +322,8 @@
     <value>When updating data in a systematically growing data-object the indexCurve must be specified in the mnemonicList.</value>
     <comment>-449</comment>
   </data>
+  <data name="DuplicateColumnIdentifiers" xml:space="preserve">
+    <value>When adding or updating curves, column-identifiers must be unique.</value>
+    <comment>-447</comment>
+  </data>
 </root>
