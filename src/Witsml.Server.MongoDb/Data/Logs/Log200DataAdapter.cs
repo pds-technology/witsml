@@ -20,9 +20,6 @@ namespace PDS.Witsml.Server.Data.Logs
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class Log200DataAdapter : MongoDbDataAdapter<Log>
     {
-        private static readonly string DbCollectionNameChannelset = "ChannelSet";
-        private static readonly string DbCollectionNameChannelsetValues = "ChannelSetValues";
-
         /// <summary>
         /// Initializes a new instance of the <see cref="Log200DataAdapter"/> class.
         /// </summary>
@@ -76,7 +73,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 SaveChannelSets(entity, channelData, indicesMap);
                 InsertEntity(entity);
 
-                WriteChannelSetValues(entity.Uuid, channelData, indicesMap);
+                var channelDataAdapter = new ChannelDataAdapter(DatabaseProvider);               
+                channelDataAdapter.WriteChannelSetValues(entity.Uuid, channelData, indicesMap);
             }
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uuid);
@@ -84,7 +82,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private void SaveChannelSets(Log entity, Dictionary<string, string> channelData, Dictionary<string, List<ChannelIndexInfo>> indicesMap)
         {
-            var collection = GetCollection<ChannelSet>(DbCollectionNameChannelset);
+            var collection = GetCollection<ChannelSet>(ObjectNames.ChannelSet200);
 
             collection.BulkWrite(entity.ChannelSet
                 .Select(cs =>
@@ -115,26 +113,6 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             return indicesInfo;
-        }
-
-        private void WriteChannelSetValues(string uidLog, Dictionary<string, string> channelData, Dictionary<string, List<ChannelIndexInfo>> indicesMap)
-        {
-            var channelDataAdapter = new ChannelDataAdapter();
-            var dataChunks = new List<ChannelSetValues>();
-            foreach (var key in indicesMap.Keys)
-            {
-                var dataChunk = channelDataAdapter.CreateChannelSetValuesList(channelData[key], uidLog, key, indicesMap[key]);
-                if (dataChunk != null && dataChunk.Count > 0)
-                    dataChunks.AddRange(dataChunk);
-            }
-
-            var collection = GetCollection<ChannelSetValues>(DbCollectionNameChannelsetValues);
-
-            collection.BulkWrite(dataChunks
-                .Select(dc =>
-                {
-                    return (WriteModel<ChannelSetValues>)new InsertOneModel<ChannelSetValues>(dc);
-                }));
         }
     }
 }
