@@ -315,6 +315,7 @@
         /// the following special characters: single-quote, double-quote, less than, greater than, forward slash,
         /// backward slash, ampersand, comma.
         /// </summary>
+        BadColumnIdentifier = -459,
 
         /// <summary>
         /// -460 For getting systematically growing data-objects, if column-identifiers(mnemonics) are specified in both

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Energistics.DataAccess.WITSML141;
 using System.ComponentModel.Composition;
@@ -16,6 +17,7 @@ namespace PDS.Witsml.Server.Data.Logs
         private readonly IWitsmlDataAdapter<Log> _logDataAdapter;
         private readonly IWitsmlDataAdapter<Wellbore> _wellboreDataAdapter;
         private readonly IWitsmlDataAdapter<Well> _wellDataAdapter;
+        private readonly string[] _illeagalColumnIdentifiers = new string[] { "'", "\"", "<", ">", "/", "\\", "&", "," };
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Log141Validator" /> class.
@@ -37,6 +39,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>A collection of validation results.</returns>
         protected override IEnumerable<ValidationResult> ValidateForInsert()
         {
+            var channelCount = DataObject.LogCurveInfo != null ? DataObject.LogCurveInfo.Count : 0;
+
             // Validate parent uid property
             if (string.IsNullOrWhiteSpace(DataObject.UidWell))
             {
@@ -63,6 +67,28 @@ namespace PDS.Witsml.Server.Data.Logs
             else if (_logDataAdapter.Exists(DataObject.GetObjectId()))
             {
                 yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
+            }
+
+            // Validate for a bad column identifier in LogCurveInfo Mnemonics
+            else if (_illeagalColumnIdentifiers.Any(s => DataObject.LogCurveInfo.Any(m => m.Mnemonic.Value.Contains(s))))
+            {
+                yield return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogCurveInfo.Mnemonic" });
+            }
+
+            // Validate for a bad column identifier in LogData MnemonicList
+            //... If the MnemonicList has more channels than the LogCurveInfo interpret as having a comma within a mnemonic which is a bad column identifier
+            else if (DataObject.LogData.Select(ld => ld.MnemonicList.Split(',')).Any(a => a.Count() > channelCount))
+            {
+                yield return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogData.MnemonicList" });
+            }
+
+            // Inspect each mnemonic, in each mnemonicList, in each LogData for an illeagal column identifier.
+            else if (DataObject.LogData.Select(ld => ld.MnemonicList.Split(','))
+                .Any(mnemArrary => mnemArrary
+                    .Any(mnemonic => _illeagalColumnIdentifiers
+                        .Any(badChar => mnemonic.Contains(badChar)))))
+            {
+                yield return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogData.MnemonicList" });
             }
         }
     }

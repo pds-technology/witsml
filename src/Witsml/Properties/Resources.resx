@@ -306,4 +306,8 @@
     <value>The value of the uom attribute is must match an ‘annotation’ attribute from the WITSML Units Dictionary XML file.</value>
     <comment>-443</comment>
   </data>
+  <data name="BadColumnIdentifier" xml:space="preserve">
+    <value>For systematically growing data-objects, the column-identifier (mnemonic) values must not contain one of the following special characters: single-quote, double-quote, less than, greater than, forward slash, backward slash, ampersand, comma.</value>
+    <comment>-459</comment>
+  </data>
 </root>

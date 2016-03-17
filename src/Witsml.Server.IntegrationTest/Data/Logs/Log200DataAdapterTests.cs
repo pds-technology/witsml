@@ -1,4 +1,5 @@
-﻿using Energistics.DataAccess.WITSML200;
+﻿using System.Linq;
+using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -89,6 +90,40 @@ namespace PDS.Witsml.Server.Data.Logs
                 .FirstOrDefault();
 
             Assert.AreEqual(Log2.Citation.Title, log2.Citation.Title);
+        }
+
+        [TestMethod]
+        public void CanAddAndGetSingleLogWithSecondaryIndex()
+        {
+            var secondaryIndex = DevKit.CreateChannelIndex(ChannelIndexType.datetime);
+            var channelSet = Log1.ChannelSet.First();
+            channelSet.Index.Add(secondaryIndex);
+            DevKit.CreateMockChannelSetData(channelSet, channelSet.Index);
+            WellAdapter.Put(Well1);
+            WellboreAdapter.Put(Wellbore1);
+            LogAdapter.Put(Log1);
+
+            var log1 = LogAdapter.Get(Log1.GetObjectId());
+
+            Assert.AreEqual(Log1.Citation.Title, log1.Citation.Title);
+        }
+
+        [TestMethod]
+        public void TestDeserializeData()
+        {
+            var data = @"[
+                            [ [0.0, ""2016-01-01T00:00:00.0000Z"" ], [ 1.0, true ], [ 2.0 ], [ 3.0 ] ],
+                            [ [0.1, ""2016-01-01T00:00:01.0000Z"" ], [ 1.1, false ], null, [ 3.1 ] ],
+                            [ [0.2, ""2016-01-01T00:00:02.0000Z"" ], null, null, [ 3.2 ] ],
+                            [ [0.3, ""2016-01-01T00:00:03.0000Z"" ], [ 1.3, true ], [ 2.3 ], [ 3.3 ] ]
+                        ]";
+
+            var parser = new ChannelDataAdapter();
+            var dataObject = parser.DeserializeChannelSetData(data);
+            Assert.IsNotNull(dataObject);
+
+            var sData = parser.SerializeChannelSetData(dataObject);
+            Assert.IsNotNull(sData);
         }
     }
 }

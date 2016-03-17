@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Energistics.DataAccess.WITSML200.ReferenceData;
 using Energistics.Datatypes;
+using MongoDB.Driver;
+using PDS.Witsml.Server.Models;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -16,6 +20,9 @@ namespace PDS.Witsml.Server.Data.Logs
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class Log200DataAdapter : MongoDbDataAdapter<Log>
     {
+        private static readonly string DbCollectionNameChannelset = "ChannelSet";
+        private static readonly string DbCollectionNameChannelsetValues = "ChannelSetValues";
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Log200DataAdapter"/> class.
         /// </summary>
@@ -63,10 +70,71 @@ namespace PDS.Witsml.Server.Data.Logs
                 var validator = Container.Resolve<IDataObjectValidator<Log>>();
                 validator.Validate(Functions.PutObject, entity);
 
+                var channelData = new Dictionary<string, string>();
+                var indicesMap = new Dictionary<string, List<ChannelIndexInfo>>();
+
+                SaveChannelSets(entity, channelData, indicesMap);
                 InsertEntity(entity);
+
+                WriteChannelSetValues(entity.Uuid, channelData, indicesMap);
             }
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uuid);
+        }
+
+        private void SaveChannelSets(Log entity, Dictionary<string, string> channelData, Dictionary<string, List<ChannelIndexInfo>> indicesMap)
+        {
+            var collection = GetCollection<ChannelSet>(DbCollectionNameChannelset);
+
+            collection.BulkWrite(entity.ChannelSet
+                .Select(cs =>
+                {
+                    if (cs.Data != null && !string.IsNullOrEmpty(cs.Data.Data))
+                    {
+                        var uuid = cs.Uuid;
+                        channelData.Add(uuid, cs.Data.Data);
+                        indicesMap.Add(uuid, CreateChannelSetIndexInfo(cs.Index));
+                        cs.Data.Data = null;
+                    }
+                    return (WriteModel<ChannelSet>)new InsertOneModel<ChannelSet>(cs);
+                }));
+        }
+
+        private List<ChannelIndexInfo> CreateChannelSetIndexInfo(List<ChannelIndex> indices)
+        {
+            var indicesInfo = new List<ChannelIndexInfo>();
+            foreach (var index in indices)
+            {
+                var indexInfo = new ChannelIndexInfo
+                {
+                    Mnemonic = index.Mnemonic,
+                    Increasing = index.Direction == IndexDirection.increasing,
+                    IsTimeIndex = index.IndexType == ChannelIndexType.datetime || index.IndexType == ChannelIndexType.elapsedtime
+                };
+                indicesInfo.Add(indexInfo);
+            }
+
+            return indicesInfo;
+        }
+
+        private void WriteChannelSetValues(string uidLog, Dictionary<string, string> channelData, Dictionary<string, List<ChannelIndexInfo>> indicesMap)
+        {
+            var channelDataAdapter = new ChannelDataAdapter();
+            var dataChunks = new List<ChannelSetValues>();
+            foreach (var key in indicesMap.Keys)
+            {
+                var dataChunk = channelDataAdapter.CreateChannelSetValuesList(channelData[key], uidLog, key, indicesMap[key]);
+                if (dataChunk != null && dataChunk.Count > 0)
+                    dataChunks.AddRange(dataChunk);
+            }
+
+            var collection = GetCollection<ChannelSetValues>(DbCollectionNameChannelsetValues);
+
+            collection.BulkWrite(dataChunks
+                .Select(dc =>
+                {
+                    return (WriteModel<ChannelSetValues>)new InsertOneModel<ChannelSetValues>(dc);
+                }));
         }
     }
 }
