@@ -318,4 +318,8 @@
     <value>If a column-identifier representing the index column is specified then it must be specified first in the data-column-list.</value>
     <comment>-457</comment>
   </data>
+  <data name="IndexCurveNotFound" xml:space="preserve">
+    <value>When updating data in a systematically growing data-object the indexCurve must be specified in the mnemonicList.</value>
+    <comment>-449</comment>
+  </data>
 </root>

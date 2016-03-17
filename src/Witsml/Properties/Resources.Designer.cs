@@ -187,6 +187,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to When updating data in a systematically growing data-object the indexCurve must be specified in the mnemonicList..
+        /// </summary>
+        internal static string IndexCurveNotFound {
+            get {
+                return ResourceManager.GetString("IndexCurveNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to If a column-identifier representing the index column is specified then it must be specified first in the data-column-list..
         /// </summary>
         internal static string IndexNotFirstInDataColumnList {

@@ -69,6 +69,23 @@ namespace PDS.Witsml.Server.Data.Logs
                 yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
             }
 
+            // Validate that IndexCurve exists in LogCurveInfo
+            else if (!string.IsNullOrEmpty(DataObject.IndexCurve) 
+                && DataObject.LogCurveInfo != null 
+                && !DataObject.LogCurveInfo.Any(lci => lci.Mnemonic != null && lci.Mnemonic.Value == DataObject.IndexCurve))
+            {
+                yield return new ValidationResult(ErrorCodes.IndexCurveNotFound.ToString(), new[] { "IndexCurve" });
+            }
+
+            // Validate that Index Curve exists in all LogData mnemonicLists
+            else if (!string.IsNullOrEmpty(DataObject.IndexCurve) 
+                && DataObject.LogData != null 
+                && DataObject.LogData.Count > 0 
+                && !DataObject.LogData.All(ld => !string.IsNullOrEmpty(ld.MnemonicList) && ld.MnemonicList.Split(',').Any(mnemonic => mnemonic == DataObject.IndexCurve)))
+            {
+                yield return new ValidationResult(ErrorCodes.IndexCurveNotFound.ToString(), new[] { "IndexCurve" });
+            }
+
             // Validate Index Mnemonic is first in LogCurveInfo list
             else if (!string.IsNullOrEmpty(DataObject.IndexCurve) && (DataObject.LogCurveInfo == null || DataObject.LogCurveInfo.Count == 0 || DataObject.LogCurveInfo[0].Mnemonic.Value != DataObject.IndexCurve ))
             {

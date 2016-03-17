@@ -265,6 +265,7 @@
         /// -449 When updating data in a systematically growing data-object the indexCurve must be specified in the
         /// mnemonicList.
         /// </summary>
+        IndexCurveNotFound = -449,
 
         /// <summary>
         /// -450 When updating data in a systematically growing data-object, each mnemonic must occur only once in the
