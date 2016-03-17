@@ -314,4 +314,8 @@
     <value>For growing data-objects, a combination of depth and date-time structural-range indices must not be specified.</value>
     <comment>-458</comment>
   </data>
+  <data name="IndexNotFirstInDataColumnList" xml:space="preserve">
+    <value>If a column-identifier representing the index column is specified then it must be specified first in the data-column-list.</value>
+    <comment>-457</comment>
+  </data>
 </root>

@@ -304,6 +304,7 @@
         /// -457 If a column-identifier representing the index column is specified then it must be specified first in the datacolumn-
         /// list.
         /// </summary>
+        IndexNotFirstInDataColumnList = -457,
 
         /// <summary>
         /// -458 For growing data-objects, a combination of depth and date-time structural-range indices must not be

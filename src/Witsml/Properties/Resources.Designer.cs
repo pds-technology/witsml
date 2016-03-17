@@ -187,6 +187,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to If a column-identifier representing the index column is specified then it must be specified first in the data-column-list..
+        /// </summary>
+        internal static string IndexNotFirstInDataColumnList {
+            get {
+                return ResourceManager.GetString("IndexNotFirstInDataColumnList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The result of an add, update, or delete operation must be compliant with the derived write schema after performing a retrieval of the complete data-object.
         /// </summary>
         internal static string InputDataObjectNotCompliant {
