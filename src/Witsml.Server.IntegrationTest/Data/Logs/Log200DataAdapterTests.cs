@@ -118,7 +118,7 @@ namespace PDS.Witsml.Server.Data.Logs
                             [ [0.3, ""2016-01-01T00:00:03.0000Z"" ], [ 1.3, true ], [ 2.3 ], [ 3.3 ] ]
                         ]";
 
-            var parser = new ChannelDataAdapter();
+            var parser = new ChannelDataAdapter(null);
             var dataObject = parser.DeserializeChannelSetData(data);
             Assert.IsNotNull(dataObject);
 
