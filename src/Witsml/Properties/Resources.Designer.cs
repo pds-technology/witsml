@@ -79,6 +79,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to For systematically growing data-objects, the column-identifier (mnemonic) values must not contain one of the following special characters: single-quote, double-quote, less than, greater than, forward slash, backward slash, ampersand, comma..
+        /// </summary>
+        internal static string BadColumnIdentifier {
+            get {
+                return ResourceManager.GetString("BadColumnIdentifier", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The CapabilitiesIn XML MUST conform to the API capClient schema..
         /// </summary>
         internal static string CapabilitiesInNonConforming {
