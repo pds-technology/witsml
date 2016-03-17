@@ -92,6 +92,7 @@
     <Compile Include="Data\Logs\Log131DataAdapter.cs" />
     <Compile Include="Data\Logs\Log141DataAdapter.cs" />
     <Compile Include="Data\Logs\Log200DataAdapter.cs" />
+    <Compile Include="Data\Logs\ChannelDataAdapter.cs" />
     <Compile Include="Data\MongoDbClassMapper.cs" />
     <Compile Include="Data\MongoDbDataAdapter.cs" />
     <Compile Include="Data\MongoDbExtensions.cs" />
@@ -104,7 +105,7 @@
     <Compile Include="Data\Wells\Well131DataAdapter.cs" />
     <Compile Include="Data\Wells\Well141DataAdapter.cs" />
     <Compile Include="Data\Wells\Well200DataAdapter.cs" />
-    <Compile Include="Models\ChannelIndex.cs" />
+    <Compile Include="Models\ChannelIndexInfo.cs" />
     <Compile Include="Models\ChannelSetValues.cs" />
     <Compile Include="Models\LogDataValues.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
