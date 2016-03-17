@@ -309,6 +309,7 @@
         /// -458 For growing data-objects, a combination of depth and date-time structural-range indices must not be
         /// specified.
         /// </summary>
+        MixedStructuralRangeIndices = -458,
 
         /// <summary>
         /// -459 For systematically growing data-objects, the column-identifier (mnemonic) values must not contain one of

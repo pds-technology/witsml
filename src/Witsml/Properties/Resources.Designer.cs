@@ -412,6 +412,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to For growing data-objects, a combination of depth and date-time structural-range indices must not be specified..
+        /// </summary>
+        internal static string MixedStructuralRangeIndices {
+            get {
+                return ResourceManager.GetString("MixedStructuralRangeIndices", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The OptionsIn parameter string must be encoded utilizing a subset (semicolon separators and no
         /// whitespace) of the encoding rules for HTML form content type application/x-www-form-urlencoded..
         /// </summary>

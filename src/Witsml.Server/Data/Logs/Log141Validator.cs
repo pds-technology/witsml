@@ -69,6 +69,12 @@ namespace PDS.Witsml.Server.Data.Logs
                 yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
             }
 
+            // Validate structural-range indices for consistent index types
+            else if ((DataObject.StartIndex != null || DataObject.EndIndex != null) && (DataObject.StartDateTimeIndex != null || DataObject.EndDateTimeIndex != null))
+            {
+                yield return new ValidationResult(ErrorCodes.MixedStructuralRangeIndices.ToString(), new[] { "StartIndex", "EndIndex", "StartDateTimeIndex", "EndDateTimeIndex" });
+            }
+
             // Validate for a bad column identifier in LogCurveInfo Mnemonics
             else if (_illeagalColumnIdentifiers.Any(s => DataObject.LogCurveInfo.Any(m => m.Mnemonic.Value.Contains(s))))
             {
