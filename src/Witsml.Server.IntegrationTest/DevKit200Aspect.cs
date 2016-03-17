@@ -301,7 +301,7 @@ namespace PDS.Witsml.Server
             if (isDepthLog)
             {
                 log.TimeDepth = "Depth";
-                channelSet = CreateDepthChannelSet(log, loggingMethod);
+                channelSet = CreateDepthChannelSet_Increasing_Index(log, loggingMethod);
             }
             else
             {
@@ -340,12 +340,14 @@ namespace PDS.Witsml.Server
         public void GenerateChannelData(List<ChannelSet> channelSetList, int numDataValue=5)
         {         
             Random random = new Random(123);
-            DateTime dateTimeStart = DateTime.Now;
+            DateTime dateTimeStart = new DateTime(2015, 3, 17, 11, 50, 0);
 
             foreach (ChannelSet channelSet in channelSetList)
             {
                 string logData = "[ ";
-                double indexValue = 0.0;
+                double indexDepthValue = 0.0;
+                DateTime indexTimeValue = dateTimeStart;
+                bool isIncreasing = true;
                 for (int i= 0; i < numDataValue; i++)
                 {
                     if (i>0)
@@ -353,8 +355,7 @@ namespace PDS.Witsml.Server
                         logData += ", ";
                     }
                     string entry = string.Empty;
-                    bool isIndex = false;
-                    bool isIncreasing = true;
+                    bool isIndex = false;                   
                     foreach (Channel channel in channelSet.Channel)
                     {
                         var index = channelSet.Index.Where(x => x.Mnemonic == channel.Mnemonic).SingleOrDefault();
@@ -364,9 +365,10 @@ namespace PDS.Witsml.Server
                             isIncreasing = index.Direction.HasValue ? index.Direction.Value == IndexDirection.increasing : false;
                             if (i == 0)
                             {
-                                indexValue = (isIncreasing) ? 1.0 : -1.0;
+                                indexDepthValue = (isIncreasing) ? 1.0 : -1.0;
                             }
-                            indexValue += random.Next(1, 5);
+                            indexDepthValue = isIncreasing ? indexDepthValue + random.Next(1, 5) : indexDepthValue - random.Next(1, 5);
+                            indexTimeValue = indexTimeValue.AddSeconds(random.Next(1, 5));
                         }
                         else
                         {
@@ -385,7 +387,7 @@ namespace PDS.Witsml.Server
                             }
                             else
                             {
-                                var columnValue = GenerateValuesByType(random, ref indexValue, isIndex, isIncreasing, channel.DataType);
+                                var columnValue = GenerateValuesByType(random, ref indexDepthValue, ref indexTimeValue, isIndex, isIncreasing, channel.DataType);
                                 column += "[ " + columnValue + " ]";
                             }
                             entry += column;
@@ -397,7 +399,7 @@ namespace PDS.Witsml.Server
                                 column = (column == string.Empty) ? "[ " : column + ", ";
 
                                 var etpDataType = pointMetaData.EtpDataType ?? null;
-                                column += GenerateValuesByType(random, ref indexValue, isIndex, isIncreasing, etpDataType);
+                                column += GenerateValuesByType(random, ref indexDepthValue, ref indexTimeValue, isIndex, isIncreasing, etpDataType);
                             }
                             column += " ] ";
                             entry += column;
@@ -412,12 +414,12 @@ namespace PDS.Witsml.Server
         }
 
         /// <summary>
-        /// Creates the depth channel set.
+        /// Creates the depth channel set with increasing index.
         /// </summary>
         /// <param name="log">The log.</param>
         /// <param name="loggingMethod">The logging method.</param>
         /// <returns></returns>
-        public ChannelSet CreateDepthChannelSet(Log log, LoggingMethod loggingMethod = LoggingMethod.Computed)
+        public ChannelSet CreateDepthChannelSet_Increasing_Index(Log log, LoggingMethod loggingMethod = LoggingMethod.Computed)
         {
             var index = new List<ChannelIndex>()
                         {
@@ -559,6 +561,153 @@ namespace PDS.Witsml.Server
         }
 
         /// <summary>
+        /// Creates the depth channel set with decreasing index.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="loggingMethod">The logging method.</param>
+        /// <returns></returns>
+        public ChannelSet CreateDepthChannelSet_Decreasing_Index(Log log, LoggingMethod loggingMethod = LoggingMethod.Computed)
+        {
+            var index = new List<ChannelIndex>()
+                        {
+                            new ChannelIndex()
+                            {
+                                Direction = IndexDirection.decreasing,
+                                IndexType = ChannelIndexType.trueverticaldepth,
+                                Mnemonic = "TVDSS",
+                                Uom = "ft",
+                                // Description: For depth indexes, this contains the uid of the datum, in the Channel's Well object, to which all of the index values are referenced.
+                                DatumReference = "Uid of wellbore datum"
+                            }
+                        };
+
+            ChannelSet channelSet = new ChannelSet()
+            {
+                Uuid = Uid(),
+                Citation = Citation("Channel Set 01"),
+                ExistenceKind = ExistenceKind.simulated,
+                Index = index,
+
+                LoggingCompanyName = log.LoggingCompanyName,
+                TimeDepth = log.TimeDepth,
+                CurveClass = log.CurveClass,
+
+                Channel = new List<Channel>()
+                    {
+                        new Channel()
+                        {
+                            Citation = Citation("Citation_01"),
+                            Mnemonic = "TVDSS",
+                            UoM = "ft",
+                            CurveClass = "TVDSS",
+                            LoggingMethod = loggingMethod,
+                            LoggingCompanyName = log.LoggingCompanyName,
+                            Source = loggingMethod.ToString(),
+                            DataType = EtpDataType.@double,
+                            Status = ChannelStatus.active,
+                            Index = index,
+                            StartIndex = new DepthIndexValue() { Depth = 0 },
+                            EndIndex = new DepthIndexValue() { Depth = -1000 },
+                            TimeDepth = log.TimeDepth,
+                            PointMetadata = new List<PointMetadata>()
+                            {
+                                new PointMetadata()
+                                {
+                                    Name = "Depth Index",
+                                    Description = "Depth Index Value",
+                                    EtpDataType = EtpDataType.@double
+                                },
+                                new PointMetadata()
+                                {
+                                    Name = "Date",
+                                    Description = "Date",
+                                    EtpDataType = EtpDataType.@string
+                                }
+                            }
+                        },
+                        new Channel()
+                        {
+                            Citation = Citation("Rate of Penetration"),
+                            Mnemonic = "ROP",
+                            UoM = "m/h",
+                            CurveClass = "Velocity",
+                            LoggingMethod = loggingMethod,
+                            LoggingCompanyName = log.LoggingCompanyName,
+                            Source = loggingMethod.ToString(),
+                            DataType = EtpDataType.@double,
+                            Status = ChannelStatus.active,
+                            Index = index,
+                            StartIndex = new DepthIndexValue() { Depth = 0 },
+                            EndIndex = new DepthIndexValue() { Depth = -1000 },
+                            TimeDepth = log.TimeDepth,
+                            PointMetadata = new List<PointMetadata>()
+                            {
+                                new PointMetadata()
+                                {
+                                    Name = "Value",
+                                    Description = "Value",
+                                    EtpDataType = EtpDataType.@double
+                                },
+                                new PointMetadata()
+                                {
+                                    Name = "Quality",
+                                    Description = "Quality",
+                                    EtpDataType = EtpDataType.boolean
+                                }
+                            }
+                        },
+                        new Channel()
+                        {
+                            Citation = Citation("Hookload"),
+                            Mnemonic = "HKLD",
+                            UoM = "klbf",
+                            CurveClass = "Force",
+                            LoggingMethod = loggingMethod,
+                            LoggingCompanyName = log.LoggingCompanyName,
+                            Source = loggingMethod.ToString(),
+                            DataType = EtpDataType.@double,
+                            Status = ChannelStatus.active,
+                            Index = index,
+                            StartIndex = new DepthIndexValue() { Depth = 0 },
+                            EndIndex = new DepthIndexValue() { Depth = -1000 },
+                            TimeDepth = log.TimeDepth,
+                        },
+                        new Channel()
+                        {
+                            Citation = Citation("Citation_04"),
+                            Mnemonic = "Sp",
+                            UoM = "mV",
+                            CurveClass = "Sp",
+                            LoggingMethod = loggingMethod,
+                            LoggingCompanyName = log.LoggingCompanyName,
+                            Source = loggingMethod.ToString(),
+                            DataType = EtpDataType.@double,
+                            Status = ChannelStatus.active,
+                            Index = index,
+                            StartIndex = new DepthIndexValue() { Depth = 0 },
+                            EndIndex = new DepthIndexValue() { Depth = -1000 },
+                            TimeDepth = log.TimeDepth,
+                        }
+                    },
+
+                DataContext = new IndexRangeContext()
+                {
+                    StartIndex = new DepthIndexValue() { Depth = 0 },
+                    EndIndex = new DepthIndexValue() { Depth = -1000 },
+                },
+
+
+                Data = new ChannelData()
+                {
+                    FileUri = "file://",
+
+                    Data = null
+                }
+            };
+            return channelSet;
+        }
+
+        /// <summary>
         /// Creates the time channel set.
         /// </summary>
         /// <param name="log">The log.</param>
@@ -658,7 +807,7 @@ namespace PDS.Witsml.Server
             return channelSet;
         }
 
-        private static string GenerateValuesByType(Random random, ref double indexValue, bool isIndex, bool isIncreasing, EtpDataType? etpDataType)
+        private static string GenerateValuesByType(Random random, ref double indexDepthValue, ref DateTime indexTimeValue, bool isIndex, bool isIncreasing, EtpDataType? etpDataType)
         {
             string column = string.Empty;
 
@@ -678,7 +827,7 @@ namespace PDS.Witsml.Server
                 case EtpDataType.@float:
                     if (isIndex)
                     {
-                        var value = isIncreasing ? indexValue + random.Next(1, 10) / 10.0 : indexValue - random.Next(1, 10) / 10.0;
+                        var value = isIncreasing ? indexDepthValue + random.Next(1, 10) / 10.0 : indexDepthValue - random.Next(1, 10) / 10.0;
                         column = string.Format(" {0:0.###}", value);
                     }
                     else
@@ -690,7 +839,7 @@ namespace PDS.Witsml.Server
                 case EtpDataType.@long:
                     if (isIndex)
                     {
-                        var value = isIncreasing ? indexValue + random.Next(1, 5) : indexValue - random.Next(1, 5);
+                        var value = isIncreasing ? indexDepthValue + random.Next(1, 5) : indexDepthValue - random.Next(1, 5);
                         column = string.Format(" {0:0}", value);
                     }
                     else
@@ -702,7 +851,7 @@ namespace PDS.Witsml.Server
                     column = "null";
                     break;
                 case EtpDataType.@string:
-                    column = "\"" + DateTime.Now.AddSeconds(random.Next(1, 10)) + "\"";
+                    column = "\"" + indexTimeValue + "\"";
                     break;
                 case EtpDataType.vector:
                     column = "(1.0, 2.0, 3.0)";

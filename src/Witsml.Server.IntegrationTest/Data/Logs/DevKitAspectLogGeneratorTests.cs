@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 namespace PDS.Witsml.Server.Data.Logs
 {
     [TestClass]
-    public class DevKitAspectTests
+    public class DevKitAspectLogGeneratorTests
     {
         private DevKit200Aspect DevKit200;
         private DataObjectReference WellboreReference;
@@ -47,7 +47,25 @@ namespace PDS.Witsml.Server.Data.Logs
         {          
             Log log200 = new Log() { TimeDepth = "Depth", Citation = DevKit200.Citation("Log 01"), Wellbore = WellboreReference, Uuid = "Test Generate Log Wellbore Uuid" };
 
-            ChannelSet channelSet = DevKit200.CreateDepthChannelSet(log200);
+            ChannelSet channelSet = DevKit200.CreateDepthChannelSet_Increasing_Index(log200);
+            List<ChannelSet> ChannelSet = new List<ChannelSet>();
+            ChannelSet.Add(channelSet);
+
+            DevKit200.GenerateChannelData(ChannelSet, numDataValue: 5);
+            Assert.AreEqual(1, ChannelSet.Count);
+            Assert.AreEqual(4, ChannelSet[0].Channel.Count);
+
+            List<List<List<object>>> dataValues = DeserializeChannelSetData(ChannelSet[0].Data.Data);
+            Assert.AreEqual(5, dataValues.Count);
+            Assert.AreEqual(4, dataValues[0].Count);
+        }
+
+        [TestMethod]
+        public void Can_Generate_Depth_Log_200_From_ChannelSet_Decreasing()
+        {
+            Log log200 = new Log() { TimeDepth = "Depth", Citation = DevKit200.Citation("Log 01"), Wellbore = WellboreReference, Uuid = "Test Generate Log Wellbore Uuid" };
+
+            ChannelSet channelSet = DevKit200.CreateDepthChannelSet_Decreasing_Index(log200);
             List<ChannelSet> ChannelSet = new List<ChannelSet>();
             ChannelSet.Add(channelSet);
 
@@ -65,7 +83,7 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             Log log200 = new Log() { Citation = DevKit200.Citation("Log 01"), Wellbore = WellboreReference, Uuid = "Test Generate Log Wellbore Uuid" };
 
-            ChannelSet channelSet = DevKit200.CreateDepthChannelSet(log200);
+            ChannelSet channelSet = DevKit200.CreateDepthChannelSet_Increasing_Index(log200);
             List<ChannelSet> ChannelSet = new List<ChannelSet>();
             ChannelSet.Add(channelSet);
             ChannelSet.Add(channelSet);
