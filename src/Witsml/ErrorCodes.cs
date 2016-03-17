@@ -265,6 +265,7 @@
         /// -449 When updating data in a systematically growing data-object the indexCurve must be specified in the
         /// mnemonicList.
         /// </summary>
+        IndexCurveNotFound = -449,
 
         /// <summary>
         /// -450 When updating data in a systematically growing data-object, each mnemonic must occur only once in the
@@ -304,11 +305,13 @@
         /// -457 If a column-identifier representing the index column is specified then it must be specified first in the datacolumn-
         /// list.
         /// </summary>
+        IndexNotFirstInDataColumnList = -457,
 
         /// <summary>
         /// -458 For growing data-objects, a combination of depth and date-time structural-range indices must not be
         /// specified.
         /// </summary>
+        MixedStructuralRangeIndices = -458,
 
         /// <summary>
         /// -459 For systematically growing data-objects, the column-identifier (mnemonic) values must not contain one of

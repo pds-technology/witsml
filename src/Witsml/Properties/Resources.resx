@@ -310,4 +310,16 @@
     <value>For systematically growing data-objects, the column-identifier (mnemonic) values must not contain one of the following special characters: single-quote, double-quote, less than, greater than, forward slash, backward slash, ampersand, comma.</value>
     <comment>-459</comment>
   </data>
+  <data name="MixedStructuralRangeIndices" xml:space="preserve">
+    <value>For growing data-objects, a combination of depth and date-time structural-range indices must not be specified.</value>
+    <comment>-458</comment>
+  </data>
+  <data name="IndexNotFirstInDataColumnList" xml:space="preserve">
+    <value>If a column-identifier representing the index column is specified then it must be specified first in the data-column-list.</value>
+    <comment>-457</comment>
+  </data>
+  <data name="IndexCurveNotFound" xml:space="preserve">
+    <value>When updating data in a systematically growing data-object the indexCurve must be specified in the mnemonicList.</value>
+    <comment>-449</comment>
+  </data>
 </root>

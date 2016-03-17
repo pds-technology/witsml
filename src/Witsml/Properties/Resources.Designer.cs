@@ -187,6 +187,24 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to When updating data in a systematically growing data-object the indexCurve must be specified in the mnemonicList..
+        /// </summary>
+        internal static string IndexCurveNotFound {
+            get {
+                return ResourceManager.GetString("IndexCurveNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to If a column-identifier representing the index column is specified then it must be specified first in the data-column-list..
+        /// </summary>
+        internal static string IndexNotFirstInDataColumnList {
+            get {
+                return ResourceManager.GetString("IndexNotFirstInDataColumnList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The result of an add, update, or delete operation must be compliant with the derived write schema after performing a retrieval of the complete data-object.
         /// </summary>
         internal static string InputDataObjectNotCompliant {
@@ -408,6 +426,15 @@ namespace PDS.Witsml.Properties {
         internal static string MissingWMLtypeIn {
             get {
                 return ResourceManager.GetString("MissingWMLtypeIn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to For growing data-objects, a combination of depth and date-time structural-range indices must not be specified..
+        /// </summary>
+        internal static string MixedStructuralRangeIndices {
+            get {
+                return ResourceManager.GetString("MixedStructuralRangeIndices", resourceCulture);
             }
         }
         
