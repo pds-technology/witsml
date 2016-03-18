@@ -35,6 +35,9 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="indicesMap">The index map for the list of channel set.</param>
         public void WriteChannelSetValues(string uidLog, Dictionary<string, string> channelData, Dictionary<string, List<ChannelIndexInfo>> indicesMap)
         {
+            if (indicesMap == null && indicesMap.Keys.Count == 0)
+                return;
+
             var collection = GetCollection<ChannelSetValues>(DbCollectionName);
             var dataChunks = new List<ChannelSetValues>();
             foreach (var key in indicesMap.Keys)
@@ -70,6 +73,11 @@ namespace PDS.Witsml.Server.Data.Logs
                         dc.UnitList = unitList;
                         return (WriteModel<ChannelSetValues>)new InsertOneModel<ChannelSetValues>(dc);
                     }));
+        }
+
+        public List<string> GetLogDataValues()
+        {
+            return null;
         }
 
         /// <summary>
