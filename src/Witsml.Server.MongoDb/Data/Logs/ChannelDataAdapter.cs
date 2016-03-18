@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Text;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using PDS.Server.MongoDb;
@@ -16,6 +18,7 @@ namespace PDS.Witsml.Server.Data.Logs
     public class ChannelDataAdapter : MongoDbDataAdapter<ChannelSetValues>
     {
         private static readonly int RangeSize = Settings.Default.LogIndexRangeSize;
+        private static readonly char Separator = ',';
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelDataAdapter"/> class.
@@ -35,7 +38,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="indicesMap">The index map for the list of channel set.</param>
         public void WriteChannelSetValues(string uidLog, Dictionary<string, string> channelData, Dictionary<string, List<ChannelIndexInfo>> indicesMap)
         {
-            if (indicesMap == null && indicesMap.Keys.Count == 0)
+            if (indicesMap == null || indicesMap.Keys.Count == 0)
                 return;
 
             var collection = GetCollection<ChannelSetValues>(DbCollectionName);
@@ -75,9 +78,182 @@ namespace PDS.Witsml.Server.Data.Logs
                     }));
         }
 
-        public List<string> GetLogDataValues()
+        /// <summary>
+        /// Gets the log data for WITSML 1.4 log (May refactor in future to accommodate 1.3 log)
+        /// </summary>
+        /// <param name="uidLog">The uid of the log.</param>
+        /// <param name="mnemonics">The subset of mnemonics for the requested log curves, i.e queryIn, that exists in the log.</param>
+        /// <param name="range">The requested index range; double for both depth and time (needs to convert to Unix seconds).</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <returns>The LogData object that contains the log data (only includes curve(s) that having valid data within the request range.</returns>
+        public LogData GetLogData(string uidLog, List<string> mnemonics, Tuple<double?, double?> range, bool increasing)
+        {         
+            var indexCurve = mnemonics[0].Trim();
+
+            // Build Log Data filter
+            var filter = BuildDataFilter(uidLog, indexCurve, range, increasing);
+
+            // Query channelSetValues collection
+            var results = GetData(filter, increasing);
+            if (results == null || results.Count == 0)
+                return null;
+
+            // Convert data
+            var logData = new LogData();
+            TransformLogData(logData, results, mnemonics);
+            return logData;
+        }
+
+        /// <summary>
+        /// Gets the log data from channelSetValues collection.
+        /// </summary>
+        /// <param name="filter">The filter.</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <returns>The list of log data chunks that fit the query criteria sorted by the start index.</returns>
+        private List<ChannelSetValues> GetData(FilterDefinition<ChannelSetValues> filter, bool increasing)
         {
-            return null;
+            var collection = GetCollection<ChannelSetValues>(DbCollectionName);
+            var sortBuilder = Builders<ChannelSetValues>.Sort;
+            var sortField = "Indices.Start";
+            var sort = increasing ? sortBuilder.Ascending(sortField) : sortBuilder.Descending(sortField);
+
+            return collection.Find(filter ?? "{}").Sort(sort).ToList();
+        }
+
+        /// <summary>
+        /// Builds the data filter for the database query.
+        /// </summary>
+        /// <param name="uidLog">The uid of the log.</param>
+        /// <param name="indexCurve">The index curve mnemonic.</param>
+        /// <param name="range">The request range.</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <returns>The query filter.</returns>
+        private FilterDefinition<ChannelSetValues> BuildDataFilter(string uidLog, string indexCurve, Tuple<double?, double?> range, bool increasing)
+        {
+            var filters = new List<FilterDefinition<ChannelSetValues>>();
+            if (range != null)
+            {
+                if (range.Item1.HasValue)
+                {
+                    var start = increasing ?
+                        Builders<ChannelSetValues>.Filter.Gte("Indices.Start", range.Item1.Value) :
+                        Builders<ChannelSetValues>.Filter.Lte("Indices.Start", range.Item1.Value);
+                    filters.Add(start);
+                }
+                if (range.Item2.HasValue)
+                {
+                    var start = increasing ?
+                        Builders<ChannelSetValues>.Filter.Lte("Indices.End", range.Item2.Value) :
+                        Builders<ChannelSetValues>.Filter.Gte("Indices.End", range.Item2.Value);
+                    filters.Add(start);
+                }
+            }
+            
+            if (filters.Count > 0)
+                filters.Add(Builders<ChannelSetValues>.Filter.EqIgnoreCase("Indices.Mnemonic", indexCurve));
+
+            filters.Add(Builders<ChannelSetValues>.Filter.EqIgnoreCase("UidLog", uidLog));
+            return Builders<ChannelSetValues>.Filter.And(filters);
+        }
+
+        /// <summary>
+        /// Transforms the log data chunks as 1.4 log data.
+        /// </summary>
+        /// <param name="logData">The <see cref="LogData"/> object.</param>
+        /// <param name="results">The list of log data chunks.</param>
+        /// <param name="mnemonics">The subset of mnemonics for the requested log curves.</param>
+        private void TransformLogData(LogData logData, List<ChannelSetValues> results, List<string> mnemonics)
+        {
+            logData.Data = new List<string>();
+            var dataList = new List<List<string>>();
+            var rangeList = new List<List<string>>();
+            List<string> dataMnemonics = null;
+            List<string> units = null;
+            var requestIndex = new List<int>();
+            foreach (var result in results)
+            {
+                var values = DeserializeLogData(result.Data);
+                             
+                if (dataMnemonics == null)
+                {
+                    dataMnemonics = result.MnemonicList.Split(Separator).ToList();
+                    units = result.UnitList.Split(Separator).ToList();
+                    foreach (var request in mnemonics)
+                    {
+                        if (dataMnemonics.Contains(request))
+                        {
+                            requestIndex.Add(dataMnemonics.IndexOf(request));
+                            rangeList.Add(new List<string>());
+                        }
+                    }
+                }
+                foreach (var value in values)
+                    dataList.Add(TransformLogDataRow(value, requestIndex, rangeList));                                  
+            }
+
+            var validIndex = new List<int>();
+            var validMnemonics = new List<string>();
+            var validUnits = new List<string>();
+            for (var i = 0; i < rangeList.Count; i++)
+            {
+                var range = rangeList[i];
+                if (range.Count > 0)
+                {
+                    validIndex.Add(i);
+                    validMnemonics.Add(mnemonics[i]);
+                    validUnits.Add(units[i]);
+                }
+            }
+            logData.MnemonicList = string.Join(Separator.ToString(), validMnemonics);
+            logData.UnitList = string.Join(Separator.ToString(), validUnits);
+            foreach (var row in dataList)
+                logData.Data.Add(ConcatLogDataRow(row, validIndex));
+
+            mnemonics = validMnemonics;
+        }
+
+        /// <summary>
+        /// Splits the log data at an index into an list of points and update the valid index range for each log curve.
+        /// </summary>
+        /// <param name="data">The data string at the index.</param>
+        /// <param name="requestIndex">The computed index for the points (split from the data string) that are requested.</param>
+        /// <param name="rangeList">The index range list for each requested curve.</param>
+        /// <returns></returns>
+        private List<string> TransformLogDataRow(string data, List<int> requestIndex, List<List<string>> rangeList)
+        {
+            var points = data.Split(Separator);
+            var result = new List<string>();
+            for (var i = 0; i < requestIndex.Count; i++)
+            {
+                var index = points[0];
+                var point = points[requestIndex[i]];
+                result.Add(point);
+                if (string.IsNullOrEmpty(point))
+                    continue;
+
+                var range = rangeList[i];
+                if (range.Count == 0)
+                {
+                    range.Add(index);
+                    range.Add(index);
+                }
+                else
+                {
+                    range[1] = index;
+                }
+            }
+            return result;
+        }
+
+        private string ConcatLogDataRow(List<string> points, List<int> validIndex)
+        {
+            var sb = new StringBuilder();
+
+            sb.Append(points[validIndex[0]]);
+            for (var j = 1; j < validIndex.Count; j++)
+                sb.AppendFormat("{0}{1}", Separator, points[validIndex[j]]);
+
+            return sb.ToString();
         }
 
         /// <summary>
@@ -164,7 +340,7 @@ namespace PDS.Witsml.Server.Data.Logs
             foreach (var dataRow in dataList)
             {
                 // TODO: Validate the index order (is the data sorted?)
-                var allValues = dataRow.Split(',');
+                var allValues = dataRow.Split(Separator);
                 double index;
                 if (isDepthLog)
                     index = double.Parse(allValues[0]);
@@ -178,7 +354,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 }
                 else
                 {
-                    var slicedData = string.Join(",", SliceStringList(allValues, sliceIndexes));
+                    var slicedData = string.Join(Separator.ToString(), SliceStringList(allValues, sliceIndexes));
                     yield return new Tuple<string, double, string>(uid, index, slicedData);
                 }
             }
@@ -221,6 +397,11 @@ namespace PDS.Witsml.Server.Data.Logs
         private string SerializeLogData(List<string> data)
         {
             return JsonConvert.SerializeObject(data);
+        }
+
+        private List<string> DeserializeLogData(string data)
+        {
+            return JsonConvert.DeserializeObject<List<string>>(data);
         }
 
         /// <summary>
