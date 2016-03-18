@@ -54,7 +54,6 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
-        [ExpectedException(typeof(WitsmlException))]
         public void Well_can_be_parsed_and_validated()
         {
             const string xml = @"<?xml version=""1.0""?>
@@ -65,7 +64,7 @@ namespace PDS.Witsml.Server.Data.Wells
                         <Creation>2016-03-16T05:05:08.8416296Z</Creation>
                         <Format>PDS.Witsml.Server.IntegrationTest, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</Format>
                     </Citation>
-                    <PcInterest>100</PcInterest>  <!-- Missing uom attribute should throw exception -->
+                    <PcInterest uom=""%"">100</PcInterest>
                     <TimeZone>-06:00</TimeZone>
                     <GeographicLocationWGS84>
                         <Latitude>28.5597</Latitude>
@@ -76,7 +75,8 @@ namespace PDS.Witsml.Server.Data.Wells
                     </GeographicLocationWGS84>
                 </Well>";
 
-            var parser = new WitsmlQueryParser(new RequestContext(Functions.AddToStore, ObjectTypes.Well, xml, null, null));
+            var context = new RequestContext(Functions.AddToStore, ObjectTypes.Well, xml, null, null);
+            var parser = new WitsmlQueryParser(context);
             var well = WellAdapter.Parse(parser);
 
             Assert.IsNotNull(well);
