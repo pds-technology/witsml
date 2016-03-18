@@ -165,7 +165,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         IsTimeIndex = entity.IndexType == LogIndexType.datetime || entity.IndexType == LogIndexType.elapsedtime
                     };
                     var channelDataAdapter = new ChannelDataAdapter(DatabaseProvider);
-                    channelDataAdapter.WriteLogDataValues(entity.Uid, logData.Data, logData.MnemonicList, indexChannel);
+                    channelDataAdapter.WriteLogDataValues(entity.Uid, logData.Data, logData.MnemonicList, logData.UnitList, indexChannel);
                 }
 
                 return new WitsmlResult(ErrorCodes.Success, entity.Uid);

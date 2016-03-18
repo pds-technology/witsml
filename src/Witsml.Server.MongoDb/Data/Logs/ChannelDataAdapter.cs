@@ -58,7 +58,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="data">The log data.</param>
         /// <param name="mnemonicList">The mnemonic list for the log data.</param>
         /// <param name="indexChannel">The index channel.</param>
-        public void WriteLogDataValues(string uidLog, List<string> data, string mnemonicList, ChannelIndexInfo indexChannel)
+        public void WriteLogDataValues(string uidLog, List<string> data, string mnemonicList, string unitList, ChannelIndexInfo indexChannel)
         {
             var collection = GetCollection<ChannelSetValues>(DbCollectionName);
             collection.BulkWrite(ToChunks(indexChannel, GetSequence(string.Empty, !indexChannel.IsTimeIndex, data))
@@ -66,6 +66,8 @@ namespace PDS.Witsml.Server.Data.Logs
                     {
                         dc.UidLog = uidLog;
                         dc.Uid = NewUid();
+                        dc.MnemonicList = mnemonicList;
+                        dc.UnitList = unitList;
                         return (WriteModel<ChannelSetValues>)new InsertOneModel<ChannelSetValues>(dc);
                     }));
         }
