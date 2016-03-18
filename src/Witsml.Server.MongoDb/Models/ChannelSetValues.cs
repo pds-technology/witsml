@@ -26,5 +26,7 @@ namespace PDS.Witsml.Server.Models
         public string Data { get; set; }
 
         public string MnemonicList { get; set; }
+
+        public string UnitList { get; set; }
     }
 }
