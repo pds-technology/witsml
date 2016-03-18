@@ -87,8 +87,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 ? GetLogHeaderRequiredProperties(logs).ToList()
                 : logs;
 
-            // Only get the LogData returnElements != "header-only"
-            if (!OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements))
+            // Only get the LogData returnElements != "header-only" and returnElements != "id-only"
+            if (!OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) && !OptionsIn.ReturnElements.IdOnly.Equals(returnElements))
             {
                 logsOut.ForEach(l =>
                 {
