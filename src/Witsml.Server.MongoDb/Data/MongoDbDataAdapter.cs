@@ -60,9 +60,9 @@ namespace PDS.Witsml.Server.Data
         /// <returns>An instance of <see cref="!:T" />.</returns>
         public override T Parse(WitsmlQueryParser parser)
         {
-            // TODO: for task #4895, need to make this work for WITSML 2.0 data objects with abstract property types (e.g. Well.GeographicLocationWGS84.Crs)
-            //var inputValidator = new MongoDbQuery<T>(GetCollection(), parser, null);
-            //inputValidator.Validate();
+            Logger.DebugFormat("Validating {0} input template.", DbCollectionName);
+            var inputValidator = new MongoDbQuery<T>(GetCollection(), parser, null);
+            inputValidator.Validate();
 
             return Parse(parser.Context.Xml);
         }

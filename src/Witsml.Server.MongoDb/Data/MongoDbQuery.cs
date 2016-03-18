@@ -15,6 +15,8 @@ namespace PDS.Witsml.Server.Data
     /// <typeparam name="T">The type of queried data object.</typeparam>
     public class MongoDbQuery<T>
     {
+        private static readonly XNamespace xsi = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
+
         private readonly IMongoCollection<T> _collection;
         private readonly WitsmlQueryParser _parser;    
         private List<string> _fields;
@@ -151,7 +153,7 @@ namespace PDS.Witsml.Server.Data
 
             foreach (var attribute in element.Attributes())
             {
-                if (attribute.IsNamespaceDeclaration || string.Compare(attribute.Name.LocalName, "nil", true) == 0)
+                if (attribute.IsNamespaceDeclaration || attribute.Name == Xsi("nil") || attribute.Name == Xsi("type"))
                     continue;
 
                 var attributeProp = GetPropertyInfoForAnElement(properties, attribute.Name.LocalName);
@@ -200,6 +202,11 @@ namespace PDS.Witsml.Server.Data
                     }
 
                     return null;
+                }
+                else if (propType.IsAbstract)
+                {
+                    var concreteType = GetConcreteType(element, propType);
+                    return BuildFilterForAnElementType(concreteType, element, fieldName);
                 }
                 else
                 {
@@ -326,6 +333,28 @@ namespace PDS.Witsml.Server.Data
         private IEnumerable<PropertyInfo> GetPropertyInfo(Type t)
         {
             return t.GetProperties().Where(p => !p.IsDefined(typeof(XmlIgnoreAttribute), false));
+        }
+
+        private Type GetConcreteType(XElement element, Type propType)
+        {
+            var xsiType = element.Attributes()
+                .Where(x => x.Name == Xsi("type"))
+                .Select(x => x.Value.Split(':'))
+                .FirstOrDefault();
+
+            var @namespace = element.Attributes()
+                .Where(x => x.Name == Xmlns(xsiType.FirstOrDefault()))
+                .Select(x => x.Value)
+                .FirstOrDefault();
+
+            var typeName = xsiType.LastOrDefault();
+
+            return propType.Assembly.GetTypes()
+                .FirstOrDefault(t =>
+                {
+                    var xmlType = t.GetCustomAttribute<XmlTypeAttribute>();
+                    return xmlType != null && xmlType.TypeName == typeName && xmlType.Namespace == @namespace;
+                });
         }
 
         private void ValidateMeasureUom(XElement element, PropertyInfo uomProperty, string measureValue)
@@ -499,6 +528,16 @@ namespace PDS.Witsml.Server.Data
                 result += input.Substring(1);
 
             return result;
+        }
+
+        private XName Xmlns(string attributeName)
+        {
+            return XNamespace.Xmlns.GetName(attributeName);
+        }
+
+        private XName Xsi(string attributeName)
+        {
+            return xsi.GetName(attributeName);
         }
     }
 }
