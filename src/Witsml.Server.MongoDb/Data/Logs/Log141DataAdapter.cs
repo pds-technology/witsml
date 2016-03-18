@@ -30,10 +30,9 @@ namespace PDS.Witsml.Server.Data.Logs
     public class Log141DataAdapter : MongoDbDataAdapter<Log>, IWitsml141Configuration
     {
         private static readonly string DbCollectionNameLogDataValues = "logDataValues";
-        private static readonly int LogIndexRangeSize = Settings.Default.LogIndexRangeSize;
-
-        private readonly int _maxDataNodes = Witsml.Properties.Settings.Default.MaxDataNodes;
-        private readonly int _maxDataPoints = Witsml.Properties.Settings.Default.MaxDataPoints;
+        private static readonly int LogIndexRangeSize = PDS.Server.MongoDb.Settings.Default.LogIndexRangeSize;
+        private static readonly int maxDataNodes = Settings.Default.MaxDataNodes;
+        private static readonly int maxDataPoints = Settings.Default.MaxDataPoints;
 
 
         /// <summary>
@@ -53,14 +52,14 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             capServer.Add(Functions.GetFromStore, new ObjectWithConstraint(ObjectTypes.Log)
             {
-                MaxDataNodes = _maxDataNodes,
-                MaxDataPoints = _maxDataPoints
+                MaxDataNodes = maxDataNodes,
+                MaxDataPoints = maxDataPoints
             });
 
             capServer.Add(Functions.AddToStore, new ObjectWithConstraint(ObjectTypes.Log)
             {
-                MaxDataNodes = _maxDataNodes,
-                MaxDataPoints = _maxDataPoints
+                MaxDataNodes = maxDataNodes,
+                MaxDataPoints = maxDataPoints
             });
 
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);

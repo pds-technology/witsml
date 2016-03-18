@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using Energistics.DataAccess.WITSML141;
 using System.ComponentModel.Composition;
 using PDS.Witsml.Server.Configuration;
+using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -18,8 +19,8 @@ namespace PDS.Witsml.Server.Data.Logs
         private readonly IWitsmlDataAdapter<Log> _logDataAdapter;
         private readonly IWitsmlDataAdapter<Wellbore> _wellboreDataAdapter;
         private readonly IWitsmlDataAdapter<Well> _wellDataAdapter;
-        private readonly int _maxDataNodes = Witsml.Properties.Settings.Default.MaxDataNodes;
-        private readonly int _maxDataPoints = Witsml.Properties.Settings.Default.MaxDataPoints;
+        private static readonly int maxDataNodes = Settings.Default.MaxDataNodes;
+        private static readonly int maxDataPoints = Settings.Default.MaxDataPoints;
 
         private readonly string[] _illeagalColumnIdentifiers = new string[] { "'", "\"", "<", ">", "/", "\\", "&", "," };
 
@@ -112,7 +113,7 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             // Validate if MaxDataNodes has been exceeded
-            else if (DataObject.LogData != null && DataObject.LogData.SelectMany(ld => ld.Data).Count() > _maxDataNodes)
+            else if (DataObject.LogData != null && DataObject.LogData.SelectMany(ld => ld.Data).Count() > maxDataNodes)
             {
                 yield return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "LogData", "Data" });
             }
@@ -122,7 +123,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 && DataObject.LogData.Count > 0 
                 && DataObject.LogData.First().Data != null 
                 && DataObject.LogData.First().Data.Count > 0 
-                && (DataObject.LogData.SelectMany(ld => ld.Data).Count() * DataObject.LogData.First().Data[0].Split(',').Count()) > _maxDataPoints)
+                && (DataObject.LogData.SelectMany(ld => ld.Data).Count() * DataObject.LogData.First().Data[0].Split(',').Count()) > maxDataPoints)
             {
                 yield return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "LogData", "Data" });
             }

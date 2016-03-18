@@ -4,8 +4,8 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using MongoDB.Driver;
 using Newtonsoft.Json;
+using PDS.Server.MongoDb;
 using PDS.Witsml.Server.Models;
-using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
