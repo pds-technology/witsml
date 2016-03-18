@@ -377,9 +377,14 @@ namespace PDS.Witsml.Server.Data
             }
 
             var enumType = uomProperty.PropertyType;
+            var hasXmlEnum = enumType.GetMembers().Any(x =>
+            {
+                var xmlEnumAttrib = x.GetCustomAttribute<XmlEnumAttribute>();
+                return xmlEnumAttrib != null && xmlEnumAttrib.Name == uomValue;
+            });
 
             // uom must be a valid enumeration member
-            if (enumType.IsEnum && !enumType.IsEnumDefined(uomValue))
+            if (enumType.IsEnum && !enumType.IsEnumDefined(uomValue) && !hasXmlEnum)
             {
                 throw new WitsmlException(ErrorCodes.InvalidUnitOfMeasure);
             }
