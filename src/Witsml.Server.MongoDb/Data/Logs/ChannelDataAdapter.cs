@@ -423,13 +423,15 @@ namespace PDS.Witsml.Server.Data.Logs
 
             do
             {
-                var chunk = increasing? 
-                    (isTimeIndex ? 
-                        logData.Where(d => ParseTime(d.First().First().ToString()) >= rangeSize.Item1 &&  ParseTime(d.First().First().ToString()) < rangeSize.Item2).ToList() :
-                        logData.Where(d => (double)d.First().First() >= rangeSize.Item1 && (double)d.First().First() < rangeSize.Item2).ToList()):
-                    (isTimeIndex ? 
-                        logData.Where(d => ParseTime(d.First().First().ToString()) >= rangeSize.Item1 &&  ParseTime(d.First().First().ToString()) < rangeSize.Item2).ToList() :
-                        logData.Where(d => (double)d.First().First() >= rangeSize.Item1 && (double)d.First().First() < rangeSize.Item2).ToList());
+                var chunk = 
+                    increasing
+                        ? (isTimeIndex 
+                            ? logData.Where(d => ParseTime(d.First().First().ToString()) >= rangeSize.Item1 &&  ParseTime(d.First().First().ToString()) < rangeSize.Item2).ToList() 
+                            : logData.Where(d => (double)d.First().First() >= rangeSize.Item1 && (double)d.First().First() < rangeSize.Item2).ToList())
+                        // Decreasing
+                        : (isTimeIndex 
+                            ? logData.Where(d => ParseTime(d.First().First().ToString()) <= rangeSize.Item1 &&  ParseTime(d.First().First().ToString()) > rangeSize.Item2).ToList() 
+                            : logData.Where(d => (double)d.First().First() <= rangeSize.Item1 && (double)d.First().First() > rangeSize.Item2).ToList());
 
                 SetChunkIndices(chunk.First().First(), chunk.Last().First(), indices);
 
@@ -443,7 +445,10 @@ namespace PDS.Witsml.Server.Data.Logs
                 };
 
                 dataChunks.Add(channelSetValues);
-                rangeSize = new Tuple<int, int>(rangeSize.Item1 + RangeSize, increasing ? rangeSize.Item2 + RangeSize : rangeSize.Item2 - RangeSize);
+                rangeSize = new Tuple<int, int>(rangeSize.Item1 + RangeSize, 
+                    increasing 
+                        ? rangeSize.Item2 + RangeSize 
+                        : rangeSize.Item2 - RangeSize);
             }
             while (WithinRange(rangeSize.Item2, end, increasing));           
 
