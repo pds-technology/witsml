@@ -268,62 +268,34 @@ namespace PDS.Witsml.Server.Data.Logs
             double endIndex = 0;
             var data = new List<string>();
             string uid = string.Empty;
+            var increasing = indexChannel.Increasing;
 
             foreach (var item in sequence)
             {
                 if (plannedRange == null)
                 {
-                    plannedRange = ComputeRange(item.Item2, RangeSize, indexChannel.Increasing);
+                    plannedRange = ComputeRange(item.Item2, RangeSize, increasing);
                     uid = item.Item1;
                     startIndex = item.Item2;
                 }
 
-                if (indexChannel.Increasing)
+                if (WithinRange(item.Item2, plannedRange.Item2, increasing, false))
                 {
-                    // If we're within the plannedRange append to the data and update the endIndex
-                    if (item.Item2 < plannedRange.Item2)
-                    {
-                        // While still appending data for the current chunk set the uid if it is currently blank
-                        uid = string.IsNullOrEmpty(uid) ? item.Item1 : uid;
-
-                        data.Add(item.Item3);
-                        endIndex = item.Item2;
-                    }
-                    else
-                    {
-                        indexChannel.Start = startIndex;
-                        indexChannel.End = endIndex;
-                        yield return new ChannelSetValues() { Data = SerializeLogData(data), Indices = new List<ChannelIndexInfo> { indexChannel } };
-                        plannedRange = ComputeRange(item.Item2, RangeSize);
-                        data = new List<string>();
-                        data.Add(item.Item3);
-                        startIndex = item.Item2;
-                        endIndex = item.Item2;
-                        uid = item.Item1;
-                    }
+                    uid = string.IsNullOrEmpty(uid) ? item.Item1 : uid;
+                    data.Add(item.Item3);
+                    endIndex = item.Item2;
                 }
                 else
                 {
-                    if (item.Item2 > plannedRange.Item2)
-                    {
-                        // While still appending data for the current chunk set the uid if it is currently blank
-                        uid = string.IsNullOrEmpty(uid) ? item.Item1 : uid;
-
-                        data.Add(item.Item3);
-                        endIndex = item.Item2;
-                    }
-                    else
-                    {
-                        indexChannel.Start = startIndex;
-                        indexChannel.End = endIndex;
-                        yield return new ChannelSetValues() { Data = SerializeLogData(data), Indices = new List<ChannelIndexInfo> { indexChannel } };
-                        plannedRange = ComputeRange(item.Item2, RangeSize, indexChannel.Increasing);
-                        data = new List<string>();
-                        data.Add(item.Item3);
-                        startIndex = item.Item2;
-                        endIndex = item.Item2;
-                        uid = item.Item1;
-                    }
+                    indexChannel.Start = startIndex;
+                    indexChannel.End = endIndex;
+                    yield return new ChannelSetValues() { Data = SerializeLogData(data), Indices = new List<ChannelIndexInfo> { indexChannel } };
+                    plannedRange = ComputeRange(item.Item2, RangeSize, increasing);
+                    data = new List<string>();
+                    data.Add(item.Item3);
+                    startIndex = item.Item2;
+                    endIndex = item.Item2;
+                    uid = item.Item1;
                 }
             }
 
@@ -370,7 +342,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Deserializes the channel set data from 2.0 log.
+        /// Deserializes the channel set data from 2.0 log into a 3 dimensional (index, channel, channel data) object list.
         /// </summary>
         /// <param name="data">The data.</param>
         /// <returns></returns>
@@ -436,8 +408,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
             if (isTimeIndex)
             {
-                start = DateTimeOffset.Parse(logData.First().First().First().ToString()).ToUnixTimeSeconds();
-                end = DateTimeOffset.Parse(logData.Last().First().First().ToString()).ToUnixTimeSeconds();
+                start = ParseTime(logData.First().First().First().ToString());
+                end = ParseTime(logData.Last().First().First().ToString());
             }
             else
             {
@@ -449,58 +421,49 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var rangeSize = ComputeRange(start, RangeSize, increasing);
 
-            if (increasing)
+            do
             {
-                do
+                var chunk = increasing? 
+                    (isTimeIndex ? 
+                        logData.Where(d => ParseTime(d.First().First().ToString()) >= rangeSize.Item1 &&  ParseTime(d.First().First().ToString()) < rangeSize.Item2).ToList() :
+                        logData.Where(d => (double)d.First().First() >= rangeSize.Item1 && (double)d.First().First() < rangeSize.Item2).ToList()):
+                    (isTimeIndex ? 
+                        logData.Where(d => ParseTime(d.First().First().ToString()) >= rangeSize.Item1 &&  ParseTime(d.First().First().ToString()) < rangeSize.Item2).ToList() :
+                        logData.Where(d => (double)d.First().First() >= rangeSize.Item1 && (double)d.First().First() < rangeSize.Item2).ToList());
+
+                SetChunkIndices(chunk.First().First(), chunk.Last().First(), indices);
+
+                var channelSetValues = new ChannelSetValues
                 {
-                    var chunk = isTimeIndex ? logData.Where(d => DateTimeOffset.Parse(d.First().First().ToString()).ToUnixTimeSeconds() >= rangeSize.Item1
-                        && DateTimeOffset.Parse(d.First().First().ToString()).ToUnixTimeSeconds() < rangeSize.Item2).ToList() :
-                        logData.Where(d => (double)d.First().First() >= rangeSize.Item1 && (double)d.First().First() < rangeSize.Item2).ToList();
+                    Uid = NewUid(),
+                    UidLog = uidLog,
+                    UidChannelSet = uidChannelSet,
+                    Indices = indices,
+                    Data = SerializeChannelSetData(chunk)
+                };
 
-                    SetChunkIndices(chunk.First().First(), chunk.Last().First(), indices);
-
-                    var channelSetValues = new ChannelSetValues
-                    {
-                        Uid = NewUid(),
-                        UidLog = uidLog,
-                        UidChannelSet = uidChannelSet,
-                        Indices = indices,
-                        Data = SerializeChannelSetData(chunk)
-                    };
-
-                    dataChunks.Add(channelSetValues);
-
-                    rangeSize = new Tuple<int, int>(rangeSize.Item1 + RangeSize, rangeSize.Item2 + RangeSize);
-                }
-                while (rangeSize.Item2 <= end);
+                dataChunks.Add(channelSetValues);
+                rangeSize = new Tuple<int, int>(rangeSize.Item1 + RangeSize, increasing ? rangeSize.Item2 + RangeSize : rangeSize.Item2 - RangeSize);
             }
-            else
-            {
-                do
-                {
-                    var chunk = isTimeIndex ? logData.Where(d => DateTimeOffset.Parse(d.First().First().ToString()).ToUnixTimeSeconds() <= rangeSize.Item1
-                         && DateTimeOffset.Parse(d.First().First().ToString()).ToUnixTimeSeconds() > rangeSize.Item2).ToList() :
-                        logData.Where(d => (double)d.First().First() <= rangeSize.Item1 && (double)d.First().First() > rangeSize.Item2).ToList();
-
-                    SetChunkIndices(chunk.First().First(), chunk.Last().First(), indices);
-
-                    var channelSetValues = new ChannelSetValues
-                    {
-                        Uid = NewUid(),
-                        UidLog = uidLog,
-                        UidChannelSet = uidChannelSet,
-                        Indices = indices,
-                        Data = SerializeChannelSetData(chunk)
-                    };
-
-                    dataChunks.Add(channelSetValues);
-
-                    rangeSize = new Tuple<int, int>(rangeSize.Item1 - RangeSize, rangeSize.Item2 - RangeSize);
-                }
-                while (rangeSize.Item2 >= end);
-            }
+            while (WithinRange(rangeSize.Item2, end, increasing));           
 
             return dataChunks;
+        }
+
+        /// <summary>
+        /// Check if the iteration is within the range: includes end point for entire data; excludes end point for chunking.
+        /// </summary>
+        /// <param name="current">The current index.</param>
+        /// <param name="end">The end index.</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <param name="closeRange">if set to <c>true</c> [close range].</param>
+        /// <returns>True if within range; false if not.</returns>
+        private bool WithinRange(double current, double end, bool increasing, bool closeRange = true)
+        {
+            if (closeRange)
+                return increasing ? current <= end : current >= end;
+            else
+                return increasing ? current < end : current > end;
         }
 
         /// <summary>
@@ -516,10 +479,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 var index = indices[i];
                 if (index.IsTimeIndex)
                 {
-                    var startTime = DateTimeOffset.Parse(starts[i].ToString());
-                    var endTime = DateTimeOffset.Parse(ends[i].ToString());
-                    index.Start = startTime.ToUnixTimeSeconds();
-                    index.End = endTime.ToUnixTimeSeconds();
+                    index.Start = ParseTime(starts[i].ToString());
+                    index.End = ParseTime(ends[i].ToString());
                 }
                 else
                 {
@@ -527,6 +488,16 @@ namespace PDS.Witsml.Server.Data.Logs
                     index.End = double.Parse(ends[i].ToString());
                 }
             }
+        }
+
+        /// <summary>
+        /// Parses the time from string input and converts to Unix seconds.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <returns>The time in Unix seconds.</returns>
+        private double ParseTime(string input)
+        {
+            return DateTimeOffset.Parse(input).ToUnixTimeSeconds();
         }
     }
 }
