@@ -4,8 +4,8 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using MongoDB.Driver;
 using Newtonsoft.Json;
+using PDS.Server.MongoDb;
 using PDS.Witsml.Server.Models;
-using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -35,6 +35,9 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="indicesMap">The index map for the list of channel set.</param>
         public void WriteChannelSetValues(string uidLog, Dictionary<string, string> channelData, Dictionary<string, List<ChannelIndexInfo>> indicesMap)
         {
+            if (indicesMap == null && indicesMap.Keys.Count == 0)
+                return;
+
             var collection = GetCollection<ChannelSetValues>(DbCollectionName);
             var dataChunks = new List<ChannelSetValues>();
             foreach (var key in indicesMap.Keys)
@@ -58,7 +61,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="data">The log data.</param>
         /// <param name="mnemonicList">The mnemonic list for the log data.</param>
         /// <param name="indexChannel">The index channel.</param>
-        public void WriteLogDataValues(string uidLog, List<string> data, string mnemonicList, ChannelIndexInfo indexChannel)
+        public void WriteLogDataValues(string uidLog, List<string> data, string mnemonicList, string unitList, ChannelIndexInfo indexChannel)
         {
             var collection = GetCollection<ChannelSetValues>(DbCollectionName);
             collection.BulkWrite(ToChunks(indexChannel, GetSequence(string.Empty, !indexChannel.IsTimeIndex, data))
@@ -66,8 +69,15 @@ namespace PDS.Witsml.Server.Data.Logs
                     {
                         dc.UidLog = uidLog;
                         dc.Uid = NewUid();
+                        dc.MnemonicList = mnemonicList;
+                        dc.UnitList = unitList;
                         return (WriteModel<ChannelSetValues>)new InsertOneModel<ChannelSetValues>(dc);
                     }));
+        }
+
+        public List<string> GetLogDataValues()
+        {
+            return null;
         }
 
         /// <summary>

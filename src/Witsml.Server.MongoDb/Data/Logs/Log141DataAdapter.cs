@@ -30,10 +30,9 @@ namespace PDS.Witsml.Server.Data.Logs
     public class Log141DataAdapter : MongoDbDataAdapter<Log>, IWitsml141Configuration
     {
         private static readonly string DbCollectionNameLogDataValues = "logDataValues";
-        private static readonly int LogIndexRangeSize = Settings.Default.LogIndexRangeSize;
-
-        private readonly int _maxDataNodes = Witsml.Properties.Settings.Default.MaxDataNodes;
-        private readonly int _maxDataPoints = Witsml.Properties.Settings.Default.MaxDataPoints;
+        private static readonly int LogIndexRangeSize = PDS.Server.MongoDb.Settings.Default.LogIndexRangeSize;
+        private static readonly int maxDataNodes = Settings.Default.MaxDataNodes;
+        private static readonly int maxDataPoints = Settings.Default.MaxDataPoints;
 
 
         /// <summary>
@@ -53,14 +52,14 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             capServer.Add(Functions.GetFromStore, new ObjectWithConstraint(ObjectTypes.Log)
             {
-                MaxDataNodes = _maxDataNodes,
-                MaxDataPoints = _maxDataPoints
+                MaxDataNodes = maxDataNodes,
+                MaxDataPoints = maxDataPoints
             });
 
             capServer.Add(Functions.AddToStore, new ObjectWithConstraint(ObjectTypes.Log)
             {
-                MaxDataNodes = _maxDataNodes,
-                MaxDataPoints = _maxDataPoints
+                MaxDataNodes = maxDataNodes,
+                MaxDataPoints = maxDataPoints
             });
 
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);
@@ -88,8 +87,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 ? GetLogHeaderRequiredProperties(logs).ToList()
                 : logs;
 
-            // Only get the LogData returnElements != "header-only"
-            if (!OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements))
+            // Only get the LogData returnElements != "header-only" and returnElements != "id-only"
+            if (!OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) && !OptionsIn.ReturnElements.IdOnly.Equals(returnElements))
             {
                 logsOut.ForEach(l =>
                 {
@@ -166,7 +165,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         IsTimeIndex = entity.IndexType == LogIndexType.datetime || entity.IndexType == LogIndexType.elapsedtime
                     };
                     var channelDataAdapter = new ChannelDataAdapter(DatabaseProvider);
-                    channelDataAdapter.WriteLogDataValues(entity.Uid, logData.Data, logData.MnemonicList, indexChannel);
+                    channelDataAdapter.WriteLogDataValues(entity.Uid, logData.Data, logData.MnemonicList, logData.UnitList, indexChannel);
                 }
 
                 return new WitsmlResult(ErrorCodes.Success, entity.Uid);
