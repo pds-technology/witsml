@@ -284,6 +284,7 @@ namespace PDS.Witsml.Server
                         ]";
                 }
             }
+            channelSet.Data = data;
         }
 
         /// <summary>

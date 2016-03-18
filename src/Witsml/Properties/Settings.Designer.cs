@@ -31,23 +31,5 @@ namespace PDS.Witsml.Properties {
                 return ((string)(this["DefaultDataSchemaVersion"]));
             }
         }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("5000")]
-        public int MaxDataNodes {
-            get {
-                return ((int)(this["MaxDataNodes"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("10000")]
-        public int MaxDataPoints {
-            get {
-                return ((int)(this["MaxDataPoints"]));
-            }
-        }
     }
 }
