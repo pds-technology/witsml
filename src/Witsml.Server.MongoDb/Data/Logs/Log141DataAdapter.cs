@@ -76,14 +76,15 @@ namespace PDS.Witsml.Server.Data.Logs
             var returnElements = parser.ReturnElements();
             Logger.DebugFormat("Querying with return elements '{0}'", returnElements);
 
-            var fields = (OptionsIn.ReturnElements.IdOnly.Equals(returnElements))
+            var fields = OptionsIn.ReturnElements.IdOnly.Equals(returnElements)
                 ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell", "UidWellbore", "NameWellbore" }
+                : OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) ? GetLogHeaderFields() 
                 : null;
 
             var logs = QueryEntities(parser, fields);
 
             // Support OptionsIn returnElements = all, header-only, data-only
-            var logsOut = (OptionsIn.ReturnElements.DataOnly.Equals(returnElements))
+            var logsOut = OptionsIn.ReturnElements.DataOnly.Equals(returnElements)
                 ? GetLogHeaderRequiredProperties(logs).ToList()
                 : logs;
 
@@ -102,6 +103,44 @@ namespace PDS.Witsml.Server.Data.Logs
                 {
                     Log = logsOut
                 });
+        }
+
+        private List<string> GetLogHeaderFields()
+        {
+            return new List<string>
+            {
+                "NameWell",
+                "NameWellbore",
+                NamePropertyName,
+                "ObjectGrowing",
+                "DataUpateRate",
+                "CurveSensorsAligned",
+                "DataGroup",
+                "ServiceCompany",
+                "RunNumber",
+                "BhaRunNumber",
+                "Pass",
+                "CreationDate",
+                "Description",
+                "DataDelimiter",
+                "IndexType",
+                "StartIndex",
+                "EndIndex",
+                "StepIncrement",
+                "StartDateTimeIndex",
+                "EndDateTimeIndex",
+                "Direction",
+                "IndexCurve",
+                "NullValue",
+                "LogParam",
+                "LogCurveInfo",
+               // TODO: uncommented the following line when DateTime issue is resolved
+               // "CommonData", 
+                "CustomData",
+                "UidWell",
+                "UidWellbore",
+                IdPropertyName
+            };
         }
 
         /// <summary>

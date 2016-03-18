@@ -62,7 +62,9 @@ namespace PDS.Witsml.Server.Data
                 {
                     entities.AddRange(results.ToList());
                 }
-                else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElements) || OptionsIn.ReturnElements.Requested.Equals(returnElements))
+                else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElements) ||
+                         OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) ||
+                         OptionsIn.ReturnElements.Requested.Equals(returnElements))
                 {
                     var projection = BuildProjection(element);
 
