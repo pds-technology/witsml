@@ -6,7 +6,7 @@
 	[
 		{ 
 		"name": "index", 
-		"type": { "type": "array", "items": "Energistics.Datatypes.ChannelData.IndexValue" } 
+		"type": { "type": "array", "items": "long" } 
 	},
 		{ 
 		"name": "data", 

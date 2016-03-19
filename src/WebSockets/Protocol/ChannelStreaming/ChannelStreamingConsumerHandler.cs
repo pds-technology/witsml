@@ -53,11 +53,10 @@ namespace Energistics.Protocol.ChannelStreaming
             Session.SendMessage(header, channelStreamingStart);
         }
 
-        public virtual void ChannelStreamingStop(IList<int> channelIds)
+        public virtual void ChannelStreamingStop(IList<long> channelIds)
         {
             var header = CreateMessageHeader(Protocols.ChannelStreaming, MessageTypes.ChannelStreaming.ChannelStreamingStop);
 
-            // TODO: should this be a list of longs to match the data type of ChannelStreamingInfo.ChannelId
             var channelStreamingStop = new ChannelStreamingStop()
             {
                 Channels = channelIds

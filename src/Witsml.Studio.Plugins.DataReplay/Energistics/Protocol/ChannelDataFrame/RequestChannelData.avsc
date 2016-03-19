@@ -9,7 +9,7 @@
 	"fields":
 	[
 		{ "name": "uri", "type": "string" },
-		{ "name": "fromIndex", "type": ["null", "Energistics.Datatypes.ChannelData.IndexValue"] },
-		{ "name": "toIndex", "type": ["null", "Energistics.Datatypes.ChannelData.IndexValue"] }
+		{ "name": "fromIndex", "type": ["null", "long"] },
+		{ "name": "toIndex", "type": ["null", "long"] }
 	]
 }

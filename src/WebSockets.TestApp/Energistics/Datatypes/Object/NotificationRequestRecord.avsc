@@ -7,7 +7,7 @@
 		{ "name": "uri", "type": "string" },
 		{ "name": "uuid", "type": "string" },
 		{ "name": "includeObjectData", "type": "boolean" },
-		{ "name": "startTime", "type": "Energistics.Datatypes.DateTime" },
+		{ "name": "startTime", "type": "long" },
 		{ 
 		"name": "objectTypes", 
 		"type": { "type": "array", "items": "string" } 

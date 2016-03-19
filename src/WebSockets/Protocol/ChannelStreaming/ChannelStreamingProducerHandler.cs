@@ -57,7 +57,7 @@ namespace Energistics.Protocol.ChannelStreaming
             Session.SendMessage(header, channelData);
         }
 
-        public virtual void ChannelDataChange(long channelId, IndexValue startIndex, IndexValue endIndex, IList<DataItem> dataItems)
+        public virtual void ChannelDataChange(long channelId, long startIndex, long endIndex, IList<DataItem> dataItems)
         {
             var header = CreateMessageHeader(Protocols.ChannelStreaming, MessageTypes.ChannelStreaming.ChannelDataChange);
 

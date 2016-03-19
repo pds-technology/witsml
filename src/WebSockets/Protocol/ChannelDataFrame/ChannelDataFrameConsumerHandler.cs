@@ -12,7 +12,7 @@ namespace Energistics.Protocol.ChannelDataFrame
             RequestedRole = "producer";
         }
 
-        public virtual void RequestChannelData(string uri, IndexValue fromIndex, IndexValue toIndex)
+        public virtual void RequestChannelData(string uri, long? fromIndex = null, long? toIndex = null)
         {
             var header = CreateMessageHeader(Protocols.ChannelDataFrame, MessageTypes.ChannelDataFrame.RequestChannelData);
 

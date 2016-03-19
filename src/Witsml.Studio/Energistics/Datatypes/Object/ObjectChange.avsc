@@ -5,7 +5,7 @@
 	"fields":
 	[
 		{ "name": "changeType", "type": "Energistics.Datatypes.Object.ObjectChangeTypes" },
-		{ "name": "changeTime", "type": "Energistics.Datatypes.DateTime" },
+		{ "name": "changeTime", "type": "long" },
 		{ "name": "dataObject", "type": "Energistics.Datatypes.Object.DataObject" }
 	]
 }

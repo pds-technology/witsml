@@ -1,0 +1,12 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Datatypes",	
+	"name": "Contact",
+	"fields":
+	[
+		{ "name": "organizationName", "type": ["null", "string"] },
+		{ "name": "contactName", "type": ["null", "string"] },
+		{ "name": "contactPhone", "type": ["null", "string"] },
+		{ "name": "contactEmail", "type": ["null", "string"] }
+	]
+}

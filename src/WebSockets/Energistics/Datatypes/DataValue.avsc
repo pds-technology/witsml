@@ -2,5 +2,5 @@
 	"type": "record",
 	"namespace": "Energistics.Datatypes",	
 	"name": "DataValue",
-	"fields": [{"name": "item", "type": [ "null",  "double",  "float",  "int",  "long",  "string",  "Energistics.Datatypes.DateTime",  "Energistics.Datatypes.ArrayOfDouble",  "boolean",  "bytes"] }]
+	"fields": [{"name": "item", "type": [ "null",  "double",  "float",  "int",  "long",  "string",  "Energistics.Datatypes.ArrayOfDouble",  "boolean",  "bytes"] }]
 }

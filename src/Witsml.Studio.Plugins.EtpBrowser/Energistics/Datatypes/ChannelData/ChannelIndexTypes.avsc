@@ -5,7 +5,6 @@
 	"symbols":
 	[
 		"Time",
-		"Depth",
-		"ElapsedTime"
+		"Depth"
 	]
 }

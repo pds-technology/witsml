@@ -22,7 +22,9 @@ namespace Energistics.Protocol.Core
             var requestSession = new RequestSession()
             {
                 ApplicationName = applicationName,
-                RequestedProtocols = requestedProtocols
+                ApplicationVersion = "1.0",
+                RequestedProtocols = requestedProtocols,
+                SupportedObjects = new List<string>()
             };
 
             Session.SendMessage(header, requestSession);

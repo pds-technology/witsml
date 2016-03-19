@@ -82,12 +82,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.Providers
                 HasChildren = count,
                 ContentType = contentType,
                 ResourceType = resourceType.ToString(),
-                CustomData = new Dictionary<string, string>(),
-                LastChanged = new Energistics.Datatypes.DateTime()
-                {
-                    Offset = 0,
-                    Time = 0
-                }
+                CustomData = new Dictionary<string, string>()
             };
         }
     }

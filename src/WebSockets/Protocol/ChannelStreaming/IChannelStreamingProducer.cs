@@ -11,7 +11,7 @@ namespace Energistics.Protocol.ChannelStreaming
 
         void ChannelData(MessageHeader request, IList<DataItem> dataItems);
 
-        void ChannelDataChange(long channelId, IndexValue startIndex, IndexValue endIndex, IList<DataItem> dataItems);
+        void ChannelDataChange(long channelId, long startIndex, long endIndex, IList<DataItem> dataItems);
 
         void ChannelStatusChange(long channelId, ChannelStatuses status);
 

@@ -9,10 +9,6 @@
 	"fields":
 	[
 		{ 
-		"name": "indexes", 
-		"type": { "type": "array", "items": "Energistics.Datatypes.ChannelData.IndexMetadataRecord" } 
-	},
-		{ 
 		"name": "channels", 
 		"type": { "type": "array", "items": "Energistics.Datatypes.ChannelData.ChannelMetadataRecord" } 
 	}

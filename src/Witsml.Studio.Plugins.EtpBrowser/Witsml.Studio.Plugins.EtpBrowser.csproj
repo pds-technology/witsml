@@ -45,7 +45,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="ETP.Messages, Version=0.0.0.0, Culture=neutral, PublicKeyToken=10cba23b8f544b64, processorArchitecture=MSIL">
-      <HintPath>..\packages\ETP.1.2.0-BUILD50\lib\ETP.Messages.dll</HintPath>
+      <HintPath>..\packages\ETP.1.3.0-BUILD55\lib\ETP.Messages.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ICSharpCode.AvalonEdit, Version=5.0.1.0, Culture=neutral, PublicKeyToken=9cc39be672370310, processorArchitecture=MSIL">
@@ -145,6 +145,7 @@
     <None Include="Energistics\Datatypes\ArrayOfFloat.avsc" />
     <None Include="Energistics\Datatypes\ArrayOfInt.avsc" />
     <None Include="Energistics\Datatypes\ArrayOfLong.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\ChannelAxis.avsc" />
     <None Include="Energistics\Datatypes\ChannelData\ChannelIndexTypes.avsc" />
     <None Include="Energistics\Datatypes\ChannelData\ChannelMetadataRecord.avsc" />
     <None Include="Energistics\Datatypes\ChannelData\ChannelRangeInfo.avsc" />
@@ -155,12 +156,11 @@
     <None Include="Energistics\Datatypes\ChannelData\ErrorCodes.avsc" />
     <None Include="Energistics\Datatypes\ChannelData\IndexDirections.avsc" />
     <None Include="Energistics\Datatypes\ChannelData\IndexMetadataRecord.avsc" />
-    <None Include="Energistics\Datatypes\ChannelData\IndexValue.avsc" />
     <None Include="Energistics\Datatypes\ChannelData\Roles.avsc" />
     <None Include="Energistics\Datatypes\ChannelData\StreamingStartIndex.avsc" />
+    <None Include="Energistics\Datatypes\Contact.avsc" />
     <None Include="Energistics\Datatypes\DataAttribute.avsc" />
     <None Include="Energistics\Datatypes\DataValue.avsc" />
-    <None Include="Energistics\Datatypes\DateTime.avsc" />
     <None Include="Energistics\Datatypes\ErrorCodes.avsc" />
     <None Include="Energistics\Datatypes\MessageHeader.avsc" />
     <None Include="Energistics\Datatypes\Object\DataObject.avsc" />
@@ -169,6 +169,7 @@
     <None Include="Energistics\Datatypes\Object\ObjectChangeTypes.avsc" />
     <None Include="Energistics\Datatypes\Object\Resource.avsc" />
     <None Include="Energistics\Datatypes\Protocols.avsc" />
+    <None Include="Energistics\Datatypes\ServerCapabilities.avsc" />
     <None Include="Energistics\Datatypes\SupportedProtocol.avsc" />
     <None Include="Energistics\Datatypes\Version.avsc" />
     <None Include="Energistics\Protocol\ChannelDataFrame\ChannelDataFrameSet.avsc" />

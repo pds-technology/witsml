@@ -37,7 +37,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
         }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="Resource" /> using the spefieced parameters.
+        /// Initializes a new instance of <see cref="Resource" /> using the specified parameters.
         /// </summary>
         /// <param name="uuid">The UUID.</param>
         /// <param name="uri">The URI.</param>
@@ -56,16 +56,12 @@ namespace PDS.Witsml.Server.Providers.Discovery
                 ContentType = uri.ContentType,
                 ResourceType = resourceType.ToString(),
                 CustomData = new Dictionary<string, string>(),
-                LastChanged = new Energistics.Datatypes.DateTime()
-                {
-                    Offset = 0,
-                    Time = 0
-                }
+                LastChanged = 0 // TODO: provide LastChanged
             };
         }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="Resource" /> using the spefieced parameters.
+        /// Initializes a new instance of <see cref="Resource" /> using the specified parameters.
         /// </summary>
         /// <param name="protocolUri">The protocol URI.</param>
         /// <param name="folderName">Name of the folder.</param>
@@ -81,7 +77,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
         }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="Resource" /> using the spefieced parameters.
+        /// Initializes a new instance of <see cref="Resource" /> using the specified parameters.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
         /// <param name="objectType">Type of the object.</param>

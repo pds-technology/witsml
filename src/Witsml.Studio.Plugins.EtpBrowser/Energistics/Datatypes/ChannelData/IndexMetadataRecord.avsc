@@ -6,11 +6,13 @@
 	[
 		{ "name": "indexType", "type": "Energistics.Datatypes.ChannelData.ChannelIndexTypes" },
 		{ "name": "uom", "type": "string" },
-		{ "name": "datum", "type": ["null", "string"] },
+		{ "name": "depthDatum", "type": ["null", "string"] },
 		{ "name": "direction", "type": "Energistics.Datatypes.ChannelData.IndexDirections" },
 		{ "name": "mnemonic", "type": ["null", "string"] },
 		{ "name": "description", "type": ["null", "string"] },
 		{ "name": "uri", "type": ["null", "string"] },
-		{ "name": "customData", "type": { "type": "map", "values": "Energistics.Datatypes.DataValue" } }
+		{ "name": "customData", "type": { "type": "map", "values": "Energistics.Datatypes.DataValue" } },
+		{ "name": "scale", "type": "int" },
+		{ "name": "timeDatum", "type": ["null", "string"] }
 	]
 }

@@ -8,7 +8,7 @@
 		"name": "channelId", 
 		"type": { "type": "array", "items": "long" } 
 	},
-		{ "name": "startIndex", "type": "Energistics.Datatypes.ChannelData.IndexValue" },
-		{ "name": "endIndex", "type": "Energistics.Datatypes.ChannelData.IndexValue" }
+		{ "name": "startIndex", "type": "long" },
+		{ "name": "endIndex", "type": "long" }
 	]
 }

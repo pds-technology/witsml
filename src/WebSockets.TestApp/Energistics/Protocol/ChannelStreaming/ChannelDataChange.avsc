@@ -9,8 +9,8 @@
 	"fields":
 	[
 		{ "name": "channelId", "type": "long" },
-		{ "name": "startIndex", "type": "Energistics.Datatypes.ChannelData.IndexValue" },
-		{ "name": "endIndex", "type": "Energistics.Datatypes.ChannelData.IndexValue" },
+		{ "name": "startIndex", "type": "long" },
+		{ "name": "endIndex", "type": "long" },
 		{ 
 		"name": "data", 
 		"type": { "type": "array", "items": "Energistics.Datatypes.ChannelData.DataItem" } 

@@ -1,0 +1,14 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Datatypes.ChannelData",	
+	"name": "ChannelAxis",
+	"fields":
+	[
+		{ "name": "axisName", "type": "string" },
+		{ "name": "axisPropertyKind", "type": "string" },
+		{ "name": "axisStart", "type": "double" },
+		{ "name": "axisSpacing", "type": "double" },
+		{ "name": "axisCount", "type": "int" },
+		{ "name": "axisUom", "type": "string" }
+	]
+}

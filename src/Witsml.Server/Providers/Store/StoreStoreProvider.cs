@@ -65,11 +65,7 @@ namespace PDS.Witsml.Server.Providers.Store
                 ContentType = uri.ContentType,
                 ResourceType = ResourceTypes.DataObject.ToString(),
                 CustomData = new Dictionary<string, string>(),
-                LastChanged = new Energistics.Datatypes.DateTime()
-                {
-                    Offset = 0,
-                    Time = 0
-                }
+                LastChanged = 0 // TODO: provide LastChanged
             };
         }
 

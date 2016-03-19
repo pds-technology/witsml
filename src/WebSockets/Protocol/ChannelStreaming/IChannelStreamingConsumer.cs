@@ -12,7 +12,7 @@ namespace Energistics.Protocol.ChannelStreaming
 
         void ChannelStreamingStart(IList<ChannelStreamingInfo> channelStreamingInfos);
 
-        void ChannelStreamingStop(IList<int> channelIds);
+        void ChannelStreamingStop(IList<long> channelIds);
 
         void ChannelRangeRequest(IList<ChannelRangeInfo> channelRangeInfos);
 

@@ -13,13 +13,17 @@
 		{ "name": "mnemonic", "type": "string" },
 		{ "name": "dataType", "type": "string" },
 		{ "name": "uom", "type": "string" },
-		{ "name": "startIndex", "type": ["null", "Energistics.Datatypes.ChannelData.IndexValue"] },
-		{ "name": "endIndex", "type": ["null", "Energistics.Datatypes.ChannelData.IndexValue"] },
+		{ "name": "startIndex", "type": ["null", "long"] },
+		{ "name": "endIndex", "type": ["null", "long"] },
 		{ "name": "description", "type": "string" },
 		{ "name": "status", "type": "Energistics.Datatypes.ChannelData.ChannelStatuses" },
 		{ "name": "contentType", "type": ["null", "string"] },
 		{ "name": "source", "type": "string" },
 		{ "name": "measureClass", "type": "string" },
-		{ "name": "uuid", "type": ["null", "string"] }
+		{ "name": "uuid", "type": ["null", "string"] },
+		{ 
+		"name": "channelAxes", 
+		"type": { "type": "array", "items": "Energistics.Datatypes.ChannelData.ChannelAxis" } 
+	}
 	]
 }

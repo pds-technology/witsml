@@ -163,12 +163,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                     HasChildren = -1,
                     ContentType = uri.ContentType,
                     ResourceType = ResourceTypes.DataObject.ToString(),
-                    CustomData = new Dictionary<string, string>(),
-                    LastChanged = new Energistics.Datatypes.DateTime()
-                    {
-                        Offset = 0,
-                        Time = 0
-                    }
+                    CustomData = new Dictionary<string, string>()
                 }
             };
 
