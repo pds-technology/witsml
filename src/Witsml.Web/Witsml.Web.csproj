@@ -53,7 +53,7 @@
       <HintPath>..\External\DevKit\Energistics.DataAccess.dll</HintPath>
     </Reference>
     <Reference Include="ETP.Messages, Version=0.0.0.0, Culture=neutral, PublicKeyToken=10cba23b8f544b64, processorArchitecture=MSIL">
-      <HintPath>..\packages\ETP.1.2.0-BUILD50\lib\ETP.Messages.dll</HintPath>
+      <HintPath>..\packages\ETP.1.3.0-BUILD55\lib\ETP.Messages.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
@@ -264,6 +264,7 @@
     <Content Include="Energistics\Protocol\ChannelDataFrame\ChannelDataFrameSet.avsc" />
     <Content Include="Energistics\Datatypes\Version.avsc" />
     <Content Include="Energistics\Datatypes\SupportedProtocol.avsc" />
+    <Content Include="Energistics\Datatypes\ServerCapabilities.avsc" />
     <Content Include="Energistics\Datatypes\Protocols.avsc" />
     <Content Include="Energistics\Datatypes\Object\Resource.avsc" />
     <Content Include="Energistics\Datatypes\Object\ObjectChangeTypes.avsc" />
@@ -272,12 +273,11 @@
     <Content Include="Energistics\Datatypes\Object\DataObject.avsc" />
     <Content Include="Energistics\Datatypes\MessageHeader.avsc" />
     <Content Include="Energistics\Datatypes\ErrorCodes.avsc" />
-    <Content Include="Energistics\Datatypes\DateTime.avsc" />
     <Content Include="Energistics\Datatypes\DataValue.avsc" />
     <Content Include="Energistics\Datatypes\DataAttribute.avsc" />
+    <Content Include="Energistics\Datatypes\Contact.avsc" />
     <Content Include="Energistics\Datatypes\ChannelData\StreamingStartIndex.avsc" />
     <Content Include="Energistics\Datatypes\ChannelData\Roles.avsc" />
-    <Content Include="Energistics\Datatypes\ChannelData\IndexValue.avsc" />
     <Content Include="Energistics\Datatypes\ChannelData\IndexMetadataRecord.avsc" />
     <Content Include="Energistics\Datatypes\ChannelData\IndexDirections.avsc" />
     <Content Include="Energistics\Datatypes\ChannelData\ErrorCodes.avsc" />
@@ -288,6 +288,7 @@
     <Content Include="Energistics\Datatypes\ChannelData\ChannelRangeInfo.avsc" />
     <Content Include="Energistics\Datatypes\ChannelData\ChannelMetadataRecord.avsc" />
     <Content Include="Energistics\Datatypes\ChannelData\ChannelIndexTypes.avsc" />
+    <Content Include="Energistics\Datatypes\ChannelData\ChannelAxis.avsc" />
     <Content Include="Energistics\Datatypes\ArrayOfLong.avsc" />
     <Content Include="Energistics\Datatypes\ArrayOfInt.avsc" />
     <Content Include="Energistics\Datatypes\ArrayOfFloat.avsc" />
@@ -370,7 +371,7 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <UseIIS>True</UseIIS>
+          <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>2889</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>

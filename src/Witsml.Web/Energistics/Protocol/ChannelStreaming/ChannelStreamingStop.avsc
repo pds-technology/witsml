@@ -10,7 +10,7 @@
 	[
 		{ 
 		"name": "channels", 
-		"type": { "type": "array", "items": "int" } 
+		"type": { "type": "array", "items": "long" } 
 	}
 	]
 }

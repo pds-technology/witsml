@@ -521,7 +521,7 @@ namespace PDS.Witsml.Server.Security
         private string eventSource = "OdbcMembershipProvider";
         private string eventLog = "Application";
         private string exceptionMessage = "An exception occurred. Please check the Event Log.";
-        private string connectionString;
+        private string connectionString = null;
 
         //
         // If false, exceptions are thrown to the caller. If true,

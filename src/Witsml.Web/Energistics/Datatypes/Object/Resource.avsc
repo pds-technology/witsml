@@ -12,7 +12,7 @@
 		{ "name": "resourceType", "type": "string" },
 		{ "name": "hasChildren", "type": "int" },
 		{ "name": "uuid", "type": ["null", "string"] },
-		{ "name": "lastChanged", "type": "Energistics.Datatypes.DateTime" },
+		{ "name": "lastChanged", "type": "long" },
 		{ "name": "objectNotifiable", "type": "boolean" }
 	]
 }
