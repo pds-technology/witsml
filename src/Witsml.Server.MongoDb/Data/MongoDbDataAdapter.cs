@@ -189,11 +189,9 @@ namespace PDS.Witsml.Server.Data
         protected TObject GetEntityById<TObject>(DataObjectId dataObjectId, string dbCollectionName)
         {
             var filter = GetEntityFilter<TObject>(dataObjectId);
-            var exclude = Builders<TObject>.Projection.Exclude("_id");
 
             return GetCollection<TObject>(dbCollectionName)
                 .Find(filter)
-                .Project<TObject>(exclude)
                 .FirstOrDefault();
         }
 

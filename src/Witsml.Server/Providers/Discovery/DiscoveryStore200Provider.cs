@@ -105,7 +105,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
             }
             else if (uri.ObjectType == ObjectTypes.Log)
             {
-                var log = _logDataAdapter.Get(new DataObjectId(uri.ObjectId, null));
+                var log = _logDataAdapter.Get(uri.ToDataObjectId());
                 log.ChannelSet.ForEach(x => args.Context.Add(ToResource(log, x)));
             }
             else if (uri.ObjectType == ObjectTypes.ChannelSet)
