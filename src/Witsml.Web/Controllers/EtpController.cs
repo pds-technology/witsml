@@ -6,6 +6,7 @@ using System.Web;
 using System.Web.Http;
 using System.Web.WebSockets;
 using Energistics;
+using Energistics.Protocol.ChannelStreaming;
 using Energistics.Protocol.Discovery;
 using Energistics.Protocol.Store;
 using PDS.Framework;
@@ -56,6 +57,7 @@ namespace PDS.Witsml.Web.Controllers
             var socket = context.WebSocket as AspNetWebSocket;
             var handler = new EtpServerHandler(socket, EtpSocketServerName, EtpSocketServerVersion);
 
+            handler.Register(() => _container.Resolve<IChannelStreamingProducer>());
             handler.Register(() => _container.Resolve<IDiscoveryStore>());
             handler.Register(() => _container.Resolve<IStoreStore>());
 

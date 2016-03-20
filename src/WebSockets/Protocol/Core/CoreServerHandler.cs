@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Avro.IO;
 using Energistics.Common;
 using Energistics.Datatypes;
@@ -72,7 +73,15 @@ namespace Energistics.Protocol.Core
             RequestedProtocols = requestSession.RequestedProtocols;
             Notify(OnRequestSession, header, requestSession);
 
-            var supportedProtocols = Session.GetSupportedProtocols();
+            var protocols = RequestedProtocols
+                .Select(x => x.Protocol)
+                .ToArray();
+
+            // only return details for requested protocols
+            var supportedProtocols = Session.GetSupportedProtocols()
+                .Where(x => protocols.Contains(x.Protocol))
+                .ToList();
+
             OpenSession(header, supportedProtocols);
         }
 

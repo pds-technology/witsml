@@ -1,6 +1,7 @@
 ﻿using System.Runtime.Serialization;
 using Caliburn.Micro;
 using PDS.Witsml.Studio.Connections;
+using PDS.Witsml.Studio.Plugins.EtpBrowser.Properties;
 
 namespace PDS.Witsml.Studio.Plugins.EtpBrowser.Models
 {
@@ -11,13 +12,20 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.Models
     [DataContract]
     public class EtpSettings : PropertyChangedBase
     {
+        private static readonly int DefaultMaxDataItems = Settings.Default.ChannelStreamingDefaultMaxDataItems;
+        private static readonly int DefaultMaxMessageRate = Settings.Default.ChannelStreamingDefaultMaxMessageRate;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="EtpSettings"/> class.
         /// </summary>
         public EtpSettings()
         {
             Connection = new Connection();
-            Streaming = new StreamingSettings();
+            Streaming = new StreamingSettings()
+            {
+                MaxDataItems = DefaultMaxDataItems,
+                MaxMessageRate = DefaultMaxMessageRate
+            };
             Store = new StoreSettings();
         }
 

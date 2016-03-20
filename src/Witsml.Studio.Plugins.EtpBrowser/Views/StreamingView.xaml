@@ -4,8 +4,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:cal="http://www.caliburnproject.org"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              xmlns:local="clr-namespace:PDS.Witsml.Studio.Plugins.EtpBrowser.Views"
+             xmlns:conv="clr-namespace:PDS.Witsml.Studio.Converters;assembly=PDS.Witsml.Studio"
              mc:Ignorable="d" d:DesignHeight="400" d:DesignWidth="300">
+
+    <UserControl.Resources>
+        <conv:BooleanInverseConverter x:Key="BooleanInverseConverter" />
+    </UserControl.Resources>
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -15,22 +21,32 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />
+            <RowDefinition Height="40" />
+            <RowDefinition Height="40" />
             <RowDefinition />
             <RowDefinition Height="40" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Column="0" Grid.Row="0" Text="URI:" Margin="10,5,5,5" HorizontalAlignment="Right" VerticalAlignment="Center" />
-        <TextBox Text="{Binding Model.Streaming.Uri}" Grid.Column="1" Grid.Row="0" Margin="5" Padding="5" VerticalContentAlignment="Center" />
-        <Button x:Name="AddUri" Grid.Column="2" Grid.Row="0" Margin="5" Content="Add" Width="40" HorizontalAlignment="Right" />
+        <TextBlock Grid.Column="0" Grid.Row="0" Text="Max Data Items:" Margin="10,5,5,5" HorizontalAlignment="Right" VerticalAlignment="Center" />
+        <xctk:IntegerUpDown Value="{Binding Model.Streaming.MaxDataItems}" Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center"
+                            Minimum="0" Maximum="10000000"/>
 
-        <ListBox ItemsSource="{Binding Model.Streaming.Uris}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="5"
+        <TextBlock Grid.Column="0" Grid.Row="1" Text="Max Msg Rate:" Margin="10,5,5,5" HorizontalAlignment="Right" VerticalAlignment="Center" />
+        <xctk:IntegerUpDown Value="{Binding Model.Streaming.MaxMessageRate}" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center"
+                            Minimum="0" Maximum="600000"/>
+
+        <TextBlock Grid.Column="0" Grid.Row="2" Text="URI:" Margin="10,5,5,5" HorizontalAlignment="Right" VerticalAlignment="Center" />
+        <TextBox Text="{Binding Model.Streaming.Uri}" Grid.Column="1" Grid.Row="2" Margin="5" Padding="5" VerticalContentAlignment="Center" />
+        <Button x:Name="AddUri" Grid.Column="2" Grid.Row="2" Margin="5" Content="Add" Width="40" HorizontalAlignment="Right" IsEnabled="{Binding IsSimpleStreamer, Converter={StaticResource BooleanInverseConverter}}" />
+
+        <ListBox ItemsSource="{Binding Model.Streaming.Uris}" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Margin="5"
                  cal:Message.Attach="[Event KeyUp] = [Action OnKeyUp($source, $eventArgs)]" />
 
-        <StackPanel Grid.Row="2" Grid.ColumnSpan="3" Margin="5,0,5,5" Orientation="Horizontal">
-            <Button Content="Start" Margin="0,0,5,0" Width="80" />
-            <Button Content="Describe" Margin="0,0,5,0" Width="80" />
-            <Button Content="Start Streaming" Margin="0,0,5,0" Width="110" />
-            <Button Content="Stop Streaming" Margin="0,0,5,0" Width="110" />
+        <StackPanel Grid.Row="4" Grid.ColumnSpan="3" Margin="5,0,5,5" Orientation="Horizontal">
+            <Button Content="Start" cal:Message.Attach="Start" IsEnabled="{Binding CanStart}" Margin="0,0,5,0" Width="80" />
+            <Button Content="Describe" IsEnabled="{Binding CanDescribe}" Margin="0,0,5,0" Width="80" />
+            <Button Content="Start Streaming" IsEnabled="{Binding CanStartStreaming}" Margin="0,0,5,0" Width="110" />
+            <Button Content="Stop Streaming" IsEnabled="{Binding CanStopStreaming}" Margin="0,0,5,0" Width="110" />
         </StackPanel>
 
     </Grid>

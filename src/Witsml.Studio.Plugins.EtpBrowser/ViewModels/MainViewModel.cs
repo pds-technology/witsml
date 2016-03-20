@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using Avro.Specific;
 using Caliburn.Micro;
@@ -61,6 +62,15 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         public int DisplayOrder
         {
             get { return Settings.Default.PluginDisplayOrder; }
+        }
+
+        /// <summary>
+        /// Gets the currently active <see cref="EtpClient"/> instance.
+        /// </summary>
+        /// <value>The ETP client instance.</value>
+        public EtpClient Client
+        {
+            get { return _client; }
         }
 
         /// <summary>
@@ -126,6 +136,16 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                     NotifyOfPropertyChange(() => Messages);
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets the resources using the Discovery protocol.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        public void GetResources(string uri)
+        {
+            _client.Handler<IDiscoveryCustomer>()
+                .GetResources(uri);
         }
 
         /// <summary>
@@ -303,6 +323,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 var headers = EtpClient.Authorization(Model.Connection.Username, Model.Connection.Password);
 
                 _client = new EtpClient(Model.Connection.Uri, Model.ApplicationName, Model.ApplicationVersion, headers);
+                _client.Register<IChannelStreamingConsumer, ChannelStreamingConsumerHandler>();
                 _client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();
                 _client.Register<IStoreCustomer, StoreCustomerHandler>();
 
@@ -310,6 +331,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 _client.Handler<IDiscoveryCustomer>().OnGetResourcesResponse += OnGetResourcesResponse;
                 _client.Handler<IStoreCustomer>().OnObject += OnObject;
 
+                _client.SocketClosed += OnClientSocketClosed;
                 _client.Output = LogClientOutput;
                 _client.Open();
             }
@@ -327,20 +349,24 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         {
             if (_client != null)
             {
+                _client.SocketClosed -= OnClientSocketClosed;
                 _client.Dispose();
                 _client = null;
-
-                Runtime.Invoke(() => Runtime.Shell.StatusBarText = "Connection closed");
             }
         }
 
         /// <summary>
-        /// Gets the resources using the Discovery protocol.
+        /// Called when the <see cref="EtpClient"/> socket is closed.
         /// </summary>
-        /// <param name="uri">The URI.</param>
-        private void GetResources(string uri)
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        private void OnClientSocketClosed(object sender, EventArgs e)
         {
-            _client.Handler<IDiscoveryCustomer>().GetResources(uri);
+            Runtime.Invoke(() => Runtime.Shell.StatusBarText = "Connection closed");
+
+            // notify child view models
+            Items.OfType<ISessionAware>()
+                .ForEach(x => x.OnSocketClosed());
         }
 
         /// <summary>
@@ -352,11 +378,9 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         {
             Runtime.Invoke(() => Runtime.Shell.StatusBarText = "Connected");
 
-            if (e.Message.SupportedProtocols.Any(x => x.Protocol == (int)Protocols.Discovery))
-            {
-                ActivateItem(Items.OfType<HierarchyViewModel>().FirstOrDefault());
-                GetResources(EtpUri.RootUri);
-            }
+            // notify child view models
+            Items.OfType<ISessionAware>()
+                .ForEach(x => x.OnSessionOpened(e));
         }
 
         /// <summary>

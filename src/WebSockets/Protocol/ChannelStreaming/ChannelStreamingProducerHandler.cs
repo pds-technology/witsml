@@ -8,7 +8,7 @@ namespace Energistics.Protocol.ChannelStreaming
 {
     public class ChannelStreamingProducerHandler : EtpProtocolHandler, IChannelStreamingProducer
     {
-        private const string SimpleStreamer = "SimpleStreamer";
+        public const string SimpleStreamer = "SimpleStreamer";
 
         public ChannelStreamingProducerHandler() : base(Protocols.ChannelStreaming, "producer")
         {

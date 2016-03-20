@@ -40,5 +40,23 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.Properties {
                 return ((string)(this["PluginDisplayName"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10000")]
+        public int ChannelStreamingDefaultMaxDataItems {
+            get {
+                return ((int)(this["ChannelStreamingDefaultMaxDataItems"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5000")]
+        public int ChannelStreamingDefaultMaxMessageRate {
+            get {
+                return ((int)(this["ChannelStreamingDefaultMaxMessageRate"]));
+            }
+        }
     }
 }

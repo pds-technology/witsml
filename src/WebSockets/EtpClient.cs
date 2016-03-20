@@ -61,6 +61,18 @@ namespace Energistics
             }
         }
 
+        public event EventHandler SocketOpened
+        {
+            add { _socket.Opened += value; }
+            remove { _socket.Opened -= value; }
+        }
+
+        public event EventHandler SocketClosed
+        {
+            add { _socket.Closed += value; }
+            remove { _socket.Closed -= value; }
+        }
+
         protected override void Send(byte[] data, int offset, int length)
         {
             CheckDisposed();

@@ -18,6 +18,13 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.Models
             Uris = new BindableCollection<string>();
         }
 
+        /// <summary>
+        /// Gets or sets the uri collection.
+        /// </summary>
+        /// <value>The collection of uris.</value>
+        [DataMember]
+        public BindableCollection<string> Uris { get; private set; }
+
         private string _uri;
         /// <summary>
         /// Gets or sets the uri.
@@ -37,11 +44,42 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.Models
             }
         }
 
+        private int _maxDataItems;
         /// <summary>
-        /// Gets or sets the uri collection.
+        /// Gets or sets the maximum data items.
         /// </summary>
-        /// <value>The collection of uris.</value>
+        /// <value>The maximum data items.</value>
         [DataMember]
-        public BindableCollection<string> Uris { get; private set; }
+        public int MaxDataItems
+        {
+            get { return _maxDataItems; }
+            set
+            {
+                if (_maxDataItems != value)
+                {
+                    _maxDataItems = value;
+                    NotifyOfPropertyChange(() => MaxDataItems);
+                }
+            }
+        }
+
+        private int _maxMessageRate;
+        /// <summary>
+        /// Gets or sets the maximum message rate, in milliseconds.
+        /// </summary>
+        /// <value>The maximum message rate.</value>
+        [DataMember]
+        public int MaxMessageRate
+        {
+            get { return _maxMessageRate; }
+            set
+            {
+                if (_maxMessageRate != value)
+                {
+                    _maxMessageRate = value;
+                    NotifyOfPropertyChange(() => MaxMessageRate);
+                }
+            }
+        }
     }
 }

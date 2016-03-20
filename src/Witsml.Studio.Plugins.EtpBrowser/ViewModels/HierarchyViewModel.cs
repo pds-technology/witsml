@@ -1,7 +1,9 @@
 ﻿using System.Linq;
 using System.Windows;
 using Caliburn.Micro;
+using Energistics.Common;
 using Energistics.Datatypes;
+using Energistics.Protocol.Core;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Models;
 using PDS.Witsml.Studio.Runtime;
 
@@ -11,7 +13,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
     /// Manages the behavior of the tree view user interface elements.
     /// </summary>
     /// <seealso cref="Caliburn.Micro.Screen" />
-    public class HierarchyViewModel : Screen
+    public class HierarchyViewModel : Screen, ISessionAware
     {
         private static readonly string[] DescribeObjectTypes = new[]
         {
@@ -137,6 +139,26 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             NotifyOfPropertyChange(() => CanGetObject);
             NotifyOfPropertyChange(() => CanDeleteObject);
             NotifyOfPropertyChange(() => CanDescribeChannels);
+        }
+
+        /// <summary>
+        /// Called when the <see cref="OpenSession" /> message is recieved.
+        /// </summary>
+        /// <param name="e">The <see cref="ProtocolEventArgs{OpenSession}" /> instance containing the event data.</param>
+        public void OnSessionOpened(ProtocolEventArgs<OpenSession> e)
+        {
+            if (e.Message.SupportedProtocols.Any(x => x.Protocol == (int)Protocols.Discovery))
+            {
+                Parent.ActivateItem(this);
+                Parent.GetResources(EtpUri.RootUri);
+            }
+        }
+
+        /// <summary>
+        /// Called when the <see cref="Energistics.EtpClient" /> web socket is closed.
+        /// </summary>
+        public void OnSocketClosed()
+        {
         }
     }
 }
