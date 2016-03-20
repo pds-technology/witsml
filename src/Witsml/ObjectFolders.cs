@@ -6,8 +6,9 @@
     public static class ObjectFolders
     {
         public const string Logs = "Logs";
-        public const string Time = "time";
-        public const string Depth = "depth";
+        public const string Time = "Time";
+        public const string Depth = "Depth";
+        public const string Other = "Other";
 
         public const string MudLogs = "MudLogs";
         public const string Rigs = "Rigs";
