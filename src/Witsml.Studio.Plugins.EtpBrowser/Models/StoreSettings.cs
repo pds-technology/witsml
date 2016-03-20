@@ -3,6 +3,10 @@ using Caliburn.Micro;
 
 namespace PDS.Witsml.Studio.Plugins.EtpBrowser.Models
 {
+    /// <summary>
+    /// Encapsulates the ETP Browser settings for the Store protocol.
+    /// </summary>
+    /// <seealso cref="Caliburn.Micro.PropertyChangedBase" />
     [DataContract]
     public class StoreSettings : PropertyChangedBase
     {

@@ -17,6 +17,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.Models
         public EtpSettings()
         {
             Connection = new Connection();
+            Streaming = new StreamingSettings();
             Store = new StoreSettings();
         }
 
@@ -35,6 +36,25 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.Models
                 {
                     _connection = value;
                     NotifyOfPropertyChange(() => Connection);
+                }
+            }
+        }
+
+        private StreamingSettings _streaming;
+        /// <summary>
+        /// Gets or sets the Channel Streaming settings.
+        /// </summary>
+        /// <value>The Channel Streaming settings.</value>
+        [DataMember]
+        public StreamingSettings Streaming
+        {
+            get { return _streaming; }
+            set
+            {
+                if (!ReferenceEquals(_streaming, value))
+                {
+                    _streaming = value;
+                    NotifyOfPropertyChange(() => Streaming);
                 }
             }
         }

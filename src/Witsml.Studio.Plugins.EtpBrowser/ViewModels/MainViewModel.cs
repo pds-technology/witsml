@@ -9,6 +9,7 @@ using Energistics;
 using Energistics.Common;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
+using Energistics.Protocol.ChannelStreaming;
 using Energistics.Protocol.Core;
 using Energistics.Protocol.Discovery;
 using Energistics.Protocol.Store;
@@ -209,12 +210,39 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         }
 
         /// <summary>
+        /// Requests channel metadata for the selected resource using the ChannelStreaming protocol.
+        /// </summary>
+        public void DescribeChannels()
+        {
+            var viewModel = Items.OfType<StreamingViewModel>().FirstOrDefault();
+            var resource = SelectedResource;
+
+            if (viewModel != null && resource != null)
+            {
+                Model.Streaming.Uri = resource.Resource.Uri;
+                viewModel.AddUri();
+                ActivateItem(viewModel);
+            }
+        }
+
+        /// <summary>
+        /// Sends the <see cref="Energistics.Protocol.ChannelStreaming.ChannelDescribe"/> message with the specified URI.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        public void SendChannelDescribe(params string[] uris)
+        {
+            _client.Handler<IChannelStreamingConsumer>()
+                .ChannelDescribe(uris);
+        }
+
+        /// <summary>
         /// Called when initializing.
         /// </summary>
         protected override void OnInitialize()
         {
             base.OnInitialize();
             ActivateItem(new SettingsViewModel(Runtime));
+            Items.Add(new StreamingViewModel(Runtime));
             Items.Add(new HierarchyViewModel(Runtime));
             Items.Add(new StoreViewModel(Runtime));
         }
@@ -287,6 +315,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             }
             catch (Exception ex)
             {
+                Runtime.Invoke(() => Runtime.Shell.StatusBarText = "Error");
                 Runtime.ShowError("Error connecting to server.", ex);
             }
         }
@@ -300,6 +329,8 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             {
                 _client.Dispose();
                 _client = null;
+
+                Runtime.Invoke(() => Runtime.Shell.StatusBarText = "Connection closed");
             }
         }
 
@@ -323,7 +354,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
 
             if (e.Message.SupportedProtocols.Any(x => x.Protocol == (int)Protocols.Discovery))
             {
-                ActivateItem(Items[1]);
+                ActivateItem(Items.OfType<HierarchyViewModel>().FirstOrDefault());
                 GetResources(EtpUri.RootUri);
             }
         }

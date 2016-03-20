@@ -25,6 +25,7 @@
                     <MenuItem Header="Get Object" cal:Message.Attach="GetObject" />
                     <MenuItem Header="Delete Object" cal:Message.Attach="DeleteObject" />
                     <Separator />
+                    <MenuItem Header="Describe" cal:Message.Attach="DescribeChannels" />
                     <MenuItem Header="Refresh" cal:Message.Attach="RefreshHierarchy" />
                 </ContextMenu>
             </TreeView.ContextMenu>

@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Linq;
+using System.Windows;
 using Caliburn.Micro;
 using Energistics.Datatypes;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Models;
@@ -12,6 +13,11 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
     /// <seealso cref="Caliburn.Micro.Screen" />
     public class HierarchyViewModel : Screen
     {
+        private static readonly string[] DescribeObjectTypes = new[]
+        {
+            ObjectTypes.Wellbore, ObjectTypes.Log, ObjectTypes.ChannelSet, ObjectTypes.Channel
+        };
+
         /// <summary>
         /// Initializes a new instance of the <see cref="HierarchyViewModel"/> class.
         /// </summary>
@@ -88,6 +94,34 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         }
 
         /// <summary>
+        /// Determines whether the ChannelDescribe message can be sent for the selected resource.
+        /// </summary>
+        /// <value><c>true</c> if the channels can be described; otherwise, <c>false</c>.</value>
+        public bool CanDescribeChannels
+        {
+            get
+            {
+                var resource = Parent.SelectedResource;
+
+                if (resource != null && resource.Level > 0)
+                {
+                    var uri = new EtpUri(resource.Resource.Uri);
+                    return DescribeObjectTypes.Contains(uri.ObjectType);
+                }
+
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Requests channel metadata for the selected resource using the ChannelStreaming protocol.
+        /// </summary>
+        public void DescribeChannels()
+        {
+            Parent.DescribeChannels();
+        }
+
+        /// <summary>
         /// Refreshes the hierarchy.
         /// </summary>
         public void RefreshHierarchy()
@@ -102,6 +136,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         {
             NotifyOfPropertyChange(() => CanGetObject);
             NotifyOfPropertyChange(() => CanDeleteObject);
+            NotifyOfPropertyChange(() => CanDescribeChannels);
         }
     }
 }
