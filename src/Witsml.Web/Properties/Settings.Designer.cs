@@ -25,10 +25,19 @@ namespace PDS.Witsml.Web.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("PDS.ETP.Server-1.0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("PDS.Witsml.Server")]
         public string EtpSocketServerName {
             get {
                 return ((string)(this["EtpSocketServerName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1.0")]
+        public string EtpSocketServerVersion {
+            get {
+                return ((string)(this["EtpSocketServerVersion"]));
             }
         }
     }

@@ -22,6 +22,7 @@ namespace PDS.Witsml.Web.Controllers
     public class EtpController : ApiController
     {
         private static readonly string EtpSocketServerName = Settings.Default.EtpSocketServerName;
+        private static readonly string EtpSocketServerVersion = Settings.Default.EtpSocketServerVersion;
         private readonly IContainer _container;
 
         [ImportingConstructor]
@@ -53,7 +54,7 @@ namespace PDS.Witsml.Web.Controllers
         private async Task AcceptWebSocketRequest(AspNetWebSocketContext context)
         {
             var socket = context.WebSocket as AspNetWebSocket;
-            var handler = new EtpServerHandler(socket, EtpSocketServerName);
+            var handler = new EtpServerHandler(socket, EtpSocketServerName, EtpSocketServerVersion);
 
             handler.Register(() => _container.Resolve<IDiscoveryStore>());
             handler.Register(() => _container.Resolve<IStoreStore>());
