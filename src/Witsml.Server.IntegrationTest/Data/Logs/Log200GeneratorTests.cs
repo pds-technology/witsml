@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Energistics.DataAccess.WITSML200.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -13,6 +13,9 @@ namespace PDS.Witsml.Server.Data.Logs
         private DataObjectReference WellboreReference;
         private Log DepthLog;
         private Log TimeLog;
+        private ChannelIndex MeasuredDepthIndex;
+        private ChannelIndex DateTimeIndex;
+        private ChannelIndex ElapseTimeIndex;
 
         [TestInitialize]
         public void TestSetUp()
@@ -28,12 +31,20 @@ namespace PDS.Witsml.Server.Data.Logs
 
             TimeLog = new Log() { TimeDepth = "Time", Citation = DevKit.Citation(DevKit.Name("Log200Generator")), Wellbore = WellboreReference, Uuid = DevKit.Uid() };
             DepthLog = new Log() { TimeDepth = "Depth", Citation = DevKit.Citation(DevKit.Name("Log200Generator")), Wellbore = WellboreReference, Uuid = DevKit.Uid() };
+
+            MeasuredDepthIndex = DevKit.CreateChannelIndex(ChannelIndexType.measureddepth);
+            DateTimeIndex = DevKit.CreateChannelIndex(ChannelIndexType.datetime);
+            ElapseTimeIndex = DevKit.CreateChannelIndex(ChannelIndexType.elapsedtime);
         }
 
         [TestMethod]
         public void Can_Generate_Log_200()
         {
-            DevKit.InitChannelSet(DepthLog, true, numDataValue: 5);
+            List<ChannelIndex> indexList = new List<ChannelIndex>();
+            indexList.Add(MeasuredDepthIndex);
+            indexList.Add(DateTimeIndex);
+
+            DevKit.InitChannelSet(DepthLog, indexList, numDataValue: 5);
 
             Assert.IsNotNull(DepthLog);
 
@@ -48,8 +59,12 @@ namespace PDS.Witsml.Server.Data.Logs
 
         [TestMethod]
         public void Can_Generate_Depth_Log_200()
-        {          
-            ChannelSet channelSet = DevKit.CreateChannelSet(DepthLog, true);
+        {
+            List<ChannelIndex> indexList = new List<ChannelIndex>();
+            indexList.Add(MeasuredDepthIndex);
+            indexList.Add(DateTimeIndex);
+
+            ChannelSet channelSet = DevKit.CreateChannelSet(DepthLog, indexList);
             List<ChannelSet> channelSetList = new List<ChannelSet>();
             channelSetList.Add(channelSet);
 
@@ -77,7 +92,12 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Can_Generate_Depth_Log_200_Decreasing()
         {
-            ChannelSet channelSet = DevKit.CreateChannelSet(DepthLog, false);
+            List<ChannelIndex> indexList = new List<ChannelIndex>();
+            MeasuredDepthIndex.Direction = IndexDirection.decreasing;
+            indexList.Add(MeasuredDepthIndex);
+            indexList.Add(DateTimeIndex);
+
+            ChannelSet channelSet = DevKit.CreateChannelSet(DepthLog, indexList);
             List<ChannelSet> channelSetList = new List<ChannelSet>();
             channelSetList.Add(channelSet);
 
@@ -93,7 +113,11 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Can_Generate_Depth_Log_200_MultiChannelSet()
         {
-            ChannelSet channelSet = DevKit.CreateChannelSet(DepthLog, true);
+            List<ChannelIndex> indexList = new List<ChannelIndex>();
+            indexList.Add(MeasuredDepthIndex);
+            indexList.Add(DateTimeIndex);
+
+            ChannelSet channelSet = DevKit.CreateChannelSet(DepthLog, indexList);
             List<ChannelSet> channelSetList = new List<ChannelSet>();
             channelSetList.Add(channelSet);
             channelSetList.Add(channelSet);
@@ -116,19 +140,22 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Can_Generate_Time_Log_200_From_ChannelSet()
         {
-            ChannelSet channelSet = DevKit.CreateChannelSet(TimeLog, true);
+            List<ChannelIndex> indexList = new List<ChannelIndex>();
+            indexList.Add(ElapseTimeIndex);
+
+            ChannelSet channelSet = DevKit.CreateChannelSet(TimeLog, indexList);
             List<ChannelSet> channelSetList = new List<ChannelSet>();
             channelSetList.Add(channelSet);;
 
             DevKit.GenerateChannelData(channelSetList, numDataValue: 5);
             Assert.AreEqual(1, channelSetList.Count);
-            Assert.AreEqual(2, channelSetList[0].Channel.Count);
+            Assert.AreEqual(1, channelSetList[0].Channel.Count);
 
             List<List<List<object>>> dataValues = DevKit.DeserializeChannelSetData(channelSetList[0].Data.Data);
             Assert.AreEqual(5, dataValues.Count);
             Assert.AreEqual(2, dataValues[0].Count);
             Assert.AreEqual(1, dataValues[0][0].Count);
-            Assert.AreEqual(2, dataValues[0][1].Count);
+            Assert.AreEqual(1, dataValues[0][1].Count);
 
             for (int i = 0; i < 5; i++)
             {
