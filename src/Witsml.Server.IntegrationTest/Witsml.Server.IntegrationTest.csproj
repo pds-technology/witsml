@@ -69,7 +69,6 @@
   <ItemGroup>
     <Compile Include="Configuration\WitsmlValidator141Tests.cs" />
     <Compile Include="Data\Logs\Log141Tests.cs" />
-    <Compile Include="Data\Logs\Log200GeneratorTests.cs" />
     <Compile Include="Data\Logs\Log200DataAdapterTests.cs" />
     <Compile Include="Data\Wellbores\Wellbore141ValidationTests.cs" />
     <Compile Include="Data\Wellbores\Wellbore200DataAdapterTests.cs" />
