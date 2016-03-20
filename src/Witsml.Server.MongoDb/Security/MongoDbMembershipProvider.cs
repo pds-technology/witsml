@@ -11,6 +11,7 @@ using System.Text;
 using System.Web.Configuration;
 using System.Web.Http;
 using System.Web.Security;
+using log4net;
 using MongoDB.Driver;
 using PDS.Witsml.Server.Data;
 
@@ -18,12 +19,15 @@ namespace PDS.Witsml.Server.Security
 {
     public class MongoDbMembershipProvider : MembershipProvider
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(MongoDbMembershipProvider));
         public static readonly string ProviderName = typeof(MongoDbMembershipProvider).Name;
 
         #region API
 
         public override MembershipUser CreateUser(string username, string password, string email, string passwordQuestion, string passwordAnswer, bool isApproved, object providerUserKey, out MembershipCreateStatus status)
         {
+            _log.InfoFormat("Creating user: {0}; email: {1};", username, email);
+
             if (ValidPassword(username, password) == false)
             {
                 status = MembershipCreateStatus.InvalidPassword;
@@ -122,6 +126,8 @@ namespace PDS.Witsml.Server.Security
 
         public override bool DeleteUser(string username, bool deleteAllRelatedData)
         {
+            _log.InfoFormat("Deleting user: {0}", username);
+
             var usr = ByUserName(username);
             //Db.Delete<DbUser>(usr);
             Collection().DeleteOne(x => x.Id == usr.Id);

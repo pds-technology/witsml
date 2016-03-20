@@ -5,11 +5,14 @@ using System.Text;
 using System.Threading;
 using System.Web;
 using System.Web.Security;
+using log4net;
 
 namespace PDS.Framework.Web.Security
 {
     public class BasicAuthenticationModule : IHttpModule
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(BasicAuthenticationModule));
+
         public void Init(HttpApplication context)
         {
             // Register event handlers
@@ -29,6 +32,7 @@ namespace PDS.Framework.Web.Security
 
         private static bool CheckPassword(string username, string password)
         {
+            _log.InfoFormat("Authenticating user: {0}", username);
             return Membership.ValidateUser(username, password);
         }
 
