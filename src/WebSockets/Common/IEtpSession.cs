@@ -9,6 +9,8 @@ namespace Energistics.Common
     {
         string ApplicationName { get; }
 
+        string ApplicationVersion { get; }
+
         string SessionId { get; set; }
 
         Action<string> Output { get; set; }

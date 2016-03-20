@@ -11,18 +11,21 @@ namespace Energistics.Protocol.Core
         {
             RequestedRole = "server";
             ServerProtocols = new List<SupportedProtocol>(0);
+            ServerObjects = new List<string>(0);
         }
 
         public IList<SupportedProtocol> ServerProtocols { get; private set; }
 
-        public virtual void RequestSession(string applicationName, IList<SupportedProtocol> requestedProtocols)
+        public IList<string> ServerObjects { get; private set; }
+
+        public virtual void RequestSession(string applicationName, string applicationVersion, IList<SupportedProtocol> requestedProtocols)
         {
             var header = CreateMessageHeader(Protocols.Core, MessageTypes.Core.RequestSession);
 
             var requestSession = new RequestSession()
             {
                 ApplicationName = applicationName,
-                ApplicationVersion = "1.0",
+                ApplicationVersion = applicationVersion,
                 RequestedProtocols = requestedProtocols,
                 SupportedObjects = new List<string>()
             };
@@ -67,6 +70,7 @@ namespace Energistics.Protocol.Core
         protected virtual void HandleOpenSession(MessageHeader header, OpenSession openSession)
         {
             ServerProtocols = openSession.SupportedProtocols;
+            ServerObjects = openSession.SupportedObjects;
             Session.SessionId = openSession.SessionId;
             Notify(OnOpenSession, header, openSession);
         }

@@ -1,4 +1,5 @@
-﻿using Caliburn.Micro;
+﻿using System;
+using Caliburn.Micro;
 using Energistics.Datatypes;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Models;
 using PDS.Witsml.Studio.Runtime;
@@ -55,6 +56,14 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                     NotifyOfPropertyChange(() => Data);
                 }
             }
+        }
+
+        /// <summary>
+        /// Generates a new UUID value.
+        /// </summary>
+        public void NewUuid()
+        {
+            Model.Store.Uuid = Guid.NewGuid().ToString();
         }
 
         /// <summary>

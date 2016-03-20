@@ -1,7 +1,6 @@
 ﻿using Avro.IO;
 using Energistics.Common;
 using Energistics.Datatypes;
-using Energistics.Datatypes.ChannelData;
 
 namespace Energistics.Protocol.ChannelDataFrame
 {

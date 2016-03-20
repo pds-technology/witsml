@@ -139,7 +139,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
 
         private async Task InitChannelStreaming(CancellationToken token)
         {
-            using (var server = new EtpSocketServer(Model.PortNumber, ((IScreen)Parent).DisplayName))
+            using (var server = new EtpSocketServer(Model.PortNumber, ((IScreen)Parent).DisplayName, Model.Version))
             {
                 server.Register(InitChannelStreamingProvider);
                 server.Register(InitDiscoveryProvider);

@@ -32,6 +32,21 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.Models
             }
         }
 
+        private string _version;
+        [DataMember]
+        public string Version
+        {
+            get { return _version; }
+            set
+            {
+                if (!string.Equals(_version, value))
+                {
+                    _version = value;
+                    NotifyOfPropertyChange(() => Version);
+                }
+            }
+        }
+
         private Connection _connection;
         [DataMember]
         public Connection Connection

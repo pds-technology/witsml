@@ -9,6 +9,7 @@ namespace Energistics
 {
     public class Program
     {
+        private static readonly string AppVersion = typeof(Program).Assembly.GetName().Version.ToString();
         private const string ServerAppName = "org.energistics.server";
         private const string ClientAppName = "org.energistics.client";
 
@@ -54,7 +55,7 @@ namespace Energistics
             Console.WriteLine(" X - exit");
             Console.WriteLine();
 
-            using (var server = new EtpSocketServer(WebSocketPort, ServerAppName))
+            using (var server = new EtpSocketServer(WebSocketPort, ServerAppName, AppVersion))
             {
                 //server.Register<ICoreServer, CoreServerHandler>();
                 server.Register<IDiscoveryStore, MockResourceProvider>();
@@ -95,7 +96,7 @@ namespace Energistics
             Console.WriteLine(" X - exit");
             Console.WriteLine();
 
-            using (var client = new EtpClient(WebSocketUri, ClientAppName))
+            using (var client = new EtpClient(WebSocketUri, ClientAppName, AppVersion))
             {
                 //client.Register<ICoreClient, CoreClientHandler>();
                 client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();

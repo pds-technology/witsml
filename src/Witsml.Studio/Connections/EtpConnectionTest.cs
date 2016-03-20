@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.Composition;
 using System.Threading.Tasks;
 using Energistics;
+using PDS.Framework;
 
 namespace PDS.Witsml.Studio.Connections
 {
@@ -22,9 +23,11 @@ namespace PDS.Witsml.Studio.Connections
         {
             try
             {
+                var applicationName = GetType().Assembly.FullName;
+                var applicationVersion = GetType().GetAssemblyVersion();
                 var headers = EtpClient.Authorization(connection.Username, connection.Password);
 
-                using (var client = new EtpClient(connection.Uri, "ETP Browser", headers))
+                using (var client = new EtpClient(connection.Uri, applicationName, applicationVersion, headers))
                 {
                     var count = 0;
                     client.Open();

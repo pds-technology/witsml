@@ -57,5 +57,43 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.Models
                 }
             }
         }
+
+        private string _applicationName;
+        /// <summary>
+        /// Gets or sets the name of the application.
+        /// </summary>
+        /// <value>The name of the application.</value>
+        [DataMember]
+        public string ApplicationName
+        {
+            get { return _applicationName; }
+            set
+            {
+                if (!string.Equals(_applicationName, value))
+                {
+                    _applicationName = value;
+                    NotifyOfPropertyChange(() => ApplicationName);
+                }
+            }
+        }
+
+        private string _applicationVersion;
+        /// <summary>
+        /// Gets or sets the version of the application.
+        /// </summary>
+        /// <value>The version of the application.</value>
+        [DataMember]
+        public string ApplicationVersion
+        {
+            get { return _applicationVersion; }
+            set
+            {
+                if (!string.Equals(_applicationVersion, value))
+                {
+                    _applicationVersion = value;
+                    NotifyOfPropertyChange(() => ApplicationVersion);
+                }
+            }
+        }
     }
 }

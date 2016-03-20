@@ -19,11 +19,11 @@ namespace Energistics
 
         private WebSocket _socket;
 
-        public EtpClient(string uri, string application) : this(uri, application, _default)
+        public EtpClient(string uri, string application, string version) : this(uri, application, version, _default)
         {
         }
 
-        public EtpClient(string uri, string application, IDictionary<string, string> headers) : base(application)
+        public EtpClient(string uri, string application, string version, IDictionary<string, string> headers) : base(application, version)
         {
             _socket = new WebSocket(uri, EtpSubProtocolName, null, _headers.Union(headers).ToList());
 
@@ -86,7 +86,7 @@ namespace Energistics
             var requestedProtocols = GetSupportedProtocols();
 
             Handler<ICoreClient>()
-                .RequestSession(ApplicationName, requestedProtocols);
+                .RequestSession(ApplicationName, ApplicationVersion, requestedProtocols);
         }
 
         private void OnWebSocketClosed(object sender, EventArgs e)

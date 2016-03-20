@@ -27,6 +27,8 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
     /// <seealso cref="PDS.Witsml.Studio.ViewModels.IPluginViewModel" />
     public class MainViewModel : Conductor<IScreen>.Collection.OneActive, IPluginViewModel
     {
+        private static readonly string PluginDisplayName = Settings.Default.PluginDisplayName;
+        private static readonly string PluginVersion = typeof(MainViewModel).GetAssemblyVersion();
         private EtpClient _client;
 
         /// <summary>
@@ -37,9 +39,13 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         public MainViewModel(IRuntimeService runtime)
         {
             Runtime = runtime;
-            DisplayName = Settings.Default.PluginDisplayName;
+            DisplayName = PluginDisplayName;
             Resources = new BindableCollection<ResourceViewModel>();
-            Model = new EtpSettings();
+            Model = new EtpSettings()
+            {
+                ApplicationName = PluginDisplayName,
+                ApplicationVersion = PluginVersion
+            };
 
             Details = new TextEditorViewModel(runtime, "JavaScript", true);
             Messages = new TextEditorViewModel(runtime, "JavaScript", true)
@@ -268,7 +274,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 Runtime.Invoke(() => Runtime.Shell.StatusBarText = "Connecting...");
                 var headers = EtpClient.Authorization(Model.Connection.Username, Model.Connection.Password);
 
-                _client = new EtpClient(Model.Connection.Uri, "ETP Browser", headers);
+                _client = new EtpClient(Model.Connection.Uri, Model.ApplicationName, Model.ApplicationVersion, headers);
                 _client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();
                 _client.Register<IStoreCustomer, StoreCustomerHandler>();
 

@@ -6,7 +6,7 @@ namespace Energistics.Protocol.Core
 {
     public interface ICoreClient : IProtocolHandler
     {
-        void RequestSession(string applicationName, IList<SupportedProtocol> requestedProtocols);
+        void RequestSession(string applicationName, string applicationVersion, IList<SupportedProtocol> requestedProtocols);
 
         void CloseSession(string reason = null);
 

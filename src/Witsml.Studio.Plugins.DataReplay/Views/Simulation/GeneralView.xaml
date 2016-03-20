@@ -39,6 +39,9 @@
             <TextBlock Grid.Column="0" Grid.Row="0" Text="Name:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
             <TextBox Text="{Binding Parent.DisplayName, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" />
 
+            <TextBlock Grid.Column="0" Grid.Row="1" Text="Version:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
+            <TextBox Text="{Binding Model.Version}" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" />
+
             <Border Grid.Row="2" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="0,1,0,0" VerticalAlignment="Center" />
 
             <!-- Well -->

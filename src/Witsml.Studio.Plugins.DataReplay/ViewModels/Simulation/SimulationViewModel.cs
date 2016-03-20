@@ -5,16 +5,22 @@ using System.Windows;
 using Caliburn.Micro;
 using Energistics.Common;
 using Microsoft.Win32;
+using PDS.Framework;
 using PDS.Witsml.Studio.Runtime;
 
 namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
 {
     public class SimulationViewModel : Conductor<IScreen>.Collection.OneActive
     {
+        private static readonly string PluginVersion = typeof(SimulationViewModel).GetAssemblyVersion();
+
         public SimulationViewModel(IRuntimeService runtime)
         {
             Runtime = runtime;
-            Model = new Models.Simulation();
+            Model = new Models.Simulation()
+            {
+                Version = PluginVersion
+            };
         }
 
         public IRuntimeService Runtime { get; private set; }

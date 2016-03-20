@@ -11,6 +11,17 @@ namespace PDS.Framework
     public static class FrameworkExtensions
     {
         /// <summary>
+        /// Gets the version for the <see cref="System.Reflection.Assembly"/> containing the specified <see cref="Type"/>.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="fieldCount">The field count.</param>
+        /// <returns>The version number string.</returns>
+        public static string GetAssemblyVersion(this Type type, int fieldCount = 4)
+        {
+            return type.Assembly.GetName().Version.ToString(fieldCount);
+        }
+
+        /// <summary>
         /// Determines whether two specified strings have the same value, ignoring case.
         /// </summary>
         /// <param name="a">The first string to compare, or null.</param>

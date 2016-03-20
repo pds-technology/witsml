@@ -23,7 +23,7 @@ namespace Energistics.Protocol.Core
             var openSession = new OpenSession()
             {
                 ApplicationName = Session.ApplicationName,
-                ApplicationVersion = "1.0",
+                ApplicationVersion = Session.ApplicationVersion,
                 SupportedProtocols = supportedProtocols,
                 SupportedObjects = new List<string>(),
                 SessionId = Session.SessionId

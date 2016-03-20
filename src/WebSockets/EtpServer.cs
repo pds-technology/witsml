@@ -7,7 +7,7 @@ namespace Energistics
     {
         private WebSocketSession _session;
 
-        public EtpServer(WebSocketSession session, string application) : base(application)
+        public EtpServer(WebSocketSession session, string application, string version) : base(application, version)
         {
             SessionId = session.SessionID;
             _session = session;

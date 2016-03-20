@@ -13,13 +13,16 @@ namespace Energistics.Common
     {
         private long MessageId = 0;
 
-        public EtpSession(string application)
+        public EtpSession(string application, string version)
         {
             Handlers = new Dictionary<object, IProtocolHandler>();
             ApplicationName = application;
+            ApplicationVersion = version;
         }
 
         public string ApplicationName { get; private set; }
+
+        public string ApplicationVersion { get; private set; }
 
         public string SessionId { get; set; }
 

@@ -13,7 +13,7 @@ namespace Energistics
         private const int BufferSize = 4096;
         private WebSocket _socket;
 
-        public EtpServerHandler(WebSocket webSocket, string application) : base(application)
+        public EtpServerHandler(WebSocket webSocket, string application, string version) : base(application, version)
         {
             _socket = webSocket;
             Register<ICoreServer, CoreServerHandler>();

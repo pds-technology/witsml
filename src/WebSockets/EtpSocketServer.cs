@@ -13,7 +13,7 @@ namespace Energistics
         private static readonly object EtpSessionKey = typeof(IEtpSession);
         private WebSocketServer _server;
 
-        public EtpSocketServer(int port, string application)
+        public EtpSocketServer(int port, string application, string version)
         {
             _server = new WebSocketServer(new BasicSubProtocol(EtpSubProtocolName));
             _server.Setup(port);
@@ -23,10 +23,13 @@ namespace Energistics
             _server.SessionClosed += OnSessionClosed;
 
             ApplicationName = application;
+            ApplicationVersion = version;
             Register<ICoreServer, CoreServerHandler>();
         }
 
         public string ApplicationName { get; private set; }
+
+        public string ApplicationVersion { get; private set; }
 
         public bool IsRunning
         {
@@ -70,7 +73,7 @@ namespace Energistics
         {
             Logger.Debug(Format("[{0}] Socket session connected.", session.SessionID));
 
-            var etpServer = new EtpServer(session, ApplicationName);
+            var etpServer = new EtpServer(session, ApplicationName, ApplicationVersion);
             RegisterAll(etpServer);
 
             session.Items[EtpSessionKey] = etpServer;
