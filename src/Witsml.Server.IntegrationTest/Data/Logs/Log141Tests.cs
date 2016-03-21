@@ -111,11 +111,10 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(row, data.Count);
             Assert.AreEqual(firstRow.Length, mnemonics.Count);
 
-            // Test data equivalence per row.
-            for (var i = 0; i < row; i++)
-            {
-                Assert.AreEqual(log.LogData[0].Data[i], logData.Data[i]);
-            }
+            // TODO: Update Test to verify that a column of LogData.Data with no values is not returned with the results.
         }
+
+        // TODO: Add a test that creates a LogData.Data with a column of blank values except for one row 
+        //... and verify that the column was returned.
     }
 }

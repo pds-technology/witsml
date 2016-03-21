@@ -73,16 +73,16 @@ namespace PDS.Witsml.Server
             }
         }
 
-        public void InitDataMany(Log log, string mnemonics, string units, int numRows, double factor = 1.0, bool isDepthLog = true)
+        public void InitDataMany(Log log, string mnemonics, string units, int numRows, double factor = 1.0, bool isDepthLog = true, bool hasEmptyChannel = true)
         {
             var start = DateTimeOffset.UtcNow.AddDays(-1);
             for (int i = 0; i < numRows; i++)
             {
                 if (isDepthLog)
-                    InitData(log, mnemonics, units, i, null, i * factor);
+                    InitData(log, mnemonics, units, i, hasEmptyChannel ? (int?)null : i, i * factor);
                 else
                 {
-                    InitData(log, mnemonics, units, start.AddSeconds(i).ToString(), null, i * factor);
+                    InitData(log, mnemonics, units, start.AddSeconds(i).ToString(), hasEmptyChannel ? (int?)null : i, i * factor);
                 }
             }
         }

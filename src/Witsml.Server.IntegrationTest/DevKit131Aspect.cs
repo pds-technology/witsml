@@ -68,11 +68,11 @@ namespace PDS.Witsml.Server
             }
         }
 
-        public void InitDataMany(Log log, string mnemonics, string units, int numRows, double factor = 1.0)
+        public void InitDataMany(Log log, string mnemonics, string units, int numRows, double factor = 1.0, bool hasEmptyChannel = true)
         {
             for (int i = 0; i < numRows; i++)
             {
-                InitData(log, mnemonics, units, i, null, i * factor);
+                InitData(log, mnemonics, units, i, hasEmptyChannel ? (int?)null : i, i * factor);
             }
         }
 
