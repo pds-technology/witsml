@@ -58,6 +58,37 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
+        public void Can_Create_Log_200_Depth()
+        {
+            Log tvdLog = DevKit.CreateLog(ChannelIndexType.trueverticaldepth, true);
+
+            Assert.IsNotNull(tvdLog);
+            Assert.IsNotNull(tvdLog.ChannelSet);
+            Assert.AreEqual(1, tvdLog.ChannelSet.Count);
+            Assert.AreEqual(2, tvdLog.ChannelSet[0].Channel.Count);
+
+            List<List<List<object>>> dataValues = DevKit.DeserializeChannelSetData(tvdLog.ChannelSet[0].Data.Data);
+            Assert.AreEqual(5, dataValues.Count);
+            Assert.AreEqual(2, dataValues[0].Count);
+
+        }
+
+        [TestMethod]
+        public void Can_Create_Log_200_Time()
+        {
+            Log dateTimeLog = DevKit.CreateLog(ChannelIndexType.datetime, true);
+
+            Assert.IsNotNull(dateTimeLog);
+            Assert.IsNotNull(dateTimeLog.ChannelSet);
+            Assert.AreEqual(1, dateTimeLog.ChannelSet.Count);
+            Assert.AreEqual(1, dateTimeLog.ChannelSet[0].Channel.Count);
+
+            List<List<List<object>>> dataValues = DevKit.DeserializeChannelSetData(dateTimeLog.ChannelSet[0].Data.Data);
+            Assert.AreEqual(5, dataValues.Count);
+            Assert.AreEqual(2, dataValues[0].Count);
+        }
+
+        [TestMethod]
         public void Can_Generate_Depth_Log_200()
         {
             List<ChannelIndex> indexList = new List<ChannelIndex>();
@@ -77,16 +108,6 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(2, dataValues[0].Count);
             Assert.AreEqual(2, dataValues[0][0].Count);
             Assert.AreEqual(2, dataValues[0][1].Count);
-
-            for (int i = 0; i < 5; i++)
-            {
-                var channel = dataValues[0][1][0];
-                if (channel != null)
-                {
-                    var channelValues = DevKit.DeserializeChannelValues(channel.ToString());
-                    Assert.AreEqual(2, channelValues.Count);
-                }
-            }
         }
 
         [TestMethod]
@@ -117,25 +138,37 @@ namespace PDS.Witsml.Server.Data.Logs
             indexList.Add(MeasuredDepthIndex);
             indexList.Add(DateTimeIndex);
 
-            ChannelSet channelSet = DevKit.CreateChannelSet(DepthLog, indexList);
+            ChannelSet channelSet1 = DevKit.CreateChannelSet(DepthLog, indexList);            
+            ChannelSet channelSet2 = DevKit.CreateChannelSet(DepthLog, indexList);
+
+            var PointMetadataList = new List<PointMetadata>()
+                                    {
+                                        DevKit.PointMetadata( "confidence", "confidence", EtpDataType.boolean )
+                                    };
+            channelSet2.Channel.Clear();
+            channelSet2.Channel.Add(DevKit.Channel(DepthLog, indexList, "GR", "GR", "api", "gammer_ray", EtpDataType.@double, pointMetadataList: PointMetadataList));
+
             List<ChannelSet> channelSetList = new List<ChannelSet>();
-            channelSetList.Add(channelSet);
-            channelSetList.Add(channelSet);
+            channelSetList.Add(channelSet1);
+            channelSetList.Add(channelSet2);
 
             DevKit.GenerateChannelData(channelSetList, numDataValue: 5);
             Assert.AreEqual(2, channelSetList.Count);
             Assert.AreEqual(2, channelSetList[0].Channel.Count);
-            Assert.AreEqual(2, channelSetList[1].Channel.Count);
+            Assert.AreEqual(1, channelSetList[1].Channel.Count);
 
             List<List<List<object>>> dataValues = DevKit.DeserializeChannelSetData(channelSetList[0].Data.Data);
             Assert.AreEqual(5, dataValues.Count);
             Assert.AreEqual(2, dataValues[0].Count);
+            Assert.AreEqual(2, dataValues[0][0].Count);
+            Assert.AreEqual(2, dataValues[0][1].Count);
 
             dataValues = DevKit.DeserializeChannelSetData(channelSetList[1].Data.Data);
             Assert.AreEqual(5, dataValues.Count);
             Assert.AreEqual(2, dataValues[0].Count);
+            Assert.AreEqual(2, dataValues[0][0].Count);
+            Assert.AreEqual(1, dataValues[0][1].Count);
         }
-
 
         [TestMethod]
         public void Can_Generate_Time_Log_200_From_ChannelSet()
@@ -156,16 +189,6 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(2, dataValues[0].Count);
             Assert.AreEqual(1, dataValues[0][0].Count);
             Assert.AreEqual(1, dataValues[0][1].Count);
-
-            for (int i = 0; i < 5; i++)
-            {
-                var channel = dataValues[0][1][0];
-                if (channel != null)
-                {
-                    var channelValues = DevKit.DeserializeChannelValues(channel.ToString());
-                    Assert.AreEqual(2, channelValues.Count);
-                }
-            }
         }
     }
 }
