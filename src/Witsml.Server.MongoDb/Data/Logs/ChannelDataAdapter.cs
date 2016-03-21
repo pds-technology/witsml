@@ -91,7 +91,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var indexCurve = mnemonics[0].Trim();
 
             // Build Log Data filter
-            var filter = BuildDataFilter(uidLog, indexCurve, range, increasing);
+            var filter = BuildDataFilter(uidLog, indexCurve, range, increasing);           
 
             // Query channelSetValues collection
             var results = GetData(filter, increasing);
@@ -111,11 +111,13 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="increasing">if set to <c>true</c> [increasing].</param>
         /// <returns>The list of log data chunks that fit the query criteria sorted by the start index.</returns>
         private List<ChannelSetValues> GetData(FilterDefinition<ChannelSetValues> filter, bool increasing)
-        {
+        {          
             var collection = GetCollection<ChannelSetValues>(DbCollectionName);
             var sortBuilder = Builders<ChannelSetValues>.Sort;
             var sortField = "Indices.Start";
             var sort = increasing ? sortBuilder.Ascending(sortField) : sortBuilder.Descending(sortField);
+
+            var filterJson = filter.Render(collection.DocumentSerializer, collection.Settings.SerializerRegistry);
 
             return collection.Find(filter ?? "{}").Sort(sort).ToList();
         }
@@ -131,6 +133,9 @@ namespace PDS.Witsml.Server.Data.Logs
         private FilterDefinition<ChannelSetValues> BuildDataFilter(string uidLog, string indexCurve, Tuple<double?, double?> range, bool increasing)
         {
             var filters = new List<FilterDefinition<ChannelSetValues>>();
+            filters.Add(Builders<ChannelSetValues>.Filter.EqIgnoreCase("UidLog", uidLog));
+
+            var rangeFilters = new List<FilterDefinition<ChannelSetValues>>();
             if (range != null)
             {
                 if (range.Item1.HasValue)
@@ -138,21 +143,22 @@ namespace PDS.Witsml.Server.Data.Logs
                     var start = increasing ?
                         Builders<ChannelSetValues>.Filter.Gte("Indices.Start", range.Item1.Value) :
                         Builders<ChannelSetValues>.Filter.Lte("Indices.Start", range.Item1.Value);
-                    filters.Add(start);
+                    rangeFilters.Add(start);
                 }
                 if (range.Item2.HasValue)
                 {
                     var start = increasing ?
                         Builders<ChannelSetValues>.Filter.Lte("Indices.End", range.Item2.Value) :
                         Builders<ChannelSetValues>.Filter.Gte("Indices.End", range.Item2.Value);
-                    filters.Add(start);
+                    rangeFilters.Add(start);
                 }
             }
             
-            if (filters.Count > 0)
-                filters.Add(Builders<ChannelSetValues>.Filter.EqIgnoreCase("Indices.Mnemonic", indexCurve));
+            if (rangeFilters.Count > 0)
+                rangeFilters.Add(Builders<ChannelSetValues>.Filter.EqIgnoreCase("Indices.Mnemonic", indexCurve));
 
-            filters.Add(Builders<ChannelSetValues>.Filter.EqIgnoreCase("UidLog", uidLog));
+            if (rangeFilters.Count > 0)
+                filters.Add(Builders<ChannelSetValues>.Filter.And(rangeFilters));
             return Builders<ChannelSetValues>.Filter.And(filters);
         }
 
