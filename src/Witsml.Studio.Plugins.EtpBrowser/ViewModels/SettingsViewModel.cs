@@ -60,7 +60,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             if (Runtime.ShowDialog(viewModel))
             {
                 Model.Connection = viewModel.DataItem;
-                Parent.OnConnectionChanged();
+                RequestSession();
             }
         }
 

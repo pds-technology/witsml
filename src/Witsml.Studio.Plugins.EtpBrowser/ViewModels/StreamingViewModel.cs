@@ -1,12 +1,16 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Caliburn.Micro;
 using Energistics.Common;
 using Energistics.Datatypes;
+using Energistics.Datatypes.ChannelData;
+using Energistics.Protocol;
 using Energistics.Protocol.ChannelStreaming;
 using Energistics.Protocol.Core;
+using PDS.Framework;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Models;
 using PDS.Witsml.Studio.Runtime;
 
@@ -25,6 +29,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         {
             Runtime = runtime;
             DisplayName = string.Format("{0:D} - {0}", Protocols.ChannelStreaming);
+            Channels = new ChannelMetadataRecord[0];
         }
 
         /// <summary>
@@ -49,6 +54,12 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         /// <value>The runtime service.</value>
         public IRuntimeService Runtime { get; private set; }
+
+        /// <summary>
+        /// Gets the collectino of channel metadata.
+        /// </summary>
+        /// <value>The channel metadata.</value>
+        public IList<ChannelMetadataRecord> Channels { get; private set; }
 
         private bool _isSimpleStreamer;
         /// <summary>
@@ -181,24 +192,46 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public void Start()
         {
-            SendStart(Model.Streaming.MaxDataItems, Model.Streaming.MaxMessageRate);
+            Parent.Client.Handler<IChannelStreamingConsumer>()
+                .Start(Model.Streaming.MaxDataItems, Model.Streaming.MaxMessageRate);
 
             CanStart = false;
             UpdateCanDescribe();
-
-            //CanStartStreaming = !IsSimpleStreamer;
-            //CanStopStreaming = IsSimpleStreamer;
         }
 
         /// <summary>
-        /// Sends the <see cref="Energistics.Protocol.ChannelStreaming.Start"/> message using the Channel Streaming protocol.
+        /// Requests channel metadata for the collection of URIs.
         /// </summary>
-        /// <param name="maxDataItems">The maximum data items.</param>
-        /// <param name="maxMessageRate">The maximum message rate.</param>
-        public void SendStart(int maxDataItems, int maxMessageRate)
+        public void Describe()
         {
             Parent.Client.Handler<IChannelStreamingConsumer>()
-                .Start(maxDataItems, maxMessageRate);
+                .ChannelDescribe(Model.Streaming.Uris);
+        }
+
+        /// <summary>
+        /// Starts the streaming of channel data.
+        /// </summary>
+        public void StartStreaming()
+        {
+            var infos = Channels
+                .Select(ToChannelStreamingInfo)
+                .ToArray();
+
+            Parent.Client.Handler<IChannelStreamingConsumer>()
+                .ChannelStreamingStart(infos);
+        }
+
+        /// <summary>
+        /// Stops the streaming of channel data.
+        /// </summary>
+        public void StopStreaming()
+        {
+            var channelIds = Channels
+                .Select(x => x.ChannelId)
+                .ToArray();
+
+            Parent.Client.Handler<IChannelStreamingConsumer>()
+                .ChannelStreamingStop(channelIds);
         }
 
         /// <summary>
@@ -222,6 +255,9 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 }
             }
 
+            Parent.Client.Handler<IChannelStreamingConsumer>()
+                .OnChannelMetadata += OnChannelMetadata;
+
             CanStart = true;
         }
 
@@ -230,11 +266,41 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public void OnSocketClosed()
         {
+            Parent.Client.Handler<IChannelStreamingConsumer>()
+                .OnChannelMetadata -= OnChannelMetadata;
+
             IsSimpleStreamer = false;
             CanStart = false;
             CanDescribe = false;
             CanStartStreaming = false;
             CanStopStreaming = false;
+        }
+
+        private void OnChannelMetadata(object sender, ProtocolEventArgs<ChannelMetadata> e)
+        {
+            if (!e.Message.Channels.Any())
+                return;
+
+            // add to channel metadata collection
+            e.Message.Channels.ForEach(Channels.Add);
+
+            if (e.Header.MessageFlags == (int)MessageFlags.FinalPart)
+            {
+                CanStartStreaming = !IsSimpleStreamer;
+                CanStopStreaming = IsSimpleStreamer;
+            }
+        }
+
+        private ChannelStreamingInfo ToChannelStreamingInfo(ChannelMetadataRecord channel)
+        {
+            return new ChannelStreamingInfo()
+            {
+                ChannelId = channel.ChannelId,
+                StartIndex = new StreamingStartIndex()
+                {
+                    Item = 0
+                }
+            };
         }
 
         private void UpdateCanDescribe()

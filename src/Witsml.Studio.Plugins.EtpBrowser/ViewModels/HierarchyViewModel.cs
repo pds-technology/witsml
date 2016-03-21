@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Runtime.Serialization;
 using System.Windows;
 using Caliburn.Micro;
 using Energistics.Common;
@@ -52,6 +53,26 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// <value>The runtime service.</value>
         public IRuntimeService Runtime { get; private set; }
 
+        private bool _canExecute;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the Discovery protocol messages can be executed.
+        /// </summary>
+        /// <value><c>true</c> if Discovery protocol messages can be executed; otherwise, <c>false</c>.</value>
+        [DataMember]
+        public bool CanExecute
+        {
+            get { return _canExecute; }
+            set
+            {
+                if (_canExecute != value)
+                {
+                    _canExecute = value;
+                    NotifyOfPropertyChange(() => CanExecute);
+                }
+            }
+        }
+
         /// <summary>
         /// Determines whether the GetObject message can be sent for the selected resource.
         /// </summary>
@@ -62,7 +83,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             {
                 var resource = Parent.SelectedResource;
 
-                return resource != null && resource.Level > 0 && 
+                return CanExecute && resource != null && resource.Level > 0 && 
                     !string.IsNullOrWhiteSpace(new EtpUri(resource.Resource.Uri).ObjectId);
             }
         }
@@ -105,7 +126,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             {
                 var resource = Parent.SelectedResource;
 
-                if (resource != null && resource.Level > 0)
+                if (CanExecute && resource != null && resource.Level > 0)
                 {
                     var uri = new EtpUri(resource.Resource.Uri);
                     return DescribeObjectTypes.Contains(uri.ObjectType);
@@ -120,7 +141,15 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public void DescribeChannels()
         {
-            Parent.DescribeChannels();
+            var viewModel = Parent.Items.OfType<StreamingViewModel>().FirstOrDefault();
+            var resource = Parent.SelectedResource;
+
+            if (viewModel != null && resource != null)
+            {
+                Model.Streaming.Uri = resource.Resource.Uri;
+                viewModel.AddUri();
+                Parent.ActivateItem(viewModel);
+            }
         }
 
         /// <summary>
@@ -128,7 +157,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public void RefreshHierarchy()
         {
-            Parent.RefreshHierarchy();
+            Parent.OnConnectionChanged();
         }
 
         /// <summary>
@@ -151,6 +180,8 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 return;
 
             Parent.GetResources(EtpUri.RootUri);
+            CanExecute = true;
+            RefreshContextMenu();
         }
 
         /// <summary>
@@ -158,6 +189,8 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public void OnSocketClosed()
         {
+            CanExecute = false;
+            RefreshContextMenu();
         }
     }
 }

@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Text;
 using Caliburn.Micro;
 using Energistics.Common;
 using Energistics.Datatypes;
+using Energistics.Datatypes.Object;
 using Energistics.Protocol.Core;
+using Energistics.Protocol.Store;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Models;
 using PDS.Witsml.Studio.Runtime;
 using PDS.Witsml.Studio.ViewModels;
@@ -106,7 +110,35 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public void PutObject()
         {
-            Parent.SendPutObject(Data.Document.Text);
+            SendPutObject(Data.Document.Text);
+        }
+
+        /// <summary>
+        /// Sends the <see cref="Energistics.Protocol.Store.PutObject"/> message with the supplied XML string.
+        /// </summary>
+        /// <param name="xml">The XML string.</param>
+        public void SendPutObject(string xml)
+        {
+            var uri = new EtpUri(Model.Store.Uri);
+
+            var dataObject = new DataObject()
+            {
+                ContentEncoding = string.Empty,
+                Data = Encoding.UTF8.GetBytes(xml),
+                Resource = new Resource()
+                {
+                    Uri = uri,
+                    Uuid = Model.Store.Uuid,
+                    Name = Model.Store.Name,
+                    HasChildren = -1,
+                    ContentType = uri.ContentType,
+                    ResourceType = ResourceTypes.DataObject.ToString(),
+                    CustomData = new Dictionary<string, string>()
+                }
+            };
+
+            Parent.Client.Handler<IStoreCustomer>()
+                .PutObject(dataObject);
         }
 
         /// <summary>

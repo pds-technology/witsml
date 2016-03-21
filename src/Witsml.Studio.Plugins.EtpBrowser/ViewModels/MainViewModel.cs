@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Text;
 using Avro.Specific;
 using Caliburn.Micro;
 using Energistics;
 using Energistics.Common;
 using Energistics.Datatypes;
-using Energistics.Datatypes.Object;
 using Energistics.Protocol.ChannelStreaming;
 using Energistics.Protocol.Core;
 using Energistics.Protocol.Discovery;
@@ -171,34 +169,6 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         }
 
         /// <summary>
-        /// Sends the <see cref="Energistics.Protocol.Store.PutObject"/> message with the supplied XML string.
-        /// </summary>
-        /// <param name="xml">The XML string.</param>
-        public void SendPutObject(string xml)
-        {
-            var uri = new EtpUri(Model.Store.Uri);
-
-            var dataObject = new DataObject()
-            {
-                ContentEncoding = string.Empty,
-                Data = Encoding.UTF8.GetBytes(xml),
-                Resource = new Resource()
-                {
-                    Uri = uri,
-                    Uuid = Model.Store.Uuid,
-                    Name = Model.Store.Name,
-                    HasChildren = -1,
-                    ContentType = uri.ContentType,
-                    ResourceType = ResourceTypes.DataObject.ToString(),
-                    CustomData = new Dictionary<string, string>()
-                }
-            };
-
-            _client.Handler<IStoreCustomer>()
-                .PutObject(dataObject);
-        }
-
-        /// <summary>
         /// Deletes the selected resource using the Store protocol.
         /// </summary>
         public void DeleteObject()
@@ -218,41 +188,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         public void SendDeleteObject(string uri)
         {
             _client.Handler<IStoreCustomer>()
-                .DeleteObject(new List<string>() { uri });
-        }
-
-        /// <summary>
-        /// Refreshes the hierarchy.
-        /// </summary>
-        public void RefreshHierarchy()
-        {
-            OnConnectionChanged();
-        }
-
-        /// <summary>
-        /// Requests channel metadata for the selected resource using the ChannelStreaming protocol.
-        /// </summary>
-        public void DescribeChannels()
-        {
-            var viewModel = Items.OfType<StreamingViewModel>().FirstOrDefault();
-            var resource = SelectedResource;
-
-            if (viewModel != null && resource != null)
-            {
-                Model.Streaming.Uri = resource.Resource.Uri;
-                viewModel.AddUri();
-                ActivateItem(viewModel);
-            }
-        }
-
-        /// <summary>
-        /// Sends the <see cref="Energistics.Protocol.ChannelStreaming.ChannelDescribe"/> message with the specified URI.
-        /// </summary>
-        /// <param name="uri">The URI.</param>
-        public void SendChannelDescribe(params string[] uris)
-        {
-            _client.Handler<IChannelStreamingConsumer>()
-                .ChannelDescribe(uris);
+                .DeleteObject(new[] { uri });
         }
 
         /// <summary>
