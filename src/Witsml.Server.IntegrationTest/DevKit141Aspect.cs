@@ -141,6 +141,39 @@ namespace PDS.Witsml.Server
             };
         }
 
+        public Well CreateTestWell()
+        {
+            var dateTimeSpud = DateTimeOffset.UtcNow;
+            var groundElevation = new WellElevationCoord
+            {
+                Uom = WellVerticalCoordinateUom.m,
+                Value = 40.0
+            };
+
+            var datum1 = WellDatum("Kelly Bushing", code: ElevCodeEnum.KB, uid: ElevCodeEnum.KB.ToString());
+            var datum2 = WellDatum("Sea Level", code: ElevCodeEnum.SL, uid: ElevCodeEnum.SL.ToString());
+
+            var commonData = new CommonData
+            {
+                ItemState = ItemState.plan,
+                Comments = "well in plan"
+            };
+
+            var well = new Well
+            {
+                Name = Name("Test Well"),
+                Country = "US",
+                DateTimeSpud = dateTimeSpud,
+                DirectionWell = WellDirection.unknown,
+                GroundElevation = groundElevation,
+                TimeZone = TimeZone,
+                WellDatum = List(datum1, datum2),
+                CommonData = commonData
+            };
+
+            return well;
+        }
+
         public Well CreateFullWell()
         {
             string wellXml = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +

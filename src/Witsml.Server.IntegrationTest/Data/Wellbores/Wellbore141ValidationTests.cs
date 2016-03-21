@@ -35,14 +35,15 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod]
         public void Validate_wellbore()
         {
-            var well = new Well { Name = "Well-to-add-01", TimeZone = DevKit.TimeZone };
+            var wellName = DevKit.Name("Well-to-add-01");
+            var well = new Well { Name = wellName, TimeZone = DevKit.TimeZone };
             var response = DevKit.Add<WellList, Well>(well);
 
             var wellbore = new Wellbore()
             {
                 UidWell = response.SuppMsgOut,
-                NameWell = "Well 01",
-                Name = "Wellbore 01-01"
+                NameWell = wellName,
+                Name = DevKit.Name("Wellbore 01-01")
             };
             response = DevKit.Add<WellboreList, Wellbore>(wellbore);
 
@@ -56,14 +57,14 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod]
         public void Validate_wellbore_with_dTimKickoff()
         {
-            var well = new Well { Name = "Well-to-add-01", TimeZone = DevKit.TimeZone };
+            var well = new Well { Name = DevKit.Name("Well-to-add-01"), TimeZone = DevKit.TimeZone };
             var response = DevKit.Add<WellList, Well>(well);
 
             var wellbore = new Wellbore()
             {
                 UidWell = response.SuppMsgOut,
                 NameWell = well.Name,
-                Name = "Wellbore 01-01",
+                Name = DevKit.Name("Wellbore 01-01"),
                 DateTimeKickoff = DateTimeOffset.Now
             };
             response = DevKit.Add<WellboreList, Wellbore>(wellbore);
@@ -78,13 +79,13 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod]
         public void Test_error_code_405_data_object_uid_duplicate()
         {
-            var well = new Well { Name = "Well-to-add-01", TimeZone = DevKit.TimeZone };
+            var well = new Well { Name = DevKit.Name("Well-to-add-01"), TimeZone = DevKit.TimeZone };
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            var wellbore = new Wellbore { Name = "Wellbore-to-add-01", NameWell = well.Name, UidWell = response.SuppMsgOut, Uid = DevKit.Uid() };
+            var wellbore = new Wellbore { Name = DevKit.Name("Wellbore-to-add-01"), NameWell = well.Name, UidWell = response.SuppMsgOut, Uid = DevKit.Uid() };
             response = DevKit.Add<WellboreList, Wellbore>(wellbore);
 
             Assert.IsNotNull(response);
@@ -99,13 +100,13 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod]
         public void Test_error_code_406_missing_parent_uid()
         {
-            var well = new Well { Name = "Well-to-add-01", TimeZone = DevKit.TimeZone };
+            var well = new Well { Name = DevKit.Name("Well-to-add-01"), TimeZone = DevKit.TimeZone };
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            var wellbore = new Wellbore { Name = "Wellbore-to-add-01", NameWell = well.Name };
+            var wellbore = new Wellbore { Name = DevKit.Name("Wellbore-to-add-01"), NameWell = well.Name };
             response = DevKit.Add<WellboreList, Wellbore>(wellbore);
 
             Assert.IsNotNull(response);
@@ -116,17 +117,17 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod]
         public void Test_error_code_478_parent_uid_case_not_matching()
         {
-            var uid = "arent-well-01-for-error-code-478";
-            var well = new Well { Name = "Well-to-add-01", TimeZone = DevKit.TimeZone, Uid = "P" + uid};
+            var uid = "arent-well-01-for-error-code-478" + DevKit.Uid();
+            var well = new Well { Name = DevKit.Name("Well-to-add-01"), TimeZone = DevKit.TimeZone, Uid = "P" + uid};
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            var wellbore = new Wellbore { Name = "Wellbore-to-add-01", NameWell = well.Name, UidWell = well.Uid };
+            var wellbore = new Wellbore { Name = DevKit.Name("Wellbore-to-add-01"), NameWell = well.Name, UidWell = well.Uid };
             response = DevKit.Add<WellboreList, Wellbore>(wellbore);
 
-            wellbore = new Wellbore { Name = "Wellbore-to-add-02", NameWell = well.Name, UidWell = "p" + uid };
+            wellbore = new Wellbore { Name = DevKit.Name("Wellbore-to-add-02"), NameWell = well.Name, UidWell = "p" + uid };
             response = DevKit.Add<WellboreList, Wellbore>(wellbore);
 
             Assert.IsNotNull(response);
@@ -139,8 +140,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod]
         public void Test_error_code_481_missing_parent_object()
         {
-            var well = new Well { Name = "Well-to-add-01", TimeZone = DevKit.TimeZone };
-            var wellbore = new Wellbore { Name = "Wellbore-to-add-01", NameWell = well.Name, UidWell = DevKit.Uid() };
+            var well = new Well { Name = DevKit.Name("Well-to-add-01"), TimeZone = DevKit.TimeZone };
+            var wellbore = new Wellbore { Name = DevKit.Name("Wellbore-to-add-01"), NameWell = well.Name, UidWell = DevKit.Uid() };
             var response = DevKit.Add<WellboreList, Wellbore>(wellbore);
 
             Assert.IsNotNull(response);
@@ -150,14 +151,14 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod]
         public void Test_can_add_wellbore_with_same_uid_under_different_well()
         {
-            var well1 = new Well { Name = "Well-to-add-01", TimeZone = DevKit.TimeZone };
+            var well1 = new Well { Name = DevKit.Name("Well-to-add-01"), TimeZone = DevKit.TimeZone };
             var response = DevKit.Add<WellList, Well>(well1);
 
             var wellbore1 = new Wellbore()
             {
                 UidWell = response.SuppMsgOut,
                 NameWell = well1.Name,
-                Name = "Wellbore 01-01"
+                Name = DevKit.Name("Wellbore 01-01")
             };
             response = DevKit.Add<WellboreList, Wellbore>(wellbore1);
 
@@ -166,7 +167,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
             var uid = response.SuppMsgOut;
 
-            var well2 = new Well { Name = "Well-to-add-02", TimeZone = DevKit.TimeZone };
+            var well2 = new Well { Name = DevKit.Name("Well-to-add-02"), TimeZone = DevKit.TimeZone };
             response = DevKit.Add<WellList, Well>(well2);
 
             var wellbore2 = new Wellbore()
@@ -174,7 +175,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 Uid = uid,
                 UidWell = response.SuppMsgOut,
                 NameWell = well2.Name,
-                Name = "Wellbore 02-01"
+                Name = DevKit.Name("Wellbore 02-01")
             };
             response = DevKit.Add<WellboreList, Wellbore>(wellbore2);
 

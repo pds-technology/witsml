@@ -27,7 +27,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Can_add_well_without_validation()
         {
-            var well = new Well { Name = "Well-to-add-01", TimeZone = DevKit.TimeZone };
+            var well = new Well { Name = DevKit.Name("Well-to-add-01"), TimeZone = DevKit.TimeZone };
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
@@ -53,7 +53,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Uid_returned_add_well()
         {
-            var well = new Well { Name = "Well-to-add-01", TimeZone = DevKit.TimeZone };
+            var well = new Well { Name = DevKit.Name("Well-to-add-01"), TimeZone = DevKit.TimeZone };
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
@@ -76,7 +76,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Add_Well_Error_405_Uid_Existed()
         {
-            var well = new Well { Name = "Test Add Well - Uid Existed", TimeZone = DevKit.TimeZone };
+            var well = new Well { Name = DevKit.Name("Test Add Well - Uid Existed"), TimeZone = DevKit.TimeZone };
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
@@ -86,7 +86,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var valid = !string.IsNullOrEmpty(uid);
             Assert.IsTrue(valid);
 
-            var existedWell = new Well { Uid = uid, Name = "Test Add Well - Adding existed well", TimeZone = DevKit.TimeZone };
+            var existedWell = new Well { Uid = uid, Name = DevKit.Name("Test Add Well - Adding existed well"), TimeZone = DevKit.TimeZone };
             response = DevKit.Add<WellList, Well>(existedWell);
 
             Assert.IsNotNull(response);
@@ -97,7 +97,7 @@ namespace PDS.Witsml.Server.Data.Wells
         public void Case_preserved_add_well()
         {
             var nameLegal = "Well Legal Name";
-            var well = new Well { Name = "Well-to-add-01", TimeZone = DevKit.TimeZone, NameLegal = nameLegal };
+            var well = new Well { Name = DevKit.Name("Well-to-add-01"), TimeZone = DevKit.TimeZone, NameLegal = nameLegal };
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
@@ -120,7 +120,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_error_code_407_missing_witsml_object_type()
         {
-            var well = new Well { Name = "Well-to-add-missing-witsml-type", TimeZone = DevKit.TimeZone };
+            var well = new Well { Name = DevKit.Name("Well-to-add-missing-witsml-type"), TimeZone = DevKit.TimeZone };
             var response = DevKit.Add<WellList, Well>(well, string.Empty);
 
             Assert.IsNotNull(response);
@@ -140,7 +140,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_error_code_409_non_conforming_input_template()
         {
-            var well = new Well { Name = "Well-to-add-invalid-input-template" }; // <-- Missing required TimeZone
+            var well = new Well { Name = DevKit.Name("Well-to-add-invalid-input-template") }; // <-- Missing required TimeZone
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
@@ -151,7 +151,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_error_code_411_optionsIn_invalid_format()
         {
-            var well = new Well { Name = "Well-to-add-invalid-optionsIn-format", TimeZone = DevKit.TimeZone };
+            var well = new Well { Name = DevKit.Name("Well-to-add-invalid-optionsIn-format"), TimeZone = DevKit.TimeZone };
             var response = DevKit.Add<WellList, Well>(well, optionsIn: "compressionMethod:gzip");
 
             Assert.IsNotNull(response);
@@ -161,7 +161,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_error_code_413_unsupported_data_object()
         {
-            var well = new Well { Name = "Well-to-add-unsupported-error" };
+            var well = new Well { Name = DevKit.Name("Well-to-add-unsupported-error") };
             var wells = new WellList { Well = DevKit.List(well) };
 
             // update Version property to an unsupported data schema version
@@ -177,7 +177,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_error_code_440_optionsIn_keyword_not_recognized()
         {
-            var well = new Well { Name = "Well-to-add-invalid-optionsIn-keyword" };
+            var well = new Well { Name = DevKit.Name("Well-to-add-invalid-optionsIn-keyword") };
             var response = DevKit.Add<WellList, Well>(well, optionsIn: "returnElements=all");
 
             Assert.IsNotNull(response);
@@ -187,7 +187,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_error_code_441_optionsIn_value_not_recognized()
         {
-            var well = new Well { Name = "Well-to-add-invalid-optionsIn-value", TimeZone = DevKit.TimeZone };
+            var well = new Well { Name = DevKit.Name("Well-to-add-invalid-optionsIn-value"), TimeZone = DevKit.TimeZone };
             var response = DevKit.Add<WellList, Well>(well, optionsIn: "compressionMethod=7zip");
 
             Assert.IsNotNull(response);
@@ -198,7 +198,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_error_code_442_optionsIn_keyword_not_supported()
         {
-            var well = new Well { Name = "Well-to-add-optionsIn-keyword-not-supported" };
+            var well = new Well { Name = DevKit.Name("Well-to-add-optionsIn-keyword-not-supported") };
             var response = DevKit.Add<WellList, Well>(well, optionsIn: "compressionMethod=gzip");
 
             Assert.IsNotNull(response);
@@ -225,8 +225,8 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_error_code_444_mulitple_data_objects_error()
         {
-            var well1 = new Well { Name = "Well-to-01", TimeZone = DevKit.TimeZone, Uid = DevKit.Uid() };
-            var well2 = new Well { Name = "Well-to-02", TimeZone = DevKit.TimeZone, Uid = DevKit.Uid() };
+            var well1 = new Well { Name = DevKit.Name("Well-to-01"), TimeZone = DevKit.TimeZone, Uid = DevKit.Uid() };
+            var well2 = new Well { Name = DevKit.Name("Well-to-02"), TimeZone = DevKit.TimeZone, Uid = DevKit.Uid() };
             var wells = new WellList { Well = DevKit.List(well1, well2) };
 
             var xmlIn = EnergisticsConverter.ObjectToXml(wells);
@@ -270,7 +270,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_error_code_466_non_conforming_capabilities_in()
         {
-            var well = new Well { Name = "Well-to-add-invalid-capabilitiesIn", TimeZone = DevKit.TimeZone };
+            var well = new Well { Name = DevKit.Name("Well-to-add-invalid-capabilitiesIn"), TimeZone = DevKit.TimeZone };
             var response = DevKit.Add<WellList, Well>(well, ObjectTypes.Well, "<capClients />");
 
             Assert.IsNotNull(response);
@@ -280,7 +280,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_error_code_468_missing_version_attribute()
         {
-            var well = new Well { Name = "Well-to-add-missing-version-attribute" };
+            var well = new Well { Name = DevKit.Name("Well-to-add-missing-version-attribute") };
             var wells = new WellList { Well = DevKit.List(well) };
 
             // update Version property to an unsupported data schema version
@@ -296,7 +296,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_error_code_486_data_object_types_dont_match()
         {
-            var well = new Well { Name = "Well-to-add-data-type-not-match" };
+            var well = new Well { Name = DevKit.Name("Well-to-add-data-type-not-match") };
             var wells = new WellList { Well = DevKit.List(well) };
 
             var xmlIn = EnergisticsConverter.ObjectToXml(wells);

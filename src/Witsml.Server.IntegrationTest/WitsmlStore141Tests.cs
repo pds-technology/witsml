@@ -102,14 +102,14 @@ namespace PDS.Witsml.Server
         [TestMethod]
         public void Query_OptionsIn_privateGroupOnly()
         {
-            var well = new Well { Name = "Well-to-add-01", TimeZone = DevKit.TimeZone };
+            var well = new Well { Name = DevKit.Name("Well-to-add-01"), TimeZone = DevKit.TimeZone };
             var response = DevKit.Add<WellList, Well>(well);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             CommonData commonData = new CommonData();
             commonData.PrivateGroupOnly = true;
-            well = new Well { Name = "Well-to-add-01", TimeZone = DevKit.TimeZone, CommonData=commonData };
+            well = new Well { Name = DevKit.Name("Well-to-add-01"), TimeZone = DevKit.TimeZone, CommonData=commonData };
             response = DevKit.Add<WellList, Well>(well);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
@@ -136,12 +136,14 @@ namespace PDS.Witsml.Server
         [TestMethod]
         public void Query_OptionsIn_ReturnElements_IdOnly()
         {
-            var well = new Well { Name = "Well-to-add-01", TimeZone = DevKit.TimeZone, NameLegal = "Company Legal Name", Field = "Big Field" };
+            var wellName = DevKit.Name("Well-to-add-01");
+
+            var well = new Well { Name = wellName, TimeZone = DevKit.TimeZone, NameLegal = "Company Legal Name", Field = "Big Field" };
             var response = DevKit.Add<WellList, Well>(well);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            var queryWell = new Well { Name = "Well-to-add-01" };
+            var queryWell = new Well { Name = wellName };
             var result = DevKit.Get<WellList, Well>(DevKit.List(queryWell), optionsIn: OptionsIn.ReturnElements.IdOnly);
             Assert.IsNotNull(result);
 
@@ -165,13 +167,15 @@ namespace PDS.Witsml.Server
         [TestMethod]
         public void Query_OptionsIn_ReturnElements_Requested()
         {
-            var well = new Well { Name = "Well-to-add-01", TimeZone = DevKit.TimeZone, NameLegal = "Company Legal Name", Field = "Big Field" };
+            var wellName = DevKit.Name("Well-to-add-01");
+
+            var well = new Well { Name = wellName, TimeZone = DevKit.TimeZone, NameLegal = "Company Legal Name", Field = "Big Field" };
             var response = DevKit.Add<WellList, Well>(well);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
             string uid = response.SuppMsgOut;
 
-            var queryWell = new Well { Uid = uid, Name = "Well-to-add-01", NameLegal = "", Field = "" };
+            var queryWell = new Well { Uid = uid, Name = wellName, NameLegal = "", Field = "" };
             var result = DevKit.Get<WellList, Well>(DevKit.List(queryWell), optionsIn: OptionsIn.ReturnElements.Requested);
             Assert.IsNotNull(result);
 
@@ -187,7 +191,7 @@ namespace PDS.Witsml.Server
                 Assert.IsTrue(node.HasChildNodes);
                 Assert.IsTrue(node.ChildNodes.Count <= 3);
                 Assert.AreEqual("name", node.ChildNodes[0].Name);
-                Assert.AreEqual("Well-to-add-01", node.ChildNodes[0].InnerText);
+                Assert.AreEqual(wellName, node.ChildNodes[0].InnerText);
                 if (uid.Equals(node.Attributes[0].InnerText))
                 {
                     uidExists = true;
@@ -203,13 +207,13 @@ namespace PDS.Witsml.Server
         [TestMethod]
         public void Can_add_wellbore_without_validation()
         {
-            var well = new Well { Name = "Well-to-add-01", TimeZone = DevKit.TimeZone };
+            var well = new Well { Name = DevKit.Name("Well-to-add-01"), TimeZone = DevKit.TimeZone };
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            var wellbore = new Wellbore { Name = "Wellbore-to-add-01", NameWell = well.Name, UidWell = response.SuppMsgOut };
+            var wellbore = new Wellbore { Name = DevKit.Name("Wellbore-to-add-01"), NameWell = well.Name, UidWell = response.SuppMsgOut };
             response = DevKit.Add<WellboreList, Wellbore>(wellbore);
 
             Assert.IsNotNull(response);
@@ -219,7 +223,7 @@ namespace PDS.Witsml.Server
         [TestMethod]
         public void Adding_wellbore_database_configuration_error()
         {
-            var well = new Well { Name = "Well-to-add-02", TimeZone = DevKit.TimeZone };
+            var well = new Well { Name = DevKit.Name("Well-to-add-02"), TimeZone = DevKit.TimeZone };
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
@@ -234,7 +238,7 @@ namespace PDS.Witsml.Server
 
             try
             {
-                var wellbore = new Wellbore { Name = "Wellbore-to-test-add-error", NameWell = well.Name, UidWell = response.SuppMsgOut };
+                var wellbore = new Wellbore { Name = DevKit.Name("Wellbore-to-test-add-error"), NameWell = well.Name, UidWell = response.SuppMsgOut };
                 wellboreAdapter.Add(wellbore);
             }
             catch (WitsmlException ex)
@@ -300,7 +304,7 @@ namespace PDS.Witsml.Server
             var client = new CapClient { ApiVers = "1.3.1.1", SchemaVersion = "1.3.1.1" };
             var clients = new CapClients { Version = "1.4.1.1", CapClient = client };
             var capabilitiesIn = EnergisticsConverter.ObjectToXml(clients);
-            var well = new Well { Name = "Well-to-add-apiVers-not-match", TimeZone = DevKit.TimeZone };
+            var well = new Well { Name = DevKit.Name("Well-to-add-apiVers-not-match"), TimeZone = DevKit.TimeZone };
             var response = DevKit.Add<WellList, Well>(well, capClient: capabilitiesIn);
 
             Assert.IsNotNull(response);
@@ -314,7 +318,7 @@ namespace PDS.Witsml.Server
             var client = new CapClient { ApiVers = "1.4.1.1"};
             var clients = new CapClients { Version = "1.4.x.y", CapClient = client };
             var capabilitiesIn = EnergisticsConverter.ObjectToXml(clients);
-            var well = new Well { Name = "Well-to-add-unsupported-schema-version", TimeZone = DevKit.TimeZone };
+            var well = new Well { Name = DevKit.Name("Well-to-add-unsupported-schema-version"), TimeZone = DevKit.TimeZone };
             var response = DevKit.Add<WellList, Well>(well, capClient: capabilitiesIn);
 
             Assert.IsNotNull(response);
@@ -328,7 +332,7 @@ namespace PDS.Witsml.Server
             var client = new CapClient { ApiVers = "1.4.1.1", SchemaVersion = "1.3.1.1" };
             var clients = new CapClients { Version = "1.4.1.1", CapClient = client };
             var capabilitiesIn = EnergisticsConverter.ObjectToXml(clients);
-            var well = new Well { Name = "Well-to-add-schema-version-not-match", TimeZone = DevKit.TimeZone };
+            var well = new Well { Name = DevKit.Name("Well-to-add-schema-version-not-match"), TimeZone = DevKit.TimeZone };
             var response = DevKit.Add<WellList, Well>(well, capClient: capabilitiesIn);
 
             Assert.IsNotNull(response);
