@@ -147,11 +147,10 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// <param name="e">The <see cref="ProtocolEventArgs{OpenSession}" /> instance containing the event data.</param>
         public void OnSessionOpened(ProtocolEventArgs<OpenSession> e)
         {
-            if (e.Message.SupportedProtocols.Any(x => x.Protocol == (int)Protocols.Discovery))
-            {
-                Parent.ActivateItem(this);
-                Parent.GetResources(EtpUri.RootUri);
-            }
+            if (!e.Message.SupportedProtocols.Any(x => x.Protocol == (int)Protocols.Discovery))
+                return;
+
+            Parent.GetResources(EtpUri.RootUri);
         }
 
         /// <summary>

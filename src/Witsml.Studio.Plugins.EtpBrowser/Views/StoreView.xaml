@@ -46,7 +46,7 @@
         </Border>
         
         <Grid Grid.Row="5" Grid.ColumnSpan="3" Margin="5,0,5,5" HorizontalAlignment="Left">
-            <Button Width="80">
+            <Button Width="80" IsEnabled="{Binding CanExecute}">
                 <i:Interaction.Behaviors>
                     <app:DropDownButtonBehavior />
                 </i:Interaction.Behaviors>

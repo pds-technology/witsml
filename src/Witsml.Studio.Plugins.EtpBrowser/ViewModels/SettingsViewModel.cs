@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using Energistics.Datatypes;
+using Energistics.Protocol.Core;
 using PDS.Witsml.Studio.Connections;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Models;
 using PDS.Witsml.Studio.Runtime;
@@ -61,6 +62,23 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 Model.Connection = viewModel.DataItem;
                 Parent.OnConnectionChanged();
             }
+        }
+
+        /// <summary>
+        /// Requests a new ETP session.
+        /// </summary>
+        public void RequestSession()
+        {
+            Parent.OnConnectionChanged();
+        }
+
+        /// <summary>
+        /// Closes the current ETP session.
+        /// </summary>
+        public void CloseSession()
+        {
+            Parent.Client.Handler<ICoreClient>()
+                .CloseSession();
         }
     }
 }

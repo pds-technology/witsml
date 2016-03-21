@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Linq;
+using System.Runtime.Serialization;
 using Caliburn.Micro;
+using Energistics.Common;
 using Energistics.Datatypes;
+using Energistics.Protocol.Core;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Models;
 using PDS.Witsml.Studio.Runtime;
 using PDS.Witsml.Studio.ViewModels;
@@ -11,7 +15,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
     /// Manages the behavior of the Store user interface elements.
     /// </summary>
     /// <seealso cref="Caliburn.Micro.Screen" />
-    public class StoreViewModel : Screen
+    public class StoreViewModel : Screen, ISessionAware
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StoreViewModel"/> class.
@@ -58,6 +62,26 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             }
         }
 
+        private bool _canExecute;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the Store protocol messages can be executed.
+        /// </summary>
+        /// <value><c>true</c> if Store protocol messages can be executed; otherwise, <c>false</c>.</value>
+        [DataMember]
+        public bool CanExecute
+        {
+            get { return _canExecute; }
+            set
+            {
+                if (_canExecute != value)
+                {
+                    _canExecute = value;
+                    NotifyOfPropertyChange(() => CanExecute);
+                }
+            }
+        }
+
         /// <summary>
         /// Generates a new UUID value.
         /// </summary>
@@ -94,6 +118,26 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             {
                 Parent.SendDeleteObject(Model.Store.Uri);
             }
+        }
+
+        /// <summary>
+        /// Called when the <see cref="OpenSession" /> message is recieved.
+        /// </summary>
+        /// <param name="e">The <see cref="ProtocolEventArgs{OpenSession}" /> instance containing the event data.</param>
+        public void OnSessionOpened(ProtocolEventArgs<OpenSession> e)
+        {
+            if (!e.Message.SupportedProtocols.Any(x => x.Protocol == (int)Protocols.Store))
+                return;
+
+            CanExecute = true;
+        }
+
+        /// <summary>
+        /// Called when the <see cref="Energistics.EtpClient" /> web socket is closed.
+        /// </summary>
+        public void OnSocketClosed()
+        {
+            CanExecute = false;
         }
     }
 }

@@ -4,8 +4,13 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PDS.Witsml.Studio.Plugins.EtpBrowser.Views"
+             xmlns:conv="clr-namespace:PDS.Witsml.Studio.Converters;assembly=PDS.Witsml.Studio"
              mc:Ignorable="d" d:DesignHeight="400" d:DesignWidth="300">
-    
+
+    <UserControl.Resources>
+        <conv:NullToBooleanConverter x:Key="NullToBooleanConverter" />
+    </UserControl.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
@@ -29,9 +34,12 @@
         <TextBlock Grid.Column="0" Grid.Row="2" Text="App Version:" Margin="10,5,5,5" HorizontalAlignment="Right" VerticalAlignment="Center" />
         <TextBox Text="{Binding Model.ApplicationVersion}" Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" />
 
-        <!--
-        <TextBlock Grid.Column="0" Grid.Row="1" Text="Version:" Margin="10,5,5,5" HorizontalAlignment="Right" VerticalAlignment="Center" />
-        <ComboBox ItemsSource="{Binding Versions}" Text="{Binding Model.Version}" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" />
-        -->
+        <StackPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="3" Margin="5" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button x:Name="RequestSession" Content="Request Session" Margin="5,0,0,0" Width="100"
+                    IsEnabled="{Binding Model.Connection.Uri, Converter={StaticResource NullToBooleanConverter}}" />
+            
+            <Button x:Name="CloseSession" Content="Close Session" Margin="5,0,0,0" Width="100" 
+                    IsEnabled="{Binding Model.Connection.Uri, Converter={StaticResource NullToBooleanConverter}}" />
+        </StackPanel>
     </Grid>
 </UserControl>
