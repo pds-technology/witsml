@@ -90,7 +90,7 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 logs.ForEach(l =>
                 {
-                    l.LogData.Add(QueryLogDataValues(l, parser));
+                    l.LogData = new List<LogData> { QueryLogDataValues(l, parser) };
                 });
             }
 

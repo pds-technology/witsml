@@ -141,15 +141,15 @@ namespace PDS.Witsml.Server.Data.Logs
                 if (range.Item1.HasValue)
                 {
                     var start = increasing ?
-                        Builders<ChannelSetValues>.Filter.Gte("Indices.Start", range.Item1.Value) :
-                        Builders<ChannelSetValues>.Filter.Lte("Indices.Start", range.Item1.Value);
+                        Builders<ChannelSetValues>.Filter.Gte("Indices.End", range.Item1.Value) :
+                        Builders<ChannelSetValues>.Filter.Lte("Indices.End", range.Item1.Value);
                     rangeFilters.Add(start);
                 }
                 if (range.Item2.HasValue)
                 {
                     var start = increasing ?
-                        Builders<ChannelSetValues>.Filter.Lte("Indices.End", range.Item2.Value) :
-                        Builders<ChannelSetValues>.Filter.Gte("Indices.End", range.Item2.Value);
+                        Builders<ChannelSetValues>.Filter.Lte("Indices.Start", range.Item2.Value) :
+                        Builders<ChannelSetValues>.Filter.Gte("Indices.Start", range.Item2.Value);
                     rangeFilters.Add(start);
                 }
             }
