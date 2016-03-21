@@ -29,7 +29,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         {
             Runtime = runtime;
             DisplayName = string.Format("{0:D} - {0}", Protocols.ChannelStreaming);
-            Channels = new ChannelMetadataRecord[0];
+            Channels = new List<ChannelMetadataRecord>();
         }
 
         /// <summary>
@@ -204,6 +204,8 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public void Describe()
         {
+            Channels.Clear();
+
             Parent.Client.Handler<IChannelStreamingConsumer>()
                 .ChannelDescribe(Model.Streaming.Uris);
         }
@@ -219,6 +221,10 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
 
             Parent.Client.Handler<IChannelStreamingConsumer>()
                 .ChannelStreamingStart(infos);
+
+            CanDescribe = false;
+            CanStartStreaming = false;
+            CanStopStreaming = true;
         }
 
         /// <summary>
@@ -232,6 +238,10 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
 
             Parent.Client.Handler<IChannelStreamingConsumer>()
                 .ChannelStreamingStop(channelIds);
+
+            CanStartStreaming = true;
+            CanStopStreaming = false;
+            UpdateCanDescribe();
         }
 
         /// <summary>
