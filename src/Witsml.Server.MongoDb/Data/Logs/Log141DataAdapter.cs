@@ -78,20 +78,17 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var fields = OptionsIn.ReturnElements.IdOnly.Equals(returnElements)
                 ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell", "UidWellbore", "NameWellbore" }
-                : OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) ? GetLogHeaderFields() 
+                : OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) ? GetLogHeaderFields()
+                : OptionsIn.ReturnElements.DataOnly.Equals(returnElements) ? new List<string> { "LogCurveInfo" }
                 : null;
 
-            var logs = QueryEntities(parser, fields);
-
-            // Support OptionsIn returnElements = all, header-only, data-only
-            var logsOut = OptionsIn.ReturnElements.DataOnly.Equals(returnElements)
-                ? GetLogHeaderRequiredProperties(logs).ToList()
-                : logs;
+            var ignored = new List<string> { "startIndex", "endIndex", "startDateTimeIndex", "endDateTimeIndex", "logData" };
+            var logs = QueryEntities(parser, fields, ignored);
 
             // Only get the LogData returnElements != "header-only" and returnElements != "id-only"
             if (!OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) && !OptionsIn.ReturnElements.IdOnly.Equals(returnElements))
             {
-                logsOut.ForEach(l =>
+                logs.ForEach(l =>
                 {
                     l.LogData.Add(QueryLogDataValues(l, parser));
                 });
@@ -101,7 +98,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 ErrorCodes.Success,
                 new LogList()
                 {
-                    Log = logsOut
+                    Log = logs
                 });
         }
 
@@ -312,34 +309,33 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>A <see cref="LogData" /> instance with the LogData.Data specified by the parser.</returns>
         private LogData QueryLogDataValues(Log log, WitsmlQueryParser parser)
         {
-            // Get the indexes to slice the log data by comparing the log's
-            //... mnemonic list to the query's mnemonic list.
-            var sliceIndexes = GetSliceIndexes(
-                log.LogCurveInfo.Select(x => x.Mnemonic.ToString()).ToArray(),
-                parser.PropertyValue(parser.Property("logData"), "mnemonicList"));
-
-            // Create a LogData object to return with an empty Data list
-            LogData logData = new LogData()
+            Tuple<double?, double?> range;
+            var increasing = log.Direction != LogIndexDirection.decreasing;
+            var isTimeLog = log.IndexType == LogIndexType.datetime;
+            if (isTimeLog)
             {
-                MnemonicList = string.Join(",", SliceStringList(
-                    log.LogCurveInfo.Select(x => x.Mnemonic.ToString()),
-                    sliceIndexes)),
-                UnitList = string.Join(",", SliceStringList(
-                    log.LogCurveInfo.Select(x => x.Unit),
-                    sliceIndexes)),
-                Data = new List<string>()
-            };
+                var startIndex = ToNullableUnixSeconds(parser.PropertyValue("startDateTimeIndex"));
+                var endIndex = ToNullableUnixSeconds(parser.PropertyValue("endDateTimeIndex"));
+                range = new Tuple<double?, double?>(startIndex, endIndex);
+            }
+            else
+            {
+                var startIndex = ToNullableDouble(parser.PropertyValue("startIndex"));
+                var endIndex = ToNullableDouble(parser.PropertyValue("endIndex"));
+                range = new Tuple<double?, double?>(startIndex, endIndex);
+            }
 
-            // Get a start and end index for index range filtering if supplied.
-            double? startIndex = ToNullableDouble(parser.PropertyValue("startIndex"));
-            double? endIndex = ToNullableDouble(parser.PropertyValue("endIndex"));
+            var logDataElement = parser.Property("logData");
+            if (logDataElement == null)
+                return null;
 
-            IMongoQueryable<LogDataValues> query = QueryLogDataValues(log, startIndex, endIndex);
+            var source = log.LogCurveInfo.Select(x => x.Mnemonic.ToString()).ToList();
+            var target = logDataElement.Elements().FirstOrDefault(e => e.Name.LocalName == "mnemonicList").Value.Split(',');
+            var mnemonics = target.Where(m => source.Contains(m)).ToList();
 
-            // Get the Data for LogData
-            logData.Data.AddRange(ToLogData(query.ToEnumerable(), startIndex, endIndex, sliceIndexes));
-
-            return logData;
+            var channelDataAdapter = new ChannelDataAdapter(DatabaseProvider);
+            
+            return channelDataAdapter.GetLogData(log.Uid, mnemonics, range, increasing);
         }
 
         /// <summary>
@@ -414,6 +410,11 @@ namespace PDS.Witsml.Server.Data.Logs
         private double? ToNullableDouble(string doubleStr)
         {
             return string.IsNullOrEmpty(doubleStr) ? (double?)null : double.Parse(doubleStr);
+        }
+
+        private double? ToNullableUnixSeconds(string dateTimeStr)
+        {
+            return string.IsNullOrEmpty(dateTimeStr)? (double?)null: DateTimeOffset.Parse(dateTimeStr).ToUnixTimeSeconds();
         }
 
         /// <summary>
