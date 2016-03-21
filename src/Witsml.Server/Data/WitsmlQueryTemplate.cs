@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Serialization;
@@ -123,6 +124,14 @@ namespace PDS.Witsml.Server.Data
                 {
                     if (property.CanWrite && !IsIgnored(property))
                     {
+                        if (property.PropertyType == typeof(string) && property.IsDefined(typeof(RegularExpressionAttribute)))
+                        {
+                            var attribute = property.GetCustomAttribute<RegularExpressionAttribute>();
+                            var xeger = new Fare.Xeger(attribute.Pattern);
+                            property.SetValue(dataObject, xeger.Generate());
+                            continue;
+                        }
+
                         property.SetValue(dataObject, CreateTemplate(property.PropertyType));
                     }
                 }
