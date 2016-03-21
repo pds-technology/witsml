@@ -110,6 +110,12 @@ namespace PDS.Witsml.Server.Data.Logs
             mnemonics = logData.MnemonicList.Split(',').ToList();
             Assert.AreEqual(row, data.Count);
             Assert.AreEqual(firstRow.Length, mnemonics.Count);
+
+            // Test data equivalence per row.
+            for (var i = 0; i < row; i++)
+            {
+                Assert.AreEqual(log.LogData[0].Data[i], logData.Data[i]);
+            }
         }
     }
 }
