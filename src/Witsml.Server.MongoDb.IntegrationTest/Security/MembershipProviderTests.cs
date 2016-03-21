@@ -33,12 +33,12 @@ namespace PDS.Witsml.Server.Security
         public void MongoDbMembershipProvider_CreateUser_creates_default_user_successfully()
         {
             MembershipCreateStatus status;
-            var name = "witsml.user";
+            var info = Tuple.Create("witsml.user", "Pd$@meric@$", "bobby.diaz@pds.nl");
 
             var user = Provider.CreateUser(
-                username: name,
-                password: "Pd$@meric@$",
-                email: name + "@pds.nl",
+                username: info.Item1,
+                password: info.Item2,
+                email: info.Item3,
                 passwordQuestion: null,
                 passwordAnswer: null,
                 isApproved: true,
@@ -48,8 +48,17 @@ namespace PDS.Witsml.Server.Security
             Assert.IsNotNull(user);
             Assert.AreEqual(MembershipCreateStatus.Success, status);
 
-            var saved = Provider.GetUser(name, false);
+            var saved = Provider.GetUser(info.Item1, false);
             Assert.IsNotNull(saved);
+        }
+
+        [TestMethod]
+        public void MongoDbMembershipProvider_can_validate_user()
+        {
+            var info = Tuple.Create("witsml.user", "Pd$@meric@$", "bobby.diaz@pds.nl");
+
+            var result = Provider.ValidateUser(info.Item1, info.Item2);
+            Assert.IsTrue(result);
         }
 
         [TestMethod]

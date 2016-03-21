@@ -81,7 +81,7 @@ namespace PDS.Witsml.Server.Security
             {
                 usr.LastActivityDate = DateTime.Now;
                 //Db.Save(usr);
-                Collection().ReplaceOne(Empty(), usr);
+                Update(usr);
             }
 
             return ToMembershipUser(usr);
@@ -102,7 +102,7 @@ namespace PDS.Witsml.Server.Security
                 UpdateFailureCount(usr, FailurePassword);
 
             //Db.Save(usr);
-            Collection().ReplaceOne(Empty(), usr);
+            Update(usr);
 
             return valid;
         }
@@ -119,7 +119,7 @@ namespace PDS.Witsml.Server.Security
             usr.Password = EncodePassword(newPwd);
             usr.LastPasswordChangedDate = DateTime.Now;
             //Db.Save(usr);
-            Collection().ReplaceOne(Empty(), usr);
+            Update(usr);
 
             return true;
         }
@@ -130,7 +130,7 @@ namespace PDS.Witsml.Server.Security
 
             var usr = ByUserName(username);
             //Db.Delete<DbUser>(usr);
-            Collection().DeleteOne(x => x.Id == usr.Id);
+            Delete(usr);
             return true;
         }
 
@@ -158,7 +158,7 @@ namespace PDS.Witsml.Server.Security
             if (answer == null && RequiresQuestionAndAnswer)
             {
                 //Db.Save(UpdateFailureCount(ByUserName(username), FailurePasswordAnswer));
-                Collection().ReplaceOne(Empty(), UpdateFailureCount(ByUserName(username), FailurePasswordAnswer));
+                Update(UpdateFailureCount(ByUserName(username), FailurePasswordAnswer));
                 throw new ProviderException("Password answer required for password reset.");
             }
 
@@ -293,9 +293,16 @@ namespace PDS.Witsml.Server.Security
             return Collection().AsQueryable();
         }
 
-        private FilterDefinition<DbUser> Empty()
+        private DbUser Update(DbUser user)
         {
-            return Builders<DbUser>.Filter.Empty;
+            var filter = Builders<DbUser>.Filter.Eq(x => x.Id, user.Id);
+            Collection().ReplaceOne(filter, user);
+            return user;
+        }
+
+        private void Delete(DbUser user)
+        {
+            Collection().DeleteOne(x => x.Id == user.Id);
         }
 
         DbUser UpdateFailureCount(DbUser usr, string failureType = FailurePassword)
