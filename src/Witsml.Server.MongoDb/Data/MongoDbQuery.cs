@@ -20,6 +20,7 @@ namespace PDS.Witsml.Server.Data
         private readonly IMongoCollection<T> _collection;
         private readonly WitsmlQueryParser _parser;    
         private List<string> _fields;
+        private List<string> _ignored;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDbQuery{T}"/> class.
@@ -27,13 +28,14 @@ namespace PDS.Witsml.Server.Data
         /// <param name="collection">The Mongo database collection.</param>
         /// <param name="parser">The parser.</param>
         /// <param name="fields">The fields of the data object to be selected.</param>
-        public MongoDbQuery(IMongoCollection<T> collection, WitsmlQueryParser parser, List<string> fields)
+        public MongoDbQuery(IMongoCollection<T> collection, WitsmlQueryParser parser, List<string> fields, List<string> ignored = null)
         {
             Logger = LogManager.GetLogger(GetType());
 
             _collection = collection;
             _parser = parser;
             _fields = fields;
+            _ignored = ignored;
         }
 
         /// <summary>
@@ -66,7 +68,8 @@ namespace PDS.Witsml.Server.Data
                 }
                 else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElements) ||
                          OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) ||
-                         OptionsIn.ReturnElements.Requested.Equals(returnElements))
+                         OptionsIn.ReturnElements.Requested.Equals(returnElements) ||
+                         OptionsIn.ReturnElements.DataOnly.Equals(returnElements))
                 {
                     var projection = BuildProjection(element);
 
@@ -120,10 +123,11 @@ namespace PDS.Witsml.Server.Data
                 filters.Add(filter);
 
             var resultFilter = Builders<T>.Filter.And(filters);
+            var filterJson = resultFilter.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
 
             if (Logger.IsDebugEnabled)
             {
-                var filterJson = resultFilter.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
+                filterJson = resultFilter.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
                 Logger.DebugFormat("Detected query filters: {0}", filterJson);
             }
 
@@ -139,6 +143,9 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The filter object that for the selection criteria for the element.</returns>
         private FilterDefinition<T> BuildFilterForAnElement(XElement element, Type type, string parentPath = null)
         {
+            if (_ignored != null && _ignored.Contains(element.Name.LocalName))
+                return null;
+
             var filters = new List<FilterDefinition<T>>();
             var properties = GetPropertyInfo(type);
 
@@ -146,6 +153,9 @@ namespace PDS.Witsml.Server.Data
 
             foreach (var group in groupings)
             {
+                if (_ignored != null && _ignored.Contains(group.Key))
+                    return null;
+
                 var propertyInfo = GetPropertyInfoForAnElement(properties, group.Key);
                 var propertyFilter = BuildFilterForAnElementGroup(propertyInfo, group, parentPath);
 
@@ -448,6 +458,9 @@ namespace PDS.Witsml.Server.Data
                 foreach (var child in element.Elements())
                 {
                     var property = GetPropertyInfoForAnElement(properties, child.Name.LocalName);
+                    if (property == null)
+                        continue;
+
                     BuildProjectionForAnElement(child, fieldPath, property);
                 }
             }

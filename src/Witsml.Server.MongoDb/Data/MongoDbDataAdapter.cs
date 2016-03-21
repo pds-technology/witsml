@@ -200,7 +200,7 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="parser">The parser.</param>
         /// <returns>The query results collection.</returns>
-        protected List<T> QueryEntities(WitsmlQueryParser parser, List<string> fields)
+        protected List<T> QueryEntities(WitsmlQueryParser parser, List<string> fields, List<string> ignored = null)
         {
             try
             {
@@ -212,7 +212,7 @@ namespace PDS.Witsml.Server.Data
                 }
 
                 Logger.DebugFormat("Querying {0} MongoDb collection.", DbCollectionName);
-                var query = new MongoDbQuery<T>(GetCollection(), parser, fields);
+                var query = new MongoDbQuery<T>(GetCollection(), parser, fields, ignored);
                 return query.Execute();
             }
             catch (MongoException ex)

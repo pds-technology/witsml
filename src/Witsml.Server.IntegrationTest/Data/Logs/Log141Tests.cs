@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -114,7 +116,42 @@ namespace PDS.Witsml.Server.Data.Logs
             // TODO: Update Test to verify that a column of LogData.Data with no values is not returned with the results.
         }
 
-        // TODO: Add a test that creates a LogData.Data with a column of blank values except for one row 
-        //... and verify that the column was returned.
+        [TestMethod]
+        public void Test_query_log_data()
+        {
+            var response = DevKit.Add<WellList, Well>(_well);
+
+            _wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+
+            var log = new Log()
+            {
+                UidWell = _wellbore.UidWell,
+                NameWell = _well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = _wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            var row = 10;
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), row);
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+            var logData = new LogData { MnemonicList = DevKit.Mnemonics(log) };
+            var query = new Log
+            {
+                Uid = uidLog,
+                UidWell = log.UidWell,
+                UidWellbore = log.UidWellbore,
+                StartIndex = new GenericMeasure(0.0, "m"),
+                EndIndex = new GenericMeasure(5.0, "m"),
+                LogData = new List<LogData> { logData }
+            };
+            var result = DevKit.Query<LogList, Log>(query, ObjectTypes.Log, null, "returnElements=data-only");
+            Assert.IsNotNull(result);
+        }
     }
 }
