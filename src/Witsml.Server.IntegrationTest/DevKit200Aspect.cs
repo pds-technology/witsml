@@ -270,15 +270,30 @@ namespace PDS.Witsml.Server
             log.Wellbore = DataObjectReference(ObjectTypes.Wellbore, Name("Wellbore Title"), Uid());
 
             List<ChannelIndex> indexList = new List<ChannelIndex>();
+            IndexDirection direction = isIncreasing ? IndexDirection.increasing : IndexDirection.decreasing;
             if (DepthIndex.Contains(indexType))
             {
                 log.TimeDepth = ObjectFolders.Depth;
-                indexList.Add(CreateIndex(IndexDirection.increasing, ChannelIndexType.measureddepth, "MD", "ft"));
+                ChannelIndex channelIndex = CreateIndex(direction, ChannelIndexType.measureddepth, "MD", "m");
+                if (indexType.Equals(ChannelIndexType.trueverticaldepth))
+                {
+                    channelIndex = CreateIndex(direction, ChannelIndexType.trueverticaldepth, "TVD", "ft");
+                }
+                else if (indexType.Equals(ChannelIndexType.passindexeddepth))
+                {
+                    channelIndex = CreateIndex(direction, ChannelIndexType.passindexeddepth, "PID", "ft");
+                }
+                indexList.Add(channelIndex);
             }
             else if (TimeIndex.Contains(indexType))
             {
                 log.TimeDepth = ObjectFolders.Time;
-                indexList.Add(CreateIndex(IndexDirection.increasing, ChannelIndexType.elapsedtime, "ElapseTime", "ms"));
+                ChannelIndex channelIndex = CreateIndex(direction, ChannelIndexType.elapsedtime, "ElapseTime", "ms");
+                if (indexType.Equals(ChannelIndexType.datetime))
+                {
+                    // DateTime should be increasing only
+                    indexList.Add(CreateIndex(IndexDirection.increasing, ChannelIndexType.datetime, "Date", "s"));
+                }
             }
             else
             {
