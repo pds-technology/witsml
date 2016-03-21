@@ -65,6 +65,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The client interface.</returns>
         private IMongoClient CreateMongoClient()
         {
+            MongoDefaults.MaxConnectionIdleTime = TimeSpan.FromMinutes(1);
             return new MongoClient(_connectionString);
         }
 
