@@ -16,6 +16,8 @@ namespace PDS.Witsml.Server.Data.Logs
         private ChannelIndex MeasuredDepthIndex;
         private ChannelIndex DateTimeIndex;
         private ChannelIndex ElapseTimeIndex;
+        private PointMetadata BooleanPointMetadata;
+        private PointMetadata FloatPointMetadata;
 
         [TestInitialize]
         public void TestSetUp()
@@ -25,20 +27,23 @@ namespace PDS.Witsml.Server.Data.Logs
             WellboreReference = new DataObjectReference
             {
                 ContentType = EtpContentTypes.Witsml200.For(ObjectTypes.Wellbore),
-                Title = DevKit.Name("Log200Generator"),
+                Title = DevKit.Name("Wellbore"),
                 Uuid = DevKit.Uid()
             };
 
-            TimeLog = new Log() { TimeDepth = "Time", Citation = DevKit.Citation(DevKit.Name("Log200Generator")), Wellbore = WellboreReference, Uuid = DevKit.Uid() };
-            DepthLog = new Log() { TimeDepth = "Depth", Citation = DevKit.Citation(DevKit.Name("Log200Generator")), Wellbore = WellboreReference, Uuid = DevKit.Uid() };
+            TimeLog = new Log() { TimeDepth = "Time", Citation = DevKit.Citation(DevKit.Name("Citation")), Wellbore = WellboreReference, Uuid = DevKit.Uid() };
+            DepthLog = new Log() { TimeDepth = "Depth", Citation = DevKit.Citation(DevKit.Name("Citation")), Wellbore = WellboreReference, Uuid = DevKit.Uid() };
 
-            MeasuredDepthIndex = DevKit.CreateChannelIndex(ChannelIndexType.measureddepth);
-            DateTimeIndex = DevKit.CreateChannelIndex(ChannelIndexType.datetime);
-            ElapseTimeIndex = DevKit.CreateChannelIndex(ChannelIndexType.elapsedtime);
+            MeasuredDepthIndex = DevKit.ChannelIndex(ChannelIndexType.measureddepth);
+            DateTimeIndex = DevKit.ChannelIndex(ChannelIndexType.datetime);
+            ElapseTimeIndex = DevKit.ChannelIndex(ChannelIndexType.elapsedtime);
+
+            BooleanPointMetadata = DevKit.PointMetadata("confidence", "confidence", EtpDataType.boolean);
+            FloatPointMetadata = DevKit.PointMetadata("Confidence", "Confidence", EtpDataType.@float);
         }
 
         [TestMethod]
-        public void Can_Generate_Log_200()
+        public void Can_Generate_Log_Data_with_Indexes()
         {
             List<ChannelIndex> indexList = new List<ChannelIndex>();
             indexList.Add(MeasuredDepthIndex);
@@ -55,10 +60,11 @@ namespace PDS.Witsml.Server.Data.Logs
             List<List<List<object>>> dataValues = DevKit.DeserializeChannelSetData(DepthLog.ChannelSet[0].Data.Data);
             Assert.AreEqual(5, dataValues.Count);
             Assert.AreEqual(2, dataValues[0].Count);
+            Assert.AreEqual(2, dataValues[0][0].Count);
         }
 
         [TestMethod]
-        public void Can_Create_Log_200_Depth()
+        public void Log_can_be_created_with_depth_index()
         {
             Log tvdLog = DevKit.CreateLog(ChannelIndexType.trueverticaldepth, true);
 
@@ -74,7 +80,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Can_Create_Log_200_Time()
+        public void Log_can_be_created_with_time_index()
         {
             Log dateTimeLog = DevKit.CreateLog(ChannelIndexType.datetime, true);
 
@@ -89,13 +95,16 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Can_Generate_Depth_Log_200()
+        public void Can_Generate_Depth_Log()
         {
             List<ChannelIndex> indexList = new List<ChannelIndex>();
             indexList.Add(MeasuredDepthIndex);
             indexList.Add(DateTimeIndex);
 
             ChannelSet channelSet = DevKit.CreateChannelSet(DepthLog, indexList);
+            channelSet.Channel.Add(DevKit.Channel(DepthLog, indexList, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: DevKit.List(BooleanPointMetadata)));
+            channelSet.Channel.Add(DevKit.Channel(DepthLog, indexList, "Hookload", "HKLD", "klbf", "Force", EtpDataType.@double));
+
             List<ChannelSet> channelSetList = new List<ChannelSet>();
             channelSetList.Add(channelSet);
 
@@ -108,10 +117,20 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(2, dataValues[0].Count);
             Assert.AreEqual(2, dataValues[0][0].Count);
             Assert.AreEqual(2, dataValues[0][1].Count);
+
+            for (int i = 0; i < 5; i++)
+            {
+                var channel = dataValues[i][1][0];
+                if (channel != null)
+                {
+                    var channelValues = DevKit.DeserializeChannelValues(channel.ToString());
+                    Assert.IsNotNull(channelValues[0]);
+                }
+            }
         }
 
         [TestMethod]
-        public void Can_Generate_Depth_Log_200_Decreasing()
+        public void Can_Generate_Depth_Log_Decreasing()
         {
             List<ChannelIndex> indexList = new List<ChannelIndex>();
             MeasuredDepthIndex.Direction = IndexDirection.decreasing;
@@ -119,6 +138,9 @@ namespace PDS.Witsml.Server.Data.Logs
             indexList.Add(DateTimeIndex);
 
             ChannelSet channelSet = DevKit.CreateChannelSet(DepthLog, indexList);
+            channelSet.Channel.Add(DevKit.Channel(DepthLog, indexList, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: DevKit.List(BooleanPointMetadata)));
+            channelSet.Channel.Add(DevKit.Channel(DepthLog, indexList, "Hookload", "HKLD", "klbf", "Force", EtpDataType.@double));
+
             List<ChannelSet> channelSetList = new List<ChannelSet>();
             channelSetList.Add(channelSet);
 
@@ -132,21 +154,18 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Can_Generate_Depth_Log_200_MultiChannelSet()
+        public void Can_Generate_Depth_Log_MultiChannelSet()
         {
             List<ChannelIndex> indexList = new List<ChannelIndex>();
             indexList.Add(MeasuredDepthIndex);
             indexList.Add(DateTimeIndex);
 
-            ChannelSet channelSet1 = DevKit.CreateChannelSet(DepthLog, indexList);            
-            ChannelSet channelSet2 = DevKit.CreateChannelSet(DepthLog, indexList);
+            ChannelSet channelSet1 = DevKit.CreateChannelSet(DepthLog, indexList);
+            channelSet1.Channel.Add(DevKit.Channel(DepthLog, indexList, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: DevKit.List(BooleanPointMetadata)));
+            channelSet1.Channel.Add(DevKit.Channel(DepthLog, indexList, "Hookload", "HKLD", "klbf", "Force", EtpDataType.@double));
 
-            var PointMetadataList = new List<PointMetadata>()
-                                    {
-                                        DevKit.PointMetadata( "confidence", "confidence", EtpDataType.boolean )
-                                    };
-            channelSet2.Channel.Clear();
-            channelSet2.Channel.Add(DevKit.Channel(DepthLog, indexList, "GR", "GR", "api", "gammer_ray", EtpDataType.@double, pointMetadataList: PointMetadataList));
+            ChannelSet channelSet2 = DevKit.CreateChannelSet(DepthLog, indexList);
+            channelSet2.Channel.Add(DevKit.Channel(DepthLog, indexList, "GR", "GR", "api", "gamma_ray", EtpDataType.@double, pointMetadataList: DevKit.List(FloatPointMetadata)));
 
             List<ChannelSet> channelSetList = new List<ChannelSet>();
             channelSetList.Add(channelSet1);
@@ -171,12 +190,15 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Can_Generate_Time_Log_200_From_ChannelSet()
+        public void Log_can_be_generated_with_time_data_for_channel_set()
         {
             List<ChannelIndex> indexList = new List<ChannelIndex>();
             indexList.Add(ElapseTimeIndex);
 
             ChannelSet channelSet = DevKit.CreateChannelSet(TimeLog, indexList);
+
+            channelSet.Channel.Add(DevKit.Channel(TimeLog, indexList, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: DevKit.List(FloatPointMetadata)));
+
             List<ChannelSet> channelSetList = new List<ChannelSet>();
             channelSetList.Add(channelSet);;
 
@@ -189,6 +211,16 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(2, dataValues[0].Count);
             Assert.AreEqual(1, dataValues[0][0].Count);
             Assert.AreEqual(1, dataValues[0][1].Count);
+
+            for (int i=0; i< 5; i++)
+            {
+                var channel = dataValues[i][1][0];
+                if (channel != null)
+                {
+                    var channelValues = DevKit.DeserializeChannelValues(channel.ToString());
+                    Assert.IsNotNull(channelValues[0]);
+                }
+            }
         }
     }
 }

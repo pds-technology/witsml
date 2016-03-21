@@ -95,7 +95,7 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void CanAddAndGetSingleLogWithSecondaryIndex()
         {
-            var secondaryIndex = DevKit.CreateChannelIndex(ChannelIndexType.datetime);
+            var secondaryIndex = DevKit.ChannelIndex(ChannelIndexType.datetime);
             var channelSet = Log1.ChannelSet.First();
             channelSet.Index.Add(secondaryIndex);
             DevKit.CreateMockChannelSetData(channelSet, channelSet.Index);
