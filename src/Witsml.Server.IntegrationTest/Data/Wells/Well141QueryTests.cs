@@ -29,7 +29,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_return_element_all()
         {
-            var well = CreateTestWell();
+            var well = DevKit.CreateTestWell();
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
@@ -48,7 +48,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_return_element_id_only()
         {
-            var well = CreateTestWell();
+            var well = DevKit.CreateTestWell();
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
@@ -82,7 +82,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_return_element_id_only_with_additional_elements()
         {
-            var well = CreateTestWell();
+            var well = DevKit.CreateTestWell();
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
@@ -122,7 +122,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_return_element_default()
         {
-            var well = CreateTestWell();
+            var well = DevKit.CreateTestWell();
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
@@ -163,7 +163,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_return_element_requested()
         {
-            var well = CreateTestWell();
+            var well = DevKit.CreateTestWell();
             var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
@@ -261,7 +261,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_Well_Selection_Uid_Caseless_Compare()
         {
-            var testUid = "test well for Test_Well_Selection_Uid_Caseless_Compare";
+            var testUid = "test well for Test_Well_Selection_Uid_Caseless_Compare" + DevKit.Uid();
             var query = new Well { Uid = testUid };
             var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.IdOnly);
 
@@ -431,7 +431,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_Well_Selection_Do_Not_Return_Empty_Values()
         {
-            var well = CreateTestWell();
+            var well = DevKit.CreateTestWell();
             Assert.IsNull(well.WaterDepth);
             var response = DevKit.Add<WellList, Well>(well);
 
@@ -494,39 +494,6 @@ namespace PDS.Witsml.Server.Data.Wells
             // Section 4.1.5
             Assert.IsTrue(result.Where(x => x.Uid == uid_01).Any());
             Assert.IsTrue(result.Where(x => x.Uid == uid_02).Any());
-        }
-
-        private Well CreateTestWell()
-        {
-            var dateTimeSpud = DateTimeOffset.UtcNow;
-            var groundElevation = new WellElevationCoord
-            {
-                Uom = WellVerticalCoordinateUom.m,
-                Value = 40.0
-            };
-
-            var datum1 = DevKit.WellDatum("Kelly Bushing", code: ElevCodeEnum.KB, uid: ElevCodeEnum.KB.ToString());
-            var datum2 = DevKit.WellDatum("Sea Level", code: ElevCodeEnum.SL, uid: ElevCodeEnum.SL.ToString());
-
-            var commonData = new CommonData
-            {
-                ItemState = ItemState.plan,
-                Comments = "well in plan"
-            };
-
-            var well = new Well
-            {
-                Name = DevKit.Name("Test Well"),
-                Country = "US",
-                DateTimeSpud = dateTimeSpud,
-                DirectionWell = WellDirection.unknown,
-                GroundElevation = groundElevation,
-                TimeZone = DevKit.TimeZone,
-                WellDatum = DevKit.List(datum1, datum2),
-                CommonData = commonData
-            };
-
-            return well;
         }
 
         private void AssertTestWell(Well expected, Well actual)
