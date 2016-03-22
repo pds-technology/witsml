@@ -43,18 +43,21 @@ namespace PDS.Witsml.Server.Data.Wells
         /// <param name="entity">The entity.</param>
         public override WitsmlResult Put(Well entity)
         {
-            if (!string.IsNullOrWhiteSpace(entity.Uuid) && Exists(entity.GetObjectId()))
+            var dataObjectId = entity.GetObjectId();
+
+            if (!string.IsNullOrWhiteSpace(entity.Uuid) && Exists(dataObjectId))
             {
-                throw new NotImplementedException();
+                entity.Citation = entity.Citation.Update();
+
+                Validate(Functions.PutObject, entity);
+                UpdateEntity(entity, dataObjectId);
             }
             else
             {
                 entity.Uuid = NewUid(entity.Uuid);
                 entity.Citation = entity.Citation.Update();
 
-                var validator = Container.Resolve<IDataObjectValidator<Well>>();
-                validator.Validate(Functions.PutObject, entity);
-
+                Validate(Functions.PutObject, entity);
                 InsertEntity(entity);
             }
 

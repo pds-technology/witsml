@@ -171,9 +171,7 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             entity.Uid = NewUid(entity.Uid);
             entity.CommonData = entity.CommonData.Update();
-
-            var validator = Container.Resolve<IDataObjectValidator<Log>>();
-            validator.Validate(Functions.AddToStore, entity);
+            Validate(Functions.AddToStore, entity);
 
             try
             {

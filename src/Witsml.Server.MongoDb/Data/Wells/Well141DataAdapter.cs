@@ -40,7 +40,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             capServer.Add(Functions.GetFromStore, ObjectTypes.Well);
             capServer.Add(Functions.AddToStore, ObjectTypes.Well);
-            //capServer.Add(Functions.UpdateInStore, ObjectTypes.Well);
+            capServer.Add(Functions.UpdateInStore, ObjectTypes.Well);
             //capServer.Add(Functions.DeleteFromStore, ObjectTypes.Well);
         }
 
@@ -79,14 +79,32 @@ namespace PDS.Witsml.Server.Data.Wells
 
             entity.Uid = NewUid(entity.Uid);
             entity.CommonData = entity.CommonData.Update();
+            Validate(Functions.AddToStore, entity);
 
-            var validator = Container.Resolve<IDataObjectValidator<Well>>();
-            validator.Validate(Functions.AddToStore, entity);
-
-            Logger.DebugFormat("Well with uid '{0}' and name {1} validated for Add", entity.Uid, entity.Name);
+            Logger.DebugFormat("Validated Well with uid '{0}' and name {1} for Add", entity.Uid, entity.Name);
             InsertEntity(entity);
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uid);
+        }
+
+        /// <summary>
+        /// Updates the specified object.
+        /// </summary>
+        /// <param name="entity">The object.</param>
+        /// <returns>
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
+        /// </returns>
+        public override WitsmlResult Update(Well entity)
+        {
+            Logger.DebugFormat("Updating Well with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
+
+            entity.CommonData = entity.CommonData.Update();
+            Validate(Functions.UpdateInStore, entity);
+
+            Logger.DebugFormat("Validated Well with uid '{0}' and name {1} for Update", entity.Uid, entity.Name);
+            UpdateEntity(entity, entity.GetObjectId());
+
+            return new WitsmlResult(ErrorCodes.Success);
         }
 
         /// <summary>
