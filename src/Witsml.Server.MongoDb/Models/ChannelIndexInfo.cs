@@ -17,5 +17,10 @@ namespace PDS.Witsml.Server.Models
         public double Start { get; set; }
 
         public double End { get; set; }
+
+        public ChannelIndexInfo Clone()
+        {
+            return (ChannelIndexInfo)MemberwiseClone();
+        }
     }
 }

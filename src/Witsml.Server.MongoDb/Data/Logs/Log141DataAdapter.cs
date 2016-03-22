@@ -78,6 +78,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var fields = OptionsIn.ReturnElements.IdOnly.Equals(returnElements)
                 ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell", "UidWellbore", "NameWellbore" }
+                // TODO: For Header Only just ignore "logData" which is already being done.
                 : OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) ? GetLogHeaderFields()
                 : OptionsIn.ReturnElements.DataOnly.Equals(returnElements) ? new List<string> { "LogCurveInfo" }
                 : null;

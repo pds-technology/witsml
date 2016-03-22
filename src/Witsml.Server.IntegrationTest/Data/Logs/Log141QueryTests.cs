@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace PDS.Witsml.Server.Data.Logs
 {
     [TestClass]
-    public class Log141Tests
+    public class Log141QueryTests
     {
         private DevKit141Aspect DevKit;
         private Well _well;
@@ -32,53 +32,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Test_add_depth_log_with_data()
-        {
-            var response = DevKit.Add<WellList, Well>(_well);
-
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = _wellbore.Name,
-                Name = DevKit.Name("Log 01")
-            };
-
-            DevKit.InitHeader(log, LogIndexType.measureddepth);
-            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10);
-            response = DevKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-        }
-
-        [TestMethod]
-        public void Test_add_time_log_with_data()
-        {
-            var response = DevKit.Add<WellList, Well>(_well);
-
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = _wellbore.Name,
-                Name = DevKit.Name("Log 01")
-            };
-
-            DevKit.InitHeader(log, LogIndexType.datetime);
-            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10, 1, false);
-            response = DevKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-        }
-
-        [TestMethod]
-        public void Test_get_log_data()
+        public void Log_can_be_retrieved_with_all_data()
         {
             var response = DevKit.Add<WellList, Well>(_well);
 
@@ -101,8 +55,10 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             var uidLog = response.SuppMsgOut;
+
             var provider = new DatabaseProvider(new MongoDbClassMapper());
             var adapter = new ChannelDataAdapter(provider);
+
             var mnemonics = log.LogCurveInfo.Select(x => x.Mnemonic.Value).ToList();
             var logData = adapter.GetLogData(uidLog, mnemonics, null, true);
 
@@ -117,7 +73,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Test_query_log_data()
+        public void Log_can_be_retrieved_with_increasing_log_data()
         {
             var response = DevKit.Add<WellList, Well>(_well);
 
@@ -146,11 +102,50 @@ namespace PDS.Witsml.Server.Data.Logs
                 Uid = uidLog,
                 UidWell = log.UidWell,
                 UidWellbore = log.UidWellbore,
-                StartIndex = new GenericMeasure(0.0, "m"),
-                EndIndex = new GenericMeasure(5.0, "m"),
+                StartIndex = new GenericMeasure(2.0, "m"),
+                EndIndex = new GenericMeasure(6.0, "m"),
                 LogData = new List<LogData> { logData }
             };
-            var result = DevKit.Query<LogList, Log>(query, ObjectTypes.Log, null, "returnElements=data-only");
+            var result = DevKit.Query<LogList, Log>(query, ObjectTypes.Log, null, OptionsIn.ReturnElements.DataOnly);
+            Assert.IsNotNull(result);
+        }
+
+        [TestMethod]
+        public void Log_can_be_retrieved_with_decreasing_log_data()
+        {
+            var response = DevKit.Add<WellList, Well>(_well);
+
+            _wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+
+            var log = new Log()
+            {
+                UidWell = _wellbore.UidWell,
+                NameWell = _well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = _wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            var row = 10;
+            DevKit.InitHeader(log, LogIndexType.measureddepth, false);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), row, 1, true, true, false);
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+            var logData = new LogData { MnemonicList = DevKit.Mnemonics(log) };
+            var query = new Log
+            {
+                Uid = uidLog,
+                UidWell = log.UidWell,
+                UidWellbore = log.UidWellbore,
+                Direction = LogIndexDirection.decreasing,
+                StartIndex = new GenericMeasure(-3.0, "m"),
+                EndIndex = new GenericMeasure(-6.0, "m"),
+                LogData = new List<LogData> { logData }
+            };
+            var result = DevKit.Query<LogList, Log>(query, ObjectTypes.Log, null, OptionsIn.ReturnElements.DataOnly);
             Assert.IsNotNull(result);
         }
     }
