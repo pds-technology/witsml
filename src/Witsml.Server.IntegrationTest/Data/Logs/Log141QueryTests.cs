@@ -13,10 +13,15 @@ namespace PDS.Witsml.Server.Data.Logs
         private DevKit141Aspect DevKit;
         private Well _well;
         private Wellbore _wellbore;
+        private DatabaseProvider _databaseProvider;
+        private ChannelDataAdapter _channelDataAdapter;
 
         [TestInitialize]
         public void TestSetUp()
         {
+            _databaseProvider = new DatabaseProvider(new MongoDbClassMapper());
+            _channelDataAdapter = new ChannelDataAdapter(_databaseProvider);
+
             DevKit = new DevKit141Aspect();
 
             DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
@@ -58,11 +63,8 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             var uidLog = response.SuppMsgOut;
-            var provider = new DatabaseProvider(new MongoDbClassMapper());
-            var adapter = new ChannelDataAdapter(provider);
-
             var mnemonics = log.LogCurveInfo.Select(x => x.Mnemonic.Value).ToList();
-            var logData = adapter.GetLogData(uidLog, mnemonics, null, true);
+            var logData = _channelDataAdapter.GetLogData(uidLog, mnemonics, null, true);
 
             // Test that LogData was returned
             Assert.IsNotNull(logData);
@@ -111,11 +113,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
 
             var uidLog = response.SuppMsgOut;
-            var provider = new DatabaseProvider(new MongoDbClassMapper());
-            var adapter = new ChannelDataAdapter(provider);
-
             var mnemonics = log.LogCurveInfo.Select(x => x.Mnemonic.Value).ToList();
-            var logData = adapter.GetLogData(uidLog, mnemonics, null, true);
+            var logData = _channelDataAdapter.GetLogData(uidLog, mnemonics, null, true);
 
 
             var data = logData.Data;
