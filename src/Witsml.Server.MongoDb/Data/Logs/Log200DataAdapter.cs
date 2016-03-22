@@ -19,6 +19,8 @@ namespace PDS.Witsml.Server.Data.Logs
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class Log200DataAdapter : MongoDbDataAdapter<Log>
     {
+        private readonly ChannelDataAdapter _channelDataAdapter;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Log200DataAdapter"/> class.
         /// </summary>
@@ -26,10 +28,8 @@ namespace PDS.Witsml.Server.Data.Logs
         [ImportingConstructor]
         public Log200DataAdapter(IDatabaseProvider databaseProvider, ChannelDataAdapter channelDataAdapter) : base(databaseProvider, ObjectNames.Log200, ObjectTypes.Uuid)
         {
-            ChannelDataAdapter = channelDataAdapter;
+            _channelDataAdapter = channelDataAdapter;
         }
-
-        public ChannelDataAdapter ChannelDataAdapter { get; set; }
 
         /// <summary>
         /// Gets a collection of data objects related to the specified URI.
@@ -78,9 +78,9 @@ namespace PDS.Witsml.Server.Data.Logs
                 var channelData = new Dictionary<string, string>();
                 var indicesMap = new Dictionary<string, List<ChannelIndexInfo>>();
 
-                ChannelDataAdapter.SaveChannelSets(entity, channelData, indicesMap);
+                _channelDataAdapter.SaveChannelSets(entity, channelData, indicesMap);
                 InsertEntity(entity);
-                ChannelDataAdapter.WriteChannelSetValues(entity.Uuid, channelData, indicesMap);
+                _channelDataAdapter.WriteChannelSetValues(entity.Uuid, channelData, indicesMap);
             }
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uuid);
