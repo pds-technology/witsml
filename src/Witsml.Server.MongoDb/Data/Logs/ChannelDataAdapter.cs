@@ -4,6 +4,9 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.DataAccess.WITSML200;
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Energistics.DataAccess.WITSML200.ReferenceData;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using PDS.Server.MongoDb;
@@ -105,6 +108,53 @@ namespace PDS.Witsml.Server.Data.Logs
             TransformLogData(logData, results, mnemonics, range, increasing);
             return logData;
         }
+
+        /// <summary>
+        /// Saves the channel sets to its own collection in addition as a property for the log.
+        /// </summary>
+        /// <param name="entity">The log entity.</param>
+        /// <param name="channelData">The collection to extract the channel set data.</param>
+        /// <param name="indicesMap">The indices map for the list of channel set.</param>
+        public void SaveChannelSets(Log entity, Dictionary<string, string> channelData, Dictionary<string, List<ChannelIndexInfo>> indicesMap)
+        {
+            var collection = GetCollection<ChannelSet>(ObjectNames.ChannelSet200);
+
+            collection.BulkWrite(entity.ChannelSet
+                .Select(cs =>
+                {
+                    if (cs.Data != null && !string.IsNullOrEmpty(cs.Data.Data))
+                    {
+                        var uuid = cs.Uuid;
+                        channelData.Add(uuid, cs.Data.Data);
+                        indicesMap.Add(uuid, CreateChannelSetIndexInfo(cs.Index));
+                        cs.Data.Data = null;
+                    }
+                    return new InsertOneModel<ChannelSet>(cs);
+                }));
+        }
+
+        /// <summary>
+        /// Creates the list of index info to be used for channel set values.
+        /// </summary>
+        /// <param name="indices">The original index list of a channel set.</param>
+        /// <returns>The list of index info.</returns>
+        private List<ChannelIndexInfo> CreateChannelSetIndexInfo(List<ChannelIndex> indices)
+        {
+            var indicesInfo = new List<ChannelIndexInfo>();
+            foreach (var index in indices)
+            {
+                var indexInfo = new ChannelIndexInfo
+                {
+                    Mnemonic = index.Mnemonic,
+                    Increasing = index.Direction == IndexDirection.increasing,
+                    IsTimeIndex = index.IndexType == ChannelIndexType.datetime || index.IndexType == ChannelIndexType.elapsedtime
+                };
+                indicesInfo.Add(indexInfo);
+            }
+
+            return indicesInfo;
+        }
+
 
         /// <summary>
         /// Gets the log data from channelSetValues collection.

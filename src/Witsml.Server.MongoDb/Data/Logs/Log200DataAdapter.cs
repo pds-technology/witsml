@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
-using Energistics.DataAccess.WITSML200.ComponentSchemas;
-using Energistics.DataAccess.WITSML200.ReferenceData;
 using Energistics.Datatypes;
 using MongoDB.Driver;
+using PDS.Witsml.Server.Data.Wellbores;
 using PDS.Witsml.Server.Models;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -25,9 +24,12 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public Log200DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Log200, ObjectTypes.Uuid)
+        public Log200DataAdapter(IDatabaseProvider databaseProvider, ChannelDataAdapter channelDataAdapter) : base(databaseProvider, ObjectNames.Log200, ObjectTypes.Uuid)
         {
+            ChannelDataAdapter = channelDataAdapter;
         }
+
+        public ChannelDataAdapter ChannelDataAdapter { get; set; }
 
         /// <summary>
         /// Gets a collection of data objects related to the specified URI.
@@ -76,60 +78,12 @@ namespace PDS.Witsml.Server.Data.Logs
                 var channelData = new Dictionary<string, string>();
                 var indicesMap = new Dictionary<string, List<ChannelIndexInfo>>();
 
-                SaveChannelSets(entity, channelData, indicesMap);
+                ChannelDataAdapter.SaveChannelSets(entity, channelData, indicesMap);
                 InsertEntity(entity);
-
-                var channelDataAdapter = new ChannelDataAdapter(DatabaseProvider);               
-                channelDataAdapter.WriteChannelSetValues(entity.Uuid, channelData, indicesMap);
+                ChannelDataAdapter.WriteChannelSetValues(entity.Uuid, channelData, indicesMap);
             }
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uuid);
-        }
-
-        /// <summary>
-        /// Saves the channel sets to its own collection in addition as a property for the log.
-        /// </summary>
-        /// <param name="entity">The log entity.</param>
-        /// <param name="channelData">The collection to extract the channel set data.</param>
-        /// <param name="indicesMap">The indices map for the list of channel set.</param>
-        private void SaveChannelSets(Log entity, Dictionary<string, string> channelData, Dictionary<string, List<ChannelIndexInfo>> indicesMap)
-        {
-            var collection = GetCollection<ChannelSet>(ObjectNames.ChannelSet200);
-
-            collection.BulkWrite(entity.ChannelSet
-                .Select(cs =>
-                {
-                    if (cs.Data != null && !string.IsNullOrEmpty(cs.Data.Data))
-                    {
-                        var uuid = cs.Uuid;
-                        channelData.Add(uuid, cs.Data.Data);
-                        indicesMap.Add(uuid, CreateChannelSetIndexInfo(cs.Index));
-                        cs.Data.Data = null;
-                    }
-                    return (WriteModel<ChannelSet>)new InsertOneModel<ChannelSet>(cs);
-                }));
-        }
-
-        /// <summary>
-        /// Creates the list of index info to be used for channel set values.
-        /// </summary>
-        /// <param name="indices">The original index list of a channel set.</param>
-        /// <returns>The list of index info.</returns>
-        private List<ChannelIndexInfo> CreateChannelSetIndexInfo(List<ChannelIndex> indices)
-        {
-            var indicesInfo = new List<ChannelIndexInfo>();
-            foreach (var index in indices)
-            {
-                var indexInfo = new ChannelIndexInfo
-                {
-                    Mnemonic = index.Mnemonic,
-                    Increasing = index.Direction == IndexDirection.increasing,
-                    IsTimeIndex = index.IndexType == ChannelIndexType.datetime || index.IndexType == ChannelIndexType.elapsedtime
-                };
-                indicesInfo.Add(indexInfo);
-            }
-
-            return indicesInfo;
         }
     }
 }
