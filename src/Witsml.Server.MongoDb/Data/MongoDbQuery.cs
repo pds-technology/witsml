@@ -154,7 +154,7 @@ namespace PDS.Witsml.Server.Data
             foreach (var group in groupings)
             {
                 if (_ignored != null && _ignored.Contains(group.Key))
-                    return null;
+                    continue;
 
                 var propertyInfo = GetPropertyInfoForAnElement(properties, group.Key);
                 var propertyFilter = BuildFilterForAnElementGroup(propertyInfo, group, parentPath);
