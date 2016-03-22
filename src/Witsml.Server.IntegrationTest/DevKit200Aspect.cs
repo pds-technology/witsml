@@ -12,13 +12,11 @@ namespace PDS.Witsml.Server
 {
     public class DevKit200Aspect : DevKitAspect
     {
-        private ChannelIndexType[] DepthIndex = new ChannelIndexType[] { ChannelIndexType.measureddepth, ChannelIndexType.trueverticaldepth, ChannelIndexType.passindexeddepth };
-        private ChannelIndexType[] TimeIndex = new ChannelIndexType[] { ChannelIndexType.datetime, ChannelIndexType.elapsedtime };
-        private ChannelIndexType[] OtherIndex = new ChannelIndexType[] { ChannelIndexType.pressure, ChannelIndexType.temperature };
-
+        private Log200Generator LogGenerator;
 
         public DevKit200Aspect() : base(null, WMLSVersion.WITSML141)
         {
+            LogGenerator = new Log200Generator();
         }
 
         public override string DataSchemaVersion
@@ -33,7 +31,7 @@ namespace PDS.Witsml.Server
                 Title = Name(name),
                 Originator = GetType().Name,
                 Format = GetType().Assembly.FullName,
-                Creation = System.DateTime.UtcNow,
+                Creation = DateTime.UtcNow,
             };
         }
 
@@ -52,31 +50,8 @@ namespace PDS.Witsml.Server
             return new DataObjectReference
             {
                 ContentType = EtpContentTypes.Witsml200.For(objectType),
-                Title = (title == null) ? "Test title for " + objectType : title,
-                Uuid = uuid == null ? "Test Uuid for " + objectType : uuid,
-            };
-        }
-
-        public ChannelIndex CreateIndex(IndexDirection isIncreasing = IndexDirection.increasing, ChannelIndexType indexType = ChannelIndexType.measureddepth, string mnemonic = "MD", string uom = "ft", string datumReference = null)
-        {
-            return new ChannelIndex()
-            {
-                Direction = isIncreasing,
-                IndexType = indexType,
-                Mnemonic = mnemonic,
-                Uom = uom,
-                // Description: For depth indexes, this contains the uid of the datum, in the Channel's Well object, to which all of the index values are referenced.
-                DatumReference = string.IsNullOrEmpty(datumReference) ? Uid() : datumReference,
-            };
-        }
-
-        public PointMetadata PointMetadata(string name, string description, EtpDataType etpDataType)
-        {
-            return new PointMetadata()
-            {
-                Name = name,
-                Description = description,
-                EtpDataType = etpDataType
+                Title = (title == null) ? objectType : title,
+                Uuid = uuid == null ? objectType : uuid,
             };
         }
 
@@ -103,21 +78,21 @@ namespace PDS.Witsml.Server
             };
         }
 
-        public void InitHeader(Log log, LoggingMethod loggingMethod, ChannelIndexType indexType, IndexDirection direction=IndexDirection.increasing)
+        public void InitHeader(Log log, LoggingMethod loggingMethod, ChannelIndex channelIndex, IndexDirection direction = IndexDirection.increasing)
         {
             log.ChannelSet = new List<ChannelSet>();
             log.LoggingCompanyName = "Service Co.";
             log.CurveClass = "unknown";
 
-            var index = List(ChannelIndex(indexType, direction));
-            if (indexType == ChannelIndexType.measureddepth)
+            var index = List(channelIndex); ;
+            if (channelIndex.IndexType == ChannelIndexType.measureddepth)
             {
                 log.TimeDepth = "depth";
 
-                var pointMetadataList = List(PointMetadata("Quality", "Quality", EtpDataType.boolean));
+                var pointMetadataList = List(LogGenerator.CreatePointMetadata("Quality", "Quality", EtpDataType.boolean));
 
-                ChannelSet channelSet = CreateChannelSet(log, index, loggingMethod);
-                
+                ChannelSet channelSet = LogGenerator.CreateChannelSet(log, index, loggingMethod);
+
                 channelSet.Channel.Add(Channel(log, index, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: pointMetadataList));
                 channelSet.Channel.Add(Channel(log, index, "Hookload", "HKLD", "klbf", "Force", EtpDataType.@double));
                 channelSet.Channel.Add(Channel(log, index, "GR1AX", "GR", "api", "Gamma_Ray", EtpDataType.@double));
@@ -126,51 +101,20 @@ namespace PDS.Witsml.Server
                 log.ChannelSet.Add(channelSet);
 
             }
-            else if (indexType == ChannelIndexType.datetime)
+            else if (channelIndex.IndexType == ChannelIndexType.datetime)
             {
                 log.TimeDepth = "time";
 
-                var pointMetadataList = List(PointMetadata("Confidence", "Confidence", EtpDataType.@float));
+                var pointMetadataList = List(LogGenerator.CreatePointMetadata("Confidence", "Confidence", EtpDataType.@float));
 
-                ChannelSet channelSet = CreateChannelSet(log, index, loggingMethod);
-               
+                ChannelSet channelSet = LogGenerator.CreateChannelSet(log, index, loggingMethod);
+
                 channelSet.Channel.Add(Channel(log, index, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: pointMetadataList));
                 channelSet.Channel.Add(Channel(log, index, "GR1AX", "GR", "api", "Gamma_Ray", EtpDataType.@double));
 
                 CreateMockChannelSetData(channelSet, channelSet.Index);
                 log.ChannelSet.Add(channelSet);
             }
-        }
-
-        public ChannelIndex ChannelIndex(ChannelIndexType indexType, IndexDirection direction=IndexDirection.increasing)
-        {
-            switch (indexType)
-            {
-                case ChannelIndexType.measureddepth:
-                    {
-                        return CreateIndex(direction, ChannelIndexType.measureddepth, "MD", "m", "MSL");
-                    }
-                case ChannelIndexType.trueverticaldepth:
-                    {
-                        return CreateIndex(direction, ChannelIndexType.trueverticaldepth, "TVD", "ft", "MSL");
-                    }
-                case ChannelIndexType.passindexeddepth:
-                    {
-                        return CreateIndex(direction, ChannelIndexType.passindexeddepth, "PID", "m", "MSL");
-                    }
-                case ChannelIndexType.datetime:
-                    {
-                        return CreateIndex(direction, ChannelIndexType.datetime, "DateTime", "s", "MSL");
-                    }
-                case ChannelIndexType.elapsedtime:
-                    {
-                        return CreateIndex(direction, ChannelIndexType.elapsedtime, "ElapsedTime", "ms", "MSL");
-                    }
-                default:
-                    {
-                        return null;
-                    }
-            };
         }
 
         public void CreateMockChannelSetData(ChannelSet channelSet, List<ChannelIndex> indices)
@@ -233,28 +177,28 @@ namespace PDS.Witsml.Server
         /// <param name="loggingMethod">The logging method.</param>
         /// <param name="numDataValue">The number data value.</param>
         public void InitChannelSet(Log log, List<ChannelIndex> indexList, LoggingMethod loggingMethod = LoggingMethod.Computed, int numDataValue = 5)
-        {           
-            ChannelSet channelSet = CreateChannelSet(log, indexList, loggingMethod);
+        {
+            ChannelSet channelSet = LogGenerator.CreateChannelSet(log, indexList, loggingMethod);
 
             bool isDepth = log.TimeDepth.EqualsIgnoreCase(ObjectFolders.Depth);
             if (isDepth)
             {
-                var pointMetadataList = List(PointMetadata("Quality", "Quality", EtpDataType.boolean));
-                                   
+                var pointMetadataList = List(LogGenerator.CreatePointMetadata("Quality", "Quality", EtpDataType.boolean));
+
                 channelSet.Channel.Add(Channel(log, indexList, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: pointMetadataList));
                 channelSet.Channel.Add(Channel(log, indexList, "Hookload", "HKLD", "klbf", "Force", EtpDataType.@double));
             }
             else
             {
-                var pointMetadataList = List(PointMetadata("Confidence", "Confidence", EtpDataType.@float));
-                                   
+                var pointMetadataList = List(LogGenerator.CreatePointMetadata("Confidence", "Confidence", EtpDataType.@float));
+
                 channelSet.Channel.Add(Channel(log, indexList, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: pointMetadataList));
             }
             log.ChannelSet = new List<ChannelSet>();
             log.ChannelSet.Add(channelSet);
 
 
-            GenerateChannelData(log.ChannelSet, numDataValue: numDataValue);
+            LogGenerator.GenerateChannelData(log.ChannelSet, numDataValue: numDataValue);
         }
 
         /// <summary>
@@ -266,7 +210,7 @@ namespace PDS.Witsml.Server
         public Log CreateLog(ChannelIndexType indexType, bool isIncreasing)
         {
             Log log = new Log();
-            log.Citation = Citation(Name("Generated Citation"));
+            log.Citation = Citation("Citation");
             log.Uuid = Uid();
 
             log.ChannelSet = new List<ChannelSet>();
@@ -276,28 +220,28 @@ namespace PDS.Witsml.Server
 
             List<ChannelIndex> indexList = new List<ChannelIndex>();
             IndexDirection direction = isIncreasing ? IndexDirection.increasing : IndexDirection.decreasing;
-            if (DepthIndex.Contains(indexType))
+            if (LogGenerator.DepthIndexTypes.Contains(indexType))
             {
                 log.TimeDepth = ObjectFolders.Depth;
-                ChannelIndex channelIndex = CreateIndex(direction, ChannelIndexType.measureddepth, "MD", "m");
+                ChannelIndex channelIndex = LogGenerator.CreateMeasuredDepthIndex(direction);
                 if (indexType.Equals(ChannelIndexType.trueverticaldepth))
                 {
-                    channelIndex = CreateIndex(direction, ChannelIndexType.trueverticaldepth, "TVD", "ft");
+                    channelIndex = LogGenerator.CreateTrueVerticalDepthIndex(direction);
                 }
                 else if (indexType.Equals(ChannelIndexType.passindexeddepth))
                 {
-                    channelIndex = CreateIndex(direction, ChannelIndexType.passindexeddepth, "PID", "ft");
+                    channelIndex = LogGenerator.CreatePassIndexDepthIndex(direction);
                 }
                 indexList.Add(channelIndex);
             }
-            else if (TimeIndex.Contains(indexType))
+            else if (LogGenerator.TimeIndexTypes.Contains(indexType))
             {
                 log.TimeDepth = ObjectFolders.Time;
-                ChannelIndex channelIndex = CreateIndex(direction, ChannelIndexType.elapsedtime, "ElapsedTime", "ms");
+                ChannelIndex channelIndex = LogGenerator.CreateElapsedTimeIndex(direction);
                 if (indexType.Equals(ChannelIndexType.datetime))
                 {
                     // DateTime should be increasing only
-                    indexList.Add(CreateIndex(IndexDirection.increasing, ChannelIndexType.datetime, "DateTime", "s"));
+                    indexList.Add(LogGenerator.CreateDateTimeIndex());
                 }
             }
             else
@@ -309,90 +253,6 @@ namespace PDS.Witsml.Server
             InitChannelSet(log, indexList);
 
             return log;
-        }
-
-        /// <summary>
-        /// Generates the channel data.
-        /// </summary>
-        /// <param name="channelSetList">The channel set list.</param>
-        /// <param name="numDataValue">The number of data value rows.</param>
-        public void GenerateChannelData(List<ChannelSet> channelSetList, int numDataValue = 5)
-        {
-            const int Seed = 123;
-
-            Random random = new Random(Seed);
-            DateTime dateTimeStart = new DateTime(2015, 3, 17, 11, 50, 0).ToUniversalTime();
-
-            foreach (ChannelSet channelSet in channelSetList)
-            {
-                object[] indexesStart = new object[channelSet.Index.Count()];
-                InitStartIndexes(dateTimeStart, channelSet.Index, indexesStart);
-
-                string logData = "[ " + Environment.NewLine;
-
-                for (int i = 0; i < numDataValue; i++)
-                {
-                    if (i > 0)
-                    {
-                        logData += ", " + Environment.NewLine;
-                    }
-                    
-                    string indexValues = GenerateIndexValues(random, channelSet, indexesStart);
-                                        
-                    string channelValues = GenerateChannelValues(random, channelSet);
-
-                    logData += "[ " + indexValues + ", " + channelValues + " ]";
-                }
-                logData += Environment.NewLine + " ]";
-                channelSet.Data.Data = logData;
-            }
-        }
-
-        public ChannelSet CreateChannelSet(Log log, List<ChannelIndex> indexList, LoggingMethod loggingMethod = LoggingMethod.Computed)
-        {
-            bool isDepth = log.TimeDepth.EqualsIgnoreCase(ObjectFolders.Depth);
-            IndexRangeContext indexRangeContext = null;
-            List<Channel> channelList = new List<Channel>();
-            
-            if (isDepth)
-            {
-                indexRangeContext = new IndexRangeContext()
-                {
-                    StartIndex = new DepthIndexValue(),
-                    EndIndex = new DepthIndexValue(),
-                };
-            }
-            else
-            {
-                indexRangeContext = new IndexRangeContext()
-                {
-                    StartIndex = new TimeIndexValue(),
-                    EndIndex = new TimeIndexValue(),
-                };            
-            }
-
-            ChannelSet channelSet = new ChannelSet()
-            {
-                Uuid = Uid(),
-                Citation = Citation(Name("ChannelSet_Citation")),
-                ExistenceKind = ExistenceKind.simulated,
-                Index = indexList,
-
-                LoggingCompanyName = log.LoggingCompanyName,
-                TimeDepth = log.TimeDepth,
-                CurveClass = log.CurveClass,
-
-                Channel = channelList,
-
-                DataContext = indexRangeContext,
-
-                Data = new ChannelData()
-                {
-                    FileUri = "file://",
-                    Data = null
-                }
-            };
-            return channelSet;
         }
 
         public List<List<List<object>>> DeserializeChannelSetData(string data)
@@ -408,143 +268,6 @@ namespace PDS.Witsml.Server
         public string SerializeChannelSetData(List<List<List<object>>> data)
         {
             return JsonConvert.SerializeObject(data);
-        }
-
-        private string GenerateIndexValues(Random random, ChannelSet channelSet, object[] indexesStart)
-        {
-            var indexValues = string.Empty;
-
-            for (int idx = 0; idx < channelSet.Index.Count; idx++)
-            {
-                var index = channelSet.Index[idx];
-                ChannelIndexType indexValue;
-                if (index.IndexType.HasValue)
-                    indexValue = index.IndexType.Value;
-                else
-                    continue;
-                indexValues = indexValues == string.Empty ? "[ " : indexValues + ", ";
-
-                bool isIncreasing = index.Direction.HasValue ? index.Direction.Value == IndexDirection.increasing : true;
-
-                if (indexValue.Equals(ChannelIndexType.datetime))
-                {
-                    indexesStart[idx] = ((DateTime)indexesStart[idx]).AddSeconds(random.Next(1, 5));
-                    indexValues += "\"" + ((DateTime)indexesStart[idx]).ToString("o") + "\"";
-                }
-                else if (DepthIndex.Contains(indexValue))
-                {
-                    indexesStart[idx] = isIncreasing ? (double)indexesStart[idx] + random.Next(1, 10) / 10.0 : (double)indexesStart[idx] - random.Next(1, 10) / 10.0;
-                    indexValues += string.Format(" {0:0.###}", (double)indexesStart[idx]);
-                }
-                else if (indexValue.Equals(ChannelIndexType.elapsedtime))
-                {
-                    indexesStart[idx] = isIncreasing ? (long)indexesStart[idx] + 4 : (long)indexesStart[idx] - 4;
-                    indexValues += string.Format(" {0:0}", (long)indexesStart[idx]);
-                }
-            }
-
-            indexValues += " ]";
-            return indexValues;
-        }
-
-        private static string GenerateChannelValues(Random random, ChannelSet channelSet)
-        {
-            var channelValues = string.Empty;
-            foreach (Channel channel in channelSet.Channel)
-            {
-                channelValues = channelValues == string.Empty ? " [" : channelValues + ", ";
-
-                var column = string.Empty;
-                bool setToNull = (random.Next() % 5 == 0);
-                if (setToNull)
-                {
-                    column += "null";
-                }
-                else
-                {
-                    var columnValue = GenerateValuesByType(random, channel.DataType, true);
-                    if (channel.PointMetadata == null)
-                    {
-                        column += columnValue;
-                    }
-                    else
-                    {
-                        column = "[" + columnValue;
-                        foreach (PointMetadata pointMetaData in channel.PointMetadata)
-                        {
-                            var etpDataType = pointMetaData.EtpDataType ?? null;
-                            column += ", " + GenerateValuesByType(random, etpDataType, false);
-                        }
-                        column += "]";
-
-                    }
-                }
-                channelValues += column;
-            }
-            channelValues += "]";
-            return channelValues;
-        }
-
-        private void InitStartIndexes(DateTime dateTimeStart, List<ChannelIndex> channelIndexes, object[] indexesStart)
-        {
-            for (int i = 0; i < channelIndexes.Count(); i++)
-            {
-                var indexType = channelIndexes[i].IndexType;
-                switch (indexType)
-                {
-                    case ChannelIndexType.datetime:
-                        indexesStart[i] = dateTimeStart;
-                        break;
-                    case ChannelIndexType.measureddepth:
-                    case ChannelIndexType.passindexeddepth:
-                    case ChannelIndexType.trueverticaldepth:
-                        indexesStart[i] = 0.0;
-                        break;
-                    case ChannelIndexType.elapsedtime:
-                        indexesStart[i] = (long)0;
-                        break;
-                };
-            }
-        }
-
-        private static string GenerateValuesByType(Random random, EtpDataType? etpDataType, bool isChannelValue)
-        {
-            string column = string.Empty;
-
-            bool setToNull = (random.Next() % 5 == 0);
-            if (setToNull && !isChannelValue)
-                return string.Empty;
-
-            switch (etpDataType)
-            {
-                case EtpDataType.boolean:
-                    column = (random.Next() % 2 == 0) ? "true" : "false";
-                    break;
-                case EtpDataType.bytes:
-                    column = "Y";
-                    break;
-                case EtpDataType.@double:
-                case EtpDataType.@float:                    
-                        column = string.Format(" {0:0.###}", random.NextDouble());
-                    break;
-                case EtpDataType.@int:
-                case EtpDataType.@long:
-                    column = string.Format(" {0:0}", random.Next());
-                    break;
-                case EtpDataType.@null:
-                    column = "null";
-                    break;
-                case EtpDataType.@string:
-                    column = "\"abc\"";
-                    break;
-                case EtpDataType.vector:
-                    column = "(1.0, 2.0, 3.0)";
-                    break;
-                default:
-                    column = "null";
-                    break;
-            }
-            return column;
         }
     }
 }

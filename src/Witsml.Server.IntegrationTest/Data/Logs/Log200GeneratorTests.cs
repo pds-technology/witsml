@@ -10,6 +10,7 @@ namespace PDS.Witsml.Server.Data.Logs
     public class Log200GeneratorTests
     {
         private DevKit200Aspect DevKit;
+        private Log200Generator LogGenerator;
         private DataObjectReference WellboreReference;
         private Log DepthLog;
         private Log TimeLog;
@@ -23,7 +24,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void TestSetUp()
         {
             DevKit = new DevKit200Aspect();
-
+            LogGenerator = new Log200Generator();
             WellboreReference = new DataObjectReference
             {
                 ContentType = EtpContentTypes.Witsml200.For(ObjectTypes.Wellbore),
@@ -34,12 +35,12 @@ namespace PDS.Witsml.Server.Data.Logs
             TimeLog = new Log() { TimeDepth = "Time", Citation = DevKit.Citation(DevKit.Name("Citation")), Wellbore = WellboreReference, Uuid = DevKit.Uid() };
             DepthLog = new Log() { TimeDepth = "Depth", Citation = DevKit.Citation(DevKit.Name("Citation")), Wellbore = WellboreReference, Uuid = DevKit.Uid() };
 
-            MeasuredDepthIndex = DevKit.ChannelIndex(ChannelIndexType.measureddepth);
-            DateTimeIndex = DevKit.ChannelIndex(ChannelIndexType.datetime);
-            ElapseTimeIndex = DevKit.ChannelIndex(ChannelIndexType.elapsedtime);
+            MeasuredDepthIndex = LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
+            DateTimeIndex = LogGenerator.CreateDateTimeIndex();
+            ElapseTimeIndex = LogGenerator.CreateElapsedTimeIndex(IndexDirection.increasing);
 
-            BooleanPointMetadata = DevKit.PointMetadata("confidence", "confidence", EtpDataType.boolean);
-            FloatPointMetadata = DevKit.PointMetadata("Confidence", "Confidence", EtpDataType.@float);
+            BooleanPointMetadata = LogGenerator.CreatePointMetadata("confidence", "confidence", EtpDataType.boolean);
+            FloatPointMetadata = LogGenerator.CreatePointMetadata("Confidence", "Confidence", EtpDataType.@float);
         }
 
         [TestMethod]
@@ -101,14 +102,14 @@ namespace PDS.Witsml.Server.Data.Logs
             indexList.Add(MeasuredDepthIndex);
             indexList.Add(DateTimeIndex);
 
-            ChannelSet channelSet = DevKit.CreateChannelSet(DepthLog, indexList);
+            ChannelSet channelSet = LogGenerator.CreateChannelSet(DepthLog, indexList);
             channelSet.Channel.Add(DevKit.Channel(DepthLog, indexList, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: DevKit.List(BooleanPointMetadata)));
             channelSet.Channel.Add(DevKit.Channel(DepthLog, indexList, "Hookload", "HKLD", "klbf", "Force", EtpDataType.@double));
 
             List<ChannelSet> channelSetList = new List<ChannelSet>();
             channelSetList.Add(channelSet);
 
-            DevKit.GenerateChannelData(channelSetList, numDataValue: 5);
+            LogGenerator.GenerateChannelData(channelSetList, numDataValue: 5);
             Assert.AreEqual(1, channelSetList.Count);
             Assert.AreEqual(2, channelSetList[0].Channel.Count);
 
@@ -137,14 +138,14 @@ namespace PDS.Witsml.Server.Data.Logs
             indexList.Add(MeasuredDepthIndex);
             indexList.Add(DateTimeIndex);
 
-            ChannelSet channelSet = DevKit.CreateChannelSet(DepthLog, indexList);
+            ChannelSet channelSet = LogGenerator.CreateChannelSet(DepthLog, indexList);
             channelSet.Channel.Add(DevKit.Channel(DepthLog, indexList, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: DevKit.List(BooleanPointMetadata)));
             channelSet.Channel.Add(DevKit.Channel(DepthLog, indexList, "Hookload", "HKLD", "klbf", "Force", EtpDataType.@double));
 
             List<ChannelSet> channelSetList = new List<ChannelSet>();
             channelSetList.Add(channelSet);
 
-            DevKit.GenerateChannelData(channelSetList, numDataValue: 5);
+            LogGenerator.GenerateChannelData(channelSetList, numDataValue: 5);
             Assert.AreEqual(1, channelSetList.Count);
             Assert.AreEqual(2, channelSetList[0].Channel.Count);
 
@@ -160,18 +161,18 @@ namespace PDS.Witsml.Server.Data.Logs
             indexList.Add(MeasuredDepthIndex);
             indexList.Add(DateTimeIndex);
 
-            ChannelSet channelSet1 = DevKit.CreateChannelSet(DepthLog, indexList);
+            ChannelSet channelSet1 = LogGenerator.CreateChannelSet(DepthLog, indexList);
             channelSet1.Channel.Add(DevKit.Channel(DepthLog, indexList, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: DevKit.List(BooleanPointMetadata)));
             channelSet1.Channel.Add(DevKit.Channel(DepthLog, indexList, "Hookload", "HKLD", "klbf", "Force", EtpDataType.@double));
 
-            ChannelSet channelSet2 = DevKit.CreateChannelSet(DepthLog, indexList);
+            ChannelSet channelSet2 = LogGenerator.CreateChannelSet(DepthLog, indexList);
             channelSet2.Channel.Add(DevKit.Channel(DepthLog, indexList, "GR", "GR", "api", "gamma_ray", EtpDataType.@double, pointMetadataList: DevKit.List(FloatPointMetadata)));
 
             List<ChannelSet> channelSetList = new List<ChannelSet>();
             channelSetList.Add(channelSet1);
             channelSetList.Add(channelSet2);
 
-            DevKit.GenerateChannelData(channelSetList, numDataValue: 5);
+            LogGenerator.GenerateChannelData(channelSetList, numDataValue: 5);
             Assert.AreEqual(2, channelSetList.Count);
             Assert.AreEqual(2, channelSetList[0].Channel.Count);
             Assert.AreEqual(1, channelSetList[1].Channel.Count);
@@ -195,14 +196,14 @@ namespace PDS.Witsml.Server.Data.Logs
             List<ChannelIndex> indexList = new List<ChannelIndex>();
             indexList.Add(ElapseTimeIndex);
 
-            ChannelSet channelSet = DevKit.CreateChannelSet(TimeLog, indexList);
+            ChannelSet channelSet = LogGenerator.CreateChannelSet(TimeLog, indexList);
 
             channelSet.Channel.Add(DevKit.Channel(TimeLog, indexList, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: DevKit.List(FloatPointMetadata)));
 
             List<ChannelSet> channelSetList = new List<ChannelSet>();
             channelSetList.Add(channelSet);;
 
-            DevKit.GenerateChannelData(channelSetList, numDataValue: 5);
+            LogGenerator.GenerateChannelData(channelSetList, numDataValue: 5);
             Assert.AreEqual(1, channelSetList.Count);
             Assert.AreEqual(1, channelSetList[0].Channel.Count);
 
