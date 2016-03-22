@@ -37,8 +37,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             WellAdapter = new Well200DataAdapter(Provider) { Container = Container };
             WellboreAdapter = new Wellbore200DataAdapter(Provider) { Container = Container };
-            LogAdapter = new Log200DataAdapter(Provider) { Container = Container };
-
+            LogAdapter = new Log200DataAdapter(Provider, new ChannelDataAdapter(Provider)) { Container = Container };
             Well1 = new Well() { Citation = DevKit.Citation("Well 01"), TimeZone = DevKit.TimeZone, Uuid = DevKit.Uid() };
 
             Well1.GeographicLocationWGS84 = DevKit.Location();
