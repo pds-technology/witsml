@@ -242,7 +242,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private bool NotInRange(double? rowIndex, Tuple<double?, double?> rowRange, bool increasing)
         {
-            if (rowIndex.HasValue && rowRange.Item1.HasValue)
+            if (rowIndex.HasValue && rowRange != null && rowRange.Item1.HasValue)
             {
                 return increasing 
                     ? rowIndex.Value < rowRange.Item1.Value
@@ -255,7 +255,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private bool OutOfRange(double? rowIndex, Tuple<double?, double?> rowRange, bool increasing)
         {
-            if (rowIndex.HasValue && rowRange.Item2.HasValue)
+            if (rowIndex.HasValue && rowRange != null && rowRange.Item2.HasValue)
             {
                 return increasing
                     ? rowIndex.Value > rowRange.Item2.Value
