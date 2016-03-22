@@ -262,8 +262,9 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 .OfType<bool>()
                 .FirstOrDefault();
 
-            Parent.Client.Handler<IChannelStreamingConsumer>()
-                .OnChannelMetadata += OnChannelMetadata;
+            var handler = Parent.Client.Handler<IChannelStreamingConsumer>();
+            handler.OnChannelMetadata += OnChannelMetadata;
+            handler.OnChannelData += OnChannelData;
 
             CanStart = true;
         }
@@ -273,8 +274,9 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public void OnSocketClosed()
         {
-            Parent.Client.Handler<IChannelStreamingConsumer>()
-                .OnChannelMetadata -= OnChannelMetadata;
+            var handler = Parent.Client.Handler<IChannelStreamingConsumer>();
+            handler.OnChannelMetadata -= OnChannelMetadata;
+            handler.OnChannelData -= OnChannelData;
 
             IsSimpleStreamer = false;
             CanStart = false;
@@ -296,6 +298,10 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 CanStartStreaming = !IsSimpleStreamer;
                 CanStopStreaming = IsSimpleStreamer;
             }
+        }
+
+        private void OnChannelData(object sender, ProtocolEventArgs<ChannelData> e)
+        {
         }
 
         private ChannelStreamingInfo ToChannelStreamingInfo(ChannelMetadataRecord channel)

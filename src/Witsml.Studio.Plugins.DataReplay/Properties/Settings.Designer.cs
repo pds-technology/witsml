@@ -34,7 +34,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Data Simulator")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Producer")]
         public string PluginDisplayName {
             get {
                 return ((string)(this["PluginDisplayName"]));

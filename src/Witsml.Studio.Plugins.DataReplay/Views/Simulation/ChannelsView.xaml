@@ -50,7 +50,7 @@
         </StackPanel>
 
         <TabControl Grid.Row="1" Margin="0,20,0,0">
-            <TabItem Header="Log Data">
+            <TabItem Header="Client">
                 <DockPanel Margin="5">
                     <StackPanel DockPanel.Dock="Bottom" Height="35" Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button x:Name="StartLogData" Content="Start" Width="80" Height="30" Margin="5,5,0,0" />
@@ -79,7 +79,7 @@
                     </Grid>
                 </DockPanel>
             </TabItem>
-            <TabItem Header="Channel Streaming">
+            <TabItem Header="Server">
                 <DockPanel Margin="5">
                     <StackPanel DockPanel.Dock="Bottom" Height="35" Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button x:Name="StartChannelStreaming" Content="Start" Width="80" Height="30" Margin="5,5,0,0" />
