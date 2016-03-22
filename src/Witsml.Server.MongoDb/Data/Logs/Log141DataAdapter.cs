@@ -34,19 +34,20 @@ namespace PDS.Witsml.Server.Data.Logs
         private static readonly int LogIndexRangeSize = PDS.Server.MongoDb.Settings.Default.LogIndexRangeSize;
         private static readonly int maxDataNodes = Settings.Default.MaxDataNodes;
         private static readonly int maxDataPoints = Settings.Default.MaxDataPoints;
+        private readonly ChannelDataAdapter _channelDataAdapter;
 
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Log141DataAdapter"/> class.
         /// </summary>
         /// <param name="databaseProvider">The database provider.</param>
+        /// <param name="channelDataAdapter">The channels data adapter.</param>
         [ImportingConstructor]
         public Log141DataAdapter(IDatabaseProvider databaseProvider, ChannelDataAdapter channelDataAdapter) : base(databaseProvider, ObjectNames.Log141)
         {
-            ChannelDataAdapter = channelDataAdapter;
+            _channelDataAdapter = channelDataAdapter;
         }
 
-        public ChannelDataAdapter ChannelDataAdapter { get; set; }
 
         /// <summary>
         /// Gets the supported capabilities for the <see cref="Log"/> object.
@@ -200,7 +201,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         IsTimeIndex = entity.IndexType == LogIndexType.datetime || entity.IndexType == LogIndexType.elapsedtime
                     };
 
-                    ChannelDataAdapter.WriteLogDataValues(entity.Uid, logData.Data, logData.MnemonicList, logData.UnitList, indexChannel);
+                    _channelDataAdapter.WriteLogDataValues(entity.Uid, logData.Data, logData.MnemonicList, logData.UnitList, indexChannel);
                 }
 
                 return new WitsmlResult(ErrorCodes.Success, entity.Uid);
