@@ -40,12 +40,14 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\DataGenerator.cs" />
     <Compile Include="EtpContentTypes.cs" />
     <Compile Include="ErrorCodes.cs" />
     <Compile Include="Export131Attribute.cs" />
     <Compile Include="Export200Attribute.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Functions.cs" />
+    <Compile Include="Data\Logs\Log200Generator.cs" />
     <Compile Include="ObjectFolders.cs" />
     <Compile Include="ObjectId.cs" />
     <Compile Include="ObjectName.cs" />
@@ -92,6 +94,7 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -15,6 +15,7 @@ namespace PDS.Witsml.Server.Data.Logs
     public class Log200DataAdapterTests
     {
         private DevKit200Aspect DevKit;
+        private Log200Generator LogGenerator;
         private IContainer Container;
         private IDatabaseProvider Provider;
         private IEtpDataAdapter<Well> WellAdapter;
@@ -32,6 +33,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void TestSetUp()
         {
             DevKit = new DevKit200Aspect();
+            LogGenerator = new Log200Generator();
             Container = ContainerFactory.Create();
             Provider = new DatabaseProvider(new MongoDbClassMapper());
 
@@ -62,8 +64,10 @@ namespace PDS.Witsml.Server.Data.Logs
             Log1 = new Log() { Citation = DevKit.Citation("Log 01"), Wellbore = WellboreReference, Uuid = DevKit.Uid() };
             Log2 = new Log() { Citation = DevKit.Citation("Log 02"), Wellbore = WellboreReference };
 
-            DevKit.InitHeader(Log1, LoggingMethod.MWD, ChannelIndexType.measureddepth);
-            DevKit.InitHeader(Log2, LoggingMethod.Surface, ChannelIndexType.datetime);
+            ChannelIndex mdChannelIndex = LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
+            ChannelIndex dtChannelIndex = LogGenerator.CreateDateTimeIndex();
+            DevKit.InitHeader(Log1, LoggingMethod.MWD, mdChannelIndex);
+            DevKit.InitHeader(Log2, LoggingMethod.Surface, dtChannelIndex);
         }
 
         [TestMethod]
@@ -95,7 +99,7 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void CanAddAndGetSingleLogWithSecondaryIndex()
         {
-            var secondaryIndex = DevKit.ChannelIndex(ChannelIndexType.datetime);
+            var secondaryIndex = LogGenerator.CreateDateTimeIndex();
             var channelSet = Log1.ChannelSet.First();
             channelSet.Index.Add(secondaryIndex);
             DevKit.CreateMockChannelSetData(channelSet, channelSet.Index);
