@@ -18,10 +18,11 @@ namespace PDS.Witsml.Server
             get { return OptionsIn.DataVersion.Version141.Value; }
         }
 
-        public void InitHeader(Log log, LogIndexType indexType)
+        public void InitHeader(Log log, LogIndexType indexType, bool increasing = true)
         {
             log.IndexType = indexType;
             log.IndexCurve = indexType == LogIndexType.datetime ? "TIME" : "MD";
+            log.Direction = increasing ? LogIndexDirection.increasing : LogIndexDirection.decreasing;
 
             log.LogCurveInfo = List<LogCurveInfo>();
 
@@ -73,13 +74,17 @@ namespace PDS.Witsml.Server
             }
         }
 
-        public void InitDataMany(Log log, string mnemonics, string units, int numRows, double factor = 1.0, bool isDepthLog = true, bool hasEmptyChannel = true)
+        public void InitDataMany(Log log, string mnemonics, string units, int numRows, double factor = 1.0, bool isDepthLog = true, bool hasEmptyChannel = true, bool increasing = true)
         {
             var start = DateTimeOffset.UtcNow.AddDays(-1);
+            var interval = increasing ? 1 : -1;
+
             for (int i = 0; i < numRows; i++)
             {
                 if (isDepthLog)
-                    InitData(log, mnemonics, units, i, hasEmptyChannel ? (int?)null : i, i * factor);
+                {
+                    InitData(log, mnemonics, units, i * interval, hasEmptyChannel ? (int?)null : i, i * factor);
+                }
                 else
                 {
                     InitData(log, mnemonics, units, start.AddSeconds(i).ToString(), hasEmptyChannel ? (int?)null : i, i * factor);

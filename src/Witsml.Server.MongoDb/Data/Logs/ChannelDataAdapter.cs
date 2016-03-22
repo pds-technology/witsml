@@ -43,6 +43,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var collection = GetCollection<ChannelSetValues>(DbCollectionName);
             var dataChunks = new List<ChannelSetValues>();
+
             foreach (var key in indicesMap.Keys)
             {
                 var dataChunk = CreateChannelSetValuesList(channelData[key], uidLog, key, indicesMap[key]);
@@ -53,7 +54,7 @@ namespace PDS.Witsml.Server.Data.Logs
             collection.BulkWrite(dataChunks
                 .Select(dc =>
                 {
-                    return (WriteModel<ChannelSetValues>)new InsertOneModel<ChannelSetValues>(dc);
+                    return new InsertOneModel<ChannelSetValues>(dc);
                 }));
         }
 
@@ -67,15 +68,16 @@ namespace PDS.Witsml.Server.Data.Logs
         public void WriteLogDataValues(string uidLog, List<string> data, string mnemonicList, string unitList, ChannelIndexInfo indexChannel)
         {
             var collection = GetCollection<ChannelSetValues>(DbCollectionName);
+
             collection.BulkWrite(ToChunks(indexChannel, GetSequence(string.Empty, !indexChannel.IsTimeIndex, data))
-                    .Select(dc =>
-                    {
-                        dc.UidLog = uidLog;
-                        dc.Uid = NewUid();
-                        dc.MnemonicList = mnemonicList;
-                        dc.UnitList = unitList;
-                        return (WriteModel<ChannelSetValues>)new InsertOneModel<ChannelSetValues>(dc);
-                    }));
+                .Select(dc =>
+                {
+                    dc.UidLog = uidLog;
+                    dc.Uid = NewUid();
+                    dc.MnemonicList = mnemonicList;
+                    dc.UnitList = unitList;
+                    return new InsertOneModel<ChannelSetValues>(dc);
+                }));
         }
 
         /// <summary>
@@ -100,7 +102,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Convert data
             var logData = new LogData();
-            TransformLogData(logData, results, mnemonics);
+            TransformLogData(logData, results, mnemonics, range, increasing);
             return logData;
         }
 
@@ -168,7 +170,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="logData">The <see cref="LogData"/> object.</param>
         /// <param name="results">The list of log data chunks.</param>
         /// <param name="mnemonics">The subset of mnemonics for the requested log curves.</param>
-        private void TransformLogData(LogData logData, List<ChannelSetValues> results, List<string> mnemonics)
+        private void TransformLogData(LogData logData, List<ChannelSetValues> results, List<string> mnemonics, Tuple<double?, double?> rowRange, bool increasing)
         {
             logData.Data = new List<string>();
             var dataList = new List<List<string>>();
@@ -193,13 +195,29 @@ namespace PDS.Witsml.Server.Data.Logs
                         }
                     }
                 }
+
                 foreach (var value in values)
-                    dataList.Add(TransformLogDataRow(value, requestIndex, rangeList));                                  
+                {
+                    // Get the Index from the current row of values
+                    double? rowIndex = GetRowIndex(value);
+
+                    // If the row's index is not within the rowRange then skip this row.
+                    if (NotInRange(rowIndex, rowRange, increasing))
+                        continue;
+
+                    // if the row's index is past the rowRange then stop transforming anymore rows.
+                    if (OutOfRange(rowIndex, rowRange, increasing))
+                        break;
+
+                    // Transform the current row.
+                    dataList.Add(TransformLogDataRow(value, requestIndex, rangeList));
+                }
             }
 
             var validIndex = new List<int>();
             var validMnemonics = new List<string>();
             var validUnits = new List<string>();
+
             for (var i = 0; i < rangeList.Count; i++)
             {
                 var range = rangeList[i];
@@ -210,12 +228,59 @@ namespace PDS.Witsml.Server.Data.Logs
                     validUnits.Add(units[i]);
                 }
             }
+
             logData.MnemonicList = string.Join(Separator.ToString(), validMnemonics);
             logData.UnitList = string.Join(Separator.ToString(), validUnits);
+
             foreach (var row in dataList)
+            {
                 logData.Data.Add(ConcatLogDataRow(row, validIndex));
+            }
 
             mnemonics = validMnemonics;
+        }
+
+        private bool NotInRange(double? rowIndex, Tuple<double?, double?> rowRange, bool increasing)
+        {
+            if (rowIndex.HasValue && rowRange.Item1.HasValue)
+            {
+                return increasing 
+                    ? rowIndex.Value < rowRange.Item1.Value
+                    : rowIndex.Value > rowRange.Item1.Value;
+
+            }
+
+            return false;
+        }
+
+        private bool OutOfRange(double? rowIndex, Tuple<double?, double?> rowRange, bool increasing)
+        {
+            if (rowIndex.HasValue && rowRange.Item2.HasValue)
+            {
+                return increasing
+                    ? rowIndex.Value > rowRange.Item2.Value
+                    : rowIndex.Value < rowRange.Item2.Value;
+            }
+
+            return false;
+        }
+
+        private double? GetRowIndex(string value)
+        {
+            if (value != null)
+            {
+                var columns = value.Split(',');
+                if (columns.Length > 0)
+                {
+                    double indexValue = 0;
+                    if (double.TryParse(columns[0], out indexValue))
+                    {
+                        return indexValue;
+                    }
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -293,9 +358,16 @@ namespace PDS.Witsml.Server.Data.Logs
                 }
                 else
                 {
-                    indexChannel.Start = startIndex;
-                    indexChannel.End = endIndex;
-                    yield return new ChannelSetValues() { Data = SerializeLogData(data), Indices = new List<ChannelIndexInfo> { indexChannel } };
+                    var newIndex = indexChannel.Clone();
+                    newIndex.Start = startIndex;
+                    newIndex.End = endIndex;
+
+                    yield return new ChannelSetValues()
+                    {
+                        Data = SerializeLogData(data),
+                        Indices = new List<ChannelIndexInfo> { newIndex }
+                    };
+
                     plannedRange = ComputeRange(item.Item2, RangeSize, increasing);
                     data = new List<string>();
                     data.Add(item.Item3);
@@ -307,9 +379,15 @@ namespace PDS.Witsml.Server.Data.Logs
 
             if (data.Count > 0)
             {
-                indexChannel.Start = startIndex;
-                indexChannel.End = endIndex;
-                yield return new ChannelSetValues() { Data = SerializeLogData(data), Indices = new List<ChannelIndexInfo> { indexChannel } };
+                var newIndex = indexChannel.Clone();
+                newIndex.Start = startIndex;
+                newIndex.End = endIndex;
+
+                yield return new ChannelSetValues()
+                {
+                    Data = SerializeLogData(data),
+                    Indices = new List<ChannelIndexInfo> { newIndex }
+                };
             }
         }
 
@@ -391,6 +469,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>The range.</returns>
         private Tuple<int, int> ComputeRange(double index, int rangeSize, bool increasing = true)
         {
+            // TODO: Create a Range struct, or a class if necessary, instead of using a Tuple
             var rangeIndex = increasing ? (int)(Math.Floor(index / rangeSize)) : (int)(Math.Ceiling(index / rangeSize));
             return new Tuple<int, int>(rangeIndex * rangeSize, rangeIndex * rangeSize + (increasing ? rangeSize : -rangeSize));
         }
@@ -412,6 +491,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var isTimeIndex = indices.First().IsTimeIndex;
 
+            // TODO: Create a helper method to get start and end (instead of First.First.First....)
             if (isTimeIndex)
             {
                 start = ParseTime(logData.First().First().First().ToString());
