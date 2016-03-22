@@ -40,9 +40,12 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public Log141DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Log141)
+        public Log141DataAdapter(IDatabaseProvider databaseProvider, ChannelDataAdapter channelDataAdapter) : base(databaseProvider, ObjectNames.Log141)
         {
+            ChannelDataAdapter = channelDataAdapter;
         }
+
+        public ChannelDataAdapter ChannelDataAdapter { get; set; }
 
         /// <summary>
         /// Gets the supported capabilities for the <see cref="Log"/> object.
@@ -195,8 +198,8 @@ namespace PDS.Witsml.Server.Data.Logs
                         Increasing = entity.Direction != LogIndexDirection.decreasing,
                         IsTimeIndex = entity.IndexType == LogIndexType.datetime || entity.IndexType == LogIndexType.elapsedtime
                     };
-                    var channelDataAdapter = new ChannelDataAdapter(DatabaseProvider);
-                    channelDataAdapter.WriteLogDataValues(entity.Uid, logData.Data, logData.MnemonicList, logData.UnitList, indexChannel);
+
+                    ChannelDataAdapter.WriteLogDataValues(entity.Uid, logData.Data, logData.MnemonicList, logData.UnitList, indexChannel);
                 }
 
                 return new WitsmlResult(ErrorCodes.Success, entity.Uid);
