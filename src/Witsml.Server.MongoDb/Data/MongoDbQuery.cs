@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using System.Xml.Serialization;
 using log4net;
 using MongoDB.Driver;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -123,11 +124,10 @@ namespace PDS.Witsml.Server.Data
                 filters.Add(filter);
 
             var resultFilter = Builders<T>.Filter.And(filters);
-            var filterJson = resultFilter.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
 
             if (Logger.IsDebugEnabled)
             {
-                filterJson = resultFilter.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
+                var filterJson = resultFilter.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
                 Logger.DebugFormat("Detected query filters: {0}", filterJson);
             }
 
@@ -260,13 +260,26 @@ namespace PDS.Witsml.Server.Data
                 var uomProperty = elementType.GetProperty("Uom");
                 var fieldName = GetPropertyPath(propertyPath, textProperty.Name);
                 var fieldType = textProperty.PropertyType;
+                var filters = new List<FilterDefinition<T>>();
 
                 if (uomProperty != null)
                 {
-                    ValidateMeasureUom(element, uomProperty, element.Value);
+                    var uomPath = GetPropertyPath(propertyPath, uomProperty.Name);
+                    var uomValue = ValidateMeasureUom(element, uomProperty, element.Value);
+                    var uomFilter = BuildFilterForProperty(uomProperty.PropertyType, uomPath, uomValue);
+
+                    if (uomFilter != null)
+                        filters.Add(uomFilter);
                 }
 
-                return BuildFilterForProperty(fieldType, fieldName, element.Value);
+                var textFilter = BuildFilterForProperty(fieldType, fieldName, element.Value);
+
+                if (textFilter != null)
+                    filters.Add(textFilter);
+
+                return (filters.Any())
+                    ? Builders<T>.Filter.And(filters)
+                    : null;
             }
             else if (element.HasElements || element.HasAttributes)
             {
@@ -314,27 +327,25 @@ namespace PDS.Witsml.Server.Data
             }
             else if (propertyType.IsEnum)
             {
-                try
-                {
-                    return Builders<T>.Filter.Eq(propertyPath, Enum.Parse(propertyType, propertyValue));
-                }
-                catch (Exception ex)
-                {
-                    Logger.WarnFormat("Error parsing query filter for enum type: {0}; value: {1}; Error: {2}", propertyType, propertyValue, ex);
-                    return null;
-                }
+                if (!Enum.IsDefined(propertyType, propertyValue))
+                    throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
+
+                var value = Enum.Parse(propertyType, propertyValue);
+                return Builders<T>.Filter.Eq(propertyPath, value);
             }
             else if (typeof(DateTime).IsAssignableFrom(propertyType))
             {
-                try
-                {
-                    return Builders<T>.Filter.Eq(propertyPath, DateTime.Parse(propertyValue));
-                }
-                catch (Exception ex)
-                {
-                    Logger.WarnFormat("Error parsing query filter for date type: {0}; value: {1}; Error: {2}", propertyType, propertyValue, ex);
-                    return null;
-                }
+                DateTime value;
+
+                if (!DateTime.TryParse(propertyValue, out value))
+                    throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
+
+                return Builders<T>.Filter.Eq(propertyPath, value);
+            }
+            else if (typeof(IConvertible).IsAssignableFrom(propertyType))
+            {
+                var value = Convert.ChangeType(propertyValue, propertyType);
+                return Builders<T>.Filter.Eq(propertyPath, value);
             }
             else
             {
@@ -369,13 +380,13 @@ namespace PDS.Witsml.Server.Data
                 });
         }
 
-        private void ValidateMeasureUom(XElement element, PropertyInfo uomProperty, string measureValue)
+        private string ValidateMeasureUom(XElement element, PropertyInfo uomProperty, string measureValue)
         {
             var xmlAttribute = uomProperty.GetCustomAttribute<XmlAttributeAttribute>();
 
             // validation not needed if uom attribute is not defined
             if (xmlAttribute == null)
-                return;
+                return null;
 
             var uomValue = element.Attributes()
                 .Where(x => x.Name.LocalName == xmlAttribute.AttributeName)
@@ -389,17 +400,22 @@ namespace PDS.Witsml.Server.Data
             }
 
             var enumType = uomProperty.PropertyType;
-            var hasXmlEnum = enumType.GetMembers().Any(x =>
+            var enumMember = enumType.GetMembers().FirstOrDefault(x =>
             {
+                if (x.Name.EqualsIgnoreCase(uomValue))
+                    return true;
+
                 var xmlEnumAttrib = x.GetCustomAttribute<XmlEnumAttribute>();
-                return xmlEnumAttrib != null && xmlEnumAttrib.Name == uomValue;
+                return xmlEnumAttrib != null && xmlEnumAttrib.Name.EqualsIgnoreCase(uomValue);
             });
 
             // uom must be a valid enumeration member
-            if (enumType.IsEnum && !enumType.IsEnumDefined(uomValue) && !hasXmlEnum)
+            if (!enumType.IsEnum || enumMember == null)
             {
                 throw new WitsmlException(ErrorCodes.InvalidUnitOfMeasure);
             }
+
+            return enumMember.Name;
         }
 
         /// <summary>
