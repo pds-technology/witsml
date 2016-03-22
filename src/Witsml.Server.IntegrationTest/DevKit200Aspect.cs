@@ -321,7 +321,7 @@ namespace PDS.Witsml.Server
             const int Seed = 123;
 
             Random random = new Random(Seed);
-            DateTime dateTimeStart = new DateTime(2015, 3, 17, 11, 50, 0);
+            DateTime dateTimeStart = new DateTime(2015, 3, 17, 11, 50, 0).ToUniversalTime();
 
             foreach (ChannelSet channelSet in channelSetList)
             {
@@ -429,7 +429,7 @@ namespace PDS.Witsml.Server
                 if (indexValue.Equals(ChannelIndexType.datetime))
                 {
                     indexesStart[idx] = ((DateTime)indexesStart[idx]).AddSeconds(random.Next(1, 5));
-                    indexValues += "\"" + (DateTime)indexesStart[idx] + "\"";
+                    indexValues += "\"" + ((DateTime)indexesStart[idx]).ToString("o") + "\"";
                 }
                 else if (DepthIndex.Contains(indexValue))
                 {
