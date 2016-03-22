@@ -18,6 +18,7 @@ namespace PDS.Witsml.Server.Data.Channels
     /// Data adapter that encapsulates CRUD functionality for <see cref="ChannelSetValues"/>
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{PDS.Witsml.Server.Models.ChannelSetValues}" />
+    [Export]
     public class ChannelDataAdapter : MongoDbDataAdapter<ChannelSetValues>
     {
         private static readonly int RangeSize = Settings.Default.LogIndexRangeSize;
