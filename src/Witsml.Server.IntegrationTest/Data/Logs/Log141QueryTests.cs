@@ -51,25 +51,78 @@ namespace PDS.Witsml.Server.Data.Logs
             var row = 10;
             DevKit.InitHeader(log, LogIndexType.measureddepth);
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), row);
+            var columnCountBeforeSave = log.LogData.First().Data.First().Split(',').Length;
             response = DevKit.Add<LogList, Log>(log);
+
+            // Test that a Log was Added successfully
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             var uidLog = response.SuppMsgOut;
-
             var provider = new DatabaseProvider(new MongoDbClassMapper());
             var adapter = new ChannelDataAdapter(provider);
 
             var mnemonics = log.LogCurveInfo.Select(x => x.Mnemonic.Value).ToList();
             var logData = adapter.GetLogData(uidLog, mnemonics, null, true);
 
+            // Test that LogData was returned
             Assert.IsNotNull(logData);
+
             var data = logData.Data;
             var firstRow = data.First().Split(',');
             mnemonics = logData.MnemonicList.Split(',').ToList();
+
+            // Test that all of the rows of data saved are returned.
             Assert.AreEqual(row, data.Count);
+
+            // Test that the number of mnemonics matches the number of data values per row
             Assert.AreEqual(firstRow.Length, mnemonics.Count);
 
-            // TODO: Update Test to verify that a column of LogData.Data with no values is not returned with the results.
+            // Update Test to verify that a column of LogData.Data with no values is NOT returned with the results.
+            Assert.AreEqual(columnCountBeforeSave - 1, firstRow.Length);
+        }
+
+        [TestMethod]
+        public void Log_column_with_one_value_returned()
+        {
+            var response = DevKit.Add<WellList, Well>(_well);
+
+            _wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+
+            var log = new Log()
+            {
+                UidWell = _wellbore.UidWell,
+                NameWell = _well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = _wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            var row = 10;
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), row);
+
+            // Replace the third data row with a value where there is none
+            log.LogData.First().Data[2] = log.LogData.First().Data[2].Replace(",,", ",0,");
+            var columnCountBeforeSave = log.LogData.First().Data.First().Split(',').Length;
+
+            // Save the Log
+            response = DevKit.Add<LogList, Log>(log);
+
+
+            var uidLog = response.SuppMsgOut;
+            var provider = new DatabaseProvider(new MongoDbClassMapper());
+            var adapter = new ChannelDataAdapter(provider);
+
+            var mnemonics = log.LogCurveInfo.Select(x => x.Mnemonic.Value).ToList();
+            var logData = adapter.GetLogData(uidLog, mnemonics, null, true);
+
+
+            var data = logData.Data;
+            var firstRow = data.First().Split(',');
+
+            // Update Test to verify that a column of LogData.Data with no values is NOT returned with the results.
+            Assert.AreEqual(columnCountBeforeSave, firstRow.Length);
         }
 
         [TestMethod]
