@@ -12,7 +12,7 @@ using Newtonsoft.Json;
 using PDS.Server.MongoDb;
 using PDS.Witsml.Server.Models;
 
-namespace PDS.Witsml.Server.Data.Logs
+namespace PDS.Witsml.Server.Data.Channels
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="ChannelSetValues"/>

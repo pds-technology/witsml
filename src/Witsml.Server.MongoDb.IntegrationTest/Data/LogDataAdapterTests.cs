@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Server.Data.Logs;
 
 namespace PDS.Witsml.Server.Data

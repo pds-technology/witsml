@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using PDS.Framework;
+using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Server.Data.Wellbores;
 using PDS.Witsml.Server.Data.Wells;
 
