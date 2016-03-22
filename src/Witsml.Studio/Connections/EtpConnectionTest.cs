@@ -1,6 +1,9 @@
 ﻿using System.ComponentModel.Composition;
 using System.Threading.Tasks;
 using Energistics;
+using Energistics.Protocol.ChannelStreaming;
+using Energistics.Protocol.Discovery;
+using Energistics.Protocol.Store;
 using PDS.Framework;
 
 namespace PDS.Witsml.Studio.Connections
@@ -29,6 +32,10 @@ namespace PDS.Witsml.Studio.Connections
 
                 using (var client = new EtpClient(connection.Uri, applicationName, applicationVersion, headers))
                 {
+                    client.Register<IChannelStreamingConsumer, ChannelStreamingConsumerHandler>();
+                    client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();
+                    client.Register<IStoreCustomer, StoreCustomerHandler>();
+
                     var count = 0;
                     client.Open();
 

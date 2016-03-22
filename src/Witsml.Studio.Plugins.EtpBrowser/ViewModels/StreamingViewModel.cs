@@ -256,14 +256,11 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             var protocol = e.Message.SupportedProtocols
                 .FirstOrDefault(x => x.Protocol == (int)Protocols.ChannelStreaming);
 
-            DataValue dataValue;
-            if (protocol.ProtocolCapabilities.TryGetValue(ChannelStreamingProducerHandler.SimpleStreamer, out dataValue))
-            {
-                if (dataValue.Item is bool && ((bool)dataValue.Item) == true)
-                {
-                    IsSimpleStreamer = true;
-                }
-            }
+            IsSimpleStreamer = protocol.ProtocolCapabilities
+                .Where(x => x.Key.EqualsIgnoreCase(ChannelStreamingProducerHandler.SimpleStreamer))
+                .Select(x => x.Value.Item)
+                .OfType<bool>()
+                .FirstOrDefault();
 
             Parent.Client.Handler<IChannelStreamingConsumer>()
                 .OnChannelMetadata += OnChannelMetadata;
