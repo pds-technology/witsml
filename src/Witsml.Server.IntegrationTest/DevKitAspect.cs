@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Xml;
 using Energistics.DataAccess;
 using PDS.Framework;
+using PDS.Witsml.Data;
 
 namespace PDS.Witsml.Server
 {
-    public abstract class DevKitAspect
+    public abstract class DevKitAspect : DataGenerator
     {
-        public readonly string TimestampFormat = "yyMMdd-HHmmss-fff";
         public readonly string TimeZone = "-06:00";
 
         public DevKitAspect(string url, WMLSVersion version)
@@ -25,19 +25,6 @@ namespace PDS.Witsml.Server
         public WitsmlStore Store { get; private set; }
 
         public abstract string DataSchemaVersion { get; }
-
-        public string Uid()
-        {
-            return Guid.NewGuid().ToString();
-        }
-
-        public string Name(string prefix = null)
-        {
-            if (String.IsNullOrWhiteSpace(prefix))
-                return DateTime.Now.ToString(TimestampFormat);
-
-            return String.Format("{0} - {1}", prefix, DateTime.Now.ToString(TimestampFormat));
-        }
 
         public TList Query<TList>() where TList : IEnergisticsCollection
         {
