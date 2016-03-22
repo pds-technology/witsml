@@ -196,6 +196,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 .Start(Model.Streaming.MaxDataItems, Model.Streaming.MaxMessageRate);
 
             CanStart = false;
+            Channels.Clear();
             UpdateCanDescribe();
         }
 

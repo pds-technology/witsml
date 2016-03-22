@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Caliburn.Micro;
 using Energistics.DataAccess;
 using PDS.Witsml.Studio.Connections;
@@ -161,6 +162,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
                 if (!string.IsNullOrEmpty(versions))
                 {
                     WitsmlVersions.AddRange(versions.Split(','));
+                    Model.WitsmlVersion = WitsmlVersions.Last();
                 }
                 else
                 {

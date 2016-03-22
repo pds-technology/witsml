@@ -12,7 +12,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.Models
         public Simulation()
         {
             Channels = new BindableCollection<ChannelMetadataRecord>();
-            Connection = new Connection();
+            WitsmlConnection = new Connection();
             LogIndexType = LogIndexType.measureddepth;
             PortNumber = 9000;
         }
@@ -47,17 +47,32 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.Models
             }
         }
 
-        private Connection _connection;
+        private Connection _witsmlConnection;
         [DataMember]
-        public Connection Connection
+        public Connection WitsmlConnection
         {
-            get { return _connection; }
+            get { return _witsmlConnection; }
             set
             {
-                if (!ReferenceEquals(_connection, value))
+                if (!ReferenceEquals(_witsmlConnection, value))
                 {
-                    _connection = value;
-                    NotifyOfPropertyChange(() => Connection);
+                    _witsmlConnection = value;
+                    NotifyOfPropertyChange(() => WitsmlConnection);
+                }
+            }
+        }
+
+        private Connection _etpConnection;
+        [DataMember]
+        public Connection EtpConnection
+        {
+            get { return _etpConnection; }
+            set
+            {
+                if (!ReferenceEquals(_etpConnection, value))
+                {
+                    _etpConnection = value;
+                    NotifyOfPropertyChange(() => EtpConnection);
                 }
             }
         }
@@ -193,6 +208,21 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.Models
                 {
                     _channels = value;
                     NotifyOfPropertyChange(() => Channels);
+                }
+            }
+        }
+
+        private string _witsmlVersion;
+        [DataMember]
+        public string WitsmlVersion
+        {
+            get { return _witsmlVersion; }
+            set
+            {
+                if (_witsmlVersion != value)
+                {
+                    _witsmlVersion = value;
+                    NotifyOfPropertyChange(() => WitsmlVersion);
                 }
             }
         }

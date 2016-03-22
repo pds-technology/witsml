@@ -9,7 +9,8 @@
     "uom": "m",
     "measureClass": "Length",
     "source": "MWD",
-    "indexes": [ ]
+    "indexes": [ ],
+	"channelAxes": [ ]
   },
   {
     "uuid": "2e92d912-3976-4963-9a1e-1704ae7a5ad9",
@@ -21,7 +22,8 @@
     "uom": "m/h",
     "measureClass": "Velocity",
     "source": "MWD",
-    "indexes": [ ]
+    "indexes": [ ],
+	"channelAxes": [ ]
   },
   {
     "uuid": "5c6faa81-3ec6-4b67-ad1c-5ed9a3eeb4f2",
@@ -33,6 +35,7 @@
     "uom": "klbf",
     "measureClass": "Weight",
     "source": "MWD",
-    "indexes": [ ]
+    "indexes": [ ],
+	"channelAxes": [ ]
   }
 ]
