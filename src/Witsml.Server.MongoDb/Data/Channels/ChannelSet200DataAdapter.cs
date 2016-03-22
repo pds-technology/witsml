@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
@@ -51,18 +50,21 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="entity">The entity.</param>
         public override WitsmlResult Put(ChannelSet entity)
         {
-            if (!string.IsNullOrWhiteSpace(entity.Uuid) && Exists(entity.GetObjectId()))
+            var dataObjectId = entity.GetObjectId();
+
+            if (!string.IsNullOrWhiteSpace(entity.Uuid) && Exists(dataObjectId))
             {
-                throw new NotImplementedException();
+                entity.Citation = entity.Citation.Update();
+
+                Validate(Functions.PutObject, entity);
+                UpdateEntity(entity, dataObjectId);
             }
             else
             {
                 entity.Uuid = NewUid(entity.Uuid);
                 entity.Citation = entity.Citation.Update();
 
-                var validator = Container.Resolve<IDataObjectValidator<ChannelSet>>();
-                validator.Validate(Functions.PutObject, entity);
-
+                Validate(Functions.PutObject, entity);
                 InsertEntity(entity);
             }
 

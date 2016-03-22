@@ -2,8 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic;
+using System.Xml.Linq;
+using Energistics.DataAccess;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
+using Newtonsoft.Json;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -84,7 +88,8 @@ namespace PDS.Witsml.Server.Data
         /// <returns>A WITSML result.</returns>
         public override WitsmlResult Delete(DataObjectId dataObjectId)
         {
-            return DeleteEntity(dataObjectId);
+            DeleteEntity(dataObjectId);
+            return new WitsmlResult(ErrorCodes.Success);
         }
 
         /// <summary>
@@ -254,29 +259,48 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Initializes a new UID value if one was not supplied.
+        /// Updates an object in the data store.
         /// </summary>
-        /// <param name="uid">The supplied UID (default value null).</param>
-        /// <returns>The supplied UID if not null; otherwise, a generated UID.</returns>
-        protected string NewUid(string uid = null)
+        /// <param name="entity">The object to be inserted.</param>
+        /// <param name="dataObjectId">The data object identifier.</param>
+        protected void UpdateEntity(T entity, DataObjectId dataObjectId)
         {
-            if (string.IsNullOrEmpty(uid))
-            {
-                uid = Guid.NewGuid().ToString();
-            }
+            UpdateEntity<T>(entity, DbCollectionName, dataObjectId);
+        }
 
-            return uid;
+        /// <summary>
+        /// Updates an object in the data store.
+        /// </summary>
+        /// <typeparam name="TObject">The type of the object.</typeparam>
+        /// <param name="entity">The object to be inserted.</param>
+        /// <param name="dbCollectionName">The name of the database collection.</param>
+        /// <param name="dataObjectId">The data object identifier.</param>
+        /// <exception cref="WitsmlException"></exception>
+        protected void UpdateEntity<TObject>(TObject entity, string dbCollectionName, DataObjectId dataObjectId)
+        {
+            try
+            {
+                Logger.DebugFormat("Updating {0} MongoDb collection", dbCollectionName);
+
+                var collection = GetCollection<TObject>(dbCollectionName);
+                var filter = GetEntityFilter<TObject>(dataObjectId);
+                var result = collection.ReplaceOne(filter, entity);
+            }
+            catch (MongoException ex)
+            {
+                Logger.ErrorFormat("Error updating {0} MongoDb collection:{1}{2}", dbCollectionName, Environment.NewLine, ex);
+                throw new WitsmlException(ErrorCodes.ErrorUpdatingInDataStore, ex);
+            }
         }
 
         /// <summary>
         /// Deletes a data object by the specified identifier.
         /// </summary>
         /// <param name="dataObjectId">The data object identifier.</param>
-        /// <returns>A WITSML result.</returns>
         /// <exception cref="WitsmlException"></exception>
-        protected WitsmlResult DeleteEntity(DataObjectId dataObjectId)
+        protected void DeleteEntity(DataObjectId dataObjectId)
         {
-            return DeleteEntity<T>(dataObjectId, DbCollectionName);
+            DeleteEntity<T>(dataObjectId, DbCollectionName);
         }
 
         /// <summary>
@@ -285,9 +309,8 @@ namespace PDS.Witsml.Server.Data
         /// <typeparam name="TObject">The type of data object.</typeparam>
         /// <param name="dataObjectId">The data object identifier.</param>
         /// <param name="dbCollectionName">The name of the database collection.</param>
-        /// <returns>A WITSML result.</returns>
         /// <exception cref="WitsmlException"></exception>
-        protected WitsmlResult DeleteEntity<TObject>(DataObjectId dataObjectId, string dbCollectionName)
+        protected void DeleteEntity<TObject>(DataObjectId dataObjectId, string dbCollectionName)
         {
             try
             {
@@ -296,8 +319,6 @@ namespace PDS.Witsml.Server.Data
                 var collection = GetCollection<TObject>(dbCollectionName);
                 var filter = GetEntityFilter<TObject>(dataObjectId);
                 var result = collection.DeleteOne(filter);
-
-                return new WitsmlResult(ErrorCodes.Success);
             }
             catch (MongoException ex)
             {
@@ -329,6 +350,21 @@ namespace PDS.Witsml.Server.Data
             }
 
             return builder.And(filters);
+        }
+
+        /// <summary>
+        /// Initializes a new UID value if one was not supplied.
+        /// </summary>
+        /// <param name="uid">The supplied UID (default value null).</param>
+        /// <returns>The supplied UID if not null; otherwise, a generated UID.</returns>
+        protected string NewUid(string uid = null)
+        {
+            if (string.IsNullOrEmpty(uid))
+            {
+                uid = Guid.NewGuid().ToString();
+            }
+
+            return uid;
         }
     }
 }

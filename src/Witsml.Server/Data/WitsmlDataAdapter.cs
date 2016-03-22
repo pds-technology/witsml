@@ -207,5 +207,16 @@ namespace PDS.Witsml.Server.Data
         {
             return new WitsmlQueryTemplate<T>();
         }
+
+        /// <summary>
+        /// Validates the entity based on the specified function.
+        /// </summary>
+        /// <param name="function">The WITSML API function.</param>
+        /// <param name="entity">The entity to validate.</param>
+        protected void Validate(Functions function, T entity)
+        {
+            var validator = Container.Resolve<IDataObjectValidator<T>>();
+            validator.Validate(function, entity);
+        }
     }
 }

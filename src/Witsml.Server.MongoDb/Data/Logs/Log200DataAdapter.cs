@@ -55,17 +55,23 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="entity">The entity.</param>
         public override WitsmlResult Put(Log entity)
         {
-            if (!string.IsNullOrWhiteSpace(entity.Uuid) && Exists(entity.GetObjectId()))
+            var dataObjectId = entity.GetObjectId();
+
+            if (!string.IsNullOrWhiteSpace(entity.Uuid) && Exists(dataObjectId))
             {
-                throw new NotImplementedException();
+                entity.Citation = entity.Citation.Update();
+
+                Validate(Functions.PutObject, entity);
+                UpdateEntity(entity, dataObjectId);
+
+                // TODO: update channel data values
             }
             else
             {
                 entity.Uuid = NewUid(entity.Uuid);
                 entity.Citation = entity.Citation.Update();
 
-                var validator = Container.Resolve<IDataObjectValidator<Log>>();
-                validator.Validate(Functions.PutObject, entity);
+                Validate(Functions.PutObject, entity);
 
                 var channelData = new Dictionary<string, string>();
                 var indicesMap = new Dictionary<string, List<ChannelIndexInfo>>();
