@@ -5,7 +5,7 @@ using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
 using MongoDB.Driver;
-using PDS.Witsml.Server.Data.Wellbores;
+using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Server.Models;
 
 namespace PDS.Witsml.Server.Data.Logs
