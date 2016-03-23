@@ -31,7 +31,7 @@
       "source": "MWD",
       "measureClass": "Length",
       "uuid": "6caf92e8-a55e-40be-8344-3bc549621d94",
-      "channelAxes": null
+      "channelAxes": []
     },
     {
       "channelUri": "",
@@ -48,7 +48,7 @@
       "source": "MWD",
       "measureClass": "Velocity",
       "uuid": "2e92d912-3976-4963-9a1e-1704ae7a5ad9",
-      "channelAxes": null
+      "channelAxes": []
     },
     {
       "channelUri": "",
@@ -65,7 +65,7 @@
       "source": "MWD",
       "measureClass": "Radioactivity",
       "uuid": "cd2d45fd-d280-4156-9426-fcaf12425324",
-      "channelAxes": null
+      "channelAxes": []
     },
     {
       "channelUri": "",
@@ -82,7 +82,7 @@
       "source": "MWD",
       "measureClass": "Weight",
       "uuid": "5c6faa81-3ec6-4b67-ad1c-5ed9a3eeb4f2",
-      "channelAxes": null
+      "channelAxes": []
     }
   ],
   "witsmlVersion": null
