@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Formatting;
 using System.Web.Http;
+using Energistics.Common;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using PDS.Framework.Web.Services;
 
 namespace PDS.Witsml.Web
@@ -25,7 +25,7 @@ namespace PDS.Witsml.Web
 
             config.Formatters.JsonFormatter.MediaTypeMappings.Add(new QueryStringMapping("json", "true", "application/json"));
 
-            config.Formatters.JsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            config.Formatters.JsonFormatter.SerializerSettings.ContractResolver = new EtpContractResolver();
 #if DEBUG
             config.Formatters.JsonFormatter.SerializerSettings.Formatting = Formatting.Indented;
 #endif

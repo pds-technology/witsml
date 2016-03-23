@@ -8,5 +8,26 @@
     <Setting Name="MaxDataPoints" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">10000</Value>
     </Setting>
+    <Setting Name="DefaultServerName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">PDS.Witsml.Server</Value>
+    </Setting>
+    <Setting Name="DefaultServerVersion" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">2016.1</Value>
+    </Setting>
+    <Setting Name="DefaultVendorName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">PDS Americas</Value>
+    </Setting>
+    <Setting Name="DefaultContactName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Bobby Diaz</Value>
+    </Setting>
+    <Setting Name="DefaultContactEmail" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">bobby.diaz@pds.nl</Value>
+    </Setting>
+    <Setting Name="DefaultContactPhone" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">+1 (832) 917-1705</Value>
+    </Setting>
+    <Setting Name="DefaultServerDescription" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">PDS WITSML Server (SOAP + ETP)</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

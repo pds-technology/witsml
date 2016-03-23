@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Xml.Linq;
-using log4net;
 using Witsml141 = Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using log4net;
+using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Configuration
 {
@@ -114,10 +115,16 @@ namespace PDS.Witsml.Server.Configuration
             capServer.SupportUomConversion = false; // TODO: update after UoM conversion implemented
             capServer.CompressionMethod = OptionsIn.CompressionMethod.None.Value; // TODO: update when compression is supported
 
-            // TODO: move these to Settings
-            capServer.Name = "PDS Witsml Server";
-            capServer.Vendor = "PDS";
-            capServer.Version = "1.0";
+            capServer.Name = Settings.Default.DefaultServerName;
+            capServer.Version = Settings.Default.DefaultServerVersion;
+            capServer.Description = Settings.Default.DefaultServerDescription;
+            capServer.Vendor = Settings.Default.DefaultVendorName;
+            capServer.Contact = new Contact()
+            {
+                Name = Settings.Default.DefaultContactName,
+                Email = Settings.Default.DefaultContactEmail,
+                Phone = Settings.Default.DefaultContactPhone
+            };
 
             return new Witsml141.CapServers()
             {

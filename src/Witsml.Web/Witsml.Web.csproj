@@ -214,11 +214,6 @@
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\Api.cshtml" />
     <Content Include="WitsmlStore.svc" />
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>Settings.settings</DependentUpon>
-    </Compile>
     <Compile Include="WitsmlStore.svc.cs">
       <DependentUpon>WitsmlStore.svc</DependentUpon>
     </Compile>
@@ -296,10 +291,6 @@
     <Content Include="Energistics\Datatypes\ArrayOfBoolean.avsc" />
     <Content Include="Energistics\Datatypes\AnyArray.avsc" />
     <None Include="Properties\PublishProfiles\pds-witsml.pubxml" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />

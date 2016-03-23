@@ -40,5 +40,68 @@ namespace PDS.Witsml.Server.Properties {
                 return ((int)(this["MaxDataPoints"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("PDS.Witsml.Server")]
+        public string DefaultServerName {
+            get {
+                return ((string)(this["DefaultServerName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2016.1")]
+        public string DefaultServerVersion {
+            get {
+                return ((string)(this["DefaultServerVersion"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("PDS Americas")]
+        public string DefaultVendorName {
+            get {
+                return ((string)(this["DefaultVendorName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Bobby Diaz")]
+        public string DefaultContactName {
+            get {
+                return ((string)(this["DefaultContactName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("bobby.diaz@pds.nl")]
+        public string DefaultContactEmail {
+            get {
+                return ((string)(this["DefaultContactEmail"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("+1 (832) 917-1705")]
+        public string DefaultContactPhone {
+            get {
+                return ((string)(this["DefaultContactPhone"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("PDS WITSML Server (SOAP + ETP)")]
+        public string DefaultServerDescription {
+            get {
+                return ((string)(this["DefaultServerDescription"]));
+            }
+        }
     }
 }

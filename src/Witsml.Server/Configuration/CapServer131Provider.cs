@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using log4net;
-using Witsml131 = Energistics.DataAccess.WITSML131;
 using System.Xml.Linq;
+using Witsml131 = Energistics.DataAccess.WITSML131;
+using Energistics.DataAccess.WITSML131.ComponentSchemas;
+using log4net;
+using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Configuration
 {
@@ -70,10 +72,16 @@ namespace PDS.Witsml.Server.Configuration
             capServer.ApiVers = "1.3.1";
             capServer.SchemaVersion = DataSchemaVersion;
 
-            // TODO: move these to Settings
-            capServer.Name = "PDS Witsml Server";
-            capServer.Vendor = "PDS";
-            capServer.Version = "1.0";
+            capServer.Name = Settings.Default.DefaultServerName;
+            capServer.Version = Settings.Default.DefaultServerVersion;
+            capServer.Description = Settings.Default.DefaultServerDescription;
+            capServer.Vendor = Settings.Default.DefaultVendorName;
+            capServer.Contact = new Contact()
+            {
+                Name = Settings.Default.DefaultContactName,
+                Email = Settings.Default.DefaultContactEmail,
+                Phone = Settings.Default.DefaultContactPhone
+            };
 
             return new Witsml131.CapServers()
             {
