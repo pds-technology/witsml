@@ -327,10 +327,7 @@ namespace PDS.Witsml.Server.Data
             }
             else if (propertyType.IsEnum)
             {
-                if (!Enum.IsDefined(propertyType, propertyValue))
-                    throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
-
-                var value = Enum.Parse(propertyType, propertyValue);
+                var value = ParseEnum(propertyType, propertyValue);
                 return Builders<T>.Filter.Eq(propertyPath, value);
             }
             else if (typeof(DateTime).IsAssignableFrom(propertyType))
@@ -399,23 +396,32 @@ namespace PDS.Witsml.Server.Data
                 throw new WitsmlException(ErrorCodes.MissingUnitForMeasureData);
             }
 
-            var enumType = uomProperty.PropertyType;
+            return uomValue;
+        }
+
+        private object ParseEnum(Type enumType, string enumValue)
+        {
+            if (Enum.IsDefined(enumType, enumValue))
+            {
+                return Enum.Parse(enumType, enumValue);
+            }
+
             var enumMember = enumType.GetMembers().FirstOrDefault(x =>
             {
-                if (x.Name.EqualsIgnoreCase(uomValue))
+                if (x.Name.EqualsIgnoreCase(enumValue))
                     return true;
 
                 var xmlEnumAttrib = x.GetCustomAttribute<XmlEnumAttribute>();
-                return xmlEnumAttrib != null && xmlEnumAttrib.Name.EqualsIgnoreCase(uomValue);
+                return xmlEnumAttrib != null && xmlEnumAttrib.Name.EqualsIgnoreCase(enumValue);
             });
 
-            // uom must be a valid enumeration member
+            // must be a valid enumeration member
             if (!enumType.IsEnum || enumMember == null)
             {
                 throw new WitsmlException(ErrorCodes.InvalidUnitOfMeasure);
             }
 
-            return enumMember.Name;
+            return Enum.Parse(enumType, enumMember.Name);
         }
 
         /// <summary>
