@@ -641,5 +641,282 @@ namespace PDS.Witsml.Server.Data.Channels
         {
             return DateTimeOffset.Parse(input).ToUnixTimeSeconds();
         }
+
+        public void UpdateLogData(Energistics.DataAccess.WITSML141.Log entity, List<LogData> logDatas, bool isTimeLog, bool increasing)
+        {
+            var uidLog = entity.Uid;
+            var inserts = new List<ChannelSetValues>();
+            var updates = new Dictionary<string, ChannelSetValues>();
+            var ranges = new List<double>();
+            var valueUpdates = new List<List<string>>();
+
+            var collection = GetCollection<ChannelSetValues>(DbCollectionName);
+            var mongoDbUpdate = new MongoDbUpdate<ChannelSetValues>(collection, null, null, null);
+
+            foreach (var logData in logDatas)
+            {
+                var updateChunks = new List<List<List<string>>>();
+                var dataObjUpdate = WitsmlParser.Parse<LogData>(logData.ToString());
+                var mnemonics = dataObjUpdate.MnemonicList.Split(Separator).ToList();
+                var units = dataObjUpdate.UnitList.Split(Separator).ToList();
+                var indexCurve = mnemonics[0].Trim();
+                var dataUpdate = new List<List<string>>();
+                var effectiveRanges = new Dictionary<string, List<double>>();
+
+                SetUpdateChunks(logData.Data, mnemonics, updateChunks, effectiveRanges, isTimeLog, increasing);
+                var indexRanges = effectiveRanges[indexCurve];
+                var updateRange = new Tuple<double?, double?>(indexRanges.First(), indexRanges.Last());
+
+                var filter = BuildDataFilter(uidLog, indexCurve, updateRange, increasing);
+
+                // Query channelSetValues collection
+                var results = GetData(filter, increasing);
+                var count = 0;
+
+                foreach (var updateChunk in updateChunks)
+                {
+                    var start = GetAnIndexValue(updateChunk.First().First(), isTimeLog);
+                    var matchingChunk = FindChunkByRange(results, start, increasing, ref count);
+                    if (matchingChunk == null)
+                    {
+                        // insert new chunk
+                        inserts.Add(CreateChunk(uidLog, updateChunk, mnemonics, units, increasing, isTimeLog));
+                    }
+                    else
+                    {
+                        // update existing chunk
+                        UpdateChunkValues(matchingChunk, updateChunk, mnemonics, units, effectiveRanges, isTimeLog, increasing);
+                        updates.Add(matchingChunk.Uid, matchingChunk);
+                    }
+                }
+
+                if (inserts.Count > 0)
+                {
+                    collection.BulkWrite(inserts
+                        .Select(i =>
+                        {
+                            return new InsertOneModel<ChannelSetValues>(i);
+                        }));
+                }
+                if (updates.Count > 0)
+                {
+                    mongoDbUpdate.Update(updates);
+                }
+            }
+        }
+
+        private ChannelSetValues FindChunkByRange(List<ChannelSetValues> results, double start, bool increasing, ref int count)
+        {
+            if (results == null || results.Count == 0)
+                return null;
+
+            for (var i = count; i < results.Count; i++)
+            {
+                var result = results[i];
+                var index = result.Indices.FirstOrDefault();
+                if (index == null)
+                    return null;
+
+                var range = ComputeRange(index.Start, RangeSize, increasing);
+                if (Before(start, range.Item2, increasing) && !Before(start, range.Item1, increasing))
+                {
+                    count = i++;
+                    return result;
+                }
+            }
+            return null;
+        }
+
+        private ChannelSetValues CreateChunk(string uidLog, List<List<string>> updates, List<string> mnemonics, List<string> units, bool increasing, bool isTimeLog)
+        {
+            var chunk = new ChannelSetValues { Uid = NewUid(), UidLog = uidLog };
+            var start = GetAnIndexValue(updates.First().First(), isTimeLog);
+            var end = GetAnIndexValue(updates.Last().First(), isTimeLog);
+            var index = new ChannelIndexInfo { Mnemonic = mnemonics[0], Start = start, End = end, Increasing = increasing, IsTimeIndex = isTimeLog };
+            chunk.Indices = new List<ChannelIndexInfo> { index };
+            var delimiter = Separator.ToString();
+            chunk.Data = SerializeLogData(updates.Select(r => string.Join(delimiter, r)).ToList());
+
+            return chunk;
+        }
+
+        private void UpdateChunkValues(ChannelSetValues chunk, List<List<string>> updates, List<string> mnemonics, List<string> units, Dictionary<string, List<double>> effectiveRanges, bool isTimeLog, bool increasing)
+        {
+            var chunkMnemonics = chunk.MnemonicList.Split(Separator).ToList();
+            var chunkUnits = chunk.UnitList.Split(Separator).ToList();
+            var chunkData = DeserializeLogData(chunk.Data);
+            var chunkIndex = chunk.Indices.FirstOrDefault();
+            var chunkRange = ComputeRange(chunkIndex.Start, RangeSize, increasing);
+            var merges = new List<string>();
+            var mnemonicIndexMap = new Dictionary<string, int>();
+            for (var i = 0; i < chunkMnemonics.Count; i++)
+                mnemonicIndexMap.Add(chunkMnemonics[i], i);
+
+            for (var i = 0; i < mnemonics.Count; i++)
+            {
+                var mnemonic = mnemonics[i];
+                if (!chunkMnemonics.Contains(mnemonic))
+                {
+                    var effectiveRange = effectiveRanges[mnemonic];
+                    if (Before(effectiveRange.First(), chunkRange.Item2, increasing) && Before(chunkRange.Item1, effectiveRange.Last(), increasing))
+                    {
+                        chunkMnemonics.Add(mnemonic);
+                        chunkUnits.Add(units[i]);
+                        mnemonicIndexMap.Add(mnemonic, chunkMnemonics.Count);
+                    }
+                }
+            }
+
+            double current, next;
+            List<string> update;
+            var mergeRange = new List<double>();
+            for (var i = 0; i < updates.Count; i++)
+            {
+                for (var j = 0; j < chunkData.Count; j++)
+                {
+                    update = updates[i];
+                    current = GetAnIndexValue(update.First(), isTimeLog);
+                    var points = chunkData[j].Split(Separator).ToList();
+                    next = GetAnIndexValue(points.First(), isTimeLog);
+                    while (Before(current, next, increasing))
+                    {
+                        MergeOneDataRow(merges, null, update, chunkMnemonics, mnemonics, mnemonicIndexMap, effectiveRanges, current, increasing);
+                        i++;
+                        update = updates[i];
+                        current = GetAnIndexValue(update.First(), isTimeLog);
+                    }
+                    if (current == next)
+                    {
+                        MergeOneDataRow(merges, points, update, chunkMnemonics, mnemonics, mnemonicIndexMap, effectiveRanges, current, increasing);
+                        i++;
+                        continue;
+                    }
+                    while (Before(next, current, increasing))
+                    {
+                        MergeOneDataRow(merges, points, null, chunkMnemonics, mnemonics, mnemonicIndexMap, effectiveRanges, next, increasing);
+                        j++;
+                        points = chunkData[j].Split(Separator).ToList();
+                        next = GetAnIndexValue(points.First(), isTimeLog);
+                    }
+                }
+            }
+
+            chunk.Data = SerializeLogData(merges);
+            chunk.MnemonicList = string.Join(Separator.ToString(), chunkMnemonics);
+            chunk.UnitList = string.Join(Separator.ToString(), chunkUnits);
+            var indexInfo = chunk.Indices.First();
+            var firstRow = merges.First().Split(Separator);
+            indexInfo.Start = GetAnIndexValue(firstRow[0], isTimeLog);
+            var lastRow = merges.Last().Split(Separator);
+            indexInfo.End = GetAnIndexValue(lastRow[0], isTimeLog);
+        }
+
+        private void MergeOneDataRow(List<string> merges, List<string> points, List<string> updates, List<string> pointMnemonics, List<string> updateMnemonics, Dictionary<string, int> indexMap, Dictionary<string, List<double>> effectiveRanges, double indexValue, bool increasing)
+        {
+            var mnemonicsCount = indexMap.Keys.Count;
+            var merge = new List<string>(mnemonicsCount);
+
+            if (points == null)
+            {
+                for (var i = 0; i < updateMnemonics.Count; i++)
+                {
+                    var mnemonic = updateMnemonics[i];
+                    merge[indexMap[mnemonic]] = updates[i];
+                }
+            }
+            else if (updates == null)
+            {
+                for (var i = 0; i < pointMnemonics.Count; i++)
+                {
+                    var mnemonic = pointMnemonics[i];
+                    if (updateMnemonics.Contains(mnemonic))
+                    {
+                        var effectiveRange = effectiveRanges[mnemonic];
+                        if (Before(indexValue, effectiveRange.First(), increasing) || Before(effectiveRange.Last(), indexValue, increasing))
+                            merge[i] = points[i];
+                        else
+                            merge[i] = string.Empty;
+                    }
+                    else
+                    {
+                        merge[i] = points[i];
+                    }
+                }
+            }
+            else
+            {
+                foreach (var mnemonic in indexMap.Keys)
+                {
+                    var mergeIndex = indexMap[mnemonic];
+                    var updateIndex = updates.IndexOf(mnemonic);
+                    merge[mergeIndex] = updateIndex > -1 ? updates[updateIndex] : points[mergeIndex];
+                }
+            }
+
+            for (var i = 1; i < merge.Count; i++)
+            {
+                if (!string.IsNullOrEmpty(merge[i]))
+                {
+                    merges.Add(string.Join(Separator.ToString(), merge));
+                    return;
+                }
+            }
+        }
+
+        private bool Before(double start, double end, bool increasing)
+        {
+            return increasing ? start < end : start > end;
+        }
+
+        private double GetNextRange(double previous, bool increasing)
+        {
+            return increasing ? previous + RangeSize : previous - RangeSize;
+        }
+
+        private Tuple<double?, double?> GetUpdateRange(string first, string last, bool isTimeLog)
+        {
+            return new Tuple<double?, double?>(GetAnIndexValue(first, isTimeLog), GetAnIndexValue(last, isTimeLog));
+        }
+
+        private double GetAnIndexValue(string input, bool isTimeLog)
+        {
+            if (isTimeLog)
+                return ParseTime(input);
+            else
+                return double.Parse(input);
+        }
+
+        private void SetUpdateChunks(List<string> logData, List<string> mnemonics, List<List<List<string>>> chunks, Dictionary<string, List<double>> ranges, bool isTimeLog, bool increasing)
+        {
+            var firstRow = logData[0];
+            var points = firstRow.Split(Separator).ToList();
+            var indexValue = GetAnIndexValue(points.First(), isTimeLog);
+            double stop = ComputeRange(indexValue, RangeSize, increasing).Item2;
+            var chunk = new List<List<string>>();
+
+            foreach (var row in logData)
+            {
+                points = row.Split(Separator).ToList();
+                indexValue = GetAnIndexValue(points.First(), isTimeLog);
+                for (var i = 0; i < points.Count; i++)
+                {
+                    var mnemonic = mnemonics[i];
+                    if (!string.IsNullOrEmpty(points[i]))
+                    {
+                        if (ranges.ContainsKey(mnemonic))
+                            ranges.Add(mnemonic, new List<double> { indexValue, indexValue });
+                        else
+                            ranges[mnemonic][1] = indexValue;
+                    }
+                }
+                if (!Before(indexValue, stop, increasing))
+                {
+                    chunks.Add(chunk);
+                    chunk.Clear();
+                }
+                stop = GetNextRange(stop, increasing);
+                chunk.Add(points);
+            }
+        }
     }
 }
