@@ -33,6 +33,25 @@ namespace PDS.Witsml.Data.Logs
         }
 
         [TestMethod]
+        public void Can_generate_depth_log_loop()
+        {
+            var startIndex = 0.0;
+            var numOfRows = 3;
+            var interval = (DepthLog.Direction == LogIndexDirection.increasing) ? 1.0 : -1.0;
+            for (int i = 0; i < 10; i++)
+            {
+                var nextStartIndex = LogGenerator.GenerateLogData(DepthLog, numOfRows, startIndex);
+                Assert.AreEqual(startIndex + numOfRows*interval, nextStartIndex);
+                startIndex = nextStartIndex;
+            }
+
+            Assert.IsNotNull(DepthLog);
+            Assert.IsNotNull(DepthLog.LogData);
+            Assert.IsNotNull(DepthLog.LogData[0].Data);
+            Assert.AreEqual(30, DepthLog.LogData[0].Data.Count);
+        }
+
+        [TestMethod]
         public void Can_generate_time_log()
         {
             LogGenerator.GenerateLogData(TimeLog, 10);
