@@ -70,12 +70,13 @@ namespace PDS.Witsml.Server
         {
             var start = DateTimeOffset.UtcNow.AddDays(-1);
             var interval = increasing ? 1 : -1;
+            var depthStart = log.StartIndex != null ? log.StartIndex.Value : 0;
 
             for (int i = 0; i < numRows; i++)
             {
                 if (isDepthLog)
                 {
-                    InitData(log, mnemonics, units, i * interval, hasEmptyChannel ? (int?)null : i, i * factor);
+                    InitData(log, mnemonics, units, depthStart + i * interval, hasEmptyChannel ? (int?)null : i, depthStart + i * factor);
                 }
                 else
                 {

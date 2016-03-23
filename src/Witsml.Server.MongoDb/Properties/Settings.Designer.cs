@@ -43,7 +43,7 @@ namespace PDS.Server.MongoDb {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
         public int LogIndexRangeSize {
             get {
                 return ((int)(this["LogIndexRangeSize"]));
