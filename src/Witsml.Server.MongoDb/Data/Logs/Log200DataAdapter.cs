@@ -80,7 +80,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
                 _channelDataAdapter.SaveChannelSets(entity, channelData, indicesMap);
                 InsertEntity(entity);
-                _channelDataAdapter.WriteChannelSetValues(entity.Uuid, channelData, indicesMap);
+                _channelDataAdapter.WriteChannelDataValues(entity.Uuid, channelData, indicesMap);
             }
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uuid);
