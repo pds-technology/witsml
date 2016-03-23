@@ -192,7 +192,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 InsertEntity(entity);
 
                 // If there is any LogData.Data then save it.
-                if (logData != null)
+                if (logData != null && logData.Data != null && logData.Data.Any())
                 {
                     var indexChannel = new ChannelIndexInfo
                     {
@@ -301,9 +301,20 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>A <see cref="LogData" /> instance with the LogData.Data specified by the parser.</returns>
         private LogData QueryLogDataValues(Log log, WitsmlQueryParser parser)
         {
+            var returnElements = parser.ReturnElements();
+            var logDataElement = parser.Property("logData");
+
+            if (logDataElement == null &&
+                !OptionsIn.ReturnElements.All.Equals(returnElements) &&
+                !OptionsIn.ReturnElements.DataOnly.Equals(returnElements))
+            {
+                return null;
+            }
+
             Tuple<double?, double?> range;
             var increasing = log.Direction != LogIndexDirection.decreasing;
             var isTimeLog = log.IndexType == LogIndexType.datetime;
+
             if (isTimeLog)
             {
                 var startIndex = ToNullableUnixSeconds(parser.PropertyValue("startDateTimeIndex"));
@@ -317,13 +328,13 @@ namespace PDS.Witsml.Server.Data.Logs
                 range = new Tuple<double?, double?>(startIndex, endIndex);
             }
 
-            var logDataElement = parser.Property("logData");
-            if (logDataElement == null)
-                return null;
+            var mnemonics = log.LogCurveInfo.Select(x => x.Mnemonic.Value).ToList();
 
-            var source = log.LogCurveInfo.Select(x => x.Mnemonic.ToString()).ToList();
-            var target = logDataElement.Elements().FirstOrDefault(e => e.Name.LocalName == "mnemonicList").Value.Split(',');
-            var mnemonics = target.Where(m => source.Contains(m)).ToList();
+            if (logDataElement != null)
+            {
+                var target = logDataElement.Elements().FirstOrDefault(e => e.Name.LocalName == "mnemonicList").Value.Split(',');
+                mnemonics = target.Where(m => mnemonics.Contains(m)).ToList();
+            }
 
             return _channelDataAdapter.GetLogData(log.Uid, mnemonics, range, increasing);
         }
