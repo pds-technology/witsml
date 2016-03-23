@@ -13,21 +13,46 @@ namespace PDS.Witsml.Data.Logs
         public readonly LogIndexType[] TimeIndexTypes = new LogIndexType[] { LogIndexType.datetime, LogIndexType.elapsedtime };
         public readonly LogIndexType[] OtherIndexTypes = new LogIndexType[] { LogIndexType.other, LogIndexType.unknown };
 
+        /// <summary>
+        /// Creates the datetime type <see cref="LogCurveInfo"/>.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="unit">The unit.</param>
+        /// <returns></returns>
         public LogCurveInfo CreateDateTimeLogCurveInfo(string name, string unit)
         {
             return CreateLogCurveInfo(name, unit, LogDataType.datetime);
         }
 
+        /// <summary>
+        /// Creates the double type <see cref="LogCurveInfo"/>.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="unit">The unit.</param>
+        /// <returns></returns>
         public LogCurveInfo CreateDoubleLogCurveInfo(string name, string unit)
         {
             return CreateLogCurveInfo(name, unit, LogDataType.@double);
         }
 
+        /// <summary>
+        /// Creates the string type <see cref="LogCurveInfo"/>.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="unit">The unit.</param>
+        /// <returns></returns>
         public LogCurveInfo CreateStringLogCurveInfo(string name, string unit)
         {
             return CreateLogCurveInfo(name, unit, LogDataType.@string);
         }
 
+        /// <summary>
+        /// Creates the <see cref="LogCurveInfo"/>
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="unit">The unit.</param>
+        /// <param name="type">The type.</param>
+        /// <returns></returns>
         public LogCurveInfo CreateLogCurveInfo(string name, string unit, LogDataType type)
         {
             return new LogCurveInfo()
@@ -38,6 +63,11 @@ namespace PDS.Witsml.Data.Logs
             };
         }
 
+        /// <summary>
+        /// Gets the units in the specified list of <see cref="LogCurveInfo"/>.
+        /// </summary>
+        /// <param name="infoList">The information list.</param>
+        /// <returns></returns>
         public string Units(List<LogCurveInfo> infoList)
         {
             return infoList != null
@@ -45,6 +75,11 @@ namespace PDS.Witsml.Data.Logs
                 : string.Empty;
         }
 
+        /// <summary>
+        /// Gets the mnemonicses in the specified list of <see cref="LogCurveInfo"/>.
+        /// </summary>
+        /// <param name="infoList">The information list.</param>
+        /// <returns></returns>
         public string Mnemonics(List<LogCurveInfo> infoList)
         {
             return infoList != null
@@ -52,6 +87,13 @@ namespace PDS.Witsml.Data.Logs
                 : string.Empty;
         }
 
+        /// <summary>
+        /// Generates the log data.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="numOfRows">The number of rows.</param>
+        /// <param name="startIndex">The start index.</param>
+        /// <returns></returns>
         public double GenerateLogData(Log log, int numOfRows = 5, double startIndex = 0d)
         {           
             const int Seed = 123;
@@ -75,7 +117,6 @@ namespace PDS.Witsml.Data.Logs
             for (int i = 0; i < numOfRows; i++)
             {
                 var row = string.Empty;
-                index += i * interval;
 
                 // index value
                 switch (log.IndexType)
@@ -118,7 +159,7 @@ namespace PDS.Witsml.Data.Logs
                         case LogDataType.datetime:
                         {
                             dateTimeStart = dateTimeStart.AddSeconds(random.Next(1, 5));
-                            row += "\"" + dateTimeStart.AddSeconds(1.0).ToString("o") + "\"";
+                            row += "\"" + dateTimeStart.ToString("o") + "\"";
                             break;
                         }
                         case LogDataType.@double:
@@ -148,6 +189,7 @@ namespace PDS.Witsml.Data.Logs
                 }
 
                 data.Add(row);
+                index += interval;
             }
 
             return index;
