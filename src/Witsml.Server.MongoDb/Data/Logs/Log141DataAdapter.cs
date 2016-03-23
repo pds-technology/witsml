@@ -325,9 +325,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var target = logDataElement.Elements().FirstOrDefault(e => e.Name.LocalName == "mnemonicList").Value.Split(',');
             var mnemonics = target.Where(m => source.Contains(m)).ToList();
 
-            var channelDataAdapter = new ChannelDataAdapter(DatabaseProvider);
-            
-            return channelDataAdapter.GetLogData(log.Uid, mnemonics, range, increasing);
+            return _channelDataAdapter.GetLogData(log.Uid, mnemonics, range, increasing);
         }
 
         /// <summary>
