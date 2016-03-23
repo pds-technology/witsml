@@ -71,17 +71,22 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="indexChannel">The index channel.</param>
         public void WriteLogDataValues(string uidLog, List<string> data, string mnemonicList, string unitList, ChannelIndexInfo indexChannel)
         {
-            var collection = GetCollection<ChannelDataValues>(DbCollectionName);
+            var chunks = ToChunks(indexChannel, GetSequence(string.Empty, !indexChannel.IsTimeIndex, data));
 
-            collection.BulkWrite(ToChunks(indexChannel, GetSequence(string.Empty, !indexChannel.IsTimeIndex, data))
-                .Select(dc =>
-                {
-                    dc.UidLog = uidLog;
-                    dc.Uid = NewUid();
-                    dc.MnemonicList = mnemonicList;
-                    dc.UnitList = unitList;
-                    return new InsertOneModel<ChannelDataValues>(dc);
-                }));
+            if (chunks != null && chunks.Any())
+            {
+                var collection = GetCollection<ChannelDataValues>(DbCollectionName);
+
+                collection.BulkWrite(chunks
+                    .Select(dc =>
+                    {
+                        dc.UidLog = uidLog;
+                        dc.Uid = NewUid();
+                        dc.MnemonicList = mnemonicList;
+                        dc.UnitList = unitList;
+                        return new InsertOneModel<ChannelDataValues>(dc);
+                    }));
+            }
         }
 
         /// <summary>
