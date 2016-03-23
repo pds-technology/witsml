@@ -1052,7 +1052,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 {
                     chunks.Add(chunk);
                     chunk.Clear();
-                    stop = ComputeRange(indexValue, RangeSize, increasing).Item2;
+                    stop = ComputeRange(indexValue, RangeSize, increasing).End;
                 }
                 chunk.Add(points);
             }
