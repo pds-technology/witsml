@@ -688,6 +688,13 @@ namespace PDS.Witsml.Server.Data.Channels
             return DateTimeOffset.Parse(input).ToUnixTimeSeconds();
         }
 
+        /// <summary>
+        /// Updates the 1.4 WITSML Log data.
+        /// </summary>
+        /// <param name="entity">The original Log object.</param>
+        /// <param name="logDatas">The log data for the updates.</param>
+        /// <param name="isTimeLog">if set to <c>true</c> [the log index type is time].</param>
+        /// <param name="increasing">if set to <c>true</c> [the log index is increasing].</param>
         public void UpdateLogData(Energistics.DataAccess.WITSML141.Log entity, List<LogData> logDatas, bool isTimeLog, bool increasing)
         {
             var uidLog = entity.Uid;
@@ -699,6 +706,7 @@ namespace PDS.Witsml.Server.Data.Channels
             var collection = GetCollection<ChannelDataValues>(DbCollectionName);
             var mongoDbUpdate = new MongoDbUpdate<ChannelDataValues>(collection, null, null, null);
 
+            // Looping through each logData elements, since multiple logData nodes are allowed during update
             foreach (var logData in logDatas)
             {
                 var updateChunks = new List<List<List<string>>>();
@@ -709,29 +717,33 @@ namespace PDS.Witsml.Server.Data.Channels
                 var dataUpdate = new List<List<string>>();
                 var effectiveRanges = new Dictionary<string, List<double>>();
 
+                // Split all comma delimited data into lists and divide the update list into chunks and compute the effective range for each channel in the updates
                 SetUpdateChunks(logData.Data, mnemonics, updateChunks, effectiveRanges, isTimeLog, increasing);
                 var indexRanges = effectiveRanges[indexCurve];
                 var updateRange = new Tuple<double?, double?>(indexRanges.First(), indexRanges.Last());
 
+                // Find the current log data chunks enclosed by the update range
                 var filter = BuildDataFilter(uidLog, indexCurve, updateRange, increasing);
-
-                // Query channelSetValues collection
                 var results = GetData(filter, increasing);
                 var count = 0;
+
                 var updatedChunkIds = new List<string>();
 
+                // Looping through update chunks
                 foreach (var updateChunk in updateChunks)
                 {
                     var start = GetAnIndexValue(updateChunk.First().First(), isTimeLog);
+
+                    // Looking for original chunk for the same range
                     var matchingChunk = FindChunkByRange(results, start, increasing, ref count);
                     if (matchingChunk == null)
                     {
-                        // insert new chunk
+                        // if not found: insert new chunk
                         inserts.Add(CreateChunk(uidLog, updateChunk, mnemonics, units, increasing, isTimeLog));
                     }
                     else
                     {
-                        // update existing chunk
+                        // if found: merge existing chunk with update chunk
                         UpdateChunkValues(matchingChunk, updateChunk, mnemonics, units, effectiveRanges, isTimeLog, increasing);
                         var chunkUid = matchingChunk.Uid;
                         updates.Add(chunkUid, matchingChunk);
@@ -739,12 +751,15 @@ namespace PDS.Witsml.Server.Data.Channels
                     }
                 }
 
+                // Looping through original chunks that has no overlapping chunk from the updates, yet are within the update range, e.g. in the middle,
+                // and update the data for the channels are in the update, i.e. overwrite it to blank since it is covered by updates
                 foreach (var unmatchedChunk in results.Where(r => !updatedChunkIds.Contains(r.Uid)))
                 {
                     UpdateChunkValues(unmatchedChunk, null, mnemonics, units, effectiveRanges, isTimeLog, increasing);
                     updates.Add(unmatchedChunk.Uid, unmatchedChunk);
                 }
 
+                // insert
                 if (inserts.Count > 0)
                 {
                     collection.BulkWrite(inserts
@@ -753,6 +768,8 @@ namespace PDS.Witsml.Server.Data.Channels
                             return new InsertOneModel<ChannelDataValues>(i);
                         }));
                 }
+
+                // update
                 if (updates.Count > 0)
                 {
                     mongoDbUpdate.Update(updates);
@@ -760,6 +777,14 @@ namespace PDS.Witsml.Server.Data.Channels
             }
         }
 
+        /// <summary>
+        /// Finds the original chunk for an update chunk by its index range.
+        /// </summary>
+        /// <param name="results">The original collection of chunks withing the update range.</param>
+        /// <param name="start">The start index of the update chunk.</param>
+        /// <param name="increasing">if set to <c>true</c> [the log is increasing].</param>
+        /// <param name="count">The starting index for search the original collection since both collection are ordered.</param>
+        /// <returns>The original chunk if found; null if not.</returns>
         private ChannelDataValues FindChunkByRange(List<ChannelDataValues> results, double start, bool increasing, ref int count)
         {
             if (results == null || results.Count == 0)
@@ -782,6 +807,16 @@ namespace PDS.Witsml.Server.Data.Channels
             return null;
         }
 
+        /// <summary>
+        /// Creates a new chunk to insert.
+        /// </summary>
+        /// <param name="uidLog">The uid of the log.</param>
+        /// <param name="updates">The collection of update log data.</param>
+        /// <param name="mnemonics">The mnemonics of the channels to update.</param>
+        /// <param name="units">The units of the channels to update.</param>
+        /// <param name="increasing">if set to <c>true</c> [the log is increasing].</param>
+        /// <param name="isTimeLog">if set to <c>true</c> [the log index type is time].</param>
+        /// <returns>The created chunk</returns>
         private ChannelDataValues CreateChunk(string uidLog, List<List<string>> updates, List<string> mnemonics, List<string> units, bool increasing, bool isTimeLog)
         {
             var chunk = new ChannelDataValues { Uid = NewUid(), UidLog = uidLog };
@@ -795,6 +830,16 @@ namespace PDS.Witsml.Server.Data.Channels
             return chunk;
         }
 
+        /// <summary>
+        /// Updates the chunk values; merge the original chunk with the updates.
+        /// </summary>
+        /// <param name="chunk">The original chunk.</param>
+        /// <param name="updates">The collection of update log data.</param>
+        /// <param name="mnemonics">The mnemonics of the channels to update.</param>
+        /// <param name="units">The units of the channels to update.</param>
+        /// <param name="effectiveRanges">The effective ranges of the channels to update.</param>
+        /// <param name="isTimeLog">if set to <c>true</c> [the log index type is time].</param>
+        /// <param name="increasing">if set to <c>true</c> [the log is increasing].</param>
         private void UpdateChunkValues(ChannelDataValues chunk, List<List<string>> updates, List<string> mnemonics, List<string> units, Dictionary<string, List<double>> effectiveRanges, bool isTimeLog, bool increasing)
         {
             var chunkMnemonics = chunk.MnemonicList.Split(Separator).ToList();
@@ -877,6 +922,18 @@ namespace PDS.Witsml.Server.Data.Channels
             chunk.Data = SerializeLogData(merges);          
         }
 
+        /// <summary>
+        /// Merges the one data row.
+        /// </summary>
+        /// <param name="merges">The collection to hold the merged row.</param>
+        /// <param name="points">The original points for the row.</param>
+        /// <param name="updates">The updates for the row.</param>
+        /// <param name="pointMnemonics">The mnemonics for the channels in the original row.</param>
+        /// <param name="updateMnemonics">The mnemonics for the channel in the update row.</param>
+        /// <param name="indexMap">The mnemonic index for the merged row.</param>
+        /// <param name="effectiveRanges">The effective ranges for the channels in the update.</param>
+        /// <param name="indexValue">The index value for the row.</param>
+        /// <param name="increasing">if set to <c>true</c> [the log is increasing].</param>
         private void MergeOneDataRow(List<string> merges, List<string> points, List<string> updates, List<string> pointMnemonics, List<string> updateMnemonics, Dictionary<string, int> indexMap, Dictionary<string, List<double>> effectiveRanges, double indexValue, bool increasing)
         {
             var mnemonicsCount = indexMap.Keys.Count;
@@ -929,21 +986,24 @@ namespace PDS.Witsml.Server.Data.Channels
             }
         }
 
+        /// <summary>
+        /// Check if the start index is before the end.
+        /// </summary>
+        /// <param name="start">The start index.</param>
+        /// <param name="end">The end index.</param>
+        /// <param name="increasing">if set to <c>true</c> [the log is increasing].</param>
+        /// <returns>True if before; false if not.</returns>
         private bool Before(double start, double end, bool increasing)
         {
             return increasing ? start < end : start > end;
         }
 
-        private double GetNextRange(double previous, bool increasing)
-        {
-            return increasing ? previous + RangeSize : previous - RangeSize;
-        }
-
-        private Tuple<double?, double?> GetUpdateRange(string first, string last, bool isTimeLog)
-        {
-            return new Tuple<double?, double?>(GetAnIndexValue(first, isTimeLog), GetAnIndexValue(last, isTimeLog));
-        }
-
+        /// <summary>
+        /// Convert a string value to a double index value.
+        /// </summary>
+        /// <param name="input">The input string.</param>
+        /// <param name="isTimeLog">if set to <c>true</c> [the log index type is time].</param>
+        /// <returns>The index value.</returns>
         private double GetAnIndexValue(string input, bool isTimeLog)
         {
             if (isTimeLog)
@@ -952,12 +1012,21 @@ namespace PDS.Witsml.Server.Data.Channels
                 return double.Parse(input);
         }
 
+        /// <summary>
+        /// Sets the update chunks.
+        /// </summary>
+        /// <param name="logData">The update log data.</param>
+        /// <param name="mnemonics">The mnemonics for the channels in the update.</param>
+        /// <param name="chunks">The collection to hold the update chunks.</param>
+        /// <param name="ranges">The collection to compute the effective range for each channel in the update.</param>
+        /// <param name="isTimeLog">if set to <c>true</c> [the log index type is time].</param>
+        /// <param name="increasing">if set to <c>true</c> [the log index is increasing].</param>
         private void SetUpdateChunks(List<string> logData, List<string> mnemonics, List<List<List<string>>> chunks, Dictionary<string, List<double>> ranges, bool isTimeLog, bool increasing)
         {
             var firstRow = logData[0];
             var points = firstRow.Split(Separator).ToList();
             var indexValue = GetAnIndexValue(points.First(), isTimeLog);
-            double stop = ComputeRange(indexValue, RangeSize, increasing).Item2;
+            var stop = ComputeRange(indexValue, RangeSize, increasing).Item2;
             var chunk = new List<List<string>>();
 
             foreach (var row in logData)
@@ -979,8 +1048,8 @@ namespace PDS.Witsml.Server.Data.Channels
                 {
                     chunks.Add(chunk);
                     chunk.Clear();
+                    stop = ComputeRange(indexValue, RangeSize, increasing).Item2;
                 }
-                stop = GetNextRange(stop, increasing);
                 chunk.Add(points);
             }
         }
