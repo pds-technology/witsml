@@ -111,6 +111,28 @@ namespace PDS.Witsml.Server.Data.Channels
         }
 
         /// <summary>
+        /// NOTE: This method is currently only used for testing 2.0 Log Data but may be of value for querying 2.0 Log Data later.
+        /// 
+        /// Gets the ChannelSetValues that fall within a given range.
+        /// </summary>
+        /// <param name="uidLog">The uid log.</param>
+        /// <param name="mnemonics">The mnemonics.</param>
+        /// <param name="range">The range.</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <returns>A List of ChannelSetValues that fall within a given range for a specific Log uid.</returns>
+        public List<ChannelSetValues> GetData(string uidLog, List<string> mnemonics, Tuple<double?, double?> range, bool increasing)
+        {
+            var indexCurve = mnemonics[0].Trim();
+
+            // Build Log Data filter
+            var filter = BuildDataFilter(uidLog, indexCurve, range, increasing);
+
+            // Query channelSetValues collection
+            return GetData(filter, increasing);
+            
+        }
+
+        /// <summary>
         /// Saves the channel sets to its own collection in addition as a property for the log.
         /// </summary>
         /// <param name="entity">The log entity.</param>
@@ -167,7 +189,7 @@ namespace PDS.Witsml.Server.Data.Channels
         {          
             var collection = GetCollection<ChannelSetValues>(DbCollectionName);
             var sortBuilder = Builders<ChannelSetValues>.Sort;
-            var sortField = "Indices.Start";
+            var sortField = "Indices.0.Start";
             var sort = increasing ? sortBuilder.Ascending(sortField) : sortBuilder.Descending(sortField);
 
             var filterJson = filter.Render(collection.DocumentSerializer, collection.Settings.SerializerRegistry);
@@ -537,6 +559,7 @@ namespace PDS.Witsml.Server.Data.Channels
         {
             var dataChunks = new List<ChannelSetValues>();
             var logData = DeserializeChannelSetData(data);
+            List<List<List<object>>> chunk = null;
 
             double start, end;
 
@@ -550,46 +573,69 @@ namespace PDS.Witsml.Server.Data.Channels
             }
             else
             {
-                start = (double)logData.First().First().First();
-                end = (double)logData.Last().First().First();
+                start = Convert.ToDouble(logData.First().First().First());
+                end = Convert.ToDouble(logData.Last().First().First());
             }
 
             var increasing = indices.First().Increasing;
-
+            var rangeSizeAdjustment = increasing ? RangeSize : -RangeSize;
             var rangeSize = ComputeRange(start, RangeSize, increasing);
 
             do
             {
-                var chunk = 
-                    increasing
-                        ? (isTimeIndex 
-                            ? logData.Where(d => ParseTime(d.First().First().ToString()) >= rangeSize.Item1 &&  ParseTime(d.First().First().ToString()) < rangeSize.Item2).ToList() 
-                            : logData.Where(d => (double)d.First().First() >= rangeSize.Item1 && (double)d.First().First() < rangeSize.Item2).ToList())
-                        // Decreasing
-                        : (isTimeIndex 
-                            ? logData.Where(d => ParseTime(d.First().First().ToString()) <= rangeSize.Item1 &&  ParseTime(d.First().First().ToString()) > rangeSize.Item2).ToList() 
-                            : logData.Where(d => (double)d.First().First() <= rangeSize.Item1 && (double)d.First().First() > rangeSize.Item2).ToList());
+                // Create our chunk
+                chunk = CreateChunk(logData, isTimeIndex, increasing, rangeSize);
 
-                SetChunkIndices(chunk.First().First(), chunk.Last().First(), indices);
-
-                var channelSetValues = new ChannelSetValues
+                // Save chunk rows if there are any
+                if (chunk.Any())
                 {
-                    Uid = NewUid(),
-                    UidLog = uidLog,
-                    UidChannelSet = uidChannelSet,
-                    Indices = indices,
-                    Data = SerializeChannelSetData(chunk)
-                };
+                    var clonedIndices = new List<ChannelIndexInfo>();
+                    indices.ForEach( i => clonedIndices.Add(i.Clone()));
 
-                dataChunks.Add(channelSetValues);
-                rangeSize = new Tuple<int, int>(rangeSize.Item1 + RangeSize, 
-                    increasing 
-                        ? rangeSize.Item2 + RangeSize 
-                        : rangeSize.Item2 - RangeSize);
+                    SetChunkIndices(chunk.First().First(), chunk.Last().First(), clonedIndices);
+
+                    var channelSetValues = new ChannelSetValues
+                    {
+                        Uid = NewUid(),
+                        UidLog = uidLog,
+                        UidChannelSet = uidChannelSet,
+                        Indices = clonedIndices,
+                        Data = SerializeChannelSetData(chunk)
+                    };
+
+                    dataChunks.Add(channelSetValues);
+
+                    // Compute the next range
+                    rangeSize = new Tuple<int, int>(rangeSize.Item1 + rangeSizeAdjustment, rangeSize.Item2 + rangeSizeAdjustment);
+                }
             }
-            while (WithinRange(rangeSize.Item2, end, increasing));           
+            // Keep looking until we are creating empty chunks
+            while (chunk != null && chunk.Any());
 
             return dataChunks;
+        }
+
+        /// <summary>
+        /// Creates the data chunk for a 2.0 Log.
+        /// </summary>
+        /// <param name="logData">The log data.</param>
+        /// <param name="isTimeIndex">if set to <c>true</c> [is time index].</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <param name="rangeSize">Size of the range.</param>
+        /// <returns>The data rows for the chunk that are within the given rangeSize</returns>
+        private List<List<List<object>>> CreateChunk(List<List<List<object>>> logData, bool isTimeIndex, bool increasing, Tuple<int, int> rangeSize)
+        {
+            var chunk =
+                increasing
+                    ? (isTimeIndex
+                        ? logData.Where(d => ParseTime(d.First().First().ToString()) >= rangeSize.Item1 && ParseTime(d.First().First().ToString()) < rangeSize.Item2).ToList()
+                        : logData.Where(d => Convert.ToDouble(d.First().First()) >= rangeSize.Item1 && Convert.ToDouble(d.First().First()) < rangeSize.Item2).ToList())
+
+                    // Decreasing
+                    : (isTimeIndex
+                        ? logData.Where(d => ParseTime(d.First().First().ToString()) <= rangeSize.Item1 && ParseTime(d.First().First().ToString()) > rangeSize.Item2).ToList()
+                        : logData.Where(d => Convert.ToDouble(d.First().First()) <= rangeSize.Item1 && Convert.ToDouble(d.First().First()) > rangeSize.Item2).ToList());
+            return chunk;
         }
 
         /// <summary>
