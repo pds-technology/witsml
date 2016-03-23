@@ -97,6 +97,10 @@
       <Project>{93faae2f-13aa-46df-a94b-36155b51ebfa}</Project>
       <Name>Witsml.Server</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Witsml.UnitTest\Witsml.UnitTest.csproj">
+      <Project>{750f795f-0c36-4cb3-9372-c4a5a716c635}</Project>
+      <Name>Witsml.UnitTest</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Witsml\Witsml.csproj">
       <Project>{0ef1d73f-e7a0-40b0-803b-7ce4b6b27112}</Project>
       <Name>Witsml</Name>
