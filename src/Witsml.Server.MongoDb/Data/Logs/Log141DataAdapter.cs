@@ -235,24 +235,16 @@ namespace PDS.Witsml.Server.Data.Logs
         public override WitsmlResult Update(Log entity)
         {
             //List<LogDataValues> logDataValuesList = null;
+            var result = Get(entity.GetObjectId());
+            var isTimeLog = result.IndexType == LogIndexType.datetime;
+            var decreasing = result.Direction == LogIndexDirection.decreasing;
 
             // Separate the LogData.Data from the Log
             var logData = ExtractLogDataData(entity);
 
-            if (logData.Any())
+            if (entity.LogData != null && entity.LogData.Count > 0)
             {
-                // Start of the first range
-                var startIndex = ComputeRange(double.Parse(logData[0].Split(',')[0]), LogIndexRangeSize).Item1;
-
-                // End of the last range
-                var endIndex = ComputeRange(double.Parse(logData[logData.Count - 1].Split(',')[0]), LogIndexRangeSize).Item2;
-
-                // Merge with updateLogData sequence
-                WriteLogDataValues(entity,
-                    ToChunks(
-                        MergeSequence(
-                            ToSequence(QueryLogDataValues(entity, startIndex, endIndex, false)),
-                            GetSequence(string.Empty, logData))));
+                _channelDataAdapter.UpdateLogData(result, entity.LogData, isTimeLog, !decreasing);              
             }
 
             // TODO: Fix later
@@ -333,9 +325,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var target = logDataElement.Elements().FirstOrDefault(e => e.Name.LocalName == "mnemonicList").Value.Split(',');
             var mnemonics = target.Where(m => source.Contains(m)).ToList();
 
-            var channelDataAdapter = new ChannelDataAdapter(DatabaseProvider);
-            
-            return channelDataAdapter.GetLogData(log.Uid, mnemonics, range, increasing);
+            return _channelDataAdapter.GetLogData(log.Uid, mnemonics, range, increasing);
         }
 
         /// <summary>
