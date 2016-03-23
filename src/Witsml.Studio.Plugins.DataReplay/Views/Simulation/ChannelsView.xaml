@@ -53,7 +53,8 @@
             <TabItem Header="WITSML Client">
                 <DockPanel Margin="5">
                     <StackPanel DockPanel.Dock="Bottom" Height="35" Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button x:Name="StartWitsmlLogData" Content="Start" Width="80" Height="30" Margin="5,5,0,0" />
+                        <Button x:Name="StartWitsmlClient" Content="Start" Width="80" Height="30" Margin="5,5,0,0" />
+                        <Button x:Name="StopWitsmlClient" Content="Stop" Width="80" Height="30" Margin="5,5,0,0" />
                     </StackPanel>
 
                     <Grid>
@@ -88,7 +89,8 @@
             <TabItem Header="ETP Client">
                 <DockPanel Margin="5">
                     <StackPanel DockPanel.Dock="Bottom" Height="35" Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button x:Name="StartEtpLogData" Content="Start" Width="80" Height="30" Margin="5,5,0,0" />
+                        <Button x:Name="StartEtpClient" Content="Start" Width="80" Height="30" Margin="5,5,0,0" />
+                        <Button x:Name="StopEtpClient" Content="Stop" Width="80" Height="30" Margin="5,5,0,0" />
                     </StackPanel>
 
                     <Grid>
@@ -111,8 +113,8 @@
             <TabItem Header="ETP Server">
                 <DockPanel Margin="5">
                     <StackPanel DockPanel.Dock="Bottom" Height="35" Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button x:Name="StartChannelStreaming" Content="Start" Width="80" Height="30" Margin="5,5,0,0" />
-                        <Button x:Name="StopChannelStreaming" Content="Stop" Width="80" Height="30" Margin="5,5,0,0" />
+                        <Button x:Name="StartEtpServer" Content="Start" Width="80" Height="30" Margin="5,5,0,0" />
+                        <Button x:Name="StopEtpServer" Content="Stop" Width="80" Height="30" Margin="5,5,0,0" />
                     </StackPanel>
 
                     <Grid>

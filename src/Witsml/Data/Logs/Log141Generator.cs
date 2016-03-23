@@ -52,7 +52,7 @@ namespace PDS.Witsml.Data.Logs
                 : string.Empty;
         }
 
-        public void GenerateLogData(Log log, int numOfRows = 5)
+        public double GenerateLogData(Log log, int numOfRows = 5, double startIndex = 0d)
         {           
             const int Seed = 123;
 
@@ -69,34 +69,35 @@ namespace PDS.Witsml.Data.Logs
             if (log.LogData[0].Data == null)
                 log.LogData[0].Data = new List<string>();
 
-            List<string> data = log.LogData[0].Data;
+            var data = log.LogData[0].Data;
+            var index = startIndex;
 
             for (int i = 0; i < numOfRows; i++)
             {
-                string row = string.Empty;
+                var row = string.Empty;
+                index += i * interval;
 
                 // index value
                 switch (log.IndexType)
                 {
                     case LogIndexType.datetime:
-                        {
-                            dateTimeStart = dateTimeStart.AddSeconds(random.Next(1, 5));
-                            row += "\"" + dateTimeStart.AddSeconds(1.0).ToString("o") + "\"";
-                            break;
-                        }
+                    {
+                        dateTimeStart = dateTimeStart.AddSeconds(random.Next(1, 5));
+                        row += "\"" + dateTimeStart.AddSeconds(1.0).ToString("o") + "\"";
+                        break;
+                    }
                     case LogIndexType.elapsedtime:                       
                     case LogIndexType.length:                        
                     case LogIndexType.measureddepth:                        
                     case LogIndexType.verticaldepth:
-                        {
-                            row += string.Format("{0:F3}", i * interval);
-                            break;
-                        }
+                    {
+                        row += string.Format("{0:F3}", index);
+                        break;
+                    }
                     default:
                         break;
                 }
 
-                
                 // channel values
                 for (int k = 1; k < log.LogCurveInfo.Count; k++)
                 {
@@ -148,6 +149,8 @@ namespace PDS.Witsml.Data.Logs
 
                 data.Add(row);
             }
+
+            return index;
         }
     }
 }

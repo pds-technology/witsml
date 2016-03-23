@@ -8,11 +8,16 @@ using System.Windows;
 using Caliburn.Micro;
 using Energistics;
 using Energistics.DataAccess;
+using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.DataAccess.WITSML141.ReferenceData;
 using Energistics.Datatypes.ChannelData;
 using Energistics.Protocol.ChannelStreaming;
 using Energistics.Protocol.Discovery;
 using Microsoft.Win32;
 using Newtonsoft.Json;
+using PDS.Framework;
+using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Studio.Connections;
 using PDS.Witsml.Studio.Plugins.DataReplay.Providers;
 using PDS.Witsml.Studio.Runtime;
@@ -68,18 +73,50 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
             }
         }
 
-        private CancellationTokenSource _tokenSource;
-        public CancellationTokenSource TokenSource
+        private CancellationTokenSource _witsmlClientTokenSource;
+        public CancellationTokenSource WitsmlClientTokenSource
         {
-            get { return _tokenSource; }
+            get { return _witsmlClientTokenSource; }
             set
             {
-                if (!ReferenceEquals(_tokenSource, value))
+                if (!ReferenceEquals(_witsmlClientTokenSource, value))
                 {
-                    _tokenSource = value;
-                    NotifyOfPropertyChange(() => TokenSource);
-                    NotifyOfPropertyChange(() => CanStartChannelStreaming);
-                    NotifyOfPropertyChange(() => CanStopChannelStreaming);
+                    _witsmlClientTokenSource = value;
+                    NotifyOfPropertyChange(() => WitsmlClientTokenSource);
+                    NotifyOfPropertyChange(() => CanStartWitsmlClient);
+                    NotifyOfPropertyChange(() => CanStopWitsmlClient);
+                }
+            }
+        }
+
+        private CancellationTokenSource _etpClientTokenSource;
+        public CancellationTokenSource EtpClientTokenSource
+        {
+            get { return _etpClientTokenSource; }
+            set
+            {
+                if (!ReferenceEquals(_etpClientTokenSource, value))
+                {
+                    _etpClientTokenSource = value;
+                    NotifyOfPropertyChange(() => EtpClientTokenSource);
+                    NotifyOfPropertyChange(() => CanStartEtpClient);
+                    NotifyOfPropertyChange(() => CanStopEtpClient);
+                }
+            }
+        }
+
+        private CancellationTokenSource _etpServerTokenSource;
+        public CancellationTokenSource EtpServerTokenSource
+        {
+            get { return _etpServerTokenSource; }
+            set
+            {
+                if (!ReferenceEquals(_etpServerTokenSource, value))
+                {
+                    _etpServerTokenSource = value;
+                    NotifyOfPropertyChange(() => EtpServerTokenSource);
+                    NotifyOfPropertyChange(() => CanStartEtpServer);
+                    NotifyOfPropertyChange(() => CanStopEtpServer);
                 }
             }
         }
@@ -115,7 +152,6 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
                 DataItem = Model.WitsmlConnection
             };
 
-
             if (Runtime.ShowDialog(viewModel))
             {
                 Model.WitsmlConnection = viewModel.DataItem;
@@ -131,7 +167,6 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
                 DataItem = Model.EtpConnection
             };
 
-
             if (Runtime.ShowDialog(viewModel))
             {
                 Model.EtpConnection = viewModel.DataItem;
@@ -143,47 +178,111 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
             Proxy = CreateProxy();
         }
 
-        public void StartWitsmlLogData()
+        public bool CanStartWitsmlClient
         {
+            get { return WitsmlClientTokenSource == null; }
         }
 
-        public void StartEtpLogData()
+        public void StartWitsmlClient()
         {
-        }
-
-        public bool CanStartChannelStreaming
-        {
-            get { return TokenSource == null; }
-        }
-
-        public void StartChannelStreaming()
-        {
-            TokenSource = new CancellationTokenSource();
-            var token = TokenSource.Token;
+            WitsmlClientTokenSource = new CancellationTokenSource();
+            var token = WitsmlClientTokenSource.Token;
 
             Task.Run(async () =>
             {
-                using (TokenSource)
+                using (WitsmlClientTokenSource)
                 {
-                    await InitChannelStreaming(token);
-                    TokenSource = null;
-
-                    Log("ETP Socket Server stopped.");
+                    try
+                    {
+                        await InitWitsmlClient(token);
+                        Log("WITSML Client simulation stopped.");
+                    }
+                    catch (ContainerException)
+                    {
+                        Log("Data object not supported; Type: {0}; Version: {1};", ObjectTypes.Log, Model.WitsmlVersion);
+                    }
+                    finally
+                    {
+                        WitsmlClientTokenSource = null;
+                    }
                 }
             },
             token);
         }
 
-        public bool CanStopChannelStreaming
+        public bool CanStopWitsmlClient
         {
-            get { return TokenSource != null; }
+            get { return WitsmlClientTokenSource != null; }
         }
 
-        public void StopChannelStreaming()
+        public void StopWitsmlClient()
         {
-            if (TokenSource != null)
+            if (WitsmlClientTokenSource != null)
             {
-                TokenSource.Cancel();
+                WitsmlClientTokenSource.Cancel();
+            }
+        }
+
+        public bool CanStartEtpClient
+        {
+            get { return EtpClientTokenSource == null; }
+        }
+
+        public void StartEtpClient()
+        {
+        }
+
+        public bool CanStopEtpClient
+        {
+            get { return EtpClientTokenSource != null; }
+        }
+
+        public void StopEtpClient()
+        {
+            if (EtpClientTokenSource != null)
+            {
+                EtpClientTokenSource.Cancel();
+            }
+        }
+
+        public bool CanStartEtpServer
+        {
+            get { return EtpServerTokenSource == null; }
+        }
+
+        public void StartEtpServer()
+        {
+            EtpServerTokenSource = new CancellationTokenSource();
+            var token = EtpServerTokenSource.Token;
+
+            Task.Run(async () =>
+            {
+                using (EtpServerTokenSource)
+                {
+                    try
+                    {
+                        await InitChannelStreaming(token);
+                        Log("ETP Socket Server stopped.");
+                    }
+                    finally
+                    {
+                        EtpServerTokenSource = null;
+                    }
+                }
+            },
+            token);
+        }
+
+        public bool CanStopEtpServer
+        {
+            get { return EtpServerTokenSource != null; }
+        }
+
+        public void StopEtpServer()
+        {
+            if (EtpServerTokenSource != null)
+            {
+                EtpServerTokenSource.Cancel();
             }
         }
 
@@ -191,10 +290,72 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
         {
             if (close)
             {
-                StopChannelStreaming();
+                StopEtpServer();
             }
 
             base.OnDeactivate(close);
+        }
+
+        private async Task InitWitsmlClient(CancellationToken token)
+        {
+            //var generator = Runtime.Container.Resolve<IWitsmlDataGenerator>(new ObjectName(ObjectTypes.Log, Model.WitsmlVersion));
+            var generator = new Log141Generator();
+            var index = 0d;
+
+            Log("WITSML Client simulation started. URL: {0}", Proxy.Url);
+
+            var logList = new Log()
+            {
+                UidWell = Model.WellUid,
+                NameWell = Model.WellName,
+                UidWellbore = Model.WellboreUid,
+                NameWellbore = Model.WellboreName,
+                Uid = Model.LogUid,
+                Name = Model.LogName,
+                IndexType = Model.LogIndexType
+            }
+            .AsList();
+
+            while (true)
+            {
+                if (token.IsCancellationRequested)
+                {
+                    break;
+                }
+
+                var result = Proxy.Read(new LogList() { Log = logList }, OptionsIn.ReturnElements.HeaderOnly);
+
+                if (!result.Log.Any())
+                {
+                    Runtime.Invoke(() => Runtime.ShowError("Log not found."));
+                    break;
+                }
+
+                var log = result.Log[0];
+                log.Direction = LogIndexDirection.increasing;
+                log.IndexCurve = Model.Channels.Select(x => x.Mnemonic).FirstOrDefault();
+                log.LogCurveInfo = Model.Channels.Select(ToLogCurveInfo).ToList();
+
+                index = generator.GenerateLogData(log, startIndex: index);
+
+                result.Log[0].LogData[0].MnemonicList = generator.Mnemonics(result.Log[0].LogCurveInfo);
+                result.Log[0].LogData[0].UnitList = generator.Units(result.Log[0].LogCurveInfo);
+
+                Proxy.Update(result);
+
+                await Task.Delay(5000);
+            }
+        }
+
+        private LogCurveInfo ToLogCurveInfo(ChannelMetadataRecord channel)
+        {
+            return new LogCurveInfo()
+            {
+                Mnemonic = new ShortNameStruct(channel.Mnemonic),
+                Unit = channel.Uom,
+                CurveDescription = channel.Description,
+                TypeLogData = LogDataType.@double,
+            };
         }
 
         private async Task InitChannelStreaming(CancellationToken token)
@@ -293,7 +454,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
         /// </returns>
         private WMLSVersion GetWitsmlVersionEnum(string witsmlVersion)
         {
-            return witsmlVersion != null && witsmlVersion.Equals(OptionsIn.DataVersion.Version131.Value)
+            return OptionsIn.DataVersion.Version131.Equals(witsmlVersion)
                 ? WMLSVersion.WITSML131
                 : WMLSVersion.WITSML141;
         }

@@ -5,9 +5,8 @@ using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using PDS.Framework;
-using PDS.Witsml.Data;
 
-namespace PDS.Witsml
+namespace PDS.Witsml.Data.Logs
 {
     public class Log200Generator : DataGenerator
     {
