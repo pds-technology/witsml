@@ -15,11 +15,11 @@ using PDS.Witsml.Server.Models;
 namespace PDS.Witsml.Server.Data.Channels
 {
     /// <summary>
-    /// Data adapter that encapsulates CRUD functionality for <see cref="ChannelSetValues"/>
+    /// Data adapter that encapsulates CRUD functionality for <see cref="ChannelDataValues"/>
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{PDS.Witsml.Server.Models.ChannelSetValues}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{PDS.Witsml.Server.Models.ChannelDataValues}" />
     [Export]
-    public class ChannelDataAdapter : MongoDbDataAdapter<ChannelSetValues>
+    public class ChannelDataAdapter : MongoDbDataAdapter<ChannelDataValues>
     {
         private static readonly int RangeSize = Settings.Default.LogIndexRangeSize;
         private static readonly char Separator = ',';
@@ -29,7 +29,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// </summary>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public ChannelDataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectTypes.ChannelSetValues, ObjectTypes.Uid)
+        public ChannelDataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectTypes.ChannelDataValues, ObjectTypes.Uid)
         {
             
         }
@@ -45,8 +45,8 @@ namespace PDS.Witsml.Server.Data.Channels
             if (indicesMap == null || indicesMap.Keys.Count == 0)
                 return;
 
-            var collection = GetCollection<ChannelSetValues>(DbCollectionName);
-            var dataChunks = new List<ChannelSetValues>();
+            var collection = GetCollection<ChannelDataValues>(DbCollectionName);
+            var dataChunks = new List<ChannelDataValues>();
 
             foreach (var key in indicesMap.Keys)
             {
@@ -58,7 +58,7 @@ namespace PDS.Witsml.Server.Data.Channels
             collection.BulkWrite(dataChunks
                 .Select(dc =>
                 {
-                    return new InsertOneModel<ChannelSetValues>(dc);
+                    return new InsertOneModel<ChannelDataValues>(dc);
                 }));
         }
 
@@ -71,7 +71,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="indexChannel">The index channel.</param>
         public void WriteLogDataValues(string uidLog, List<string> data, string mnemonicList, string unitList, ChannelIndexInfo indexChannel)
         {
-            var collection = GetCollection<ChannelSetValues>(DbCollectionName);
+            var collection = GetCollection<ChannelDataValues>(DbCollectionName);
 
             collection.BulkWrite(ToChunks(indexChannel, GetSequence(string.Empty, !indexChannel.IsTimeIndex, data))
                 .Select(dc =>
@@ -80,7 +80,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     dc.Uid = NewUid();
                     dc.MnemonicList = mnemonicList;
                     dc.UnitList = unitList;
-                    return new InsertOneModel<ChannelSetValues>(dc);
+                    return new InsertOneModel<ChannelDataValues>(dc);
                 }));
         }
 
@@ -163,10 +163,10 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="filter">The filter.</param>
         /// <param name="increasing">if set to <c>true</c> [increasing].</param>
         /// <returns>The list of log data chunks that fit the query criteria sorted by the start index.</returns>
-        private List<ChannelSetValues> GetData(FilterDefinition<ChannelSetValues> filter, bool increasing)
+        private List<ChannelDataValues> GetData(FilterDefinition<ChannelDataValues> filter, bool increasing)
         {          
-            var collection = GetCollection<ChannelSetValues>(DbCollectionName);
-            var sortBuilder = Builders<ChannelSetValues>.Sort;
+            var collection = GetCollection<ChannelDataValues>(DbCollectionName);
+            var sortBuilder = Builders<ChannelDataValues>.Sort;
             var sortField = "Indices.Start";
             var sort = increasing ? sortBuilder.Ascending(sortField) : sortBuilder.Descending(sortField);
 
@@ -183,36 +183,36 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="range">The request range.</param>
         /// <param name="increasing">if set to <c>true</c> [increasing].</param>
         /// <returns>The query filter.</returns>
-        private FilterDefinition<ChannelSetValues> BuildDataFilter(string uidLog, string indexCurve, Tuple<double?, double?> range, bool increasing)
+        private FilterDefinition<ChannelDataValues> BuildDataFilter(string uidLog, string indexCurve, Tuple<double?, double?> range, bool increasing)
         {
-            var filters = new List<FilterDefinition<ChannelSetValues>>();
-            filters.Add(Builders<ChannelSetValues>.Filter.EqIgnoreCase("UidLog", uidLog));
+            var filters = new List<FilterDefinition<ChannelDataValues>>();
+            filters.Add(Builders<ChannelDataValues>.Filter.EqIgnoreCase("UidLog", uidLog));
 
-            var rangeFilters = new List<FilterDefinition<ChannelSetValues>>();
+            var rangeFilters = new List<FilterDefinition<ChannelDataValues>>();
             if (range != null)
             {
                 if (range.Item1.HasValue)
                 {
                     var start = increasing ?
-                        Builders<ChannelSetValues>.Filter.Gte("Indices.End", range.Item1.Value) :
-                        Builders<ChannelSetValues>.Filter.Lte("Indices.End", range.Item1.Value);
+                        Builders<ChannelDataValues>.Filter.Gte("Indices.End", range.Item1.Value) :
+                        Builders<ChannelDataValues>.Filter.Lte("Indices.End", range.Item1.Value);
                     rangeFilters.Add(start);
                 }
                 if (range.Item2.HasValue)
                 {
                     var start = increasing ?
-                        Builders<ChannelSetValues>.Filter.Lte("Indices.Start", range.Item2.Value) :
-                        Builders<ChannelSetValues>.Filter.Gte("Indices.Start", range.Item2.Value);
+                        Builders<ChannelDataValues>.Filter.Lte("Indices.Start", range.Item2.Value) :
+                        Builders<ChannelDataValues>.Filter.Gte("Indices.Start", range.Item2.Value);
                     rangeFilters.Add(start);
                 }
             }
             
             if (rangeFilters.Count > 0)
-                rangeFilters.Add(Builders<ChannelSetValues>.Filter.EqIgnoreCase("Indices.Mnemonic", indexCurve));
+                rangeFilters.Add(Builders<ChannelDataValues>.Filter.EqIgnoreCase("Indices.Mnemonic", indexCurve));
 
             if (rangeFilters.Count > 0)
-                filters.Add(Builders<ChannelSetValues>.Filter.And(rangeFilters));
-            return Builders<ChannelSetValues>.Filter.And(filters);
+                filters.Add(Builders<ChannelDataValues>.Filter.And(rangeFilters));
+            return Builders<ChannelDataValues>.Filter.And(filters);
         }
 
         /// <summary>
@@ -221,7 +221,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="logData">The <see cref="LogData"/> object.</param>
         /// <param name="results">The list of log data chunks.</param>
         /// <param name="mnemonics">The subset of mnemonics for the requested log curves.</param>
-        private void TransformLogData(LogData logData, List<ChannelSetValues> results, List<string> mnemonics, Tuple<double?, double?> rowRange, bool increasing)
+        private void TransformLogData(LogData logData, List<ChannelDataValues> results, List<string> mnemonics, Tuple<double?, double?> rowRange, bool increasing)
         {
             logData.Data = new List<string>();
             var dataList = new List<List<string>>();
@@ -383,7 +383,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// </summary>
         /// <param name="sequence">An <see cref="IEnumerable{Tuple{string, double, string}}"/> containing a uid, the index value of the data and the row of data.</param>
         /// <returns>An <see cref="IEnumerable{LogDataValues}"/> of "chunked" data.</returns>
-        private IEnumerable<ChannelSetValues> ToChunks(ChannelIndexInfo indexChannel, IEnumerable<Tuple<string, double, string>> sequence)
+        private IEnumerable<ChannelDataValues> ToChunks(ChannelIndexInfo indexChannel, IEnumerable<Tuple<string, double, string>> sequence)
         {
             Tuple<int, int> plannedRange = null;
             double startIndex = 0;
@@ -413,7 +413,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     newIndex.Start = startIndex;
                     newIndex.End = endIndex;
 
-                    yield return new ChannelSetValues()
+                    yield return new ChannelDataValues()
                     {
                         Data = SerializeLogData(data),
                         Indices = new List<ChannelIndexInfo> { newIndex }
@@ -434,7 +434,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 newIndex.Start = startIndex;
                 newIndex.End = endIndex;
 
-                yield return new ChannelSetValues()
+                yield return new ChannelDataValues()
                 {
                     Data = SerializeLogData(data),
                     Indices = new List<ChannelIndexInfo> { newIndex }
@@ -533,9 +533,9 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="uidChannelSet">The uid of the channel set.</param>
         /// <param name="indices">The list of index for the channel set.</param>
         /// <returns>The list of data chunks.</returns>
-        private List<ChannelSetValues> CreateChannelSetValuesList(string data, string uidLog, string uidChannelSet, List<ChannelIndexInfo> indices)
+        private List<ChannelDataValues> CreateChannelSetValuesList(string data, string uidLog, string uidChannelSet, List<ChannelIndexInfo> indices)
         {
-            var dataChunks = new List<ChannelSetValues>();
+            var dataChunks = new List<ChannelDataValues>();
             var logData = DeserializeChannelSetData(data);
 
             double start, end;
@@ -572,7 +572,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
                 SetChunkIndices(chunk.First().First(), chunk.Last().First(), indices);
 
-                var channelSetValues = new ChannelSetValues
+                var channelSetValues = new ChannelDataValues
                 {
                     Uid = NewUid(),
                     UidLog = uidLog,
@@ -645,13 +645,13 @@ namespace PDS.Witsml.Server.Data.Channels
         public void UpdateLogData(Energistics.DataAccess.WITSML141.Log entity, List<LogData> logDatas, bool isTimeLog, bool increasing)
         {
             var uidLog = entity.Uid;
-            var inserts = new List<ChannelSetValues>();
-            var updates = new Dictionary<string, ChannelSetValues>();
+            var inserts = new List<ChannelDataValues>();
+            var updates = new Dictionary<string, ChannelDataValues>();
             var ranges = new List<double>();
             var valueUpdates = new List<List<string>>();
 
-            var collection = GetCollection<ChannelSetValues>(DbCollectionName);
-            var mongoDbUpdate = new MongoDbUpdate<ChannelSetValues>(collection, null, null, null);
+            var collection = GetCollection<ChannelDataValues>(DbCollectionName);
+            var mongoDbUpdate = new MongoDbUpdate<ChannelDataValues>(collection, null, null, null);
 
             foreach (var logData in logDatas)
             {
@@ -704,7 +704,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     collection.BulkWrite(inserts
                         .Select(i =>
                         {
-                            return new InsertOneModel<ChannelSetValues>(i);
+                            return new InsertOneModel<ChannelDataValues>(i);
                         }));
                 }
                 if (updates.Count > 0)
@@ -714,7 +714,7 @@ namespace PDS.Witsml.Server.Data.Channels
             }
         }
 
-        private ChannelSetValues FindChunkByRange(List<ChannelSetValues> results, double start, bool increasing, ref int count)
+        private ChannelDataValues FindChunkByRange(List<ChannelDataValues> results, double start, bool increasing, ref int count)
         {
             if (results == null || results.Count == 0)
                 return null;
@@ -736,9 +736,9 @@ namespace PDS.Witsml.Server.Data.Channels
             return null;
         }
 
-        private ChannelSetValues CreateChunk(string uidLog, List<List<string>> updates, List<string> mnemonics, List<string> units, bool increasing, bool isTimeLog)
+        private ChannelDataValues CreateChunk(string uidLog, List<List<string>> updates, List<string> mnemonics, List<string> units, bool increasing, bool isTimeLog)
         {
-            var chunk = new ChannelSetValues { Uid = NewUid(), UidLog = uidLog };
+            var chunk = new ChannelDataValues { Uid = NewUid(), UidLog = uidLog };
             var start = GetAnIndexValue(updates.First().First(), isTimeLog);
             var end = GetAnIndexValue(updates.Last().First(), isTimeLog);
             var index = new ChannelIndexInfo { Mnemonic = mnemonics[0], Start = start, End = end, Increasing = increasing, IsTimeIndex = isTimeLog };
@@ -749,7 +749,7 @@ namespace PDS.Witsml.Server.Data.Channels
             return chunk;
         }
 
-        private void UpdateChunkValues(ChannelSetValues chunk, List<List<string>> updates, List<string> mnemonics, List<string> units, Dictionary<string, List<double>> effectiveRanges, bool isTimeLog, bool increasing)
+        private void UpdateChunkValues(ChannelDataValues chunk, List<List<string>> updates, List<string> mnemonics, List<string> units, Dictionary<string, List<double>> effectiveRanges, bool isTimeLog, bool increasing)
         {
             var chunkMnemonics = chunk.MnemonicList.Split(Separator).ToList();
             var chunkUnits = chunk.UnitList.Split(Separator).ToList();

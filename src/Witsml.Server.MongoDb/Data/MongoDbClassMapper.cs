@@ -46,7 +46,7 @@ namespace PDS.Witsml.Server.Data
 
             // Custom
             RegisterId<LogDataValues>();
-            RegisterId<ChannelSetValues>();
+            RegisterId<ChannelDataValues>();
 
             try
             {

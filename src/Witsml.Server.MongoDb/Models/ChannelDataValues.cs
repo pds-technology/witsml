@@ -7,7 +7,7 @@ namespace PDS.Witsml.Server.Models
     /// Model class for unified log data
     /// </summary>
     [Serializable]
-    public class ChannelSetValues
+    public class ChannelDataValues
     {
         public string Uid { get; set; }
 
