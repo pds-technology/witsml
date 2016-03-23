@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\DataGenerator.cs" />
+    <Compile Include="Data\Logs\Log141Generator.cs" />
     <Compile Include="EtpContentTypes.cs" />
     <Compile Include="ErrorCodes.cs" />
     <Compile Include="Export131Attribute.cs" />

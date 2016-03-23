@@ -4,13 +4,17 @@ using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
+using PDS.Witsml.Data.Logs;
 
 namespace PDS.Witsml.Server
 {
     public class DevKit141Aspect : DevKitAspect
     {
+        private Log141Generator LogGenerator;
+
         public DevKit141Aspect(string url = null) : base(url, WMLSVersion.WITSML141)
         {
+            LogGenerator = new Log141Generator();
         }
 
         public override string DataSchemaVersion
@@ -26,29 +30,17 @@ namespace PDS.Witsml.Server
 
             log.LogCurveInfo = List<LogCurveInfo>();
 
-            log.LogCurveInfo.Add(
-                new LogCurveInfo()
-                {
-                    Mnemonic = new ShortNameStruct(log.IndexCurve),
-                    TypeLogData = indexType == LogIndexType.datetime ? LogDataType.datetime : LogDataType.@double,
-                    Unit = indexType == LogIndexType.datetime ? "s" : "m"
-                });
+            if (indexType == LogIndexType.datetime)
+            {
+                log.LogCurveInfo.Add(LogGenerator.CreateDateTimeLogCurveInfo(log.IndexCurve, "s"));
+            }
+            else
+            {
+                log.LogCurveInfo.Add(LogGenerator.CreateDoubleLogCurveInfo(log.IndexCurve, "m"));
+            }
 
-            log.LogCurveInfo.Add(
-                new LogCurveInfo()
-                {
-                    Mnemonic = new ShortNameStruct("ROP"),
-                    TypeLogData = LogDataType.@double,
-                    Unit = "m/h"
-                });
-
-            log.LogCurveInfo.Add(
-                new LogCurveInfo()
-                {
-                    Mnemonic = new ShortNameStruct("GR"),
-                    TypeLogData = LogDataType.@double,
-                    Unit = "gAPI"
-                });
+            log.LogCurveInfo.Add(LogGenerator.CreateDoubleLogCurveInfo("ROP", "m/h"));
+            log.LogCurveInfo.Add(LogGenerator.CreateDoubleLogCurveInfo("GR", "gAPI"));
 
             InitData(log, Mnemonics(log), Units(log));
         }

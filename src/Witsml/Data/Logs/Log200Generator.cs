@@ -65,12 +65,12 @@ namespace PDS.Witsml
 
         public ChannelIndex CreateDateTimeIndex()
         {
-            return CreateChannelIndex(ChannelIndexType.datetime, IndexDirection.increasing, "DateTime", "s", "MSL");
+            return CreateChannelIndex(ChannelIndexType.datetime, IndexDirection.increasing, "TIME", "s", "MSL");
         }
 
         public ChannelIndex CreateElapsedTimeIndex(IndexDirection direction)
         {
-            return CreateChannelIndex(ChannelIndexType.elapsedtime, direction, "ElapsedTime", "ms", "MSL");
+            return CreateChannelIndex(ChannelIndexType.elapsedtime, direction, "TIME", "ms", "MSL");
         }
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace PDS.Witsml
             ChannelSet channelSet = new ChannelSet()
             {
                 Uuid = Uid(),
-                Citation = CreateCitation(Name("Citation")),
+                Citation = CreateCitation("ChannelSet"),
                 ExistenceKind = ExistenceKind.simulated,
                 Index = indexList,
 
