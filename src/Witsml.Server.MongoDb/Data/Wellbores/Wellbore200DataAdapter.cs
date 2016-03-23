@@ -56,16 +56,22 @@ namespace PDS.Witsml.Server.Data.Wellbores
             if (!string.IsNullOrWhiteSpace(entity.Uuid) && Exists(dataObjectId))
             {
                 entity.Citation = entity.Citation.Update();
+                Logger.DebugFormat("Updating Wellbore with Uuid '{0}' and citation title '{1}'.", entity.Uuid, entity.Citation.Title);
 
                 Validate(Functions.PutObject, entity);
+                Logger.DebugFormat("Validated Wellbore with Uuid '{0}' and citation title '{1}'.", entity.Uuid, entity.Citation.Title);
+                
                 UpdateEntity(entity, dataObjectId);
             }
             else
             {
                 entity.Uuid = NewUid(entity.Uuid);
                 entity.Citation = entity.Citation.Update();
+                Logger.DebugFormat("Adding Wellbore with Uuid '{0}' and citation title '{1}'.", entity.Uuid, entity.Citation.Title);
 
                 Validate(Functions.PutObject, entity);
+                Logger.DebugFormat("Validated Wellbore with Uuid '{0}' and citation title '{1}'.", entity.Uuid, entity.Citation.Title);
+
                 InsertEntity(entity);
             }
 
