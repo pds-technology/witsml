@@ -236,11 +236,8 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             //List<LogDataValues> logDataValuesList = null;
             var result = Get(entity.GetObjectId());
-            var isTimeLog = result.IndexType == LogIndexType.datetime;
-            var decreasing = result.Direction == LogIndexDirection.decreasing;
-
-            // Separate the LogData.Data from the Log
-            var logData = ExtractLogDataData(entity);
+            var isTimeLog = result.IndexType.GetValueOrDefault() == LogIndexType.datetime;
+            var decreasing = result.Direction.GetValueOrDefault() == LogIndexDirection.decreasing;
 
             if (entity.LogData != null && entity.LogData.Count > 0)
             {
@@ -332,7 +329,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             if (logDataElement != null)
             {
-                var target = logDataElement.Elements().FirstOrDefault(e => e.Name.LocalName == "mnemonicList").Value.Split(',');
+            var target = logDataElement.Elements().FirstOrDefault(e => e.Name.LocalName == "mnemonicList").Value.Split(',');
                 mnemonics = target.Where(m => mnemonics.Contains(m)).ToList();
             }
 

@@ -714,9 +714,8 @@ namespace PDS.Witsml.Server.Data.Channels
             foreach (var logData in logDatas)
             {
                 var updateChunks = new List<List<List<string>>>();
-                var dataObjUpdate = WitsmlParser.Parse<LogData>(logData.ToString());
-                var mnemonics = dataObjUpdate.MnemonicList.Split(Separator).ToList();
-                var units = dataObjUpdate.UnitList.Split(Separator).ToList();
+                var mnemonics = logData.MnemonicList.Split(Separator).ToList();
+                var units = logData.UnitList.Split(Separator).ToList();
                 var indexCurve = mnemonics[0].Trim();
                 var dataUpdate = new List<List<string>>();
                 var effectiveRanges = new Dictionary<string, List<double>>();
@@ -724,7 +723,10 @@ namespace PDS.Witsml.Server.Data.Channels
                 // Split all comma delimited data into lists and divide the update list into chunks and compute the effective range for each channel in the updates
                 SetUpdateChunks(logData.Data, mnemonics, updateChunks, effectiveRanges, isTimeLog, increasing);
                 var indexRanges = effectiveRanges[indexCurve];
-                var updateRange = new Tuple<double?, double?>(indexRanges.First(), indexRanges.Last());
+
+                var rangeStart = ComputeRange(indexRanges.First(), RangeSize, increasing);
+                var rangeEnd = ComputeRange(indexRanges.Last(), RangeSize, increasing);
+                var updateRange = new Tuple<double?, double?>(rangeStart.Start, rangeEnd.End);
 
                 // Find the current log data chunks enclosed by the update range
                 var filter = BuildDataFilter(uidLog, indexCurve, updateRange, increasing);
@@ -941,7 +943,9 @@ namespace PDS.Witsml.Server.Data.Channels
         private void MergeOneDataRow(List<string> merges, List<string> points, List<string> updates, List<string> pointMnemonics, List<string> updateMnemonics, Dictionary<string, int> indexMap, Dictionary<string, List<double>> effectiveRanges, double indexValue, bool increasing)
         {
             var mnemonicsCount = indexMap.Keys.Count;
-            var merge = new List<string>(mnemonicsCount);
+            var merge = new List<string>();
+            for (var i = 0; i < mnemonicsCount; i++)
+                merge.Add(string.Empty);
 
             if (points == null)
             {
@@ -958,11 +962,14 @@ namespace PDS.Witsml.Server.Data.Channels
                     var mnemonic = pointMnemonics[i];
                     if (updateMnemonics.Contains(mnemonic))
                     {
+                        if (effectiveRanges.ContainsKey(mnemonic))
+                        {
                         var effectiveRange = effectiveRanges[mnemonic];
                         if (Before(indexValue, effectiveRange.First(), increasing) || Before(effectiveRange.Last(), indexValue, increasing))
                             merge[i] = points[i];
                         else
                             merge[i] = string.Empty;
+                    }
                     }
                     else
                     {
@@ -1043,19 +1050,22 @@ namespace PDS.Witsml.Server.Data.Channels
                     if (!string.IsNullOrEmpty(points[i]))
                     {
                         if (ranges.ContainsKey(mnemonic))
-                            ranges.Add(mnemonic, new List<double> { indexValue, indexValue });
+                            ranges[mnemonic][1] = indexValue;                      
                         else
-                            ranges[mnemonic][1] = indexValue;
+                            ranges.Add(mnemonic, new List<double> { indexValue, indexValue });
                     }
                 }
                 if (!Before(indexValue, stop, increasing))
                 {
                     chunks.Add(chunk);
-                    chunk.Clear();
+                    chunk = new List<List<string>>();
                     stop = ComputeRange(indexValue, RangeSize, increasing).End;
                 }
                 chunk.Add(points);
             }
+
+            if (chunk.Count > 0)
+                chunks.Add(chunk);
         }
     }
 }
