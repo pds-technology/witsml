@@ -40,7 +40,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="uidLog">The uid of the log.</param>
         /// <param name="channelData">The data for channel set of the log.</param>
         /// <param name="indicesMap">The index map for the list of channel set.</param>
-        public void WriteChannelSetValues(string uidLog, Dictionary<string, string> channelData, Dictionary<string, List<ChannelIndexInfo>> indicesMap)
+        public void WriteChannelDataValues(string uidLog, Dictionary<string, string> channelData, Dictionary<string, List<ChannelIndexInfo>> indicesMap)
         {
             if (indicesMap == null || indicesMap.Keys.Count == 0)
                 return;
@@ -50,7 +50,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
             foreach (var key in indicesMap.Keys)
             {
-                var dataChunk = CreateChannelSetValuesList(channelData[key], uidLog, key, indicesMap[key]);
+                var dataChunk = CreateChannelDataValuesList(channelData[key], uidLog, key, indicesMap[key]);
                 if (dataChunk != null && dataChunk.Count > 0)
                     dataChunks.AddRange(dataChunk);
             }
@@ -99,7 +99,7 @@ namespace PDS.Witsml.Server.Data.Channels
             // Build Log Data filter
             var filter = BuildDataFilter(uidLog, indexCurve, range, increasing);           
 
-            // Query channelSetValues collection
+            // Query channelDataValues collection
             var results = GetData(filter, increasing);
             if (results == null || results.Count == 0)
                 return null;
@@ -113,13 +113,13 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <summary>
         /// NOTE: This method is currently only used for testing 2.0 Log Data but may be of value for querying 2.0 Log Data later.
         /// 
-        /// Gets the ChannelSetValues that fall within a given range.
+        /// Gets the ChannelDataValues that fall within a given range.
         /// </summary>
         /// <param name="uidLog">The uid log.</param>
         /// <param name="mnemonics">The mnemonics.</param>
         /// <param name="range">The range.</param>
         /// <param name="increasing">if set to <c>true</c> [increasing].</param>
-        /// <returns>A List of ChannelSetValues that fall within a given range for a specific Log uid.</returns>
+        /// <returns>A List of ChannelDataValues that fall within a given range for a specific Log uid.</returns>
         public List<ChannelDataValues> GetData(string uidLog, List<string> mnemonics, Tuple<double?, double?> range, bool increasing)
         {
             var indexCurve = mnemonics[0].Trim();
@@ -127,7 +127,7 @@ namespace PDS.Witsml.Server.Data.Channels
             // Build Log Data filter
             var filter = BuildDataFilter(uidLog, indexCurve, range, increasing);
 
-            // Query channelSetValues collection
+            // Query channelDataValues collection
             return GetData(filter, increasing);
             
         }
@@ -180,7 +180,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
 
         /// <summary>
-        /// Gets the log data from channelSetValues collection.
+        /// Gets the log data from channelDataValues collection.
         /// </summary>
         /// <param name="filter">The filter.</param>
         /// <param name="increasing">if set to <c>true</c> [increasing].</param>
@@ -555,7 +555,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="uidChannelSet">The uid of the channel set.</param>
         /// <param name="indices">The list of index for the channel set.</param>
         /// <returns>The list of data chunks.</returns>
-        private List<ChannelDataValues> CreateChannelSetValuesList(string data, string uidLog, string uidChannelSet, List<ChannelIndexInfo> indices)
+        private List<ChannelDataValues> CreateChannelDataValuesList(string data, string uidLog, string uidChannelSet, List<ChannelIndexInfo> indices)
         {
             var dataChunks = new List<ChannelDataValues>();
             var logData = DeserializeChannelSetData(data);
@@ -594,7 +594,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
                     SetChunkIndices(chunk.First().First(), chunk.Last().First(), clonedIndices);
 
-                var channelSetValues = new ChannelDataValues
+                var channelDataValues = new ChannelDataValues
                 {
                     Uid = NewUid(),
                     UidLog = uidLog,
@@ -603,7 +603,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     Data = SerializeChannelSetData(chunk)
                 };
 
-                dataChunks.Add(channelSetValues);
+                dataChunks.Add(channelDataValues);
 
                     // Compute the next range
                     rangeSize = new Tuple<int, int>(rangeSize.Item1 + rangeSizeAdjustment, rangeSize.Item2 + rangeSizeAdjustment);
@@ -715,7 +715,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
                 var filter = BuildDataFilter(uidLog, indexCurve, updateRange, increasing);
 
-                // Query channelSetValues collection
+                // Query channelDataValues collection
                 var results = GetData(filter, increasing);
                 var count = 0;
                 var updatedChunkIds = new List<string>();
