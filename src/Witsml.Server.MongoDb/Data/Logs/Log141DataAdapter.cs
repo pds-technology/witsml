@@ -192,7 +192,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 InsertEntity(entity);
 
                 // If there is any LogData.Data then save it.
-                if (logData != null)
+                if (logData != null && logData.Data != null && logData.Data.Count > 0)
                 {
                     var indexChannel = new ChannelIndexInfo
                     {
@@ -236,11 +236,8 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             //List<LogDataValues> logDataValuesList = null;
             var result = Get(entity.GetObjectId());
-            var isTimeLog = result.IndexType == LogIndexType.datetime;
-            var decreasing = result.Direction == LogIndexDirection.decreasing;
-
-            // Separate the LogData.Data from the Log
-            var logData = ExtractLogDataData(entity);
+            var isTimeLog = result.IndexType.GetValueOrDefault() == LogIndexType.datetime;
+            var decreasing = result.Direction.GetValueOrDefault() == LogIndexDirection.decreasing;
 
             if (entity.LogData != null && entity.LogData.Count > 0)
             {
