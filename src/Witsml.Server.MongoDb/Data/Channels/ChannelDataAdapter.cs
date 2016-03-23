@@ -672,6 +672,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 // Query channelSetValues collection
                 var results = GetData(filter, increasing);
                 var count = 0;
+                var updatedChunkIds = new List<string>();
 
                 foreach (var updateChunk in updateChunks)
                 {
@@ -686,8 +687,16 @@ namespace PDS.Witsml.Server.Data.Channels
                     {
                         // update existing chunk
                         UpdateChunkValues(matchingChunk, updateChunk, mnemonics, units, effectiveRanges, isTimeLog, increasing);
-                        updates.Add(matchingChunk.Uid, matchingChunk);
+                        var chunkUid = matchingChunk.Uid;
+                        updates.Add(chunkUid, matchingChunk);
+                        updatedChunkIds.Add(chunkUid);
                     }
+                }
+
+                foreach (var unmatchedChunk in results.Where(r => !updatedChunkIds.Contains(r.Uid)))
+                {
+                    UpdateChunkValues(unmatchedChunk, null, mnemonics, units, effectiveRanges, isTimeLog, increasing);
+                    updates.Add(unmatchedChunk.Uid, unmatchedChunk);
                 }
 
                 if (inserts.Count > 0)
@@ -770,45 +779,56 @@ namespace PDS.Witsml.Server.Data.Channels
             double current, next;
             List<string> update;
             var mergeRange = new List<double>();
-            for (var i = 0; i < updates.Count; i++)
+            if (updates != null)
+            {
+                for (var i = 0; i < updates.Count; i++)
+                {
+                    for (var j = 0; j < chunkData.Count; j++)
+                    {
+                        update = updates[i];
+                        current = GetAnIndexValue(update.First(), isTimeLog);
+                        var points = chunkData[j].Split(Separator).ToList();
+                        next = GetAnIndexValue(points.First(), isTimeLog);
+                        while (Before(current, next, increasing))
+                        {
+                            MergeOneDataRow(merges, null, update, chunkMnemonics, mnemonics, mnemonicIndexMap, effectiveRanges, current, increasing);
+                            i++;
+                            update = updates[i];
+                            current = GetAnIndexValue(update.First(), isTimeLog);
+                        }
+                        if (current == next)
+                        {
+                            MergeOneDataRow(merges, points, update, chunkMnemonics, mnemonics, mnemonicIndexMap, effectiveRanges, current, increasing);
+                            i++;
+                            continue;
+                        }
+                        while (Before(next, current, increasing))
+                        {
+                            MergeOneDataRow(merges, points, null, chunkMnemonics, mnemonics, mnemonicIndexMap, effectiveRanges, next, increasing);
+                            j++;
+                            points = chunkData[j].Split(Separator).ToList();
+                            next = GetAnIndexValue(points.First(), isTimeLog);
+                        }
+                    }
+                }
+                var indexInfo = chunk.Indices.First();
+                var firstRow = merges.First().Split(Separator);
+                indexInfo.Start = GetAnIndexValue(firstRow[0], isTimeLog);
+                var lastRow = merges.Last().Split(Separator);
+                indexInfo.End = GetAnIndexValue(lastRow[0], isTimeLog);
+                chunk.MnemonicList = string.Join(Separator.ToString(), chunkMnemonics);
+                chunk.UnitList = string.Join(Separator.ToString(), chunkUnits);
+            }
+            else
             {
                 for (var j = 0; j < chunkData.Count; j++)
                 {
-                    update = updates[i];
-                    current = GetAnIndexValue(update.First(), isTimeLog);
                     var points = chunkData[j].Split(Separator).ToList();
                     next = GetAnIndexValue(points.First(), isTimeLog);
-                    while (Before(current, next, increasing))
-                    {
-                        MergeOneDataRow(merges, null, update, chunkMnemonics, mnemonics, mnemonicIndexMap, effectiveRanges, current, increasing);
-                        i++;
-                        update = updates[i];
-                        current = GetAnIndexValue(update.First(), isTimeLog);
-                    }
-                    if (current == next)
-                    {
-                        MergeOneDataRow(merges, points, update, chunkMnemonics, mnemonics, mnemonicIndexMap, effectiveRanges, current, increasing);
-                        i++;
-                        continue;
-                    }
-                    while (Before(next, current, increasing))
-                    {
-                        MergeOneDataRow(merges, points, null, chunkMnemonics, mnemonics, mnemonicIndexMap, effectiveRanges, next, increasing);
-                        j++;
-                        points = chunkData[j].Split(Separator).ToList();
-                        next = GetAnIndexValue(points.First(), isTimeLog);
-                    }
+                    MergeOneDataRow(merges, points, null, chunkMnemonics, mnemonics, mnemonicIndexMap, effectiveRanges, next, increasing);
                 }
             }
-
-            chunk.Data = SerializeLogData(merges);
-            chunk.MnemonicList = string.Join(Separator.ToString(), chunkMnemonics);
-            chunk.UnitList = string.Join(Separator.ToString(), chunkUnits);
-            var indexInfo = chunk.Indices.First();
-            var firstRow = merges.First().Split(Separator);
-            indexInfo.Start = GetAnIndexValue(firstRow[0], isTimeLog);
-            var lastRow = merges.Last().Split(Separator);
-            indexInfo.End = GetAnIndexValue(lastRow[0], isTimeLog);
+            chunk.Data = SerializeLogData(merges);          
         }
 
         private void MergeOneDataRow(List<string> merges, List<string> points, List<string> updates, List<string> pointMnemonics, List<string> updateMnemonics, Dictionary<string, int> indexMap, Dictionary<string, List<double>> effectiveRanges, double indexValue, bool increasing)
