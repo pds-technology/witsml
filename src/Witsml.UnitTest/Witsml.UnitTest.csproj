@@ -67,10 +67,6 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Data\Logs\Log141GeneratorTests.cs" />
-    <Compile Include="DevKit131Aspect.cs" />
-    <Compile Include="DevKit141Aspect.cs" />
-    <Compile Include="DevKit200Aspect.cs" />
-    <Compile Include="DevKitAspect.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ObjectTypesTests.cs" />
     <Compile Include="ExtensionsTests.cs" />
@@ -86,10 +82,6 @@
     <ProjectReference Include="..\WebSockets\WebSockets.csproj">
       <Project>{30DE888B-A6B7-4528-AD89-324A7F9B0F4C}</Project>
       <Name>WebSockets</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Witsml.Server\Witsml.Server.csproj">
-      <Project>{93faae2f-13aa-46df-a94b-36155b51ebfa}</Project>
-      <Name>Witsml.Server</Name>
     </ProjectReference>
     <ProjectReference Include="..\Witsml\Witsml.csproj">
       <Project>{0ef1d73f-e7a0-40b0-803b-7ce4b6b27112}</Project>

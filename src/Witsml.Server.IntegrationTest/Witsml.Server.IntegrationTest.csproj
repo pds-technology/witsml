@@ -79,6 +79,10 @@
     <Compile Include="Data\Wells\Well141ValidationTests.cs" />
     <Compile Include="Data\Wells\Well200DataAdapterTests.cs" />
     <Compile Include="Data\WitsmlQueryTemplateTests.cs" />
+    <Compile Include="DevKit131Aspect.cs" />
+    <Compile Include="DevKit141Aspect.cs" />
+    <Compile Include="DevKit200Aspect.cs" />
+    <Compile Include="DevKitAspect.cs" />
     <Compile Include="WitsmlStore131ProxyTests.cs" />
     <Compile Include="WitsmlStore141ProxyTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

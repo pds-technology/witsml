@@ -4,7 +4,6 @@ using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
-using PDS.Framework;
 
 namespace PDS.Witsml.Data.Logs
 {
@@ -53,22 +52,31 @@ namespace PDS.Witsml.Data.Logs
                 : string.Empty;
         }
 
-        public List<string> GenerateLogData(LogIndexType indexType, List<LogCurveInfo> logCurveInfoList, LogIndexDirection direction, int numOfRows = 5)
+        public void GenerateLogData(Log log, int numOfRows = 5)
         {           
             const int Seed = 123;
 
             Random random = new Random(Seed);
             DateTime dateTimeStart = DateTime.Now.ToUniversalTime();
-            double interval = direction == LogIndexDirection.decreasing ? -1.0 : 1.0;
+            double interval = log.Direction == LogIndexDirection.decreasing ? -1.0 : 1.0;
 
-            List<string> data = new List<string>();
+            if (log.LogData == null)
+                log.LogData = new List<LogData>();
+
+            if (!log.LogData.Any())
+                log.LogData.Add(new LogData());
+
+            if (log.LogData[0].Data == null)
+                log.LogData[0].Data = new List<string>();
+
+            List<string> data = log.LogData[0].Data;
 
             for (int i = 0; i < numOfRows; i++)
             {
                 string row = string.Empty;
 
                 // index value
-                switch (indexType)
+                switch (log.IndexType)
                 {
                     case LogIndexType.datetime:
                         {
@@ -90,7 +98,7 @@ namespace PDS.Witsml.Data.Logs
 
                 
                 // channel values
-                for (int k = 1; k < logCurveInfoList.Count; k++)
+                for (int k = 1; k < log.LogCurveInfo.Count; k++)
                 {
                     row += ", ";
 
@@ -99,76 +107,47 @@ namespace PDS.Witsml.Data.Logs
                         continue;
                     }
 
-                    switch (logCurveInfoList[k].TypeLogData)
+                    switch (log.LogCurveInfo[k].TypeLogData)
                     {
                         case LogDataType.@byte:
-                            {
-                                row += "Y";
-                                break;
-                            }
+                        {
+                            row += "Y";
+                            break;
+                        }
                         case LogDataType.datetime:
-                            {
-                                dateTimeStart = dateTimeStart.AddSeconds(random.Next(1, 5));
-                                row += "\"" + dateTimeStart.AddSeconds(1.0).ToString("o") + "\"";
-                                break;
-                            }
+                        {
+                            dateTimeStart = dateTimeStart.AddSeconds(random.Next(1, 5));
+                            row += "\"" + dateTimeStart.AddSeconds(1.0).ToString("o") + "\"";
+                            break;
+                        }
                         case LogDataType.@double:
                         case LogDataType.@float:                       
-                            {
-                                row += random.NextDouble().ToString("N3");
-                                break;
-                            }
+                        {
+                            row += random.NextDouble().ToString("N3");
+                            break;
+                        }
                         case LogDataType.@int:
                         case LogDataType.@long:
                         case LogDataType.@short:
-                            {
-                                row += random.Next(1, 10);
-                                break;
-                            }
-                        case LogDataType.@string:
-                            {
-                                row += "abc";
-                                break;
-                            }
-                        default:
-                            {
-                                row += "null";
-                            }
+                        {
+                            row += random.Next(1, 10);
                             break;
+                        }
+                        case LogDataType.@string:
+                        {
+                            row += "abc";
+                            break;
+                        }
+                        default:
+                        {
+                            row += "null";
+                        }
+                        break;
                     }
                 }
+
                 data.Add(row);
             }
-
-            return data;
-        }
-
-        public Log CreateLog(Log log, LogIndexDirection direction, int numOfRows = 5)
-        {
-            log.LogCurveInfo = new List<LogCurveInfo>();
-            
-            LogIndexType indexType = log.IndexType.HasValue ? log.IndexType.Value : LogIndexType.measureddepth;
-            if (DepthIndexTypes.Contains(indexType))
-            {
-                log.LogCurveInfo.Add(CreateDoubleLogCurveInfo("MD", "m"));
-            }
-            else
-            {
-                log.LogCurveInfo.Add(CreateDateTimeLogCurveInfo("DateTime", "s"));
-            }
-            log.LogCurveInfo.Add(CreateDoubleLogCurveInfo("GR", "api"));
-            log.LogCurveInfo.Add(CreateStringLogCurveInfo("UNK", "s"));
-
-            log.LogData = new List<LogData>() { new LogData() };
-        
-            log.LogData[0].Data = new List<string>();
- 
-            log.LogData[0].MnemonicList = Mnemonics(log.LogCurveInfo);
-            log.LogData[0].UnitList = Units(log.LogCurveInfo);
-
-            log.LogData[0].Data = GenerateLogData(indexType, log.LogCurveInfo, direction, numOfRows);
-
-            return log;
         }
     }
 }

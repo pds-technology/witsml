@@ -38,33 +38,9 @@ namespace PDS.Witsml.Server
             {
                 log.LogCurveInfo.Add(LogGenerator.CreateDoubleLogCurveInfo(log.IndexCurve, "m"));
             }
-            //log.LogCurveInfo.Add(
-            //    new LogCurveInfo()
-            //    {
-            //        Mnemonic = new ShortNameStruct(log.IndexCurve),
-            //        TypeLogData = indexType == LogIndexType.datetime ? LogDataType.datetime : LogDataType.@double,
-            //        Unit = indexType == LogIndexType.datetime ? "s" : "m"
-            //    });
 
             log.LogCurveInfo.Add(LogGenerator.CreateDoubleLogCurveInfo("ROP", "m/h"));
             log.LogCurveInfo.Add(LogGenerator.CreateDoubleLogCurveInfo("GR", "gAPI"));
-
-            //log.LogCurveInfo.Add(
-            //    new LogCurveInfo()
-            //    {
-            //        Mnemonic = new ShortNameStruct("ROP"),
-            //        TypeLogData = LogDataType.@double,
-            //        Unit = "m/h"
-            //    });
-
-
-            //log.LogCurveInfo.Add(
-            //    new LogCurveInfo()
-            //    {
-            //        Mnemonic = new ShortNameStruct("GR"),
-            //        TypeLogData = LogDataType.@double,
-            //        Unit = "gAPI"
-            //    });
 
             InitData(log, Mnemonics(log), Units(log));
         }

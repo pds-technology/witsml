@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
@@ -21,28 +17,55 @@ namespace PDS.Witsml.Data.Logs
         public void TestSetUp()
         {
             LogGenerator = new Log141Generator();
-            DepthLog = new Log() { IndexType = LogIndexType.measureddepth };
-            TimeLog = new Log() { IndexType = LogIndexType.datetime };
+            DepthLog = Create(LogIndexType.measureddepth, LogIndexDirection.decreasing);
+            TimeLog = Create(LogIndexType.datetime, LogIndexDirection.increasing);
         }
 
         [TestMethod]
         public void Can_generate_depth_log()
         {
-            Log log = LogGenerator.CreateLog(DepthLog, LogIndexDirection.increasing, 10);
-            Assert.IsNotNull(log);
-            Assert.IsNotNull(log.LogData);
-            Assert.IsNotNull(log.LogData[0].Data);
-            Assert.AreEqual(10, log.LogData[0].Data.Count);
+            LogGenerator.GenerateLogData(DepthLog);
+
+            Assert.IsNotNull(DepthLog);
+            Assert.IsNotNull(DepthLog.LogData);
+            Assert.IsNotNull(DepthLog.LogData[0].Data);
+            Assert.AreEqual(5, DepthLog.LogData[0].Data.Count);
         }
 
         [TestMethod]
         public void Can_generate_time_log()
         {
-            Log log = LogGenerator.CreateLog(TimeLog, LogIndexDirection.increasing, 10);
-            Assert.IsNotNull(log);
-            Assert.IsNotNull(log.LogData);
-            Assert.IsNotNull(log.LogData[0].Data);
-            Assert.AreEqual(10, log.LogData[0].Data.Count);
+            LogGenerator.GenerateLogData(TimeLog, 10);
+
+            Assert.IsNotNull(TimeLog);
+            Assert.IsNotNull(TimeLog.LogData);
+            Assert.IsNotNull(TimeLog.LogData[0].Data);
+            Assert.AreEqual(10, TimeLog.LogData[0].Data.Count);
+        }
+
+        private Log Create(LogIndexType indexType, LogIndexDirection direction)
+        {
+            var log = new Log();
+
+            log.IndexType = indexType;
+            log.Direction = direction;
+            log.LogCurveInfo = new List<LogCurveInfo>();
+
+            if (indexType == LogIndexType.datetime)
+            {
+                log.IndexCurve = "TIME";
+                log.LogCurveInfo.Add(LogGenerator.CreateDateTimeLogCurveInfo(log.IndexCurve, "s"));
+            }
+            else
+            {
+                log.IndexCurve = "MD";
+                log.LogCurveInfo.Add(LogGenerator.CreateDoubleLogCurveInfo(log.IndexCurve, "m"));
+            }
+
+            log.LogCurveInfo.Add(LogGenerator.CreateDoubleLogCurveInfo("ROP", "m/h"));
+            log.LogCurveInfo.Add(LogGenerator.CreateDoubleLogCurveInfo("GR", "gAPI"));
+
+            return log;
         }
     }
 }

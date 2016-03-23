@@ -210,7 +210,7 @@ namespace PDS.Witsml.Server
         public Log CreateLog(ChannelIndexType indexType, bool isIncreasing)
         {
             Log log = new Log();
-            log.Citation = Citation("Citation");
+            log.Citation = Citation("ChannelSet");
             log.Uuid = Uid();
 
             log.ChannelSet = new List<ChannelSet>();
