@@ -37,7 +37,7 @@ namespace PDS.Witsml.Data.Logs
         {
             var startIndex = 0.0;
             var numOfRows = 3;
-            var interval = (DepthLog.Direction == LogIndexDirection.increasing) ? 1.0 : -1.0;
+            var interval = -1.0;
             for (int i = 0; i < 10; i++)
             {
                 var nextStartIndex = LogGenerator.GenerateLogData(DepthLog, numOfRows, startIndex);
@@ -49,6 +49,15 @@ namespace PDS.Witsml.Data.Logs
             Assert.IsNotNull(DepthLog.LogData);
             Assert.IsNotNull(DepthLog.LogData[0].Data);
             Assert.AreEqual(30, DepthLog.LogData[0].Data.Count);
+
+            double index = 0;
+            foreach (string row in DepthLog.LogData[0].Data)
+            {
+                string[] columns = row.Split(',');
+                Assert.AreEqual(index, double.Parse(columns[0]));
+                index += interval;
+            }
+
         }
 
         [TestMethod]

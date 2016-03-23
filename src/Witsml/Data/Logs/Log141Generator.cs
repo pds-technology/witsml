@@ -99,7 +99,8 @@ namespace PDS.Witsml.Data.Logs
             const int Seed = 123;
 
             Random random = new Random(Seed);
-            DateTime dateTimeStart = DateTime.Now.ToUniversalTime();
+            DateTimeOffset dateTimeIndexStart = DateTimeOffset.Now;
+            DateTimeOffset dateTimeChannelStart = dateTimeIndexStart;
             double interval = log.Direction == LogIndexDirection.decreasing ? -1.0 : 1.0;
 
             if (log.LogData == null)
@@ -123,8 +124,8 @@ namespace PDS.Witsml.Data.Logs
                 {
                     case LogIndexType.datetime:
                     {
-                        dateTimeStart = dateTimeStart.AddSeconds(random.Next(1, 5));
-                        row += "\"" + dateTimeStart.AddSeconds(1.0).ToString("o") + "\"";
+                        dateTimeIndexStart = dateTimeIndexStart.AddSeconds(random.Next(1, 5));
+                        row += dateTimeIndexStart.ToString("o");
                         break;
                     }
                     case LogIndexType.elapsedtime:                       
@@ -158,14 +159,21 @@ namespace PDS.Witsml.Data.Logs
                         }
                         case LogDataType.datetime:
                         {
-                            dateTimeStart = dateTimeStart.AddSeconds(random.Next(1, 5));
-                            row += "\"" + dateTimeStart.ToString("o") + "\"";
+                            if (log.IndexType == LogIndexType.datetime)
+                            {
+                                dateTimeChannelStart = dateTimeIndexStart;
+                            }
+                            else
+                            {
+                                dateTimeChannelStart = dateTimeChannelStart.AddSeconds(random.Next(1, 5));
+                            }
+                            row += dateTimeChannelStart.ToString("o");
                             break;
                         }
                         case LogDataType.@double:
                         case LogDataType.@float:                       
                         {
-                            row += random.NextDouble().ToString("N3");
+                            row += random.NextDouble().ToString();
                             break;
                         }
                         case LogDataType.@int:
