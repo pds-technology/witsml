@@ -407,7 +407,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <returns>An <see cref="IEnumerable{LogDataValues}"/> of "chunked" data.</returns>
         private IEnumerable<ChannelDataValues> ToChunks(ChannelIndexInfo indexChannel, IEnumerable<Tuple<string, double, string>> sequence)
         {
-            Tuple<int, int> plannedRange = null;
+            ChannelIndexRange? plannedRange = null;
             double startIndex = 0;
             double endIndex = 0;
             var data = new List<string>();
@@ -416,14 +416,14 @@ namespace PDS.Witsml.Server.Data.Channels
 
             foreach (var item in sequence)
             {
-                if (plannedRange == null)
+                if (!plannedRange.HasValue)
                 {
                     plannedRange = ComputeRange(item.Item2, RangeSize, increasing);
                     uid = item.Item1;
                     startIndex = item.Item2;
                 }
 
-                if (WithinRange(item.Item2, plannedRange.Item2, increasing, false))
+                if (WithinRange(item.Item2, plannedRange.Value.End, increasing, false))
                 {
                     uid = string.IsNullOrEmpty(uid) ? item.Item1 : uid;
                     data.Add(item.Item3);
@@ -540,11 +540,10 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="rangeSize">Size of the range.</param>
         /// <param name="increasing">if set to <c>true</c> [increasing].</param>
         /// <returns>The range.</returns>
-        private Tuple<int, int> ComputeRange(double index, int rangeSize, bool increasing = true)
+        private ChannelIndexRange ComputeRange(double index, int rangeSize, bool increasing = true)
         {
-            // TODO: Create a Range struct, or a class if necessary, instead of using a Tuple
             var rangeIndex = increasing ? (int)(Math.Floor(index / rangeSize)) : (int)(Math.Ceiling(index / rangeSize));
-            return new Tuple<int, int>(rangeIndex * rangeSize, rangeIndex * rangeSize + (increasing ? rangeSize : -rangeSize));
+            return new ChannelIndexRange(rangeIndex * rangeSize, rangeIndex * rangeSize + (increasing ? rangeSize : -rangeSize));
         }
 
         /// <summary>
@@ -579,7 +578,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
             var increasing = indices.First().Increasing;
             var rangeSizeAdjustment = increasing ? RangeSize : -RangeSize;
-            var rangeSize = ComputeRange(start, RangeSize, increasing);
+            ChannelIndexRange rangeSize = ComputeRange(start, RangeSize, increasing);
 
             do
             {
@@ -606,7 +605,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 dataChunks.Add(channelDataValues);
 
                     // Compute the next range
-                    rangeSize = new Tuple<int, int>(rangeSize.Item1 + rangeSizeAdjustment, rangeSize.Item2 + rangeSizeAdjustment);
+                    rangeSize = new ChannelIndexRange(rangeSize.Start + rangeSizeAdjustment, rangeSize.End + rangeSizeAdjustment);
                 }
             }
             // Keep looking until we are creating empty chunks
@@ -623,18 +622,18 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="increasing">if set to <c>true</c> [increasing].</param>
         /// <param name="rangeSize">Size of the range.</param>
         /// <returns>The data rows for the chunk that are within the given rangeSize</returns>
-        private List<List<List<object>>> CreateChunk(List<List<List<object>>> logData, bool isTimeIndex, bool increasing, Tuple<int, int> rangeSize)
+        private List<List<List<object>>> CreateChunk(List<List<List<object>>> logData, bool isTimeIndex, bool increasing, ChannelIndexRange rangeSize)
         {
             var chunk =
                 increasing
                     ? (isTimeIndex
-                        ? logData.Where(d => ParseTime(d.First().First().ToString()) >= rangeSize.Item1 && ParseTime(d.First().First().ToString()) < rangeSize.Item2).ToList()
-                        : logData.Where(d => Convert.ToDouble(d.First().First()) >= rangeSize.Item1 && Convert.ToDouble(d.First().First()) < rangeSize.Item2).ToList())
+                        ? logData.Where(d => ParseTime(d.First().First().ToString()) >= rangeSize.Start && ParseTime(d.First().First().ToString()) < rangeSize.End).ToList()
+                        : logData.Where(d => Convert.ToDouble(d.First().First()) >= rangeSize.Start && Convert.ToDouble(d.First().First()) < rangeSize.End).ToList())
 
                     // Decreasing
                     : (isTimeIndex
-                        ? logData.Where(d => ParseTime(d.First().First().ToString()) <= rangeSize.Item1 && ParseTime(d.First().First().ToString()) > rangeSize.Item2).ToList()
-                        : logData.Where(d => Convert.ToDouble(d.First().First()) <= rangeSize.Item1 && Convert.ToDouble(d.First().First()) > rangeSize.Item2).ToList());
+                        ? logData.Where(d => ParseTime(d.First().First().ToString()) <= rangeSize.Start && ParseTime(d.First().First().ToString()) > rangeSize.End).ToList()
+                        : logData.Where(d => Convert.ToDouble(d.First().First()) <= rangeSize.Start && Convert.ToDouble(d.First().First()) > rangeSize.End).ToList());
             return chunk;
         }
 
@@ -773,7 +772,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     return null;
 
                 var range = ComputeRange(index.Start, RangeSize, increasing);
-                if (Before(start, range.Item2, increasing) && !Before(start, range.Item1, increasing))
+                if (Before(start, range.End, increasing) && !Before(start, range.Start, increasing))
                 {
                     count = i++;
                     return result;
@@ -813,7 +812,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 if (!chunkMnemonics.Contains(mnemonic))
                 {
                     var effectiveRange = effectiveRanges[mnemonic];
-                    if (Before(effectiveRange.First(), chunkRange.Item2, increasing) && Before(chunkRange.Item1, effectiveRange.Last(), increasing))
+                    if (Before(effectiveRange.First(), chunkRange.End, increasing) && Before(chunkRange.Start, effectiveRange.Last(), increasing))
                     {
                         chunkMnemonics.Add(mnemonic);
                         chunkUnits.Add(units[i]);
@@ -957,7 +956,7 @@ namespace PDS.Witsml.Server.Data.Channels
             var firstRow = logData[0];
             var points = firstRow.Split(Separator).ToList();
             var indexValue = GetAnIndexValue(points.First(), isTimeLog);
-            double stop = ComputeRange(indexValue, RangeSize, increasing).Item2;
+            double stop = ComputeRange(indexValue, RangeSize, increasing).End;
             var chunk = new List<List<string>>();
 
             foreach (var row in logData)
