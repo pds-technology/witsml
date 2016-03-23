@@ -75,18 +75,18 @@ namespace PDS.Witsml.Server.Data.Channels
 
             if (chunks != null && chunks.Any())
             {
-            var collection = GetCollection<ChannelDataValues>(DbCollectionName);
+                var collection = GetCollection<ChannelDataValues>(DbCollectionName);
 
                 collection.BulkWrite(chunks
-                .Select(dc =>
-                {
-                    dc.UidLog = uidLog;
-                    dc.Uid = NewUid();
-                    dc.MnemonicList = mnemonicList;
-                    dc.UnitList = unitList;
-                    return new InsertOneModel<ChannelDataValues>(dc);
-                }));
-        }
+                    .Select(dc =>
+                    {
+                        dc.UidLog = uidLog;
+                        dc.Uid = NewUid();
+                        dc.MnemonicList = mnemonicList;
+                        dc.UnitList = unitList;
+                        return new InsertOneModel<ChannelDataValues>(dc);
+                    }));
+            }
         }
 
         /// <summary>
@@ -169,6 +169,7 @@ namespace PDS.Witsml.Server.Data.Channels
         private List<ChannelIndexInfo> CreateChannelSetIndexInfo(List<ChannelIndex> indices)
         {
             var indicesInfo = new List<ChannelIndexInfo>();
+
             foreach (var index in indices)
             {
                 var indexInfo = new ChannelIndexInfo
@@ -239,6 +240,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
             if (rangeFilters.Count > 0)
                 filters.Add(Builders<ChannelDataValues>.Filter.And(rangeFilters));
+
             return Builders<ChannelDataValues>.Filter.And(filters);
         }
 
@@ -250,12 +252,14 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="mnemonics">The subset of mnemonics for the requested log curves.</param>
         private void TransformLogData(LogData logData, List<ChannelDataValues> results, List<string> mnemonics, Tuple<double?, double?> rowRange, bool increasing)
         {
-            logData.Data = new List<string>();
             var dataList = new List<List<string>>();
             var rangeList = new List<List<string>>();
+            var requestIndex = new List<int>();
             List<string> dataMnemonics = null;
             List<string> units = null;
-            var requestIndex = new List<int>();
+
+            logData.Data = new List<string>();
+
             foreach (var result in results)
             {
                 var values = DeserializeLogData(result.Data);
@@ -264,6 +268,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 {
                     dataMnemonics = result.MnemonicList.Split(Separator).ToList();
                     units = result.UnitList.Split(Separator).ToList();
+
                     foreach (var request in mnemonics)
                     {
                         if (dataMnemonics.Contains(request))
@@ -372,11 +377,14 @@ namespace PDS.Witsml.Server.Data.Channels
         {
             var points = data.Split(Separator);
             var result = new List<string>();
+
             for (var i = 0; i < requestIndex.Count; i++)
             {
                 var index = points[0];
                 var point = points[requestIndex[i]];
+
                 result.Add(point);
+
                 if (string.IsNullOrEmpty(point))
                     continue;
 
@@ -391,6 +399,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     range[1] = index;
                 }
             }
+
             return result;
         }
 
@@ -399,6 +408,7 @@ namespace PDS.Witsml.Server.Data.Channels
             var sb = new StringBuilder();
 
             sb.Append(points[validIndex[0]]);
+
             for (var j = 1; j < validIndex.Count; j++)
                 sb.AppendFormat("{0}{1}", Separator, points[validIndex[j]]);
 
@@ -476,6 +486,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 // TODO: Validate the index order (is the data sorted?)
                 var allValues = dataRow.Split(Separator);
                 double index;
+
                 if (isDepthLog)
                     index = double.Parse(allValues[0]);
                 else
@@ -707,7 +718,7 @@ namespace PDS.Witsml.Server.Data.Channels
             var ranges = new List<double>();
             var valueUpdates = new List<List<string>>();
 
-            var collection = GetCollection<ChannelDataValues>(DbCollectionName);
+            var collection = GetCollection();
             var mongoDbUpdate = new MongoDbUpdate<ChannelDataValues>(collection, null, null, null);
 
             // Looping through each logData elements, since multiple logData nodes are allowed during update
@@ -800,6 +811,7 @@ namespace PDS.Witsml.Server.Data.Channels
             {
                 var result = results[i];
                 var index = result.Indices.FirstOrDefault();
+
                 if (index == null)
                     return null;
 
@@ -810,6 +822,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     return result;
                 }
             }
+
             return null;
         }
 
@@ -825,12 +838,14 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <returns>The created chunk</returns>
         private ChannelDataValues CreateChunk(string uidLog, List<List<string>> updates, List<string> mnemonics, List<string> units, bool increasing, bool isTimeLog)
         {
-            var chunk = new ChannelDataValues { Uid = NewUid(), UidLog = uidLog };
             var start = GetAnIndexValue(updates.First().First(), isTimeLog);
             var end = GetAnIndexValue(updates.Last().First(), isTimeLog);
-            var index = new ChannelIndexInfo { Mnemonic = mnemonics[0], Start = start, End = end, Increasing = increasing, IsTimeIndex = isTimeLog };
-            chunk.Indices = new List<ChannelIndexInfo> { index };
             var delimiter = Separator.ToString();
+
+            var chunk = new ChannelDataValues { Uid = NewUid(), UidLog = uidLog, MnemonicList = string.Join(",", mnemonics), UnitList = string.Join(",", units) };
+            var index = new ChannelIndexInfo { Mnemonic = mnemonics[0], Start = start, End = end, Increasing = increasing, IsTimeIndex = isTimeLog };
+
+            chunk.Indices = new List<ChannelIndexInfo> { index };
             chunk.Data = SerializeLogData(updates.Select(r => string.Join(delimiter, r)).ToList());
 
             return chunk;
@@ -853,10 +868,13 @@ namespace PDS.Witsml.Server.Data.Channels
             var chunkData = DeserializeLogData(chunk.Data);
             var chunkIndex = chunk.Indices.FirstOrDefault();
             var chunkRange = ComputeRange(chunkIndex.Start, RangeSize, increasing);
-            var merges = new List<string>();
             var mnemonicIndexMap = new Dictionary<string, int>();
+            var merges = new List<string>();
+
             for (var i = 0; i < chunkMnemonics.Count; i++)
+            {
                 mnemonicIndexMap.Add(chunkMnemonics[i], i);
+            }
 
             for (var i = 0; i < mnemonics.Count; i++)
             {
@@ -873,9 +891,11 @@ namespace PDS.Witsml.Server.Data.Channels
                 }
             }
 
+            var mergeRange = new List<double>();
             double current, next;
             List<string> update;
-            var mergeRange = new List<double>();
+            List<string> points;
+
             if (updates != null)
             {
                 for (var i = 0; i < updates.Count; i++)
@@ -884,14 +904,16 @@ namespace PDS.Witsml.Server.Data.Channels
                     {
                         update = updates[i];
                         current = GetAnIndexValue(update.First(), isTimeLog);
-                        var points = chunkData[j].Split(Separator).ToList();
+
+                        points = chunkData[j].Split(Separator).ToList();
                         next = GetAnIndexValue(points.First(), isTimeLog);
-                        while (Before(current, next, increasing))
+
+                        while (Before(current, next, increasing) && i < updates.Count)
                         {
-                            MergeOneDataRow(merges, null, update, chunkMnemonics, mnemonics, mnemonicIndexMap, effectiveRanges, current, increasing);
-                            i++;
                             update = updates[i];
                             current = GetAnIndexValue(update.First(), isTimeLog);
+                            MergeOneDataRow(merges, null, update, chunkMnemonics, mnemonics, mnemonicIndexMap, effectiveRanges, current, increasing);
+                            i++;
                         }
                         if (current == next)
                         {
@@ -899,20 +921,23 @@ namespace PDS.Witsml.Server.Data.Channels
                             i++;
                             continue;
                         }
-                        while (Before(next, current, increasing))
+                        while (Before(next, current, increasing) && j < chunkData.Count)
                         {
-                            MergeOneDataRow(merges, points, null, chunkMnemonics, mnemonics, mnemonicIndexMap, effectiveRanges, next, increasing);
-                            j++;
                             points = chunkData[j].Split(Separator).ToList();
                             next = GetAnIndexValue(points.First(), isTimeLog);
+                            MergeOneDataRow(merges, points, null, chunkMnemonics, mnemonics, mnemonicIndexMap, effectiveRanges, next, increasing);
+                            j++;
                         }
                     }
                 }
+
                 var indexInfo = chunk.Indices.First();
                 var firstRow = merges.First().Split(Separator);
-                indexInfo.Start = GetAnIndexValue(firstRow[0], isTimeLog);
                 var lastRow = merges.Last().Split(Separator);
+
+                indexInfo.Start = GetAnIndexValue(firstRow[0], isTimeLog);
                 indexInfo.End = GetAnIndexValue(lastRow[0], isTimeLog);
+
                 chunk.MnemonicList = string.Join(Separator.ToString(), chunkMnemonics);
                 chunk.UnitList = string.Join(Separator.ToString(), chunkUnits);
             }
@@ -920,11 +945,12 @@ namespace PDS.Witsml.Server.Data.Channels
             {
                 for (var j = 0; j < chunkData.Count; j++)
                 {
-                    var points = chunkData[j].Split(Separator).ToList();
+                    points = chunkData[j].Split(Separator).ToList();
                     next = GetAnIndexValue(points.First(), isTimeLog);
                     MergeOneDataRow(merges, points, null, chunkMnemonics, mnemonics, mnemonicIndexMap, effectiveRanges, next, increasing);
                 }
             }
+
             chunk.Data = SerializeLogData(merges);          
         }
 
@@ -944,8 +970,11 @@ namespace PDS.Witsml.Server.Data.Channels
         {
             var mnemonicsCount = indexMap.Keys.Count;
             var merge = new List<string>();
+
             for (var i = 0; i < mnemonicsCount; i++)
+            {
                 merge.Add(string.Empty);
+            }
 
             if (points == null)
             {
@@ -964,12 +993,16 @@ namespace PDS.Witsml.Server.Data.Channels
                     {
                         if (effectiveRanges.ContainsKey(mnemonic))
                         {
-                        var effectiveRange = effectiveRanges[mnemonic];
-                        if (Before(indexValue, effectiveRange.First(), increasing) || Before(effectiveRange.Last(), indexValue, increasing))
-                            merge[i] = points[i];
-                        else
-                            merge[i] = string.Empty;
-                    }
+                            var effectiveRange = effectiveRanges[mnemonic];
+                            if (Before(indexValue, effectiveRange.First(), increasing) || Before(effectiveRange.Last(), indexValue, increasing))
+                            {
+                                merge[i] = points[i];
+                            }
+                            else
+                            {
+                                merge[i] = string.Empty;
+                            }
+                        }
                     }
                     else
                     {
@@ -1044,6 +1077,7 @@ namespace PDS.Witsml.Server.Data.Channels
             {
                 points = row.Split(Separator).ToList();
                 indexValue = GetAnIndexValue(points.First(), isTimeLog);
+
                 for (var i = 0; i < points.Count; i++)
                 {
                     var mnemonic = mnemonics[i];
@@ -1055,12 +1089,14 @@ namespace PDS.Witsml.Server.Data.Channels
                             ranges.Add(mnemonic, new List<double> { indexValue, indexValue });
                     }
                 }
+
                 if (!Before(indexValue, stop, increasing))
                 {
                     chunks.Add(chunk);
                     chunk = new List<List<string>>();
                     stop = ComputeRange(indexValue, RangeSize, increasing).End;
                 }
+
                 chunk.Add(points);
             }
 

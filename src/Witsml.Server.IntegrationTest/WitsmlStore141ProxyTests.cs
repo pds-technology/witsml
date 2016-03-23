@@ -269,7 +269,7 @@ namespace PDS.Witsml.Server
 
             Assert.IsNotNull(result.Log[0].LogData[0].Data);
             Assert.AreEqual(1, result.Log[0].LogData[0].Data.Count);
-            Assert.AreEqual("0,,0", result.Log[0].LogData[0].Data[0]);
+            Assert.AreEqual("0,0", result.Log[0].LogData[0].Data[0]);
         }
 
         [TestMethod]
@@ -310,9 +310,9 @@ namespace PDS.Witsml.Server
 
             Assert.IsNotNull(result.Log[0].LogData[0].Data);
             Assert.AreEqual(3, result.Log[0].LogData[0].Data.Count);
-            Assert.AreEqual("0,,0", result.Log[0].LogData[0].Data[0]);
-            Assert.AreEqual("0.1,,1", result.Log[0].LogData[0].Data[1]);
-            Assert.AreEqual("0.2,,2", result.Log[0].LogData[0].Data[2]);
+            Assert.AreEqual("0,0", result.Log[0].LogData[0].Data[0]);
+            Assert.AreEqual("0.1,1", result.Log[0].LogData[0].Data[1]);
+            Assert.AreEqual("0.2,2", result.Log[0].LogData[0].Data[2]);
         }
 
         [TestMethod]
