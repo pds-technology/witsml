@@ -117,6 +117,8 @@
     </Compile>
     <Compile Include="Providers\SimulationChannelStreamingProvider.cs" />
     <Compile Include="Providers\SimulationDiscoveryProvider.cs" />
+    <Compile Include="ViewModels\Proxies\Log141ProxyViewModel.cs" />
+    <Compile Include="ViewModels\Proxies\WitsmlProxyViewModel.cs" />
     <Compile Include="ViewModels\Simulation\ChannelsViewModel.cs" />
     <Compile Include="ViewModels\DataReplayViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />

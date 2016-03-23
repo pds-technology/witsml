@@ -7,19 +7,15 @@ using System.Threading.Tasks;
 using System.Windows;
 using Caliburn.Micro;
 using Energistics;
-using Energistics.DataAccess;
-using Energistics.DataAccess.WITSML141;
-using Energistics.DataAccess.WITSML141.ComponentSchemas;
-using Energistics.DataAccess.WITSML141.ReferenceData;
 using Energistics.Datatypes.ChannelData;
 using Energistics.Protocol.ChannelStreaming;
 using Energistics.Protocol.Discovery;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using PDS.Framework;
-using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Studio.Connections;
 using PDS.Witsml.Studio.Plugins.DataReplay.Providers;
+using PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies;
 using PDS.Witsml.Studio.Runtime;
 using PDS.Witsml.Studio.ViewModels;
 
@@ -46,17 +42,13 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
         /// <summary>
         /// Gets the proxy for the WITSML web service.
         /// </summary>
-        /// <value>
-        /// The WITSML seb service proxy.
-        /// </value>
-        public WITSMLWebServiceConnection Proxy { get; private set; }
+        /// <value>The WITSML seb service proxy.</value>
+        public WitsmlProxyViewModel Proxy { get; private set; }
 
         /// <summary>
         /// Gets the witsml versions retrieved from the server.
         /// </summary>
-        /// <value>
-        /// The server's supported witsml versions.
-        /// </value>
+        /// <value>The server's supported witsml versions.</value>
         public BindableCollection<string> WitsmlVersions { get; }
 
         private string _output;
@@ -194,12 +186,17 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
                 {
                     try
                     {
-                        await InitWitsmlClient(token);
+                        Log("WITSML Client simulation starting. URL: {0}", Model.WitsmlConnection.Uri);
+                        await Proxy.Start(Model, token);
                         Log("WITSML Client simulation stopped.");
                     }
                     catch (ContainerException)
                     {
                         Log("Data object not supported; Type: {0}; Version: {1};", ObjectTypes.Log, Model.WitsmlVersion);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log("An error occurred: " + ex);
                     }
                     finally
                     {
@@ -296,68 +293,6 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
             base.OnDeactivate(close);
         }
 
-        private async Task InitWitsmlClient(CancellationToken token)
-        {
-            //var generator = Runtime.Container.Resolve<IWitsmlDataGenerator>(new ObjectName(ObjectTypes.Log, Model.WitsmlVersion));
-            var generator = new Log141Generator();
-            var index = 0d;
-
-            Log("WITSML Client simulation started. URL: {0}", Proxy.Url);
-
-            var logList = new Log()
-            {
-                UidWell = Model.WellUid,
-                NameWell = Model.WellName,
-                UidWellbore = Model.WellboreUid,
-                NameWellbore = Model.WellboreName,
-                Uid = Model.LogUid,
-                Name = Model.LogName,
-                IndexType = Model.LogIndexType
-            }
-            .AsList();
-
-            while (true)
-            {
-                if (token.IsCancellationRequested)
-                {
-                    break;
-                }
-
-                var result = Proxy.Read(new LogList() { Log = logList }, OptionsIn.ReturnElements.HeaderOnly);
-
-                if (!result.Log.Any())
-                {
-                    Runtime.Invoke(() => Runtime.ShowError("Log not found."));
-                    break;
-                }
-
-                var log = result.Log[0];
-                log.Direction = LogIndexDirection.increasing;
-                log.IndexCurve = Model.Channels.Select(x => x.Mnemonic).FirstOrDefault();
-                log.LogCurveInfo = Model.Channels.Select(ToLogCurveInfo).ToList();
-
-                index = generator.GenerateLogData(log, startIndex: index);
-
-                result.Log[0].LogData[0].MnemonicList = generator.Mnemonics(result.Log[0].LogCurveInfo);
-                result.Log[0].LogData[0].UnitList = generator.Units(result.Log[0].LogCurveInfo);
-
-                Proxy.Update(result);
-
-                await Task.Delay(5000);
-            }
-        }
-
-        private LogCurveInfo ToLogCurveInfo(ChannelMetadataRecord channel)
-        {
-            return new LogCurveInfo()
-            {
-                Mnemonic = new ShortNameStruct(channel.Mnemonic),
-                Unit = channel.Uom,
-                CurveDescription = channel.Description,
-                TypeLogData = LogDataType.@double,
-            };
-        }
-
         private async Task InitChannelStreaming(CancellationToken token)
         {
             using (var server = new EtpSocketServer(Model.PortNumber, ((IScreen)Parent).DisplayName, Model.Version))
@@ -400,24 +335,24 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
             try
             {
                 WitsmlVersions.Clear();
-                var versions = Proxy.GetVersion();
+                var versions = Proxy.Connection.GetVersion();
 
                 if (!string.IsNullOrEmpty(versions))
                 {
-                    _log.DebugFormat("Supported versions '{0}' found on WITSML server with uri '{1}'", versions, Model.WitsmlConnection.Uri);
+                    _log.DebugFormat("Supported versions '{0}' found on WITSML server with URI '{1}'", versions, Model.WitsmlConnection.Uri);
                     WitsmlVersions.AddRange(versions.Split(','));
                     Model.WitsmlVersion = WitsmlVersions.Last();
                 }
                 else
                 {
-                    var msg = "The Witsml server does not support any versions.";
+                    var msg = "The WITSML server does not support any versions.";
                     _log.Warn(msg);
                     Runtime.ShowError(msg);
                 }
             }
             catch (Exception ex)
             {
-                var errorMessage = string.Format("{0}{1}{1}{2}", "Error connecting to server.", Environment.NewLine, "Invalid URL");
+                var errorMessage = "Error connecting to server: Invalid URL";
 
                 // Log the error
                 _log.Error(errorMessage, ex);
@@ -427,36 +362,13 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
             }
         }
 
-        /// <summary>
-        /// Creates a WITSMLWebServiceConnection for the current connection uri and witsml version.
-        /// </summary>
-        /// <returns></returns>
-        private WITSMLWebServiceConnection CreateProxy()
+        private WitsmlProxyViewModel CreateProxy()
         {
-            _log.DebugFormat("A new Proxy is being created with {2}{2}uri: {0}{2}{2}WitsmlVersion: {1}{2}{2}", Model.WitsmlConnection.Uri, Model.WitsmlVersion, Environment.NewLine);
-            var proxy = new WITSMLWebServiceConnection(Model.WitsmlConnection.Uri, GetWitsmlVersionEnum(Model.WitsmlVersion));
+            //return OptionsIn.DataVersion.Version131.Equals(Model.WitsmlVersion)
+            //    ? new Log131ProxyViewModel(Model.WitsmlConnection)
+            //    : new Log141ProxyViewModel(Model.WitsmlConnection);
 
-            if (!string.IsNullOrWhiteSpace(Model.WitsmlConnection.Username))
-            {
-                proxy.Username = Model.WitsmlConnection.Username;
-                proxy.SetSecurePassword(Model.WitsmlConnection.SecurePassword);
-            }
-
-            return proxy;
-        }
-
-        /// <summary>
-        /// Gets the witsml version enum.
-        /// </summary>
-        /// <returns>
-        /// The WMLSVersion enum value based on the current value of Model.WitsmlVersion.
-        /// If Model.WitsmlVersion has not been established the the default is WMLSVersion.WITSML141.
-        /// </returns>
-        private WMLSVersion GetWitsmlVersionEnum(string witsmlVersion)
-        {
-            return OptionsIn.DataVersion.Version131.Equals(witsmlVersion)
-                ? WMLSVersion.WITSML131
-                : WMLSVersion.WITSML141;
+            return new Log141ProxyViewModel(Runtime, Model.WitsmlConnection);
         }
 
         private void Log(string message, params object[] values)
