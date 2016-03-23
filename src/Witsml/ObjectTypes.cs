@@ -29,7 +29,7 @@ namespace PDS.Witsml
         public const string ChangeLog = "changeLog";
         public const string ChannelSet = "channelSet";
         public const string Channel = "channel";
-        public const string ChannelSetValues = "channelSetValues";
+        public const string ChannelDataValues = "channelDataValues";
 
         private static readonly string[] GrowingObjects = new [] { Log, MudLog, Trajectory };
 
