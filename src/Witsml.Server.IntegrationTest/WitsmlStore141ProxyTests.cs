@@ -150,7 +150,7 @@ namespace PDS.Witsml.Server
 
             // Get Wellbore by Uid
             var query = DevKit.Query<WellboreList>();
-            query.Wellbore = DevKit.One<Wellbore>(x => x.Uid = Wellbore1.Uid);
+            query.Wellbore = DevKit.One<Wellbore>(x => { x.Uid = Wellbore1.Uid; x.UidWell = Wellbore1.UidWell; });
 
             var result = DevKit.Proxy.Read(query);
 
@@ -193,7 +193,7 @@ namespace PDS.Witsml.Server
 
             // Get Log header by Uid
             var query = DevKit.Query<LogList>();
-            query.Log = DevKit.One<Log>(x => x.Uid = Log1.Uid);
+            query.Log = DevKit.One<Log>(x => { x.Uid = Log1.Uid; x.UidWell = Log1.UidWell; x.UidWellbore = Log1.UidWellbore; });
 
             var result = DevKit.Proxy.Read(query, OptionsIn.ReturnElements.HeaderOnly);
 
@@ -250,13 +250,13 @@ namespace PDS.Witsml.Server
             DevKit.Proxy.Write(DevKit.New<LogList>(x => x.Log = DevKit.List(Log1)));
 
             // Update Log with new LogData
-            var log1 = new Log() { Uid = Log1.Uid };
+            var log1 = new Log() { Uid = Log1.Uid, UidWell = Log1.UidWell, UidWellbore = Log1.UidWellbore };
             DevKit.InitData(log1, DevKit.Mnemonics(Log1), DevKit.Units(Log1), 0, null, 0);
             DevKit.Proxy.Update(DevKit.New<LogList>(x => x.Log = DevKit.List(log1)));
 
             // Get Log by Uid
             var query = DevKit.Query<LogList>();
-            query.Log = DevKit.One<Log>(x => x.Uid = Log1.Uid);
+            query.Log = DevKit.One<Log>(x => { x.Uid = Log1.Uid; x.UidWell = Log1.UidWell; x.UidWellbore = Log1.UidWellbore; });
 
             var result = DevKit.Proxy.Read(query, OptionsIn.ReturnElements.All);
 
@@ -285,19 +285,19 @@ namespace PDS.Witsml.Server
             DevKit.Proxy.Write(DevKit.New<LogList>(x => x.Log = DevKit.List(Log1)));
 
             // Update Log with new LogData
-            var log1 = new Log() { Uid = Log1.Uid };
+            var log1 = new Log() { Uid = Log1.Uid, UidWell = Log1.UidWell, UidWellbore = Log1.UidWellbore };
             DevKit.InitData(log1, DevKit.Mnemonics(Log1), DevKit.Units(Log1), 0, null, 0);
             DevKit.Proxy.Update(DevKit.New<LogList>(x => x.Log = DevKit.List(log1)));
 
             // Update Log with appended LogData
-            var log2 = new Log() { Uid = Log1.Uid };
+            var log2 = new Log() { Uid = Log1.Uid, UidWell = Log1.UidWell, UidWellbore = Log1.UidWellbore };
             DevKit.InitData(log2, DevKit.Mnemonics(Log1), DevKit.Units(Log1), 0.1, null, 1);
             DevKit.InitData(log2, DevKit.Mnemonics(Log1), DevKit.Units(Log1), 0.2, null, 2);
             DevKit.Proxy.Update(DevKit.New<LogList>(x => x.Log = DevKit.List(log2)));
 
             // Get Log by Uid
             var query = DevKit.Query<LogList>();
-            query.Log = DevKit.One<Log>(x => x.Uid = Log1.Uid);
+            query.Log = DevKit.One<Log>(x => { x.Uid = Log1.Uid; x.UidWell = Log1.UidWell; x.UidWellbore = Log1.UidWellbore; });
 
             var result = DevKit.Proxy.Read(query, OptionsIn.ReturnElements.All);
 
@@ -328,19 +328,19 @@ namespace PDS.Witsml.Server
             DevKit.Proxy.Write(DevKit.New<LogList>(x => x.Log = DevKit.List(Log1)));
 
             // Update Log with new LogData
-            var log1 = new Log() { Uid = Log1.Uid };
+            var log1 = new Log() { Uid = Log1.Uid, UidWell = Log1.UidWell, UidWellbore = Log1.UidWellbore };
             DevKit.InitData(log1, DevKit.Mnemonics(Log1), DevKit.Units(Log1), 0, null, 0);
             DevKit.InitData(log1, DevKit.Mnemonics(Log1), DevKit.Units(Log1), 0.1, null, 1);
             DevKit.Proxy.Update(DevKit.New<LogList>(x => x.Log = DevKit.List(log1)));
 
             // Update Log with updated LogData
-            var log2 = new Log() { Uid = Log1.Uid };
+            var log2 = new Log() { Uid = Log1.Uid, UidWell = Log1.UidWell, UidWellbore = Log1.UidWellbore };
             DevKit.InitData(log2, DevKit.Mnemonics(Log1), DevKit.Units(Log1), 0.1, 10, 1.1);
             DevKit.Proxy.Update(DevKit.New<LogList>(x => x.Log = DevKit.List(log2)));
 
             // Get Log by Uid
             var query = DevKit.Query<LogList>();
-            query.Log = DevKit.One<Log>(x => x.Uid = Log1.Uid);
+            query.Log = DevKit.One<Log>(x => { x.Uid = Log1.Uid; x.UidWell = Log1.UidWell; x.UidWellbore = Log1.UidWellbore; });
 
             var result = DevKit.Proxy.Read(query, OptionsIn.ReturnElements.All);
 
@@ -370,7 +370,7 @@ namespace PDS.Witsml.Server
             DevKit.Proxy.Write(DevKit.New<LogList>(x => x.Log = DevKit.List(Log1)));
 
             // Update Log with new LogData
-            var log1 = new Log() { Uid = Log1.Uid };
+            var log1 = new Log() { Uid = Log1.Uid, UidWell = Log1.UidWell, UidWellbore = Log1.UidWellbore };
             DevKit.InitDataMany(log1, DevKit.Mnemonics(Log1), DevKit.Units(Log1), 10);
             DevKit.Proxy.Update(DevKit.New<LogList>(x => x.Log = DevKit.List(log1)));
 
@@ -438,7 +438,7 @@ namespace PDS.Witsml.Server
             DevKit.Proxy.Write(DevKit.New<LogList>(x => x.Log = DevKit.List(Log1)));
 
             // Update Log with new LogData
-            var log1 = new Log() { Uid = Log1.Uid };
+            var log1 = new Log() { Uid = Log1.Uid, UidWell = Log1.UidWell, UidWellbore = Log1.UidWellbore };
             DevKit.InitDataMany(log1, DevKit.Mnemonics(Log1), DevKit.Units(Log1), 10);
             DevKit.Proxy.Update(DevKit.New<LogList>(x => x.Log = DevKit.List(log1)));
 
@@ -499,7 +499,7 @@ namespace PDS.Witsml.Server
             DevKit.Proxy.Write(DevKit.New<LogList>(x => x.Log = DevKit.List(Log1)));
 
             // Update Log with new LogData
-            var log1 = new Log() { Uid = Log1.Uid };
+            var log1 = new Log() { Uid = Log1.Uid, UidWell = Log1.UidWell, UidWellbore = Log1.UidWellbore };
             DevKit.InitDataMany(log1, DevKit.Mnemonics(Log1), DevKit.Units(Log1), 10);
             DevKit.Proxy.Update(DevKit.New<LogList>(x => x.Log = DevKit.List(log1)));
 
@@ -575,7 +575,7 @@ namespace PDS.Witsml.Server
 
             // Get Log by Uid
             var query = DevKit.Query<LogList>();
-            query.Log = DevKit.One<Log>(x => x.Uid = Log1.Uid);
+            query.Log = DevKit.One<Log>(x => { x.Uid = Log1.Uid; x.UidWell = Log1.UidWell; x.UidWellbore = Log1.UidWellbore; });
 
             var result = DevKit.Proxy.Read(query, OptionsIn.ReturnElements.All);
 
