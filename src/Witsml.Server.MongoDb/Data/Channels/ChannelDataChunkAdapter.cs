@@ -31,7 +31,8 @@ namespace PDS.Witsml.Server.Data.Channels
                         dc.MnemonicList = string.Join(",", reader.Mnemonics);
                         dc.UnitList = string.Join(",", reader.Units);
                         return new InsertOneModel<ChannelDataChunk>(dc);
-                    }));
+                    })
+                    .ToList());
             }
         }
 

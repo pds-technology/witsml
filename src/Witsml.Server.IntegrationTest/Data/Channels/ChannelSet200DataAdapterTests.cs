@@ -40,7 +40,7 @@ namespace PDS.Witsml.Server.Data.Channels
         public void ChannelSet_can_be_added_with_depth_data()
         {
             var result = ChannelSetAdapter.Put(ChannelSet);
-            Assert.AreEqual((int)ErrorCodes.Success, result.Code);
+            Assert.AreEqual(ErrorCodes.Success, result.Code);
         }
     }
 }

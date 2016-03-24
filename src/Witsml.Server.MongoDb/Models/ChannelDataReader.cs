@@ -71,7 +71,7 @@ namespace PDS.Witsml.Server.Models
 
         public bool IsClosed
         {
-            get { return _current >= _records.Count; }
+            get { return _records == null || _current >= _records.Count; }
         }
 
         public int RecordsAffected
