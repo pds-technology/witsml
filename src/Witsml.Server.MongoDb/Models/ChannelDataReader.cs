@@ -10,7 +10,7 @@ using PDS.Witsml.Server.MongoDb;
 
 namespace PDS.Witsml.Server.Models
 {
-    public class ChannelDataReader : IDataReader
+    public class ChannelDataReader : IDataReader, IChannelDataRecord
     {
         internal static int RangeSize = Settings.Default.LogIndexRangeSize;
 
@@ -45,16 +45,6 @@ namespace PDS.Witsml.Server.Models
 
         public List<ChannelIndexInfo> Indices { get; }
 
-        public bool IsIncreasing
-        {
-            get { return Indices.Select(x => x.Increasing).FirstOrDefault(); }
-        }
-
-        public bool IsTimeIndex
-        {
-            get { return Indices.Select(x => x.IsTimeIndex).FirstOrDefault(); }
-        }
-
         public object this[string name]
         {
             get
@@ -81,7 +71,7 @@ namespace PDS.Witsml.Server.Models
 
         public bool IsClosed
         {
-            get { return _current > -1 && _current < _records.Count; }
+            get { return _current >= _records.Count; }
         }
 
         public int RecordsAffected
@@ -247,12 +237,13 @@ namespace PDS.Witsml.Server.Models
 
         public bool Read()
         {
-            if (IsClosed)
-                return false;
-
             _current++;
-
             return !IsClosed;
+        }
+
+        public void Reset()
+        {
+            _current = -1;
         }
 
         public string GetJson()
@@ -261,6 +252,14 @@ namespace PDS.Witsml.Server.Models
                 return null;
 
             return JsonConvert.SerializeObject(_records[_current]);
+        }
+
+        public IEnumerable<IChannelDataRecord> AsEnumerable()
+        {
+            while (Read())
+            {
+                yield return this;
+            }
         }
 
         private IEnumerable<object> GetRowValues(int row)
