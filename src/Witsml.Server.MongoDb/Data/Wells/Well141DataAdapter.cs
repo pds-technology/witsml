@@ -126,15 +126,15 @@ namespace PDS.Witsml.Server.Data.Wells
         /// </summary>
         /// <param name="entity">The entity.</param>
         public override WitsmlResult Put(Well entity)
-        {
-            Logger.DebugFormat("Putting Well with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
-            
+        {   
             if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.GetObjectId()))
             {
+                Logger.DebugFormat("Updating Well with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
                 return Update(entity);
             }
             else
             {
+                Logger.DebugFormat("Adding Well with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
                 return Add(entity);
             }
         }

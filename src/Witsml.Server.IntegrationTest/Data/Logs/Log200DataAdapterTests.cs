@@ -145,7 +145,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var mnemonics = Log1.ChannelSet.First().Channel.Select(c => c.Mnemonic).ToList();
             var logData = cda.GetData(uidLog, mnemonics, null, true);
 
-            var rowCount = logData.Sum(ld => DevKit.DeserializeChannelSetData(ld.Data).Count);
+            var rowCount = logData.Sum(ld => LogGenerator.DeserializeChannelSetData(ld.Data).Count);
 
             var start = logData.First().Indices.First().Start;
             var end = logData.Last().Indices.First().End;
@@ -180,7 +180,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var mnemonics = LogDecreasing.ChannelSet.First().Channel.Select(c => c.Mnemonic).ToList();
             var logData = cda.GetData(uidLog, mnemonics, null, false);
 
-            var rowCount = logData.Sum(ld => DevKit.DeserializeChannelSetData(ld.Data).Count);
+            var rowCount = logData.Sum(ld => LogGenerator.DeserializeChannelSetData(ld.Data).Count);
 
             var start = logData.First().Indices.First().Start;
             var end = logData.Last().Indices.First().End;

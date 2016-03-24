@@ -56,34 +56,13 @@ namespace PDS.Witsml.Server
             };
         }
 
-        public Channel Channel(Log log, List<ChannelIndex> indexList, string citationName = "Citation", string mnemonic = "MD", string uom = "ft", string curveClass = "CurveClass", EtpDataType etpDataType = EtpDataType.@double, List<PointMetadata> pointMetadataList = null)
-        {
-            return new Channel()
-            {
-                Citation = Citation(citationName),
-                Mnemonic = mnemonic,
-                UoM = uom,
-                CurveClass = curveClass,
-                LoggingMethod = log.LoggingMethod,
-                LoggingCompanyName = log.LoggingCompanyName,
-                Source = log.LoggingMethod.ToString(),
-                DataType = etpDataType,
-                Status = ChannelStatus.active,
-                Index = indexList,
-                StartIndex = (log.TimeDepth.EqualsIgnoreCase(ObjectFolders.Depth) ?
-                               (AbstractIndexValue)new DepthIndexValue() : (new TimeIndexValue())),
-                EndIndex = (log.TimeDepth.EqualsIgnoreCase(ObjectFolders.Depth) ?
-                               (AbstractIndexValue)new DepthIndexValue() : (new TimeIndexValue())),
-                TimeDepth = log.TimeDepth,
-                PointMetadata = pointMetadataList,
-            };
-        }
 
         public void InitHeader(Log log, LoggingMethod loggingMethod, ChannelIndex channelIndex, IndexDirection direction = IndexDirection.increasing)
         {
             log.ChannelSet = new List<ChannelSet>();
             log.LoggingCompanyName = "Service Co.";
             log.CurveClass = "unknown";
+            log.LoggingMethod = loggingMethod;
 
             var index = List(channelIndex); ;
             if (channelIndex.IndexType == ChannelIndexType.measureddepth)
@@ -92,11 +71,12 @@ namespace PDS.Witsml.Server
 
                 var pointMetadataList = List(LogGenerator.CreatePointMetadata("Quality", "Quality", EtpDataType.boolean));
 
-                ChannelSet channelSet = LogGenerator.CreateChannelSet(log, index, loggingMethod);
+                ChannelSet channelSet = LogGenerator.CreateChannelSet(log);
+                channelSet.Index = index;
 
-                channelSet.Channel.Add(Channel(log, index, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: pointMetadataList));
-                channelSet.Channel.Add(Channel(log, index, "Hookload", "HKLD", "klbf", "Force", EtpDataType.@double));
-                channelSet.Channel.Add(Channel(log, index, "GR1AX", "GR", "api", "Gamma_Ray", EtpDataType.@double));
+                channelSet.Channel.Add(LogGenerator.CreateChannel(log, index, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: pointMetadataList));
+                channelSet.Channel.Add(LogGenerator.CreateChannel(log, index, "Hookload", "HKLD", "klbf", "Force", EtpDataType.@double, null));
+                channelSet.Channel.Add(LogGenerator.CreateChannel(log, index, "GR1AX", "GR", "api", "Gamma_Ray", EtpDataType.@double, null));
 
                 CreateMockChannelSetData(channelSet, channelSet.Index);
                 log.ChannelSet.Add(channelSet);
@@ -108,10 +88,11 @@ namespace PDS.Witsml.Server
 
                 var pointMetadataList = List(LogGenerator.CreatePointMetadata("Confidence", "Confidence", EtpDataType.@float));
 
-                ChannelSet channelSet = LogGenerator.CreateChannelSet(log, index, loggingMethod);
+                ChannelSet channelSet = LogGenerator.CreateChannelSet(log);
+                channelSet.Index = index;
 
-                channelSet.Channel.Add(Channel(log, index, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: pointMetadataList));
-                channelSet.Channel.Add(Channel(log, index, "GR1AX", "GR", "api", "Gamma_Ray", EtpDataType.@double));
+                channelSet.Channel.Add(LogGenerator.CreateChannel(log, index, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: pointMetadataList));
+                channelSet.Channel.Add(LogGenerator.CreateChannel(log, index, "GR1AX", "GR", "api", "Gamma_Ray", EtpDataType.@double, null));
 
                 CreateMockChannelSetData(channelSet, channelSet.Index);
                 log.ChannelSet.Add(channelSet);
@@ -179,21 +160,21 @@ namespace PDS.Witsml.Server
         /// <param name="numDataValue">The number data value.</param>
         public void InitChannelSet(Log log, List<ChannelIndex> indexList, LoggingMethod loggingMethod = LoggingMethod.Computed, int numDataValue = 5)
         {
-            ChannelSet channelSet = LogGenerator.CreateChannelSet(log, indexList, loggingMethod);
-
+            ChannelSet channelSet = LogGenerator.CreateChannelSet(log);
+            channelSet.Index = indexList;
             bool isDepth = log.TimeDepth.EqualsIgnoreCase(ObjectFolders.Depth);
             if (isDepth)
             {
                 var pointMetadataList = List(LogGenerator.CreatePointMetadata("Quality", "Quality", EtpDataType.boolean));
 
-                channelSet.Channel.Add(Channel(log, indexList, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: pointMetadataList));
-                channelSet.Channel.Add(Channel(log, indexList, "Hookload", "HKLD", "klbf", "Force", EtpDataType.@double));
+                channelSet.Channel.Add(LogGenerator.CreateChannel(log, indexList, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: pointMetadataList));
+                channelSet.Channel.Add(LogGenerator.CreateChannel(log, indexList, "Hookload", "HKLD", "klbf", "Force", EtpDataType.@double, null));
             }
             else
             {
                 var pointMetadataList = List(LogGenerator.CreatePointMetadata("Confidence", "Confidence", EtpDataType.@float));
 
-                channelSet.Channel.Add(Channel(log, indexList, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: pointMetadataList));
+                channelSet.Channel.Add(LogGenerator.CreateChannel(log, indexList, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: pointMetadataList));
             }
             log.ChannelSet = new List<ChannelSet>();
             log.ChannelSet.Add(channelSet);
@@ -254,21 +235,6 @@ namespace PDS.Witsml.Server
             InitChannelSet(log, indexList);
 
             return log;
-        }
-
-        public List<List<List<object>>> DeserializeChannelSetData(string data)
-        {
-            return JsonConvert.DeserializeObject<List<List<List<object>>>>(data);
-        }
-
-        public List<object> DeserializeChannelValues(string data)
-        {
-            return JsonConvert.DeserializeObject<List<object>>(data);
-        }
-
-        public string SerializeChannelSetData(List<List<List<object>>> data)
-        {
-            return JsonConvert.SerializeObject(data);
         }
     }
 }

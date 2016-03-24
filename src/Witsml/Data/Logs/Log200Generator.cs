@@ -4,6 +4,7 @@ using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
+using Newtonsoft.Json;
 using PDS.Framework;
 
 namespace PDS.Witsml.Data.Logs
@@ -14,6 +15,11 @@ namespace PDS.Witsml.Data.Logs
         public readonly ChannelIndexType[] TimeIndexTypes = new ChannelIndexType[] { ChannelIndexType.datetime, ChannelIndexType.elapsedtime };
         public readonly ChannelIndexType[] OtherIndexTypes = new ChannelIndexType[] { ChannelIndexType.pressure, ChannelIndexType.temperature };
 
+        /// <summary>
+        /// Creates the citation <see cref="Citation"/>
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns></returns>
         public Citation CreateCitation(string name)
         {
             return new Citation()
@@ -25,6 +31,13 @@ namespace PDS.Witsml.Data.Logs
             };
         }
 
+        /// <summary>
+        /// Creates the point metadata <see cref="PointMetadata"/>
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="description">The description.</param>
+        /// <param name="etpDataType">Type of the ETP data.</param>
+        /// <returns></returns>
         public PointMetadata CreatePointMetadata(string name, string description, EtpDataType etpDataType)
         {
             return new PointMetadata()
@@ -35,6 +48,15 @@ namespace PDS.Witsml.Data.Logs
             };
         }
 
+        /// <summary>
+        /// Creates the channel index <see cref="ChannelIndex"/>
+        /// </summary>
+        /// <param name="indexType">Type of the index.</param>
+        /// <param name="direction">The direction.</param>
+        /// <param name="mnemonic">The mnemonic.</param>
+        /// <param name="uom">The uom.</param>
+        /// <param name="datumReference">The datum reference.</param>
+        /// <returns></returns>
         public ChannelIndex CreateChannelIndex(ChannelIndexType indexType, IndexDirection direction, string mnemonic, string uom, string datumReference)
         {
             return new ChannelIndex()
@@ -47,39 +69,116 @@ namespace PDS.Witsml.Data.Logs
             };
         }
 
+        /// <summary>
+        /// Creates the index <see cref="ChannelIndex"/> of the measured depth 
+        /// </summary>
+        /// <param name="direction">The direction.</param>
+        /// <returns></returns>
         public ChannelIndex CreateMeasuredDepthIndex(IndexDirection direction)
         {
             return CreateChannelIndex( ChannelIndexType.measureddepth, direction, "MD", "m", "MSL");
         }
 
+        /// <summary>
+        /// Creates the index <see cref="ChannelIndex"/> of the true vertical depth.
+        /// </summary>
+        /// <param name="direction">The direction.</param>
+        /// <returns></returns>
         public ChannelIndex CreateTrueVerticalDepthIndex(IndexDirection direction)
         {
             return CreateChannelIndex(ChannelIndexType.trueverticaldepth, direction, "TVD", "ft", "MSL");
         }
 
+        /// <summary>
+        /// Creates the index <see cref="ChannelIndex"/> of the pass index depth.
+        /// </summary>
+        /// <param name="direction">The direction.</param>
+        /// <returns></returns>
         public ChannelIndex CreatePassIndexDepthIndex(IndexDirection direction)
         {
             return CreateChannelIndex(ChannelIndexType.passindexeddepth, direction, "PID", "m", "MSL");
         }
 
+        /// <summary>
+        /// Creates the index <see cref="ChannelIndex"/> of the date time.
+        /// </summary>
+        /// <returns></returns>
         public ChannelIndex CreateDateTimeIndex()
         {
             return CreateChannelIndex(ChannelIndexType.datetime, IndexDirection.increasing, "TIME", "s", "MSL");
         }
 
+        /// <summary>
+        /// Creates the index <see cref="ChannelIndex"/> of the elapsed time.
+        /// </summary>
+        /// <param name="direction">The direction.</param>
+        /// <returns></returns>
         public ChannelIndex CreateElapsedTimeIndex(IndexDirection direction)
         {
             return CreateChannelIndex(ChannelIndexType.elapsedtime, direction, "TIME", "ms", "MSL");
         }
 
         /// <summary>
-        /// Creates the channel set.
+        /// Creates the channel.
         /// </summary>
         /// <param name="log">The log.</param>
         /// <param name="indexList">The index list.</param>
-        /// <param name="loggingMethod">The logging method.</param>
+        /// <param name="citationName">Name of the citation.</param>
+        /// <param name="mnemonic">The mnemonic.</param>
+        /// <param name="uom">The uom.</param>
+        /// <param name="curveClass">The curve class.</param>
+        /// <param name="etpDataType">Type of the ETP data.</param>
+        /// <param name="pointMetadataList">The point metadata list.</param>
         /// <returns></returns>
-        public ChannelSet CreateChannelSet(Log log, List<ChannelIndex> indexList, LoggingMethod loggingMethod = LoggingMethod.Computed)
+        public Channel CreateChannel(Log log, List<ChannelIndex> indexList, string citationName, string mnemonic, string uom, string curveClass, EtpDataType etpDataType, List<PointMetadata> pointMetadataList)
+        {
+            return new Channel()
+            {
+                Citation = CreateCitation(citationName),
+                Mnemonic = mnemonic,
+                UoM = uom,
+                CurveClass = curveClass,
+                LoggingMethod = log.LoggingMethod,
+                LoggingCompanyName = log.LoggingCompanyName,
+                Source = log.LoggingMethod.ToString(),
+                DataType = etpDataType,
+                Status = ChannelStatus.active,
+                Index = indexList,
+                StartIndex = (log.TimeDepth.EqualsIgnoreCase(ObjectFolders.Depth) ?
+                               (AbstractIndexValue)new DepthIndexValue() : (new TimeIndexValue())),
+                EndIndex = (log.TimeDepth.EqualsIgnoreCase(ObjectFolders.Depth) ?
+                               (AbstractIndexValue)new DepthIndexValue() : (new TimeIndexValue())),
+                TimeDepth = log.TimeDepth,
+                PointMetadata = pointMetadataList,
+            };
+        }
+
+        /// <summary>
+        /// Deserializes the channel set data.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        /// <returns></returns>
+        public List<List<List<object>>> DeserializeChannelSetData(string data)
+        {
+            return JsonConvert.DeserializeObject<List<List<List<object>>>>(data);
+        }
+
+        /// <summary>
+        /// Deserializes the channel values.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        /// <returns></returns>
+        public List<object> DeserializeChannelValues(string data)
+        {
+            return JsonConvert.DeserializeObject<List<object>>(data);
+        }
+
+        /// <summary>
+        /// Creates the channel set.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns></returns>
+        public ChannelSet CreateChannelSet(Log log)
         {
             bool isDepth = log.TimeDepth.EqualsIgnoreCase(ObjectFolders.Depth);
             IndexRangeContext indexRangeContext = null;
@@ -107,7 +206,7 @@ namespace PDS.Witsml.Data.Logs
                 Uuid = Uid(),
                 Citation = CreateCitation("ChannelSet"),
                 ExistenceKind = ExistenceKind.simulated,
-                Index = indexList,
+                Index = new List<ChannelIndex>(),
 
                 LoggingCompanyName = log.LoggingCompanyName,
                 TimeDepth = log.TimeDepth,
