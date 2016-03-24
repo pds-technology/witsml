@@ -154,5 +154,44 @@ namespace PDS.Witsml.Server.Data.Logs
             var updateResponse = DevKit.Update<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
         }
+
+        [TestMethod]
+        public void Test_update_overlapping_log_data()
+        {
+            var response = DevKit.Add<WellList, Well>(_well);
+
+            _wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+
+            var log = new Log()
+            {
+                UidWell = _wellbore.UidWell,
+                NameWell = _well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = _wellbore.Name,
+                Name = DevKit.Name("Log 01"),
+                StartIndex = new GenericMeasure(1, "m")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 8);
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWellbore = log.UidWellbore;
+            var uidLog = response.SuppMsgOut;
+            log = new Log()
+            {
+                UidWell = _wellbore.UidWell,
+                UidWellbore = uidWellbore,
+                Uid = uidLog,
+                StartIndex = new GenericMeasure(4.1, "m")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 3, 0.9);
+            var updateResponse = DevKit.Update<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+        }
     }
 }
