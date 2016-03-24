@@ -64,12 +64,15 @@ namespace PDS.Witsml.Server.Data.Channels
                 Validate(Functions.PutObject, entity);
 
                 // Get Reader 
+                var reader = entity.GetReader();
 
                 // Clear Data
+                ClearData(entity);
 
                 UpdateEntity(entity, dataObjectId);
 
                 // Merge ChannelDataValues
+                _channelDataChunkAdapter.Merge(reader);
             }
             else
             {
@@ -86,7 +89,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
                 InsertEntity(entity);
 
-                // Save ChannelDataValues
+                // Add ChannelDataChunk
                 _channelDataChunkAdapter.Add(reader);
             }
 

@@ -66,6 +66,15 @@ namespace PDS.Witsml.Server.Models
                 .WithIndices(channelDataValues.Indices);
         }
 
+        public static ChannelDataReader GetReader(this ChannelDataChunk channelDataChunk)
+        {
+            var mnemonics = ChannelDataReader.Split(channelDataChunk.MnemonicList);
+            var units = ChannelDataReader.Split(channelDataChunk.UnitList);
+
+            return new ChannelDataReader(channelDataChunk.Data, mnemonics, units, channelDataChunk.Uid)
+                .WithIndices(channelDataChunk.Indices);
+        }
+
         public static ChannelDataReader WithIndex(this ChannelDataReader reader, string mnemonic, bool increasing, bool isTimeIndex)
         {
             var index = new ChannelIndexInfo()

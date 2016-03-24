@@ -41,7 +41,7 @@ namespace PDS.Witsml.Server.Models
 
         public string[] Units { get; private set; }
 
-        public string Uid { get; private set; }
+        public string Uid { get; set; }
 
         public List<ChannelIndexInfo> Indices { get; }
 

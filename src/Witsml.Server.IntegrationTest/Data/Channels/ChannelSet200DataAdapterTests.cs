@@ -42,5 +42,22 @@ namespace PDS.Witsml.Server.Data.Channels
             var result = ChannelSetAdapter.Put(ChannelSet);
             Assert.AreEqual(ErrorCodes.Success, result.Code);
         }
+
+        [TestMethod]
+        public void ChannelSet_can_be_updated_with_middle_depth_data()
+        {
+            // Create
+            var result = ChannelSetAdapter.Put(ChannelSet);
+            Assert.AreEqual(ErrorCodes.Success, result.Code);
+
+            // Add data that will update in the middle
+            ChannelSet.Data.Data = @"[
+                            [ [0.11 ], [ [ 1.11, false ], null, 3.11 ] ]
+                        ]";
+
+            // Update
+            result = ChannelSetAdapter.Put(ChannelSet);
+            Assert.AreEqual(ErrorCodes.Success, result.Code);
+        }
     }
 }
