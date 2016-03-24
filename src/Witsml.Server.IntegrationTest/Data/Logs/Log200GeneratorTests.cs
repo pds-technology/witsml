@@ -17,9 +17,9 @@ namespace PDS.Witsml.Server.Data.Logs
         private Log TimeLog;
         private ChannelIndex MeasuredDepthIndex;
         private ChannelIndex DateTimeIndex;
-        private ChannelIndex ElapseTimeIndex;
-        private PointMetadata BooleanPointMetadata;
-        private PointMetadata FloatPointMetadata;
+        //private ChannelIndex ElapseTimeIndex;
+        //private PointMetadata BooleanPointMetadata;
+        //private PointMetadata FloatPointMetadata;
 
         [TestInitialize]
         public void TestSetUp()
@@ -38,10 +38,10 @@ namespace PDS.Witsml.Server.Data.Logs
 
             MeasuredDepthIndex = LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
             DateTimeIndex = LogGenerator.CreateDateTimeIndex();
-            ElapseTimeIndex = LogGenerator.CreateElapsedTimeIndex(IndexDirection.increasing);
+            //ElapseTimeIndex = LogGenerator.CreateElapsedTimeIndex(IndexDirection.increasing);
 
-            BooleanPointMetadata = LogGenerator.CreatePointMetadata("confidence", "confidence", EtpDataType.boolean);
-            FloatPointMetadata = LogGenerator.CreatePointMetadata("Confidence", "Confidence", EtpDataType.@float);
+            //BooleanPointMetadata = LogGenerator.CreatePointMetadata("confidence", "confidence", EtpDataType.boolean);
+            //FloatPointMetadata = LogGenerator.CreatePointMetadata("Confidence", "Confidence", EtpDataType.@float);
         }
 
         [TestMethod]
@@ -59,7 +59,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(1, DepthLog.ChannelSet.Count);
             Assert.AreEqual(2, DepthLog.ChannelSet[0].Channel.Count);
 
-            List<List<List<object>>> dataValues = DevKit.DeserializeChannelSetData(DepthLog.ChannelSet[0].Data.Data);
+            List<List<List<object>>> dataValues = LogGenerator.DeserializeChannelSetData(DepthLog.ChannelSet[0].Data.Data);
             Assert.AreEqual(5, dataValues.Count);
             Assert.AreEqual(2, dataValues[0].Count);
             Assert.AreEqual(2, dataValues[0][0].Count);
@@ -75,7 +75,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(1, tvdLog.ChannelSet.Count);
             Assert.AreEqual(2, tvdLog.ChannelSet[0].Channel.Count);
 
-            List<List<List<object>>> dataValues = DevKit.DeserializeChannelSetData(tvdLog.ChannelSet[0].Data.Data);
+            List<List<List<object>>> dataValues = LogGenerator.DeserializeChannelSetData(tvdLog.ChannelSet[0].Data.Data);
             Assert.AreEqual(5, dataValues.Count);
             Assert.AreEqual(2, dataValues[0].Count);
 
@@ -91,138 +91,138 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(1, dateTimeLog.ChannelSet.Count);
             Assert.AreEqual(1, dateTimeLog.ChannelSet[0].Channel.Count);
 
-            List<List<List<object>>> dataValues = DevKit.DeserializeChannelSetData(dateTimeLog.ChannelSet[0].Data.Data);
+            List<List<List<object>>> dataValues = LogGenerator.DeserializeChannelSetData(dateTimeLog.ChannelSet[0].Data.Data);
             Assert.AreEqual(5, dataValues.Count);
             Assert.AreEqual(2, dataValues[0].Count);
         }
 
-        [TestMethod]
-        public void Can_Generate_Depth_Log()
-        {
-            List<ChannelIndex> indexList = new List<ChannelIndex>();
-            indexList.Add(MeasuredDepthIndex);
-            indexList.Add(DateTimeIndex);
+        //[TestMethod]
+        //public void Can_Generate_Depth_Log()
+        //{
+        //    List<ChannelIndex> indexList = new List<ChannelIndex>();
+        //    indexList.Add(MeasuredDepthIndex);
+        //    indexList.Add(DateTimeIndex);
 
-            ChannelSet channelSet = LogGenerator.CreateChannelSet(DepthLog, indexList);
-            channelSet.Channel.Add(DevKit.Channel(DepthLog, indexList, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: DevKit.List(BooleanPointMetadata)));
-            channelSet.Channel.Add(DevKit.Channel(DepthLog, indexList, "Hookload", "HKLD", "klbf", "Force", EtpDataType.@double));
+        //    ChannelSet channelSet = LogGenerator.CreateChannelSet(DepthLog, indexList);
+        //    channelSet.Channel.Add(LogGenerator.CreateChannel(DepthLog, indexList, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: DevKit.List(BooleanPointMetadata)));
+        //    channelSet.Channel.Add(LogGenerator.CreateChannel(DepthLog, indexList, "Hookload", "HKLD", "klbf", "Force", EtpDataType.@double, null));
 
-            List<ChannelSet> channelSetList = new List<ChannelSet>();
-            channelSetList.Add(channelSet);
+        //    List<ChannelSet> channelSetList = new List<ChannelSet>();
+        //    channelSetList.Add(channelSet);
 
-            LogGenerator.GenerateChannelData(channelSetList, numDataValue: 5);
-            Assert.AreEqual(1, channelSetList.Count);
-            Assert.AreEqual(2, channelSetList[0].Channel.Count);
+        //    LogGenerator.GenerateChannelData(channelSetList, numDataValue: 5);
+        //    Assert.AreEqual(1, channelSetList.Count);
+        //    Assert.AreEqual(2, channelSetList[0].Channel.Count);
 
-            List<List<List<object>>> dataValues = DevKit.DeserializeChannelSetData(channelSetList[0].Data.Data);
-            Assert.AreEqual(5, dataValues.Count);
-            Assert.AreEqual(2, dataValues[0].Count);
-            Assert.AreEqual(2, dataValues[0][0].Count);
-            Assert.AreEqual(2, dataValues[0][1].Count);
+        //    List<List<List<object>>> dataValues = DevKit.DeserializeChannelSetData(channelSetList[0].Data.Data);
+        //    Assert.AreEqual(5, dataValues.Count);
+        //    Assert.AreEqual(2, dataValues[0].Count);
+        //    Assert.AreEqual(2, dataValues[0][0].Count);
+        //    Assert.AreEqual(2, dataValues[0][1].Count);
 
-            for (int i = 0; i < 5; i++)
-            {
-                var channel = dataValues[i][1][0];
-                if (channel != null)
-                {
-                    var channelValues = DevKit.DeserializeChannelValues(channel.ToString());
-                    Assert.IsNotNull(channelValues[0]);
-                }
-            }
-        }
+        //    for (int i = 0; i < 5; i++)
+        //    {
+        //        var channel = dataValues[i][1][0];
+        //        if (channel != null)
+        //        {
+        //            var channelValues = DevKit.DeserializeChannelValues(channel.ToString());
+        //            Assert.IsNotNull(channelValues[0]);
+        //        }
+        //    }
+        //}
 
-        [TestMethod]
-        public void Can_Generate_Depth_Log_Decreasing()
-        {
-            List<ChannelIndex> indexList = new List<ChannelIndex>();
-            MeasuredDepthIndex.Direction = IndexDirection.decreasing;
-            indexList.Add(MeasuredDepthIndex);
-            indexList.Add(DateTimeIndex);
+        //[TestMethod]
+        //public void Can_Generate_Depth_Log_Decreasing()
+        //{
+        //    List<ChannelIndex> indexList = new List<ChannelIndex>();
+        //    MeasuredDepthIndex.Direction = IndexDirection.decreasing;
+        //    indexList.Add(MeasuredDepthIndex);
+        //    indexList.Add(DateTimeIndex);
 
-            ChannelSet channelSet = LogGenerator.CreateChannelSet(DepthLog, indexList);
-            channelSet.Channel.Add(DevKit.Channel(DepthLog, indexList, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: DevKit.List(BooleanPointMetadata)));
-            channelSet.Channel.Add(DevKit.Channel(DepthLog, indexList, "Hookload", "HKLD", "klbf", "Force", EtpDataType.@double));
+        //    ChannelSet channelSet = LogGenerator.CreateChannelSet(DepthLog, indexList);
+        //    channelSet.Channel.Add(LogGenerator.CreateChannel(DepthLog, indexList, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: DevKit.List(BooleanPointMetadata)));
+        //    channelSet.Channel.Add(LogGenerator.CreateChannel(DepthLog, indexList, "Hookload", "HKLD", "klbf", "Force", EtpDataType.@double, null));
 
-            List<ChannelSet> channelSetList = new List<ChannelSet>();
-            channelSetList.Add(channelSet);
+        //    List<ChannelSet> channelSetList = new List<ChannelSet>();
+        //    channelSetList.Add(channelSet);
 
-            LogGenerator.GenerateChannelData(channelSetList, numDataValue: 5);
-            Assert.AreEqual(1, channelSetList.Count);
-            Assert.AreEqual(2, channelSetList[0].Channel.Count);
+        //    LogGenerator.GenerateChannelData(channelSetList, numDataValue: 5);
+        //    Assert.AreEqual(1, channelSetList.Count);
+        //    Assert.AreEqual(2, channelSetList[0].Channel.Count);
 
-            List<List<List<object>>> dataValues = DevKit.DeserializeChannelSetData(channelSetList[0].Data.Data);
-            Assert.AreEqual(5, dataValues.Count);
-            Assert.AreEqual(2, dataValues[0].Count);
-        }
+        //    List<List<List<object>>> dataValues = DevKit.DeserializeChannelSetData(channelSetList[0].Data.Data);
+        //    Assert.AreEqual(5, dataValues.Count);
+        //    Assert.AreEqual(2, dataValues[0].Count);
+        //}
 
-        [TestMethod]
-        public void Can_Generate_Depth_Log_MultiChannelSet()
-        {
-            List<ChannelIndex> indexList = new List<ChannelIndex>();
-            indexList.Add(MeasuredDepthIndex);
-            indexList.Add(DateTimeIndex);
+        //[TestMethod]
+        //public void Can_Generate_Depth_Log_MultiChannelSet()
+        //{
+        //    List<ChannelIndex> indexList = new List<ChannelIndex>();
+        //    indexList.Add(MeasuredDepthIndex);
+        //    indexList.Add(DateTimeIndex);
 
-            ChannelSet channelSet1 = LogGenerator.CreateChannelSet(DepthLog, indexList);
-            channelSet1.Channel.Add(DevKit.Channel(DepthLog, indexList, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: DevKit.List(BooleanPointMetadata)));
-            channelSet1.Channel.Add(DevKit.Channel(DepthLog, indexList, "Hookload", "HKLD", "klbf", "Force", EtpDataType.@double));
+        //    ChannelSet channelSet1 = LogGenerator.CreateChannelSet(DepthLog, indexList);
+        //    channelSet1.Channel.Add(LogGenerator.CreateChannel(DepthLog, indexList, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: DevKit.List(BooleanPointMetadata)));
+        //    channelSet1.Channel.Add(LogGenerator.CreateChannel(DepthLog, indexList, "Hookload", "HKLD", "klbf", "Force", EtpDataType.@double, null));
 
-            ChannelSet channelSet2 = LogGenerator.CreateChannelSet(DepthLog, indexList);
-            channelSet2.Channel.Add(DevKit.Channel(DepthLog, indexList, "GR", "GR", "api", "gamma_ray", EtpDataType.@double, pointMetadataList: DevKit.List(FloatPointMetadata)));
+        //    ChannelSet channelSet2 = LogGenerator.CreateChannelSet(DepthLog, indexList);
+        //    channelSet2.Channel.Add(LogGenerator.CreateChannel(DepthLog, indexList, "GR", "GR", "api", "gamma_ray", EtpDataType.@double, pointMetadataList: DevKit.List(FloatPointMetadata)));
 
-            List<ChannelSet> channelSetList = new List<ChannelSet>();
-            channelSetList.Add(channelSet1);
-            channelSetList.Add(channelSet2);
+        //    List<ChannelSet> channelSetList = new List<ChannelSet>();
+        //    channelSetList.Add(channelSet1);
+        //    channelSetList.Add(channelSet2);
 
-            LogGenerator.GenerateChannelData(channelSetList, numDataValue: 5);
-            Assert.AreEqual(2, channelSetList.Count);
-            Assert.AreEqual(2, channelSetList[0].Channel.Count);
-            Assert.AreEqual(1, channelSetList[1].Channel.Count);
+        //    LogGenerator.GenerateChannelData(channelSetList, numDataValue: 5);
+        //    Assert.AreEqual(2, channelSetList.Count);
+        //    Assert.AreEqual(2, channelSetList[0].Channel.Count);
+        //    Assert.AreEqual(1, channelSetList[1].Channel.Count);
 
-            List<List<List<object>>> dataValues = DevKit.DeserializeChannelSetData(channelSetList[0].Data.Data);
-            Assert.AreEqual(5, dataValues.Count);
-            Assert.AreEqual(2, dataValues[0].Count);
-            Assert.AreEqual(2, dataValues[0][0].Count);
-            Assert.AreEqual(2, dataValues[0][1].Count);
+        //    List<List<List<object>>> dataValues = DevKit.DeserializeChannelSetData(channelSetList[0].Data.Data);
+        //    Assert.AreEqual(5, dataValues.Count);
+        //    Assert.AreEqual(2, dataValues[0].Count);
+        //    Assert.AreEqual(2, dataValues[0][0].Count);
+        //    Assert.AreEqual(2, dataValues[0][1].Count);
 
-            dataValues = DevKit.DeserializeChannelSetData(channelSetList[1].Data.Data);
-            Assert.AreEqual(5, dataValues.Count);
-            Assert.AreEqual(2, dataValues[0].Count);
-            Assert.AreEqual(2, dataValues[0][0].Count);
-            Assert.AreEqual(1, dataValues[0][1].Count);
-        }
+        //    dataValues = DevKit.DeserializeChannelSetData(channelSetList[1].Data.Data);
+        //    Assert.AreEqual(5, dataValues.Count);
+        //    Assert.AreEqual(2, dataValues[0].Count);
+        //    Assert.AreEqual(2, dataValues[0][0].Count);
+        //    Assert.AreEqual(1, dataValues[0][1].Count);
+        //}
 
-        [TestMethod]
-        public void Log_can_be_generated_with_time_data_for_channel_set()
-        {
-            List<ChannelIndex> indexList = new List<ChannelIndex>();
-            indexList.Add(ElapseTimeIndex);
+        //[TestMethod]
+        //public void Log_can_be_generated_with_time_data_for_channel_set()
+        //{
+        //    List<ChannelIndex> indexList = new List<ChannelIndex>();
+        //    indexList.Add(ElapseTimeIndex);
 
-            ChannelSet channelSet = LogGenerator.CreateChannelSet(TimeLog, indexList);
+        //    ChannelSet channelSet = LogGenerator.CreateChannelSet(TimeLog, indexList);
 
-            channelSet.Channel.Add(DevKit.Channel(TimeLog, indexList, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: DevKit.List(FloatPointMetadata)));
+        //    channelSet.Channel.Add(LogGenerator.CreateChannel(TimeLog, indexList, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: DevKit.List(FloatPointMetadata)));
 
-            List<ChannelSet> channelSetList = new List<ChannelSet>();
-            channelSetList.Add(channelSet);;
+        //    List<ChannelSet> channelSetList = new List<ChannelSet>();
+        //    channelSetList.Add(channelSet);;
 
-            LogGenerator.GenerateChannelData(channelSetList, numDataValue: 5);
-            Assert.AreEqual(1, channelSetList.Count);
-            Assert.AreEqual(1, channelSetList[0].Channel.Count);
+        //    LogGenerator.GenerateChannelData(channelSetList, numDataValue: 5);
+        //    Assert.AreEqual(1, channelSetList.Count);
+        //    Assert.AreEqual(1, channelSetList[0].Channel.Count);
 
-            List<List<List<object>>> dataValues = DevKit.DeserializeChannelSetData(channelSetList[0].Data.Data);
-            Assert.AreEqual(5, dataValues.Count);
-            Assert.AreEqual(2, dataValues[0].Count);
-            Assert.AreEqual(1, dataValues[0][0].Count);
-            Assert.AreEqual(1, dataValues[0][1].Count);
+        //    List<List<List<object>>> dataValues = DevKit.DeserializeChannelSetData(channelSetList[0].Data.Data);
+        //    Assert.AreEqual(5, dataValues.Count);
+        //    Assert.AreEqual(2, dataValues[0].Count);
+        //    Assert.AreEqual(1, dataValues[0][0].Count);
+        //    Assert.AreEqual(1, dataValues[0][1].Count);
 
-            for (int i=0; i< 5; i++)
-            {
-                var channel = dataValues[i][1][0];
-                if (channel != null)
-                {
-                    var channelValues = DevKit.DeserializeChannelValues(channel.ToString());
-                    Assert.IsNotNull(channelValues[0]);
-                }
-            }
-        }
+        //    for (int i=0; i< 5; i++)
+        //    {
+        //        var channel = dataValues[i][1][0];
+        //        if (channel != null)
+        //        {
+        //            var channelValues = DevKit.DeserializeChannelValues(channel.ToString());
+        //            Assert.IsNotNull(channelValues[0]);
+        //        }
+        //    }
+        //}
     }
 }

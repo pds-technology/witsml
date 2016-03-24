@@ -47,11 +47,6 @@ namespace PDS.Witsml.Server
             return list;
         }
 
-        public List<T> List<T>(params T[] instances)
-        {
-            return new List<T>(instances);
-        }
-
         public List<T> One<T>(Action<T> action)
         {
             var instance = Activator.CreateInstance<T>();

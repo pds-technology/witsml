@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace PDS.Witsml.Data
 {
@@ -26,6 +27,17 @@ namespace PDS.Witsml.Data
                 return DateTime.Now.ToString(TimestampFormat);
 
             return String.Format("{0} - {1}", prefix, DateTime.Now.ToString(TimestampFormat));
+        }
+
+        /// <summary>
+        /// Lists the specified instances.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="instances">The instances.</param>
+        /// <returns></returns>
+        public List<T> List<T>(params T[] instances)
+        {
+            return new List<T>(instances);
         }
     }
 }
