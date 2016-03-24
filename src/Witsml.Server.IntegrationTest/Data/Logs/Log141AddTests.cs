@@ -114,6 +114,20 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 6);
             var updateResponse = DevKit.Update<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            var query = new Log
+            {
+                UidWell = _wellbore.UidWell,
+                UidWellbore = uidWellbore,
+                Uid = uidLog
+            };
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: "returnElements=all");
+            Assert.AreEqual(1, results.Count);
+            var result = results.First();
+            var logData = result.LogData.FirstOrDefault();
+            Assert.IsNotNull(logData);
+            Assert.AreEqual(16, logData.Data.Count);
         }
 
         [TestMethod]
@@ -153,6 +167,20 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 6);
             var updateResponse = DevKit.Update<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            var query = new Log
+            {
+                UidWell = _wellbore.UidWell,
+                UidWellbore = uidWellbore,
+                Uid = uidLog
+            };
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: "returnElements=all");
+            Assert.AreEqual(1, results.Count);
+            var result = results.First();
+            var logData = result.LogData.FirstOrDefault();
+            Assert.IsNotNull(logData);
+            Assert.AreEqual(16, logData.Data.Count);
         }
 
         [TestMethod]
@@ -192,6 +220,20 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 3, 0.9);
             var updateResponse = DevKit.Update<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            var query = new Log
+            {
+                UidWell = _wellbore.UidWell,
+                UidWellbore = uidWellbore,
+                Uid = uidLog
+            };
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: "returnElements=all");
+            Assert.AreEqual(1, results.Count);
+            var result = results.First();
+            var logData = result.LogData.FirstOrDefault();
+            Assert.IsNotNull(logData);
+            Assert.AreEqual(9, logData.Data.Count);
         }
 
         [TestMethod]
@@ -233,6 +275,20 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Add("21.5, 1, 21.7");
             var updateResponse = DevKit.Update<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            var query = new Log
+            {
+                UidWell = _wellbore.UidWell,
+                UidWellbore = uidWellbore,
+                Uid = uidLog
+            };
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: "returnElements=all");
+            Assert.AreEqual(1, results.Count);
+            var result = results.First();
+            logData = result.LogData.FirstOrDefault();
+            Assert.IsNotNull(logData);
+            Assert.AreEqual(5, logData.Data.Count);
         }
 
         [TestMethod]
@@ -283,6 +339,22 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Add("23,,23.2");
             var updateResponse = DevKit.Update<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            var query = new Log
+            {
+                UidWell = _wellbore.UidWell,
+                UidWellbore = uidWellbore,
+                Uid = uidLog
+            };
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: "returnElements=all");
+            Assert.AreEqual(1, results.Count);
+            var result = results.First();
+            logData = result.LogData.FirstOrDefault();
+            Assert.IsNotNull(logData);
+            Assert.AreEqual(11, logData.Data.Count);
+            var data = logData.Data;
+            Assert.AreEqual("15,15.1,15", data[2]);
         }
     }
 }
