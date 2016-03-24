@@ -329,8 +329,12 @@ namespace PDS.Witsml.Server.Data.Logs
 
             if (logDataElement != null)
             {
-                var target = logDataElement.Elements().FirstOrDefault(e => e.Name.LocalName == "mnemonicList").Value.Split(',');
-                mnemonics = target.Where(m => mnemonics.Contains(m)).ToList();
+                var mnemonicElement = logDataElement.Elements().FirstOrDefault(e => e.Name.LocalName == "mnemonicList");
+                if (mnemonicElement != null)
+                {
+                    var target = logDataElement.Elements().FirstOrDefault(e => e.Name.LocalName == "mnemonicList").Value.Split(',');
+                    mnemonics = target.Where(m => mnemonics.Contains(m)).ToList();
+                }
             }
 
             return _channelDataAdapter.GetLogData(log.Uid, mnemonics, range, increasing);
