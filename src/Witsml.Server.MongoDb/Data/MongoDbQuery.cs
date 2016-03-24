@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 using System.Xml.Serialization;
+using Energistics.DataAccess;
 using log4net;
 using MongoDB.Driver;
 using PDS.Framework;
@@ -330,7 +331,7 @@ namespace PDS.Witsml.Server.Data
                 var value = ParseEnum(propertyType, propertyValue);
                 return Builders<T>.Filter.Eq(propertyPath, value);
             }
-            else if (typeof(DateTime).IsAssignableFrom(propertyType))
+            else if (propertyType == typeof(DateTime))
             {
                 DateTime value;
 
@@ -338,6 +339,15 @@ namespace PDS.Witsml.Server.Data
                     throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
 
                 return Builders<T>.Filter.Eq(propertyPath, value);
+            }
+            else if (propertyType == typeof(Timestamp))
+            {
+                DateTimeOffset value;
+
+                if (!DateTimeOffset.TryParse(propertyValue, out value))
+                    throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
+
+                return Builders<T>.Filter.Eq(propertyPath, new Timestamp(value));
             }
             else if (typeof(IConvertible).IsAssignableFrom(propertyType))
             {
