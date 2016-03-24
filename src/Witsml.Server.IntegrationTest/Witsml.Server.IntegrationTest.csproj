@@ -68,6 +68,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Configuration\WitsmlValidator141Tests.cs" />
+    <Compile Include="Data\Channels\ChannelSet200DataAdapterTests.cs" />
     <Compile Include="Data\Logs\Log141QueryTests.cs" />
     <Compile Include="Data\Logs\Log141AddTests.cs" />
     <Compile Include="Data\Logs\Log200DataAdapterTests.cs" />

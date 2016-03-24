@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Server.Models;
@@ -21,12 +19,11 @@ namespace PDS.Witsml.Server.Data.Channels
 
         public void Add(ChannelDataReader reader)
         {
-
             if (reader.RecordsAffected > 0)
             {
                 var collection = GetCollection();
 
-                collection.BulkWrite(ToChunks(reader)
+                collection.BulkWrite(ToChunks(reader.AsEnumerable())
                     .Select(dc =>
                     {
                         dc.Id = NewUid();
@@ -36,34 +33,37 @@ namespace PDS.Witsml.Server.Data.Channels
                         return new InsertOneModel<ChannelDataChunk>(dc);
                     }));
             }
-
         }
 
-        private IEnumerable<ChannelDataChunk> ToChunks(ChannelDataReader reader)
+        private IEnumerable<ChannelDataChunk> ToChunks(IEnumerable<IChannelDataRecord> records)
         {
-            ChannelIndexInfo indexChannel = reader.Indices.First();
+            var data = new List<string>();
+            var uid = string.Empty;
+            ChannelIndexInfo indexChannel = null;
             Range<int>? plannedRange = null;
             double startIndex = 0;
             double endIndex = 0;
-            var data = new List<string>();
-            string uid = string.Empty;
-            var increasing = indexChannel.Increasing;
 
-            while (reader.Read())
+            foreach (var record in records)
             {
-                var index = indexChannel.IsTimeIndex ? reader.GetUnixTimeSeconds(0) : reader.GetDouble(0);
+                indexChannel = record.Indices.First();
+                var increasing = indexChannel.Increasing;
+
+                var index = indexChannel.IsTimeIndex 
+                    ? record.GetUnixTimeSeconds(0) 
+                    : record.GetDouble(0);
 
                 if (!plannedRange.HasValue)
                 {
                     plannedRange = ComputeRange(index, ChannelDataReader.RangeSize, increasing);
-                    uid = reader.Uid;
+                    uid = record.Uid;
                     startIndex = index;
                 }
 
                 if (WithinRange(index, plannedRange.Value.End, increasing, false))
                 {
-                    uid = string.IsNullOrEmpty(uid) ? reader.Uid : uid;
-                    data.Add(reader.GetJson());
+                    uid = string.IsNullOrEmpty(uid) ? record.Uid : uid;
+                    data.Add(record.GetJson());
                     endIndex = index;
                 }
                 else
@@ -80,14 +80,14 @@ namespace PDS.Witsml.Server.Data.Channels
 
                     plannedRange = ComputeRange(index, ChannelDataReader.RangeSize, increasing);
                     data = new List<string>();
-                    data.Add(reader.GetJson());
+                    data.Add(record.GetJson());
                     startIndex = index;
                     endIndex = index;
-                    uid = reader.Uid;
+                    uid = record.Uid;
                 }
             }
 
-            if (data.Count > 0)
+            if (data.Count > 0 && indexChannel != null)
             {
                 var newIndex = indexChannel.Clone();
                 newIndex.Start = startIndex;

@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
-using Newtonsoft.Json;
 using PDS.Framework;
 using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Server.Data.Channels;
@@ -45,8 +43,8 @@ namespace PDS.Witsml.Server.Data.Logs
             WellAdapter = new Well200DataAdapter(Provider) { Container = Container };
             WellboreAdapter = new Wellbore200DataAdapter(Provider) { Container = Container };
             LogAdapter = new Log200DataAdapter(Provider, new ChannelDataAdapter(Provider)) { Container = Container };
-            Well1 = new Well() { Citation = DevKit.Citation("Well 01"), TimeZone = DevKit.TimeZone, Uuid = DevKit.Uid() };
 
+            Well1 = new Well() { Citation = DevKit.Citation("Well 01"), TimeZone = DevKit.TimeZone, Uuid = DevKit.Uid() };
             Well1.GeographicLocationWGS84 = DevKit.Location();
 
             WellReference = new DataObjectReference
@@ -72,6 +70,7 @@ namespace PDS.Witsml.Server.Data.Logs
             ChannelIndex mdChannelIndex = LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
             ChannelIndex mdChannelIndexDecreasing = LogGenerator.CreateMeasuredDepthIndex(IndexDirection.decreasing);
             ChannelIndex dtChannelIndex = LogGenerator.CreateDateTimeIndex();
+
             DevKit.InitHeader(Log1, LoggingMethod.MWD, mdChannelIndex);
             DevKit.InitHeader(Log2, LoggingMethod.Surface, dtChannelIndex);
             DevKit.InitHeader(LogDecreasing, LoggingMethod.Surface, mdChannelIndexDecreasing);
