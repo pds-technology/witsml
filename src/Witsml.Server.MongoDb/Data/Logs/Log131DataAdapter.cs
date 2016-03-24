@@ -46,7 +46,7 @@ namespace PDS.Witsml.Server.Data.Logs
             capServer.Add(Functions.GetFromStore, ObjectTypes.Log);
             capServer.Add(Functions.AddToStore, ObjectTypes.Log);
             //capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);
-            //capServer.Add(Functions.DeleteFromStore, ObjectTypes.Well);
+            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Log);
         }
 
         /// <summary>
@@ -122,19 +122,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Computes the range of the data chunk containing the given index value for a given rangeSize.
-        /// </summary>
-        /// <param name="index">The index value contained within the computed range.</param>
-        /// <param name="rangeSize">Size of the range.</param>
-        /// <returns>A <see cref="Tuple{int, int}"/> containing the computed range.</returns>
-        public Tuple<int, int> ComputeRange(double index, int rangeSize)
-        {
-            var rangeIndex = (int)(Math.Floor(index / rangeSize));
-            return new Tuple<int, int>(rangeIndex * rangeSize, rangeIndex * rangeSize + rangeSize);
-
-        }
-
-        /// <summary>
         /// Updates the specified <see cref="Log"/> instance in the store.
         /// </summary>
         /// <param name="entity">The <see cref="Log"/> instance.</param>
@@ -170,9 +157,33 @@ namespace PDS.Witsml.Server.Data.Logs
             return new WitsmlResult(ErrorCodes.Success);
         }
 
+        /// <summary>
+        /// Deletes or partially updates the specified object by uid.
+        /// </summary>
+        /// <param name="parser">The parser that specifies the object.</param>
+        /// <returns>
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
+        /// </returns>
         public override WitsmlResult Delete(WitsmlQueryParser parser)
         {
-            throw new NotImplementedException();
+            var entity = Parse(parser.Context.Xml);
+            var dataObjectId = entity.GetObjectId();
+
+            DeleteEntity(dataObjectId);
+
+            return new WitsmlResult(ErrorCodes.Success);
+        }
+
+        /// <summary>
+        /// Computes the range of the data chunk containing the given index value for a given rangeSize.
+        /// </summary>
+        /// <param name="index">The index value contained within the computed range.</param>
+        /// <param name="rangeSize">Size of the range.</param>
+        /// <returns>A <see cref="Tuple{int, int}"/> containing the computed range.</returns>
+        public Tuple<int, int> ComputeRange(double index, int rangeSize)
+        {
+            var rangeIndex = (int)(Math.Floor(index / rangeSize));
+            return new Tuple<int, int>(rangeIndex * rangeSize, rangeIndex * rangeSize + rangeSize);
         }
 
         /// <summary>
