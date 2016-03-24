@@ -9,6 +9,7 @@ using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using MongoDB.Driver;
 using Newtonsoft.Json;
+using PDS.Framework;
 using PDS.Witsml.Server.Models;
 using PDS.Witsml.Server.MongoDb;
 
@@ -432,7 +433,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <returns>An <see cref="IEnumerable{LogDataValues}"/> of "chunked" data.</returns>
         private IEnumerable<ChannelDataValues> ToChunks(ChannelIndexInfo indexChannel, IEnumerable<Tuple<string, double, string>> sequence)
         {
-            ChannelIndexRange? plannedRange = null;
+            Range<int>? plannedRange = null;
             double startIndex = 0;
             double endIndex = 0;
             var data = new List<string>();
@@ -566,10 +567,10 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="rangeSize">Size of the range.</param>
         /// <param name="increasing">if set to <c>true</c> [increasing].</param>
         /// <returns>The range.</returns>
-        private ChannelIndexRange ComputeRange(double index, int rangeSize, bool increasing = true)
+        private Range<int> ComputeRange(double index, int rangeSize, bool increasing = true)
         {
             var rangeIndex = increasing ? (int)(Math.Floor(index / rangeSize)) : (int)(Math.Ceiling(index / rangeSize));
-            return new ChannelIndexRange(rangeIndex * rangeSize, rangeIndex * rangeSize + (increasing ? rangeSize : -rangeSize));
+            return new Range<int>(rangeIndex * rangeSize, rangeIndex * rangeSize + (increasing ? rangeSize : -rangeSize));
         }
 
         /// <summary>
@@ -604,7 +605,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
             var increasing = indices.First().Increasing;
             var rangeSizeAdjustment = increasing ? RangeSize : -RangeSize;
-            ChannelIndexRange rangeSize = ComputeRange(start, RangeSize, increasing);
+            var rangeSize = ComputeRange(start, RangeSize, increasing);
 
             do
             {
@@ -631,7 +632,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 dataChunks.Add(channelDataValues);
 
                     // Compute the next range
-                    rangeSize = new ChannelIndexRange(rangeSize.Start + rangeSizeAdjustment, rangeSize.End + rangeSizeAdjustment);
+                    rangeSize = new Range<int>(rangeSize.Start + rangeSizeAdjustment, rangeSize.End + rangeSizeAdjustment);
                 }
             }
             // Keep looking until we are creating empty chunks
@@ -648,7 +649,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="increasing">if set to <c>true</c> [increasing].</param>
         /// <param name="rangeSize">Size of the range.</param>
         /// <returns>The data rows for the chunk that are within the given rangeSize</returns>
-        private List<List<List<object>>> CreateChunk(List<List<List<object>>> logData, bool isTimeIndex, bool increasing, ChannelIndexRange rangeSize)
+        private List<List<List<object>>> CreateChunk(List<List<List<object>>> logData, bool isTimeIndex, bool increasing, Range<int> rangeSize)
         {
             var chunk =
                 increasing
