@@ -329,7 +329,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             if (logDataElement != null)
             {
-            var target = logDataElement.Elements().FirstOrDefault(e => e.Name.LocalName == "mnemonicList").Value.Split(',');
+                var target = logDataElement.Elements().FirstOrDefault(e => e.Name.LocalName == "mnemonicList").Value.Split(',');
                 mnemonics = target.Where(m => mnemonics.Contains(m)).ToList();
             }
 
