@@ -35,7 +35,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             capServer.Add(Functions.GetFromStore, ObjectTypes.Wellbore);
             capServer.Add(Functions.AddToStore, ObjectTypes.Wellbore);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Wellbore);
-            //capServer.Add(Functions.DeleteFromStore, ObjectTypes.Wellbore);
+            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Wellbore);
         }
 
         /// <summary>
@@ -95,6 +95,23 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
             Logger.DebugFormat("Validated Wellbore with uid '{0}' and name {1} for Update", entity.Uid, entity.Name);
             UpdateEntity(entity, entity.GetObjectId());
+
+            return new WitsmlResult(ErrorCodes.Success);
+        }
+
+        /// <summary>
+        /// Deletes or partially updates the specified object by uid.
+        /// </summary>
+        /// <param name="parser">The parser that specifies the object.</param>
+        /// <returns>
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
+        /// </returns>
+        public override WitsmlResult Delete(WitsmlQueryParser parser)
+        {
+            var entity = Parse(parser.Context.Xml);
+            var dataObjectId = entity.GetObjectId();
+
+            DeleteEntity(dataObjectId);
 
             return new WitsmlResult(ErrorCodes.Success);
         }

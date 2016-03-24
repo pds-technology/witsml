@@ -70,7 +70,7 @@ namespace PDS.Witsml.Server.Configuration
                 ValidateEmptyRootElement(context.ObjectType, document);
                 ValidateSingleChildElement(context.ObjectType, document);
             }
-            else if (context.Function == Functions.UpdateInStore)
+            else if (context.Function == Functions.DeleteFromStore)
             {
                 //ValidateKeywords(optionsIn, OptionsIn.CascadedDelete.Keyword);
                 //ValidateCascadedDelete(optionsIn, GetCapServer().CapServer.CascadedDelete.GetValueOrDefault());

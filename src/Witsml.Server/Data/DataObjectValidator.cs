@@ -39,11 +39,7 @@ namespace PDS.Witsml.Server.Data
 
             IList<ValidationResult> results;
             DataObjectValidator.TryValidate(this, out results);
-
-            if (results.Any())
-            {
-                ValidateResults(results);
-            }
+            ValidateResults(results);
         }
 
         /// <summary>
@@ -57,6 +53,17 @@ namespace PDS.Witsml.Server.Data
             {
                 case Functions.AddToStore:
                     foreach (var result in ValidateProperties().Union(ValidateForInsert()))
+                        yield return result;
+                    break;
+
+                case Functions.UpdateInStore:
+                    foreach (var result in ValidateForUpdate())
+                        yield return result;
+                    break;
+
+                case Functions.DeleteObject:
+                case Functions.DeleteFromStore:
+                    foreach (var result in ValidateForDelete())
                         yield return result;
                     break;
 
@@ -74,13 +81,8 @@ namespace PDS.Witsml.Server.Data
         protected virtual IEnumerable<ValidationResult> ValidateProperties()
         {
             IList<ValidationResult> results;
-
-            // Validate object properties
-            if (!DataObjectValidator.TryValidate(DataObject, out results))
-            {
-                ValidateResults(results);
-            }
-
+            DataObjectValidator.TryValidate(DataObject, out results);
+            ValidateResults(results);
             yield break;
         }
 
@@ -89,6 +91,24 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <returns>A collection of validation results.</returns>
         protected virtual IEnumerable<ValidationResult> ValidateForInsert()
+        {
+            yield break;
+        }
+
+        /// <summary>
+        /// Validates the data object while executing UpdateInStore.
+        /// </summary>
+        /// <returns>A collection of validation results.</returns>
+        protected virtual IEnumerable<ValidationResult> ValidateForUpdate()
+        {
+            yield break;
+        }
+
+        /// <summary>
+        /// Validates the data object while executing DeleteFromStore.
+        /// </summary>
+        /// <returns>A collection of validation results.</returns>
+        protected virtual IEnumerable<ValidationResult> ValidateForDelete()
         {
             yield break;
         }
@@ -104,8 +124,10 @@ namespace PDS.Witsml.Server.Data
 
         private static void ValidateResults(IList<ValidationResult> results)
         {
-            var errorCode = ErrorCodes.Unset;
+            if (!results.Any())
+                return;
 
+            var errorCode = ErrorCodes.Unset;
             var witsmlValidationResult = results.OfType<WitsmlValidationResult>().FirstOrDefault();
 
             if (witsmlValidationResult != null)

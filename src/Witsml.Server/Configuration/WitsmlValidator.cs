@@ -289,8 +289,11 @@ namespace PDS.Witsml.Server.Configuration
         public static void ValidateSelectionCriteria(XDocument document)
         {
             var entities = document.Root.Elements();
+
             foreach (var entity in entities)
+            {
                 ValidateSelectionCriteriaForAnEntity(entity);
+            }
         }
 
         /// <summary>
@@ -354,17 +357,22 @@ namespace PDS.Witsml.Server.Configuration
                 return;
 
             var groupings = elements.GroupBy(e => e.Name.LocalName);
+
             foreach (var group in groupings)
             {
                 var values = group.ToList();
                 var count = values.Count;
 
                 var selection = values[0];
+
                 if (count == 1)
+                {
                     ValidateSelectionCriteriaForAnEntity(selection);
+                }
                 else
                 {
                     IsRecurringElementValueEmpty(selection);
+
                     for (var i = 1; i < values.Count; i++)
                     {
                         var match = values[i];

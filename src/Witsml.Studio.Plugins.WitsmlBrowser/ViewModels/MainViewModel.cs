@@ -247,7 +247,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                             returnCode = wmls.WMLS_UpdateInStore(objectType, xmlIn, null, null, out suppMsgOut);
                             break;
                         case Functions.DeleteFromStore:
-                            //Runtime.ShowInfo("Coming soon.");
+                            returnCode = wmls.WMLS_DeleteFromStore(objectType, xmlIn, null, null, out suppMsgOut);
                             break;
                         default:
                             optionsIn = GetGetFromStoreOptionsIn();
