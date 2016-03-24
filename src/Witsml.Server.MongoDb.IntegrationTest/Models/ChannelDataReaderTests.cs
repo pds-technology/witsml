@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
@@ -37,8 +38,8 @@ namespace PDS.Witsml.Server.Models
         private const string ChannelSetData = @"[
             [[0.0, ""2016-03-01T00:00:00.0-06:00""], [[0.0, true], 0.0, 0.0]],
             [[0.1, ""2016-03-01T00:00:01.0-06:00""], [[1.0, true], 1.1, 1.2]],
-            [[0.2, ""2016-03-01T00:00:02.0-06:00""], [[2.0, true], 2.1, 2.2]],
-            [[0.3, ""2016-03-01T00:00:03.0-06:00""], [[3.0, true], 3.1, 3.2]],
+            [[0.2, ""2016-03-01T00:00:02.0-06:00""], [[2.0, false], 2.1, 2.2]],
+            [[0.3, ""2016-03-01T00:00:03.0-06:00""], [null,        null, 3.2]],
             [[0.4, ""2016-03-01T00:00:04.0-06:00""], [[4.0, true], 4.1, 4.2]],
         ]";
 
@@ -109,11 +110,13 @@ namespace PDS.Witsml.Server.Models
         public void ChannelDataReader_can_read_ChannelSet_data()
         {
             var reader = new ChannelDataReader(ChannelSetData);
+            var json = new StringBuilder("[");
             int count = 0;
 
             Assert.AreEqual(2, reader.Depth);
             Assert.AreEqual(5, reader.FieldCount);
             Assert.AreEqual(5, reader.RecordsAffected);
+            json.AppendLine();
 
             while (reader.Read())
             {
@@ -123,7 +126,19 @@ namespace PDS.Witsml.Server.Models
                     reader.GetString(2),
                     reader.GetDouble(3),
                     reader.GetDouble(4));
+
+                json.AppendLine(reader.GetJson());
             }
+
+            Assert.IsNull(reader.GetJson());
+
+            // original
+            Console.WriteLine();
+            Console.WriteLine(ChannelSetData);
+
+            // serialized
+            Console.WriteLine();
+            Console.WriteLine(json.Append("]"));
         }
 
         [TestMethod]
