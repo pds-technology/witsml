@@ -85,7 +85,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell", "UidWellbore", "NameWellbore" }
                 // TODO: For Header Only just ignore "logData" which is already being done.
                 : OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) ? GetLogHeaderFields()
-                : OptionsIn.ReturnElements.DataOnly.Equals(returnElements) ? new List<string> { "LogCurveInfo" }
+                : OptionsIn.ReturnElements.DataOnly.Equals(returnElements) ? new List<string> { IdPropertyName, "UidWell", "UidWellbore", "LogCurveInfo" }
                 : null;
 
             var ignored = new List<string> { "startIndex", "endIndex", "startDateTimeIndex", "endDateTimeIndex", "logData" };
@@ -97,6 +97,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 logs.ForEach(l =>
                 {
                     l.LogData = new List<LogData> { QueryLogDataValues(l, parser) };
+                    if (OptionsIn.ReturnElements.DataOnly.Equals(returnElements))
+                        l.LogCurveInfo.Clear();
                 });
             }
 
