@@ -912,12 +912,6 @@ namespace PDS.Witsml.Server.Data.Channels
                 {
                     for (var j = counter; j < chunkData.Count; j++)
                     {  
-                        if (points != null)
-                        {
-                            next = GetAnIndexValue(points.First(), isTimeLog);
-                            MergeOneDataRow(merges, points, null, chunkMnemonics, mnemonics, mnemonicIndexMap, effectiveRanges, next, increasing);
-                        }
-
                         points = chunkData[j].Split(Separator).ToList();
                         next = GetAnIndexValue(points.First(), isTimeLog);
                         if (i >= updates.Count)
@@ -958,11 +952,15 @@ namespace PDS.Witsml.Server.Data.Channels
                             counter = j;
 
                             if (j >= chunkData.Count)
+                            {
                                 break;
+                            }
 
                             points = chunkData[j].Split(Separator).ToList();
                             next = GetAnIndexValue(points.First(), isTimeLog);
                         }
+                        j--;
+                        counter = j;
                     }
                     if (i >= updates.Count)
                         break;
@@ -970,6 +968,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     update = updates[i];
                     current = GetAnIndexValue(update.First(), isTimeLog);
                     MergeOneDataRow(merges, null, update, chunkMnemonics, mnemonics, mnemonicIndexMap, effectiveRanges, current, increasing);
+                    counter = chunkData.Count;
                 }
 
                 var indexInfo = chunk.Indices.First();
