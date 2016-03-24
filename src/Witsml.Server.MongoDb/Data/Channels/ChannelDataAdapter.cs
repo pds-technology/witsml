@@ -22,7 +22,8 @@ namespace PDS.Witsml.Server.Data.Channels
     public class ChannelDataAdapter : MongoDbDataAdapter<ChannelDataValues>
     {
         private static readonly int RangeSize = Settings.Default.LogIndexRangeSize;
-        private static readonly char Separator = ',';
+        private const string Delimiter = ",";
+        private const char Separator = ',';
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelDataAdapter"/> class.
@@ -45,7 +46,7 @@ namespace PDS.Witsml.Server.Data.Channels
             if (indicesMap == null || indicesMap.Keys.Count == 0)
                 return;
 
-            var collection = GetCollection<ChannelDataValues>(DbCollectionName);
+            var collection = GetCollection();
             var dataChunks = new List<ChannelDataValues>();
 
             foreach (var key in indicesMap.Keys)
@@ -75,7 +76,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
             if (chunks != null && chunks.Any())
             {
-                var collection = GetCollection<ChannelDataValues>(DbCollectionName);
+                var collection = GetCollection();
 
                 collection.BulkWrite(chunks
                     .Select(dc =>
@@ -193,14 +194,24 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <returns>The list of log data chunks that fit the query criteria sorted by the start index.</returns>
         private List<ChannelDataValues> GetData(FilterDefinition<ChannelDataValues> filter, bool increasing)
         {          
-            var collection = GetCollection<ChannelDataValues>(DbCollectionName);
+            var collection = GetCollection();
             var sortBuilder = Builders<ChannelDataValues>.Sort;
             var sortField = "Indices.0.Start";
-            var sort = increasing ? sortBuilder.Ascending(sortField) : sortBuilder.Descending(sortField);
 
-            var filterJson = filter.Render(collection.DocumentSerializer, collection.Settings.SerializerRegistry);
+            var sort = increasing 
+                ? sortBuilder.Ascending(sortField) 
+                : sortBuilder.Descending(sortField);
 
-            return collection.Find(filter ?? "{}").Sort(sort).ToList();
+            if (Logger.IsDebugEnabled)
+            {
+                var filterJson = filter.Render(collection.DocumentSerializer, collection.Settings.SerializerRegistry);
+                Logger.DebugFormat("Data query filters: {0}", filterJson);
+            }
+
+            return collection
+                .Find(filter ?? "{}")
+                .Sort(sort)
+                .ToList();
         }
 
         /// <summary>
@@ -312,8 +323,8 @@ namespace PDS.Witsml.Server.Data.Channels
                 }
             }
 
-            logData.MnemonicList = string.Join(Separator.ToString(), validMnemonics);
-            logData.UnitList = string.Join(Separator.ToString(), validUnits);
+            logData.MnemonicList = string.Join(Delimiter, validMnemonics);
+            logData.UnitList = string.Join(Delimiter, validUnits);
 
             foreach (var row in dataList)
             {
@@ -330,7 +341,6 @@ namespace PDS.Witsml.Server.Data.Channels
                 return increasing 
                     ? rowIndex.Value < rowRange.Item1.Value
                     : rowIndex.Value > rowRange.Item1.Value;
-
             }
 
             return false;
@@ -499,7 +509,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 }
                 else
                 {
-                    var slicedData = string.Join(Separator.ToString(), SliceStringList(allValues, sliceIndexes));
+                    var slicedData = string.Join(Delimiter, SliceStringList(allValues, sliceIndexes));
                     yield return new Tuple<string, double, string>(uid, index, slicedData);
                 }
             }
@@ -840,13 +850,12 @@ namespace PDS.Witsml.Server.Data.Channels
         {
             var start = GetAnIndexValue(updates.First().First(), isTimeLog);
             var end = GetAnIndexValue(updates.Last().First(), isTimeLog);
-            var delimiter = Separator.ToString();
 
             var chunk = new ChannelDataValues { Uid = NewUid(), UidLog = uidLog, MnemonicList = string.Join(",", mnemonics), UnitList = string.Join(",", units) };
             var index = new ChannelIndexInfo { Mnemonic = mnemonics[0], Start = start, End = end, Increasing = increasing, IsTimeIndex = isTimeLog };
 
             chunk.Indices = new List<ChannelIndexInfo> { index };
-            chunk.Data = SerializeLogData(updates.Select(r => string.Join(delimiter, r)).ToList());
+            chunk.Data = SerializeLogData(updates.Select(r => string.Join(Delimiter, r)).ToList());
 
             return chunk;
         }
@@ -908,12 +917,16 @@ namespace PDS.Witsml.Server.Data.Channels
                         points = chunkData[j].Split(Separator).ToList();
                         next = GetAnIndexValue(points.First(), isTimeLog);
 
-                        while (Before(current, next, increasing) && i < updates.Count)
+                        while (Before(current, next, increasing))
                         {
-                            update = updates[i];
-                            current = GetAnIndexValue(update.First(), isTimeLog);
                             MergeOneDataRow(merges, null, update, chunkMnemonics, mnemonics, mnemonicIndexMap, effectiveRanges, current, increasing);
                             i++;
+
+                            if (i >= updates.Count)
+                                break;
+
+                            update = updates[i];
+                            current = GetAnIndexValue(update.First(), isTimeLog);
                         }
                         if (current == next)
                         {
@@ -921,12 +934,16 @@ namespace PDS.Witsml.Server.Data.Channels
                             i++;
                             continue;
                         }
-                        while (Before(next, current, increasing) && j < chunkData.Count)
+                        while (Before(next, current, increasing))
                         {
-                            points = chunkData[j].Split(Separator).ToList();
-                            next = GetAnIndexValue(points.First(), isTimeLog);
                             MergeOneDataRow(merges, points, null, chunkMnemonics, mnemonics, mnemonicIndexMap, effectiveRanges, next, increasing);
                             j++;
+
+                            if (j >= chunkData.Count)
+                                break;
+
+                            points = chunkData[j].Split(Separator).ToList();
+                            next = GetAnIndexValue(points.First(), isTimeLog);
                         }
                     }
                 }
@@ -938,8 +955,8 @@ namespace PDS.Witsml.Server.Data.Channels
                 indexInfo.Start = GetAnIndexValue(firstRow[0], isTimeLog);
                 indexInfo.End = GetAnIndexValue(lastRow[0], isTimeLog);
 
-                chunk.MnemonicList = string.Join(Separator.ToString(), chunkMnemonics);
-                chunk.UnitList = string.Join(Separator.ToString(), chunkUnits);
+                chunk.MnemonicList = string.Join(Delimiter, chunkMnemonics);
+                chunk.UnitList = string.Join(Delimiter, chunkUnits);
             }
             else
             {
@@ -1024,7 +1041,7 @@ namespace PDS.Witsml.Server.Data.Channels
             {
                 if (!string.IsNullOrEmpty(merge[i]))
                 {
-                    merges.Add(string.Join(Separator.ToString(), merge));
+                    merges.Add(string.Join(Delimiter, merge));
                     return;
                 }
             }
