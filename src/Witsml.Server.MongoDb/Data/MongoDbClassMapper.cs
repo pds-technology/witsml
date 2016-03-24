@@ -45,6 +45,7 @@ namespace PDS.Witsml.Server.Data
             Register3<Witsml200.ComponentSchemas.TimeIndexValue>();
 
             // Custom
+            Register3<ChannelDataChunk>();
             RegisterId<LogDataValues>();
             RegisterId<ChannelDataValues>();
 

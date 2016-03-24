@@ -247,12 +247,12 @@ namespace PDS.Witsml.Server.Models
 
         public bool Read()
         {
-            if (IsClosed)
-                return false;
+            //if (IsClosed)
+            //    return false;
 
             _current++;
 
-            return !IsClosed;
+            return true;  //!IsClosed;
         }
 
         public string GetJson()

@@ -86,6 +86,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\Channels\ChannelDataChunkAdapter.cs" />
     <Compile Include="Data\Channels\ChannelSet200DataAdapter.cs" />
     <Compile Include="Data\DatabaseProvider.cs" />
     <Compile Include="Data\IDatabaseProvider.cs" />
@@ -106,6 +107,7 @@
     <Compile Include="Data\Wells\Well131DataAdapter.cs" />
     <Compile Include="Data\Wells\Well141DataAdapter.cs" />
     <Compile Include="Data\Wells\Well200DataAdapter.cs" />
+    <Compile Include="Models\ChannelDataChunk.cs" />
     <Compile Include="Models\ChannelDataExtensions.cs" />
     <Compile Include="Models\ChannelDataReader.cs" />
     <Compile Include="Models\ChannelIndexInfo.cs" />
