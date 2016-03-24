@@ -903,7 +903,7 @@ namespace PDS.Witsml.Server.Data.Channels
             var mergeRange = new List<double>();
             double current, next;
             List<string> update;
-            List<string> points;
+            List<string> points = null;
             var counter = 0;
 
             if (updates != null)
@@ -911,12 +911,19 @@ namespace PDS.Witsml.Server.Data.Channels
                 for (var i = 0; i < updates.Count; i++)
                 {
                     for (var j = counter; j < chunkData.Count; j++)
-                    {                       
+                    {  
+                        if (points != null)
+                        {
+                            next = GetAnIndexValue(points.First(), isTimeLog);
+                            MergeOneDataRow(merges, points, null, chunkMnemonics, mnemonics, mnemonicIndexMap, effectiveRanges, next, increasing);
+                        }
+
                         points = chunkData[j].Split(Separator).ToList();
                         next = GetAnIndexValue(points.First(), isTimeLog);
                         if (i >= updates.Count)
                         {
                             MergeOneDataRow(merges, points, null, chunkMnemonics, mnemonics, mnemonicIndexMap, effectiveRanges, next, increasing);
+                            points = null;
                             continue;
                         }
 
@@ -929,7 +936,9 @@ namespace PDS.Witsml.Server.Data.Channels
                             i++;
 
                             if (i >= updates.Count)
+                            {
                                 break;
+                            }
 
                             update = updates[i];
                             current = GetAnIndexValue(update.First(), isTimeLog);
@@ -937,8 +946,8 @@ namespace PDS.Witsml.Server.Data.Channels
                         if (current == next)
                         {
                             MergeOneDataRow(merges, points, update, chunkMnemonics, mnemonics, mnemonicIndexMap, effectiveRanges, current, increasing);
+                            points = null;
                             i++;
-                            j++;
                             counter = j;
                             continue;
                         }
