@@ -87,7 +87,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\Channels\ChannelDataChunkAdapter.cs" />
-    <Compile Include="Data\Channels\ChannelIndexRange.cs" />
     <Compile Include="Data\Channels\ChannelSet200DataAdapter.cs" />
     <Compile Include="Data\DatabaseProvider.cs" />
     <Compile Include="Data\IDatabaseProvider.cs" />

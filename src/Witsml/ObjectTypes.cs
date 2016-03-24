@@ -11,6 +11,7 @@ namespace PDS.Witsml
     /// </summary>
     public static class ObjectTypes
     {
+        public const string Id = "Id";
         public const string Uid = "Uid";
         public const string Uuid = "Uuid";
         public const string NameProperty = "Name";
@@ -30,6 +31,7 @@ namespace PDS.Witsml
         public const string ChannelSet = "channelSet";
         public const string Channel = "channel";
         public const string ChannelDataValues = "channelDataValues";
+        public const string ChannelDataChunk = "channelDataChunk";
 
         private static readonly string[] GrowingObjects = new [] { Log, MudLog, Trajectory };
 
