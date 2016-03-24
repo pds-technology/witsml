@@ -9,12 +9,14 @@ namespace PDS.Witsml.Server.Models
     [Serializable]
     public class ChannelDataValues
     {
+        public string Id { get; set; }
+
         public string Uid { get; set; }
 
         public string UidLog { get; set; }
 
         public string UidChannelSet { get; set; }
-
+        
         /// <summary>
         /// Gets or sets the indices.
         /// </summary>

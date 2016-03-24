@@ -3,6 +3,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
+using PDS.Witsml.Server.Models;
 
 namespace PDS.Witsml.Server.Data.Channels
 {
@@ -57,7 +58,14 @@ namespace PDS.Witsml.Server.Data.Channels
                 entity.Citation = entity.Citation.Update();
 
                 Validate(Functions.PutObject, entity);
+
+                // Get Reader 
+
+                // Clear Data
+
                 UpdateEntity(entity, dataObjectId);
+
+                // Merge ChannelDataValues
             }
             else
             {
@@ -65,7 +73,15 @@ namespace PDS.Witsml.Server.Data.Channels
                 entity.Citation = entity.Citation.Update();
 
                 Validate(Functions.PutObject, entity);
+
+                // Get Reader 
+                var reader = ChannelDataExtensions.GetReader(entity);
+                
+                // Clear Data
+
                 InsertEntity(entity);
+
+                // Save ChannelDataValues
             }
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uuid);
