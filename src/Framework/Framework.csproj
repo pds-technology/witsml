@@ -45,6 +45,7 @@
     <Compile Include="FrameworkExtensions.cs" />
     <Compile Include="IContainer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Range.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
