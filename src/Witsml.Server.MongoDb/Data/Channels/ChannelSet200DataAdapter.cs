@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
@@ -16,13 +17,16 @@ namespace PDS.Witsml.Server.Data.Channels
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class ChannelSet200DataAdapter : MongoDbDataAdapter<ChannelSet>
     {
+        private readonly ChannelDataChunkAdapter _channelDataValuesAdapter;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelSet200DataAdapter"/> class.
         /// </summary>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public ChannelSet200DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.ChannelSet200, ObjectTypes.Uuid)
+        public ChannelSet200DataAdapter(IDatabaseProvider databaseProvider, ChannelDataChunkAdapter channelDataValuesAdapter) : base(databaseProvider, ObjectNames.ChannelSet200, ObjectTypes.Uuid)
         {
+            _channelDataValuesAdapter = channelDataValuesAdapter;
         }
 
         /// <summary>
@@ -76,15 +80,25 @@ namespace PDS.Witsml.Server.Data.Channels
 
                 // Get Reader 
                 var reader = ChannelDataExtensions.GetReader(entity);
-                
+
                 // Clear Data
+                ClearData(entity);
 
                 InsertEntity(entity);
 
                 // Save ChannelDataValues
+                _channelDataValuesAdapter.SaveChannelDataValues(reader);
             }
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uuid);
+        }
+
+        private void ClearData(ChannelSet entity)
+        {
+            if (entity.Data != null)
+            {
+                entity.Data.Data = null;
+            }
         }
     }
 }
