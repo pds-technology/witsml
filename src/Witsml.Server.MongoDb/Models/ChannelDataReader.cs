@@ -12,7 +12,7 @@ namespace PDS.Witsml.Server.Models
 {
     public class ChannelDataReader : IDataReader
     {
-        internal static int ChunkSize = Settings.Default.LogIndexRangeSize;
+        internal static int RangeSize = Settings.Default.LogIndexRangeSize;
 
         private static readonly string[] Empty = new string[0];
         private List<List<List<object>>> _records;
@@ -20,16 +20,18 @@ namespace PDS.Witsml.Server.Models
         private int _count;
         private int _current = -1;
 
-        internal ChannelDataReader(IList<string> data, string[] mnemonics = null, string[] units = null, string uid = null) : this(Combine(data), mnemonics, units, uid)
+        internal ChannelDataReader(IList<string> data, string[] mnemonics = null, string[] units = null, string uid = null) 
+            : this(Combine(data), mnemonics, units, uid)
         {
         }
 
         internal ChannelDataReader(string data, string[] mnemonics = null, string[] units = null, string uid = null)
         {
             _records = Deserialize(data);
-            _count = GetRow(0).Count();
+            _count = GetRowValues(0).Count();
             _indexCount = GetIndexValues(0).Count();
 
+            Indices = new List<ChannelIndexInfo>();
             Mnemonics = mnemonics ?? Empty;
             Units = units ?? Empty;
             Uid = uid;
@@ -40,6 +42,18 @@ namespace PDS.Witsml.Server.Models
         public string[] Units { get; private set; }
 
         public string Uid { get; private set; }
+
+        public List<ChannelIndexInfo> Indices { get; }
+
+        public bool IsIncreasing
+        {
+            get { return Indices.Select(x => x.Increasing).FirstOrDefault(); }
+        }
+
+        public bool IsTimeIndex
+        {
+            get { return Indices.Select(x => x.IsTimeIndex).FirstOrDefault(); }
+        }
 
         public object this[string name]
         {
@@ -131,6 +145,11 @@ namespace PDS.Witsml.Server.Models
             return DateTimeOffset.Parse(GetString(i));
         }
 
+        public long GetUnixTimeSeconds(int i)
+        {
+            return GetDateTimeOffset(i).ToUnixTimeSeconds();
+        }
+
         public decimal GetDecimal(int i)
         {
             return decimal.Parse(GetString(i));
@@ -195,7 +214,7 @@ namespace PDS.Witsml.Server.Models
 
         public object GetValue(int i)
         {
-            var value = GetRow(_current).Skip(i).FirstOrDefault();
+            var value = GetRowValues(_current).Skip(i).FirstOrDefault();
             var array = value as JArray;
 
             if (array != null && array.Count == 1)
@@ -209,7 +228,7 @@ namespace PDS.Witsml.Server.Models
         public int GetValues(object[] values)
         {
             var count = Math.Min(values.Length, _count);
-            var source = GetRow(_current).Take(count).ToArray();
+            var source = GetRowValues(_current).Take(count).ToArray();
 
             Array.Copy(source, values, count);
             return count;
@@ -237,7 +256,7 @@ namespace PDS.Witsml.Server.Models
             return false;
         }
 
-        private IEnumerable<object> GetRow(int row)
+        private IEnumerable<object> GetRowValues(int row)
         {
             return _records
                 .Skip(row)
