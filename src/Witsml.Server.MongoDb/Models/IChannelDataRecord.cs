@@ -12,5 +12,9 @@ namespace PDS.Witsml.Server.Models
         string[] Units { get; }
 
         List<ChannelIndexInfo> Indices { get; }
+
+        long GetUnixTimeSeconds(int i);
+
+        string GetJson();
     }
 }
