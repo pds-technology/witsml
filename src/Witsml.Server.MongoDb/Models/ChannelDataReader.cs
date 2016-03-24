@@ -90,6 +90,27 @@ namespace PDS.Witsml.Server.Models
             Close();
         }
 
+        public Range<double> GetIndexRange(int index = 0)
+        {
+            var channelIndex = Indices.Skip(index).FirstOrDefault();
+            var start = GetIndexValues(0).Skip(index).FirstOrDefault();
+            var end = GetIndexValues(RecordsAffected - 1).Skip(index).FirstOrDefault();
+
+            if (channelIndex == null || start == null || end == null)
+                return new Range<double>(double.NaN, double.NaN);
+
+            if (channelIndex.IsTimeIndex)
+            {
+                return new Range<double>(
+                    start: DateTimeOffset.Parse(start.ToString()).ToUnixTimeSeconds(),
+                    end: DateTimeOffset.Parse(end.ToString()).ToUnixTimeSeconds());
+            }
+
+            return new Range<double>(
+                start: double.Parse(start.ToString()),
+                end: double.Parse(end.ToString()));
+        }
+
         public bool GetBoolean(int i)
         {
             return bool.TrueString.EqualsIgnoreCase(GetString(i));

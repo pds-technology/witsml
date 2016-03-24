@@ -54,7 +54,7 @@ namespace PDS.Witsml.Server.Models
                 .ToArray();
 
             return new ChannelDataReader(channelSet.Data.Data, mnemonics, units, channelSet.Uuid)
-                .WithIndices(channelSet.Index.Select(ToChannelIndexInfo));
+                .WithIndices(channelSet.Index.Select(ToChannelIndexInfo), true);
         }
 
         public static ChannelDataReader GetReader(this ChannelDataValues channelDataValues)
@@ -68,19 +68,31 @@ namespace PDS.Witsml.Server.Models
 
         public static ChannelDataReader WithIndex(this ChannelDataReader reader, string mnemonic, bool increasing, bool isTimeIndex)
         {
-            reader.Indices.Add(new ChannelIndexInfo()
+            var index = new ChannelIndexInfo()
             {
                 Mnemonic = mnemonic,
                 Increasing = increasing,
                 IsTimeIndex = isTimeIndex
-            });
+            };
+
+            reader.Indices.Add(index);
+            CalculateIndexRange(reader, index, reader.Indices.Count - 1);
 
             return reader;
         }
 
-        public static ChannelDataReader WithIndices(this ChannelDataReader reader, IEnumerable<ChannelIndexInfo> indices)
+        public static ChannelDataReader WithIndices(this ChannelDataReader reader, IEnumerable<ChannelIndexInfo> indices, bool calculate = false)
         {
-            reader.Indices.AddRange(indices);
+            foreach (var index in indices)
+            {
+                reader.Indices.Add(index);
+
+                if (calculate)
+                {
+                    CalculateIndexRange(reader, index, reader.Indices.Count - 1);
+                }
+            }
+
             return reader;
         }
 
@@ -92,6 +104,13 @@ namespace PDS.Witsml.Server.Models
                 Increasing = channelIndex.Direction.GetValueOrDefault() == Witsml200.ReferenceData.IndexDirection.increasing,
                 IsTimeIndex = channelIndex.IndexType.GetValueOrDefault() == Witsml200.ReferenceData.ChannelIndexType.datetime
             };
+        }
+
+        private static void CalculateIndexRange(ChannelDataReader reader, ChannelIndexInfo channelIndex, int index)
+        {
+            var range = reader.GetIndexRange(index);
+            channelIndex.Start = range.Start;
+            channelIndex.End = range.End;
         }
     }
 }
