@@ -9,8 +9,8 @@ using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using MongoDB.Driver;
 using Newtonsoft.Json;
-using PDS.Server.MongoDb;
 using PDS.Witsml.Server.Models;
+using PDS.Witsml.Server.MongoDb;
 
 namespace PDS.Witsml.Server.Data.Channels
 {

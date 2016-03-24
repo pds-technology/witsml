@@ -2,7 +2,7 @@
 using System.ComponentModel.Composition;
 using System.Configuration;
 using MongoDB.Driver;
-using PDS.Server.MongoDb;
+using PDS.Witsml.Server.MongoDb;
 
 namespace PDS.Witsml.Server.Data
 {
