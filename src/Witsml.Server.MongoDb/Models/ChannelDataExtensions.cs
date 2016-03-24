@@ -10,20 +10,28 @@ namespace PDS.Witsml.Server.Models
     {
         public static ChannelDataReader GetReader(this Witsml131.Log log)
         {
+            var isTimeIndex = log.IndexType.GetValueOrDefault() == Witsml131.ReferenceData.LogIndexType.datetime;
+            var increasing = log.Direction.GetValueOrDefault() == Witsml131.ReferenceData.LogIndexDirection.increasing;
+
             var mnemonics = log.LogCurveInfo.Select(x => x.Mnemonic).ToArray();
             var units = log.LogCurveInfo.Select(x => x.Unit).ToArray();
 
-            return new ChannelDataReader(log.LogData, mnemonics, units, log.Uid);
+            return new ChannelDataReader(log.LogData, mnemonics, units, log.Uid)
+                .WithIndex(mnemonics.FirstOrDefault(), increasing, isTimeIndex);
         }
 
         public static IEnumerable<ChannelDataReader> GetReaders(this Witsml141.Log log)
         {
+            var isTimeIndex = log.IndexType.GetValueOrDefault() == Witsml141.ReferenceData.LogIndexType.datetime;
+            var increasing = log.Direction.GetValueOrDefault() == Witsml141.ReferenceData.LogIndexDirection.increasing;
+
             foreach (var logData in log.LogData)
             {
                 var mnemonics = ChannelDataReader.Split(logData.MnemonicList);
                 var units = ChannelDataReader.Split(logData.UnitList);
 
-                yield return new ChannelDataReader(logData.Data, mnemonics, units, log.Uid);
+                yield return new ChannelDataReader(logData.Data, mnemonics, units, log.Uid)
+                    .WithIndex(mnemonics.FirstOrDefault(), increasing, isTimeIndex);
             }
         }
 
@@ -45,7 +53,8 @@ namespace PDS.Witsml.Server.Models
                 .Union(channelSet.Channel.Select(x => x.UoM))
                 .ToArray();
 
-            return new ChannelDataReader(channelSet.Data.Data, mnemonics, units, channelSet.Uuid);
+            return new ChannelDataReader(channelSet.Data.Data, mnemonics, units, channelSet.Uuid)
+                .WithIndices(channelSet.Index.Select(ToChannelIndexInfo));
         }
 
         public static ChannelDataReader GetReader(this ChannelDataValues channelDataValues)
@@ -53,7 +62,36 @@ namespace PDS.Witsml.Server.Models
             var mnemonics = ChannelDataReader.Split(channelDataValues.MnemonicList);
             var units = ChannelDataReader.Split(channelDataValues.UnitList);
 
-            return new ChannelDataReader(channelDataValues.Data, mnemonics, units, channelDataValues.Uid);
+            return new ChannelDataReader(channelDataValues.Data, mnemonics, units, channelDataValues.Uid)
+                .WithIndices(channelDataValues.Indices);
+        }
+
+        public static ChannelDataReader WithIndex(this ChannelDataReader reader, string mnemonic, bool increasing, bool isTimeIndex)
+        {
+            reader.Indices.Add(new ChannelIndexInfo()
+            {
+                Mnemonic = mnemonic,
+                Increasing = increasing,
+                IsTimeIndex = isTimeIndex
+            });
+
+            return reader;
+        }
+
+        public static ChannelDataReader WithIndices(this ChannelDataReader reader, IEnumerable<ChannelIndexInfo> indices)
+        {
+            reader.Indices.AddRange(indices);
+            return reader;
+        }
+
+        public static ChannelIndexInfo ToChannelIndexInfo(this Witsml200.ComponentSchemas.ChannelIndex channelIndex)
+        {
+            return new ChannelIndexInfo()
+            {
+                Mnemonic = channelIndex.Mnemonic,
+                Increasing = channelIndex.Direction.GetValueOrDefault() == Witsml200.ReferenceData.IndexDirection.increasing,
+                IsTimeIndex = channelIndex.IndexType.GetValueOrDefault() == Witsml200.ReferenceData.ChannelIndexType.datetime
+            };
         }
     }
 }
