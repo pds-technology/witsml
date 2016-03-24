@@ -1035,7 +1035,7 @@ namespace PDS.Witsml.Server.Data.Channels
                         if (effectiveRanges.ContainsKey(mnemonic))
                         {
                             var effectiveRange = effectiveRanges[mnemonic];
-                            if (Before(indexValue, effectiveRange.First(), increasing) || Before(effectiveRange.Last(), indexValue, increasing))
+                            if (i == 0 || Before(indexValue, effectiveRange.First(), increasing) || Before(effectiveRange.Last(), indexValue, increasing))
                             {
                                 merge[i] = points[i];
                             }
@@ -1056,8 +1056,23 @@ namespace PDS.Witsml.Server.Data.Channels
                 foreach (var mnemonic in indexMap.Keys)
                 {
                     var mergeIndex = indexMap[mnemonic];
-                    var updateIndex = updates.IndexOf(mnemonic);
-                    merge[mergeIndex] = updateIndex > -1 ? updates[updateIndex] : points[mergeIndex];
+                    var updateIndex = updateMnemonics.IndexOf(mnemonic);
+                    if (updateIndex < 0)
+                    {
+                        merge[mergeIndex] = points[mergeIndex];
+                    }
+                    else
+                    {
+                        var effectiveRange = effectiveRanges[mnemonic];
+                        if (Before(indexValue, effectiveRange.First(), increasing) || Before(effectiveRange.Last(), indexValue, increasing))
+                        {
+                            merge[mergeIndex] = points[mergeIndex];
+                        }
+                        else
+                        {
+                            merge[mergeIndex] = updates[updateIndex];
+                        }
+                    }
                 }
             }
 
@@ -1122,7 +1137,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 for (var i = 0; i < points.Count; i++)
                 {
                     var mnemonic = mnemonics[i];
-                    if (!string.IsNullOrEmpty(points[i]))
+                    if (!string.IsNullOrEmpty(points[i].Trim()))
                     {
                         if (ranges.ContainsKey(mnemonic))
                             ranges[mnemonic][1] = indexValue;                      
