@@ -73,6 +73,7 @@
   <ItemGroup>
     <Compile Include="Data\DatabaseProviderTests.cs" />
     <Compile Include="Data\LogDataAdapterTests.cs" />
+    <Compile Include="Models\ChannelDataReaderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Security\MembershipProviderTests.cs" />
   </ItemGroup>

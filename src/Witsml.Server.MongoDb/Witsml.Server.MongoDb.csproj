@@ -107,6 +107,8 @@
     <Compile Include="Data\Wells\Well131DataAdapter.cs" />
     <Compile Include="Data\Wells\Well141DataAdapter.cs" />
     <Compile Include="Data\Wells\Well200DataAdapter.cs" />
+    <Compile Include="Models\ChannelDataExtensions.cs" />
+    <Compile Include="Models\ChannelDataReader.cs" />
     <Compile Include="Models\ChannelIndexInfo.cs" />
     <Compile Include="Models\ChannelDataValues.cs" />
     <Compile Include="Models\LogDataValues.cs" />
@@ -147,7 +149,7 @@
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>PDS.Server.MongoDb</CustomToolNamespace>
+      <CustomToolNamespace>PDS.Witsml.Server.MongoDb</CustomToolNamespace>
     </None>
   </ItemGroup>
   <ItemGroup />

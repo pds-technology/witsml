@@ -31,7 +31,7 @@ namespace PDS.Witsml.Server.Data.Logs
     public class Log141DataAdapter : MongoDbDataAdapter<Log>, IWitsml141Configuration
     {
         private static readonly string DbCollectionNameLogDataValues = "logDataValues";
-        private static readonly int LogIndexRangeSize = PDS.Server.MongoDb.Settings.Default.LogIndexRangeSize;
+        private static readonly int LogIndexRangeSize = MongoDb.Settings.Default.LogIndexRangeSize;
         private static readonly int maxDataNodes = Settings.Default.MaxDataNodes;
         private static readonly int maxDataPoints = Settings.Default.MaxDataPoints;
         private readonly ChannelDataAdapter _channelDataAdapter;

@@ -11,7 +11,7 @@ using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Models;
-using PDS.Server.MongoDb;
+using PDS.Witsml.Server.MongoDb;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
