@@ -81,7 +81,7 @@ namespace PDS.Witsml.Server.Models
 
         public bool IsClosed
         {
-            get { return _current > -1 && _current < _count; }
+            get { return _current > -1 && _current < _records.Count; }
         }
 
         public int RecordsAffected
@@ -247,17 +247,27 @@ namespace PDS.Witsml.Server.Models
 
         public bool Read()
         {
-            if (_records.Count > _current + 1)
-            {
-                _current++;
-                return true;
-            }
+            if (IsClosed)
+                return false;
 
-            return false;
+            _current++;
+
+            return !IsClosed;
+        }
+
+        public string GetJson()
+        {
+            if (IsClosed)
+                return null;
+
+            return JsonConvert.SerializeObject(_records[_current]);
         }
 
         private IEnumerable<object> GetRowValues(int row)
         {
+            if (IsClosed)
+                return Enumerable.Empty<object>();
+
             return _records
                 .Skip(row)
                 .Take(1)
@@ -266,6 +276,9 @@ namespace PDS.Witsml.Server.Models
 
         private IEnumerable<object> GetIndexValues(int row)
         {
+            if (IsClosed)
+                return Enumerable.Empty<object>();
+
             return _records
                 .Skip(row)
                 .Take(1)
@@ -274,6 +287,9 @@ namespace PDS.Witsml.Server.Models
 
         private IEnumerable<object> GetChannelValues(int row)
         {
+            if (IsClosed)
+                return Enumerable.Empty<object>();
+
             return _records
                 .Skip(row)
                 .Take(1)
