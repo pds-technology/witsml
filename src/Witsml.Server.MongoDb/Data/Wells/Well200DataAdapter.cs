@@ -48,16 +48,22 @@ namespace PDS.Witsml.Server.Data.Wells
             if (!string.IsNullOrWhiteSpace(entity.Uuid) && Exists(dataObjectId))
             {
                 entity.Citation = entity.Citation.Update();
+                Logger.DebugFormat("Updating Well with Uuid '{0}' and citation title '{1}'.", entity.Uuid, entity.Citation.Title);
 
                 Validate(Functions.PutObject, entity);
+                Logger.DebugFormat("Validated Well with Uuid '{0}' and citation title '{1}'.", entity.Uuid, entity.Citation.Title);
+
                 UpdateEntity(entity, dataObjectId);
             }
             else
             {
                 entity.Uuid = NewUid(entity.Uuid);
                 entity.Citation = entity.Citation.Update();
+                Logger.DebugFormat("Adding Well with Uuid '{0}' and citation title '{1}'.", entity.Uuid, entity.Citation.Title);
 
                 Validate(Functions.PutObject, entity);
+                Logger.DebugFormat("Validated Well with Uuid '{0}' and citation title '{1}'.", entity.Uuid, entity.Citation.Title);
+
                 InsertEntity(entity);
             }
 
