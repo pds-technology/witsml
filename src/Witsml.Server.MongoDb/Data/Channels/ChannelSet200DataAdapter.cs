@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
@@ -17,16 +16,17 @@ namespace PDS.Witsml.Server.Data.Channels
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class ChannelSet200DataAdapter : MongoDbDataAdapter<ChannelSet>
     {
-        private readonly ChannelDataChunkAdapter _channelDataValuesAdapter;
+        private readonly ChannelDataChunkAdapter _channelDataChunkAdapter;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ChannelSet200DataAdapter"/> class.
+        /// Initializes a new instance of the <see cref="ChannelSet200DataAdapter" /> class.
         /// </summary>
         /// <param name="databaseProvider">The database provider.</param>
+        /// <param name="channelDataChunkAdapter">The channel data chunk adapter.</param>
         [ImportingConstructor]
-        public ChannelSet200DataAdapter(IDatabaseProvider databaseProvider, ChannelDataChunkAdapter channelDataValuesAdapter) : base(databaseProvider, ObjectNames.ChannelSet200, ObjectTypes.Uuid)
+        public ChannelSet200DataAdapter(IDatabaseProvider databaseProvider, ChannelDataChunkAdapter channelDataChunkAdapter) : base(databaseProvider, ObjectNames.ChannelSet200, ObjectTypes.Uuid)
         {
-            _channelDataValuesAdapter = channelDataValuesAdapter;
+            _channelDataChunkAdapter = channelDataChunkAdapter;
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 Validate(Functions.PutObject, entity);
 
                 // Get Reader 
-                var reader = ChannelDataExtensions.GetReader(entity);
+                var reader = entity.GetReader();
 
                 // Clear Data
                 ClearData(entity);
@@ -87,7 +87,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 InsertEntity(entity);
 
                 // Save ChannelDataValues
-                _channelDataValuesAdapter.SaveChannelDataValues(reader);
+                _channelDataChunkAdapter.Add(reader);
             }
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uuid);
