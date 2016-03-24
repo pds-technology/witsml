@@ -193,5 +193,96 @@ namespace PDS.Witsml.Server.Data.Logs
             var updateResponse = DevKit.Update<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
         }
+
+        [TestMethod]
+        public void Test_overwrite_log_data_chunk()
+        {
+            var response = DevKit.Add<WellList, Well>(_well);
+
+            _wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+
+            var log = new Log()
+            {
+                UidWell = _wellbore.UidWell,
+                NameWell = _well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = _wellbore.Name,
+                Name = DevKit.Name("Log 01"),
+                StartIndex = new GenericMeasure(17, "m")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 6);
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWellbore = log.UidWellbore;
+            var uidLog = response.SuppMsgOut;
+            log = new Log()
+            {
+                UidWell = _wellbore.UidWell,
+                UidWellbore = uidWellbore,
+                Uid = uidLog,
+                StartIndex = new GenericMeasure(4.1, "m")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 3, 0.9);
+            var logData = log.LogData.First();
+            logData.Data.Add("21.5, 1, 21.7");
+            var updateResponse = DevKit.Update<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+        }
+
+        [TestMethod]
+        public void Test_update_log_data_with_different_range_for_each_channel()
+        {
+            var response = DevKit.Add<WellList, Well>(_well);
+
+            _wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+
+            var log = new Log()
+            {
+                UidWell = _wellbore.UidWell,
+                NameWell = _well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = _wellbore.Name,
+                Name = DevKit.Name("Log 01"),
+                StartIndex = new GenericMeasure(15, "m")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 8);
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWellbore = log.UidWellbore;
+            var uidLog = response.SuppMsgOut;
+            log = new Log()
+            {
+                UidWell = _wellbore.UidWell,
+                UidWellbore = uidWellbore,
+                Uid = uidLog,
+                StartIndex = new GenericMeasure(13, "m")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 6, 0.9);
+            var logData = log.LogData.First();
+            logData.Data.Clear();
+            logData.Data.Add("13,13.1,");
+            logData.Data.Add("14,14.1,");
+            logData.Data.Add("15,15.1,");
+            logData.Data.Add("16,16.1,");
+            logData.Data.Add("17,17.1,");
+            logData.Data.Add("20,20.1,20.2");
+            logData.Data.Add("21,,21.2");
+            logData.Data.Add("22,,22.2");
+            logData.Data.Add("23,,23.2");
+            var updateResponse = DevKit.Update<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+        }
     }
 }
