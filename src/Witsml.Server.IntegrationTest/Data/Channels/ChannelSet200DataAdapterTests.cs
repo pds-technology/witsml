@@ -52,7 +52,11 @@ namespace PDS.Witsml.Server.Data.Channels
 
             // Add data that will update in the middle
             ChannelSet.Data.Data = @"[
-                            [ [0.11 ], [ [ 1.11, false ], null, 3.11 ] ]
+                            [ [0.11 ], [ [ 1.11, false ], null, 3.11 ] ],
+                            [ [100.11 ], [ [ 1.11, false ], null, 3.11 ] ],
+                            [ [150.11 ], [ [ 1.11, false ], null, 3.11 ] ],
+                            [ [200.11 ], [ [ 1.11, false ], null, 3.11 ] ],
+                            [ [250.11 ], [ [ 1.11, false ], null, 3.11 ] ],
                         ]";
 
             // Update

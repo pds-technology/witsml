@@ -62,7 +62,7 @@ namespace PDS.Witsml.Server.Models
             var mnemonics = ChannelDataReader.Split(channelDataValues.MnemonicList);
             var units = ChannelDataReader.Split(channelDataValues.UnitList);
 
-            return new ChannelDataReader(channelDataValues.Data, mnemonics, units, channelDataValues.Uid)
+            return new ChannelDataReader(channelDataValues.Data, mnemonics, units, channelDataValues.Uid, channelDataValues.Id)
                 .WithIndices(channelDataValues.Indices);
         }
 
@@ -73,6 +73,22 @@ namespace PDS.Witsml.Server.Models
 
             return new ChannelDataReader(channelDataChunk.Data, mnemonics, units, channelDataChunk.Uid, channelDataChunk.Id)
                 .WithIndices(channelDataChunk.Indices);
+        }
+
+        public static IEnumerable<IChannelDataRecord> GetRecords(this IEnumerable<ChannelDataChunk> channelDataChunks)
+        {
+            if (channelDataChunks == null)
+                yield break;
+
+            foreach (var chunk in channelDataChunks)
+            {
+                var records = chunk.GetReader().AsEnumerable();
+
+                foreach (var record in records)
+                {
+                    yield return record;
+                }
+            }
         }
 
         public static ChannelDataReader WithIndex(this ChannelDataReader reader, string mnemonic, bool increasing, bool isTimeIndex)

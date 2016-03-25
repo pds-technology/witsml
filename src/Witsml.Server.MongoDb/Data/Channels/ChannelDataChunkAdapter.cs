@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using Energistics.DataAccess.WITSML200;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Server.Models;
@@ -20,24 +19,69 @@ namespace PDS.Witsml.Server.Data.Channels
 
         public void Add(ChannelDataReader reader)
         {
-            if (reader.RecordsAffected > 0)
-            {
-                BulkWriteChunks(ToChunks(reader.AsEnumerable()), reader.Uid, reader.Mnemonics, reader.Units);
-            }
+            if (reader.RecordsAffected <= 0)
+                return;
+
+            BulkWriteChunks(
+                ToChunks(
+                    reader.AsEnumerable()), 
+                reader.Uid,
+                string.Join(",", reader.Mnemonics),
+                string.Join(",", reader.Units));
         }
 
-        private void BulkWriteChunks(IEnumerable<ChannelDataChunk> chunks, string uid, string[] mnemonics, string[] units)
+        public void Merge(ChannelDataReader reader)
+        {
+            if (reader.RecordsAffected <= 0)
+                return;
+
+            //reader.GetIndexRange(int i = 0);
+            var indexChannel = reader.Indices.First();
+            var increasing = indexChannel.Increasing;
+
+            // Get the full range of the reader.  
+            //... This is the range that we need to select existing ChannelDataChunks from the database to update
+            var updateRange = reader.GetIndexRange();
+
+            // Get DataChannelChunk list from database for the computed range and Uid
+            var filter = BuildDataFilter(reader.Uid, indexChannel.Mnemonic, updateRange, increasing);
+            var results = GetData(filter, increasing);
+
+            BulkWriteChunks(
+                ToChunks(
+                    MergeSequence(results.GetRecords(), reader.AsEnumerable())),
+                reader.Uid,
+                string.Join(",", reader.Mnemonics),
+                string.Join(",", reader.Units));
+        }
+
+        private void BulkWriteChunks(IEnumerable<ChannelDataChunk> chunks, string uid, string mnemonics, string units)
         {
             var collection = GetCollection();
 
             collection.BulkWrite(chunks
                 .Select(dc =>
                 {
-                    dc.Id = string.IsNullOrEmpty(dc.Id) ? NewUid() : dc.Id;
-                    dc.Uid = uid;
-                    dc.MnemonicList = string.Join(",", mnemonics);
-                    dc.UnitList = string.Join(",", units);
-                    return new InsertOneModel<ChannelDataChunk>(dc);
+                    if (string.IsNullOrWhiteSpace(dc.Id))
+                    {
+                        dc.Id = NewUid();
+                        dc.Uid = uid;
+                        dc.MnemonicList = mnemonics;
+                        dc.UnitList = units;
+
+                        return (WriteModel<ChannelDataChunk>) new InsertOneModel<ChannelDataChunk>(dc);
+                    }
+
+                    var filter = Builders<ChannelDataChunk>.Filter;
+                    var update = Builders<ChannelDataChunk>.Update;
+
+                    return new UpdateOneModel<ChannelDataChunk>(
+                        filter.Eq(f => f.Uid, uid) & filter.Eq(f => f.Id, dc.Id),
+                        update
+                            .Set(u => u.Indices, dc.Indices)
+                            .Set(u => u.MnemonicList, mnemonics)
+                            .Set(u => u.UnitList, units)
+                            .Set(u => u.Data, dc.Data));
                 })
                 .ToList());
         }
@@ -56,7 +100,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 indexChannel = record.Indices.First();
                 var increasing = indexChannel.Increasing;
 
-                double index = GetIndexValue(record);
+                double index = record.GetIndexValue();
 
                 if (!plannedRange.HasValue)
                 {
@@ -108,69 +152,20 @@ namespace PDS.Witsml.Server.Data.Channels
             }
         }
 
-        private static double GetIndexValue(IChannelDataRecord channelDataRecord)
-        {
-            var indexChannel = channelDataRecord.Indices.First();
-            var increasing = indexChannel.Increasing;
-
-            return indexChannel.IsTimeIndex
-                ? channelDataRecord.GetUnixTimeSeconds(0)
-                : channelDataRecord.GetDouble(0);
-        }
-
-        public void Merge(ChannelDataReader reader)
-        {
-            //reader.GetIndexRange(int i = 0);
-            var indexChannel = reader.Indices.First();
-            var increasing = indexChannel.Increasing;
-
-            // Get the full range of the reader.  
-            //... This is the range that we need to select existing ChannelDataChunks from the database to update
-            var updateRange = reader.GetIndexRange();
-
-            // Get DataChannelChunk list from database for the computed range and Uid
-            var filter = BuildDataFilter(reader.Uid, reader.GetName(0), updateRange, increasing);
-            var results = GetData(filter, increasing);
-
-            if (reader.RecordsAffected > 0)
-            {
-                BulkWriteChunks(
-                    ToChunks(
-                        MergeSequence(ToEnumerable(results), reader.AsEnumerable())),
-                    reader.Uid,
-                    reader.Mnemonics,
-                    reader.Units);
-            }
-        }
-
-        private IEnumerable<IChannelDataRecord> ToEnumerable(List<ChannelDataChunk> channelDataChunks)
-        {
-            // TODO: Handle if channelDataChunks is empty
-            foreach (var chunk in channelDataChunks)
-            {
-                var enumChunk = chunk.GetReader().AsEnumerable();
-
-                foreach(var channelDataRecord in enumChunk)
-                {
-                    yield return channelDataRecord;
-                }
-            }
-        }
-
         /// <summary>
-        /// Merges two sequences of log data to update a log data value "chunk"
+        /// Merges two sequences of channel data to update a channel data value "chunk"
         /// </summary>
-        /// <param name="existingLogDataSequence">The existing log data sequence.</param>
-        /// <param name="updateLogDataSequence">The update log data sequence.</param>
-        /// <returns>The merged sequence of data</returns>
+        /// <param name="existingChunks">The existing channel data chunks.</param>
+        /// <param name="updatedChunks">The updated channel data chunks.</param>
+        /// <returns>The merged sequence of channel data.</returns>
         private IEnumerable<IChannelDataRecord> MergeSequence(
-            IEnumerable<IChannelDataRecord> existingLogDataSequence,
-            IEnumerable<IChannelDataRecord> updateLogDataSequence)
+            IEnumerable<IChannelDataRecord> existingChunks,
+            IEnumerable<IChannelDataRecord> updatedChunks)
         {
             string id = string.Empty;
 
-            using (var existingEnum = existingLogDataSequence.GetEnumerator())
-            using (var updateEnum = updateLogDataSequence.GetEnumerator())
+            using (var existingEnum = existingChunks.GetEnumerator())
+            using (var updateEnum = updatedChunks.GetEnumerator())
             {
                 var endOfExisting = !existingEnum.MoveNext();
                 var endOfUpdate = !updateEnum.MoveNext();
@@ -180,8 +175,8 @@ namespace PDS.Witsml.Server.Data.Channels
                     id = endOfExisting ? string.Empty : existingEnum.Current.Id;
 
                     if (!endOfExisting && (endOfUpdate || ExistingBefore(
-                                                            GetIndexValue(existingEnum.Current), 
-                                                            GetIndexValue(updateEnum.Current), 
+                                                            existingEnum.Current.GetIndexValue(),
+                                                            updateEnum.Current.GetIndexValue(), 
                                                             existingEnum.Current.Indices.First().Increasing)))
                     {
                         yield return existingEnum.Current;
@@ -191,10 +186,12 @@ namespace PDS.Witsml.Server.Data.Channels
                     {
                         updateEnum.Current.Id = id;
                         yield return updateEnum.Current;
-                        if (!endOfExisting && GetIndexValue(existingEnum.Current) == GetIndexValue(updateEnum.Current))
+
+                        if (!endOfExisting && existingEnum.Current.GetIndexValue() == updateEnum.Current.GetIndexValue())
                         {
                             endOfExisting = !existingEnum.MoveNext();
                         }
+
                         endOfUpdate = !updateEnum.MoveNext();
                     }
                 }
@@ -240,34 +237,36 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <summary>
         /// Builds the data filter for the database query.
         /// </summary>
-        /// <param name="uid">The uid of the log.</param>
+        /// <param name="uid">The uid of the data object.</param>
         /// <param name="indexCurve">The index curve mnemonic.</param>
         /// <param name="range">The request range.</param>
-        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <param name="increasing">if set to <c>true</c> the index is increasing.</param>
         /// <returns>The query filter.</returns>
         private FilterDefinition<ChannelDataChunk> BuildDataFilter(string uid, string indexCurve, Range<double> range, bool increasing)
         {
+            var builder = Builders<ChannelDataChunk>.Filter;
             var filters = new List<FilterDefinition<ChannelDataChunk>>();
-            filters.Add(Builders<ChannelDataChunk>.Filter.EqIgnoreCase("Uid", uid));
-
             var rangeFilters = new List<FilterDefinition<ChannelDataChunk>>();
-            var filter = increasing ?
-                Builders<ChannelDataChunk>.Filter.Gte("Indices.End", range.Start) :
-                Builders<ChannelDataChunk>.Filter.Lte("Indices.End", range.Start);
-            rangeFilters.Add(filter);
 
-            filter = increasing ?
-                Builders<ChannelDataChunk>.Filter.Lte("Indices.Start", range.End) :
-                Builders<ChannelDataChunk>.Filter.Gte("Indices.Start", range.End);
-            rangeFilters.Add(filter);
+            filters.Add(builder.EqIgnoreCase("Uid", uid));
+
+            var endFilter = increasing
+                ? builder.Gte("Indices.End", range.Start)
+                : builder.Lte("Indices.End", range.Start);
+            rangeFilters.Add(endFilter);
+
+            var startFilter = increasing
+                ? builder.Lte("Indices.Start", range.End) 
+                : builder.Gte("Indices.Start", range.End);
+            rangeFilters.Add(startFilter);
 
             if (rangeFilters.Count > 0)
-                rangeFilters.Add(Builders<ChannelDataChunk>.Filter.EqIgnoreCase("Indices.Mnemonic", indexCurve));
+                rangeFilters.Add(builder.EqIgnoreCase("Indices.Mnemonic", indexCurve));
 
             if (rangeFilters.Count > 0)
-                filters.Add(Builders<ChannelDataChunk>.Filter.And(rangeFilters));
+                filters.Add(builder.And(rangeFilters));
 
-            return Builders<ChannelDataChunk>.Filter.And(filters);
+            return builder.And(filters);
         }
 
         /// <summary>
