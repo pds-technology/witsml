@@ -5,6 +5,8 @@ namespace PDS.Witsml.Server.Models
 {
     public interface IChannelDataRecord : IDataRecord
     {
+        string Id { get; set; }
+
         string Uid { get; set; }
 
         string[] Mnemonics { get; }

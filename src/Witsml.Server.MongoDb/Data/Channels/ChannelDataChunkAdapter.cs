@@ -33,7 +33,7 @@ namespace PDS.Witsml.Server.Data.Channels
             collection.BulkWrite(chunks
                 .Select(dc =>
                 {
-                    dc.Id = NewUid();
+                    dc.Id = string.IsNullOrEmpty(dc.Id) ? NewUid() : dc.Id;
                     dc.Uid = uid;
                     dc.MnemonicList = string.Join(",", mnemonics);
                     dc.UnitList = string.Join(",", units);
@@ -45,7 +45,7 @@ namespace PDS.Witsml.Server.Data.Channels
         private IEnumerable<ChannelDataChunk> ToChunks(IEnumerable<IChannelDataRecord> records)
         {
             var data = new List<string>();
-            var uid = string.Empty;
+            var id = string.Empty;
             ChannelIndexInfo indexChannel = null;
             Range<int>? plannedRange = null;
             double startIndex = 0;
@@ -61,13 +61,13 @@ namespace PDS.Witsml.Server.Data.Channels
                 if (!plannedRange.HasValue)
                 {
                     plannedRange = ComputeRange(index, ChannelDataReader.RangeSize, increasing);
-                    uid = record.Uid;
+                    id = record.Id;
                     startIndex = index;
                 }
 
                 if (WithinRange(index, plannedRange.Value.End, increasing, false))
                 {
-                    uid = string.IsNullOrEmpty(uid) ? record.Uid : uid;
+                    id = string.IsNullOrEmpty(id) ? record.Id : id;
                     data.Add(record.GetJson());
                     endIndex = index;
                 }
@@ -79,6 +79,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
                     yield return new ChannelDataChunk()
                     {
+                        Id = id,
                         Data = "[" + String.Join(",", data) + "]",
                         Indices = new List<ChannelIndexInfo> { newIndex }
                     };
@@ -88,7 +89,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     data.Add(record.GetJson());
                     startIndex = index;
                     endIndex = index;
-                    uid = record.Uid;
+                    id = record.Id;
                 }
             }
 
@@ -100,6 +101,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
                 yield return new ChannelDataChunk()
                 {
+                    Id = id,
                     Data = "[" + String.Join(",", data) + "]",
                     Indices = new List<ChannelIndexInfo> { newIndex }
                 };
@@ -130,17 +132,28 @@ namespace PDS.Witsml.Server.Data.Channels
             var filter = BuildDataFilter(reader.Uid, reader.GetName(0), updateRange, increasing);
             var results = GetData(filter, increasing);
 
-            // TODO: Modify to handle multiple ChannelDataChunks
-            var existingDataReader = results.First().GetReader();
-
             if (reader.RecordsAffected > 0)
             {
                 BulkWriteChunks(
                     ToChunks(
-                        MergeSequence(existingDataReader.AsEnumerable(), reader.AsEnumerable())), 
-                    reader.Uid, 
-                    reader.Mnemonics, 
+                        MergeSequence(ToEnumerable(results), reader.AsEnumerable())),
+                    reader.Uid,
+                    reader.Mnemonics,
                     reader.Units);
+            }
+        }
+
+        private IEnumerable<IChannelDataRecord> ToEnumerable(List<ChannelDataChunk> channelDataChunks)
+        {
+            // TODO: Handle if channelDataChunks is empty
+            foreach (var chunk in channelDataChunks)
+            {
+                var enumChunk = chunk.GetReader().AsEnumerable();
+
+                foreach(var channelDataRecord in enumChunk)
+                {
+                    yield return channelDataRecord;
+                }
             }
         }
 
@@ -154,7 +167,7 @@ namespace PDS.Witsml.Server.Data.Channels
             IEnumerable<IChannelDataRecord> existingLogDataSequence,
             IEnumerable<IChannelDataRecord> updateLogDataSequence)
         {
-            string uid = string.Empty;
+            string id = string.Empty;
 
             using (var existingEnum = existingLogDataSequence.GetEnumerator())
             using (var updateEnum = updateLogDataSequence.GetEnumerator())
@@ -164,16 +177,19 @@ namespace PDS.Witsml.Server.Data.Channels
 
                 while (!(endOfExisting && endOfUpdate))
                 {
-                    uid = endOfExisting ? string.Empty : existingEnum.Current.Uid;
+                    id = endOfExisting ? string.Empty : existingEnum.Current.Id;
 
-                    if (!endOfExisting && (endOfUpdate || GetIndexValue(existingEnum.Current) < GetIndexValue(updateEnum.Current)))
+                    if (!endOfExisting && (endOfUpdate || ExistingBefore(
+                                                            GetIndexValue(existingEnum.Current), 
+                                                            GetIndexValue(updateEnum.Current), 
+                                                            existingEnum.Current.Indices.First().Increasing)))
                     {
                         yield return existingEnum.Current;
                         endOfExisting = !existingEnum.MoveNext();
                     }
                     else
                     {
-                        updateEnum.Current.Uid = uid;
+                        updateEnum.Current.Id = id;
                         yield return updateEnum.Current;
                         if (!endOfExisting && GetIndexValue(existingEnum.Current) == GetIndexValue(updateEnum.Current))
                         {
@@ -183,6 +199,13 @@ namespace PDS.Witsml.Server.Data.Channels
                     }
                 }
             }
+        }
+
+        private bool ExistingBefore(double existingValue, double updateValue, bool increasing)
+        {
+            return increasing
+                ? existingValue < updateValue
+                : existingValue >= updateValue;
         }
 
         /// <summary>
