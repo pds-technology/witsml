@@ -25,7 +25,7 @@ namespace PDS.Witsml.Server.Models
         {
         }
 
-        internal ChannelDataReader(string data, string[] mnemonics = null, string[] units = null, string uid = null)
+        internal ChannelDataReader(string data, string[] mnemonics = null, string[] units = null, string uid = null, string id = null)
         {
             _records = Deserialize(data);
             _count = GetRowValues(0).Count();
@@ -35,11 +35,14 @@ namespace PDS.Witsml.Server.Models
             Mnemonics = mnemonics ?? Empty;
             Units = units ?? Empty;
             Uid = uid;
+            Id = id;
         }
 
         public string[] Mnemonics { get; private set; }
 
         public string[] Units { get; private set; }
+
+        public string Id { get; set; }
 
         public string Uid { get; set; }
 
