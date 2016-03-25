@@ -122,8 +122,9 @@ namespace PDS.Witsml.Server.Data.Channels
             var indexChannel = reader.Indices.First();
             var increasing = indexChannel.Increasing;
 
-            // TODO: Replace hard code of range
-            var updateRange = ComputeRange(1, ChannelDataReader.RangeSize, increasing);
+            // Get the full range of the reader.  
+            //... This is the range that we need to select existing ChannelDataChunks from the database to update
+            var updateRange = reader.GetIndexRange();
 
             // Get DataChannelChunk list from database for the computed range and Uid
             var filter = BuildDataFilter(reader.Uid, reader.GetName(0), updateRange, increasing);
@@ -221,7 +222,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="range">The request range.</param>
         /// <param name="increasing">if set to <c>true</c> [increasing].</param>
         /// <returns>The query filter.</returns>
-        private FilterDefinition<ChannelDataChunk> BuildDataFilter(string uid, string indexCurve, Range<int> range, bool increasing)
+        private FilterDefinition<ChannelDataChunk> BuildDataFilter(string uid, string indexCurve, Range<double> range, bool increasing)
         {
             var filters = new List<FilterDefinition<ChannelDataChunk>>();
             filters.Add(Builders<ChannelDataChunk>.Filter.EqIgnoreCase("Uid", uid));
