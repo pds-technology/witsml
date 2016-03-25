@@ -20,8 +20,8 @@ namespace PDS.Witsml.Server.Models
         private int _count;
         private int _current = -1;
 
-        internal ChannelDataReader(IList<string> data, string[] mnemonics = null, string[] units = null, string uid = null) 
-            : this(Combine(data), mnemonics, units, uid)
+        internal ChannelDataReader(IList<string> data, string[] mnemonics = null, string[] units = null, string uid = null, string id = null) 
+            : this(Combine(data), mnemonics, units, uid, id)
         {
         }
 
@@ -91,6 +91,15 @@ namespace PDS.Witsml.Server.Models
         public void Dispose()
         {
             Close();
+        }
+
+        public double GetIndexValue(int index = 0)
+        {
+            var channelIndex = Indices.Skip(index).FirstOrDefault();
+
+            return channelIndex.IsTimeIndex
+                ? GetUnixTimeSeconds(index)
+                : GetDouble(index);
         }
 
         public Range<double> GetIndexRange(int index = 0)

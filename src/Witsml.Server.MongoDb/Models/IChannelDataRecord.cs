@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Models
 {
@@ -15,7 +17,13 @@ namespace PDS.Witsml.Server.Models
 
         List<ChannelIndexInfo> Indices { get; }
 
+        Range<double> GetIndexRange(int index = 0);
+
+        double GetIndexValue(int index = 0);
+
         long GetUnixTimeSeconds(int i);
+
+        DateTimeOffset GetDateTimeOffset(int i);
 
         string GetJson();
     }

@@ -63,15 +63,12 @@ namespace PDS.Witsml.Server.Data.Channels
 
                 Validate(Functions.PutObject, entity);
 
-                // Get Reader 
-                var reader = entity.GetReader();
-
-                // Clear Data
-                ClearData(entity);
+                // Extract Data
+                var reader = ExtractDataReader(entity);
 
                 UpdateEntity(entity, dataObjectId);
 
-                // Merge ChannelDataValues
+                // Merge ChannelDataChunks
                 _channelDataChunkAdapter.Merge(reader);
             }
             else
@@ -81,27 +78,28 @@ namespace PDS.Witsml.Server.Data.Channels
 
                 Validate(Functions.PutObject, entity);
 
-                // Get Reader 
-                var reader = entity.GetReader();
-
-                // Clear Data
-                ClearData(entity);
+                // Extract Data
+                var reader = ExtractDataReader(entity);
 
                 InsertEntity(entity);
 
-                // Add ChannelDataChunk
+                // Add ChannelDataChunks
                 _channelDataChunkAdapter.Add(reader);
             }
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uuid);
         }
 
-        private void ClearData(ChannelSet entity)
+        private ChannelDataReader ExtractDataReader(ChannelSet entity)
         {
+            var reader = entity.GetReader();
+
             if (entity.Data != null)
             {
                 entity.Data.Data = null;
             }
+
+            return reader;
         }
     }
 }
