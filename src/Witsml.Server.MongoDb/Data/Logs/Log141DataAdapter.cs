@@ -86,7 +86,11 @@ namespace PDS.Witsml.Server.Data.Logs
                 // TODO: For Header Only just ignore "logData" which is already being done.
                 : OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) ? GetLogHeaderFields()
                 : OptionsIn.ReturnElements.DataOnly.Equals(returnElements) ? new List<string> { IdPropertyName, "UidWell", "UidWellbore", "LogCurveInfo" }
+                : OptionsIn.ReturnElements.Requested.Equals(returnElements) ? new List<string>()
                 : null;
+
+            if (fields != null && !fields.Contains("indexType"))
+                fields.Add("IndexType");
 
             var ignored = new List<string> { "startIndex", "endIndex", "startDateTimeIndex", "endDateTimeIndex", "logData" };
             var logs = QueryEntities(parser, fields, ignored);
