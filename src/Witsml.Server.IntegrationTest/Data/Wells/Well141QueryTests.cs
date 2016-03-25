@@ -259,6 +259,43 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
+        public void Test_Well_query_by_dTimLicense_with_custom_timestamp()
+        {
+            var timeStr = "2001-05-15T13:20:00.0000000+00:00";
+            string inputXml = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                "<well>" + Environment.NewLine +
+                "<name>PDS Full Test Well</name>" + Environment.NewLine +
+                "<dTimLicense>" + timeStr + "</dTimLicense>" + Environment.NewLine +
+                "<timeZone>-06:00</timeZone>" + Environment.NewLine +
+                "</well>" + Environment.NewLine +
+                "</wells>";
+
+            WellList wells = EnergisticsConverter.XmlToObject<WellList>(inputXml);
+            var well = wells.Items[0] as Well;
+            var response = DevKit.Add<WellList, Well>(well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uid = response.SuppMsgOut;
+            var query = new Well { Uid = uid };
+            var queryIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                "<well uid=\"" + uid + "\" >" + Environment.NewLine +
+                "<name>PDS Full Test Well</name>" + Environment.NewLine +
+                "<dTimLicense>" + timeStr + "</dTimLicense>" + Environment.NewLine +
+                "</well>" + Environment.NewLine +
+                "</wells>";
+            var result = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, null);
+            var results = EnergisticsConverter.XmlToObject<WellList>(result.XMLout).Well;
+
+            Assert.AreEqual(1, results.Count);
+            var returnWell = results.FirstOrDefault();
+
+            Assert.IsNotNull(returnWell);
+            Assert.AreEqual(timeStr, returnWell.DateTimeLicense.Value.ToString());
+        }
+
+        [TestMethod]
         public void Test_Well_Selection_Uid_Caseless_Compare()
         {
             var testUid = "test well for Test_Well_Selection_Uid_Caseless_Compare" + DevKit.Uid();
