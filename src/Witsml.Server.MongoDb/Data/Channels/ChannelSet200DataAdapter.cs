@@ -67,8 +67,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 // Extract Data
                 var reader = ExtractDataReader(entity);
 
-                // TODO: wait for selective update to be implemented
-                //UpdateEntity(entity, dataObjectId);
+                UpdateEntity(entity, dataObjectId);
 
                 // Merge ChannelDataChunks
                 _channelDataChunkAdapter.Merge(reader);
@@ -92,14 +91,26 @@ namespace PDS.Witsml.Server.Data.Channels
             return new WitsmlResult(ErrorCodes.Success, entity.Uuid);
         }
 
-        private ChannelDataReader ExtractDataReader(ChannelSet entity)
+        private ChannelDataReader ExtractDataReader(ChannelSet entity, ChannelSet existing = null)
         {
-            var reader = entity.GetReader();
+            // TODO: Handle: if (!string.IsNullOrEmpty(entity.Data.FileUri))
+            // return null;
 
-            if (entity.Data != null)
+            ChannelDataReader reader = null;
+
+            if (existing == null)
             {
-                entity.Data.Data = null;
+                reader = entity.GetReader();
+                entity.Data = null;
+                return reader;
             }
+
+            var channelData = existing.Data;
+            existing.Data = entity.Data;
+            entity.Data = null;
+
+            reader = existing.GetReader();
+            existing.Data = channelData;
 
             return reader;
         }

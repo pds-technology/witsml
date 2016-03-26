@@ -29,7 +29,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
         public void Add(ChannelDataReader reader)
         {
-            if (reader.RecordsAffected <= 0)
+            if (reader == null || reader.RecordsAffected <= 0)
                 return;
 
             BulkWriteChunks(
@@ -42,7 +42,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
         public void Merge(ChannelDataReader reader)
         {
-            if (reader.RecordsAffected <= 0)
+            if (reader == null || reader.RecordsAffected <= 0)
                 return;
 
             //reader.GetIndexRange(int i = 0);
