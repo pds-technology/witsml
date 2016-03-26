@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using Caliburn.Micro;
 using ICSharpCode.AvalonEdit.Document;
@@ -25,6 +26,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             Runtime = runtime;
             DisplayName = "Query";
 
+            _model = new Models.QuerySettings();
+
             XmlQuery = new TextEditorViewModel(runtime, "XML")
             {
                 Document = xmlQuery
@@ -50,15 +53,25 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             get { return (MainViewModel)Parent.Parent; }
         }
 
+        private Models.QuerySettings _model;
+
         /// <summary>
         /// Gets the data model.
         /// </summary>
         /// <value>
         /// The WitsmlSettings data model.
         /// </value>
-        public Models.WitsmlSettings Model
+        public Models.QuerySettings Model
         {
-            get { return Parent.Model; }
+            get { return _model; }
+            set
+            {
+                if (!ReferenceEquals(_model, value))
+                {
+                    _model = value;
+                    NotifyOfPropertyChange(() => Model);
+                }
+            }
         }
 
         /// <summary>
@@ -87,14 +100,24 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         }
 
         /// <summary>
+        /// Gets the store functions that can be executed.
+        /// </summary>
+        /// <value>
+        /// The executable store functions.
+        /// </value>
+        public IEnumerable<Functions> StoreFunctions
+        {
+            get { return new Functions[] { Functions.AddToStore, Functions.GetFromStore, Functions.UpdateInStore, Functions.DeleteFromStore }; }
+        }
+
+        /// <summary>
         /// Submits a query to the WITSML server for the given function type.
         /// </summary>
-        /// <param name="functionText">The function type text.</param>
-        public void SubmitQuery(string functionText)
+        public void SubmitQuery()
         {
-            _log.DebugFormat("Submitting a query for '{0}'", functionText);
+            _log.DebugFormat("Submitting a query for '{0}'", Model.StoreFunction);
 
-            MainViewModel.SubmitQuery((Functions)Enum.Parse(typeof(Functions), functionText));
+            MainViewModel.SubmitQuery(Model.StoreFunction);
         }
 
         /// <summary>
