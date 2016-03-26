@@ -6,26 +6,23 @@ using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PDS.Framework;
-using PDS.Witsml.Server.MongoDb;
 
-namespace PDS.Witsml.Server.Models
+namespace PDS.Witsml.Data.Channels
 {
     public class ChannelDataReader : IDataReader, IChannelDataRecord
     {
-        internal static int RangeSize = Settings.Default.LogIndexRangeSize;
-
         private static readonly string[] Empty = new string[0];
         private List<List<List<object>>> _records;
         private int _indexCount;
         private int _count;
         private int _current = -1;
 
-        internal ChannelDataReader(IList<string> data, string[] mnemonics = null, string[] units = null, string uid = null, string id = null) 
+        public ChannelDataReader(IList<string> data, string[] mnemonics = null, string[] units = null, string uid = null, string id = null) 
             : this(Combine(data), mnemonics, units, uid, id)
         {
         }
 
-        internal ChannelDataReader(string data, string[] mnemonics = null, string[] units = null, string uid = null, string id = null)
+        public ChannelDataReader(string data, string[] mnemonics = null, string[] units = null, string uid = null, string id = null)
         {
             _records = Deserialize(data);
             _count = GetRowValues(0).Count();
@@ -82,6 +79,11 @@ namespace PDS.Witsml.Server.Models
             get { return _records.Count; }
         }
 
+        public static string[] Split(string value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? Empty : value.Split(',');
+        }
+
         public void Close()
         {
             _records = null;
@@ -93,34 +95,31 @@ namespace PDS.Witsml.Server.Models
             Close();
         }
 
+        public ChannelIndexInfo GetIndex(int index = 0)
+        {
+            return Indices.Skip(index).FirstOrDefault();
+        }
+
         public double GetIndexValue(int index = 0)
         {
-            var channelIndex = Indices.Skip(index).FirstOrDefault();
+            var channelIndex = GetIndex(index);
 
             return channelIndex.IsTimeIndex
                 ? GetUnixTimeSeconds(index)
                 : GetDouble(index);
         }
 
-        public Range<double> GetIndexRange(int index = 0)
+        public Range<double?> GetIndexRange(int index = 0)
         {
-            var channelIndex = Indices.Skip(index).FirstOrDefault();
+            var channelIndex = GetIndex(index);
+
+            if (channelIndex == null)
+                return new Range<double?>(null, null);
+
             var start = GetIndexValues(0).Skip(index).FirstOrDefault();
             var end = GetIndexValues(RecordsAffected - 1).Skip(index).FirstOrDefault();
 
-            if (channelIndex == null || start == null || end == null)
-                return new Range<double>(double.NaN, double.NaN);
-
-            if (channelIndex.IsTimeIndex)
-            {
-                return new Range<double>(
-                    start: DateTimeOffset.Parse(start.ToString()).ToUnixTimeSeconds(),
-                    end: DateTimeOffset.Parse(end.ToString()).ToUnixTimeSeconds());
-            }
-
-            return new Range<double>(
-                start: double.Parse(start.ToString()),
-                end: double.Parse(end.ToString()));
+            return Range.Parse(start, end, channelIndex.IsTimeIndex);
         }
 
         public bool GetBoolean(int i)
@@ -336,7 +335,7 @@ namespace PDS.Witsml.Server.Models
             return JsonConvert.DeserializeObject<List<List<List<object>>>>(data);
         }
 
-        internal static string Combine(IList<string> data)
+        private static string Combine(IList<string> data)
         {
             var json = new StringBuilder("[");
             var rows = new List<string>();
@@ -354,11 +353,6 @@ namespace PDS.Witsml.Server.Models
             json.Append("]");
 
             return json.ToString();
-        }
-
-        internal static string[] Split(string value)
-        {
-            return string.IsNullOrWhiteSpace(value) ? Empty : value.Split(',');
         }
     }
 }

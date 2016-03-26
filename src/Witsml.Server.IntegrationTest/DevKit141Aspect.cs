@@ -68,9 +68,9 @@ namespace PDS.Witsml.Server
 
         public void InitDataMany(Log log, string mnemonics, string units, int numRows, double factor = 1.0, bool isDepthLog = true, bool hasEmptyChannel = true, bool increasing = true)
         {
-            var start = DateTimeOffset.UtcNow.AddDays(-1);
-            var interval = increasing ? 1 : -1;
             var depthStart = log.StartIndex != null ? log.StartIndex.Value : 0;
+            var timeStart = DateTimeOffset.UtcNow.AddDays(-1);
+            var interval = increasing ? 1 : -1;
 
             for (int i = 0; i < numRows; i++)
             {
@@ -80,7 +80,7 @@ namespace PDS.Witsml.Server
                 }
                 else
                 {
-                    InitData(log, mnemonics, units, start.AddSeconds(i).ToString(), hasEmptyChannel ? (int?)null : i, i * factor);
+                    InitData(log, mnemonics, units, timeStart.AddSeconds(i).ToString("o"), hasEmptyChannel ? (int?)null : i, i * factor);
                 }
             }
         }

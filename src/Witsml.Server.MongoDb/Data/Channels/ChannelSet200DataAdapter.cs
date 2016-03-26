@@ -3,6 +3,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
+using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Models;
 
 namespace PDS.Witsml.Server.Data.Channels
@@ -66,7 +67,8 @@ namespace PDS.Witsml.Server.Data.Channels
                 // Extract Data
                 var reader = ExtractDataReader(entity);
 
-                UpdateEntity(entity, dataObjectId);
+                // TODO: wait for selective update to be implemented
+                //UpdateEntity(entity, dataObjectId);
 
                 // Merge ChannelDataChunks
                 _channelDataChunkAdapter.Merge(reader);

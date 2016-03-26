@@ -66,6 +66,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Data\Channels\ChannelDataReaderTests.cs" />
     <Compile Include="Data\Logs\Log141GeneratorTests.cs" />
     <Compile Include="Data\Logs\Log200GeneratorTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

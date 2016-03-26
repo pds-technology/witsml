@@ -181,7 +181,7 @@ namespace PDS.Witsml.Server
             var query = DevKit.Query<LogList>();
             query.Log = DevKit.One<Log>(x => x.Uid = Log1.Uid);
 
-            var result = DevKit.Proxy.Read(query, OptionsIn.ReturnElements.HeaderOnly);
+            var result = DevKit.Proxy.Read(query, OptionsIn.ReturnElements.All);
 
             Assert.IsNotNull(result.Log);
             Assert.AreEqual(1, result.Log.Count);
@@ -213,7 +213,7 @@ namespace PDS.Witsml.Server
                 x.Name = Log1.Name;
             });
 
-            var result = DevKit.Proxy.Read(query, OptionsIn.ReturnElements.HeaderOnly);
+            var result = DevKit.Proxy.Read(query, OptionsIn.ReturnElements.All);
 
             Assert.IsNotNull(result.Log);
             Assert.AreEqual(1, result.Log.Count);
@@ -236,22 +236,19 @@ namespace PDS.Witsml.Server
             DevKit.Proxy.Write(DevKit.New<LogList>(x => x.Log = DevKit.List(Log1)));
 
             // Update Log with new LogData
-            var log1 = new Log() { Uid = Log1.Uid };
+            var log1 = new Log() { Uid = Log1.Uid, UidWell = Log1.UidWell, UidWellbore = Log1.UidWellbore };
             DevKit.InitData(log1, DevKit.Mnemonics(Log1), DevKit.Units(Log1), 0, null, 0);
             DevKit.Proxy.Update(DevKit.New<LogList>(x => x.Log = DevKit.List(log1)));
 
             // Get Log by Uid
             var query = DevKit.Query<LogList>();
-            query.Log = DevKit.One<Log>(x => x.Uid = Log1.Uid);
+            query.Log = DevKit.One<Log>(x => { x.Uid = Log1.Uid; x.UidWell = Log1.UidWell; x.UidWellbore = Log1.UidWellbore; });
 
             var result = DevKit.Proxy.Read(query, OptionsIn.ReturnElements.All);
 
             Assert.IsNotNull(result.Log);
             Assert.AreEqual(1, result.Log.Count);
             Assert.IsNotNull(result.Log.SingleOrDefault(x => x.Uid == Log1.Uid));
-
-            Assert.IsNotNull(result.Log[0].LogData);
-            Assert.AreEqual(1, result.Log[0].LogData.Count);
 
             Assert.IsNotNull(result.Log[0].LogData);
             Assert.AreEqual(1, result.Log[0].LogData.Count);
@@ -271,28 +268,25 @@ namespace PDS.Witsml.Server
             DevKit.Proxy.Write(DevKit.New<LogList>(x => x.Log = DevKit.List(Log1)));
 
             // Update Log with new LogData
-            var log1 = new Log() { Uid = Log1.Uid };
+            var log1 = new Log() { Uid = Log1.Uid, UidWell = Log1.UidWell, UidWellbore = Log1.UidWellbore };
             DevKit.InitData(log1, DevKit.Mnemonics(Log1), DevKit.Units(Log1), 0, null, 0);
             DevKit.Proxy.Update(DevKit.New<LogList>(x => x.Log = DevKit.List(log1)));
 
             // Update Log with appended LogData
-            var log2 = new Log() { Uid = Log1.Uid };
+            var log2 = new Log() { Uid = Log1.Uid, UidWell = Log1.UidWell, UidWellbore = Log1.UidWellbore };
             DevKit.InitData(log2, DevKit.Mnemonics(Log1), DevKit.Units(Log1), 0.1, null, 1);
             DevKit.InitData(log2, DevKit.Mnemonics(Log1), DevKit.Units(Log1), 0.2, null, 2);
             DevKit.Proxy.Update(DevKit.New<LogList>(x => x.Log = DevKit.List(log2)));
 
             // Get Log by Uid
             var query = DevKit.Query<LogList>();
-            query.Log = DevKit.One<Log>(x => x.Uid = Log1.Uid);
+            query.Log = DevKit.One<Log>(x => { x.Uid = Log1.Uid; x.UidWell = Log1.UidWell; x.UidWellbore = Log1.UidWellbore; });
 
             var result = DevKit.Proxy.Read(query, OptionsIn.ReturnElements.All);
 
             Assert.IsNotNull(result.Log);
             Assert.AreEqual(1, result.Log.Count);
             Assert.IsNotNull(result.Log.SingleOrDefault(x => x.Uid == Log1.Uid));
-
-            Assert.IsNotNull(result.Log[0].LogData);
-            Assert.AreEqual(1, result.Log[0].LogData.Count);
 
             Assert.IsNotNull(result.Log[0].LogData);
             Assert.AreEqual(3, result.Log[0].LogData.Count);
@@ -314,28 +308,25 @@ namespace PDS.Witsml.Server
             DevKit.Proxy.Write(DevKit.New<LogList>(x => x.Log = DevKit.List(Log1)));
 
             // Update Log with new LogData
-            var log1 = new Log() { Uid = Log1.Uid };
+            var log1 = new Log() { Uid = Log1.Uid, UidWell = Log1.UidWell, UidWellbore = Log1.UidWellbore };
             DevKit.InitData(log1, DevKit.Mnemonics(Log1), DevKit.Units(Log1), 0, null, 0);
             DevKit.InitData(log1, DevKit.Mnemonics(Log1), DevKit.Units(Log1), 0.1, null, 1);
             DevKit.Proxy.Update(DevKit.New<LogList>(x => x.Log = DevKit.List(log1)));
 
             // Update Log with updated LogData
-            var log2 = new Log() { Uid = Log1.Uid };
+            var log2 = new Log() { Uid = Log1.Uid, UidWell = Log1.UidWell, UidWellbore = Log1.UidWellbore };
             DevKit.InitData(log2, DevKit.Mnemonics(Log1), DevKit.Units(Log1), 0.1, 10, 1.1);
             DevKit.Proxy.Update(DevKit.New<LogList>(x => x.Log = DevKit.List(log2)));
 
             // Get Log by Uid
             var query = DevKit.Query<LogList>();
-            query.Log = DevKit.One<Log>(x => x.Uid = Log1.Uid);
+            query.Log = DevKit.One<Log>(x => { x.Uid = Log1.Uid; x.UidWell = Log1.UidWell; x.UidWellbore = Log1.UidWellbore; });
 
             var result = DevKit.Proxy.Read(query, OptionsIn.ReturnElements.All);
 
             Assert.IsNotNull(result.Log);
             Assert.AreEqual(1, result.Log.Count);
             Assert.IsNotNull(result.Log.SingleOrDefault(x => x.Uid == Log1.Uid));
-
-            Assert.IsNotNull(result.Log[0].LogData);
-            Assert.AreEqual(1, result.Log[0].LogData.Count);
 
             Assert.IsNotNull(result.Log[0].LogData);
             Assert.AreEqual(2, result.Log[0].LogData.Count);
@@ -356,10 +347,9 @@ namespace PDS.Witsml.Server
             DevKit.Proxy.Write(DevKit.New<LogList>(x => x.Log = DevKit.List(Log1)));
 
             // Update Log with new LogData
-            var log1 = new Log() { Uid = Log1.Uid };
+            var log1 = new Log() { Uid = Log1.Uid, UidWell = Log1.UidWell, UidWellbore = Log1.UidWellbore };
             DevKit.InitDataMany(log1, DevKit.Mnemonics(Log1), DevKit.Units(Log1), 10);
             DevKit.Proxy.Update(DevKit.New<LogList>(x => x.Log = DevKit.List(log1)));
-
 
             // StartIndex and End Index above range
             LogList result = DevKit.QueryLogByRange(log1, -2, -1);
@@ -424,7 +414,7 @@ namespace PDS.Witsml.Server
             DevKit.Proxy.Write(DevKit.New<LogList>(x => x.Log = DevKit.List(Log1)));
 
             // Update Log with new LogData
-            var log1 = new Log() { Uid = Log1.Uid };
+            var log1 = new Log() { Uid = Log1.Uid, UidWell = Log1.UidWell, UidWellbore = Log1.UidWellbore };
             DevKit.InitDataMany(log1, DevKit.Mnemonics(Log1), DevKit.Units(Log1), 10);
             DevKit.Proxy.Update(DevKit.New<LogList>(x => x.Log = DevKit.List(log1)));
 
@@ -485,7 +475,7 @@ namespace PDS.Witsml.Server
             DevKit.Proxy.Write(DevKit.New<LogList>(x => x.Log = DevKit.List(Log1)));
 
             // Update Log with new LogData
-            var log1 = new Log() { Uid = Log1.Uid };
+            var log1 = new Log() { Uid = Log1.Uid, UidWell = Log1.UidWell, UidWellbore = Log1.UidWellbore };
             DevKit.InitDataMany(log1, DevKit.Mnemonics(Log1), DevKit.Units(Log1), 10);
             DevKit.Proxy.Update(DevKit.New<LogList>(x => x.Log = DevKit.List(log1)));
 
@@ -561,16 +551,13 @@ namespace PDS.Witsml.Server
 
             // Get Log by Uid
             var query = DevKit.Query<LogList>();
-            query.Log = DevKit.One<Log>(x => x.Uid = Log1.Uid);
+            query.Log = DevKit.One<Log>(x => { x.Uid = Log1.Uid; x.UidWell = Log1.UidWell; x.UidWellbore = Log1.UidWellbore; });
 
             var result = DevKit.Proxy.Read(query, OptionsIn.ReturnElements.All);
 
             Assert.IsNotNull(result.Log);
             Assert.AreEqual(1, result.Log.Count);
             Assert.IsNotNull(result.Log.SingleOrDefault(x => x.Uid == Log1.Uid));
-
-            Assert.IsNotNull(result.Log[0].LogData);
-            Assert.AreEqual(1, result.Log[0].LogData.Count);
 
             Assert.IsNotNull(result.Log[0].LogData);
             Assert.AreEqual(dataRowsAdded, result.Log[0].LogData.Count);
@@ -580,6 +567,5 @@ namespace PDS.Witsml.Server
             Assert.AreEqual(firstFactor.Count, firstFactor.Except(secondFactor).Count());
             CollectionAssert.AreNotEqual(firstFactor, secondFactor);
         }
-
     }
 }
