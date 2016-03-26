@@ -459,7 +459,8 @@ namespace PDS.Witsml.Server.Data
             if (_fields.Count == 0)
             {
                 Logger.Warn("No fields projected.  Projection field count should never be zero.");
-                return Builders<T>.Projection.Include(string.Empty);
+                var requested = OptionsIn.ReturnElements.Requested.Equals(_parser.ReturnElements());
+                return requested ? Builders<T>.Projection.Include(string.Empty) : null;
             }
             else
             {

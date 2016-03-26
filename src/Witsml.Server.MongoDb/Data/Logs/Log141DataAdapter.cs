@@ -84,13 +84,11 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var fields = OptionsIn.ReturnElements.IdOnly.Equals(returnElements)
                 ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell", "UidWellbore", "NameWellbore" }
-                // TODO: For Header Only just ignore "logData" which is already being done.
-                : OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) ? GetLogHeaderFields()
                 : OptionsIn.ReturnElements.DataOnly.Equals(returnElements) ? new List<string> { IdPropertyName, "UidWell", "UidWellbore", "LogCurveInfo" }
                 : OptionsIn.ReturnElements.Requested.Equals(returnElements) ? new List<string>()
                 : null;
 
-            if (fields != null && !fields.Contains("indexType"))
+            if (fields != null && !fields.Contains("IndexType"))
                 fields.Add("IndexType");
 
             var ignored = new List<string> { "startIndex", "endIndex", "startDateTimeIndex", "endDateTimeIndex", "logData" };
@@ -114,40 +112,6 @@ namespace PDS.Witsml.Server.Data.Logs
                 {
                     Log = logs
                 });
-        }
-
-        private List<string> GetLogHeaderFields()
-        {
-            return new List<string>
-            {
-                "NameWell",
-                "NameWellbore",
-                NamePropertyName,
-                "DataGroup",
-                "ServiceCompany",
-                "RunNumber",
-                "BhaRunNumber",
-                "Pass",
-                "CreationDate",
-                "Description",
-                "DataDelimiter",
-                "IndexType",
-                "StartIndex",
-                "EndIndex",
-                "StepIncrement",
-                "StartDateTimeIndex",
-                "EndDateTimeIndex",
-                "Direction",
-                "IndexCurve",
-                "NullValue",
-                "LogParam",
-                "LogCurveInfo",
-                "CommonData", 
-                "CustomData",
-                "UidWell",
-                "UidWellbore",
-                IdPropertyName
-            };
         }
 
         /// <summary>
