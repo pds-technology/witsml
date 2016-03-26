@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PDS.Witsml.Server.Models
+namespace PDS.Witsml.Data.Channels
 {
     /// <summary>
     /// Encapsulates the index information for unified log data chunk

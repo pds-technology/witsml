@@ -11,6 +11,7 @@ using Energistics.DataAccess.WITSML141.ReferenceData;
 using Energistics.Datatypes;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
+using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Server.Models;
@@ -93,12 +94,13 @@ namespace PDS.Witsml.Server.Data.Logs
             var ignored = new List<string> { "startIndex", "endIndex", "startDateTimeIndex", "endDateTimeIndex", "logData" };
             var logs = QueryEntities(parser, fields, ignored);
 
-            // Only get the LogData returnElements != "header-only" and returnElements != "id-only"
+            // Only get LogData when returnElements != "header-only" and returnElements != "id-only"
             if (!OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) && !OptionsIn.ReturnElements.IdOnly.Equals(returnElements))
             {
                 logs.ForEach(l =>
                 {
                     l.LogData = new List<LogData> { QueryLogDataValues(l, parser) };
+
                     if (OptionsIn.ReturnElements.DataOnly.Equals(returnElements))
                         l.LogCurveInfo.Clear();
                 });

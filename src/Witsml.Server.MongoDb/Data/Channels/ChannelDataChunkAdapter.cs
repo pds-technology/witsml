@@ -4,22 +4,32 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using MongoDB.Driver;
 using PDS.Framework;
+using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Models;
+using PDS.Witsml.Server.MongoDb;
 
 namespace PDS.Witsml.Server.Data.Channels
 {
     [Export]
     public class ChannelDataChunkAdapter : MongoDbDataAdapter<ChannelDataChunk>
     {
+        private static readonly int RangeSize = Settings.Default.LogIndexRangeSize;
+
         [ImportingConstructor]
         public ChannelDataChunkAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectTypes.ChannelDataChunk, ObjectTypes.Id)
         {
 
         }
 
+        public List<ChannelDataChunk> GetData(string uid, string indexCurve, Range<double?> range, bool increasing)
+        {
+            var filter = BuildDataFilter(uid, indexCurve, range, increasing);
+            return GetData(filter, increasing);
+        }
+
         public void Add(ChannelDataReader reader)
         {
-            if (reader.RecordsAffected <= 0)
+            if (reader == null || reader.RecordsAffected <= 0)
                 return;
 
             BulkWriteChunks(
@@ -32,11 +42,11 @@ namespace PDS.Witsml.Server.Data.Channels
 
         public void Merge(ChannelDataReader reader)
         {
-            if (reader.RecordsAffected <= 0)
+            if (reader == null || reader.RecordsAffected <= 0)
                 return;
 
             //reader.GetIndexRange(int i = 0);
-            var indexChannel = reader.Indices.First();
+            var indexChannel = reader.GetIndex();
             var increasing = indexChannel.Increasing;
 
             // Get the full range of the reader.  
@@ -97,18 +107,19 @@ namespace PDS.Witsml.Server.Data.Channels
 
             foreach (var record in records)
             {
-                indexChannel = record.Indices.First();
+                indexChannel = record.GetIndex();
                 var increasing = indexChannel.Increasing;
 
                 double index = record.GetIndexValue();
 
                 if (!plannedRange.HasValue)
                 {
-                    plannedRange = ComputeRange(index, ChannelDataReader.RangeSize, increasing);
+                    plannedRange = ComputeRange(index, RangeSize, increasing);
                     id = record.Id;
                     startIndex = index;
                 }
 
+                // TODO: Can we use this instead? plannedRange.Value.Contains(index, increasing);
                 if (WithinRange(index, plannedRange.Value.End, increasing, false))
                 {
                     id = string.IsNullOrEmpty(id) ? record.Id : id;
@@ -128,7 +139,7 @@ namespace PDS.Witsml.Server.Data.Channels
                         Indices = new List<ChannelIndexInfo> { newIndex }
                     };
 
-                    plannedRange = ComputeRange(index, ChannelDataReader.RangeSize, increasing);
+                    plannedRange = ComputeRange(index, RangeSize, increasing);
                     data = new List<string>();
                     data.Add(record.GetJson());
                     startIndex = index;
@@ -177,7 +188,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     if (!endOfExisting && (endOfUpdate || ExistingBefore(
                                                             existingEnum.Current.GetIndexValue(),
                                                             updateEnum.Current.GetIndexValue(), 
-                                                            existingEnum.Current.Indices.First().Increasing)))
+                                                            existingEnum.Current.GetIndex().Increasing)))
                     {
                         yield return existingEnum.Current;
                         endOfExisting = !existingEnum.MoveNext();
@@ -235,46 +246,11 @@ namespace PDS.Witsml.Server.Data.Channels
         }
 
         /// <summary>
-        /// Builds the data filter for the database query.
+        /// Gets the channel data stored in a unified format.
         /// </summary>
-        /// <param name="uid">The uid of the data object.</param>
-        /// <param name="indexCurve">The index curve mnemonic.</param>
-        /// <param name="range">The request range.</param>
-        /// <param name="increasing">if set to <c>true</c> the index is increasing.</param>
-        /// <returns>The query filter.</returns>
-        private FilterDefinition<ChannelDataChunk> BuildDataFilter(string uid, string indexCurve, Range<double> range, bool increasing)
-        {
-            var builder = Builders<ChannelDataChunk>.Filter;
-            var filters = new List<FilterDefinition<ChannelDataChunk>>();
-            var rangeFilters = new List<FilterDefinition<ChannelDataChunk>>();
-
-            filters.Add(builder.EqIgnoreCase("Uid", uid));
-
-            var endFilter = increasing
-                ? builder.Gte("Indices.End", range.Start)
-                : builder.Lte("Indices.End", range.Start);
-            rangeFilters.Add(endFilter);
-
-            var startFilter = increasing
-                ? builder.Lte("Indices.Start", range.End) 
-                : builder.Gte("Indices.Start", range.End);
-            rangeFilters.Add(startFilter);
-
-            if (rangeFilters.Count > 0)
-                rangeFilters.Add(builder.EqIgnoreCase("Indices.Mnemonic", indexCurve));
-
-            if (rangeFilters.Count > 0)
-                filters.Add(builder.And(rangeFilters));
-
-            return builder.And(filters);
-        }
-
-        /// <summary>
-        /// Gets the log data from channelDataValues collection.
-        /// </summary>
-        /// <param name="filter">The filter.</param>
-        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
-        /// <returns>The list of log data chunks that fit the query criteria sorted by the start index.</returns>
+        /// <param name="filter">The data filter.</param>
+        /// <param name="increasing">if set to <c>true</c> the data will be sorted in ascending order.</param>
+        /// <returns>The list of channel data chunks that fit the query criteria sorted by the primary index.</returns>
         private List<ChannelDataChunk> GetData(FilterDefinition<ChannelDataChunk> filter, bool increasing)
         {
             var collection = GetCollection();
@@ -285,7 +261,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 ? sortBuilder.Ascending(sortField)
                 : sortBuilder.Descending(sortField);
 
-            if (Logger.IsDebugEnabled)
+            if (Logger.IsDebugEnabled && filter != null)
             {
                 var filterJson = filter.Render(collection.DocumentSerializer, collection.Settings.SerializerRegistry);
                 Logger.DebugFormat("Data query filters: {0}", filterJson);
@@ -295,6 +271,47 @@ namespace PDS.Witsml.Server.Data.Channels
                 .Find(filter ?? "{}")
                 .Sort(sort)
                 .ToList();
+        }
+
+        /// <summary>
+        /// Builds the data filter for the database query.
+        /// </summary>
+        /// <param name="uid">The uid of the data object.</param>
+        /// <param name="indexCurve">The index curve mnemonic.</param>
+        /// <param name="range">The request range.</param>
+        /// <param name="increasing">if set to <c>true</c> the index is increasing.</param>
+        /// <returns>The query filter.</returns>
+        private FilterDefinition<ChannelDataChunk> BuildDataFilter(string uid, string indexCurve, Range<double?> range, bool increasing)
+        {
+            var builder = Builders<ChannelDataChunk>.Filter;
+            var filters = new List<FilterDefinition<ChannelDataChunk>>();
+            var rangeFilters = new List<FilterDefinition<ChannelDataChunk>>();
+
+            filters.Add(builder.EqIgnoreCase("Uid", uid));
+
+            if (range.Start.HasValue)
+            {
+                var endFilter = increasing
+                    ? builder.Gte("Indices.End", range.Start.Value)
+                    : builder.Lte("Indices.End", range.Start.Value);
+                rangeFilters.Add(endFilter);
+            }
+
+            if (range.End.HasValue)
+            {
+                var startFilter = increasing
+                    ? builder.Lte("Indices.Start", range.End)
+                    : builder.Gte("Indices.Start", range.End);
+                rangeFilters.Add(startFilter);
+            }
+
+            if (rangeFilters.Count > 0)
+                rangeFilters.Add(builder.EqIgnoreCase("Indices.Mnemonic", indexCurve));
+
+            if (rangeFilters.Count > 0)
+                filters.Add(builder.And(rangeFilters));
+
+            return builder.And(filters);
         }
     }
 }

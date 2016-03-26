@@ -1,25 +1,25 @@
 ﻿using System.Linq;
-using Energistics.DataAccess.WITSML141;
-using Energistics.DataAccess.WITSML141.ComponentSchemas;
-using Energistics.DataAccess.WITSML141.ReferenceData;
+using Energistics.DataAccess.WITSML131;
+using Energistics.DataAccess.WITSML131.ComponentSchemas;
+using Energistics.DataAccess.WITSML131.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
     [TestClass]
-    public class Log141AddTests
+    public class Log131AddTests
     {
-        private DevKit141Aspect DevKit;
+        private DevKit131Aspect DevKit;
         private Well Well;
         private Wellbore Wellbore;
 
         [TestInitialize]
         public void TestSetUp()
         {
-            DevKit = new DevKit141Aspect();
+            DevKit = new DevKit131Aspect();
 
             DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
-                .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
+                .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version131.Value)
                 .ToArray();
 
             Well = new Well { Name = DevKit.Name("Well 01"), TimeZone = DevKit.TimeZone };
@@ -104,7 +104,7 @@ namespace PDS.Witsml.Server.Data.Logs
             };
 
             DevKit.InitHeader(log, LogIndexType.datetime);
-            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10, 1, false);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10, 1, true, false);
 
             response = DevKit.Add<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
@@ -162,10 +162,10 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(1, results.Count);
 
             var result = results.First();
-            var logData = result.LogData.FirstOrDefault();
+            var logData = result.LogData;
 
             Assert.IsNotNull(logData);
-            Assert.AreEqual(16, logData.Data.Count);
+            Assert.AreEqual(16, logData.Count);
         }
 
         [TestMethod]
@@ -220,10 +220,10 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(1, results.Count);
 
             var result = results.First();
-            var logData = result.LogData.FirstOrDefault();
+            var logData = result.LogData;
 
             Assert.IsNotNull(logData);
-            Assert.AreEqual(16, logData.Data.Count);
+            Assert.AreEqual(16, logData.Count);
         }
 
         [TestMethod]
@@ -278,10 +278,10 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(1, results.Count);
 
             var result = results.First();
-            var logData = result.LogData.FirstOrDefault();
+            var logData = result.LogData;
 
             Assert.IsNotNull(logData);
-            Assert.AreEqual(9, logData.Data.Count);
+            Assert.AreEqual(9, logData.Count);
         }
 
         [TestMethod]
@@ -322,8 +322,8 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.InitHeader(log, LogIndexType.measureddepth);
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 3, 0.9);
 
-            var logData = log.LogData.First();
-            logData.Data.Add("21.5, 1, 21.7");
+            var logData = log.LogData;
+            logData.Add("21.5, 1, 21.7");
 
             var updateResponse = DevKit.Update<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
@@ -339,10 +339,10 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(1, results.Count);
 
             var result = results.First();
-            logData = result.LogData.FirstOrDefault();
+            logData = result.LogData;
 
             Assert.IsNotNull(logData);
-            Assert.AreEqual(5, logData.Data.Count);
+            Assert.AreEqual(5, logData.Count);
         }
 
         [TestMethod]
@@ -383,18 +383,18 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.InitHeader(log, LogIndexType.measureddepth);
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 6, 0.9);
 
-            var logData = log.LogData.First();
-            logData.Data.Clear();
+            var logData = log.LogData;
+            logData.Clear();
 
-            logData.Data.Add("13,13.1,");
-            logData.Data.Add("14,14.1,");
-            logData.Data.Add("15,15.1,");
-            logData.Data.Add("16,16.1,");
-            logData.Data.Add("17,17.1,");
-            logData.Data.Add("20,20.1,20.2");
-            logData.Data.Add("21,,21.2");
-            logData.Data.Add("22,,22.2");
-            logData.Data.Add("23,,23.2");
+            logData.Add("13,13.1,");
+            logData.Add("14,14.1,");
+            logData.Add("15,15.1,");
+            logData.Add("16,16.1,");
+            logData.Add("17,17.1,");
+            logData.Add("20,20.1,20.2");
+            logData.Add("21,,21.2");
+            logData.Add("22,,22.2");
+            logData.Add("23,,23.2");
 
             var updateResponse = DevKit.Update<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
@@ -410,12 +410,12 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(1, results.Count);
 
             var result = results.First();
-            logData = result.LogData.FirstOrDefault();
+            logData = result.LogData;
 
             Assert.IsNotNull(logData);
-            Assert.AreEqual(11, logData.Data.Count);
+            Assert.AreEqual(11, logData.Count);
 
-            var data = logData.Data;
+            var data = logData;
             Assert.AreEqual("15,15.1,15", data[2]);
         }
     }

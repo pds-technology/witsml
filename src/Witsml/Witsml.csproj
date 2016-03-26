@@ -40,10 +40,15 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\Channels\ChannelDataExtensions.cs" />
+    <Compile Include="Data\Channels\ChannelDataReader.cs" />
+    <Compile Include="Data\Channels\ChannelIndexInfo.cs" />
+    <Compile Include="Data\Channels\IChannelDataRecord.cs" />
     <Compile Include="Data\DataGenerator.cs" />
     <Compile Include="Data\Logs\Log141Generator.cs" />
     <Compile Include="EtpContentTypes.cs" />
@@ -72,6 +77,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="EtpUris.cs" />
+    <Compile Include="Range.cs" />
     <Compile Include="WitsmlException.cs" />
     <Compile Include="WitsmlParser.cs" />
   </ItemGroup>

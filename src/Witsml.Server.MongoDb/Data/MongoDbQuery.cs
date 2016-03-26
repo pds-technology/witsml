@@ -190,6 +190,9 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The filter object that for the selection criteria for the group of elements.</returns>
         private FilterDefinition<T> BuildFilterForAnElementGroup(PropertyInfo propertyInfo, IEnumerable<XElement> elements, string parentPath = null)
         {
+            if (propertyInfo == null)
+                return null;
+
             var fieldName = GetPropertyPath(parentPath, propertyInfo.Name);
             var propType = propertyInfo.PropertyType;
             var values = elements.ToList();
@@ -360,9 +363,11 @@ namespace PDS.Witsml.Server.Data
             }
         }
 
-        private IEnumerable<PropertyInfo> GetPropertyInfo(Type t)
+        private IList<PropertyInfo> GetPropertyInfo(Type t)
         {
-            return t.GetProperties().Where(p => !p.IsDefined(typeof(XmlIgnoreAttribute), false));
+            return t.GetProperties()
+                .Where(p => !p.IsDefined(typeof(XmlIgnoreAttribute), false))
+                .ToList();
         }
 
         private Type GetConcreteType(XElement element, Type propType)
@@ -539,14 +544,21 @@ namespace PDS.Witsml.Server.Data
         {
             foreach (var prop in properties)
             {
-                var elementAttribute = prop.GetCustomAttribute(typeof(XmlElementAttribute), false) as XmlElementAttribute;
+                var elementAttribute = prop.GetCustomAttribute<XmlElementAttribute>();
                 if (elementAttribute != null)
                 {
                     if (elementAttribute.ElementName == name)
                         return prop;
                 }
 
-                var attributeAttribute = prop.GetCustomAttribute(typeof(XmlAttributeAttribute), false) as XmlAttributeAttribute;
+                var arrayAttribute = prop.GetCustomAttribute<XmlArrayAttribute>();
+                if (arrayAttribute != null)
+                {
+                    if (arrayAttribute.ElementName == name)
+                        return prop;
+                }
+
+                var attributeAttribute = prop.GetCustomAttribute<XmlAttributeAttribute>();
                 if (attributeAttribute != null)
                 {
                     if (attributeAttribute.AttributeName == name)

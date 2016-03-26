@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using PDS.Framework;
 
-namespace PDS.Witsml.Server.Models
+namespace PDS.Witsml.Data.Channels
 {
     public interface IChannelDataRecord : IDataRecord
     {
@@ -17,13 +17,15 @@ namespace PDS.Witsml.Server.Models
 
         List<ChannelIndexInfo> Indices { get; }
 
-        Range<double> GetIndexRange(int index = 0);
+        ChannelIndexInfo GetIndex(int index = 0);
 
         double GetIndexValue(int index = 0);
 
-        long GetUnixTimeSeconds(int i);
+        Range<double?> GetIndexRange(int index = 0);
 
         DateTimeOffset GetDateTimeOffset(int i);
+
+        long GetUnixTimeSeconds(int i);
 
         string GetJson();
     }

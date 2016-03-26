@@ -108,11 +108,8 @@
     <Compile Include="Data\Wells\Well141DataAdapter.cs" />
     <Compile Include="Data\Wells\Well200DataAdapter.cs" />
     <Compile Include="Models\ChannelDataChunk.cs" />
-    <Compile Include="Models\ChannelDataExtensions.cs" />
-    <Compile Include="Models\ChannelDataReader.cs" />
-    <Compile Include="Models\ChannelIndexInfo.cs" />
     <Compile Include="Models\ChannelDataValues.cs" />
-    <Compile Include="Models\IChannelDataRecord.cs" />
+    <Compile Include="Models\ChunkExtensions.cs" />
     <Compile Include="Models\LogDataValues.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">

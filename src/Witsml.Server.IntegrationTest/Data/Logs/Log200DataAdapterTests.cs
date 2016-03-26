@@ -23,6 +23,7 @@ namespace PDS.Witsml.Server.Data.Logs
         private IEtpDataAdapter<Well> WellAdapter;
         private IEtpDataAdapter<Wellbore> WellboreAdapter;
         private IEtpDataAdapter<Log> LogAdapter;
+        private IEtpDataAdapter<ChannelSet> ChannelSetAdapter;
 
         private Well Well1;
         private Wellbore Wellbore1;
@@ -42,7 +43,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
             WellAdapter = new Well200DataAdapter(Provider) { Container = Container };
             WellboreAdapter = new Wellbore200DataAdapter(Provider) { Container = Container };
-            LogAdapter = new Log200DataAdapter(Provider, new ChannelDataAdapter(Provider)) { Container = Container };
+            ChannelSetAdapter = new ChannelSet200DataAdapter(Provider, new ChannelDataChunkAdapter(Provider)) { Container = Container };
+            LogAdapter = new Log200DataAdapter(Provider, ChannelSetAdapter) { Container = Container };
 
             Well1 = new Well() { Citation = DevKit.Citation("Well 01"), TimeZone = DevKit.TimeZone, Uuid = DevKit.Uid() };
             Well1.GeographicLocationWGS84 = DevKit.Location();
@@ -137,12 +139,13 @@ namespace PDS.Witsml.Server.Data.Logs
             LogGenerator.GenerateChannelData(Log1.ChannelSet, numDataValue);
             LogAdapter.Put(Log1);
 
-            var cda = new ChannelDataAdapter(Provider);
+            var cda = new ChannelDataChunkAdapter(Provider);
 
             // Retrieve the data
-            var uidLog = Log1.Uuid;
-            var mnemonics = Log1.ChannelSet.First().Channel.Select(c => c.Mnemonic).ToList();
-            var logData = cda.GetData(uidLog, mnemonics, null, true);
+            var uid = channelSet.Uuid;
+            var indexCurve = channelSet.Channel.Select(c => c.Mnemonic).FirstOrDefault();
+            var range = new Range<double?>(null, null);
+            var logData = cda.GetData(uid, indexCurve, range, true);
 
             var rowCount = logData.Sum(ld => LogGenerator.DeserializeChannelSetData(ld.Data).Count);
 
@@ -172,12 +175,13 @@ namespace PDS.Witsml.Server.Data.Logs
             LogGenerator.GenerateChannelData(LogDecreasing.ChannelSet, numDataValue);
             LogAdapter.Put(LogDecreasing);
 
-            var cda = new ChannelDataAdapter(Provider);
+            var cda = new ChannelDataChunkAdapter(Provider);
 
             // Retrieve the data
-            var uidLog = LogDecreasing.Uuid;
-            var mnemonics = LogDecreasing.ChannelSet.First().Channel.Select(c => c.Mnemonic).ToList();
-            var logData = cda.GetData(uidLog, mnemonics, null, false);
+            var uid = channelSet.Uuid;
+            var indexCurve = channelSet.Channel.Select(c => c.Mnemonic).FirstOrDefault();
+            var range = new Range<double?>(null, null);
+            var logData = cda.GetData(uid, indexCurve, range, false);
 
             var rowCount = logData.Sum(ld => LogGenerator.DeserializeChannelSetData(ld.Data).Count);
 

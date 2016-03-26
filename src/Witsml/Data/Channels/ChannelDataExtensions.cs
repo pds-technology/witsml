@@ -4,7 +4,7 @@ using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
 
-namespace PDS.Witsml.Server.Models
+namespace PDS.Witsml.Data.Channels
 {
     public static class ChannelDataExtensions
     {
@@ -57,40 +57,6 @@ namespace PDS.Witsml.Server.Models
                 .WithIndices(channelSet.Index.Select(ToChannelIndexInfo), true);
         }
 
-        public static ChannelDataReader GetReader(this ChannelDataValues channelDataValues)
-        {
-            var mnemonics = ChannelDataReader.Split(channelDataValues.MnemonicList);
-            var units = ChannelDataReader.Split(channelDataValues.UnitList);
-
-            return new ChannelDataReader(channelDataValues.Data, mnemonics, units, channelDataValues.Uid, channelDataValues.Id)
-                .WithIndices(channelDataValues.Indices);
-        }
-
-        public static ChannelDataReader GetReader(this ChannelDataChunk channelDataChunk)
-        {
-            var mnemonics = ChannelDataReader.Split(channelDataChunk.MnemonicList);
-            var units = ChannelDataReader.Split(channelDataChunk.UnitList);
-
-            return new ChannelDataReader(channelDataChunk.Data, mnemonics, units, channelDataChunk.Uid, channelDataChunk.Id)
-                .WithIndices(channelDataChunk.Indices);
-        }
-
-        public static IEnumerable<IChannelDataRecord> GetRecords(this IEnumerable<ChannelDataChunk> channelDataChunks)
-        {
-            if (channelDataChunks == null)
-                yield break;
-
-            foreach (var chunk in channelDataChunks)
-            {
-                var records = chunk.GetReader().AsEnumerable();
-
-                foreach (var record in records)
-                {
-                    yield return record;
-                }
-            }
-        }
-
         public static ChannelDataReader WithIndex(this ChannelDataReader reader, string mnemonic, bool increasing, bool isTimeIndex)
         {
             var index = new ChannelIndexInfo()
@@ -134,8 +100,8 @@ namespace PDS.Witsml.Server.Models
         private static void CalculateIndexRange(ChannelDataReader reader, ChannelIndexInfo channelIndex, int index)
         {
             var range = reader.GetIndexRange(index);
-            channelIndex.Start = range.Start;
-            channelIndex.End = range.End;
+            channelIndex.Start = range.Start.GetValueOrDefault(double.NaN);
+            channelIndex.End = range.End.GetValueOrDefault(double.NaN);
         }
     }
 }
