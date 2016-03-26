@@ -4,8 +4,6 @@ using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
 using MongoDB.Driver;
-using PDS.Witsml.Data.Channels;
-using PDS.Witsml.Server.Data.Channels;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -18,16 +16,16 @@ namespace PDS.Witsml.Server.Data.Logs
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class Log200DataAdapter : MongoDbDataAdapter<Log>
     {
-        private readonly ChannelDataAdapter _channelDataAdapter;
+        private readonly IEtpDataAdapter<ChannelSet> _channelSetDataAdapter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Log200DataAdapter"/> class.
         /// </summary>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public Log200DataAdapter(IDatabaseProvider databaseProvider, ChannelDataAdapter channelDataAdapter) : base(databaseProvider, ObjectNames.Log200, ObjectTypes.Uuid)
+        public Log200DataAdapter(IDatabaseProvider databaseProvider, IEtpDataAdapter<ChannelSet> channelSetDataAdapter) : base(databaseProvider, ObjectNames.Log200, ObjectTypes.Uuid)
         {
-            _channelDataAdapter = channelDataAdapter;
+            _channelSetDataAdapter = channelSetDataAdapter;
         }
 
         /// <summary>
@@ -58,14 +56,17 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             var dataObjectId = entity.GetObjectId();
 
+            foreach (var channelSet in entity.ChannelSet)
+            {
+                _channelSetDataAdapter.Put(channelSet);
+            }
+
             if (!string.IsNullOrWhiteSpace(entity.Uuid) && Exists(dataObjectId))
             {
                 entity.Citation = entity.Citation.Update();
 
                 Validate(Functions.PutObject, entity);
                 UpdateEntity(entity, dataObjectId);
-
-                // TODO: update channel data values
             }
             else
             {
@@ -73,13 +74,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 entity.Citation = entity.Citation.Update();
 
                 Validate(Functions.PutObject, entity);
-
-                var channelData = new Dictionary<string, string>();
-                var indicesMap = new Dictionary<string, List<ChannelIndexInfo>>();
-
-                _channelDataAdapter.SaveChannelSets(entity, channelData, indicesMap);
                 InsertEntity(entity);
-                _channelDataAdapter.WriteChannelDataValues(entity.Uuid, channelData, indicesMap);
             }
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uuid);

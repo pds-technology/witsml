@@ -215,20 +215,20 @@ namespace PDS.Witsml.Server.Data.Logs
             return logData;
         }
 
-        private ChannelDataReader ExtractDataReader(Log input, Log existing = null)
+        private ChannelDataReader ExtractDataReader(Log entity, Log existing = null)
         {
             ChannelDataReader reader = null;
 
             if (existing == null)
             {
-                reader = input.GetReader();
-                input.LogData = null;
+                reader = entity.GetReader();
+                entity.LogData = null;
                 return reader;
             }
 
             var logData = existing.LogData;
-            existing.LogData = input.LogData;
-            input.LogData = null;
+            existing.LogData = entity.LogData;
+            entity.LogData = null;
 
             reader = existing.GetReader();
             existing.LogData = logData;
