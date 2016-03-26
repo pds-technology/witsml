@@ -3,6 +3,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
+using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Models;
 
 namespace PDS.Witsml.Server.Data.Channels
@@ -90,14 +91,26 @@ namespace PDS.Witsml.Server.Data.Channels
             return new WitsmlResult(ErrorCodes.Success, entity.Uuid);
         }
 
-        private ChannelDataReader ExtractDataReader(ChannelSet entity)
+        private ChannelDataReader ExtractDataReader(ChannelSet entity, ChannelSet existing = null)
         {
-            var reader = entity.GetReader();
+            // TODO: Handle: if (!string.IsNullOrEmpty(entity.Data.FileUri))
+            // return null;
 
-            if (entity.Data != null)
+            ChannelDataReader reader = null;
+
+            if (existing == null)
             {
-                entity.Data.Data = null;
+                reader = entity.GetReader();
+                entity.Data = null;
+                return reader;
             }
+
+            var channelData = existing.Data;
+            existing.Data = entity.Data;
+            entity.Data = null;
+
+            reader = existing.GetReader();
+            existing.Data = channelData;
 
             return reader;
         }

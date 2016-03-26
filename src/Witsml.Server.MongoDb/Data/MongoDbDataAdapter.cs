@@ -200,6 +200,20 @@ namespace PDS.Witsml.Server.Data
                 .FirstOrDefault();
         }
 
+        protected List<T> GetEntities(IEnumerable<DataObjectId> dataObjectIds)
+        {
+            return GetEntities<T>(dataObjectIds, DbCollectionName);
+        }
+
+        protected List<TObject> GetEntities<TObject>(IEnumerable<DataObjectId> dataObjectIds, string dbCollectionName)
+        {
+            var filters = dataObjectIds.Select(x => GetEntityFilter<TObject>(x));
+
+            return GetCollection<TObject>(dbCollectionName)
+                .Find(Builders<TObject>.Filter.Or(filters))
+                .ToList();
+        }
+
         /// <summary>
         /// Queries the data store with Mongo Bson filter and projection.
         /// </summary>
