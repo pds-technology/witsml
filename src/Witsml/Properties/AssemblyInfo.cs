@@ -34,3 +34,10 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
+
+[assembly: InternalsVisibleTo("PDS.Witsml.Client.IntegrationTest")]
+[assembly: InternalsVisibleTo("PDS.Witsml.Server.IntegrationTest")]
+[assembly: InternalsVisibleTo("PDS.Witsml.Server.MongoDb.IntegrationTest")]
+[assembly: InternalsVisibleTo("PDS.Witsml.Studio.IntegrationTest")]
+[assembly: InternalsVisibleTo("PDS.Witsml.Studio.UnitTest")]
+[assembly: InternalsVisibleTo("PDS.Witsml.UnitTest")]

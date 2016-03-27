@@ -36,6 +36,32 @@ namespace PDS.Framework
         }
 
         /// <summary>
+        /// Converts the specified string to camel case.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>The camel case string value.</returns>
+        public static string ToCamelCase(this string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return value;
+
+            return value.Substring(0, 1).ToLowerInvariant() + value.Substring(1);
+        }
+
+        /// <summary>
+        /// Converts the specified string to pascal case.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>The pascal case string value.</returns>
+        public static string ToPascalCase(this string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return value;
+
+            return value.Substring(0, 1).ToUpperInvariant() + value.Substring(1);
+        }
+
+        /// <summary>
         /// Performs the specified action on each item in the collection.
         /// </summary>
         /// <typeparam name="T">The item type.</typeparam>

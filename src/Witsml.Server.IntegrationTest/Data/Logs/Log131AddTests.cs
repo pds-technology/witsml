@@ -104,7 +104,7 @@ namespace PDS.Witsml.Server.Data.Logs
             };
 
             DevKit.InitHeader(log, LogIndexType.datetime);
-            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10, 1, true, false);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10, 1, false, false);
 
             response = DevKit.Add<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);

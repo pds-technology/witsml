@@ -142,10 +142,9 @@ namespace PDS.Witsml.Server.Data.Logs
             var cda = new ChannelDataChunkAdapter(Provider);
 
             // Retrieve the data
-            var uid = channelSet.Uuid;
             var indexCurve = channelSet.Channel.Select(c => c.Mnemonic).FirstOrDefault();
             var range = new Range<double?>(null, null);
-            var logData = cda.GetData(uid, indexCurve, range, true);
+            var logData = cda.GetData(channelSet.GetUri(), indexCurve, range, true);
 
             var rowCount = logData.Sum(ld => LogGenerator.DeserializeChannelSetData(ld.Data).Count);
 
@@ -178,10 +177,9 @@ namespace PDS.Witsml.Server.Data.Logs
             var cda = new ChannelDataChunkAdapter(Provider);
 
             // Retrieve the data
-            var uid = channelSet.Uuid;
             var indexCurve = channelSet.Channel.Select(c => c.Mnemonic).FirstOrDefault();
             var range = new Range<double?>(null, null);
-            var logData = cda.GetData(uid, indexCurve, range, false);
+            var logData = cda.GetData(channelSet.GetUri(), indexCurve, range, false);
 
             var rowCount = logData.Sum(ld => LogGenerator.DeserializeChannelSetData(ld.Data).Count);
 

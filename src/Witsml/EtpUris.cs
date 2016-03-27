@@ -1,65 +1,67 @@
-﻿using Energistics.Datatypes;
+﻿using Energistics.DataAccess;
+using Energistics.Datatypes;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
+using AbstractObject = Energistics.DataAccess.WITSML200.ComponentSchemas.AbstractObject;
 
 namespace PDS.Witsml
 {
     public static class EtpUris
     {
-        public static readonly EtpUri Witsml141 = new EtpUri("eml://witsml141");
+        public static readonly EtpUri Witsml131 = new EtpUri("eml://witsml1311");
+        public static readonly EtpUri Witsml141 = new EtpUri("eml://witsml1411");
         public static readonly EtpUri Witsml200 = new EtpUri("eml://witsml20");
 
-        public static EtpUri ToUri(this Witsml141.Well entity)
+        public static EtpUri GetUriFamily(this IDataObject entity)
         {
-            return Witsml141
-                .Append(ObjectTypes.Well, entity.Uid);
+            if (entity.GetType().Namespace.Contains("WITSML131"))
+                return Witsml131;
+
+            return Witsml141;
         }
 
-        public static EtpUri ToUri(this Witsml141.Wellbore entity)
+        public static EtpUri GetUri(this IDataObject entity)
         {
-            return Witsml141
+            return entity.GetUriFamily()
+                .Append(ObjectTypes.GetObjectType(entity), entity.Uid);
+        }
+
+        public static EtpUri GetUri(this IWellObject entity)
+        {
+            return entity.GetUriFamily()
                 .Append(ObjectTypes.Well, entity.UidWell)
-                .Append(ObjectTypes.Wellbore, entity.Uid);
+                .Append(ObjectTypes.GetObjectType(entity), entity.Uid);
         }
 
-        public static EtpUri ToUri(this Witsml141.Log entity)
+        public static EtpUri GetUri(this IWellboreObject entity)
         {
-            return Witsml141
+            return entity.GetUriFamily()
                 .Append(ObjectTypes.Well, entity.UidWell)
                 .Append(ObjectTypes.Wellbore, entity.UidWellbore)
-                .Append(ObjectTypes.Log, entity.Uid);
+                .Append(ObjectTypes.GetObjectType(entity), entity.Uid);
         }
 
-        public static EtpUri ToUri(this Witsml141.ComponentSchemas.LogCurveInfo entity, Witsml141.Log log)
+        public static EtpUri GetUri(this AbstractObject entity)
         {
-            return log.ToUri()
+            return Witsml200
+                .Append(ObjectTypes.GetObjectType(entity), entity.Uuid);
+        }
+
+        public static EtpUri GetUri(this Witsml141.ComponentSchemas.LogCurveInfo entity, Witsml141.Log log)
+        {
+            return log.GetUri()
                 .Append(ObjectTypes.LogCurveInfo, entity.Mnemonic.Value);
         }
 
-        public static EtpUri ToUri(this Witsml200.Well entity)
+        public static EtpUri GetUri(this Witsml200.ChannelSet entity, Witsml200.Log log)
         {
-            return Witsml200.Append(ObjectTypes.Well, entity.Uuid);
-        }
-
-        public static EtpUri ToUri(this Witsml200.Wellbore entity)
-        {
-            return Witsml200.Append(ObjectTypes.Wellbore, entity.Uuid);
-        }
-
-        public static EtpUri ToUri(this Witsml200.Log entity)
-        {
-            return Witsml200.Append(ObjectTypes.Log, entity.Uuid);
-        }
-
-        public static EtpUri ToUri(this Witsml200.ChannelSet entity, Witsml200.Log log)
-        {
-            return log.ToUri()
+            return log.GetUri()
                 .Append(ObjectTypes.ChannelSet, entity.Uuid);
         }
 
-        public static EtpUri ToUri(this Witsml200.Channel entity, Witsml200.Log log, Witsml200.ChannelSet channelSet)
+        public static EtpUri GetUri(this Witsml200.Channel entity, Witsml200.Log log, Witsml200.ChannelSet channelSet)
         {
-            return channelSet.ToUri(log)
+            return channelSet.GetUri(log)
                 .Append(ObjectTypes.Channel, entity.Mnemonic);
         }
     }

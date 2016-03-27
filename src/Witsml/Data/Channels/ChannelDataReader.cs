@@ -11,18 +11,21 @@ namespace PDS.Witsml.Data.Channels
 {
     public class ChannelDataReader : IDataReader, IChannelDataRecord
     {
+        private const string Null = "null";
+        private const string NaN = "NaN";
+
         private static readonly string[] Empty = new string[0];
         private List<List<List<object>>> _records;
         private int _indexCount;
         private int _count;
         private int _current = -1;
 
-        public ChannelDataReader(IList<string> data, string[] mnemonics = null, string[] units = null, string uid = null, string id = null) 
-            : this(Combine(data), mnemonics, units, uid, id)
+        public ChannelDataReader(IList<string> data, string[] mnemonics = null, string[] units = null, string uri = null, string id = null) 
+            : this(Combine(data), mnemonics, units, uri, id)
         {
         }
 
-        public ChannelDataReader(string data, string[] mnemonics = null, string[] units = null, string uid = null, string id = null)
+        public ChannelDataReader(string data, string[] mnemonics = null, string[] units = null, string uri = null, string id = null)
         {
             _records = Deserialize(data);
             _count = GetRowValues(0).Count();
@@ -31,17 +34,17 @@ namespace PDS.Witsml.Data.Channels
             Indices = new List<ChannelIndexInfo>();
             Mnemonics = mnemonics ?? Empty;
             Units = units ?? Empty;
-            Uid = uid;
+            Uri = uri;
             Id = id;
         }
+
+        public string Id { get; set; }
+
+        public string Uri { get; set; }
 
         public string[] Mnemonics { get; private set; }
 
         public string[] Units { get; private set; }
-
-        public string Id { get; set; }
-
-        public string Uid { get; set; }
 
         public List<ChannelIndexInfo> Indices { get; }
 
@@ -258,8 +261,7 @@ namespace PDS.Witsml.Data.Channels
 
         public bool IsDBNull(int i)
         {
-            var value = GetString(i).Trim();
-            return string.IsNullOrEmpty(value) || "null".EqualsIgnoreCase(value) || "NaN".EqualsIgnoreCase(value);
+            return IsNull(GetString(i));
         }
 
         public bool NextResult()
@@ -344,8 +346,14 @@ namespace PDS.Witsml.Data.Channels
             {
                 foreach (var row in data)
                 {
-                    var values = row.Split(new[] { ',' }, 2);
-                    rows.Add(string.Format("[[{0}],[{1}]]", values));
+                    var values = row.Split(new[] { ',' })
+                        .Select(Format)
+                        .ToArray();
+
+                    rows.Add(string.Format(
+                        "[[{0}],[{1}]]", 
+                        values.First(),
+                        string.Join(",", values.Skip(1))));
                 }
             }
 
@@ -353,6 +361,26 @@ namespace PDS.Witsml.Data.Channels
             json.Append("]");
 
             return json.ToString();
+        }
+
+        private static string Format(string value)
+        {
+            double number;
+
+            if (IsNull(value))
+                return "null";
+
+            if (double.TryParse(value, out number))
+                return value;
+
+            return string.Format("\"{0}\"", value.Trim());
+        }
+
+        private static bool IsNull(string value)
+        {
+            return string.IsNullOrWhiteSpace(value) || 
+                Null.EqualsIgnoreCase(value) || 
+                NaN.EqualsIgnoreCase(value);
         }
     }
 }

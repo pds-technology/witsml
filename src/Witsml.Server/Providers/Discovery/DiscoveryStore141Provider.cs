@@ -2,11 +2,11 @@
 using System.ComponentModel.Composition;
 using Energistics.Common;
 using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using Energistics.Protocol.Discovery;
 using PDS.Witsml.Server.Data;
-using Energistics.DataAccess.WITSML141.ComponentSchemas;
 
 namespace PDS.Witsml.Server.Providers.Discovery
 {
@@ -92,7 +92,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
         {
             return DiscoveryStoreProvider.New(
                 uuid: entity.Uid,
-                uri: entity.ToUri(),
+                uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Name,
                 count: -1);
@@ -102,7 +102,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
         {
             return DiscoveryStoreProvider.New(
                 uuid: entity.Uid,
-                uri: entity.ToUri(),
+                uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Name,
                 count: -1);
@@ -112,7 +112,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
         {
             return DiscoveryStoreProvider.New(
                 uuid: entity.Uid,
-                uri: entity.ToUri(),
+                uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Name,
                 count: -1);
@@ -122,7 +122,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
         {
             return DiscoveryStoreProvider.New(
                 uuid: curve.Uid,
-                uri: curve.ToUri(log),
+                uri: curve.GetUri(log),
                 resourceType: ResourceTypes.DataObject,
                 name: curve.Mnemonic.Value,
                 count: 0);

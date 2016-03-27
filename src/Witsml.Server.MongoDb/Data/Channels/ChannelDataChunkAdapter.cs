@@ -21,9 +21,9 @@ namespace PDS.Witsml.Server.Data.Channels
 
         }
 
-        public List<ChannelDataChunk> GetData(string uid, string indexCurve, Range<double?> range, bool increasing)
+        public List<ChannelDataChunk> GetData(string uri, string indexCurve, Range<double?> range, bool increasing)
         {
-            var filter = BuildDataFilter(uid, indexCurve, range, increasing);
+            var filter = BuildDataFilter(uri, indexCurve, range, increasing);
             return GetData(filter, increasing);
         }
 
@@ -35,7 +35,7 @@ namespace PDS.Witsml.Server.Data.Channels
             BulkWriteChunks(
                 ToChunks(
                     reader.AsEnumerable()), 
-                reader.Uid,
+                reader.Uri,
                 string.Join(",", reader.Mnemonics),
                 string.Join(",", reader.Units));
         }
@@ -53,19 +53,19 @@ namespace PDS.Witsml.Server.Data.Channels
             //... This is the range that we need to select existing ChannelDataChunks from the database to update
             var updateRange = reader.GetIndexRange();
 
-            // Get DataChannelChunk list from database for the computed range and Uid
-            var filter = BuildDataFilter(reader.Uid, indexChannel.Mnemonic, updateRange, increasing);
+            // Get DataChannelChunk list from database for the computed range and URI
+            var filter = BuildDataFilter(reader.Uri, indexChannel.Mnemonic, updateRange, increasing);
             var results = GetData(filter, increasing);
 
             BulkWriteChunks(
                 ToChunks(
                     MergeSequence(results.GetRecords(), reader.AsEnumerable())),
-                reader.Uid,
+                reader.Uri,
                 string.Join(",", reader.Mnemonics),
                 string.Join(",", reader.Units));
         }
 
-        private void BulkWriteChunks(IEnumerable<ChannelDataChunk> chunks, string uid, string mnemonics, string units)
+        private void BulkWriteChunks(IEnumerable<ChannelDataChunk> chunks, string uri, string mnemonics, string units)
         {
             var collection = GetCollection();
 
@@ -75,7 +75,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     if (string.IsNullOrWhiteSpace(dc.Id))
                     {
                         dc.Id = NewUid();
-                        dc.Uid = uid;
+                        dc.Uri = uri;
                         dc.MnemonicList = mnemonics;
                         dc.UnitList = units;
 
@@ -86,7 +86,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     var update = Builders<ChannelDataChunk>.Update;
 
                     return new UpdateOneModel<ChannelDataChunk>(
-                        filter.Eq(f => f.Uid, uid) & filter.Eq(f => f.Id, dc.Id),
+                        filter.Eq(f => f.Uri, uri) & filter.Eq(f => f.Id, dc.Id),
                         update
                             .Set(u => u.Indices, dc.Indices)
                             .Set(u => u.MnemonicList, mnemonics)
@@ -276,18 +276,18 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <summary>
         /// Builds the data filter for the database query.
         /// </summary>
-        /// <param name="uid">The uid of the data object.</param>
+        /// <param name="uri">The URI of the data object.</param>
         /// <param name="indexCurve">The index curve mnemonic.</param>
         /// <param name="range">The request range.</param>
         /// <param name="increasing">if set to <c>true</c> the index is increasing.</param>
         /// <returns>The query filter.</returns>
-        private FilterDefinition<ChannelDataChunk> BuildDataFilter(string uid, string indexCurve, Range<double?> range, bool increasing)
+        private FilterDefinition<ChannelDataChunk> BuildDataFilter(string uri, string indexCurve, Range<double?> range, bool increasing)
         {
             var builder = Builders<ChannelDataChunk>.Filter;
             var filters = new List<FilterDefinition<ChannelDataChunk>>();
             var rangeFilters = new List<FilterDefinition<ChannelDataChunk>>();
 
-            filters.Add(builder.EqIgnoreCase("Uid", uid));
+            filters.Add(builder.EqIgnoreCase("Uri", uri));
 
             if (range.Start.HasValue)
             {

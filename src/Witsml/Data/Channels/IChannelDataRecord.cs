@@ -9,7 +9,7 @@ namespace PDS.Witsml.Data.Channels
     {
         string Id { get; set; }
 
-        string Uid { get; set; }
+        string Uri { get; set; }
 
         string[] Mnemonics { get; }
 

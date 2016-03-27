@@ -65,7 +65,8 @@ namespace PDS.Witsml.Server.Data.Channels
                 Validate(Functions.PutObject, entity);
 
                 // Extract Data
-                var reader = ExtractDataReader(entity);
+                var saved = GetEntity(dataObjectId);
+                var reader = ExtractDataReader(entity, saved);
 
                 UpdateEntity(entity, dataObjectId);
 

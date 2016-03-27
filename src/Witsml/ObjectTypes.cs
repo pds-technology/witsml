@@ -3,6 +3,8 @@ using System.Linq;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using Energistics.DataAccess;
+using AbstractObject = Energistics.DataAccess.WITSML200.ComponentSchemas.AbstractObject;
+using PDS.Framework;
 
 namespace PDS.Witsml
 {
@@ -36,11 +38,41 @@ namespace PDS.Witsml
         private static readonly string[] GrowingObjects = new [] { Log, MudLog, Trajectory };
 
         /// <summary>
+        /// Gets the type of the object.
+        /// </summary>
+        /// <param name="pluralObject">The plural object.</param>
+        /// <returns>The WITSML data object type, as a string.</returns>
+        public static string GetObjectType(IEnergisticsCollection pluralObject)
+        {
+            return GetObjectType(pluralObject.GetType());
+        }
+
+        /// <summary>
+        /// Gets the type of the object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns>The WITSML data object type, as a string.</returns>
+        public static string GetObjectType(IDataObject dataObject)
+        {
+            return GetObjectType(dataObject.GetType());
+        }
+
+        /// <summary>
+        /// Gets the type of the object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns>The WITSML data object type, as a string.</returns>
+        public static string GetObjectType(AbstractObject dataObject)
+        {
+            return GetObjectType(dataObject.GetType());
+        }
+
+        /// <summary>
         /// Gets the type of the data object.
         /// </summary>
         /// <typeparam name="T">The type of object.</typeparam>
         /// <returns>The WITSML data object type, as a string.</returns>
-        public static string GetObjectType<T>() where T : IEnergisticsCollection
+        public static string GetObjectType<T>()
         {
             return GetObjectType(typeof(T));
         }
@@ -53,14 +85,29 @@ namespace PDS.Witsml
         /// <exception cref="System.ArgumentException">Invalid WITSML object type, does not implement IEnergisticsCollection</exception>
         public static string GetObjectType(Type type)
         {
-            if (!typeof(IEnergisticsCollection).IsAssignableFrom(type))
+            if (!typeof(IEnergisticsCollection).IsAssignableFrom(type) && 
+                !typeof(IDataObject).IsAssignableFrom(type) &&
+                !typeof(AbstractObject).IsAssignableFrom(type))
             {
-                throw new ArgumentException("Invalid WITSML object type, does not implement IEnergisticsCollection", "type");
+                throw new ArgumentException("Invalid WITSML object type, does not implement IEnergisticsCollection, IDataObject or AbstractObject", "type");
+            }
+
+            if (typeof(IDataObject).IsAssignableFrom(type))
+            {
+                return type.GetCustomAttributes(typeof(XmlTypeAttribute), false)
+                    .OfType<XmlTypeAttribute>()
+                    .Select(x => x.TypeName.Substring(4).ToCamelCase())
+                    .FirstOrDefault();
             }
 
             return type.GetCustomAttributes(typeof(XmlRootAttribute), false)
                 .OfType<XmlRootAttribute>()
-                .Select(x => x.ElementName.Substring(0, x.ElementName.Length - 1))
+                .Select(x =>
+                {
+                    return typeof(IEnergisticsCollection).IsAssignableFrom(type)
+                        ? PluralToSingle(x.ElementName)
+                        : x.ElementName.ToCamelCase();
+                })
                 .FirstOrDefault();
         }
 
@@ -183,13 +230,18 @@ namespace PDS.Witsml
         /// Convert a singular string to plural.
         /// </summary>
         /// <param name="singleString">The single string.</param>
-        /// <returns></returns>
-        public static string SingleToPlural(string singleString)
+        /// <returns>The singular string.</returns>
+        internal static string SingleToPlural(string singleString)
         {
             return singleString + "s";
         }
 
-        private static string PluralToSingle(string pluralString)
+        /// <summary>
+        /// Converts a plural string to singlular.
+        /// </summary>
+        /// <param name="pluralString">The plural string.</param>
+        /// <returns>The plural string.</returns>
+        internal static string PluralToSingle(string pluralString)
         {
             return pluralString.EndsWith("s")
                 ? pluralString.Substring(0, pluralString.Length - 1)

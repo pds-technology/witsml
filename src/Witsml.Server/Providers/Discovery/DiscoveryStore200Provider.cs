@@ -126,7 +126,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
         {
             return DiscoveryStoreProvider.New(
                 uuid: entity.Uuid,
-                uri: entity.ToUri(),
+                uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Citation.Title,
                 count: -1);
@@ -136,7 +136,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
         {
             return DiscoveryStoreProvider.New(
                 uuid: entity.Uuid,
-                uri: entity.ToUri(),
+                uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Citation.Title,
                 count: -1);
@@ -146,7 +146,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
         {
             return DiscoveryStoreProvider.New(
                 uuid: entity.Uuid,
-                uri: entity.ToUri(),
+                uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Citation.Title,
                 count: -1);
@@ -156,7 +156,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
         {
             return DiscoveryStoreProvider.New(
                 uuid: entity.Uuid,
-                uri: entity.ToUri(log),
+                uri: entity.GetUri(log),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Citation.Title,
                 count: -1);
@@ -166,7 +166,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
         {
             return DiscoveryStoreProvider.New(
                 uuid: entity.Uuid,
-                uri: entity.ToUri(log, channelSet),
+                uri: entity.GetUri(log, channelSet),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Mnemonic,
                 count: 0);

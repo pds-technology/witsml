@@ -16,7 +16,7 @@ namespace PDS.Witsml.Data.Channels
             var mnemonics = log.LogCurveInfo.Select(x => x.Mnemonic).ToArray();
             var units = log.LogCurveInfo.Select(x => x.Unit).ToArray();
 
-            return new ChannelDataReader(log.LogData, mnemonics, units, log.Uid)
+            return new ChannelDataReader(log.LogData, mnemonics, units, log.GetUri())
                 .WithIndex(mnemonics.FirstOrDefault(), increasing, isTimeIndex);
         }
 
@@ -30,7 +30,7 @@ namespace PDS.Witsml.Data.Channels
                 var mnemonics = ChannelDataReader.Split(logData.MnemonicList);
                 var units = ChannelDataReader.Split(logData.UnitList);
 
-                yield return new ChannelDataReader(logData.Data, mnemonics, units, log.Uid)
+                yield return new ChannelDataReader(logData.Data, mnemonics, units, log.GetUri())
                     .WithIndex(mnemonics.FirstOrDefault(), increasing, isTimeIndex);
             }
         }
@@ -53,7 +53,7 @@ namespace PDS.Witsml.Data.Channels
                 .Union(channelSet.Channel.Select(x => x.UoM))
                 .ToArray();
 
-            return new ChannelDataReader(channelSet.Data.Data, mnemonics, units, channelSet.Uuid)
+            return new ChannelDataReader(channelSet.Data.Data, mnemonics, units, channelSet.GetUri())
                 .WithIndices(channelSet.Index.Select(ToChannelIndexInfo), true);
         }
 
