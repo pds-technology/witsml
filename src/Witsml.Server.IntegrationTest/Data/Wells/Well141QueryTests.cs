@@ -261,9 +261,11 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_Well_query_by_dTimLicense_with_custom_timestamp()
         {
+            var uid = DevKit.Uid();
             var timeStr = "2001-05-15T13:20:00.0000000+00:00";
+
             string inputXml = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-                "<well>" + Environment.NewLine +
+                "<well uid=\"" + uid + "\">" + Environment.NewLine +
                 "<name>PDS Full Test Well</name>" + Environment.NewLine +
                 "<dTimLicense>" + timeStr + "</dTimLicense>" + Environment.NewLine +
                 "<timeZone>-06:00</timeZone>" + Environment.NewLine +
@@ -277,15 +279,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            var uid = response.SuppMsgOut;
-            var query = new Well { Uid = uid };
-            var queryIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-                "<well uid=\"" + uid + "\" >" + Environment.NewLine +
-                "<name>PDS Full Test Well</name>" + Environment.NewLine +
-                "<dTimLicense>" + timeStr + "</dTimLicense>" + Environment.NewLine +
-                "</well>" + Environment.NewLine +
-                "</wells>";
-            var result = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, null);
+            var result = DevKit.GetFromStore(ObjectTypes.Well, inputXml, null, null);
             var results = EnergisticsConverter.XmlToObject<WellList>(result.XMLout).Well;
 
             Assert.AreEqual(1, results.Count);
