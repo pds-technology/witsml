@@ -364,11 +364,9 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
 
         private WitsmlProxyViewModel CreateProxy()
         {
-            //return OptionsIn.DataVersion.Version131.Equals(Model.WitsmlVersion)
-            //    ? new Log131ProxyViewModel(Model.WitsmlConnection)
-            //    : new Log141ProxyViewModel(Model.WitsmlConnection);
-
-            return new Log141ProxyViewModel(Runtime, Model.WitsmlConnection);
+            return OptionsIn.DataVersion.Version131.Equals(Model.WitsmlVersion)
+                ? new Log131ProxyViewModel(Runtime, Model.WitsmlConnection) as WitsmlProxyViewModel
+                : new Log141ProxyViewModel(Runtime, Model.WitsmlConnection) as WitsmlProxyViewModel;
         }
 
         private void Log(string message, params object[] values)

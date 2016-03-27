@@ -50,6 +50,7 @@
     <Compile Include="Data\Channels\ChannelIndexInfo.cs" />
     <Compile Include="Data\Channels\IChannelDataRecord.cs" />
     <Compile Include="Data\DataGenerator.cs" />
+    <Compile Include="Data\Logs\Log131Generator.cs" />
     <Compile Include="Data\Logs\Log141Generator.cs" />
     <Compile Include="EtpContentTypes.cs" />
     <Compile Include="ErrorCodes.cs" />
