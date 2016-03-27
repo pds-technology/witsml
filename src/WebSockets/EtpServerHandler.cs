@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Net.WebSockets;
 using System.Threading;
@@ -13,11 +14,18 @@ namespace Energistics
         private const int BufferSize = 4096;
         private WebSocket _socket;
 
+        static EtpServerHandler()
+        {
+            Clients = new ConcurrentDictionary<string, EtpServerHandler>();
+        }
+
         public EtpServerHandler(WebSocket webSocket, string application, string version) : base(application, version)
         {
             _socket = webSocket;
             Register<ICoreServer, CoreServerHandler>();
         }
+
+        public static ConcurrentDictionary<string, EtpServerHandler> Clients { get; private set; }
 
         public bool IsOpen
         {
@@ -48,6 +56,9 @@ namespace Energistics
             {
                 try
                 {
+                    // keep track of connected clients
+                    Clients.AddOrUpdate(SessionId, this, (id, client) => this);
+
                     while (true)
                     {
                         var buffer = new ArraySegment<byte>(new byte[BufferSize]);
@@ -74,6 +85,19 @@ namespace Energistics
                     Format("Error: {0}", ex.Message);
                     Logger.Error(ex);
                     throw;
+                }
+                finally
+                {
+                    EtpServerHandler item;
+                    
+                    // remove client after connection ends
+                    if (Clients.TryRemove(SessionId, out item))
+                    {
+                        if (item != this)
+                        {
+                            Clients.AddOrUpdate(item.SessionId, item, (id, client) => item);
+                        }
+                    }
                 }
             }
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Composition;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.WebSockets;
@@ -11,6 +12,7 @@ using System.Web.WebSockets;
 using Energistics;
 using Energistics.Datatypes;
 using Energistics.Protocol.ChannelStreaming;
+using Energistics.Protocol.Core;
 using Energistics.Protocol.Discovery;
 using Energistics.Protocol.Store;
 using PDS.Framework;
@@ -80,6 +82,26 @@ namespace PDS.Witsml.Web.Controllers
             };
 
             return Ok(capServer);
+        }
+
+        // GET: api/etp/Clients
+        [Route("api/etp/Clients")]
+        public IHttpActionResult GetClients()
+        {
+            var clients = EtpServerHandler.Clients.Select(c =>
+            {
+                var handler = c.Value;
+                var core = handler.Handler<ICoreServer>() as CoreServerHandler;
+
+                return new
+                {
+                    handler.SessionId,
+                    core.ClientApplicationName,
+                    core.RequestedProtocols
+                };
+            });
+
+            return Ok(clients);
         }
 
         private async Task AcceptWebSocketRequest(AspNetWebSocketContext context)
