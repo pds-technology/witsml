@@ -1,5 +1,6 @@
 ﻿using Energistics.DataAccess;
 using Energistics.Datatypes;
+using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
 using AbstractObject = Energistics.DataAccess.WITSML200.ComponentSchemas.AbstractObject;
@@ -45,6 +46,12 @@ namespace PDS.Witsml
         {
             return Witsml200
                 .Append(ObjectTypes.GetObjectType(entity), entity.Uuid);
+        }
+
+        public static EtpUri GetUri(this Witsml131.ComponentSchemas.LogCurveInfo entity, Witsml131.Log log)
+        {
+            return log.GetUri()
+                .Append(ObjectTypes.LogCurveInfo, entity.Mnemonic);
         }
 
         public static EtpUri GetUri(this Witsml141.ComponentSchemas.LogCurveInfo entity, Witsml141.Log log)

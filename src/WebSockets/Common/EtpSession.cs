@@ -147,8 +147,8 @@ namespace Energistics.Common
             if (handler != null)
             {
                 handler.Session = this;
-                Handlers.Add(contractType, handler);
-                Handlers.Add(handler.Protocol, handler);
+                Handlers[contractType] = handler;
+                Handlers[handler.Protocol] = handler;
             }
         }
 

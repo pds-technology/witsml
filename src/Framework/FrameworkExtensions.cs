@@ -77,6 +77,23 @@ namespace PDS.Framework
         }
 
         /// <summary>
+        /// Performs the specified action on each item in the collection.
+        /// </summary>
+        /// <typeparam name="T">The item type.</typeparam>
+        /// <param name="collection">The collection.</param>
+        /// <param name="action">The action to perform on each item in the collection.</param>
+        /// <returns>The source collection, for chaining.</returns>
+        public static IEnumerable<T> ForEach<T>(this IEnumerable<T> collection, Action<T, int> action)
+        {
+            int index = 0;
+
+            foreach (var item in collection)
+                action(item, index++);
+
+            return collection;
+        }
+
+        /// <summary>
         /// Gets the description for the specified enumeration member.
         /// </summary>
         /// <param name="value">The enumeration value.</param>

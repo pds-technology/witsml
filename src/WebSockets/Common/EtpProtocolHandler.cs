@@ -20,7 +20,7 @@ namespace Energistics.Common
             Role = role;
         }
 
-        public IEtpSession Session { get; set; }
+        public virtual IEtpSession Session { get; set; }
 
         public int Protocol { get; private set; }
 
