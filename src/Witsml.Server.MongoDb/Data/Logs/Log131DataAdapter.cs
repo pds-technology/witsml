@@ -174,7 +174,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var mnemonics = GetMnemonicList(log, parser);
             var increasing = log.Direction.GetValueOrDefault() == LogIndexDirection.increasing;
 
-            var chunks = _channelDataChunkAdapter.GetData(log.Uid, mnemonics.First(), range, increasing);
+            var chunks = _channelDataChunkAdapter.GetData(log.GetUri(), mnemonics.First(), range, increasing);
             var records = chunks.GetRecords(range, increasing);
 
             return FormatLogData(records, mnemonics);

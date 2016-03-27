@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using System.Text.RegularExpressions;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace PDS.Witsml.Server.Data
@@ -18,7 +19,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The regular expression filter definition.</returns>
         public static FilterDefinition<T> EqIgnoreCase<T>(this FilterDefinitionBuilder<T> filter, string propertyPath, string propertyValue)
         {
-            return filter.Regex(propertyPath, new BsonRegularExpression("/^" + propertyValue + "$/i"));
+            return filter.Regex(propertyPath, new BsonRegularExpression("^" + Regex.Escape(propertyValue) + "$", "i"));
         }
     }
 }
