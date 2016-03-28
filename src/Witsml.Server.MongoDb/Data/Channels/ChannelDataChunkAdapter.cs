@@ -159,7 +159,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     startIndex = index;
                 }
 
-                // TODO: Can we use this instead? plannedRange.Value.Contains(index, increasing);
+                // TODO: Can we use this instead? plannedRange.Value.Contains(index, increasing) or a new method?
                 if (WithinRange(index, plannedRange.Value.End, increasing, false))
                 {
                     id = string.IsNullOrEmpty(id) ? record.Id : id;
@@ -226,9 +226,9 @@ namespace PDS.Witsml.Server.Data.Channels
                 {
                     id = endOfExisting ? string.Empty : existingEnum.Current.Id;
 
-                    if (!endOfExisting && 
-                        (endOfUpdate || 
-                        existingEnum.Current.GetIndexValue() < updateRange.Start.Value || 
+                    if (!endOfExisting &&
+                        (endOfUpdate ||
+                        existingEnum.Current.GetIndexValue() < updateRange.Start.Value ||
                         existingEnum.Current.GetIndexValue() > updateRange.End.Value))
                     {
                         yield return existingEnum.Current;
@@ -254,18 +254,18 @@ namespace PDS.Witsml.Server.Data.Channels
                             }
 
                             else if (existingEnum.Current.GetIndexValue() < updateEnum.Current.GetIndexValue())
-                        {
-                            endOfExisting = !existingEnum.MoveNext();
-                        }
+                            {
+                                endOfExisting = !existingEnum.MoveNext();
+                            }
 
                             else // existingEnum.Current.GetIndexValue() > updateEnum.Current.GetIndexValue()
                             {
                                 updateEnum.Current.Id = id;
                                 yield return updateEnum.Current;
-                        endOfUpdate = !updateEnum.MoveNext();
+                                endOfUpdate = !updateEnum.MoveNext();
+                            }
+                        }
                     }
-                }
-            }
 
                     //if (!endOfExisting && (endOfUpdate || ExistingBefore(
                     //                                        existingEnum.Current.GetIndexValue(),
@@ -293,6 +293,18 @@ namespace PDS.Witsml.Server.Data.Channels
 
         private IChannelDataRecord MergeRow(IChannelDataRecord existingRecord, IChannelDataRecord updateRecord)
         {
+            var existingIndexValue = existingRecord.GetIndexValue();
+            var increasing = existingRecord.GetIndex().Increasing;
+
+            for (var i = updateRecord.Indices.Count; i < updateRecord.FieldCount; i++)
+            {
+                var mnemonicRange = updateRecord.GetChannelIndexRange(i);
+                if (mnemonicRange.Contains(existingIndexValue, increasing))
+                {
+                    existingRecord.SetValue(i, updateRecord.GetValue(i));
+                }
+            }
+
             return existingRecord;
         }
 
