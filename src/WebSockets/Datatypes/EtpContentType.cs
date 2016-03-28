@@ -9,7 +9,7 @@ namespace Energistics.Datatypes
     {
         private static readonly Regex _pattern = new Regex(@"^application/x\-(witsml|resqml|prodml|energyml)\+xml;version=([0-9.]+)((;)?|(;type=((obj_)?(\w+))(;)?)?)$");
         private static readonly string _baseFormat = "application/x-{0}+xml;version={1};";
-        private static readonly string _typeFormat = "type={0};";
+        private static readonly string _typeFormat = "type=obj_{0};";
         private readonly Match _match;
         private string _contentType;
 
@@ -52,8 +52,7 @@ namespace Energistics.Datatypes
             Version = version;
             ObjectType = objectType;
 
-            _contentType = string.Format(_baseFormat, family, version) +
-                (string.IsNullOrWhiteSpace(objectType) ? string.Empty : string.Format(_typeFormat, objectType));
+            _contentType = string.Format(_baseFormat, family, version) + FormatType(objectType, version);
         }
 
         /// <summary>
@@ -130,6 +129,30 @@ namespace Energistics.Datatypes
             return match.Success && match.Groups.Count > index
                 ? match.Groups[index].Value
                 : null;
+        }
+
+        /// <summary>
+        /// Formats the specified object type to match the ML version.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="version">The version.</param>
+        /// <returns>The formatted object type.</returns>
+        private static string FormatType(string objectType, string version)
+        {
+            if (string.IsNullOrWhiteSpace(objectType))
+                return string.Empty;
+
+            if (!version.Contains("_"))
+            {
+                System.Version ver;
+
+                objectType = (System.Version.TryParse(version, out ver) && ver.Major < 2
+                    ? objectType.Substring(0, 1).ToLowerInvariant()
+                    : objectType.Substring(0, 1).ToUpperInvariant())
+                    + objectType.Substring(1);
+            }
+
+            return string.Format(_typeFormat, objectType);
         }
     }
 }
