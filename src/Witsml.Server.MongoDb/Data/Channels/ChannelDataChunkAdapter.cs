@@ -10,23 +10,44 @@ using PDS.Witsml.Server.MongoDb;
 
 namespace PDS.Witsml.Server.Data.Channels
 {
+    /// <summary>
+    /// Data adapter that encapsulates CRUD functionality for a 2.0 ChannelSet data.
+    /// </summary>
+    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{PDS.Witsml.Server.Models.ChannelDataChunk}" />
     [Export]
     public class ChannelDataChunkAdapter : MongoDbDataAdapter<ChannelDataChunk>
     {
         private static readonly int RangeSize = Settings.Default.LogIndexRangeSize;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ChannelDataChunkAdapter"/> class.
+        /// </summary>
+        /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
         public ChannelDataChunkAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectTypes.ChannelDataChunk, ObjectTypes.Id)
         {
 
         }
 
+        /// <summary>
+        /// Gets a list of ChannelDataChunk data for a given ChannelSet uri.
+        /// </summary>
+        /// <param name="uri">The ChannelSet URI.</param>
+        /// <param name="indexChannel">The index channel.</param>
+        /// <param name="range">The index range to select data for.</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <returns>A <see cref="List{ChannelDataChunk}" /> </returns>
         public List<ChannelDataChunk> GetData(string uri, string indexChannel, Range<double?> range, bool increasing)
         {
             var filter = BuildDataFilter(uri, indexChannel, range, increasing);
             return GetData(filter, increasing);
         }
 
+
+        /// <summary>
+        /// Adds ChannelDataChunks using the specified reader.
+        /// </summary>
+        /// <param name="reader">The <see cref="ChannelDataReader"/> used to parse the data.</param>
         public void Add(ChannelDataReader reader)
         {
             if (reader == null || reader.RecordsAffected <= 0)
@@ -40,6 +61,11 @@ namespace PDS.Witsml.Server.Data.Channels
                 string.Join(",", reader.Units));
         }
 
+
+        /// <summary>
+        /// Merges <see cref="ChannelDataChunk"/> data for updates.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
         public void Merge(ChannelDataReader reader)
         {
             if (reader == null || reader.RecordsAffected <= 0)
@@ -59,12 +85,20 @@ namespace PDS.Witsml.Server.Data.Channels
 
             BulkWriteChunks(
                 ToChunks(
-                    MergeSequence(results.GetRecords(), reader.AsEnumerable())),
+                    MergeSequence(results.GetRecords(), reader.AsEnumerable(), updateRange)),
                 reader.Uri,
                 string.Join(",", reader.Mnemonics),
                 string.Join(",", reader.Units));
         }
 
+
+        /// <summary>
+        /// Bulks writes <see cref="ChannelDataChunk"/> records for insert and update
+        /// </summary>
+        /// <param name="chunks">The chunks.</param>
+        /// <param name="uri">The URI.</param>
+        /// <param name="mnemonics">The mnemonics.</param>
+        /// <param name="units">The units.</param>
         private void BulkWriteChunks(IEnumerable<ChannelDataChunk> chunks, string uri, string mnemonics, string units)
         {
             var collection = GetCollection();
@@ -96,6 +130,12 @@ namespace PDS.Witsml.Server.Data.Channels
                 .ToList());
         }
 
+
+        /// <summary>
+        /// Combines <see cref="IEnumerable{IChannelDataRecord}"/> data into RangeSize chunks for storage into the database
+        /// </summary>
+        /// <param name="records">The <see cref="IEnumerable{ChannelDataChunk}"/> records to be chunked.</param>
+        /// <returns>An <see cref="IEnumerable{ChannelDataChunk}"/> of channel data.</returns>
         private IEnumerable<ChannelDataChunk> ToChunks(IEnumerable<IChannelDataRecord> records)
         {
             var data = new List<string>();
@@ -171,7 +211,8 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <returns>The merged sequence of channel data.</returns>
         private IEnumerable<IChannelDataRecord> MergeSequence(
             IEnumerable<IChannelDataRecord> existingChunks,
-            IEnumerable<IChannelDataRecord> updatedChunks)
+            IEnumerable<IChannelDataRecord> updatedChunks,
+            Range<double?> updateRange)
         {
             string id = string.Empty;
 
@@ -185,30 +226,84 @@ namespace PDS.Witsml.Server.Data.Channels
                 {
                     id = endOfExisting ? string.Empty : existingEnum.Current.Id;
 
-                    if (!endOfExisting && (endOfUpdate || ExistingBefore(
-                                                            existingEnum.Current.GetIndexValue(),
-                                                            updateEnum.Current.GetIndexValue(), 
-                                                            existingEnum.Current.GetIndex().Increasing)))
+                    if (!endOfExisting && 
+                        (endOfUpdate || 
+                        existingEnum.Current.GetIndexValue() < updateRange.Start.Value || 
+                        existingEnum.Current.GetIndexValue() > updateRange.End.Value))
                     {
                         yield return existingEnum.Current;
                         endOfExisting = !existingEnum.MoveNext();
                     }
-                    else
+                    else if (!endOfUpdate &&
+                        (endOfExisting ||
+                        updateEnum.Current.GetIndexValue() < existingEnum.Current.GetIndexValue()))
                     {
                         updateEnum.Current.Id = id;
                         yield return updateEnum.Current;
+                        endOfUpdate = !updateEnum.MoveNext();
+                    }
+                    else
+                    {
+                        if (!endOfExisting && !endOfUpdate)
+                        {
+                            if (existingEnum.Current.GetIndexValue() == updateEnum.Current.GetIndexValue())
+                            {
+                                yield return MergeRow(existingEnum.Current, updateEnum.Current);
+                                endOfExisting = !existingEnum.MoveNext();
+                                endOfUpdate = !updateEnum.MoveNext();
+                            }
 
-                        if (!endOfExisting && existingEnum.Current.GetIndexValue() == updateEnum.Current.GetIndexValue())
+                            else if (existingEnum.Current.GetIndexValue() < updateEnum.Current.GetIndexValue())
                         {
                             endOfExisting = !existingEnum.MoveNext();
                         }
 
+                            else // existingEnum.Current.GetIndexValue() > updateEnum.Current.GetIndexValue()
+                            {
+                                updateEnum.Current.Id = id;
+                                yield return updateEnum.Current;
                         endOfUpdate = !updateEnum.MoveNext();
                     }
                 }
             }
+
+                    //if (!endOfExisting && (endOfUpdate || ExistingBefore(
+                    //                                        existingEnum.Current.GetIndexValue(),
+                    //                                        updateEnum.Current.GetIndexValue(), 
+                    //                                        existingEnum.Current.GetIndex().Increasing)))
+                    //{
+                    //    yield return existingEnum.Current;
+                    //    endOfExisting = !existingEnum.MoveNext();
+                    //}
+                    //else
+                    //{
+                    //    updateEnum.Current.Id = id;
+                    //    yield return updateEnum.Current;
+
+                    //    if (!endOfExisting && existingEnum.Current.GetIndexValue() == updateEnum.Current.GetIndexValue())
+                    //    {
+                    //        endOfExisting = !existingEnum.MoveNext();
+                    //    }
+
+                    //    endOfUpdate = !updateEnum.MoveNext();
+                    //}
+                }
+            }
         }
 
+        private IChannelDataRecord MergeRow(IChannelDataRecord existingRecord, IChannelDataRecord updateRecord)
+        {
+            return existingRecord;
+        }
+
+
+        /// <summary>
+        /// A test for merging data depending on the index direction
+        /// </summary>
+        /// <param name="existingValue">The existing value.</param>
+        /// <param name="updateValue">The update value.</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <returns></returns>
         private bool ExistingBefore(double existingValue, double updateValue, bool increasing)
         {
             return increasing
