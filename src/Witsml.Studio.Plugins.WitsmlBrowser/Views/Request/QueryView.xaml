@@ -25,15 +25,20 @@
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
-                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0" Orientation="Horizontal">
-                <ComboBox Width="120" Margin="5,5,0,5" IsReadOnly="True" SelectedItem="{Binding Model.StoreFunction, Mode=TwoWay}" ItemsSource="{Binding StoreFunctions}" VerticalContentAlignment="Center" />
-                <Button x:Name="SubmitQuery" Content="Execute" Width="80" Margin="5,5,0,5" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" />
+                <ComboBox Width="120" Margin="5,5,0,5" IsEditable="False" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" 
+                          SelectedItem="{Binding Model.StoreFunction}" ItemsSource="{Binding StoreFunctions}" VerticalContentAlignment="Center" />
+                
+                <Button x:Name="SubmitQuery" Content="Execute" Width="70" Margin="5,5,0,5" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" />
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <ComboBox Width="120" Margin="0,5,5,5" IsEditable="False" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}"
+                          SelectedItem="{Binding Parent.Parent.DataObject}" ItemsSource="{Binding Parent.Parent.DataObjects}" VerticalContentAlignment="Center" />
+
                 <Button x:Name="OpenQuery" Content="Open" Width="60" Margin="0,5,5,5" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" />
                 <Button x:Name="SaveQuery" Content="Save" Width="60" Margin="0,5,5,5" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" />
             </StackPanel>

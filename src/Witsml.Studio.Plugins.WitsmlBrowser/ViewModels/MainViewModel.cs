@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Caliburn.Micro;
 using Energistics.DataAccess;
 using ICSharpCode.AvalonEdit.Document;
@@ -24,6 +26,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
     public class MainViewModel : Conductor<IScreen>.Collection.AllActive, IPluginViewModel
     {
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MainViewModel));
+        private const string QueryTemplateText = "Query Templates";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainViewModel"/> class.
@@ -36,6 +39,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
 
             Runtime = runtime;
             DisplayName = Settings.Default.PluginDisplayName;
+            DataObjects = new BindableCollection<string>() { QueryTemplateText };
 
             // Create the model for our witsml settings
             Model = new Models.WitsmlSettings();
@@ -77,6 +81,32 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// </summary>
         /// <value>The runtime.</value>
         public IRuntimeService Runtime { get; private set; }
+
+        /// <summary>
+        /// Gets the collection of supported data objects.
+        /// </summary>
+        /// <value>The collection of data objects.</value>
+        public BindableCollection<string> DataObjects { get; private set; }
+
+        private string _dataObject;
+
+        /// <summary>
+        /// Gets or sets the selected data object.
+        /// </summary>
+        /// <value>The selected data object.</value>
+        public string DataObject
+        {
+            get { return _dataObject; }
+            set
+            {
+                if (!string.Equals(_dataObject, value))
+                {
+                    _dataObject = value;
+                    NotifyOfPropertyChange(() => DataObject);
+                    OnDataObjectSelected();
+                }
+            }
+        }
 
         private Models.WitsmlSettings _model;
 
@@ -239,6 +269,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                             // Set options in for the selected WitsmlVersion.
                             optionsIn = new OptionsIn.DataVersion(Model.WitsmlVersion);
                             returnCode = wmls.WMLS_GetCap(optionsIn, out xmlOut, out suppMsgOut);
+                            ProcessCapServer(xmlOut);
                             break;
                         case Functions.AddToStore:
                             returnCode = wmls.WMLS_AddToStore(objectType, xmlIn, null, null, out suppMsgOut);
@@ -321,6 +352,58 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             _log.Debug("Initializing screen");
             base.OnInitialize();
             LoadScreens();
+        }
+
+        /// <summary>
+        /// Processes the capServer response recieved.
+        /// </summary>
+        /// <param name="xmlOut">The XML out.</param>
+        private void ProcessCapServer(string capServers)
+        {
+            if (string.IsNullOrWhiteSpace(capServers))
+                return;
+
+            DataObjects.Clear();
+            DataObjects.Add(QueryTemplateText);
+            DataObject = QueryTemplateText;
+
+            var xml = XDocument.Parse(capServers);
+
+            xml.Descendants()
+                .Where(x => x.Name.LocalName == "dataObject")
+                .ForEach(x =>
+                {
+                    if (!DataObjects.Contains(x.Value))
+                        DataObjects.Add(x.Value);
+                });
+        }
+
+        /// <summary>
+        /// Called when a data object is selected.
+        /// </summary>
+        private void OnDataObjectSelected()
+        {
+            if (DataObject == QueryTemplateText)
+                return;
+
+            var ns = OptionsIn.DataVersion.Version131.Equals(Model.WitsmlVersion)
+                ? "Energistics.DataAccess.WITSML131."
+                : "Energistics.DataAccess.WITSML141.";
+
+            var type = Proxy.GetType().Assembly.GetType(ns + DataObject.ToPascalCase() + "List");
+
+            var method = Proxy.GetType()
+                .GetMethod("BuildEmptyQuery", BindingFlags.Static | BindingFlags.Public)
+                .MakeGenericMethod(type);
+
+            var query = method.Invoke(null, null) as IEnergisticsCollection;
+            query.SetVersion(Model.WitsmlVersion);
+
+            Runtime.Invoke(() =>
+            {
+                XmlQuery.Text = EnergisticsConverter.ObjectToXml(query);
+                DataObject = QueryTemplateText;
+            });
         }
 
         /// <summary>
