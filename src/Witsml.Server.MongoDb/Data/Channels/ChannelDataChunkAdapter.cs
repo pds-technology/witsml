@@ -21,9 +21,9 @@ namespace PDS.Witsml.Server.Data.Channels
 
         }
 
-        public List<ChannelDataChunk> GetData(string uri, string indexCurve, Range<double?> range, bool increasing)
+        public List<ChannelDataChunk> GetData(string uri, string indexChannel, Range<double?> range, bool increasing)
         {
-            var filter = BuildDataFilter(uri, indexCurve, range, increasing);
+            var filter = BuildDataFilter(uri, indexChannel, range, increasing);
             return GetData(filter, increasing);
         }
 
@@ -277,11 +277,11 @@ namespace PDS.Witsml.Server.Data.Channels
         /// Builds the data filter for the database query.
         /// </summary>
         /// <param name="uri">The URI of the data object.</param>
-        /// <param name="indexCurve">The index curve mnemonic.</param>
+        /// <param name="indexChannel">The index channel mnemonic.</param>
         /// <param name="range">The request range.</param>
         /// <param name="increasing">if set to <c>true</c> the index is increasing.</param>
         /// <returns>The query filter.</returns>
-        private FilterDefinition<ChannelDataChunk> BuildDataFilter(string uri, string indexCurve, Range<double?> range, bool increasing)
+        private FilterDefinition<ChannelDataChunk> BuildDataFilter(string uri, string indexChannel, Range<double?> range, bool increasing)
         {
             var builder = Builders<ChannelDataChunk>.Filter;
             var filters = new List<FilterDefinition<ChannelDataChunk>>();
@@ -306,7 +306,7 @@ namespace PDS.Witsml.Server.Data.Channels
             }
 
             if (rangeFilters.Count > 0)
-                rangeFilters.Add(builder.EqIgnoreCase("Indices.Mnemonic", indexCurve));
+                rangeFilters.Add(builder.EqIgnoreCase("Indices.Mnemonic", indexChannel));
 
             if (rangeFilters.Count > 0)
                 filters.Add(builder.And(rangeFilters));

@@ -30,6 +30,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             Runtime = runtime;
             DisplayName = string.Format("{0:D} - {0}", Protocols.ChannelStreaming);
             Channels = new List<ChannelMetadataRecord>();
+            ChannelStreamingInfos = new List<ChannelStreamingInfo>();
         }
 
         /// <summary>
@@ -60,6 +61,12 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         /// <value>The channel metadata.</value>
         public IList<ChannelMetadataRecord> Channels { get; private set; }
+
+        /// <summary>
+        /// Gets the collectino of channel streaming information.
+        /// </summary>
+        /// <value>The channel streaming information.</value>
+        public IList<ChannelStreamingInfo> ChannelStreamingInfos { get; private set; }
 
         private bool _isSimpleStreamer;
         /// <summary>
@@ -197,6 +204,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
 
             CanStart = false;
             Channels.Clear();
+            ChannelStreamingInfos.Clear();
             UpdateCanDescribe();
         }
 
@@ -206,6 +214,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         public void Describe()
         {
             Channels.Clear();
+            ChannelStreamingInfos.Clear();
 
             Parent.Client.Handler<IChannelStreamingConsumer>()
                 .ChannelDescribe(Model.Streaming.Uris);
@@ -216,12 +225,8 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         public void StartStreaming()
         {
-            var infos = Channels
-                .Select(ToChannelStreamingInfo)
-                .ToArray();
-
             Parent.Client.Handler<IChannelStreamingConsumer>()
-                .ChannelStreamingStart(infos);
+                .ChannelStreamingStart(ChannelStreamingInfos);
 
             CanDescribe = false;
             CanStartStreaming = false;
@@ -292,7 +297,11 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 return;
 
             // add to channel metadata collection
-            e.Message.Channels.ForEach(Channels.Add);
+            e.Message.Channels.ForEach(x =>
+            {
+                Channels.Add(x);
+                ChannelStreamingInfos.Add(ToChannelStreamingInfo(x));
+            });
 
             if (e.Header.MessageFlags == (int)MessageFlags.FinalPart)
             {

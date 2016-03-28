@@ -168,6 +168,44 @@ namespace Energistics.Datatypes
         }
 
         /// <summary>
+        /// Determines whether the specified <see cref="System.Object" />, is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool Equals(object obj)
+        {
+            if (obj == null || !(obj is EtpUri))
+                return false;
+
+            return Equals((EtpUri)obj);
+        }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="EtpUri" />, is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="EtpUri" /> to compare with this instance.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified <see cref="EtpUri" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public bool Equals(EtpUri other)
+        {
+            return string.Equals(other, this, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// </returns>
+        public override int GetHashCode()
+        {
+            return Uri.ToLower().GetHashCode();
+        }
+
+        /// <summary>
         /// Performs an implicit conversion from <see cref="EtpUri"/> to <see cref="System.String"/>.
         /// </summary>
         /// <param name="uri">The URI.</param>

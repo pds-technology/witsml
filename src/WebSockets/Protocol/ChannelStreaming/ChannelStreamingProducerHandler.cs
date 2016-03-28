@@ -34,6 +34,7 @@ namespace Energistics.Protocol.ChannelStreaming
 
         public virtual void ChannelMetadata(MessageHeader request, IList<ChannelMetadataRecord> channelMetadataRecords)
         {
+            //var messageFlag = channelMetadataRecords.Count == 0 ? MessageFlags.FinalPart : MessageFlags.MultiPart;
             var header = CreateMessageHeader(Protocols.ChannelStreaming, MessageTypes.ChannelStreaming.ChannelMetadata, request.MessageId, MessageFlags.FinalPart);
 
             var channelMetadata = new ChannelMetadata()
@@ -47,7 +48,9 @@ namespace Energistics.Protocol.ChannelStreaming
         public virtual void ChannelData(MessageHeader request, IList<DataItem> dataItems)
         {
             // NOTE: CorrelationId is only specified when responding to a ChannelRangeRequest message
-            var header = CreateMessageHeader(Protocols.ChannelStreaming, MessageTypes.ChannelStreaming.ChannelData, request == null ? 0 : request.MessageId, MessageFlags.MultiPart);
+            var correlationId = request == null ? 0 : request.MessageId;
+            var messageFlag = dataItems.Count == 0 ? MessageFlags.FinalPart : MessageFlags.MultiPart;
+            var header = CreateMessageHeader(Protocols.ChannelStreaming, MessageTypes.ChannelStreaming.ChannelData, correlationId, messageFlag);
 
             var channelData = new ChannelData()
             {

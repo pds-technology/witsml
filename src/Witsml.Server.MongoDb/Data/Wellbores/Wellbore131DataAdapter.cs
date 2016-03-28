@@ -3,6 +3,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
+using Energistics.Datatypes;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wellbores
@@ -14,6 +15,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// <seealso cref="PDS.Witsml.Server.Configuration.IWitsml131Configuration" />
     [Export(typeof(IWitsml131Configuration))]
     [Export(typeof(IWitsmlDataAdapter<Wellbore>))]
+    [Export(typeof(IEtpDataAdapter<Wellbore>))]
+    [Export131(ObjectTypes.Wellbore, typeof(IEtpDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class Wellbore131DataAdapter : MongoDbDataAdapter<Wellbore>, IWitsml131Configuration
     {
@@ -114,6 +117,44 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DeleteEntity(dataObjectId);
 
             return new WitsmlResult(ErrorCodes.Success);
+        }
+
+        /// <summary>
+        /// Gets a collection of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        public override List<Wellbore> GetAll(EtpUri? parentUri = null)
+        {
+            var query = GetQuery().AsQueryable();
+
+            if (parentUri != null)
+            {
+                var uidWell = parentUri.Value.ObjectId;
+                query = query.Where(x => x.UidWell == uidWell);
+            }
+
+            return query
+                .OrderBy(x => x.Name)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Puts the specified data object into the data store.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        public override WitsmlResult Put(Wellbore entity)
+        {
+            if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.GetObjectId()))
+            {
+                Logger.DebugFormat("Update Wellbore with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
+                return Update(entity);
+            }
+            else
+            {
+                Logger.DebugFormat("Add Wellbore with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
+                return Add(entity);
+            }
         }
 
         /// <summary>

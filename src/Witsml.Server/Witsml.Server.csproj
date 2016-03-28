@@ -79,6 +79,7 @@
     <Compile Include="Configuration\RequestExtensions.cs" />
     <Compile Include="Configuration\WitsmlValidator.cs" />
     <Compile Include="Data\Channels\ChannelSet200Validator.cs" />
+    <Compile Include="Data\Channels\IChannelDataProvider.cs" />
     <Compile Include="Data\DataObjectValidator.cs" />
     <Compile Include="Configuration\ICapServerProvider.cs" />
     <Compile Include="Data\IDataObjectValidator.cs" />
@@ -118,6 +119,7 @@
     <Compile Include="Providers\ChannelStreaming\ChannelStreamingAggregator.cs" />
     <Compile Include="Providers\ChannelStreaming\ChannelStreamingProducer.cs" />
     <Compile Include="Providers\ChannelStreaming\ChannelStreamingConsumer.cs" />
+    <Compile Include="Providers\Discovery\DiscoveryStore131Provider.cs" />
     <Compile Include="Providers\Discovery\DiscoveryStore141Provider.cs" />
     <Compile Include="Providers\Discovery\DiscoveryStore200Provider.cs" />
     <Compile Include="Providers\Discovery\DiscoveryStoreProvider.cs" />
@@ -125,6 +127,7 @@
     <Compile Include="Data\WitsmlExtensions.cs" />
     <Compile Include="Providers\EtpExtensions.cs" />
     <Compile Include="Providers\Store\IStoreStoreProvider.cs" />
+    <Compile Include="Providers\Store\StoreStore131Provider.cs" />
     <Compile Include="Providers\Store\StoreStore200Provider.cs" />
     <Compile Include="Providers\Store\StoreStore141Provider.cs" />
     <Compile Include="Providers\Store\StoreStoreProvider.cs" />
