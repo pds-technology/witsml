@@ -10,23 +10,44 @@ using PDS.Witsml.Server.MongoDb;
 
 namespace PDS.Witsml.Server.Data.Channels
 {
+    /// <summary>
+    /// Data adapter that encapsulates CRUD functionality for a 2.0 ChannelSet data.
+    /// </summary>
+    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{PDS.Witsml.Server.Models.ChannelDataChunk}" />
     [Export]
     public class ChannelDataChunkAdapter : MongoDbDataAdapter<ChannelDataChunk>
     {
         private static readonly int RangeSize = Settings.Default.LogIndexRangeSize;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ChannelDataChunkAdapter"/> class.
+        /// </summary>
+        /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
         public ChannelDataChunkAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectTypes.ChannelDataChunk, ObjectTypes.Id)
         {
 
         }
 
+        /// <summary>
+        /// Gets a list of ChannelDataChunk data for a given ChannelSet uri.
+        /// </summary>
+        /// <param name="uri">The ChannelSet URI.</param>
+        /// <param name="indexCurve">The index curve mnemonic.</param>
+        /// <param name="range">The index range to select data for.</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <returns>A <see cref="List{ChannelDataChunk}"/> </returns>
         public List<ChannelDataChunk> GetData(string uri, string indexCurve, Range<double?> range, bool increasing)
         {
             var filter = BuildDataFilter(uri, indexCurve, range, increasing);
             return GetData(filter, increasing);
         }
 
+
+        /// <summary>
+        /// Adds ChannelDataChunks using the specified reader.
+        /// </summary>
+        /// <param name="reader">The <see cref="ChannelDataReader"/> used to parse the data.</param>
         public void Add(ChannelDataReader reader)
         {
             if (reader == null || reader.RecordsAffected <= 0)
@@ -40,6 +61,11 @@ namespace PDS.Witsml.Server.Data.Channels
                 string.Join(",", reader.Units));
         }
 
+
+        /// <summary>
+        /// Merges <see cref="ChannelDataChunk"/> data for updates.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
         public void Merge(ChannelDataReader reader)
         {
             if (reader == null || reader.RecordsAffected <= 0)
@@ -65,6 +91,14 @@ namespace PDS.Witsml.Server.Data.Channels
                 string.Join(",", reader.Units));
         }
 
+
+        /// <summary>
+        /// Bulks writes <see cref="ChannelDataChunk"/> records for insert and update
+        /// </summary>
+        /// <param name="chunks">The chunks.</param>
+        /// <param name="uri">The URI.</param>
+        /// <param name="mnemonics">The mnemonics.</param>
+        /// <param name="units">The units.</param>
         private void BulkWriteChunks(IEnumerable<ChannelDataChunk> chunks, string uri, string mnemonics, string units)
         {
             var collection = GetCollection();
@@ -96,6 +130,12 @@ namespace PDS.Witsml.Server.Data.Channels
                 .ToList());
         }
 
+
+        /// <summary>
+        /// Combines <see cref="IEnumerable{IChannelDataRecord}"/> data into RangeSize chunks for storage into the database
+        /// </summary>
+        /// <param name="records">The <see cref="IEnumerable{ChannelDataChunk}"/> records to be chunked.</param>
+        /// <returns>An <see cref="IEnumerable{ChannelDataChunk}"/> of channel data.</returns>
         private IEnumerable<ChannelDataChunk> ToChunks(IEnumerable<IChannelDataRecord> records)
         {
             var data = new List<string>();
@@ -209,6 +249,14 @@ namespace PDS.Witsml.Server.Data.Channels
             }
         }
 
+
+        /// <summary>
+        /// A test for merging data depending on the index direction
+        /// </summary>
+        /// <param name="existingValue">The existing value.</param>
+        /// <param name="updateValue">The update value.</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <returns></returns>
         private bool ExistingBefore(double existingValue, double updateValue, bool increasing)
         {
             return increasing
