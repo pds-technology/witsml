@@ -418,5 +418,44 @@ namespace PDS.Witsml.Server.Data.Logs
             var data = logData.Data;
             Assert.AreEqual("15,15.1,15", data[2]);
         }
+
+        [TestMethod]
+        public void Test_update_log_header()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var uidWellbore = response.SuppMsgOut;
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = uidWellbore,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01"),
+                RunNumber = "101",
+                BhaRunNumber = 1
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                UidWellbore = uidWellbore
+            };
+
+            log.RunNumber = "102";
+            log.BhaRunNumber = 2;
+            log.Uid = response.SuppMsgOut;
+            var updateResponse = DevKit.Update<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+        }
     }
 }

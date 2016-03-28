@@ -731,7 +731,7 @@ namespace PDS.Witsml.Server.Data.Channels
             var valueUpdates = new List<List<string>>();
 
             var collection = GetCollection();
-            var mongoDbUpdate = new MongoDbUpdate<ChannelDataValues>(collection, null, null, null);
+            var mongoDbUpdate = new MongoDbUpdate<ChannelDataValues>(collection, null);
 
             // Looping through each logData elements, since multiple logData nodes are allowed during update
             foreach (var logData in logDatas)

@@ -67,10 +67,11 @@ namespace PDS.Witsml.Server.Data
         /// Updates the specified object.
         /// </summary>
         /// <param name="entity">The object.</param>
+        /// <param name="parser">The update parser.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        public virtual WitsmlResult Update(T entity)
+        public virtual WitsmlResult Update(T entity, WitsmlQueryParser parser)
         {
             throw new NotImplementedException();
         }
