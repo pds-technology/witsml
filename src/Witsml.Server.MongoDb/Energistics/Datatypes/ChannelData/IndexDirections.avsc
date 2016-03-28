@@ -1,0 +1,10 @@
+{
+	"type": "enum",
+	"namespace": "Energistics.Datatypes.ChannelData",
+	"name": "IndexDirections",
+	"symbols":
+	[
+		"Increasing",
+		"Decreasing"
+	]
+}

@@ -1,0 +1,11 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Datatypes.Object",	
+	"name": "DataObject",
+	"fields":
+	[
+		{ "name": "resource", "type": "Energistics.Datatypes.Object.Resource" },
+		{ "name": "contentEncoding", "type": "string" },
+		{ "name": "data", "type": "bytes" }
+	]
+}
