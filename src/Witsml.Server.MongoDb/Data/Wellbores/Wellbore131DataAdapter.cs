@@ -149,7 +149,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.GetObjectId()))
             {
                 Logger.DebugFormat("Update Wellbore with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
-                return Update(entity);
+                return Update(entity, null);
             }
             else
             {
