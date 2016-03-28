@@ -94,14 +94,16 @@ namespace PDS.Witsml.Data.Logs
         /// <param name="numOfRows">The number of rows.</param>
         /// <param name="startIndex">The start index.</param>
         /// <returns></returns>
-        public double GenerateLogData(Log log, int numOfRows = 5, double startIndex = 0d)
+        public double GenerateLogData(Log log, int numOfRows = 5, double startIndex = 0d, double interval = 1.0)
         {           
             const int Seed = 123;
 
             Random random = new Random(Seed);
             DateTimeOffset dateTimeIndexStart = DateTimeOffset.Now;
             DateTimeOffset dateTimeChannelStart = dateTimeIndexStart;
-            double interval = log.Direction == LogIndexDirection.decreasing ? -1.0 : 1.0;
+
+            if (log.Direction == LogIndexDirection.decreasing)
+                interval = -interval;
 
             if (log.LogData == null)
                 log.LogData = new List<LogData>();

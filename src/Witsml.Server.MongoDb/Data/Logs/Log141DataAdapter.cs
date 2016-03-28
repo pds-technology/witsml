@@ -95,7 +95,8 @@ namespace PDS.Witsml.Server.Data.Logs
             var logs = QueryEntities(parser, fields, ignored);
 
             // Only get LogData when returnElements != "header-only" and returnElements != "id-only"
-            if (!OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) && !OptionsIn.ReturnElements.IdOnly.Equals(returnElements))
+            if (!OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) && !OptionsIn.ReturnElements.IdOnly.Equals(returnElements) && 
+                !OptionsIn.RequestObjectSelectionCapability.True.Equals(parser.RequestObjectSelectionCapability()))
             {
                 logs.ForEach(l =>
                 {

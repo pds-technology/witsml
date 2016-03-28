@@ -3,14 +3,17 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
+using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
 using Energistics.Datatypes;
+using Energistics.Datatypes.ChannelData;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Server.Models;
+using PDS.Witsml.Server.Providers;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -18,6 +21,7 @@ namespace PDS.Witsml.Server.Data.Logs
     /// Data adapter that encapsulates CRUD functionality for a 131 <see cref="Log" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML131.Log}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.Channels.IChannelDataProvider" />
     /// <seealso cref="PDS.Witsml.Server.Configuration.IWitsml131Configuration" />
     [Export(typeof(IWitsml131Configuration))]
     [Export(typeof(IWitsmlDataAdapter<Log>))]
@@ -69,7 +73,8 @@ namespace PDS.Witsml.Server.Data.Logs
             var logs = QueryEntities(parser, fields, ignored);
 
             // Only get LogData when returnElements != "header-only" and returnElements != "id-only"
-            if (!OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) && !OptionsIn.ReturnElements.IdOnly.Equals(returnElements))
+            if (!OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) && !OptionsIn.ReturnElements.IdOnly.Equals(returnElements) &&
+                !OptionsIn.RequestObjectSelectionCapability.True.Equals(parser.RequestObjectSelectionCapability()))
             {
                 var logHeaders = GetEntities(logs.Select(x => x.GetObjectId()))
                     .ToDictionary(x => x.GetObjectId());
@@ -162,17 +167,42 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Gets the channel data.
+        /// Gets the channel metadata for the specified data object URI.
         /// </summary>
-        /// <param name="uri">The URI.</param>
-        /// <param name="indexChannel">The index channel.</param>
-        /// <param name="range">The range.</param>
-        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
-        /// <returns></returns>
-        public IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, string indexChannel, Range<double?> range, bool increasing)
+        /// <param name="uri">The parent data object URI.</param>
+        /// <returns>A collection of channel metadata.</returns>
+        public IList<ChannelMetadataRecord> GetChannelMetadata(EtpUri uri)
         {
-            var chunks = _channelDataChunkAdapter.GetData(uri, indexChannel, range, increasing);
-            return chunks.GetRecords(range, increasing);
+            var entity = GetEntity(uri.ToDataObjectId());
+            var metadata = new List<ChannelMetadataRecord>();
+            var index = 0;
+
+            if (entity.LogCurveInfo == null || !entity.LogCurveInfo.Any())
+                return metadata;
+
+            metadata.AddRange(entity.LogCurveInfo.Select(x =>
+            {
+                var channel = ToChannelMetadataRecord(entity, x);
+                channel.ChannelId = index++;
+                return channel;
+            }));
+
+            return metadata;
+        }
+
+        /// <summary>
+        /// Gets the channel data records for the specified data object URI and range.
+        /// </summary>
+        /// <param name="uri">The parent data object URI.</param>
+        /// <param name="range">The data range to retrieve.</param>
+        /// <returns>A collection of channel data.</returns>
+        public IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, Range<double?> range)
+        {
+            var entity = GetEntity(uri.ToDataObjectId());
+            var mnemonics = entity.LogCurveInfo.Select(x => x.Mnemonic);
+            var increasing = entity.Direction.GetValueOrDefault() == LogIndexDirection.increasing;
+
+            return GetChannelData(uri, mnemonics.First(), range, increasing);
         }
 
         /// <summary>
@@ -225,6 +255,12 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             var list = WitsmlParser.Parse<LogList>(xml);
             return list.Log.FirstOrDefault();
+        }
+
+        private IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, string indexChannel, Range<double?> range, bool increasing)
+        {
+            var chunks = _channelDataChunkAdapter.GetData(uri, indexChannel, range, increasing);
+            return chunks.GetRecords(range, increasing);
         }
 
         private List<string> QueryLogDataValues(Log log, WitsmlQueryParser parser)
@@ -291,6 +327,27 @@ namespace PDS.Witsml.Server.Data.Logs
             existing.LogData = logData;
 
             return reader;
+        }
+
+        private ChannelMetadataRecord ToChannelMetadataRecord(Log log, LogCurveInfo curve)
+        {
+            var uri = curve.GetUri(log);
+
+            return new ChannelMetadataRecord()
+            {
+                ChannelUri = uri,
+                ContentType = uri.ContentType,
+                DataType = curve.TypeLogData.GetValueOrDefault(LogDataType.@double).ToString().Replace("@", string.Empty),
+                Description = curve.CurveDescription ?? curve.Mnemonic,
+                Mnemonic = curve.Mnemonic,
+                Uom = curve.Unit,
+                MeasureClass = curve.ClassWitsml == null ? ObjectTypes.Unknown : curve.ClassWitsml.Name,
+                Source = curve.DataSource ?? ObjectTypes.Unknown,
+                Uuid = curve.Mnemonic,
+                Status = ChannelStatuses.Active,
+                ChannelAxes = new List<ChannelAxis>(),
+                Indexes = new List<IndexMetadataRecord>(),
+            };
         }
     }
 }

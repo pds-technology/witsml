@@ -64,7 +64,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
                 log.IndexCurve = model.Channels.Select(x => x.Mnemonic).FirstOrDefault();
                 log.LogCurveInfo = model.Channels.Select(ToLogCurveInfo).ToList();
 
-                index = generator.GenerateLogData(log, startIndex: index);
+                index = generator.GenerateLogData(log, startIndex: index, interval: 0.1);
 
                 result.Log[0].LogData[0].MnemonicList = generator.Mnemonics(result.Log[0].LogCurveInfo);
                 result.Log[0].LogData[0].UnitList = generator.Units(result.Log[0].LogCurveInfo);
