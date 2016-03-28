@@ -307,6 +307,12 @@ namespace PDS.Witsml.Server.Data
             }
         }
 
+        protected void UpdateEntity(T entity, WitsmlQueryParser parser)
+        {
+            var update = new MongoDbUpdate<T>(GetCollection(), parser);
+            update.Update(entity);
+        }
+
         /// <summary>
         /// Deletes a data object by the specified identifier.
         /// </summary>

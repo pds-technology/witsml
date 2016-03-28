@@ -123,10 +123,11 @@ namespace PDS.Witsml.Server.Data.Logs
         /// Updates the specified <see cref="Log"/> instance in the store.
         /// </summary>
         /// <param name="entity">The <see cref="Log"/> instance.</param>
+        /// <param name="parser">The update parser.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        public override WitsmlResult Update(Log entity)
+        public override WitsmlResult Update(Log entity, WitsmlQueryParser parser)
         {
             var dataObjectId = entity.GetObjectId();
             entity.CommonData = entity.CommonData.Update();
@@ -237,7 +238,7 @@ namespace PDS.Witsml.Server.Data.Logs
             if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.GetObjectId()))
             {
                 Logger.DebugFormat("Update Log with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
-                return Update(entity);
+                return Update(entity, null);
             }
             else
             {

@@ -418,5 +418,71 @@ namespace PDS.Witsml.Server.Data.Logs
             var data = logData.Data;
             Assert.AreEqual("15,15.1,15", data[2]);
         }
+
+        [TestMethod]
+        public void Test_update_log_header()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var uidWellbore = response.SuppMsgOut;
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = uidWellbore,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01"),
+                Description = "Not updated field",
+                RunNumber = "101",
+                BhaRunNumber = 1
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var query = new Log
+            {
+                UidWell = Wellbore.UidWell,
+                UidWellbore = uidWellbore,
+                Uid = uidLog
+            };
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            var logAdded = results.FirstOrDefault();
+            Assert.IsNotNull(logAdded);
+            Assert.AreEqual(log.Description, logAdded.Description);
+            Assert.AreEqual(log.RunNumber, logAdded.RunNumber);
+            Assert.AreEqual(log.BhaRunNumber, logAdded.BhaRunNumber);
+            Assert.IsNull(logAdded.CommonData.ItemState);
+
+            var update = new Log()
+            {
+                Uid = uidLog,
+                UidWell = Wellbore.UidWell,
+                UidWellbore = uidWellbore,
+                CommonData = new CommonData { ItemState = ItemState.actual }
+            };
+
+            update.RunNumber = "102";
+            update.BhaRunNumber = 2;
+            var updateResponse = DevKit.Update<LogList, Log>(update);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            var logUpdated = results.FirstOrDefault();
+            Assert.IsNotNull(logUpdated);
+            Assert.AreEqual(logAdded.Description, logUpdated.Description);
+            Assert.AreEqual(update.RunNumber, logUpdated.RunNumber);
+            Assert.AreEqual(update.BhaRunNumber, logUpdated.BhaRunNumber);
+            Assert.AreEqual(update.CommonData.ItemState, logUpdated.CommonData.ItemState);
+        }
     }
 }
