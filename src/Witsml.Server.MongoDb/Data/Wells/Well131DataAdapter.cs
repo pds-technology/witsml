@@ -3,6 +3,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
+using Energistics.Datatypes;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
@@ -14,15 +15,17 @@ namespace PDS.Witsml.Server.Data.Wells
     /// <seealso cref="PDS.Witsml.Server.Configuration.IWitsml131Configuration" />
     [Export(typeof(IWitsml131Configuration))]
     [Export(typeof(IWitsmlDataAdapter<Well>))]
+    [Export(typeof(IEtpDataAdapter<Well>))]
+    [Export131(ObjectTypes.Well, typeof(IEtpDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class MongoDbWellDataAdapter : MongoDbDataAdapter<Well>, IWitsml131Configuration
+    public class Well131DataAdapter : MongoDbDataAdapter<Well>, IWitsml131Configuration
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MongoDbWellDataAdapter"/> class.
+        /// Initializes a new instance of the <see cref="Well131DataAdapter"/> class.
         /// </summary>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public MongoDbWellDataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Well131)
+        public Well131DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Well131)
         {
             Logger.Debug("Instance created.");
         }
@@ -119,6 +122,38 @@ namespace PDS.Witsml.Server.Data.Wells
             DeleteEntity(dataObjectId);
 
             return new WitsmlResult(ErrorCodes.Success);
+        }
+
+        /// <summary>
+        /// Gets a collection of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        public override List<Well> GetAll(EtpUri? parentUri = null)
+        {
+            Logger.Debug("Fetching all Wells.");
+
+            return GetQuery()
+                .OrderBy(x => x.Name)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Puts the specified data object into the data store.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        public override WitsmlResult Put(Well entity)
+        {
+            if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.GetObjectId()))
+            {
+                Logger.DebugFormat("Updating Well with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
+                return Update(entity);
+            }
+            else
+            {
+                Logger.DebugFormat("Adding Well with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
+                return Add(entity);
+            }
         }
 
         /// <summary>

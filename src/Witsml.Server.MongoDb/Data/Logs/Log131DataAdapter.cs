@@ -4,6 +4,7 @@ using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ReferenceData;
+using Energistics.Datatypes;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
@@ -20,8 +21,11 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <seealso cref="PDS.Witsml.Server.Configuration.IWitsml131Configuration" />
     [Export(typeof(IWitsml131Configuration))]
     [Export(typeof(IWitsmlDataAdapter<Log>))]
+    [Export(typeof(IEtpDataAdapter<Log>))]
+    [Export131(ObjectTypes.Log, typeof(IEtpDataAdapter))]
+    [Export131(ObjectTypes.Log, typeof(IChannelDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Log131DataAdapter : MongoDbDataAdapter<Log>, IWitsml131Configuration
+    public class Log131DataAdapter : MongoDbDataAdapter<Log>, IChannelDataProvider, IWitsml131Configuration
     {
         private readonly ChannelDataChunkAdapter _channelDataChunkAdapter;
 
@@ -158,6 +162,61 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
+        /// Gets the channel data.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="indexChannel">The index channel.</param>
+        /// <param name="range">The range.</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <returns></returns>
+        public IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, string indexChannel, Range<double?> range, bool increasing)
+        {
+            var chunks = _channelDataChunkAdapter.GetData(uri, indexChannel, range, increasing);
+            return chunks.GetRecords(range, increasing);
+        }
+
+        /// <summary>
+        /// Gets a collection of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        public override List<Log> GetAll(EtpUri? parentUri = null)
+        {
+            var query = GetQuery().AsQueryable();
+
+            if (parentUri != null)
+            {
+                var ids = parentUri.Value.GetObjectIds().ToDictionary(x => x.Key, y => y.Value);
+                var uidWellbore = ids[ObjectTypes.Wellbore];
+                var uidWell = ids[ObjectTypes.Well];
+
+                query = query.Where(x => x.UidWell == uidWell && x.UidWellbore == uidWellbore);
+            }
+
+            return query
+                .OrderBy(x => x.Name)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Puts the specified data object into the data store.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        public override WitsmlResult Put(Log entity)
+        {
+            if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.GetObjectId()))
+            {
+                Logger.DebugFormat("Update Log with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
+                return Update(entity);
+            }
+            else
+            {
+                Logger.DebugFormat("Add Log with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
+                return Add(entity);
+            }
+        }
+
+        /// <summary>
         /// Parses the specified XML string.
         /// </summary>
         /// <param name="xml">The XML string.</param>
@@ -173,9 +232,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var range = GetLogDataSubsetRange(log, parser);
             var mnemonics = GetMnemonicList(log, parser);
             var increasing = log.Direction.GetValueOrDefault() == LogIndexDirection.increasing;
-
-            var chunks = _channelDataChunkAdapter.GetData(log.GetUri(), mnemonics.First(), range, increasing);
-            var records = chunks.GetRecords(range, increasing);
+            var records = GetChannelData(log.GetUri(), mnemonics.First(), range, increasing);
 
             return FormatLogData(records, mnemonics);
         }
