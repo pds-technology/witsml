@@ -436,6 +436,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 UidWellbore = uidWellbore,
                 NameWellbore = Wellbore.Name,
                 Name = DevKit.Name("Log 01"),
+                Description = "Not updated field",
                 RunNumber = "101",
                 BhaRunNumber = 1
             };
@@ -445,17 +446,43 @@ namespace PDS.Witsml.Server.Data.Logs
             response = DevKit.Add<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            log = new Log()
+            var uidLog = response.SuppMsgOut;
+
+            var query = new Log
             {
                 UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore
+                UidWellbore = uidWellbore,
+                Uid = uidLog
             };
 
-            log.RunNumber = "102";
-            log.BhaRunNumber = 2;
-            log.Uid = response.SuppMsgOut;
-            var updateResponse = DevKit.Update<LogList, Log>(log);
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            var logAdded = results.FirstOrDefault();
+            Assert.IsNotNull(logAdded);
+            Assert.AreEqual(log.Description, logAdded.Description);
+            Assert.AreEqual(log.RunNumber, logAdded.RunNumber);
+            Assert.AreEqual(log.BhaRunNumber, logAdded.BhaRunNumber);
+            Assert.IsNull(logAdded.CommonData.ItemState);
+
+            var update = new Log()
+            {
+                Uid = uidLog,
+                UidWell = Wellbore.UidWell,
+                UidWellbore = uidWellbore,
+                CommonData = new CommonData { ItemState = ItemState.actual }
+            };
+
+            update.RunNumber = "102";
+            update.BhaRunNumber = 2;
+            var updateResponse = DevKit.Update<LogList, Log>(update);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            var logUpdated = results.FirstOrDefault();
+            Assert.IsNotNull(logUpdated);
+            Assert.AreEqual(logAdded.Description, logUpdated.Description);
+            Assert.AreEqual(update.RunNumber, logUpdated.RunNumber);
+            Assert.AreEqual(update.BhaRunNumber, logUpdated.BhaRunNumber);
+            Assert.AreEqual(update.CommonData.ItemState, logUpdated.CommonData.ItemState);
         }
     }
 }

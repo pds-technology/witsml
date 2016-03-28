@@ -32,12 +32,12 @@ namespace PDS.Witsml.Server.Data
 
         public void Update(T entity)
         {
-            var element = _parser.Element();
-            var update = Builders<T>.Update.CurrentDate("CommonData.DateTimeLastChange");
-            update = BuildUpdate(update, element, entity);
-
             var dataObj = entity as IDataObject;
             var filter = MongoDbFieldHelper.GetEntityFilter<T>(dataObj.GetObjectId());
+
+            var element = _parser.Element();
+            var update = Builders<T>.Update.Set(DefaultIdField, dataObj.Uid);
+            update = BuildUpdate(update, element, entity);
 
             var updateJson = update.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
 
@@ -164,11 +164,11 @@ namespace PDS.Witsml.Server.Data
                     update = BuildUpdateForProperty(update, uomProperty.PropertyType, uomPath, uomValue);
                 }
 
-                update = BuildUpdateForProperty(update, fieldType, fieldName, element.Value);             
+                return BuildUpdateForProperty(update, fieldType, fieldName, element.Value);             
             }
             else if (element.HasElements || element.HasAttributes)
             {
-                update = BuildUpdateForAnElement(update, element, elementType, propertyPath);
+                return BuildUpdateForAnElement(update, element, elementType, propertyPath);
             }
 
             return BuildUpdateForProperty(update, elementType, propertyPath, element.Value);
