@@ -82,6 +82,23 @@ namespace PDS.Witsml.Data.Channels
         }
 
         [TestMethod]
+        public void ChannelDataReader_can_set_data_value()
+        {
+            var reader = new ChannelDataReader(UpdateLogData1, new[] { "MD", "ROP", "GR", "HKLD" })
+                .WithIndex("MD", true, false);
+
+            Assert.AreEqual(1, reader.Depth);
+            Assert.AreEqual(4, reader.FieldCount);
+            Assert.AreEqual(9, reader.RecordsAffected);
+
+            if (reader.Read())
+            {
+                reader.SetValue(1, 1000.0);
+                Assert.AreEqual(1000.0, reader.GetDouble(1));
+            }
+        }
+
+        [TestMethod]
         public void ChannelDataReader_can_read_time_log_data()
         {
             var reader = new ChannelDataReader(TimeLogData);

@@ -98,6 +98,16 @@ namespace PDS.Witsml.Data.Channels
             Close();
         }
 
+        public void SetValue(int i, object value)
+        {
+            var row = _records[_current];
+
+            if (i < Depth)
+                row[0][i] = value;
+            else
+                row[1][i - Depth] = value;
+        }
+
         public ChannelIndexInfo GetIndex(int index = 0)
         {
             return Indices.Skip(index).FirstOrDefault();
@@ -125,16 +135,16 @@ namespace PDS.Witsml.Data.Channels
             return Range.Parse(start, end, channelIndex.IsTimeIndex);
         }
 
-        public Range<double?> GetChannelIndexRange(int index)
+        public Range<double?> GetChannelIndexRange(int i)
         {
             if (RecordsAffected < 1)
                 return GetIndexRange();
 
-            if (index < Depth)
-                return GetIndexRange(index);
+            if (i < Depth)
+                return GetIndexRange(i);
 
             var channelIndex = GetIndex();
-            var valueIndex = index - Depth;
+            var valueIndex = i - Depth;
             string start = null;
             string end = null;
 
