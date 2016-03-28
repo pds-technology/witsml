@@ -84,10 +84,11 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// Updates the specified object.
         /// </summary>
         /// <param name="entity">The object.</param>
+        /// <param name="parser">The update parser.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        public override WitsmlResult Update(Wellbore entity)
+        public override WitsmlResult Update(Wellbore entity, WitsmlQueryParser parser)
         {
             Logger.DebugFormat("Updating Wellbore with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
 
@@ -146,7 +147,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.GetObjectId()))
             {
                 Logger.DebugFormat("Update Wellbore with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
-                return Update(entity);
+                return Update(entity, null);
             }
             else
             {

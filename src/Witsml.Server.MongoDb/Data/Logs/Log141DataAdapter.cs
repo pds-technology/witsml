@@ -165,15 +165,18 @@ namespace PDS.Witsml.Server.Data.Logs
         /// Updates the specified <see cref="Log"/> instance in the store.
         /// </summary>
         /// <param name="entity">The <see cref="Log"/> instance.</param>
+        /// <param name="parser">The update parser.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        public override WitsmlResult Update(Log entity)
+        public override WitsmlResult Update(Log entity, WitsmlQueryParser parser)
         {
             //List<LogDataValues> logDataValuesList = null;
             var result = Get(entity.GetObjectId());
             var isTimeLog = result.IndexType.GetValueOrDefault() == LogIndexType.datetime;
             var decreasing = result.Direction.GetValueOrDefault() == LogIndexDirection.decreasing;
+
+            UpdateEntity(entity, parser);
 
             if (entity.LogData != null && entity.LogData.Count > 0)
             {
