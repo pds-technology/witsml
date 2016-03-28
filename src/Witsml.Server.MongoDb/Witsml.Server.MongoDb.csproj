@@ -105,6 +105,7 @@
     <Compile Include="Data\MongoDbClassMapper.cs" />
     <Compile Include="Data\MongoDbDataAdapter.cs" />
     <Compile Include="Data\MongoDbExtensions.cs" />
+    <Compile Include="Data\MongoDbFieldHelper.cs" />
     <Compile Include="Data\MongoDbQuery.cs" />
     <Compile Include="Data\MongoDbUpdate.cs" />
     <Compile Include="Data\TimestampSerializer.cs" />
