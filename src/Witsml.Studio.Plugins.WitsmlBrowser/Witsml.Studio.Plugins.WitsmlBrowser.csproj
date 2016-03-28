@@ -93,7 +93,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\QuerySettings.cs" />
     <Compile Include="Models\WitsmlResult.cs" />
     <Compile Include="Models\WitsmlSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">

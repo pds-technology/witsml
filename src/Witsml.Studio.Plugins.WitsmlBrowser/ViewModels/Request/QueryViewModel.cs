@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Windows;
 using Caliburn.Micro;
 using ICSharpCode.AvalonEdit.Document;
@@ -26,8 +25,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             Runtime = runtime;
             DisplayName = "Query";
 
-            _model = new Models.QuerySettings();
-
             XmlQuery = new TextEditorViewModel(runtime, "XML")
             {
                 Document = xmlQuery
@@ -45,33 +42,19 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         /// <summary>
         /// Gets the main view model.
         /// </summary>
-        /// <value>
-        /// The main view model.
-        /// </value>
+        /// <value>The main view model.</value>
         public MainViewModel MainViewModel
         {
             get { return (MainViewModel)Parent.Parent; }
         }
 
-        private Models.QuerySettings _model;
-
         /// <summary>
         /// Gets the data model.
         /// </summary>
-        /// <value>
-        /// The WitsmlSettings data model.
-        /// </value>
-        public Models.QuerySettings Model
+        /// <value>The WitsmlSettings data model.</value>
+        public Models.WitsmlSettings Model
         {
-            get { return _model; }
-            set
-            {
-                if (!ReferenceEquals(_model, value))
-                {
-                    _model = value;
-                    NotifyOfPropertyChange(() => Model);
-                }
-            }
+            get { return Parent.Model; }
         }
 
         /// <summary>

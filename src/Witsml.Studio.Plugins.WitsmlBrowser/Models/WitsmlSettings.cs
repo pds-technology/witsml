@@ -8,6 +8,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
         public WitsmlSettings()
         {
             Connection = new Connection();
+            StoreFunction = Functions.GetFromStore;
             MaxDataRows = 1000;
         }
 
@@ -92,6 +93,20 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
                 {
                     _maxDataRows = value;
                     NotifyOfPropertyChange(() => MaxDataRows);
+                }
+            }
+        }
+
+        private Functions _storeFunction;
+        public Functions StoreFunction
+        {
+            get { return _storeFunction; }
+            set
+            {
+                if (_storeFunction != value)
+                {
+                    _storeFunction = value;
+                    NotifyOfPropertyChange(() => StoreFunction);
                 }
             }
         }

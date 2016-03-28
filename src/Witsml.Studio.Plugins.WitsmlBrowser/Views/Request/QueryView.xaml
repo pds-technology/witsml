@@ -8,8 +8,7 @@
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:app="clr-namespace:PDS.Witsml.Studio.Behaviors;assembly=PDS.Witsml.Studio"
              xmlns:conv="clr-namespace:PDS.Witsml.Studio.Converters;assembly=PDS.Witsml.Studio"
-             mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             mc:Ignorable="d" d:DesignHeight="500" d:DesignWidth="500">
 
     <UserControl.Resources>
         <conv:NullToBooleanConverter x:Key="NullToBooleanConverter" />
@@ -18,16 +17,26 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
-            <RowDefinition Height="40" />
+            <RowDefinition Height="45" />
         </Grid.RowDefinitions>
 
         <ContentControl x:Name="XmlQuery" />
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal">
-            <ComboBox Width="119" Margin="5,5,0,5" IsReadOnly="True" SelectedItem="{Binding Model.StoreFunction, Mode=TwoWay}" ItemsSource="{Binding StoreFunctions}" VerticalContentAlignment="Center" />
-            <Button Width="55" Content="Execute" Margin="5,5,0,5" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" cal:Message.Attach="SubmitQuery" />
-            <Button x:Name="SaveQuery" Content="Save" Width="45" Margin="5,5,0,5" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" />
-            <Button x:Name="OpenQuery" Content="Open" Width="48" Margin="5,5,0,5" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" />
-        </StackPanel>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <ComboBox Width="120" Margin="5,5,0,5" IsReadOnly="True" SelectedItem="{Binding Model.StoreFunction, Mode=TwoWay}" ItemsSource="{Binding StoreFunctions}" VerticalContentAlignment="Center" />
+                <Button x:Name="SubmitQuery" Content="Execute" Width="80" Margin="5,5,0,5" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="OpenQuery" Content="Open" Width="60" Margin="0,5,5,5" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" />
+                <Button x:Name="SaveQuery" Content="Save" Width="60" Margin="0,5,5,5" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" />
+            </StackPanel>
+        </Grid>
     </Grid>
 </UserControl>

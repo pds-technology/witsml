@@ -9,6 +9,8 @@ namespace PDS.Witsml.Studio.ViewModels
 {
     public class TextEditorViewModel : Screen
     {
+        private TextEditor _textEditor;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TextEditorViewModel"/> class.
         /// </summary>
@@ -145,6 +147,63 @@ namespace PDS.Witsml.Studio.ViewModels
             }
         }
 
+        private bool _canCut;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the Cut command can be executed.
+        /// </summary>
+        /// <value><c>true</c> if Cut can be executed; otherwise, <c>false</c>.</value>
+        public bool CanCut
+        {
+            get { return _canCut; }
+            set
+            {
+                if (_canCut != value)
+                {
+                    _canCut = value;
+                    NotifyOfPropertyChange(() => CanCut);
+                }
+            }
+        }
+
+        private bool _canCopy;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the Copy command can be executed.
+        /// </summary>
+        /// <value><c>true</c> if Copy can be executed; otherwise, <c>false</c>.</value>
+        public bool CanCopy
+        {
+            get { return _canCopy; }
+            set
+            {
+                if (_canCopy != value)
+                {
+                    _canCopy = value;
+                    NotifyOfPropertyChange(() => CanCopy);
+                }
+            }
+        }
+
+        private bool _canPaste;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the Paste command can be executed.
+        /// </summary>
+        /// <value><c>true</c> if Paste can be executed; otherwise, <c>false</c>.</value>
+        public bool CanPaste
+        {
+            get { return _canPaste; }
+            set
+            {
+                if (_canPaste != value)
+                {
+                    _canPaste = value;
+                    NotifyOfPropertyChange(() => CanPaste);
+                }
+            }
+        }
+
         /// <summary>
         /// Sets the document text.
         /// </summary>
@@ -170,27 +229,75 @@ namespace PDS.Witsml.Studio.ViewModels
         }
 
         /// <summary>
-        /// Copies the text to the clipboard.
+        /// Cuts the currently selected editor text.
+        /// </summary>
+        public void Cut()
+        {
+            Runtime.Invoke(() =>
+            {
+                Clipboard.SetText(_textEditor.SelectedText);
+                Document.Replace(_textEditor.SelectionStart, _textEditor.SelectionLength, string.Empty);
+            });
+        }
+
+        /// <summary>
+        /// Copies the currently selected editor text.
         /// </summary>
         public void Copy()
+        {
+            Runtime.Invoke(() => Clipboard.SetText(_textEditor.SelectedText));
+        }
+
+        /// <summary>
+        /// Pastes the clipboard text into the editor.
+        /// </summary>
+        public void Paste()
+        {
+            Runtime.Invoke(() => Document.Replace(_textEditor.SelectionStart, _textEditor.SelectionLength, Clipboard.GetText()));
+        }
+
+        /// <summary>
+        /// Selects all editor textx.
+        /// </summary>
+        public void SelectAll()
+        {
+            Runtime.Invoke(() => _textEditor.SelectAll());
+        }
+
+        /// <summary>
+        /// Copies all editor text to the clipboard.
+        /// </summary>
+        public void CopyAll()
         {
             Runtime.Invoke(() => Clipboard.SetText(Document.Text));
         }
 
         /// <summary>
-        /// Pastes the clipboard text to the Document text.
+        /// Replaces the editor text with the clipboard text.
         /// </summary>
-        public void Paste()
+        public void Replace()
         {
             Runtime.Invoke(() => Document.Text = Clipboard.GetText());
         }
 
         /// <summary>
-        /// Clears the text.
+        /// Clears the editor text.
         /// </summary>
         public void Clear()
         {
             Runtime.Invoke(() => Document.Text = string.Empty);
+        }
+
+        public void RefreshContextMenu(TextEditor control)
+        {
+            _textEditor = control;
+
+            Runtime.Invoke(() =>
+            {
+                CanCopy = control.SelectionLength > 0;
+                CanPaste = !IsReadOnly && Clipboard.ContainsText();
+                CanCut = !IsReadOnly && CanCopy;
+            });
         }
 
         /// <summary>
