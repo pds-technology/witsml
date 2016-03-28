@@ -91,10 +91,11 @@ namespace PDS.Witsml.Server.Data.Wells
         /// Updates the specified object.
         /// </summary>
         /// <param name="entity">The object.</param>
+        /// <param name="parser">The update parser.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        public override WitsmlResult Update(Well entity)
+        public override WitsmlResult Update(Well entity, WitsmlQueryParser parser)
         {
             Logger.DebugFormat("Updating Well with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
 
@@ -147,7 +148,7 @@ namespace PDS.Witsml.Server.Data.Wells
             if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.GetObjectId()))
             {
                 Logger.DebugFormat("Updating Well with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
-                return Update(entity);
+                return Update(entity, null);
             }
             else
             {
