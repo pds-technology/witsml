@@ -85,7 +85,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
             BulkWriteChunks(
                 ToChunks(
-                    MergeSequence(results.GetRecords(), reader.AsEnumerable())),
+                    MergeSequence(results.GetRecords(), reader.AsEnumerable(), updateRange)),
                 reader.Uri,
                 string.Join(",", reader.Mnemonics),
                 string.Join(",", reader.Units));
@@ -211,7 +211,8 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <returns>The merged sequence of channel data.</returns>
         private IEnumerable<IChannelDataRecord> MergeSequence(
             IEnumerable<IChannelDataRecord> existingChunks,
-            IEnumerable<IChannelDataRecord> updatedChunks)
+            IEnumerable<IChannelDataRecord> updatedChunks,
+            Range<double?> updateRange)
         {
             string id = string.Empty;
 
@@ -225,28 +226,74 @@ namespace PDS.Witsml.Server.Data.Channels
                 {
                     id = endOfExisting ? string.Empty : existingEnum.Current.Id;
 
-                    if (!endOfExisting && (endOfUpdate || ExistingBefore(
-                                                            existingEnum.Current.GetIndexValue(),
-                                                            updateEnum.Current.GetIndexValue(), 
-                                                            existingEnum.Current.GetIndex().Increasing)))
+                    if (!endOfExisting && 
+                        (endOfUpdate || 
+                        existingEnum.Current.GetIndexValue() < updateRange.Start.Value || 
+                        existingEnum.Current.GetIndexValue() > updateRange.End.Value))
                     {
                         yield return existingEnum.Current;
                         endOfExisting = !existingEnum.MoveNext();
                     }
-                    else
+                    else if (!endOfUpdate &&
+                        (endOfExisting ||
+                        updateEnum.Current.GetIndexValue() < existingEnum.Current.GetIndexValue()))
                     {
                         updateEnum.Current.Id = id;
                         yield return updateEnum.Current;
-
-                        if (!endOfExisting && existingEnum.Current.GetIndexValue() == updateEnum.Current.GetIndexValue())
-                        {
-                            endOfExisting = !existingEnum.MoveNext();
-                        }
-
                         endOfUpdate = !updateEnum.MoveNext();
                     }
+                    else
+                    {
+                        if (!endOfExisting && !endOfUpdate)
+                        {
+                            if (existingEnum.Current.GetIndexValue() == updateEnum.Current.GetIndexValue())
+                            {
+                                yield return MergeRow(existingEnum.Current, updateEnum.Current);
+                                endOfExisting = !existingEnum.MoveNext();
+                                endOfUpdate = !updateEnum.MoveNext();
+                            }
+
+                            else if (existingEnum.Current.GetIndexValue() < updateEnum.Current.GetIndexValue())
+                            {
+                                endOfExisting = !existingEnum.MoveNext();
+                            }
+
+                            else // existingEnum.Current.GetIndexValue() > updateEnum.Current.GetIndexValue()
+                            {
+                                updateEnum.Current.Id = id;
+                                yield return updateEnum.Current;
+                                endOfUpdate = !updateEnum.MoveNext();
+                            }
+                        }
+                    }
+
+                    //if (!endOfExisting && (endOfUpdate || ExistingBefore(
+                    //                                        existingEnum.Current.GetIndexValue(),
+                    //                                        updateEnum.Current.GetIndexValue(), 
+                    //                                        existingEnum.Current.GetIndex().Increasing)))
+                    //{
+                    //    yield return existingEnum.Current;
+                    //    endOfExisting = !existingEnum.MoveNext();
+                    //}
+                    //else
+                    //{
+                    //    updateEnum.Current.Id = id;
+                    //    yield return updateEnum.Current;
+
+                    //    if (!endOfExisting && existingEnum.Current.GetIndexValue() == updateEnum.Current.GetIndexValue())
+                    //    {
+                    //        endOfExisting = !existingEnum.MoveNext();
+                    //    }
+
+                    //    endOfUpdate = !updateEnum.MoveNext();
+                    //}
                 }
             }
+        }
+
+        private IChannelDataRecord MergeRow(IChannelDataRecord existingRecord, IChannelDataRecord updateRecord)
+        {
+            return existingRecord;
         }
 
 
