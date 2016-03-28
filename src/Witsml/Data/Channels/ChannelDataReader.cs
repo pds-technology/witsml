@@ -125,6 +125,35 @@ namespace PDS.Witsml.Data.Channels
             return Range.Parse(start, end, channelIndex.IsTimeIndex);
         }
 
+        public Range<double?> GetChannelIndexRange(int index)
+        {
+            if (RecordsAffected < 1)
+                return GetIndexRange();
+
+            if (index < Depth)
+                return GetIndexRange(index);
+
+            var channelIndex = GetIndex();
+            var valueIndex = index - Depth;
+            string start = null;
+            string end = null;
+
+            _records.ForEach(x =>
+            {
+                var value = string.Format("{0}", x.Last().Skip(valueIndex).FirstOrDefault());
+                
+                if (!IsNull(value))
+                {
+                    if (start == null)
+                        start = value;
+
+                    end = value;
+                }
+            });
+
+            return Range.Parse(start, end, channelIndex.IsTimeIndex);
+        }
+
         public bool GetBoolean(int i)
         {
             return bool.TrueString.EqualsIgnoreCase(GetString(i));

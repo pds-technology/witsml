@@ -23,6 +23,8 @@ namespace PDS.Witsml.Data.Channels
 
         Range<double?> GetIndexRange(int index = 0);
 
+        Range<double?> GetChannelIndexRange(int index);
+
         DateTimeOffset GetDateTimeOffset(int i);
 
         long GetUnixTimeSeconds(int i);

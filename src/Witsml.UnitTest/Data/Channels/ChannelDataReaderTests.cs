@@ -20,7 +20,7 @@ namespace PDS.Witsml.Data.Channels
         ]";
 
         private const string DepthLogData1 = @"[
-            [[0.0], [0.0, 0.0, 0.0]],
+            [[0.0], [0.0, 0.1, 0.2]],
             [[0.1], [1.0, 1.1, 1.2]],
             [[0.2], [2.0, 2.1, 2.2]],
             [[0.3], [3.0, 3.1, 3.2]],
@@ -28,7 +28,7 @@ namespace PDS.Witsml.Data.Channels
         ]";
 
         private const string DepthLogData2 = @"[
-            [[0.5], [5.0, 5.0, 5.0]],
+            [[0.5], [5.0, 5.1, 5.2]],
             [[0.6], [6.0, 6.1, 6.2]],
             [[0.7], [7.0, 7.1, 7.2]],
             [[0.8], [8.0, 8.1, 8.2]],
@@ -36,11 +36,39 @@ namespace PDS.Witsml.Data.Channels
         ]";
 
         private const string ChannelSetData = @"[
-            [[0.0, ""2016-03-01T00:00:00.0-06:00""], [[0.0, true], 0.0, 0.0]],
+            [[0.0, ""2016-03-01T00:00:00.0-06:00""], [[0.0, true], 0.1, 0.2]],
             [[0.1, ""2016-03-01T00:00:01.0-06:00""], [[1.0, true], 1.1, 1.2]],
             [[0.2, ""2016-03-01T00:00:02.0-06:00""], [[2.0, false], 2.1, 2.2]],
             [[0.3, ""2016-03-01T00:00:03.0-06:00""], [null,        null, 3.2]],
             [[0.4, ""2016-03-01T00:00:04.0-06:00""], [[4.0, true], 4.1, 4.2]],
+        ]";
+
+        private const string UpdateLogData1 = @"[
+            [[0.0], [0.0, 0.1, 0.2]],
+            [[1.0], [1.0, 1.1, 1.2]],
+            [[2.0], [2.0, 2.1, 2.2]],
+            [[3.0], [3.0, 3.1, 3.2]],
+            [[4.0], [4.0, 4.1, 4.2]],
+            [[5.0], [5.0, 5.1, 5.2]],
+            [[5.5], [5.05, 5.15, 5.25]],
+            [[6.0], [6.0, 6.1, 6.2]],
+            [[7.0], [7.0, 7.1, 7.2]]
+        ]";
+
+        private const string UpdateLogData2 = @"[
+            [[3.0], [null, null, 3.22]],
+            [[3.5], [3.005, 3.115, 3.225]],
+            [[5.0], [null, null, 5.22]],
+            [[6.0], [null, null, 6.22]],
+        ]";
+
+        private const string UpdateLogData3 = @"[
+            [[3.0], [null, null, 3.22]],
+            [[3.5], [3.005, 3.115, 3.225]],
+            [[5.0], [null, null, 5.22]],
+            [[6.0], [null, 6.11, 6.22]],
+            [[7.0], [null, 7.11, 7.22]],
+            [[7.5], [null, null, 7.225]],
         ]";
 
         [TestMethod]
@@ -91,19 +119,38 @@ namespace PDS.Witsml.Data.Channels
                     reader.GetDouble(2),
                     reader.GetDouble(reader.GetOrdinal("HKLD")));
             }
+        }
 
-            //var list = new List<ChannelDataValues>()
-            //{
-            //    new ChannelDataValues()
-            //    {
-            //        UidLog = Guid.NewGuid().ToString(),
-            //        MnemonicList = string.Join(",", reader.Mnemonics),
-            //        UnitList = string.Join(",", reader.Units),
-            //        Data = DepthLogData2
-            //    }
-            //};
+        [TestMethod]
+        public void ChannelDataReader_can_calculate_channel_min_max_indices_with_single_value()
+        {
+            var reader = new ChannelDataReader(UpdateLogData2, new[] { "MD", "ROP", "GR", "HKLD" })
+                .WithIndex("MD", true, false);
 
-            //var chunks = reader.Merge(list);
+            Assert.AreEqual(1, reader.Depth);
+            Assert.AreEqual(4, reader.FieldCount);
+            Assert.AreEqual(4, reader.RecordsAffected);
+
+            var range = reader.GetChannelIndexRange(reader.GetOrdinal("GR"));
+
+            Assert.AreEqual(3.115, range.Start);
+            Assert.AreEqual(3.115, range.End);
+        }
+
+        [TestMethod]
+        public void ChannelDataReader_can_calculate_channel_min_max_indices_with_multiple_values()
+        {
+            var reader = new ChannelDataReader(UpdateLogData3, new[] { "MD", "ROP", "GR", "HKLD" })
+                .WithIndex("MD", true, false);
+
+            Assert.AreEqual(1, reader.Depth);
+            Assert.AreEqual(4, reader.FieldCount);
+            Assert.AreEqual(6, reader.RecordsAffected);
+
+            var range = reader.GetChannelIndexRange(reader.GetOrdinal("GR"));
+
+            Assert.AreEqual(3.115, range.Start);
+            Assert.AreEqual(7.11, range.End);
         }
 
         [TestMethod]
