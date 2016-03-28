@@ -70,7 +70,7 @@ namespace Energistics.Datatypes
         {
             var uuid = Uuid();
             var uri = new EtpUri("eml://witsml1411/well(" + uuid + ")");
-            var type = "application/x-witsml+xml;version=1.4.1.1;type=well;";
+            var type = "application/x-witsml+xml;version=1.4.1.1;type=obj_well;";
 
             Assert.IsNotNull(uri);
             Assert.IsTrue(uri.IsValid);

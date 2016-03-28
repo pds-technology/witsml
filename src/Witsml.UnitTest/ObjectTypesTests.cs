@@ -37,7 +37,7 @@ namespace PDS.Witsml
         {
             Should.Throw<ArgumentException>(() =>
             {
-                ObjectTypes.GetObjectType(typeof(Well));
+                ObjectTypes.GetObjectType(typeof(DateTime));
             });
         }
 
