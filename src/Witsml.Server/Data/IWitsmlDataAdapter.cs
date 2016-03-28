@@ -29,10 +29,11 @@ namespace PDS.Witsml.Server.Data
         /// Updates the specified object.
         /// </summary>
         /// <param name="entity">The object.</param>
+        /// <param name="parser">The update parser.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        WitsmlResult Update(T entity);
+        WitsmlResult Update(T entity, WitsmlQueryParser parser);
 
         /// <summary>
         /// Deletes or partially updates the specified object by uid.
