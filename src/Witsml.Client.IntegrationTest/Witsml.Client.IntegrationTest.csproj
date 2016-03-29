@@ -38,6 +38,10 @@
     <Reference Include="Energistics.DataAccess">
       <HintPath>..\External\DevKit\Energistics.DataAccess.dll</HintPath>
     </Reference>
+    <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <Choose>
@@ -70,6 +74,7 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="log4net.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

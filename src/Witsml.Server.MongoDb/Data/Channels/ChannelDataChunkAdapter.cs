@@ -11,7 +11,7 @@ using PDS.Witsml.Server.MongoDb;
 namespace PDS.Witsml.Server.Data.Channels
 {
     /// <summary>
-    /// Data adapter that encapsulates CRUD functionality for a 2.0 ChannelSet data.
+    /// Data adapter that encapsulates CRUD functionality for channel data.
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{PDS.Witsml.Server.Models.ChannelDataChunk}" />
     [Export]
@@ -26,23 +26,41 @@ namespace PDS.Witsml.Server.Data.Channels
         [ImportingConstructor]
         public ChannelDataChunkAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectTypes.ChannelDataChunk, ObjectTypes.Id)
         {
-
         }
 
         /// <summary>
-        /// Gets a list of ChannelDataChunk data for a given ChannelSet uri.
+        /// Gets a list of ChannelDataChunk data for a given data object URI.
         /// </summary>
-        /// <param name="uri">The ChannelSet URI.</param>
+        /// <param name="uri">The data object URI.</param>
         /// <param name="indexChannel">The index channel.</param>
         /// <param name="range">The index range to select data for.</param>
-        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
-        /// <returns>A <see cref="List{ChannelDataChunk}" /> </returns>
+        /// <param name="increasing">if set to <c>true</c> the primary index is increasing.</param>
+        /// <returns>A collection of <see cref="List{ChannelDataChunk}" /> items.</returns>
         public List<ChannelDataChunk> GetData(string uri, string indexChannel, Range<double?> range, bool increasing)
         {
             var filter = BuildDataFilter(uri, indexChannel, range, increasing);
             return GetData(filter, increasing);
         }
 
+        /// <summary>
+        /// Gets the index range for all channel data.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        /// <param name="increasing">if set to <c>true</c> the primary index is increasing.</param>
+        /// <returns>The full index range.</returns>
+        public Range<double> GetIndexRange(string uri, bool increasing)
+        {
+            if (increasing)
+            {
+                return new Range<double>(
+                    start: GetQuery().OrderBy(x => x.Indices[0].Start).Select(x => x.Indices[0].Start).FirstOrDefault(),
+                    end: GetQuery().OrderByDescending(x => x.Indices[0].Start).Select(x => x.Indices[0].End).FirstOrDefault());
+            }
+
+            return new Range<double>(
+                start: GetQuery().OrderByDescending(x => x.Indices[0].Start).Select(x => x.Indices[0].Start).FirstOrDefault(),
+                end: GetQuery().OrderBy(x => x.Indices[0].Start).Select(x => x.Indices[0].End).FirstOrDefault());
+        }
 
         /// <summary>
         /// Adds ChannelDataChunks using the specified reader.

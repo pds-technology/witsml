@@ -65,8 +65,12 @@ namespace PDS.Witsml.Server.Data.Logs
             var returnElements = parser.ReturnElements();
             Logger.DebugFormat("Querying with return elements '{0}'", returnElements);
 
-            var fields = (OptionsIn.ReturnElements.IdOnly.Equals(returnElements))
+            var fields = OptionsIn.ReturnElements.IdOnly.Equals(returnElements)
                 ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell", "UidWellbore", "NameWellbore" }
+                : OptionsIn.ReturnElements.DataOnly.Equals(returnElements)
+                ? new List<string> { IdPropertyName, "UidWell", "UidWellbore", "LogCurveInfo" }
+                : OptionsIn.ReturnElements.Requested.Equals(returnElements)
+                ? new List<string>()
                 : null;
 
             var ignored = new List<string> { "startIndex", "endIndex", "startDateTimeIndex", "endDateTimeIndex", "logData" };

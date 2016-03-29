@@ -149,7 +149,6 @@ namespace PDS.Witsml.Server.Data
 
             var filters = new List<FilterDefinition<T>>();
             var properties = GetPropertyInfo(type);
-
             var groupings = element.Elements().GroupBy(e => e.Name.LocalName);
 
             foreach (var group in groupings)

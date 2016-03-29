@@ -1,21 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using System.Linq.Dynamic;
-using System.Text;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Energistics.Datatypes;
+using Energistics.Datatypes.ChannelData;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
+using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Server.Models;
 using PDS.Witsml.Server.Properties;
+using PDS.Witsml.Server.Providers;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -23,29 +22,30 @@ namespace PDS.Witsml.Server.Data.Logs
     /// Data adapter that encapsulates CRUD functionality for a 141 <see cref="Log" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML141.Log}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.Channels.IChannelDataProvider" />
     /// <seealso cref="PDS.Witsml.Server.Configuration.IWitsml141Configuration" />
     [Export(typeof(IWitsml141Configuration))]
     [Export(typeof(IWitsmlDataAdapter<Log>))]
     [Export(typeof(IEtpDataAdapter<Log>))]
     [Export141(ObjectTypes.Log, typeof(IEtpDataAdapter))]
+    [Export141(ObjectTypes.Log, typeof(IChannelDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Log141DataAdapter : MongoDbDataAdapter<Log>, IWitsml141Configuration
+    public class Log141DataAdapter : MongoDbDataAdapter<Log>, IChannelDataProvider, IWitsml141Configuration
     {
-        private static readonly int LogIndexRangeSize = MongoDb.Settings.Default.LogIndexRangeSize;
-        private static readonly int maxDataNodes = Settings.Default.MaxDataNodes;
-        private static readonly int maxDataPoints = Settings.Default.MaxDataPoints;
-        private readonly ChannelDataAdapter _channelDataAdapter;
+        private static readonly int MaxDataNodes = Settings.Default.MaxDataNodes;
+        private static readonly int MaxDataPoints = Settings.Default.MaxDataPoints;
 
+        private readonly ChannelDataChunkAdapter _channelDataChunkAdapter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Log141DataAdapter"/> class.
         /// </summary>
         /// <param name="databaseProvider">The database provider.</param>
-        /// <param name="channelDataAdapter">The channels data adapter.</param>
+        /// <param name="channelDataChunkAdapter">The channels data adapter.</param>
         [ImportingConstructor]
-        public Log141DataAdapter(IDatabaseProvider databaseProvider, ChannelDataAdapter channelDataAdapter) : base(databaseProvider, ObjectNames.Log141)
+        public Log141DataAdapter(IDatabaseProvider databaseProvider, ChannelDataChunkAdapter channelDataChunkAdapter) : base(databaseProvider, ObjectNames.Log141)
         {
-            _channelDataAdapter = channelDataAdapter;
+            _channelDataChunkAdapter = channelDataChunkAdapter;
         }
 
 
@@ -57,14 +57,14 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             capServer.Add(Functions.GetFromStore, new ObjectWithConstraint(ObjectTypes.Log)
             {
-                MaxDataNodes = maxDataNodes,
-                MaxDataPoints = maxDataPoints
+                MaxDataNodes = MaxDataNodes,
+                MaxDataPoints = MaxDataPoints
             });
 
             capServer.Add(Functions.AddToStore, new ObjectWithConstraint(ObjectTypes.Log)
             {
-                MaxDataNodes = maxDataNodes,
-                MaxDataPoints = maxDataPoints
+                MaxDataNodes = MaxDataNodes,
+                MaxDataPoints = MaxDataPoints
             });
 
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);
@@ -83,12 +83,11 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var fields = OptionsIn.ReturnElements.IdOnly.Equals(returnElements)
                 ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell", "UidWellbore", "NameWellbore" }
-                : OptionsIn.ReturnElements.DataOnly.Equals(returnElements) ? new List<string> { IdPropertyName, "UidWell", "UidWellbore", "LogCurveInfo" }
-                : OptionsIn.ReturnElements.Requested.Equals(returnElements) ? new List<string>()
+                : OptionsIn.ReturnElements.DataOnly.Equals(returnElements) 
+                ? new List<string> { IdPropertyName, "UidWell", "UidWellbore", "LogCurveInfo" }
+                : OptionsIn.ReturnElements.Requested.Equals(returnElements)
+                ? new List<string>()
                 : null;
-
-            if (fields != null && !fields.Contains("IndexType"))
-                fields.Add("IndexType");
 
             var ignored = new List<string> { "startIndex", "endIndex", "startDateTimeIndex", "endDateTimeIndex", "logData" };
             var logs = QueryEntities(parser, fields, ignored);
@@ -97,12 +96,16 @@ namespace PDS.Witsml.Server.Data.Logs
             if (!OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) && !OptionsIn.ReturnElements.IdOnly.Equals(returnElements) && 
                 !OptionsIn.RequestObjectSelectionCapability.True.Equals(parser.RequestObjectSelectionCapability()))
             {
+                var logHeaders = GetEntities(logs.Select(x => x.GetObjectId()))
+                    .ToDictionary(x => x.GetObjectId());
+
                 logs.ForEach(l =>
                 {
-                    l.LogData = new List<LogData> { QueryLogDataValues(l, parser) };
-
-                    if (OptionsIn.ReturnElements.DataOnly.Equals(returnElements))
-                        l.LogCurveInfo.Clear();
+                    var logHeader = logHeaders[l.GetObjectId()];
+                    l.LogData = new List<LogData>()
+                    {
+                        QueryLogDataValues(logHeader, parser)
+                    };
                 });
             }
 
@@ -125,40 +128,18 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             entity.Uid = NewUid(entity.Uid);
             entity.CommonData = entity.CommonData.Update(true);
+
             Validate(Functions.AddToStore, entity);
 
-            try
-            {
-                // Separate the LogData.Data from the Log
-                LogData logData = null;
-                if (entity.LogData != null && entity.LogData.Count > 0)
-                {
-                    logData = entity.LogData.First();
-                    entity.LogData.Clear();
-                }
+            // Extract Data
+            var readers = ExtractDataReaders(entity);
 
-                // Save the log and verify
-                InsertEntity(entity);
+            InsertEntity(entity);
 
-                // If there is any LogData.Data then save it.
-                if (logData != null && logData.Data != null && logData.Data.Any())
-                {
-                    var indexChannel = new ChannelIndexInfo
-                    {
-                        Mnemonic = entity.IndexCurve,
-                        Increasing = entity.Direction != LogIndexDirection.decreasing,
-                        IsTimeIndex = entity.IndexType == LogIndexType.datetime || entity.IndexType == LogIndexType.elapsedtime
-                    };
+            // Add ChannelDataChunks
+            _channelDataChunkAdapter.Add(readers.FirstOrDefault());
 
-                    _channelDataAdapter.WriteLogDataValues(entity.Uid, logData.Data, logData.MnemonicList, logData.UnitList, indexChannel);
-                }
-
-                return new WitsmlResult(ErrorCodes.Success, entity.Uid);
-            }
-            catch (Exception ex)
-            {
-                return new WitsmlResult(ErrorCodes.Unset, ex.Message + "\n" + ex.StackTrace);
-            }
+            return new WitsmlResult(ErrorCodes.Success, entity.Uid);
         }
 
         /// <summary>
@@ -174,15 +155,19 @@ namespace PDS.Witsml.Server.Data.Logs
             var dataObjectId = entity.GetObjectId();
             entity.CommonData = entity.CommonData.Update();
 
+            Validate(Functions.UpdateInStore, entity);
+
+            // Extract Data
             var saved = GetEntity(dataObjectId);
-            var isTimeLog = saved.IndexType.GetValueOrDefault() == LogIndexType.datetime;
-            var decreasing = saved.Direction.GetValueOrDefault() == LogIndexDirection.decreasing;
+            var readers = ExtractDataReaders(entity, saved);
+            var ignored = new[] { "logData" };
 
-            UpdateEntity(entity, parser, dataObjectId);
+            UpdateEntity(entity, parser, dataObjectId, ignored);
 
-            if (entity.LogData != null && entity.LogData.Count > 0)
+            // Merge ChannelDataChunks
+            foreach (var reader in readers)
             {
-                _channelDataAdapter.UpdateLogData(saved, entity.LogData, isTimeLog, !decreasing);              
+                _channelDataChunkAdapter.Merge(reader);
             }
 
             // TODO: Fix later
@@ -209,6 +194,45 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
+        /// Gets the channel metadata for the specified data object URI.
+        /// </summary>
+        /// <param name="uri">The parent data object URI.</param>
+        /// <returns>A collection of channel metadata.</returns>
+        public IList<ChannelMetadataRecord> GetChannelMetadata(EtpUri uri)
+        {
+            var entity = GetEntity(uri.ToDataObjectId());
+            var metadata = new List<ChannelMetadataRecord>();
+            var index = 0;
+
+            if (entity.LogCurveInfo == null || !entity.LogCurveInfo.Any())
+                return metadata;
+
+            metadata.AddRange(entity.LogCurveInfo.Select(x =>
+            {
+                var channel = ToChannelMetadataRecord(entity, x);
+                channel.ChannelId = index++;
+                return channel;
+            }));
+
+            return metadata;
+        }
+
+        /// <summary>
+        /// Gets the channel data records for the specified data object URI and range.
+        /// </summary>
+        /// <param name="uri">The parent data object URI.</param>
+        /// <param name="range">The data range to retrieve.</param>
+        /// <returns>A collection of channel data.</returns>
+        public IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, Range<double?> range)
+        {
+            var entity = GetEntity(uri.ToDataObjectId());
+            var mnemonics = entity.LogCurveInfo.Select(x => x.Mnemonic.Value);
+            var increasing = entity.Direction.GetValueOrDefault() == LogIndexDirection.increasing;
+
+            return GetChannelData(uri, mnemonics.First(), range, increasing);
+        }
+
+        /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
@@ -232,15 +256,21 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Computes the range of the data chunk containing the given index value for a given rangeSize.
+        /// Puts the specified data object into the data store.
         /// </summary>
-        /// <param name="index">The index value contained within the computed range.</param>
-        /// <param name="rangeSize">Size of the range.</param>
-        /// <returns>A <see cref="Tuple{int, int}"/> containing the computed range.</returns>
-        public Tuple<int, int> ComputeRange(double index, int rangeSize)
+        /// <param name="entity">The entity.</param>
+        public override WitsmlResult Put(Log entity)
         {
-            var rangeIndex = (int)(Math.Floor(index / rangeSize));
-            return new Tuple<int, int>(rangeIndex * rangeSize, rangeIndex * rangeSize + rangeSize);
+            if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.GetObjectId()))
+            {
+                Logger.DebugFormat("Update Log with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
+                return Update(entity, null);
+            }
+            else
+            {
+                Logger.DebugFormat("Add Log with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
+                return Add(entity);
+            }
         }
 
         /// <summary>
@@ -254,99 +284,179 @@ namespace PDS.Witsml.Server.Data.Logs
             return list.Log.FirstOrDefault();
         }
 
-        /// <summary>
-        /// Gets a list of logs with on the required log header properties.
-        /// </summary>
-        /// <param name="logs">The logs.</param>
-        /// <returns>
-        /// A <see cref="IEnumerable{Log}" /> with only the required Log header properties.
-        /// </returns>
-        private IEnumerable<Log> GetLogHeaderRequiredProperties(List<Log> logs)
+        private IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, string indexChannel, Range<double?> range, bool increasing)
         {
-            var logsRequired = new List<Log>();
-
-            logs.ForEach(x =>
-            {
-                logsRequired.Add(new Log()
-                {
-                    Uid = x.Uid,
-                    UidWell = x.UidWell,
-                    UidWellbore = x.UidWellbore,
-                    Name = x.Name,
-                    NameWell = x.NameWell,
-                    NameWellbore = x.NameWellbore,
-                    IndexType = x.IndexType,
-                    IndexCurve = x.IndexCurve
-                });
-            });
-
-            return logsRequired;
+            var chunks = _channelDataChunkAdapter.GetData(uri, indexChannel, range, increasing);
+            return chunks.GetRecords(range, increasing);
         }
 
-        /// <summary>
-        /// Queries the log data values as specified by the parser.
-        /// </summary>
-        /// <param name="log">The log.</param>
-        /// <param name="parser">The parser.</param>
-        /// <returns>A <see cref="LogData" /> instance with the LogData.Data specified by the parser.</returns>
         private LogData QueryLogDataValues(Log log, WitsmlQueryParser parser)
         {
-            var returnElements = parser.ReturnElements();
-            var logDataElement = parser.Property("logData");
+            var range = GetLogDataSubsetRange(log, parser);
+            var mnemonics = GetMnemonicList(log, parser);
+            var units = GetUnitList(log, parser);
+            var increasing = log.Direction.GetValueOrDefault() == LogIndexDirection.increasing;
+            var records = GetChannelData(log.GetUri(), mnemonics.First(), range, increasing);
 
-            if (logDataElement == null &&
-                !OptionsIn.ReturnElements.All.Equals(returnElements) &&
-                !OptionsIn.ReturnElements.DataOnly.Equals(returnElements))
+            return FormatLogData(records, mnemonics, units);
+        }
+
+        private Range<double?> GetLogDataSubsetRange(Log log, WitsmlQueryParser parser)
+        {
+            var isTimeLog = log.IndexType.GetValueOrDefault() == LogIndexType.datetime;
+
+            return Range.Parse(
+                parser.PropertyValue(isTimeLog ? "startDateTimeIndex" : "startIndex"),
+                parser.PropertyValue(isTimeLog ? "endDateTimeIndex" : "endIndex"),
+                isTimeLog);
+        }
+
+        private string[] GetMnemonicList(Log log, WitsmlQueryParser parser)
+        {
+            // TODO: limit mnemonics based on returnElements
+
+            return log.LogCurveInfo
+                .Select(x => x.Mnemonic.Value)
+                .ToArray();
+        }
+
+        private string[] GetUnitList(Log log, WitsmlQueryParser parser)
+        {
+            // TODO: limit units based on returnElements
+
+            return log.LogCurveInfo
+                .Select(x => x.Unit)
+                .ToArray();
+        }
+
+        private LogData FormatLogData(IEnumerable<IChannelDataRecord> records, string[] mnemonics, string[] units)
+        {
+            var logData = new LogData()
             {
-                return null;
+                MnemonicList = string.Join(",", mnemonics),
+                UnitList = string.Join(",", units),
+                Data = new List<string>()
+            };
+
+            // TODO: limit data to requested mnemonics
+
+            foreach (var record in records)
+            {
+                var values = new object[record.FieldCount];
+                record.GetValues(values);
+                logData.Data.Add(string.Join(",", values));
             }
 
-            Tuple<double?, double?> range;
-            var increasing = log.Direction != LogIndexDirection.decreasing;
-            var isTimeLog = log.IndexType == LogIndexType.datetime;
+            return logData;
+        }
 
-            if (isTimeLog)
+        private IEnumerable<ChannelDataReader> ExtractDataReaders(Log entity, Log existing = null)
+        {
+            IEnumerable<ChannelDataReader> readers = null;
+
+            if (existing == null)
             {
-                var startIndex = ToNullableUnixSeconds(parser.PropertyValue("startDateTimeIndex"));
-                var endIndex = ToNullableUnixSeconds(parser.PropertyValue("endDateTimeIndex"));
-                range = new Tuple<double?, double?>(startIndex, endIndex);
-            }
-            else
-            {
-                var startIndex = ToNullableDouble(parser.PropertyValue("startIndex"));
-                var endIndex = ToNullableDouble(parser.PropertyValue("endIndex"));
-                range = new Tuple<double?, double?>(startIndex, endIndex);
+                readers = entity.GetReaders().ToList();
+                entity.LogData = null;
+                return readers;
             }
 
-            var mnemonics = log.LogCurveInfo.Select(x => x.Mnemonic.Value).ToList();
+            var logData = existing.LogData;
+            existing.LogData = entity.LogData;
+            entity.LogData = null;
 
-            if (logDataElement != null)
+            readers = existing.GetReaders().ToList();
+            existing.LogData = logData;
+
+            return readers;
+        }
+
+        private List<LogData> EmptyLogData(LogData logData)
+        {
+            return new List<LogData>()
             {
-                var mnemonicElement = logDataElement.Elements().FirstOrDefault(e => e.Name.LocalName == "mnemonicList");
-                if (mnemonicElement != null)
+                new LogData()
                 {
-                    var target = logDataElement.Elements().FirstOrDefault(e => e.Name.LocalName == "mnemonicList").Value.Split(',');
-                    mnemonics = target.Where(m => mnemonics.Contains(m)).ToList();
+                    MnemonicList = logData != null ? logData.MnemonicList : null,
+                    UnitList = logData != null ? logData.UnitList : null
                 }
-            }
-
-            return _channelDataAdapter.GetLogData(log.Uid, mnemonics, range, increasing);
+            };
         }
 
-        /// <summary>
-        /// Converts a string to a nullable double.
-        /// </summary>
-        /// <param name="doubleStr">The double string.</param>
-        /// <returns>A <see cref="Nullable{double}"/> representation of the doubleStr parameter.</returns>
-        private double? ToNullableDouble(string doubleStr)
+        private ChannelMetadataRecord ToChannelMetadataRecord(Log log, LogCurveInfo curve)
         {
-            return string.IsNullOrEmpty(doubleStr) ? (double?)null : double.Parse(doubleStr);
+            var uri = curve.GetUri(log);
+
+            return new ChannelMetadataRecord()
+            {
+                ChannelUri = uri,
+                ContentType = uri.ContentType,
+                DataType = curve.TypeLogData.GetValueOrDefault(LogDataType.@double).ToString().Replace("@", string.Empty),
+                Description = curve.CurveDescription ?? curve.Mnemonic.Value,
+                Mnemonic = curve.Mnemonic.Value,
+                Uom = curve.Unit,
+                MeasureClass = curve.ClassWitsml == null ? ObjectTypes.Unknown : curve.ClassWitsml,
+                Source = curve.DataSource ?? ObjectTypes.Unknown,
+                Uuid = curve.Mnemonic.Value,
+                Status = ChannelStatuses.Active,
+                ChannelAxes = new List<ChannelAxis>(),
+                Indexes = new List<IndexMetadataRecord>(),
+            };
         }
 
-        private double? ToNullableUnixSeconds(string dateTimeStr)
-        {
-            return string.IsNullOrEmpty(dateTimeStr)? (double?)null: DateTimeOffset.Parse(dateTimeStr).ToUnixTimeSeconds();
-        }
+        //private LogData QueryLogDataValues(Log log, WitsmlQueryParser parser)
+        //{
+        //    var returnElements = parser.ReturnElements();
+        //    var logDataElement = parser.Property("logData");
+
+        //    if (logDataElement == null &&
+        //        !OptionsIn.ReturnElements.All.Equals(returnElements) &&
+        //        !OptionsIn.ReturnElements.DataOnly.Equals(returnElements))
+        //    {
+        //        return null;
+        //    }
+
+        //    Tuple<double?, double?> range;
+        //    var increasing = log.Direction != LogIndexDirection.decreasing;
+        //    var isTimeLog = log.IndexType == LogIndexType.datetime;
+
+        //    if (isTimeLog)
+        //    {
+        //        var startIndex = ToNullableUnixSeconds(parser.PropertyValue("startDateTimeIndex"));
+        //        var endIndex = ToNullableUnixSeconds(parser.PropertyValue("endDateTimeIndex"));
+        //        range = new Tuple<double?, double?>(startIndex, endIndex);
+        //    }
+        //    else
+        //    {
+        //        var startIndex = ToNullableDouble(parser.PropertyValue("startIndex"));
+        //        var endIndex = ToNullableDouble(parser.PropertyValue("endIndex"));
+        //        range = new Tuple<double?, double?>(startIndex, endIndex);
+        //    }
+
+        //    var mnemonics = log.LogCurveInfo.Select(x => x.Mnemonic.Value).ToList();
+
+        //    if (logDataElement != null)
+        //    {
+        //        var mnemonicElement = logDataElement.Elements().FirstOrDefault(e => e.Name.LocalName == "mnemonicList");
+        //        if (mnemonicElement != null)
+        //        {
+        //            var target = logDataElement.Elements().FirstOrDefault(e => e.Name.LocalName == "mnemonicList").Value.Split(',');
+        //            mnemonics = target.Where(m => mnemonics.Contains(m)).ToList();
+        //        }
+        //    }
+
+        //    return _channelDataChunkAdapter.GetLogData(log.Uid, mnemonics, range, increasing);
+        //}
+
+        //private double? ToNullableDouble(string doubleStr)
+        //{
+        //    return string.IsNullOrEmpty(doubleStr) ? (double?)null : double.Parse(doubleStr);
+        //}
+
+        //private double? ToNullableUnixSeconds(string dateTimeStr)
+        //{
+        //    return string.IsNullOrEmpty(dateTimeStr)? (double?)null: DateTimeOffset.Parse(dateTimeStr).ToUnixTimeSeconds();
+        //}
 
         #region UpdateLogHeaderRanges Code
         //private void UpdateLogData(Log log, List<LogDataValues> logDataChanges)

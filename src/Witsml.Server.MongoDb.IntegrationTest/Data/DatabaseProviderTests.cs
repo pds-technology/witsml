@@ -2,7 +2,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 
 namespace PDS.Witsml.Server.Data
 {

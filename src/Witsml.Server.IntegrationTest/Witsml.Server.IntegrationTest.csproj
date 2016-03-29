@@ -38,6 +38,10 @@
     <Reference Include="Energistics.DataAccess">
       <HintPath>..\External\DevKit\Energistics.DataAccess.dll</HintPath>
     </Reference>
+    <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="MongoDB.Driver, Version=2.2.2.10, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\MongoDB.Driver.2.2.2\lib\net45\MongoDB.Driver.dll</HintPath>
@@ -62,7 +66,9 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
+          <Private>False</Private>
+        </Reference>
       </ItemGroup>
     </Otherwise>
   </Choose>
@@ -84,6 +90,7 @@
     <Compile Include="DevKit141Aspect.cs" />
     <Compile Include="DevKit200Aspect.cs" />
     <Compile Include="DevKitAspect.cs" />
+    <Compile Include="AssemblyInitializer.cs" />
     <Compile Include="WitsmlStore131ProxyTests.cs" />
     <Compile Include="WitsmlStore141ProxyTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -117,7 +124,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="log4net.config" />
+    <Content Include="log4net.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
   <Choose>

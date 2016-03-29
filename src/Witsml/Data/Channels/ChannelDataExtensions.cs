@@ -22,6 +22,9 @@ namespace PDS.Witsml.Data.Channels
 
         public static IEnumerable<ChannelDataReader> GetReaders(this Witsml141.Log log)
         {
+            if (log.LogData == null)
+                yield break;
+
             var isTimeIndex = log.IndexType.GetValueOrDefault() == Witsml141.ReferenceData.LogIndexType.datetime;
             var increasing = log.Direction.GetValueOrDefault() == Witsml141.ReferenceData.LogIndexDirection.increasing;
 
@@ -37,6 +40,9 @@ namespace PDS.Witsml.Data.Channels
 
         public static IEnumerable<ChannelDataReader> GetReaders(this Witsml200.Log log)
         {
+            if (log.ChannelSet == null)
+                yield break;
+
             foreach (var channelSet in log.ChannelSet)
             {
                 yield return channelSet.GetReader();
