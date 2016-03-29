@@ -447,11 +447,8 @@ namespace PDS.Witsml.Server.Data
         {
             Logger.DebugFormat("Building projection fields for entity: {0}", _parser.Context.ObjectType);
 
-            if (element == null)
+            if (element == null || _fields == null)
                 return null;
-
-            if (_fields == null)
-                _fields = new List<string>();
 
             BuildProjectionForAnElement(element, null, typeof(T));
 
