@@ -64,12 +64,12 @@ namespace PDS.Witsml.Server.Data
                 var results = _collection.Find(filter ?? "{}");
 
                 // Format response using MongoDb projection, i.e. selecting specified fields only
-                if (OptionsIn.ReturnElements.All.Equals(returnElements))
+                if (OptionsIn.ReturnElements.All.Equals(returnElements) || 
+                    OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements))
                 {
                     entities.AddRange(results.ToList());
                 }
                 else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElements) ||
-                         OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) ||
                          OptionsIn.ReturnElements.Requested.Equals(returnElements) ||
                          OptionsIn.ReturnElements.DataOnly.Equals(returnElements))
                 {
@@ -447,8 +447,11 @@ namespace PDS.Witsml.Server.Data
         {
             Logger.DebugFormat("Building projection fields for entity: {0}", _parser.Context.ObjectType);
 
-            if (element == null || _fields == null)
+            if (element == null)
                 return null;
+
+            if (_fields == null)
+                _fields = new List<string>();
 
             BuildProjectionForAnElement(element, null, typeof(T));
 

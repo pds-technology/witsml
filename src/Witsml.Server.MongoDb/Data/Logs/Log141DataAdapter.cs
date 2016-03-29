@@ -96,20 +96,17 @@ namespace PDS.Witsml.Server.Data.Logs
             if (!OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) && !OptionsIn.ReturnElements.IdOnly.Equals(returnElements) && 
                 !OptionsIn.RequestObjectSelectionCapability.True.Equals(parser.RequestObjectSelectionCapability()))
             {
-                if (logs.Count > 0)
-                {
-                    var logHeaders = GetEntities(logs.Select(x => x.GetObjectId()))
-                        .ToDictionary(x => x.GetObjectId());
+                var logHeaders = GetEntities(logs.Select(x => x.GetObjectId()))
+                    .ToDictionary(x => x.GetObjectId());
 
-                    logs.ForEach(l =>
-                    {
-                        var logHeader = logHeaders[l.GetObjectId()];
-                        l.LogData = new List<LogData>()
+                logs.ForEach(l =>
+                {
+                    var logHeader = logHeaders[l.GetObjectId()];
+                    l.LogData = new List<LogData>()
                     {
                         QueryLogDataValues(logHeader, parser)
                     };
-                    });
-                }
+                });
             }
 
             return new WitsmlResult<IEnergisticsCollection>(
