@@ -278,9 +278,10 @@ namespace PDS.Witsml.Server.Data
         /// <param name="entity">The object to be updated.</param>
         /// <param name="parser">The WITSML query parser.</param>
         /// <param name="dataObjectId">The data object identifier.</param>
-        protected void UpdateEntity(T entity, WitsmlQueryParser parser, DataObjectId dataObjectId)
+        /// <param name="ignored">The list of ignored elements.</param>
+        protected void UpdateEntity(T entity, WitsmlQueryParser parser, DataObjectId dataObjectId, string[] ignored = null)
         {
-            UpdateEntity<T>(entity, DbCollectionName, parser, dataObjectId);
+            UpdateEntity<T>(entity, DbCollectionName, parser, dataObjectId, ignored);
         }
 
         /// <summary>
@@ -291,14 +292,15 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dbCollectionName">The name of the database collection.</param>
         /// <param name="parser">The WITSML query parser.</param>
         /// <param name="dataObjectId">The data object identifier.</param>
+        /// <param name="ignored">The list of ignored elements.</param>
         /// <exception cref="WitsmlException"></exception>
-        protected void UpdateEntity<TObject>(TObject entity, string dbCollectionName, WitsmlQueryParser parser, DataObjectId dataObjectId)
+        protected void UpdateEntity<TObject>(TObject entity, string dbCollectionName, WitsmlQueryParser parser, DataObjectId dataObjectId, string[] ignored = null)
         {
             try
             {
                 Logger.DebugFormat("Updating {0} MongoDb collection", dbCollectionName);
 
-                var update = new MongoDbUpdate<TObject>(GetCollection<TObject>(dbCollectionName), parser, IdPropertyName);
+                var update = new MongoDbUpdate<TObject>(GetCollection<TObject>(dbCollectionName), parser, IdPropertyName, ignored);
                 update.Update(entity, dataObjectId);
             }
             catch (MongoException ex)

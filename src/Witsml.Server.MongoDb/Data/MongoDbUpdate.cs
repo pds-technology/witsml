@@ -15,14 +15,16 @@ namespace PDS.Witsml.Server.Data
         private readonly IMongoCollection<T> _collection;
         private readonly WitsmlQueryParser _parser;
         private readonly string _idPropertyName;
+        private readonly string[] _ignored;
 
-        public MongoDbUpdate(IMongoCollection<T> collection, WitsmlQueryParser parser, string idPropertyName = "Uid")
+        public MongoDbUpdate(IMongoCollection<T> collection, WitsmlQueryParser parser, string idPropertyName = "Uid", string[] ignored = null)
         {
             Logger = LogManager.GetLogger(GetType());
 
             _collection = collection;
             _parser = parser;
             _idPropertyName = idPropertyName;
+            _ignored = ignored ?? new string[0];
         }
 
         /// <summary>
@@ -78,12 +80,17 @@ namespace PDS.Witsml.Server.Data
 
         private UpdateDefinition<T> BuildUpdateForAnElement(UpdateDefinition<T> update, XElement element, Type type, string parentPath = null)
         {
-            var properties = MongoDbFieldHelper.GetPropertyInfo(type);
+            if (_ignored.Contains(element.Name.LocalName))
+                return update;
 
+            var properties = MongoDbFieldHelper.GetPropertyInfo(type);
             var groupings = element.Elements().GroupBy(e => e.Name.LocalName);
 
             foreach (var group in groupings)
             {
+                if (_ignored.Contains(group.Key))
+                    continue;
+
                 var propertyInfo = MongoDbFieldHelper.GetPropertyInfoForAnElement(properties, group.Key);  
                 update = BuildUpdateForAnElementGroup(update, propertyInfo, group, parentPath);
             }
