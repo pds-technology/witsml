@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -7,6 +8,7 @@ using System.Xml.Serialization;
 using Energistics.DataAccess;
 using log4net;
 using MongoDB.Driver;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -16,6 +18,8 @@ namespace PDS.Witsml.Server.Data
         private readonly WitsmlQueryParser _parser;
         private readonly string _idPropertyName;
         private readonly string[] _ignored;
+
+        private FilterDefinition<T> _entityFilter;
 
         public MongoDbUpdate(IMongoCollection<T> collection, WitsmlQueryParser parser, string idPropertyName = "Uid", string[] ignored = null)
         {
@@ -39,7 +43,7 @@ namespace PDS.Witsml.Server.Data
             var abstractObj = entity as Energistics.DataAccess.WITSML200.ComponentSchemas.AbstractObject;
             var uidValue = abstractObj == null ? dataObj.Uid : abstractObj.Uuid;
 
-            var filter = MongoDbFieldHelper.GetEntityFilter<T>(dataObjectId, _idPropertyName);
+            _entityFilter = MongoDbFieldHelper.GetEntityFilter<T>(dataObjectId, _idPropertyName);
             var update = Builders<T>.Update.Set(_idPropertyName, uidValue);
 
             var element = _parser.Element();
@@ -51,7 +55,7 @@ namespace PDS.Witsml.Server.Data
                 Logger.DebugFormat("Detected update elements: {0}", updateJson);
             }
 
-            var result = _collection.UpdateOne(filter, update);
+            var result = _collection.UpdateOne(_entityFilter, update);
         }
 
         public void Update(Dictionary<string, T> replacements, string field = null)
@@ -75,15 +79,13 @@ namespace PDS.Witsml.Server.Data
 
         private UpdateDefinition<T> BuildUpdate(UpdateDefinition<T> update, XElement element, T entity)
         {
-            return BuildUpdateForAnElement(update, element, typeof(T));
+            return BuildUpdateForAnElement(update, entity, element, typeof(T));
         }
 
-        private UpdateDefinition<T> BuildUpdateForAnElement(UpdateDefinition<T> update, XElement element, Type type, string parentPath = null)
+        private UpdateDefinition<T> BuildUpdateForAnElement(UpdateDefinition<T> update, object obj, XElement element, Type type, string parentPath = null)
         {
-            if (_ignored.Contains(element.Name.LocalName))
-                return update;
-
             var properties = MongoDbFieldHelper.GetPropertyInfo(type);
+
             var groupings = element.Elements().GroupBy(e => e.Name.LocalName);
 
             foreach (var group in groupings)
@@ -91,8 +93,9 @@ namespace PDS.Witsml.Server.Data
                 if (_ignored.Contains(group.Key))
                     continue;
 
-                var propertyInfo = MongoDbFieldHelper.GetPropertyInfoForAnElement(properties, group.Key);  
-                update = BuildUpdateForAnElementGroup(update, propertyInfo, group, parentPath);
+                var propertyInfo = MongoDbFieldHelper.GetPropertyInfoForAnElement(properties, group.Key);
+                var propertyValue = propertyInfo.GetValue(obj);
+                update = BuildUpdateForAnElementGroup(update, propertyInfo, propertyValue, group, new List<FilterDefinition<T>> { _entityFilter }, parentPath);
             }
 
             foreach (var attribute in element.Attributes())
@@ -107,7 +110,7 @@ namespace PDS.Witsml.Server.Data
             return update;
         }
 
-        private UpdateDefinition<T> BuildUpdateForAnElementGroup(UpdateDefinition<T> update, PropertyInfo propertyInfo, IEnumerable<XElement> elements, string parentPath = null)
+        private UpdateDefinition<T> BuildUpdateForAnElementGroup(UpdateDefinition<T> update, PropertyInfo propertyInfo, object propertyValue, IEnumerable<XElement> elements, List<FilterDefinition<T>> filters, string parentPath = null)
         {
             if (propertyInfo == null)
                 return update;
@@ -128,7 +131,7 @@ namespace PDS.Witsml.Server.Data
                     if (genericType == typeof(Nullable<>))
                     {
                         var underlyingType = Nullable.GetUnderlyingType(propType);
-                        update = BuildUpdateForAnElementType(update, underlyingType, element, fieldName);
+                        update = BuildUpdateForAnElementType(update, underlyingType, propertyValue, element, fieldName);
 
                         // set the *Specified property when updating nullable elements
                         if (propertyInfo.DeclaringType.GetProperty(propertyInfo.Name + "Specified") != null)
@@ -139,35 +142,31 @@ namespace PDS.Witsml.Server.Data
                     else if (genericType == typeof(List<>))
                     {
                         var childType = propType.GetGenericArguments()[0];
-                        return BuildUpdateForAnElementType(update, childType, element, fieldName);
+                        UpdateArrayElements(values, propertyInfo, propertyValue, childType, fieldName, filters);
+                        return update;
                     }
                 }
                 else if (propType.IsAbstract)
                 {
                     var concreteType = MongoDbFieldHelper.GetConcreteType(element, propType);
-                    return BuildUpdateForAnElementType(update, concreteType, element, fieldName);
+                    return BuildUpdateForAnElementType(update, concreteType, propertyValue, element, fieldName);
                 }
                 else
                 {
-                    return BuildUpdateForAnElementType(update, propType, element, fieldName);
+                    return BuildUpdateForAnElementType(update, propType, propertyValue, element, fieldName);
                 }
             }
             else
             {
                 var childType = propType.GetGenericArguments()[0];
-
-                foreach (var value in values)
-                {
-                    //BuildUpdateForAnElementType(builder, childType, value, fieldName);
-                }
-
+                UpdateArrayElements(values, propertyInfo, propertyValue, childType, fieldName, filters);
                 return update;
             }
 
             return update;
         }
 
-        private UpdateDefinition<T> BuildUpdateForAnElementType(UpdateDefinition<T> update, Type elementType, XElement element, string propertyPath)
+        private UpdateDefinition<T> BuildUpdateForAnElementType(UpdateDefinition<T> update, Type elementType, object value, XElement element, string propertyPath)
         {
             var textProperty = elementType.GetProperties().FirstOrDefault(x => x.IsDefined(typeof(XmlTextAttribute), false));
 
@@ -185,11 +184,11 @@ namespace PDS.Witsml.Server.Data
                     update = BuildUpdateForProperty(update, uomProperty.PropertyType, uomPath, uomValue);
                 }
 
-                return BuildUpdateForProperty(update, fieldType, fieldName, element.Value);             
+                return BuildUpdateForProperty(update, fieldType, fieldName, element.Value);
             }
             else if (element.HasElements || element.HasAttributes)
             {
-                return BuildUpdateForAnElement(update, element, elementType, propertyPath);
+                return BuildUpdateForAnElement(update, value, element, elementType, propertyPath);
             }
 
             return BuildUpdateForProperty(update, elementType, propertyPath, element.Value);
@@ -246,6 +245,61 @@ namespace PDS.Witsml.Server.Data
             var propertyType = propertyInfo.PropertyType;
 
             return BuildUpdateForProperty(update, propertyType, propertyPath, attribute.Value);
+        }
+
+        private void UpdateArrayElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath, List<FilterDefinition<T>> filters)
+        {
+            var updateBuilder = Builders<T>.Update;
+            var filterBuilder = Builders<T>.Filter;
+            var uid = "Uid";
+            var filterPath = MongoDbFieldHelper.GetPropertyPath(parentPath, uid);
+            var properties = MongoDbFieldHelper.GetPropertyInfo(type);
+            var positionPath = parentPath + ".$";
+            foreach (var element in elements)
+            {
+                var uidAttrib = element.Attributes().FirstOrDefault(a => a.Name.LocalName.EqualsIgnoreCase(uid));
+                if (uidAttrib == null)
+                    continue;
+
+                var uidValue = uidAttrib.Value;
+                var current = GetCurrentElementValue(uidValue, properties, propertyValue);
+
+                if (current == null)
+                {
+                    var item = typeof(WitsmlParser).GetMethod("Parse", BindingFlags.Public | BindingFlags.Static)
+                        .MakeGenericMethod(type)
+                        .Invoke(null, new object[] { element.ToString() });
+                    var update = updateBuilder.Push(parentPath, item);
+                    _collection.UpdateOne(filterBuilder.And(filters), update);
+                }
+                else
+                {
+                    var elementFilter = Builders<T>.Filter.EqIgnoreCase(filterPath, uidValue);
+                    filters.Add(elementFilter);
+                    var filter = filterBuilder.And(filters);
+
+                    var update = updateBuilder.Set(MongoDbFieldHelper.GetPropertyPath(positionPath, uid), uidValue);
+                    update = BuildUpdateForAnElement(update, current, element, type, positionPath);
+
+                    var filterJson = filter.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
+                    var updateJson = update.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
+
+                    _collection.UpdateOne(filter, update);
+                }
+            }
+        }
+
+        private object GetCurrentElementValue(string uid, IEnumerable<PropertyInfo> properties, object propertyValue)
+        {
+            var list = (IEnumerable)propertyValue;
+            foreach (var item in list)
+            {
+                var prop = MongoDbFieldHelper.GetPropertyInfoForAnElement(properties, "uid");
+                var uidValue = prop.GetValue(item).ToString();
+                if (uid.EqualsIgnoreCase(uidValue))
+                    return item;
+            }
+            return null;
         }
     }
 }
