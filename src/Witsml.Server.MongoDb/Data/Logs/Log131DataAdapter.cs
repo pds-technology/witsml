@@ -68,7 +68,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var fields = OptionsIn.ReturnElements.IdOnly.Equals(returnElements)
                 ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell", "UidWellbore", "NameWellbore" }
                 : OptionsIn.ReturnElements.DataOnly.Equals(returnElements)
-                ? new List<string> { IdPropertyName, "UidWell", "UidWellbore", "LogCurveInfo" }
+                ? new List<string> { IdPropertyName, "UidWell", "UidWellbore" }
                 : OptionsIn.ReturnElements.Requested.Equals(returnElements)
                 ? new List<string>()
                 : null;
