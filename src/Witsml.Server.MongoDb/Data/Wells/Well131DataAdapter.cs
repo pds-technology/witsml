@@ -103,7 +103,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Validate(Functions.UpdateInStore, entity);
 
             Logger.DebugFormat("Validated Well with uid '{0}' and name {1} for Update", entity.Uid, entity.Name);
-            UpdateEntity(entity, parser, entity.GetObjectId());
+            UpdateEntity(parser, entity.GetObjectId());
 
             return new WitsmlResult(ErrorCodes.Success);
         }

@@ -275,26 +275,24 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Updates an object in the data store.
         /// </summary>
-        /// <param name="entity">The object to be updated.</param>
         /// <param name="parser">The WITSML query parser.</param>
         /// <param name="dataObjectId">The data object identifier.</param>
         /// <param name="ignored">The list of ignored elements.</param>
-        protected void UpdateEntity(T entity, WitsmlQueryParser parser, DataObjectId dataObjectId, string[] ignored = null)
+        protected void UpdateEntity(WitsmlQueryParser parser, DataObjectId dataObjectId, string[] ignored = null)
         {
-            UpdateEntity<T>(entity, DbCollectionName, parser, dataObjectId, ignored);
+            UpdateEntity<T>(DbCollectionName, parser, dataObjectId, ignored);
         }
 
         /// <summary>
         /// Updates an object in the data store.
         /// </summary>
         /// <typeparam name="TObject">The type of the object.</typeparam>
-        /// <param name="entity">The object to be updated.</param>
         /// <param name="dbCollectionName">The name of the database collection.</param>
         /// <param name="parser">The WITSML query parser.</param>
         /// <param name="dataObjectId">The data object identifier.</param>
         /// <param name="ignored">The list of ignored elements.</param>
         /// <exception cref="WitsmlException"></exception>
-        protected void UpdateEntity<TObject>(TObject entity, string dbCollectionName, WitsmlQueryParser parser, DataObjectId dataObjectId, string[] ignored = null)
+        protected void UpdateEntity<TObject>(string dbCollectionName, WitsmlQueryParser parser, DataObjectId dataObjectId, string[] ignored = null)
         {
             try
             {

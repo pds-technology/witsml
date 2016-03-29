@@ -63,7 +63,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
                 var parser = CreateQueryParser(Functions.PutObject, entity);
 
-                UpdateEntity(entity, parser, dataObjectId);
+                UpdateEntity(parser, dataObjectId);
             }
             else
             {

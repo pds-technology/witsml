@@ -165,7 +165,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var readers = ExtractDataReaders(entity, saved);
             var ignored = new[] { "logData" };
 
-            UpdateEntity(entity, parser, dataObjectId, ignored);
+            UpdateEntity(parser, dataObjectId, ignored);
 
             // Merge ChannelDataChunks
             foreach (var reader in readers)
