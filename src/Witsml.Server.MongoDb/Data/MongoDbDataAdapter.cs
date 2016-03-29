@@ -275,42 +275,37 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Updates an object in the data store.
         /// </summary>
-        /// <param name="entity">The object to be inserted.</param>
+        /// <param name="entity">The object to be updated.</param>
+        /// <param name="parser">The WITSML query parser.</param>
         /// <param name="dataObjectId">The data object identifier.</param>
-        protected void UpdateEntity(T entity, DataObjectId dataObjectId)
+        protected void UpdateEntity(T entity, WitsmlQueryParser parser, DataObjectId dataObjectId)
         {
-            UpdateEntity<T>(entity, DbCollectionName, dataObjectId);
+            UpdateEntity<T>(entity, DbCollectionName, parser, dataObjectId);
         }
 
         /// <summary>
         /// Updates an object in the data store.
         /// </summary>
         /// <typeparam name="TObject">The type of the object.</typeparam>
-        /// <param name="entity">The object to be inserted.</param>
+        /// <param name="entity">The object to be updated.</param>
         /// <param name="dbCollectionName">The name of the database collection.</param>
+        /// <param name="parser">The WITSML query parser.</param>
         /// <param name="dataObjectId">The data object identifier.</param>
         /// <exception cref="WitsmlException"></exception>
-        protected void UpdateEntity<TObject>(TObject entity, string dbCollectionName, DataObjectId dataObjectId)
+        protected void UpdateEntity<TObject>(TObject entity, string dbCollectionName, WitsmlQueryParser parser, DataObjectId dataObjectId)
         {
             try
             {
                 Logger.DebugFormat("Updating {0} MongoDb collection", dbCollectionName);
 
-                var collection = GetCollection<TObject>(dbCollectionName);
-                var filter = GetEntityFilter<TObject>(dataObjectId);
-                var result = collection.ReplaceOne(filter, entity);
+                var update = new MongoDbUpdate<TObject>(GetCollection<TObject>(dbCollectionName), parser, IdPropertyName);
+                update.Update(entity, dataObjectId);
             }
             catch (MongoException ex)
             {
-                Logger.ErrorFormat("Error updating {0} MongoDb collection:{1}{2}", dbCollectionName, Environment.NewLine, ex);
+                Logger.ErrorFormat("Error updating {0} MongoDb collection: {1}", dbCollectionName, ex);
                 throw new WitsmlException(ErrorCodes.ErrorUpdatingInDataStore, ex);
             }
-        }
-
-        protected void UpdateEntity(T entity, WitsmlQueryParser parser)
-        {
-            var update = new MongoDbUpdate<T>(GetCollection(), parser);
-            update.Update(entity);
         }
 
         /// <summary>

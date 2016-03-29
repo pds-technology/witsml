@@ -73,7 +73,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public override WitsmlResult Add(Wellbore entity)
         {
             entity.Uid = NewUid(entity.Uid);
-            entity.CommonData = entity.CommonData.Update();
+            entity.CommonData = entity.CommonData.Update(true);
             Validate(Functions.AddToStore, entity);
 
             Logger.DebugFormat("Add new wellbore with uidWell: {0}; uid: {1}", entity.UidWell, entity.Uid);
@@ -98,7 +98,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Validate(Functions.UpdateInStore, entity);
 
             Logger.DebugFormat("Validated Wellbore with uid '{0}' and name {1} for Update", entity.Uid, entity.Name);
-            UpdateEntity(entity, entity.GetObjectId());
+            UpdateEntity(entity, parser, entity.GetObjectId());
 
             return new WitsmlResult(ErrorCodes.Success);
         }

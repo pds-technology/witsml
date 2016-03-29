@@ -8,6 +8,7 @@ using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using log4net;
 using PDS.Framework;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -207,6 +208,20 @@ namespace PDS.Witsml.Server.Data
         protected virtual WitsmlQueryTemplate<T> CreateQueryTemplate()
         {
             return new WitsmlQueryTemplate<T>();
+        }
+
+        /// <summary>
+        /// Creates the WITSML query parser.
+        /// </summary>
+        /// <param name="function">The WITSML API function.</param>
+        /// <param name="entity">The entity to parse.</param>
+        /// <returns>A new <see cref="WitsmlQueryParser"/> instance.</returns>
+        protected WitsmlQueryParser CreateQueryParser(Functions function, T entity)
+        {
+            var context = new RequestContext(function, ObjectTypes.GetObjectType<T>(),
+                EnergisticsConverter.ObjectToXml(entity), null, null);
+
+            return new WitsmlQueryParser(context);
         }
 
         /// <summary>

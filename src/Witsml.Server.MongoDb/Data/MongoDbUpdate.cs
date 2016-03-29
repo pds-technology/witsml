@@ -14,14 +14,15 @@ namespace PDS.Witsml.Server.Data
     {
         private readonly IMongoCollection<T> _collection;
         private readonly WitsmlQueryParser _parser;
-        private readonly string DefaultIdField = "Uid";
+        private readonly string _idPropertyName;
 
-        public MongoDbUpdate(IMongoCollection<T> collection, WitsmlQueryParser parser)
+        public MongoDbUpdate(IMongoCollection<T> collection, WitsmlQueryParser parser, string idPropertyName = "Uid")
         {
             Logger = LogManager.GetLogger(GetType());
 
             _collection = collection;
             _parser = parser;
+            _idPropertyName = idPropertyName;
         }
 
         /// <summary>
@@ -30,16 +31,23 @@ namespace PDS.Witsml.Server.Data
         /// <value>The logger.</value>
         protected ILog Logger { get; private set; }
 
-        public void Update(T entity)
+        public void Update(T entity, DataObjectId dataObjectId)
         {
             var dataObj = entity as IDataObject;
-            var filter = MongoDbFieldHelper.GetEntityFilter<T>(dataObj.GetObjectId());
+            var abstractObj = entity as Energistics.DataAccess.WITSML200.ComponentSchemas.AbstractObject;
+            var uidValue = abstractObj == null ? dataObj.Uid : abstractObj.Uuid;
+
+            var filter = MongoDbFieldHelper.GetEntityFilter<T>(dataObjectId, _idPropertyName);
+            var update = Builders<T>.Update.Set(_idPropertyName, uidValue);
 
             var element = _parser.Element();
-            var update = Builders<T>.Update.Set(DefaultIdField, dataObj.Uid);
             update = BuildUpdate(update, element, entity);
 
-            var updateJson = update.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
+            if (Logger.IsDebugEnabled)
+            {
+                var updateJson = update.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
+                Logger.DebugFormat("Detected update elements: {0}", updateJson);
+            }
 
             var result = _collection.UpdateOne(filter, update);
         }
@@ -48,7 +56,7 @@ namespace PDS.Witsml.Server.Data
         {
             foreach (var key in replacements.Keys)
             {
-                var filter = BuildIdFilter(field ?? DefaultIdField, key);
+                var filter = BuildIdFilter(field ?? _idPropertyName, key);
                 _collection.ReplaceOne(filter, replacements[key]);
             }
         }
@@ -113,7 +121,13 @@ namespace PDS.Witsml.Server.Data
                     if (genericType == typeof(Nullable<>))
                     {
                         var underlyingType = Nullable.GetUnderlyingType(propType);
-                        return BuildUpdateForAnElementType(update, underlyingType, element, fieldName);
+                        update = BuildUpdateForAnElementType(update, underlyingType, element, fieldName);
+
+                        // set the *Specified property when updating nullable elements
+                        if (propertyInfo.DeclaringType.GetProperty(propertyInfo.Name + "Specified") != null)
+                            update = update.Set(fieldName + "Specified", true);
+
+                        return update;
                     }
                     else if (genericType == typeof(List<>))
                     {

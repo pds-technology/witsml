@@ -4,6 +4,7 @@ using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
 using PDS.Witsml.Data.Channels;
+using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Models;
 
 namespace PDS.Witsml.Server.Data.Channels
@@ -67,8 +68,9 @@ namespace PDS.Witsml.Server.Data.Channels
                 // Extract Data
                 var saved = GetEntity(dataObjectId);
                 var reader = ExtractDataReader(entity, saved);
+                var parser = CreateQueryParser(Functions.PutObject, entity);
 
-                UpdateEntity(entity, dataObjectId);
+                UpdateEntity(entity, parser, dataObjectId);
 
                 // Merge ChannelDataChunks
                 _channelDataChunkAdapter.Merge(reader);
@@ -76,7 +78,7 @@ namespace PDS.Witsml.Server.Data.Channels
             else
             {
                 entity.Uuid = NewUid(entity.Uuid);
-                entity.Citation = entity.Citation.Update();
+                entity.Citation = entity.Citation.Update(true);
 
                 Validate(Functions.PutObject, entity);
 

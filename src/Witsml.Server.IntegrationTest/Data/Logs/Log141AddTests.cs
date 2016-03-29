@@ -423,10 +423,9 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Test_update_log_header()
         {
             var response = DevKit.Add<WellList, Well>(Well);
-
             Wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
 
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
             var uidWellbore = response.SuppMsgOut;
 
             var log = new Log()
@@ -457,6 +456,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             var logAdded = results.FirstOrDefault();
+
             Assert.IsNotNull(logAdded);
             Assert.AreEqual(log.Description, logAdded.Description);
             Assert.AreEqual(log.RunNumber, logAdded.RunNumber);
@@ -473,11 +473,13 @@ namespace PDS.Witsml.Server.Data.Logs
 
             update.RunNumber = "102";
             update.BhaRunNumber = 2;
+
             var updateResponse = DevKit.Update<LogList, Log>(update);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
 
             results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             var logUpdated = results.FirstOrDefault();
+
             Assert.IsNotNull(logUpdated);
             Assert.AreEqual(logAdded.Description, logUpdated.Description);
             Assert.AreEqual(update.RunNumber, logUpdated.RunNumber);

@@ -60,13 +60,15 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
                 Validate(Functions.PutObject, entity);
                 Logger.DebugFormat("Validated Wellbore with Uuid '{0}' and citation title '{1}'.", entity.Uuid, entity.Citation.Title);
-                
-                UpdateEntity(entity, dataObjectId);
+
+                var parser = CreateQueryParser(Functions.PutObject, entity);
+
+                UpdateEntity(entity, parser, dataObjectId);
             }
             else
             {
                 entity.Uuid = NewUid(entity.Uuid);
-                entity.Citation = entity.Citation.Update();
+                entity.Citation = entity.Citation.Update(true);
                 Logger.DebugFormat("Adding Wellbore with Uuid '{0}' and citation title '{1}'.", entity.Uuid, entity.Citation.Title);
 
                 Validate(Functions.PutObject, entity);

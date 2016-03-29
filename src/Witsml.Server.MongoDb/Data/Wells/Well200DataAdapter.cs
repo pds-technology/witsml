@@ -53,12 +53,14 @@ namespace PDS.Witsml.Server.Data.Wells
                 Validate(Functions.PutObject, entity);
                 Logger.DebugFormat("Validated Well with Uuid '{0}' and citation title '{1}'.", entity.Uuid, entity.Citation.Title);
 
-                UpdateEntity(entity, dataObjectId);
+                var parser = CreateQueryParser(Functions.PutObject, entity);
+
+                UpdateEntity(entity, parser, dataObjectId);
             }
             else
             {
                 entity.Uuid = NewUid(entity.Uuid);
-                entity.Citation = entity.Citation.Update();
+                entity.Citation = entity.Citation.Update(true);
                 Logger.DebugFormat("Adding Well with Uuid '{0}' and citation title '{1}'.", entity.Uuid, entity.Citation.Title);
 
                 Validate(Functions.PutObject, entity);

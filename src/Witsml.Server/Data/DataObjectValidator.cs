@@ -68,7 +68,7 @@ namespace PDS.Witsml.Server.Data
                     break;
 
                 case Functions.PutObject:
-                    foreach (var result in ValidateProperties().Union(ValidateForPutObject()))
+                    foreach (var result in ValidateForPutObject())
                         yield return result;
                     break;
             }
