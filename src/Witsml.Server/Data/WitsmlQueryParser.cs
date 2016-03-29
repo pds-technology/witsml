@@ -92,6 +92,16 @@ namespace PDS.Witsml.Server.Data
             return Element().Elements(_namespace + name).FirstOrDefault();
         }
 
+        public IEnumerable<XElement> Properties(string name)
+        {
+            return Element().Elements(_namespace + name);
+        }
+
+        public IEnumerable<XElement> Properties(IEnumerable<XElement> elements, string name)
+        {
+            return elements.Elements(_namespace + name);
+        }
+
         public bool HasElements(string name)
         {
             return HasElements(Element(), name);
