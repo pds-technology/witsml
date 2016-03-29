@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 using System.Xml.Serialization;
+using Energistics.DataAccess;
 using MongoDB.Driver;
 using PDS.Framework;
 
@@ -164,6 +165,31 @@ namespace PDS.Witsml.Server.Data
             }
 
             return builder.And(filters);
+        }
+
+        public static Dictionary<string, object> CreateUpdateFields<T>()
+        {
+            if (typeof(IDataObject).IsAssignableFrom(typeof(T)))
+            {
+                return new Dictionary<string, object> {
+                    { "CommonData.DateTimeLastChange", DateTimeOffset.UtcNow.ToString("o") }
+                };
+            }
+            else
+            {
+                return new Dictionary<string, object> {
+                    { "Citation.LastUpdate", DateTime.UtcNow.ToString("o") }
+                };
+            }
+        }
+
+        public static string[] CreateIgnoreFields<T>(string[] ignored)
+        {
+            var creationTime = typeof(IDataObject).IsAssignableFrom(typeof(T))
+                ? new string[] { "CommonData.DateTimeCreation" }
+                : new string[] { "Citation.Creation" };
+
+            return ignored == null ? creationTime : creationTime.Union(ignored).ToArray();
         }
     }
 }

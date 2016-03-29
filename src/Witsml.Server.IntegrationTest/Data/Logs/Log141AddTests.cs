@@ -570,5 +570,69 @@ namespace PDS.Witsml.Server.Data.Logs
             logCurve = logUpdated.LogCurveInfo.FirstOrDefault(c => c.Uid == "ROP");
             Assert.AreEqual(updateCurve.CurveDescription, logCurve.CurveDescription);
         }
+
+        [TestMethod]
+        public void Test_update_log_header_add_curve()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+            Wellbore.UidWell = response.SuppMsgOut;
+
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            var uidWellbore = response.SuppMsgOut;
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = uidWellbore,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            log.LogCurveInfo.RemoveRange(1, 2);
+            log.LogData.Clear();
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var query = new Log
+            {
+                UidWell = Wellbore.UidWell,
+                UidWellbore = uidWellbore,
+                Uid = uidLog
+            };
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            var logAdded = results.FirstOrDefault();
+
+            Assert.IsNotNull(logAdded);
+            Assert.AreEqual(1, logAdded.LogCurveInfo.Count);
+            Assert.AreEqual(log.LogCurveInfo.Count, logAdded.LogCurveInfo.Count);
+
+            var update = new Log()
+            {
+                Uid = uidLog,
+                UidWell = Wellbore.UidWell,
+                UidWellbore = uidWellbore
+            };
+
+            DevKit.InitHeader(update, LogIndexType.measureddepth);
+            update.LogCurveInfo.RemoveAt(2);
+            update.LogCurveInfo.RemoveAt(0);
+            update.LogData.Clear();
+
+            var updateResponse = DevKit.Update<LogList, Log>(update);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            var logUpdated = results.FirstOrDefault();
+
+            Assert.IsNotNull(logUpdated);
+            Assert.AreEqual(2, logUpdated.LogCurveInfo.Count);
+            Assert.AreEqual(update.LogCurveInfo.Count, logUpdated.LogCurveInfo.Count);
+        }
     }
 }
