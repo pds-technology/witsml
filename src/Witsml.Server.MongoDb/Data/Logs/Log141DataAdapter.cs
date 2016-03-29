@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess;
@@ -163,7 +164,7 @@ namespace PDS.Witsml.Server.Data.Logs
             // Extract Data
             var saved = GetEntity(dataObjectId);
             var readers = ExtractDataReaders(entity, saved);
-            var ignored = new[] { "logData" };
+            var ignored = new[] { "logData", "CommonData.DateTimeCreation" };
 
             UpdateEntity(parser, dataObjectId, ignored);
 
