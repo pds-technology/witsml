@@ -124,7 +124,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public override WitsmlResult Add(Log entity)
         {
             entity.Uid = NewUid(entity.Uid);
-            entity.CommonData = entity.CommonData.Update();
+            entity.CommonData = entity.CommonData.Update(true);
             Validate(Functions.AddToStore, entity);
 
             try
@@ -171,16 +171,18 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </returns>
         public override WitsmlResult Update(Log entity, WitsmlQueryParser parser)
         {
-            //List<LogDataValues> logDataValuesList = null;
-            var result = Get(entity.GetObjectId());
-            var isTimeLog = result.IndexType.GetValueOrDefault() == LogIndexType.datetime;
-            var decreasing = result.Direction.GetValueOrDefault() == LogIndexDirection.decreasing;
+            var dataObjectId = entity.GetObjectId();
+            entity.CommonData = entity.CommonData.Update();
 
-            UpdateEntity(entity, parser);
+            var saved = GetEntity(dataObjectId);
+            var isTimeLog = saved.IndexType.GetValueOrDefault() == LogIndexType.datetime;
+            var decreasing = saved.Direction.GetValueOrDefault() == LogIndexDirection.decreasing;
+
+            UpdateEntity(entity, parser, dataObjectId);
 
             if (entity.LogData != null && entity.LogData.Count > 0)
             {
-                _channelDataAdapter.UpdateLogData(result, entity.LogData, isTimeLog, !decreasing);              
+                _channelDataAdapter.UpdateLogData(saved, entity.LogData, isTimeLog, !decreasing);              
             }
 
             // TODO: Fix later

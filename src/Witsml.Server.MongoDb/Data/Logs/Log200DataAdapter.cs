@@ -66,12 +66,15 @@ namespace PDS.Witsml.Server.Data.Logs
                 entity.Citation = entity.Citation.Update();
 
                 Validate(Functions.PutObject, entity);
-                UpdateEntity(entity, dataObjectId);
+
+                var parser = CreateQueryParser(Functions.PutObject, entity);
+
+                UpdateEntity(entity, parser, dataObjectId);
             }
             else
             {
                 entity.Uuid = NewUid(entity.Uuid);
-                entity.Citation = entity.Citation.Update();
+                entity.Citation = entity.Citation.Update(true);
 
                 Validate(Functions.PutObject, entity);
                 InsertEntity(entity);

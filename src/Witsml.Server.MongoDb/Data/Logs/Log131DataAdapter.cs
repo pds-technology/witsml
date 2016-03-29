@@ -104,7 +104,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public override WitsmlResult Add(Log entity)
         {
             entity.Uid = NewUid(entity.Uid);
-            entity.CommonData = entity.CommonData.Update();
+            entity.CommonData = entity.CommonData.Update(true);
 
             //Validate(Functions.AddToStore, entity);
 
@@ -138,8 +138,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var saved = GetEntity(dataObjectId);
             var reader = ExtractDataReader(entity, saved);
 
-            // TODO: wait for selective update to be implemented
-            //UpdateEntity(entity, dataObjectId);
+            UpdateEntity(entity, parser, dataObjectId);
 
             // Merge ChannelDataChunks
             _channelDataChunkAdapter.Merge(reader);

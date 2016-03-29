@@ -12,7 +12,6 @@ namespace PDS.Witsml.Server.Data
     public static class MongoDbFieldHelper
     {
         private static readonly XNamespace xsi = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
-        private static readonly string DefaultIdField = "Uid";
 
         public static IList<PropertyInfo> GetPropertyInfo(Type t)
         {
@@ -147,12 +146,12 @@ namespace PDS.Witsml.Server.Data
             return xsi.GetName(attributeName);
         }
 
-        public static FilterDefinition<T> GetEntityFilter<T>(DataObjectId dataObjectId)
+        public static FilterDefinition<T> GetEntityFilter<T>(DataObjectId dataObjectId, string idPropertyName = "Uid")
         {
             var builder = Builders<T>.Filter;
             var filters = new List<FilterDefinition<T>>();
 
-            filters.Add(builder.EqIgnoreCase(DefaultIdField, dataObjectId.Uid));
+            filters.Add(builder.EqIgnoreCase(idPropertyName, dataObjectId.Uid));
 
             if (dataObjectId is WellObjectId)
             {

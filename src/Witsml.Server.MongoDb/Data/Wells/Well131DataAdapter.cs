@@ -78,7 +78,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Logger.DebugFormat("Adding Well with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
 
             entity.Uid = NewUid(entity.Uid);
-            entity.CommonData = entity.CommonData.Update();
+            entity.CommonData = entity.CommonData.Update(true);
             Validate(Functions.AddToStore, entity);
 
             Logger.DebugFormat("Well with uid '{0}' and name {1} validated for Add", entity.Uid, entity.Name);
@@ -103,7 +103,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Validate(Functions.UpdateInStore, entity);
 
             Logger.DebugFormat("Validated Well with uid '{0}' and name {1} for Update", entity.Uid, entity.Name);
-            UpdateEntity(entity, entity.GetObjectId());
+            UpdateEntity(entity, parser, entity.GetObjectId());
 
             return new WitsmlResult(ErrorCodes.Success);
         }
