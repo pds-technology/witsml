@@ -119,7 +119,8 @@ namespace PDS.Witsml.Server.Data
                 .FirstOrDefault(t =>
                 {
                     var xmlType = t.GetCustomAttribute<XmlTypeAttribute>();
-                    return xmlType != null && xmlType.TypeName == typeName && xmlType.Namespace == @namespace;
+                    return ((xmlType != null && xmlType.TypeName == typeName) && 
+                        (string.IsNullOrWhiteSpace(@namespace) || xmlType.Namespace == @namespace));
                 });
         }
 
