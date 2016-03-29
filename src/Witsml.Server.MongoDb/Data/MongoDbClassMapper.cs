@@ -43,12 +43,13 @@ namespace PDS.Witsml.Server.Data
             Register3<Witsml200.ComponentSchemas.IndexRangeContext>();
             Register3<Witsml200.ComponentSchemas.DepthIndexValue>();
             Register3<Witsml200.ComponentSchemas.TimeIndexValue>();
+            RegisterId<Witsml200.ComponentSchemas.ChannelIndex>("Mnemonic");
 
             // Custom
             Register3<ChannelDataChunk>();
             RegisterId<LogDataValues>();
             RegisterId<ChannelDataValues>();
-
+            
             try
             {
                 BsonSerializer.RegisterSerializer(new TimestampSerializer());
