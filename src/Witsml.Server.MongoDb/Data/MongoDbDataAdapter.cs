@@ -207,6 +207,11 @@ namespace PDS.Witsml.Server.Data
 
         protected List<TObject> GetEntities<TObject>(IEnumerable<DataObjectId> dataObjectIds, string dbCollectionName)
         {
+            if (!dataObjectIds.Any())
+            {
+                return new List<TObject>(0);
+            }
+
             var filters = dataObjectIds.Select(x => GetEntityFilter<TObject>(x));
 
             return GetCollection<TObject>(dbCollectionName)
