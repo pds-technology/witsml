@@ -55,7 +55,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
                 var parser = CreateQueryParser(Functions.PutObject, entity);
 
-                UpdateEntity(entity, parser, dataObjectId);
+                UpdateEntity(parser, dataObjectId);
             }
             else
             {

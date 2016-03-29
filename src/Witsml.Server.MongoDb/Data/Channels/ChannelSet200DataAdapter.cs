@@ -70,7 +70,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 var reader = ExtractDataReader(entity, saved);
                 var parser = CreateQueryParser(Functions.PutObject, entity);
 
-                UpdateEntity(entity, parser, dataObjectId);
+                UpdateEntity(parser, dataObjectId);
 
                 // Merge ChannelDataChunks
                 _channelDataChunkAdapter.Merge(reader);

@@ -69,7 +69,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
                 var parser = CreateQueryParser(Functions.PutObject, entity);
 
-                UpdateEntity(entity, parser, dataObjectId);
+                UpdateEntity(parser, dataObjectId);
             }
             else
             {

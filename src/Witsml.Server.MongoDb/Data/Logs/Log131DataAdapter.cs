@@ -145,7 +145,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var saved = GetEntity(dataObjectId);
             var reader = ExtractDataReader(entity, saved);
 
-            UpdateEntity(entity, parser, dataObjectId);
+            UpdateEntity(parser, dataObjectId);
 
             // Merge ChannelDataChunks
             _channelDataChunkAdapter.Merge(reader);
