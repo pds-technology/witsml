@@ -300,8 +300,8 @@ namespace PDS.Witsml.Server.Data
 
                 var current = GetEntityById<TObject>(dataObjectId, dbCollectionName);
 
-                var update = new MongoDbUpdate<TObject>(GetCollection<TObject>(dbCollectionName), parser, IdPropertyName, ignored);
-                update.Update(current, dataObjectId);
+                var update = new MongoDbUpdate<TObject>(GetCollection<TObject>(dbCollectionName), parser, IdPropertyName, MongoDbFieldHelper.CreateIgnoreFields<TObject>(ignored));
+                update.Update(current, dataObjectId, MongoDbFieldHelper.CreateUpdateFields<TObject>());
             }
             catch (MongoException ex)
             {
