@@ -300,8 +300,10 @@ namespace PDS.Witsml.Server.Data
             {
                 Logger.DebugFormat("Updating {0} MongoDb collection", dbCollectionName);
 
+                var current = GetEntityById<TObject>(dataObjectId, dbCollectionName);
+
                 var update = new MongoDbUpdate<TObject>(GetCollection<TObject>(dbCollectionName), parser, IdPropertyName, ignored);
-                update.Update(entity, dataObjectId);
+                update.Update(current, dataObjectId);
             }
             catch (MongoException ex)
             {
