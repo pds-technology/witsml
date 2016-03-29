@@ -25,7 +25,7 @@ namespace PDS.Witsml.Server.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("10000")]
+        [global::System.Configuration.DefaultSettingValueAttribute("15000")]
         public int MaxDataNodes {
             get {
                 return ((int)(this["MaxDataNodes"]));
@@ -34,7 +34,7 @@ namespace PDS.Witsml.Server.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("100000")]
+        [global::System.Configuration.DefaultSettingValueAttribute("300000")]
         public int MaxDataPoints {
             get {
                 return ((int)(this["MaxDataPoints"]));
