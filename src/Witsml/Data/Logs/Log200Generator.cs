@@ -234,7 +234,7 @@ namespace PDS.Witsml.Data.Logs
             const int Seed = 123;
 
             Random random = new Random(Seed);
-            DateTime dateTimeStart = new DateTime(2015, 3, 17, 11, 50, 0).ToUniversalTime();
+            var dateTimeStart = new DateTimeOffset(2015, 3, 17, 11, 50, 0, TimeSpan.FromHours(-6));
 
             foreach (ChannelSet channelSet in channelSetList)
             {
@@ -284,8 +284,8 @@ namespace PDS.Witsml.Data.Logs
 
                 if (indexValue.Equals(ChannelIndexType.datetime))
                 {
-                    indexesStart[idx] = ((DateTime)indexesStart[idx]).AddSeconds(random.Next(1, 5));
-                    indexValues += "\"" + ((DateTime)indexesStart[idx]).ToString("o") + "\"";
+                    indexesStart[idx] = ((DateTimeOffset)indexesStart[idx]).AddSeconds(random.Next(1, 5));
+                    indexValues += "\"" + ((DateTimeOffset)indexesStart[idx]).ToString("o") + "\"";
                 }
                 else if (indexValue.Equals(ChannelIndexType.elapsedtime))
                 {
@@ -341,7 +341,7 @@ namespace PDS.Witsml.Data.Logs
             return channelValues;
         }
 
-        private void InitStartIndexes(DateTime dateTimeStart, List<ChannelIndex> channelIndexes, object[] indexesStart)
+        private void InitStartIndexes(DateTimeOffset dateTimeStart, List<ChannelIndex> channelIndexes, object[] indexesStart)
         {
             for (int i = 0; i < channelIndexes.Count(); i++)
             {

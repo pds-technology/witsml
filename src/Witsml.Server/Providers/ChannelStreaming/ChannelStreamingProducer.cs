@@ -8,6 +8,7 @@ using Energistics.Common;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
 using Energistics.Protocol.ChannelStreaming;
+using Newtonsoft.Json.Linq;
 using PDS.Framework;
 using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Data.Channels;
@@ -163,6 +164,8 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                         // update ChannelStreamingInfo index value
                         y.StartIndex.Item = index;
 
+                        var value = Format(record.GetValue(record.GetOrdinal(channel.Mnemonic)));
+
                         return new DataItem()
                         {
                             ChannelId = y.ChannelId,
@@ -170,7 +173,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                             ValueAttributes = new DataAttribute[0],
                             Value = new DataValue()
                             {
-                                Item = record.GetValue(record.GetOrdinal(channel.Mnemonic))
+                                Item = value
                             }
                         };
                     })
@@ -182,6 +185,29 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     ChannelData(Request, dataItems);
                 }
             }
+        }
+
+        private object Format(object value)
+        {
+            if (value is DateTime)
+            {
+                return ((DateTime)value).ToString("o");
+            }
+            else if (value is DateTimeOffset)
+            {
+                return ((DateTimeOffset)value).ToString("o");
+            }
+            else if (value is JValue)
+            {
+                return ((JValue)value).Value;
+            }
+            else if (value is JArray)
+            {
+                var array = value as JArray;
+                return array.Count > 0 ? array[0].ToString() : null;
+            }
+
+            return value;
         }
     }
 }

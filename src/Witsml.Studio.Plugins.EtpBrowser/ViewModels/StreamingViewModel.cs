@@ -321,7 +321,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 ChannelId = channel.ChannelId,
                 StartIndex = new StreamingStartIndex()
                 {
-                    Item = 0
+                    Item = -1
                 }
             };
         }

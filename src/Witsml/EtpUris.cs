@@ -66,10 +66,28 @@ namespace PDS.Witsml
                 .Append(ObjectTypes.ChannelSet, entity.Uuid);
         }
 
+        public static EtpUri GetUri(this Witsml200.Channel entity, Witsml200.ChannelSet channelSet)
+        {
+            return channelSet.GetUri()
+                .Append(ObjectTypes.Channel, entity.Mnemonic);
+        }
+
         public static EtpUri GetUri(this Witsml200.Channel entity, Witsml200.Log log, Witsml200.ChannelSet channelSet)
         {
             return channelSet.GetUri(log)
                 .Append(ObjectTypes.Channel, entity.Mnemonic);
+        }
+
+        public static EtpUri GetUri(this Witsml200.ComponentSchemas.ChannelIndex entity, Witsml200.ChannelSet channelSet)
+        {
+            return channelSet.GetUri()
+                .Append(ObjectTypes.ChannelIndex, entity.Mnemonic);
+        }
+
+        public static EtpUri GetUri(this Witsml200.ComponentSchemas.ChannelIndex entity, Witsml200.Log log, Witsml200.ChannelSet channelSet)
+        {
+            return channelSet.GetUri(log)
+                .Append(ObjectTypes.ChannelIndex, entity.Mnemonic);
         }
     }
 }
