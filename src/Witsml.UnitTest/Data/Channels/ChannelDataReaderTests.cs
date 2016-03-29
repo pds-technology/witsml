@@ -150,8 +150,8 @@ namespace PDS.Witsml.Data.Channels
 
             var range = reader.GetChannelIndexRange(reader.GetOrdinal("GR"));
 
-            Assert.AreEqual(3.115, range.Start);
-            Assert.AreEqual(3.115, range.End);
+            Assert.AreEqual(3.5, range.Start);
+            Assert.AreEqual(3.5, range.End);
         }
 
         [TestMethod]
@@ -166,8 +166,8 @@ namespace PDS.Witsml.Data.Channels
 
             var range = reader.GetChannelIndexRange(reader.GetOrdinal("GR"));
 
-            Assert.AreEqual(3.115, range.Start);
-            Assert.AreEqual(7.11, range.End);
+            Assert.AreEqual(3.5, range.Start);
+            Assert.AreEqual(7.0, range.End);
         }
 
         [TestMethod]
