@@ -37,7 +37,7 @@ namespace PDS.Witsml.Server.Data
         /// <value>The logger.</value>
         protected ILog Logger { get; private set; }
 
-        public void Update(T entity, DataObjectId dataObjectId)
+        public void Update(T entity, DataObjectId dataObjectId, Dictionary<string, object> updates)
         {
             var dataObj = entity as IDataObject;
             var abstractObj = entity as Energistics.DataAccess.WITSML200.ComponentSchemas.AbstractObject;
@@ -45,6 +45,8 @@ namespace PDS.Witsml.Server.Data
 
             _entityFilter = MongoDbFieldHelper.GetEntityFilter<T>(dataObjectId, _idPropertyName);
             var update = Builders<T>.Update.Set(_idPropertyName, uidValue);
+            foreach (var pair in updates)
+                update = update.Set(pair.Key, pair.Value);
 
             var element = _parser.Element();
             update = BuildUpdate(update, element, entity);
@@ -266,7 +268,8 @@ namespace PDS.Witsml.Server.Data
 
                 if (current == null)
                 {
-                    var item = typeof(WitsmlParser).GetMethod("Parse", BindingFlags.Public | BindingFlags.Static)
+                    var item = typeof(WitsmlParser).GetMethods(BindingFlags.Public | BindingFlags.Static)
+                        .FirstOrDefault(x=>x.GetGenericArguments().Any())
                         .MakeGenericMethod(type)
                         .Invoke(null, new object[] { element.ToString() });
                     var update = updateBuilder.Push(parentPath, item);
