@@ -226,15 +226,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 {
                     id = endOfExisting ? string.Empty : existingEnum.Current.Id;
 
-                    if (!endOfExisting &&
-                        (endOfUpdate ||
-                        existingEnum.Current.GetIndexValue() < updateRange.Start.Value ||
-                        existingEnum.Current.GetIndexValue() > updateRange.End.Value))
-                    {
-                        yield return existingEnum.Current;
-                        endOfExisting = !existingEnum.MoveNext();
-                    }
-                    else if (!endOfUpdate &&
+                    if (!endOfUpdate &&
                         (endOfExisting ||
                         updateEnum.Current.GetIndexValue() < existingEnum.Current.GetIndexValue()))
                     {
@@ -242,19 +234,40 @@ namespace PDS.Witsml.Server.Data.Channels
                         yield return updateEnum.Current;
                         endOfUpdate = !updateEnum.MoveNext();
                     }
-                    else
+                    else if (!endOfExisting &&
+                        (endOfUpdate ||
+                        existingEnum.Current.GetIndexValue() < updateRange.Start.Value ||
+                        existingEnum.Current.GetIndexValue() > updateRange.End.Value))
+                    {
+                        yield return existingEnum.Current;
+                        endOfExisting = !existingEnum.MoveNext();
+                    }
+                    else // existing and update overlap
                     {
                         if (!endOfExisting && !endOfUpdate)
                         {
                             if (existingEnum.Current.GetIndexValue() == updateEnum.Current.GetIndexValue())
                             {
-                                yield return MergeRow(existingEnum.Current, updateEnum.Current);
+                                var mergedRow = MergeRow(existingEnum.Current, updateEnum.Current);
+
+                                if (mergedRow.HasValues())
+                                {
+                                    yield return mergedRow;
+                                }
+
                                 endOfExisting = !existingEnum.MoveNext();
                                 endOfUpdate = !updateEnum.MoveNext();
                             }
 
                             else if (existingEnum.Current.GetIndexValue() < updateEnum.Current.GetIndexValue())
                             {
+                                var mergedRow = MergeRow(existingEnum.Current, updateEnum.Current, clear: true);
+
+                                if (mergedRow.HasValues())
+                                {
+                                    yield return mergedRow;
+                                }
+
                                 endOfExisting = !existingEnum.MoveNext();
                             }
 
@@ -266,32 +279,11 @@ namespace PDS.Witsml.Server.Data.Channels
                             }
                         }
                     }
-
-                    //if (!endOfExisting && (endOfUpdate || ExistingBefore(
-                    //                                        existingEnum.Current.GetIndexValue(),
-                    //                                        updateEnum.Current.GetIndexValue(), 
-                    //                                        existingEnum.Current.GetIndex().Increasing)))
-                    //{
-                    //    yield return existingEnum.Current;
-                    //    endOfExisting = !existingEnum.MoveNext();
-                    //}
-                    //else
-                    //{
-                    //    updateEnum.Current.Id = id;
-                    //    yield return updateEnum.Current;
-
-                    //    if (!endOfExisting && existingEnum.Current.GetIndexValue() == updateEnum.Current.GetIndexValue())
-                    //    {
-                    //        endOfExisting = !existingEnum.MoveNext();
-                    //    }
-
-                    //    endOfUpdate = !updateEnum.MoveNext();
-                    //}
                 }
             }
         }
 
-        private IChannelDataRecord MergeRow(IChannelDataRecord existingRecord, IChannelDataRecord updateRecord)
+        private IChannelDataRecord MergeRow(IChannelDataRecord existingRecord, IChannelDataRecord updateRecord, bool clear = false)
         {
             var existingIndexValue = existingRecord.GetIndexValue();
             var increasing = existingRecord.GetIndex().Increasing;
@@ -301,7 +293,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 var mnemonicRange = updateRecord.GetChannelIndexRange(i);
                 if (mnemonicRange.Contains(existingIndexValue, increasing))
                 {
-                    existingRecord.SetValue(i, updateRecord.GetValue(i));
+                    existingRecord.SetValue(i, clear ? null : updateRecord.GetValue(i));
                 }
             }
 
