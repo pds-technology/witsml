@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Energistics.DataAccess.WITSML200;
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Framework;
@@ -49,6 +50,8 @@ namespace PDS.Witsml.Server.Data.Channels
             // Create
             var result = ChannelSetAdapter.Put(ChannelSet);
             Assert.AreEqual(ErrorCodes.Success, result.Code);
+
+            ChannelSet.Data = new ChannelData();
 
             // Add data that will update in the middle
             ChannelSet.Data.Data = @"[
