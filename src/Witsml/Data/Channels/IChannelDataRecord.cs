@@ -29,6 +29,8 @@ namespace PDS.Witsml.Data.Channels
 
         long GetUnixTimeSeconds(int i);
 
+        bool HasValues();
+
         string GetJson();
 
         void SetValue(int i, object value);
