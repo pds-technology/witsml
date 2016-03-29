@@ -145,8 +145,8 @@ namespace PDS.Witsml.Data.Channels
 
             var channelIndex = GetIndex();
             var valueIndex = i - Depth;
-            string start = null;
-            string end = null;
+            object start = null;
+            object end = null;
 
             _records.ForEach(x =>
             {
@@ -154,10 +154,10 @@ namespace PDS.Witsml.Data.Channels
                 
                 if (!IsNull(value))
                 {
-                    if (start == null)
-                        start = value;
+                    end = x[0][0];
 
-                    end = value;
+                    if (start == null)
+                        start = end;
                 }
             });
 
@@ -317,6 +317,12 @@ namespace PDS.Witsml.Data.Channels
         public void Reset()
         {
             _current = -1;
+        }
+
+        public bool HasValues()
+        {
+            return GetChannelValues(_current)
+                .Any(x => x != null && !IsNull(x.ToString()));
         }
 
         public string GetJson()
