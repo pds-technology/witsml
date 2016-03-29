@@ -488,6 +488,13 @@ namespace PDS.Witsml.Server.Data
         {
             Logger.DebugFormat("Building projection fields for element: {0}", element.Name.LocalName);
 
+            if (type.IsGenericType)
+            {
+                type = type.GetGenericArguments()[0];
+                BuildProjectionForAnElement(element, fieldPath, type);
+                return;
+            }
+
             var properties = GetPropertyInfo(type);
 
             if (element.HasElements)

@@ -77,9 +77,9 @@ namespace PDS.Witsml.Server.Data.Logs
             var ignored = new List<string> { "startIndex", "endIndex", "startDateTimeIndex", "endDateTimeIndex", "logData" };
             var logs = QueryEntities(parser, fields, ignored);
 
-            // Only get LogData when returnElements != "header-only" and returnElements != "id-only"
-            if (!OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements) && !OptionsIn.ReturnElements.IdOnly.Equals(returnElements) &&
-                !OptionsIn.RequestObjectSelectionCapability.True.Equals(parser.RequestObjectSelectionCapability()))
+            if (OptionsIn.ReturnElements.All.Equals(returnElements) ||
+                OptionsIn.ReturnElements.DataOnly.Equals(returnElements) ||
+                (fields != null && fields.Contains("LogData")))
             {
                 var logHeaders = GetEntities(logs.Select(x => x.GetObjectId()))
                     .ToDictionary(x => x.GetObjectId());
@@ -87,17 +87,19 @@ namespace PDS.Witsml.Server.Data.Logs
                 logs.ForEach(l =>
                 {
                     var logHeader = logHeaders[l.GetObjectId()];
-                    var allMnemonics = GetMnemonicList(logHeader, parser);
-                    var mnemonicSliceIndexes = 
-                        ComputeMnemonicSliceIndexes(
-                            allMnemonics, 
-                            GetLogCurveInfoMnemonics(parser),
-                            parser.ReturnElements());
+                    var mnemonics = GetMnemonicList(logHeader, parser);
 
-                    l.LogData = QueryLogDataValues(logHeader, parser, allMnemonics, mnemonicSliceIndexes);
+                    l.LogData = QueryLogDataValues(logHeader, parser, mnemonics);
 
-                    // TODO: Remove LogCurveInfos from the Log Header if there are slices
-
+                    FormatLogHeader(l, mnemonics, returnElements);
+                });
+            }
+            else if (!OptionsIn.RequestObjectSelectionCapability.True.Equals(parser.RequestObjectSelectionCapability()))
+            {
+                logs.ForEach(l =>
+                {
+                    var mnemonics = GetMnemonicList(l, parser);
+                    FormatLogHeader(l, mnemonics, returnElements);
                 });
             }
 
@@ -278,52 +280,13 @@ namespace PDS.Witsml.Server.Data.Logs
             return chunks.GetRecords(range, increasing);
         }
 
-        private List<string> QueryLogDataValues(Log log, WitsmlQueryParser parser, string[] mnemonics, int[] mnemonicSliceIndexes)
+        private List<string> QueryLogDataValues(Log log, WitsmlQueryParser parser, IDictionary<int, string> mnemonics)
         {
             var range = GetLogDataSubsetRange(log, parser);
             var increasing = log.Direction.GetValueOrDefault() == LogIndexDirection.increasing;
-            var records = GetChannelData(log.GetUri(), mnemonics.First(), range, increasing);
+            var records = GetChannelData(log.GetUri(), mnemonics[0], range, increasing);
 
-            return FormatLogData(records, mnemonicSliceIndexes);
-        }
-
-        private string GetLogCurveInfoMnemonics(WitsmlQueryParser parser)
-        {
-            string mnemonics = string.Empty;
-
-            var logCurveInfos = parser.Properties("logCurveInfo");
-
-            if (logCurveInfos != null && logCurveInfos.Any())
-            {
-                var mnemonicList = parser.Properties(logCurveInfos, "mnemonic");
-
-                if (mnemonicList != null && mnemonicList.Any())
-                {
-                    mnemonics = String.Join(",", mnemonicList.Select(x => x.Value));
-                }
-            }
-
-            return mnemonics;
-        }
-
-        private int[] ComputeMnemonicSliceIndexes(string[] mnemonics, string sliceMnemonics, string returnElements)
-        {
-
-            if (string.IsNullOrEmpty(sliceMnemonics) &&
-                !OptionsIn.ReturnElements.All.Equals(returnElements) &&
-                !OptionsIn.ReturnElements.DataOnly.Equals(returnElements))
-            {
-                return new int[0];
-            }
-
-            var slices = sliceMnemonics.Split(',');
-            var sliceIndexes = mnemonics
-                .Select((mn, index) => new { Mnemonic = mn, Index = index })
-                .Where(x => slices.Contains(x.Mnemonic))
-                .Select(x => x.Index)
-                .ToArray();
-
-            return sliceIndexes;
+            return FormatLogData(records, mnemonics);
         }
 
         private Range<double?> GetLogDataSubsetRange(Log log, WitsmlQueryParser parser)
@@ -336,19 +299,55 @@ namespace PDS.Witsml.Server.Data.Logs
                 isTimeLog);
         }
 
-        private string[] GetMnemonicList(Log log, WitsmlQueryParser parser)
+        private IEnumerable<string> GetLogCurveInfoMnemonics(WitsmlQueryParser parser)
         {
-            // TODO: limit mnemonics based on returnElements
+            var mnemonics = Enumerable.Empty<string>();
+            var logCurveInfos = parser.Properties("logCurveInfo");
 
-            return log.LogCurveInfo
-                .Select(x => x.Mnemonic)
-                .ToArray();
+            if (logCurveInfos != null && logCurveInfos.Any())
+            {
+                var mnemonicList = parser.Properties(logCurveInfos, "mnemonic");
+
+                if (mnemonicList != null && mnemonicList.Any())
+                {
+                    mnemonics = mnemonicList.Select(x => x.Value);
+                }
+            }
+
+            return mnemonics;
         }
 
-        private List<string> FormatLogData(IEnumerable<IChannelDataRecord> records, int[] mnemonicSlices)
+        private IDictionary<int, string> ComputeMnemonicIndexes(string[] allMnemonics, string[] queryMnemonics, string returnElements)
+        {
+            // Start with all mnemonics
+            var mnemonicIndexes = allMnemonics
+                .Select((mn, index) => new { Mnemonic = mn, Index = index });
+
+            // Check if mnemonics need to be filtered
+            if (queryMnemonics.Any() && !OptionsIn.ReturnElements.All.Equals(returnElements))
+            {
+                // always return the index channel
+                mnemonicIndexes = mnemonicIndexes
+                    .Where(x => x.Index == 0 || queryMnemonics.Contains(x.Mnemonic));
+            }
+
+            // create an index-to-mnemonic map
+            return mnemonicIndexes
+                .ToDictionary(x => x.Index, x => x.Mnemonic);
+        }
+
+        private IDictionary<int, string> GetMnemonicList(Log log, WitsmlQueryParser parser)
+        {
+            var allMnemonics = log.LogCurveInfo.Select(x => x.Mnemonic).ToArray();
+            var queryMnemonics = GetLogCurveInfoMnemonics(parser).ToArray();
+
+            return ComputeMnemonicIndexes(allMnemonics, queryMnemonics, parser.ReturnElements());
+        }
+
+        private List<string> FormatLogData(IEnumerable<IChannelDataRecord> records, IDictionary<int, string> mnemonics)
         {
             var logData = new List<string>();
-
+            var slices = mnemonics.Keys.ToArray();
 
             foreach (var record in records)
             {
@@ -356,12 +355,10 @@ namespace PDS.Witsml.Server.Data.Logs
                 record.GetValues(values);
 
                 // Limit data to requested mnemonics
-                if (mnemonicSlices.Length > 0)
+                if (slices.Any())
                 {
                     values = values
-                        .Select((v, index) => new { Value = v, Index = index })
-                        .Where(x => mnemonicSlices.Contains(x.Index))
-                        .Select(x => x.Value)
+                        .Where((x, i) => slices.Contains(i))
                         .ToArray();
                 }
 
@@ -369,6 +366,15 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             return logData;
+        }
+
+        private void FormatLogHeader(Log log, IDictionary<int, string> mnemonics, string returnElements)
+        {
+            // Remove LogCurveInfos from the Log header if slicing by column
+            if (log.LogCurveInfo != null && !OptionsIn.ReturnElements.All.Equals(returnElements))
+            {
+                log.LogCurveInfo.RemoveAll(x => !mnemonics.Values.Contains(x.Mnemonic));
+            }
         }
 
         private ChannelDataReader ExtractDataReader(Log entity, Log existing = null)

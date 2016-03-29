@@ -43,7 +43,7 @@ namespace PDS.Witsml.Server.MongoDb {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1000")]
         public int LogIndexRangeSize {
             get {
                 return ((int)(this["LogIndexRangeSize"]));
