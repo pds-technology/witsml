@@ -7,6 +7,7 @@
     <indexType>measured depth</indexType>
     <startIndex uom='ft'>35.5</startIndex>
     <endIndex uom='ft'>6235.5</endIndex>
+    <direction>increasing</direction>
     <indexCurve>DEPT</indexCurve>
     <nullValue>-999.2500</nullValue>
     <logCurveInfo uid='DEPT'>
