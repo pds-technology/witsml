@@ -633,5 +633,70 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsNotNull(logUpdated);
             Assert.AreEqual(2, logUpdated.LogCurveInfo.Count);
         }
+
+        [TestMethod]
+        public void Test_log_index_direction_default_and_update()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+            Wellbore.UidWell = response.SuppMsgOut;
+
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            var uidWellbore = response.SuppMsgOut;
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = uidWellbore,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01"),
+                RunNumber = "101",
+                IndexCurve = "MD",
+                IndexType = LogIndexType.measureddepth
+            };
+
+            DevKit.InitHeader(log, log.IndexType.Value);
+            log.Direction = null;
+
+            Assert.IsFalse(log.Direction.HasValue);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var query = new Log
+            {
+                UidWell = Wellbore.UidWell,
+                UidWellbore = uidWellbore,
+                Uid = uidLog
+            };
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            var logAdded = results.FirstOrDefault();
+
+            Assert.IsNotNull(logAdded);
+            Assert.AreEqual(LogIndexDirection.increasing, logAdded.Direction);
+            Assert.AreEqual(log.RunNumber, logAdded.RunNumber);
+
+            var update = new Log()
+            {
+                Uid = uidLog,
+                UidWell = Wellbore.UidWell,
+                UidWellbore = uidWellbore,
+                Direction = LogIndexDirection.decreasing,
+                RunNumber = "102"
+            };
+
+            var updateResponse = DevKit.Update<LogList, Log>(update);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            var logUpdated = results.FirstOrDefault();
+
+            Assert.IsNotNull(logUpdated);
+            Assert.AreEqual(LogIndexDirection.increasing, logAdded.Direction);
+            Assert.AreEqual(update.RunNumber, logUpdated.RunNumber);
+        }
     }
 }
