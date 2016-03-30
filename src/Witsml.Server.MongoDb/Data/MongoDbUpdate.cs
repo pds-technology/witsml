@@ -8,6 +8,7 @@ using System.Xml.Serialization;
 using Energistics.DataAccess;
 using log4net;
 using MongoDB.Driver;
+using Newtonsoft.Json;
 using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data
@@ -257,6 +258,7 @@ namespace PDS.Witsml.Server.Data
             var filterPath = MongoDbFieldHelper.GetPropertyPath(parentPath, uid);
             var properties = MongoDbFieldHelper.GetPropertyInfo(type);
             var positionPath = parentPath + ".$";
+
             foreach (var element in elements)
             {
                 var uidAttrib = element.Attributes().FirstOrDefault(a => a.Name.LocalName.EqualsIgnoreCase(uid));
@@ -268,10 +270,15 @@ namespace PDS.Witsml.Server.Data
 
                 if (current == null)
                 {
+                    // update element name to match XSD type
+                    var xmlType = type.GetCustomAttribute<XmlTypeAttribute>();
+                    element.Name = xmlType != null ? xmlType.TypeName : element.Name;
+
                     var item = typeof(WitsmlParser).GetMethods(BindingFlags.Public | BindingFlags.Static)
                         .FirstOrDefault(x=>x.GetGenericArguments().Any())
                         .MakeGenericMethod(type)
                         .Invoke(null, new object[] { element.ToString() });
+
                     var update = updateBuilder.Push(parentPath, item);
                     _collection.UpdateOne(filterBuilder.And(filters), update);
                 }
