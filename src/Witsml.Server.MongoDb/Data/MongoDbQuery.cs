@@ -148,7 +148,7 @@ namespace PDS.Witsml.Server.Data
                 return null;
 
             var filters = new List<FilterDefinition<T>>();
-            var properties = GetPropertyInfo(type);
+            var properties = MongoDbFieldHelper.GetPropertyInfo(type);
             var groupings = element.Elements().GroupBy(e => e.Name.LocalName);
 
             foreach (var group in groupings)
@@ -156,7 +156,7 @@ namespace PDS.Witsml.Server.Data
                 if (_ignored != null && _ignored.Contains(group.Key))
                     continue;
 
-                var propertyInfo = GetPropertyInfoForAnElement(properties, group.Key);
+                var propertyInfo = MongoDbFieldHelper.GetPropertyInfoForAnElement(properties, group.Key);
                 var propertyFilter = BuildFilterForAnElementGroup(propertyInfo, group, parentPath);
 
                 if (propertyFilter != null)
@@ -165,10 +165,10 @@ namespace PDS.Witsml.Server.Data
 
             foreach (var attribute in element.Attributes())
             {
-                if (attribute.IsNamespaceDeclaration || attribute.Name == Xsi("nil") || attribute.Name == Xsi("type"))
+                if (attribute.IsNamespaceDeclaration || attribute.Name == MongoDbFieldHelper.Xsi("nil") || attribute.Name == MongoDbFieldHelper.Xsi("type"))
                     continue;
 
-                var attributeProp = GetPropertyInfoForAnElement(properties, attribute.Name.LocalName);
+                var attributeProp = MongoDbFieldHelper.GetPropertyInfoForAnElement(properties, attribute.Name.LocalName);
                 var attributeFilter = BuildFilterForAttribute(attributeProp, attribute, parentPath);
 
                 if (attributeFilter != null)
@@ -192,7 +192,7 @@ namespace PDS.Witsml.Server.Data
             if (propertyInfo == null)
                 return null;
 
-            var fieldName = GetPropertyPath(parentPath, propertyInfo.Name);
+            var fieldName = MongoDbFieldHelper.GetPropertyPath(parentPath, propertyInfo.Name);
             var propType = propertyInfo.PropertyType;
             var values = elements.ToList();
             var count = values.Count;
@@ -220,7 +220,7 @@ namespace PDS.Witsml.Server.Data
                 }
                 else if (propType.IsAbstract)
                 {
-                    var concreteType = GetConcreteType(element, propType);
+                    var concreteType = MongoDbFieldHelper.GetConcreteType(element, propType);
                     return BuildFilterForAnElementType(concreteType, element, fieldName);
                 }
                 else
@@ -261,14 +261,14 @@ namespace PDS.Witsml.Server.Data
             if (textProperty != null)
             {
                 var uomProperty = elementType.GetProperty("Uom");
-                var fieldName = GetPropertyPath(propertyPath, textProperty.Name);
+                var fieldName = MongoDbFieldHelper.GetPropertyPath(propertyPath, textProperty.Name);
                 var fieldType = textProperty.PropertyType;
                 var filters = new List<FilterDefinition<T>>();
 
                 if (uomProperty != null)
                 {
-                    var uomPath = GetPropertyPath(propertyPath, uomProperty.Name);
-                    var uomValue = ValidateMeasureUom(element, uomProperty, element.Value);
+                    var uomPath = MongoDbFieldHelper.GetPropertyPath(propertyPath, uomProperty.Name);
+                    var uomValue = MongoDbFieldHelper.ValidateMeasureUom(element, uomProperty, element.Value);
                     var uomFilter = BuildFilterForProperty(uomProperty.PropertyType, uomPath, uomValue);
 
                     if (uomFilter != null)
@@ -301,7 +301,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The filter object that for the selection criteria for the attribute.</returns>
         private FilterDefinition<T> BuildFilterForAttribute(PropertyInfo propertyInfo, XAttribute attribute, string parentPath = null)
         {
-            var propertyPath = GetPropertyPath(parentPath, propertyInfo.Name);
+            var propertyPath = MongoDbFieldHelper.GetPropertyPath(parentPath, propertyInfo.Name);
             var propertyType = propertyInfo.PropertyType;
 
             return BuildFilterForProperty(propertyType, propertyPath, attribute.Value);
@@ -330,7 +330,7 @@ namespace PDS.Witsml.Server.Data
             }
             else if (propertyType.IsEnum)
             {
-                var value = ParseEnum(propertyType, propertyValue);
+                var value = MongoDbFieldHelper.ParseEnum(propertyType, propertyValue);
                 return Builders<T>.Filter.Eq(propertyPath, value);
             }
             else if (propertyType == typeof(DateTime))
@@ -360,82 +360,6 @@ namespace PDS.Witsml.Server.Data
             {
                 return Builders<T>.Filter.Eq(propertyPath, propertyValue);
             }
-        }
-
-        private IList<PropertyInfo> GetPropertyInfo(Type t)
-        {
-            return t.GetProperties()
-                .Where(p => !p.IsDefined(typeof(XmlIgnoreAttribute), false))
-                .ToList();
-        }
-
-        private Type GetConcreteType(XElement element, Type propType)
-        {
-            var xsiType = element.Attributes()
-                .Where(x => x.Name == Xsi("type"))
-                .Select(x => x.Value.Split(':'))
-                .FirstOrDefault();
-
-            var @namespace = element.Attributes()
-                .Where(x => x.Name == Xmlns(xsiType.FirstOrDefault()))
-                .Select(x => x.Value)
-                .FirstOrDefault();
-
-            var typeName = xsiType.LastOrDefault();
-
-            return propType.Assembly.GetTypes()
-                .FirstOrDefault(t =>
-                {
-                    var xmlType = t.GetCustomAttribute<XmlTypeAttribute>();
-                    return xmlType != null && xmlType.TypeName == typeName && xmlType.Namespace == @namespace;
-                });
-        }
-
-        private string ValidateMeasureUom(XElement element, PropertyInfo uomProperty, string measureValue)
-        {
-            var xmlAttribute = uomProperty.GetCustomAttribute<XmlAttributeAttribute>();
-
-            // validation not needed if uom attribute is not defined
-            if (xmlAttribute == null)
-                return null;
-
-            var uomValue = element.Attributes()
-                .Where(x => x.Name.LocalName == xmlAttribute.AttributeName)
-                .Select(x => x.Value)
-                .FirstOrDefault();
-
-            // uom is required when a measure value is specified
-            if (!string.IsNullOrWhiteSpace(measureValue) && string.IsNullOrWhiteSpace(uomValue))
-            {
-                throw new WitsmlException(ErrorCodes.MissingUnitForMeasureData);
-            }
-
-            return uomValue;
-        }
-
-        private object ParseEnum(Type enumType, string enumValue)
-        {
-            if (Enum.IsDefined(enumType, enumValue))
-            {
-                return Enum.Parse(enumType, enumValue);
-            }
-
-            var enumMember = enumType.GetMembers().FirstOrDefault(x =>
-            {
-                if (x.Name.EqualsIgnoreCase(enumValue))
-                    return true;
-
-                var xmlEnumAttrib = x.GetCustomAttribute<XmlEnumAttribute>();
-                return xmlEnumAttrib != null && xmlEnumAttrib.Name.EqualsIgnoreCase(enumValue);
-            });
-
-            // must be a valid enumeration member
-            if (!enumType.IsEnum || enumMember == null)
-            {
-                throw new WitsmlException(ErrorCodes.InvalidUnitOfMeasure);
-            }
-
-            return Enum.Parse(enumType, enumMember.Name);
         }
 
         /// <summary>
@@ -495,13 +419,13 @@ namespace PDS.Witsml.Server.Data
                 return;
             }
 
-            var properties = GetPropertyInfo(type);
+            var properties = MongoDbFieldHelper.GetPropertyInfo(type);
 
             if (element.HasElements)
             {
                 foreach (var child in element.Elements())
                 {
-                    var property = GetPropertyInfoForAnElement(properties, child.Name.LocalName);
+                    var property = MongoDbFieldHelper.GetPropertyInfoForAnElement(properties, child.Name.LocalName);
                     if (property == null)
                         continue;
 
@@ -515,7 +439,7 @@ namespace PDS.Witsml.Server.Data
                     if (attribute.IsNamespaceDeclaration)
                         continue;
 
-                    var attributePath = GetPropertyPath(fieldPath, attribute.Name.LocalName);
+                    var attributePath = MongoDbFieldHelper.GetPropertyPath(fieldPath, attribute.Name.LocalName);
                     AddProjectionProperty(attributePath);
                 }
             }
@@ -529,7 +453,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="propertyInfo">The property information for the field.</param>
         private void BuildProjectionForAnElement(XElement element, string fieldPath, PropertyInfo propertyInfo)
         {
-            var path = GetPropertyPath(fieldPath, propertyInfo.Name);
+            var path = MongoDbFieldHelper.GetPropertyPath(fieldPath, propertyInfo.Name);
 
             if (!element.HasElements && !element.HasAttributes)
             {
@@ -540,75 +464,12 @@ namespace PDS.Witsml.Server.Data
             BuildProjectionForAnElement(element, path, propertyInfo.PropertyType);
         }
 
-        /// <summary>
-        /// Gets the property information for an element, for some element name is not the same as property name, i.e. Mongo field name.
-        /// </summary>
-        /// <param name="properties">The properties.</param>
-        /// <param name="element">The element.</param>
-        /// <returns>The found property for the serialization element.</returns>
-        private PropertyInfo GetPropertyInfoForAnElement(IEnumerable<PropertyInfo> properties, string name)
-        {
-            foreach (var prop in properties)
-            {
-                var elementAttribute = prop.GetCustomAttribute<XmlElementAttribute>();
-                if (elementAttribute != null)
-                {
-                    if (elementAttribute.ElementName == name)
-                        return prop;
-                }
-
-                var arrayAttribute = prop.GetCustomAttribute<XmlArrayAttribute>();
-                if (arrayAttribute != null)
-                {
-                    if (arrayAttribute.ElementName == name)
-                        return prop;
-                }
-
-                var attributeAttribute = prop.GetCustomAttribute<XmlAttributeAttribute>();
-                if (attributeAttribute != null)
-                {
-                    if (attributeAttribute.AttributeName == name)
-                        return prop;
-                }
-            }
-            return null;
-        }
-
         private void AddProjectionProperty(string propertyPath)
         {
             if (_fields.Contains(propertyPath))
                 return;
 
             _fields.Add(propertyPath);
-        }
-
-        private string GetPropertyPath(string parentPath, string propertyName)
-        {
-            var prefix = string.IsNullOrEmpty(parentPath) ? string.Empty : string.Format("{0}.", parentPath);
-            return string.Format("{0}{1}", prefix, CaptalizeString(propertyName));
-        }
-
-        private string CaptalizeString(string input)
-        {
-            if (string.IsNullOrEmpty(input))
-                return input;
-
-            var result = char.ToUpper(input[0]).ToString();
-
-            if (input.Length > 1)
-                result += input.Substring(1);
-
-            return result;
-        }
-
-        private XName Xmlns(string attributeName)
-        {
-            return XNamespace.Xmlns.GetName(attributeName);
-        }
-
-        private XName Xsi(string attributeName)
-        {
-            return xsi.GetName(attributeName);
         }
     }
 }
