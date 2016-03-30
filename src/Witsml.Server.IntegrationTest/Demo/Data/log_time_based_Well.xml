@@ -1,0 +1,7 @@
+<wells xmlns="http://www.witsml.org/schemas/1series" version="1.4.1.1">
+  <well uid="W-645509">
+    <name>Phase_1_Test_Data</name>
+	<timeZone>+01:00</timeZone>
+	<statusWell>active</statusWell>
+  </well>
+ </wells>
