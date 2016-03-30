@@ -632,7 +632,6 @@ namespace PDS.Witsml.Server.Data.Logs
 
             Assert.IsNotNull(logUpdated);
             Assert.AreEqual(2, logUpdated.LogCurveInfo.Count);
-            Assert.AreEqual(update.LogCurveInfo.Count, logUpdated.LogCurveInfo.Count);
         }
     }
 }
