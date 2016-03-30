@@ -13,7 +13,7 @@ using PDS.Witsml.Server.Configuration;
 namespace PDS.Witsml.Server.Data
 {
     /// <summary>
-    /// Data adapter that encapsulates CRUD functionalities on WITSML objects.
+    /// Data adapter that encapsulates CRUD functionality for WITSML data objects.
     /// </summary>
     /// <typeparam name="T">Type of the object.</typeparam>
     /// <seealso cref="PDS.Witsml.Server.Data.IWitsmlDataAdapter{T}" />
@@ -28,9 +28,7 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Gets the logger.
         /// </summary>
-        /// <value>
-        /// The logger.
-        /// </value>
+        /// <value>The logger.</value>
         protected ILog Logger { get; private set; }
 
         /// <summary>
@@ -41,11 +39,11 @@ namespace PDS.Witsml.Server.Data
         public IContainer Container { get; set; }
 
         /// <summary>
-        /// Queries the object(s) specified by the parser.
+        /// Queries the data object(s) specified by the parser.
         /// </summary>
         /// <param name="parser">The parser that specifies the query parameters.</param>
         /// <returns>
-        /// Queried objects.
+        /// A collection of data objects retrieved from the data store.
         /// </returns>
         public virtual WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
         {
@@ -53,9 +51,9 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Adds an object to the data store.
+        /// Adds a data object to the data store.
         /// </summary>
-        /// <param name="entity">The object.</param>
+        /// <param name="entity">The data object to be added.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
@@ -65,7 +63,7 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Updates the specified object.
+        /// Updates a data object in the data store.
         /// </summary>
         /// <param name="parser">The update parser.</param>
         /// <returns>
@@ -77,9 +75,9 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Deletes or partially updates the specified object by uid.
+        /// Deletes or partially updates a data object in the data store.
         /// </summary>
-        /// <param name="parser">The parser that specifies the object.</param>
+        /// <param name="parser">The parser that specifies the object to delete.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
@@ -103,19 +101,54 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
         /// <returns>A collection of data objects.</returns>
+        IList IEtpDataAdapter.GetAll(EtpUri? parentUri)
+        {
+            return GetAll(parentUri);
+        }
+
+        /// <summary>
+        /// Gets a collection of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
         public virtual List<T> GetAll(EtpUri? parentUri = null)
         {
             throw new NotImplementedException();
         }
 
         /// <summary>
-        /// Gets a data object by the specified UUID.
+        /// Gets a data object by the specified URI.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        /// <returns>The data object instance.</returns>
+        object IEtpDataAdapter.Get(EtpUri uri)
+        {
+            return Get(uri);
+        }
+
+        /// <summary>
+        /// Gets a data object by the specified URI.
         /// </summary>
         /// <param name="uri">The data object URI.</param>
         /// <returns>The data object instance.</returns>
         public virtual T Get(EtpUri uri)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Puts the specified data object into the data store.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns>A WITSML result.</returns>
+        public virtual WitsmlResult Put(DataObject dataObject)
+        {
+            var context = new RequestContext(Functions.PutObject, ObjectTypes.GetObjectType<T>(),
+                Encoding.UTF8.GetString(dataObject.Data), null, null);
+
+            var parser = new WitsmlQueryParser(context);
+
+            return Put(parser);
         }
 
         /// <summary>
@@ -129,7 +162,7 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Deletes a data object by the specified identifier.
+        /// Deletes a data object by the specified URI.
         /// </summary>
         /// <param name="uri">The data object URI.</param>
         /// <returns>A WITSML result.</returns>
@@ -146,51 +179,6 @@ namespace PDS.Witsml.Server.Data
         public virtual T Parse(WitsmlQueryParser parser)
         {
             throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets a collection of data objects related to the specified URI.
-        /// </summary>
-        /// <param name="parentUri">The parent URI.</param>
-        /// <returns>A collection of data objects.</returns>
-        IList IEtpDataAdapter.GetAll(EtpUri? parentUri)
-        {
-            return GetAll(parentUri);
-        }
-
-        /// <summary>
-        /// Gets a data object by the specified identifier.
-        /// </summary>
-        /// <param name="uri">The data object URI.</param>
-        /// <returns>The data object instance.</returns>
-        object IEtpDataAdapter.Get(EtpUri uri)
-        {
-            return Get(uri);
-        }
-
-        /// <summary>
-        /// Puts the specified data object into the data store.
-        /// </summary>
-        /// <param name="dataObject">The data object.</param>
-        /// <returns>A WITSML result.</returns>
-        WitsmlResult IEtpDataAdapter.Put(DataObject dataObject)
-        {
-            var context = new RequestContext(Functions.PutObject, ObjectTypes.GetObjectType<T>(),
-                Encoding.UTF8.GetString(dataObject.Data), null, null);
-
-            var parser = new WitsmlQueryParser(context);
-
-            return Put(parser);
-        }
-
-        /// <summary>
-        /// Deletes a data object by the specified identifier.
-        /// </summary>
-        /// <param name="uri">The data object URI.</param>
-        /// <returns>A WITSML result.</returns>
-        WitsmlResult IEtpDataAdapter.Delete(EtpUri uri)
-        {
-            return Delete(uri);
         }
 
         /// <summary>

@@ -17,7 +17,7 @@ namespace PDS.Witsml.Server.Data
         List<T> GetAll(EtpUri? parentUri = null);
 
         /// <summary>
-        /// Gets a data object by the specified identifier.
+        /// Gets a data object by the specified URI.
         /// </summary>
         /// <param uri>The data object URI.</param>
         /// <returns>The data object instance.</returns>
@@ -31,7 +31,7 @@ namespace PDS.Witsml.Server.Data
         WitsmlResult Put(WitsmlQueryParser parser);
 
         /// <summary>
-        /// Deletes a data object by the specified identifier.
+        /// Deletes a data object by the specified URI.
         /// </summary>
         /// <param name="uri">The data object URI.</param>
         /// <returns>A WITSML result.</returns>

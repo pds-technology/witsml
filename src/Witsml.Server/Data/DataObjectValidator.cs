@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Energistics.DataAccess.Validation;
-using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data
 {
