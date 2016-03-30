@@ -120,6 +120,11 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             entity.Uid = NewUid(entity.Uid);
             entity.CommonData = entity.CommonData.Create();
+            if (!entity.Direction.HasValue)
+            {
+                entity.Direction = LogIndexDirection.increasing;
+            }
+
             Logger.DebugFormat("Adding Log with uid '{0}' and name '{1}'", entity.Uid, entity.Name);
 
             //Validate(Functions.AddToStore, entity);
@@ -150,7 +155,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Logger.DebugFormat("Updating Log with uid '{0}'.", uri.ObjectId);
             //Validate(Functions.UpdateInStore, entity);
 
-            var ignored = new[] { "logData" };
+            var ignored = new[] { "logData", "direction" };
             UpdateEntity(parser, uri, ignored);
 
             // Extract Data
