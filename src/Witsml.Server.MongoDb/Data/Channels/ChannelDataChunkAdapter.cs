@@ -120,8 +120,15 @@ namespace PDS.Witsml.Server.Data.Channels
                 //... This is the range that we need to select existing ChannelDataChunks from the database to update
                 var updateRange = reader.GetIndexRange();
 
+                // Based on the range of the updates, compute the range of the data chunk(s) 
+                //... so we can merge updates with existing data.
+                var existingRange = new Range<double?>(
+                    ComputeRange(updateRange.Start.Value, RangeSize, increasing).Start,
+                    ComputeRange(updateRange.End.Value, RangeSize, increasing).End
+                );                
+
                 // Get DataChannelChunk list from database for the computed range and URI
-                var filter = BuildDataFilter(reader.Uri, indexChannel.Mnemonic, updateRange, increasing);
+                var filter = BuildDataFilter(reader.Uri, indexChannel.Mnemonic, existingRange, increasing);
                 var results = GetData(filter, increasing);
 
                 BulkWriteChunks(
