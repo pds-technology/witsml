@@ -66,58 +66,22 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// <summary>
         /// Adds a <see cref="Wellbore"/> to the data store.
         /// </summary>
-        /// <param name="entity">The object.</param>
+        /// <param name="entity">The <see cref="Wellbore"/> to be added.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
         public override WitsmlResult Add(Wellbore entity)
         {
             entity.Uid = NewUid(entity.Uid);
-            entity.CommonData = entity.CommonData.Update(true);
-            Validate(Functions.AddToStore, entity);
+            entity.CommonData = entity.CommonData.Create();
+            Logger.DebugFormat("Adding Wellbore with uid '{0}' and name '{1}'", entity.Uid, entity.Name);
 
-            Logger.DebugFormat("Add new wellbore with uidWell: {0}; uid: {1}", entity.UidWell, entity.Uid);
+            Validate(Functions.AddToStore, entity);
+            Logger.DebugFormat("Validated Wellbore with uid '{0}' and name '{1}' for Add", entity.Uid, entity.Name);
+
             InsertEntity(entity);
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uid);
-        }
-
-        /// <summary>
-        /// Updates the specified object.
-        /// </summary>
-        /// <param name="parser">The update parser.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public override WitsmlResult Update(WitsmlQueryParser parser)
-        {
-            var entity = Parse(parser.Context.Xml);
-            Logger.DebugFormat("Updating Wellbore with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
-
-            //entity.CommonData = entity.CommonData.Update();
-            //Validate(Functions.UpdateInStore, entity);
-
-            Logger.DebugFormat("Validated Wellbore with uid '{0}' and name {1} for Update", entity.Uid, entity.Name);
-            UpdateEntity(parser, entity.GetObjectId());
-
-            return new WitsmlResult(ErrorCodes.Success);
-        }
-
-        /// <summary>
-        /// Deletes or partially updates the specified object by uid.
-        /// </summary>
-        /// <param name="parser">The parser that specifies the object.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public override WitsmlResult Delete(WitsmlQueryParser parser)
-        {
-            var entity = Parse(parser.Context.Xml);
-            var dataObjectId = entity.GetObjectId();
-
-            DeleteEntity(dataObjectId);
-
-            return new WitsmlResult(ErrorCodes.Success);
         }
 
         /// <summary>
@@ -138,25 +102,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
             return query
                 .OrderBy(x => x.Name)
                 .ToList();
-        }
-
-        /// <summary>
-        /// Puts the specified data object into the data store.
-        /// </summary>
-        /// <param name="parser">The input parser.</param>
-        /// <returns>A WITSML result.</returns>
-        public override WitsmlResult Put(WitsmlQueryParser parser)
-        {
-            var entity = Parse(parser.Context.Xml);
-
-            if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.GetObjectId()))
-            {
-                return Update(parser);
-            }
-            else
-            {
-                return Add(entity);
-            }
         }
 
         /// <summary>

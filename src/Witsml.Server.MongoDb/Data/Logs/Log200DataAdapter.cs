@@ -4,7 +4,6 @@ using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
 using MongoDB.Driver;
-using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -56,8 +55,9 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>A WITSML result.</returns>
         public override WitsmlResult Put(WitsmlQueryParser parser)
         {
-            var entity = Parse(parser.Context.Xml);
-            var dataObjectId = entity.GetObjectId();
+            var uri = parser.GetUri<Log>();
+
+            Logger.DebugFormat("Putting Log with uid '{0}'.", uri.ObjectId);
 
             // save ChannelSets + data via the ChannelSet data adapter
             foreach (var childParser in parser.ForkProperties("ChannelSet", ObjectTypes.ChannelSet))
@@ -65,31 +65,35 @@ namespace PDS.Witsml.Server.Data.Logs
                 _channelSetDataAdapter.Put(childParser);
             }
 
-            // Clear ChannelSet data properties
-            foreach (var channelSet in entity.ChannelSet)
+            if (!string.IsNullOrWhiteSpace(uri.ObjectId) && Exists(uri))
             {
-                channelSet.Data = null;
-            }
-
-            if (!string.IsNullOrWhiteSpace(entity.Uuid) && Exists(dataObjectId))
-            {
-                //entity.Citation = entity.Citation.Update();
-                //Validate(Functions.PutObject, entity);
+                //Validate(Functions.UpdateInStore, entity);
+                //Logger.DebugFormat("Validated Log with uid '{0}' for Update", uri.ObjectId);
 
                 var ignored = new[] { "Data" };
+                UpdateEntity(parser, uri, ignored);
 
-                UpdateEntity(parser, dataObjectId, ignored);
+                return new WitsmlResult(ErrorCodes.Success);
             }
             else
             {
+                var entity = Parse(parser.Context.Xml);
+
+                // Clear ChannelSet data properties
+                foreach (var channelSet in entity.ChannelSet)
+                {
+                    channelSet.Data = null;
+                }
+
                 entity.Uuid = NewUid(entity.Uuid);
-                entity.Citation = entity.Citation.Update(true);
+                entity.Citation = entity.Citation.Create();
+                Logger.DebugFormat("Adding Log with uid '{0}' and name '{1}'", entity.Uuid, entity.Citation.Title);
 
-                Validate(Functions.PutObject, entity);
+                Validate(Functions.AddToStore, entity);
                 InsertEntity(entity);
-            }
 
-            return new WitsmlResult(ErrorCodes.Success, entity.Uuid);
+                return new WitsmlResult(ErrorCodes.Success, entity.Uuid);
+            }
         }
     }
 }
