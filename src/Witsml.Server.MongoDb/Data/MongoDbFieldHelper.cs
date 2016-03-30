@@ -11,10 +11,18 @@ using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data
 {
+    /// <summary>
+    /// Helper class that encapsulates methods to handle element parsing for update and query
+    /// </summary>
     public static class MongoDbFieldHelper
     {
         private static readonly XNamespace xsi = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
 
+        /// <summary>
+        /// Gets the property information.
+        /// </summary>
+        /// <param name="t">The type.</param>
+        /// <returns>The list of property info for the type.</returns>
         public static IList<PropertyInfo> GetPropertyInfo(Type t)
         {
             return t.GetProperties()
@@ -22,12 +30,24 @@ namespace PDS.Witsml.Server.Data
                 .ToList();
         }
 
+        /// <summary>
+        /// Gets the property path for its MongoDb field.
+        /// </summary>
+        /// <param name="parentPath">The parent path.</param>
+        /// <param name="propertyName">Name of the property.</param>
+        /// <returns>The MongoDb field path for the property.</returns>
         public static string GetPropertyPath(string parentPath, string propertyName)
         {
             var prefix = string.IsNullOrEmpty(parentPath) ? string.Empty : string.Format("{0}.", parentPath);
             return string.Format("{0}{1}", prefix, CaptalizeString(propertyName));
         }
 
+        /// <summary>
+        /// Gets the property information for an element, for some element name is not the same as property name, i.e. Mongo field name.
+        /// </summary>
+        /// <param name="properties">The properties.</param>
+        /// <param name="element">The element.</param>
+        /// <returns>The found property for the serialization element.</returns>
         public static PropertyInfo GetPropertyInfoForAnElement(IEnumerable<PropertyInfo> properties, string name)
         {
             foreach (var prop in properties)
@@ -56,6 +76,13 @@ namespace PDS.Witsml.Server.Data
             return null;
         }
 
+        /// <summary>
+        /// Parses the enum.
+        /// </summary>
+        /// <param name="enumType">Type of the enum.</param>
+        /// <param name="enumValue">The enum value.</param>
+        /// <returns>The enum.</returns>
+        /// <exception cref="WitsmlException"></exception>
         public static object ParseEnum(Type enumType, string enumValue)
         {
             if (Enum.IsDefined(enumType, enumValue))
@@ -81,6 +108,14 @@ namespace PDS.Witsml.Server.Data
             return Enum.Parse(enumType, enumMember.Name);
         }
 
+        /// <summary>
+        /// Validates uom/value pair for the element.
+        /// </summary>
+        /// <param name="element">The element.</param>
+        /// <param name="uomProperty">The uom property.</param>
+        /// <param name="measureValue">The measure value.</param>
+        /// <returns></returns>
+        /// <exception cref="WitsmlException"></exception>
         public static string ValidateMeasureUom(XElement element, PropertyInfo uomProperty, string measureValue)
         {
             var xmlAttribute = uomProperty.GetCustomAttribute<XmlAttributeAttribute>();
@@ -103,6 +138,12 @@ namespace PDS.Witsml.Server.Data
             return uomValue;
         }
 
+        /// <summary>
+        /// Gets the concrete type.
+        /// </summary>
+        /// <param name="element">The element.</param>
+        /// <param name="propType">Type of the property.</param>
+        /// <returns>The concrete type.</returns>
         public static Type GetConcreteType(XElement element, Type propType)
         {
             var xsiType = element.Attributes()
@@ -139,16 +180,33 @@ namespace PDS.Witsml.Server.Data
             return result;
         }
 
+        /// <summary>
+        /// Get the Xml namespace value of the element.
+        /// </summary>
+        /// <param name="attributeName">Name of the attribute.</param>
+        /// <returns>The Xml namespace value.</returns>
         public static XName Xmlns(string attributeName)
         {
             return XNamespace.Xmlns.GetName(attributeName);
         }
 
+        /// <summary>
+        /// Get the XNamespace.
+        /// </summary>
+        /// <param name="attributeName">Name of the attribute.</param>
+        /// <returns>The XNamespace value.</returns>
         public static XName Xsi(string attributeName)
         {
             return xsi.GetName(attributeName);
         }
 
+        /// <summary>
+        /// Gets the entity filter by its id property.
+        /// </summary>
+        /// <typeparam name="T">The object type.</typeparam>
+        /// <param name="dataObjectId">The data object identifier.</param>
+        /// <param name="idPropertyName">Name of the identifier property.</param>
+        /// <returns>The Mongo collection filter by the id.</returns>
         public static FilterDefinition<T> GetEntityFilter<T>(DataObjectId dataObjectId, string idPropertyName = "Uid")
         {
             var builder = Builders<T>.Filter;
