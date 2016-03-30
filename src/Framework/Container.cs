@@ -101,6 +101,9 @@ namespace PDS.Framework
         /// <exception cref="ContainerException">Error resolving contract type or contract name</exception>
         public IEnumerable<object> ResolveAll(Type type, string contractName = null)
         {
+            if (type == null && string.IsNullOrWhiteSpace(contractName))
+                return Enumerable.Empty<object>();
+
             try
             {
                 return _container.GetExports(type, null, contractName)
