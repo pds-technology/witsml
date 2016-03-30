@@ -12,10 +12,18 @@ using Energistics.Datatypes;
 
 namespace PDS.Witsml.Server.Data
 {
+    /// <summary>
+    /// Utility class that encapsulates helper methods for parsing element in query and update
+    /// </summary>
     public static class MongoDbUtility
     {
         private static readonly XNamespace xsi = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
 
+        /// <summary>
+        /// Gets the property information.
+        /// </summary>
+        /// <param name="t">The type.</param>
+        /// <returns>The list of properties for the type.</returns>
         public static IList<PropertyInfo> GetPropertyInfo(Type t)
         {
             return t.GetProperties()
@@ -23,12 +31,24 @@ namespace PDS.Witsml.Server.Data
                 .ToList();
         }
 
+        /// <summary>
+        /// Gets the Mongo collection field path for the property.
+        /// </summary>
+        /// <param name="parentPath">The parent path.</param>
+        /// <param name="propertyName">Name of the property.</param>
+        /// <returns>The Mongo collection field path for the property.</returns>
         public static string GetPropertyPath(string parentPath, string propertyName)
         {
             var prefix = string.IsNullOrEmpty(parentPath) ? string.Empty : string.Format("{0}.", parentPath);
             return string.Format("{0}{1}", prefix, CaptalizeString(propertyName));
         }
 
+        /// <summary>
+        /// Gets the property information for an element.
+        /// </summary>
+        /// <param name="properties">The properties.</param>
+        /// <param name="name">The name of the property.</param>
+        /// <returns>The property info for the element.</returns>
         public static PropertyInfo GetPropertyInfoForAnElement(IEnumerable<PropertyInfo> properties, string name)
         {
             foreach (var prop in properties)
@@ -57,6 +77,13 @@ namespace PDS.Witsml.Server.Data
             return null;
         }
 
+        /// <summary>
+        /// Parses the string value and convert to enum.
+        /// </summary>
+        /// <param name="enumType">Type of the enum.</param>
+        /// <param name="enumValue">The enum value.</param>
+        /// <returns>The enum.</returns>
+        /// <exception cref="WitsmlException"></exception>
         public static object ParseEnum(Type enumType, string enumValue)
         {
             if (Enum.IsDefined(enumType, enumValue))
@@ -82,6 +109,14 @@ namespace PDS.Witsml.Server.Data
             return Enum.Parse(enumType, enumMember.Name);
         }
 
+        /// <summary>
+        /// Validates the uom/value pair for the element.
+        /// </summary>
+        /// <param name="element">The element.</param>
+        /// <param name="uomProperty">The uom property.</param>
+        /// <param name="measureValue">The measure value.</param>
+        /// <returns>The uom value if valid.</returns>
+        /// <exception cref="WitsmlException"></exception>
         public static string ValidateMeasureUom(XElement element, PropertyInfo uomProperty, string measureValue)
         {
             var xmlAttribute = uomProperty.GetCustomAttribute<XmlAttributeAttribute>();
@@ -104,6 +139,12 @@ namespace PDS.Witsml.Server.Data
             return uomValue;
         }
 
+        /// <summary>
+        /// Gets the concrete type of the element.
+        /// </summary>
+        /// <param name="element">The element.</param>
+        /// <param name="propType">Type of the property.</param>
+        /// <returns>The concrete type</returns>
         public static Type GetConcreteType(XElement element, Type propType)
         {
             var xsiType = element.Attributes()
@@ -150,6 +191,13 @@ namespace PDS.Witsml.Server.Data
             return xsi.GetName(attributeName);
         }
 
+        /// <summary>
+        /// Gets the entity filter using the specified id field.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="uri">The URI.</param>
+        /// <param name="idPropertyName">Name of the identifier property.</param>
+        /// <returns>The entity filter with the specified id field</returns>
         public static FilterDefinition<T> GetEntityFilter<T>(EtpUri uri, string idPropertyName = "Uid")
         {
             var builder = Builders<T>.Filter;
