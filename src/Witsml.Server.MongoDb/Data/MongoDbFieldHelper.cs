@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using Energistics.DataAccess;
+using Witsml200 = Energistics.DataAccess.WITSML200;
 using MongoDB.Driver;
 using PDS.Framework;
 
@@ -167,6 +168,11 @@ namespace PDS.Witsml.Server.Data
             return builder.And(filters);
         }
 
+        /// <summary>
+        /// Creates a dictionary of common object property paths to update.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static Dictionary<string, object> CreateUpdateFields<T>()
         {
             if (typeof(IDataObject).IsAssignableFrom(typeof(T)))
@@ -175,19 +181,27 @@ namespace PDS.Witsml.Server.Data
                     { "CommonData.DateTimeLastChange", DateTimeOffset.UtcNow.ToString("o") }
                 };
             }
-            else
+            else if (typeof(Witsml200.ComponentSchemas.AbstractObject).IsAssignableFrom(typeof(T)))
             {
                 return new Dictionary<string, object> {
                     { "Citation.LastUpdate", DateTime.UtcNow.ToString("o") }
                 };
             }
+
+            return new Dictionary<string, object>(0);
         }
 
+        /// <summary>
+        /// Creates a list of common element names to ignore during an update.
+        /// </summary>
+        /// <typeparam name="T">The data object type</typeparam>
+        /// <param name="ignored">A custom list of elements to ignore.</param>
+        /// <returns></returns>
         public static string[] CreateIgnoreFields<T>(string[] ignored)
         {
             var creationTime = typeof(IDataObject).IsAssignableFrom(typeof(T))
-                ? new string[] { "CommonData.DateTimeCreation" }
-                : new string[] { "Citation.Creation" };
+                ? new string[] { "dTimCreation", "dTimLastChange" }
+                : new string[] { "Creation", "LastUpdate" };
 
             return ignored == null ? creationTime : creationTime.Union(ignored).ToArray();
         }

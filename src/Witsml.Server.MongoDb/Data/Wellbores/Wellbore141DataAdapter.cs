@@ -83,17 +83,17 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// <summary>
         /// Updates the specified object.
         /// </summary>
-        /// <param name="entity">The object.</param>
         /// <param name="parser">The update parser.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        public override WitsmlResult Update(Wellbore entity, WitsmlQueryParser parser)
+        public override WitsmlResult Update(WitsmlQueryParser parser)
         {
+            var entity = Parse(parser.Context.Xml);
             Logger.DebugFormat("Updating Wellbore with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
 
-            entity.CommonData = entity.CommonData.Update();
-            Validate(Functions.UpdateInStore, entity);
+            //entity.CommonData = entity.CommonData.Update();
+            //Validate(Functions.UpdateInStore, entity);
 
             Logger.DebugFormat("Validated Wellbore with uid '{0}' and name {1} for Update", entity.Uid, entity.Name);
             UpdateEntity(parser, entity.GetObjectId());
@@ -141,17 +141,18 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// <summary>
         /// Puts the specified data object into the data store.
         /// </summary>
-        /// <param name="entity">The entity.</param>
-        public override WitsmlResult Put(Wellbore entity)
+        /// <param name="parser">The input parser.</param>
+        /// <returns>A WITSML result.</returns>
+        public override WitsmlResult Put(WitsmlQueryParser parser)
         {
+            var entity = Parse(parser.Context.Xml);
+
             if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.GetObjectId()))
             {
-                Logger.DebugFormat("Update Wellbore with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
-                return Update(entity, null);
+                return Update(parser);
             }
             else
             {
-                Logger.DebugFormat("Add Wellbore with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
                 return Add(entity);
             }
         }

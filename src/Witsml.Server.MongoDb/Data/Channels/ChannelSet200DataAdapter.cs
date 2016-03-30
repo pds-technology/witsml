@@ -106,23 +106,24 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <summary>
         /// Puts the specified data object into the data store.
         /// </summary>
-        /// <param name="entity">The entity.</param>
-        public override WitsmlResult Put(ChannelSet entity)
+        /// <param name="parser">The input parser.</param>
+        /// <returns>A WITSML result.</returns>
+        public override WitsmlResult Put(WitsmlQueryParser parser)
         {
+            var entity = Parse(parser.Context.Xml);
             var dataObjectId = entity.GetObjectId();
 
             if (!string.IsNullOrWhiteSpace(entity.Uuid) && Exists(dataObjectId))
             {
-                entity.Citation = entity.Citation.Update();
-
-                Validate(Functions.PutObject, entity);
+                //entity.Citation = entity.Citation.Update();
+                //Validate(Functions.PutObject, entity);
 
                 // Extract Data
                 var saved = GetEntity(dataObjectId);
                 var reader = ExtractDataReader(entity, saved);
-                var parser = CreateQueryParser(Functions.PutObject, entity);
+                var ignored = new[] { "Data" };
 
-                UpdateEntity(parser, dataObjectId);
+                UpdateEntity(parser, dataObjectId, ignored);
 
                 // Merge ChannelDataChunks
                 _channelDataChunkAdapter.Merge(reader);
@@ -146,7 +147,7 @@ namespace PDS.Witsml.Server.Data.Channels
             return new WitsmlResult(ErrorCodes.Success, entity.Uuid);
         }
 
-        private ChannelDataReader ExtractDataReader(ChannelSet entity, ChannelSet existing = null)
+        internal ChannelDataReader ExtractDataReader(ChannelSet entity, ChannelSet existing = null)
         {
             // TODO: Handle: if (!string.IsNullOrEmpty(entity.Data.FileUri))
             // return null;

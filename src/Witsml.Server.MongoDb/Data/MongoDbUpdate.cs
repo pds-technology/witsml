@@ -8,7 +8,6 @@ using System.Xml.Serialization;
 using Energistics.DataAccess;
 using log4net;
 using MongoDB.Driver;
-using Newtonsoft.Json;
 using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data
