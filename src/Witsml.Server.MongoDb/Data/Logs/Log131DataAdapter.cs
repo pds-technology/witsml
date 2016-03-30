@@ -303,6 +303,9 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private IDictionary<int, string> GetMnemonicList(Log log, WitsmlQueryParser parser)
         {
+            if (log.LogCurveInfo == null)
+                return new Dictionary<int, string>(0);
+
             var allMnemonics = log.LogCurveInfo.Select(x => x.Mnemonic).ToArray();
             var queryMnemonics = GetLogCurveInfoMnemonics(parser).ToArray();
 
