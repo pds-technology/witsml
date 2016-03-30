@@ -87,7 +87,7 @@ namespace PDS.Witsml.Server.Data.Wells
         {
             WellAdapter.Put(DevKit.Parser(Well1));
 
-            var well1 = WellAdapter.Get(Well1.GetObjectId());
+            var well1 = WellAdapter.Get(Well1.GetUri());
 
             Assert.AreEqual(Well1.Citation.Title, well1.Citation.Title);
         }

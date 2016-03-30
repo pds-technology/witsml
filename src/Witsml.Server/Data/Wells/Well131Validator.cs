@@ -31,8 +31,10 @@ namespace PDS.Witsml.Server.Data.Wells
         /// <returns>A collection of validation results.</returns>
         protected override IEnumerable<ValidationResult> ValidateForInsert()
         {
+            var uri = DataObject.GetUri();
+
             // Validate UID does not exist
-            if (_wellDataAdapter.Exists(DataObject.GetObjectId()))
+            if (_wellDataAdapter.Exists(uri))
             {
                 yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
             }

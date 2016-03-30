@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using Energistics.DataAccess;
+using Energistics.Datatypes;
+using Witsml200 = Energistics.DataAccess.WITSML200;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data
@@ -75,6 +78,28 @@ namespace PDS.Witsml.Server.Data
                 result = false;
 
             return result;
+        }
+
+        public EtpUri GetUri<T>()
+        {
+            return GetUri(typeof(T));
+        }
+
+        public EtpUri GetUri(Type type)
+        {
+            var objectType = ObjectTypes.GetObjectType(type);
+            var baseUri = EtpUris.GetUriFamily(type);
+
+            if (typeof(Witsml200.ComponentSchemas.AbstractObject).IsAssignableFrom(type))
+                return baseUri.Append(objectType, Attribute("uuid"));
+
+            if (typeof(IWellObject).IsAssignableFrom(type))
+                baseUri = baseUri.Append(ObjectTypes.Well, Attribute("uidWell"));
+
+            if (typeof(IWellboreObject).IsAssignableFrom(type))
+                baseUri = baseUri.Append(ObjectTypes.Wellbore, Attribute("uidWellbore"));
+
+            return baseUri.Append(objectType, Attribute("uid"));
         }
 
         public IEnumerable<XElement> Elements()

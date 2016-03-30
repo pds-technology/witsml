@@ -49,6 +49,9 @@ namespace PDS.Witsml.Server.Data.Logs
         protected override IEnumerable<ValidationResult> ValidateForInsert()
         {
             var channelCount = DataObject.LogCurveInfo != null ? DataObject.LogCurveInfo.Count : 0;
+            var uri = DataObject.GetUri();
+            var uriWellbore = uri.Parent;
+            var uriWell = uriWellbore.Parent;
 
             // Validate parent uid property
             if (string.IsNullOrWhiteSpace(DataObject.UidWell))
@@ -62,18 +65,18 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             // Validate parent exists
-            else if (!_wellDataAdapter.Exists(new DataObjectId(DataObject.UidWell, DataObject.NameWell)))
+            else if (!_wellDataAdapter.Exists(uriWell))
             {
                 yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWell" });
             }
             // Validate parent exists
-            else if (!_wellboreDataAdapter.Exists(new WellObjectId(DataObject.UidWellbore, DataObject.UidWell, DataObject.NameWellbore)))
+            else if (!_wellboreDataAdapter.Exists(uriWellbore))
             {
                 yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWellbore" });
             }
 
             // Validate UID does not exist
-            else if (_logDataAdapter.Exists(DataObject.GetObjectId()))
+            else if (_logDataAdapter.Exists(uri))
             {
                 yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
             }

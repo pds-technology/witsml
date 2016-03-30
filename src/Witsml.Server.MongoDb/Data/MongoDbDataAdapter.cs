@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic;
-using System.Xml.Linq;
-using Energistics.DataAccess;
+using Energistics.Datatypes;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
-using Newtonsoft.Json;
-using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -65,6 +62,7 @@ namespace PDS.Witsml.Server.Data
         public override T Parse(WitsmlQueryParser parser)
         {
             Logger.DebugFormat("Validating {0} input template.", DbCollectionName);
+
             var inputValidator = new MongoDbQuery<T>(GetCollection(), parser, null);
             inputValidator.Validate();
 
@@ -74,46 +72,102 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Gets a data object by the specified UUID.
         /// </summary>
-        /// <param name="dataObjectId">The data object identifier.</param>
+        /// <param name="uri">The data object URI.</param>
         /// <returns>The data object instance.</returns>
-        public override T Get(DataObjectId dataObjectId)
+        public override T Get(EtpUri uri)
         {
-            return GetEntity(dataObjectId);
+            return GetEntity(uri);
+        }
+
+        /// <summary>
+        /// Puts a data object into the data store.
+        /// </summary>
+        /// <param name="parser">The input parser.</param>
+        /// <returns>A WITSML result.</returns>
+        public override WitsmlResult Put(WitsmlQueryParser parser)
+        {
+            var uri = parser.GetUri<T>();
+
+            Logger.DebugFormat("Putting {0} with uid '{1}'.", typeof(T).Name, uri.ObjectId);
+
+            if (!string.IsNullOrWhiteSpace(uri.ObjectId) && Exists(uri))
+            {
+                return Update(parser);
+            }
+            else
+            {
+                var entity = Parse(parser.Context.Xml);
+                return Add(entity);
+            }
+        }
+
+        /// <summary>
+        /// Updates a data object in the data store.
+        /// </summary>
+        /// <param name="parser">The update parser.</param>
+        /// <returns>
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
+        /// </returns>
+        public override WitsmlResult Update(WitsmlQueryParser parser)
+        {
+            var uri = parser.GetUri<T>();
+
+            Logger.DebugFormat("Updating {0} with uid '{1}'.", typeof(T).Name, uri.ObjectId);
+
+            //Validate(Functions.UpdateInStore, entity);
+            //Logger.DebugFormat("Validated {0} with uid '{1}' for Update", typeof(T).Name, uri.ObjectId);
+
+            UpdateEntity(parser, uri);
+
+            return new WitsmlResult(ErrorCodes.Success);
+        }
+
+        /// <summary>
+        /// Deletes or partially updates the specified object by uid.
+        /// </summary>
+        /// <param name="parser">The query parser that specifies the object.</param>
+        /// <returns>
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
+        /// </returns>
+        public override WitsmlResult Delete(WitsmlQueryParser parser)
+        {
+            var uri = parser.GetUri<T>();
+            return Delete(uri);
         }
 
         /// <summary>
         /// Deletes a data object by the specified identifier.
         /// </summary>
-        /// <param name="dataObjectId">The data object identifier.</param>
+        /// <param name="uri">The data object URI.</param>
         /// <returns>A WITSML result.</returns>
-        public override WitsmlResult Delete(DataObjectId dataObjectId)
+        public override WitsmlResult Delete(EtpUri uri)
         {
-            DeleteEntity(dataObjectId);
+            DeleteEntity(uri);
             return new WitsmlResult(ErrorCodes.Success);
         }
 
         /// <summary>
         /// Determines whether the entity exists in the data store.
         /// </summary>
-        /// <param name="dataObjectId">The data object identifier.</param>
+        /// <param name="uri">The data object URI.</param>
         /// <returns>true if the entity exists; otherwise, false</returns>
-        public override bool Exists(DataObjectId dataObjectId)
+        public override bool Exists(EtpUri uri)
         {
-            return Exists<T>(dataObjectId, DbCollectionName);
+            return Exists<T>(uri, DbCollectionName);
         }
 
         /// <summary>
         /// Determines whether the entity exists in the data store.
         /// </summary>
-        /// <param name="dataObjectId">The data object identifier.</param>
+        /// <param name="uri">The data object URI.</param>
         /// <param name="dbCollectionName">The name of the database collection.</param>
         /// <typeparam name="TObject">The data object type.</typeparam>
         /// <returns>true if the entity exists; otherwise, false</returns>
-        protected bool Exists<TObject>(DataObjectId dataObjectId, string dbCollectionName)
+        protected bool Exists<TObject>(EtpUri uri, string dbCollectionName)
         {
             try
             {
-                return GetEntityById<TObject>(dataObjectId, dbCollectionName) != null;
+                return GetEntity<TObject>(uri, dbCollectionName) != null;
             }
             catch (MongoException ex)
             {
@@ -146,26 +200,31 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Gets an object from the data store by uid
         /// </summary>
-        /// <param name="dataObjectId">The data object identifier.</param>
+        /// <param name="uri">The data object URI.</param>
         /// <returns>The object represented by the UID.</returns>
-        protected T GetEntity(DataObjectId dataObjectId)
+        protected T GetEntity(EtpUri uri)
         {
-            return GetEntity<T>(dataObjectId, DbCollectionName);
+            return GetEntity<T>(uri, DbCollectionName);
         }
 
         /// <summary>
         /// Gets an object from the data store by uid
         /// </summary>
-        /// <param name="dataObjectId">The data object identifier.</param>
+        /// <param name="uri">The data object URI.</param>
         /// <param name="dbCollectionName">The naame of the database collection.</param>
         /// <typeparam name="TObject">The data object type.</typeparam>
         /// <returns>The entity represented by the indentifier.</returns>
-        protected TObject GetEntity<TObject>(DataObjectId dataObjectId, string dbCollectionName)
+        protected TObject GetEntity<TObject>(EtpUri uri, string dbCollectionName)
         {
             try
             {
-                Logger.DebugFormat("Querying {0} MongoDb collection; uid: {1}", dbCollectionName, dataObjectId);
-                return GetEntityById<TObject>(dataObjectId, dbCollectionName);
+                Logger.DebugFormat("Querying {0} MongoDb collection; uid: {1}", dbCollectionName, uri.ObjectId);
+
+                var filter = MongoDbUtility.GetEntityFilter<TObject>(uri, IdPropertyName);
+
+                return GetCollection<TObject>(dbCollectionName)
+                    .Find(filter)
+                    .FirstOrDefault();
             }
             catch (MongoException ex)
             {
@@ -174,45 +233,19 @@ namespace PDS.Witsml.Server.Data
             }
         }
 
-        /// <summary>
-        /// Gets the entity by it's data object identifier.
-        /// </summary>
-        /// <param name="dataObjectId">The data object identifier.</param>
-        /// <returns>The entity represented by the indentifier.</returns>
-        protected T GetEntityById(DataObjectId dataObjectId)
+        protected List<T> GetEntities(IEnumerable<EtpUri> uris)
         {
-            return GetEntityById<T>(dataObjectId, DbCollectionName);
+            return GetEntities<T>(uris, DbCollectionName);
         }
 
-        /// <summary>
-        /// Gets the entity by it's data object identifier.
-        /// </summary>
-        /// <typeparam name="TObject">The type of the object.</typeparam>
-        /// <param name="dataObjectId">The data object identifier.</param>
-        /// <param name="dbCollectionName">Name of the database collection.</param>
-        /// <returns></returns>
-        protected TObject GetEntityById<TObject>(DataObjectId dataObjectId, string dbCollectionName)
+        protected List<TObject> GetEntities<TObject>(IEnumerable<EtpUri> uris, string dbCollectionName)
         {
-            var filter = GetEntityFilter<TObject>(dataObjectId);
-
-            return GetCollection<TObject>(dbCollectionName)
-                .Find(filter)
-                .FirstOrDefault();
-        }
-
-        protected List<T> GetEntities(IEnumerable<DataObjectId> dataObjectIds)
-        {
-            return GetEntities<T>(dataObjectIds, DbCollectionName);
-        }
-
-        protected List<TObject> GetEntities<TObject>(IEnumerable<DataObjectId> dataObjectIds, string dbCollectionName)
-        {
-            if (!dataObjectIds.Any())
+            if (!uris.Any())
             {
                 return new List<TObject>(0);
             }
 
-            var filters = dataObjectIds.Select(x => GetEntityFilter<TObject>(x));
+            var filters = uris.Select(x => MongoDbUtility.GetEntityFilter<TObject>(x, IdPropertyName));
 
             return GetCollection<TObject>(dbCollectionName)
                 .Find(Builders<TObject>.Filter.Or(filters))
@@ -241,7 +274,7 @@ namespace PDS.Witsml.Server.Data
             }
             catch (MongoException ex)
             {
-                Logger.ErrorFormat("Error querying {0} MongoDb collection:{1}{2}", DbCollectionName, Environment.NewLine, ex);
+                Logger.ErrorFormat("Error querying {0} MongoDb collection: {1}", DbCollectionName, ex);
                 throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, ex);
             }
         }
@@ -283,9 +316,9 @@ namespace PDS.Witsml.Server.Data
         /// <param name="parser">The WITSML query parser.</param>
         /// <param name="dataObjectId">The data object identifier.</param>
         /// <param name="ignored">The list of ignored elements.</param>
-        protected void UpdateEntity(WitsmlQueryParser parser, DataObjectId dataObjectId, string[] ignored = null)
+        protected void UpdateEntity(WitsmlQueryParser parser, EtpUri uri, string[] ignored = null)
         {
-            UpdateEntity<T>(DbCollectionName, parser, dataObjectId, ignored);
+            UpdateEntity<T>(DbCollectionName, parser, uri, ignored);
         }
 
         /// <summary>
@@ -294,22 +327,22 @@ namespace PDS.Witsml.Server.Data
         /// <typeparam name="TObject">The type of the object.</typeparam>
         /// <param name="dbCollectionName">The name of the database collection.</param>
         /// <param name="parser">The WITSML query parser.</param>
-        /// <param name="dataObjectId">The data object identifier.</param>
+        /// <param name="uri">The data object URI.</param>
         /// <param name="ignored">The list of ignored elements.</param>
         /// <exception cref="WitsmlException"></exception>
-        protected void UpdateEntity<TObject>(string dbCollectionName, WitsmlQueryParser parser, DataObjectId dataObjectId, string[] ignored = null)
+        protected void UpdateEntity<TObject>(string dbCollectionName, WitsmlQueryParser parser, EtpUri uri, string[] ignored = null)
         {
             try
             {
                 Logger.DebugFormat("Updating {0} MongoDb collection", dbCollectionName);
 
                 var collection = GetCollection<TObject>(dbCollectionName);
-                var current = GetEntityById<TObject>(dataObjectId, dbCollectionName);
-                var updates = MongoDbFieldHelper.CreateUpdateFields<TObject>();
-                var ignores = MongoDbFieldHelper.CreateIgnoreFields<TObject>(ignored);
+                var current = GetEntity<TObject>(uri, dbCollectionName);
+                var updates = MongoDbUtility.CreateUpdateFields<TObject>();
+                var ignores = MongoDbUtility.CreateIgnoreFields<TObject>(ignored);
 
                 var update = new MongoDbUpdate<TObject>(collection, parser, IdPropertyName, ignores);
-                update.Update(current, dataObjectId, updates);
+                update.Update(current, uri, updates);
             }
             catch (MongoException ex)
             {
@@ -321,60 +354,35 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Deletes a data object by the specified identifier.
         /// </summary>
-        /// <param name="dataObjectId">The data object identifier.</param>
+        /// <param name="uri">The data object URI.</param>
         /// <exception cref="WitsmlException"></exception>
-        protected void DeleteEntity(DataObjectId dataObjectId)
+        protected void DeleteEntity(EtpUri uri)
         {
-            DeleteEntity<T>(dataObjectId, DbCollectionName);
+            DeleteEntity<T>(uri, DbCollectionName);
         }
 
         /// <summary>
         /// Deletes a data object by the specified identifier.
         /// </summary>
         /// <typeparam name="TObject">The type of data object.</typeparam>
-        /// <param name="dataObjectId">The data object identifier.</param>
+        /// <param name="uri">The data object URI.</param>
         /// <param name="dbCollectionName">The name of the database collection.</param>
         /// <exception cref="WitsmlException"></exception>
-        protected void DeleteEntity<TObject>(DataObjectId dataObjectId, string dbCollectionName)
+        protected void DeleteEntity<TObject>(EtpUri uri, string dbCollectionName)
         {
             try
             {
                 Logger.DebugFormat("Deleting from {0} MongoDb collection", dbCollectionName);
 
                 var collection = GetCollection<TObject>(dbCollectionName);
-                var filter = GetEntityFilter<TObject>(dataObjectId);
+                var filter = MongoDbUtility.GetEntityFilter<TObject>(uri, IdPropertyName);
                 var result = collection.DeleteOne(filter);
             }
             catch (MongoException ex)
             {
-                Logger.ErrorFormat("Error deleting from {0} MongoDb collection:{1}{2}", dbCollectionName, Environment.NewLine, ex);
+                Logger.ErrorFormat("Error deleting from {0} MongoDb collection: {1}", dbCollectionName, ex);
                 throw new WitsmlException(ErrorCodes.ErrorDeletingFromDataStore, ex);
             }
-        }
-
-        /// <summary>
-        /// Creates a filter that can be used to find the unique entity represented by the specified <see cref="DataObjectId"/>.
-        /// </summary>
-        /// <typeparam name="TObject">The data object type.</typeparam>
-        /// <param name="dataObjectId">The data object identifier.</param>
-        /// <returns>The filter definition instance.</returns>
-        protected FilterDefinition<TObject> GetEntityFilter<TObject>(DataObjectId dataObjectId)
-        {
-            var builder = Builders<TObject>.Filter;
-            var filters = new List<FilterDefinition<TObject>>();
-
-            filters.Add(builder.EqIgnoreCase(IdPropertyName, dataObjectId.Uid));
-
-            if (dataObjectId is WellObjectId)
-            {
-                filters.Add(builder.EqIgnoreCase("UidWell", ((WellObjectId)dataObjectId).UidWell));
-            }
-            if (dataObjectId is WellboreObjectId)
-            {
-                filters.Add(builder.EqIgnoreCase("UidWellbore", ((WellboreObjectId)dataObjectId).UidWellbore));
-            }
-
-            return builder.And(filters);
         }
 
         /// <summary>

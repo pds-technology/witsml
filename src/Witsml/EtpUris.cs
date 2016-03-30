@@ -1,4 +1,5 @@
-﻿using Energistics.DataAccess;
+﻿using System;
+using Energistics.DataAccess;
 using Energistics.Datatypes;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
@@ -13,12 +14,19 @@ namespace PDS.Witsml
         public static readonly EtpUri Witsml141 = new EtpUri("eml://witsml1411");
         public static readonly EtpUri Witsml200 = new EtpUri("eml://witsml20");
 
-        public static EtpUri GetUriFamily(this IDataObject entity)
+        public static EtpUri GetUriFamily(Type type)
         {
-            if (entity.GetType().Namespace.Contains("WITSML131"))
+            if (type.Namespace.Contains("WITSML131"))
                 return Witsml131;
+            else if (type.Namespace.Contains("WITSML200"))
+                return Witsml200;
 
             return Witsml141;
+        }
+
+        public static EtpUri GetUriFamily(this IDataObject entity)
+        {
+            return GetUriFamily(entity.GetType());
         }
 
         public static EtpUri GetUri(this IDataObject entity)

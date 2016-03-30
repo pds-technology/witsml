@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using Energistics.DataAccess;
+using Energistics.Datatypes;
 using log4net;
 using MongoDB.Driver;
 using PDS.Framework;
@@ -37,18 +38,13 @@ namespace PDS.Witsml.Server.Data
         /// <value>The logger.</value>
         protected ILog Logger { get; private set; }
 
-        public void Update(T entity, DataObjectId dataObjectId, Dictionary<string, object> updates)
+        public void Update(T entity, EtpUri uri, Dictionary<string, object> updates)
         {
-            var dataObj = entity as IDataObject;
-            var abstractObj = entity as Energistics.DataAccess.WITSML200.ComponentSchemas.AbstractObject;
-            var uidValue = abstractObj == null ? dataObj.Uid : abstractObj.Uuid;
+            _entityFilter = MongoDbUtility.GetEntityFilter<T>(uri, _idPropertyName);
 
-            _entityFilter = MongoDbFieldHelper.GetEntityFilter<T>(dataObjectId, _idPropertyName);
-            var update = Builders<T>.Update.Set(_idPropertyName, uidValue);
-            foreach (var pair in updates)
-                update = update.Set(pair.Key, pair.Value);
-
+            var update = Update(updates, uri.ObjectId);
             var element = _parser.Element();
+
             update = BuildUpdate(update, element, entity);
 
             if (Logger.IsDebugEnabled)
@@ -58,6 +54,16 @@ namespace PDS.Witsml.Server.Data
             }
 
             var result = _collection.UpdateOne(_entityFilter, update);
+        }
+
+        public UpdateDefinition<T> Update(Dictionary<string, object> updates, string uidValue)
+        {
+            var update = Builders<T>.Update.Set(_idPropertyName, uidValue);
+
+            foreach (var pair in updates)
+                update = update.Set(pair.Key, pair.Value);
+
+            return update;
         }
 
         public void Update(Dictionary<string, T> replacements, string field = null)
@@ -86,7 +92,7 @@ namespace PDS.Witsml.Server.Data
 
         private UpdateDefinition<T> BuildUpdateForAnElement(UpdateDefinition<T> update, object obj, XElement element, Type type, string parentPath = null)
         {
-            var properties = MongoDbFieldHelper.GetPropertyInfo(type);
+            var properties = MongoDbUtility.GetPropertyInfo(type);
 
             var groupings = element.Elements().GroupBy(e => e.Name.LocalName);
 
@@ -95,17 +101,17 @@ namespace PDS.Witsml.Server.Data
                 if (_ignored.Contains(group.Key))
                     continue;
 
-                var propertyInfo = MongoDbFieldHelper.GetPropertyInfoForAnElement(properties, group.Key);
+                var propertyInfo = MongoDbUtility.GetPropertyInfoForAnElement(properties, group.Key);
                 var propertyValue = propertyInfo.GetValue(obj);
                 update = BuildUpdateForAnElementGroup(update, propertyInfo, propertyValue, group, new List<FilterDefinition<T>> { _entityFilter }, parentPath);
             }
 
             foreach (var attribute in element.Attributes())
             {
-                if (attribute.IsNamespaceDeclaration || attribute.Name == MongoDbFieldHelper.Xsi("nil") || attribute.Name == MongoDbFieldHelper.Xsi("type"))
+                if (attribute.IsNamespaceDeclaration || attribute.Name == MongoDbUtility.Xsi("nil") || attribute.Name == MongoDbUtility.Xsi("type"))
                     continue;
 
-                var attributeProp = MongoDbFieldHelper.GetPropertyInfoForAnElement(properties, attribute.Name.LocalName);
+                var attributeProp = MongoDbUtility.GetPropertyInfoForAnElement(properties, attribute.Name.LocalName);
                 update = BuildUpdateForAttribute(update, attributeProp, attribute, parentPath);
             }
 
@@ -117,7 +123,7 @@ namespace PDS.Witsml.Server.Data
             if (propertyInfo == null)
                 return update;
 
-            var fieldName = MongoDbFieldHelper.GetPropertyPath(parentPath, propertyInfo.Name);
+            var fieldName = MongoDbUtility.GetPropertyPath(parentPath, propertyInfo.Name);
             var propType = propertyInfo.PropertyType;
             var values = elements.ToList();
             var count = values.Count;
@@ -150,7 +156,7 @@ namespace PDS.Witsml.Server.Data
                 }
                 else if (propType.IsAbstract)
                 {
-                    var concreteType = MongoDbFieldHelper.GetConcreteType(element, propType);
+                    var concreteType = MongoDbUtility.GetConcreteType(element, propType);
                     return BuildUpdateForAnElementType(update, concreteType, propertyValue, element, fieldName);
                 }
                 else
@@ -175,14 +181,14 @@ namespace PDS.Witsml.Server.Data
             if (textProperty != null)
             {
                 var uomProperty = elementType.GetProperty("Uom");
-                var fieldName = MongoDbFieldHelper.GetPropertyPath(propertyPath, textProperty.Name);
+                var fieldName = MongoDbUtility.GetPropertyPath(propertyPath, textProperty.Name);
                 var fieldType = textProperty.PropertyType;
                 var filters = new List<FilterDefinition<T>>();
 
                 if (uomProperty != null)
                 {
-                    var uomPath = MongoDbFieldHelper.GetPropertyPath(propertyPath, uomProperty.Name);
-                    var uomValue = MongoDbFieldHelper.ValidateMeasureUom(element, uomProperty, element.Value);
+                    var uomPath = MongoDbUtility.GetPropertyPath(propertyPath, uomProperty.Name);
+                    var uomValue = MongoDbUtility.ValidateMeasureUom(element, uomProperty, element.Value);
                     update = BuildUpdateForProperty(update, uomProperty.PropertyType, uomPath, uomValue);
                 }
 
@@ -209,7 +215,7 @@ namespace PDS.Witsml.Server.Data
             }
             else if (propertyType.IsEnum)
             {
-                var value = MongoDbFieldHelper.ParseEnum(propertyType, propertyValue);
+                var value = MongoDbUtility.ParseEnum(propertyType, propertyValue);
                 return update.Set(propertyPath, value);
             }
             else if (propertyType == typeof(DateTime))
@@ -243,7 +249,7 @@ namespace PDS.Witsml.Server.Data
 
         private UpdateDefinition<T> BuildUpdateForAttribute(UpdateDefinition<T> update, PropertyInfo propertyInfo, XAttribute attribute, string parentPath = null)
         {
-            var propertyPath = MongoDbFieldHelper.GetPropertyPath(parentPath, propertyInfo.Name);
+            var propertyPath = MongoDbUtility.GetPropertyPath(parentPath, propertyInfo.Name);
             var propertyType = propertyInfo.PropertyType;
 
             return BuildUpdateForProperty(update, propertyType, propertyPath, attribute.Value);
@@ -254,8 +260,8 @@ namespace PDS.Witsml.Server.Data
             var updateBuilder = Builders<T>.Update;
             var filterBuilder = Builders<T>.Filter;
             var uid = "Uid";
-            var filterPath = MongoDbFieldHelper.GetPropertyPath(parentPath, uid);
-            var properties = MongoDbFieldHelper.GetPropertyInfo(type);
+            var filterPath = MongoDbUtility.GetPropertyPath(parentPath, uid);
+            var properties = MongoDbUtility.GetPropertyInfo(type);
             var positionPath = parentPath + ".$";
 
             foreach (var element in elements)
@@ -287,7 +293,7 @@ namespace PDS.Witsml.Server.Data
                     filters.Add(elementFilter);
                     var filter = filterBuilder.And(filters);
 
-                    var update = updateBuilder.Set(MongoDbFieldHelper.GetPropertyPath(positionPath, uid), uidValue);
+                    var update = updateBuilder.Set(MongoDbUtility.GetPropertyPath(positionPath, uid), uidValue);
                     update = BuildUpdateForAnElement(update, current, element, type, positionPath);
 
                     var filterJson = filter.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
@@ -303,7 +309,7 @@ namespace PDS.Witsml.Server.Data
             var list = (IEnumerable)propertyValue;
             foreach (var item in list)
             {
-                var prop = MongoDbFieldHelper.GetPropertyInfoForAnElement(properties, "uid");
+                var prop = MongoDbUtility.GetPropertyInfoForAnElement(properties, "uid");
                 var uidValue = prop.GetValue(item).ToString();
                 if (uid.EqualsIgnoreCase(uidValue))
                     return item;

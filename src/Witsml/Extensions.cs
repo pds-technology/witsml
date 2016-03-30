@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Energistics.DataAccess;
-using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using PDS.Witsml.Properties;
 
 namespace PDS.Witsml
@@ -53,46 +52,6 @@ namespace PDS.Witsml
         public static List<TObject> AsList<TObject>(this TObject instance) where TObject : IDataObject
         {
             return new List<TObject>() { instance };
-        }
-
-        /// <summary>
-        /// Gets the data object identifier, i.e. uid.
-        /// </summary>
-        /// <param name="instance">The instance.</param>
-        /// <returns>The identifier object.</returns>
-        public static DataObjectId GetObjectId(this IDataObject instance)
-        {
-            return new DataObjectId(instance.Uid, instance.Name);
-        }
-
-        /// <summary>
-        /// Gets the well object identifier, i.e. uid and uidWell.
-        /// </summary>
-        /// <param name="instance">The instance.</param>
-        /// <returns>The identified object.</returns>
-        public static WellObjectId GetObjectId(this IWellObject instance)
-        {
-            return new WellObjectId(instance.Uid, instance.UidWell, instance.Name);
-        }
-
-        /// <summary>
-        /// Gets the wellbore object identifier, i.e. uid, uidWell, and uidWellbore.
-        /// </summary>
-        /// <param name="instance">The instance.</param>
-        /// <returns>The identified object.</returns>
-        public static WellboreObjectId GetObjectId(this IWellboreObject instance)
-        {
-            return new WellboreObjectId(instance.Uid, instance.UidWell, instance.UidWellbore, instance.Name);
-        }
-
-        /// <summary>
-        /// Gets the  WITSML 2.0 data object identifier, i.e. uuid.
-        /// </summary>
-        /// <param name="instance">The instance.</param>
-        /// <returns>The identified object.</returns>
-        public static DataObjectId GetObjectId(this AbstractObject instance)
-        {
-            return new DataObjectId(instance.Uuid, instance.Citation == null ? null : instance.Citation.Title);
         }
     }
 }

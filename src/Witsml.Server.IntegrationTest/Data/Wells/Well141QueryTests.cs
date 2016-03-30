@@ -292,7 +292,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_Well_Selection_Uid_Caseless_Compare()
         {
-            var testUid = "test well for Test_Well_Selection_Uid_Caseless_Compare" + DevKit.Uid();
+            var testUid = "Test_Well_Selection_Uid_Caseless_Compare_" + DevKit.Uid();
             var query = new Well { Uid = testUid };
             var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.IdOnly);
 
@@ -406,9 +406,9 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             var uid_01 = response.SuppMsgOut;
+            var now = DateTimeOffset.UtcNow;
 
             var well_02 = DevKit.CreateFullWell();
-            well_02.CommonData.DateTimeCreation = DateTimeOffset.UtcNow;
             response = DevKit.Add<WellList, Well>(well_02);
 
             Assert.IsNotNull(response);
@@ -417,7 +417,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var uid_02 = response.SuppMsgOut;
 
             var query = new Well { CommonData = new CommonData() };
-            query.CommonData.DateTimeCreation = well_01.CommonData.DateTimeCreation;
+            query.CommonData.DateTimeCreation = now;
             var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
 
             // Section 6.6.4

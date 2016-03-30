@@ -22,6 +22,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
         private readonly IEtpDataAdapter<Well> _wellDataAdapter;
         private readonly IEtpDataAdapter<Wellbore> _wellboreDataAdapter;
         private readonly IEtpDataAdapter<Log> _logDataAdapter;
+        private readonly IEtpDataAdapter<ChannelSet> _channelSetDataAdapter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DiscoveryStore200Provider" /> class.
@@ -29,15 +30,18 @@ namespace PDS.Witsml.Server.Providers.Discovery
         /// <param name="wellDataAdapter">The well data adapter.</param>
         /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
         /// <param name="logDataAdapter">The log data adapter.</param>
+        /// <param name="channelSetDataAdapter">The channel set data adapter.</param>
         [ImportingConstructor]
         public DiscoveryStore200Provider(
             IEtpDataAdapter<Well> wellDataAdapter,
             IEtpDataAdapter<Wellbore> wellboreDataAdapter,
-            IEtpDataAdapter<Log> logDataAdapter)
+            IEtpDataAdapter<Log> logDataAdapter,
+            IEtpDataAdapter<ChannelSet> channelSetDataAdapter)
         {
             _wellDataAdapter = wellDataAdapter;
             _wellboreDataAdapter = wellboreDataAdapter;
             _logDataAdapter = logDataAdapter;
+            _channelSetDataAdapter = channelSetDataAdapter;
         }
 
         /// <summary>
@@ -105,8 +109,8 @@ namespace PDS.Witsml.Server.Providers.Discovery
             }
             else if (uri.ObjectType == ObjectTypes.Log)
             {
-                var log = _logDataAdapter.Get(uri.ToDataObjectId());
-                log.ChannelSet.ForEach(x => args.Context.Add(ToResource(log, x)));
+                var log = _logDataAdapter.Get(uri);
+                log.ChannelSet.ForEach(x => args.Context.Add(ToResource(x)));
             }
             else if (uri.ObjectType == ObjectTypes.ChannelSet)
             {
@@ -115,10 +119,10 @@ namespace PDS.Witsml.Server.Providers.Discovery
                     .Select(x => x.Value)
                     .FirstOrDefault();
 
-                var log = _logDataAdapter.Get(new DataObjectId(uid, null));
-                var set = log.ChannelSet.FirstOrDefault(x => x.Uuid == uri.ObjectId);
+                var set = _channelSetDataAdapter.Get(uri);
+                //var set = log.ChannelSet.FirstOrDefault(x => x.Uuid == uri.ObjectId);
 
-                set.Channel.ForEach(x => args.Context.Add(ToResource(log, set, x)));
+                set.Channel.ForEach(x => args.Context.Add(ToResource(set, x)));
             }
         }
 
@@ -152,21 +156,21 @@ namespace PDS.Witsml.Server.Providers.Discovery
                 count: -1);
         }
 
-        private Resource ToResource(Log log, ChannelSet entity)
+        private Resource ToResource(ChannelSet entity)
         {
             return DiscoveryStoreProvider.New(
                 uuid: entity.Uuid,
-                uri: entity.GetUri(log),
+                uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Citation.Title,
                 count: -1);
         }
 
-        private Resource ToResource(Log log, ChannelSet channelSet, Channel entity)
+        private Resource ToResource(ChannelSet channelSet, Channel entity)
         {
             return DiscoveryStoreProvider.New(
                 uuid: entity.Uuid,
-                uri: entity.GetUri(log, channelSet),
+                uri: entity.GetUri(channelSet),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Mnemonic,
                 count: 0);

@@ -83,21 +83,12 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="commonData">The common data.</param>
         /// <returns>The instance of common data.</returns>
-        public static Witsml131Schemas.CommonData Update(this Witsml131Schemas.CommonData commonData, bool created = false)
+        public static Witsml131Schemas.CommonData Create(this Witsml131Schemas.CommonData commonData)
         {
             if (commonData == null)
                 commonData = new Witsml131Schemas.CommonData();
 
-            if (created)
-            {
-                commonData.DateTimeCreation = DateTime.UtcNow;
-            }
-            else
-            {
-                commonData.DateTimeCreation = null;
-                commonData.DateTimeCreationSpecified = false;
-            }
-
+            commonData.DateTimeCreation = DateTime.UtcNow;
             commonData.DateTimeLastChange = DateTime.UtcNow;
 
             return commonData;
@@ -108,21 +99,12 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="commonData">The common data.</param>
         /// <returns>The instance of common data.</returns>
-        public static Witsml141Schemas.CommonData Update(this Witsml141Schemas.CommonData commonData, bool created = false)
+        public static Witsml141Schemas.CommonData Create(this Witsml141Schemas.CommonData commonData)
         {
             if (commonData == null)
                 commonData = new Witsml141Schemas.CommonData();
 
-            if (created)
-            {
-                commonData.DateTimeCreation = DateTimeOffset.UtcNow;
-            }
-            else
-            {
-                commonData.DateTimeCreation = null;
-                commonData.DateTimeCreationSpecified = false;
-            }
-
+            commonData.DateTimeCreation = DateTimeOffset.UtcNow;
             commonData.DateTimeLastChange = DateTimeOffset.UtcNow;
 
             return commonData;
@@ -133,15 +115,12 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="citation">The citation.</param>
         /// <returns>The instance of the citation.</returns>
-        public static Witsml200Schemas.Citation Update(this Witsml200Schemas.Citation citation, bool created = false)
+        public static Witsml200Schemas.Citation Create(this Witsml200Schemas.Citation citation)
         {
             if (citation == null)
                 citation = new Witsml200Schemas.Citation();
 
-            citation.Creation = (created)
-                ? DateTime.UtcNow
-                : (DateTime?)null;
-
+            citation.Creation = DateTime.UtcNow;
             citation.LastUpdate = DateTime.UtcNow;
 
             return citation;

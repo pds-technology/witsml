@@ -14,7 +14,6 @@ using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Server.Models;
 using PDS.Witsml.Server.Properties;
-using PDS.Witsml.Server.Providers;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -96,12 +95,12 @@ namespace PDS.Witsml.Server.Data.Logs
                 OptionsIn.ReturnElements.DataOnly.Equals(returnElements) ||
                 (fields != null && fields.Contains("LogData")))
             {
-                var logHeaders = GetEntities(logs.Select(x => x.GetObjectId()))
-                    .ToDictionary(x => x.GetObjectId());
+                var logHeaders = GetEntities(logs.Select(x => x.GetUri()))
+                    .ToDictionary(x => x.GetUri());
 
                 logs.ForEach(l =>
                 {
-                    var logHeader = logHeaders[l.GetObjectId()];
+                    var logHeader = logHeaders[l.GetUri()];
                     var mnemonics = GetMnemonicList(logHeader, parser);
 
                     l.LogData = new List<LogData>() { QueryLogDataValues(logHeader, parser, mnemonics) };
@@ -129,16 +128,18 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <summary>
         /// Adds a <see cref="Log"/> entity to the data store.
         /// </summary>
-        /// <param name="entity">The Log instance to add to the store.</param>
+        /// <param name="entity">The <see cref="Log"/> to be added.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
         public override WitsmlResult Add(Log entity)
         {
             entity.Uid = NewUid(entity.Uid);
-            entity.CommonData = entity.CommonData.Update(true);
+            entity.CommonData = entity.CommonData.Create();
+            Logger.DebugFormat("Adding Log with uid '{0}' and name '{1}'", entity.Uid, entity.Name);
 
             Validate(Functions.AddToStore, entity);
+            Logger.DebugFormat("Validated Log with uid '{0}' and name '{1}' for Add", entity.Uid, entity.Name);
 
             // Extract Data
             var readers = ExtractDataReaders(entity);
@@ -160,18 +161,17 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </returns>
         public override WitsmlResult Update(WitsmlQueryParser parser)
         {
-            var entity = Parse(parser.Context.Xml);
-            var dataObjectId = entity.GetObjectId();
+            var uri = parser.GetUri<Log>();
 
-            //entity.CommonData = entity.CommonData.Update();
+            Logger.DebugFormat("Updating Log with uid '{0}'.", uri.ObjectId);
             //Validate(Functions.UpdateInStore, entity);
 
-            // Extract Data
-            var saved = GetEntity(dataObjectId);
-            var readers = ExtractDataReaders(entity, saved);
             var ignored = new[] { "logData" };
+            UpdateEntity(parser, uri, ignored);
 
-            UpdateEntity(parser, dataObjectId, ignored);
+            // Extract Data
+            var entity = Parse(parser.Context.Xml);
+            var readers = ExtractDataReaders(entity, GetEntity(uri));
 
             // Merge ChannelDataChunks
             foreach (var reader in readers)
@@ -186,30 +186,13 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Deletes or partially updates the specified object by uid.
-        /// </summary>
-        /// <param name="parser">The parser that specifies the object.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public override WitsmlResult Delete(WitsmlQueryParser parser)
-        {
-            var entity = Parse(parser.Context.Xml);
-            var dataObjectId = entity.GetObjectId();
-
-            DeleteEntity(dataObjectId);
-
-            return new WitsmlResult(ErrorCodes.Success);
-        }
-
-        /// <summary>
         /// Gets the channel metadata for the specified data object URI.
         /// </summary>
         /// <param name="uri">The parent data object URI.</param>
         /// <returns>A collection of channel metadata.</returns>
         public IList<ChannelMetadataRecord> GetChannelMetadata(EtpUri uri)
         {
-            var entity = GetEntity(uri.ToDataObjectId());
+            var entity = GetEntity(uri);
             var metadata = new List<ChannelMetadataRecord>();
             var index = 0;
 
@@ -234,7 +217,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>A collection of channel data.</returns>
         public IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, Range<double?> range)
         {
-            var entity = GetEntity(uri.ToDataObjectId());
+            var entity = GetEntity(uri);
             var mnemonics = entity.LogCurveInfo.Select(x => x.Mnemonic.Value);
             var increasing = entity.Direction.GetValueOrDefault() == LogIndexDirection.increasing;
 
@@ -262,25 +245,6 @@ namespace PDS.Witsml.Server.Data.Logs
             return query
                 .OrderBy(x => x.Name)
                 .ToList();
-        }
-
-        /// <summary>
-        /// Puts the specified data object into the data store.
-        /// </summary>
-        /// <param name="parser">The input parser.</param>
-        /// <returns>A WITSML result.</returns>
-        public override WitsmlResult Put(WitsmlQueryParser parser)
-        {
-            var entity = Parse(parser.Context.Xml);
-
-            if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.GetObjectId()))
-            {
-                return Update(parser);
-            }
-            else
-            {
-                return Add(entity);
-            }
         }
 
         /// <summary>
@@ -389,6 +353,7 @@ namespace PDS.Witsml.Server.Data.Logs
             };
 
             var slices = mnemonics.Keys.ToArray();
+
             foreach (var record in records)
             {
                 var values = new object[record.FieldCount];
@@ -419,23 +384,15 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private IEnumerable<ChannelDataReader> ExtractDataReaders(Log entity, Log existing = null)
         {
-            IEnumerable<ChannelDataReader> readers = null;
-
             if (existing == null)
             {
-                readers = entity.GetReaders().ToList();
+                var readers = entity.GetReaders().ToList();
                 entity.LogData = null;
                 return readers;
             }
 
-            var logData = existing.LogData;
             existing.LogData = entity.LogData;
-            entity.LogData = null;
-
-            readers = existing.GetReaders().ToList();
-            existing.LogData = logData;
-
-            return readers;
+            return existing.GetReaders().ToList();
         }
 
         private List<LogData> EmptyLogData(LogData logData)
@@ -470,60 +427,6 @@ namespace PDS.Witsml.Server.Data.Logs
                 Indexes = new List<IndexMetadataRecord>(),
             };
         }
-
-        //private LogData QueryLogDataValues(Log log, WitsmlQueryParser parser)
-        //{
-        //    var returnElements = parser.ReturnElements();
-        //    var logDataElement = parser.Property("logData");
-
-        //    if (logDataElement == null &&
-        //        !OptionsIn.ReturnElements.All.Equals(returnElements) &&
-        //        !OptionsIn.ReturnElements.DataOnly.Equals(returnElements))
-        //    {
-        //        return null;
-        //    }
-
-        //    Tuple<double?, double?> range;
-        //    var increasing = log.Direction != LogIndexDirection.decreasing;
-        //    var isTimeLog = log.IndexType == LogIndexType.datetime;
-
-        //    if (isTimeLog)
-        //    {
-        //        var startIndex = ToNullableUnixSeconds(parser.PropertyValue("startDateTimeIndex"));
-        //        var endIndex = ToNullableUnixSeconds(parser.PropertyValue("endDateTimeIndex"));
-        //        range = new Tuple<double?, double?>(startIndex, endIndex);
-        //    }
-        //    else
-        //    {
-        //        var startIndex = ToNullableDouble(parser.PropertyValue("startIndex"));
-        //        var endIndex = ToNullableDouble(parser.PropertyValue("endIndex"));
-        //        range = new Tuple<double?, double?>(startIndex, endIndex);
-        //    }
-
-        //    var mnemonics = log.LogCurveInfo.Select(x => x.Mnemonic.Value).ToList();
-
-        //    if (logDataElement != null)
-        //    {
-        //        var mnemonicElement = logDataElement.Elements().FirstOrDefault(e => e.Name.LocalName == "mnemonicList");
-        //        if (mnemonicElement != null)
-        //        {
-        //            var target = logDataElement.Elements().FirstOrDefault(e => e.Name.LocalName == "mnemonicList").Value.Split(',');
-        //            mnemonics = target.Where(m => mnemonics.Contains(m)).ToList();
-        //        }
-        //    }
-
-        //    return _channelDataChunkAdapter.GetLogData(log.Uid, mnemonics, range, increasing);
-        //}
-
-        //private double? ToNullableDouble(string doubleStr)
-        //{
-        //    return string.IsNullOrEmpty(doubleStr) ? (double?)null : double.Parse(doubleStr);
-        //}
-
-        //private double? ToNullableUnixSeconds(string dateTimeStr)
-        //{
-        //    return string.IsNullOrEmpty(dateTimeStr)? (double?)null: DateTimeOffset.Parse(dateTimeStr).ToUnixTimeSeconds();
-        //}
 
         #region UpdateLogHeaderRanges Code
         //private void UpdateLogData(Log log, List<LogDataValues> logDataChanges)

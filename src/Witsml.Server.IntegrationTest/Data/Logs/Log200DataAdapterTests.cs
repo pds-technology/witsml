@@ -85,7 +85,7 @@ namespace PDS.Witsml.Server.Data.Logs
             WellboreAdapter.Put(DevKit.Parser(Wellbore1));
             LogAdapter.Put(DevKit.Parser(Log1));
 
-            var log1 = LogAdapter.Get(Log1.GetObjectId());
+            var log1 = LogAdapter.Get(Log1.GetUri());
 
             Assert.AreEqual(Log1.Citation.Title, log1.Citation.Title);
         }
@@ -117,7 +117,7 @@ namespace PDS.Witsml.Server.Data.Logs
             WellboreAdapter.Put(DevKit.Parser(Wellbore1));
             LogAdapter.Put(DevKit.Parser(Log1));
 
-            var log1 = LogAdapter.Get(Log1.GetObjectId());
+            var log1 = LogAdapter.Get(Log1.GetUri());
 
             Assert.AreEqual(Log1.Citation.Title, log1.Citation.Title);
         }

@@ -91,9 +91,9 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Determines whether the entity exists in the data store.
         /// </summary>
-        /// <param name="dataObjectId">The data object identifier.</param>
+        /// <param name="uri">The data object URI.</param>
         /// <returns>true if the entity exists; otherwise, false</returns>
-        public virtual bool Exists(DataObjectId dataObjectId)
+        public virtual bool Exists(EtpUri uri)
         {
             throw new NotImplementedException();
         }
@@ -111,9 +111,9 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Gets a data object by the specified UUID.
         /// </summary>
-        /// <param name="dataObjectId">The data object identifier.</param>
+        /// <param name="uri">The data object URI.</param>
         /// <returns>The data object instance.</returns>
-        public virtual T Get(DataObjectId dataObjectId)
+        public virtual T Get(EtpUri uri)
         {
             throw new NotImplementedException();
         }
@@ -131,9 +131,9 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Deletes a data object by the specified identifier.
         /// </summary>
-        /// <param name="dataObjectId">The data object identifier.</param>
+        /// <param name="uri">The data object URI.</param>
         /// <returns>A WITSML result.</returns>
-        public virtual WitsmlResult Delete(DataObjectId dataObjectId)
+        public virtual WitsmlResult Delete(EtpUri uri)
         {
             throw new NotImplementedException();
         }
@@ -161,11 +161,11 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Gets a data object by the specified identifier.
         /// </summary>
-        /// <param name="dataObjectId">The data object identifier.</param>
+        /// <param name="uri">The data object URI.</param>
         /// <returns>The data object instance.</returns>
-        object IEtpDataAdapter.Get(DataObjectId dataObjectId)
+        object IEtpDataAdapter.Get(EtpUri uri)
         {
-            return Get(dataObjectId);
+            return Get(uri);
         }
 
         /// <summary>
@@ -186,11 +186,11 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Deletes a data object by the specified identifier.
         /// </summary>
-        /// <param name="dataObjectId">The data object identifier.</param>
+        /// <param name="uri">The data object URI.</param>
         /// <returns>A WITSML result.</returns>
-        WitsmlResult IEtpDataAdapter.Delete(DataObjectId dataObjectId)
+        WitsmlResult IEtpDataAdapter.Delete(EtpUri uri)
         {
-            return Delete(dataObjectId);
+            return Delete(uri);
         }
 
         /// <summary>

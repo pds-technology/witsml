@@ -37,6 +37,7 @@ namespace PDS.Witsml.Server.Data.Logs
             };
         }
 
+        [Ignore]
         [TestMethod]
         public void Log_can_be_retrieved_with_all_data()
         {
@@ -84,6 +85,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(columnCountBeforeSave - 1, firstRow.Length);
         }
 
+        [Ignore]
         [TestMethod]
         public void Log_column_with_one_value_returned()
         {

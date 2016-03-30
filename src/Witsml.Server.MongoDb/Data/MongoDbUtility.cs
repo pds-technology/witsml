@@ -8,10 +8,11 @@ using Energistics.DataAccess;
 using Witsml200 = Energistics.DataAccess.WITSML200;
 using MongoDB.Driver;
 using PDS.Framework;
+using Energistics.Datatypes;
 
 namespace PDS.Witsml.Server.Data
 {
-    public static class MongoDbFieldHelper
+    public static class MongoDbUtility
     {
         private static readonly XNamespace xsi = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
 
@@ -149,20 +150,23 @@ namespace PDS.Witsml.Server.Data
             return xsi.GetName(attributeName);
         }
 
-        public static FilterDefinition<T> GetEntityFilter<T>(DataObjectId dataObjectId, string idPropertyName = "Uid")
+        public static FilterDefinition<T> GetEntityFilter<T>(EtpUri uri, string idPropertyName = "Uid")
         {
             var builder = Builders<T>.Filter;
             var filters = new List<FilterDefinition<T>>();
 
-            filters.Add(builder.EqIgnoreCase(idPropertyName, dataObjectId.Uid));
+            var objectIds = uri.GetObjectIds()
+                .ToDictionary(x => x.Key, x => x.Value);
 
-            if (dataObjectId is WellObjectId)
+            filters.Add(builder.EqIgnoreCase(idPropertyName, uri.ObjectId));
+
+            if (!ObjectTypes.Well.EqualsIgnoreCase(uri.ObjectType) && objectIds.ContainsKey(ObjectTypes.Well))
             {
-                filters.Add(builder.EqIgnoreCase("UidWell", ((WellObjectId)dataObjectId).UidWell));
+                filters.Add(builder.EqIgnoreCase("UidWell", objectIds[ObjectTypes.Well]));
             }
-            if (dataObjectId is WellboreObjectId)
+            if (!ObjectTypes.Wellbore.EqualsIgnoreCase(uri.ObjectType) && objectIds.ContainsKey(ObjectTypes.Wellbore))
             {
-                filters.Add(builder.EqIgnoreCase("UidWellbore", ((WellboreObjectId)dataObjectId).UidWellbore));
+                filters.Add(builder.EqIgnoreCase("UidWellbore", objectIds[ObjectTypes.Wellbore]));
             }
 
             return builder.And(filters);

@@ -34,6 +34,9 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// <returns>A collection of validation results.</returns>
         protected override IEnumerable<ValidationResult> ValidateForInsert()
         {
+            var uri = DataObject.GetUri();
+            var uriWell = uri.Parent;
+
             // Validate parent uid property
             if (string.IsNullOrWhiteSpace(DataObject.UidWell))
             {
@@ -41,13 +44,13 @@ namespace PDS.Witsml.Server.Data.Wellbores
             }
 
             // Validate parent exists
-            else if (!_wellDataAdapter.Exists(new DataObjectId(DataObject.UidWell, DataObject.NameWell)))
+            else if (!_wellDataAdapter.Exists(uriWell))
             {
                 yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWell" });
             }
 
             // Validate UID does not exist
-            else if (_wellboreDataAdapter.Exists(DataObject.GetObjectId()))
+            else if (_wellboreDataAdapter.Exists(uri))
             {
                 yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
             }

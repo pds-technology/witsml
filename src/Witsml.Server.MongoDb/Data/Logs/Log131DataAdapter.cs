@@ -13,7 +13,6 @@ using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Server.Models;
-using PDS.Witsml.Server.Providers;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -80,12 +79,12 @@ namespace PDS.Witsml.Server.Data.Logs
                 OptionsIn.ReturnElements.DataOnly.Equals(returnElements) ||
                 (fields != null && fields.Contains("LogData")))
             {
-                var logHeaders = GetEntities(logs.Select(x => x.GetObjectId()))
-                    .ToDictionary(x => x.GetObjectId());
+                var logHeaders = GetEntities(logs.Select(x => x.GetUri()))
+                    .ToDictionary(x => x.GetUri());
 
                 logs.ForEach(l =>
                 {
-                    var logHeader = logHeaders[l.GetObjectId()];
+                    var logHeader = logHeaders[l.GetUri()];
                     var mnemonics = GetMnemonicList(logHeader, parser);
 
                     l.LogData = QueryLogDataValues(logHeader, parser, mnemonics);
@@ -120,9 +119,11 @@ namespace PDS.Witsml.Server.Data.Logs
         public override WitsmlResult Add(Log entity)
         {
             entity.Uid = NewUid(entity.Uid);
-            entity.CommonData = entity.CommonData.Update(true);
+            entity.CommonData = entity.CommonData.Create();
+            Logger.DebugFormat("Adding Log with uid '{0}' and name '{1}'", entity.Uid, entity.Name);
 
             //Validate(Functions.AddToStore, entity);
+            //Logger.DebugFormat("Validated Log with uid '{0}' and name '{1}' for Add", entity.Uid, entity.Name);
 
             // Extract Data
             var reader = ExtractDataReader(entity);
@@ -144,18 +145,17 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </returns>
         public override WitsmlResult Update(WitsmlQueryParser parser)
         {
-            var entity = Parse(parser.Context.Xml);
-            var dataObjectId = entity.GetObjectId();
+            var uri = parser.GetUri<Log>();
 
-            //entity.CommonData = entity.CommonData.Update();
+            Logger.DebugFormat("Updating Log with uid '{0}'.", uri.ObjectId);
             //Validate(Functions.UpdateInStore, entity);
 
-            // Extract Data
-            var saved = GetEntity(dataObjectId);
-            var reader = ExtractDataReader(entity, saved);
             var ignored = new[] { "logData" };
+            UpdateEntity(parser, uri, ignored);
 
-            UpdateEntity(parser, dataObjectId, ignored);
+            // Extract Data
+            var entity = Parse(parser.Context.Xml);
+            var reader = ExtractDataReader(entity, GetEntity(uri));
 
             // Merge ChannelDataChunks
             _channelDataChunkAdapter.Merge(reader);
@@ -167,30 +167,13 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Deletes or partially updates the specified object by uid.
-        /// </summary>
-        /// <param name="parser">The parser that specifies the object.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public override WitsmlResult Delete(WitsmlQueryParser parser)
-        {
-            var entity = Parse(parser.Context.Xml);
-            var dataObjectId = entity.GetObjectId();
-
-            DeleteEntity(dataObjectId);
-
-            return new WitsmlResult(ErrorCodes.Success);
-        }
-
-        /// <summary>
         /// Gets the channel metadata for the specified data object URI.
         /// </summary>
         /// <param name="uri">The parent data object URI.</param>
         /// <returns>A collection of channel metadata.</returns>
         public IList<ChannelMetadataRecord> GetChannelMetadata(EtpUri uri)
         {
-            var entity = GetEntity(uri.ToDataObjectId());
+            var entity = GetEntity(uri);
             var metadata = new List<ChannelMetadataRecord>();
             var index = 0;
 
@@ -215,7 +198,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>A collection of channel data.</returns>
         public IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, Range<double?> range)
         {
-            var entity = GetEntity(uri.ToDataObjectId());
+            var entity = GetEntity(uri);
             var mnemonics = entity.LogCurveInfo.Select(x => x.Mnemonic);
             var increasing = entity.Direction.GetValueOrDefault() == LogIndexDirection.increasing;
 
@@ -243,25 +226,6 @@ namespace PDS.Witsml.Server.Data.Logs
             return query
                 .OrderBy(x => x.Name)
                 .ToList();
-        }
-
-        /// <summary>
-        /// Puts the specified data object into the data store.
-        /// </summary>
-        /// <param name="parser">The input parser.</param>
-        /// <returns>A WITSML result.</returns>
-        public override WitsmlResult Put(WitsmlQueryParser parser)
-        {
-            var entity = Parse(parser.Context.Xml);
-
-            if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.GetObjectId()))
-            {
-                return Update(parser);
-            }
-            else
-            {
-                return Add(entity);
-            }
         }
 
         /// <summary>
@@ -380,23 +344,15 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private ChannelDataReader ExtractDataReader(Log entity, Log existing = null)
         {
-            ChannelDataReader reader = null;
-
             if (existing == null)
             {
-                reader = entity.GetReader();
+                var reader = entity.GetReader();
                 entity.LogData = null;
                 return reader;
             }
 
-            var logData = existing.LogData;
             existing.LogData = entity.LogData;
-            entity.LogData = null;
-
-            reader = existing.GetReader();
-            existing.LogData = logData;
-
-            return reader;
+            return existing.GetReader();
         }
 
         private ChannelMetadataRecord ToChannelMetadataRecord(Log log, LogCurveInfo curve)

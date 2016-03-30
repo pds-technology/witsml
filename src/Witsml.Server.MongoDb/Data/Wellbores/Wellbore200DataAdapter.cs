@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
@@ -26,6 +25,27 @@ namespace PDS.Witsml.Server.Data.Wellbores
         }
 
         /// <summary>
+        /// Adds a <see cref="Wellbore"/> to the data store.
+        /// </summary>
+        /// <param name="entity">The <see cref="Wellbore"/> to be added.</param>
+        /// <returns>
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
+        /// </returns>
+        public override WitsmlResult Add(Wellbore entity)
+        {
+            entity.Uuid = NewUid(entity.Uuid);
+            entity.Citation = entity.Citation.Create();
+            Logger.DebugFormat("Adding Wellbore with uid '{0}' and name '{1}'.", entity.Uuid, entity.Citation.Title);
+
+            Validate(Functions.AddToStore, entity);
+            Logger.DebugFormat("Validated Wellbore with uid '{0}' and name '{1}' for Add", entity.Uuid, entity.Citation.Title);
+
+            InsertEntity(entity);
+
+            return new WitsmlResult(ErrorCodes.Success, entity.Uuid);
+        }
+
+        /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
@@ -43,41 +63,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
             return query
                 .OrderBy(x => x.Citation.Title)
                 .ToList();
-        }
-
-        /// <summary>
-        /// Puts the specified data object into the data store.
-        /// </summary>
-        /// <param name="parser">The input parser.</param>
-        /// <returns>A WITSML result.</returns>
-        public override WitsmlResult Put(WitsmlQueryParser parser)
-        {
-            var entity = Parse(parser.Context.Xml);
-            var dataObjectId = entity.GetObjectId();
-
-            if (!string.IsNullOrWhiteSpace(entity.Uuid) && Exists(dataObjectId))
-            {
-                //entity.Citation = entity.Citation.Update();
-                Logger.DebugFormat("Updating Wellbore with Uuid '{0}' and citation title '{1}'.", entity.Uuid, entity.Citation.Title);
-
-                //Validate(Functions.PutObject, entity);
-                //Logger.DebugFormat("Validated Wellbore with Uuid '{0}' and citation title '{1}'.", entity.Uuid, entity.Citation.Title);
-
-                UpdateEntity(parser, dataObjectId);
-            }
-            else
-            {
-                entity.Uuid = NewUid(entity.Uuid);
-                entity.Citation = entity.Citation.Update(true);
-                Logger.DebugFormat("Adding Wellbore with Uuid '{0}' and citation title '{1}'.", entity.Uuid, entity.Citation.Title);
-
-                Validate(Functions.PutObject, entity);
-                Logger.DebugFormat("Validated Wellbore with Uuid '{0}' and citation title '{1}'.", entity.Uuid, entity.Citation.Title);
-
-                InsertEntity(entity);
-            }
-
-            return new WitsmlResult(ErrorCodes.Success, entity.Uuid);
         }
     }
 }

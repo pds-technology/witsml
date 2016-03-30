@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Energistics.DataAccess;
+﻿using Energistics.DataAccess;
+using Energistics.Datatypes;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -46,9 +46,9 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Determines whether the entity exists in the data store.
         /// </summary>
-        /// <param name="dataObjectId">The data object identifier.</param>
+        /// <param name="uri">The data object URI.</param>
         /// <returns>true if the entity exists; otherwise, false</returns>
-        bool Exists(DataObjectId dataObjectId);
+        bool Exists(EtpUri uri);
 
         /// <summary>
         /// Parses the specified XML string.

@@ -19,9 +19,9 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Gets a data object by the specified identifier.
         /// </summary>
-        /// <param dataObjectId>The data object identifier.</param>
+        /// <param uri>The data object URI.</param>
         /// <returns>The data object instance.</returns>
-        T Get(DataObjectId dataObjectId);
+        T Get(EtpUri uri);
 
         /// <summary>
         /// Puts the specified data object into the data store.
@@ -33,9 +33,9 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Deletes a data object by the specified identifier.
         /// </summary>
-        /// <param name="dataObjectId">The data object identifier.</param>
+        /// <param name="uri">The data object URI.</param>
         /// <returns>A WITSML result.</returns>
-        WitsmlResult Delete(DataObjectId dataObjectId);
+        WitsmlResult Delete(EtpUri uri);
 
         /// <summary>
         /// Parses the specified XML string.
