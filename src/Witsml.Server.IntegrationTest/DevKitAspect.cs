@@ -4,6 +4,8 @@ using System.Xml;
 using Energistics.DataAccess;
 using PDS.Framework;
 using PDS.Witsml.Data;
+using PDS.Witsml.Server.Configuration;
+using PDS.Witsml.Server.Data;
 
 namespace PDS.Witsml.Server
 {
@@ -52,6 +54,14 @@ namespace PDS.Witsml.Server
             var instance = Activator.CreateInstance<T>();
             action(instance);
             return List(instance);
+        }
+
+        public WitsmlQueryParser Parser<T>(Functions function, T entity, string options = null, string capabilities = null)
+        {
+            var context = new RequestContext(function, ObjectTypes.GetObjectType<T>(),
+                EnergisticsConverter.ObjectToXml(entity), options, capabilities);
+
+            return new WitsmlQueryParser(context);
         }
 
         public bool HasChildNodes(XmlElement element)

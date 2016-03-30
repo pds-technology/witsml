@@ -40,20 +40,20 @@ namespace PDS.Witsml.Server.Data.Wells
         /// <summary>
         /// Puts the specified data object into the data store.
         /// </summary>
-        /// <param name="entity">The entity.</param>
-        public override WitsmlResult Put(Well entity)
+        /// <param name="parser">The input parser.</param>
+        /// <returns>A WITSML result.</returns>
+        public override WitsmlResult Put(WitsmlQueryParser parser)
         {
+            var entity = Parse(parser.Context.Xml);
             var dataObjectId = entity.GetObjectId();
 
             if (!string.IsNullOrWhiteSpace(entity.Uuid) && Exists(dataObjectId))
             {
-                entity.Citation = entity.Citation.Update();
-                Logger.DebugFormat("Updating Well with Uuid '{0}' and citation title '{1}'.", entity.Uuid, entity.Citation.Title);
+                //entity.Citation = entity.Citation.Update();
+                Logger.DebugFormat("Updating Well with Uuid '{0}' and title '{1}'.", entity.Uuid, entity.Citation.Title);
 
-                Validate(Functions.PutObject, entity);
-                Logger.DebugFormat("Validated Well with Uuid '{0}' and citation title '{1}'.", entity.Uuid, entity.Citation.Title);
-
-                var parser = CreateQueryParser(Functions.PutObject, entity);
+                //Validate(Functions.PutObject, entity);
+                //Logger.DebugFormat("Validated Well with Uuid '{0}' and title '{1}'.", entity.Uuid, entity.Citation.Title);
 
                 UpdateEntity(parser, dataObjectId);
             }
@@ -61,10 +61,10 @@ namespace PDS.Witsml.Server.Data.Wells
             {
                 entity.Uuid = NewUid(entity.Uuid);
                 entity.Citation = entity.Citation.Update(true);
-                Logger.DebugFormat("Adding Well with Uuid '{0}' and citation title '{1}'.", entity.Uuid, entity.Citation.Title);
+                Logger.DebugFormat("Adding Well with Uuid '{0}' and title '{1}'.", entity.Uuid, entity.Citation.Title);
 
                 Validate(Functions.PutObject, entity);
-                Logger.DebugFormat("Validated Well with Uuid '{0}' and citation title '{1}'.", entity.Uuid, entity.Citation.Title);
+                Logger.DebugFormat("Validated Well with Uuid '{0}' and title '{1}'.", entity.Uuid, entity.Citation.Title);
 
                 InsertEntity(entity);
             }

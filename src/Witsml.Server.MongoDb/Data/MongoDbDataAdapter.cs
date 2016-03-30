@@ -303,10 +303,13 @@ namespace PDS.Witsml.Server.Data
             {
                 Logger.DebugFormat("Updating {0} MongoDb collection", dbCollectionName);
 
+                var collection = GetCollection<TObject>(dbCollectionName);
                 var current = GetEntityById<TObject>(dataObjectId, dbCollectionName);
+                var updates = MongoDbFieldHelper.CreateUpdateFields<TObject>();
+                var ignores = MongoDbFieldHelper.CreateIgnoreFields<TObject>(ignored);
 
-                var update = new MongoDbUpdate<TObject>(GetCollection<TObject>(dbCollectionName), parser, IdPropertyName, MongoDbFieldHelper.CreateIgnoreFields<TObject>(ignored));
-                update.Update(current, dataObjectId, MongoDbFieldHelper.CreateUpdateFields<TObject>());
+                var update = new MongoDbUpdate<TObject>(collection, parser, IdPropertyName, ignores);
+                update.Update(current, dataObjectId, updates);
             }
             catch (MongoException ex)
             {

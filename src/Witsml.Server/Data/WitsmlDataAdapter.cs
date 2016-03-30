@@ -67,12 +67,11 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Updates the specified object.
         /// </summary>
-        /// <param name="entity">The object.</param>
         /// <param name="parser">The update parser.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        public virtual WitsmlResult Update(T entity, WitsmlQueryParser parser)
+        public virtual WitsmlResult Update(WitsmlQueryParser parser)
         {
             throw new NotImplementedException();
         }
@@ -122,9 +121,9 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Puts the specified data object into the data store.
         /// </summary>
-        /// <param name="entity">The entity.</param>
+        /// <param name="parser">The input parser.</param>
         /// <returns>A WITSML result.</returns>
-        public virtual WitsmlResult Put(T entity)
+        public virtual WitsmlResult Put(WitsmlQueryParser parser)
         {
             throw new NotImplementedException();
         }
@@ -176,9 +175,12 @@ namespace PDS.Witsml.Server.Data
         /// <returns>A WITSML result.</returns>
         WitsmlResult IEtpDataAdapter.Put(DataObject dataObject)
         {
-            var xml = Encoding.UTF8.GetString(dataObject.Data);
-            var entity = Parse(xml);
-            return Put(entity);
+            var context = new RequestContext(Functions.PutObject, ObjectTypes.GetObjectType<T>(),
+                Encoding.UTF8.GetString(dataObject.Data), null, null);
+
+            var parser = new WitsmlQueryParser(context);
+
+            return Put(parser);
         }
 
         /// <summary>
@@ -208,20 +210,6 @@ namespace PDS.Witsml.Server.Data
         protected virtual WitsmlQueryTemplate<T> CreateQueryTemplate()
         {
             return new WitsmlQueryTemplate<T>();
-        }
-
-        /// <summary>
-        /// Creates the WITSML query parser.
-        /// </summary>
-        /// <param name="function">The WITSML API function.</param>
-        /// <param name="entity">The entity to parse.</param>
-        /// <returns>A new <see cref="WitsmlQueryParser"/> instance.</returns>
-        protected WitsmlQueryParser CreateQueryParser(Functions function, T entity)
-        {
-            var context = new RequestContext(function, ObjectTypes.GetObjectType<T>(),
-                EnergisticsConverter.ObjectToXml(entity), null, null);
-
-            return new WitsmlQueryParser(context);
         }
 
         /// <summary>

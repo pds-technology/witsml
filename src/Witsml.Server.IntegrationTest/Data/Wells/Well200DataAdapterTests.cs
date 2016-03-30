@@ -85,7 +85,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void CanAddAndGetSingleWellWithUuid()
         {
-            WellAdapter.Put(Well1);
+            WellAdapter.Put(DevKit.Parser(Well1));
 
             var well1 = WellAdapter.Get(Well1.GetObjectId());
 
@@ -95,7 +95,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void CanAddAndGetSingleWellWithoutUuid()
         {
-            WellAdapter.Put(Well2);
+            WellAdapter.Put(DevKit.Parser(Well2));
 
             var well2 = Provider.GetDatabase().GetCollection<Well>(ObjectNames.Well200).AsQueryable()
                 .Where(x => x.Citation.Title == Well2.Citation.Title)

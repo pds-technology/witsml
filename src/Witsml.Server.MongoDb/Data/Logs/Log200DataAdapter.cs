@@ -4,6 +4,7 @@ using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
 using MongoDB.Driver;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -51,25 +52,33 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <summary>
         /// Puts the specified data object into the data store.
         /// </summary>
-        /// <param name="entity">The entity.</param>
-        public override WitsmlResult Put(Log entity)
+        /// <param name="parser">The input parser.</param>
+        /// <returns>A WITSML result.</returns>
+        public override WitsmlResult Put(WitsmlQueryParser parser)
         {
+            var entity = Parse(parser.Context.Xml);
             var dataObjectId = entity.GetObjectId();
 
+            // save ChannelSets + data via the ChannelSet data adapter
+            foreach (var childParser in parser.ForkProperties("ChannelSet", ObjectTypes.ChannelSet))
+            {
+                _channelSetDataAdapter.Put(childParser);
+            }
+
+            // Clear ChannelSet data properties
             foreach (var channelSet in entity.ChannelSet)
             {
-                _channelSetDataAdapter.Put(channelSet);
+                channelSet.Data = null;
             }
 
             if (!string.IsNullOrWhiteSpace(entity.Uuid) && Exists(dataObjectId))
             {
-                entity.Citation = entity.Citation.Update();
+                //entity.Citation = entity.Citation.Update();
+                //Validate(Functions.PutObject, entity);
 
-                Validate(Functions.PutObject, entity);
+                var ignored = new[] { "Data" };
 
-                var parser = CreateQueryParser(Functions.PutObject, entity);
-
-                UpdateEntity(parser, dataObjectId);
+                UpdateEntity(parser, dataObjectId, ignored);
             }
             else
             {

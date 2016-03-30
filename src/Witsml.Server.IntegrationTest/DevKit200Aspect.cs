@@ -5,9 +5,9 @@ using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
-using Newtonsoft.Json;
 using PDS.Framework;
 using PDS.Witsml.Data.Logs;
+using PDS.Witsml.Server.Data;
 
 namespace PDS.Witsml.Server
 {
@@ -23,6 +23,11 @@ namespace PDS.Witsml.Server
         public override string DataSchemaVersion
         {
             get { return OptionsIn.DataVersion.Version200.Value; }
+        }
+
+        public WitsmlQueryParser Parser<T>(T entity, Functions function = Functions.PutObject)
+        {
+            return Parser(function, entity);
         }
 
         public Citation Citation(string name)

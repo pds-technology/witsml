@@ -38,8 +38,15 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <returns>A collection of <see cref="List{ChannelDataChunk}" /> items.</returns>
         public List<ChannelDataChunk> GetData(string uri, string indexChannel, Range<double?> range, bool increasing)
         {
-            var filter = BuildDataFilter(uri, indexChannel, range, increasing);
-            return GetData(filter, increasing);
+            try
+            {
+                var filter = BuildDataFilter(uri, indexChannel, range, increasing);
+                return GetData(filter, increasing);
+            }
+            catch (MongoException ex)
+            {
+                throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, ex);
+            }
         }
 
         /// <summary>
@@ -50,16 +57,23 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <returns>The full index range.</returns>
         public Range<double> GetIndexRange(string uri, bool increasing)
         {
-            if (increasing)
+            try
             {
-                return new Range<double>(
-                    start: GetQuery().OrderBy(x => x.Indices[0].Start).Select(x => x.Indices[0].Start).FirstOrDefault(),
-                    end: GetQuery().OrderByDescending(x => x.Indices[0].Start).Select(x => x.Indices[0].End).FirstOrDefault());
-            }
+                if (increasing)
+                {
+                    return new Range<double>(
+                        start: GetQuery().OrderBy(x => x.Indices[0].Start).Select(x => x.Indices[0].Start).FirstOrDefault(),
+                        end: GetQuery().OrderByDescending(x => x.Indices[0].Start).Select(x => x.Indices[0].End).FirstOrDefault());
+                }
 
-            return new Range<double>(
-                start: GetQuery().OrderByDescending(x => x.Indices[0].Start).Select(x => x.Indices[0].Start).FirstOrDefault(),
-                end: GetQuery().OrderBy(x => x.Indices[0].Start).Select(x => x.Indices[0].End).FirstOrDefault());
+                return new Range<double>(
+                    start: GetQuery().OrderByDescending(x => x.Indices[0].Start).Select(x => x.Indices[0].Start).FirstOrDefault(),
+                    end: GetQuery().OrderBy(x => x.Indices[0].Start).Select(x => x.Indices[0].End).FirstOrDefault());
+            }
+            catch (MongoException ex)
+            {
+                throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, ex);
+            }
         }
 
         /// <summary>
@@ -71,12 +85,19 @@ namespace PDS.Witsml.Server.Data.Channels
             if (reader == null || reader.RecordsAffected <= 0)
                 return;
 
-            BulkWriteChunks(
-                ToChunks(
-                    reader.AsEnumerable()), 
-                reader.Uri,
-                string.Join(",", reader.Mnemonics),
-                string.Join(",", reader.Units));
+            try
+            {
+                BulkWriteChunks(
+                    ToChunks(
+                        reader.AsEnumerable()),
+                    reader.Uri,
+                    string.Join(",", reader.Mnemonics),
+                    string.Join(",", reader.Units));
+            }
+            catch (MongoException ex)
+            {
+                throw new WitsmlException(ErrorCodes.ErrorAddingToDataStore, ex);
+            }
         }
 
 
@@ -89,24 +110,31 @@ namespace PDS.Witsml.Server.Data.Channels
             if (reader == null || reader.RecordsAffected <= 0)
                 return;
 
-            //reader.GetIndexRange(int i = 0);
-            var indexChannel = reader.GetIndex();
-            var increasing = indexChannel.Increasing;
+            try
+            {
+                //reader.GetIndexRange(int i = 0);
+                var indexChannel = reader.GetIndex();
+                var increasing = indexChannel.Increasing;
 
-            // Get the full range of the reader.  
-            //... This is the range that we need to select existing ChannelDataChunks from the database to update
-            var updateRange = reader.GetIndexRange();
+                // Get the full range of the reader.  
+                //... This is the range that we need to select existing ChannelDataChunks from the database to update
+                var updateRange = reader.GetIndexRange();
 
-            // Get DataChannelChunk list from database for the computed range and URI
-            var filter = BuildDataFilter(reader.Uri, indexChannel.Mnemonic, updateRange, increasing);
-            var results = GetData(filter, increasing);
+                // Get DataChannelChunk list from database for the computed range and URI
+                var filter = BuildDataFilter(reader.Uri, indexChannel.Mnemonic, updateRange, increasing);
+                var results = GetData(filter, increasing);
 
-            BulkWriteChunks(
-                ToChunks(
-                    MergeSequence(results.GetRecords(), reader.AsEnumerable(), updateRange)),
-                reader.Uri,
-                string.Join(",", reader.Mnemonics),
-                string.Join(",", reader.Units));
+                BulkWriteChunks(
+                    ToChunks(
+                        MergeSequence(results.GetRecords(), reader.AsEnumerable(), updateRange)),
+                    reader.Uri,
+                    string.Join(",", reader.Mnemonics),
+                    string.Join(",", reader.Units));
+            }
+            catch (MongoException ex)
+            {
+                throw new WitsmlException(ErrorCodes.ErrorUpdatingInDataStore, ex);
+            }
         }
 
 

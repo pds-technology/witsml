@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess;
@@ -139,23 +138,24 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <summary>
         /// Updates the specified <see cref="Log"/> instance in the store.
         /// </summary>
-        /// <param name="entity">The <see cref="Log"/> instance.</param>
         /// <param name="parser">The update parser.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        public override WitsmlResult Update(Log entity, WitsmlQueryParser parser)
+        public override WitsmlResult Update(WitsmlQueryParser parser)
         {
+            var entity = Parse(parser.Context.Xml);
             var dataObjectId = entity.GetObjectId();
-            entity.CommonData = entity.CommonData.Update();
 
+            //entity.CommonData = entity.CommonData.Update();
             //Validate(Functions.UpdateInStore, entity);
 
             // Extract Data
             var saved = GetEntity(dataObjectId);
             var reader = ExtractDataReader(entity, saved);
+            var ignored = new[] { "logData" };
 
-            UpdateEntity(parser, dataObjectId);
+            UpdateEntity(parser, dataObjectId, ignored);
 
             // Merge ChannelDataChunks
             _channelDataChunkAdapter.Merge(reader);
@@ -248,17 +248,18 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <summary>
         /// Puts the specified data object into the data store.
         /// </summary>
-        /// <param name="entity">The entity.</param>
-        public override WitsmlResult Put(Log entity)
+        /// <param name="parser">The input parser.</param>
+        /// <returns>A WITSML result.</returns>
+        public override WitsmlResult Put(WitsmlQueryParser parser)
         {
+            var entity = Parse(parser.Context.Xml);
+
             if (!string.IsNullOrWhiteSpace(entity.Uid) && Exists(entity.GetObjectId()))
             {
-                Logger.DebugFormat("Update Log with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
-                return Update(entity, null);
+                return Update(parser);
             }
             else
             {
-                Logger.DebugFormat("Add Log with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
                 return Add(entity);
             }
         }

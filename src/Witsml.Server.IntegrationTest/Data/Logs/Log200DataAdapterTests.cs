@@ -81,9 +81,9 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log_can_be_added_with_uuid()
         {
-            WellAdapter.Put(Well1);
-            WellboreAdapter.Put(Wellbore1);
-            LogAdapter.Put(Log1);
+            WellAdapter.Put(DevKit.Parser(Well1));
+            WellboreAdapter.Put(DevKit.Parser(Wellbore1));
+            LogAdapter.Put(DevKit.Parser(Log1));
 
             var log1 = LogAdapter.Get(Log1.GetObjectId());
 
@@ -93,9 +93,9 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log_can_be_added_without_uuid()
         {
-            WellAdapter.Put(Well1);
-            WellboreAdapter.Put(Wellbore1);
-            LogAdapter.Put(Log2);
+            WellAdapter.Put(DevKit.Parser(Well1));
+            WellboreAdapter.Put(DevKit.Parser(Wellbore1));
+            LogAdapter.Put(DevKit.Parser(Log2));
 
             var log2 = Provider.GetDatabase().GetCollection<Log>(ObjectNames.Log200).AsQueryable()
                 .Where(x => x.Citation.Title == Log2.Citation.Title)
@@ -113,10 +113,9 @@ namespace PDS.Witsml.Server.Data.Logs
             
             DevKit.CreateMockChannelSetData(channelSet, channelSet.Index);
 
-            WellAdapter.Put(Well1);
-            WellboreAdapter.Put(Wellbore1);
-            LogAdapter.Put(Log1);
-
+            WellAdapter.Put(DevKit.Parser(Well1));
+            WellboreAdapter.Put(DevKit.Parser(Wellbore1));
+            LogAdapter.Put(DevKit.Parser(Log1));
 
             var log1 = LogAdapter.Get(Log1.GetObjectId());
 
@@ -132,12 +131,12 @@ namespace PDS.Witsml.Server.Data.Logs
             channelSet.Index.Add(secondaryIndex);
 
             // Save the Well and Wellbore
-            WellAdapter.Put(Well1);
-            WellboreAdapter.Put(Wellbore1);
+            WellAdapter.Put(DevKit.Parser(Well1));
+            WellboreAdapter.Put(DevKit.Parser(Wellbore1));
 
             // Generate 150 rows of data
             LogGenerator.GenerateChannelData(Log1.ChannelSet, numDataValue);
-            LogAdapter.Put(Log1);
+            LogAdapter.Put(DevKit.Parser(Log1));
 
             var cda = new ChannelDataChunkAdapter(Provider);
 
@@ -167,12 +166,12 @@ namespace PDS.Witsml.Server.Data.Logs
             channelSet.Index.Add(secondaryIndex);
 
             // Save the Well and Wellbore
-            WellAdapter.Put(Well1);
-            WellboreAdapter.Put(Wellbore1);
+            WellAdapter.Put(DevKit.Parser(Well1));
+            WellboreAdapter.Put(DevKit.Parser(Wellbore1));
 
             // Generate 150 rows of data
             LogGenerator.GenerateChannelData(LogDecreasing.ChannelSet, numDataValue);
-            LogAdapter.Put(LogDecreasing);
+            LogAdapter.Put(DevKit.Parser(LogDecreasing));
 
             var cda = new ChannelDataChunkAdapter(Provider);
 

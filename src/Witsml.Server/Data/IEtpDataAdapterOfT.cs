@@ -26,9 +26,9 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Puts the specified data object into the data store.
         /// </summary>
-        /// <param name="entity">The entity.</param>
+        /// <param name="parser">The input parser.</param>
         /// <returns>A WITSML result.</returns>
-        WitsmlResult Put(T entity);
+        WitsmlResult Put(WitsmlQueryParser parser);
 
         /// <summary>
         /// Deletes a data object by the specified identifier.

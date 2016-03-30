@@ -69,8 +69,7 @@ namespace PDS.Witsml.Server.Data
         {
             Logger.Debug("Executing update");
             var parser = new WitsmlQueryParser(context);
-            var entity = _dataAdapter.Parse(parser);
-            return _dataAdapter.Update(entity, parser);
+            return _dataAdapter.Update(parser);
         }
 
         /// <summary>

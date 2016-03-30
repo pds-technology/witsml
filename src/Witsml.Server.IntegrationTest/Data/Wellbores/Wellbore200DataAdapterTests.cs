@@ -53,8 +53,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod]
         public void CanAddAndGetSingleWellboreWithUuid()
         {
-            WellAdapter.Put(Well1);
-            WellboreAdapter.Put(Wellbore1);
+            WellAdapter.Put(DevKit.Parser(Well1));
+            WellboreAdapter.Put(DevKit.Parser(Wellbore1));
 
             var wellbore1 = WellboreAdapter.Get(Wellbore1.GetObjectId());
 
@@ -64,8 +64,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod]
         public void CanAddAndGetSingleWellboreWithoutUuid()
         {
-            WellAdapter.Put(Well1);
-            WellboreAdapter.Put(Wellbore2);
+            WellAdapter.Put(DevKit.Parser(Well1));
+            WellboreAdapter.Put(DevKit.Parser(Wellbore2));
 
             var wellbore2 = Provider.GetDatabase().GetCollection<Wellbore>(ObjectNames.Wellbore200).AsQueryable()
                 .Where(x => x.Citation.Title == Wellbore2.Citation.Title)
