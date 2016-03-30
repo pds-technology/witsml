@@ -163,6 +163,25 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             }
         }
 
+        private bool _canRequestRange;
+        /// <summary>
+        /// Gets or sets a value indicating whether Channel Range Request can be made.
+        /// </summary>
+        /// <value><c>true</c> if Channel Range Request can be made; otherwise, <c>false</c>.</value>
+        [DataMember]
+        public bool CanRequestRange
+        {
+            get { return _canRequestRange; }
+            set
+            {
+                if (_canRequestRange != value)
+                {
+                    _canRequestRange = value;
+                    NotifyOfPropertyChange(() => CanRequestRange);
+                }
+            }
+        }
+
         /// <summary>
         /// Adds the URI to the collection of URIs.
         /// </summary>
@@ -231,6 +250,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             CanDescribe = false;
             CanStartStreaming = false;
             CanStopStreaming = true;
+            CanRequestRange = false;
         }
 
         /// <summary>
@@ -247,7 +267,29 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
 
             CanStartStreaming = true;
             CanStopStreaming = false;
+            CanRequestRange = !IsSimpleStreamer;
             UpdateCanDescribe();
+        }
+
+        /// <summary>
+        /// Requests a range of channel data.
+        /// </summary>
+        public void RequestRange()
+        {
+            var rangeInfo = new ChannelRangeInfo()
+            {
+                ChannelId = Channels.Select(x => x.ChannelId).ToArray(),
+                StartIndex = Model.Streaming.StartIndex,
+                EndIndex = Model.Streaming.EndIndex
+            };
+
+            Parent.Client.Handler<IChannelStreamingConsumer>()
+                .ChannelRangeRequest(new[] { rangeInfo });
+
+            CanDescribe = false;
+            CanStartStreaming = false;
+            CanStopStreaming = true;
+            CanRequestRange = false;
         }
 
         /// <summary>
@@ -289,6 +331,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             CanDescribe = false;
             CanStartStreaming = false;
             CanStopStreaming = false;
+            CanRequestRange = false;
         }
 
         private void OnChannelMetadata(object sender, ProtocolEventArgs<ChannelMetadata> e)
@@ -307,6 +350,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             {
                 CanStartStreaming = !IsSimpleStreamer;
                 CanStopStreaming = IsSimpleStreamer;
+                CanRequestRange = !IsSimpleStreamer;
             }
         }
 
@@ -321,7 +365,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 ChannelId = channel.ChannelId,
                 StartIndex = new StreamingStartIndex()
                 {
-                    Item = -1
+                    Item = Model.Streaming.StartIndex
                 }
             };
         }

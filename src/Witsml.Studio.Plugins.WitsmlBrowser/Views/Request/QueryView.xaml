@@ -39,8 +39,10 @@
                 <ComboBox Width="120" Margin="0,5,5,5" IsEditable="False" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}"
                           SelectedItem="{Binding Parent.Parent.DataObject}" ItemsSource="{Binding Parent.Parent.DataObjects}" VerticalContentAlignment="Center" />
 
+                <!--
                 <Button x:Name="OpenQuery" Content="Open" Width="60" Margin="0,5,5,5" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" />
                 <Button x:Name="SaveQuery" Content="Save" Width="60" Margin="0,5,5,5" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" />
+                -->
             </StackPanel>
         </Grid>
     </Grid>

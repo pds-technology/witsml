@@ -81,5 +81,43 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.Models
                 }
             }
         }
+
+        private int _startIndex;
+        /// <summary>
+        /// Gets or sets the start index.
+        /// </summary>
+        /// <value>The start index.</value>
+        [DataMember]
+        public int StartIndex
+        {
+            get { return _startIndex; }
+            set
+            {
+                if (_startIndex != value)
+                {
+                    _startIndex = value;
+                    NotifyOfPropertyChange(() => StartIndex);
+                }
+            }
+        }
+
+        private int _endIndex;
+        /// <summary>
+        /// Gets or sets the end index.
+        /// </summary>
+        /// <value>The end index.</value>
+        [DataMember]
+        public int EndIndex
+        {
+            get { return _endIndex; }
+            set
+            {
+                if (_endIndex != value)
+                {
+                    _endIndex = value;
+                    NotifyOfPropertyChange(() => EndIndex);
+                }
+            }
+        }
     }
 }

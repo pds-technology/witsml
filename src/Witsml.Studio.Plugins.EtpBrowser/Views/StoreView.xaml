@@ -29,14 +29,14 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Column="0" Grid.Row="0" Text="URI:" Margin="10,5,5,5" HorizontalAlignment="Right" VerticalAlignment="Center" />
-        <TextBox Text="{Binding Model.Store.Uri}" Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" />
+        <TextBox Text="{Binding Model.Store.Uri, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" />
 
         <TextBlock Grid.Column="0" Grid.Row="1" Text="UUID:" Margin="10,5,5,5" HorizontalAlignment="Right" VerticalAlignment="Center" />
         <TextBox Text="{Binding Model.Store.Uuid}" Grid.Column="1" Grid.Row="1" Margin="5" Padding="5" VerticalContentAlignment="Center" />
         <Button x:Name="NewUuid" Grid.Column="2" Grid.Row="1" Margin="5" Content="New" Width="40" HorizontalAlignment="Right" />
 
         <TextBlock Grid.Column="0" Grid.Row="2" Text="Name:" Margin="10,5,5,5" HorizontalAlignment="Right" VerticalAlignment="Center" />
-        <TextBox Text="{Binding Model.Store.Name}" Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" />
+        <TextBox Text="{Binding Model.Store.Name, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" />
 
         <TextBlock Grid.Column="0" Grid.Row="3" Text="Content Type:" Margin="10,5,5,5" HorizontalAlignment="Right" VerticalAlignment="Center" />
         <TextBox Text="{Binding Model.Store.ContentType}" Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" />
@@ -44,28 +44,12 @@
         <Border Grid.Row="4" Grid.ColumnSpan="3" Margin="5" BorderThickness="1" BorderBrush="#FFABADB3">
             <ContentControl x:Name="Data" />
         </Border>
-        
-        <Grid Grid.Row="5" Grid.ColumnSpan="3" Margin="5,0,5,5" HorizontalAlignment="Left">
-            <Button Width="80" IsEnabled="{Binding CanExecute}">
-                <i:Interaction.Behaviors>
-                    <app:DropDownButtonBehavior />
-                </i:Interaction.Behaviors>
-                <Button.Content>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Execute" />
-                        <Path Margin="2" HorizontalAlignment="Right" VerticalAlignment="Center" Width="6" Fill="#FF527DB5" Stretch="Uniform"
-                              Data="F1 M 301.14,-189.041L 311.57,-189.041L 306.355,-182.942L 301.14,-189.041 Z "/>
-                    </StackPanel>
-                </Button.Content>
-                <Button.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="Get" cal:Message.Attach="GetObject" IsEnabled="{Binding Model.Store.Uri, Converter={StaticResource NullToBooleanConverter}}" />
-                        <MenuItem Header="Put" cal:Message.Attach="PutObject" IsEnabled="{Binding Model.Store.Name, Converter={StaticResource NullToBooleanConverter}}" />
-                        <MenuItem Header="Delete" cal:Message.Attach="DeleteObject" IsEnabled="{Binding Model.Store.Uri, Converter={StaticResource NullToBooleanConverter}}" />
-                    </ContextMenu>
-                </Button.ContextMenu>
-            </Button>
-        </Grid>
+
+        <StackPanel Grid.Row="5" Grid.ColumnSpan="3" Margin="5,0,5,5" Orientation="Horizontal" IsEnabled="{Binding CanExecute}">
+            <Button x:Name="GetObject" Content="Get Object" IsEnabled="{Binding Model.Store.Uri, Converter={StaticResource NullToBooleanConverter}}" Margin="0,0,5,0" Width="90" />
+            <Button x:Name="PutObject" Content="Put Object" IsEnabled="{Binding Model.Store.Name, Converter={StaticResource NullToBooleanConverter}}" Margin="0,0,5,0" Width="90" />
+            <Button x:Name="DeleteObject" Content="Delete Object" IsEnabled="{Binding Model.Store.Uri, Converter={StaticResource NullToBooleanConverter}}" Margin="0,0,5,0" Width="90" />
+        </StackPanel>
 
     </Grid>
 </UserControl>

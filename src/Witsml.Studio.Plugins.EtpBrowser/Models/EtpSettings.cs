@@ -24,7 +24,9 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.Models
             Streaming = new StreamingSettings()
             {
                 MaxDataItems = DefaultMaxDataItems,
-                MaxMessageRate = DefaultMaxMessageRate
+                MaxMessageRate = DefaultMaxMessageRate,
+                StartIndex = -1,
+                EndIndex = 1000
             };
             Store = new StoreSettings();
         }
