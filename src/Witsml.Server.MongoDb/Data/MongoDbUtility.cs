@@ -56,21 +56,21 @@ namespace PDS.Witsml.Server.Data
                 var elementAttribute = prop.GetCustomAttribute<XmlElementAttribute>();
                 if (elementAttribute != null)
                 {
-                    if (elementAttribute.ElementName == name)
+                    if (elementAttribute.ElementName.EqualsIgnoreCase(name))
                         return prop;
                 }
 
                 var arrayAttribute = prop.GetCustomAttribute<XmlArrayAttribute>();
                 if (arrayAttribute != null)
                 {
-                    if (arrayAttribute.ElementName == name)
+                    if (arrayAttribute.ElementName.EqualsIgnoreCase(name))
                         return prop;
                 }
 
                 var attributeAttribute = prop.GetCustomAttribute<XmlAttributeAttribute>();
                 if (attributeAttribute != null)
                 {
-                    if (attributeAttribute.AttributeName == name)
+                    if (attributeAttribute.AttributeName.EqualsIgnoreCase(name))
                         return prop;
                 }
             }
