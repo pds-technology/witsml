@@ -8,6 +8,7 @@ using System.Xml.Serialization;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
 using log4net;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using PDS.Framework;
 
@@ -259,19 +260,22 @@ namespace PDS.Witsml.Server.Data
         {
             var updateBuilder = Builders<T>.Update;
             var filterBuilder = Builders<T>.Filter;
-            var uid = "Uid";
-            var filterPath = MongoDbUtility.GetPropertyPath(parentPath, uid);
+            var idField = "Uid";
+            var filterPath = MongoDbUtility.GetPropertyPath(parentPath, idField);
             var properties = MongoDbUtility.GetPropertyInfo(type);
             var positionPath = parentPath + ".$";
 
+            var classMap = BsonClassMap.LookupClassMap(type);
+            if (classMap != null && classMap.IdMemberMap != null)
+                idField = classMap.IdMemberMap.MemberName;
+
             foreach (var element in elements)
             {
-                var uidAttrib = element.Attributes().FirstOrDefault(a => a.Name.LocalName.EqualsIgnoreCase(uid));
-                if (uidAttrib == null)
+                var elementId = GetElementId(element, idField);
+                if (string.IsNullOrEmpty(elementId))
                     continue;
 
-                var uidValue = uidAttrib.Value;
-                var current = GetCurrentElementValue(uidValue, properties, propertyValue);
+                var current = GetCurrentElementValue(idField, elementId, properties, propertyValue);
 
                 if (current == null)
                 {
@@ -289,11 +293,11 @@ namespace PDS.Witsml.Server.Data
                 }
                 else
                 {
-                    var elementFilter = Builders<T>.Filter.EqIgnoreCase(filterPath, uidValue);
+                    var elementFilter = Builders<T>.Filter.EqIgnoreCase(filterPath, elementId);
                     filters.Add(elementFilter);
                     var filter = filterBuilder.And(filters);
 
-                    var update = updateBuilder.Set(MongoDbUtility.GetPropertyPath(positionPath, uid), uidValue);
+                    var update = updateBuilder.Set(MongoDbUtility.GetPropertyPath(positionPath, idField), elementId);
                     update = BuildUpdateForAnElement(update, current, element, type, positionPath);
 
                     var filterJson = filter.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
@@ -304,14 +308,27 @@ namespace PDS.Witsml.Server.Data
             }
         }
 
-        private object GetCurrentElementValue(string uid, IEnumerable<PropertyInfo> properties, object propertyValue)
+        private string GetElementId(XElement element, string idField)
+        {
+            var idAttribute = element.Attributes().FirstOrDefault(a => a.Name.LocalName.EqualsIgnoreCase(idField));
+            if (idAttribute != null)
+                return idAttribute.Value.Trim();
+
+            var idElement = element.Elements().FirstOrDefault(e => e.Name.LocalName.EqualsIgnoreCase(idField));
+            if (idElement != null)
+                return idElement.Value.Trim();
+
+            return string.Empty;
+        }
+
+        private object GetCurrentElementValue(string idField, string elementId, IEnumerable<PropertyInfo> properties, object propertyValue)
         {
             var list = (IEnumerable)propertyValue;
             foreach (var item in list)
             {
-                var prop = MongoDbUtility.GetPropertyInfoForAnElement(properties, "uid");
-                var uidValue = prop.GetValue(item).ToString();
-                if (uid.EqualsIgnoreCase(uidValue))
+                var prop = MongoDbUtility.GetPropertyInfoForAnElement(properties, idField);
+                var idValue = prop.GetValue(item).ToString();
+                if (elementId.EqualsIgnoreCase(idValue))
                     return item;
             }
             return null;
