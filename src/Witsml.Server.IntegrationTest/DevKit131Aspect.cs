@@ -32,6 +32,7 @@ namespace PDS.Witsml.Server
             log.LogCurveInfo.Add(
                 new LogCurveInfo()
                 {
+                    Uid = log.IndexCurve.Value,
                     Mnemonic = log.IndexCurve.Value,
                     TypeLogData = indexType == LogIndexType.datetime ? LogDataType.datetime : LogDataType.@double,
                     Unit = indexType == LogIndexType.datetime ? "s" : "m"
@@ -40,6 +41,7 @@ namespace PDS.Witsml.Server
             log.LogCurveInfo.Add(
                 new LogCurveInfo()
                 {
+                    Uid = "ROP",
                     Mnemonic = "ROP",
                     TypeLogData = LogDataType.@double,
                     Unit = "m/h"
@@ -48,6 +50,7 @@ namespace PDS.Witsml.Server
             log.LogCurveInfo.Add(
                 new LogCurveInfo()
                 {
+                    Uid = "GR",
                     Mnemonic = "GR",
                     TypeLogData = LogDataType.@double,
                     Unit = "gAPI"
