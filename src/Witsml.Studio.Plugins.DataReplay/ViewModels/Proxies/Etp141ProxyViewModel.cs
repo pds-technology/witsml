@@ -1,8 +1,8 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Energistics;
 using Energistics.Common;
-using Energistics.DataAccess;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
 using Energistics.Protocol.ChannelStreaming;
@@ -12,25 +12,20 @@ using PDS.Witsml.Studio.Runtime;
 
 namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
 {
-    public class Etp141ProxyViewModel : WitsmlProxyViewModel
+    public class Etp141ProxyViewModel : EtpProxyViewModel
     {
-        public Etp141ProxyViewModel(IRuntimeService runtime, Connections.Connection connection) : base(connection, (WMLSVersion)2)
+        private Log141Generator _generator;
+        private long _interval;
+
+        public Etp141ProxyViewModel(IRuntimeService runtime, Action<string> log) : base(runtime, log)
         {
-            Runtime = runtime;
-            Generator = new Log141Generator();
+            _generator = new Log141Generator();
         }
-
-        public IRuntimeService Runtime { get; private set; }
-
-        public Log141Generator Generator { get; private set; }
-
-        public Models.Simulation Model { get; private set; }
-
-        public EtpClient Client { get; private set; }
 
         public override async Task Start(Models.Simulation model, CancellationToken token, int interval = 5000)
         {
             Model = model;
+            _interval = interval;
 
             var headers = EtpClient.Authorization(Model.EtpConnection.Username, Model.EtpConnection.Password);
 
@@ -40,13 +35,13 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
                 Client.Handler<IChannelStreamingProducer>().OnStart += OnStart;
                 Client.Handler<IChannelStreamingProducer>().OnChannelStreamingStart += OnChannelStreamingStart;
                 Client.Handler<IChannelStreamingProducer>().OnChannelStreamingStop += OnChannelStreamingStop;
+                Client.Output = Log;
                 Client.Open();
-
-                //Log("ETP Socket Server started, listening on port {0}.", Model.PortNumber);
 
                 while (true)
                 {
-                    await Task.Delay(1000);
+                    var delay = (int)Interlocked.Read(ref _interval);
+                    await Task.Delay(delay);
 
                     if (token.IsCancellationRequested || !Client.IsOpen)
                     {
@@ -60,11 +55,16 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
                     //client.Handler<IChannelStreamingProducer>()
                     //    .ChannelData(dataItems);
                 }
+
+                Client.Handler<ICoreClient>()
+                    .CloseSession("Streaming stopped.");
             }
         }
 
         private void OnStart(object sender, ProtocolEventArgs<Start> e)
         {
+            Interlocked.Exchange(ref _interval, e.Message.MaxMessageRate);
+
             Client.Handler<IChannelStreamingProducer>()
                 .ChannelMetadata(e.Header, Model.Channels);
         }
@@ -75,8 +75,6 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
 
         private void OnChannelStreamingStop(object sender, ProtocolEventArgs<ChannelStreamingStop> e)
         {
-            Client.Handler<ICoreClient>()
-                .CloseSession("Streaming stopped.");
         }
 
         private DataItem ToChannelDataItem(ChannelMetadataRecord channel)

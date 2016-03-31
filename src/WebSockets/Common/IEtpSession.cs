@@ -25,6 +25,10 @@ namespace Energistics.Common
 
         IList<SupportedProtocol> GetSupportedProtocols();
 
+        T Handler<T>() where T : IProtocolHandler;
+
+        bool CanHandle<T>() where T : IProtocolHandler;
+
         long NewMessageId();
 
         void Close(string reason = null);

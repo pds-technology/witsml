@@ -13,7 +13,7 @@
     <Grid Margin="5">
         <Grid.RowDefinitions>
             <RowDefinition />
-            <RowDefinition />
+            <RowDefinition Height="3*" />
         </Grid.RowDefinitions>
 
         <xcdg:DataGridControl Grid.Row="0" ItemsSource="{Binding Model.Channels}" AutoCreateColumns="False">
@@ -134,7 +134,9 @@
                 </DockPanel>
             </TabItem>
             <TabItem Header="Output">
-                <TextBox x:Name="Output" AcceptsReturn="True" IsReadOnly="True" VerticalScrollBarVisibility="Auto" Margin="5" />
+                <Border Margin="5" BorderThickness="1" BorderBrush="#FFABADB3">
+                    <ContentControl x:Name="Messages" />
+                </Border>
             </TabItem>
         </TabControl>
     </Grid>

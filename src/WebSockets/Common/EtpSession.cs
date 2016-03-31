@@ -41,6 +41,11 @@ namespace Energistics.Common
             throw new NotSupportedException(string.Format("Protocol handler not registered for {0}.", typeof(T).FullName));
         }
 
+        public bool CanHandle<T>() where T : IProtocolHandler
+        {
+            return Handlers.ContainsKey(typeof(T));
+        }
+
         public virtual void OnDataReceived(byte[] data)
         {
             Decode(data);

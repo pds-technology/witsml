@@ -12,6 +12,7 @@ namespace Energistics.Protocol.ChannelStreaming
 
         public ChannelStreamingProducerHandler() : base(Protocols.ChannelStreaming, "producer")
         {
+            RequestedRole = "consumer";
         }
 
         public bool IsSimpleStreamer { get; protected set; }

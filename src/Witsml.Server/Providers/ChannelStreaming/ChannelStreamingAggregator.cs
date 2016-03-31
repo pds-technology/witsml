@@ -11,6 +11,7 @@ using Energistics.Protocol.ChannelStreaming;
 namespace PDS.Witsml.Server.Providers.ChannelStreaming
 {
     [Export]
+    [PartCreationPolicy(CreationPolicy.NonShared)]
     public class ChannelStreamingAggregator : EtpProtocolHandler, IChannelStreamingProducer, IChannelStreamingConsumer
     {
         private readonly IChannelStreamingProducer _producer;
@@ -174,9 +175,13 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             var messageType = (MessageTypes.ChannelStreaming)header.MessageType;
 
             if (ProducerMessageTypes.Contains(messageType))
+            {
                 _consumer.HandleMessage(header, decoder);
-
-            _producer.HandleMessage(header, decoder);
+            }
+            else
+            {
+                _producer.HandleMessage(header, decoder);
+            }
         }
     }
 }

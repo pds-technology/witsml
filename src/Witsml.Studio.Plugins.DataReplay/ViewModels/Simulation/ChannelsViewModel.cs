@@ -30,6 +30,10 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
             Runtime = runtime;
             DisplayName = "Channels";
             WitsmlVersions = new BindableCollection<string>();
+            Messages = new TextEditorViewModel(runtime, "JavaScript", true)
+            {
+                IsScrollingEnabled = true
+            };
         }
 
         public Models.Simulation Model
@@ -38,6 +42,12 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
         }
 
         public IRuntimeService Runtime { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the messages editor.
+        /// </summary>
+        /// <value>The messages editor.</value>
+        public TextEditorViewModel Messages { get; private set; }
 
         /// <summary>
         /// Gets the proxy for the WITSML web service.
@@ -49,27 +59,13 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
         /// Gets the proxy for the ETP consumer.
         /// </summary>
         /// <value>The ETP consumer proxy.</value>
-        public WitsmlProxyViewModel EtpClientProxy { get; private set; }
+        public EtpProxyViewModel EtpClientProxy { get; private set; }
 
         /// <summary>
         /// Gets the witsml versions retrieved from the server.
         /// </summary>
         /// <value>The server's supported witsml versions.</value>
         public BindableCollection<string> WitsmlVersions { get; }
-
-        private string _output;
-        public string Output
-        {
-            get { return _output; }
-            set
-            {
-                if (!String.Equals(_output, value))
-                {
-                    _output = value;
-                    NotifyOfPropertyChange(() => Output);
-                }
-            }
-        }
 
         private CancellationTokenSource _witsmlClientTokenSource;
         public CancellationTokenSource WitsmlClientTokenSource
@@ -168,6 +164,8 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
             if (Runtime.ShowDialog(viewModel))
             {
                 Model.EtpConnection = viewModel.DataItem;
+                EtpClientProxy = CreateEtpClientProxy();
+                Messages.Clear();
             }
         }
 
@@ -399,14 +397,25 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
                 : new Log141ProxyViewModel(Runtime, Model.WitsmlConnection) as WitsmlProxyViewModel;
         }
 
-        private WitsmlProxyViewModel CreateEtpClientProxy()
+        private EtpProxyViewModel CreateEtpClientProxy()
         {
-            return new Etp141ProxyViewModel(Runtime, Model.EtpConnection);
+            return new Etp141ProxyViewModel(Runtime, Log);
         }
 
         private void Log(string message, params object[] values)
         {
-            Output += DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff - ") + string.Format(message, values) + Environment.NewLine;
+            Log(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff - ") + string.Format(message, values));
+        }
+
+        private void Log(string message)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+                return;
+
+            Messages.Append(string.Concat(
+                message.StartsWith("{") ? string.Empty : "// ",
+                message,
+                Environment.NewLine));
         }
     }
 }

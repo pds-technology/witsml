@@ -6,7 +6,11 @@
     "uri": null,
     "username": null
   },
-  "etpConnection": null,
+  "etpConnection": {
+    "name": null,
+    "uri": null,
+    "username": null
+  },
   "portNumber": 9000,
   "wellName": "Test Well 01",
   "wellUid": "804415d0-b5e7-4389-a3c6-cdb790f5485f",

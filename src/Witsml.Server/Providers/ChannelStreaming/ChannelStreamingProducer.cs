@@ -16,7 +16,7 @@ using PDS.Witsml.Data.Channels;
 namespace PDS.Witsml.Server.Providers.ChannelStreaming
 {
     [Export(typeof(IChannelStreamingProducer))]
-    [PartCreationPolicy(CreationPolicy.Shared)]
+    [PartCreationPolicy(CreationPolicy.NonShared)]
     public class ChannelStreamingProducer : ChannelStreamingProducerHandler
     {
         private static readonly IList<DataItem> EmptyChannelData = new List<DataItem>(0);

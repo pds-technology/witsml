@@ -13,6 +13,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.Models
         {
             Channels = new BindableCollection<ChannelMetadataRecord>();
             WitsmlConnection = new Connection();
+            EtpConnection = new Connection();
             LogIndexType = LogIndexType.measureddepth;
             PortNumber = 9000;
         }

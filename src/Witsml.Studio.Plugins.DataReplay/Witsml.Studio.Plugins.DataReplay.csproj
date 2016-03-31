@@ -117,6 +117,7 @@
     </Compile>
     <Compile Include="Providers\SimulationChannelStreamingProvider.cs" />
     <Compile Include="Providers\SimulationDiscoveryProvider.cs" />
+    <Compile Include="ViewModels\Proxies\EtpProxyViewModel.cs" />
     <Compile Include="ViewModels\Proxies\Log131ProxyViewModel.cs" />
     <Compile Include="ViewModels\Proxies\Log141ProxyViewModel.cs" />
     <Compile Include="ViewModels\Proxies\Etp141ProxyViewModel.cs" />
