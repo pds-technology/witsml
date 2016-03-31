@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using Energistics.Datatypes;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
@@ -144,6 +145,24 @@ namespace PDS.Witsml.Server.Data.Channels
             }
         }
 
+        /// <summary>
+        /// Deletes all <see cref="ChannelDataChunk"/> entries for the data object represented by the specified URI.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        public override WitsmlResult Delete(EtpUri uri)
+        {
+            try
+            {
+                var filter = Builders<ChannelDataChunk>.Filter.EqIgnoreCase("Uri", uri.Uri);
+                GetCollection().DeleteMany(filter);
+
+                return new WitsmlResult(ErrorCodes.Success);
+            }
+            catch (MongoException ex)
+            {
+                throw new WitsmlException(ErrorCodes.ErrorDeletingFromDataStore, ex);
+            }
+        }
 
         /// <summary>
         /// Bulks writes <see cref="ChannelDataChunk"/> records for insert and update

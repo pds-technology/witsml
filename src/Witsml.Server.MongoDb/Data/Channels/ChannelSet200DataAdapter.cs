@@ -157,6 +157,21 @@ namespace PDS.Witsml.Server.Data.Channels
             return new WitsmlResult(ErrorCodes.Success);
         }
 
+        /// <summary>
+        /// Deletes a data object by the specified identifier.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        /// <returns>A WITSML result.</returns>
+        public override WitsmlResult Delete(EtpUri uri)
+        {
+            var result = base.Delete(uri);
+
+            if (result.Code == ErrorCodes.Success)
+                result = _channelDataChunkAdapter.Delete(uri);
+
+            return result;
+        }
+
         internal ChannelDataReader ExtractDataReader(ChannelSet entity, ChannelSet existing = null)
         {
             // TODO: Handle: if (!string.IsNullOrEmpty(entity.Data.FileUri))
