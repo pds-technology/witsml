@@ -55,6 +55,7 @@ namespace PDS.Framework.Web.Security
                 else
                 {
                     // Invalid username or password.
+                    _log.WarnFormat("Invalid authentication attempt for user: {0}", name);
                     DenyAccess();
                 }
             }
