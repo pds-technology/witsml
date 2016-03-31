@@ -351,6 +351,11 @@ namespace PDS.Witsml.Server.Data
             }
         }
 
+        protected void UpdateEntityFields(string dbCollectionName)
+        {
+            var collection = GetCollection<T>(dbCollectionName);
+        }
+
         /// <summary>
         /// Deletes a data object by the specified identifier.
         /// </summary>

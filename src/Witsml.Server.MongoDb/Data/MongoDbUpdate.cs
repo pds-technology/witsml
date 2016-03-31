@@ -76,6 +76,12 @@ namespace PDS.Witsml.Server.Data
             }
         }
 
+        public void UpdateFields(FilterDefinition<T> filter, UpdateDefinition<T> update)
+        {
+            var filterJson = filter.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
+            _collection.UpdateOne(filter, update);
+        }
+
         private FilterDefinition<T> BuildIdFilter(XElement element)
         {
             return null;
