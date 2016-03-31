@@ -12,6 +12,7 @@ using Newtonsoft.Json.Linq;
 using PDS.Framework;
 using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Data.Channels;
+using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Providers.ChannelStreaming
 {
@@ -20,6 +21,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
     public class ChannelStreamingProducer : ChannelStreamingProducerHandler
     {
         private static readonly IList<DataItem> EmptyChannelData = new List<DataItem>(0);
+        private static readonly int RangeSize = Settings.Default.ChannelDataChunkRangeSize;
 
         private readonly IContainer _container;
         private CancellationTokenSource _tokenSource;
@@ -130,14 +132,11 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             var channelInfos = infos.Where(x => channelIds.Contains(x.ChannelId)).ToArray();
             var minStart = channelInfos.Min(x => Convert.ToDouble(x.StartIndex.Item));
 
-            // TODO: calculate range based on MaxDataItems instead of using Take()
-            //var take = (int)Math.Ceiling((double)MaxDataItems / (double)channels.Count);
-
             channelIds = channelInfos.Select(x => x.ChannelId).ToArray();
             channels = channels.Where(x => channelIds.Contains(x.ChannelId)).ToList();
 
             var dataProvider = GetDataProvider(uri);
-            var channelData = dataProvider.GetChannelData(uri, new Range<double?>(minStart, null));
+            var channelData = dataProvider.GetChannelData(uri, new Range<double?>(minStart, minStart + RangeSize));
 
             await StreamChannelData(infos, channels, channelData);
 
@@ -207,7 +206,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     ValueAttributes = new DataAttribute[0],
                     Value = new DataValue()
                     {
-                        Item = value // index // use index for testing
+                        Item = value
                     }
                 };
             }

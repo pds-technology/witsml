@@ -7,7 +7,7 @@ using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Models;
-using PDS.Witsml.Server.MongoDb;
+using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Data.Channels
 {
@@ -18,7 +18,7 @@ namespace PDS.Witsml.Server.Data.Channels
     [Export]
     public class ChannelDataChunkAdapter : MongoDbDataAdapter<ChannelDataChunk>
     {
-        private static readonly int RangeSize = Settings.Default.LogIndexRangeSize;
+        private static readonly int RangeSize = Settings.Default.ChannelDataChunkRangeSize;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelDataChunkAdapter"/> class.
@@ -124,8 +124,8 @@ namespace PDS.Witsml.Server.Data.Channels
                 // Based on the range of the updates, compute the range of the data chunk(s) 
                 //... so we can merge updates with existing data.
                 var existingRange = new Range<double?>(
-                    ComputeRange(updateRange.Start.Value, RangeSize, increasing).Start,
-                    ComputeRange(updateRange.End.Value, RangeSize, increasing).End
+                    Range.ComputeRange(updateRange.Start.Value, RangeSize, increasing).Start,
+                    Range.ComputeRange(updateRange.End.Value, RangeSize, increasing).End
                 );                
 
                 // Get DataChannelChunk list from database for the computed range and URI
@@ -226,7 +226,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
                 if (!plannedRange.HasValue)
                 {
-                    plannedRange = ComputeRange(index, RangeSize, increasing);
+                    plannedRange = Range.ComputeRange(index, RangeSize, increasing);
                     id = record.Id;
                     startIndex = index;
                 }
@@ -251,7 +251,7 @@ namespace PDS.Witsml.Server.Data.Channels
                         Indices = new List<ChannelIndexInfo> { newIndex }
                     };
 
-                    plannedRange = ComputeRange(index, RangeSize, increasing);
+                    plannedRange = Range.ComputeRange(index, RangeSize, increasing);
                     data = new List<string>();
                     data.Add(record.GetJson());
                     startIndex = index;
@@ -385,19 +385,6 @@ namespace PDS.Witsml.Server.Data.Channels
             return increasing
                 ? existingValue < updateValue
                 : existingValue >= updateValue;
-        }
-
-        /// <summary>
-        /// Computes the range.
-        /// </summary>
-        /// <param name="index">The start index.</param>
-        /// <param name="rangeSize">Size of the range.</param>
-        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
-        /// <returns>The range.</returns>
-        private Range<int> ComputeRange(double index, int rangeSize, bool increasing = true)
-        {
-            var rangeIndex = increasing ? (int)(Math.Floor(index / rangeSize)) : (int)(Math.Ceiling(index / rangeSize));
-            return new Range<int>(rangeIndex * rangeSize, rangeIndex * rangeSize + (increasing ? rangeSize : -rangeSize));
         }
 
         /// <summary>

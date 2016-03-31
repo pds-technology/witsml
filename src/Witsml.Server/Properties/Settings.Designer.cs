@@ -103,5 +103,14 @@ namespace PDS.Witsml.Server.Properties {
                 return ((string)(this["DefaultServerDescription"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1000")]
+        public int ChannelDataChunkRangeSize {
+            get {
+                return ((int)(this["ChannelDataChunkRangeSize"]));
+            }
+        }
     }
 }
