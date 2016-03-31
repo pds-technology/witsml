@@ -12,7 +12,7 @@ using Newtonsoft.Json;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Models;
-using PDS.Witsml.Server.MongoDb;
+using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Data.Channels
 {
@@ -23,7 +23,7 @@ namespace PDS.Witsml.Server.Data.Channels
     [Export]
     public class ChannelDataAdapter : MongoDbDataAdapter<ChannelDataValues>
     {
-        private static readonly int RangeSize = Settings.Default.LogIndexRangeSize;
+        private static readonly int RangeSize = Settings.Default.ChannelDataChunkRangeSize;
         private const string Delimiter = ",";
         private const char Separator = ',';
 
@@ -445,7 +445,7 @@ namespace PDS.Witsml.Server.Data.Channels
             {
                 if (!plannedRange.HasValue)
                 {
-                    plannedRange = ComputeRange(item.Item2, RangeSize, increasing);
+                    plannedRange = Range.ComputeRange(item.Item2, RangeSize, increasing);
                     uid = item.Item1;
                     startIndex = item.Item2;
                 }
@@ -468,7 +468,7 @@ namespace PDS.Witsml.Server.Data.Channels
                         Indices = new List<ChannelIndexInfo> { newIndex }
                     };
 
-                    plannedRange = ComputeRange(item.Item2, RangeSize, increasing);
+                    plannedRange = Range.ComputeRange(item.Item2, RangeSize, increasing);
                     data = new List<string>();
                     data.Add(item.Item3);
                     startIndex = item.Item2;
@@ -562,19 +562,6 @@ namespace PDS.Witsml.Server.Data.Channels
         }
 
         /// <summary>
-        /// Computes the range.
-        /// </summary>
-        /// <param name="index">The start index.</param>
-        /// <param name="rangeSize">Size of the range.</param>
-        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
-        /// <returns>The range.</returns>
-        private Range<int> ComputeRange(double index, int rangeSize, bool increasing = true)
-        {
-            var rangeIndex = increasing ? (int)(Math.Floor(index / rangeSize)) : (int)(Math.Ceiling(index / rangeSize));
-            return new Range<int>(rangeIndex * rangeSize, rangeIndex * rangeSize + (increasing ? rangeSize : -rangeSize));
-        }
-
-        /// <summary>
         /// Transform the original channel set data string to list of data chunks (For WITSML 2.0 log).
         /// </summary>
         /// <param name="data">The original channel set data.</param>
@@ -606,7 +593,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
             var increasing = indices.First().Increasing;
             var rangeSizeAdjustment = increasing ? RangeSize : -RangeSize;
-            var rangeSize = ComputeRange(start, RangeSize, increasing);
+            var rangeSize = Range.ComputeRange(start, RangeSize, increasing);
 
             do
             {
@@ -747,8 +734,8 @@ namespace PDS.Witsml.Server.Data.Channels
                 SetUpdateChunks(logData.Data, mnemonics, updateChunks, effectiveRanges, isTimeLog, increasing);
                 var indexRanges = effectiveRanges[indexCurve];
 
-                var rangeStart = ComputeRange(indexRanges.First(), RangeSize, increasing);
-                var rangeEnd = ComputeRange(indexRanges.Last(), RangeSize, increasing);
+                var rangeStart = Range.ComputeRange(indexRanges.First(), RangeSize, increasing);
+                var rangeEnd = Range.ComputeRange(indexRanges.Last(), RangeSize, increasing);
                 var updateRange = new Tuple<double?, double?>(rangeStart.Start, rangeEnd.End);
 
                 // Find the current log data chunks enclosed by the update range
@@ -827,7 +814,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 if (index == null)
                     return null;
 
-                var range = ComputeRange(index.Start, RangeSize, increasing);
+                var range = Range.ComputeRange(index.Start, RangeSize, increasing);
                 if (Before(start, range.End, increasing) && !Before(start, range.Start, increasing))
                 {
                     count = i++;
@@ -878,7 +865,7 @@ namespace PDS.Witsml.Server.Data.Channels
             var chunkUnits = chunk.UnitList.Split(Separator).ToList();
             var chunkData = DeserializeLogData(chunk.Data);
             var chunkIndex = chunk.Indices.FirstOrDefault();
-            var chunkRange = ComputeRange(chunkIndex.Start, RangeSize, increasing);
+            var chunkRange = Range.ComputeRange(chunkIndex.Start, RangeSize, increasing);
             var mnemonicIndexMap = new Dictionary<string, int>();
             var merges = new List<string>();
 
@@ -1127,7 +1114,7 @@ namespace PDS.Witsml.Server.Data.Channels
             var firstRow = logData[0];
             var points = firstRow.Split(Separator).ToList();
             var indexValue = GetAnIndexValue(points.First(), isTimeLog);
-            var stop = ComputeRange(indexValue, RangeSize, increasing).End;
+            var stop = Range.ComputeRange(indexValue, RangeSize, increasing).End;
             var chunk = new List<List<string>>();
 
             foreach (var row in logData)
@@ -1151,7 +1138,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 {
                     chunks.Add(chunk);
                     chunk = new List<List<string>>();
-                    stop = ComputeRange(indexValue, RangeSize, increasing).End;
+                    stop = Range.ComputeRange(indexValue, RangeSize, increasing).End;
                 }
 
                 chunk.Add(points);
