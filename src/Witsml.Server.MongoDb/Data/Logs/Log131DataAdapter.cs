@@ -327,6 +327,10 @@ namespace PDS.Witsml.Server.Data.Logs
                 var values = new object[record.FieldCount];
                 record.GetValues(values);
 
+                // use timestamp format for time index values
+                if (record.Indices.Select(x => x.IsTimeIndex).FirstOrDefault())
+                    values[0] = record.GetDateTimeOffset(0).ToString("o");
+
                 // Limit data to requested mnemonics
                 if (slices.Any())
                 {
