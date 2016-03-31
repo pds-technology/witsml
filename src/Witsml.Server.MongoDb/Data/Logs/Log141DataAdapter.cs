@@ -288,6 +288,25 @@ namespace PDS.Witsml.Server.Data.Logs
                 parser.PropertyValue(isTimeLog ? "endDateTimeIndex" : "endIndex"),
                 isTimeLog);
         }
+
+        private IEnumerable<string> GetLogDataMnemonics(WitsmlQueryParser parser)
+        {
+            var mnemonics = Enumerable.Empty<string>();
+            var logData = parser.Property("logData");
+
+            if (logData != null)
+            {
+                var mnemonicList = parser.Properties(logData, "mnemonicList");
+
+                if (mnemonicList != null && mnemonicList.Any())
+                {
+                    mnemonics = mnemonicList.First().Value.Split(',');
+                }
+            }
+
+            return mnemonics;
+        }
+
         private IEnumerable<string> GetLogCurveInfoMnemonics(WitsmlQueryParser parser)
         {
             var mnemonics = Enumerable.Empty<string>();
@@ -331,7 +350,11 @@ namespace PDS.Witsml.Server.Data.Logs
                 return new Dictionary<int, string>(0);
 
             var allMnemonics = log.LogCurveInfo.Select(x => x.Mnemonic.Value).ToArray();
-            var queryMnemonics = GetLogCurveInfoMnemonics(parser).ToArray();
+            var queryMnemonics = GetLogDataMnemonics(parser).ToArray();
+            if (!queryMnemonics.Any())
+            {
+                queryMnemonics = GetLogCurveInfoMnemonics(parser).ToArray();
+            }
 
             return ComputeMnemonicIndexes(allMnemonics, queryMnemonics, parser.ReturnElements());
         }
