@@ -422,5 +422,103 @@ namespace PDS.Witsml.Server.Data.Logs
             var data = logData;
             Assert.AreEqual("15,15.1,15", data[2]);
         }
+
+        [TestMethod]
+        public void Test_update_log_data_and_index_range()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01"),
+                StartIndex = new GenericMeasure(15, "m")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 8);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWellbore = log.UidWellbore;
+            var uidLog = response.SuppMsgOut;
+
+            var query = new Log
+            {
+                UidWell = Wellbore.UidWell,
+                UidWellbore = uidWellbore,
+                Uid = uidLog
+            };
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            var logAdded = results.FirstOrDefault();
+
+            Assert.IsNotNull(logAdded);
+            Assert.AreEqual(15, logAdded.StartIndex.Value);
+            Assert.AreEqual(22, logAdded.EndIndex.Value);
+            var mdCurve = logAdded.LogCurveInfo.FirstOrDefault(c => c.Mnemonic == logAdded.IndexCurve.Value);
+            Assert.AreEqual(logAdded.StartIndex.Value, mdCurve.MinIndex.Value);
+            Assert.AreEqual(logAdded.EndIndex.Value, mdCurve.MaxIndex.Value);
+            var curve2 = logAdded.LogCurveInfo[1];
+            Assert.IsNull(curve2.MinIndex);
+            Assert.IsNull(curve2.MaxIndex);
+            var curve3 = logAdded.LogCurveInfo[2];
+            Assert.AreEqual(logAdded.StartIndex.Value, curve3.MinIndex.Value);
+            Assert.AreEqual(logAdded.EndIndex.Value, curve3.MaxIndex.Value);
+
+            log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                UidWellbore = uidWellbore,
+                Uid = uidLog,
+                StartIndex = new GenericMeasure(13, "m")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 6, 0.9);
+
+            var logData = log.LogData;
+            logData.Clear();
+
+            logData.Add("13,13.1,");
+            logData.Add("14,14.1,");
+            logData.Add("15,15.1,");
+            logData.Add("16,16.1,");
+            logData.Add("17,17.1,");
+            logData.Add("20,20.1,20.2");
+            logData.Add("21,,21.2");
+            logData.Add("22,,22.2");
+            logData.Add("23,,23.2");
+
+            var updateResponse = DevKit.Update<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+
+            var logUpdated = results.First();
+            logData = logUpdated.LogData;
+
+            Assert.IsNotNull(logData);
+            Assert.AreEqual(11, logData.Count);
+            Assert.AreEqual(13, logUpdated.StartIndex.Value);
+            Assert.AreEqual(23, logUpdated.EndIndex.Value);
+            mdCurve = logUpdated.LogCurveInfo.FirstOrDefault(c => c.Mnemonic == logUpdated.IndexCurve.Value);
+            Assert.AreEqual(logUpdated.StartIndex.Value, mdCurve.MinIndex.Value);
+            Assert.AreEqual(logUpdated.EndIndex.Value, mdCurve.MaxIndex.Value);
+            curve2 = logUpdated.LogCurveInfo[1];
+            Assert.AreEqual(13, curve2.MinIndex.Value);
+            Assert.AreEqual(20, curve2.MaxIndex.Value);
+            curve3 = logUpdated.LogCurveInfo[2];
+            Assert.AreEqual(15, curve3.MinIndex.Value);
+            Assert.AreEqual(23, curve3.MaxIndex.Value);
+        }
     }
 }

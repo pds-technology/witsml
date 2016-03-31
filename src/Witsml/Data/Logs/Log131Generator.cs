@@ -57,6 +57,7 @@ namespace PDS.Witsml.Data.Logs
         {
             return new LogCurveInfo()
             {
+                Uid = name,
                 Mnemonic = name,
                 TypeLogData = type,
                 Unit = unit
