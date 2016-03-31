@@ -444,8 +444,8 @@ namespace PDS.Witsml.Server.Data.Channels
             if (range.Start.HasValue)
             {
                 var endFilter = increasing
-                    ? builder.Gte("Indices.End", range.Start.Value)
-                    : builder.Lte("Indices.End", range.Start.Value);
+                    ? builder.Gt("Indices.End", range.Start.Value)
+                    : builder.Lt("Indices.End", range.Start.Value);
                 rangeFilters.Add(endFilter);
             }
 

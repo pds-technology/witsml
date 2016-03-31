@@ -115,8 +115,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
                 foreach (var uri in Channels.Keys)
                     await StreamChannelData(infos, uri);
-
-                await Task.Delay(MaxMessageRate);
             }
         }
 
@@ -125,7 +123,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             return _container.Resolve<IChannelDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
         }
 
-        private Task<bool> StreamChannelData(IList<ChannelStreamingInfo> infos, EtpUri uri)
+        private async Task<bool> StreamChannelData(IList<ChannelStreamingInfo> infos, EtpUri uri)
         {
             var channels = Channels[uri];
             var channelIds = channels.Select(x => x.ChannelId).ToArray();
@@ -133,7 +131,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             var minStart = channelInfos.Min(x => Convert.ToDouble(x.StartIndex.Item));
 
             // TODO: calculate range based on MaxDataItems instead of using Take()
-            var take = (int)Math.Ceiling((double)MaxDataItems / (double)channels.Count);
+            //var take = (int)Math.Ceiling((double)MaxDataItems / (double)channels.Count);
 
             channelIds = channelInfos.Select(x => x.ChannelId).ToArray();
             channels = channels.Where(x => channelIds.Contains(x.ChannelId)).ToList();
@@ -141,11 +139,76 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             var dataProvider = GetDataProvider(uri);
             var channelData = dataProvider.GetChannelData(uri, new Range<double?>(minStart, null));
 
-            StreamChannelData(channels, infos, channelData.Take(take));
+            var dataItemList = new List<DataItem>();
 
-            return Task.FromResult(true);
+            using (var channelDataEnum = channelData.GetEnumerator())
+            {
+                var endOfChannelData = !channelDataEnum.MoveNext();
+
+                while (!endOfChannelData)
+                {
+                    foreach (var dataItem in CreateDataItems(channels, infos, channelDataEnum.Current))
+                    {
+                        if (dataItem != null)
+                        {
+                            dataItemList.Add(dataItem);
+                        }
+
+                        if (dataItemList.Count >= MaxDataItems)
+                        {
+                            await SendChannelData(dataItemList);
+                        }
+                    }
+                    endOfChannelData = !channelDataEnum.MoveNext();
+                }
+
+                if (dataItemList.Any())
+                {
+                    await SendChannelData(dataItemList);
+                }
+            }
+
+            return true;
         }
 
+        private async Task SendChannelData(List<DataItem> dataItemList)
+        {
+            ChannelData(Request, dataItemList);
+            await Task.Delay(MaxMessageRate);
+            dataItemList.Clear();
+        }
+
+        private IEnumerable<DataItem> CreateDataItems(IList<ChannelMetadataRecord> channels, IList<ChannelStreamingInfo> infos, IChannelDataRecord record)
+        {
+            var index = record.GetIndexValue();
+
+            foreach (var info in infos)
+            {
+                var channel = channels.FirstOrDefault(c => c.ChannelId == info.ChannelId);
+                var start = Convert.ToDouble(info.StartIndex.Item);
+
+                if (index <= start)
+                    yield return null;
+
+                // update ChannelStreamingInfo index value
+                info.StartIndex.Item = index;
+
+                var value = Format(record.GetValue(record.GetOrdinal(channel.Mnemonic)));
+
+                yield return new DataItem()
+                {
+                    ChannelId = info.ChannelId,
+                    Indexes = new List<long>(),
+                    ValueAttributes = new DataAttribute[0],
+                    Value = new DataValue()
+                    {
+                        Item = value // index // use index for testing
+                    }
+                };
+            }
+        }
+
+        // TODO: Remove when finished with refactoring
         private void StreamChannelData(IList<ChannelMetadataRecord> channels, IList<ChannelStreamingInfo> infos, IEnumerable<IChannelDataRecord> channelData)
         {
             foreach (var record in channelData)
