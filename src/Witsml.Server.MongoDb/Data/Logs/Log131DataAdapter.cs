@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess;
@@ -135,8 +136,17 @@ namespace PDS.Witsml.Server.Data.Logs
 
             InsertEntity(entity);
 
-            // Add ChannelDataChunks
-            _channelDataChunkAdapter.Add(reader);
+            if (reader != null)
+            {
+                var ranges = GetCurrentIndexRange(entity);
+                GetUpdatedLogHeaderIndexRange(reader, ranges, entity.Direction == LogIndexDirection.increasing);
+
+                // Add ChannelDataChunks
+                _channelDataChunkAdapter.Add(reader);
+
+                // Update index range
+                UpdateIndexRange(entity.GetUri(), entity, ranges, reader.Mnemonics, entity.IndexType == LogIndexType.datetime, reader.Units.First());
+            }
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uid);
         }
@@ -162,11 +172,22 @@ namespace PDS.Witsml.Server.Data.Logs
             var entity = Parse(parser.Context.Xml);
             var reader = ExtractDataReader(entity, GetEntity(uri));
 
-            // Merge ChannelDataChunks
-            _channelDataChunkAdapter.Merge(reader);
+            // Get Updated Log
+            var current = GetEntity(uri);
 
-            // TODO: Fix later
-            //UpdateLogHeaderRanges(entity);
+            // Merge ChannelDataChunks
+            if (reader != null)
+            {
+                // Get current index information
+                var ranges = GetCurrentIndexRange(current);
+                GetUpdatedLogHeaderIndexRange(reader, ranges, current.Direction == LogIndexDirection.increasing);
+
+                // Add ChannelDataChunks
+                _channelDataChunkAdapter.Merge(reader);
+
+                // Update index range
+                UpdateIndexRange(uri, current, ranges, reader.Mnemonics, entity.IndexType == LogIndexType.datetime, reader.Units.FirstOrDefault());
+            }
 
             return new WitsmlResult(ErrorCodes.Success);
         }
@@ -401,6 +422,143 @@ namespace PDS.Witsml.Server.Data.Logs
                 ChannelAxes = new List<ChannelAxis>(),
                 Indexes = new List<IndexMetadataRecord>(),
             };
+        }
+
+        private Dictionary<string, List<double?>> GetCurrentIndexRange(Log entity)
+        {
+            var ranges = new Dictionary<string, List<double?>>();
+            var isTimeLog = entity.IndexType == LogIndexType.datetime;
+
+            foreach (var curve in entity.LogCurveInfo)
+            {
+                var range = new List<double?> { null, null };
+                if (isTimeLog)
+                {
+                    if (curve.MinDateTimeIndex.HasValue)
+                        range[0] = DateTimeOffset.Parse(curve.MinDateTimeIndex.Value.ToString("o")).ToUnixTimeSeconds();
+                    if (curve.MaxDateTimeIndex.HasValue)
+                        range[1] = DateTimeOffset.Parse(curve.MaxDateTimeIndex.Value.ToString("o")).ToUnixTimeSeconds();
+                }
+                else
+                {
+                    if (curve.MinIndex != null)
+                        range[0] = curve.MinIndex.Value;
+                    if (curve.MaxIndex != null)
+                        range[1] = curve.MaxIndex.Value;
+                }
+                ranges.Add(curve.Mnemonic, range);
+            }
+
+            return ranges;
+        }
+
+        private void GetUpdatedLogHeaderIndexRange(ChannelDataReader reader, Dictionary<string, List<double?>> ranges, bool increasing = true)
+        {
+            for (var i = 0; i < reader.Mnemonics.Length; i++)
+            {
+                var mnemonic = reader.Mnemonics[i];
+                List<double?> current;
+                if (ranges.ContainsKey(mnemonic))
+                {
+                    current = ranges[mnemonic];
+                }
+                else
+                {
+                    current = new List<double?> { null, null };
+                    ranges.Add(mnemonic, current);
+                }
+                var update = reader.GetChannelIndexRange(i);
+                if (!current[0].HasValue || !update.StartsAfter(current[0].Value, increasing))
+                    current[0] = update.Start;
+                if (!current[1].HasValue || !update.EndsBefore(current[1].Value, increasing))
+                    current[1] = update.End;
+            }
+        }
+
+        private GenericMeasure UpdateGenericMeasure(GenericMeasure gmObject, double gmValue, string uom)
+        {
+            if (gmObject == null)
+            {
+                gmObject = new GenericMeasure();
+            }
+            gmObject.Value = gmValue;
+            gmObject.Uom = uom;
+
+            return gmObject;
+        }
+
+        private void UpdateIndexRange(EtpUri uri, Log entity, Dictionary<string, List<double?>> ranges, IEnumerable<string> mnemonics, bool isTimeLog, string indexUnit)
+        {
+            var collection = GetCollection();
+            var mongoUpdate = new MongoDbUpdate<Log>(GetCollection(), null);
+            var filter = MongoDbUtility.GetEntityFilter<Log>(uri);
+            UpdateDefinition<Log> logIndexUpdate = null;
+
+            foreach (var mnemonic in mnemonics)
+            {
+                var curve = entity.LogCurveInfo.FirstOrDefault(c => c.Uid.EqualsIgnoreCase(mnemonic));
+                if (curve == null)
+                    continue;
+
+                var filters = new List<FilterDefinition<Log>>();
+                filters.Add(filter);
+                filters.Add(MongoDbUtility.BuildFilter<Log>("LogCurveInfo.Uid", curve.Uid));
+                var curveFilter = Builders<Log>.Filter.And(filters);
+
+                var updateBuilder = Builders<Log>.Update;
+                UpdateDefinition<Log> updates = null;
+
+                var range = ranges[mnemonic];
+                var isIndexCurve = mnemonic == entity.IndexCurve.Value;
+                if (isTimeLog)
+                {
+                    if (range[0].HasValue)
+                    {
+                        var minDate = DateTimeOffset.FromUnixTimeSeconds((long)range[0].Value).ToString("o");
+                        updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MinDateTimeIndex", minDate);
+                        if (isIndexCurve)
+                        {
+                            logIndexUpdate = MongoDbUtility.BuildUpdate(logIndexUpdate, "StartDateTimeIndex", minDate);
+                        }
+                    }
+                    if (range[1].HasValue)
+                    {
+                        var maxDate = DateTimeOffset.FromUnixTimeSeconds((long)range[1].Value).ToString("o");
+                        updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MaxDateTimeIndex", maxDate);
+                        if (isIndexCurve)
+                        {
+                            logIndexUpdate = MongoDbUtility.BuildUpdate(logIndexUpdate, "EndDateTimeIndex", maxDate);
+                        }
+                    }
+                }
+                else
+                {
+                    if (range[0].HasValue)
+                    {
+                        curve.MinIndex = UpdateGenericMeasure(curve.MinIndex, range[0].Value, indexUnit);
+                        updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MinIndex", curve.MinIndex);
+                        if (isIndexCurve)
+                        {
+                            logIndexUpdate = MongoDbUtility.BuildUpdate(logIndexUpdate, "StartIndex", curve.MinIndex);
+                        }
+                    }
+
+                    if (range[1].HasValue)
+                    {
+                        curve.MaxIndex = UpdateGenericMeasure(curve.MaxIndex, range[1].Value, indexUnit);
+                        updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MaxIndex", curve.MaxIndex);
+                        if (isIndexCurve)
+                        {
+                            logIndexUpdate = MongoDbUtility.BuildUpdate(logIndexUpdate, "EndIndex", curve.MaxIndex);
+                        }
+                    }
+                }
+                if (updates != null)
+                    mongoUpdate.UpdateFields(curveFilter, updates);
+            }
+
+            if (logIndexUpdate != null)
+                mongoUpdate.UpdateFields(filter, logIndexUpdate);
         }
     }
 }
