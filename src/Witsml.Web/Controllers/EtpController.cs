@@ -116,6 +116,7 @@ namespace PDS.Witsml.Web.Controllers
             var handler = new EtpServerHandler(socket, DefaultServerName, DefaultServerVersion);
             var aggregator = _container.Resolve<ChannelStreamingAggregator>();
 
+            handler.Register(() => _container.Resolve<ICoreServer>());
             handler.Register<IChannelStreamingProducer>(() => aggregator);
             handler.Register<IChannelStreamingConsumer>(() => aggregator);
             handler.Register(() => _container.Resolve<IDiscoveryStore>());
