@@ -139,6 +139,13 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             var dataProvider = GetDataProvider(uri);
             var channelData = dataProvider.GetChannelData(uri, new Range<double?>(minStart, null));
 
+            await StreamChannelData(infos, channels, channelData);
+
+            return true;
+        }
+
+        private async Task StreamChannelData(IList<ChannelStreamingInfo> infos, List<ChannelMetadataRecord> channels, IEnumerable<IChannelDataRecord> channelData)
+        {
             var dataItemList = new List<DataItem>();
 
             using (var channelDataEnum = channelData.GetEnumerator())
@@ -167,8 +174,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     await SendChannelData(dataItemList);
                 }
             }
-
-            return true;
         }
 
         private async Task SendChannelData(List<DataItem> dataItemList)
@@ -209,46 +214,46 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         }
 
         // TODO: Remove when finished with refactoring
-        private void StreamChannelData(IList<ChannelMetadataRecord> channels, IList<ChannelStreamingInfo> infos, IEnumerable<IChannelDataRecord> channelData)
-        {
-            foreach (var record in channelData)
-            {
-                var index = record.GetIndexValue();
+        //private void StreamChannelData(IList<ChannelMetadataRecord> channels, IList<ChannelStreamingInfo> infos, IEnumerable<IChannelDataRecord> channelData)
+        //{
+        //    foreach (var record in channelData)
+        //    {
+        //        var index = record.GetIndexValue();
 
-                var dataItems = infos
-                    .Select(y =>
-                    {
-                        var channel = channels.FirstOrDefault(c => c.ChannelId == y.ChannelId);
-                        var start = Convert.ToDouble(y.StartIndex.Item);
+        //        var dataItems = infos
+        //            .Select(y =>
+        //            {
+        //                var channel = channels.FirstOrDefault(c => c.ChannelId == y.ChannelId);
+        //                var start = Convert.ToDouble(y.StartIndex.Item);
 
-                        if (index <= start)
-                            return null;
+        //                if (index <= start)
+        //                    return null;
 
-                        // update ChannelStreamingInfo index value
-                        y.StartIndex.Item = index;
+        //                // update ChannelStreamingInfo index value
+        //                y.StartIndex.Item = index;
 
-                        var value = Format(record.GetValue(record.GetOrdinal(channel.Mnemonic)));
+        //                var value = Format(record.GetValue(record.GetOrdinal(channel.Mnemonic)));
 
-                        return new DataItem()
-                        {
-                            ChannelId = y.ChannelId,
-                            Indexes = new List<long>(),
-                            ValueAttributes = new DataAttribute[0],
-                            Value = new DataValue()
-                            {
-                                Item = value
-                            }
-                        };
-                    })
-                    .Where(x => x != null)
-                    .ToList();
+        //                return new DataItem()
+        //                {
+        //                    ChannelId = y.ChannelId,
+        //                    Indexes = new List<long>(),
+        //                    ValueAttributes = new DataAttribute[0],
+        //                    Value = new DataValue()
+        //                    {
+        //                        Item = value
+        //                    }
+        //                };
+        //            })
+        //            .Where(x => x != null)
+        //            .ToList();
 
-                if (dataItems.Any())
-                {
-                    ChannelData(Request, dataItems);
-                }
-            }
-        }
+        //        if (dataItems.Any())
+        //        {
+        //            ChannelData(Request, dataItems);
+        //        }
+        //    }
+        //}
 
         private object Format(object value)
         {
