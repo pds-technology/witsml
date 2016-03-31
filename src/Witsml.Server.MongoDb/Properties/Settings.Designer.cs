@@ -40,14 +40,5 @@ namespace PDS.Witsml.Server.MongoDb {
                 return ((string)(this["DefaultDatabaseName"]));
             }
         }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1000")]
-        public int LogIndexRangeSize {
-            get {
-                return ((int)(this["LogIndexRangeSize"]));
-            }
-        }
     }
 }
