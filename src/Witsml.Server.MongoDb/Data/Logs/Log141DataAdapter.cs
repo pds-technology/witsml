@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess;
@@ -146,13 +147,23 @@ namespace PDS.Witsml.Server.Data.Logs
             Validate(Functions.AddToStore, entity);
             Logger.DebugFormat("Validated Log with uid '{0}' and name '{1}' for Add", entity.Uid, entity.Name);
 
-            // Extract Data
-            var readers = ExtractDataReaders(entity);
+            // Extract Data                    
+            var reader = ExtractDataReaders(entity).FirstOrDefault();
 
+            // Insert Log
             InsertEntity(entity);
 
-            // Add ChannelDataChunks
-            _channelDataChunkAdapter.Add(readers.FirstOrDefault());
+            if (reader != null)
+            {
+                var ranges = GetCurrentIndexRange(entity);
+                GetUpdatedLogHeaderIndexRange(reader, ranges, entity.Direction == LogIndexDirection.increasing);
+
+                // Add ChannelDataChunks
+                _channelDataChunkAdapter.Add(reader);
+
+                // Update index range
+                UpdateIndexRange(entity.GetUri(), entity, ranges, reader.Mnemonics, entity.IndexType == LogIndexType.datetime, reader.Units.First());
+            }                
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uid);
         }
@@ -178,14 +189,37 @@ namespace PDS.Witsml.Server.Data.Logs
             var entity = Parse(parser.Context.Xml);
             var readers = ExtractDataReaders(entity, GetEntity(uri));
 
+            // Get Updated Log
+            var current = GetEntity(uri);
+
+            // Get current index information
+            var ranges = GetCurrentIndexRange(current);
+
+            var indexUnit = string.Empty;
+            var updateMnemonics = new List<string>();
+
+            var updateIndex = false;
+
             // Merge ChannelDataChunks
             foreach (var reader in readers)
             {
+                if (string.IsNullOrEmpty(indexUnit))
+                    indexUnit = reader.Units.First();
+
+                updateMnemonics = updateMnemonics.Union(reader.Mnemonics.Where(m => !updateMnemonics.Contains(m))).ToList();
+
+                // Update index range for each logData element
+                GetUpdatedLogHeaderIndexRange(reader, ranges, current.Direction == LogIndexDirection.increasing);
+
+                // Update log data
                 _channelDataChunkAdapter.Merge(reader);
+                if (!updateIndex)
+                    updateIndex = true;
             }
 
-            // TODO: Fix later
-            //UpdateLogHeaderRanges(entity);
+            // Update index range
+            if (updateIndex)
+                UpdateIndexRange(uri, current, ranges, updateMnemonics, entity.IndexType == LogIndexType.datetime, indexUnit);
 
             return new WitsmlResult(ErrorCodes.Success);
         }
@@ -436,114 +470,142 @@ namespace PDS.Witsml.Server.Data.Logs
             };
         }
 
-        #region UpdateLogHeaderRanges Code
-        //private void UpdateLogData(Log log, List<LogDataValues> logDataChanges)
-        //{
-        //    var database = DatabaseProvider.GetDatabase();
-        //    var collection = database.GetCollection<LogDataValues>(_DbLogDataValuesDocumentName);
-        //    var changeIndexes = logDataChanges.Select(x => x.Index);
-
-
-        //    List<LogDataValues> newLogDataChanges;
-        //    List<LogDataValues> updateLogDataChanges;
-
-        //    // Pull existing indexes but only for those that are in our change list.
-        //    var existingIndexes = collection.AsQueryable()
-        //        .Where(x => x.UidLog == log.Uid && changeIndexes.Contains(x.Index))
-        //        .Select(x => x.Index)
-        //        .ToList();
-
-        //    newLogDataChanges = logDataChanges.Where(ldc => !existingIndexes.Contains(ldc.Index)).ToList();
-        //    updateLogDataChanges = logDataChanges.Where(ldc => existingIndexes.Contains(ldc.Index)).ToList();
-
-
-        //    if (newLogDataChanges.Any())
-        //    {
-        //        //CreateLogDataValues(log, newLogDataChanges);
-        //    }
-
-        //    if (updateLogDataChanges.Any())
-        //    {
-        //        updateLogDataChanges.ForEach(ldc =>
-        //        {
-        //            var query = collection.AsQueryable()
-        //                .Where(x => x.UidLog == log.Uid && x.Index == ldc.Index);
-
-        //            var existingLogDataValues = query.FirstOrDefault();
-        //            var updateFilter = Builders<LogDataValues>.Filter.Eq("Uid", existingLogDataValues.Uid);
-        //            var update = Builders<LogDataValues>.Update.Set("Data", ldc.Data);
-        //            collection.UpdateOne(updateFilter, update);
-        //        });
-        //    }
-
-        //    // Update index range references within the log
-        //    UpdateLogHeaderRanges(log);
-        //}
-
-        // TODO: Update later (the right way)
-        //private void UpdateLogHeaderRanges(Log log)
-        //{
-        //    var database = DatabaseProvider.GetDatabase();
-        //    var collection = database.GetCollection<Log>(_DbDocumentName);
-        //    var updateFilter = Builders<Log>.Filter.Eq("Uid", log.Uid);
-
-        //    // Find the Log that needs to be updated
-        //    var dbLog = GetEntity(log.Uid, _DbDocumentName);
-
-        //    // Get the min and max index range for this log.
-        //    double startIndex;
-        //    double endIndex;
-        //    GetLogDataIndexRange(log, out startIndex, out endIndex);
-        //    dbLog.StartIndex = UpdateGenericMeasure(dbLog.StartIndex, startIndex);
-        //    dbLog.EndIndex = UpdateGenericMeasure(dbLog.EndIndex, endIndex);
-        //    var update = Builders<Log>.Update.Set("StartIndex", dbLog.StartIndex);
-        //    update.Set("EndIndex", dbLog.EndIndex);
-
-
-        //    if (dbLog.LogCurveInfo != null)
-        //    {
-        //        dbLog.LogCurveInfo.ForEach(x =>
-        //        {
-        //            x.MinIndex = UpdateGenericMeasure(x.MinIndex, startIndex);
-        //            x.MaxIndex = UpdateGenericMeasure(x.MaxIndex, endIndex);
-        //        });
-        //        update.Set("LogCurveInfo", dbLog.LogCurveInfo);
-        //    }
-        //    collection.UpdateOne(updateFilter, update);
-        //}
-
-        //private void GetLogDataIndexRange(Log log, out double startIndex, out double endIndex)
-        //{
-        //    var database = DatabaseProvider.GetDatabase();
-        //    var collection = database.GetCollection<LogDataValues>(_DbLogDataValuesDocumentName);
-
-        //    // Fetch the LogDataValue record for the Log with the smallest index
-        //    var min = collection.AsQueryable()
-        //        .Where(x => x.UidLog == log.Uid)
-        //        .OrderBy(x => x.Index)
-        //        .Select(x => x.Index)
-        //        .Take(1).FirstOrDefault();
-
-        //    var max = collection.AsQueryable()
-        //        .Where(x => x.UidLog == log.Uid)
-        //        .OrderByDescending(x => x.Index)
-        //        .Select(x => x.Index)
-        //        .Take(1).FirstOrDefault();
-
-        //    // Initialize
-        //    startIndex = min;
-        //    endIndex = max;
-        //}
-
-        private GenericMeasure UpdateGenericMeasure(GenericMeasure gmObject, double gmValue)
+        #region UpdateLogHeaderRanges Code      
+        private GenericMeasure UpdateGenericMeasure(GenericMeasure gmObject, double gmValue, string uom)
         {
             if (gmObject == null)
             {
                 gmObject = new GenericMeasure();
             }
             gmObject.Value = gmValue;
+            gmObject.Uom = uom;
 
             return gmObject;
+        }
+
+        private Dictionary<string, List<double?>> GetCurrentIndexRange(Log entity)
+        {
+            var ranges = new Dictionary<string, List<double?>>();
+            var isTimeLog = entity.IndexType == LogIndexType.datetime;
+
+            foreach (var curve in entity.LogCurveInfo)
+            {
+                var range = new List<double?> { null, null };
+                if (isTimeLog)
+                {
+                    if (curve.MinDateTimeIndex.HasValue)
+                        range[0] = DateTimeOffset.Parse(curve.MinDateTimeIndex.Value.ToString("o")).ToUnixTimeSeconds();
+                    if (curve.MaxDateTimeIndex.HasValue)
+                        range[1] = DateTimeOffset.Parse(curve.MaxDateTimeIndex.Value.ToString("o")).ToUnixTimeSeconds();
+                }
+                else
+                {
+                    if (curve.MinIndex != null)
+                        range[0] = curve.MinIndex.Value;
+                    if (curve.MaxIndex != null)
+                        range[1] = curve.MaxIndex.Value;
+                }
+                ranges.Add(curve.Mnemonic.Value, range);
+            }
+
+            return ranges;
+        }
+        
+        private void GetUpdatedLogHeaderIndexRange(ChannelDataReader reader, Dictionary<string, List<double?>> ranges, bool increasing = true)
+        {
+            for (var i = 0; i < reader.Mnemonics.Length; i++)
+            {
+                var mnemonic = reader.Mnemonics[i];
+                List<double?> current;
+                if (ranges.ContainsKey(mnemonic))
+                {
+                    current = ranges[mnemonic];
+                }
+                else
+                {
+                    current = new List<double?> { null, null };
+                    ranges.Add(mnemonic, current);
+                }
+                var update = reader.GetChannelIndexRange(i);
+                if (!current[0].HasValue || !update.StartsAfter(current[0].Value, increasing))
+                    current[0] = update.Start;
+                if (!current[1].HasValue || !update.EndsBefore(current[1].Value, increasing))
+                    current[1] = update.End;
+            }
+        }
+
+        private void UpdateIndexRange(EtpUri uri, Log entity, Dictionary<string, List<double?>> ranges, IEnumerable<string> mnemonics, bool isTimeLog, string indexUnit)
+        {
+            var collection = GetCollection();
+            var mongoUpdate = new MongoDbUpdate<Log>(GetCollection(), null);
+            var filter = MongoDbUtility.GetEntityFilter<Log>(uri);
+            UpdateDefinition<Log> logIndexUpdate = null;
+
+            foreach (var mnemonic in mnemonics)
+            {
+                var curve = entity.LogCurveInfo.FirstOrDefault(c => c.Uid.EqualsIgnoreCase(mnemonic));
+                if (curve == null)
+                    continue;
+
+                var filters = new List<FilterDefinition<Log>>();
+                filters.Add(filter);
+                filters.Add(MongoDbUtility.BuildFilter<Log>("LogCurveInfo.Uid", curve.Uid));
+                var curveFilter = Builders<Log>.Filter.And(filters);
+
+                var updateBuilder = Builders<Log>.Update;
+                UpdateDefinition<Log> updates = null;
+                
+                var range = ranges[mnemonic];
+                var isIndexCurve = mnemonic == entity.IndexCurve;
+                if (isTimeLog)
+                {
+                    if (range[0].HasValue)
+                    {
+                        curve.MinDateTimeIndex = new Timestamp(DateTimeOffset.FromUnixTimeSeconds((long)range[0].Value));
+                        updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MinDateTimeIndex", curve.MinDateTimeIndex);
+                        if (isIndexCurve)
+                        {
+                            logIndexUpdate = MongoDbUtility.BuildUpdate(logIndexUpdate, "StartDateTimeIndex", curve.MinDateTimeIndex);
+                        }
+                    }                       
+                    if (range[1].HasValue)
+                    {
+                        curve.MaxDateTimeIndex = new Timestamp(DateTimeOffset.FromUnixTimeSeconds((long)range[1].Value));
+                        updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MaxDateTimeIndex", curve.MaxDateTimeIndex);
+                        if (isIndexCurve)
+                        {
+                            logIndexUpdate = MongoDbUtility.BuildUpdate(logIndexUpdate, "EndDateTimeIndex", curve.MaxDateTimeIndex);
+                        }
+                    }                   
+                }
+                else
+                {
+                    if (range[0].HasValue)
+                    {
+                        curve.MinIndex = UpdateGenericMeasure(curve.MinIndex, range[0].Value, indexUnit);
+                        updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MinIndex", curve.MinIndex);
+                        if (isIndexCurve)
+                        {
+                            logIndexUpdate = MongoDbUtility.BuildUpdate(logIndexUpdate, "StartIndex", curve.MinIndex);
+                        }
+                    }
+                        
+                    if (range[1].HasValue)
+                    {
+                        curve.MaxIndex = UpdateGenericMeasure(curve.MaxIndex, range[1].Value, indexUnit);
+                        updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MaxIndex", curve.MaxIndex);
+                        if (isIndexCurve)
+                        {
+                            logIndexUpdate = MongoDbUtility.BuildUpdate(logIndexUpdate, "EndIndex", curve.MaxIndex);
+                        }
+                    }
+                }
+                if (updates != null)
+                    mongoUpdate.UpdateFields(curveFilter, updates);
+            }
+
+            if (logIndexUpdate != null)
+                mongoUpdate.UpdateFields(filter, logIndexUpdate);
         }
         #endregion
     }
