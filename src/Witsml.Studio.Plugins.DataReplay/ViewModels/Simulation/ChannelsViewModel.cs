@@ -43,7 +43,13 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
         /// Gets the proxy for the WITSML web service.
         /// </summary>
         /// <value>The WITSML seb service proxy.</value>
-        public WitsmlProxyViewModel Proxy { get; private set; }
+        public WitsmlProxyViewModel WitsmlClientProxy { get; private set; }
+
+        /// <summary>
+        /// Gets the proxy for the ETP consumer.
+        /// </summary>
+        /// <value>The ETP consumer proxy.</value>
+        public WitsmlProxyViewModel EtpClientProxy { get; private set; }
 
         /// <summary>
         /// Gets the witsml versions retrieved from the server.
@@ -147,7 +153,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
             if (Runtime.ShowDialog(viewModel))
             {
                 Model.WitsmlConnection = viewModel.DataItem;
-                Proxy = CreateProxy();
+                WitsmlClientProxy = CreateWitsmlClientProxy();
                 GetVersions();
             }
         }
@@ -167,7 +173,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
 
         public void OnWitsmlVersionChanged()
         {
-            Proxy = CreateProxy();
+            WitsmlClientProxy = CreateWitsmlClientProxy();
         }
 
         public bool CanStartWitsmlClient
@@ -187,7 +193,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
                     try
                     {
                         Log("WITSML Client simulation starting. URL: {0}", Model.WitsmlConnection.Uri);
-                        await Proxy.Start(Model, token);
+                        await WitsmlClientProxy.Start(Model, token);
                         Log("WITSML Client simulation stopped.");
                     }
                     catch (ContainerException)
@@ -227,6 +233,30 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
 
         public void StartEtpClient()
         {
+            EtpClientTokenSource = new CancellationTokenSource();
+            var token = EtpClientTokenSource.Token;
+
+            Task.Run(async () =>
+            {
+                using (EtpClientTokenSource)
+                {
+                    try
+                    {
+                        Log("ETP Client simulation starting. URL: {0}", Model.EtpConnection.Uri);
+                        await EtpClientProxy.Start(Model, token);
+                        Log("ETP Client simulation stopped.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Log("An error occurred: " + ex);
+                    }
+                    finally
+                    {
+                        EtpClientTokenSource = null;
+                    }
+                }
+            },
+            token);
         }
 
         public bool CanStopEtpClient
@@ -335,7 +365,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
             try
             {
                 WitsmlVersions.Clear();
-                var versions = Proxy.Connection.GetVersion();
+                var versions = WitsmlClientProxy.Connection.GetVersion();
 
                 if (!string.IsNullOrEmpty(versions))
                 {
@@ -362,11 +392,16 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
             }
         }
 
-        private WitsmlProxyViewModel CreateProxy()
+        private WitsmlProxyViewModel CreateWitsmlClientProxy()
         {
             return OptionsIn.DataVersion.Version131.Equals(Model.WitsmlVersion)
                 ? new Log131ProxyViewModel(Runtime, Model.WitsmlConnection) as WitsmlProxyViewModel
                 : new Log141ProxyViewModel(Runtime, Model.WitsmlConnection) as WitsmlProxyViewModel;
+        }
+
+        private WitsmlProxyViewModel CreateEtpClientProxy()
+        {
+            return new Etp141ProxyViewModel(Runtime, Model.EtpConnection);
         }
 
         private void Log(string message, params object[] values)
