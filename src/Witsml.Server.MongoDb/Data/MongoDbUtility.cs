@@ -257,5 +257,22 @@ namespace PDS.Witsml.Server.Data
 
             return ignored == null ? creationTime : creationTime.Union(ignored).ToArray();
         }
+
+        public static FilterDefinition<T> BuildFilter<T>(string field, object value)
+        {
+            var type = value.GetType();
+            if (type == typeof(string))
+                return Builders<T>.Filter.EqIgnoreCase(field, value.ToString());
+            else
+                return Builders<T>.Filter.Eq(field, value);
+        }
+
+        public static UpdateDefinition<T> BuildUpdate<T>(UpdateDefinition<T> updates, string field, object value)
+        {
+            if (updates == null)
+                return Builders<T>.Update.Set(field, value);
+            else
+                return updates.Set(field, value);
+        }
     }
 }
