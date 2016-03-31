@@ -98,11 +98,13 @@ namespace PDS.Witsml.Server.Data.Logs
             Wellbore.UidWell = response.SuppMsgOut;
             response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
 
+            var uidWellbore = response.SuppMsgOut;
+
             var log = new Log()
             {
                 UidWell = Wellbore.UidWell,
                 NameWell = Well.Name,
-                UidWellbore = response.SuppMsgOut,
+                UidWellbore = uidWellbore,
                 NameWellbore = Wellbore.Name,
                 Name = DevKit.Name("Log 01")
             };
@@ -112,6 +114,18 @@ namespace PDS.Witsml.Server.Data.Logs
 
             response = DevKit.Add<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var query = new Log
+            {
+                UidWell = Wellbore.UidWell,
+                UidWellbore = uidWellbore,
+                Uid = uidLog
+            };
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
         }
 
         [TestMethod]
