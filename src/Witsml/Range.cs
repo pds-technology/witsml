@@ -93,5 +93,18 @@ namespace PDS.Witsml
                 ? (value >= range.Start.Value && value <= range.End.Value)
                 : (value <= range.Start.Value && value >= range.End.Value);
         }
+
+        /// <summary>
+        /// Computes the range of a data chunk that contains the given index.
+        /// </summary>
+        /// <param name="index">The index contained within the computed range.</param>
+        /// <param name="rangeSize">The range size of one chunk.</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <returns>The range.</returns>
+        public static Range<int> ComputeRange(double index, int rangeSize, bool increasing = true)
+        {
+            var rangeIndex = increasing ? (int)(Math.Floor(index / rangeSize)) : (int)(Math.Ceiling(index / rangeSize));
+            return new Range<int>(rangeIndex * rangeSize, rangeIndex * rangeSize + (increasing ? rangeSize : -rangeSize));
+        }
     }
 }
