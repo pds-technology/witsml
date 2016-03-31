@@ -61,6 +61,9 @@ namespace PDS.Witsml.Server.Providers.Store
 
         private IEnergisticsCollection GetList(string objectType, IDataObject entity)
         {
+            if (entity == null)
+                return null;
+
             var entityType = entity.GetType();
             var groupType = entityType.Assembly.GetType(entityType.FullName + "List");
             var property = groupType.GetProperty(entityType.Name);
