@@ -139,7 +139,12 @@ namespace PDS.Witsml.Server.Data
 
         public IEnumerable<XElement> Properties(string name)
         {
-            return Element().Elements(_namespace + name);
+            return Properties(Element(), name);
+        }
+
+        public IEnumerable<XElement> Properties(XElement element, string name)
+        {
+            return element.Elements(_namespace + name);
         }
 
         public IEnumerable<XElement> Properties(IEnumerable<XElement> elements, string name)
