@@ -178,6 +178,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 var indexInfo = new ChannelIndexInfo
                 {
                     Mnemonic = index.Mnemonic,
+                    Unit = index.Uom,
                     Increasing = index.Direction == IndexDirection.increasing,
                     IsTimeIndex = index.IndexType == ChannelIndexType.datetime || index.IndexType == ChannelIndexType.elapsedtime
                 };
@@ -841,7 +842,7 @@ namespace PDS.Witsml.Server.Data.Channels
             var end = GetAnIndexValue(updates.Last().First(), isTimeLog);
 
             var chunk = new ChannelDataValues { Uid = NewUid(), UidLog = uidLog, MnemonicList = string.Join(",", mnemonics), UnitList = string.Join(",", units) };
-            var index = new ChannelIndexInfo { Mnemonic = mnemonics[0], Start = start, End = end, Increasing = increasing, IsTimeIndex = isTimeLog };
+            var index = new ChannelIndexInfo { Mnemonic = mnemonics[0], Unit = units[0], Start = start, End = end, Increasing = increasing, IsTimeIndex = isTimeLog };
 
             chunk.Indices = new List<ChannelIndexInfo> { index };
             chunk.Data = SerializeLogData(updates.Select(r => string.Join(Delimiter, r)).ToList());
