@@ -117,7 +117,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     break;
 
                 foreach (var uri in Channels.Keys)
-                    await StreamChannelData(infos, uri);
+                    await StreamChannelData(infos, uri, token);
             }
         }
 
@@ -126,7 +126,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             return _container.Resolve<IChannelDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
         }
 
-        private async Task<bool> StreamChannelData(IList<ChannelStreamingInfo> infos, EtpUri uri)
+        private async Task<bool> StreamChannelData(IList<ChannelStreamingInfo> infos, EtpUri uri, CancellationToken token)
         {
             var channels = Channels[uri];
             var channelIds = channels.Select(x => x.ChannelId).ToArray();
@@ -147,17 +147,17 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             // Stream Channel Data with IndexedDataItems if StreamIndexValuePairs setting is true
             if (StreamIndexValuePairs)
             {
-                await StreamIndexedChannelData(infos, channels, channelData, increasing);
+                await StreamIndexedChannelData(infos, channels, channelData, increasing, token);
             }
             else
             {
-                await StreamChannelData(infos, channels, channelData, increasing);
+                await StreamChannelData(infos, channels, channelData, increasing, token);
             }
 
             return true;
         }
 
-        private async Task StreamChannelData(IList<ChannelStreamingInfo> infos, List<ChannelMetadataRecord> channels, IEnumerable<IChannelDataRecord> channelData, bool increasing)
+        private async Task StreamChannelData(IList<ChannelStreamingInfo> infos, List<ChannelMetadataRecord> channels, IEnumerable<IChannelDataRecord> channelData, bool increasing, CancellationToken token)
         {
             var dataItemList = new List<DataItem>();
 
@@ -169,6 +169,9 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 {
                     foreach (var dataItem in CreateDataItems(channels, infos, channelDataEnum.Current, increasing))
                     {
+                        if (token.IsCancellationRequested)
+                            break;
+
                         if (dataItemList.Count >= MaxDataItems)
                         {
                             await SendChannelData(dataItemList);
@@ -178,6 +181,9 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                         dataItemList.Add(dataItem);
                     }
                     endOfChannelData = !channelDataEnum.MoveNext();
+
+                    if (token.IsCancellationRequested)
+                        break;
                 }
 
                 if (dataItemList.Any())
@@ -229,7 +235,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             }
         }
 
-        private async Task StreamIndexedChannelData(IList<ChannelStreamingInfo> infos, List<ChannelMetadataRecord> channels, IEnumerable<IChannelDataRecord> channelData, bool increasing)
+        private async Task StreamIndexedChannelData(IList<ChannelStreamingInfo> infos, List<ChannelMetadataRecord> channels, IEnumerable<IChannelDataRecord> channelData, bool increasing, CancellationToken token)
         {
             var dataItemList = new List<DataItem>();
 
@@ -241,6 +247,9 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 {
                     foreach (var dataItem in CreateIndexedDataItems(channels, infos, channelDataEnum.Current, increasing))
                     {
+                        if (token.IsCancellationRequested)
+                            break;
+
                         if (dataItemList.Count + 1 >= MaxDataItems)
                         {
                             await SendChannelData(dataItemList);
@@ -251,6 +260,10 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                         dataItemList.Add(dataItem.ValueDataItem);
                     }
                     endOfChannelData = !channelDataEnum.MoveNext();
+
+                    if (token.IsCancellationRequested)
+                        break;
+
                 }
 
                 if (dataItemList.Any())
