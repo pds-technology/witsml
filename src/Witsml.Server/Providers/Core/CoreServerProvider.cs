@@ -4,6 +4,7 @@ using System.Linq;
 using Energistics.Datatypes;
 using Energistics.Protocol.ChannelStreaming;
 using Energistics.Protocol.Core;
+using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Providers.Core
 {
@@ -11,6 +12,8 @@ namespace PDS.Witsml.Server.Providers.Core
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class CoreServerProvider : CoreServerHandler
     {
+        private static readonly int MaxMessageRate = Settings.Default.MaxMessageRate;
+
         protected override void HandleRequestSession(MessageHeader header, RequestSession requestSession)
         {
             // The base implementation sends the OpenSession message
@@ -26,7 +29,7 @@ namespace PDS.Witsml.Server.Providers.Core
             {
                 // Start a ChannelStreaming session
                 Session.Handler<IChannelStreamingConsumer>()
-                    .Start(maxMessageRate: 5000);
+                    .Start(maxMessageRate: MaxMessageRate);
             }
         }
 

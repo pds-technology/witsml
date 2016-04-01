@@ -112,5 +112,14 @@ namespace PDS.Witsml.Server.Properties {
                 return ((int)(this["ChannelDataChunkRangeSize"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1000")]
+        public int MaxMessageRate {
+            get {
+                return ((int)(this["MaxMessageRate"]));
+            }
+        }
     }
 }

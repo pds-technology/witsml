@@ -183,6 +183,16 @@ namespace PDS.Witsml.Server.Data.Channels
         }
 
         /// <summary>
+        /// Updates the channel data for the specified data object URI.
+        /// </summary>
+        /// <param name="uri">The parent data object URI.</param>
+        /// <param name="reader">The update reader.</param>
+        public void UpdateChannelData(EtpUri uri, ChannelDataReader reader)
+        {
+            // TODO: refactor Add and Update to call this method
+        }
+
+        /// <summary>
         /// Deletes a data object by the specified identifier.
         /// </summary>
         /// <param name="uri">The data object URI.</param>
