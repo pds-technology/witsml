@@ -32,5 +32,8 @@
     <Setting Name="ChannelDataChunkRangeSize" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">1000</Value>
     </Setting>
+    <Setting Name="MaxMessageRate" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">1000</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -49,6 +49,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\Channels\ChannelDataBlock.cs" />
     <Compile Include="Data\Channels\ChannelDataExtensions.cs" />
     <Compile Include="Data\Channels\ChannelDataReader.cs" />
     <Compile Include="Data\Channels\ChannelIndexInfo.cs" />

@@ -25,5 +25,12 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="range">The data range to retrieve.</param>
         /// <returns>A collection of channel data.</returns>
         IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, Range<double?> range);
+
+        /// <summary>
+        /// Updates the channel data for the specified data object URI.
+        /// </summary>
+        /// <param name="uri">The parent data object URI.</param>
+        /// <param name="reader">The update reader.</param>
+        void UpdateChannelData(EtpUri uri, ChannelDataReader reader);
     }
 }

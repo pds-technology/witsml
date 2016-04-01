@@ -14,6 +14,11 @@ namespace PDS.Witsml.Data.Channels
         private const string Null = "null";
         private const string NaN = "NaN";
 
+        private static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings()
+        {
+            DateParseHandling = DateParseHandling.DateTimeOffset
+        };
+
         private static readonly string[] Empty = new string[0];
         private List<List<List<object>>> _records;
         private int _indexCount;
@@ -26,8 +31,13 @@ namespace PDS.Witsml.Data.Channels
         }
 
         public ChannelDataReader(string data, string[] mnemonics = null, string[] units = null, string uri = null, string id = null)
+            : this(Deserialize(data), mnemonics, units, uri, id)
         {
-            _records = Deserialize(data);
+        }
+
+        internal ChannelDataReader(List<List<List<object>>> records, string[] mnemonics = null, string[] units = null, string uri = null, string id = null)
+        {
+            _records = records;
             _count = GetRowValues(0).Count();
             _indexCount = GetIndexValues(0).Count();
 
@@ -374,14 +384,12 @@ namespace PDS.Witsml.Data.Channels
                 .SelectMany(x => x.Last());
         }
 
-        private List<List<List<object>>> Deserialize(string data)
+        private static List<List<List<object>>> Deserialize(string data)
         {
             if (string.IsNullOrWhiteSpace(data))
                 return new List<List<List<object>>>();
             
-            var dateTimeSetting = new JsonSerializerSettings() { DateParseHandling = DateParseHandling.DateTimeOffset };
-
-            return JsonConvert.DeserializeObject<List<List<List<object>>>>(data, dateTimeSetting);       
+            return JsonConvert.DeserializeObject<List<List<List<object>>>>(data, JsonSettings);       
         }
 
         private static string Combine(IList<string> data)

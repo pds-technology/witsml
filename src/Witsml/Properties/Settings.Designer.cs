@@ -31,5 +31,14 @@ namespace PDS.Witsml.Properties {
                 return ((string)(this["DefaultDataSchemaVersion"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public int ChannelDataBlockBatchSize {
+            get {
+                return ((int)(this["ChannelDataBlockBatchSize"]));
+            }
+        }
     }
 }

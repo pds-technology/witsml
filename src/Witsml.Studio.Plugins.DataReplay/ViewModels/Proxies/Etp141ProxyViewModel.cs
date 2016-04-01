@@ -182,7 +182,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
 
             var value = 0d;
 
-            if (streamingInfo.StartIndex.Item is long)
+            if (streamingInfo.StartIndex.Item is double)
             {
                 value = (double)streamingInfo.StartIndex.Item 
                       + Math.Pow(10, index.Scale);
