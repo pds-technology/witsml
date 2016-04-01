@@ -14,6 +14,7 @@ using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Server.Models;
+using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -31,6 +32,7 @@ namespace PDS.Witsml.Server.Data.Logs
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class Log131DataAdapter : MongoDbDataAdapter<Log>, IChannelDataProvider, IWitsml131Configuration
     {
+        private static readonly bool StreamIndexValuePairs = Settings.Default.StreamIndexValuePairs;
         private readonly ChannelDataChunkAdapter _channelDataChunkAdapter;
 
         /// <summary>
@@ -204,15 +206,19 @@ namespace PDS.Witsml.Server.Data.Logs
             if (entity.LogCurveInfo == null || !entity.LogCurveInfo.Any())
                 return metadata;
 
-            var indexMetadata = ToIndexMetadataRecord(entity, entity.LogCurveInfo.First());
+            var indexCurve = entity.LogCurveInfo.FirstOrDefault(x => x.Mnemonic == entity.IndexCurve.Value);
+            var indexMetadata = ToIndexMetadataRecord(entity, indexCurve);
 
-            // TODO: skip the indexCurve after updating the ChannelStreamingProducer
-            metadata.AddRange(entity.LogCurveInfo.Select(x =>
-            {
-                var channel = ToChannelMetadataRecord(entity, x, indexMetadata);
-                channel.ChannelId = index++;
-                return channel;
-            }));
+            // Skip the indexCurve after updating the ChannelStreamingProducer
+            metadata.AddRange(
+                entity.LogCurveInfo
+                .Where(x => StreamIndexValuePairs || !x.Mnemonic.EqualsIgnoreCase(indexCurve.Mnemonic))
+                .Select(x =>
+                {
+                    var channel = ToChannelMetadataRecord(entity, x, indexMetadata);
+                    channel.ChannelId = index++;
+                    return channel;
+                }));
 
             return metadata;
         }
