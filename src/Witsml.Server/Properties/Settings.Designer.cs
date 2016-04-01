@@ -112,5 +112,14 @@ namespace PDS.Witsml.Server.Properties {
                 return ((int)(this["ChannelDataChunkRangeSize"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool StreamIndexValuePairs {
+            get {
+                return ((bool)(this["StreamIndexValuePairs"]));
+            }
+        }
     }
 }
