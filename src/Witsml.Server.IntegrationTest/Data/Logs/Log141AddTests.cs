@@ -35,7 +35,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log_can_be_added_without_data()
         {
             Well.Uid = "804415d0-b5e7-4389-a3c6-cdb790f5485f";
-            Well.Name = "Test Well 01";
+            Well.Name = "Test Well 1.4.1.1";
 
             // check if well already exists
             var results = DevKit.Query<WellList, Well>(Well);
@@ -44,7 +44,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var response = DevKit.Add<WellList, Well>(Well);
 
             Wellbore.Uid = "d3e7d4bf-0f29-4c2b-974d-4871cf8001fd";
-            Wellbore.Name = "Test Wellbore 01";
+            Wellbore.Name = "Test Wellbore 1.4.1.1";
             Wellbore.UidWell = Well.Uid;
             Wellbore.NameWell = Well.Name;
 
@@ -53,7 +53,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var log = new Log()
             {
                 Uid = "e2401b72-550f-4695-ab27-d5b0589bde17",
-                Name = "Test Log 01",
+                Name = "Test Log 1.4.1.1",
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 UidWellbore = Wellbore.Uid,
