@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
@@ -120,8 +121,20 @@ namespace PDS.Witsml.Server.Data.Channels
 
             InsertEntity(entity);
 
-            // Add ChannelDataChunks
-            _channelDataChunkAdapter.Add(reader);
+            if (reader != null)
+            {
+                var increasing = entity.Index.FirstOrDefault().Direction == IndexDirection.increasing;
+
+                // Get current index information
+                var ranges = GetCurrentIndexRange(entity);
+                GetUpdatedLogHeaderIndexRange(reader, ranges, increasing);
+
+                // Add ChannelDataChunks
+                _channelDataChunkAdapter.Add(reader);
+
+                // Update index range
+                UpdateIndexRange(entity.GetUri(), entity, ranges, reader.Mnemonics, entity.StartIndex, reader.Units.First());
+            }
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uuid);
         }
@@ -147,8 +160,24 @@ namespace PDS.Witsml.Server.Data.Channels
             var entity = Parse(parser.Context.Xml);
             var reader = ExtractDataReader(entity, GetEntity(uri));
 
+            // Get Updated ChannelSet
+            var current = GetEntity(uri);
+
             // Merge ChannelDataChunks
-            _channelDataChunkAdapter.Merge(reader);
+            if (reader != null)
+            {
+                var increasing = entity.Index.FirstOrDefault().Direction == IndexDirection.increasing;
+
+                // Get current index information
+                var ranges = GetCurrentIndexRange(current);
+                GetUpdatedLogHeaderIndexRange(reader, ranges, increasing);
+
+                // Add ChannelDataChunks
+                _channelDataChunkAdapter.Merge(reader);
+
+                // Update index range
+                UpdateIndexRange(entity.GetUri(), entity, ranges, reader.Mnemonics, entity.StartIndex, reader.Units.First());
+            }
 
             return new WitsmlResult(ErrorCodes.Success);
         }
@@ -222,6 +251,81 @@ namespace PDS.Witsml.Server.Data.Channels
                     : IndexDirections.Increasing,
                 CustomData = new Dictionary<string, DataValue>(0),
             };
+        }
+
+        private Dictionary<string, List<double?>> GetCurrentIndexRange(ChannelSet entity)
+        {
+            var ranges = new Dictionary<string, List<double?>>();
+            var index = entity.Index.FirstOrDefault();
+            AddIndexRange(index.Mnemonic, entity.StartIndex, entity.EndIndex, ranges);
+
+            foreach (var channel in entity.Channel)
+            {
+                AddIndexRange(channel.Mnemonic, channel.StartIndex, channel.EndIndex, ranges);
+            }
+
+            return ranges;
+        }
+
+        private void AddIndexRange(string mnemonic, AbstractIndexValue start, AbstractIndexValue end, Dictionary<string, List<double?>> ranges)
+        {
+            var range = new List<double?> { null, null };
+            if (start is TimeIndexValue)
+            {
+                var startTime = start as TimeIndexValue;
+                if (startTime != null && !string.IsNullOrEmpty(startTime.Time))
+                    range[0] = DateTimeOffset.Parse(startTime.Time).ToUnixTimeSeconds();
+                var endTime = end as TimeIndexValue;
+                if (endTime != null && !string.IsNullOrEmpty(endTime.Time))
+                    range[1] = DateTimeOffset.Parse(endTime.Time).ToUnixTimeSeconds();
+            }
+            else if (start is DepthIndexValue)
+            {
+                var startDepth = start as DepthIndexValue;
+                if (startDepth != null && startDepth.Depth.HasValue)
+                    range[0] = startDepth.Depth.Value;
+                var endDepth = end as DepthIndexValue;
+                if (endDepth != null && endDepth.Depth.HasValue)
+                    range[1] = endDepth.Depth.Value;
+            }
+            else
+            {
+                var startPass = start as PassIndexedDepth;
+                if (startPass != null && startPass.Depth.HasValue)
+                    range[0] = startPass.Depth.Value;
+                var endPass = end as PassIndexedDepth;
+                if (endPass != null && endPass.Depth.HasValue)
+                    range[1] = endPass.Depth.Value;
+            }
+            ranges.Add(mnemonic, range);
+        }
+
+        private void GetUpdatedLogHeaderIndexRange(ChannelDataReader reader, Dictionary<string, List<double?>> ranges, bool increasing = true)
+        {
+            for (var i = 0; i < reader.Mnemonics.Length; i++)
+            {
+                var mnemonic = reader.Mnemonics[i];
+                List<double?> current;
+                if (ranges.ContainsKey(mnemonic))
+                {
+                    current = ranges[mnemonic];
+                }
+                else
+                {
+                    current = new List<double?> { null, null };
+                    ranges.Add(mnemonic, current);
+                }
+                var update = reader.GetChannelIndexRange(i);
+                if (!current[0].HasValue || !update.StartsAfter(current[0].Value, increasing))
+                    current[0] = update.Start;
+                if (!current[1].HasValue || !update.EndsBefore(current[1].Value, increasing))
+                    current[1] = update.End;
+            }
+        }
+
+        private void UpdateIndexRange(EtpUri uri, ChannelSet entity, Dictionary<string, List<double?>> ranges, IEnumerable<string> mnemonics, AbstractIndexValue index, string indexUnit)
+        {
+
         }
     }
 }
