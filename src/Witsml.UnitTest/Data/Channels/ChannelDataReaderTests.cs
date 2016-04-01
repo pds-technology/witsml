@@ -85,7 +85,7 @@ namespace PDS.Witsml.Data.Channels
         public void ChannelDataReader_can_set_data_value()
         {
             var reader = new ChannelDataReader(UpdateLogData1, new[] { "MD", "ROP", "GR", "HKLD" })
-                .WithIndex("MD", true, false);
+                .WithIndex("MD", "m", true, false);
 
             Assert.AreEqual(1, reader.Depth);
             Assert.AreEqual(4, reader.FieldCount);
@@ -142,7 +142,7 @@ namespace PDS.Witsml.Data.Channels
         public void ChannelDataReader_can_calculate_channel_min_max_indices_with_single_value()
         {
             var reader = new ChannelDataReader(UpdateLogData2, new[] { "MD", "ROP", "GR", "HKLD" })
-                .WithIndex("MD", true, false);
+                .WithIndex("MD", "m", true, false);
 
             Assert.AreEqual(1, reader.Depth);
             Assert.AreEqual(4, reader.FieldCount);
@@ -158,7 +158,7 @@ namespace PDS.Witsml.Data.Channels
         public void ChannelDataReader_can_calculate_channel_min_max_indices_with_multiple_values()
         {
             var reader = new ChannelDataReader(UpdateLogData3, new[] { "MD", "ROP", "GR", "HKLD" })
-                .WithIndex("MD", true, false);
+                .WithIndex("MD", "m", true, false);
 
             Assert.AreEqual(1, reader.Depth);
             Assert.AreEqual(4, reader.FieldCount);

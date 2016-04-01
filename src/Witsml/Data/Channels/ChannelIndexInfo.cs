@@ -10,6 +10,8 @@ namespace PDS.Witsml.Data.Channels
     {
         public string Mnemonic { get; set; }
 
+        public string Unit { get; set; }
+
         public bool Increasing { get; set; }
 
         public bool IsTimeIndex { get; set; }

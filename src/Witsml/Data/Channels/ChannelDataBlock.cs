@@ -49,7 +49,7 @@ namespace PDS.Witsml.Data.Channels
                 Mnemonic = mnemonic,
                 Increasing = increasing,
                 IsTimeIndex = isTimeIndex,
-                //Unit = unit
+                Unit = unit
             });
         }
 
