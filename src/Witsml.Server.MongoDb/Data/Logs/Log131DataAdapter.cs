@@ -172,22 +172,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var entity = Parse(parser.Context.Xml);
             var reader = ExtractDataReader(entity, GetEntity(uri));
 
-            // Get Updated Log
-            var current = GetEntity(uri);
-
-            // Merge ChannelDataChunks
-            if (reader != null)
-            {
-                // Get current index information
-                var ranges = GetCurrentIndexRange(current);
-                GetUpdatedLogHeaderIndexRange(reader, ranges, current.Direction == LogIndexDirection.increasing);
-
-                // Add ChannelDataChunks
-                _channelDataChunkAdapter.Merge(reader);
-
-                // Update index range
-                UpdateIndexRange(uri, current, ranges, reader.Mnemonics, entity.IndexType == LogIndexType.datetime, reader.Units.FirstOrDefault());
-            }
+            UpdateLogDataAndIndex(uri, reader);
 
             return new WitsmlResult(ErrorCodes.Success);
         }
@@ -199,7 +184,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="reader">The update reader.</param>
         public void UpdateChannelData(EtpUri uri, ChannelDataReader reader)
         {
-            // TODO: refactor Add and Update to call this method
+            UpdateLogDataAndIndex(uri, reader);
         }
 
         /// <summary>
@@ -459,6 +444,37 @@ namespace PDS.Witsml.Server.Data.Logs
             };
         }
 
+        private void UpdateLogDataAndIndex(EtpUri uri, ChannelDataReader reader)
+        {
+            var current = GetEntity(uri);
+
+            // Merge ChannelDataChunks
+            if (reader != null)
+            {
+                // Get current index information
+                var ranges = GetCurrentIndexRange(current);
+                GetUpdatedLogHeaderIndexRange(reader, ranges, current.Direction == LogIndexDirection.increasing);
+
+                // Add ChannelDataChunks
+                _channelDataChunkAdapter.Merge(reader);
+
+                // Update index range
+                UpdateIndexRange(uri, current, ranges, reader.Mnemonics, current.IndexType == LogIndexType.datetime, reader.Units.FirstOrDefault());
+            }
+        }
+
+        private GenericMeasure UpdateGenericMeasure(GenericMeasure gmObject, double gmValue, string uom)
+        {
+            if (gmObject == null)
+            {
+                gmObject = new GenericMeasure();
+            }
+            gmObject.Value = gmValue;
+            gmObject.Uom = uom;
+
+            return gmObject;
+        }
+
         private Dictionary<string, List<double?>> GetCurrentIndexRange(Log entity)
         {
             var ranges = new Dictionary<string, List<double?>>();
@@ -508,18 +524,6 @@ namespace PDS.Witsml.Server.Data.Logs
                 if (!current[1].HasValue || !update.EndsBefore(current[1].Value, increasing))
                     current[1] = update.End;
             }
-        }
-
-        private GenericMeasure UpdateGenericMeasure(GenericMeasure gmObject, double gmValue, string uom)
-        {
-            if (gmObject == null)
-            {
-                gmObject = new GenericMeasure();
-            }
-            gmObject.Value = gmValue;
-            gmObject.Uom = uom;
-
-            return gmObject;
         }
 
         private void UpdateIndexRange(EtpUri uri, Log entity, Dictionary<string, List<double?>> ranges, IEnumerable<string> mnemonics, bool isTimeLog, string indexUnit)
