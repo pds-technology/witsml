@@ -191,5 +191,25 @@ namespace PDS.Witsml.Server.Data.Logs
             // Test the log is still decreasing
             Assert.IsTrue(end < start);
         }
+
+        [TestMethod]
+        public void Log_can_be_added_with_increasing_time_data()
+        {
+            var numDataValue = 150;
+            var secondaryIndex = LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
+            var channelSet = Log2.ChannelSet.First();
+            channelSet.Index.Add(secondaryIndex);
+
+            // Save the Well and Wellbore
+            WellAdapter.Put(DevKit.Parser(Well1));
+            WellboreAdapter.Put(DevKit.Parser(Wellbore1));
+
+            // Generate 150 rows of data
+            LogGenerator.GenerateChannelData(Log2.ChannelSet, numDataValue);
+            var response = LogAdapter.Put(DevKit.Parser(Log2));
+            Assert.AreEqual(ErrorCodes.Success, response.Code);
+
+            var uuidLog = response.Message;           
+        }
     }
 }

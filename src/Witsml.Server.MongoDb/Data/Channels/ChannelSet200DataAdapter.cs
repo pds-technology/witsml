@@ -7,6 +7,7 @@ using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
@@ -321,33 +322,33 @@ namespace PDS.Witsml.Server.Data.Channels
             ranges.Add(mnemonic, range);
         }
 
-        private AbstractIndexValue UpdateIndexValue(AbstractIndexValue index, AbstractIndexValue current, double value)
+        private AbstractIndexValue UpdateIndexValue(ChannelIndexType? indexType, AbstractIndexValue current, double value)
         {
             AbstractIndexValue indexValue = null;
 
-            if (index is TimeIndexValue)
+            if (indexType == ChannelIndexType.datetime || indexType == ChannelIndexType.elapsedtime)
             {
                 if (current == null)
                     indexValue = new TimeIndexValue();
                 else
                     indexValue = current;
-                ((TimeIndexValue)indexValue).Time = DateTime.Parse(value.ToString()).ToString("o");
+                ((TimeIndexValue)indexValue).Time = DateTimeOffset.FromUnixTimeSeconds((long)value).DateTime.ToString("o");
             }
-            else if (index is DepthIndexValue)
-            {
-                if (current == null)
-                    indexValue = new DepthIndexValue();
-                else
-                    indexValue = current;
-                ((DepthIndexValue)indexValue).Depth = (float)value;
-            }
-            else if (index is PassIndexedDepth)
+            else if (indexType == ChannelIndexType.passindexeddepth)
             {
                 if (current == null)
                     indexValue = new PassIndexedDepth();
                 else
                     indexValue = current;
                 ((PassIndexedDepth)indexValue).Depth = (float)value;
+            }
+            else
+            {
+                if (current == null)
+                    indexValue = new DepthIndexValue();
+                else
+                    indexValue = current;
+                ((DepthIndexValue)indexValue).Depth = (float)value;
             }
 
             return indexValue;
@@ -380,20 +381,28 @@ namespace PDS.Witsml.Server.Data.Channels
         {
             var collection = GetCollection();
             var mongoUpdate = new MongoDbUpdate<ChannelSet>(GetCollection(), null);
-            var filter = MongoDbUtility.GetEntityFilter<ChannelSet>(uri);
+
+            var idField = "Uid";
+            var classMap = BsonClassMap.LookupClassMap(typeof(ChannelSet));
+            if (classMap != null && classMap.IdMemberMap != null)
+                idField = classMap.IdMemberMap.MemberName;
+
+            var filter = MongoDbUtility.GetEntityFilter<ChannelSet>(uri, idField);
             UpdateDefinition<ChannelSet> channelIndexUpdate = null;
 
-            var indexMnemonic = entity.Index.FirstOrDefault().Mnemonic;
+            var indexChannel = entity.Index.FirstOrDefault();
+            var indexType = indexChannel.IndexType;
+            var indexMnemonic = indexChannel.Mnemonic;
             var startIndex = entity.StartIndex;
             var range = ranges[indexMnemonic];
             if (range[0].HasValue)
             {
-                var start = UpdateIndexValue(startIndex, startIndex, range[0].Value);
+                var start = UpdateIndexValue(indexType, startIndex, range[0].Value);
                 channelIndexUpdate = MongoDbUtility.BuildUpdate(channelIndexUpdate, "StartIndex", start);
             }
             if (range[1].HasValue)
             {
-                var end = UpdateIndexValue(startIndex, entity.EndIndex, range[1].Value);
+                var end = UpdateIndexValue(indexType, entity.EndIndex, range[1].Value);
                 channelIndexUpdate = MongoDbUtility.BuildUpdate(channelIndexUpdate, "EndIndex", end);
             }
             if (channelIndexUpdate != null)
@@ -416,12 +425,12 @@ namespace PDS.Witsml.Server.Data.Channels
                 range = ranges[mnemonic];
                 if (range[0].HasValue)
                 {
-                    var start = UpdateIndexValue(startIndex, channel.StartIndex, range[0].Value);
+                    var start = UpdateIndexValue(indexType, channel.StartIndex, range[0].Value);
                     updates = MongoDbUtility.BuildUpdate(updates, "Channel.$.StartIndex", start);
                 }
                 if (range[1].HasValue)
                 {
-                    var end = UpdateIndexValue(startIndex, channel.EndIndex, range[1].Value);
+                    var end = UpdateIndexValue(indexType, channel.EndIndex, range[1].Value);
                     updates = MongoDbUtility.BuildUpdate(updates, "Channel.$.EndIndex", end);
                 }
                 if (updates != null)
