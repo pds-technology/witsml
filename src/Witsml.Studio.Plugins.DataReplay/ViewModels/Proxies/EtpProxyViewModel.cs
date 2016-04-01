@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Energistics;
+using PDS.Framework;
 using PDS.Witsml.Studio.Runtime;
 
 namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
@@ -10,6 +11,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
     {
         public EtpProxyViewModel(IRuntimeService runtime, Action<string> log)
         {
+            TaskRunner = new TaskRunner();
             Runtime = runtime;
             Log = log;
         }
@@ -21,6 +23,8 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
         public Models.Simulation Model { get; protected set; }
 
         public EtpClient Client { get; protected set; }
+
+        public TaskRunner TaskRunner { get; protected set; }
 
         public abstract Task Start(Models.Simulation model, CancellationToken token, int interval = 5000);
     }

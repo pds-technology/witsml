@@ -13,7 +13,7 @@ namespace PDS.Witsml.Server.Providers.Core
     {
         protected override void HandleRequestSession(MessageHeader header, RequestSession requestSession)
         {
-            // The base implementation send the OpenSession message
+            // The base implementation sends the OpenSession message
             base.HandleRequestSession(header, requestSession);
 
             // Is the client requesting the ChannelStreaming consumer role
@@ -25,7 +25,8 @@ namespace PDS.Witsml.Server.Providers.Core
             if (isClientProducer && isServerConsumer)
             {
                 // Start a ChannelStreaming session
-                Session.Handler<IChannelStreamingConsumer>().Start(maxMessageRate: 5000);
+                Session.Handler<IChannelStreamingConsumer>()
+                    .Start(maxMessageRate: 5000);
             }
         }
 
