@@ -32,6 +32,7 @@ namespace PDS.Witsml.Server.Data.Logs
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class Log141DataAdapter : MongoDbDataAdapter<Log>, IChannelDataProvider, IWitsml141Configuration
     {
+        private static readonly bool StreamIndexValuePairs = Settings.Default.StreamIndexValuePairs;
         private static readonly int MaxDataNodes = Settings.Default.MaxDataNodes;
         private static readonly int MaxDataPoints = Settings.Default.MaxDataPoints;
 
@@ -219,15 +220,19 @@ namespace PDS.Witsml.Server.Data.Logs
             if (entity.LogCurveInfo == null || !entity.LogCurveInfo.Any())
                 return metadata;
 
-            var indexMetadata = ToIndexMetadataRecord(entity, entity.LogCurveInfo.First());
+            var indexCurve = entity.LogCurveInfo.FirstOrDefault(x => x.Mnemonic.Value == entity.IndexCurve);
+            var indexMetadata = ToIndexMetadataRecord(entity, indexCurve);
 
-            // TODO: skip the indexCurve after updating the ChannelStreamingProducer
-            metadata.AddRange(entity.LogCurveInfo.Select(x =>
-            {
-                var channel = ToChannelMetadataRecord(entity, x, indexMetadata);
-                channel.ChannelId = index++;
-                return channel;
-            }));
+            // Skip the indexCurve if StreamIndexValuePairs setting is false
+            metadata.AddRange(
+                entity.LogCurveInfo
+                .Where(x => StreamIndexValuePairs || !x.Mnemonic.Value.EqualsIgnoreCase(indexCurve.Mnemonic.Value))
+                .Select(x =>
+                {
+                    var channel = ToChannelMetadataRecord(entity, x, indexMetadata);
+                    channel.ChannelId = index++;
+                    return channel;
+                }));
 
             return metadata;
         }
