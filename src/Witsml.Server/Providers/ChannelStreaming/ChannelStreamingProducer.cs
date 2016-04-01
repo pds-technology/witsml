@@ -139,12 +139,13 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             var dataProvider = GetDataProvider(uri);
             var channelData = dataProvider.GetChannelData(uri, new Range<double?>(minStart, minStart + RangeSize));
 
-            await StreamChannelData(infos, channels, channelData);
+            // TODO: Stream Channel Data with IndexedDataItems if StreamIndexValuePairs setting is true
+            await StreamIndexedChannelData(infos, channels, channelData);
 
             return true;
         }
 
-        private async Task StreamChannelData(IList<ChannelStreamingInfo> infos, List<ChannelMetadataRecord> channels, IEnumerable<IChannelDataRecord> channelData)
+        private async Task StreamIndexedChannelData(IList<ChannelStreamingInfo> infos, List<ChannelMetadataRecord> channels, IEnumerable<IChannelDataRecord> channelData)
         {
             var dataItemList = new List<DataItem>();
 
@@ -154,7 +155,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
                 while (!endOfChannelData)
                 {
-                    foreach (var dataItem in CreateDataItems(channels, infos, channelDataEnum.Current))
+                    foreach (var dataItem in CreateIndexedDataItems(channels, infos, channelDataEnum.Current))
                     {
                         if (dataItemList.Count + 1 >= MaxDataItems)
                         {
@@ -162,11 +163,8 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                             dataItemList.Clear();
                         }
 
-                        if (dataItem != null)
-                        {
-                            dataItemList.Add(dataItem.Value.IndexDataItem);
-                            dataItemList.Add(dataItem.Value.ValueDataItem);
-                        }
+                        dataItemList.Add(dataItem.IndexDataItem);
+                        dataItemList.Add(dataItem.ValueDataItem);
                     }
                     endOfChannelData = !channelDataEnum.MoveNext();
                 }
@@ -184,15 +182,24 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             await Task.Delay(MaxMessageRate);
         }
 
-        private IEnumerable<IndexedDataItem?> CreateDataItems(IList<ChannelMetadataRecord> channels, IList<ChannelStreamingInfo> infos, IChannelDataRecord record)
+        private IEnumerable<IndexedDataItem> CreateIndexedDataItems(IList<ChannelMetadataRecord> channels, IList<ChannelStreamingInfo> infos, IChannelDataRecord record)
         {
+            // Get the value and ChannelId of the primary index
             var index = record.GetIndexValue();
+            var indexChannelId = channels
+                .Where(x => x.Mnemonic.EqualsIgnoreCase(x.Indexes[0].Mnemonic))
+                .Select(x => x.ChannelId)
+                .FirstOrDefault();
+            var indexMnemonics = channels
+                .Take(1)
+                .SelectMany(x => x.Indexes.Select(y => y.Mnemonic))
+                .ToArray();
 
-            // Create a DataItem for the Index
+            // Create a DataItem for the Primary Index
             var indexDataItem = new DataItem()
             {
-                ChannelId = 0,
-                Indexes = new List<long>(),
+                ChannelId = indexChannelId,
+                Indexes = new long[0],
                 ValueAttributes = new DataAttribute[0],
                 Value = new DataValue()
                 {
@@ -206,9 +213,8 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 var start = Convert.ToDouble(info.StartIndex.Item);
 
                 // TODO: Handle decreasing data
-                if (index <= start || info.ChannelId < record.Depth)
+                if (index <= start || indexMnemonics.Any(x => x.EqualsIgnoreCase(channel.Mnemonic)))
                 {
-                    yield return null;
                     continue;
                 }
 
@@ -220,7 +226,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 var valueDataItem = new DataItem()
                 {
                     ChannelId = info.ChannelId,
-                    Indexes = new List<long>(),
+                    Indexes = new long[0],
                     ValueAttributes = new DataAttribute[0],
                     Value = new DataValue()
                     {
