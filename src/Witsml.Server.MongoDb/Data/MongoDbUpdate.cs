@@ -78,7 +78,11 @@ namespace PDS.Witsml.Server.Data
 
         public void UpdateFields(FilterDefinition<T> filter, UpdateDefinition<T> update)
         {
-            var filterJson = filter.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
+            if (Logger.IsDebugEnabled)
+            {
+                var filterJson = filter.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
+                var updateJson = update.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
+            }
             _collection.UpdateOne(filter, update);
         }
 
