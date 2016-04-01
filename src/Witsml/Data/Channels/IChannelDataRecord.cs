@@ -21,7 +21,7 @@ namespace PDS.Witsml.Data.Channels
 
         ChannelIndexInfo GetIndex(int index = 0);
 
-        double GetIndexValue(int index = 0);
+        double GetIndexValue(int index = 0, int scale = 0);
 
         Range<double?> GetIndexRange(int index = 0);
 

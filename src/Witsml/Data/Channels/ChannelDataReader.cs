@@ -123,13 +123,13 @@ namespace PDS.Witsml.Data.Channels
             return Indices.Skip(index).FirstOrDefault();
         }
 
-        public double GetIndexValue(int index = 0)
+        public double GetIndexValue(int index = 0, int scale = 0)
         {
             var channelIndex = GetIndex(index);
 
             return channelIndex.IsTimeIndex
                 ? GetUnixTimeSeconds(index)
-                : GetDouble(index);
+                : GetDouble(index) * Math.Pow(10, scale);
         }
 
         public Range<double?> GetIndexRange(int index = 0)

@@ -402,7 +402,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         private void LogChannelData(IList<DataItem> dataItems)
         {
             // Check if producer is sending index/value pairs
-            if (dataItems.Take(1).SelectMany(x => x.Indexes).Any())
+            if (!dataItems.Take(1).SelectMany(x => x.Indexes).Any())
             {
                 for (int i=0; i<dataItems.Count; i+=2)
                 {

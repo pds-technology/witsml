@@ -810,5 +810,55 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(15, curve3.MinIndex.Value);
             Assert.AreEqual(23, curve3.MaxIndex.Value);
         }
+
+        [TestMethod]
+        public void Test_log_index_direction_decreasing()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+            Wellbore.UidWell = response.SuppMsgOut;
+
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            var uidWellbore = response.SuppMsgOut;
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = uidWellbore,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01 - Decreasing"),
+                RunNumber = "101",
+                IndexCurve = "MD",
+                IndexType = LogIndexType.measureddepth,
+                Direction = LogIndexDirection.decreasing
+            };
+
+            DevKit.InitHeader(log, log.IndexType.Value, increasing: false);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 100, 0.9, increasing: false);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var query = new Log
+            {
+                UidWell = Wellbore.UidWell,
+                UidWellbore = uidWellbore,
+                Uid = uidLog
+            };
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            var logAdded = results.FirstOrDefault();
+
+            Assert.IsNotNull(logAdded);
+            Assert.AreEqual(LogIndexDirection.decreasing, logAdded.Direction);
+            Assert.AreEqual(log.RunNumber, logAdded.RunNumber);
+
+            var logData = log.LogData.FirstOrDefault();
+            var firstIndex = int.Parse(logData.Data[0].Split(',')[0]);
+            var secondIndex = int.Parse(logData.Data[1].Split(',')[0]);
+            Assert.IsTrue(firstIndex > secondIndex);
+        }
     }
 }
