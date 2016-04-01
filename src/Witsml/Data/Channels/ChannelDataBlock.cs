@@ -11,12 +11,12 @@ namespace PDS.Witsml.Data.Channels
         public static readonly int BatchSize = Settings.Default.ChannelDataBlockBatchSize;
 
         private readonly List<List<List<object>>> _records;
-        private readonly Dictionary<long, List<List<object>>> _recordsByIndex;
+        private readonly Dictionary<double, List<List<object>>> _recordsByIndex;
 
         public ChannelDataBlock(string uri)
         {
             _records = new List<List<List<object>>>();
-            _recordsByIndex = new Dictionary<long, List<List<object>>>();
+            _recordsByIndex = new Dictionary<double, List<List<object>>>();
             Indices = new List<ChannelIndexInfo>();
             ChannelIds = new List<long>();
             Mnemonics = new List<string>();
@@ -63,7 +63,7 @@ namespace PDS.Witsml.Data.Channels
             Units.Add(unit);
         }
 
-        public void Append(long channelId, IList<long> indexes, object value)
+        public void Append(long channelId, IList<double> indexes, object value)
         {
             var primaryIndex = indexes.First();
             List<List<object>> record;

@@ -26,6 +26,7 @@ namespace Energistics.Protocol.ChannelStreaming
                 MaxMessageRate = maxMessageRate
             };
 
+            ChannelMetadataRecords.Clear();
             Session.SendMessage(header, start);
         }
 
@@ -119,7 +120,9 @@ namespace Energistics.Protocol.ChannelStreaming
 
         protected virtual void HandleChannelMetadata(MessageHeader header, ChannelMetadata channelMetadata)
         {
-            ChannelMetadataRecords = channelMetadata.Channels;
+            foreach (var channel in channelMetadata.Channels)
+                ChannelMetadataRecords.Add(channel);
+
             Notify(OnChannelMetadata, header, channelMetadata);
         }
 

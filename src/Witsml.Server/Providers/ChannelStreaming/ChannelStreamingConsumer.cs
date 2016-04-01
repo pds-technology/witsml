@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.Datatypes;
@@ -59,8 +60,24 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 var parentUri = _channelParentUris[dataItem.ChannelId];
                 var dataBlock = _dataBlocks[parentUri];
 
-                dataBlock.Append(dataItem.ChannelId, dataItem.Indexes, dataItem.Value.Item);
+                var channel = ChannelMetadataRecords.FirstOrDefault(x => x.ChannelId == dataItem.ChannelId);
+                var indexes = DownscaleIndexValues(channel.Indexes, dataItem.Indexes);
+
+                dataBlock.Append(dataItem.ChannelId, indexes, dataItem.Value.Item);
             }
+        }
+
+        private IList<double> DownscaleIndexValues(IList<IndexMetadataRecord> indexMetadata, IList<long> indexValues)
+        {
+            return indexValues
+                .Select((x, i) =>
+                {
+                    var index = indexMetadata[i];
+                    return index.IndexType == ChannelIndexTypes.Depth
+                        ? indexValues[i] / Math.Pow(10, index.Scale)
+                        : indexValues[i];
+                })
+                .ToList();
         }
 
         private void InitializeDataBlocks(IList<ChannelMetadataRecord> channels)
