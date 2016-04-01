@@ -1,0 +1,93 @@
+﻿{
+  "name": "Smart 1.4.1.1 Sensor Simulation",
+  "version": "1.0.0.0",
+  "witsmlConnection": {
+    "name": null,
+    "uri": null,
+    "username": null
+  },
+  "etpConnection": {
+    "name": null,
+    "uri": null,
+    "username": null
+  },
+  "portNumber": 9000,
+  "wellName": "Test Well 1.4.1.1",
+  "wellUid": "804415d0-b5e7-4389-a3c6-cdb790f5485f",
+  "wellboreName": "Test Wellbore 1.4.1.1",
+  "wellboreUid": "d3e7d4bf-0f29-4c2b-974d-4871cf8001fd",
+  "logName": "Test Log 1.4.1.1",
+  "logUid": "e2401b72-550f-4695-ab27-d5b0589bde17",
+  "logIndexType": "measureddepth",
+  "channels": [
+    {
+      "channelUri": "",
+      "channelId": 1,
+      "indexes": [],
+      "mnemonic": "MD",
+      "dataType": "double",
+      "uom": "m",
+      "startIndex": null,
+      "endIndex": null,
+      "description": "Measured Depth",
+      "status": "Active",
+      "contentType": null,
+      "source": "MWD",
+      "measureClass": "Length",
+      "uuid": "6caf92e8-a55e-40be-8344-3bc549621d94",
+      "channelAxes": []
+    },
+    {
+      "channelUri": "",
+      "channelId": 2,
+      "indexes": [],
+      "mnemonic": "ROP",
+      "dataType": "double",
+      "uom": "m/h",
+      "startIndex": null,
+      "endIndex": null,
+      "description": "Rate of Penetration",
+      "status": "Active",
+      "contentType": null,
+      "source": "MWD",
+      "measureClass": "Velocity",
+      "uuid": "2e92d912-3976-4963-9a1e-1704ae7a5ad9",
+      "channelAxes": []
+    },
+    {
+      "channelUri": "",
+      "channelId": 3,
+      "indexes": [],
+      "mnemonic": "GR",
+      "dataType": "double",
+      "uom": "gAPI",
+      "startIndex": null,
+      "endIndex": null,
+      "description": "Gamma Ray",
+      "status": "Active",
+      "contentType": null,
+      "source": "MWD",
+      "measureClass": "Radioactivity",
+      "uuid": "cd2d45fd-d280-4156-9426-fcaf12425324",
+      "channelAxes": []
+    },
+    {
+      "channelUri": "",
+      "channelId": 4,
+      "indexes": [],
+      "mnemonic": "HKLD",
+      "dataType": "double",
+      "uom": "klbf",
+      "startIndex": null,
+      "endIndex": null,
+      "description": "Hookload",
+      "status": "Active",
+      "contentType": null,
+      "source": "MWD",
+      "measureClass": "Weight",
+      "uuid": "5c6faa81-3ec6-4b67-ad1c-5ed9a3eeb4f2",
+      "channelAxes": []
+    }
+  ],
+  "witsmlVersion": null
+}
