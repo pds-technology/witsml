@@ -378,8 +378,10 @@ namespace PDS.Witsml.Data.Channels
         {
             if (string.IsNullOrWhiteSpace(data))
                 return new List<List<List<object>>>();
+            
+            var dateTimeSetting = new JsonSerializerSettings() { DateParseHandling = DateParseHandling.DateTimeOffset };
 
-            return JsonConvert.DeserializeObject<List<List<List<object>>>>(data);
+            return JsonConvert.DeserializeObject<List<List<List<object>>>>(data, dateTimeSetting);       
         }
 
         private static string Combine(IList<string> data)
