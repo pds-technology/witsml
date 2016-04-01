@@ -238,9 +238,10 @@ namespace PDS.Witsml.Server.Data.Logs
             if (entity.LogCurveInfo == null || !entity.LogCurveInfo.Any())
                 return metadata;
 
-            var indexMetadata = ToIndexMetadataRecord(entity, entity.LogCurveInfo.First());
+            var indexCurve = entity.LogCurveInfo.FirstOrDefault(x => x.Mnemonic.Value == entity.IndexCurve);
+            var indexMetadata = ToIndexMetadataRecord(entity, indexCurve);
 
-            // TODO: skip the indexCurve after updating the ChannelStreamingProducer
+            // TODO: Skip the indexCurve if StreamIndexValuePairs setting is false
             metadata.AddRange(entity.LogCurveInfo.Select(x =>
             {
                 var channel = ToChannelMetadataRecord(entity, x, indexMetadata);
