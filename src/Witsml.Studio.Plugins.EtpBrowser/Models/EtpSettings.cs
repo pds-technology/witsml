@@ -25,7 +25,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.Models
             {
                 MaxDataItems = DefaultMaxDataItems,
                 MaxMessageRate = DefaultMaxMessageRate,
-                StartIndex = -1,
+                StartIndex = 0,
                 EndIndex = 1000
             };
             Store = new StoreSettings();

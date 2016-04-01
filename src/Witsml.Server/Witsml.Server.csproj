@@ -119,6 +119,7 @@
     <Compile Include="Providers\ChannelStreaming\ChannelStreamingAggregator.cs" />
     <Compile Include="Providers\ChannelStreaming\ChannelStreamingProducer.cs" />
     <Compile Include="Providers\ChannelStreaming\ChannelStreamingConsumer.cs" />
+    <Compile Include="Providers\ChannelStreaming\IndexedDataItem.cs" />
     <Compile Include="Providers\Core\CoreServerProvider.cs" />
     <Compile Include="Providers\Discovery\DiscoveryStore131Provider.cs" />
     <Compile Include="Providers\Discovery\DiscoveryStore141Provider.cs" />
