@@ -9,7 +9,6 @@ using Energistics.Datatypes.ChannelData;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Models;
-using PDS.Witsml.Server.Providers;
 
 namespace PDS.Witsml.Server.Data.Channels
 {
@@ -51,16 +50,13 @@ namespace PDS.Witsml.Server.Data.Channels
             if (entity.Channel == null || !entity.Channel.Any())
                 return metadata;
 
-            metadata.AddRange(entity.Index.Select(x =>
-            {
-                var channel = ToChannelMetadataRecord(entity, x);
-                channel.ChannelId = index++;
-                return channel;
-            }));
+            var indexMetadata = entity.Index
+                .Select(x => ToIndexMetadataRecord(entity, x))
+                .ToList();
 
             metadata.AddRange(entity.Channel.Select(x =>
             {
-                var channel = ToChannelMetadataRecord(entity, x);
+                var channel = ToChannelMetadataRecord(entity, x, indexMetadata);
                 channel.ChannelId = index++;
                 return channel;
             }));
@@ -188,28 +184,7 @@ namespace PDS.Witsml.Server.Data.Channels
             return existing.GetReader();
         }
 
-        private ChannelMetadataRecord ToChannelMetadataRecord(ChannelSet entity, ChannelIndex index)
-        {
-            var uri = index.GetUri(entity);
-
-            return new ChannelMetadataRecord()
-            {
-                ChannelUri = uri,
-                ContentType = uri.ContentType,
-                DataType = EtpDataType.@double.ToString().Replace("@", string.Empty),
-                Description = index.Mnemonic,
-                Mnemonic = index.Mnemonic,
-                Uom = index.Uom,
-                MeasureClass = ObjectTypes.Unknown,
-                Source = ObjectTypes.Unknown,
-                Uuid = index.Mnemonic,
-                Status = ChannelStatuses.Active,
-                ChannelAxes = new List<ChannelAxis>(),
-                Indexes = new List<IndexMetadataRecord>()
-            };
-        }
-
-        private ChannelMetadataRecord ToChannelMetadataRecord(ChannelSet entity, Channel channel)
+        private ChannelMetadataRecord ToChannelMetadataRecord(ChannelSet entity, Channel channel, IList<IndexMetadataRecord> indexMetadata)
         {
             var uri = channel.GetUri(entity);
 
@@ -226,7 +201,26 @@ namespace PDS.Witsml.Server.Data.Channels
                 Uuid = channel.Mnemonic,
                 Status = ChannelStatuses.Active,
                 ChannelAxes = new List<ChannelAxis>(),
-                Indexes = new List<IndexMetadataRecord>()
+                Indexes = indexMetadata
+            };
+        }
+
+        private IndexMetadataRecord ToIndexMetadataRecord(ChannelSet entity, ChannelIndex indexChannel, int scale = 3)
+        {
+            return new IndexMetadataRecord()
+            {
+                Uri = indexChannel.GetUri(entity),
+                Mnemonic = indexChannel.Mnemonic,
+                Description = indexChannel.Mnemonic,
+                Uom = indexChannel.Uom,
+                Scale = scale,
+                IndexType = indexChannel.IndexType == ChannelIndexType.datetime || indexChannel.IndexType == ChannelIndexType.elapsedtime
+                    ? ChannelIndexTypes.Time
+                    : ChannelIndexTypes.Depth,
+                Direction = indexChannel.Direction == IndexDirection.decreasing
+                    ? IndexDirections.Decreasing
+                    : IndexDirections.Increasing,
+                CustomData = new Dictionary<string, DataValue>(0),
             };
         }
     }

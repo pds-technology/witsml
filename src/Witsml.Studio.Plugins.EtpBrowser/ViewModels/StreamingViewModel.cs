@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Windows.Controls;
@@ -225,6 +226,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             Channels.Clear();
             ChannelStreamingInfos.Clear();
             UpdateCanDescribe();
+            LogStartSession();
         }
 
         /// <summary>
@@ -348,6 +350,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
 
             if (e.Header.MessageFlags == (int)MessageFlags.FinalPart)
             {
+                LogChannelMetadata(Channels);
                 CanStartStreaming = !IsSimpleStreamer;
                 CanStopStreaming = IsSimpleStreamer;
                 CanRequestRange = !IsSimpleStreamer;
@@ -356,6 +359,8 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
 
         private void OnChannelData(object sender, ProtocolEventArgs<ChannelData> e)
         {
+            if (e.Message.Data.Any())
+                LogChannelData(e.Message.Data);
         }
 
         private ChannelStreamingInfo ToChannelStreamingInfo(ChannelMetadataRecord channel)
@@ -373,6 +378,62 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         private void UpdateCanDescribe()
         {
             CanDescribe = !IsSimpleStreamer && Model.Streaming.Uris.Any();
+        }
+
+        private void LogStartSession()
+        {
+            Parent.Details.SetText(string.Format(
+                "// Channel Streaming session started.{0}{0}",
+                Environment.NewLine));
+        }
+
+        private void LogChannelMetadata(IList<ChannelMetadataRecord> channels)
+        {
+            var headers = string.Join("\", \"", channels.Select(x => x.Mnemonic));
+            var units = string.Join("\", \"", channels.Select(x => x.Uom));
+
+            Parent.Details.Append(string.Format(
+                "// Mnemonics:{2}[ \"{0}\" ]{2}{2}// Units:{2}[ \"{1}\" ]{2}{2}",
+                headers,
+                units,
+                Environment.NewLine));
+        }
+
+        private void LogChannelData(IList<DataItem> dataItems)
+        {
+            // Check if producer is sending index/value pairs
+            if (dataItems.Take(1).SelectMany(x => x.Indexes).Any())
+            {
+                for (int i=0; i<dataItems.Count; i+=2)
+                {
+                    //var indexChannel = Channels.Where(c => c.ChannelId == dataItems[i].ChannelId).FirstOrDefault();
+                    var valueChannel = Channels.Where(c => c.ChannelId == dataItems[i + 1].ChannelId).FirstOrDefault();
+
+                    Parent.Details.Append(string.Format(
+                        "[ \"{0}\", {1}, {2} ],{3}",
+                        valueChannel.Mnemonic,
+                        dataItems[i].Value.Item,
+                        dataItems[i + 1].Value.Item,
+                        Environment.NewLine));
+                }
+            }
+            else // DataItems with indexes
+            {
+                var dataValues = string.Join(Environment.NewLine, dataItems.Select(x =>
+                {
+                    var valueChannel = Channels.Where(c => c.ChannelId == x.ChannelId).FirstOrDefault();
+
+                    return string.Format("[ \"{0}\", {1}, {2} ]",
+                        valueChannel.Mnemonic,
+                        x.Indexes[0],
+                        x.Value.Item);
+                }));
+
+                Parent.Details.Append(string.Format(
+                    "{0}{1}",
+                    dataValues,
+                    Environment.NewLine));
+            }
         }
     }
 }

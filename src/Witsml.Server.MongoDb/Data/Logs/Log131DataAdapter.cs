@@ -206,9 +206,12 @@ namespace PDS.Witsml.Server.Data.Logs
             if (entity.LogCurveInfo == null || !entity.LogCurveInfo.Any())
                 return metadata;
 
+            var indexMetadata = ToIndexMetadataRecord(entity, entity.LogCurveInfo.First());
+
+            // TODO: skip the indexCurve after updating the ChannelStreamingProducer
             metadata.AddRange(entity.LogCurveInfo.Select(x =>
             {
-                var channel = ToChannelMetadataRecord(entity, x);
+                var channel = ToChannelMetadataRecord(entity, x, indexMetadata);
                 channel.ChannelId = index++;
                 return channel;
             }));
@@ -403,9 +406,9 @@ namespace PDS.Witsml.Server.Data.Logs
             return existing.GetReader();
         }
 
-        private ChannelMetadataRecord ToChannelMetadataRecord(Log log, LogCurveInfo curve)
+        private ChannelMetadataRecord ToChannelMetadataRecord(Log entity, LogCurveInfo curve, IndexMetadataRecord indexMetadata)
         {
-            var uri = curve.GetUri(log);
+            var uri = curve.GetUri(entity);
 
             return new ChannelMetadataRecord()
             {
@@ -420,7 +423,29 @@ namespace PDS.Witsml.Server.Data.Logs
                 Uuid = curve.Mnemonic,
                 Status = ChannelStatuses.Active,
                 ChannelAxes = new List<ChannelAxis>(),
-                Indexes = new List<IndexMetadataRecord>(),
+                Indexes = new List<IndexMetadataRecord>()
+                {
+                    indexMetadata
+                }
+            };
+        }
+
+        private IndexMetadataRecord ToIndexMetadataRecord(Log entity, LogCurveInfo indexCurve, int scale = 3)
+        {
+            return new IndexMetadataRecord()
+            {
+                Uri = indexCurve.GetUri(entity),
+                Mnemonic = indexCurve.Mnemonic,
+                Description = indexCurve.CurveDescription,
+                Uom = indexCurve.Unit,
+                Scale = scale,
+                IndexType = entity.IndexType == LogIndexType.datetime || entity.IndexType == LogIndexType.elapsedtime
+                    ? ChannelIndexTypes.Time
+                    : ChannelIndexTypes.Depth,
+                Direction = entity.Direction == LogIndexDirection.decreasing
+                    ? IndexDirections.Decreasing
+                    : IndexDirections.Increasing,
+                CustomData = new Dictionary<string, DataValue>(0),
             };
         }
 
