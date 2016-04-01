@@ -189,37 +189,8 @@ namespace PDS.Witsml.Server.Data.Logs
             var entity = Parse(parser.Context.Xml);
             var readers = ExtractDataReaders(entity, GetEntity(uri));
 
-            // Get Updated Log
-            var current = GetEntity(uri);
-
-            // Get current index information
-            var ranges = GetCurrentIndexRange(current);
-
-            var indexUnit = string.Empty;
-            var updateMnemonics = new List<string>();
-
-            var updateIndex = false;
-
-            // Merge ChannelDataChunks
-            foreach (var reader in readers)
-            {
-                if (string.IsNullOrEmpty(indexUnit))
-                    indexUnit = reader.Units.First();
-
-                updateMnemonics = updateMnemonics.Union(reader.Mnemonics.Where(m => !updateMnemonics.Contains(m))).ToList();
-
-                // Update index range for each logData element
-                GetUpdatedLogHeaderIndexRange(reader, ranges, current.Direction == LogIndexDirection.increasing);
-
-                // Update log data
-                _channelDataChunkAdapter.Merge(reader);
-                if (!updateIndex)
-                    updateIndex = true;
-            }
-
-            // Update index range
-            if (updateIndex)
-                UpdateIndexRange(uri, current, ranges, updateMnemonics, entity.IndexType == LogIndexType.datetime, indexUnit);
+            // Update Log Data and Index Range
+            UpdateLogDataAndIndex(uri, readers);
 
             return new WitsmlResult(ErrorCodes.Success);
         }
@@ -231,7 +202,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="reader">The update reader.</param>
         public void UpdateChannelData(EtpUri uri, ChannelDataReader reader)
         {
-            // TODO: refactor Add and Update to call this method
+            UpdateLogDataAndIndex(uri, new List<ChannelDataReader> { reader });
         }
 
         /// <summary>
@@ -547,7 +518,42 @@ namespace PDS.Witsml.Server.Data.Logs
             };
         }
 
-        #region UpdateLogHeaderRanges Code      
+        #region UpdateLogHeaderRanges Code 
+        private void UpdateLogDataAndIndex(EtpUri uri, IEnumerable<ChannelDataReader> readers)
+        {
+            // Get Updated Log
+            var current = GetEntity(uri);
+
+            // Get current index information
+            var ranges = GetCurrentIndexRange(current);
+
+            var indexUnit = string.Empty;
+            var updateMnemonics = new List<string>();
+
+            var updateIndex = false;
+
+            // Merge ChannelDataChunks
+            foreach (var reader in readers)
+            {
+                if (string.IsNullOrEmpty(indexUnit))
+                    indexUnit = reader.Units.First();
+
+                updateMnemonics = updateMnemonics.Union(reader.Mnemonics.Where(m => !updateMnemonics.Contains(m))).ToList();
+
+                // Update index range for each logData element
+                GetUpdatedLogHeaderIndexRange(reader, ranges, current.Direction == LogIndexDirection.increasing);
+
+                // Update log data
+                _channelDataChunkAdapter.Merge(reader);
+                if (!updateIndex)
+                    updateIndex = true;
+            }
+
+            // Update index range
+            if (updateIndex)
+                UpdateIndexRange(uri, current, ranges, updateMnemonics, current.IndexType == LogIndexType.datetime, indexUnit);
+        }
+             
         private GenericMeasure UpdateGenericMeasure(GenericMeasure gmObject, double gmValue, string uom)
         {
             if (gmObject == null)
