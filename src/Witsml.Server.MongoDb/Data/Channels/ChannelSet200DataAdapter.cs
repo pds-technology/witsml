@@ -7,6 +7,7 @@ using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
+using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Models;
@@ -124,16 +125,18 @@ namespace PDS.Witsml.Server.Data.Channels
             if (reader != null)
             {
                 var increasing = entity.Index.FirstOrDefault().Direction == IndexDirection.increasing;
+                var indexCurve = reader.Indices[0];
+                var allMnemonics = new[] { indexCurve.Mnemonic }.Concat(reader.Mnemonics).ToArray();
 
                 // Get current index information
                 var ranges = GetCurrentIndexRange(entity);
-                GetUpdatedLogHeaderIndexRange(reader, ranges, increasing);
+                GetUpdatedLogHeaderIndexRange(reader, allMnemonics, ranges, increasing);
 
                 // Add ChannelDataChunks
                 _channelDataChunkAdapter.Add(reader);
 
                 // Update index range
-                UpdateIndexRange(entity.GetUri(), entity, ranges, reader.Mnemonics, entity.StartIndex, reader.Units.First());
+                UpdateIndexRange(entity.GetUri(), entity, ranges, allMnemonics);
             }
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uuid);
@@ -167,16 +170,18 @@ namespace PDS.Witsml.Server.Data.Channels
             if (reader != null)
             {
                 var increasing = entity.Index.FirstOrDefault().Direction == IndexDirection.increasing;
+                var indexCurve = reader.Indices[0];
+                var allMnemonics = new[] { indexCurve.Mnemonic }.Concat(reader.Mnemonics).ToArray();
 
                 // Get current index information
                 var ranges = GetCurrentIndexRange(current);
-                GetUpdatedLogHeaderIndexRange(reader, ranges, increasing);
+                GetUpdatedLogHeaderIndexRange(reader, allMnemonics, ranges, increasing);
 
                 // Add ChannelDataChunks
                 _channelDataChunkAdapter.Merge(reader);
 
                 // Update index range
-                UpdateIndexRange(entity.GetUri(), entity, ranges, reader.Mnemonics, entity.StartIndex, reader.Units.First());
+                UpdateIndexRange(entity.GetUri(), entity, ranges, allMnemonics);
             }
 
             return new WitsmlResult(ErrorCodes.Success);
@@ -316,9 +321,41 @@ namespace PDS.Witsml.Server.Data.Channels
             ranges.Add(mnemonic, range);
         }
 
-        private void GetUpdatedLogHeaderIndexRange(ChannelDataReader reader, Dictionary<string, List<double?>> ranges, bool increasing = true)
+        private AbstractIndexValue UpdateIndexValue(AbstractIndexValue index, AbstractIndexValue current, double value)
         {
-            for (var i = 0; i < reader.Mnemonics.Length; i++)
+            AbstractIndexValue indexValue;
+
+            if (index is TimeIndexValue)
+            {
+                if (current == null)
+                    indexValue = new TimeIndexValue();
+                else
+                    indexValue = current;
+                ((TimeIndexValue)indexValue).Time = DateTime.Parse(value.ToString()).ToString("o");
+            }
+            else if (index is DepthIndexValue)
+            {
+                if (current == null)
+                    indexValue = new DepthIndexValue();
+                else
+                    indexValue = current;
+                ((DepthIndexValue)indexValue).Depth = (float)value;
+            }
+            else
+            {
+                if (current == null)
+                    indexValue = new PassIndexedDepth();
+                else
+                    indexValue = current;
+                ((PassIndexedDepth)indexValue).Depth = (float)value;
+            }
+
+            return indexValue;
+        }
+
+        private void GetUpdatedLogHeaderIndexRange(ChannelDataReader reader, string[] mnemonics, Dictionary<string, List<double?>> ranges, bool increasing = true)
+        {
+            for (var i = 0; i < mnemonics.Length; i++)
             {
                 var mnemonic = reader.Mnemonics[i];
                 List<double?> current;
@@ -339,9 +376,57 @@ namespace PDS.Witsml.Server.Data.Channels
             }
         }
 
-        private void UpdateIndexRange(EtpUri uri, ChannelSet entity, Dictionary<string, List<double?>> ranges, IEnumerable<string> mnemonics, AbstractIndexValue index, string indexUnit)
+        private void UpdateIndexRange(EtpUri uri, ChannelSet entity, Dictionary<string, List<double?>> ranges, IEnumerable<string> mnemonics)
         {
+            var collection = GetCollection();
+            var mongoUpdate = new MongoDbUpdate<ChannelSet>(GetCollection(), null);
+            var filter = MongoDbUtility.GetEntityFilter<ChannelSet>(uri);
+            UpdateDefinition<ChannelSet> channelIndexUpdate = null;
 
+            var indexMnemonic = entity.Index.FirstOrDefault().Mnemonic;
+            var startIndex = entity.StartIndex;
+            var range = ranges[indexMnemonic];
+            if (range[0].HasValue)
+            {
+                var start = UpdateIndexValue(startIndex, startIndex, range[0].Value);
+                channelIndexUpdate = MongoDbUtility.BuildUpdate(channelIndexUpdate, "StartIndex", start);
+            }
+            if (range[1].HasValue)
+            {
+                var end = UpdateIndexValue(startIndex, entity.EndIndex, range[1].Value);
+                channelIndexUpdate = MongoDbUtility.BuildUpdate(channelIndexUpdate, "EndIndex", end);
+            }
+            if (channelIndexUpdate != null)
+                mongoUpdate.UpdateFields(filter, channelIndexUpdate);
+
+            foreach (var mnemonic in mnemonics)
+            {
+                var channel = entity.Channel.FirstOrDefault(c => c.Mnemonic.EqualsIgnoreCase(mnemonic));
+                if (channel == null)
+                    continue;
+
+                var filters = new List<FilterDefinition<ChannelSet>>();
+                filters.Add(filter);
+                filters.Add(MongoDbUtility.BuildFilter<ChannelSet>("Channel.Mnemonic", channel.Mnemonic));
+                var channelFilter = Builders<ChannelSet>.Filter.And(filters);
+
+                var updateBuilder = Builders<ChannelSet>.Update;
+                UpdateDefinition<ChannelSet> updates = null;
+
+                range = ranges[mnemonic];
+                if (range[0].HasValue)
+                {
+                    var start = UpdateIndexValue(startIndex, channel.StartIndex, range[0].Value);
+                    updates = MongoDbUtility.BuildUpdate(updates, "Channel.$.StartIndex", start);
+                }
+                if (range[1].HasValue)
+                {
+                    var end = UpdateIndexValue(startIndex, channel.EndIndex, range[1].Value);
+                    updates = MongoDbUtility.BuildUpdate(updates, "Channel.$.EndIndex", end);
+                }
+                if (updates != null)
+                    mongoUpdate.UpdateFields(channelFilter, updates);
+            }
         }
     }
 }
