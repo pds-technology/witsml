@@ -206,7 +206,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 var start = Convert.ToDouble(info.StartIndex.Item);
 
                 // Handle decreasing data
-                if (increasing ? primaryIndexValue <= start : primaryIndexValue > start)
+                if (increasing ? primaryIndexValue <= start : primaryIndexValue >= start)
                 {
                     continue;
                 }
@@ -297,7 +297,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 var start = Convert.ToDouble(info.StartIndex.Item);
 
                 // Handle decreasing data
-                if ((increasing ? primaryIndexValue <= start : primaryIndexValue > start) 
+                if ((increasing ? primaryIndexValue <= start : primaryIndexValue >= start) 
                     || indexMnemonics.Any(x => x.EqualsIgnoreCase(channel.Mnemonic)))
                 {
                     continue;
