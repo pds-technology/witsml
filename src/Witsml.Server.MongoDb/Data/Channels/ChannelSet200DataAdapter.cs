@@ -189,7 +189,13 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="reader">The update reader.</param>
         public void UpdateChannelData(EtpUri uri, ChannelDataReader reader)
         {
-            // TODO: refactor Add and Update to call this method
+            // Get Updated ChannelSet
+            var current = GetEntity(uri);
+
+            if (reader != null)
+            {
+                _channelDataChunkAdapter.Merge(reader);
+            }
         }
 
         /// <summary>
