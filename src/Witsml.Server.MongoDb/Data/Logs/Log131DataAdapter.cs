@@ -138,14 +138,17 @@ namespace PDS.Witsml.Server.Data.Logs
 
             if (reader != null)
             {
+                var indexCurve = reader.Indices[0];
+                var allMnemonics = new[] { indexCurve.Mnemonic }.Concat(reader.Mnemonics).ToArray();
+
                 var ranges = GetCurrentIndexRange(entity);
-                GetUpdatedLogHeaderIndexRange(reader, ranges, entity.Direction == LogIndexDirection.increasing);
+                GetUpdatedLogHeaderIndexRange(reader, allMnemonics, ranges, entity.Direction == LogIndexDirection.increasing);
 
                 // Add ChannelDataChunks
                 _channelDataChunkAdapter.Add(reader);
 
                 // Update index range
-                UpdateIndexRange(entity.GetUri(), entity, ranges, reader.Mnemonics, entity.IndexType == LogIndexType.datetime, reader.Units.First());
+                UpdateIndexRange(entity.GetUri(), entity, ranges, allMnemonics, entity.IndexType == LogIndexType.datetime, indexCurve.Unit);
             }
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uid);
@@ -451,15 +454,18 @@ namespace PDS.Witsml.Server.Data.Logs
             // Merge ChannelDataChunks
             if (reader != null)
             {
+                var indexCurve = reader.Indices[0];
+                var allMnemonics = new[] { indexCurve.Mnemonic }.Concat(reader.Mnemonics).ToArray();
+
                 // Get current index information
                 var ranges = GetCurrentIndexRange(current);
-                GetUpdatedLogHeaderIndexRange(reader, ranges, current.Direction == LogIndexDirection.increasing);
+                GetUpdatedLogHeaderIndexRange(reader, allMnemonics, ranges, current.Direction == LogIndexDirection.increasing);
 
                 // Add ChannelDataChunks
                 _channelDataChunkAdapter.Merge(reader);
 
                 // Update index range
-                UpdateIndexRange(uri, current, ranges, reader.Mnemonics, current.IndexType == LogIndexType.datetime, reader.Units.FirstOrDefault());
+                UpdateIndexRange(uri, current, ranges, allMnemonics, current.IndexType == LogIndexType.datetime, indexCurve.Unit);
             }
         }
 
@@ -503,12 +509,13 @@ namespace PDS.Witsml.Server.Data.Logs
             return ranges;
         }
 
-        private void GetUpdatedLogHeaderIndexRange(ChannelDataReader reader, Dictionary<string, List<double?>> ranges, bool increasing = true)
+        private void GetUpdatedLogHeaderIndexRange(ChannelDataReader reader, string[] mnemonics, Dictionary<string, List<double?>> ranges, bool increasing = true)
         {
-            for (var i = 0; i < reader.Mnemonics.Length; i++)
+            for (var i = 0; i < mnemonics.Length; i++)
             {
-                var mnemonic = reader.Mnemonics[i];
+                var mnemonic = mnemonics[i];
                 List<double?> current;
+
                 if (ranges.ContainsKey(mnemonic))
                 {
                     current = ranges[mnemonic];
@@ -518,7 +525,9 @@ namespace PDS.Witsml.Server.Data.Logs
                     current = new List<double?> { null, null };
                     ranges.Add(mnemonic, current);
                 }
+
                 var update = reader.GetChannelIndexRange(i);
+
                 if (!current[0].HasValue || !update.StartsAfter(current[0].Value, increasing))
                     current[0] = update.Start;
                 if (!current[1].HasValue || !update.EndsBefore(current[1].Value, increasing))

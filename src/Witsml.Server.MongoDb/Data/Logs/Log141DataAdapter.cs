@@ -156,14 +156,17 @@ namespace PDS.Witsml.Server.Data.Logs
 
             if (reader != null)
             {
+                var indexCurve = reader.Indices[0];
+                var allMnemonics = new[] { indexCurve.Mnemonic }.Concat(reader.Mnemonics).ToArray();
+
                 var ranges = GetCurrentIndexRange(entity);
-                GetUpdatedLogHeaderIndexRange(reader, ranges, entity.Direction == LogIndexDirection.increasing);
+                GetUpdatedLogHeaderIndexRange(reader, allMnemonics, ranges, entity.Direction == LogIndexDirection.increasing);
 
                 // Add ChannelDataChunks
                 _channelDataChunkAdapter.Add(reader);
 
                 // Update index range
-                UpdateIndexRange(entity.GetUri(), entity, ranges, reader.Mnemonics, entity.IndexType == LogIndexType.datetime, reader.Units.First());
+                UpdateIndexRange(entity.GetUri(), entity, ranges, allMnemonics, entity.IndexType == LogIndexType.datetime, indexCurve.Unit);
             }                
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uid);
@@ -540,23 +543,30 @@ namespace PDS.Witsml.Server.Data.Logs
             // Merge ChannelDataChunks
             foreach (var reader in readers)
             {
-                if (string.IsNullOrEmpty(indexUnit))
-                    indexUnit = reader.Units.First();
+                var indexCurve = reader.Indices[0];
 
-                updateMnemonics = updateMnemonics.Union(reader.Mnemonics.Where(m => !updateMnemonics.Contains(m))).ToList();
+                if (string.IsNullOrEmpty(indexUnit))
+                {
+                    indexUnit = indexCurve.Unit;
+                    updateMnemonics.Add(indexCurve.Mnemonic);
+                }
+
+                updateMnemonics.AddRange(reader.Mnemonics
+                    .Where(m => !updateMnemonics.Contains(m)));
 
                 // Update index range for each logData element
-                GetUpdatedLogHeaderIndexRange(reader, ranges, current.Direction == LogIndexDirection.increasing);
+                GetUpdatedLogHeaderIndexRange(reader, updateMnemonics.ToArray(), ranges, current.Direction == LogIndexDirection.increasing);
 
                 // Update log data
                 _channelDataChunkAdapter.Merge(reader);
-                if (!updateIndex)
-                    updateIndex = true;
+                updateIndex = true;
             }
 
             // Update index range
             if (updateIndex)
+            {
                 UpdateIndexRange(uri, current, ranges, updateMnemonics, current.IndexType == LogIndexType.datetime, indexUnit);
+            }
         }
              
         private GenericMeasure UpdateGenericMeasure(GenericMeasure gmObject, double gmValue, string uom)
@@ -599,12 +609,13 @@ namespace PDS.Witsml.Server.Data.Logs
             return ranges;
         }
         
-        private void GetUpdatedLogHeaderIndexRange(ChannelDataReader reader, Dictionary<string, List<double?>> ranges, bool increasing = true)
+        private void GetUpdatedLogHeaderIndexRange(ChannelDataReader reader, string[] mnemonics, Dictionary<string, List<double?>> ranges, bool increasing = true)
         {
-            for (var i = 0; i < reader.Mnemonics.Length; i++)
+            for (var i = 0; i < mnemonics.Length; i++)
             {
-                var mnemonic = reader.Mnemonics[i];
+                var mnemonic = mnemonics[i];
                 List<double?> current;
+
                 if (ranges.ContainsKey(mnemonic))
                 {
                     current = ranges[mnemonic];
@@ -614,7 +625,9 @@ namespace PDS.Witsml.Server.Data.Logs
                     current = new List<double?> { null, null };
                     ranges.Add(mnemonic, current);
                 }
+
                 var update = reader.GetChannelIndexRange(i);
+
                 if (!current[0].HasValue || !update.StartsAfter(current[0].Value, increasing))
                     current[0] = update.Start;
                 if (!current[1].HasValue || !update.EndsBefore(current[1].Value, increasing))
