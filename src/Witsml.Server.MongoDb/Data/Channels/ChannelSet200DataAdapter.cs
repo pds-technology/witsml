@@ -323,7 +323,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
         private AbstractIndexValue UpdateIndexValue(AbstractIndexValue index, AbstractIndexValue current, double value)
         {
-            AbstractIndexValue indexValue;
+            AbstractIndexValue indexValue = null;
 
             if (index is TimeIndexValue)
             {
@@ -341,7 +341,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     indexValue = current;
                 ((DepthIndexValue)indexValue).Depth = (float)value;
             }
-            else
+            else if (index is PassIndexedDepth)
             {
                 if (current == null)
                     indexValue = new PassIndexedDepth();
@@ -357,7 +357,7 @@ namespace PDS.Witsml.Server.Data.Channels
         {
             for (var i = 0; i < mnemonics.Length; i++)
             {
-                var mnemonic = reader.Mnemonics[i];
+                var mnemonic = mnemonics[i];
                 List<double?> current;
                 if (ranges.ContainsKey(mnemonic))
                 {
