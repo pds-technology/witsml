@@ -570,18 +570,22 @@ namespace PDS.Witsml.Server.Data.Logs
                     {
                         var minDate = DateTimeOffset.FromUnixTimeSeconds((long)range[0].Value).ToString("o");
                         updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MinDateTimeIndex", minDate);
+                        updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MinDateTimeIndexSpecified", true);
                         if (isIndexCurve)
                         {
                             logIndexUpdate = MongoDbUtility.BuildUpdate(logIndexUpdate, "StartDateTimeIndex", minDate);
+                            logIndexUpdate = MongoDbUtility.BuildUpdate(logIndexUpdate, "StartDateTimeIndexSpecified", true);
                         }
                     }
                     if (range[1].HasValue)
                     {
                         var maxDate = DateTimeOffset.FromUnixTimeSeconds((long)range[1].Value).ToString("o");
                         updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MaxDateTimeIndex", maxDate);
+                        updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MaxDateTimeIndexSpecified", true);
                         if (isIndexCurve)
                         {
                             logIndexUpdate = MongoDbUtility.BuildUpdate(logIndexUpdate, "EndDateTimeIndex", maxDate);
+                            logIndexUpdate = MongoDbUtility.BuildUpdate(logIndexUpdate, "EndDateTimeIndexSpecified", true);
                         }
                     }
                 }
