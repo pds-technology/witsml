@@ -1,5 +1,5 @@
-{
-  "name": "Smart Sensor Simulation 1.3.1.1",
+﻿{
+  "name": "Smart Sensor Depth Simulation 1.4.1.1",
   "version": "1.0.0.0",
   "witsmlConnection": {
     "name": null,
@@ -12,11 +12,11 @@
     "username": null
   },
   "portNumber": 9000,
-  "wellName": "Test Well 1.3.1.1",
+  "wellName": "Test Well 1.4.1.1",
   "wellUid": "804415d0-b5e7-4389-a3c6-cdb790f5485f",
-  "wellboreName": "Test Wellbore 1.3.1.1",
+  "wellboreName": "Test Wellbore 1.4.1.1",
   "wellboreUid": "d3e7d4bf-0f29-4c2b-974d-4871cf8001fd",
-  "logName": "Test Log 1.3.1.1",
+  "logName": "Test Depth Log 1.4.1.1",
   "logUid": "e2401b72-550f-4695-ab27-d5b0589bde17",
   "logIndexType": "measureddepth",
   "channels": [

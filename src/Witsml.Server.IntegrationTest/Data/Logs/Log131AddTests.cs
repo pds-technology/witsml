@@ -32,38 +32,93 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log_can_be_added_without_data()
+        public void Log_can_be_added_without_depth_data()
         {
             Well.Uid = "804415d0-b5e7-4389-a3c6-cdb790f5485f";
             Well.Name = "Test Well 1.3.1.1";
 
             // check if well already exists
-            var results = DevKit.Query<WellList, Well>(Well);
-            if (results.Any()) return;
-
-            var response = DevKit.Add<WellList, Well>(Well);
+            var wlResults = DevKit.Query<WellList, Well>(Well);
+            if (!wlResults.Any())
+            {
+                DevKit.Add<WellList, Well>(Well);
+            }
 
             Wellbore.Uid = "d3e7d4bf-0f29-4c2b-974d-4871cf8001fd";
             Wellbore.Name = "Test Wellbore 1.3.1.1";
             Wellbore.UidWell = Well.Uid;
             Wellbore.NameWell = Well.Name;
 
-            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            // check if wellbore already exists
+            var wbResults = DevKit.Query<WellboreList, Wellbore>(Wellbore);
+            if (!wbResults.Any())
+            {
+                DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            }
 
             var log = new Log()
             {
                 Uid = "e2401b72-550f-4695-ab27-d5b0589bde17",
-                Name = "Test Log 1.3.1.1",
+                Name = "Test Depth Log 1.3.1.1",
                 UidWell = Well.Uid,
                 NameWell = Well.Name,
                 UidWellbore = Wellbore.Uid,
                 NameWellbore = Wellbore.Name,
             };
 
-            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            // check if log already exists
+            var logResults = DevKit.Query<LogList, Log>(log);
+            if (!logResults.Any())
+            {
+                DevKit.InitHeader(log, LogIndexType.measureddepth);
+                var response = DevKit.Add<LogList, Log>(log);
+                Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+            }
+        }
 
-            response = DevKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+        [TestMethod]
+        public void Log_can_be_added_without_time_data()
+        {
+            Well.Uid = "804415d0-b5e7-4389-a3c6-cdb790f5485f";
+            Well.Name = "Test Well 1.3.1.1";
+
+            // check if well already exists
+            var wlResults = DevKit.Query<WellList, Well>(Well);
+            if (!wlResults.Any())
+            {
+                DevKit.Add<WellList, Well>(Well);
+            }
+
+            Wellbore.Uid = "d3e7d4bf-0f29-4c2b-974d-4871cf8001fd";
+            Wellbore.Name = "Test Wellbore 1.3.1.1";
+            Wellbore.UidWell = Well.Uid;
+            Wellbore.NameWell = Well.Name;
+
+            // check if wellbore already exists
+            var wbResults = DevKit.Query<WellboreList, Wellbore>(Wellbore);
+            if (!wbResults.Any())
+            {
+                DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            }
+
+            var log = new Log()
+            {
+                Uid = "e2401b72-550f-4695-ab27-d5b0589bde18",
+                Name = "Test Time Log 1.3.1.1",
+                UidWell = Well.Uid,
+                NameWell = Well.Name,
+                UidWellbore = Wellbore.Uid,
+                NameWellbore = Wellbore.Name,
+            };
+
+            // check if log already exists
+            var logResults = DevKit.Query<LogList, Log>(log);
+            if (!logResults.Any())
+            {
+                DevKit.InitHeader(log, LogIndexType.datetime);
+                var response = DevKit.Add<LogList, Log>(log);
+                Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+            }
         }
 
         [TestMethod]

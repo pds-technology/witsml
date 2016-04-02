@@ -223,7 +223,15 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="Samples\SmartSensorSimulation1411.json" />
+    <None Include="Samples\SmartSensorTimeSimulation1311.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Samples\SmartSensorTimeSimulation1411.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Samples\SmartSensorDepthSimulation1411.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -298,7 +306,9 @@
     <None Include="Energistics\Protocol\Store\Object.avsc" />
     <None Include="Energistics\Protocol\Store\PutObject.avsc" />
     <None Include="etp.avpr" />
-    <None Include="Samples\SmartSensorSimulation1311.json" />
+    <None Include="Samples\SmartSensorDepthSimulation1311.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Witsml.Studio_TemporaryKey.pfx" />
     <Resource Include="Images\StatusInvalid_16x.png" />
     <Resource Include="Images\StatusOK_16x.png" />
