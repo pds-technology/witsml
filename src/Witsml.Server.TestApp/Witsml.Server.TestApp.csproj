@@ -80,7 +80,8 @@
     </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>del $(TargetDir)\*.dll /q /f /s
+    <PreBuildEvent>powershell.exe -file "$(SolutionDir)\External\InsertCopyright.ps1" -target $(ProjectDir) -productname "PDS.Witsml.Server"
+del $(TargetDir)\*.dll /q /f /s
 del $(TargetDir)\*.pdb /q /f /s</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
