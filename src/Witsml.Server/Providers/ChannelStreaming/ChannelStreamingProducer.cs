@@ -167,10 +167,11 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
             // Get the start index before we convert to scale
             var minStart = channelRangeInfo.StartIndex;
+            var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
 
             // Because we can store only longs, convert indexes to scale
-            channelRangeInfo.StartIndex = IndexToScale(channelRangeInfo.StartIndex, primaryIndex.Scale);
-            channelRangeInfo.EndIndex = IndexToScale(channelRangeInfo.EndIndex, primaryIndex.Scale);
+            channelRangeInfo.StartIndex = IndexToScale(channelRangeInfo.StartIndex, primaryIndex.Scale, isTimeIndex);
+            channelRangeInfo.EndIndex = IndexToScale(channelRangeInfo.EndIndex, primaryIndex.Scale, isTimeIndex);
 
             var increasing = !(channels
                 .Take(1)
@@ -248,17 +249,18 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             {
                 indexValues.Add((long)record.GetIndexValue(i++, x.Scale));
             });
+            var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
 
             // Convert range info index from scale to compare to record index values
-            var start = IndexFromScale(channelRangeInfo.StartIndex, primaryIndex.Scale);
-            var end = IndexFromScale(channelRangeInfo.EndIndex, primaryIndex.Scale);
+            var start = IndexFromScale(channelRangeInfo.StartIndex, primaryIndex.Scale, isTimeIndex);
+            var end = IndexFromScale(channelRangeInfo.EndIndex, primaryIndex.Scale, isTimeIndex);
 
             // Only output if we are within the range
             if ((increasing ? primaryIndexValue >= start : primaryIndexValue <= start) &&
                 (increasing ? primaryIndexValue <= end : primaryIndexValue >= end))
             {
                 // Move the range info start index
-                channelRangeInfo.StartIndex = IndexToScale(primaryIndexValue, primaryIndex.Scale);
+                channelRangeInfo.StartIndex = IndexToScale(primaryIndexValue, primaryIndex.Scale, isTimeIndex);
 
                 foreach (var channelId in channelRangeInfo.ChannelId)
                 {
@@ -345,11 +347,12 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     Item = primaryIndexValue
                 }
             };
+            var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
 
 
             // Convert range info index from scale to compare to record index values
-            var start = IndexFromScale(channelRangeInfo.StartIndex, primaryIndex.Scale);
-            var end = IndexFromScale(channelRangeInfo.EndIndex, primaryIndex.Scale);
+            var start = IndexFromScale(channelRangeInfo.StartIndex, primaryIndex.Scale, isTimeIndex);
+            var end = IndexFromScale(channelRangeInfo.EndIndex, primaryIndex.Scale, isTimeIndex);
 
             // Only output if we are within the range
             if ((increasing ? primaryIndexValue >= start : primaryIndexValue <= start) &&
@@ -357,7 +360,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 
             {
                 // Move the range info start index
-                channelRangeInfo.StartIndex = IndexToScale(primaryIndexValue, primaryIndex.Scale);
+                channelRangeInfo.StartIndex = IndexToScale(primaryIndexValue, primaryIndex.Scale, isTimeIndex);
                 foreach (var channelId in channelRangeInfo.ChannelId)
                 {
                     var channel = channels.FirstOrDefault(c => c.ChannelId == channelId);
@@ -647,14 +650,20 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             return value;
         }
 
-        private double IndexFromScale(long index, int scale)
+        private double IndexFromScale(long index, int scale, bool isTimeIndex)
         {
-            return index * Math.Pow(10, -scale);
+            return isTimeIndex
+                ? index
+                : index * Math.Pow(10, -scale);
         }
 
-        private long IndexToScale(double index, int scale)
+        private long IndexToScale(double index, int scale, bool isTimeIndex)
         {
-            return Convert.ToInt64((index * Math.Pow(10, scale)));
+            return Convert.ToInt64(
+                (isTimeIndex 
+                    ? index
+                    : index * Math.Pow(10, scale))
+                );
         }
     }
 }
