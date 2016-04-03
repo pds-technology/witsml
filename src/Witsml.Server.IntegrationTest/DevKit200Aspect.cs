@@ -163,7 +163,7 @@ namespace PDS.Witsml.Server
         /// <param name="isIncreasing">if set to <c>true</c> [is increasing].</param>
         /// <param name="loggingMethod">The logging method.</param>
         /// <param name="numDataValue">The number data value.</param>
-        public void InitChannelSet(Log log, List<ChannelIndex> indexList, LoggingMethod loggingMethod = LoggingMethod.Computed, int numDataValue = 5)
+        public void InitChannelSet(Log log, List<ChannelIndex> indexList, LoggingMethod loggingMethod = LoggingMethod.computed, int numDataValue = 5)
         {
             ChannelSet channelSet = LogGenerator.CreateChannelSet(log);
             channelSet.Index = indexList;
