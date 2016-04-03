@@ -69,7 +69,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             remove { _producer.OnChannelStreamingStop -= value; }
         }
 
-        public event ProtocolEventHandler<ChannelRangeRequest, IList<DataItem>> OnChannelRangeRequest
+        public event ProtocolEventHandler<ChannelRangeRequest> OnChannelRangeRequest
         {
             add { _producer.OnChannelRangeRequest += value; }
             remove { _producer.OnChannelRangeRequest -= value; }
