@@ -16,21 +16,28 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
-using Energistics.Common;
-using Energistics.Datatypes;
+using System;
 
-namespace Energistics.Protocol.Core
+namespace Energistics.Datatypes
 {
-    [ProtocolRole(Protocols.Core, "client", "server")]
-    public interface ICoreClient : IProtocolHandler
+    [AttributeUsage(AttributeTargets.Interface, Inherited = true, AllowMultiple = false)]
+    public class ProtocolRoleAttribute : Attribute
     {
-        void RequestSession(string applicationName, string applicationVersion, IList<SupportedProtocol> requestedProtocols);
+        public ProtocolRoleAttribute(Protocols protocol, string role, string requestedRole) : this((int)protocol, role, requestedRole)
+        {
+        }
 
-        void CloseSession(string reason = null);
+        public ProtocolRoleAttribute(int protocol, string role, string requestedRole)
+        {
+            Protocol = protocol;
+            Role = role;
+            RequestedRole = requestedRole;
+        }
 
-        event ProtocolEventHandler<OpenSession> OnOpenSession;
+        public int Protocol { get; private set; }
 
-        event ProtocolEventHandler<CloseSession> OnCloseSession;
+        public string Role { get; private set; }
+
+        public string RequestedRole { get; private set; }
     }
 }

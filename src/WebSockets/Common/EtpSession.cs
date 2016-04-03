@@ -89,17 +89,17 @@ namespace Energistics.Common
             Sent(header, body);
         }
 
-        public IList<SupportedProtocol> GetSupportedProtocols()
+        public IList<SupportedProtocol> GetSupportedProtocols(bool isSender = false)
         {
             var supportedProtocols = new List<SupportedProtocol>();
-            var version = new Energistics.Datatypes.Version()
+            var version = new Datatypes.Version()
             {
                 Major = 1
             };
 
             foreach (var handler in Handlers.Values)
             {
-                if (supportedProtocols.Any(x => x.Protocol == handler.Protocol))
+                if (supportedProtocols.Any(x => x.Protocol == handler.Protocol && x.Role == handler.Role))
                 {
                     continue;
                 }
@@ -109,7 +109,7 @@ namespace Energistics.Common
                     Protocol = handler.Protocol,
                     ProtocolVersion = version,
                     ProtocolCapabilities = handler.GetCapabilities(),
-                    Role = handler.RequestedRole ?? handler.Role
+                    Role = isSender ? handler.RequestedRole : handler.Role
                 });
             }
 
@@ -154,7 +154,7 @@ namespace Energistics.Common
             }
             else
             {
-                var message = string.Format("Protocol handler not registed for protocol {0}.", header.Protocol);
+                var message = string.Format("Protocol handler not registered for protocol {0}.", header.Protocol);
 
                 Handler((int)Protocols.Core)
                     .ProtocolException((int)ErrorCodes.EUNSUPPORTED_PROTOCOL, message, header.MessageId);
@@ -182,15 +182,15 @@ namespace Energistics.Common
                 return Handlers[protocol];
             }
 
-            Logger.Error(Format("[{0}] Protocol handler not registed for protocol {1}.", SessionId, protocol));
-            throw new NotSupportedException(string.Format("Protocol handler not registed for protocol {0}.", protocol));
+            Logger.Error(Format("[{0}] Protocol handler not registered for protocol {1}.", SessionId, protocol));
+            throw new NotSupportedException(string.Format("Protocol handler not registered for protocol {0}.", protocol));
         }
 
         protected void Sent<T>(MessageHeader header, T body)
         {
             if (Output != null)
             {
-                Format("[{0}] Message sent at {1}", SessionId, System.DateTime.Now);
+                Format("[{0}] Message sent at {1}", SessionId, DateTime.Now);
                 Format(this.Serialize(header));
                 Format(this.Serialize(body, true));
             }

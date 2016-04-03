@@ -26,9 +26,8 @@ namespace Energistics.Protocol.ChannelStreaming
 {
     public class ChannelStreamingConsumerHandler : EtpProtocolHandler, IChannelStreamingConsumer
     {
-        public ChannelStreamingConsumerHandler() : base(Protocols.ChannelStreaming, "consumer")
+        public ChannelStreamingConsumerHandler() : base(Protocols.ChannelStreaming, "consumer", "producer")
         {
-            RequestedRole = "producer";
             ChannelMetadataRecords = new List<ChannelMetadataRecord>(0);
         }
 

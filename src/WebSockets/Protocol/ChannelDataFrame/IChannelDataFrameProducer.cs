@@ -18,10 +18,12 @@
 
 using System.Collections.Generic;
 using Energistics.Common;
+using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
 
 namespace Energistics.Protocol.ChannelDataFrame
 {
+    [ProtocolRole(Protocols.ChannelDataFrame, "producer", "consumer")]
     public interface IChannelDataFrameProducer : IProtocolHandler
     {
         void ChannelMetadata(ChannelMetadata channelMetadata);

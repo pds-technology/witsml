@@ -112,6 +112,7 @@
     <Compile Include="Datatypes\ResourceTypes.cs" />
     <Compile Include="Protocol\MessageFlags.cs" />
     <Compile Include="Protocol\MessageTypes.cs" />
+    <Compile Include="Datatypes\ProtocolRoleAttribute.cs" />
     <Compile Include="Protocol\Store\IStoreCustomer.cs" />
     <Compile Include="Protocol\Store\IStoreStore.cs" />
     <Compile Include="EtpClient.cs" />

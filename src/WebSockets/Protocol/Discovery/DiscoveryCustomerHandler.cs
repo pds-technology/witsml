@@ -27,9 +27,8 @@ namespace Energistics.Protocol.Discovery
     {
         private readonly IDictionary<long, string> _requests;
 
-        public DiscoveryCustomerHandler() : base(Protocols.Discovery, "customer")
+        public DiscoveryCustomerHandler() : base(Protocols.Discovery, "customer", "store")
         {
-            RequestedRole = "store";
             _requests = new Dictionary<long, string>();
         }
 

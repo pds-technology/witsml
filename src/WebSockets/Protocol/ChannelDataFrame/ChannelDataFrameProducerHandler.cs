@@ -26,7 +26,7 @@ namespace Energistics.Protocol.ChannelDataFrame
 {
     public class ChannelDataFrameProducerHandler : EtpProtocolHandler, IChannelDataFrameProducer
     {
-        public ChannelDataFrameProducerHandler() : base(Protocols.ChannelDataFrame, "producer")
+        public ChannelDataFrameProducerHandler() : base(Protocols.ChannelDataFrame, "producer", "consumer")
         {
         }
 

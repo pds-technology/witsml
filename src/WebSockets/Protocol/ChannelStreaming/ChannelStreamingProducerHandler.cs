@@ -28,9 +28,8 @@ namespace Energistics.Protocol.ChannelStreaming
     {
         public const string SimpleStreamer = "SimpleStreamer";
 
-        public ChannelStreamingProducerHandler() : base(Protocols.ChannelStreaming, "producer")
+        public ChannelStreamingProducerHandler() : base(Protocols.ChannelStreaming, "producer", "consumer")
         {
-            RequestedRole = "consumer";
         }
 
         public bool IsSimpleStreamer { get; protected set; }

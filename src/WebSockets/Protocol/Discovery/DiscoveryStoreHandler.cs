@@ -27,7 +27,7 @@ namespace Energistics.Protocol.Discovery
 {
     public class DiscoveryStoreHandler : EtpProtocolHandler, IDiscoveryStore
     {
-        public DiscoveryStoreHandler() : base(Protocols.Discovery, "store")
+        public DiscoveryStoreHandler() : base(Protocols.Discovery, "store", "customer")
         {
         }
 

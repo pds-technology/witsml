@@ -17,10 +17,11 @@
 //-----------------------------------------------------------------------
 
 using Energistics.Common;
-using Energistics.Datatypes.ChannelData;
+using Energistics.Datatypes;
 
 namespace Energistics.Protocol.ChannelDataFrame
 {
+    [ProtocolRole(Protocols.ChannelDataFrame, "consumer", "producer")]
     public interface IChannelDataFrameConsumer : IProtocolHandler
     {
         void RequestChannelData(string uri, long? fromIndex = null, long? toIndex = null);

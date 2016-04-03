@@ -113,7 +113,7 @@ namespace Energistics
         {
             Logger.Debug(Format("[{0}] Socket opened.", SessionId));
 
-            var requestedProtocols = GetSupportedProtocols();
+            var requestedProtocols = GetSupportedProtocols(true);
 
             Handler<ICoreClient>()
                 .RequestSession(ApplicationName, ApplicationVersion, requestedProtocols);

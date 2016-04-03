@@ -26,9 +26,8 @@ namespace Energistics.Protocol.Store
 {
     public class StoreCustomerHandler : EtpProtocolHandler, IStoreCustomer
     {
-        public StoreCustomerHandler() : base(Protocols.Store, "customer")
+        public StoreCustomerHandler() : base(Protocols.Store, "customer", "store")
         {
-            RequestedRole = "store";
         }
 
         public virtual void GetObject(string uri)

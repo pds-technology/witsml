@@ -17,9 +17,11 @@
 //-----------------------------------------------------------------------
 
 using Energistics.Common;
+using Energistics.Datatypes;
 
 namespace Energistics.Protocol.Discovery
 {
+    [ProtocolRole(Protocols.Discovery, "customer", "store")]
     public interface IDiscoveryCustomer : IProtocolHandler
     {
         void GetResources(string uri);

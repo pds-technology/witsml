@@ -18,10 +18,12 @@
 
 using System.Collections.Generic;
 using Energistics.Common;
+using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
 
 namespace Energistics.Protocol.ChannelStreaming
 {
+    [ProtocolRole(Protocols.ChannelStreaming, "consumer", "producer")]
     public interface IChannelStreamingConsumer : IProtocolHandler
     {
         void Start(int maxDataItems = 10000, int maxMessageRate = 1000);

@@ -23,6 +23,7 @@ using Energistics.Datatypes.Object;
 
 namespace Energistics.Protocol.Discovery
 {
+    [ProtocolRole(Protocols.Discovery, "store", "customer")]
     public interface IDiscoveryStore : IProtocolHandler
     {
         void GetResourcesResponse(MessageHeader request, IList<Resource> resources);

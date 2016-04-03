@@ -41,7 +41,7 @@ namespace Energistics.Common
 
         void SendMessage<T>(MessageHeader header, T body) where T : ISpecificRecord;
 
-        IList<SupportedProtocol> GetSupportedProtocols();
+        IList<SupportedProtocol> GetSupportedProtocols(bool isSender = false);
 
         T Handler<T>() where T : IProtocolHandler;
 

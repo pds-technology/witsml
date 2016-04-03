@@ -26,7 +26,7 @@ namespace Energistics.Protocol.Core
 {
     public class CoreServerHandler : EtpProtocolHandler, ICoreServer
     {
-        public CoreServerHandler() : base(Protocols.Core, "server")
+        public CoreServerHandler() : base(Protocols.Core, "server", "client")
         {
             RequestedProtocols = new List<SupportedProtocol>(0);
         }
@@ -92,12 +92,12 @@ namespace Energistics.Protocol.Core
             Notify(OnRequestSession, header, requestSession);
 
             var protocols = RequestedProtocols
-                .Select(x => x.Protocol)
+                .Select(x => new { x.Protocol, x.Role })
                 .ToArray();
 
             // only return details for requested protocols
             var supportedProtocols = Session.GetSupportedProtocols()
-                .Where(x => protocols.Contains(x.Protocol))
+                .Where(x => protocols.Any(y => x.Protocol == y.Protocol && x.Role == y.Role))
                 .ToList();
 
             OpenSession(header, supportedProtocols);

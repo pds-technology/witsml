@@ -23,6 +23,7 @@ using Energistics.Datatypes.ChannelData;
 
 namespace Energistics.Protocol.ChannelStreaming
 {
+    [ProtocolRole(Protocols.ChannelStreaming, "producer", "consumer")]
     public interface IChannelStreamingProducer : IProtocolHandler
     {
         void ChannelMetadata(MessageHeader request, IList<ChannelMetadataRecord> channelMetadataRecords);

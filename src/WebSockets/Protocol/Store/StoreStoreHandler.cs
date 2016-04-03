@@ -25,7 +25,7 @@ namespace Energistics.Protocol.Store
 {
     public class StoreStoreHandler : EtpProtocolHandler, IStoreStore
     {
-        public StoreStoreHandler() : base(Protocols.Store, "store")
+        public StoreStoreHandler() : base(Protocols.Store, "store", "customer")
         {
         }
 

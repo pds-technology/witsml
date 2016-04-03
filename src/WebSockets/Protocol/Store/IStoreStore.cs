@@ -17,10 +17,12 @@
 //-----------------------------------------------------------------------
 
 using Energistics.Common;
+using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 
 namespace Energistics.Protocol.Store
 {
+    [ProtocolRole(Protocols.Store, "customer", "store")]
     public interface IStoreStore : IProtocolHandler
     {
         void Object(DataObject dataObject);

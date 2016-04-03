@@ -24,9 +24,8 @@ namespace Energistics.Protocol.ChannelDataFrame
 {
     public class ChannelDataFrameConsumerHandler : EtpProtocolHandler, IChannelDataFrameConsumer
     {
-        public ChannelDataFrameConsumerHandler() : base(Protocols.ChannelDataFrame, "consumer")
+        public ChannelDataFrameConsumerHandler() : base(Protocols.ChannelDataFrame, "consumer", "producer")
         {
-            RequestedRole = "producer";
         }
 
         public virtual void RequestChannelData(string uri, long? fromIndex = null, long? toIndex = null)

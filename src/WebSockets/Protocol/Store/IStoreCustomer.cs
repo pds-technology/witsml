@@ -18,10 +18,12 @@
 
 using System.Collections.Generic;
 using Energistics.Common;
+using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 
 namespace Energistics.Protocol.Store
 {
+    [ProtocolRole(Protocols.Store, "store", "customer")]
     public interface IStoreCustomer : IProtocolHandler
     {
         void GetObject(string uri);

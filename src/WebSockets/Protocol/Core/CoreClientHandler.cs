@@ -25,9 +25,8 @@ namespace Energistics.Protocol.Core
 {
     public class CoreClientHandler : EtpProtocolHandler, ICoreClient
     {
-        public CoreClientHandler() : base(Protocols.Core, "client")
+        public CoreClientHandler() : base(Protocols.Core, "client", "server")
         {
-            RequestedRole = "server";
             ServerProtocols = new List<SupportedProtocol>(0);
             ServerObjects = new List<string>(0);
         }

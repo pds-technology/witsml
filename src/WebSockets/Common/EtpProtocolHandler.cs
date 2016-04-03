@@ -28,14 +28,15 @@ namespace Energistics.Common
 {
     public abstract class EtpProtocolHandler : EtpBase, IProtocolHandler
     {
-        public EtpProtocolHandler(Protocols protocol, string role) : this((int)protocol, role)
+        public EtpProtocolHandler(Protocols protocol, string role, string requestedRole) : this((int)protocol, role, requestedRole)
         { 
         }
 
-        public EtpProtocolHandler(int protocol, string role)
+        public EtpProtocolHandler(int protocol, string role, string requestedRole)
         {
             Protocol = protocol;
             Role = role;
+            RequestedRole = requestedRole;
         }
 
         public virtual IEtpSession Session { get; set; }
@@ -44,7 +45,7 @@ namespace Energistics.Common
 
         public string Role { get; private set; }
 
-        public string RequestedRole { get; protected set; }
+        public string RequestedRole { get; private set; }
 
         public virtual IDictionary<string, DataValue> GetCapabilities()
         {

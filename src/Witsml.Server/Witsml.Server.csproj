@@ -116,7 +116,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Providers\ChannelStreaming\ChannelStreamingAggregator.cs" />
     <Compile Include="Providers\ChannelStreaming\ChannelStreamingProducer.cs" />
     <Compile Include="Providers\ChannelStreaming\ChannelStreamingConsumer.cs" />
     <Compile Include="Providers\ChannelStreaming\IndexedDataItem.cs" />

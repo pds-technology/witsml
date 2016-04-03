@@ -22,6 +22,7 @@ using Energistics.Datatypes;
 
 namespace Energistics.Protocol.Core
 {
+    [ProtocolRole(Protocols.Core, "server", "client")]
     public interface ICoreServer : IProtocolHandler
     {
         void OpenSession(MessageHeader request, IList<SupportedProtocol> supportedProtocols);

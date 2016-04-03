@@ -22,6 +22,7 @@ using System.Linq;
 using Energistics.Datatypes;
 using Energistics.Protocol.ChannelStreaming;
 using Energistics.Protocol.Core;
+using PDS.Framework;
 using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Providers.Core
@@ -31,6 +32,7 @@ namespace PDS.Witsml.Server.Providers.Core
     public class CoreServerProvider : CoreServerHandler
     {
         private static readonly int MaxMessageRate = Settings.Default.MaxMessageRate;
+        private const string Consumer = "consumer";
 
         protected override void HandleRequestSession(MessageHeader header, RequestSession requestSession)
         {
@@ -41,9 +43,7 @@ namespace PDS.Witsml.Server.Providers.Core
             var isClientProducer = HasConsumerRole(RequestedProtocols);
 
             // Does the server support the ChannelStreaming consumer role
-            var isServerConsumer = HasConsumerRole(Session.GetSupportedProtocols());
-
-            if (isClientProducer && isServerConsumer)
+            if (isClientProducer && Session.CanHandle<IChannelStreamingConsumer>())
             {
                 // Start a ChannelStreaming session
                 Session.Handler<IChannelStreamingConsumer>()
@@ -53,7 +53,7 @@ namespace PDS.Witsml.Server.Providers.Core
 
         private bool HasConsumerRole(IList<SupportedProtocol> protocols)
         {
-            return protocols.Any(x => x.Protocol == (int)Protocols.ChannelStreaming && x.Role.Contains("consumer"));
+            return protocols.Any(x => x.Protocol == (int)Protocols.ChannelStreaming && Consumer.EqualsIgnoreCase(x.Role));
         }
     }
 }

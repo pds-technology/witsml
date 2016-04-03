@@ -270,12 +270,12 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
 
             // Convert range info index from scale to compare to record index values
-            var start = IndexFromScale(channelRangeInfo.StartIndex, primaryIndex.Scale, isTimeIndex);
-            var end = IndexFromScale(channelRangeInfo.EndIndex, primaryIndex.Scale, isTimeIndex);
+            var startEndRange = new Range<double?>(
+                IndexFromScale(channelRangeInfo.StartIndex, primaryIndex.Scale, isTimeIndex),
+                IndexFromScale(channelRangeInfo.EndIndex, primaryIndex.Scale, isTimeIndex));
 
             // Only output if we are within the range
-            if ((increasing ? primaryIndexValue >= start : primaryIndexValue <= start) &&
-                (increasing ? primaryIndexValue <= end : primaryIndexValue >= end))
+            if (startEndRange.Contains(primaryIndexValue))
             {
                 // Move the range info start index
                 channelRangeInfo.StartIndex = IndexToScale(primaryIndexValue, primaryIndex.Scale, isTimeIndex);
@@ -367,18 +367,18 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             };
             var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
 
-
             // Convert range info index from scale to compare to record index values
-            var start = IndexFromScale(channelRangeInfo.StartIndex, primaryIndex.Scale, isTimeIndex);
-            var end = IndexFromScale(channelRangeInfo.EndIndex, primaryIndex.Scale, isTimeIndex);
+            var startEndRange = new Range<double?>(
+                IndexFromScale(channelRangeInfo.StartIndex, primaryIndex.Scale, isTimeIndex),
+                IndexFromScale(channelRangeInfo.EndIndex, primaryIndex.Scale, isTimeIndex));
 
             // Only output if we are within the range
-            if ((increasing ? primaryIndexValue >= start : primaryIndexValue <= start) &&
-                (increasing ? primaryIndexValue <= end : primaryIndexValue >= end))
+            if (startEndRange.Contains(primaryIndexValue))
                 
             {
                 // Move the range info start index
                 channelRangeInfo.StartIndex = IndexToScale(primaryIndexValue, primaryIndex.Scale, isTimeIndex);
+
                 foreach (var channelId in channelRangeInfo.ChannelId)
                 {
                     var channel = channels.FirstOrDefault(c => c.ChannelId == channelId);
@@ -519,10 +519,10 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             foreach (var info in infos)
             {
                 var channel = channels.FirstOrDefault(c => c.ChannelId == info.ChannelId);
-                var start = Convert.ToDouble(info.StartIndex.Item);
+                var start = new Range<double?>(Convert.ToDouble(info.StartIndex.Item), null);
 
                 // Handle decreasing data
-                if (increasing ? primaryIndexValue <= start : primaryIndexValue >= start)
+                if (start.StartsAfter(primaryIndexValue, increasing, inclusive: true))
                 {
                     continue;
                 }
@@ -610,10 +610,10 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             foreach (var info in infos)
             {
                 var channel = channels.FirstOrDefault(c => c.ChannelId == info.ChannelId);
-                var start = Convert.ToDouble(info.StartIndex.Item);
+                var start = new Range<double?>(Convert.ToDouble(info.StartIndex.Item), null);
 
                 // Handle decreasing data
-                if ((increasing ? primaryIndexValue <= start : primaryIndexValue >= start) 
+                if ((start.StartsAfter(primaryIndexValue, increasing, inclusive: true))
                     || indexMnemonics.Any(x => x.EqualsIgnoreCase(channel.Mnemonic)))
                 {
                     continue;
