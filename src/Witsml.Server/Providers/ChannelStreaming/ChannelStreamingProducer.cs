@@ -115,6 +115,294 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             token);
         }
 
+        protected override void HandleChannelRangeRequest(MessageHeader header, ChannelRangeRequest channelRangeRequest)
+        {
+            // no action needed if streaming already started
+            if (_tokenSource != null)
+                return;
+
+            base.HandleChannelRangeRequest(header, channelRangeRequest);
+
+            Request = header;
+            _tokenSource = new CancellationTokenSource();
+            var token = _tokenSource.Token;
+
+            Task.Run(async () =>
+            {
+                using (_tokenSource)
+                {
+                    try
+                    {
+                        Logger.Debug("Channel Streaming starting.");
+                        await StartChannelRangeRequest(channelRangeRequest.ChannelRanges, token);
+                        Logger.Debug("Channel Streaming stopped.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error(ex);
+                    }
+                    finally
+                    {
+                        _tokenSource = null;
+                    }
+                }
+            },
+            token);
+        }
+
+        private async Task StartChannelRangeRequest(IList<ChannelRangeInfo> channelRangeInfos, CancellationToken token)
+        {
+            while (!channelRangeInfos.All(x => x.EndIndex <= x.StartIndex))
+            {
+                if (token.IsCancellationRequested)
+                    break;
+
+                foreach (var uri in Channels.Keys)
+                {
+                    if (token.IsCancellationRequested)
+                        break;
+
+                    foreach (var channelRangeInfo in channelRangeInfos)
+                    {
+                        if (token.IsCancellationRequested)
+                            break;
+
+                        await StreamChannelDataRange(channelRangeInfo, uri, token);
+                    }
+                }
+            }
+            await Task.Delay(1000);
+        }
+
+        private async Task<bool> StreamChannelDataRange(ChannelRangeInfo channelRangeInfo, EtpUri uri, CancellationToken token)
+        {
+            // Select the channels using the channel ids from channelRangeInfo
+            var channels = Channels[uri].Where(x => channelRangeInfo.ChannelId.Contains(x.ChannelId));
+            var primaryIndex = channels
+                .Take(1)
+                .Select(x => x.Indexes[0])
+                .FirstOrDefault();
+
+            // Get the start index before we convert to scale
+            var minStart = channelRangeInfo.StartIndex;
+            var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
+
+            // Because we can store only longs, convert indexes to scale
+            channelRangeInfo.StartIndex = IndexToScale(channelRangeInfo.StartIndex, primaryIndex.Scale, isTimeIndex);
+            channelRangeInfo.EndIndex = IndexToScale(channelRangeInfo.EndIndex, primaryIndex.Scale, isTimeIndex);
+
+            var increasing = !(channels
+                .Take(1)
+                .Select(x => x.Indexes[0].Direction)
+                .FirstOrDefault() == IndexDirections.Decreasing);
+
+            var dataProvider = GetDataProvider(uri);
+            var channelData = dataProvider.GetChannelData(uri, new Range<double?>(minStart, increasing ? minStart + RangeSize : minStart - RangeSize));
+
+            // Stream Channel Data with IndexedDataItems if StreamIndexValuePairs setting is true
+            if (StreamIndexValuePairs)
+            {
+                await StreamIndexedChannelDataRange(channelRangeInfo, channels, channelData, increasing, token);
+            }
+            else
+            {
+                await StreamChannelDataRange(channelRangeInfo, channels, channelData, increasing, token);
+            }
+
+            return true;
+        }
+
+        private async Task StreamChannelDataRange(ChannelRangeInfo channelRangeInfo, IEnumerable<ChannelMetadataRecord> channels, IEnumerable<IChannelDataRecord> channelData, bool increasing, CancellationToken token)
+        {
+            var dataItemList = new List<DataItem>();
+
+            using (var channelDataEnum = channelData.GetEnumerator())
+            {
+                var endOfChannelData = !channelDataEnum.MoveNext();
+
+                while (!endOfChannelData)
+                {
+                    foreach (var dataItem in CreateDataItems(channels, channelRangeInfo, channelDataEnum.Current, increasing))
+                    {
+                        if (token.IsCancellationRequested)
+                            break;
+
+                        if (dataItemList.Count >= MaxDataItems)
+                        {
+                            await SendChannelData(dataItemList);
+                            dataItemList.Clear();
+                        }
+
+                        if (token.IsCancellationRequested)
+                            break;
+
+                        dataItemList.Add(dataItem);
+                    }
+                    endOfChannelData = !channelDataEnum.MoveNext();
+
+                    if (token.IsCancellationRequested)
+                        break;
+                }
+
+                if (dataItemList.Any())
+                {
+                    await SendChannelData(dataItemList);
+                }
+            }
+        }
+
+        private IEnumerable<DataItem> CreateDataItems(IEnumerable<ChannelMetadataRecord> channels, ChannelRangeInfo channelRangeInfo, IChannelDataRecord record, bool increasing)
+        {
+            // Get the value and ChannelId of the primary index
+            var primaryIndexValue = record.GetIndexValue();
+            var primaryIndex = channels
+                .Take(1)
+                .Select(x => x.Indexes[0])
+                .FirstOrDefault();
+
+            var indexValues = new List<long>();
+            var indexes = channels.Take(1).SelectMany(x => x.Indexes);
+            var i = 0;
+            indexes.ForEach(x =>
+            {
+                indexValues.Add((long)record.GetIndexValue(i++, x.Scale));
+            });
+            var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
+
+            // Convert range info index from scale to compare to record index values
+            var start = IndexFromScale(channelRangeInfo.StartIndex, primaryIndex.Scale, isTimeIndex);
+            var end = IndexFromScale(channelRangeInfo.EndIndex, primaryIndex.Scale, isTimeIndex);
+
+            // Only output if we are within the range
+            if ((increasing ? primaryIndexValue >= start : primaryIndexValue <= start) &&
+                (increasing ? primaryIndexValue <= end : primaryIndexValue >= end))
+            {
+                // Move the range info start index
+                channelRangeInfo.StartIndex = IndexToScale(primaryIndexValue, primaryIndex.Scale, isTimeIndex);
+
+                foreach (var channelId in channelRangeInfo.ChannelId)
+                {
+                    var channel = channels.FirstOrDefault(c => c.ChannelId == channelId);
+                    var value = Format(record.GetValue(record.GetOrdinal(channel.Mnemonic)));
+
+                    yield return new DataItem()
+                    {
+                        ChannelId = channelId,
+                        Indexes = indexValues.ToArray(),
+                        ValueAttributes = new DataAttribute[0],
+                        Value = new DataValue()
+                        {
+                            Item = value
+                        }
+                    };
+                }
+            }
+        }
+
+        private async Task StreamIndexedChannelDataRange(ChannelRangeInfo channelRangeInfo, IEnumerable<ChannelMetadataRecord> channels, IEnumerable<IChannelDataRecord> channelData, bool increasing, CancellationToken token)
+        {
+            var dataItemList = new List<DataItem>();
+
+            using (var channelDataEnum = channelData.GetEnumerator())
+            {
+                var endOfChannelData = !channelDataEnum.MoveNext();
+
+                while (!endOfChannelData)
+                {
+                    foreach (var dataItem in CreateIndexedDataItems(channels, channelRangeInfo, channelDataEnum.Current, increasing))
+                    {
+                        if (token.IsCancellationRequested)
+                            break;
+
+                        if (dataItemList.Count + 1 >= MaxDataItems)
+                        {
+                            await SendChannelData(dataItemList);
+                            dataItemList.Clear();
+                        }
+
+                        dataItemList.Add(dataItem.IndexDataItem);
+                        dataItemList.Add(dataItem.ValueDataItem);
+                    }
+                    endOfChannelData = !channelDataEnum.MoveNext();
+
+                    if (token.IsCancellationRequested)
+                        break;
+                }
+
+                if (dataItemList.Any())
+                {
+                    await SendChannelData(dataItemList);
+                }
+            }
+        }
+
+        private IEnumerable<IndexedDataItem> CreateIndexedDataItems(IEnumerable<ChannelMetadataRecord> channels, ChannelRangeInfo channelRangeInfo, IChannelDataRecord record, bool increasing)
+        {
+            // Get the value and ChannelId of the primary index
+            var primaryIndexValue = record.GetIndexValue();
+            var primaryIndex = channels
+                .Take(1)
+                .Select(x => x.Indexes[0])
+                .FirstOrDefault();
+
+            var primaryIndexChannelId = channels
+                .Where(x => x.Mnemonic.EqualsIgnoreCase(x.Indexes[0].Mnemonic))
+                .Select(x => x.ChannelId)
+                .FirstOrDefault();
+            var indexMnemonics = channels
+                .Take(1)
+                .SelectMany(x => x.Indexes.Select(y => y.Mnemonic))
+                .ToArray();
+
+            // Create a DataItem for the Primary Index
+            var indexDataItem = new DataItem()
+            {
+                ChannelId = primaryIndexChannelId,
+                Indexes = new long[0],
+                ValueAttributes = new DataAttribute[0],
+                Value = new DataValue()
+                {
+                    Item = primaryIndexValue
+                }
+            };
+            var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
+
+
+            // Convert range info index from scale to compare to record index values
+            var start = IndexFromScale(channelRangeInfo.StartIndex, primaryIndex.Scale, isTimeIndex);
+            var end = IndexFromScale(channelRangeInfo.EndIndex, primaryIndex.Scale, isTimeIndex);
+
+            // Only output if we are within the range
+            if ((increasing ? primaryIndexValue >= start : primaryIndexValue <= start) &&
+                (increasing ? primaryIndexValue <= end : primaryIndexValue >= end))
+                
+            {
+                // Move the range info start index
+                channelRangeInfo.StartIndex = IndexToScale(primaryIndexValue, primaryIndex.Scale, isTimeIndex);
+                foreach (var channelId in channelRangeInfo.ChannelId)
+                {
+                    var channel = channels.FirstOrDefault(c => c.ChannelId == channelId);
+
+                    if (indexMnemonics.Any(x => x.EqualsIgnoreCase(channel.Mnemonic)))
+                        continue;
+
+                    var value = Format(record.GetValue(record.GetOrdinal(channel.Mnemonic)));
+                    var valueDataItem = new DataItem()
+                    {
+                        ChannelId = channelId,
+                        Indexes = new long[0],
+                        ValueAttributes = new DataAttribute[0],
+                        Value = new DataValue()
+                        {
+                            Item = value
+                        }
+                    };
+
+                    yield return new IndexedDataItem(indexDataItem, valueDataItem);
+                }
+            }
+        }
+
         protected override void HandleChannelStreamingStop(MessageHeader header, ChannelStreamingStop channelStreamingStop)
         {
             // no action needed if streaming not in progress
@@ -149,6 +437,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             var channels = Channels[uri];
             var channelIds = channels.Select(x => x.ChannelId).ToArray();
             var channelInfos = infos.Where(x => channelIds.Contains(x.ChannelId)).ToArray();
+
             var minStart = channelInfos.Min(x => Convert.ToDouble(x.StartIndex.Item));
             var increasing = !(channels
                 .Take(1)
@@ -195,6 +484,9 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                             await SendChannelData(dataItemList);
                             dataItemList.Clear();
                         }
+
+                        if (token.IsCancellationRequested)
+                            break;
 
                         dataItemList.Add(dataItem);
                     }
@@ -281,7 +573,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
                     if (token.IsCancellationRequested)
                         break;
-
                 }
 
                 if (dataItemList.Any())
@@ -289,12 +580,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     await SendChannelData(dataItemList);
                 }
             }
-        }
-
-        private async Task SendChannelData(List<DataItem> dataItemList)
-        {
-            ChannelData(Request, dataItemList);
-            await Task.Delay(MaxMessageRate);
         }
 
         private IEnumerable<IndexedDataItem> CreateIndexedDataItems(IList<ChannelMetadataRecord> channels, IList<ChannelStreamingInfo> infos, IChannelDataRecord record, bool increasing)
@@ -354,6 +639,12 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             }
         }
 
+        private async Task SendChannelData(List<DataItem> dataItemList)
+        {
+            ChannelData(Request, dataItemList);
+            await Task.Delay(MaxMessageRate);
+        }
+
         private object Format(object value)
         {
             if (value is DateTime)
@@ -375,6 +666,22 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             }
 
             return value;
+        }
+
+        private double IndexFromScale(long index, int scale, bool isTimeIndex)
+        {
+            return isTimeIndex
+                ? index
+                : index * Math.Pow(10, -scale);
+        }
+
+        private long IndexToScale(double index, int scale, bool isTimeIndex)
+        {
+            return Convert.ToInt64(
+                (isTimeIndex 
+                    ? index
+                    : index * Math.Pow(10, scale))
+                );
         }
     }
 }

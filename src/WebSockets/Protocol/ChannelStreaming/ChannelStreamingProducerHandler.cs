@@ -128,7 +128,7 @@ namespace Energistics.Protocol.ChannelStreaming
 
         public event ProtocolEventHandler<ChannelStreamingStop> OnChannelStreamingStop;
 
-        public event ProtocolEventHandler<ChannelRangeRequest, IList<DataItem>> OnChannelRangeRequest;
+        public event ProtocolEventHandler<ChannelRangeRequest> OnChannelRangeRequest;
 
         protected override void HandleMessage(MessageHeader header, Decoder decoder)
         {
@@ -191,14 +191,7 @@ namespace Energistics.Protocol.ChannelStreaming
 
         protected virtual void HandleChannelRangeRequest(MessageHeader header, ChannelRangeRequest channelRangeRequest)
         {
-            var args = Notify(OnChannelRangeRequest, header, channelRangeRequest, new List<DataItem>());
-            HandleChannelRangeRequest(args);
-
-            ChannelData(header, args.Context);
-        }
-
-        protected virtual void HandleChannelRangeRequest(ProtocolEventArgs<ChannelRangeRequest, IList<DataItem>> args)
-        {
+            Notify(OnChannelRangeRequest, header, channelRangeRequest);
         }
     }
 }

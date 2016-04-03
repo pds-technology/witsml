@@ -43,6 +43,6 @@ namespace Energistics.Protocol.ChannelStreaming
 
         event ProtocolEventHandler<ChannelStreamingStop> OnChannelStreamingStop;
 
-        event ProtocolEventHandler<ChannelRangeRequest, IList<DataItem>> OnChannelRangeRequest;
+        event ProtocolEventHandler<ChannelRangeRequest> OnChannelRangeRequest;
     }
 }
