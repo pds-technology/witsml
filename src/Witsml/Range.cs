@@ -49,15 +49,16 @@ namespace PDS.Witsml
         /// <param name="range">The range.</param>
         /// <param name="value">The value.</param>
         /// <param name="increasing">if set to <c>true</c> the range is increasing.</param>
+        /// <param name="inclusive">if set to <c>true</c> the comparison should include value, false otherwise.</param>
         /// <returns><c>true</c> if the range starts after the specified value; otherwise, <c>false</c>.</returns>
-        public static bool StartsAfter(this Range<double?> range, double value, bool increasing = true)
+        public static bool StartsAfter(this Range<double?> range, double value, bool increasing = true, bool inclusive = false)
         {
             if (!range.Start.HasValue)
                 return false;
 
             return increasing
-                ? value < range.Start.Value
-                : value > range.Start.Value;
+                ? (inclusive ? value <= range.Start.Value : value < range.Start.Value)
+                : (inclusive ? value >= range.Start.Value : value > range.Start.Value);
         }
 
         /// <summary>
@@ -66,15 +67,16 @@ namespace PDS.Witsml
         /// <param name="range">The range.</param>
         /// <param name="value">The value.</param>
         /// <param name="increasing">if set to <c>true</c> the range is increasing.</param>
+        /// <param name="inclusive">if set to <c>true</c> the comparison should include value, false otherwise.</param>
         /// <returns><c>true</c> if the range ends before the specified value; otherwise, <c>false</c>.</returns>
-        public static bool EndsBefore(this Range<double?> range, double value, bool increasing = true)
+        public static bool EndsBefore(this Range<double?> range, double value, bool increasing = true, bool inclusive = false)
         {
             if (!range.End.HasValue)
                 return false;
 
             return increasing
-                ? value > range.End.Value
-                : value < range.End.Value;
+                ? (inclusive ? value >= range.End.Value : value > range.End.Value)
+                : (inclusive ? value <= range.End.Value : value < range.End.Value);
         }
 
         /// <summary>
