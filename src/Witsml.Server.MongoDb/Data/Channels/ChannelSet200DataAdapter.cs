@@ -181,7 +181,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 _channelDataChunkAdapter.Merge(reader);
 
                 // Update index range
-                UpdateIndexRange(entity.GetUri(), entity, ranges, allMnemonics);
+                UpdateIndexRange(entity.GetUri(), current, ranges, allMnemonics);
             }
 
             return new WitsmlResult(ErrorCodes.Success);
