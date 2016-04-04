@@ -14,6 +14,13 @@ namespace PDS.Witsml.Data.Logs
         public readonly ChannelIndexType[] DepthIndexTypes = new ChannelIndexType[] { ChannelIndexType.measureddepth, ChannelIndexType.trueverticaldepth, ChannelIndexType.passindexeddepth };
         public readonly ChannelIndexType[] TimeIndexTypes = new ChannelIndexType[] { ChannelIndexType.datetime, ChannelIndexType.elapsedtime };
         public readonly ChannelIndexType[] OtherIndexTypes = new ChannelIndexType[] { ChannelIndexType.pressure, ChannelIndexType.temperature };
+        private const int Seed = 123;
+        private Random _random;
+
+        public Log200Generator()
+        {
+            _random = new Random(Seed);
+        }
 
         /// <summary>
         /// Creates the citation <see cref="Citation"/>
@@ -231,9 +238,6 @@ namespace PDS.Witsml.Data.Logs
         /// <param name="numDataValue">The number of data value rows.</param>
         public void GenerateChannelData(List<ChannelSet> channelSetList, int numDataValue = 5)
         {
-            const int Seed = 123;
-
-            Random random = new Random(Seed);
             var dateTimeStart = new DateTimeOffset(2015, 3, 17, 11, 50, 0, TimeSpan.FromHours(-6));
 
             foreach (ChannelSet channelSet in channelSetList)
@@ -250,9 +254,9 @@ namespace PDS.Witsml.Data.Logs
                         logData += ", " + Environment.NewLine;
                     }
 
-                    string indexValues = GenerateIndexValues(random, channelSet, indexesStart);
+                    string indexValues = GenerateIndexValues(_random, channelSet, indexesStart);
 
-                    string channelValues = GenerateChannelValues(random, channelSet);
+                    string channelValues = GenerateChannelValues(_random, channelSet);
 
                     logData += "[ " + indexValues + ", " + channelValues + " ]";
                 }
@@ -394,13 +398,13 @@ namespace PDS.Witsml.Data.Logs
                 case EtpDataType.@double:
                 case EtpDataType.@float:
                     {
-                        column = string.Format(" {0:0.###}", random.NextDouble());
+                        column = random.NextDouble().ToString();
                         break;
                     }
                 case EtpDataType.@int:
                 case EtpDataType.@long:
                     {
-                        column = string.Format(" {0:0}", random.Next());
+                        column = random.Next().ToString();
                         break;
                     }
                 case EtpDataType.@null:

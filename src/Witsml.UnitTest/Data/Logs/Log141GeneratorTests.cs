@@ -24,7 +24,7 @@ namespace PDS.Witsml.Data.Logs
         }
 
         [TestMethod]
-        public void Can_generate_depth_log()
+        public void Can_generate_decreasing_depth_log()
         {
             LogGenerator.GenerateLogData(DepthLogDecreasing);
 
@@ -32,6 +32,17 @@ namespace PDS.Witsml.Data.Logs
             Assert.IsNotNull(DepthLogDecreasing.LogData);
             Assert.IsNotNull(DepthLogDecreasing.LogData[0].Data);
             Assert.AreEqual(5, DepthLogDecreasing.LogData[0].Data.Count);
+        }
+
+        [TestMethod]
+        public void Can_generate_increasing_depth_log()
+        {
+            LogGenerator.GenerateLogData(DepthLogIncreasing, 50);
+
+            Assert.IsNotNull(DepthLogIncreasing);
+            Assert.IsNotNull(DepthLogIncreasing.LogData);
+            Assert.IsNotNull(DepthLogIncreasing.LogData[0].Data);
+            Assert.AreEqual(50, DepthLogIncreasing.LogData[0].Data.Count);
         }
 
         [TestMethod]
