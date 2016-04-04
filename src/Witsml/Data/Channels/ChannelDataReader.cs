@@ -291,7 +291,8 @@ namespace PDS.Witsml.Data.Channels
 
         public int GetOrdinal(string name)
         {
-            return Array.IndexOf(Mnemonics, name);
+            var allMnemonics = Indices.Select(i => i.Mnemonic).Union(Mnemonics).ToArray();
+            return Array.IndexOf(allMnemonics, name);
         }
 
         public DataTable GetSchemaTable()
