@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Energistics.Common;
+using Energistics.Datatypes;
 using Energistics.Properties;
 using Energistics.Protocol.Core;
 using WebSocket4Net;
@@ -95,6 +96,10 @@ namespace Energistics
         {
             CheckDisposed();
             _socket.Send(data, offset, length);
+        }
+
+        protected override void HandleUnsupportedProtocols(IList<SupportedProtocol> supportedProtocols)
+        {
         }
 
         protected override void Dispose(bool disposing)

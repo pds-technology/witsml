@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Energistics.Datatypes;
 using log4net;
 
 namespace Energistics.Common
@@ -66,6 +67,10 @@ namespace Energistics.Common
             }
 
             return message;
+        }
+
+        public virtual void OnSessionOpened(IList<SupportedProtocol> supportedProtocols)
+        {
         }
 
         public virtual void Register<TContract, THandler>() where TContract : IProtocolHandler where THandler : TContract

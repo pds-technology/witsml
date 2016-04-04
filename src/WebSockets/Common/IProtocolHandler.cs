@@ -35,6 +35,8 @@ namespace Energistics.Common
 
         IDictionary<string, DataValue> GetCapabilities();
 
+        void OnSessionOpened(IList<SupportedProtocol> supportedProtocols);
+
         void Acknowledge(int correlationId);
 
         void ProtocolException(int errorCode, string errorMessage, long correlationId = 0);

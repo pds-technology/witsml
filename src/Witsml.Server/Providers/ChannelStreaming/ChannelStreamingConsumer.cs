@@ -20,12 +20,15 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using Energistics.Common;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
 using Energistics.Protocol.ChannelStreaming;
+using Energistics.Protocol.Core;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Data.Channels;
+using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Providers.ChannelStreaming
 {
@@ -33,6 +36,8 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class ChannelStreamingConsumer : ChannelStreamingConsumerHandler
     {
+        private static readonly int MaxMessageRate = Settings.Default.MaxMessageRate;
+
         private readonly IContainer _container;
         private readonly IDictionary<EtpUri, ChannelDataBlock> _dataBlocks;
         private readonly IDictionary<long, EtpUri> _channelParentUris;
@@ -43,6 +48,15 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             _container = container;
             _dataBlocks = new Dictionary<EtpUri, ChannelDataBlock>();
             _channelParentUris = new Dictionary<long, EtpUri>();
+        }
+
+        public override void OnSessionOpened(IList<SupportedProtocol> supportedProtocols)
+        {
+            // Is the client requesting the ChannelStreaming consumer role
+            if (supportedProtocols.Contains(Protocol, Role))
+            {
+                Start(maxMessageRate: MaxMessageRate);
+            }
         }
 
         protected override void HandleChannelMetadata(MessageHeader header, ChannelMetadata channelMetadata)

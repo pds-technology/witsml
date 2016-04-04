@@ -64,6 +64,18 @@ namespace Energistics.Common
             return Handlers.ContainsKey(typeof(T));
         }
 
+        public override void OnSessionOpened(IList<SupportedProtocol> supportedProtocols)
+        {
+            HandleUnsupportedProtocols(supportedProtocols);
+
+            // notify protocol handlers about new session
+            foreach (var item in Handlers)
+            {
+                if (item.Key is Type)
+                    item.Value.OnSessionOpened(supportedProtocols);
+            }
+        }
+
         public virtual void OnDataReceived(byte[] data)
         {
             Decode(data);
@@ -99,17 +111,17 @@ namespace Energistics.Common
 
             foreach (var handler in Handlers.Values)
             {
-                if (supportedProtocols.Any(x => x.Protocol == handler.Protocol && x.Role == handler.Role))
-                {
+                var role = isSender ? handler.RequestedRole : handler.Role;
+
+                if (supportedProtocols.Contains(handler.Protocol, role))
                     continue;
-                }
 
                 supportedProtocols.Add(new SupportedProtocol()
                 {
                     Protocol = handler.Protocol,
                     ProtocolVersion = version,
                     ProtocolCapabilities = handler.GetCapabilities(),
-                    Role = isSender ? handler.RequestedRole : handler.Role
+                    Role = role
                 });
             }
 
@@ -184,6 +196,27 @@ namespace Energistics.Common
 
             Logger.Error(Format("[{0}] Protocol handler not registered for protocol {1}.", SessionId, protocol));
             throw new NotSupportedException(string.Format("Protocol handler not registered for protocol {0}.", protocol));
+        }
+
+        protected virtual void HandleUnsupportedProtocols(IList<SupportedProtocol> supportedProtocols)
+        {
+            // remove unsupported handler mappings (excluding Core protocol)
+            Handlers
+                .Where(x => x.Value.Protocol > 0 && !supportedProtocols.Contains(x.Value.Protocol, x.Value.Role))
+                .ToList()
+                .ForEach(x =>
+                {
+                    x.Value.Session = null;
+                    Handlers.Remove(x.Key);
+                    Handlers.Remove(x.Value.Protocol);
+                });
+
+            // update remaining handler mappings by protocol
+            foreach (var handler in Handlers.Values.ToArray())
+            {
+                if (!Handlers.ContainsKey(handler.Protocol))
+                    Handlers[handler.Protocol] = handler;
+            }
         }
 
         protected void Sent<T>(MessageHeader header, T body)

@@ -49,6 +49,7 @@ namespace Energistics.Protocol.Core
             };
 
             Session.SendMessage(header, openSession);
+            Session.OnSessionOpened(supportedProtocols);
         }
 
         public virtual void CloseSession(string reason = null)

@@ -37,6 +37,8 @@ namespace Energistics.Common
 
         string Format(string message, params object[] args);
 
+        void OnSessionOpened(IList<SupportedProtocol> supportedProtocols);
+
         void OnDataReceived(byte[] data);
 
         void SendMessage<T>(MessageHeader header, T body) where T : ISpecificRecord;

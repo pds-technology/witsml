@@ -90,6 +90,7 @@ namespace Energistics.Protocol.Core
             ServerObjects = openSession.SupportedObjects;
             Session.SessionId = openSession.SessionId;
             Notify(OnOpenSession, header, openSession);
+            Session.OnSessionOpened(ServerProtocols);
         }
 
         protected virtual void HandleCloseSession(MessageHeader header, CloseSession closeSession)

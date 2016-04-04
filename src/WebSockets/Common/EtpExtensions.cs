@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Avro.IO;
 using Avro.Specific;
 using Energistics.Datatypes;
@@ -76,6 +77,12 @@ namespace Energistics.Common
         {
             var formatting = (indent) ? Formatting.Indented : Formatting.None;
             return JsonConvert.SerializeObject(instance, formatting, JsonSettings);
+        }
+
+        public static bool Contains(this IList<SupportedProtocol> supportedProtocols, int protocol, string role)
+        {
+            return supportedProtocols.Any(x => x.Protocol == protocol &&
+                string.Equals(x.Role, role, StringComparison.InvariantCultureIgnoreCase));
         }
     }
 }
