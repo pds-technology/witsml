@@ -28,6 +28,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// Data adapter that encapsulates CRUD functionality for <see cref="Wellbore" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML200.Wellbore}" />
+    [Export(typeof(IEtpDataAdapter))]
     [Export(typeof(IEtpDataAdapter<Wellbore>))]
     [Export200(ObjectTypes.Wellbore, typeof(IEtpDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]

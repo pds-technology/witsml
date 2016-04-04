@@ -116,6 +116,24 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Adds the content types managed by this data adapter to the collection of <see cref="EtpContentType"/>.
+        /// </summary>
+        /// <param name="contentTypes">A collection of content types.</param>
+        public virtual void GetSupportedObjects(IList<EtpContentType> contentTypes)
+        {
+            var type = typeof(T);
+
+            if (type.Assembly != typeof(IDataObject).Assembly)
+                return;
+
+            var contentType = EtpUris.GetUriFamily(type)
+                .Append(ObjectTypes.GetObjectType(type))
+                .ContentType;
+
+            contentTypes.Add(contentType);
+        }
+
+        /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>

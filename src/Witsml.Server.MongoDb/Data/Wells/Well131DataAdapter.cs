@@ -31,6 +31,7 @@ namespace PDS.Witsml.Server.Data.Wells
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML131.Well}" />
     /// <seealso cref="PDS.Witsml.Server.Configuration.IWitsml131Configuration" />
+    [Export(typeof(IEtpDataAdapter))]
     [Export(typeof(IWitsml131Configuration))]
     [Export(typeof(IWitsmlDataAdapter<Well>))]
     [Export(typeof(IEtpDataAdapter<Well>))]

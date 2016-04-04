@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System.Collections;
+using System.Collections.Generic;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 
@@ -27,6 +28,12 @@ namespace PDS.Witsml.Server.Data
     /// </summary>
     public interface IEtpDataAdapter
     {
+        /// <summary>
+        /// Adds the content types managed by this data adapter to the collection of <see cref="EtpContentType"/>.
+        /// </summary>
+        /// <param name="contentTypes">A collection of content types.</param>
+        void GetSupportedObjects(IList<EtpContentType> contentTypes);
+
         /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>
