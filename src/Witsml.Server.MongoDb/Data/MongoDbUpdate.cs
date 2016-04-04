@@ -270,14 +270,10 @@ namespace PDS.Witsml.Server.Data
         {
             var updateBuilder = Builders<T>.Update;
             var filterBuilder = Builders<T>.Filter;
-            var idField = "Uid";
+            var idField = MongoDbUtility.LookUpIdField(type);
             var filterPath = MongoDbUtility.GetPropertyPath(parentPath, idField);
             var properties = MongoDbUtility.GetPropertyInfo(type);
             var positionPath = parentPath + ".$";
-
-            var classMap = BsonClassMap.LookupClassMap(type);
-            if (classMap != null && classMap.IdMemberMap != null)
-                idField = classMap.IdMemberMap.MemberName;
 
             foreach (var element in elements)
             {
