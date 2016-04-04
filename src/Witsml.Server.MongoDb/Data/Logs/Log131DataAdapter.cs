@@ -432,6 +432,8 @@ namespace PDS.Witsml.Server.Data.Logs
         private ChannelMetadataRecord ToChannelMetadataRecord(Log entity, LogCurveInfo curve, IndexMetadataRecord indexMetadata)
         {
             var uri = curve.GetUri(entity);
+            var isTimeLog = indexMetadata.IndexType == ChannelIndexTypes.Time;
+            var curveIndexes = GetCurrentIndexRange(entity);
 
             return new ChannelMetadataRecord()
             {
@@ -446,6 +448,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 Uuid = curve.Mnemonic,
                 Status = ChannelStatuses.Active,
                 ChannelAxes = new List<ChannelAxis>(),
+                StartIndex = curveIndexes[curve.Mnemonic][0].IndexToScale(indexMetadata.Scale, isTimeLog),
+                EndIndex = curveIndexes[curve.Mnemonic][1].IndexToScale(indexMetadata.Scale, isTimeLog),
                 Indexes = new List<IndexMetadataRecord>()
                 {
                     indexMetadata

@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using Energistics.DataAccess;
 using PDS.Witsml.Properties;
@@ -70,6 +71,66 @@ namespace PDS.Witsml
         public static List<TObject> AsList<TObject>(this TObject instance) where TObject : IDataObject
         {
             return new List<TObject>() { instance };
+        }
+
+        /// <summary>
+        /// Converts a nullable scaled index to an index nullable double value.
+        /// </summary>
+        /// <param name="index">The nullable scaled index.</param>
+        /// <param name="scale">The scale factor value.</param>
+        /// <param name="isTimeIndex">if set to <c>true</c> the index value is passed through, otherwise it is converted.</param>
+        /// <returns>The converted index value</returns>
+        public static double? IndexFromScale(this long? index, int scale, bool isTimeIndex = false)
+        {
+            if (index == null)
+                return null;
+
+            return index.Value.IndexFromScale(scale, isTimeIndex);
+        }
+
+        /// <summary>
+        /// Converts a scaled index to an index double value.
+        /// </summary>
+        /// <param name="index">The scaled index.</param>
+        /// <param name="scale">The scale factor value.</param>
+        /// <param name="isTimeIndex">if set to <c>true</c> the index value is passed through, otherwise it is converted.</param>
+        /// <returns>The converted index value</returns>
+        public static double IndexFromScale(this long index, int scale, bool isTimeIndex = false)
+        {
+            return isTimeIndex
+                ? index
+                : index * Math.Pow(10, -scale);
+        }
+
+        /// <summary>
+        /// Converts a nullable index value to a nullable scaled long value.
+        /// </summary>
+        /// <param name="index">The nullable index value to be scaled.</param>
+        /// <param name="scale">The scale factor value.</param>
+        /// <param name="isTimeIndex">if set to <c>true</c> the index value is passed through, otherwise it is converted.</param>
+        /// <returns>The converted, scaled index value</returns>
+        public static long? IndexToScale(this double? index, int scale, bool isTimeIndex = false)
+        {
+            if (index == null)
+                return null;
+
+            return index.Value.IndexToScale(scale, isTimeIndex);
+        }
+
+        /// <summary>
+        /// Converts an index value to a scaled long value.
+        /// </summary>
+        /// <param name="index">The index value to be scaled.</param>
+        /// <param name="scale">The scale factor value.</param>
+        /// <param name="isTimeIndex">if set to <c>true</c> the index value is passed through, otherwise it is converted.</param>
+        /// <returns>The converted, scaled index value</returns>
+        public static long IndexToScale(this double index, int scale, bool isTimeIndex = false)
+        {
+            return Convert.ToInt64(
+                (isTimeIndex
+                    ? index
+                    : index * Math.Pow(10, scale))
+                );
         }
     }
 }
