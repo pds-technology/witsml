@@ -26,6 +26,8 @@ namespace Energistics.Protocol.ChannelStreaming
     [ProtocolRole(Protocols.ChannelStreaming, "producer", "consumer")]
     public interface IChannelStreamingProducer : IProtocolHandler
     {
+        bool IsSimpleStreamer { get; set; }
+
         void ChannelMetadata(MessageHeader request, IList<ChannelMetadataRecord> channelMetadataRecords);
 
         void ChannelData(MessageHeader request, IList<DataItem> dataItems);

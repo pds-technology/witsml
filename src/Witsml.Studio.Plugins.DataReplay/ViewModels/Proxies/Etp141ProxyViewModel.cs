@@ -60,6 +60,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
                 Client.Handler<IChannelStreamingProducer>().OnStart += OnStart;
                 Client.Handler<IChannelStreamingProducer>().OnChannelStreamingStart += OnChannelStreamingStart;
                 Client.Handler<IChannelStreamingProducer>().OnChannelStreamingStop += OnChannelStreamingStop;
+                Client.Handler<IChannelStreamingProducer>().IsSimpleStreamer = true;
                 Client.Output = Log;
                 Client.Open();
 
@@ -98,6 +99,14 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
 
             Client.Handler<IChannelStreamingProducer>()
                 .ChannelMetadata(e.Header, channelMetadata);
+
+            if (Client.Handler<IChannelStreamingProducer>().IsSimpleStreamer)
+            {
+                foreach (var channel in channelMetadata.Select(ToChannelStreamingInfo))
+                    ChannelStreamingInfo.Add(channel);
+
+                TaskRunner.Start();
+            }
         }
 
         private void OnChannelStreamingStart(object sender, ProtocolEventArgs<ChannelStreamingStart> e)
@@ -128,6 +137,20 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
                 .Append(ObjectTypes.Wellbore, Model.WellboreUid)
                 .Append(ObjectTypes.Log, Model.LogUid)
                 .Append(ObjectTypes.LogCurveInfo, mnemonic);
+        }
+
+        public static ChannelStreamingInfo ToChannelStreamingInfo(ChannelMetadataRecord record)
+        {
+            return new ChannelStreamingInfo()
+            {
+                ChannelId = record.ChannelId,
+                ReceiveChangeNotification = false,
+                StartIndex = new StreamingStartIndex()
+                {
+                    // "null" indicates a request for the latest value
+                    Item = null
+                }
+            };
         }
 
         private ChannelMetadataRecord ToChannelMetadataRecord(ChannelMetadataRecord record, IndexMetadataRecord indexMetadata)

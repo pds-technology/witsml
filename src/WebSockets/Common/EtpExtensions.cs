@@ -25,6 +25,7 @@ using Avro.IO;
 using Avro.Specific;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
+using Energistics.Protocol.ChannelStreaming;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -87,6 +88,19 @@ namespace Energistics.Common
         {
             return supportedProtocols.Any(x => x.Protocol == protocol &&
                 string.Equals(x.Role, role, StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        public static bool IsSimpleStreamer(this IList<SupportedProtocol> supportedProtocols)
+        {
+            return supportedProtocols.Any(x =>
+            {
+                DataValue dataValue;
+                return (
+                    x.Protocol == (int)Protocols.ChannelStreaming &&
+                    x.ProtocolCapabilities.TryGetValue(ChannelStreamingProducerHandler.SimpleStreamer, out dataValue) &&
+                    Convert.ToBoolean(dataValue.Item)
+                );
+            });
         }
 
         public static byte[] GetData(this DataObject dataObject)

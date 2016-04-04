@@ -56,6 +56,11 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             if (supportedProtocols.Contains(Protocol, Role))
             {
                 Start(maxMessageRate: MaxMessageRate);
+
+                if (!supportedProtocols.IsSimpleStreamer())
+                {
+                    ChannelDescribe(new[] { EtpUri.RootUri });
+                }
             }
         }
 

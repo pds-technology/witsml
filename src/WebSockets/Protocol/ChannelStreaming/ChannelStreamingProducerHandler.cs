@@ -32,7 +32,7 @@ namespace Energistics.Protocol.ChannelStreaming
         {
         }
 
-        public bool IsSimpleStreamer { get; protected set; }
+        public bool IsSimpleStreamer { get; set; }
 
         public int MaxDataItems { get; private set; }
 
