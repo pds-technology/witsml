@@ -314,7 +314,7 @@ namespace PDS.Witsml.Server.Data
         /// Updates an object in the data store.
         /// </summary>
         /// <param name="parser">The WITSML query parser.</param>
-        /// <param name="dataObjectId">The data object identifier.</param>
+        /// <param name="uri">The data object URI.</param>
         /// <param name="ignored">The list of ignored elements.</param>
         protected void UpdateEntity(WitsmlQueryParser parser, EtpUri uri, string[] ignored = null)
         {
