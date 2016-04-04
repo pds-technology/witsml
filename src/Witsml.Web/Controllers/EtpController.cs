@@ -133,6 +133,7 @@ namespace PDS.Witsml.Web.Controllers
         private async Task AcceptWebSocketRequest(AspNetWebSocketContext context)
         {
             var handler = CreateEtpServerHandler(context.WebSocket);
+            handler.SupportedObjects = GetSupportedObjects();
             await handler.Accept(context);
         }
 
@@ -148,7 +149,7 @@ namespace PDS.Witsml.Web.Controllers
             return handler;
         }
 
-        private IList<string> GetSupportedObjects()
+        private List<string> GetSupportedObjects()
         {
             var contentTypes = new List<EtpContentType>();
 
