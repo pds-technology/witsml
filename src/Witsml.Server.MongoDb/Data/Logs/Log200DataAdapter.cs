@@ -29,6 +29,7 @@ namespace PDS.Witsml.Server.Data.Logs
     /// Data adapter that encapsulates CRUD functionality for <see cref="Log" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML200.Log}" />
+    [Export(typeof(IEtpDataAdapter))]
     [Export(typeof(IEtpDataAdapter<Log>))]
     [Export200(ObjectTypes.Log, typeof(IEtpDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]

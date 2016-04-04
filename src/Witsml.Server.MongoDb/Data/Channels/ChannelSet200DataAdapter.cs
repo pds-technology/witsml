@@ -38,6 +38,7 @@ namespace PDS.Witsml.Server.Data.Channels
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML200.ChannelSet}" />
     /// <seealso cref="PDS.Witsml.Server.Data.Channels.IChannelDataProvider" />
+    [Export(typeof(IEtpDataAdapter))]
     [Export(typeof(IEtpDataAdapter<ChannelSet>))]
     [Export200(ObjectTypes.ChannelSet, typeof(IEtpDataAdapter))]
     [Export200(ObjectTypes.ChannelSet, typeof(IChannelDataProvider))]

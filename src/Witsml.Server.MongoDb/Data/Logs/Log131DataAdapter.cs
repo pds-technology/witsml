@@ -42,6 +42,7 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML131.Log}" />
     /// <seealso cref="PDS.Witsml.Server.Data.Channels.IChannelDataProvider" />
     /// <seealso cref="PDS.Witsml.Server.Configuration.IWitsml131Configuration" />
+    [Export(typeof(IEtpDataAdapter))]
     [Export(typeof(IWitsml131Configuration))]
     [Export(typeof(IWitsmlDataAdapter<Log>))]
     [Export(typeof(IEtpDataAdapter<Log>))]

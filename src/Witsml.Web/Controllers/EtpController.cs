@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Net;
@@ -34,6 +35,7 @@ using Energistics.Protocol.Core;
 using Energistics.Protocol.Discovery;
 using Energistics.Protocol.Store;
 using PDS.Framework;
+using PDS.Witsml.Server.Data;
 using PDS.Witsml.Server.Properties;
 using PDS.Witsml.Server.Providers.ChannelStreaming;
 
@@ -55,7 +57,11 @@ namespace PDS.Witsml.Web.Controllers
         public EtpController(IContainer container)
         {
             _container = container;
+            DataAdapters = new List<IEtpDataAdapter>();
         }
+
+        [ImportMany]
+        public List<IEtpDataAdapter> DataAdapters { get; set; }
 
         // GET: api/etp
         public HttpResponseMessage Get()
@@ -83,6 +89,7 @@ namespace PDS.Witsml.Web.Controllers
         public IHttpActionResult GetServerCapabilities()
         {
             var handler = CreateEtpServerHandler(null);
+            var supportedObjects = GetSupportedObjects();
 
             var capServer = new ServerCapabilities()
             {
@@ -90,7 +97,7 @@ namespace PDS.Witsml.Web.Controllers
                 ApplicationVersion = handler.ApplicationVersion,
                 SupportedProtocols = handler.GetSupportedProtocols(),
                 SessionId = Guid.NewGuid().ToString(),
-                SupportedObjects = new string[0],
+                SupportedObjects = supportedObjects,
                 ContactInfomration = new Contact()
                 {
                     OrganizationName = Settings.Default.DefaultVendorName,
@@ -139,6 +146,18 @@ namespace PDS.Witsml.Web.Controllers
             handler.Register(() => _container.Resolve<IStoreStore>());
 
             return handler;
+        }
+
+        private IList<string> GetSupportedObjects()
+        {
+            var contentTypes = new List<EtpContentType>();
+
+            DataAdapters.ForEach(x => x.GetSupportedObjects(contentTypes));
+
+            return contentTypes
+                .Select(x => x.ToString())
+                .OrderBy(x => x)
+                .ToList();
         }
     }
 }
