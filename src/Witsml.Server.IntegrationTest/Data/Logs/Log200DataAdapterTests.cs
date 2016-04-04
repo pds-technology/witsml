@@ -74,8 +74,8 @@ namespace PDS.Witsml.Server.Data.Logs
             ChannelIndex dtChannelIndex = LogGenerator.CreateDateTimeIndex();
 
             DevKit.InitHeader(Log1, LoggingMethod.MWD, mdChannelIndex);
-            DevKit.InitHeader(Log2, LoggingMethod.Surface, dtChannelIndex);
-            DevKit.InitHeader(LogDecreasing, LoggingMethod.Surface, mdChannelIndexDecreasing);
+            DevKit.InitHeader(Log2, LoggingMethod.surface, dtChannelIndex);
+            DevKit.InitHeader(LogDecreasing, LoggingMethod.surface, mdChannelIndexDecreasing);
         }
 
         [TestMethod]

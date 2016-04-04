@@ -316,6 +316,7 @@
     <Content Include="Plugins\PDS.Witsml.Studio.Plugins.DataReplay.dll" />
     <Content Include="Plugins\PDS.Witsml.Studio.Plugins.EtpBrowser.dll" />
     <Content Include="Plugins\PDS.Witsml.Studio.Plugins.WitsmlBrowser.dll" />
+    <Content Include="Plugins\Witsml.Studio.Plugins.ObjectInspector.dll" />
     <Content Include="Samples\ChannelMetadataRecords.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
