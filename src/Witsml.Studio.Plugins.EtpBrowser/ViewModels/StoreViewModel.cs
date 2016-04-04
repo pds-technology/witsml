@@ -141,8 +141,6 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
 
             var dataObject = new DataObject()
             {
-                ContentEncoding = string.Empty,
-                Data = Encoding.UTF8.GetBytes(xml),
                 Resource = new Resource()
                 {
                     Uri = uri,
@@ -154,6 +152,8 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                     CustomData = new Dictionary<string, string>()
                 }
             };
+
+            dataObject.SetData(Encoding.UTF8.GetBytes(xml));
 
             Parent.Client.Handler<IStoreCustomer>()
                 .PutObject(dataObject);

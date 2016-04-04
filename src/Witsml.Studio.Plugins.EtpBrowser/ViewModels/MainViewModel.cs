@@ -413,7 +413,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 "// Header:{3}{0}{3}{3}// Body:{3}{1}{3}{3}/* Data:{3}{2}{3}*/{3}",
                 _client.Serialize(e.Header, true),
                 _client.Serialize(e.Message, true),
-                Encoding.UTF8.GetString(e.Message.DataObject.Data),
+                Encoding.UTF8.GetString(e.Message.DataObject.GetData()),
                 Environment.NewLine));
         }
 

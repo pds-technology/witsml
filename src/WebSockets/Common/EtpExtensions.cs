@@ -19,10 +19,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using Avro.IO;
 using Avro.Specific;
 using Energistics.Datatypes;
+using Energistics.Datatypes.Object;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -30,6 +32,8 @@ namespace Energistics.Common
 {
     public static class EtpExtensions
     {
+        private const string GzipEncoding = "gzip";
+
         private static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings()
         {
             ContractResolver = new EtpContractResolver(),
@@ -83,6 +87,43 @@ namespace Energistics.Common
         {
             return supportedProtocols.Any(x => x.Protocol == protocol &&
                 string.Equals(x.Role, role, StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        public static byte[] GetData(this DataObject dataObject)
+        {
+            if (string.IsNullOrWhiteSpace(dataObject.ContentEncoding))
+                return dataObject.Data;
+
+            if (!GzipEncoding.Equals(dataObject.ContentEncoding, StringComparison.InvariantCultureIgnoreCase))
+                throw new NotSupportedException("Content encoding not supported: " + dataObject.ContentEncoding);
+
+            using (var uncompressed = new MemoryStream())
+            using (var compressed = new MemoryStream(dataObject.Data))
+            using (var gzip = new GZipStream(compressed, CompressionMode.Decompress))
+            {
+                gzip.CopyTo(uncompressed);
+                return uncompressed.GetBuffer();
+            }
+        }
+
+        public static void SetData(this DataObject dataObject, byte[] data, bool compress = false)
+        {
+            var encoding = string.Empty;
+
+            if (compress)
+            {
+                using (var compressed = new MemoryStream())
+                using (var uncompressed = new MemoryStream(data))
+                using (var gzip = new GZipStream(uncompressed, CompressionMode.Compress))
+                {
+                    gzip.CopyTo(compressed);
+                    data = compressed.GetBuffer();
+                    encoding = GzipEncoding;
+                }
+            }
+
+            dataObject.ContentEncoding = encoding;
+            dataObject.Data = data;
         }
     }
 }

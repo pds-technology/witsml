@@ -65,15 +65,14 @@ namespace PDS.Witsml.Server.Providers.Store
         {
             if (entity == null)
             {
-                dataObject.Data = new byte[0];
+                dataObject.SetData(new byte[0]);
             }
             else
             {
                 var xml = EnergisticsConverter.ObjectToXml(entity);
-                dataObject.Data = Encoding.UTF8.GetBytes(xml);
+                dataObject.SetData(Encoding.UTF8.GetBytes(xml));
             }
 
-            dataObject.ContentEncoding = string.Empty;
             dataObject.Resource = new Resource()
             {
                 Uri = uri,
