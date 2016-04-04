@@ -112,6 +112,7 @@ namespace PDS.Witsml.Server.Data.Channels
         public override WitsmlResult Add(ChannelSet entity)
         {
             entity.Uuid = NewUid(entity.Uuid);
+            entity.Channel.ForEach(c => c.Uuid = NewUid(c.Uuid));
             entity.Citation = entity.Citation.Create();
             Logger.DebugFormat("Adding ChannelSet with uid '{0}' and name '{1}'", entity.Uuid, entity.Citation.Title);
 
@@ -126,8 +127,7 @@ namespace PDS.Witsml.Server.Data.Channels
             if (reader != null)
             {
                 var increasing = entity.Index.FirstOrDefault().Direction == IndexDirection.increasing;
-                var indexCurve = reader.Indices[0];
-                var allMnemonics = new[] { indexCurve.Mnemonic }.Concat(reader.Mnemonics).ToArray();
+                var allMnemonics = reader.Indices.Select(i => i.Mnemonic).Concat(reader.Mnemonics).ToArray();
 
                 // Get current index information
                 var ranges = GetCurrentIndexRange(entity);
@@ -171,8 +171,7 @@ namespace PDS.Witsml.Server.Data.Channels
             if (reader != null)
             {
                 var increasing = entity.Index.FirstOrDefault().Direction == IndexDirection.increasing;
-                var indexCurve = reader.Indices[0];
-                var allMnemonics = new[] { indexCurve.Mnemonic }.Concat(reader.Mnemonics).ToArray();
+                var allMnemonics = reader.Indices.Select(i => i.Mnemonic).Concat(reader.Mnemonics).ToArray();
 
                 // Get current index information
                 var ranges = GetCurrentIndexRange(current);
@@ -382,10 +381,7 @@ namespace PDS.Witsml.Server.Data.Channels
             var collection = GetCollection();
             var mongoUpdate = new MongoDbUpdate<ChannelSet>(GetCollection(), null);
 
-            var idField = "Uid";
-            var classMap = BsonClassMap.LookupClassMap(typeof(ChannelSet));
-            if (classMap != null && classMap.IdMemberMap != null)
-                idField = classMap.IdMemberMap.MemberName;
+            var idField = MongoDbUtility.LookUpIdField(typeof(ChannelSet), "Uuid");
 
             var filter = MongoDbUtility.GetEntityFilter<ChannelSet>(uri, idField);
             UpdateDefinition<ChannelSet> channelIndexUpdate = null;
@@ -408,6 +404,8 @@ namespace PDS.Witsml.Server.Data.Channels
             if (channelIndexUpdate != null)
                 mongoUpdate.UpdateFields(filter, channelIndexUpdate);
 
+            idField = MongoDbUtility.LookUpIdField(typeof(Channel), "Uuid");
+
             foreach (var mnemonic in mnemonics)
             {
                 var channel = entity.Channel.FirstOrDefault(c => c.Mnemonic.EqualsIgnoreCase(mnemonic));
@@ -416,7 +414,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
                 var filters = new List<FilterDefinition<ChannelSet>>();
                 filters.Add(filter);
-                filters.Add(MongoDbUtility.BuildFilter<ChannelSet>("Channel.Mnemonic", channel.Mnemonic));
+                filters.Add(MongoDbUtility.BuildFilter<ChannelSet>("Channel." + idField, channel.Uuid));
                 var channelFilter = Builders<ChannelSet>.Filter.And(filters);
 
                 var updateBuilder = Builders<ChannelSet>.Update;
