@@ -159,13 +159,13 @@
     <Content Include="Demo\Data\490252303100_Wellbore.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Demo\Data\log_time_based_Log.xml">
+    <Content Include="Demo\Data\Generated_Time_Log_Log.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Demo\Data\log_time_based_Well.xml">
+    <Content Include="Demo\Data\Generated_Time_Log_Well.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Demo\Data\log_time_based_Wellbore.xml">
+    <Content Include="Demo\Data\Generated_Time_Log_Wellbore.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
