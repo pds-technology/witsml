@@ -188,8 +188,8 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
 
             // Because we can store only longs, convert indexes to scale
-            channelRangeInfo.StartIndex = IndexToScale(channelRangeInfo.StartIndex, primaryIndex.Scale, isTimeIndex);
-            channelRangeInfo.EndIndex = IndexToScale(channelRangeInfo.EndIndex, primaryIndex.Scale, isTimeIndex);
+            channelRangeInfo.StartIndex = ((double)channelRangeInfo.StartIndex).IndexToScale(primaryIndex.Scale, isTimeIndex);
+            channelRangeInfo.EndIndex = ((double)channelRangeInfo.EndIndex).IndexToScale(primaryIndex.Scale, isTimeIndex);
 
             var increasing = !(channels
                 .Take(1)
@@ -271,14 +271,14 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
             // Convert range info index from scale to compare to record index values
             var startEndRange = new Range<double?>(
-                IndexFromScale(channelRangeInfo.StartIndex, primaryIndex.Scale, isTimeIndex),
-                IndexFromScale(channelRangeInfo.EndIndex, primaryIndex.Scale, isTimeIndex));
+                channelRangeInfo.StartIndex.IndexFromScale(primaryIndex.Scale, isTimeIndex),
+                channelRangeInfo.EndIndex.IndexFromScale(primaryIndex.Scale, isTimeIndex));
 
             // Only output if we are within the range
             if (startEndRange.Contains(primaryIndexValue))
             {
                 // Move the range info start index
-                channelRangeInfo.StartIndex = IndexToScale(primaryIndexValue, primaryIndex.Scale, isTimeIndex);
+                channelRangeInfo.StartIndex = primaryIndexValue.IndexToScale(primaryIndex.Scale, isTimeIndex);
 
                 foreach (var channelId in channelRangeInfo.ChannelId)
                 {
@@ -369,15 +369,15 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
             // Convert range info index from scale to compare to record index values
             var startEndRange = new Range<double?>(
-                IndexFromScale(channelRangeInfo.StartIndex, primaryIndex.Scale, isTimeIndex),
-                IndexFromScale(channelRangeInfo.EndIndex, primaryIndex.Scale, isTimeIndex));
+                channelRangeInfo.StartIndex.IndexFromScale(primaryIndex.Scale, isTimeIndex),
+                channelRangeInfo.EndIndex.IndexFromScale(primaryIndex.Scale, isTimeIndex));
 
             // Only output if we are within the range
             if (startEndRange.Contains(primaryIndexValue))
                 
             {
                 // Move the range info start index
-                channelRangeInfo.StartIndex = IndexToScale(primaryIndexValue, primaryIndex.Scale, isTimeIndex);
+                channelRangeInfo.StartIndex = primaryIndexValue.IndexToScale(primaryIndex.Scale, isTimeIndex);
 
                 foreach (var channelId in channelRangeInfo.ChannelId)
                 {
@@ -666,22 +666,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             }
 
             return value;
-        }
-
-        private double IndexFromScale(long index, int scale, bool isTimeIndex)
-        {
-            return isTimeIndex
-                ? index
-                : index * Math.Pow(10, -scale);
-        }
-
-        private long IndexToScale(double index, int scale, bool isTimeIndex)
-        {
-            return Convert.ToInt64(
-                (isTimeIndex 
-                    ? index
-                    : index * Math.Pow(10, scale))
-                );
         }
     }
 }
