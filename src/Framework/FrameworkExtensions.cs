@@ -22,6 +22,18 @@ namespace PDS.Framework
         }
 
         /// <summary>
+        /// Throws an exception if the input parameter is null.
+        /// </summary>
+        /// <param name="parameter">The parameter to check.</param>
+        /// <param name="parameterName">The name of the parameter.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="parameter"/> is null.</exception>
+        public static void NotNull(this object parameter, string parameterName)
+        {
+            if (parameter == null)
+                throw new ArgumentNullException(parameterName);
+        }
+
+        /// <summary>
         /// Determines whether two specified strings have the same value, ignoring case.
         /// </summary>
         /// <param name="a">The first string to compare, or null.</param>
