@@ -9,6 +9,7 @@ using Witsml200 = Energistics.DataAccess.WITSML200;
 using MongoDB.Driver;
 using PDS.Framework;
 using Energistics.Datatypes;
+using MongoDB.Bson.Serialization;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -273,6 +274,16 @@ namespace PDS.Witsml.Server.Data
                 return Builders<T>.Update.Set(field, value);
             else
                 return updates.Set(field, value);
+        }
+
+        public static string LookUpIdField(Type type, string defaultField = "Uid")
+        {
+            var idField = defaultField;
+            var classMap = BsonClassMap.LookupClassMap(type);
+            if (classMap != null && classMap.IdMemberMap != null)
+                idField = classMap.IdMemberMap.MemberName;
+
+            return idField;
         }
     }
 }
