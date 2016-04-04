@@ -31,6 +31,8 @@ namespace Energistics.Common
 
         string SessionId { get; set; }
 
+        IList<string> SupportedObjects { get; set; }
+
         Action<string> Output { get; set; }
 
         string Format(string message);

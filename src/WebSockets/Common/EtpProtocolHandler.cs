@@ -146,7 +146,7 @@ namespace Energistics.Common
 
         protected void Received<T>(MessageHeader header, T message)
         {
-            if (Session.Output != null)
+            if (Session != null && Session.Output != null)
             {
                 Session.Format("[{0}] Message received at {1}", Session.SessionId, System.DateTime.Now);
                 Session.Format(this.Serialize(header));

@@ -29,6 +29,7 @@ namespace Energistics.Common
         public EtpBase()
         {
             Logger = LogManager.GetLogger(GetType());
+            SupportedObjects = new List<string>();
             RegisteredHandlers = new Dictionary<Type, Type>();
             RegisteredFactories = new Dictionary<Type, Func<object>>();
         }
@@ -36,6 +37,8 @@ namespace Energistics.Common
         public Action<string> Output { get; set; }
 
         public ILog Logger { get; private set; }
+
+        public IList<string> SupportedObjects { get; set; }
 
         protected IDictionary<Type, Type> RegisteredHandlers { get; private set; }
 

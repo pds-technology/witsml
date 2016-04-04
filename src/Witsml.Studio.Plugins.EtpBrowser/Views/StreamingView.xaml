@@ -39,11 +39,11 @@
 
         <TextBlock Grid.Column="0" Grid.Row="2" Text="Start Index:" Margin="10,5,5,5" HorizontalAlignment="Right" VerticalAlignment="Center" />
         <xctk:IntegerUpDown Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center"
-                            Value="{Binding Model.Streaming.StartIndex}" Minimum="0" Maximum="600000" Increment="10"/>
+                            Value="{Binding Model.Streaming.StartIndex}" />
 
         <TextBlock Grid.Column="0" Grid.Row="3" Text="End Index:" Margin="10,5,5,5" HorizontalAlignment="Right" VerticalAlignment="Center" />
         <xctk:IntegerUpDown Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center"
-                            Value="{Binding Model.Streaming.EndIndex}" Minimum="0" Maximum="600000" Increment="10"/>
+                            Value="{Binding Model.Streaming.EndIndex}" />
 
         <TextBlock Grid.Column="0" Grid.Row="4" Text="URI:" Margin="10,5,5,5" HorizontalAlignment="Right" VerticalAlignment="Center" />
         <TextBox Text="{Binding Model.Streaming.Uri}" Grid.Column="1" Grid.Row="4" Margin="5" Padding="5" VerticalContentAlignment="Center" />

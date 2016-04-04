@@ -92,6 +92,7 @@ namespace Energistics
             Logger.Debug(Format("[{0}] Socket session connected.", session.SessionID));
 
             var etpServer = new EtpServer(session, ApplicationName, ApplicationVersion);
+            etpServer.SupportedObjects = SupportedObjects;
             RegisterAll(etpServer);
 
             session.Items[EtpSessionKey] = etpServer;

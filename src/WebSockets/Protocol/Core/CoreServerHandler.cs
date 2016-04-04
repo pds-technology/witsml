@@ -44,7 +44,7 @@ namespace Energistics.Protocol.Core
                 ApplicationName = Session.ApplicationName,
                 ApplicationVersion = Session.ApplicationVersion,
                 SupportedProtocols = supportedProtocols,
-                SupportedObjects = new List<string>(),
+                SupportedObjects = Session.SupportedObjects,
                 SessionId = Session.SessionId
             };
 

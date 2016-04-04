@@ -366,7 +366,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 ChannelStreamingInfos.Add(ToChannelStreamingInfo(x));
             });
 
-            if (e.Header.MessageFlags == (int)MessageFlags.FinalPart)
+            if (e.Header.MessageFlags != (int)MessageFlags.MultiPart)
             {
                 LogChannelMetadata(Channels);
                 CanStartStreaming = !IsSimpleStreamer;
