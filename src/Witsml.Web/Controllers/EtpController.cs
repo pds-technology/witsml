@@ -133,7 +133,6 @@ namespace PDS.Witsml.Web.Controllers
         {
             var handler = new EtpServerHandler(socket, DefaultServerName, DefaultServerVersion);
 
-            handler.Register(() => _container.Resolve<ICoreServer>());
             handler.Register(() => _container.Resolve<IChannelStreamingProducer>());
             handler.Register(() => _container.Resolve<IChannelStreamingConsumer>());
             handler.Register(() => _container.Resolve<IDiscoveryStore>());
