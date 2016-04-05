@@ -438,6 +438,14 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             var channelIds = channels.Select(x => x.ChannelId).ToArray();
             var channelInfos = infos.Where(x => channelIds.Contains(x.ChannelId)).ToArray();
 
+            // TODO: Handle 3 different StartIndex types
+            //if (x.StartIndex.Item is int)
+            //    // Stream Index Count Data
+            //else if (x.StartIndex.Item is long)
+            //    // Stream Channel Data();
+            //else
+            //    // Stream Latest Value Data
+
             var minStart = channelInfos.Min(x => Convert.ToDouble(x.StartIndex.Item));
             var increasing = !(channels
                 .Take(1)

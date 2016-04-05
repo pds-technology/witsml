@@ -108,11 +108,15 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="40" />
                                 <RowDefinition Height="40" />
+                                <RowDefinition Height="40" />
                             </Grid.RowDefinitions>
 
                             <TextBlock Grid.Column="0" Grid.Row="0" Text="Connection:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
                             <TextBox Text="{Binding Model.EtpConnection.Uri}" Grid.Column="1" Grid.Row="0" Margin="5" Padding="5" VerticalContentAlignment="Center" IsReadOnly="True" />
                             <Button x:Name="ShowEtpConnectionDialog" Grid.Column="2" Grid.Row="0" Margin="5" Content="..." Width="40" HorizontalAlignment="Right" />
+
+                            <CheckBox Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" Content="Simple Streamer?" Margin="10,0,0,0" VerticalAlignment="Center"
+                                      IsChecked="{Binding Model.IsSimpleStreamer}" />
                         </Grid>
                     </DockPanel>
                 </TabItem>

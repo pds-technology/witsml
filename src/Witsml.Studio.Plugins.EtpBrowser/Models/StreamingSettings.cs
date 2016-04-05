@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Runtime.Serialization;
 using Caliburn.Micro;
 
@@ -100,13 +101,70 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.Models
             }
         }
 
-        private int _startIndex;
+        private string _streamingType;
+        /// <summary>
+        /// Gets or sets the streaming type.
+        /// </summary>
+        /// <value>The streaming type.</value>
+        [DataMember]
+        public string StreamingType
+        {
+            get { return _streamingType; }
+            set
+            {
+                if (!ReferenceEquals(_streamingType, value))
+                {
+                    _streamingType = value;
+                    NotifyOfPropertyChange(() => StreamingType);
+                }
+            }
+        }
+
+        private int _scale;
+        /// <summary>
+        /// Gets or sets the scale factor.
+        /// </summary>
+        /// <value>The scale factor.</value>
+        [DataMember]
+        public int Scale
+        {
+            get { return _scale; }
+            set
+            {
+                if (_scale != value)
+                {
+                    _scale = value;
+                    NotifyOfPropertyChange(() => Scale);
+                }
+            }
+        }
+
+        private int _indexCount;
+        /// <summary>
+        /// Gets or sets the index count.
+        /// </summary>
+        /// <value>The index count.</value>
+        [DataMember]
+        public int IndexCount
+        {
+            get { return _indexCount; }
+            set
+            {
+                if (_indexCount != value)
+                {
+                    _indexCount = value;
+                    NotifyOfPropertyChange(() => IndexCount);
+                }
+            }
+        }
+
+        private long _startIndex;
         /// <summary>
         /// Gets or sets the start index.
         /// </summary>
         /// <value>The start index.</value>
         [DataMember]
-        public int StartIndex
+        public long StartIndex
         {
             get { return _startIndex; }
             set
@@ -119,13 +177,13 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.Models
             }
         }
 
-        private int _endIndex;
+        private long? _endIndex;
         /// <summary>
         /// Gets or sets the end index.
         /// </summary>
         /// <value>The end index.</value>
         [DataMember]
-        public int EndIndex
+        public long? EndIndex
         {
             get { return _endIndex; }
             set
@@ -134,6 +192,44 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.Models
                 {
                     _endIndex = value;
                     NotifyOfPropertyChange(() => EndIndex);
+                }
+            }
+        }
+
+        private DateTime _startTime;
+        /// <summary>
+        /// Gets or sets the start time.
+        /// </summary>
+        /// <value>The start time.</value>
+        [DataMember]
+        public DateTime StartTime
+        {
+            get { return _startTime; }
+            set
+            {
+                if (_startTime != value)
+                {
+                    _startTime = value;
+                    NotifyOfPropertyChange(() => StartTime);
+                }
+            }
+        }
+
+        private DateTime? _endTime;
+        /// <summary>
+        /// Gets or sets the end time.
+        /// </summary>
+        /// <value>The end time.</value>
+        [DataMember]
+        public DateTime? EndTime
+        {
+            get { return _endTime; }
+            set
+            {
+                if (_endTime != value)
+                {
+                    _endTime = value;
+                    NotifyOfPropertyChange(() => EndTime);
                 }
             }
         }

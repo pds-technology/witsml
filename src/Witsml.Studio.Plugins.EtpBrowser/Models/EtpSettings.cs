@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Runtime.Serialization;
 using Caliburn.Micro;
 using PDS.Witsml.Studio.Connections;
@@ -43,8 +44,10 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.Models
             {
                 MaxDataItems = DefaultMaxDataItems,
                 MaxMessageRate = DefaultMaxMessageRate,
+                StreamingType = "LatestValue",
+                StartTime = DateTime.Now,
                 StartIndex = 0,
-                EndIndex = 1000
+                IndexCount = 10
             };
             Store = new StoreSettings();
         }

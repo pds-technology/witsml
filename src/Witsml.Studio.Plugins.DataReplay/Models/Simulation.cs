@@ -33,6 +33,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.Models
             WitsmlConnection = new Connection();
             EtpConnection = new Connection();
             LogIndexType = LogIndexType.measureddepth;
+            IsSimpleStreamer = true;
             PortNumber = 9000;
         }
 
@@ -242,6 +243,21 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.Models
                 {
                     _witsmlVersion = value;
                     NotifyOfPropertyChange(() => WitsmlVersion);
+                }
+            }
+        }
+
+        private bool _isSimpleStreamer;
+        [DataMember]
+        public bool IsSimpleStreamer
+        {
+            get { return _isSimpleStreamer; }
+            set
+            {
+                if (_isSimpleStreamer != value)
+                {
+                    _isSimpleStreamer = value;
+                    NotifyOfPropertyChange(() => IsSimpleStreamer);
                 }
             }
         }

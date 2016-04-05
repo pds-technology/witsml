@@ -58,9 +58,10 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
             {
                 Client.Register<IChannelStreamingProducer, ChannelStreamingProducerHandler>();
                 Client.Handler<IChannelStreamingProducer>().OnStart += OnStart;
+                Client.Handler<IChannelStreamingProducer>().OnChannelDescribe += OnChannelDescribe;
                 Client.Handler<IChannelStreamingProducer>().OnChannelStreamingStart += OnChannelStreamingStart;
                 Client.Handler<IChannelStreamingProducer>().OnChannelStreamingStop += OnChannelStreamingStop;
-                Client.Handler<IChannelStreamingProducer>().IsSimpleStreamer = true;
+                Client.Handler<IChannelStreamingProducer>().IsSimpleStreamer = Model.IsSimpleStreamer;
                 Client.Output = Log;
                 Client.Open();
 
@@ -89,24 +90,24 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
                 OnError = LogStreamingError
             };
 
-            var indexMetadata = ToIndexMetadataRecord(Model.Channels.First());
-
-            // Skip index channel
-            var channelMetadata = Model.Channels
-                .Skip(1)
-                .Select(x => ToChannelMetadataRecord(x, indexMetadata))
-                .ToList();
-
-            Client.Handler<IChannelStreamingProducer>()
-                .ChannelMetadata(e.Header, channelMetadata);
-
             if (Client.Handler<IChannelStreamingProducer>().IsSimpleStreamer)
             {
+                var channelMetadata = GetChannelMetadata(e.Header);
+
+                Client.Handler<IChannelStreamingProducer>()
+                    .ChannelMetadata(e.Header, channelMetadata);
+
                 foreach (var channel in channelMetadata.Select(ToChannelStreamingInfo))
                     ChannelStreamingInfo.Add(channel);
 
                 TaskRunner.Start();
             }
+        }
+
+        private void OnChannelDescribe(object sender, ProtocolEventArgs<ChannelDescribe, IList<ChannelMetadataRecord>> e)
+        {
+            GetChannelMetadata(e.Header)
+                .ForEach(e.Context.Add);
         }
 
         private void OnChannelStreamingStart(object sender, ProtocolEventArgs<ChannelStreamingStart> e)
@@ -130,6 +131,19 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
                 .ChannelData(null, dataItems);
         }
 
+        private List<ChannelMetadataRecord> GetChannelMetadata(MessageHeader header)
+        {
+            var indexMetadata = ToIndexMetadataRecord(Model.Channels.First());
+
+            // Skip index channel
+            var channelMetadata = Model.Channels
+                .Skip(1)
+                .Select(x => ToChannelMetadataRecord(x, indexMetadata))
+                .ToList();
+
+            return channelMetadata;
+        }
+
         private EtpUri GetChannelUri(string mnemonic)
         {
             return EtpUris.Witsml141
@@ -139,7 +153,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
                 .Append(ObjectTypes.LogCurveInfo, mnemonic);
         }
 
-        public static ChannelStreamingInfo ToChannelStreamingInfo(ChannelMetadataRecord record)
+        private static ChannelStreamingInfo ToChannelStreamingInfo(ChannelMetadataRecord record)
         {
             return new ChannelStreamingInfo()
             {
@@ -181,7 +195,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
             return channel;
         }
 
-        public IndexMetadataRecord ToIndexMetadataRecord(ChannelMetadataRecord record, int scale = 3)
+        private IndexMetadataRecord ToIndexMetadataRecord(ChannelMetadataRecord record, int scale = 3)
         {
             return new IndexMetadataRecord()
             {
