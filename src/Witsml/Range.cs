@@ -1,4 +1,22 @@
-﻿using System;
+﻿//----------------------------------------------------------------------- 
+// PDS.Witsml, 2016.1
+//
+// Copyright 2016 Petrotechnical Data Systems
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//   
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------
+
+using System;
 using PDS.Framework;
 
 namespace PDS.Witsml
@@ -49,15 +67,16 @@ namespace PDS.Witsml
         /// <param name="range">The range.</param>
         /// <param name="value">The value.</param>
         /// <param name="increasing">if set to <c>true</c> the range is increasing.</param>
+        /// <param name="inclusive">if set to <c>true</c> the comparison should include value, false otherwise.</param>
         /// <returns><c>true</c> if the range starts after the specified value; otherwise, <c>false</c>.</returns>
-        public static bool StartsAfter(this Range<double?> range, double value, bool increasing = true)
+        public static bool StartsAfter(this Range<double?> range, double value, bool increasing = true, bool inclusive = false)
         {
             if (!range.Start.HasValue)
                 return false;
 
             return increasing
-                ? value < range.Start.Value
-                : value > range.Start.Value;
+                ? (inclusive ? value <= range.Start.Value : value < range.Start.Value)
+                : (inclusive ? value >= range.Start.Value : value > range.Start.Value);
         }
 
         /// <summary>
@@ -66,15 +85,16 @@ namespace PDS.Witsml
         /// <param name="range">The range.</param>
         /// <param name="value">The value.</param>
         /// <param name="increasing">if set to <c>true</c> the range is increasing.</param>
+        /// <param name="inclusive">if set to <c>true</c> the comparison should include value, false otherwise.</param>
         /// <returns><c>true</c> if the range ends before the specified value; otherwise, <c>false</c>.</returns>
-        public static bool EndsBefore(this Range<double?> range, double value, bool increasing = true)
+        public static bool EndsBefore(this Range<double?> range, double value, bool increasing = true, bool inclusive = false)
         {
             if (!range.End.HasValue)
                 return false;
 
             return increasing
-                ? value > range.End.Value
-                : value < range.End.Value;
+                ? (inclusive ? value >= range.End.Value : value > range.End.Value)
+                : (inclusive ? value <= range.End.Value : value < range.End.Value);
         }
 
         /// <summary>

@@ -1,4 +1,22 @@
-﻿using System.Collections.Generic;
+﻿//----------------------------------------------------------------------- 
+// ETP DevKit, 1.0
+//
+// Copyright 2016 Petrotechnical Data Systems
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//   
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------
+
+using System.Collections.Generic;
 using Avro.IO;
 using Energistics.Common;
 using Energistics.Datatypes;
@@ -10,12 +28,11 @@ namespace Energistics.Protocol.ChannelStreaming
     {
         public const string SimpleStreamer = "SimpleStreamer";
 
-        public ChannelStreamingProducerHandler() : base(Protocols.ChannelStreaming, "producer")
+        public ChannelStreamingProducerHandler() : base(Protocols.ChannelStreaming, "producer", "consumer")
         {
-            RequestedRole = "consumer";
         }
 
-        public bool IsSimpleStreamer { get; protected set; }
+        public bool IsSimpleStreamer { get; set; }
 
         public int MaxDataItems { get; private set; }
 
@@ -35,7 +52,6 @@ namespace Energistics.Protocol.ChannelStreaming
 
         public virtual void ChannelMetadata(MessageHeader request, IList<ChannelMetadataRecord> channelMetadataRecords)
         {
-            //var messageFlag = channelMetadataRecords.Count == 0 ? MessageFlags.FinalPart : MessageFlags.MultiPart;
             var header = CreateMessageHeader(Protocols.ChannelStreaming, MessageTypes.ChannelStreaming.ChannelMetadata, request.MessageId, MessageFlags.FinalPart);
 
             var channelMetadata = new ChannelMetadata()
@@ -50,8 +66,7 @@ namespace Energistics.Protocol.ChannelStreaming
         {
             // NOTE: CorrelationId is only specified when responding to a ChannelRangeRequest message
             var correlationId = request == null ? 0 : request.MessageId;
-            var messageFlag = dataItems.Count == 0 ? MessageFlags.FinalPart : MessageFlags.MultiPart;
-            var header = CreateMessageHeader(Protocols.ChannelStreaming, MessageTypes.ChannelStreaming.ChannelData, correlationId, messageFlag);
+            var header = CreateMessageHeader(Protocols.ChannelStreaming, MessageTypes.ChannelStreaming.ChannelData, correlationId, MessageFlags.MultiPart);
 
             var channelData = new ChannelData()
             {
@@ -110,7 +125,7 @@ namespace Energistics.Protocol.ChannelStreaming
 
         public event ProtocolEventHandler<ChannelStreamingStop> OnChannelStreamingStop;
 
-        public event ProtocolEventHandler<ChannelRangeRequest, IList<DataItem>> OnChannelRangeRequest;
+        public event ProtocolEventHandler<ChannelRangeRequest> OnChannelRangeRequest;
 
         protected override void HandleMessage(MessageHeader header, Decoder decoder)
         {
@@ -173,14 +188,7 @@ namespace Energistics.Protocol.ChannelStreaming
 
         protected virtual void HandleChannelRangeRequest(MessageHeader header, ChannelRangeRequest channelRangeRequest)
         {
-            var args = Notify(OnChannelRangeRequest, header, channelRangeRequest, new List<DataItem>());
-            HandleChannelRangeRequest(args);
-
-            ChannelData(header, args.Context);
-        }
-
-        protected virtual void HandleChannelRangeRequest(ProtocolEventArgs<ChannelRangeRequest, IList<DataItem>> args)
-        {
+            Notify(OnChannelRangeRequest, header, channelRangeRequest);
         }
     }
 }

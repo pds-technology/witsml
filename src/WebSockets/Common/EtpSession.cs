@@ -1,4 +1,22 @@
-﻿using System;
+﻿//----------------------------------------------------------------------- 
+// ETP DevKit, 1.0
+//
+// Copyright 2016 Petrotechnical Data Systems
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//   
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -46,6 +64,18 @@ namespace Energistics.Common
             return Handlers.ContainsKey(typeof(T));
         }
 
+        public override void OnSessionOpened(IList<SupportedProtocol> supportedProtocols)
+        {
+            HandleUnsupportedProtocols(supportedProtocols);
+
+            // notify protocol handlers about new session
+            foreach (var item in Handlers)
+            {
+                if (item.Key is Type)
+                    item.Value.OnSessionOpened(supportedProtocols);
+            }
+        }
+
         public virtual void OnDataReceived(byte[] data)
         {
             Decode(data);
@@ -71,27 +101,27 @@ namespace Energistics.Common
             Sent(header, body);
         }
 
-        public IList<SupportedProtocol> GetSupportedProtocols()
+        public IList<SupportedProtocol> GetSupportedProtocols(bool isSender = false)
         {
             var supportedProtocols = new List<SupportedProtocol>();
-            var version = new Energistics.Datatypes.Version()
+            var version = new Datatypes.Version()
             {
                 Major = 1
             };
 
             foreach (var handler in Handlers.Values)
             {
-                if (supportedProtocols.Any(x => x.Protocol == handler.Protocol))
-                {
+                var role = isSender ? handler.RequestedRole : handler.Role;
+
+                if (supportedProtocols.Contains(handler.Protocol, role))
                     continue;
-                }
 
                 supportedProtocols.Add(new SupportedProtocol()
                 {
                     Protocol = handler.Protocol,
                     ProtocolVersion = version,
                     ProtocolCapabilities = handler.GetCapabilities(),
-                    Role = handler.RequestedRole ?? handler.Role
+                    Role = role
                 });
             }
 
@@ -136,7 +166,7 @@ namespace Energistics.Common
             }
             else
             {
-                var message = string.Format("Protocol handler not registed for protocol {0}.", header.Protocol);
+                var message = string.Format("Protocol handler not registered for protocol {0}.", header.Protocol);
 
                 Handler((int)Protocols.Core)
                     .ProtocolException((int)ErrorCodes.EUNSUPPORTED_PROTOCOL, message, header.MessageId);
@@ -164,15 +194,36 @@ namespace Energistics.Common
                 return Handlers[protocol];
             }
 
-            Logger.Error(Format("[{0}] Protocol handler not registed for protocol {1}.", SessionId, protocol));
-            throw new NotSupportedException(string.Format("Protocol handler not registed for protocol {0}.", protocol));
+            Logger.Error(Format("[{0}] Protocol handler not registered for protocol {1}.", SessionId, protocol));
+            throw new NotSupportedException(string.Format("Protocol handler not registered for protocol {0}.", protocol));
+        }
+
+        protected virtual void HandleUnsupportedProtocols(IList<SupportedProtocol> supportedProtocols)
+        {
+            // remove unsupported handler mappings (excluding Core protocol)
+            Handlers
+                .Where(x => x.Value.Protocol > 0 && !supportedProtocols.Contains(x.Value.Protocol, x.Value.Role))
+                .ToList()
+                .ForEach(x =>
+                {
+                    x.Value.Session = null;
+                    Handlers.Remove(x.Key);
+                    Handlers.Remove(x.Value.Protocol);
+                });
+
+            // update remaining handler mappings by protocol
+            foreach (var handler in Handlers.Values.ToArray())
+            {
+                if (!Handlers.ContainsKey(handler.Protocol))
+                    Handlers[handler.Protocol] = handler;
+            }
         }
 
         protected void Sent<T>(MessageHeader header, T body)
         {
             if (Output != null)
             {
-                Format("[{0}] Message sent at {1}", SessionId, System.DateTime.Now);
+                Format("[{0}] Message sent at {1}", SessionId, DateTime.Now);
                 Format(this.Serialize(header));
                 Format(this.Serialize(body, true));
             }

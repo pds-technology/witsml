@@ -1,4 +1,22 @@
-﻿using System;
+﻿//----------------------------------------------------------------------- 
+// PDS.Witsml.Studio, 2016.1
+//
+// Copyright 2016 Petrotechnical Data Systems
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//   
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -40,8 +58,10 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
             {
                 Client.Register<IChannelStreamingProducer, ChannelStreamingProducerHandler>();
                 Client.Handler<IChannelStreamingProducer>().OnStart += OnStart;
+                Client.Handler<IChannelStreamingProducer>().OnChannelDescribe += OnChannelDescribe;
                 Client.Handler<IChannelStreamingProducer>().OnChannelStreamingStart += OnChannelStreamingStart;
                 Client.Handler<IChannelStreamingProducer>().OnChannelStreamingStop += OnChannelStreamingStop;
+                Client.Handler<IChannelStreamingProducer>().IsSimpleStreamer = Model.IsSimpleStreamer;
                 Client.Output = Log;
                 Client.Open();
 
@@ -70,16 +90,24 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
                 OnError = LogStreamingError
             };
 
-            var indexMetadata = ToIndexMetadataRecord(Model.Channels.First());
+            if (Client.Handler<IChannelStreamingProducer>().IsSimpleStreamer)
+            {
+                var channelMetadata = GetChannelMetadata(e.Header);
 
-            // Skip index channel
-            var channelMetadata = Model.Channels
-                .Skip(1)
-                .Select(x => ToChannelMetadataRecord(x, indexMetadata))
-                .ToList();
+                Client.Handler<IChannelStreamingProducer>()
+                    .ChannelMetadata(e.Header, channelMetadata);
 
-            Client.Handler<IChannelStreamingProducer>()
-                .ChannelMetadata(e.Header, channelMetadata);
+                foreach (var channel in channelMetadata.Select(ToChannelStreamingInfo))
+                    ChannelStreamingInfo.Add(channel);
+
+                TaskRunner.Start();
+            }
+        }
+
+        private void OnChannelDescribe(object sender, ProtocolEventArgs<ChannelDescribe, IList<ChannelMetadataRecord>> e)
+        {
+            GetChannelMetadata(e.Header)
+                .ForEach(e.Context.Add);
         }
 
         private void OnChannelStreamingStart(object sender, ProtocolEventArgs<ChannelStreamingStart> e)
@@ -103,6 +131,19 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
                 .ChannelData(null, dataItems);
         }
 
+        private List<ChannelMetadataRecord> GetChannelMetadata(MessageHeader header)
+        {
+            var indexMetadata = ToIndexMetadataRecord(Model.Channels.First());
+
+            // Skip index channel
+            var channelMetadata = Model.Channels
+                .Skip(1)
+                .Select(x => ToChannelMetadataRecord(x, indexMetadata))
+                .ToList();
+
+            return channelMetadata;
+        }
+
         private EtpUri GetChannelUri(string mnemonic)
         {
             return EtpUris.Witsml141
@@ -110,6 +151,20 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
                 .Append(ObjectTypes.Wellbore, Model.WellboreUid)
                 .Append(ObjectTypes.Log, Model.LogUid)
                 .Append(ObjectTypes.LogCurveInfo, mnemonic);
+        }
+
+        private static ChannelStreamingInfo ToChannelStreamingInfo(ChannelMetadataRecord record)
+        {
+            return new ChannelStreamingInfo()
+            {
+                ChannelId = record.ChannelId,
+                ReceiveChangeNotification = false,
+                StartIndex = new StreamingStartIndex()
+                {
+                    // "null" indicates a request for the latest value
+                    Item = null
+                }
+            };
         }
 
         private ChannelMetadataRecord ToChannelMetadataRecord(ChannelMetadataRecord record, IndexMetadataRecord indexMetadata)
@@ -140,7 +195,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
             return channel;
         }
 
-        public IndexMetadataRecord ToIndexMetadataRecord(ChannelMetadataRecord record, int scale = 3)
+        private IndexMetadataRecord ToIndexMetadataRecord(ChannelMetadataRecord record, int scale = 3)
         {
             return new IndexMetadataRecord()
             {

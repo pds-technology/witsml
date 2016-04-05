@@ -1,4 +1,22 @@
-﻿using System.Runtime.Serialization;
+﻿//----------------------------------------------------------------------- 
+// PDS.Witsml.Studio, 2016.1
+//
+// Copyright 2016 Petrotechnical Data Systems
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//   
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------
+
+using System.Runtime.Serialization;
 using Caliburn.Micro;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Energistics.Datatypes.ChannelData;
@@ -15,6 +33,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.Models
             WitsmlConnection = new Connection();
             EtpConnection = new Connection();
             LogIndexType = LogIndexType.measureddepth;
+            IsSimpleStreamer = true;
             PortNumber = 9000;
         }
 
@@ -224,6 +243,21 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.Models
                 {
                     _witsmlVersion = value;
                     NotifyOfPropertyChange(() => WitsmlVersion);
+                }
+            }
+        }
+
+        private bool _isSimpleStreamer;
+        [DataMember]
+        public bool IsSimpleStreamer
+        {
+            get { return _isSimpleStreamer; }
+            set
+            {
+                if (_isSimpleStreamer != value)
+                {
+                    _isSimpleStreamer = value;
+                    NotifyOfPropertyChange(() => IsSimpleStreamer);
                 }
             }
         }

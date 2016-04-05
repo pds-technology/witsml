@@ -116,11 +116,9 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Providers\ChannelStreaming\ChannelStreamingAggregator.cs" />
     <Compile Include="Providers\ChannelStreaming\ChannelStreamingProducer.cs" />
     <Compile Include="Providers\ChannelStreaming\ChannelStreamingConsumer.cs" />
     <Compile Include="Providers\ChannelStreaming\IndexedDataItem.cs" />
-    <Compile Include="Providers\Core\CoreServerProvider.cs" />
     <Compile Include="Providers\Discovery\DiscoveryStore131Provider.cs" />
     <Compile Include="Providers\Discovery\DiscoveryStore141Provider.cs" />
     <Compile Include="Providers\Discovery\DiscoveryStore200Provider.cs" />
@@ -233,6 +231,9 @@
     </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>powershell.exe -file "$(SolutionDir)\External\InsertCopyright.ps1" -target $(ProjectDir) -productname "PDS.Witsml.Server"</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

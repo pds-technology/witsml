@@ -1,4 +1,23 @@
-﻿using System;
+﻿//----------------------------------------------------------------------- 
+// PDS.Witsml.Server, 2016.1
+//
+// Copyright 2016 Petrotechnical Data Systems
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//   
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------
+
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Net;
@@ -16,6 +35,7 @@ using Energistics.Protocol.Core;
 using Energistics.Protocol.Discovery;
 using Energistics.Protocol.Store;
 using PDS.Framework;
+using PDS.Witsml.Server.Data;
 using PDS.Witsml.Server.Properties;
 using PDS.Witsml.Server.Providers.ChannelStreaming;
 
@@ -37,7 +57,11 @@ namespace PDS.Witsml.Web.Controllers
         public EtpController(IContainer container)
         {
             _container = container;
+            DataAdapters = new List<IEtpDataAdapter>();
         }
+
+        [ImportMany]
+        public List<IEtpDataAdapter> DataAdapters { get; set; }
 
         // GET: api/etp
         public HttpResponseMessage Get()
@@ -65,6 +89,7 @@ namespace PDS.Witsml.Web.Controllers
         public IHttpActionResult GetServerCapabilities()
         {
             var handler = CreateEtpServerHandler(null);
+            var supportedObjects = GetSupportedObjects();
 
             var capServer = new ServerCapabilities()
             {
@@ -72,7 +97,7 @@ namespace PDS.Witsml.Web.Controllers
                 ApplicationVersion = handler.ApplicationVersion,
                 SupportedProtocols = handler.GetSupportedProtocols(),
                 SessionId = Guid.NewGuid().ToString(),
-                SupportedObjects = new string[0],
+                SupportedObjects = supportedObjects,
                 ContactInfomration = new Contact()
                 {
                     OrganizationName = Settings.Default.DefaultVendorName,
@@ -108,21 +133,32 @@ namespace PDS.Witsml.Web.Controllers
         private async Task AcceptWebSocketRequest(AspNetWebSocketContext context)
         {
             var handler = CreateEtpServerHandler(context.WebSocket);
+            handler.SupportedObjects = GetSupportedObjects();
             await handler.Accept(context);
         }
 
         private EtpServerHandler CreateEtpServerHandler(WebSocket socket)
         {
             var handler = new EtpServerHandler(socket, DefaultServerName, DefaultServerVersion);
-            var aggregator = _container.Resolve<ChannelStreamingAggregator>();
 
-            handler.Register(() => _container.Resolve<ICoreServer>());
-            handler.Register<IChannelStreamingProducer>(() => aggregator);
-            handler.Register<IChannelStreamingConsumer>(() => aggregator);
+            handler.Register(() => _container.Resolve<IChannelStreamingProducer>());
+            handler.Register(() => _container.Resolve<IChannelStreamingConsumer>());
             handler.Register(() => _container.Resolve<IDiscoveryStore>());
             handler.Register(() => _container.Resolve<IStoreStore>());
 
             return handler;
+        }
+
+        private List<string> GetSupportedObjects()
+        {
+            var contentTypes = new List<EtpContentType>();
+
+            DataAdapters.ForEach(x => x.GetSupportedObjects(contentTypes));
+
+            return contentTypes
+                .Select(x => x.ToString())
+                .OrderBy(x => x)
+                .ToList();
         }
     }
 }

@@ -1,9 +1,31 @@
-﻿using System;
+﻿//----------------------------------------------------------------------- 
+// ETP DevKit, 1.0
+//
+// Copyright 2016 Petrotechnical Data Systems
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//   
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using Avro.IO;
 using Avro.Specific;
 using Energistics.Datatypes;
+using Energistics.Datatypes.Object;
+using Energistics.Protocol.ChannelStreaming;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -11,6 +33,8 @@ namespace Energistics.Common
 {
     public static class EtpExtensions
     {
+        private const string GzipEncoding = "gzip";
+
         private static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings()
         {
             ContractResolver = new EtpContractResolver(),
@@ -58,6 +82,62 @@ namespace Energistics.Common
         {
             var formatting = (indent) ? Formatting.Indented : Formatting.None;
             return JsonConvert.SerializeObject(instance, formatting, JsonSettings);
+        }
+
+        public static bool Contains(this IList<SupportedProtocol> supportedProtocols, int protocol, string role)
+        {
+            return supportedProtocols.Any(x => x.Protocol == protocol &&
+                string.Equals(x.Role, role, StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        public static bool IsSimpleStreamer(this IList<SupportedProtocol> supportedProtocols)
+        {
+            return supportedProtocols.Any(x =>
+            {
+                DataValue dataValue;
+                return (
+                    x.Protocol == (int)Protocols.ChannelStreaming &&
+                    x.ProtocolCapabilities.TryGetValue(ChannelStreamingProducerHandler.SimpleStreamer, out dataValue) &&
+                    Convert.ToBoolean(dataValue.Item)
+                );
+            });
+        }
+
+        public static byte[] GetData(this DataObject dataObject)
+        {
+            if (string.IsNullOrWhiteSpace(dataObject.ContentEncoding))
+                return dataObject.Data;
+
+            if (!GzipEncoding.Equals(dataObject.ContentEncoding, StringComparison.InvariantCultureIgnoreCase))
+                throw new NotSupportedException("Content encoding not supported: " + dataObject.ContentEncoding);
+
+            using (var uncompressed = new MemoryStream())
+            using (var compressed = new MemoryStream(dataObject.Data))
+            using (var gzip = new GZipStream(compressed, CompressionMode.Decompress))
+            {
+                gzip.CopyTo(uncompressed);
+                return uncompressed.GetBuffer();
+            }
+        }
+
+        public static void SetData(this DataObject dataObject, byte[] data, bool compress = false)
+        {
+            var encoding = string.Empty;
+
+            if (compress)
+            {
+                using (var compressed = new MemoryStream())
+                using (var uncompressed = new MemoryStream(data))
+                using (var gzip = new GZipStream(uncompressed, CompressionMode.Compress))
+                {
+                    gzip.CopyTo(compressed);
+                    data = compressed.GetBuffer();
+                    encoding = GzipEncoding;
+                }
+            }
+
+            dataObject.ContentEncoding = encoding;
+            dataObject.Data = data;
         }
     }
 }

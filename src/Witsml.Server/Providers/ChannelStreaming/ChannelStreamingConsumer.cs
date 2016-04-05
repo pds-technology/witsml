@@ -1,13 +1,34 @@
-﻿using System;
+﻿//----------------------------------------------------------------------- 
+// PDS.Witsml.Server, 2016.1
+//
+// Copyright 2016 Petrotechnical Data Systems
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//   
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using Energistics.Common;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
 using Energistics.Protocol.ChannelStreaming;
+using Energistics.Protocol.Core;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Data.Channels;
+using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Providers.ChannelStreaming
 {
@@ -15,6 +36,8 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class ChannelStreamingConsumer : ChannelStreamingConsumerHandler
     {
+        private static readonly int MaxMessageRate = Settings.Default.MaxMessageRate;
+
         private readonly IContainer _container;
         private readonly IDictionary<EtpUri, ChannelDataBlock> _dataBlocks;
         private readonly IDictionary<long, EtpUri> _channelParentUris;
@@ -25,6 +48,20 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             _container = container;
             _dataBlocks = new Dictionary<EtpUri, ChannelDataBlock>();
             _channelParentUris = new Dictionary<long, EtpUri>();
+        }
+
+        public override void OnSessionOpened(IList<SupportedProtocol> supportedProtocols)
+        {
+            // Is the client requesting the ChannelStreaming consumer role
+            if (supportedProtocols.Contains(Protocol, Role))
+            {
+                Start(maxMessageRate: MaxMessageRate);
+
+                if (!supportedProtocols.IsSimpleStreamer())
+                {
+                    ChannelDescribe(new[] { EtpUri.RootUri });
+                }
+            }
         }
 
         protected override void HandleChannelMetadata(MessageHeader header, ChannelMetadata channelMetadata)

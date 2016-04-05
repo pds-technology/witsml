@@ -1,4 +1,22 @@
-﻿using System;
+﻿//----------------------------------------------------------------------- 
+// ETP DevKit, 1.0
+//
+// Copyright 2016 Petrotechnical Data Systems
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//   
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using Avro.IO;
 using Avro.Specific;
@@ -10,14 +28,15 @@ namespace Energistics.Common
 {
     public abstract class EtpProtocolHandler : EtpBase, IProtocolHandler
     {
-        public EtpProtocolHandler(Protocols protocol, string role) : this((int)protocol, role)
+        public EtpProtocolHandler(Protocols protocol, string role, string requestedRole) : this((int)protocol, role, requestedRole)
         { 
         }
 
-        public EtpProtocolHandler(int protocol, string role)
+        public EtpProtocolHandler(int protocol, string role, string requestedRole)
         {
             Protocol = protocol;
             Role = role;
+            RequestedRole = requestedRole;
         }
 
         public virtual IEtpSession Session { get; set; }
@@ -26,7 +45,7 @@ namespace Energistics.Common
 
         public string Role { get; private set; }
 
-        public string RequestedRole { get; protected set; }
+        public string RequestedRole { get; private set; }
 
         public virtual IDictionary<string, DataValue> GetCapabilities()
         {
@@ -127,7 +146,7 @@ namespace Energistics.Common
 
         protected void Received<T>(MessageHeader header, T message)
         {
-            if (Session.Output != null)
+            if (Session != null && Session.Output != null)
             {
                 Session.Format("[{0}] Message received at {1}", Session.SessionId, System.DateTime.Now);
                 Session.Format(this.Serialize(header));

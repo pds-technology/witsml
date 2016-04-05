@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0"?>
 <logs xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/terms/" version="1.4.1.1" xmlns="http://www.witsml.org/schemas/1series">
   <log uidWell="804415d0-b5e7-4389-a3c6-cdb790f5485f" uidWellbore="d3e7d4bf-0f29-4c2b-974d-4871cf8001fd" uid="e2401b72-550f-4695-ab27-d5b0589bde18">
     <nameWell>Test Well 1.4.1.1</nameWell>

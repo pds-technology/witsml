@@ -1,4 +1,22 @@
-﻿using System;
+﻿//----------------------------------------------------------------------- 
+// PDS.Witsml.Studio, 2016.1
+//
+// Copyright 2016 Petrotechnical Data Systems
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//   
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -183,6 +201,12 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             }
         }
 
+        public void SetStreamingType(string type)
+        {
+            Model.Streaming.StreamingType = type;
+            UpdateCanRequestRange();
+        }
+
         /// <summary>
         /// Adds the URI to the collection of URIs.
         /// </summary>
@@ -269,7 +293,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
 
             CanStartStreaming = true;
             CanStopStreaming = false;
-            CanRequestRange = !IsSimpleStreamer;
+            UpdateCanRequestRange();
             UpdateCanDescribe();
         }
 
@@ -281,8 +305,8 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             var rangeInfo = new ChannelRangeInfo()
             {
                 ChannelId = Channels.Select(x => x.ChannelId).ToArray(),
-                StartIndex = Model.Streaming.StartIndex,
-                EndIndex = Model.Streaming.EndIndex
+                StartIndex = (long)GetStreamingStartValue(true),
+                EndIndex = (long)GetStreamingEndValue()
             };
 
             Parent.Client.Handler<IChannelStreamingConsumer>()
@@ -348,12 +372,12 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 ChannelStreamingInfos.Add(ToChannelStreamingInfo(x));
             });
 
-            if (e.Header.MessageFlags == (int)MessageFlags.FinalPart)
+            if (e.Header.MessageFlags != (int)MessageFlags.MultiPart)
             {
                 LogChannelMetadata(Channels);
                 CanStartStreaming = !IsSimpleStreamer;
                 CanStopStreaming = IsSimpleStreamer;
-                CanRequestRange = !IsSimpleStreamer;
+                UpdateCanRequestRange();
             }
         }
 
@@ -370,9 +394,51 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 ChannelId = channel.ChannelId,
                 StartIndex = new StreamingStartIndex()
                 {
-                    Item = Model.Streaming.StartIndex
+                    Item = GetStreamingStartValue()
                 }
             };
+        }
+
+        private object GetStreamingStartValue(bool isRangeRequest = false)
+        {
+            if (isRangeRequest && !"TimeIndex".EqualsIgnoreCase(Model.Streaming.StreamingType) && !"DepthIndex".EqualsIgnoreCase(Model.Streaming.StreamingType))
+                return default(long);
+            if ("LatestValue".EqualsIgnoreCase(Model.Streaming.StreamingType))
+                return null;
+            else if ("IndexCount".EqualsIgnoreCase(Model.Streaming.StreamingType))
+                return Model.Streaming.IndexCount;
+
+            var isTimeIndex = "TimeIndex".EqualsIgnoreCase(Model.Streaming.StreamingType);
+
+            var startIndex = isTimeIndex
+                ? new DateTimeOffset(Model.Streaming.StartTime).ToUnixTimeSeconds()
+                : Model.Streaming.StartIndex;
+
+            return startIndex;
+        }
+
+        private object GetStreamingEndValue()
+        {
+            var isTimeIndex = "TimeIndex".EqualsIgnoreCase(Model.Streaming.StreamingType);
+
+            if ("LatestValue".EqualsIgnoreCase(Model.Streaming.StreamingType) ||
+                "IndexCount".EqualsIgnoreCase(Model.Streaming.StreamingType) ||
+                (isTimeIndex && !Model.Streaming.EndTime.HasValue) ||
+                (!isTimeIndex && !Model.Streaming.EndIndex.HasValue))
+                return default(long);
+
+            var endIndex = isTimeIndex
+                ? new DateTimeOffset(Model.Streaming.EndTime.Value).ToUnixTimeSeconds()
+                : Model.Streaming.EndIndex;
+
+            return endIndex;
+        }
+
+        private void UpdateCanRequestRange()
+        {
+            CanRequestRange = !IsSimpleStreamer && ChannelStreamingInfos.Any() &&
+                ("TimeIndex".EqualsIgnoreCase(Model.Streaming.StreamingType) ||
+                "DepthIndex".EqualsIgnoreCase(Model.Streaming.StreamingType));
         }
 
         private void UpdateCanDescribe()

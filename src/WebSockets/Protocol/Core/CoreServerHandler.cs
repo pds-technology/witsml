@@ -1,4 +1,22 @@
-﻿using System.Collections.Generic;
+﻿//----------------------------------------------------------------------- 
+// ETP DevKit, 1.0
+//
+// Copyright 2016 Petrotechnical Data Systems
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//   
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------
+
+using System.Collections.Generic;
 using System.Linq;
 using Avro.IO;
 using Energistics.Common;
@@ -8,7 +26,7 @@ namespace Energistics.Protocol.Core
 {
     public class CoreServerHandler : EtpProtocolHandler, ICoreServer
     {
-        public CoreServerHandler() : base(Protocols.Core, "server")
+        public CoreServerHandler() : base(Protocols.Core, "server", "client")
         {
             RequestedProtocols = new List<SupportedProtocol>(0);
         }
@@ -26,11 +44,12 @@ namespace Energistics.Protocol.Core
                 ApplicationName = Session.ApplicationName,
                 ApplicationVersion = Session.ApplicationVersion,
                 SupportedProtocols = supportedProtocols,
-                SupportedObjects = new List<string>(),
+                SupportedObjects = Session.SupportedObjects,
                 SessionId = Session.SessionId
             };
 
             Session.SendMessage(header, openSession);
+            Session.OnSessionOpened(supportedProtocols);
         }
 
         public virtual void CloseSession(string reason = null)
@@ -74,12 +93,12 @@ namespace Energistics.Protocol.Core
             Notify(OnRequestSession, header, requestSession);
 
             var protocols = RequestedProtocols
-                .Select(x => x.Protocol)
+                .Select(x => new { x.Protocol, x.Role })
                 .ToArray();
 
             // only return details for requested protocols
             var supportedProtocols = Session.GetSupportedProtocols()
-                .Where(x => protocols.Contains(x.Protocol))
+                .Where(x => protocols.Any(y => x.Protocol == y.Protocol && x.Role == y.Role))
                 .ToList();
 
             OpenSession(header, supportedProtocols);
