@@ -53,6 +53,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSockets.UnitTest", "WebS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Studio.Plugins.ObjectInspector", "Witsml.Studio.Plugins.ObjectInspector\Witsml.Studio.Plugins.ObjectInspector.csproj", "{C17BF64B-B129-4CBC-91DF-69F1EBD4365E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Studio.Core", "Witsml.Studio.Core\Witsml.Studio.Core.csproj", "{5F8F5AC8-680A-4097-9CF2-AB5A97B3BFDF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -147,6 +149,10 @@ Global
 		{C17BF64B-B129-4CBC-91DF-69F1EBD4365E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C17BF64B-B129-4CBC-91DF-69F1EBD4365E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C17BF64B-B129-4CBC-91DF-69F1EBD4365E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F8F5AC8-680A-4097-9CF2-AB5A97B3BFDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F8F5AC8-680A-4097-9CF2-AB5A97B3BFDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F8F5AC8-680A-4097-9CF2-AB5A97B3BFDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F8F5AC8-680A-4097-9CF2-AB5A97B3BFDF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
