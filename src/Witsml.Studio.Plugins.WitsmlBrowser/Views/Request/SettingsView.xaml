@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-             xmlns:conv="clr-namespace:PDS.Witsml.Studio.Converters;assembly=PDS.Witsml.Studio"
+             xmlns:conv="clr-namespace:PDS.Witsml.Studio.Core.Converters;assembly=PDS.Witsml.Studio.Core"
              xmlns:cal="http://www.caliburnproject.org"
              xmlns:local="clr-namespace:PDS.Witsml.Studio.Plugins.WitsmlBrowser.Views.Request"
              mc:Ignorable="d" 

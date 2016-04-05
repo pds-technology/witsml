@@ -20,7 +20,7 @@ using System.Runtime.Serialization;
 using Caliburn.Micro;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Energistics.Datatypes.ChannelData;
-using PDS.Witsml.Studio.Connections;
+using PDS.Witsml.Studio.Core.Connections;
 
 namespace PDS.Witsml.Studio.Plugins.DataReplay.Models
 {

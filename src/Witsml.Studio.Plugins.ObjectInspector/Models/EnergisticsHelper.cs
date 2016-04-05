@@ -22,7 +22,7 @@ using System.Linq;
 using System.Reflection;
 using Energistics.DataAccess.Reflection;
 
-namespace Witsml.Studio.Plugins.ObjectInspector.Models
+namespace PDS.Witsml.Studio.Plugins.ObjectInspector.Models
 {
     /// <summary>
     /// Static methods for working with Energistics Data Objects in the DevKit

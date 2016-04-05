@@ -21,12 +21,12 @@ using System.ComponentModel.Composition;
 using System.Threading.Tasks;
 using Energistics.DataAccess;
 
-namespace PDS.Witsml.Studio.Connections
+namespace PDS.Witsml.Studio.Core.Connections
 {
     /// <summary>
     /// Provides a connection test for a Witsml Connection instance.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Studio.Connections.IConnectionTest" />
+    /// <seealso cref="PDS.Witsml.Studio.Core.Connections.IConnectionTest" />
     [Export("Witsml", typeof(IConnectionTest))]
     public class WitsmlConnectionTest : IConnectionTest
     {

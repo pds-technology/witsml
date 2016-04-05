@@ -6,7 +6,7 @@
              xmlns:ext="http://schemas.xceed.com/wpf/xaml/toolkit"
              xmlns:cal="http://www.caliburnproject.org"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
-             xmlns:app="clr-namespace:PDS.Witsml.Studio.Behaviors;assembly=PDS.Witsml.Studio"
+             xmlns:app="clr-namespace:PDS.Witsml.Studio.Core.Behaviors;assembly=PDS.Witsml.Studio.Core"
              xmlns:local="clr-namespace:PDS.Witsml.Studio.Plugins.DataReplay.Views"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800">

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace PDS.Witsml.Studio.Plugins.ObjectInspector.Properties {
+namespace PDS.Witsml.Studio.Core.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -25,19 +25,19 @@ namespace PDS.Witsml.Studio.Plugins.ObjectInspector.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int PluginDisplayOrder {
+        [global::System.Configuration.DefaultSettingValueAttribute("Data")]
+        public string PersistedDataFolderName {
             get {
-                return ((int)(this["PluginDisplayOrder"]));
+                return ((string)(this["PersistedDataFolderName"]));
             }
         }
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Object Inspector")]
-        public string PluginDisplayName {
+        [global::System.Configuration.DefaultSettingValueAttribute("ConnectionData.json")]
+        public string ConnectionBaseFileName {
             get {
-                return ((string)(this["PluginDisplayName"]));
+                return ((string)(this["ConnectionBaseFileName"]));
             }
         }
     }

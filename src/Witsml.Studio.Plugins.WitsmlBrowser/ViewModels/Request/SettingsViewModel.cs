@@ -21,9 +21,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Caliburn.Micro;
 using Energistics.DataAccess;
-using PDS.Witsml.Studio.Connections;
-using PDS.Witsml.Studio.Runtime;
-using PDS.Witsml.Studio.ViewModels;
+using PDS.Witsml.Studio.Core.Connections;
+using PDS.Witsml.Studio.Core.Runtime;
+using PDS.Witsml.Studio.Core.ViewModels;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 {

@@ -31,11 +31,11 @@ using Energistics.Protocol.Discovery;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using PDS.Framework;
-using PDS.Witsml.Studio.Connections;
+using PDS.Witsml.Studio.Core.Connections;
 using PDS.Witsml.Studio.Plugins.DataReplay.Providers;
 using PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies;
-using PDS.Witsml.Studio.Runtime;
-using PDS.Witsml.Studio.ViewModels;
+using PDS.Witsml.Studio.Core.Runtime;
+using PDS.Witsml.Studio.Core.ViewModels;
 
 namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
 {

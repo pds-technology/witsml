@@ -7,8 +7,8 @@
     <ProjectGuid>{C17BF64B-B129-4CBC-91DF-69F1EBD4365E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Witsml.Studio.Plugins.ObjectInspector</RootNamespace>
-    <AssemblyName>Witsml.Studio.Plugins.ObjectInspector</AssemblyName>
+    <RootNamespace>PDS.Witsml.Studio.Plugins.ObjectInspector</RootNamespace>
+    <AssemblyName>PDS.Witsml.Studio.Plugins.ObjectInspector</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -138,16 +138,15 @@
       <Project>{fae228aa-4917-4b02-b239-0a24df883898}</Project>
       <Name>Framework</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Witsml.Studio\Witsml.Studio.csproj">
-      <Project>{e7531da0-51bd-4c58-b020-ffce2dfbced6}</Project>
-      <Name>Witsml.Studio</Name>
+    <ProjectReference Include="..\Witsml.Studio.Core\Witsml.Studio.Core.csproj">
+      <Project>{5f8f5ac8-680a-4097-9cf2-ab5a97b3bfdf}</Project>
+      <Name>Witsml.Studio.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy $(TargetDir)$(TargetName).* $(SolutionDir)\Witsml.Studio\Plugins /y
-xcopy $(TargetDir)$(TargetName).* $(SolutionDir)\Witsml.Studio\bin\Plugins /y
-</PostBuildEvent>
+xcopy $(TargetDir)$(TargetName).* $(SolutionDir)\Witsml.Studio\bin\Plugins /y</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>powershell.exe -file "$(SolutionDir)\External\InsertCopyright.ps1" -target $(ProjectDir) -productname "PDS.Witsml.Studio"</PreBuildEvent>

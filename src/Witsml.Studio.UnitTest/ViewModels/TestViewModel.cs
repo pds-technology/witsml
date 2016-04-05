@@ -18,13 +18,13 @@
 
 using Caliburn.Micro;
 
-namespace PDS.Witsml.Studio.ViewModels
+namespace PDS.Witsml.Studio.Core.ViewModels
 {
     /// <summary>
     /// An IPluginViewModel for testing
     /// </summary>
     /// <seealso cref="Caliburn.Micro.Screen" />
-    /// <seealso cref="PDS.Witsml.Studio.ViewModels.IPluginViewModel" />
+    /// <seealso cref="PDS.Witsml.Studio.Core.ViewModels.IPluginViewModel" />
     public class TestViewModel : Screen, IPluginViewModel
     {
         /// <summary>

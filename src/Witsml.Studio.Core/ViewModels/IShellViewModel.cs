@@ -17,9 +17,9 @@
 //-----------------------------------------------------------------------
 
 using System.ComponentModel.Composition;
-using PDS.Witsml.Studio.Runtime;
+using PDS.Witsml.Studio.Core.Runtime;
 
-namespace PDS.Witsml.Studio.ViewModels
+namespace PDS.Witsml.Studio.Core.ViewModels
 {
     /// <summary>
     /// Provides access to the main application user interface

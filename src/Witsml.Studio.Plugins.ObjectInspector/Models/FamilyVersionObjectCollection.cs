@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.Linq;
 using PDS.Framework;
 
-namespace Witsml.Studio.Plugins.ObjectInspector.Models
+namespace PDS.Witsml.Studio.Plugins.ObjectInspector.Models
 {
     /// <summary>
     /// Encapsulates the collection of Energistics data objects from a particular standard family data schema.

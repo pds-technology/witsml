@@ -18,10 +18,10 @@
 
 using Energistics.DataAccess;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Witsml.Studio.Connections;
+using PDS.Witsml.Studio.Core.Connections;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request;
-using PDS.Witsml.Studio.Runtime;
-using PDS.Witsml.Studio.ViewModels;
+using PDS.Witsml.Studio.Core.Runtime;
+using PDS.Witsml.Studio.Core.ViewModels;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
 {

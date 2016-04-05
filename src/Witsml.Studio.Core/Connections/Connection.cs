@@ -20,7 +20,7 @@ using System.Runtime.Serialization;
 using System.Security;
 using Caliburn.Micro;
 
-namespace PDS.Witsml.Studio.Connections
+namespace PDS.Witsml.Studio.Core.Connections
 {
     /// <summary>
     /// Connection details for a connection

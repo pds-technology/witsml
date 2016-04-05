@@ -6,7 +6,7 @@
              xmlns:cal="http://www.caliburnproject.org"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              xmlns:local="clr-namespace:PDS.Witsml.Studio.Plugins.EtpBrowser.Views"
-             xmlns:conv="clr-namespace:PDS.Witsml.Studio.Converters;assembly=PDS.Witsml.Studio"
+             xmlns:conv="clr-namespace:PDS.Witsml.Studio.Core.Converters;assembly=PDS.Witsml.Studio.Core"
              mc:Ignorable="d" d:DesignHeight="400" d:DesignWidth="300">
 
     <UserControl.Resources>

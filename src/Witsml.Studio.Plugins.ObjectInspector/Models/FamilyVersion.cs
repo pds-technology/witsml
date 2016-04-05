@@ -23,7 +23,7 @@ using System.Reflection;
 using Energistics.DataAccess.Reflection;
 using PDS.Framework;
 
-namespace Witsml.Studio.Plugins.ObjectInspector.Models
+namespace PDS.Witsml.Studio.Plugins.ObjectInspector.Models
 {
     /// <summary>
     /// Encapsulates the standard family and data schema version of objects to inspect.

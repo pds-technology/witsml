@@ -24,7 +24,7 @@ using System.Xml.Serialization;
 using Energistics.DataAccess.Reflection;
 using PDS.Framework;
 
-namespace Witsml.Studio.Plugins.ObjectInspector.Models
+namespace PDS.Witsml.Studio.Plugins.ObjectInspector.Models
 {
     /// <summary>
     /// Encapsulates meta-data about an Energistics Data Object

@@ -24,7 +24,7 @@ using Energistics.Common;
 using Energistics.Datatypes;
 using Energistics.Protocol.Core;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Models;
-using PDS.Witsml.Studio.Runtime;
+using PDS.Witsml.Studio.Core.Runtime;
 
 namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
 {

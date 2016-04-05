@@ -19,10 +19,10 @@
 using Caliburn.Micro;
 using Energistics.Datatypes;
 using Energistics.Protocol.Core;
-using PDS.Witsml.Studio.Connections;
+using PDS.Witsml.Studio.Core.Connections;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Models;
-using PDS.Witsml.Studio.Runtime;
-using PDS.Witsml.Studio.ViewModels;
+using PDS.Witsml.Studio.Core.Runtime;
+using PDS.Witsml.Studio.Core.ViewModels;
 
 namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
 {

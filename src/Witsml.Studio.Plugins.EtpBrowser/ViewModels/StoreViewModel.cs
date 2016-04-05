@@ -28,8 +28,8 @@ using Energistics.Datatypes.Object;
 using Energistics.Protocol.Core;
 using Energistics.Protocol.Store;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Models;
-using PDS.Witsml.Studio.Runtime;
-using PDS.Witsml.Studio.ViewModels;
+using PDS.Witsml.Studio.Core.Runtime;
+using PDS.Witsml.Studio.Core.ViewModels;
 
 namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
 {

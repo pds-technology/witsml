@@ -18,7 +18,7 @@
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace PDS.Witsml.Studio.ViewModels
+namespace PDS.Witsml.Studio.Core.ViewModels
 {
     [TestClass]
     public class ConnectionViewModelTests : ConnectionViewModelTestBase

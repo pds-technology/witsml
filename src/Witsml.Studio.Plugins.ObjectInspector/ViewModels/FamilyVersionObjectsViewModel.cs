@@ -19,10 +19,10 @@
 using System;
 using Caliburn.Micro;
 using PDS.Framework;
-using PDS.Witsml.Studio.Runtime;
-using Witsml.Studio.Plugins.ObjectInspector.Models;
+using PDS.Witsml.Studio.Core.Runtime;
+using PDS.Witsml.Studio.Plugins.ObjectInspector.Models;
 
-namespace Witsml.Studio.Plugins.ObjectInspector.ViewModels
+namespace PDS.Witsml.Studio.Plugins.ObjectInspector.ViewModels
 {
     /// <summary>
     /// Manages the behavior for the family version object list UI elements.

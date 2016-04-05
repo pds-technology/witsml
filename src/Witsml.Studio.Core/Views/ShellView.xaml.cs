@@ -19,7 +19,7 @@
 using System.Windows;
 using System.Windows.Controls;
 
-namespace PDS.Witsml.Studio.Views
+namespace PDS.Witsml.Studio.Core.Views
 {
     /// <summary>
     /// Interaction logic for ShellView.xaml

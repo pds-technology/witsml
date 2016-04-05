@@ -21,9 +21,9 @@ using Caliburn.Micro;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Highlighting;
-using PDS.Witsml.Studio.Runtime;
+using PDS.Witsml.Studio.Core.Runtime;
 
-namespace PDS.Witsml.Studio.ViewModels
+namespace PDS.Witsml.Studio.Core.ViewModels
 {
     public class TextEditorViewModel : Screen
     {

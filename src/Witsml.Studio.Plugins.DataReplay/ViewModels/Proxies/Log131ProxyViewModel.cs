@@ -25,13 +25,13 @@ using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
 using Energistics.Datatypes.ChannelData;
 using PDS.Witsml.Data.Logs;
-using PDS.Witsml.Studio.Runtime;
+using PDS.Witsml.Studio.Core.Runtime;
 
 namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
 {
     public class Log131ProxyViewModel : WitsmlProxyViewModel
     {
-        public Log131ProxyViewModel(IRuntimeService runtime, Connections.Connection connection) : base(connection, WMLSVersion.WITSML131)
+        public Log131ProxyViewModel(IRuntimeService runtime, Core.Connections.Connection connection) : base(connection, WMLSVersion.WITSML131)
         {
             Runtime = runtime;
             Generator = new Log131Generator();

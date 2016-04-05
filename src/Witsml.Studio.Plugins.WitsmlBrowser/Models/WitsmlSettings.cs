@@ -17,7 +17,7 @@
 //-----------------------------------------------------------------------
 
 using Caliburn.Micro;
-using PDS.Witsml.Studio.Connections;
+using PDS.Witsml.Studio.Core.Connections;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
 {

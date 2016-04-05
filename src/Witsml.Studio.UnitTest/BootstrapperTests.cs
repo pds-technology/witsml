@@ -19,7 +19,7 @@
 using System.Linq;
 using Caliburn.Micro;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Witsml.Studio.ViewModels;
+using PDS.Witsml.Studio.Core.ViewModels;
 
 namespace PDS.Witsml.Studio
 {

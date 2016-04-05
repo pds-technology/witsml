@@ -21,11 +21,11 @@ using System.ComponentModel;
 using System.ComponentModel.Composition;
 using Caliburn.Micro;
 using PDS.Framework;
-using PDS.Witsml.Studio.Runtime;
-using PDS.Witsml.Studio.ViewModels;
-using Witsml.Studio.Plugins.ObjectInspector.Properties;
+using PDS.Witsml.Studio.Core.Runtime;
+using PDS.Witsml.Studio.Core.ViewModels;
+using PDS.Witsml.Studio.Plugins.ObjectInspector.Properties;
 
-namespace Witsml.Studio.Plugins.ObjectInspector.ViewModels
+namespace PDS.Witsml.Studio.Plugins.ObjectInspector.ViewModels
 {
     /// <summary>
     /// Manages the behavior of the main user interface for the Object Inspector plug-in.

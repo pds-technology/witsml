@@ -22,7 +22,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Interactivity;
 
-namespace PDS.Witsml.Studio.Behaviors
+namespace PDS.Witsml.Studio.Core.Behaviors
 {
     /// <summary>
     /// Manages the behavior of the context menu for a dropdown button control.

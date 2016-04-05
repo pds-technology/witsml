@@ -19,7 +19,7 @@
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace PDS.Witsml.Studio.Connections
+namespace PDS.Witsml.Studio.Core.Connections
 {
     [TestClass]
     public class ConnectionTestTests

@@ -31,7 +31,7 @@ using Energistics.Protocol.ChannelStreaming;
 using Energistics.Protocol.Core;
 using PDS.Framework;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Models;
-using PDS.Witsml.Studio.Runtime;
+using PDS.Witsml.Studio.Core.Runtime;
 
 namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
 {

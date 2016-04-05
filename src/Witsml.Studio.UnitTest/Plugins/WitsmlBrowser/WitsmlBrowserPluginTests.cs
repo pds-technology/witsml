@@ -20,7 +20,7 @@ using Energistics.DataAccess;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request;
-using PDS.Witsml.Studio.Runtime;
+using PDS.Witsml.Studio.Core.Runtime;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
 {

@@ -18,7 +18,7 @@
 
 using System.Windows;
 
-namespace PDS.Witsml.Studio.Views
+namespace PDS.Witsml.Studio.Core.Views
 {
     /// <summary>
     /// Interaction logic for EditConnectionView.xaml

@@ -21,7 +21,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
-namespace PDS.Witsml.Studio.Converters
+namespace PDS.Witsml.Studio.Core.Converters
 {
     public class BooleanToVisibilityConverter : IValueConverter
     {

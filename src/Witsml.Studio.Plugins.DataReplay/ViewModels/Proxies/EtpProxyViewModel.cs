@@ -21,7 +21,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Energistics;
 using PDS.Framework;
-using PDS.Witsml.Studio.Runtime;
+using PDS.Witsml.Studio.Core.Runtime;
 
 namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
 {

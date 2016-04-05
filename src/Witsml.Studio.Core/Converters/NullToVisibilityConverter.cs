@@ -21,7 +21,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
-namespace PDS.Witsml.Studio.Converters
+namespace PDS.Witsml.Studio.Core.Converters
 {
     /// <summary>
     /// Converts an object to a Visibility enumeration using a null test.
@@ -29,7 +29,7 @@ namespace PDS.Witsml.Studio.Converters
     /// <seealso cref="System.Windows.Data.IValueConverter" />
     public class NullToVisibilityConverter : IValueConverter
     {
-        /// <summary>Initializes a new instance of the <see cref="T:PDS.Witsml.Studio.Converters.NullToVisibilityConverter" /> class.</summary>
+        /// <summary>Initializes a new instance of the <see cref="T:PDS.Witsml.Studio.Core.Converters.NullToVisibilityConverter" /> class.</summary>
         public NullToVisibilityConverter()
         {
         }

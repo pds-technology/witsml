@@ -26,8 +26,8 @@ using System.Windows;
 using Caliburn.Micro;
 using PDS.Framework;
 using PDS.Witsml.Studio.Properties;
-using PDS.Witsml.Studio.Runtime;
-using PDS.Witsml.Studio.ViewModels;
+using PDS.Witsml.Studio.Core.Runtime;
+using PDS.Witsml.Studio.Core.ViewModels;
 
 namespace PDS.Witsml.Studio
 {
@@ -115,7 +115,7 @@ namespace PDS.Witsml.Studio
             // Ensure that the plugins folder exists so we don't get an error
             Directory.CreateDirectory(path);
 
-            IEnumerable<Assembly> assemblies = new[] { typeof(Bootstrapper).Assembly }
+            IEnumerable<Assembly> assemblies = new[] { typeof(Bootstrapper).Assembly, typeof(IShellViewModel).Assembly }
                 .Union(Directory.GetFiles(path, "*.dll")
                 .Select(x => Assembly.LoadFrom(x)));
 

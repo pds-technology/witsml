@@ -33,8 +33,8 @@ using Energistics.Protocol.Store;
 using PDS.Framework;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Models;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Properties;
-using PDS.Witsml.Studio.Runtime;
-using PDS.Witsml.Studio.ViewModels;
+using PDS.Witsml.Studio.Core.Runtime;
+using PDS.Witsml.Studio.Core.ViewModels;
 
 namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
 {
@@ -42,7 +42,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
     /// Manages the behavior of the main user interface for the ETP Browser plug-in.
     /// </summary>
     /// <seealso cref="Caliburn.Micro.Conductor{Caliburn.Micro.IScreen}.Collection.OneActive" />
-    /// <seealso cref="PDS.Witsml.Studio.ViewModels.IPluginViewModel" />
+    /// <seealso cref="PDS.Witsml.Studio.Core.ViewModels.IPluginViewModel" />
     public class MainViewModel : Conductor<IScreen>.Collection.OneActive, IPluginViewModel
     {
         private static readonly string PluginDisplayName = Settings.Default.PluginDisplayName;

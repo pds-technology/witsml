@@ -1,0 +1,12 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Witsml.Studio.Core.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="PersistedDataFolderName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Data</Value>
+    </Setting>
+    <Setting Name="ConnectionBaseFileName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">ConnectionData.json</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

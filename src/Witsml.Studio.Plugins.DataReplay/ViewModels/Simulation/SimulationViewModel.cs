@@ -24,7 +24,7 @@ using Caliburn.Micro;
 using Energistics.Common;
 using Microsoft.Win32;
 using PDS.Framework;
-using PDS.Witsml.Studio.Runtime;
+using PDS.Witsml.Studio.Core.Runtime;
 
 namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
 {

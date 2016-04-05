@@ -19,7 +19,7 @@
 using System;
 using System.Runtime.Serialization;
 using Caliburn.Micro;
-using PDS.Witsml.Studio.Connections;
+using PDS.Witsml.Studio.Core.Connections;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Properties;
 
 namespace PDS.Witsml.Studio.Plugins.EtpBrowser.Models

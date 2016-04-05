@@ -31,7 +31,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace PDS.Witsml.Studio.Views
+namespace PDS.Witsml.Studio.Core.Views
 {
     /// <summary>
     /// Interaction logic for TextEditorView.xaml

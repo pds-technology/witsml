@@ -31,7 +31,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Witsml.Studio.Plugins.ObjectInspector.Views
+namespace PDS.Witsml.Studio.Plugins.ObjectInspector.Views
 {
     /// <summary>
     /// Interaction logic for FamilyVersionView.xaml

@@ -6,8 +6,8 @@
              xmlns:local="clr-namespace:PDS.Witsml.Studio.Plugins.WitsmlBrowser.Views.Request"
              xmlns:cal="http://www.caliburnproject.org"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
-             xmlns:app="clr-namespace:PDS.Witsml.Studio.Behaviors;assembly=PDS.Witsml.Studio"
-             xmlns:conv="clr-namespace:PDS.Witsml.Studio.Converters;assembly=PDS.Witsml.Studio"
+             xmlns:app="clr-namespace:PDS.Witsml.Studio.Core.Behaviors;assembly=PDS.Witsml.Studio.Core"
+             xmlns:conv="clr-namespace:PDS.Witsml.Studio.Core.Converters;assembly=PDS.Witsml.Studio.Core"
              mc:Ignorable="d" d:DesignHeight="500" d:DesignWidth="500">
 
     <UserControl.Resources>

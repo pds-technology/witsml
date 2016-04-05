@@ -31,8 +31,8 @@ using PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.Properties;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result;
-using PDS.Witsml.Studio.Runtime;
-using PDS.Witsml.Studio.ViewModels;
+using PDS.Witsml.Studio.Core.Runtime;
+using PDS.Witsml.Studio.Core.ViewModels;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
 {
@@ -40,7 +40,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
     /// Manages the behavior of the main user interface for the Witsml Browser plug-in.
     /// </summary>
     /// <seealso cref="Caliburn.Micro.Conductor{Caliburn.Micro.IScreen}.Collection.AllActive" />
-    /// <seealso cref="PDS.Witsml.Studio.ViewModels.IPluginViewModel" />
+    /// <seealso cref="PDS.Witsml.Studio.Core.ViewModels.IPluginViewModel" />
     public class MainViewModel : Conductor<IScreen>.Collection.AllActive, IPluginViewModel
     {
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MainViewModel));

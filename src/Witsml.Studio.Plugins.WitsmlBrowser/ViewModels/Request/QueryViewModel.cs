@@ -20,8 +20,8 @@ using System.Collections.Generic;
 using System.Windows;
 using Caliburn.Micro;
 using ICSharpCode.AvalonEdit.Document;
-using PDS.Witsml.Studio.Runtime;
-using PDS.Witsml.Studio.ViewModels;
+using PDS.Witsml.Studio.Core.Runtime;
+using PDS.Witsml.Studio.Core.ViewModels;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 {

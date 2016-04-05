@@ -25,14 +25,14 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using Caliburn.Micro;
 using PDS.Framework;
-using PDS.Witsml.Studio.ViewModels;
+using PDS.Witsml.Studio.Core.ViewModels;
 
-namespace PDS.Witsml.Studio.Runtime
+namespace PDS.Witsml.Studio.Core.Runtime
 {
     /// <summary>
     /// Provides an implementation of <see cref="IRuntimeService"/> that can be used from within desktop applications.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Studio.Runtime.IRuntimeService" />
+    /// <seealso cref="PDS.Witsml.Studio.Core.Runtime.IRuntimeService" />
     public class DesktopRuntimeService : IRuntimeService
     {
         /// <summary>

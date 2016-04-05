@@ -26,7 +26,7 @@ using System.Xml.Serialization;
 using Energistics.DataAccess.Validation;
 using PDS.Framework;
 
-namespace Witsml.Studio.Plugins.ObjectInspector.Models
+namespace PDS.Witsml.Studio.Plugins.ObjectInspector.Models
 {
     /// <summary>
     /// Encapsulates meta-data about a (nested) property of a Energistics Data Object

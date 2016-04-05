@@ -18,7 +18,7 @@
 
 using System.Threading.Tasks;
 
-namespace PDS.Witsml.Studio.Connections
+namespace PDS.Witsml.Studio.Core.Connections
 {
     /// <summary>
     /// Interface for a connection test against a Connection instance.

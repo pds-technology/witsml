@@ -24,12 +24,12 @@ using Energistics.Protocol.Discovery;
 using Energistics.Protocol.Store;
 using PDS.Framework;
 
-namespace PDS.Witsml.Studio.Connections
+namespace PDS.Witsml.Studio.Core.Connections
 {
     /// <summary>
     /// Provides a connection test for an Ept Connection instance.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Studio.Connections.IConnectionTest" />
+    /// <seealso cref="PDS.Witsml.Studio.Core.Connections.IConnectionTest" />
     [Export("Etp", typeof(IConnectionTest))]
     public class EtpConnectionTest : IConnectionTest
     {

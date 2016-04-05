@@ -19,7 +19,7 @@
 using System.ComponentModel.Composition;
 using Caliburn.Micro;
 
-namespace PDS.Witsml.Studio.ViewModels
+namespace PDS.Witsml.Studio.Core.ViewModels
 {
     /// <summary>
     /// Provides access to the main user interface for a plug-in

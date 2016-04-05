@@ -20,9 +20,10 @@ using System;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Caliburn.Micro;
-using PDS.Witsml.Studio.Runtime;
+using PDS.Witsml.Studio.Core.Runtime;
+using System.Windows;
 
-namespace PDS.Witsml.Studio.ViewModels
+namespace PDS.Witsml.Studio.Core.ViewModels
 {
     /// <summary>
     /// Manages the main application user interface
@@ -91,7 +92,7 @@ namespace PDS.Witsml.Studio.ViewModels
         /// </summary>
         public void Exit()
         {
-            App.Current.Shutdown();
+            Application.Current.Shutdown();
         }
 
         /// <summary>

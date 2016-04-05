@@ -22,9 +22,9 @@ using System.Windows;
 using System.Windows.Threading;
 using Caliburn.Micro;
 using PDS.Framework;
-using PDS.Witsml.Studio.ViewModels;
+using PDS.Witsml.Studio.Core.ViewModels;
 
-namespace PDS.Witsml.Studio.Runtime
+namespace PDS.Witsml.Studio.Core.Runtime
 {
     /// <summary>
     /// Defines properties and methods that can be used to interact with the current runtime environment (e.g. Desktop, Console, Test, etc.).

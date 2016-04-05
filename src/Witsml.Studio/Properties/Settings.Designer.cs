@@ -25,24 +25,6 @@ namespace PDS.Witsml.Studio.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Data")]
-        public string PersistedDataFolderName {
-            get {
-                return ((string)(this["PersistedDataFolderName"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("ConnectionData.json")]
-        public string ConnectionBaseFileName {
-            get {
-                return ((string)(this["ConnectionBaseFileName"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("Plugins")]
         public string PluginsFolderName {
             get {
