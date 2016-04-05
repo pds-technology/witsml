@@ -457,6 +457,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to For updating systematically growing data, the update data must not contain multiple nodes with the same index..
+        /// </summary>
+        internal static string NodesWithSameIndex {
+            get {
+                return ResourceManager.GetString("NodesWithSameIndex", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The OptionsIn parameter string must be encoded utilizing a subset (semicolon separators and no
         /// whitespace) of the encoding rules for HTML form content type application/x-www-form-urlencoded..
         /// </summary>

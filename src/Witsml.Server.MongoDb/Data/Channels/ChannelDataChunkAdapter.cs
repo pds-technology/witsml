@@ -234,6 +234,7 @@ namespace PDS.Witsml.Server.Data.Channels
             Range<int>? plannedRange = null;
             double startIndex = 0;
             double endIndex = 0;
+            double? previousIndex = null;
 
             foreach (var record in records)
             {
@@ -241,6 +242,12 @@ namespace PDS.Witsml.Server.Data.Channels
                 var increasing = indexChannel.Increasing;
 
                 double index = record.GetIndexValue();
+
+                if (previousIndex.HasValue && previousIndex.Value == index)
+                {
+                    throw new WitsmlException(ErrorCodes.NodesWithSameIndex);
+                }
+                previousIndex = index;
 
                 if (!plannedRange.HasValue)
                 {
