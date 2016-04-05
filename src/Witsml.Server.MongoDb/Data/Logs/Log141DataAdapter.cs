@@ -108,6 +108,8 @@ namespace PDS.Witsml.Server.Data.Logs
                     l.LogData = new List<LogData>() { QueryLogDataValues(logHeader, parser, mnemonics) };
 
                     FormatLogHeader(l, mnemonics, returnElements);
+                    if (l.IndexType == LogIndexType.datetime || l.IndexType == LogIndexType.elapsedtime)
+                        FormatTimeValues(l);
                 });
             }
             else if (!OptionsIn.RequestObjectSelectionCapability.True.Equals(parser.RequestObjectSelectionCapability()))
@@ -160,13 +162,19 @@ namespace PDS.Witsml.Server.Data.Logs
                 var allMnemonics = new[] { indexCurve.Mnemonic }.Concat(reader.Mnemonics).ToArray();
 
                 var ranges = GetCurrentIndexRange(entity);
+
+                TimeSpan? offset = null;
+                var isTimeLog = entity.IndexType == LogIndexType.datetime || entity.IndexType == LogIndexType.elapsedtime;
+                if (isTimeLog)
+                    offset = reader.GetChannelIndexRange(0).Offset;
+
                 GetUpdatedLogHeaderIndexRange(reader, allMnemonics, ranges, entity.Direction == LogIndexDirection.increasing);
 
                 // Add ChannelDataChunks
                 _channelDataChunkAdapter.Add(reader);
 
                 // Update index range
-                UpdateIndexRange(entity.GetUri(), entity, ranges, allMnemonics, entity.IndexType == LogIndexType.datetime, indexCurve.Unit);
+                UpdateIndexRange(entity.GetUri(), entity, ranges, allMnemonics, isTimeLog, indexCurve.Unit, offset);
             }                
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uid);
@@ -191,6 +199,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Extract Data
             var entity = Parse(parser.Context.Xml);
+
             var readers = ExtractDataReaders(entity, GetEntity(uri));
 
             // Update Log Data and Index Range
@@ -526,8 +535,47 @@ namespace PDS.Witsml.Server.Data.Logs
             };
         }
 
+        private void FormatTimeValues(Log entity)
+        {           
+            var offset = GetOffset(entity);
+            if (!offset.HasValue)
+                return;
+
+            foreach (var logCurve in entity.LogCurveInfo)
+            {
+                if (!logCurve.MinDateTimeIndex.HasValue)
+                    return;
+
+                logCurve.MinDateTimeIndex = MongoDbUtility.ToOffsetTime(logCurve.MinDateTimeIndex, offset);
+                logCurve.MaxDateTimeIndex = MongoDbUtility.ToOffsetTime(logCurve.MaxDateTimeIndex, offset);
+            }
+
+            entity.StartDateTimeIndex = MongoDbUtility.ToOffsetTime(entity.StartDateTimeIndex, offset);
+            entity.EndDateTimeIndex = MongoDbUtility.ToOffsetTime(entity.EndDateTimeIndex, offset);
+
+            if (entity.CommonData != null)
+            {
+                entity.CommonData.DateTimeCreation = MongoDbUtility.ToOffsetTime(entity.CommonData.DateTimeCreation, offset);
+                entity.CommonData.DateTimeLastChange = MongoDbUtility.ToOffsetTime(entity.CommonData.DateTimeLastChange, offset);
+            }
+        }
+
+        private TimeSpan? GetOffset(Log entity)
+        {
+            if (entity == null || entity.LogData == null || !entity.LogData.Any())
+                return null;
+
+            var logData = entity.LogData.FirstOrDefault();
+            if (logData == null || logData.Data == null || !logData.Data.Any())
+                return null;
+
+            var dataRow = logData.Data.FirstOrDefault().Split(',');
+            var indexTime = DateTimeOffset.Parse(dataRow[0]);
+            return indexTime.Offset;
+        }
+
         #region UpdateLogHeaderRanges Code 
-        private void UpdateLogDataAndIndex(EtpUri uri, IEnumerable<ChannelDataReader> readers)
+        private void UpdateLogDataAndIndex(EtpUri uri, IEnumerable<ChannelDataReader> readers, TimeSpan? offset = null)
         {
             // Get Updated Log
             var current = GetEntity(uri);
@@ -539,6 +587,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var updateMnemonics = new List<string>();
 
             var updateIndex = false;
+            var checkOffset = true;
 
             // Merge ChannelDataChunks
             foreach (var reader in readers)
@@ -554,9 +603,16 @@ namespace PDS.Witsml.Server.Data.Logs
                 updateMnemonics.AddRange(reader.Mnemonics
                     .Where(m => !updateMnemonics.Contains(m)));
 
+                var isTimeLog = current.IndexType == LogIndexType.datetime || current.IndexType == LogIndexType.elapsedtime;
+                if (isTimeLog && checkOffset && !offset.HasValue)
+                {
+                    offset = reader.GetChannelIndexRange(0).Offset;
+                    checkOffset = false;
+                }
+
                 // Update index range for each logData element
                 GetUpdatedLogHeaderIndexRange(reader, updateMnemonics.ToArray(), ranges, current.Direction == LogIndexDirection.increasing);
-
+                
                 // Update log data
                 _channelDataChunkAdapter.Merge(reader);
                 updateIndex = true;
@@ -565,7 +621,7 @@ namespace PDS.Witsml.Server.Data.Logs
             // Update index range
             if (updateIndex)
             {
-                UpdateIndexRange(uri, current, ranges, updateMnemonics, current.IndexType == LogIndexType.datetime, indexUnit);
+                UpdateIndexRange(uri, current, ranges, updateMnemonics, current.IndexType == LogIndexType.datetime, indexUnit, offset);
             }
         }
              
@@ -635,12 +691,26 @@ namespace PDS.Witsml.Server.Data.Logs
             }
         }
 
-        private void UpdateIndexRange(EtpUri uri, Log entity, Dictionary<string, List<double?>> ranges, IEnumerable<string> mnemonics, bool isTimeLog, string indexUnit)
+        private void UpdateIndexRange(EtpUri uri, Log entity, Dictionary<string, List<double?>> ranges, IEnumerable<string> mnemonics, bool isTimeLog, string indexUnit, TimeSpan? offset)
         {
             var collection = GetCollection();
             var mongoUpdate = new MongoDbUpdate<Log>(GetCollection(), null);
             var filter = MongoDbUtility.GetEntityFilter<Log>(uri);
             UpdateDefinition<Log> logIndexUpdate = null;
+
+            if (entity.CommonData != null)
+            {
+                if (entity.CommonData.DateTimeCreation.HasValue)
+                {
+                    var creationTime = MongoDbUtility.ToOffsetTime(entity.CommonData.DateTimeCreation, offset);
+                    logIndexUpdate = MongoDbUtility.BuildUpdate(logIndexUpdate, "CommonData.DateTimeCreation", creationTime.Value.ToString("o"));
+                }
+                if (entity.CommonData.DateTimeLastChange.HasValue)
+                {
+                    var updateTime = MongoDbUtility.ToOffsetTime(entity.CommonData.DateTimeLastChange, offset);
+                    logIndexUpdate = MongoDbUtility.BuildUpdate(logIndexUpdate, "CommonData.DateTimeLastChange", updateTime.Value.ToString("o"));
+                }
+            }
 
             foreach (var mnemonic in mnemonics)
             {
@@ -662,7 +732,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 {
                     if (range[0].HasValue)
                     {
-                        var minDate = DateTimeOffset.FromUnixTimeSeconds((long)range[0].Value).ToString("o");
+                        var minDate = MongoDbUtility.ToOffsetTime(DateTimeOffset.FromUnixTimeSeconds((long)range[0].Value), offset).Value.ToString("o");
                         updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MinDateTimeIndex", minDate);
                         updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MinDateTimeIndexSpecified", true);
                         if (isIndexCurve)
@@ -673,7 +743,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     }                       
                     if (range[1].HasValue)
                     {
-                        var maxDate = DateTimeOffset.FromUnixTimeSeconds((long)range[1].Value).ToString("o");
+                        var maxDate = MongoDbUtility.ToOffsetTime(DateTimeOffset.FromUnixTimeSeconds((long)range[1].Value), offset).Value.ToString("o");
                         updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MaxDateTimeIndex", maxDate);
                         updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MaxDateTimeIndexSpecified", true);
                         if (isIndexCurve)

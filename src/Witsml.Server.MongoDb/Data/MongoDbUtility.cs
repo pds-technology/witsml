@@ -285,5 +285,25 @@ namespace PDS.Witsml.Server.Data
 
             return idField;
         }
+
+        public static DateTimeOffset? ToOffsetTime(Timestamp? value, TimeSpan? offset)
+        {
+            if (!value.HasValue || !offset.HasValue)
+                return value;
+
+            var time = DateTimeOffset.Parse(value.Value.ToString());
+            return ToOffsetTime(time, offset);
+        }
+
+        public static DateTimeOffset? ToOffsetTime(DateTimeOffset time, TimeSpan? offset)
+        {
+            if (!offset.HasValue)
+                return time;
+
+            if (time.Offset.CompareTo(offset) == 0)
+                return time;
+
+            return DateTimeOffset.FromUnixTimeSeconds(time.ToUnixTimeSeconds()).ToOffset(offset.Value);
+        }
     }
 }
