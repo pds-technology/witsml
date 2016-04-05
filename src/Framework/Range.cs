@@ -16,6 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+
 namespace PDS.Framework
 {
     /// <summary>
@@ -29,10 +31,11 @@ namespace PDS.Framework
         /// </summary>
         /// <param name="start">The start value.</param>
         /// <param name="end">The end value.</param>
-        public Range(T start, T end)
+        public Range(T start, T end, TimeSpan? offset = null)
         {
             Start = start;
             End = end;
+            Offset = offset;
         }
 
         /// <summary>
@@ -46,5 +49,7 @@ namespace PDS.Framework
         /// </summary>
         /// <value>The end value.</value>
         public T End { get; private set; }
+
+        public TimeSpan? Offset { get; private set; }
     }
 }
