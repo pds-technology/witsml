@@ -101,7 +101,6 @@
     <Compile Include="Data\Logs\Log131DataAdapter.cs" />
     <Compile Include="Data\Logs\Log141DataAdapter.cs" />
     <Compile Include="Data\Logs\Log200DataAdapter.cs" />
-    <Compile Include="Data\Channels\ChannelDataAdapter.cs" />
     <Compile Include="Data\MongoDbClassMapper.cs" />
     <Compile Include="Data\MongoDbDataAdapter.cs" />
     <Compile Include="Data\MongoDbExtensions.cs" />
