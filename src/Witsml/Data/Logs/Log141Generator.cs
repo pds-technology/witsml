@@ -30,6 +30,13 @@ namespace PDS.Witsml.Data.Logs
         public readonly LogIndexType[] DepthIndexTypes = new LogIndexType[] { LogIndexType.length, LogIndexType.measureddepth, LogIndexType.verticaldepth };
         public readonly LogIndexType[] TimeIndexTypes = new LogIndexType[] { LogIndexType.datetime, LogIndexType.elapsedtime };
         public readonly LogIndexType[] OtherIndexTypes = new LogIndexType[] { LogIndexType.other, LogIndexType.unknown };
+        private const int Seed = 123;
+        private Random _random;
+
+        public Log141Generator()
+        {
+            _random = new Random(Seed);
+        }
 
         /// <summary>
         /// Creates the datetime type <see cref="LogCurveInfo"/>.
@@ -115,9 +122,6 @@ namespace PDS.Witsml.Data.Logs
         /// <returns></returns>
         public double GenerateLogData(Log log, int numOfRows = 5, double startIndex = 0d, double interval = 1.0)
         {           
-            const int Seed = 123;
-
-            Random random = new Random(Seed);
             DateTimeOffset dateTimeIndexStart = DateTimeOffset.Now;
             DateTimeOffset dateTimeChannelStart = dateTimeIndexStart;
 
@@ -145,7 +149,7 @@ namespace PDS.Witsml.Data.Logs
                 {
                     case LogIndexType.datetime:
                     {
-                        dateTimeIndexStart = dateTimeIndexStart.AddSeconds(random.Next(1, 5));
+                        dateTimeIndexStart = dateTimeIndexStart.AddSeconds(_random.Next(1, 5));
                         row += dateTimeIndexStart.ToString("o");
                         break;
                     }
@@ -166,7 +170,7 @@ namespace PDS.Witsml.Data.Logs
                 {
                     row += ", ";
 
-                    if (random.Next(1, 10) == 2)
+                    if (_random.Next(10) % 9 == 0)
                     {
                         continue;
                     }
@@ -186,7 +190,7 @@ namespace PDS.Witsml.Data.Logs
                             }
                             else
                             {
-                                dateTimeChannelStart = dateTimeChannelStart.AddSeconds(random.Next(1, 5));
+                                dateTimeChannelStart = dateTimeChannelStart.AddSeconds(_random.Next(1, 5));
                             }
                             row += dateTimeChannelStart.ToString("o");
                             break;
@@ -194,14 +198,14 @@ namespace PDS.Witsml.Data.Logs
                         case LogDataType.@double:
                         case LogDataType.@float:                       
                         {
-                            row += random.NextDouble().ToString();
+                            row += _random.NextDouble().ToString();
                             break;
                         }
                         case LogDataType.@int:
                         case LogDataType.@long:
                         case LogDataType.@short:
                         {
-                            row += random.Next(1, 10);
+                            row += _random.Next(11);
                             break;
                         }
                         case LogDataType.@string:
