@@ -1,4 +1,6 @@
-﻿namespace PDS.Framework
+﻿using System;
+
+namespace PDS.Framework
 {
     /// <summary>
     /// Represents the start and end values of a range.
@@ -11,10 +13,11 @@
         /// </summary>
         /// <param name="start">The start value.</param>
         /// <param name="end">The end value.</param>
-        public Range(T start, T end)
+        public Range(T start, T end, TimeSpan? offset = null)
         {
             Start = start;
             End = end;
+            Offset = offset;
         }
 
         /// <summary>
@@ -28,5 +31,7 @@
         /// </summary>
         /// <value>The end value.</value>
         public T End { get; private set; }
+
+        public TimeSpan? Offset { get; private set; }
     }
 }

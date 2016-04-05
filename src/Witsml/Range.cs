@@ -18,16 +18,24 @@ namespace PDS.Witsml
         public static Range<double?> Parse(object start, object end, bool isTime)
         {
             double? rangeStart = null, rangeEnd = null;
+            TimeSpan? offset = null;
 
             if (isTime)
             {
                 DateTimeOffset time;
 
                 if (start != null && DateTimeOffset.TryParse(start.ToString(), out time))
+                {
                     rangeStart = time.ToUnixTimeSeconds();
+                    offset = time.Offset;
+                }
+                    
 
                 if (end != null && DateTimeOffset.TryParse(end.ToString(), out time))
+                {
                     rangeEnd = time.ToUnixTimeSeconds();
+                    offset = time.Offset;
+                }                  
             }
             else
             {
@@ -40,7 +48,7 @@ namespace PDS.Witsml
                     rangeEnd = depth;
             }
 
-            return new Range<double?>(rangeStart, rangeEnd);
+            return new Range<double?>(rangeStart, rangeEnd, offset);
         }
 
         /// <summary>
