@@ -49,10 +49,124 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Behaviors\DropDownButtonBehavior.cs" />
+    <Compile Include="Connections\Connection.cs" />
+    <Compile Include="Connections\ConnectionTypes.cs" />
+    <Compile Include="Connections\EtpConnectionTest.cs" />
+    <Compile Include="Connections\IConnectionTest.cs" />
+    <Compile Include="Connections\WitsmlConnectionTest.cs" />
+    <Compile Include="Converters\BooleanInverseConverter.cs" />
+    <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
+    <Compile Include="Converters\NullToBooleanConverter.cs" />
+    <Compile Include="Converters\NullToVisibilityConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Runtime\DesktopRuntimeService.cs" />
+    <Compile Include="Runtime\IRuntimeService.cs" />
+    <Compile Include="ViewModels\ConnectionViewModel.cs" />
+    <Compile Include="ViewModels\IPluginViewModel.cs" />
+    <Compile Include="ViewModels\IShellViewModel.cs" />
+    <Compile Include="ViewModels\ShellViewModel.cs" />
+    <Compile Include="ViewModels\TextEditorViewModel.cs" />
+    <Compile Include="Views\ConnectionView.xaml.cs">
+      <DependentUpon>ConnectionView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ShellView.xaml.cs">
+      <DependentUpon>ShellView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TextEditorView.xaml.cs">
+      <DependentUpon>TextEditorView.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Energistics\Datatypes\AnyArray.avsc" />
+    <None Include="Energistics\Datatypes\ArrayOfBoolean.avsc" />
+    <None Include="Energistics\Datatypes\ArrayOfDouble.avsc" />
+    <None Include="Energistics\Datatypes\ArrayOfFloat.avsc" />
+    <None Include="Energistics\Datatypes\ArrayOfInt.avsc" />
+    <None Include="Energistics\Datatypes\ArrayOfLong.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\ChannelAxis.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\ChannelIndexTypes.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\ChannelMetadataRecord.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\ChannelRangeInfo.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\ChannelStatuses.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\ChannelStreamingInfo.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\DataFrame.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\DataItem.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\ErrorCodes.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\IndexDirections.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\IndexMetadataRecord.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\Roles.avsc" />
+    <None Include="Energistics\Datatypes\ChannelData\StreamingStartIndex.avsc" />
+    <None Include="Energistics\Datatypes\Contact.avsc" />
+    <None Include="Energistics\Datatypes\DataAttribute.avsc" />
+    <None Include="Energistics\Datatypes\DataValue.avsc" />
+    <None Include="Energistics\Datatypes\ErrorCodes.avsc" />
+    <None Include="Energistics\Datatypes\MessageHeader.avsc" />
+    <None Include="Energistics\Datatypes\Object\DataObject.avsc" />
+    <None Include="Energistics\Datatypes\Object\NotificationRequestRecord.avsc" />
+    <None Include="Energistics\Datatypes\Object\ObjectChange.avsc" />
+    <None Include="Energistics\Datatypes\Object\ObjectChangeTypes.avsc" />
+    <None Include="Energistics\Datatypes\Object\Resource.avsc" />
+    <None Include="Energistics\Datatypes\Protocols.avsc" />
+    <None Include="Energistics\Datatypes\ServerCapabilities.avsc" />
+    <None Include="Energistics\Datatypes\SupportedProtocol.avsc" />
+    <None Include="Energistics\Datatypes\Version.avsc" />
+    <None Include="Energistics\Protocol\ChannelDataFrame\ChannelDataFrameSet.avsc" />
+    <None Include="Energistics\Protocol\ChannelDataFrame\ChannelMetadata.avsc" />
+    <None Include="Energistics\Protocol\ChannelDataFrame\RequestChannelData.avsc" />
+    <None Include="Energistics\Protocol\ChannelStreaming\ChannelData.avsc" />
+    <None Include="Energistics\Protocol\ChannelStreaming\ChannelDataChange.avsc" />
+    <None Include="Energistics\Protocol\ChannelStreaming\ChannelDelete.avsc" />
+    <None Include="Energistics\Protocol\ChannelStreaming\ChannelDescribe.avsc" />
+    <None Include="Energistics\Protocol\ChannelStreaming\ChannelMetadata.avsc" />
+    <None Include="Energistics\Protocol\ChannelStreaming\ChannelRangeRequest.avsc" />
+    <None Include="Energistics\Protocol\ChannelStreaming\ChannelStatusChange.avsc" />
+    <None Include="Energistics\Protocol\ChannelStreaming\ChannelStreamingStart.avsc" />
+    <None Include="Energistics\Protocol\ChannelStreaming\ChannelStreamingStop.avsc" />
+    <None Include="Energistics\Protocol\ChannelStreaming\Start.avsc" />
+    <None Include="Energistics\Protocol\Core\Acknowledge.avsc" />
+    <None Include="Energistics\Protocol\Core\CloseSession.avsc" />
+    <None Include="Energistics\Protocol\Core\OpenSession.avsc" />
+    <None Include="Energistics\Protocol\Core\ProtocolException.avsc" />
+    <None Include="Energistics\Protocol\Core\RequestSession.avsc" />
+    <None Include="Energistics\Protocol\DataArray\DataArray.avsc" />
+    <None Include="Energistics\Protocol\DataArray\GetDataArray.avsc" />
+    <None Include="Energistics\Protocol\DataArray\GetDataArraySlice.avsc" />
+    <None Include="Energistics\Protocol\Discovery\GetResources.avsc" />
+    <None Include="Energistics\Protocol\Discovery\GetResourcesResponse.avsc" />
+    <None Include="Energistics\Protocol\GrowingObject\GrowingObjectDelete.avsc" />
+    <None Include="Energistics\Protocol\GrowingObject\GrowingObjectDeleteRange.avsc" />
+    <None Include="Energistics\Protocol\GrowingObject\GrowingObjectGet.avsc" />
+    <None Include="Energistics\Protocol\GrowingObject\GrowingObjectGetRange.avsc" />
+    <None Include="Energistics\Protocol\GrowingObject\GrowingObjectPut.avsc" />
+    <None Include="Energistics\Protocol\GrowingObject\ObjectFragment.avsc" />
+    <None Include="Energistics\Protocol\StoreNotification\ChangeNotification.avsc" />
+    <None Include="Energistics\Protocol\StoreNotification\DeleteNotification.avsc" />
+    <None Include="Energistics\Protocol\StoreNotification\NotificationRequest.avsc" />
+    <None Include="Energistics\Protocol\Store\DeleteObject.avsc" />
+    <None Include="Energistics\Protocol\Store\GetObject.avsc" />
+    <None Include="Energistics\Protocol\Store\Object.avsc" />
+    <None Include="Energistics\Protocol\Store\PutObject.avsc" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Images\StatusInvalid_16x.png" />
+    <Content Include="Images\StatusOK_16x.png" />
+    <Content Include="Images\WitsmlStudio.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Views\ConnectionView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\ShellView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\TextEditorView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
