@@ -78,6 +78,7 @@
     <Compile Include="Data\Logs\Log131AddTests.cs" />
     <Compile Include="Data\Logs\Log141QueryTests.cs" />
     <Compile Include="Data\Logs\Log141AddTests.cs" />
+    <Compile Include="Data\Logs\Log141ValidationTests.cs" />
     <Compile Include="Data\Logs\Log200DataAdapterTests.cs" />
     <Compile Include="Data\Wellbores\Wellbore141ValidationTests.cs" />
     <Compile Include="Data\Wellbores\Wellbore200DataAdapterTests.cs" />
