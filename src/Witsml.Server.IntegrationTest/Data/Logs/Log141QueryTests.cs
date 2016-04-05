@@ -15,13 +15,11 @@ namespace PDS.Witsml.Server.Data.Logs
         private Well _well;
         private Wellbore _wellbore;
         private DatabaseProvider _databaseProvider;
-        private ChannelDataAdapter _channelDataAdapter;
 
         [TestInitialize]
         public void TestSetUp()
         {
             _databaseProvider = new DatabaseProvider(new MongoDbClassMapper());
-            _channelDataAdapter = new ChannelDataAdapter(_databaseProvider);
 
             DevKit = new DevKit141Aspect();
 
@@ -65,15 +63,25 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             var uidLog = response.SuppMsgOut;
-            var mnemonics = log.LogCurveInfo.Select(x => x.Mnemonic.Value).ToList();
-            var logData = _channelDataAdapter.GetLogData(uidLog, mnemonics, null, true);
 
-            // Test that LogData was returned
+            var query = new Log
+            {
+                Uid = uidLog,
+                UidWell = log.UidWell,
+                UidWellbore = log.UidWellbore,
+            };
+            var result = DevKit.Query<LogList, Log>(query, ObjectTypes.Log, null, OptionsIn.ReturnElements.DataOnly);
+            var queriedLog = result.FirstOrDefault();
+
+            // Test that Log was returned
+            Assert.IsNotNull(queriedLog);
+
+            var logData = queriedLog.LogData.FirstOrDefault();
             Assert.IsNotNull(logData);
 
             var data = logData.Data;
             var firstRow = data.First().Split(',');
-            mnemonics = logData.MnemonicList.Split(',').ToList();
+            var mnemonics = logData.MnemonicList.Split(',').ToList();
 
             // Test that all of the rows of data saved are returned.
             Assert.AreEqual(row, data.Count);
@@ -114,11 +122,21 @@ namespace PDS.Witsml.Server.Data.Logs
             // Save the Log
             response = DevKit.Add<LogList, Log>(log);
 
-
             var uidLog = response.SuppMsgOut;
-            var mnemonics = log.LogCurveInfo.Select(x => x.Mnemonic.Value).ToList();
-            var logData = _channelDataAdapter.GetLogData(uidLog, mnemonics, null, true);
+            var query = new Log
+            {
+                Uid = uidLog,
+                UidWell = log.UidWell,
+                UidWellbore = log.UidWellbore,
+            };
+            var result = DevKit.Query<LogList, Log>(query, ObjectTypes.Log, null, OptionsIn.ReturnElements.DataOnly);
+            var queriedLog = result.FirstOrDefault();
 
+            // Test that Log was returned
+            Assert.IsNotNull(queriedLog);
+
+            var logData = queriedLog.LogData.FirstOrDefault();
+            Assert.IsNotNull(logData);
 
             var data = logData.Data;
             var firstRow = data.First().Split(',');
