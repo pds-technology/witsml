@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 using Energistics.DataAccess;
@@ -28,6 +29,8 @@ namespace PDS.Witsml
     /// </summary>
     public static class WitsmlParser
     {
+        private static readonly XNamespace xsi = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
+
         /// <summary>
         /// Parses the specified XML document using LINQ to XML.
         /// </summary>
@@ -62,6 +65,33 @@ namespace PDS.Witsml
             catch (Exception ex)
             {
                 throw new WitsmlException(ErrorCodes.InputTemplateNonConforming, ex);
+            }
+        }
+
+        /// <summary>
+        /// Serialize WITSML query results to XML and remove empty elements and xsi:nil attributes.
+        /// </summary>
+        /// <param name="obj">The object.</param>
+        /// <returns>The serialized XML string.</returns>
+        public static string ToXml(object obj)
+        {
+            var xml = EnergisticsConverter.ObjectToXml(obj);
+            var xmlDoc = Parse(xml);
+            var root = xmlDoc.Root;
+            foreach (var element in root.Elements().ToList())
+            {
+                ProcessElement(element);
+            }
+
+            return root.ToString();
+        }
+
+        private static void ProcessElement(XElement element)
+        {
+            element.Descendants().Attributes().Where(a => a.Name == xsi.GetName("nil")).Remove();
+            while (element.Descendants().Any(e => string.IsNullOrEmpty(e.Value) && !e.HasAttributes && !e.HasElements))
+            {
+                element.Descendants().Where(e => string.IsNullOrEmpty(e.Value) && !e.HasAttributes && !e.HasElements).Remove();
             }
         }
     }
