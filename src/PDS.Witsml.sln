@@ -32,6 +32,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Server.MongoDb.IntegrationTest", "Witsml.Server.MongoDb.IntegrationTest\Witsml.Server.MongoDb.IntegrationTest.csproj", "{F0BB0099-5016-4206-8385-312B9664DDEC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Studio", "Witsml.Studio\Witsml.Studio.csproj", "{E7531DA0-51BD-4C58-B020-FFCE2DFBCED6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5F8F5AC8-680A-4097-9CF2-AB5A97B3BFDF} = {5F8F5AC8-680A-4097-9CF2-AB5A97B3BFDF}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Studio.Plugins.WitsmlBrowser", "Witsml.Studio.Plugins.WitsmlBrowser\Witsml.Studio.Plugins.WitsmlBrowser.csproj", "{7522280E-7550-493D-8CEA-2E73C623E93D}"
 EndProject
