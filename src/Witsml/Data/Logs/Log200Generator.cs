@@ -307,7 +307,7 @@ namespace PDS.Witsml.Data.Logs
                 if (indexValue.Equals(ChannelIndexType.datetime))
                 {
                     indexesStart[idx] = ((DateTimeOffset)indexesStart[idx]).AddSeconds(random.Next(1, 5));
-                    indexValues += "\"" + ((DateTimeOffset)indexesStart[idx]).ToString("o") + "\"";
+                    indexValues += "\"" + ((DateTimeOffset)indexesStart[idx]).UtcDateTime.ToString("o") + "\"";
                 }
                 else if (indexValue.Equals(ChannelIndexType.elapsedtime))
                 {
