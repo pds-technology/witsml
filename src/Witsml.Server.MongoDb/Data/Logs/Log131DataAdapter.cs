@@ -409,10 +409,42 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private void FormatLogHeader(Log log, IDictionary<int, string> mnemonics, string returnElements)
         {
+            // If returning all data then set the start/end indexes based on the data selected
+            if (OptionsIn.ReturnElements.All.Equals(returnElements))
+            {
+                SetLogIndexRange(log);
+            }
+
             // Remove LogCurveInfos from the Log header if slicing by column
-            if (log.LogCurveInfo != null && !OptionsIn.ReturnElements.All.Equals(returnElements))
+            else if (log.LogCurveInfo != null && !OptionsIn.ReturnElements.All.Equals(returnElements))
             {
                 log.LogCurveInfo.RemoveAll(x => !mnemonics.Values.Contains(x.Mnemonic));
+            }
+        }
+
+        private void SetLogIndexRange(Log log)
+        {
+            var isTimeLog = log.IndexType == LogIndexType.datetime;
+
+            if (log.LogData != null && log.LogData.Count > 0)
+            {
+                var firstRow = log.LogData.FirstOrDefault().Split(',');
+                var lastRow = log.LogData.LastOrDefault().Split(',');
+
+                if (firstRow.Length > 0 && lastRow.Length > 0)
+                {
+                    if (isTimeLog)
+                    {
+
+                        log.StartDateTimeIndex = DateTime.Parse(firstRow[0]);
+                        log.EndDateTimeIndex = DateTime.Parse(lastRow[0]);
+                    }
+                    else
+                    {
+                        log.StartIndex.Value = double.Parse(firstRow[0]);
+                        log.EndIndex.Value = double.Parse(lastRow[0]);
+                    }
+                }
             }
         }
 
