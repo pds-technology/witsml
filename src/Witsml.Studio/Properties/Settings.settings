@@ -1,9 +1,0 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="PDS.Witsml.Studio.Properties" GeneratedClassName="Settings">
-  <Profiles />
-  <Settings>
-    <Setting Name="PluginsFolderName" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">Plugins</Value>
-    </Setting>
-  </Settings>
-</SettingsFile>

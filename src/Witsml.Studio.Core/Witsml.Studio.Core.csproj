@@ -40,7 +40,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Avro, Version=0.9.0.0, Culture=neutral, PublicKeyToken=b1248d7eeb9d0814, processorArchitecture=MSIL">
-      <HintPath>..\packages\Apache.Avro.1.7.7.1\lib\Avro.dll</HintPath>
+      <HintPath>..\packages\Apache.Avro.1.7.7.2\lib\Avro.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Caliburn.Micro, Version=2.0.2.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL">

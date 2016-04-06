@@ -25,7 +25,7 @@ namespace PDS.Witsml.Studio.Plugins.ObjectInspector.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("400")]
         public int PluginDisplayOrder {
             get {
                 return ((int)(this["PluginDisplayOrder"]));

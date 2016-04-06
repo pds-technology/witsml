@@ -37,7 +37,6 @@ namespace PDS.Witsml.Studio
     public class Bootstrapper : BootstrapperBase
     {
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(Bootstrapper));
-        private static readonly string PluginsFolderName = Settings.Default.PluginsFolderName;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Bootstrapper"/> class.
@@ -62,13 +61,7 @@ namespace PDS.Witsml.Studio
 
         protected override void Configure()
         {
-            var catalog = new AggregateCatalog
-            (
-                AssemblySource.Instance
-                    .Select(x => new AssemblyCatalog(x))
-            );
-
-            Container = ContainerFactory.Create(catalog);
+            Container = ContainerFactory.Create();
 
             Container.Register<IWindowManager>(new WindowManager());
             Container.Register<IEventAggregator>(new EventAggregator());
@@ -109,15 +102,10 @@ namespace PDS.Witsml.Studio
         /// <returns>An IEnumerable of the Assemblies found in the Plugins folder</returns>
         protected override IEnumerable<Assembly> SelectAssemblies()
         {
-            var path = Path.Combine(Environment.CurrentDirectory, PluginsFolderName);
-            _log.DebugFormat("Bootstrapper Assembly Path: {0}", path);
+            var assemblyPath = Assembly.GetExecutingAssembly().Location;
 
-            // Ensure that the plugins folder exists so we don't get an error
-            Directory.CreateDirectory(path);
-
-            IEnumerable<Assembly> assemblies = new[] { typeof(Bootstrapper).Assembly, typeof(IShellViewModel).Assembly }
-                .Union(Directory.GetFiles(path, "*.dll")
-                .Select(x => Assembly.LoadFrom(x)));
+            IEnumerable<Assembly> assemblies = Directory.GetFiles(Path.GetDirectoryName(assemblyPath), "*.dll")
+                .Select(x => Assembly.LoadFrom(x));
 
             if (_log.IsDebugEnabled)
             {
