@@ -90,14 +90,38 @@ namespace PDS.Witsml.Server
             var timeStart = DateTimeOffset.UtcNow.AddDays(-1);
             var interval = increasing ? 1 : -1;
 
+            if (isDepthLog)
+            {
+                log.StartIndex = log.StartIndex == null ? new GenericMeasure() : log.StartIndex;
+                log.StartIndex.Uom = "ft";
+                log.EndIndex = log.EndIndex == null ? new GenericMeasure() : log.EndIndex;
+                log.EndIndex.Uom = "ft";
+            }
+
             for (int i = 0; i < numRows; i++)
             {
                 if (isDepthLog)
                 {
+                    if (i == 0)
+                    {
+                        log.StartIndex.Value = depthStart;
+                    }
+                    else if (i == numRows - 1)
+                    {
+                        log.EndIndex.Value = depthStart + i;
+                    }
                     InitData(log, mnemonics, units, depthStart + i * interval, hasEmptyChannel ? (int?)null : i, depthStart + i * factor);
                 }
                 else
                 {
+                    if (i == 0)
+                    {
+                        log.StartDateTimeIndex = timeStart;
+                    }
+                    else if (i == numRows - 1)
+                    {
+                        log.EndDateTimeIndex = timeStart.AddSeconds(i);
+                    }
                     InitData(log, mnemonics, units, timeStart.AddSeconds(i).ToString("o"), hasEmptyChannel ? (int?)null : i, i * factor);
                 }
             }
