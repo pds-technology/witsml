@@ -359,6 +359,7 @@ namespace PDS.Witsml
         /// -463 For updating systematically growing data, the update data must not contain multiple nodes with the same
         /// index.
         /// </summary>
+        NodesWithSameIndex = -463,
 
         /// <summary>
         /// -464 Each lower level child uid value must be unique within the context of its nearest recurring parent node.

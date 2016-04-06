@@ -330,4 +330,8 @@
     <value>The client must not attempt to add or update more data than is allowed by the server’s maxDataNodes and maxDataPoints values.</value>
     <comment>-456</comment>
   </data>
+  <data name="NodesWithSameIndex" xml:space="preserve">
+    <value>For updating systematically growing data, the update data must not contain multiple nodes with the same index.</value>
+    <comment>-463</comment>
+  </data>
 </root>

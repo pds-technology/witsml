@@ -16,12 +16,14 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -238,6 +240,56 @@ namespace PDS.Witsml.Server.Data.Logs
             };
             var result = DevKit.Query<LogList, Log>(query, ObjectTypes.Log, null, OptionsIn.ReturnElements.DataOnly);
             Assert.IsNotNull(result);
+        }
+
+        [TestMethod]
+        public void Log_empty_elements_are_removed()
+        {
+            var response = DevKit.Add<WellList, Well>(_well);
+
+            _wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+
+            var log = new Log()
+            {
+                UidWell = _wellbore.UidWell,
+                NameWell = _well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = _wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth, false);
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+            
+            var query = new Log()
+            {
+                UidWell = log.UidWell,
+                UidWellbore = log.UidWellbore,
+                Uid = uidLog
+            };
+            var returnLog = DevKit.Query<LogList, Log>(query, ObjectTypes.Log, null, OptionsIn.ReturnElements.All).FirstOrDefault();
+            Assert.IsNotNull(returnLog);
+            Assert.IsNotNull(returnLog.IndexType);
+            Assert.AreEqual(log.IndexType, returnLog.IndexType);
+
+
+            var queryIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
+                "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
+                "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
+                    "<log uid=\"" + uidLog + "\" uidWell=\"" + log.UidWell + "\" uidWellbore=\"" + log.UidWellbore + "\">" + Environment.NewLine +
+                        "<nameWell />" + Environment.NewLine +
+                    "</log>" + Environment.NewLine +
+               "</logs>";
+            var result = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, null);
+            var xmlOut = result.XMLout;
+            Assert.IsNotNull(result);
+            var context = new RequestContext(Functions.GetFromStore, ObjectTypes.Log, xmlOut, null, null);
+            var parser = new WitsmlQueryParser(context);
+            Assert.IsFalse(parser.HasElements("indexType"));
         }
     }
 }
