@@ -89,6 +89,10 @@
       <Project>{30DE888B-A6B7-4528-AD89-324A7F9B0F4C}</Project>
       <Name>WebSockets</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Witsml.Server\Witsml.Server.csproj">
+      <Project>{93faae2f-13aa-46df-a94b-36155b51ebfa}</Project>
+      <Name>Witsml.Server</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Witsml\Witsml.csproj">
       <Project>{0ef1d73f-e7a0-40b0-803b-7ce4b6b27112}</Project>
       <Name>Witsml</Name>

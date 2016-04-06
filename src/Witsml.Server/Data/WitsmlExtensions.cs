@@ -25,6 +25,7 @@ using Witsml131Schemas = Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Witsml141Schemas = Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Witsml200Schemas = Energistics.DataAccess.WITSML200.ComponentSchemas;
 using System;
+using System.Xml.Linq;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -33,6 +34,8 @@ namespace PDS.Witsml.Server.Data
     /// </summary>
     public static class WitsmlExtensions
     {
+        private static readonly XNamespace xsi = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
+
         /// <summary>
         /// Adds support for the specified function and data object to the capServer instance.
         /// </summary>
@@ -142,6 +145,47 @@ namespace PDS.Witsml.Server.Data
             citation.LastUpdate = DateTime.UtcNow;
 
             return citation;
+        }
+
+        /// <summary>
+        /// Posts the process the xml, e.g. remove xsi:nil attribute from element
+        /// and the subsequent empty element.
+        /// </summary>
+        /// <param name="xml">The XML input to be processed.</param>
+        /// <returns>the processed XML output.</returns>
+        public static string PostProcess(this string xml)
+        {
+            var xmlDoc = WitsmlParser.Parse(xml);
+            var root = xmlDoc.Root;
+            foreach (var element in root.Elements().ToList())
+            {
+                ProcessElement(element, false);
+            }
+
+            return root.ToString();
+        }
+
+        private static void ProcessElement(XElement element, bool remove = true)
+        {
+            if (element.HasAttributes)
+            {
+                foreach (var attribute in element.Attributes().ToList())
+                {
+                    if (attribute.Name == xsi.GetName("nil"))
+                        attribute.Remove();
+                }
+            }
+            foreach (var child in element.Elements().ToList())
+            {
+                ProcessElement(child);
+            }
+            if (remove && IsEmpty(element))
+                element.Remove();
+        }
+
+        private static bool IsEmpty(XElement element)
+        {
+            return element.IsEmpty && !element.HasAttributes && !element.HasElements;
         }
     }
 }

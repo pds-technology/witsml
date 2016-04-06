@@ -16,8 +16,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Framework;
+using PDS.Witsml.Server.Data;
 
 namespace PDS.Witsml
 {
@@ -51,6 +54,26 @@ namespace PDS.Witsml
             var actual = Functions.GetFromStore.GetDescription();
 
             Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void PostProcess_remove_empty_elements_and_nil_attributes()
+        {
+            var input = "<?xml version=\"1.0\"?>" + Environment.NewLine +
+                "<logs xmlns:gml=\"http://www.opengis.net/gml/3.2\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
+                " xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:dc=\"http://purl.org/dc/terms/\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
+                    "<log>" + Environment.NewLine +
+                        "<nameWell>Well 01 - 160406-074115-107</nameWell>" + Environment.NewLine +
+                        "<name>Log 01 - 160406-074117-259</name>" + Environment.NewLine +
+                        "<indexType xsi:nil=\"true\" />" + Environment.NewLine +
+                        "<startIndex uom=\"m\">0</startIndex>" + Environment.NewLine +
+                    "</log>" + Environment.NewLine +
+                "</logs>";
+            var output = input.PostProcess();
+            var root = WitsmlParser.Parse(output).Root;
+            var logElement = root.Elements().FirstOrDefault();
+            var exist = logElement.Elements().Any(e => e.Name.LocalName == "indexType");
+            Assert.IsFalse(exist);
         }
     }
 }

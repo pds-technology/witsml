@@ -149,7 +149,7 @@ namespace PDS.Witsml.Server
                 var response = new WMLS_GetFromStoreResponse(
                     (short)result.Code,
                     result.Results != null
-                        ? EnergisticsConverter.ObjectToXml(result.Results)
+                        ? EnergisticsConverter.ObjectToXml(result.Results).PostProcess()
                         : string.Empty,
                     result.Message);
 
