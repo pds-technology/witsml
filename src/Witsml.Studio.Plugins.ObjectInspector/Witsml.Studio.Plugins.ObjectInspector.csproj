@@ -145,8 +145,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy $(TargetDir)$(TargetName).* $(SolutionDir)\Witsml.Studio\Plugins /y
-xcopy $(TargetDir)$(TargetName).* $(SolutionDir)\Witsml.Studio\bin\Plugins /y</PostBuildEvent>
+    <PostBuildEvent>if not exist "$(SolutionDir)Witsml.Studio\Plugins" mkdir "$(SolutionDir)Witsml.Studio\Plugins"
+if not exist "$(SolutionDir)Witsml.Studio\bin\Plugins" mkdir "$(SolutionDir)Witsml.Studio\bin\Plugins"
+xcopy $(TargetDir)$(TargetName).* $(SolutionDir)Witsml.Studio\Plugins /y
+xcopy $(TargetDir)$(TargetName).* $(SolutionDir)Witsml.Studio\bin\Plugins /y</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>powershell.exe -file "$(SolutionDir)\External\InsertCopyright.ps1" -target $(ProjectDir) -productname "PDS.Witsml.Studio"</PreBuildEvent>
