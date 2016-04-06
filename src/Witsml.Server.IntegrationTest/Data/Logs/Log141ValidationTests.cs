@@ -16,11 +16,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -50,7 +52,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Test_add_error_code_463_nodes_with_same_index()
+        public void Test_error_code_463_nodes_with_same_index()
         {
             var response = DevKit.Add<WellList, Well>(Well);
 
@@ -80,6 +82,362 @@ namespace PDS.Witsml.Server.Data.Logs
 
             response = DevKit.Add<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.NodesWithSameIndex, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_447_duplicate_column_identifiers_in_LogCurveInfo()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10);
+
+            // Set the 3rd mnemonic to the 2nd in LogCurveInfo
+            log.LogCurveInfo[2].Mnemonic.Value = log.LogCurveInfo[1].Mnemonic.Value;
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.DuplicateColumnIdentifiers, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_447_duplicate_column_identifiers_in_LogData_MnemonicList()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10);
+
+            // Set the 3rd mnemonic to the 2nd in the LogData.MnemonicList
+            var mnemonics = log.LogData.FirstOrDefault().MnemonicList.Split(',');
+            mnemonics[2] = mnemonics[1];
+            log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.DuplicateColumnIdentifiers, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_449_index_curve_not_found_in_LogCurveInfo()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10);
+
+            // Remove LogCurveInfo for IndexCurve
+            log.LogCurveInfo.Remove(log.LogCurveInfo.Where(l => l.Mnemonic.Value == log.IndexCurve).FirstOrDefault());
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.IndexCurveNotFound, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_449_index_curve_not_found_in_LogData_MnemonicList()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10);
+
+            // Remove the index curve from the LogData.MnemonicList
+            var mnemonics = log.LogData.FirstOrDefault().MnemonicList.Split(',');
+            log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics.Where(m => m != log.IndexCurve));
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.IndexCurveNotFound, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_456_max_data_exceeded_for_nodes()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+            var maxDataNodes = Settings.Default.MaxDataNodes;
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            // Create a Data set with one more row than maxNodes
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), maxDataNodes + 1);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.MaxDataExceeded, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_456_max_data_exceeded_for_points()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+            var maxDataPoints = Settings.Default.MaxDataPoints;
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            
+            // Create a Data set with one more row than maxNodes
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), (maxDataPoints / log.LogCurveInfo.Count) + 1);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.MaxDataExceeded, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_457_index_not_first_in_LogCurveInfo()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10);
+
+            // Move the last LogCurveInfo before the index LogCurveInfo
+            var lastLogCurveInfo = log.LogCurveInfo.LastOrDefault();
+            log.LogCurveInfo.Remove(lastLogCurveInfo);
+            log.LogCurveInfo.Insert(0, lastLogCurveInfo);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.IndexNotFirstInDataColumnList, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_458_mixed_index_types_in_Log()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10);
+
+            // Add a StartDateTimeIndex to the Depth Log
+            log.StartDateTimeIndex = DateTimeOffset.Now;
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.MixedStructuralRangeIndices, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_459_bad_column_identifier_in_LogCurveInfo()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10);
+
+            // Test all Illegal characters => { "'", "\"", "<", ">", "/", "\\", "&", "," }
+
+            // Test &
+            log.LogCurveInfo[1].Mnemonic.Value = log.LogCurveInfo[1].Mnemonic.Value + "&";
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+
+            // Test "
+            log.LogCurveInfo[1].Mnemonic.Value = log.LogCurveInfo[1].Mnemonic.Value + "\"";
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+
+            // Test '
+            log.LogCurveInfo[1].Mnemonic.Value = log.LogCurveInfo[1].Mnemonic.Value + "'";
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+
+            // Test >
+            log.LogCurveInfo[1].Mnemonic.Value = log.LogCurveInfo[1].Mnemonic.Value + ">";
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+
+            // Test <
+            log.LogCurveInfo[1].Mnemonic.Value = log.LogCurveInfo[1].Mnemonic.Value + "<";
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+
+            // Test \
+            log.LogCurveInfo[1].Mnemonic.Value = log.LogCurveInfo[1].Mnemonic.Value + "\\";
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+
+            // Test /
+            log.LogCurveInfo[1].Mnemonic.Value = log.LogCurveInfo[1].Mnemonic.Value + "/";
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+
+            // Test ,
+            log.LogCurveInfo[1].Mnemonic.Value = log.LogCurveInfo[1].Mnemonic.Value + ",";
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_459_bad_column_identifier_in_LogData()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10);
+
+            // Test all Illegal characters => { "'", "\"", "<", ">", "/", "\\", "&", "," }
+            var mnemonics = log.LogData.FirstOrDefault().MnemonicList.Split(',');
+
+            // Test &
+            mnemonics[1] = "&";
+            log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics);
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+
+            // Test "
+            mnemonics[1] = "\"";
+            log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics);
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+
+            // Test '
+            mnemonics[1] = "'";
+            log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics);
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+
+            // Test >
+            mnemonics[1] = ">";
+            log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics);
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+
+            // Test <
+            mnemonics[1] = "<";
+            log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics);
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+
+            // Test \
+            mnemonics[1] = "\\";
+            log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics);
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+
+            // Test /
+            mnemonics[1] = "/";
+            log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics);
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+
+            // Test ,
+            mnemonics[1] = ",";
+            log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics);
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
         }
     }
 }
