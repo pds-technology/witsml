@@ -18,7 +18,6 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Text;
 using Energistics.Common;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
@@ -65,12 +64,12 @@ namespace PDS.Witsml.Server.Providers.Store
         {
             if (entity == null)
             {
-                dataObject.SetData(new byte[0]);
+                dataObject.SetXml(null);
             }
             else
             {
                 var xml = EnergisticsConverter.ObjectToXml(entity);
-                dataObject.SetData(Encoding.UTF8.GetBytes(xml));
+                dataObject.SetXml(xml);
             }
 
             dataObject.Resource = new Resource()

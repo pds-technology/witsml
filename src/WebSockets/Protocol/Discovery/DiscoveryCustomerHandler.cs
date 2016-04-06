@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using Avro.IO;
 using Energistics.Common;
 using Energistics.Datatypes;
+using Energistics.Protocol.Core;
 
 namespace Energistics.Protocol.Discovery
 {
@@ -62,21 +63,46 @@ namespace Energistics.Protocol.Discovery
             }
         }
 
-        protected virtual void HandleGetResourcesResponse(MessageHeader header, GetResourcesResponse getResourcesResponse)
+        protected override void HandleAcknowledge(MessageHeader header, Acknowledge acknowledge)
         {
-            var uri = string.Empty;
-
-            if (_requests.TryGetValue(header.CorrelationId, out uri) && header.MessageFlags == (int)MessageFlags.FinalPart)
+            // Handle case when "No Data" Acknowledge message was received
+            if (header.MessageFlags == (int)MessageFlags.NoData)
             {
-                _requests.Remove(header.CorrelationId);
+                var uri = GetRequestedUri(header);
+                HandleAcknowledge(header, acknowledge, uri);
+                return;
             }
 
+            base.HandleAcknowledge(header, acknowledge);
+        }
+
+        protected virtual void HandleAcknowledge(MessageHeader header, Acknowledge acknowledge, string uri)
+        {
+            var args = Notify(OnGetResourcesResponse, header, new GetResourcesResponse(), uri);
+            HandleGetResourcesResponse(args);
+        }
+
+        protected virtual void HandleGetResourcesResponse(MessageHeader header, GetResourcesResponse getResourcesResponse)
+        {
+            var uri = GetRequestedUri(header);
             var args = Notify(OnGetResourcesResponse, header, getResourcesResponse, uri);
             HandleGetResourcesResponse(args);
         }
 
         protected virtual void HandleGetResourcesResponse(ProtocolEventArgs<GetResourcesResponse, string> args)
         {
+        }
+
+        private string GetRequestedUri(MessageHeader header)
+        {
+            var uri = string.Empty;
+
+            if (_requests.TryGetValue(header.CorrelationId, out uri) && header.MessageFlags != (int)MessageFlags.MultiPart)
+            {
+                _requests.Remove(header.CorrelationId);
+            }
+
+            return uri;
         }
     }
 }

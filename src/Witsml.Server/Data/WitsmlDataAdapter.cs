@@ -20,7 +20,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Text;
 using Energistics.Common;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
@@ -181,7 +180,7 @@ namespace PDS.Witsml.Server.Data
         public virtual WitsmlResult Put(DataObject dataObject)
         {
             var context = new RequestContext(Functions.PutObject, ObjectTypes.GetObjectType<T>(),
-                Encoding.UTF8.GetString(dataObject.GetData()), null, null);
+                dataObject.GetXml(), null, null);
 
             var parser = new WitsmlQueryParser(context);
 

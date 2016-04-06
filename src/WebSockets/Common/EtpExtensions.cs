@@ -103,7 +103,31 @@ namespace Energistics.Common
             });
         }
 
-        public static byte[] GetData(this DataObject dataObject)
+        public static string GetXml(this DataObject dataObject)
+        {
+            return System.Text.Encoding.UTF8.GetString(dataObject.GetData());
+            //return System.Text.Encoding.Unicode.GetString(dataObject.GetData());
+        }
+
+        public static void SetXml(this DataObject dataObject, string xml, bool compress = true)
+        {
+            if (string.IsNullOrWhiteSpace(xml))
+            {
+                dataObject.SetData(new byte[0], compress);
+                return;
+            }
+
+            var bytes = System.Text.Encoding.UTF8.GetBytes(xml);
+
+            //var bytes = System.Text.Encoding.Convert(
+            //    System.Text.Encoding.UTF8,
+            //    System.Text.Encoding.Unicode,
+            //    System.Text.Encoding.UTF8.GetBytes(xml));
+
+            dataObject.SetData(bytes, compress);
+        }
+
+        private static byte[] GetData(this DataObject dataObject)
         {
             if (string.IsNullOrWhiteSpace(dataObject.ContentEncoding))
                 return dataObject.Data;
@@ -112,25 +136,31 @@ namespace Energistics.Common
                 throw new NotSupportedException("Content encoding not supported: " + dataObject.ContentEncoding);
 
             using (var uncompressed = new MemoryStream())
-            using (var compressed = new MemoryStream(dataObject.Data))
-            using (var gzip = new GZipStream(compressed, CompressionMode.Decompress))
             {
-                gzip.CopyTo(uncompressed);
+                using (var compressed = new MemoryStream(dataObject.Data))
+                using (var gzip = new GZipStream(compressed, CompressionMode.Decompress))
+                {
+                    gzip.CopyTo(uncompressed);
+                }
+
                 return uncompressed.GetBuffer();
             }
         }
 
-        public static void SetData(this DataObject dataObject, byte[] data, bool compress = false)
+        private static void SetData(this DataObject dataObject, byte[] data, bool compress = true)
         {
             var encoding = string.Empty;
 
             if (compress)
             {
                 using (var compressed = new MemoryStream())
-                using (var uncompressed = new MemoryStream(data))
-                using (var gzip = new GZipStream(uncompressed, CompressionMode.Compress))
                 {
-                    gzip.CopyTo(compressed);
+                    using (var uncompressed = new MemoryStream(data))
+                    using (var gzip = new GZipStream(compressed, CompressionMode.Compress, true))
+                    {
+                        uncompressed.CopyTo(gzip);
+                    }
+
                     data = compressed.GetBuffer();
                     encoding = GzipEncoding;
                 }

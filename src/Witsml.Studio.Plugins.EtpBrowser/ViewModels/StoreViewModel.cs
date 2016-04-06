@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
 using Caliburn.Micro;
 using Energistics.Common;
 using Energistics.Datatypes;
@@ -153,7 +152,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 }
             };
 
-            dataObject.SetData(Encoding.UTF8.GetBytes(xml));
+            dataObject.SetXml(xml);
 
             Parent.Client.Handler<IStoreCustomer>()
                 .PutObject(dataObject);

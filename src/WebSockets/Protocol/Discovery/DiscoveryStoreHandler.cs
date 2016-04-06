@@ -33,6 +33,12 @@ namespace Energistics.Protocol.Discovery
 
         public virtual void GetResourcesResponse(MessageHeader request, IList<Resource> resources)
         {
+            if (!resources.Any())
+            {
+                Acknowledge(request.MessageId, MessageFlags.NoData);
+                return;
+            }
+
             for (int i=0; i<resources.Count; i++)
             {
                 var messageFlags = i < resources.Count - 1

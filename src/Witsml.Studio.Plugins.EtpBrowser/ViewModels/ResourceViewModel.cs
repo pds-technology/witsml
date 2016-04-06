@@ -28,10 +28,17 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
     /// <seealso cref="Caliburn.Micro.PropertyChangedBase" />
     public class ResourceViewModel : PropertyChangedBase
     {
-        private static readonly ResourceViewModel Placeholder = new ResourceViewModel(new Resource()
+        private static readonly ResourceViewModel Placeholder = new ResourceViewModel(new Resource() { Name = "loading..." })
         {
-            Name = "loading..."
-        });
+            _isPlaceholder = true
+        };
+
+        public static readonly ResourceViewModel NoData = new ResourceViewModel(new Resource() { Name = "(no data)" })
+        {
+            _isPlaceholder = true
+        };
+
+        private bool _isPlaceholder = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ResourceViewModel"/> class.
@@ -66,7 +73,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// <value><c>true</c> if this instance has placeholder; otherwise, <c>false</c>.</value>
         public bool HasPlaceholder
         {
-            get { return Children.Count == 1 && Children[0] == Placeholder; }
+            get { return Children.Count == 1 && Children[0]._isPlaceholder; }
         }
 
         /// <summary>
