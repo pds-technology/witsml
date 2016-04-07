@@ -61,6 +61,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A new column(log curve) cannot be added at the same time an existing column(log curve) is being  updated. (The index column (curve) does not count as being updated.).
+        /// </summary>
+        internal static string AddingUpdatingLogCurveAtTheSameTime {
+            get {
+                return ResourceManager.GetString("AddingUpdatingLogCurveAtTheSameTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The capClient apiVers value must match the API schema version..
         /// </summary>
         internal static string ApiVersionNotMatch {
@@ -106,6 +115,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A data-object with the same type and unique identifier(s) must already exist in the persistent store..
+        /// </summary>
+        internal static string DataObjectNotExist {
+            get {
+                return ResourceManager.GetString("DataObjectNotExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to In WMLS_AddToStore, the objectType being added in WMLtypeIn must be an objectType supported by the server. The server does not support the object type trying to be added..
         /// </summary>
         internal static string DataObjectTypeNotSupported {
@@ -133,6 +151,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The input template must specify the unique identifiers of one data-object to be processed..
+        /// </summary>
+        internal static string DataObjectUidMissing {
+            get {
+                return ResourceManager.GetString("DataObjectUidMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to For WMLS_GetCap, the OptionsIn keyword ‘dataVersion’ must specify a Data Schema Version that is supported by the server as defined by WMLS_GetVersion..
         /// </summary>
         internal static string DataVersionNotSupported {
@@ -147,6 +174,15 @@ namespace PDS.Witsml.Properties {
         internal static string DuplicateColumnIdentifiers {
             get {
                 return ResourceManager.GetString("DuplicateColumnIdentifiers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to For WMLS_UpdateInStore, new elements or attributes must not be empty..
+        /// </summary>
+        internal static string EmptyNewElementsOrAttributes {
+            get {
+                return ResourceManager.GetString("EmptyNewElementsOrAttributes", resourceCulture);
             }
         }
         
@@ -210,6 +246,15 @@ namespace PDS.Witsml.Properties {
         internal static string IndexNotFirstInDataColumnList {
             get {
                 return ResourceManager.GetString("IndexNotFirstInDataColumnList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to When an update adds a new column-identifier to a systematically growing data-object, a structural-range must not also be specified..
+        /// </summary>
+        internal static string IndexRangeSpecified {
+            get {
+                return ResourceManager.GetString("IndexRangeSpecified", resourceCulture);
             }
         }
         
@@ -349,6 +394,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to For updating systematically growing data, if data-nodes are specified then the column-identifiers (mnemonic) must be specified in the data-column-list..
+        /// </summary>
+        internal static string MissingColumnIdentifiers {
+            get {
+                return ResourceManager.GetString("MissingColumnIdentifiers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A QueryIn template must include a version attribute in the plural data-object that defines the Data Schema Version of the data-object..
         /// </summary>
         internal static string MissingDataSchemaVersion {
@@ -372,6 +426,15 @@ namespace PDS.Witsml.Properties {
         internal static string MissingDefaultWitsmlNamespace {
             get {
                 return ResourceManager.GetString("MissingDefaultWitsmlNamespace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to For WMLS_UpdateInStore, if an element with a unique identifier in the schema is specified then the  identifier value must also be specified.
+        /// </summary>
+        internal static string MissingElementUid {
+            get {
+                return ResourceManager.GetString("MissingElementUid", resourceCulture);
             }
         }
         
@@ -430,6 +493,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to When updating data in a systematically growing data-object, the unitList must always be specified..
+        /// </summary>
+        internal static string MissingUnitList {
+            get {
+                return ResourceManager.GetString("MissingUnitList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A QueryIn template must include a version attribute in the plural data-object that defines the Data Schema Version of the data-object..
         /// </summary>
         internal static string MissingVersionAttribute {
@@ -453,6 +525,15 @@ namespace PDS.Witsml.Properties {
         internal static string MixedStructuralRangeIndices {
             get {
                 return ResourceManager.GetString("MixedStructuralRangeIndices", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to When updating data in a systematically growing data-object, each mnemonic must occur only once in the mnemonicList..
+        /// </summary>
+        internal static string MnemonicsNotUnique {
+            get {
+                return ResourceManager.GetString("MnemonicsNotUnique", resourceCulture);
             }
         }
         
@@ -535,6 +616,15 @@ namespace PDS.Witsml.Properties {
         internal static string Success {
             get {
                 return ResourceManager.GetString("Success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to When updating data in a systematically growing data-object, the unitList must be populated with units that match the header..
+        /// </summary>
+        internal static string UnitListNotMatch {
+            get {
+                return ResourceManager.GetString("UnitListNotMatch", resourceCulture);
             }
         }
         
