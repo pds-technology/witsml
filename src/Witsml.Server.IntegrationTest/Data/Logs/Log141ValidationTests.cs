@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
@@ -439,6 +440,91 @@ namespace PDS.Witsml.Server.Data.Logs
             log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics);
             response = DevKit.Add<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_442_optionsIn_keyword_not_supported()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10);
+
+            response = DevKit.Add<LogList, Log>(log, optionsIn: "compressionMethod=gzip");
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.KeywordNotSupportedByServer, response.Result);
+        }
+
+        [Ignore]
+        [TestMethod]
+        public void Test_error_code_464_child_uids_not_unique()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            // Make all child uids the same for LogCurveInfos
+            log.LogCurveInfo.ForEach(lci => lci.Uid = "lci1");
+
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10);
+
+            response = DevKit.Add<LogList, Log>(log);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.ChildUidNotUnique, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_486_data_object_types_dont_match()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10);
+
+            var logs = new LogList { Log = DevKit.List(log) };
+            var xmlIn = EnergisticsConverter.ObjectToXml(logs);
+            response = DevKit.AddToStore(ObjectTypes.Wellbore, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
 
         [TestMethod]

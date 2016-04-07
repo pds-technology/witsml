@@ -325,6 +325,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>A WITSML result.</returns>
         public override WitsmlResult Delete(EtpUri uri)
         {
+            Logger.DebugFormat("Delete for Log with uri '{0}'.", uri.Uri);
+
             var result = base.Delete(uri);
 
             if (result.Code == ErrorCodes.Success)
