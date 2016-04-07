@@ -756,6 +756,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private void UpdateIndexRange(EtpUri uri, Log entity, Dictionary<string, Range<double?>> ranges, IEnumerable<string> mnemonics, bool isTimeLog, string indexUnit, TimeSpan? offset)
         {
+            Logger.DebugFormat("Updating index range with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
             var collection = GetCollection();
             var mongoUpdate = new MongoDbUpdate<Log>(GetCollection(), null);
             var filter = MongoDbUtility.GetEntityFilter<Log>(uri);
