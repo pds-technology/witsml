@@ -111,9 +111,10 @@ namespace PDS.Witsml.Server.Data.Logs
             // Validate that column-identifiers in all LogData MnemonicLists are unique.
             else if (DataObject.LogData != null
                 && DataObject.LogData.Count > 0
-                && DataObject.LogData.Any(ld => 
-                    (ld.MnemonicList.Split(',').Distinct().Count() < ld.MnemonicList.Split(',').Count()) &&
-                    !ld.MnemonicList.Contains(",,,")))
+                && DataObject.LogData.Any(ld => {
+                        var mnemonics = ld.MnemonicList.Split(',');
+                        return (mnemonics.Distinct().Count() < mnemonics.Count()) && !ld.MnemonicList.Contains(",,,");
+                    }))
             {
                 yield return new ValidationResult(ErrorCodes.DuplicateColumnIdentifiers.ToString(), new[] { "LogData", "MnemonicList" });
             }
