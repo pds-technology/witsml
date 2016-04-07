@@ -334,4 +334,44 @@
     <value>For updating systematically growing data, the update data must not contain multiple nodes with the same index.</value>
     <comment>-463</comment>
   </data>
+  <data name="AddingUpdatingLogCurveAtTheSameTime" xml:space="preserve">
+    <value>A new column(log curve) cannot be added at the same time an existing column(log curve) is being  updated. (The index column (curve) does not count as being updated.)</value>
+    <comment>-480</comment>
+  </data>
+  <data name="DataObjectNotExist" xml:space="preserve">
+    <value>A data-object with the same type and unique identifier(s) must already exist in the persistent store.</value>
+    <comment>-433</comment>
+  </data>
+  <data name="DataObjectUidMissing" xml:space="preserve">
+    <value>The input template must specify the unique identifiers of one data-object to be processed.</value>
+    <comment>-415</comment>
+  </data>
+  <data name="EmptyNewElementsOrAttributes" xml:space="preserve">
+    <value>For WMLS_UpdateInStore, new elements or attributes must not be empty.</value>
+    <comment>-445</comment>
+  </data>
+  <data name="IndexRangeSpecified" xml:space="preserve">
+    <value>When an update adds a new column-identifier to a systematically growing data-object, a structural-range must not also be specified.</value>
+    <comment>-436</comment>
+  </data>
+  <data name="MissingColumnIdentifiers" xml:space="preserve">
+    <value>For updating systematically growing data, if data-nodes are specified then the column-identifiers (mnemonic) must be specified in the data-column-list.</value>
+    <comment>-434</comment>
+  </data>
+  <data name="MissingElementUid" xml:space="preserve">
+    <value>For WMLS_UpdateInStore, if an element with a unique identifier in the schema is specified then the  identifier value must also be specified</value>
+    <comment>-448</comment>
+  </data>
+  <data name="MissingUnitList" xml:space="preserve">
+    <value>When updating data in a systematically growing data-object, the unitList must always be specified.</value>
+    <comment>-451</comment>
+  </data>
+  <data name="MnemonicsNotUnique" xml:space="preserve">
+    <value>When updating data in a systematically growing data-object, each mnemonic must occur only once in the mnemonicList.</value>
+    <comment>-450</comment>
+  </data>
+  <data name="UnitListNotMatch" xml:space="preserve">
+    <value>When updating data in a systematically growing data-object, the unitList must be populated with units that match the header.</value>
+    <comment>-452</comment>
+  </data>
 </root>

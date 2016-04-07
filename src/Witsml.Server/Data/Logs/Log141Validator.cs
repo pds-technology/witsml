@@ -16,11 +16,14 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Linq;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using Energistics.DataAccess.WITSML141;
 using System.ComponentModel.Composition;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.DataAccess.WITSML141.ReferenceData;
+using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Properties;
 
@@ -40,6 +43,7 @@ namespace PDS.Witsml.Server.Data.Logs
         private static readonly int maxDataNodes = Settings.Default.MaxDataNodes;
         private static readonly int maxDataPoints = Settings.Default.MaxDataPoints;
 
+        private static readonly char _seperator = ',';
         private readonly string[] _illeagalColumnIdentifiers = new string[] { "'", "\"", "<", ">", "/", "\\", "&", "," };
 
         /// <summary>
@@ -185,6 +189,124 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 yield return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogData.MnemonicList" });
             }
+        }
+
+        protected override IEnumerable<ValidationResult> ValidateForUpdate()
+        {           
+            var uri = DataObject.GetUri();
+            var logCurves = DataObject.LogCurveInfo;
+            var logParams = DataObject.LogParam;
+            var logData = DataObject.LogData;
+            var current = ((WitsmlDataAdapter<Log>)_logDataAdapter).Get(uri);
+            var isTimeLog = current.IndexType == LogIndexType.datetime || current.IndexType == LogIndexType.elapsedtime;
+
+            // Validate Log uid property
+            if (string.IsNullOrWhiteSpace(DataObject.UidWell) || string.IsNullOrWhiteSpace(DataObject.UidWellbore) || string.IsNullOrWhiteSpace(DataObject.Uid))
+            {
+                yield return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] { "Uid", "UidWell", "UidWellbore" });
+            }
+
+            // Validate Log does not exist
+            else if (current == null)
+            {
+                yield return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] { "Uid", "UidWell", "UidWellbore" });
+            }
+
+            // Validate that uid for LogCurveInfo exists
+            else if (logCurves != null && logCurves.Any(l => string.IsNullOrWhiteSpace(l.Uid)))
+            {
+                yield return new ValidationResult(ErrorCodes.MissingElementUid.ToString(), new[] { "LogCurveInfo", "Uid" });
+            }
+
+            // Validate that uid for LogParam exists
+            else if (logParams != null && logParams.Any(lp => string.IsNullOrWhiteSpace(lp.Uid)))
+            {
+                yield return new ValidationResult(ErrorCodes.MissingElementUid.ToString(), new[] { "LogParam", "Uid" });
+            }
+
+            // Validate that uids in LogCurveInfo are unique
+            else if (logCurves != null && DuplicateUid(logCurves.Select(l => l.Uid)))
+            {
+                yield return new ValidationResult(ErrorCodes.ChildUidNotUnique.ToString(), new[] { "LogCurveInfo", "Uid" });
+            }
+
+            // Validate that uids in LogParam are unique
+            else if (logParams != null && DuplicateUid(logCurves.Select(l => l.Uid)))
+            {
+                yield return new ValidationResult(ErrorCodes.ChildUidNotUnique.ToString(), new[] { "LogParam", "Uid" });
+            }
+
+            // Validate that uids in LogCurveInfo are unique
+            else if (logData != null && logData.Any(d => string.IsNullOrWhiteSpace(d.MnemonicList)))
+            {
+                yield return new ValidationResult(ErrorCodes.MissingColumnIdentifiers.ToString(), new[] { "LogData", "MnemonicList" });
+            }
+
+            // Validate that uids in LogCurveInfo are unique
+            else if (logData != null && logData.Any(d => string.IsNullOrWhiteSpace(d.UnitList)))
+            {
+                yield return new ValidationResult(ErrorCodes.MissingUnitList.ToString(), new[] { "LogData", "UnitList" });
+            }
+
+            // Validate that LogCurveInfo index should not be specified
+            else if (logCurves != null)
+            {
+                var exist = current.LogCurveInfo != null ? current.LogCurveInfo : new List<LogCurveInfo>();
+                var uids = exist.Select(e => e.Uid.ToUpper()).ToList();
+                var newCurves = logCurves.Where(l => !uids.Contains(l.Uid.ToUpper())).ToList();
+                var updateCurves = logCurves.Where(l => uids.Contains(l.Uid.ToUpper())).ToList();
+                if (newCurves.Count > 0 && updateCurves.Count > 1)
+                    yield return new ValidationResult(ErrorCodes.AddingUpdatingLogCurveAtTheSameTime.ToString(), new[] { "LogCurveInfo", "Uid" });
+               
+                else if (isTimeLog && newCurves.Any(c => c.MinDateTimeIndex.HasValue || c.MaxDateTimeIndex.HasValue)
+                    || !isTimeLog && newCurves.Any(c => c.MinIndex != null || c.MaxIndex != null))
+                {
+                    yield return new ValidationResult(ErrorCodes.IndexRangeSpecified.ToString(), new[] { "LogCurveInfo", "Index" });
+                }
+            }
+
+            // Validate LogData mnemonic list
+            else if (logData != null && logData.Count > 0)
+            {
+                var indexCurve = current.IndexCurve;
+                if (logData.Any(ld => !ld.MnemonicList.Split(_seperator).Contains(indexCurve)))
+                {
+                    yield return new ValidationResult(ErrorCodes.IndexCurveNotFound.ToString(), new[] { "LogData", "MnemonicList" });
+                }
+                else if (logData.Any(ld => DuplicateUid(ld.MnemonicList.Split(_seperator))))
+                {
+                    yield return new ValidationResult(ErrorCodes.MnemonicsNotUnique.ToString(), new[] { "LogData", "MnemonicList" });
+                }
+                else if (logCurves != null && logData.Any(ld => !UnitsMatch(logCurves, ld)))
+                {
+                    yield return new ValidationResult(ErrorCodes.UnitListNotMatch.ToString(), new[] { "LogData", "UnitList" });
+                }
+            }
+        }
+
+        private bool DuplicateUid(IEnumerable<string> uids)
+        {
+            return uids.GroupBy(u => u)
+                .Select(group => new { Uid = group.Key, Count = group.Count() })
+                .Any(g => g.Count > 1);
+        }
+
+        private bool UnitsMatch(List<LogCurveInfo> logCurves, LogData logData)
+        {
+            var mnemonics = logData.MnemonicList.Split(_seperator);
+            var units = logData.UnitList.Split(_seperator);
+
+            for (var i = 0; i < mnemonics.Length; i++)
+            {
+                var mnemonic = mnemonics[i];
+                var logCurve = logCurves.FirstOrDefault(l => l.Mnemonic.Value.EqualsIgnoreCase(mnemonic));
+                if (logCurve == null)
+                    continue;
+
+                if (!units[i].EqualsIgnoreCase(logCurve.Unit))
+                    return false;
+            }
+            return true;
         }
     }
 }

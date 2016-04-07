@@ -19,6 +19,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
@@ -303,6 +304,8 @@ namespace PDS.Witsml.Server.Data
 
                 if (current == null)
                 {
+                    ValidateArrayElement(element, properties);
+
                     // update element name to match XSD type
                     var xmlType = type.GetCustomAttribute<XmlTypeAttribute>();
                     element.Name = xmlType != null ? xmlType.TypeName : element.Name;
@@ -317,6 +320,8 @@ namespace PDS.Witsml.Server.Data
                 }
                 else
                 {
+                    ValidateArrayElement(element, properties, false);
+
                     var elementFilter = Builders<T>.Filter.EqIgnoreCase(filterPath, elementId);
                     filters.Add(elementFilter);
                     var filter = filterBuilder.And(filters);
@@ -356,6 +361,39 @@ namespace PDS.Witsml.Server.Data
                     return item;
             }
             return null;
+        }
+
+        private void ValidateArrayElement(XElement element, IList<PropertyInfo> properties, bool isAdd = true)
+        {
+            var emptyElements = element.Elements().Where(e => e.IsEmpty || string.IsNullOrWhiteSpace(e.Value)).ToList();
+            var emptyAttributes = element.Attributes().Where(a => string.IsNullOrWhiteSpace(a.Value)).ToList();
+            if (isAdd)
+            {
+                if (emptyElements.Count > 0 || emptyAttributes.Count > 0)
+                    throw new WitsmlException(ErrorCodes.AddingUpdatingLogCurveAtTheSameTime);
+            }
+            else
+            {
+                foreach (var child in emptyElements)
+                {
+                    var prop = MongoDbUtility.GetPropertyInfoForAnElement(properties, child.Name.LocalName);
+                    if (prop == null)
+                        continue;
+
+                    if (prop.IsDefined(typeof(RequiredAttribute), false))
+                        throw new WitsmlException(ErrorCodes.EmptyNewElementsOrAttributes);
+                }
+
+                foreach (var child in emptyAttributes)
+                {
+                    var prop = MongoDbUtility.GetPropertyInfoForAnElement(properties, child.Name.LocalName);
+                    if (prop == null)
+                        continue;
+
+                    if (prop.IsDefined(typeof(RequiredAttribute), false))
+                        throw new WitsmlException(ErrorCodes.MissingRequiredData);
+                }
+            }
         }
     }
 }

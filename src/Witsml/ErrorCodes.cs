@@ -118,6 +118,7 @@ namespace PDS.Witsml
         /// <summary>
         /// -415 The input template must specify the unique identifiers of one data-object to be processed.
         /// </summary>
+        DataObjectUidMissing = -415,
 
         /// <summary>
         /// -416 For WMLS_DeleteFromStore, an empty uid attribute must not be specified.
@@ -204,11 +205,13 @@ namespace PDS.Witsml
         /// <summary>
         /// -433 A data-object with the same type and unique identifier(s) must already exist in the persistent store.
         /// </summary>
+        DataObjectNotExist = -433,
 
         /// <summary>
         /// -434 For updating systematically growing data, if data-nodes are specified then the column-identifiers
         /// (mnemonic) must be specified in the data-column-list.
         /// </summary>
+        MissingColumnIdentifiers = -434,
 
         /// <summary>
         /// -435 Deleted January 2014. Not used in the specification.Redundant to -480.
@@ -218,6 +221,7 @@ namespace PDS.Witsml
         /// -436 When an update adds a new column-identifier to a systematically growing data-object, a structural-range
         /// must not also be specified.
         /// </summary>
+        IndexRangeSpecified = -436,
 
         /// <summary>
         /// -437 For WMLS_DeleteFromStore with a systematically growing data-object, a column-identifier must not be
@@ -264,6 +268,7 @@ namespace PDS.Witsml
         /// <summary>
         /// -445 For WMLS_UpdateInStore, new elements or attributes must not be empty.
         /// </summary>
+        EmptyNewElementsOrAttributes = -445,
 
         /// <summary>
         /// -446 For WMLS_UpdateInStore, a uom attribute must not be specified unless its corresponding value is
@@ -279,6 +284,7 @@ namespace PDS.Witsml
         /// -448 For WMLS_UpdateInStore, if an element with a unique identifier in the schema is specified then the
         /// identifier value must also be specified
         /// </summary>
+        MissingElementUid = -448,
 
         /// <summary>
         /// -449 When updating data in a systematically growing data-object the indexCurve must be specified in the
@@ -290,15 +296,18 @@ namespace PDS.Witsml
         /// -450 When updating data in a systematically growing data-object, each mnemonic must occur only once in the
         /// mnemonicList.
         /// </summary>
+        MnemonicsNotUnique = -450,
 
         /// <summary>
         /// -451 When updating data in a systematically growing data-object, the unitList must always be specified.
         /// </summary>
+        MissingUnitList = -451,
 
         /// <summary>
         /// -452 When updating data in a systematically growing data-object, the unitList must be populated with units
         /// that match the header.
         /// </summary>
+        UnitListNotMatch = -452,
 
         /// <summary>
         /// -453 For WMLS_AddToStore and WMLS_UpdateInStore, the client must always specify the unit for all measure data.
@@ -445,6 +454,7 @@ namespace PDS.Witsml
         /// -480 A new column(log curve) cannot be added at the same time an existing column(log curve) is being
         /// updated. (The index column (curve) does not count as being updated.)
         /// </summary>
+        AddingUpdatingLogCurveAtTheSameTime = -480,
 
         /// <summary>
         /// -481 Parent does not exist.
