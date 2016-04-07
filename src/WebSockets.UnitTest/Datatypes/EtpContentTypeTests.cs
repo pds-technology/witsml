@@ -48,7 +48,7 @@ namespace Energistics.Datatypes
         }
 
         [TestMethod]
-        public void EtpContentType_can_rejects_content_type_without_version()
+        public void EtpContentType_rejects_content_type_without_version()
         {
             var actual = "application/x-witsml+xml;";
             var contentType = new EtpContentType(actual);

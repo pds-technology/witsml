@@ -48,7 +48,7 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         {
             _viewModel.LoadPlugins();
 
-            Assert.AreEqual(3, _viewModel.Items.Count);
+            Assert.AreEqual(4, _viewModel.Items.Count);
         }
 
         /// <summary>
