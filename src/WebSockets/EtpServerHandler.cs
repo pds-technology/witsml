@@ -18,11 +18,14 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using Energistics.Common;
+using Energistics.Properties;
 using Energistics.Protocol.Core;
 
 namespace Energistics
@@ -37,7 +40,7 @@ namespace Energistics
             Clients = new ConcurrentDictionary<string, EtpServerHandler>();
         }
 
-        public EtpServerHandler(WebSocket webSocket, string application, string version) : base(application, version)
+        public EtpServerHandler(WebSocket webSocket, string application, string version, IDictionary<string, string> headers) : base(application, version, headers)
         {
             _socket = webSocket;
             Register<ICoreServer, CoreServerHandler>();
@@ -126,6 +129,15 @@ namespace Energistics
 
             var buffer = new ArraySegment<byte>(data, offset, length);
             _socket.SendAsync(buffer, WebSocketMessageType.Binary, true, CancellationToken.None);
+        }
+
+        protected override void ValidateHeaders()
+        {
+            if (Headers.ContainsKey(Settings.Default.EtpEncodingHeader) &&
+                string.Equals(Headers[Settings.Default.EtpEncodingHeader], Settings.Default.EtpEncodingJson, StringComparison.InvariantCultureIgnoreCase))
+            {
+                throw new HttpException(412, "JSON Encoding not supported");
+            }
         }
 
         protected override void Dispose(bool disposing)

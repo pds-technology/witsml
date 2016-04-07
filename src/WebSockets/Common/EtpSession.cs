@@ -31,11 +31,13 @@ namespace Energistics.Common
     {
         private long MessageId = 0;
 
-        public EtpSession(string application, string version)
+        public EtpSession(string application, string version, IDictionary<string, string> headers)
         {
+            Headers = headers ?? new Dictionary<string, string>();
             Handlers = new Dictionary<object, IProtocolHandler>();
             ApplicationName = application;
             ApplicationVersion = version;
+            ValidateHeaders();
         }
 
         public string ApplicationName { get; private set; }
@@ -43,6 +45,8 @@ namespace Energistics.Common
         public string ApplicationVersion { get; private set; }
 
         public string SessionId { get; set; }
+
+        protected IDictionary<string, string> Headers { get; private set; } 
 
         protected IDictionary<object, IProtocolHandler> Handlers { get; private set; }
 
@@ -232,6 +236,10 @@ namespace Energistics.Common
             {
                 Logger.DebugFormat("[{0}] Message sent: {1}", SessionId, this.Serialize(header));
             }
+        }
+
+        protected virtual void ValidateHeaders()
+        {
         }
     }
 }

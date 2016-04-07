@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avro.IO;
@@ -98,7 +99,7 @@ namespace Energistics.Protocol.Core
 
             // only return details for requested protocols
             var supportedProtocols = Session.GetSupportedProtocols()
-                .Where(x => protocols.Any(y => x.Protocol == y.Protocol && x.Role == y.Role))
+                .Where(x => protocols.Any(y => x.Protocol == y.Protocol && string.Equals(x.Role, y.Role, StringComparison.InvariantCultureIgnoreCase)))
                 .ToList();
 
             OpenSession(header, supportedProtocols);

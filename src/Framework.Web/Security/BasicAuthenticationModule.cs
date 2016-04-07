@@ -87,14 +87,14 @@ namespace PDS.Framework.Web.Security
         private static void OnApplicationAuthenticateRequest(object sender, EventArgs e)
         {
             var request = HttpContext.Current.Request;
-            var authHeader = request.Headers["Authorization"];
+            var authHeader = request.QueryString["Authorization"] ?? request.Headers["Authorization"];
 
             if (authHeader != null)
             {
                 var authHeaderVal = AuthenticationHeaderValue.Parse(authHeader);
 
                 // RFC 2617 sec 1.2, "scheme" name is case-insensitive
-                if (authHeaderVal.Scheme.Equals("basic", StringComparison.OrdinalIgnoreCase) && authHeaderVal.Parameter != null)
+                if (authHeaderVal.Scheme.Equals("basic", StringComparison.InvariantCultureIgnoreCase) && authHeaderVal.Parameter != null)
                 {
                     AuthenticateUser(authHeaderVal.Parameter);
                 }
