@@ -65,6 +65,7 @@ namespace PDS.Witsml.Server.Data.Channels
             }
             catch (MongoException ex)
             {
+                Logger.ErrorFormat("Error getting data: {0}", ex);
                 throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, ex);
             }
         }
@@ -99,6 +100,7 @@ namespace PDS.Witsml.Server.Data.Channels
             }
             catch (MongoException ex)
             {
+                Logger.ErrorFormat("Error getting index range: {0}", ex);
                 throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, ex);
             }
         }
@@ -125,6 +127,7 @@ namespace PDS.Witsml.Server.Data.Channels
             }
             catch (MongoException ex)
             {
+                Logger.ErrorFormat("Error when adding data chunks: {0}", ex);
                 throw new WitsmlException(ErrorCodes.ErrorAddingToDataStore, ex);
             }
         }
@@ -169,6 +172,7 @@ namespace PDS.Witsml.Server.Data.Channels
             }
             catch (MongoException ex)
             {
+                Logger.ErrorFormat("Error when merging data: {0}", ex);
                 throw new WitsmlException(ErrorCodes.ErrorUpdatingInDataStore, ex);
             }
         }
@@ -188,6 +192,7 @@ namespace PDS.Witsml.Server.Data.Channels
             }
             catch (MongoException ex)
             {
+                Logger.ErrorFormat("Error when deleting data: {0}", ex);
                 throw new WitsmlException(ErrorCodes.ErrorDeletingFromDataStore, ex);
             }
         }
@@ -259,6 +264,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
                 if (previousIndex.HasValue && previousIndex.Value == index)
                 {
+                    Logger.ErrorFormat("Data nodes having same index: {0}", index);
                     throw new WitsmlException(ErrorCodes.NodesWithSameIndex);
                 }
                 previousIndex = index;

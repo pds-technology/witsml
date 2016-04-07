@@ -145,14 +145,16 @@ namespace PDS.Witsml.Server.Data.Channels
 
             if (reader != null)
             {
+                Logger.DebugFormat("Adding log data with uid '{0}' and name '{1}'", entity.Uuid, entity.Citation.Title);
                 var increasing = entity.Index.FirstOrDefault().Direction == IndexDirection.increasing;
                 var allMnemonics = reader.Indices.Select(i => i.Mnemonic).Concat(reader.Mnemonics).ToArray();
 
                 // Get current index information
                 var ranges = GetCurrentIndexRange(entity);
                 var indexCurve = entity.Index[0];
+                Logger.DebugFormat("Index curve mnemonic: {0}.", indexCurve.Mnemonic);
 
-                TimeSpan? offset = null;
+               TimeSpan ? offset = null;
                 var isTimeLog = indexCurve.IndexType == ChannelIndexType.datetime || indexCurve.IndexType == ChannelIndexType.elapsedtime;
                 if (isTimeLog)
                     offset = reader.GetChannelIndexRange(0).Offset;
