@@ -178,7 +178,10 @@ namespace PDS.Witsml.Server.Data.Logs
             if (reader != null)
             {
                 var indexCurve = reader.Indices[0];
+                Logger.DebugFormat("Index curve mnemonic from reader: {0}.", indexCurve == null ? "'null'" : indexCurve.Mnemonic);
+
                 var allMnemonics = new[] { indexCurve.Mnemonic }.Concat(reader.Mnemonics).ToArray();
+                Logger.DebugFormat("All Mnemonics from reader: {0}", allMnemonics);
 
                 var ranges = GetCurrentIndexRange(entity);
 
@@ -194,7 +197,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
                 // Update index range
                 UpdateIndexRange(entity.GetUri(), entity, ranges, allMnemonics, isTimeLog, indexCurve.Unit, offset);
-            }                
+            }              
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uid);
         }
@@ -632,6 +635,8 @@ namespace PDS.Witsml.Server.Data.Logs
         #region UpdateLogHeaderRanges Code 
         private void UpdateLogDataAndIndex(EtpUri uri, IEnumerable<ChannelDataReader> readers, TimeSpan? offset = null)
         {
+            Logger.DebugFormat("Updating log data and index for log uri '{0}'.", uri.Uri);
+
             // Get Updated Log
             var current = GetEntity(uri);
 
@@ -643,6 +648,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var updateIndex = false;
             var checkOffset = true;
+
+            Logger.Debug("Merging ChannelDataChunks with ChannelDataReaders.");
 
             // Merge ChannelDataChunks
             foreach (var reader in readers)
@@ -717,6 +724,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         end = curve.MaxIndex.Value;
                 }
 
+                Logger.DebugFormat("Index range for curve '{0}' - start: {1}, end: {2}.", curve.Mnemonic.Value, start, end);
                 ranges.Add(curve.Mnemonic.Value, new Range<double?>(start, end));
             }
 
@@ -739,6 +747,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     current = new Range<double?>(null, null);
                     ranges.Add(mnemonic, current);
                 }
+                Logger.DebugFormat("Current '{0}' index range - start: {1}, end: {2}.", mnemonic, current.Start, current.End);
 
                 var update = reader.GetChannelIndexRange(i);
                 double? start = current.Start;
@@ -750,6 +759,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 if (!end.HasValue || !update.EndsBefore(end.Value, increasing))
                     end = update.End;
 
+                Logger.DebugFormat("Updated '{0}' index range - start: {1}, end: {2}.", mnemonic, start, end);
                 ranges[mnemonic] = new Range<double?>(start, end);
             }
         }
@@ -767,11 +777,13 @@ namespace PDS.Witsml.Server.Data.Logs
                 {
                     var creationTime = MongoDbUtility.ToOffsetTime(entity.CommonData.DateTimeCreation, offset);
                     logIndexUpdate = MongoDbUtility.BuildUpdate(logIndexUpdate, "CommonData.DateTimeCreation", creationTime.Value.ToString("o"));
+                    Logger.DebugFormat("Updating Common Data create time to '{0}'", creationTime);
                 }
                 if (entity.CommonData.DateTimeLastChange.HasValue)
                 {
                     var updateTime = MongoDbUtility.ToOffsetTime(entity.CommonData.DateTimeLastChange, offset);
                     logIndexUpdate = MongoDbUtility.BuildUpdate(logIndexUpdate, "CommonData.DateTimeLastChange", updateTime.Value.ToString("o"));
+                    Logger.DebugFormat("Updating Common Data update time to '{0}'", updateTime);
                 }
             }
 
@@ -799,6 +811,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         var minDate = MongoDbUtility.ToOffsetTime(DateTimeOffset.FromUnixTimeSeconds((long)range.Start.Value), offset).Value.ToString("o");
                         updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MinDateTimeIndex", minDate);
                         updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MinDateTimeIndexSpecified", true);
+                        Logger.DebugFormat("Building MongoDb Update for minDate '{0}'", minDate);
 
                         if (isIndexCurve)
                         {
@@ -812,6 +825,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         var maxDate = MongoDbUtility.ToOffsetTime(DateTimeOffset.FromUnixTimeSeconds((long)range.End.Value), offset).Value.ToString("o");
                         updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MaxDateTimeIndex", maxDate);
                         updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MaxDateTimeIndexSpecified", true);
+                        Logger.DebugFormat("Building MongoDb Update for maxDate '{0}'", maxDate);
 
                         if (isIndexCurve)
                         {
@@ -826,6 +840,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     {
                         curve.MinIndex = UpdateGenericMeasure(curve.MinIndex, range.Start.Value, indexUnit);
                         updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MinIndex", curve.MinIndex);
+                        Logger.DebugFormat("Building MongoDb Update for MinIndex '{0}'", curve.MinIndex);
 
                         if (isIndexCurve)
                         {
@@ -837,6 +852,8 @@ namespace PDS.Witsml.Server.Data.Logs
                     {
                         curve.MaxIndex = UpdateGenericMeasure(curve.MaxIndex, range.End.Value, indexUnit);
                         updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MaxIndex", curve.MaxIndex);
+                        Logger.DebugFormat("Building MongoDb Update for MaxIndex '{0}'", curve.MaxIndex);
+
                         if (isIndexCurve)
                         {
                             logIndexUpdate = MongoDbUtility.BuildUpdate(logIndexUpdate, "EndIndex", curve.MaxIndex);
