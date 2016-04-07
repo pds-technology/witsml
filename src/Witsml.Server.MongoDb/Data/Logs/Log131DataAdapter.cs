@@ -159,7 +159,11 @@ namespace PDS.Witsml.Server.Data.Logs
 
             if (reader != null)
             {
+                Logger.DebugFormat("Adding log data with uid '{0}' and name '{1}'", entity.Uid, entity.Name);
+
                 var indexCurve = reader.Indices[0];
+                Logger.DebugFormat("Index curve mnemonic: {0}", indexCurve.Mnemonic);
+
                 var allMnemonics = new[] { indexCurve.Mnemonic }.Concat(reader.Mnemonics).ToArray();
 
                 var ranges = GetCurrentIndexRange(entity);
