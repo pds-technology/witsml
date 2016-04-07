@@ -217,10 +217,14 @@ namespace PDS.Witsml.Server.Data.Logs
             //Validate(Functions.UpdateInStore, entity);
 
             var ignored = new[] { "logData", "direction" };
-            UpdateEntity(parser, uri, ignored);
 
             // Extract Data
             var entity = Parse(parser.Context.Xml);
+
+            Validate(Functions.UpdateInStore, entity);
+            Logger.DebugFormat("Validated Log with uid '{0}' and name '{1}' for Update", uri, entity.Name);
+
+            UpdateEntity(parser, uri, ignored);
 
             var readers = ExtractDataReaders(entity, GetEntity(uri));
 
@@ -307,6 +311,11 @@ namespace PDS.Witsml.Server.Data.Logs
             return query
                 .OrderBy(x => x.Name)
                 .ToList();
+        }
+
+        public override Log Get(EtpUri uri)
+        {
+            return GetEntity(uri);
         }
 
         /// <summary>
