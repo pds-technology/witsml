@@ -45,6 +45,7 @@ namespace PDS.Witsml.Server.Data.Channels
         [ImportingConstructor]
         public ChannelDataChunkAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectTypes.ChannelDataChunk, ObjectTypes.Id)
         {
+            Logger.Debug("Creating instance.");
         }
 
         /// <summary>
@@ -78,16 +79,23 @@ namespace PDS.Witsml.Server.Data.Channels
         {
             try
             {
+                double start;
+                double end;
+
                 if (increasing)
                 {
-                    return new Range<double>(
-                        start: GetQuery().OrderBy(x => x.Indices[0].Start).Select(x => x.Indices[0].Start).FirstOrDefault(),
-                        end: GetQuery().OrderByDescending(x => x.Indices[0].Start).Select(x => x.Indices[0].End).FirstOrDefault());
+                    start = GetQuery().OrderBy(x => x.Indices[0].Start).Select(x => x.Indices[0].Start).FirstOrDefault();
+                    end = GetQuery().OrderByDescending(x => x.Indices[0].Start).Select(x => x.Indices[0].End).FirstOrDefault();
+                    Logger.DebugFormat("Range for increasing index - start: {0}, end: {1}", start, end);
+
+                    return new Range<double>(start, end);
                 }
 
-                return new Range<double>(
-                    start: GetQuery().OrderByDescending(x => x.Indices[0].Start).Select(x => x.Indices[0].Start).FirstOrDefault(),
-                    end: GetQuery().OrderBy(x => x.Indices[0].Start).Select(x => x.Indices[0].End).FirstOrDefault());
+                start = GetQuery().OrderByDescending(x => x.Indices[0].Start).Select(x => x.Indices[0].Start).FirstOrDefault();
+                end = GetQuery().OrderBy(x => x.Indices[0].Start).Select(x => x.Indices[0].End).FirstOrDefault();
+                Logger.DebugFormat("Range for decreasing index - start: {0}, end: {1}", start, end);
+
+                return new Range<double>(start, end);
             }
             catch (MongoException ex)
             {
@@ -101,6 +109,8 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="reader">The <see cref="ChannelDataReader"/> used to parse the data.</param>
         public void Add(ChannelDataReader reader)
         {
+            Logger.Debug("Adding ChannelDataChunk records with a ChannelDataReader.");
+
             if (reader == null || reader.RecordsAffected <= 0)
                 return;
 
@@ -191,6 +201,8 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="units">The units.</param>
         private void BulkWriteChunks(IEnumerable<ChannelDataChunk> chunks, string uri, string mnemonics, string units)
         {
+            Logger.DebugFormat("Bulk writing ChannelDataChunks for uri '{0}', mnemonics '{1}' and units '{2}'.", uri, mnemonics, units);
+
             var collection = GetCollection();
 
             collection.BulkWrite(chunks
@@ -228,6 +240,8 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <returns>An <see cref="IEnumerable{ChannelDataChunk}"/> of channel data.</returns>
         private IEnumerable<ChannelDataChunk> ToChunks(IEnumerable<IChannelDataRecord> records)
         {
+            Logger.Debug("Converting ChannelDataRecords to ChannelDataChunks.");
+
             var data = new List<string>();
             var id = string.Empty;
             ChannelIndexInfo indexChannel = null;
@@ -268,6 +282,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     var newIndex = indexChannel.Clone();
                     newIndex.Start = startIndex;
                     newIndex.End = endIndex;
+                    Logger.DebugFormat("ChannelDataChunk created with id '{0}', startIndex '{1}' and endIndex '{2}'.", id, startIndex, endIndex);
 
                     yield return new ChannelDataChunk()
                     {
@@ -290,6 +305,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 var newIndex = indexChannel.Clone();
                 newIndex.Start = startIndex;
                 newIndex.End = endIndex;
+                Logger.DebugFormat("ChannelDataChunk created with id '{0}', startIndex '{1}' and endIndex '{2}'.", id, startIndex, endIndex);
 
                 yield return new ChannelDataChunk()
                 {
@@ -311,6 +327,8 @@ namespace PDS.Witsml.Server.Data.Channels
             IEnumerable<IChannelDataRecord> updatedChunks,
             Range<double?> updateRange)
         {
+            Logger.DebugFormat("Merging existing and update ChannelDataRecords for range - start: {0}, end: {1}", updateRange.Start, updateRange.End);
+
             string id = string.Empty;
 
             using (var existingEnum = existingChunks.GetEnumerator())
@@ -382,6 +400,8 @@ namespace PDS.Witsml.Server.Data.Channels
 
         private IChannelDataRecord MergeRow(IChannelDataRecord existingRecord, IChannelDataRecord updateRecord, bool clear = false)
         {
+            Logger.DebugFormat("Merging existing record with index '{0}' with update record with index '{1}'.", existingRecord.GetIndexValue(), updateRecord.GetIndexValue());
+
             var existingIndexValue = existingRecord.GetIndexValue();
             var increasing = existingRecord.GetIndex().Increasing;
 
@@ -477,6 +497,8 @@ namespace PDS.Witsml.Server.Data.Channels
                 var endFilter = increasing
                     ? builder.Gte("Indices.End", range.Start.Value)
                     : builder.Lte("Indices.End", range.Start.Value);
+                Logger.DebugFormat("Building end filter with start range '{0}'.", range.Start.Value);
+
                 rangeFilters.Add(endFilter);
             }
 
@@ -485,11 +507,16 @@ namespace PDS.Witsml.Server.Data.Channels
                 var startFilter = increasing
                     ? builder.Lte("Indices.Start", range.End)
                     : builder.Gte("Indices.Start", range.End);
+                Logger.DebugFormat("Building start filter with end range '{0}'.", range.End.Value);
+
                 rangeFilters.Add(startFilter);
             }
 
             if (rangeFilters.Count > 0)
+            {
                 rangeFilters.Add(builder.EqIgnoreCase("Indices.Mnemonic", indexChannel));
+                Logger.DebugFormat("Building mnemonic filter with index channel '{0}'.", indexChannel);
+            }
 
             if (rangeFilters.Count > 0)
                 filters.Add(builder.And(rangeFilters));
