@@ -86,7 +86,7 @@ namespace PDS.Witsml
             return root.ToString();
         }
 
-        private static void ProcessElement(XElement element)
+        public static void ProcessElement(XElement element)
         {
             element.Descendants().Attributes().Where(a => a.Name == xsi.GetName("nil")).Remove();
             while (element.Descendants().Any(e => string.IsNullOrEmpty(e.Value) && !e.HasAttributes && !e.HasElements))

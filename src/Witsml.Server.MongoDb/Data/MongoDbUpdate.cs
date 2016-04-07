@@ -169,7 +169,7 @@ namespace PDS.Witsml.Server.Data
                     if (genericType == typeof(Nullable<>))
                     {
                         var underlyingType = Nullable.GetUnderlyingType(propType);
-                        update = BuildUpdateForAnElementType(update, underlyingType, propertyValue, element, fieldName);
+                        update = BuildUpdateForAnElementType(update, propertyInfo, underlyingType, propertyValue, element, fieldName);
 
                         // set the *Specified property when updating nullable elements
                         if (propertyInfo.DeclaringType.GetProperty(propertyInfo.Name + "Specified") != null)
@@ -187,11 +187,11 @@ namespace PDS.Witsml.Server.Data
                 else if (propType.IsAbstract)
                 {
                     var concreteType = MongoDbUtility.GetConcreteType(element, propType);
-                    return BuildUpdateForAnElementType(update, concreteType, propertyValue, element, fieldName);
+                    return BuildUpdateForAnElementType(update, propertyInfo, concreteType, propertyValue, element, fieldName);
                 }
                 else
                 {
-                    return BuildUpdateForAnElementType(update, propType, propertyValue, element, fieldName);
+                    return BuildUpdateForAnElementType(update, propertyInfo, propType, propertyValue, element, fieldName);
                 }
             }
             else
@@ -204,7 +204,7 @@ namespace PDS.Witsml.Server.Data
             return update;
         }
 
-        private UpdateDefinition<T> BuildUpdateForAnElementType(UpdateDefinition<T> update, Type elementType, object value, XElement element, string propertyPath)
+        private UpdateDefinition<T> BuildUpdateForAnElementType(UpdateDefinition<T> update, PropertyInfo prop, Type elementType, object value, XElement element, string propertyPath)
         {
             var textProperty = elementType.GetProperties().FirstOrDefault(x => x.IsDefined(typeof(XmlTextAttribute), false));
 
@@ -219,23 +219,26 @@ namespace PDS.Witsml.Server.Data
                 {
                     var uomPath = MongoDbUtility.GetPropertyPath(propertyPath, uomProperty.Name);
                     var uomValue = MongoDbUtility.ValidateMeasureUom(element, uomProperty, element.Value);
-                    update = BuildUpdateForProperty(update, uomProperty.PropertyType, uomPath, uomValue);
+                    update = BuildUpdateForProperty(update, uomProperty, uomProperty.PropertyType, uomPath, uomValue);
                 }
 
-                return BuildUpdateForProperty(update, fieldType, fieldName, element.Value);
+                return BuildUpdateForProperty(update, textProperty, fieldType, fieldName, element.Value);
             }
             else if (element.HasElements || element.HasAttributes)
             {
                 return BuildUpdateForAnElement(update, value, element, elementType, propertyPath);
             }
 
-            return BuildUpdateForProperty(update, elementType, propertyPath, element.Value);
+            return BuildUpdateForProperty(update, prop, elementType, propertyPath, element.Value);
         }
 
-        private UpdateDefinition<T> BuildUpdateForProperty(UpdateDefinition<T> update, Type propertyType, string propertyPath, string propertyValue)
+        private UpdateDefinition<T> BuildUpdateForProperty(UpdateDefinition<T> update, PropertyInfo prop, Type propertyType, string propertyPath, string propertyValue)
         {
             if (string.IsNullOrEmpty(propertyValue))
             {
+                if (prop.IsDefined(typeof(RequiredAttribute), false))
+                    throw new WitsmlException(ErrorCodes.MissingRequiredData);
+
                 return update.Unset(propertyPath);
             }
 
@@ -280,9 +283,8 @@ namespace PDS.Witsml.Server.Data
         private UpdateDefinition<T> BuildUpdateForAttribute(UpdateDefinition<T> update, PropertyInfo propertyInfo, XAttribute attribute, string parentPath = null)
         {
             var propertyPath = MongoDbUtility.GetPropertyPath(parentPath, propertyInfo.Name);
-            var propertyType = propertyInfo.PropertyType;
 
-            return BuildUpdateForProperty(update, propertyType, propertyPath, attribute.Value);
+            return BuildUpdateForProperty(update, propertyInfo, propertyInfo.PropertyType, propertyPath, attribute.Value);
         }
 
         private void UpdateArrayElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath, List<FilterDefinition<T>> filters)
@@ -364,16 +366,16 @@ namespace PDS.Witsml.Server.Data
         }
 
         private void ValidateArrayElement(XElement element, IList<PropertyInfo> properties, bool isAdd = true)
-        {
-            var emptyElements = element.Elements().Where(e => e.IsEmpty || string.IsNullOrWhiteSpace(e.Value)).ToList();
-            var emptyAttributes = element.Attributes().Where(a => string.IsNullOrWhiteSpace(a.Value)).ToList();
+        {          
             if (isAdd)
             {
-                if (emptyElements.Count > 0 || emptyAttributes.Count > 0)
-                    throw new WitsmlException(ErrorCodes.AddingUpdatingLogCurveAtTheSameTime);
+                WitsmlParser.ProcessElement(element);
+                if (!element.HasElements)
+                    throw new WitsmlException(ErrorCodes.EmptyNewElementsOrAttributes);
             }
             else
             {
+                var emptyElements = element.Elements().Where(e => e.IsEmpty || string.IsNullOrWhiteSpace(e.Value)).ToList();              
                 foreach (var child in emptyElements)
                 {
                     var prop = MongoDbUtility.GetPropertyInfoForAnElement(properties, child.Name.LocalName);
@@ -384,6 +386,7 @@ namespace PDS.Witsml.Server.Data
                         throw new WitsmlException(ErrorCodes.EmptyNewElementsOrAttributes);
                 }
 
+                var emptyAttributes = element.Attributes().Where(a => string.IsNullOrWhiteSpace(a.Value)).ToList();
                 foreach (var child in emptyAttributes)
                 {
                     var prop = MongoDbUtility.GetPropertyInfoForAnElement(properties, child.Name.LocalName);
