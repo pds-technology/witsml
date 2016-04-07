@@ -21,12 +21,18 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using log4net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PDS.Framework;
 
 namespace PDS.Witsml.Data.Channels
 {
+    /// <summary>
+    /// Data reader used to parse and read Channel Data for processing.
+    /// </summary>
+    /// <seealso cref="System.Data.IDataReader" />
+    /// <seealso cref="PDS.Witsml.Data.Channels.IChannelDataRecord" />
     public class ChannelDataReader : IDataReader, IChannelDataRecord
     {
         private const string Null = "null";
@@ -43,18 +49,46 @@ namespace PDS.Witsml.Data.Channels
         private int _count;
         private int _current = -1;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ChannelDataReader"/> class.
+        /// </summary>
+        /// <param name="data">The channel data.</param>
+        /// <param name="mnemonics">The channel mnemonics.</param>
+        /// <param name="units">The channel units.</param>
+        /// <param name="uri">The URI.</param>
+        /// <param name="id">The identifier.</param>
         public ChannelDataReader(IList<string> data, string[] mnemonics = null, string[] units = null, string uri = null, string id = null) 
             : this(Combine(data), mnemonics, units, uri, id)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ChannelDataReader"/> class.
+        /// </summary>
+        /// <param name="data">The channel data.</param>
+        /// <param name="mnemonics">The channel mnemonics.</param>
+        /// <param name="units">The channel units.</param>
+        /// <param name="uri">The URI.</param>
+        /// <param name="id">The identifier.</param>
         public ChannelDataReader(string data, string[] mnemonics = null, string[] units = null, string uri = null, string id = null)
             : this(Deserialize(data), mnemonics, units, uri, id)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ChannelDataReader"/> class.
+        /// </summary>
+        /// <param name="records">The channel records.</param>
+        /// <param name="mnemonics">The channel mnemonics.</param>
+        /// <param name="units">The channel units.</param>
+        /// <param name="uri">The URI.</param>
+        /// <param name="id">The identifier.</param>
         internal ChannelDataReader(List<List<List<object>>> records, string[] mnemonics = null, string[] units = null, string uri = null, string id = null)
         {
+            Logger = LogManager.GetLogger(GetType());
+
+            Logger.Debug("ChannelDataReader instance created");
+
             _records = records;
             _count = GetRowValues(0).Count();
             _indexCount = GetIndexValues(0).Count();
@@ -66,16 +100,60 @@ namespace PDS.Witsml.Data.Channels
             Id = id;
         }
 
+        /// <summary>
+        /// Gets the logger.
+        /// </summary>
+        /// <value>The logger.</value>
+        protected ILog Logger { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the identifier.
+        /// </summary>
+        /// <value>
+        /// The channel identifier.
+        /// </value>
         public string Id { get; set; }
 
+        /// <summary>
+        /// Gets or sets the URI.
+        /// </summary>
+        /// <value>
+        /// The URI.
+        /// </value>
         public string Uri { get; set; }
 
+        /// <summary>
+        /// Gets the mnemonics.
+        /// </summary>
+        /// <value>
+        /// The list of channel mnemonics.
+        /// </value>
         public string[] Mnemonics { get; private set; }
 
+        /// <summary>
+        /// Gets the units.
+        /// </summary>
+        /// <value>
+        /// The list of channel units.
+        /// </value>
         public string[] Units { get; private set; }
 
+        /// <summary>
+        /// Gets the indices.
+        /// </summary>
+        /// <value>
+        /// A <see cref="List{ChannelIndexInfo}"/> of indices.
+        /// </value>
         public List<ChannelIndexInfo> Indices { get; }
 
+        /// <summary>
+        /// Indexer property that gets the value with the specified mnemonic name for the current row referenced by the reader.
+        /// </summary>
+        /// <value>
+        /// The <see cref="System.Object"/>.
+        /// </value>
+        /// <param name="name">The name of the mnemonic.</param>
+        /// <returns>The value for the mnemonic</returns>
         public object this[string name]
         {
             get
@@ -85,47 +163,83 @@ namespace PDS.Witsml.Data.Channels
             }
         }
 
+        /// <summary>
+        /// Indexer property that gets the value with the specified numerical index in the current row referenced by the reader.
+        /// </summary>
+        /// <value>
+        /// The <see cref="System.Object"/>.
+        /// </value>
+        /// <param name="i">The i.</param>
+        /// <returns></returns>
         public object this[int i]
         {
             get { return GetValue(i); }
         }
 
+        /// <summary>
+        /// Gets a value indicating the number of indexes for the current row.
+        /// </summary>
         public int Depth
         {
             get { return _indexCount; }
         }
 
+        /// <summary>
+        /// Gets the number of columns in the current row.
+        /// </summary>
         public int FieldCount
         {
             get { return _count; }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the data reader is closed.
+        /// </summary>
         public bool IsClosed
         {
             get { return _records == null || _current >= _records.Count; }
         }
 
+        /// <summary>
+        /// Gets the number of rows changed, inserted, or deleted by execution of the SQL statement.
+        /// </summary>
         public int RecordsAffected
         {
             get { return _records.Count; }
         }
 
+        /// <summary>
+        /// Splits the specified comma delimited value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
         public static string[] Split(string value)
         {
             return string.IsNullOrWhiteSpace(value) ? Empty : value.Split(',');
         }
 
+        /// <summary>
+        /// Closes the <see cref="T:System.Data.IDataReader" /> Object.
+        /// </summary>
         public void Close()
         {
             _records = null;
             _current = -1;
         }
 
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
         public void Dispose()
         {
             Close();
         }
 
+        /// <summary>
+        /// Sets the value.
+        /// </summary>
+        /// <param name="i">The i.</param>
+        /// <param name="value">The value.</param>
         public void SetValue(int i, object value)
         {
             var row = _records[_current];
@@ -136,11 +250,22 @@ namespace PDS.Witsml.Data.Channels
                 row[1][i - Depth] = value;
         }
 
+        /// <summary>
+        /// Gets the channel index at the index parameter position
+        /// </summary>
+        /// <param name="index">The index position for the channel index.</param>
+        /// <returns>The index at the given index position</returns>
         public ChannelIndexInfo GetIndex(int index = 0)
         {
             return Indices.Skip(index).FirstOrDefault();
         }
 
+        /// <summary>
+        /// Gets the index value.
+        /// </summary>
+        /// <param name="index">The index position.</param>
+        /// <param name="scale">The scale factor.</param>
+        /// <returns>The scaled index value at the index paramter position</returns>
         public double GetIndexValue(int index = 0, int scale = 0)
         {
             var channelIndex = GetIndex(index);
@@ -150,6 +275,11 @@ namespace PDS.Witsml.Data.Channels
                 : GetDouble(index) * Math.Pow(10, scale);
         }
 
+        /// <summary>
+        /// Gets the index range for the index position given by the index parameter.
+        /// </summary>
+        /// <param name="index">The index position.</param>
+        /// <returns>The index range</returns>
         public Range<double?> GetIndexRange(int index = 0)
         {
             var channelIndex = GetIndex(index);
@@ -163,6 +293,11 @@ namespace PDS.Witsml.Data.Channels
             return Range.Parse(start, end, channelIndex.IsTimeIndex);
         }
 
+        /// <summary>
+        /// Gets the channel index range.
+        /// </summary>
+        /// <param name="i">The i-th index.</param>
+        /// <returns></returns>
         public Range<double?> GetChannelIndexRange(int i)
         {
             if (RecordsAffected < 1)
@@ -192,119 +327,291 @@ namespace PDS.Witsml.Data.Channels
             return Range.Parse(start, end, channelIndex.IsTimeIndex);
         }
 
+        /// <summary>
+        /// Gets the value of the specified column as a Boolean.
+        /// </summary>
+        /// <param name="i">The zero-based column ordinal.</param>
+        /// <returns>
+        /// The value of the column.
+        /// </returns>
         public bool GetBoolean(int i)
         {
             return bool.TrueString.EqualsIgnoreCase(GetString(i));
         }
 
+        /// <summary>
+        /// Gets the 8-bit unsigned integer value of the specified column.
+        /// </summary>
+        /// <param name="i">The zero-based column ordinal.</param>
+        /// <returns>
+        /// The 8-bit unsigned integer value of the specified column.
+        /// </returns>
         public byte GetByte(int i)
         {
             return byte.Parse(GetString(i));
         }
 
+
+        /// <summary>
+        /// Reads a stream of bytes from the specified column offset into the buffer as an array, starting at the given buffer offset.
+        /// </summary>
+        /// <param name="i">The zero-based column ordinal.</param>
+        /// <param name="fieldOffset">The index within the field from which to start the read operation.</param>
+        /// <param name="buffer">The buffer into which to read the stream of bytes.</param>
+        /// <param name="bufferoffset">The index for <paramref name="buffer" /> to start the read operation.</param>
+        /// <param name="length">The number of bytes to read.</param>
+        /// <returns>
+        /// The actual number of bytes read.
+        /// </returns>
+        /// <exception cref="System.NotImplementedException"></exception>
         public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Gets the character value of the specified column.
+        /// </summary>
+        /// <param name="i">The zero-based column ordinal.</param>
+        /// <returns>
+        /// The character value of the specified column.
+        /// </returns>
         public char GetChar(int i)
         {
             return char.Parse(GetString(i));
         }
 
+        /// <summary>
+        /// Reads a stream of characters from the specified column offset into the buffer as an array, starting at the given buffer offset.
+        /// </summary>
+        /// <param name="i">The zero-based column ordinal.</param>
+        /// <param name="fieldoffset">The index within the row from which to start the read operation.</param>
+        /// <param name="buffer">The buffer into which to read the stream of bytes.</param>
+        /// <param name="bufferoffset">The index for <paramref name="buffer" /> to start the read operation.</param>
+        /// <param name="length">The number of bytes to read.</param>
+        /// <returns>
+        /// The actual number of characters read.
+        /// </returns>
+        /// <exception cref="System.NotImplementedException"></exception>
         public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Returns an <see cref="T:System.Data.IDataReader" /> for the specified column ordinal.
+        /// </summary>
+        /// <param name="i">The index of the field to find.</param>
+        /// <returns>
+        /// The <see cref="T:System.Data.IDataReader" /> for the specified column ordinal.
+        /// </returns>
+        /// <exception cref="System.NotImplementedException"></exception>
         public IDataReader GetData(int i)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Gets the data type information for the specified field.
+        /// </summary>
+        /// <param name="i">The index of the field to find.</param>
+        /// <returns>
+        /// The data type information for the specified field.
+        /// </returns>
+        /// <exception cref="System.NotImplementedException"></exception>
         public string GetDataTypeName(int i)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Gets the date and time data value of the specified field.
+        /// </summary>
+        /// <param name="i">The index of the field to find.</param>
+        /// <returns>
+        /// The date and time data value of the specified field.
+        /// </returns>
         public DateTime GetDateTime(int i)
         {
             return DateTime.Parse(GetString(i));
         }
 
+        /// <summary>
+        /// Gets the date time offset.
+        /// </summary>
+        /// <param name="i">The i.</param>
+        /// <returns></returns>
         public DateTimeOffset GetDateTimeOffset(int i)
         {
             return DateTimeOffset.Parse(GetString(i));
         }
 
+        /// <summary>
+        /// Gets the unix time seconds.
+        /// </summary>
+        /// <param name="i">The i.</param>
+        /// <returns></returns>
         public long GetUnixTimeSeconds(int i)
         {
             return GetDateTimeOffset(i).ToUnixTimeSeconds();
         }
 
+        /// <summary>
+        /// Gets the fixed-position numeric value of the specified field.
+        /// </summary>
+        /// <param name="i">The index of the field to find.</param>
+        /// <returns>
+        /// The fixed-position numeric value of the specified field.
+        /// </returns>
         public decimal GetDecimal(int i)
         {
             return decimal.Parse(GetString(i));
         }
 
+        /// <summary>
+        /// Gets the double-precision floating point number of the specified field.
+        /// </summary>
+        /// <param name="i">The index of the field to find.</param>
+        /// <returns>
+        /// The double-precision floating point number of the specified field.
+        /// </returns>
         public double GetDouble(int i)
         {
             double value;
             return double.TryParse(GetString(i), out value) ? value : double.NaN;
         }
 
+        /// <summary>
+        /// Gets the <see cref="T:System.Type" /> information corresponding to the type of <see cref="T:System.Object" /> that would be returned from <see cref="M:System.Data.IDataRecord.GetValue(System.Int32)" />.
+        /// </summary>
+        /// <param name="i">The index of the field to find.</param>
+        /// <returns>
+        /// The <see cref="T:System.Type" /> information corresponding to the type of <see cref="T:System.Object" /> that would be returned from <see cref="M:System.Data.IDataRecord.GetValue(System.Int32)" />.
+        /// </returns>
+        /// <exception cref="System.NotImplementedException"></exception>
         public Type GetFieldType(int i)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Gets the single-precision floating point number of the specified field.
+        /// </summary>
+        /// <param name="i">The index of the field to find.</param>
+        /// <returns>
+        /// The single-precision floating point number of the specified field.
+        /// </returns>
         public float GetFloat(int i)
         {
             float value;
             return float.TryParse(GetString(i), out value) ? value : float.NaN;
         }
 
+        /// <summary>
+        /// Returns the GUID value of the specified field.
+        /// </summary>
+        /// <param name="i">The index of the field to find.</param>
+        /// <returns>
+        /// The GUID value of the specified field.
+        /// </returns>
+        /// <exception cref="System.NotImplementedException"></exception>
         public Guid GetGuid(int i)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Gets the 16-bit signed integer value of the specified field.
+        /// </summary>
+        /// <param name="i">The index of the field to find.</param>
+        /// <returns>
+        /// The 16-bit signed integer value of the specified field.
+        /// </returns>
         public short GetInt16(int i)
         {
             return short.Parse(GetString(i));
         }
 
+        /// <summary>
+        /// Gets the 32-bit signed integer value of the specified field.
+        /// </summary>
+        /// <param name="i">The index of the field to find.</param>
+        /// <returns>
+        /// The 32-bit signed integer value of the specified field.
+        /// </returns>
         public int GetInt32(int i)
         {
             return int.Parse(GetString(i));
         }
 
+        /// <summary>
+        /// Gets the 64-bit signed integer value of the specified field.
+        /// </summary>
+        /// <param name="i">The index of the field to find.</param>
+        /// <returns>
+        /// The 64-bit signed integer value of the specified field.
+        /// </returns>
         public long GetInt64(int i)
         {
             return long.Parse(GetString(i));
         }
 
+        /// <summary>
+        /// Gets the name for the field to find.
+        /// </summary>
+        /// <param name="i">The index of the field to find.</param>
+        /// <returns>
+        /// The name of the field or the empty string (""), if there is no value to return.
+        /// </returns>
         public string GetName(int i)
         {
             return Mnemonics.Skip(i).FirstOrDefault();
         }
 
+        /// <summary>
+        /// Return the index of the named field.
+        /// </summary>
+        /// <param name="name">The name of the field to find.</param>
+        /// <returns>
+        /// The index of the named field.
+        /// </returns>
         public int GetOrdinal(string name)
         {
             var allMnemonics = Indices.Select(i => i.Mnemonic).Union(Mnemonics).ToArray();
             return Array.IndexOf(allMnemonics, name);
         }
 
+        /// <summary>
+        /// Returns a <see cref="T:System.Data.DataTable" /> that describes the column metadata of the <see cref="T:System.Data.IDataReader" />.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="T:System.Data.DataTable" /> that describes the column metadata.
+        /// </returns>
+        /// <exception cref="System.NotImplementedException"></exception>
         public DataTable GetSchemaTable()
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Gets the string value of the specified field.
+        /// </summary>
+        /// <param name="i">The index of the field to find.</param>
+        /// <returns>
+        /// The string value of the specified field.
+        /// </returns>
         public string GetString(int i)
         {
             return string.Format("{0}", GetValue(i));
         }
 
+        /// <summary>
+        /// Return the value of the specified field.
+        /// </summary>
+        /// <param name="i">The index of the field to find.</param>
+        /// <returns>
+        /// The <see cref="T:System.Object" /> which will contain the field value upon return.
+        /// </returns>
         public object GetValue(int i)
         {
             var value = GetRowValues(_current).Skip(i).FirstOrDefault();
@@ -318,6 +625,13 @@ namespace PDS.Witsml.Data.Channels
             return value;
         }
 
+        /// <summary>
+        /// Populates an array of objects with the column values of the current record.
+        /// </summary>
+        /// <param name="values">An array of <see cref="T:System.Object" /> to copy the attribute fields into.</param>
+        /// <returns>
+        /// The number of instances of <see cref="T:System.Object" /> in the array.
+        /// </returns>
         public int GetValues(object[] values)
         {
             var count = Math.Min(values.Length, _count);
@@ -327,33 +641,63 @@ namespace PDS.Witsml.Data.Channels
             return count;
         }
 
+        /// <summary>
+        /// Return whether the specified field is set to null.
+        /// </summary>
+        /// <param name="i">The index of the field to find.</param>
+        /// <returns>
+        /// true if the specified field is set to null; otherwise, false.
+        /// </returns>
         public bool IsDBNull(int i)
         {
             return IsNull(GetString(i));
         }
 
+        /// <summary>
+        /// Advances the data reader to the next result, when reading the results of batch SQL statements.
+        /// </summary>
+        /// <returns>
+        /// true if there are more rows; otherwise, false.
+        /// </returns>
         public bool NextResult()
         {
             return false;
         }
 
+        /// <summary>
+        /// Advances the <see cref="T:System.Data.IDataReader" /> to the next record.
+        /// </summary>
+        /// <returns>
+        /// true if there are more rows; otherwise, false.
+        /// </returns>
         public bool Read()
         {
             _current++;
             return !IsClosed;
         }
 
+        /// <summary>
+        /// Resets this instance.
+        /// </summary>
         public void Reset()
         {
             _current = -1;
         }
 
+        /// <summary>
+        /// Determines whether this instance has values.
+        /// </summary>
+        /// <returns>true if the current row has values, false otherwise.</returns>
         public bool HasValues()
         {
             return GetChannelValues(_current)
                 .Any(x => x != null && !IsNull(x.ToString()));
         }
 
+        /// <summary>
+        /// Gets current row serialized to json.
+        /// </summary>
+        /// <returns>The current row serialized as JSON.</returns>
         public string GetJson()
         {
             if (IsClosed)
@@ -362,6 +706,10 @@ namespace PDS.Witsml.Data.Channels
             return JsonConvert.SerializeObject(_records[_current]);
         }
 
+        /// <summary>
+        /// Returns all of the data in the reader as <see cref="IEnumerable{IChannelDataRecord}"/>
+        /// </summary>
+        /// <returns>An <see cref="IEnumerable{IChannelDataRecord}"/></returns>
         public IEnumerable<IChannelDataRecord> AsEnumerable()
         {
             while (Read())
@@ -370,6 +718,11 @@ namespace PDS.Witsml.Data.Channels
             }
         }
 
+        /// <summary>
+        /// Gets the row values.
+        /// </summary>
+        /// <param name="row">The row.</param>
+        /// <returns>An <see cref="IEnumerable{Object}"/> of channel values and metadata for a given row.</returns>
         private IEnumerable<object> GetRowValues(int row)
         {
             if (IsClosed)
@@ -381,6 +734,11 @@ namespace PDS.Witsml.Data.Channels
                 .SelectMany(x => x.SelectMany(y => y));
         }
 
+        /// <summary>
+        /// Gets the index values.
+        /// </summary>
+        /// <param name="row">The row.</param>
+        /// <returns>An <see cref="IEnumerable{Object}"/> of index values for a given row.</returns>
         private IEnumerable<object> GetIndexValues(int row)
         {
             if (IsClosed)
@@ -392,6 +750,11 @@ namespace PDS.Witsml.Data.Channels
                 .SelectMany(x => x.First());
         }
 
+        /// <summary>
+        /// Gets the channel values only without the metadata.
+        /// </summary>
+        /// <param name="row">The row.</param>
+        /// <returns>An <see cref="IEnumerable{Object}"/></returns>
         private IEnumerable<object> GetChannelValues(int row)
         {
             if (IsClosed)
@@ -403,6 +766,11 @@ namespace PDS.Witsml.Data.Channels
                 .SelectMany(x => x.Last());
         }
 
+        /// <summary>
+        /// Deserializes the specified data.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        /// <returns></returns>
         private static List<List<List<object>>> Deserialize(string data)
         {
             if (string.IsNullOrWhiteSpace(data))
@@ -411,6 +779,11 @@ namespace PDS.Witsml.Data.Channels
             return JsonConvert.DeserializeObject<List<List<List<object>>>>(data, JsonSettings);       
         }
 
+        /// <summary>
+        /// Combines the specified data.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        /// <returns>A JSON arrary of string values from the data list.</returns>
         private static string Combine(IList<string> data)
         {
             var json = new StringBuilder("[");
@@ -437,6 +810,11 @@ namespace PDS.Witsml.Data.Channels
             return json.ToString();
         }
 
+        /// <summary>
+        /// Formats the specified value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>A value formated for null, string or double.</returns>
         private static string Format(string value)
         {
             double number;
@@ -450,6 +828,11 @@ namespace PDS.Witsml.Data.Channels
             return string.Format("\"{0}\"", value.Trim());
         }
 
+        /// <summary>
+        /// Determines whether the specified value is null.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>true of the specified value is null or white space, false otherwise.</returns>
         private static bool IsNull(string value)
         {
             return string.IsNullOrWhiteSpace(value) || 
