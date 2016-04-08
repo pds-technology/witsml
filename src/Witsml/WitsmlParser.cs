@@ -29,7 +29,7 @@ namespace PDS.Witsml
     /// </summary>
     public static class WitsmlParser
     {
-        private static readonly XNamespace xsi = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
+        public static readonly XNamespace Xsi = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
 
         /// <summary>
         /// Parses the specified XML document using LINQ to XML.
@@ -78,7 +78,7 @@ namespace PDS.Witsml
             var xml = EnergisticsConverter.ObjectToXml(obj);
             var xmlDoc = Parse(xml);
             var root = xmlDoc.Root;
-            foreach (var element in root.Elements().ToList())
+            foreach (var element in root.Elements())
             {
                 ProcessElement(element);
             }
@@ -88,9 +88,9 @@ namespace PDS.Witsml
 
         public static void ProcessElement(XElement element)
         {
-            element.Descendants().Attributes().Where(a => a.Name == xsi.GetName("nil")).Remove();
-            while (element.Descendants().Any(e => string.IsNullOrEmpty(e.Value) && !e.HasAttributes && !e.HasElements))
+            while (element.Descendants().Any(e => string.IsNullOrEmpty(e.Value) && !e.HasAttributes && !e.HasElements || e.Attributes().Any(a => a.Name == Xsi.GetName("nil"))))
             {
+                element.Descendants().Attributes().Where(a => a.Name == Xsi.GetName("nil")).Remove();
                 element.Descendants().Where(e => string.IsNullOrEmpty(e.Value) && !e.HasAttributes && !e.HasElements).Remove();
             }
         }
