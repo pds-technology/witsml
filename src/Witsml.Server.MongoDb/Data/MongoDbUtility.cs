@@ -36,8 +36,6 @@ namespace PDS.Witsml.Server.Data
     /// </summary>
     public static class MongoDbUtility
     {
-        private static readonly XNamespace xsi = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
-
         /// <summary>
         /// Gets the property information.
         /// </summary>
@@ -207,7 +205,7 @@ namespace PDS.Witsml.Server.Data
 
         public static XName Xsi(string attributeName)
         {
-            return xsi.GetName(attributeName);
+            return WitsmlParser.Xsi.GetName(attributeName);
         }
 
         /// <summary>
