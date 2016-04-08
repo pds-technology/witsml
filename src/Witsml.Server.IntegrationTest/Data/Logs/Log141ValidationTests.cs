@@ -468,7 +468,6 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.KeywordNotSupportedByServer, response.Result);
         }
 
-        [Ignore]
         [TestMethod]
         public void Test_error_code_464_child_uids_not_unique()
         {

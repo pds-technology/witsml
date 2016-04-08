@@ -44,7 +44,7 @@ namespace PDS.Witsml.Server.Data.Logs
         private static readonly int maxDataPoints = Settings.Default.MaxDataPoints;
 
         private static readonly char _seperator = ',';
-        private readonly string[] _illeagalColumnIdentifiers = new string[] { "'", "\"", "<", ">", "/", "\\", "&", "," };
+        private readonly string[] _illegalColumnIdentifiers = new string[] { "'", "\"", "<", ">", "/", "\\", "&", "," };
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Log141Validator" /> class.
@@ -70,7 +70,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>A collection of validation results.</returns>
         protected override IEnumerable<ValidationResult> ValidateForInsert()
         {
-            var channelCount = DataObject.LogCurveInfo != null ? DataObject.LogCurveInfo.Count : 0;
+            var logCurves = DataObject.LogCurveInfo;
+            var channelCount = logCurves != null ? logCurves.Count : 0;
             var uri = DataObject.GetUri();
             var uriWellbore = uri.Parent;
             var uriWell = uriWellbore.Parent;
@@ -104,8 +105,8 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             // Validate that column-identifiers in LogCurveInfo are unique
-            else if (DataObject.LogCurveInfo != null
-                && DataObject.LogCurveInfo.GroupBy(lci => lci.Mnemonic.Value)
+            else if (logCurves != null
+                && logCurves.GroupBy(lci => lci.Mnemonic.Value)
                 .Select(group => new { Menmonic = group.Key, Count = group.Count() })
                 .Any(g => g.Count > 1))
             {
@@ -125,8 +126,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Validate that IndexCurve exists in LogCurveInfo
             else if (!string.IsNullOrEmpty(DataObject.IndexCurve)
-                && DataObject.LogCurveInfo != null
-                && !DataObject.LogCurveInfo.Any(lci => lci.Mnemonic != null && lci.Mnemonic.Value == DataObject.IndexCurve))
+                && logCurves != null
+                && !logCurves.Any(lci => lci.Mnemonic != null && lci.Mnemonic.Value == DataObject.IndexCurve))
             {
                 yield return new ValidationResult(ErrorCodes.IndexCurveNotFound.ToString(), new[] { "IndexCurve" });
             }
@@ -157,7 +158,7 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             // Validate Index Mnemonic is first in LogCurveInfo list
-            else if (!string.IsNullOrEmpty(DataObject.IndexCurve) && (DataObject.LogCurveInfo == null || DataObject.LogCurveInfo.Count == 0 || DataObject.LogCurveInfo[0].Mnemonic.Value != DataObject.IndexCurve))
+            else if (!string.IsNullOrEmpty(DataObject.IndexCurve) && (logCurves == null || logCurves.Count == 0 || logCurves[0].Mnemonic.Value != DataObject.IndexCurve))
             {
                 yield return new ValidationResult(ErrorCodes.IndexNotFirstInDataColumnList.ToString(), new[] { "IndexCurve" });
             }
@@ -168,8 +169,14 @@ namespace PDS.Witsml.Server.Data.Logs
                 yield return new ValidationResult(ErrorCodes.MixedStructuralRangeIndices.ToString(), new[] { "StartIndex", "EndIndex", "StartDateTimeIndex", "EndDateTimeIndex" });
             }
 
+            // Validate that uids in LogCurveInfo are unique
+            else if (logCurves != null && DuplicateUid(logCurves.Select(l => l.Uid)))
+            {
+                yield return new ValidationResult(ErrorCodes.ChildUidNotUnique.ToString(), new[] { "LogCurveInfo", "Uid" });
+            }
+
             // Validate for a bad column identifier in LogCurveInfo Mnemonics
-            else if (_illeagalColumnIdentifiers.Any(s => DataObject.LogCurveInfo.Any(m => m.Mnemonic.Value.Contains(s))))
+            else if (_illegalColumnIdentifiers.Any(s => logCurves.Any(m => m.Mnemonic.Value.Contains(s))))
             {
                 yield return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogCurveInfo.Mnemonic" });
             }
@@ -184,7 +191,7 @@ namespace PDS.Witsml.Server.Data.Logs
             // Inspect each mnemonic, in each mnemonicList, in each LogData for an illeagal column identifier.
             else if (DataObject.LogData.Select(ld => ld.MnemonicList.Split(','))
                 .Any(mnemArrary => mnemArrary
-                    .Any(mnemonic => _illeagalColumnIdentifiers
+                    .Any(mnemonic => _illegalColumnIdentifiers
                         .Any(badChar => mnemonic.Contains(badChar)))))
             {
                 yield return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogData.MnemonicList" });
@@ -231,7 +238,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 }
 
                 // Validate that uids in LogParam are unique
-                else if (logParams != null && DuplicateUid(logCurves.Select(l => l.Uid)))
+                else if (logParams != null && DuplicateUid(logParams.Select(l => l.Uid)))
                 {
                     yield return new ValidationResult(ErrorCodes.ChildUidNotUnique.ToString(), new[] { "LogParam", "Uid" });
                 }
