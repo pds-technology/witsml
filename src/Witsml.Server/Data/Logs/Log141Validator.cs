@@ -191,6 +191,12 @@ namespace PDS.Witsml.Server.Data.Logs
             }
         }
 
+        /// <summary>
+        /// Validates the data object while executing UpdateInStore.
+        /// </summary>
+        /// <returns>
+        /// A collection of validation results.
+        /// </returns>
         protected override IEnumerable<ValidationResult> ValidateForUpdate()
         {
             // Validate Log uid property
@@ -264,24 +270,16 @@ namespace PDS.Witsml.Server.Data.Logs
                     {
                         yield return new ValidationResult(ErrorCodes.IndexRangeSpecified.ToString(), new[] { "LogCurveInfo", "Index" });
                     }
+                    else if (logData != null && logData.Count > 0)
+                    {
+                        yield return ValidateLogData(logCurves.First().Mnemonic.Value, logCurves, logData);
+                    }
                 }
 
                 // Validate LogData mnemonic list
                 else if (logData != null && logData.Count > 0)
                 {
-                    var indexCurve = current.IndexCurve;
-                    if (logData.Any(ld => !ld.MnemonicList.Split(_seperator).Contains(indexCurve)))
-                    {
-                        yield return new ValidationResult(ErrorCodes.IndexCurveNotFound.ToString(), new[] { "LogData", "MnemonicList" });
-                    }
-                    else if (logData.Any(ld => DuplicateUid(ld.MnemonicList.Split(_seperator))))
-                    {
-                        yield return new ValidationResult(ErrorCodes.MnemonicsNotUnique.ToString(), new[] { "LogData", "MnemonicList" });
-                    }
-                    else if (logCurves != null && logData.Any(ld => !UnitsMatch(logCurves, ld)))
-                    {
-                        yield return new ValidationResult(ErrorCodes.UnitListNotMatch.ToString(), new[] { "LogData", "UnitList" });
-                    }
+                    yield return ValidateLogData(current.IndexCurve, logCurves, logData);
                 }
             }
         }
@@ -309,6 +307,24 @@ namespace PDS.Witsml.Server.Data.Logs
                     return false;
             }
             return true;
+        }
+
+        private ValidationResult ValidateLogData(string indexCurve, List<LogCurveInfo> logCurves, List<LogData> logData)
+        {
+            if (logData.Any(ld => !ld.MnemonicList.Split(_seperator).Contains(indexCurve)))
+            {
+                return new ValidationResult(ErrorCodes.IndexCurveNotFound.ToString(), new[] { "LogData", "MnemonicList" });
+            }
+            else if (logData.Any(ld => DuplicateUid(ld.MnemonicList.Split(_seperator))))
+            {
+                return new ValidationResult(ErrorCodes.MnemonicsNotUnique.ToString(), new[] { "LogData", "MnemonicList" });
+            }
+            else if (logCurves != null && logData.Any(ld => !UnitsMatch(logCurves, ld)))
+            {
+                return new ValidationResult(ErrorCodes.UnitListNotMatch.ToString(), new[] { "LogData", "UnitList" });
+            }
+
+            return null;
         }
     }
 }

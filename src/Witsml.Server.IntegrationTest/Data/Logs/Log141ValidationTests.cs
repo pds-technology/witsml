@@ -819,5 +819,227 @@ namespace PDS.Witsml.Server.Data.Logs
             var updateResponse = DevKit.Update<LogList, Log>(update);
             Assert.AreEqual((short)ErrorCodes.AddingUpdatingLogCurveAtTheSameTime, updateResponse.Result);
         }
+
+        [TestMethod]
+        public void Test_error_code_434_missing_mnemonics_when_updating_log_data()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+            Wellbore.UidWell = response.SuppMsgOut;
+
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            var uidWellbore = response.SuppMsgOut;
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = uidWellbore,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var update = new Log()
+            {
+                Uid = uidLog,
+                UidWell = Wellbore.UidWell,
+                UidWellbore = uidWellbore
+            };
+
+            DevKit.InitHeader(update, LogIndexType.measureddepth);          
+
+            var logData = update.LogData.First();
+            logData.Data.Add("13,13.1,");
+            logData.Data.Add("14,14.1,");
+            logData.MnemonicList = string.Empty;
+
+            var updateResponse = DevKit.Update<LogList, Log>(update);
+            Assert.AreEqual((short)ErrorCodes.MissingColumnIdentifiers, updateResponse.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_436_index_range_should_not_be_specified_when_updating_data()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+            Wellbore.UidWell = response.SuppMsgOut;
+
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            var uidWellbore = response.SuppMsgOut;
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = uidWellbore,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var update = new Log()
+            {
+                Uid = uidLog,
+                UidWell = Wellbore.UidWell,
+                UidWellbore = uidWellbore
+            };
+
+            DevKit.InitHeader(update, LogIndexType.measureddepth);
+            update.LogCurveInfo.RemoveAt(2);
+            var lastCurve = update.LogCurveInfo.Last();
+            lastCurve.Uid = "NewCurve";
+            lastCurve.Mnemonic.Value = "NewCurve";
+            lastCurve.MinIndex = new GenericMeasure { Value = 13, Uom = "m" };
+
+            var logData = update.LogData.First();
+            logData.Data.Add("13,13.1");
+            logData.Data.Add("14,14.1");
+            logData.MnemonicList = DevKit.Mnemonics(update);
+
+            var updateResponse = DevKit.Update<LogList, Log>(update);
+            Assert.AreEqual((short)ErrorCodes.IndexRangeSpecified, updateResponse.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_451_missing_units_when_updating_log_data()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+            Wellbore.UidWell = response.SuppMsgOut;
+
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            var uidWellbore = response.SuppMsgOut;
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = uidWellbore,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var update = new Log()
+            {
+                Uid = uidLog,
+                UidWell = Wellbore.UidWell,
+                UidWellbore = uidWellbore
+            };
+
+            DevKit.InitHeader(update, LogIndexType.measureddepth);
+
+            var logData = update.LogData.First();
+            logData.Data.Add("13,13.1,");
+            logData.Data.Add("14,14.1,");
+            logData.UnitList = string.Empty;
+
+            var updateResponse = DevKit.Update<LogList, Log>(update);
+            Assert.AreEqual((short)ErrorCodes.MissingUnitList, updateResponse.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_452_units_not_match_when_updating_log_data()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+            Wellbore.UidWell = response.SuppMsgOut;
+
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            var uidWellbore = response.SuppMsgOut;
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = uidWellbore,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var update = new Log()
+            {
+                Uid = uidLog,
+                UidWell = Wellbore.UidWell,
+                UidWellbore = uidWellbore
+            };
+
+            DevKit.InitHeader(update, LogIndexType.measureddepth);
+            var indexCurve = update.LogCurveInfo.First();
+            indexCurve.Unit = "ft";
+
+            var logData = update.LogData.First();
+            logData.Data.Add("13,13.1,13.2");
+            logData.Data.Add("14,14.1,");
+
+            var updateResponse = DevKit.Update<LogList, Log>(update);
+            Assert.AreEqual((short)ErrorCodes.UnitListNotMatch, updateResponse.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_449_missing_index_curve_when_updating_log_data()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+            Wellbore.UidWell = response.SuppMsgOut;
+
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            var uidWellbore = response.SuppMsgOut;
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = uidWellbore,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var update = new Log()
+            {
+                Uid = uidLog,
+                UidWell = Wellbore.UidWell,
+                UidWellbore = uidWellbore
+            };
+
+            DevKit.InitHeader(update, LogIndexType.measureddepth);
+
+            var logData = update.LogData.First();
+            logData.Data.Add("13,13.1,13.2");
+            logData.Data.Add("14,14.1,");
+            var mnemonics = logData.MnemonicList.Split(',');
+            logData.MnemonicList = string.Join(",", mnemonics.Where(m => m != log.IndexCurve));
+
+            var updateResponse = DevKit.Update<LogList, Log>(update);
+            Assert.AreEqual((short)ErrorCodes.IndexCurveNotFound, updateResponse.Result);
+        }
     }
 }
