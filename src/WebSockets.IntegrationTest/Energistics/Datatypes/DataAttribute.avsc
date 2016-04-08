@@ -1,0 +1,10 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Datatypes",	
+	"name": "DataAttribute",
+	"fields":
+	[
+		{ "name": "attributeId", "type": "int" },
+		{ "name": "attributeValue", "type": "Energistics.Datatypes.DataValue" }
+	]
+}

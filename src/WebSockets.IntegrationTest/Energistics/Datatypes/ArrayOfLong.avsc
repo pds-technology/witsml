@@ -1,0 +1,12 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Datatypes",	
+	"name": "ArrayOfLong",
+	"fields":
+	[
+		{ 
+		"name": "values", 
+		"type": { "type": "array", "items": "long" } 
+	}
+	]
+}

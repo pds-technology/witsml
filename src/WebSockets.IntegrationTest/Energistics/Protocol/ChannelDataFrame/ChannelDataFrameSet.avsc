@@ -1,0 +1,20 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Protocol.ChannelDataFrame",	
+	"name": "ChannelDataFrameSet",
+	"messageType": "4",
+	"protocol": "2",
+	"senderRole": "producer",
+	"protocolRoles": "producer,consumer",
+	"fields":
+	[
+		{ 
+		"name": "channels", 
+		"type": { "type": "array", "items": "long" } 
+	},
+		{ 
+		"name": "data", 
+		"type": { "type": "array", "items": "Energistics.Datatypes.ChannelData.DataFrame" } 
+	}
+	]
+}

@@ -1,0 +1,11 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Datatypes.ChannelData",	
+	"name": "ChannelStreamingInfo",
+	"fields":
+	[
+		{ "name": "channelId", "type": "long" },
+		{ "name": "startIndex", "type": "Energistics.Datatypes.ChannelData.StreamingStartIndex" },
+		{ "name": "receiveChangeNotification", "type": "boolean" }
+	]
+}

@@ -1,0 +1,13 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Protocol.Discovery",	
+	"name": "GetResourcesResponse",
+	"messageType": "2",
+	"protocol": "3",
+	"senderRole": "store",
+	"protocolRoles": "store,customer",
+	"fields":
+	[
+		{ "name": "resource", "type": "Energistics.Datatypes.Object.Resource" }
+	]
+}

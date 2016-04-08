@@ -1,0 +1,16 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Protocol.ChannelStreaming",	
+	"name": "ChannelStreamingStart",
+	"messageType": "4",
+	"protocol": "1",
+	"senderRole": "consumer",
+	"protocolRoles": "producer,consumer",
+	"fields":
+	[
+		{ 
+		"name": "channels", 
+		"type": { "type": "array", "items": "Energistics.Datatypes.ChannelData.ChannelStreamingInfo" } 
+	}
+	]
+}

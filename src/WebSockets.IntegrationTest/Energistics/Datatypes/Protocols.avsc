@@ -1,0 +1,16 @@
+{
+	"type": "enum",
+	"namespace": "Energistics.Datatypes",
+	"name": "Protocols",
+	"symbols":
+	[
+		"Core",
+		"ChannelStreaming",
+		"ChannelDataFrame",
+		"Discovery",
+		"Store",
+		"StoreNotification",
+		"GrowingObject",
+		"DataArray"
+	]
+}

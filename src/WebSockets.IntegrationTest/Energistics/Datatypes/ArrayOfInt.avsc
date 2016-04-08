@@ -1,0 +1,12 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Datatypes",	
+	"name": "ArrayOfInt",
+	"fields":
+	[
+		{ 
+		"name": "values", 
+		"type": { "type": "array", "items": "int" } 
+	}
+	]
+}
