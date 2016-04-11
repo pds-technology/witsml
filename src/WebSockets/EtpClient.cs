@@ -30,21 +30,21 @@ namespace Energistics
     public class EtpClient : EtpSession
     {
         private static readonly string EtpSubProtocolName = Settings.Default.EtpSubProtocolName;
-        private static readonly IDictionary<string, string> _default = new Dictionary<string, string>();
-        private static readonly IDictionary<string, string> _headers = new Dictionary<string, string>()
+        private static readonly IDictionary<string, string> EmptyHeaders = new Dictionary<string, string>();
+        private static readonly IDictionary<string, string> BinaryHeaders = new Dictionary<string, string>()
         {
             { Settings.Default.EtpEncodingHeader, Settings.Default.EtpEncodingBinary }
         };
 
         private WebSocket _socket;
 
-        public EtpClient(string uri, string application, string version) : this(uri, application, version, _default)
+        public EtpClient(string uri, string application, string version) : this(uri, application, version, EmptyHeaders)
         {
         }
 
-        public EtpClient(string uri, string application, string version, IDictionary<string, string> headers) : base(application, version)
+        public EtpClient(string uri, string application, string version, IDictionary<string, string> headers) : base(application, version, headers)
         {
-            _socket = new WebSocket(uri, EtpSubProtocolName, null, _headers.Union(headers).ToList());
+            _socket = new WebSocket(uri, EtpSubProtocolName, null, BinaryHeaders.Union(Headers).ToList());
 
             _socket.Opened += OnWebSocketOpened;
             _socket.Closed += OnWebSocketClosed;

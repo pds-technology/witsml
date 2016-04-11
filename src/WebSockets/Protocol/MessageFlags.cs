@@ -25,6 +25,7 @@ namespace Energistics.Protocol
     {
         None = 0x0,
         MultiPart = 0x1,
-        FinalPart = 0x2
+        FinalPart = 0x2,
+        NoData = 0x4
     }
 }

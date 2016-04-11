@@ -52,9 +52,9 @@ namespace Energistics.Common
             return new Dictionary<string, DataValue>();
         }
 
-        public virtual void Acknowledge(int correlationId)
+        public virtual void Acknowledge(long correlationId, MessageFlags messageFlag = MessageFlags.None)
         {
-            var header = CreateMessageHeader(Protocol, (int)MessageTypes.Core.Acknowledge, correlationId);
+            var header = CreateMessageHeader(Protocol, (int)MessageTypes.Core.Acknowledge, correlationId, messageFlag);
             var acknowledge = new Acknowledge();
 
             Session.SendMessage(header, acknowledge);

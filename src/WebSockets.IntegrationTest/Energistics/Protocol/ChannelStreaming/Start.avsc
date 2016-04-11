@@ -1,0 +1,14 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Protocol.ChannelStreaming",	
+	"name": "Start",
+	"messageType": "0",
+	"protocol": "1",
+	"senderRole": "consumer",
+	"protocolRoles": "producer,consumer",
+	"fields":
+	[
+		{ "name": "maxMessageRate", "type": "int" },
+		{ "name": "maxDataItems", "type": "int" }
+	]
+}

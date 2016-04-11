@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Net;
@@ -37,7 +38,6 @@ using Energistics.Protocol.Store;
 using PDS.Framework;
 using PDS.Witsml.Server.Data;
 using PDS.Witsml.Server.Properties;
-using PDS.Witsml.Server.Providers.ChannelStreaming;
 
 namespace PDS.Witsml.Web.Controllers
 {
@@ -88,7 +88,7 @@ namespace PDS.Witsml.Web.Controllers
         [ResponseType(typeof(ServerCapabilities))]
         public IHttpActionResult GetServerCapabilities()
         {
-            var handler = CreateEtpServerHandler(null);
+            var handler = CreateEtpServerHandler(null, null);
             var supportedObjects = GetSupportedObjects();
 
             var capServer = new ServerCapabilities()
@@ -132,14 +132,28 @@ namespace PDS.Witsml.Web.Controllers
 
         private async Task AcceptWebSocketRequest(AspNetWebSocketContext context)
         {
-            var handler = CreateEtpServerHandler(context.WebSocket);
+            var headers = GetWebSocketHeaders(context.Headers, context.QueryString);
+            var handler = CreateEtpServerHandler(context.WebSocket, headers);
             handler.SupportedObjects = GetSupportedObjects();
             await handler.Accept(context);
         }
 
-        private EtpServerHandler CreateEtpServerHandler(WebSocket socket)
+        private IDictionary<string, string> GetWebSocketHeaders(NameValueCollection headers, NameValueCollection queryString)
         {
-            var handler = new EtpServerHandler(socket, DefaultServerName, DefaultServerVersion);
+            var combined = new Dictionary<string, string>();
+
+            foreach (var key in headers.AllKeys)
+                combined[key] = headers[key];
+
+            foreach (var key in queryString.AllKeys)
+                combined[key] = queryString[key];
+
+            return combined;
+        }
+
+        private EtpServerHandler CreateEtpServerHandler(WebSocket socket, IDictionary<string, string> headers)
+        {
+            var handler = new EtpServerHandler(socket, DefaultServerName, DefaultServerVersion, headers);
 
             handler.Register(() => _container.Resolve<IChannelStreamingProducer>());
             handler.Register(() => _container.Resolve<IChannelStreamingConsumer>());

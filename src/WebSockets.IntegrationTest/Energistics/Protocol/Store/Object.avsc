@@ -1,0 +1,13 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Protocol.Store",	
+	"name": "Object",
+	"messageType": "4",
+	"protocol": "4",
+	"senderRole": "store",
+	"protocolRoles": "store,customer",
+	"fields":
+	[
+		{ "name": "dataObject", "type": "Energistics.Datatypes.Object.DataObject" }
+	]
+}

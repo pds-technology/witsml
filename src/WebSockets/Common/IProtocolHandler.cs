@@ -19,6 +19,7 @@
 using System.Collections.Generic;
 using Avro.IO;
 using Energistics.Datatypes;
+using Energistics.Protocol;
 using Energistics.Protocol.Core;
 
 namespace Energistics.Common
@@ -37,7 +38,7 @@ namespace Energistics.Common
 
         void OnSessionOpened(IList<SupportedProtocol> supportedProtocols);
 
-        void Acknowledge(int correlationId);
+        void Acknowledge(long correlationId, MessageFlags messageFlag = MessageFlags.None);
 
         void ProtocolException(int errorCode, string errorMessage, long correlationId = 0);
 

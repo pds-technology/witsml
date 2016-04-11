@@ -27,12 +27,15 @@ namespace Energistics.Protocol.ChannelStreaming
     public class ChannelStreamingProducerHandler : EtpProtocolHandler, IChannelStreamingProducer
     {
         public const string SimpleStreamer = "SimpleStreamer";
+        public const string DefaultUri = "DefaultUri";
 
         public ChannelStreamingProducerHandler() : base(Protocols.ChannelStreaming, "producer", "consumer")
         {
         }
 
         public bool IsSimpleStreamer { get; set; }
+
+        public string DefaultDescribeUri { get; set; }
 
         public int MaxDataItems { get; private set; }
 
@@ -43,9 +46,10 @@ namespace Energistics.Protocol.ChannelStreaming
             var capabilities = base.GetCapabilities();
 
             if (IsSimpleStreamer)
-            {
                 capabilities[SimpleStreamer] = new DataValue() { Item = true };
-            }
+
+            if (!string.IsNullOrWhiteSpace(DefaultDescribeUri))
+                capabilities[DefaultUri] = new DataValue() { Item = DefaultDescribeUri };
 
             return capabilities;
         }

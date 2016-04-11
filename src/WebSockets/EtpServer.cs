@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using Energistics.Common;
 using SuperWebSocket;
 
@@ -25,7 +26,7 @@ namespace Energistics
     {
         private WebSocketSession _session;
 
-        public EtpServer(WebSocketSession session, string application, string version) : base(application, version)
+        public EtpServer(WebSocketSession session, string application, string version, IDictionary<string, string> headers) : base(application, version, headers)
         {
             SessionId = session.SessionID;
             _session = session;

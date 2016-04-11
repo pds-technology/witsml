@@ -1,0 +1,11 @@
+{
+	"type": "enum",
+	"namespace": "Energistics.Datatypes.ChannelData",
+	"name": "ChannelStatuses",
+	"symbols":
+	[
+		"Active",
+		"Inactive",
+		"Closed"
+	]
+}

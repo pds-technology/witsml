@@ -62,6 +62,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
                 Client.Handler<IChannelStreamingProducer>().OnChannelStreamingStart += OnChannelStreamingStart;
                 Client.Handler<IChannelStreamingProducer>().OnChannelStreamingStop += OnChannelStreamingStop;
                 Client.Handler<IChannelStreamingProducer>().IsSimpleStreamer = Model.IsSimpleStreamer;
+                Client.Handler<IChannelStreamingProducer>().DefaultDescribeUri = EtpUri.RootUri;
                 Client.Output = Log;
                 Client.Open();
 
@@ -150,7 +151,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
                 .Append(ObjectTypes.Well, Model.WellUid)
                 .Append(ObjectTypes.Wellbore, Model.WellboreUid)
                 .Append(ObjectTypes.Log, Model.LogUid)
-                .Append(ObjectTypes.LogCurveInfo, mnemonic);
+                .Append(ObjectTypes.Channel, mnemonic);
         }
 
         private static ChannelStreamingInfo ToChannelStreamingInfo(ChannelMetadataRecord record)

@@ -1,0 +1,13 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Protocol.StoreNotification",	
+	"name": "DeleteNotification",
+	"messageType": "3",
+	"protocol": "5",
+	"senderRole": "store",
+	"protocolRoles": "store,customer",
+	"fields":
+	[
+		{ "name": "delete", "type": "Energistics.Datatypes.Object.ObjectChange" }
+	]
+}

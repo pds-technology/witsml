@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using System.Text;
 using Avro.Specific;
 using Caliburn.Micro;
 using Energistics;
@@ -344,8 +343,14 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// <param name="e">The <see cref="ProtocolEventArgs{GetResourcesResponse, System.String}"/> instance containing the event data.</param>
         private void OnGetResourcesResponse(object sender, ProtocolEventArgs<GetResourcesResponse, string> e)
         {
-            var viewModel = new ResourceViewModel(e.Message.Resource);
-            viewModel.LoadChildren = GetResources;
+            var viewModel = ResourceViewModel.NoData;
+
+            // Handle case when "No Data" Acknowledge message was received
+            if (e.Message.Resource != null)
+            {
+                viewModel = new ResourceViewModel(e.Message.Resource);
+                viewModel.LoadChildren = GetResources;
+            }
 
             LogObjectDetails(e);
 
@@ -413,7 +418,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 "// Header:{3}{0}{3}{3}// Body:{3}{1}{3}{3}/* Data:{3}{2}{3}*/{3}",
                 _client.Serialize(e.Header, true),
                 _client.Serialize(e.Message, true),
-                Encoding.UTF8.GetString(e.Message.DataObject.GetData()),
+                e.Message.DataObject.GetXml(),
                 Environment.NewLine));
         }
 
