@@ -1065,5 +1065,68 @@ namespace PDS.Witsml.Server.Data.Logs
             var updateResponse = DevKit.Update<LogList, Log>(update);
             Assert.AreEqual((short)ErrorCodes.IndexCurveNotFound, updateResponse.Result);
         }
+
+        [TestMethod]
+        public void Test_error_code_453_units_not_specified_for_log_data_add()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10);
+
+            // Set the 3rd mnemonic to the 2nd in LogCurveInfo
+            var logData = log.LogData.First();
+            logData.UnitList = "m,";
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.MissingUnitForMeasureData, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_453_units_not_specified_for_log_data_update()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            log.Uid = uidLog;
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10);
+
+            // Set the 3rd mnemonic to the 2nd in LogCurveInfo
+            var logData = log.LogData.First();
+            logData.UnitList = "m,";
+
+            var update = DevKit.Update<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.MissingUnitForMeasureData, update.Result);
+        }
     }
 }

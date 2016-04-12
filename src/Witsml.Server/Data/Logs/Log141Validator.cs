@@ -193,6 +193,10 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 yield return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogData.MnemonicList" });
             }
+            else if (DataObject.LogData != null && DataObject.LogData.Count > 0 && !UnitSpecified(DataObject.LogData))
+            {
+                yield return new ValidationResult(ErrorCodes.MissingUnitForMeasureData.ToString(), new[] { "LogData", "UnitList" });
+            }
         }
 
         /// <summary>
@@ -304,7 +308,10 @@ namespace PDS.Witsml.Server.Data.Logs
         private bool DuplicateColumnIdentifier()
         {
             var logCurves = DataObject.LogCurveInfo;
-            return logCurves != null && logCurves.GroupBy(lci => lci.Mnemonic.Value)
+            if (logCurves == null || logCurves.Count == 0)
+                return false;
+
+            return logCurves.Where(l => l.Mnemonic != null).GroupBy(lci => lci.Mnemonic.Value)
                 .Select(group => new { Menmonic = group.Key, Count = group.Count() })
                 .Any(g => g.Count > 1);
         }
@@ -337,12 +344,36 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 return new ValidationResult(ErrorCodes.MnemonicsNotUnique.ToString(), new[] { "LogData", "MnemonicList" });
             }
+            else if (!UnitSpecified(logData))
+            {
+                return new ValidationResult(ErrorCodes.MissingUnitForMeasureData.ToString(), new[] { "LogData", "UnitList" });
+            }
             else if (logCurves != null && logData.Any(ld => !UnitsMatch(logCurves, ld)))
             {
                 return new ValidationResult(ErrorCodes.UnitListNotMatch.ToString(), new[] { "LogData", "UnitList" });
             }
 
             return null;
+        }
+
+        private bool UnitSpecified(List<LogData> logDatas)
+        {
+            foreach (var logData in logDatas)
+            {
+                var data = logData.Data;
+                if (data == null || data.Count == 0)
+                    continue;
+
+                var firstRow = data.First().Split(_seperator);
+                var units = logData.UnitList.Split(_seperator);
+                for (var i = 0; i < firstRow.Length; i++)
+                {
+                    if (units.Length <= i || string.IsNullOrWhiteSpace(units[i]))
+                        return false;
+                }
+            }
+
+            return true; ;
         }
     }
 }
