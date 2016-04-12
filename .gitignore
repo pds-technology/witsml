@@ -106,6 +106,8 @@ _TeamCity*
 # NCrunch
 _NCrunch_*
 .*crunch*.local.xml
+*.ncrunchproject
+*.ncrunchsolution
 
 # MightyMoose
 *.mm.*
@@ -222,3 +224,4 @@ ModelManifest.xml
 /src/Witsml.Studio/Plugins/PDS.Witsml.Studio.Plugins.DataReplay.dll.config
 /src/Witsml.Studio/Plugins/PDS.Witsml.Studio.Plugins.DataReplay.pdb
 /src/Witsml.Web/Studio
+/src/Witsml.UnitTest/Energistics
