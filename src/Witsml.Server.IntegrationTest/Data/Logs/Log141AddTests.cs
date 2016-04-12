@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
@@ -74,15 +75,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 DevKit.Add<WellboreList, Wellbore>(Wellbore);
             }
 
-            var log = new Log()
-            {
-                Uid = "e2401b72-550f-4695-ab27-d5b0589bde17",
-                Name = "Test Depth Log 1.4.1.1",
-                UidWell = Well.Uid,
-                NameWell = Well.Name,
-                UidWellbore = Wellbore.Uid,
-                NameWellbore = Wellbore.Name,
-            };
+            var log = CreateLog("e2401b72-550f-4695-ab27-d5b0589bde17", "Test Depth Log 1.4.1.1", Well, Wellbore);
 
             // check if log already exists
             var logResults = DevKit.Query<LogList, Log>(log);
@@ -118,16 +111,12 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 DevKit.Add<WellboreList, Wellbore>(Wellbore);
             }
-            
-            var log = new Log()
-            {
-                Uid = "e2401b72-550f-4695-ab27-d5b0589bde18",
-                Name = "Test Time Log 1.4.1.1",
-                UidWell = Well.Uid,
-                NameWell = Well.Name,
-                UidWellbore = Wellbore.Uid,
-                NameWellbore = Wellbore.Name,
-            };
+
+            var log = CreateLog(
+                "e2401b72-550f-4695-ab27-d5b0589bde18", 
+                "Test Time Log 1.4.1.1", 
+                Well, 
+                Wellbore);
 
             // check if log already exists
             var logResults = DevKit.Query<LogList, Log>(log);
@@ -147,14 +136,13 @@ namespace PDS.Witsml.Server.Data.Logs
             Wellbore.UidWell = response.SuppMsgOut;
             response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
 
-            var log = new Log()
-            {
-                UidWell = Wellbore.UidWell,
-                NameWell = Well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = Wellbore.Name,
-                Name = DevKit.Name("Log 01")
-            };
+            var log = CreateLog(
+                null, 
+                DevKit.Name("Log can be added with depth data"), 
+                Wellbore.UidWell, 
+                Well.Name, 
+                response.SuppMsgOut, 
+                Wellbore.Name);
 
             DevKit.InitHeader(log, LogIndexType.measureddepth);
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10);
@@ -170,17 +158,15 @@ namespace PDS.Witsml.Server.Data.Logs
 
             Wellbore.UidWell = response.SuppMsgOut;
             response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
-
             var uidWellbore = response.SuppMsgOut;
 
-            var log = new Log()
-            {
-                UidWell = Wellbore.UidWell,
-                NameWell = Well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = Wellbore.Name,
-                Name = DevKit.Name("Log 01")
-            };
+            var log = CreateLog(
+                null, 
+                DevKit.Name("Log can be added with time data"), 
+                Wellbore.UidWell, 
+                Well.Name, 
+                uidWellbore, 
+                Wellbore.Name);
 
             DevKit.InitHeader(log, LogIndexType.datetime);
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10, 1, false);
@@ -190,12 +176,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var uidLog = response.SuppMsgOut;
 
-            var query = new Log
-            {
-                UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                Uid = uidLog
-            };
+            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
 
             var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             Assert.AreEqual(1, results.Count);
@@ -209,15 +190,14 @@ namespace PDS.Witsml.Server.Data.Logs
             Wellbore.UidWell = response.SuppMsgOut;
             response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
 
-            var log = new Log()
-            {
-                UidWell = Wellbore.UidWell,
-                NameWell = Well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = Wellbore.Name,
-                Name = DevKit.Name("Log 01"),
-                StartIndex = new GenericMeasure(5, "m")
-            };
+            var log = CreateLog(
+                null, 
+                DevKit.Name("Log Test append log data"), 
+                Wellbore.UidWell, 
+                Well.Name, 
+                response.SuppMsgOut, 
+                Wellbore.Name);
+            log.StartIndex = new GenericMeasure(5, "m");
 
             DevKit.InitHeader(log, LogIndexType.measureddepth);
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10);
@@ -228,13 +208,8 @@ namespace PDS.Witsml.Server.Data.Logs
             var uidWellbore = log.UidWellbore;
             var uidLog = response.SuppMsgOut;
 
-            log = new Log()
-            {
-                UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                Uid = uidLog,
-                StartIndex = new GenericMeasure(17, "m")
-            };
+            log = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
+            log.StartIndex = new GenericMeasure(17, "m");
 
             DevKit.InitHeader(log, LogIndexType.measureddepth);
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 6);
@@ -242,12 +217,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var updateResponse = DevKit.Update<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
 
-            var query = new Log
-            {
-                UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                Uid = uidLog
-            };
+            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
 
             var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             Assert.AreEqual(1, results.Count);
@@ -267,15 +237,14 @@ namespace PDS.Witsml.Server.Data.Logs
             Wellbore.UidWell = response.SuppMsgOut;
             response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
 
-            var log = new Log()
-            {
-                UidWell = Wellbore.UidWell,
-                NameWell = Well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = Wellbore.Name,
-                Name = DevKit.Name("Log 01"),
-                StartIndex = new GenericMeasure(17, "m")
-            };
+            var log = CreateLog(
+                null, 
+                DevKit.Name("Log Test prepend log data"), 
+                Wellbore.UidWell, 
+                Well.Name, 
+                response.SuppMsgOut, 
+                Wellbore.Name);
+            log.StartIndex = new GenericMeasure(17, "m");
 
             DevKit.InitHeader(log, LogIndexType.measureddepth);
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10);
@@ -286,13 +255,8 @@ namespace PDS.Witsml.Server.Data.Logs
             var uidWellbore = log.UidWellbore;
             var uidLog = response.SuppMsgOut;
 
-            log = new Log()
-            {
-                UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                Uid = uidLog,
-                StartIndex = new GenericMeasure(5, "m")
-            };
+            log = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
+            log.StartIndex = new GenericMeasure(5, "m");
 
             DevKit.InitHeader(log, LogIndexType.measureddepth);
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 6);
@@ -300,12 +264,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var updateResponse = DevKit.Update<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
 
-            var query = new Log
-            {
-                UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                Uid = uidLog
-            };
+            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
 
             var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             Assert.AreEqual(1, results.Count);
@@ -325,15 +284,14 @@ namespace PDS.Witsml.Server.Data.Logs
             Wellbore.UidWell = response.SuppMsgOut;
             response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
 
-            var log = new Log()
-            {
-                UidWell = Wellbore.UidWell,
-                NameWell = Well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = Wellbore.Name,
-                Name = DevKit.Name("Log 01"),
-                StartIndex = new GenericMeasure(1, "m")
-            };
+            var log = CreateLog(
+                null, 
+                DevKit.Name("Log Test update overlapping log data"), 
+                Wellbore.UidWell, 
+                Well.Name, 
+                response.SuppMsgOut, 
+                Wellbore.Name);
+            log.StartIndex = new GenericMeasure(1, "m");
 
             DevKit.InitHeader(log, LogIndexType.measureddepth);
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 8);
@@ -344,13 +302,8 @@ namespace PDS.Witsml.Server.Data.Logs
             var uidWellbore = log.UidWellbore;
             var uidLog = response.SuppMsgOut;
 
-            log = new Log()
-            {
-                UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                Uid = uidLog,
-                StartIndex = new GenericMeasure(4.1, "m")
-            };
+            log = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
+            log.StartIndex = new GenericMeasure(4.1, "m");
 
             DevKit.InitHeader(log, LogIndexType.measureddepth);
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 3, 0.9);
@@ -358,12 +311,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var updateResponse = DevKit.Update<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
 
-            var query = new Log
-            {
-                UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                Uid = uidLog
-            };
+            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
 
             var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             Assert.AreEqual(1, results.Count);
@@ -383,15 +331,14 @@ namespace PDS.Witsml.Server.Data.Logs
             Wellbore.UidWell = response.SuppMsgOut;
             response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
 
-            var log = new Log()
-            {
-                UidWell = Wellbore.UidWell,
-                NameWell = Well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = Wellbore.Name,
-                Name = DevKit.Name("Log 01"),
-                StartIndex = new GenericMeasure(17, "m")
-            };
+            var log = CreateLog(
+                null, 
+                DevKit.Name("Log Test overwrite log data chunk"), 
+                Wellbore.UidWell, 
+                Well.Name, 
+                response.SuppMsgOut, 
+                Wellbore.Name);
+            log.StartIndex = new GenericMeasure(17, "m");
 
             DevKit.InitHeader(log, LogIndexType.measureddepth);
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 6);
@@ -402,13 +349,8 @@ namespace PDS.Witsml.Server.Data.Logs
             var uidWellbore = log.UidWellbore;
             var uidLog = response.SuppMsgOut;
 
-            log = new Log()
-            {
-                UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                Uid = uidLog,
-                StartIndex = new GenericMeasure(4.1, "m")
-            };
+            log = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
+            log.StartIndex = new GenericMeasure(4.1, "m");
 
             DevKit.InitHeader(log, LogIndexType.measureddepth);
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 3, 0.9);
@@ -419,12 +361,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var updateResponse = DevKit.Update<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
 
-            var query = new Log
-            {
-                UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                Uid = uidLog
-            };
+            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
 
             var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             Assert.AreEqual(1, results.Count);
@@ -444,15 +381,14 @@ namespace PDS.Witsml.Server.Data.Logs
             Wellbore.UidWell = response.SuppMsgOut;
             response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
 
-            var log = new Log()
-            {
-                UidWell = Wellbore.UidWell,
-                NameWell = Well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = Wellbore.Name,
-                Name = DevKit.Name("Log 01"),
-                StartIndex = new GenericMeasure(15, "m")
-            };
+            var log = CreateLog(
+                null, 
+                DevKit.Name("Log Test update log data diff range"), 
+                Wellbore.UidWell, 
+                Well.Name, 
+                response.SuppMsgOut, 
+                Wellbore.Name);
+            log.StartIndex = new GenericMeasure(15, "m");
 
             DevKit.InitHeader(log, LogIndexType.measureddepth);
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 8);
@@ -463,13 +399,8 @@ namespace PDS.Witsml.Server.Data.Logs
             var uidWellbore = log.UidWellbore;
             var uidLog = response.SuppMsgOut;
 
-            log = new Log()
-            {
-                UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                Uid = uidLog,
-                StartIndex = new GenericMeasure(13, "m")
-            };
+            log = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
+            log.StartIndex = new GenericMeasure(13, "m");
 
             DevKit.InitHeader(log, LogIndexType.measureddepth);
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 6, 0.9);
@@ -490,12 +421,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var updateResponse = DevKit.Update<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
 
-            var query = new Log
-            {
-                UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                Uid = uidLog
-            };
+            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
 
             var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             Assert.AreEqual(1, results.Count);
@@ -519,17 +445,16 @@ namespace PDS.Witsml.Server.Data.Logs
             response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
             var uidWellbore = response.SuppMsgOut;
 
-            var log = new Log()
-            {
-                UidWell = Wellbore.UidWell,
-                NameWell = Well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = Wellbore.Name,
-                Name = DevKit.Name("Log 01"),
-                Description = "Not updated field",
-                RunNumber = "101",
-                BhaRunNumber = 1
-            };
+            var log = CreateLog(
+                null, 
+                DevKit.Name("Log Test update log header"), 
+                Wellbore.UidWell, 
+                Well.Name, 
+                uidWellbore, 
+                Wellbore.Name);
+            log.Description = "Not updated field";
+            log.RunNumber = "101";
+            log.BhaRunNumber = 1;
 
             DevKit.InitHeader(log, LogIndexType.measureddepth);
 
@@ -538,12 +463,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var uidLog = response.SuppMsgOut;
 
-            var query = new Log
-            {
-                UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                Uid = uidLog
-            };
+            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
 
             var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             var logAdded = results.FirstOrDefault();
@@ -554,14 +474,8 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(log.BhaRunNumber, logAdded.BhaRunNumber);
             Assert.IsNull(logAdded.CommonData.ItemState);
 
-            var update = new Log()
-            {
-                Uid = uidLog,
-                UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                CommonData = new CommonData { ItemState = ItemState.actual }
-            };
-
+            var update = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
+            update.CommonData = new CommonData { ItemState = ItemState.actual };
             update.RunNumber = "102";
             update.BhaRunNumber = 2;
 
@@ -587,17 +501,16 @@ namespace PDS.Witsml.Server.Data.Logs
             response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
             var uidWellbore = response.SuppMsgOut;
 
-            var log = new Log()
-            {
-                UidWell = Wellbore.UidWell,
-                NameWell = Well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = Wellbore.Name,
-                Name = DevKit.Name("Log 01"),
-                Description = "Not updated field",
-                RunNumber = "101",
-                BhaRunNumber = 1
-            };
+            var log = CreateLog(
+                null, 
+                DevKit.Name("Log Test update log header update curve"), 
+                Wellbore.UidWell, 
+                Well.Name, 
+                uidWellbore, 
+                Wellbore.Name);
+            log.Description = "Not updated field";
+            log.RunNumber = "101";
+            log.BhaRunNumber = 1;
 
             DevKit.InitHeader(log, LogIndexType.measureddepth);
             log.LogCurveInfo.RemoveAt(2);
@@ -607,12 +520,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var uidLog = response.SuppMsgOut;
 
-            var query = new Log
-            {
-                UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                Uid = uidLog
-            };
+            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
 
             var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             var logAdded = results.FirstOrDefault();
@@ -625,14 +533,8 @@ namespace PDS.Witsml.Server.Data.Logs
             var logCurve = logAdded.LogCurveInfo.FirstOrDefault(c => c.Uid == "ROP");
             Assert.IsNull(logCurve.CurveDescription);
 
-            var update = new Log()
-            {
-                Uid = uidLog,
-                UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                CommonData = new CommonData { ItemState = ItemState.actual }
-            };
-
+            var update = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
+            update.CommonData = new CommonData { ItemState = ItemState.actual };
             update.RunNumber = "102";
             update.BhaRunNumber = 2;
 
@@ -667,14 +569,13 @@ namespace PDS.Witsml.Server.Data.Logs
             response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
             var uidWellbore = response.SuppMsgOut;
 
-            var log = new Log()
-            {
-                UidWell = Wellbore.UidWell,
-                NameWell = Well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = Wellbore.Name,
-                Name = DevKit.Name("Log 01")
-            };
+            var log = CreateLog(
+                null, 
+                DevKit.Name("Log Test update log header add curve"), 
+                Wellbore.UidWell, 
+                Well.Name, 
+                uidWellbore, 
+                Wellbore.Name);
 
             DevKit.InitHeader(log, LogIndexType.measureddepth);
             log.LogCurveInfo.RemoveRange(1, 2);
@@ -685,12 +586,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var uidLog = response.SuppMsgOut;
 
-            var query = new Log
-            {
-                UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                Uid = uidLog
-            };
+            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
 
             var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             var logAdded = results.FirstOrDefault();
@@ -699,12 +595,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(1, logAdded.LogCurveInfo.Count);
             Assert.AreEqual(log.LogCurveInfo.Count, logAdded.LogCurveInfo.Count);
 
-            var update = new Log()
-            {
-                Uid = uidLog,
-                UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore
-            };
+            var update = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
 
             DevKit.InitHeader(update, LogIndexType.measureddepth);
             update.LogCurveInfo.RemoveAt(2);
@@ -730,17 +621,16 @@ namespace PDS.Witsml.Server.Data.Logs
             response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
             var uidWellbore = response.SuppMsgOut;
 
-            var log = new Log()
-            {
-                UidWell = Wellbore.UidWell,
-                NameWell = Well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = Wellbore.Name,
-                Name = DevKit.Name("Log 01"),
-                RunNumber = "101",
-                IndexCurve = "MD",
-                IndexType = LogIndexType.measureddepth
-            };
+            var log = CreateLog(
+                null, 
+                DevKit.Name("Log Test log index direction default"), 
+                Wellbore.UidWell, 
+                Well.Name, 
+                uidWellbore, 
+                Wellbore.Name);
+            log.RunNumber = "101";
+            log.IndexCurve = "MD";
+            log.IndexType = LogIndexType.measureddepth;
 
             DevKit.InitHeader(log, log.IndexType.Value);
             log.Direction = null;
@@ -752,12 +642,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var uidLog = response.SuppMsgOut;
 
-            var query = new Log
-            {
-                UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                Uid = uidLog
-            };
+            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
 
             var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             var logAdded = results.FirstOrDefault();
@@ -766,14 +651,9 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(LogIndexDirection.increasing, logAdded.Direction);
             Assert.AreEqual(log.RunNumber, logAdded.RunNumber);
 
-            var update = new Log()
-            {
-                Uid = uidLog,
-                UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                Direction = LogIndexDirection.decreasing,
-                RunNumber = "102"
-            };
+            var update = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
+            update.Direction = LogIndexDirection.decreasing;
+            update.RunNumber = "102";
 
             var updateResponse = DevKit.Update<LogList, Log>(update);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
@@ -794,15 +674,14 @@ namespace PDS.Witsml.Server.Data.Logs
             Wellbore.UidWell = response.SuppMsgOut;
             response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
 
-            var log = new Log()
-            {
-                UidWell = Wellbore.UidWell,
-                NameWell = Well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = Wellbore.Name,
-                Name = DevKit.Name("Log 01"),
-                StartIndex = new GenericMeasure(15, "m")
-            };
+            var log = CreateLog(
+                null, 
+                DevKit.Name("Log Test update log data and index range"), 
+                Wellbore.UidWell, 
+                Well.Name, 
+                response.SuppMsgOut, 
+                Wellbore.Name);
+            log.StartIndex = new GenericMeasure(15, "m");
 
             DevKit.InitHeader(log, LogIndexType.measureddepth);
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 8);
@@ -813,13 +692,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var uidWellbore = log.UidWellbore;
             var uidLog = response.SuppMsgOut;
 
-            var query = new Log
-            {
-                UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                Uid = uidLog
-            };
-
+            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
             var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             var logAdded = results.FirstOrDefault();
 
@@ -836,13 +709,8 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(logAdded.StartIndex.Value, curve3.MinIndex.Value);
             Assert.AreEqual(logAdded.EndIndex.Value, curve3.MaxIndex.Value);
 
-            log = new Log()
-            {
-                UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                Uid = uidLog,
-                StartIndex = new GenericMeasure(13, "m")
-            };
+            log = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
+            log.StartIndex = new GenericMeasure(13, "m");
 
             DevKit.InitHeader(log, LogIndexType.measureddepth);
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 6, 0.9);
@@ -893,18 +761,17 @@ namespace PDS.Witsml.Server.Data.Logs
             response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
             var uidWellbore = response.SuppMsgOut;
 
-            var log = new Log()
-            {
-                UidWell = Wellbore.UidWell,
-                NameWell = Well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = Wellbore.Name,
-                Name = DevKit.Name("Log 01 - Decreasing"),
-                RunNumber = "101",
-                IndexCurve = "MD",
-                IndexType = LogIndexType.measureddepth,
-                Direction = LogIndexDirection.decreasing
-            };
+            var log = CreateLog(
+                null, 
+                DevKit.Name("Log log index direction decreasing"), 
+                Wellbore.UidWell, 
+                Well.Name, 
+                uidWellbore, 
+                Wellbore.Name);
+            log.RunNumber = "101";
+            log.IndexCurve = "MD";
+            log.IndexType = LogIndexType.measureddepth;
+            log.Direction = LogIndexDirection.decreasing;
 
             DevKit.InitHeader(log, log.IndexType.Value, increasing: false);
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 100, 0.9, increasing: false);
@@ -914,12 +781,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var uidLog = response.SuppMsgOut;
 
-            var query = new Log
-            {
-                UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                Uid = uidLog
-            };
+            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
 
             var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             var logAdded = results.FirstOrDefault();
@@ -944,40 +806,18 @@ namespace PDS.Witsml.Server.Data.Logs
 
             response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
             var uidWellbore = response.SuppMsgOut;
-
-            string xmlIn =
-                "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" +
-                "    <log uidWell=\"" + uidWell + "\" uidWellbore=\"" + uidWellbore + "\">" +
-                "        <nameWell>" + Well.Name + "</nameWell>" +
-                "        <nameWellbore>" + Wellbore.Name + "</nameWellbore>" +
-                "        <name>Log Test Bad Uom</name>" +
-                "        <serviceCompany>Baker Hughes INTEQ</serviceCompany>" +
-                "        <indexType>measured depth</indexType>" +
-                "        <startIndex uom =\"abc\">499</startIndex>" +
-                "        <endIndex uom =\"abc\">509.01</endIndex>" +
-                "        <stepIncrement uom =\"abc\">0</stepIncrement>" +
-                "        <indexCurve>Mdepth</indexCurve>" +
-                "        <logCurveInfo uid=\"lci-1\">" + 
-                "            <mnemonic>Mdepth</mnemonic>" + 
-                "            <unit>m</unit>" + 
-                "            <mnemAlias>md</mnemAlias>" + 
-                "            <nullValue>-999.25</nullValue>" + 
-                "            <minIndex uom=\"m\">499</minIndex>" + 
-                "            <maxIndex uom=\"m\">509.01</maxIndex>" + 
-                "            <typeLogData>double</typeLogData>" + 
-                "        </logCurveInfo>" + 
-                "        <logCurveInfo uid=\"lci-2\">" +
-                "            <mnemonic>Vdepth</mnemonic>" + 
-                "            <unit>m</unit>" + 
-                "            <mnemAlias>tvd</mnemAlias>" + 
-                "            <nullValue>-999.25</nullValue>" + 
-                "            <minIndex uom=\"m\">499</minIndex>" + 
-                "            <maxIndex uom=\"m\">509.01</maxIndex>" + 
-                "            <typeLogData>double</typeLogData >" + 
-                "        </logCurveInfo >" + 
-                "    </log>" +
-                "</logs>";
-
+            var logName = "Log Test -443 - Invalid Uom";
+            var startIndexUom = "abc";
+            var endIndexUom = startIndexUom;
+            
+            string xmlIn = CreateXmlLog(
+                logName, 
+                uidWell, 
+                Well.Name, 
+                uidWellbore, 
+                Wellbore.Name, 
+                startIndexUom, 
+                endIndexUom);
             response = DevKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
 
             Assert.IsNotNull(response);
@@ -993,18 +833,126 @@ namespace PDS.Witsml.Server.Data.Logs
 
             response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
             var uidWellbore = response.SuppMsgOut;
+            var logName = "Log Test -453 - Missing Uom";
 
+            string xmlIn = CreateXmlLog(
+                logName, 
+                uidWell, 
+                Well.Name, 
+                uidWellbore, 
+                Wellbore.Name, 
+                startIndexUom: null, 
+                endIndexUom: null);
+            response = DevKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingUnitForMeasureData, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_406_missing_parent_uid()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+            Wellbore.UidWell = response.SuppMsgOut;
+
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            var uidWellbore = response.SuppMsgOut;
+
+            var log = CreateLog(
+                null, 
+                DevKit.Name("Log Test error code -406 missing parent"), 
+                null, 
+                Well.Name, 
+                null, 
+                Wellbore.Name);
+            log.RunNumber = "101";
+            log.IndexCurve = "MD";
+            log.IndexType = LogIndexType.measureddepth;
+            log.Direction = LogIndexDirection.decreasing;
+
+            DevKit.InitHeader(log, log.IndexType.Value, increasing: false);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 100, 0.9, increasing: false);
+
+            response = DevKit.Add<LogList, Log>(log);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingParentUid, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_478_parent_uid_case_not_matching()
+        {
+            // Base uid
+            var uid = "arent-well-01-for-error-code-478" + DevKit.Uid();
+
+            // Well Uid with uppercase "P"
+            Well.Uid = "P" + uid;
+            Well.Name = DevKit.Name("Well-to-add-01");
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Well Uid with uppercase "P"
+            Wellbore.Name = DevKit.Name("Wellbore-to-add-02");
+            Wellbore.NameWell = Well.Name;
+            Wellbore.UidWell = "P" + uid;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            // Well Uid with lowercase "p"
+            var log = CreateLog(
+                DevKit.Uid(), 
+                name: DevKit.Name("Log Test error code -478 parent uid case"), 
+                uidWell: "p" + uid, 
+                nameWell: Well.Name, 
+                uidWellbore: response.SuppMsgOut, 
+                nameWellbore: Wellbore.Name);
+            log.RunNumber = "101";
+            log.IndexCurve = "MD";
+            log.IndexType = LogIndexType.measureddepth;
+            log.Direction = LogIndexDirection.decreasing;
+            DevKit.InitHeader(log, log.IndexType.Value, increasing: false);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 100, 0.9, increasing: false);
+
+            response = DevKit.Add<LogList, Log>(log);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.IncorrectCaseParentUid, response.Result);
+        }
+
+        #region Helper Methods
+
+        private Log CreateLog(string uid, string name, Well well, Wellbore wellbore)
+        {
+            return CreateLog(uid, name, well.Uid, well.Name, wellbore.Uid, wellbore.Name);
+        }
+
+        private Log CreateLog(string uid, string name, string uidWell, string nameWell, string uidWellbore, string nameWellbore)
+        {
+            return new Log()
+            {
+                Uid = uid,
+                Name = name,
+                UidWell = uidWell,
+                NameWell = nameWell,
+                UidWellbore = uidWellbore,
+                NameWellbore = nameWellbore,
+            };
+        }
+
+        private string CreateXmlLog(string logName, string uidWell, string nameWell, string uidWellbore, string nameWellbore, string startIndexUom, string endIndexUom)
+        {
             string xmlIn =
                 "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" +
                 "    <log uidWell=\"" + uidWell + "\" uidWellbore=\"" + uidWellbore + "\">" +
                 "        <nameWell>" + Well.Name + "</nameWell>" +
                 "        <nameWellbore>" + Wellbore.Name + "</nameWellbore>" +
-                "        <name>Log Test Bad Uom</name>" +
-                "        <serviceCompany>Baker Hughes INTEQ</serviceCompany>" +
+                "        <name>" + logName + "</name>" +
+                "        <serviceCompany>Service Company Name</serviceCompany>" +
                 "        <indexType>measured depth</indexType>" +
-                "        <startIndex>499</startIndex>" +
-                "        <endIndex>509.01</endIndex>" +
-                "        <stepIncrement uom =\"abc\">0</stepIncrement>" +
+                (string.IsNullOrEmpty(startIndexUom) ? "<startIndex>499</startIndex>" : "<startIndex uom =\"" + startIndexUom + "\">499</startIndex>") +
+                (string.IsNullOrEmpty(endIndexUom) ? "<endIndex>509.01</endIndex>" : "<endIndex uom =\"" + endIndexUom + "\">509.01</endIndex>") +
+                "        <stepIncrement uom =\"m\">0</stepIncrement>" +
                 "        <indexCurve>Mdepth</indexCurve>" +
                 "        <logCurveInfo uid=\"lci-1\">" +
                 "            <mnemonic>Mdepth</mnemonic>" +
@@ -1027,74 +975,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 "    </log>" +
                 "</logs>";
 
-            response = DevKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
-
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.MissingUnitForMeasureData, response.Result);
+            return xmlIn;
         }
-
-        [TestMethod]
-        public void Test_error_code_406_missing_parent_uid()
-        {
-            var response = DevKit.Add<WellList, Well>(Well);
-            Wellbore.UidWell = response.SuppMsgOut;
-
-            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
-            var uidWellbore = response.SuppMsgOut;
-
-            var log = new Log()
-            {
-                NameWell = Well.Name,
-                NameWellbore = Wellbore.Name,
-                Name = DevKit.Name("Log 01 - Decreasing"),
-                RunNumber = "101",
-                IndexCurve = "MD",
-                IndexType = LogIndexType.measureddepth,
-                Direction = LogIndexDirection.decreasing
-            };
-
-            DevKit.InitHeader(log, log.IndexType.Value, increasing: false);
-            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 100, 0.9, increasing: false);
-
-            response = DevKit.Add<LogList, Log>(log);
-
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.MissingParentUid, response.Result);
-        }
-
-        [TestMethod]
-        public void Test_error_code_478_parent_uid_case_not_matching()
-        {
-            var uid = "arent-well-01-for-error-code-478" + DevKit.Uid();
-            var well = new Well { Name = DevKit.Name("Well-to-add-01"), TimeZone = DevKit.TimeZone, Uid = "P" + uid };
-            var response = DevKit.Add<WellList, Well>(well);
-
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var wellbore = new Wellbore { Name = DevKit.Name("Wellbore-to-add-02"), NameWell = well.Name, UidWell = "P" + uid };
-            response = DevKit.Add<WellboreList, Wellbore>(wellbore);
-
-            var log = new Log()
-            {
-                Uid = DevKit.Uid(),
-                UidWell = "p" + uid,
-                NameWell = Well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = Wellbore.Name,
-                Name = DevKit.Name("Log 01 - Decreasing"),
-                RunNumber = "101",
-                IndexCurve = "MD",
-                IndexType = LogIndexType.measureddepth,
-                Direction = LogIndexDirection.decreasing
-            };
-            DevKit.InitHeader(log, log.IndexType.Value, increasing: false);
-            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 100, 0.9, increasing: false);
-
-            response = DevKit.Add<LogList, Log>(log);
-
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.IncorrectCaseParentUid, response.Result);
-        }
+        #endregion
     }
 }
