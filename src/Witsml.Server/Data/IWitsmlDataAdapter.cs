@@ -76,5 +76,12 @@ namespace PDS.Witsml.Server.Data
         /// <param name="parser">The query parser.</param>
         /// <returns>An instance of <see cref="T"/>.</returns>
         T Parse(WitsmlQueryParser parser);
+
+        /// <summary>
+        /// Gets the specified URI.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <returns></returns>
+        T Get(EtpUri uri);
     }
 }

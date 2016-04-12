@@ -1072,17 +1072,15 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            var wellbore = new Wellbore { Name = DevKit.Name("Wellbore-to-add-01"), NameWell = well.Name, UidWell = well.Uid };
-            response = DevKit.Add<WellboreList, Wellbore>(wellbore);
-
-            wellbore = new Wellbore { Name = DevKit.Name("Wellbore-to-add-02"), NameWell = well.Name, UidWell = "P" + uid };
+            var wellbore = new Wellbore { Name = DevKit.Name("Wellbore-to-add-02"), NameWell = well.Name, UidWell = "P" + uid };
             response = DevKit.Add<WellboreList, Wellbore>(wellbore);
 
             var log = new Log()
             {
+                Uid = DevKit.Uid(),
                 UidWell = "p" + uid,
                 NameWell = Well.Name,
-                UidWellbore = wellbore.Uid,
+                UidWellbore = response.SuppMsgOut,
                 NameWellbore = Wellbore.Name,
                 Name = DevKit.Name("Log 01 - Decreasing"),
                 RunNumber = "101",
@@ -1090,6 +1088,10 @@ namespace PDS.Witsml.Server.Data.Logs
                 IndexType = LogIndexType.measureddepth,
                 Direction = LogIndexDirection.decreasing
             };
+            DevKit.InitHeader(log, log.IndexType.Value, increasing: false);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 100, 0.9, increasing: false);
+
+            response = DevKit.Add<LogList, Log>(log);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.IncorrectCaseParentUid, response.Result);
