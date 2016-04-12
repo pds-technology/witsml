@@ -54,6 +54,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         {
             var uri = DataObject.GetUri();
             var uriWell = uri.Parent;
+            var well = _wellDataAdapter.Get(uriWell);
 
             // Validate parent uid property
             if (string.IsNullOrWhiteSpace(DataObject.UidWell))
@@ -62,9 +63,14 @@ namespace PDS.Witsml.Server.Data.Wellbores
             }
 
             // Validate parent exists
-            else if (!_wellDataAdapter.Exists(uriWell))
+            else if (well == null)
             {
                 yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWell" });
+            }
+
+            else if (!well.Uid.Equals(DataObject.UidWell))
+            {
+                yield return new ValidationResult(ErrorCodes.IncorrectCaseParentUid.ToString(), new[] { "UidWell" });
             }
 
             // Validate UID does not exist

@@ -75,6 +75,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var uri = DataObject.GetUri();
             var uriWellbore = uri.Parent;
             var uriWell = uriWellbore.Parent;
+            var wellbore = _wellboreDataAdapter.Get(uriWellbore);
 
             // Validate parent uid property
             if (string.IsNullOrWhiteSpace(DataObject.UidWell))
@@ -93,9 +94,14 @@ namespace PDS.Witsml.Server.Data.Logs
                 yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWell" });
             }
             // Validate parent exists
-            else if (!_wellboreDataAdapter.Exists(uriWellbore))
+            else if (wellbore == null)
             {
                 yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWellbore" });
+            }
+
+            else if (!wellbore.UidWell.Equals(DataObject.UidWell) || !wellbore.Uid.Equals(DataObject.UidWellbore))
+            {
+                yield return new ValidationResult(ErrorCodes.IncorrectCaseParentUid.ToString(), new[] { "UidWellbore" });
             }
 
             // Validate UID does not exist
