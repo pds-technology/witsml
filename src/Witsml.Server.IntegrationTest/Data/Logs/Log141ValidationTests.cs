@@ -654,7 +654,32 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Test_error_code_464_unique_curve_uid()
+        public void Test_error_code_464_unique_curve_uid_add()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+            Wellbore.UidWell = response.SuppMsgOut;
+
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            var uidWellbore = response.SuppMsgOut;
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = uidWellbore,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            log.LogCurveInfo.ForEach(l => l.Uid = "uid01");
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.ChildUidNotUnique, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_464_unique_curve_uid_update()
         {
             var response = DevKit.Add<WellList, Well>(Well);
             Wellbore.UidWell = response.SuppMsgOut;
