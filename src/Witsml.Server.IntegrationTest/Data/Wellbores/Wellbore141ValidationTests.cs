@@ -131,7 +131,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.AreEqual((short)ErrorCodes.MissingParentUid, response.Result);         
         }
 
-        [Ignore]
         [TestMethod]
         public void Test_error_code_478_parent_uid_case_not_matching()
         {

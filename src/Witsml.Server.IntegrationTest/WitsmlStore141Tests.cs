@@ -273,9 +273,9 @@ namespace PDS.Witsml.Server
         [TestMethod]
         public void Test_error_code_401_missing_plural_root_element_xmlIn()
         {
-            var list = new WellList();
-            var xmlIn = EnergisticsConverter.ObjectToXml(list).Replace("wells", "well");
-            var response = DevKit.GetFromStore(ObjectTypes.Well, xmlIn, null, null);
+            var list = new LogList();
+            var xmlIn = EnergisticsConverter.ObjectToXml(list).Replace("logs", "log");
+            var response = DevKit.GetFromStore(ObjectTypes.Log, xmlIn, null, null);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.MissingPluralRootElement, response.Result);

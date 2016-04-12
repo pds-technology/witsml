@@ -933,5 +933,166 @@ namespace PDS.Witsml.Server.Data.Logs
             var secondIndex = int.Parse(logData.Data[1].Split(',')[0]);
             Assert.IsTrue(firstIndex > secondIndex);
         }
+
+        [TestMethod]
+        public void Test_error_code_443_invalid_unit_of_measure_value()
+        {
+
+            var response = DevKit.Add<WellList, Well>(Well);
+            var uidWell = response.SuppMsgOut;
+            Wellbore.UidWell = response.SuppMsgOut;
+
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            var uidWellbore = response.SuppMsgOut;
+
+            string xmlIn =
+                "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" +
+                "    <log uidWell=\"" + uidWell + "\" uidWellbore=\"" + uidWellbore + "\">" +
+                "        <nameWell>" + Well.Name + "</nameWell>" +
+                "        <nameWellbore>" + Wellbore.Name + "</nameWellbore>" +
+                "        <name>Log Test Bad Uom</name>" +
+                "        <serviceCompany>Baker Hughes INTEQ</serviceCompany>" +
+                "        <indexType>measured depth</indexType>" +
+                "        <startIndex uom =\"abc\">499</startIndex>" +
+                "        <endIndex uom =\"abc\">509.01</endIndex>" +
+                "        <stepIncrement uom =\"abc\">0</stepIncrement>" +
+                "        <indexCurve>Mdepth</indexCurve>" +
+                "        <logCurveInfo uid=\"lci-1\">" + 
+                "            <mnemonic>Mdepth</mnemonic>" + 
+                "            <unit>m</unit>" + 
+                "            <mnemAlias>md</mnemAlias>" + 
+                "            <nullValue>-999.25</nullValue>" + 
+                "            <minIndex uom=\"m\">499</minIndex>" + 
+                "            <maxIndex uom=\"m\">509.01</maxIndex>" + 
+                "            <typeLogData>double</typeLogData>" + 
+                "        </logCurveInfo>" + 
+                "        <logCurveInfo uid=\"lci-2\">" +
+                "            <mnemonic>Vdepth</mnemonic>" + 
+                "            <unit>m</unit>" + 
+                "            <mnemAlias>tvd</mnemAlias>" + 
+                "            <nullValue>-999.25</nullValue>" + 
+                "            <minIndex uom=\"m\">499</minIndex>" + 
+                "            <maxIndex uom=\"m\">509.01</maxIndex>" + 
+                "            <typeLogData>double</typeLogData >" + 
+                "        </logCurveInfo >" + 
+                "    </log>" +
+                "</logs>";
+
+            response = DevKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.InvalidUnitOfMeasure, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_453_missing_unit_for_measure_data()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+            var uidWell = response.SuppMsgOut;
+            Wellbore.UidWell = response.SuppMsgOut;
+
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            var uidWellbore = response.SuppMsgOut;
+
+            string xmlIn =
+                "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" +
+                "    <log uidWell=\"" + uidWell + "\" uidWellbore=\"" + uidWellbore + "\">" +
+                "        <nameWell>" + Well.Name + "</nameWell>" +
+                "        <nameWellbore>" + Wellbore.Name + "</nameWellbore>" +
+                "        <name>Log Test Bad Uom</name>" +
+                "        <serviceCompany>Baker Hughes INTEQ</serviceCompany>" +
+                "        <indexType>measured depth</indexType>" +
+                "        <startIndex>499</startIndex>" +
+                "        <endIndex>509.01</endIndex>" +
+                "        <stepIncrement uom =\"abc\">0</stepIncrement>" +
+                "        <indexCurve>Mdepth</indexCurve>" +
+                "        <logCurveInfo uid=\"lci-1\">" +
+                "            <mnemonic>Mdepth</mnemonic>" +
+                "            <unit>m</unit>" +
+                "            <mnemAlias>md</mnemAlias>" +
+                "            <nullValue>-999.25</nullValue>" +
+                "            <minIndex uom=\"m\">499</minIndex>" +
+                "            <maxIndex uom=\"m\">509.01</maxIndex>" +
+                "            <typeLogData>double</typeLogData>" +
+                "        </logCurveInfo>" +
+                "        <logCurveInfo uid=\"lci-2\">" +
+                "            <mnemonic>Vdepth</mnemonic>" +
+                "            <unit>m</unit>" +
+                "            <mnemAlias>tvd</mnemAlias>" +
+                "            <nullValue>-999.25</nullValue>" +
+                "            <minIndex uom=\"m\">499</minIndex>" +
+                "            <maxIndex uom=\"m\">509.01</maxIndex>" +
+                "            <typeLogData>double</typeLogData >" +
+                "        </logCurveInfo >" +
+                "    </log>" +
+                "</logs>";
+
+            response = DevKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingUnitForMeasureData, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_406_missing_parent_uid()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+            Wellbore.UidWell = response.SuppMsgOut;
+
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            var uidWellbore = response.SuppMsgOut;
+
+            var log = new Log()
+            {
+                NameWell = Well.Name,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01 - Decreasing"),
+                RunNumber = "101",
+                IndexCurve = "MD",
+                IndexType = LogIndexType.measureddepth,
+                Direction = LogIndexDirection.decreasing
+            };
+
+            DevKit.InitHeader(log, log.IndexType.Value, increasing: false);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 100, 0.9, increasing: false);
+
+            response = DevKit.Add<LogList, Log>(log);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingParentUid, response.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_478_parent_uid_case_not_matching()
+        {
+            var uid = "arent-well-01-for-error-code-478" + DevKit.Uid();
+            var well = new Well { Name = DevKit.Name("Well-to-add-01"), TimeZone = DevKit.TimeZone, Uid = "P" + uid };
+            var response = DevKit.Add<WellList, Well>(well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var wellbore = new Wellbore { Name = DevKit.Name("Wellbore-to-add-01"), NameWell = well.Name, UidWell = well.Uid };
+            response = DevKit.Add<WellboreList, Wellbore>(wellbore);
+
+            wellbore = new Wellbore { Name = DevKit.Name("Wellbore-to-add-02"), NameWell = well.Name, UidWell = "P" + uid };
+            response = DevKit.Add<WellboreList, Wellbore>(wellbore);
+
+            var log = new Log()
+            {
+                UidWell = "p" + uid,
+                NameWell = Well.Name,
+                UidWellbore = wellbore.Uid,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01 - Decreasing"),
+                RunNumber = "101",
+                IndexCurve = "MD",
+                IndexType = LogIndexType.measureddepth,
+                Direction = LogIndexDirection.decreasing
+            };
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.IncorrectCaseParentUid, response.Result);
+        }
     }
 }
