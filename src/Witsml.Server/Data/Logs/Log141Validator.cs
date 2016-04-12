@@ -105,10 +105,7 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             // Validate that column-identifiers in LogCurveInfo are unique
-            else if (logCurves != null
-                && logCurves.GroupBy(lci => lci.Mnemonic.Value)
-                .Select(group => new { Menmonic = group.Key, Count = group.Count() })
-                .Any(g => g.Count > 1))
+            else if (DuplicateColumnIdentifier())
             {
                 yield return new ValidationResult(ErrorCodes.DuplicateColumnIdentifiers.ToString(), new[] { "LogCurveInfo", "Mnemonic" });
             }
@@ -167,12 +164,6 @@ namespace PDS.Witsml.Server.Data.Logs
             else if ((DataObject.StartIndex != null || DataObject.EndIndex != null) && (DataObject.StartDateTimeIndex != null || DataObject.EndDateTimeIndex != null))
             {
                 yield return new ValidationResult(ErrorCodes.MixedStructuralRangeIndices.ToString(), new[] { "StartIndex", "EndIndex", "StartDateTimeIndex", "EndDateTimeIndex" });
-            }
-
-            // Validate that uids in LogCurveInfo are unique
-            else if (logCurves != null && DuplicateUid(logCurves.Select(l => l.Uid)))
-            {
-                yield return new ValidationResult(ErrorCodes.ChildUidNotUnique.ToString(), new[] { "LogCurveInfo", "Uid" });
             }
 
             // Validate for a bad column identifier in LogCurveInfo Mnemonics
@@ -249,6 +240,11 @@ namespace PDS.Witsml.Server.Data.Logs
                     yield return new ValidationResult(ErrorCodes.ChildUidNotUnique.ToString(), new[] { "LogParam", "Uid" });
                 }
 
+                else if (DuplicateColumnIdentifier())
+                {
+                    yield return new ValidationResult(ErrorCodes.DuplicateColumnIdentifiers.ToString(), new[] { "LogCurveInfo", "Mnemonic" });
+                }
+
                 // Validate that uids in LogCurveInfo are unique
                 else if (logData != null && logData.Any(d => string.IsNullOrWhiteSpace(d.MnemonicList)))
                 {
@@ -296,6 +292,14 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             return uids.GroupBy(u => u)
                 .Select(group => new { Uid = group.Key, Count = group.Count() })
+                .Any(g => g.Count > 1);
+        }
+
+        private bool DuplicateColumnIdentifier()
+        {
+            var logCurves = DataObject.LogCurveInfo;
+            return logCurves != null && logCurves.GroupBy(lci => lci.Mnemonic.Value)
+                .Select(group => new { Menmonic = group.Key, Count = group.Count() })
                 .Any(g => g.Count > 1);
         }
 
