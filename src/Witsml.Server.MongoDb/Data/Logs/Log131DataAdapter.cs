@@ -170,7 +170,15 @@ namespace PDS.Witsml.Server.Data.Logs
                 GetUpdatedLogHeaderIndexRange(reader, allMnemonics, ranges, entity.Direction == LogIndexDirection.increasing);
 
                 // Add ChannelDataChunks
-                _channelDataChunkAdapter.Add(reader);
+                try
+                {
+                    _channelDataChunkAdapter.Add(reader);
+                }
+                catch (SequenceException)
+                {
+                    _channelDataChunkAdapter.Add(reader.Sort(entity.Direction == LogIndexDirection.increasing));
+                    GetUpdatedLogHeaderIndexRange(reader, allMnemonics, ranges, entity.Direction == LogIndexDirection.increasing);
+                }
 
                 // Update index range
                 UpdateIndexRange(entity.GetUri(), entity, ranges, allMnemonics, entity.IndexType == LogIndexType.datetime, indexCurve.Unit);
@@ -531,7 +539,15 @@ namespace PDS.Witsml.Server.Data.Logs
                 GetUpdatedLogHeaderIndexRange(reader, allMnemonics, ranges, current.Direction == LogIndexDirection.increasing);
 
                 // Add ChannelDataChunks
-                _channelDataChunkAdapter.Merge(reader);
+                try
+                {
+                    _channelDataChunkAdapter.Merge(reader);
+                }
+                catch (SequenceException)
+                {
+                    _channelDataChunkAdapter.Merge(reader.Sort(current.Direction == LogIndexDirection.increasing));
+                    GetUpdatedLogHeaderIndexRange(reader, allMnemonics.ToArray(), ranges, current.Direction == LogIndexDirection.increasing);
+                }
 
                 // Update index range
                 UpdateIndexRange(uri, current, ranges, allMnemonics, current.IndexType == LogIndexType.datetime, indexCurve.Unit);

@@ -718,6 +718,21 @@ namespace PDS.Witsml.Data.Channels
             }
         }
 
+        public ChannelDataReader Sort(bool increasing = true)
+        {
+            if (increasing)
+            {
+                _records = _records.OrderBy(x => x.First().First()).ToList();
+            }
+            else
+            {
+                _records = _records.OrderByDescending(x => x.First().First()).ToList();
+            }
+            Reset();
+
+            return this;
+        }
+
         /// <summary>
         /// Gets the row values.
         /// </summary>
