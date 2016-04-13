@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Dynamic;
 using Energistics.Datatypes;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
@@ -40,7 +39,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dbCollectionName">The database collection name.</param>
         /// <param name="idPropertyName">The name of the identifier property.</param>
         /// <param name="namePropertyName">The name of the object name property</param>
-        public MongoDbDataAdapter(IDatabaseProvider databaseProvider, string dbCollectionName, string idPropertyName = ObjectTypes.Uid, string namePropertyName = ObjectTypes.NameProperty)
+        protected MongoDbDataAdapter(IDatabaseProvider databaseProvider, string dbCollectionName, string idPropertyName = ObjectTypes.Uid, string namePropertyName = ObjectTypes.NameProperty)
         {
             DatabaseProvider = databaseProvider;
             DbCollectionName = dbCollectionName;
@@ -258,12 +257,14 @@ namespace PDS.Witsml.Server.Data
 
         protected List<TObject> GetEntities<TObject>(IEnumerable<EtpUri> uris, string dbCollectionName)
         {
-            if (!uris.Any())
+            var list = uris.ToList();
+
+            if (!list.Any())
             {
                 return new List<TObject>(0);
             }
 
-            var filters = uris.Select(x => MongoDbUtility.GetEntityFilter<TObject>(x, IdPropertyName));
+            var filters = list.Select(x => MongoDbUtility.GetEntityFilter<TObject>(x, IdPropertyName));
 
             return GetCollection<TObject>(dbCollectionName)
                 .Find(Builders<TObject>.Filter.Or(filters))
@@ -275,7 +276,8 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="parser">The parser.</param>
         /// <returns>The query results collection.</returns>
-        protected List<T> QueryEntities(WitsmlQueryParser parser, List<string> fields, List<string> ignored = null)
+        /// <exception cref="WitsmlException"></exception>
+        protected List<T> QueryEntities(WitsmlQueryParser parser)
         {
             try
             {
@@ -285,6 +287,12 @@ namespace PDS.Witsml.Server.Data
                     var queryTemplate = CreateQueryTemplate();
                     return queryTemplate.AsList();
                 }
+
+                var returnElements = parser.ReturnElements();
+                Logger.DebugFormat("Querying with return elements '{0}'", returnElements);
+
+                var fields = GetProjectionPropertyNames(returnElements);
+                var ignored = GetIgnoredElementNames();
 
                 Logger.DebugFormat("Querying {0} MongoDb collection.", DbCollectionName);
                 var query = new MongoDbQuery<T>(GetCollection(), parser, fields, ignored);
@@ -369,11 +377,6 @@ namespace PDS.Witsml.Server.Data
             }
         }
 
-        protected void UpdateEntityFields(string dbCollectionName)
-        {
-            var collection = GetCollection<T>(dbCollectionName);
-        }
-
         /// <summary>
         /// Deletes a data object by the specified identifier.
         /// </summary>
@@ -399,7 +402,7 @@ namespace PDS.Witsml.Server.Data
 
                 var collection = GetCollection<TObject>(dbCollectionName);
                 var filter = MongoDbUtility.GetEntityFilter<TObject>(uri, IdPropertyName);
-                var result = collection.DeleteOne(filter);
+                collection.DeleteOne(filter);
             }
             catch (MongoException ex)
             {
@@ -421,6 +424,27 @@ namespace PDS.Witsml.Server.Data
             }
 
             return uid;
+        }
+
+        /// <summary>
+        /// Gets a list of the property names to project during a query.
+        /// </summary>
+        /// <param name="returnElements">The return elements.</param>
+        /// <returns>A list of property names.</returns>
+        protected virtual List<string> GetProjectionPropertyNames(string returnElements)
+        {
+            return OptionsIn.ReturnElements.IdOnly.Equals(returnElements)
+                ? new List<string> { IdPropertyName, NamePropertyName }
+                : null;
+        }
+
+        /// <summary>
+        /// Gets a list of the element names to ignore during a query.
+        /// </summary>
+        /// <returns>A list of element names.</returns>
+        protected virtual List<string> GetIgnoredElementNames()
+        {
+            return null;
         }
     }
 }

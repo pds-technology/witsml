@@ -21,14 +21,13 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
-using MongoDB.Driver;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Log" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML200.Log}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Log}" />
     [Export(typeof(IEtpDataAdapter))]
     [Export(typeof(IEtpDataAdapter<Log>))]
     [Export200(ObjectTypes.Log, typeof(IEtpDataAdapter))]
@@ -38,9 +37,10 @@ namespace PDS.Witsml.Server.Data.Logs
         private readonly IEtpDataAdapter<ChannelSet> _channelSetDataAdapter;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Log200DataAdapter"/> class.
+        /// Initializes a new instance of the <see cref="Log200DataAdapter" /> class.
         /// </summary>
         /// <param name="databaseProvider">The database provider.</param>
+        /// <param name="channelSetDataAdapter">The channel set data adapter.</param>
         [ImportingConstructor]
         public Log200DataAdapter(IDatabaseProvider databaseProvider, IEtpDataAdapter<ChannelSet> channelSetDataAdapter) : base(databaseProvider, ObjectNames.Log200, ObjectTypes.Uuid)
         {

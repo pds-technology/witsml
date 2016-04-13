@@ -39,7 +39,7 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for a 131 <see cref="Log" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML131.Log}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Log}" />
     /// <seealso cref="PDS.Witsml.Server.Data.Channels.IChannelDataProvider" />
     /// <seealso cref="PDS.Witsml.Server.Configuration.IWitsml131Configuration" />
     [Export(typeof(IEtpDataAdapter))]
@@ -84,22 +84,11 @@ namespace PDS.Witsml.Server.Data.Logs
         public override WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
         {
             var returnElements = parser.ReturnElements();
-            Logger.DebugFormat("Querying with return elements '{0}'", returnElements);
-
-            var fields = OptionsIn.ReturnElements.IdOnly.Equals(returnElements)
-                ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell", "UidWellbore", "NameWellbore" }
-                : OptionsIn.ReturnElements.DataOnly.Equals(returnElements)
-                ? new List<string> { IdPropertyName, "UidWell", "UidWellbore" }
-                : OptionsIn.ReturnElements.Requested.Equals(returnElements)
-                ? new List<string>()
-                : null;
-
-            var ignored = new List<string> { "startIndex", "endIndex", "startDateTimeIndex", "endDateTimeIndex", "logData" };
-            var logs = QueryEntities(parser, fields, ignored);
+            var logs = QueryEntities(parser);
 
             if (OptionsIn.ReturnElements.All.Equals(returnElements) ||
                 OptionsIn.ReturnElements.DataOnly.Equals(returnElements) ||
-                (fields != null && fields.Contains("LogData")))
+                parser.Contains("logData"))
             {
                 var logHeaders = GetEntities(logs.Select(x => x.GetUri()))
                     .ToDictionary(x => x.GetUri());

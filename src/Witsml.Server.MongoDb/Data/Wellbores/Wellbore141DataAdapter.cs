@@ -29,7 +29,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Wellbore" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML141.Wellbore}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Wellbore}" />
     /// <seealso cref="PDS.Witsml.Server.Configuration.IWitsml141Configuration" />
     [Export(typeof(IEtpDataAdapter))]
     [Export(typeof(IWitsml141Configuration))]
@@ -61,24 +61,29 @@ namespace PDS.Witsml.Server.Data.Wellbores
         }
 
         /// <summary>
+        /// Gets a list of the property names to project during a query.
+        /// </summary>
+        /// <param name="returnElements">The return elements.</param>
+        /// <returns>A list of property names.</returns>
+        protected override List<string> GetProjectionPropertyNames(string returnElements)
+        {
+            return OptionsIn.ReturnElements.IdOnly.Equals(returnElements)
+                ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell" }
+                : null;
+        }
+
+        /// <summary>
         /// Queries the object(s) specified by the parser.
         /// </summary>
         /// <param name="parser">The parser that specifies the query parameters.</param>
         /// <returns>Queried objects.</returns>
         public override WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
         {
-            var returnElements = parser.ReturnElements();
-            Logger.DebugFormat("Querying with return elements '{0}'", returnElements);
-
-            var fields = (OptionsIn.ReturnElements.IdOnly.Equals(returnElements))
-                ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell" }
-                : null;
-
             return new WitsmlResult<IEnergisticsCollection>(
                 ErrorCodes.Success,
                 new WellboreList()
                 {
-                    Wellbore = QueryEntities(parser, fields)
+                    Wellbore = QueryEntities(parser)
                 });
         }
 

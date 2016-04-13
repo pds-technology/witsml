@@ -71,17 +71,17 @@ namespace PDS.Witsml.Server.Data
         bool Exists(EtpUri uri);
 
         /// <summary>
+        /// Gets a data object by the specified URI.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        /// <returns>The data object instance.</returns>
+        T Get(EtpUri uri);
+
+        /// <summary>
         /// Parses the specified XML string.
         /// </summary>
         /// <param name="parser">The query parser.</param>
         /// <returns>An instance of <see cref="T"/>.</returns>
         T Parse(WitsmlQueryParser parser);
-
-        /// <summary>
-        /// Gets the specified URI.
-        /// </summary>
-        /// <param name="uri">The URI.</param>
-        /// <returns></returns>
-        T Get(EtpUri uri);
     }
 }
