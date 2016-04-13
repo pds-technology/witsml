@@ -163,6 +163,14 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 entity.Direction = LogIndexDirection.increasing;
             }
+            if (entity.LogCurveInfo != null)
+            {
+                foreach (var logCurve in entity.LogCurveInfo)
+                {
+                    if (string.IsNullOrWhiteSpace(logCurve.Uid))
+                        logCurve.Uid = logCurve.Mnemonic.Value;
+                }
+            }
                 
             Logger.DebugFormat("Adding Log with uid '{0}' and name '{1}'", entity.Uid, entity.Name);
 
