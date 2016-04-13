@@ -71,41 +71,6 @@ namespace PDS.Witsml.Server.Data.Channels
         }
 
         /// <summary>
-        /// Gets the index range for all channel data.
-        /// </summary>
-        /// <param name="uri">The data object URI.</param>
-        /// <param name="increasing">if set to <c>true</c> the primary index is increasing.</param>
-        /// <returns>The full index range.</returns>
-        public Range<double> GetIndexRange(string uri, bool increasing)
-        {
-            try
-            {
-                double start;
-                double end;
-
-                if (increasing)
-                {
-                    start = GetQuery().OrderBy(x => x.Indices[0].Start).Select(x => x.Indices[0].Start).FirstOrDefault();
-                    end = GetQuery().OrderByDescending(x => x.Indices[0].Start).Select(x => x.Indices[0].End).FirstOrDefault();
-                    Logger.DebugFormat("Range for increasing index - start: {0}, end: {1}", start, end);
-
-                    return new Range<double>(start, end);
-                }
-
-                start = GetQuery().OrderByDescending(x => x.Indices[0].Start).Select(x => x.Indices[0].Start).FirstOrDefault();
-                end = GetQuery().OrderBy(x => x.Indices[0].Start).Select(x => x.Indices[0].End).FirstOrDefault();
-                Logger.DebugFormat("Range for decreasing index - start: {0}, end: {1}", start, end);
-
-                return new Range<double>(start, end);
-            }
-            catch (MongoException ex)
-            {
-                Logger.ErrorFormat("Error getting index range: {0}", ex);
-                throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, ex);
-            }
-        }
-
-        /// <summary>
         /// Adds ChannelDataChunks using the specified reader.
         /// </summary>
         /// <param name="reader">The <see cref="ChannelDataReader"/> used to parse the data.</param>
@@ -262,11 +227,20 @@ namespace PDS.Witsml.Server.Data.Channels
 
                 double index = record.GetIndexValue();
 
-                if (previousIndex.HasValue && previousIndex.Value == index)
+                if (previousIndex.HasValue) 
                 {
-                    Logger.ErrorFormat("Data nodes having same index: {0}", index);
-                    throw new WitsmlException(ErrorCodes.NodesWithSameIndex);
+                    if (previousIndex.Value == index)
+                    {
+                        Logger.ErrorFormat("Data nodes having same index: {0}", index);
+                        throw new WitsmlException(ErrorCodes.NodesWithSameIndex);
+                    }
+                    else if (increasing && previousIndex.Value > index || !increasing && previousIndex.Value < index)
+                    {
+                        Logger.DebugFormat("Data nodes index not in sequence: {0}", index);
+                        throw new SequenceException();
+                    } 
                 }
+                
                 previousIndex = index;
 
                 if (!plannedRange.HasValue)
