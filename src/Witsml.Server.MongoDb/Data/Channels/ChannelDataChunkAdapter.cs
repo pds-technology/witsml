@@ -32,7 +32,7 @@ namespace PDS.Witsml.Server.Data.Channels
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for channel data.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{PDS.Witsml.Server.Models.ChannelDataChunk}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{ChannelDataChunk}" />
     [Export]
     public class ChannelDataChunkAdapter : MongoDbDataAdapter<ChannelDataChunk>
     {

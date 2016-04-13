@@ -37,7 +37,7 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Gets a data object by the specified URI.
         /// </summary>
-        /// <param uri>The data object URI.</param>
+        /// <param name="uri">The data object URI.</param>
         /// <returns>The data object instance.</returns>
         T Get(EtpUri uri);
 

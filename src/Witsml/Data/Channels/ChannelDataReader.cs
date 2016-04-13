@@ -45,8 +45,8 @@ namespace PDS.Witsml.Data.Channels
 
         private static readonly string[] Empty = new string[0];
         private List<List<List<object>>> _records;
-        private int _indexCount;
-        private int _count;
+        private readonly int _indexCount;
+        private readonly int _count;
         private int _current = -1;
 
         /// <summary>
@@ -667,9 +667,7 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Advances the <see cref="T:System.Data.IDataReader" /> to the next record.
         /// </summary>
-        /// <returns>
-        /// true if there are more rows; otherwise, false.
-        /// </returns>
+        /// <returns>true if there are more rows; otherwise, false.</returns>
         public bool Read()
         {
             _current++;
@@ -682,6 +680,17 @@ namespace PDS.Witsml.Data.Channels
         public void Reset()
         {
             _current = -1;
+        }
+
+        /// <summary>
+        /// Moves the current pointer to the specified row.
+        /// </summary>
+        /// <param name="row">The row.</param>
+        /// <returns>true if there are more rows; otherwise, false.</returns>
+        public bool MoveTo(int row)
+        {
+            _current = row;
+            return !IsClosed;
         }
 
         /// <summary>

@@ -29,7 +29,7 @@ namespace PDS.Witsml.Server.Data.Wells
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Well" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML131.Well}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Well}" />
     /// <seealso cref="PDS.Witsml.Server.Configuration.IWitsml131Configuration" />
     [Export(typeof(IEtpDataAdapter))]
     [Export(typeof(IWitsml131Configuration))]
@@ -70,18 +70,11 @@ namespace PDS.Witsml.Server.Data.Wells
         /// <returns>Queried objects.</returns>
         public override WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
         {
-            var returnElements = parser.ReturnElements();
-            Logger.DebugFormat("Querying with return elements '{0}'", returnElements);
-
-            var fields = (OptionsIn.ReturnElements.IdOnly.Equals(returnElements))
-                ? new List<string> { IdPropertyName, NamePropertyName }
-                : null;
-
             return new WitsmlResult<IEnergisticsCollection>(
                 ErrorCodes.Success,
                 new WellList()
                 {
-                    Well = QueryEntities(parser, fields)
+                    Well = QueryEntities(parser)
                 });
         }
 

@@ -132,5 +132,24 @@ namespace PDS.Witsml
                     : index * Math.Pow(10, scale))
                 );
         }
+
+        public static DateTimeOffset? ToOffsetTime(this Timestamp? value, TimeSpan? offset)
+        {
+            if (!value.HasValue || !offset.HasValue)
+                return value;
+
+            return ToOffsetTime(value.Value, offset);
+        }
+
+        public static DateTimeOffset ToOffsetTime(this DateTimeOffset value, TimeSpan? offset)
+        {
+            if (!offset.HasValue)
+                return value;
+
+            if (value.Offset.CompareTo(offset) == 0)
+                return value;
+
+            return DateTimeOffset.FromUnixTimeSeconds(value.ToUnixTimeSeconds()).ToOffset(offset.Value);
+        }
     }
 }

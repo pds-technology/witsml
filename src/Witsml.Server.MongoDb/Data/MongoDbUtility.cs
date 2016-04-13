@@ -250,7 +250,8 @@ namespace PDS.Witsml.Server.Data
                     { "CommonData.DateTimeLastChange", DateTimeOffset.UtcNow.ToString("o") }
                 };
             }
-            else if (typeof(Witsml200.ComponentSchemas.AbstractObject).IsAssignableFrom(typeof(T)))
+
+            if (typeof(Witsml200.ComponentSchemas.AbstractObject).IsAssignableFrom(typeof(T)))
             {
                 return new Dictionary<string, object> {
                     { "Citation.LastUpdate", DateTime.UtcNow.ToString("o") }
@@ -269,57 +270,37 @@ namespace PDS.Witsml.Server.Data
         public static string[] CreateIgnoreFields<T>(string[] ignored)
         {
             var creationTime = typeof(IDataObject).IsAssignableFrom(typeof(T))
-                ? new string[] { "dTimCreation", "dTimLastChange" }
-                : new string[] { "Creation", "LastUpdate" };
+                ? new[] { "dTimCreation", "dTimLastChange" }
+                : new[] { "Creation", "LastUpdate" };
 
             return ignored == null ? creationTime : creationTime.Union(ignored).ToArray();
         }
 
         public static FilterDefinition<T> BuildFilter<T>(string field, object value)
         {
-            var type = value.GetType();
-            if (type == typeof(string))
+            if (value is string)
                 return Builders<T>.Filter.EqIgnoreCase(field, value.ToString());
-            else
-                return Builders<T>.Filter.Eq(field, value);
+
+            return Builders<T>.Filter.Eq(field, value);
         }
 
         public static UpdateDefinition<T> BuildUpdate<T>(UpdateDefinition<T> updates, string field, object value)
         {
             if (updates == null)
                 return Builders<T>.Update.Set(field, value);
-            else
-                return updates.Set(field, value);
+
+            return updates.Set(field, value);
         }
 
         public static string LookUpIdField(Type type, string defaultField = "Uid")
         {
             var idField = defaultField;
             var classMap = BsonClassMap.LookupClassMap(type);
+
             if (classMap != null && classMap.IdMemberMap != null)
                 idField = classMap.IdMemberMap.MemberName;
 
             return idField;
-        }
-
-        public static DateTimeOffset? ToOffsetTime(Timestamp? value, TimeSpan? offset)
-        {
-            if (!value.HasValue || !offset.HasValue)
-                return value;
-
-            var time = DateTimeOffset.Parse(value.Value.ToString());
-            return ToOffsetTime(time, offset);
-        }
-
-        public static DateTimeOffset? ToOffsetTime(DateTimeOffset time, TimeSpan? offset)
-        {
-            if (!offset.HasValue)
-                return time;
-
-            if (time.Offset.CompareTo(offset) == 0)
-                return time;
-
-            return DateTimeOffset.FromUnixTimeSeconds(time.ToUnixTimeSeconds()).ToOffset(offset.Value);
         }
     }
 }
