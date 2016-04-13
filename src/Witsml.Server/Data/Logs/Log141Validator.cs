@@ -110,6 +110,12 @@ namespace PDS.Witsml.Server.Data.Logs
                 yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
             }
 
+            // Validate that uid for LogParam exists
+            else if (DataObject.LogParam != null && DataObject.LogParam.Any(lp => string.IsNullOrWhiteSpace(lp.Uid)))
+            {
+                yield return new ValidationResult(ErrorCodes.MissingElementUid.ToString(), new[] { "LogParam", "Uid" });
+            }
+
             // Validate that column-identifiers in LogCurveInfo are unique
             else if (DuplicateColumnIdentifier())
             {

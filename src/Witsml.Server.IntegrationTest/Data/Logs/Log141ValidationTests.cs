@@ -1128,5 +1128,79 @@ namespace PDS.Witsml.Server.Data.Logs
             var update = DevKit.Update<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.MissingUnitForMeasureData, update.Result);
         }
+
+        [TestMethod]
+        public void Test_error_code_448_missing_log_param_uid_add()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+            Wellbore.UidWell = response.SuppMsgOut;
+
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            var uidWellbore = response.SuppMsgOut;
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = uidWellbore,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            var logParam = new IndexedObject
+            {
+                Description = "Md Index"
+            };
+
+            log.LogParam = new List<IndexedObject> { logParam };
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.MissingElementUid, response.Result);          
+        }
+
+        [TestMethod]
+        public void Test_log_curve_uid_default_to_mnemonic()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+            Wellbore.UidWell = response.SuppMsgOut;
+
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            var uidWellbore = response.SuppMsgOut;
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = uidWellbore,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            var indexCurve = log.LogCurveInfo.First();
+            indexCurve.Uid = string.Empty;
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var query = new Log
+            {
+                Uid = uidLog,
+                UidWell = log.UidWell,
+                UidWellbore = log.UidWellbore
+            };
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All.ToString());
+            Assert.AreEqual(1, results.Count);
+
+            var logAdded = results.First();
+            indexCurve = logAdded.LogCurveInfo.First();
+            Assert.AreEqual(indexCurve.Mnemonic.Value, indexCurve.Uid);
+        }
     }
 }
