@@ -27,7 +27,7 @@ namespace PDS.Witsml.Server.Data.Wells
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Well" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML200.Well}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Well}" />
     [Export(typeof(IEtpDataAdapter))]
     [Export(typeof(IEtpDataAdapter<Well>))]
     [Export200(ObjectTypes.Well, typeof(IEtpDataAdapter))]

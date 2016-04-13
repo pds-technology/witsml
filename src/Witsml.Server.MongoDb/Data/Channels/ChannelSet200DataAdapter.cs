@@ -25,7 +25,6 @@ using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
-using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
@@ -36,7 +35,7 @@ namespace PDS.Witsml.Server.Data.Channels
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="ChannelSet" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Energistics.DataAccess.WITSML200.ChannelSet}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{ChannelSet}" />
     /// <seealso cref="PDS.Witsml.Server.Data.Channels.IChannelDataProvider" />
     [Export(typeof(IEtpDataAdapter))]
     [Export(typeof(IEtpDataAdapter<ChannelSet>))]
@@ -154,18 +153,13 @@ namespace PDS.Witsml.Server.Data.Channels
                 var indexCurve = entity.Index[0];
                 Logger.DebugFormat("Index curve mnemonic: {0}.", indexCurve.Mnemonic);
 
-               TimeSpan ? offset = null;
-                var isTimeLog = indexCurve.IndexType == ChannelIndexType.datetime || indexCurve.IndexType == ChannelIndexType.elapsedtime;
-                if (isTimeLog)
-                    offset = reader.GetChannelIndexRange(0).Offset;
-
                 GetUpdatedLogHeaderIndexRange(reader, allMnemonics, ranges, increasing);
 
                 // Add ChannelDataChunks
                 _channelDataChunkAdapter.Add(reader);
 
                 // Update index range
-                UpdateIndexRange(entity.GetUri(), entity, ranges, allMnemonics, offset);
+                UpdateIndexRange(entity.GetUri(), entity, ranges, allMnemonics);
             }
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uuid);
@@ -298,18 +292,13 @@ namespace PDS.Witsml.Server.Data.Channels
                 var ranges = GetCurrentIndexRange(current);
                 var indexCurve = current.Index[0];
 
-                TimeSpan? offset = null;
-                var isTimeLog = indexCurve.IndexType == ChannelIndexType.datetime || indexCurve.IndexType == ChannelIndexType.elapsedtime;
-                if (isTimeLog)
-                    offset = reader.GetChannelIndexRange(0).Offset;
-
                 GetUpdatedLogHeaderIndexRange(reader, allMnemonics, ranges, increasing);
 
                 // Add ChannelDataChunks
                 _channelDataChunkAdapter.Merge(reader);
 
                 // Update index range
-                UpdateIndexRange(uri, current, ranges, allMnemonics, offset);
+                UpdateIndexRange(uri, current, ranges, allMnemonics);
             }
         }
 
@@ -364,7 +353,7 @@ namespace PDS.Witsml.Server.Data.Channels
             ranges.Add(mnemonic, new Range<double?>(startValue, endValue));
         }
 
-        private AbstractIndexValue UpdateIndexValue(ChannelIndexType? indexType, AbstractIndexValue current, double value, TimeSpan? offset)
+        private AbstractIndexValue UpdateIndexValue(ChannelIndexType? indexType, AbstractIndexValue current, double value)
         {
             AbstractIndexValue indexValue = null;
 
@@ -374,7 +363,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     indexValue = new TimeIndexValue();
                 else
                     indexValue = current;
-                ((TimeIndexValue)indexValue).Time = MongoDbUtility.ToOffsetTime(DateTimeOffset.FromUnixTimeSeconds((long)value), offset).Value.ToString("o");
+                ((TimeIndexValue)indexValue).Time = DateTimeOffset.FromUnixTimeSeconds((long)value).ToString("o");
             }
             else if (indexType == ChannelIndexType.passindexeddepth)
             {
@@ -403,20 +392,12 @@ namespace PDS.Witsml.Server.Data.Channels
                 var mnemonic = mnemonics[i];
                 Range<double?> current;
 
-
-                if (ranges.ContainsKey(mnemonic))
-                {
-                    current = ranges[mnemonic];
-                }
-                else
-                {
+                if (!ranges.TryGetValue(mnemonic, out current))
                     current = new Range<double?>(null, null);
-                    ranges.Add(mnemonic, current);
-                }
 
                 var update = reader.GetChannelIndexRange(i);
-                double? start = current.Start;
-                double? end = current.End;
+                var start = current.Start;
+                var end = current.End;
 
                 if (!current.Start.HasValue || !update.StartsAfter(current.Start.Value, increasing))
                     start = update.Start;
@@ -427,9 +408,8 @@ namespace PDS.Witsml.Server.Data.Channels
             }
         }
 
-        private void UpdateIndexRange(EtpUri uri, ChannelSet entity, Dictionary<string, Range<double?>> ranges, IEnumerable<string> mnemonics, TimeSpan? offset)
+        private void UpdateIndexRange(EtpUri uri, ChannelSet entity, Dictionary<string, Range<double?>> ranges, IEnumerable<string> mnemonics)
         {
-            var collection = GetCollection();
             var mongoUpdate = new MongoDbUpdate<ChannelSet>(GetCollection(), null);
 
             var idField = MongoDbUtility.LookUpIdField(typeof(ChannelSet), "Uuid");
@@ -441,12 +421,12 @@ namespace PDS.Witsml.Server.Data.Channels
             {
                 if (entity.Citation.Creation.HasValue)
                 {
-                    var creationTime = MongoDbUtility.ToOffsetTime(entity.Citation.Creation.Value, offset);
+                    var creationTime = entity.Citation.Creation;
                     channelIndexUpdate = MongoDbUtility.BuildUpdate(channelIndexUpdate, "Citation.Creation", creationTime.Value.ToString("o"));
                 }
                 if (entity.Citation.LastUpdate.HasValue)
                 {
-                    var updateTime = MongoDbUtility.ToOffsetTime(entity.Citation.LastUpdate.Value, offset);
+                    var updateTime = entity.Citation.LastUpdate;
                     channelIndexUpdate = MongoDbUtility.BuildUpdate(channelIndexUpdate, "Citation.LastUpdate", updateTime.Value.ToString("o"));
                 }
             }
@@ -454,18 +434,17 @@ namespace PDS.Witsml.Server.Data.Channels
             var indexChannel = entity.Index.FirstOrDefault();
             var indexType = indexChannel.IndexType;
             var indexMnemonic = indexChannel.Mnemonic;
-            var startIndex = entity.StartIndex;
             var range = ranges[indexMnemonic];
 
             if (range.Start.HasValue)
             {
-                var start = UpdateIndexValue(indexType, startIndex, range.Start.Value, offset);
+                var start = UpdateIndexValue(indexType, entity.StartIndex, range.Start.Value);
                 channelIndexUpdate = MongoDbUtility.BuildUpdate(channelIndexUpdate, "StartIndex", start);
             }
 
             if (range.End.HasValue)
             {
-                var end = UpdateIndexValue(indexType, entity.EndIndex, range.End.Value, offset);
+                var end = UpdateIndexValue(indexType, entity.EndIndex, range.End.Value);
                 channelIndexUpdate = MongoDbUtility.BuildUpdate(channelIndexUpdate, "EndIndex", end);
             }
 
@@ -480,30 +459,28 @@ namespace PDS.Witsml.Server.Data.Channels
                 if (channel == null)
                     continue;
 
-                var filters = new List<FilterDefinition<ChannelSet>>();
-                filters.Add(filter);
-                filters.Add(MongoDbUtility.BuildFilter<ChannelSet>("Channel." + idField, channel.Uuid));
-                var channelFilter = Builders<ChannelSet>.Filter.And(filters);
+                var channelFilter = Builders<ChannelSet>.Filter.And(filter,
+                    MongoDbUtility.BuildFilter<ChannelSet>("Channel." + idField, channel.Uuid));
 
-                var updateBuilder = Builders<ChannelSet>.Update;
                 UpdateDefinition<ChannelSet> updates = null;
-
                 range = ranges[mnemonic];
 
                 if (range.Start.HasValue)
                 {
-                    var start = UpdateIndexValue(indexType, channel.StartIndex, range.Start.Value, offset);
+                    var start = UpdateIndexValue(indexType, channel.StartIndex, range.Start.Value);
                     updates = MongoDbUtility.BuildUpdate(updates, "Channel.$.StartIndex", start);
                 }
 
                 if (range.End.HasValue)
                 {
-                    var end = UpdateIndexValue(indexType, channel.EndIndex, range.End.Value, offset);
+                    var end = UpdateIndexValue(indexType, channel.EndIndex, range.End.Value);
                     updates = MongoDbUtility.BuildUpdate(updates, "Channel.$.EndIndex", end);
                 }
 
                 if (updates != null)
+                {
                     mongoUpdate.UpdateFields(channelFilter, updates);
+                }
             }
         }
     }
