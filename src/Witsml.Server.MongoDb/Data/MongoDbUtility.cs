@@ -234,7 +234,7 @@ namespace PDS.Witsml.Server.Data
                 filters.Add(builder.EqIgnoreCase("UidWellbore", objectIds[ObjectTypes.Wellbore]));
             }
 
-            return builder.And(filters);
+            return builder.And(filters.Where(f => f != null));
         }
 
         /// <summary>

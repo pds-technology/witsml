@@ -37,7 +37,11 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The regular expression filter definition.</returns>
         public static FilterDefinition<T> EqIgnoreCase<T>(this FilterDefinitionBuilder<T> filter, string propertyPath, string propertyValue)
         {
-            return filter.Regex(propertyPath, new BsonRegularExpression("^" + (propertyValue == null ? string.Empty : Regex.Escape(propertyValue)) + "$", "i"));
+            if (string.IsNullOrEmpty(propertyPath) || propertyValue == null)
+            {
+                return null;
+            }                
+            return filter.Regex(propertyPath, new BsonRegularExpression("^" + Regex.Escape(propertyValue) + "$", "i"));
         }
     }
 }
