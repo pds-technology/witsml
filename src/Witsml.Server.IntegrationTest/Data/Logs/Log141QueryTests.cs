@@ -291,5 +291,70 @@ namespace PDS.Witsml.Server.Data.Logs
             var parser = new WitsmlQueryParser(context);
             Assert.IsFalse(parser.HasElements("indexType"));
         }
+
+        [TestMethod]
+        public void Log_header_index_value_sorted_for_decreasing_log()
+        {
+            var response = DevKit.Add<WellList, Well>(_well);
+
+            _wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+
+            var log = new Log()
+            {
+                UidWell = _wellbore.UidWell,
+                NameWell = _well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = _wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            var row = 10;
+            DevKit.InitHeader(log, LogIndexType.measureddepth, false);
+
+            var startIndex = new GenericMeasure { Uom = "m", Value = 100 };
+            log.StartIndex = startIndex;
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), row, 1, true, false, false);
+            var logData = log.LogData.First();
+            logData.Data.Clear();
+            logData.Data.Add("100,1,");
+            logData.Data.Add("99,2,");
+            logData.Data.Add("98,3,");
+            logData.Data.Add("97,4,");
+            logData.Data.Add("96,5,");
+            logData.Data.Add("95,,6");
+            logData.Data.Add("94,,7");
+            logData.Data.Add("93,,8");
+            logData.Data.Add("92,,9");
+            logData.Data.Add("91,,10");
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+            logData = new LogData { MnemonicList = DevKit.Mnemonics(log) };
+            var query = new Log
+            {
+                Uid = uidLog,
+                UidWell = log.UidWell,
+                UidWellbore = log.UidWellbore,
+                Direction = LogIndexDirection.decreasing,
+                StartIndex = new GenericMeasure(98.0, "m"),
+                EndIndex = new GenericMeasure(94.0, "m")
+            };
+            var result = DevKit.Query<LogList, Log>(query, ObjectTypes.Log, null, OptionsIn.ReturnElements.All);
+            Assert.IsNotNull(result);
+            var logAdded = result.First();
+            var indexCurve = logAdded.LogCurveInfo.First();
+            Assert.AreEqual(query.EndIndex.Value, indexCurve.MinIndex.Value);
+            Assert.AreEqual(query.StartIndex.Value, indexCurve.MaxIndex.Value);
+            Assert.AreEqual(query.StartIndex.Value, logAdded.StartIndex.Value);
+            Assert.AreEqual(query.EndIndex.Value, logAdded.EndIndex.Value);
+            var firstChannel = logAdded.LogCurveInfo[1];
+            Assert.AreEqual(96, firstChannel.MinIndex.Value);
+            Assert.AreEqual(query.StartIndex.Value, firstChannel.MaxIndex.Value);
+            var secondChannel = logAdded.LogCurveInfo[2];
+            Assert.AreEqual(query.EndIndex.Value, secondChannel.MinIndex.Value);
+            Assert.AreEqual(95, secondChannel.MaxIndex.Value);
+        }
     }
 }
