@@ -218,7 +218,7 @@ namespace PDS.Witsml.Server.Data.Logs
             return new Range<double?>(start, end);
         }
 
-        protected override void SetLogDataValues(Log log, List<string> logDataValues, IEnumerable<string> mnemonics, IDictionary<int, string> units)
+        protected override void SetLogDataValues(Log log, List<string> logDataValues, IEnumerable<string> mnemonics, IEnumerable<string> units)
         {
             if (log.LogData == null)
                 log.LogData = new List<LogData>();
@@ -226,7 +226,7 @@ namespace PDS.Witsml.Server.Data.Logs
             log.LogData.Add(new LogData()
             {
                 MnemonicList = string.Join(",", mnemonics),
-                UnitList = string.Join(",", units.Values),
+                UnitList = string.Join(",", units),
                 Data = logDataValues
             });
         }

@@ -335,7 +335,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var records = GetChannelData(logHeader.GetUri(), mnemonics[0], range, IsIncreasing(logHeader));
             var logData = FormatLogData(records.GetReader(), mnemonics, units);
 
-            SetLogDataValues(log, logData, mnemonics.Values, units);
+            SetLogDataValues(log, logData, mnemonics.Values, units.Values);
         }
 
         protected Range<double?> GetLogDataSubsetRange(T log, WitsmlQueryParser parser)
@@ -672,7 +672,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
         protected abstract void SetLogIndexRange(T log);
 
-        protected abstract void SetLogDataValues(T log, List<string> logData, IEnumerable<string> mnemonics, IDictionary<int, string> units);
+        protected abstract void SetLogDataValues(T log, List<string> logData, IEnumerable<string> mnemonics, IEnumerable<string> units);
 
         protected abstract UpdateDefinition<T> UpdateCommonData(MongoDbUpdate<T> mongoUpdate, UpdateDefinition<T> logHeaderUpdate, T entity, TimeSpan? offset);
 
