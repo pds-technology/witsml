@@ -43,6 +43,7 @@ namespace PDS.Witsml.Data.Channels
             DateParseHandling = DateParseHandling.DateTimeOffset
         };
 
+        private static ILog _log = LogManager.GetLogger(typeof(ChannelDataReader));
         private static readonly string[] Empty = new string[0];
         private List<List<List<object>>> _records;
         private readonly int _indexCount;
@@ -78,6 +79,27 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelDataReader"/> class.
         /// </summary>
+        /// <param name="records">The collection of data records.</param>
+        public ChannelDataReader(IEnumerable<IChannelDataRecord> records)
+        {
+            _log.Debug("ChannelDataReader instance created");
+
+            var items = records.ToList();
+            var record = items.FirstOrDefault();
+
+            _records = Combine(records);
+            _count = GetRowValues(0).Count();
+            _indexCount = GetIndexValues(0).Count();
+
+            Indices = record?.Indices ?? new List<ChannelIndexInfo>();
+            Mnemonics = record?.Mnemonics ?? Empty;
+            Units = record?.Units ?? Empty;
+            Uri = record?.Uri ?? null;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ChannelDataReader"/> class.
+        /// </summary>
         /// <param name="records">The channel records.</param>
         /// <param name="mnemonics">The channel mnemonics.</param>
         /// <param name="units">The channel units.</param>
@@ -85,9 +107,7 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="id">The identifier.</param>
         internal ChannelDataReader(List<List<List<object>>> records, string[] mnemonics = null, string[] units = null, string uri = null, string id = null)
         {
-            Logger = LogManager.GetLogger(GetType());
-
-            Logger.Debug("ChannelDataReader instance created");
+            _log.Debug("ChannelDataReader instance created");
 
             _records = records;
             _count = GetRowValues(0).Count();
@@ -101,57 +121,39 @@ namespace PDS.Witsml.Data.Channels
         }
 
         /// <summary>
-        /// Gets the logger.
-        /// </summary>
-        /// <value>The logger.</value>
-        protected ILog Logger { get; private set; }
-
-        /// <summary>
         /// Gets or sets the identifier.
         /// </summary>
-        /// <value>
-        /// The channel identifier.
-        /// </value>
+        /// <value>The unique identifier.</value>
         public string Id { get; set; }
 
         /// <summary>
         /// Gets or sets the URI.
         /// </summary>
-        /// <value>
-        /// The URI.
-        /// </value>
+        /// <value>The parent data object URI.</value>
         public string Uri { get; set; }
 
         /// <summary>
         /// Gets the mnemonics.
         /// </summary>
-        /// <value>
-        /// The list of channel mnemonics.
-        /// </value>
+        /// <value>The list of channel mnemonics.</value>
         public string[] Mnemonics { get; private set; }
 
         /// <summary>
         /// Gets the units.
         /// </summary>
-        /// <value>
-        /// The list of channel units.
-        /// </value>
+        /// <value>The list of channel units.</value>
         public string[] Units { get; private set; }
 
         /// <summary>
         /// Gets the indices.
         /// </summary>
-        /// <value>
-        /// A <see cref="List{ChannelIndexInfo}"/> of indices.
-        /// </value>
-        public List<ChannelIndexInfo> Indices { get; }
+        /// <value>A list of indices.</value>
+        public List<ChannelIndexInfo> Indices { get; private set; }
 
         /// <summary>
         /// Indexer property that gets the value with the specified mnemonic name for the current row referenced by the reader.
         /// </summary>
-        /// <value>
-        /// The <see cref="System.Object"/>.
-        /// </value>
+        /// <value>The <see cref="System.Object"/>.</value>
         /// <param name="name">The name of the mnemonic.</param>
         /// <returns>The value for the mnemonic</returns>
         public object this[string name]
@@ -166,9 +168,7 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Indexer property that gets the value with the specified numerical index in the current row referenced by the reader.
         /// </summary>
-        /// <value>
-        /// The <see cref="System.Object"/>.
-        /// </value>
+        /// <value>The <see cref="System.Object"/>.</value>
         /// <param name="i">The i.</param>
         /// <returns></returns>
         public object this[int i]
@@ -238,7 +238,7 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Sets the value.
         /// </summary>
-        /// <param name="i">The i.</param>
+        /// <param name="i">The position for the channel.</param>
         /// <param name="value">The value.</param>
         public void SetValue(int i, object value)
         {
@@ -482,11 +482,13 @@ namespace PDS.Witsml.Data.Channels
         }
 
         /// <summary>
-        /// Gets the <see cref="T:System.Type" /> information corresponding to the type of <see cref="T:System.Object" /> that would be returned from <see cref="M:System.Data.IDataRecord.GetValue(System.Int32)" />.
+        /// Gets the <see cref="T:System.Type" /> information corresponding to the type of <see cref="T:System.Object" /> 
+        /// that would be returned from <see cref="M:System.Data.IDataRecord.GetValue(System.Int32)" />.
         /// </summary>
         /// <param name="i">The index of the field to find.</param>
         /// <returns>
-        /// The <see cref="T:System.Type" /> information corresponding to the type of <see cref="T:System.Object" /> that would be returned from <see cref="M:System.Data.IDataRecord.GetValue(System.Int32)" />.
+        /// The <see cref="T:System.Type" /> information corresponding to the type of <see cref="T:System.Object" /> 
+        /// that would be returned from <see cref="M:System.Data.IDataRecord.GetValue(System.Int32)" />.
         /// </returns>
         /// <exception cref="System.NotImplementedException"></exception>
         public Type GetFieldType(int i)
@@ -801,6 +803,19 @@ namespace PDS.Witsml.Data.Channels
                 return new List<List<List<object>>>();
             
             return JsonConvert.DeserializeObject<List<List<List<object>>>>(data, JsonSettings);       
+        }
+
+        /// <summary>
+        /// Combines the specified records.
+        /// </summary>
+        /// <param name="records">The records.</param>
+        /// <returns></returns>
+        private static List<List<List<object>>> Combine(IEnumerable<IChannelDataRecord> records)
+        {
+            return records
+                .Cast<ChannelDataReader>()
+                .Select(x => x._records[x._current])
+                .ToList();
         }
 
         /// <summary>

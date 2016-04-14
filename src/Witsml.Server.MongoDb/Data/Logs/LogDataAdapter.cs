@@ -325,7 +325,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var range = GetLogDataSubsetRange(logHeader, parser);
             var units = GetUnitList(logHeader, mnemonics.Keys.ToArray());
             var records = GetChannelData(logHeader.GetUri(), mnemonics[0], range, IsIncreasing(logHeader));
-            var logData = FormatLogData(records, mnemonics);
+            var logData = FormatLogData(records.GetReader(), mnemonics);
 
             SetLogDataValues(log, logData, mnemonics.Values, units);
         }
@@ -340,29 +340,43 @@ namespace PDS.Witsml.Server.Data.Logs
                 isTimeLog);
         }
 
-        protected List<string> FormatLogData(IEnumerable<IChannelDataRecord> records, IDictionary<int, string> mnemonics)
+        protected List<string> FormatLogData(ChannelDataReader reader, IDictionary<int, string> mnemonics)
         {
             var logData = new List<string>();
             var slices = mnemonics.Keys.ToArray();
+            var isTimeIndex = reader.Indices.Select(x => x.IsTimeIndex).FirstOrDefault();
 
-            foreach (var record in records)
+            for (int i = 1; i < reader.FieldCount; i++)
             {
-                var values = new object[record.FieldCount];
-                record.GetValues(values);
+                var range = reader.GetChannelIndexRange(i);
 
-                // use timestamp format for time index values
-                if (record.Indices.Select(x => x.IsTimeIndex).FirstOrDefault())
-                    values[0] = record.GetDateTimeOffset(0).ToString("o");
+                // Filter mnemonics with no channel values
+                if (!range.Start.HasValue)
+                    mnemonics.Remove(i);
+            }
 
-                // Limit data to requested mnemonics
-                if (slices.Any())
+            // Read through each row
+            while (reader.Read())
+            {
+                var values = new List<object>();
+
+                // Use timestamp format for time index values
+                values.Add(isTimeIndex
+                    ? reader.GetDateTimeOffset(0).ToString("o")
+                    : (object)reader.GetDouble(0));
+
+                for (int i = 1; i < reader.FieldCount; i++)
                 {
-                    values = values
-                        .Where((x, i) => slices.Contains(i))
-                        .ToArray();
+                    // Limit data to requested mnemonics
+                    if (!slices.Any() || slices.Contains(i))
+                        values.Add(reader.GetValue(i));
                 }
 
-                logData.Add(string.Join(",", values));
+                // Filter rows with no channel values
+                if (values.Count > 1)
+                {
+                    logData.Add(string.Join(",", values));
+                }
             }
 
             return logData;

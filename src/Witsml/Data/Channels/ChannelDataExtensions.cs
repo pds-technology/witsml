@@ -27,6 +27,11 @@ namespace PDS.Witsml.Data.Channels
 {
     public static class ChannelDataExtensions
     {
+        public static ChannelDataReader GetReader(this IEnumerable<IChannelDataRecord> records)
+        {
+            return new ChannelDataReader(records);
+        }
+
         public static ChannelDataReader GetReader(this Witsml131.Log log)
         {
             var isTimeIndex = log.IndexType.GetValueOrDefault() == Witsml131.ReferenceData.LogIndexType.datetime;
