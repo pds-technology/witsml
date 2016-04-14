@@ -27,7 +27,6 @@ using System.Xml.Serialization;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
 using log4net;
-using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using PDS.Framework;
 
@@ -213,7 +212,6 @@ namespace PDS.Witsml.Server.Data
                 var uomProperty = elementType.GetProperty("Uom");
                 var fieldName = MongoDbUtility.GetPropertyPath(propertyPath, textProperty.Name);
                 var fieldType = textProperty.PropertyType;
-                var filters = new List<FilterDefinition<T>>();
 
                 if (uomProperty != null)
                 {
@@ -224,7 +222,8 @@ namespace PDS.Witsml.Server.Data
 
                 return BuildUpdateForProperty(update, textProperty, fieldType, fieldName, element.Value);
             }
-            else if (element.HasElements || element.HasAttributes)
+
+            if (element.HasElements || element.HasAttributes)
             {
                 return BuildUpdateForAnElement(update, value, element, elementType, propertyPath);
             }
@@ -331,8 +330,11 @@ namespace PDS.Witsml.Server.Data
                     var update = updateBuilder.Set(MongoDbUtility.GetPropertyPath(positionPath, idField), elementId);
                     update = BuildUpdateForAnElement(update, current, element, type, positionPath);
 
-                    var filterJson = filter.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
-                    var updateJson = update.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
+                    if (Logger.IsDebugEnabled)
+                    {
+                        var filterJson = filter.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
+                        var updateJson = update.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
+                    }
 
                     _collection.UpdateOne(filter, update);
                 }
@@ -369,29 +371,34 @@ namespace PDS.Witsml.Server.Data
         {          
             if (isAdd)
             {
-                WitsmlParser.ProcessElement(element);
+                WitsmlParser.RemoveEmptyElements(element);
+
                 if (!element.HasElements)
                     throw new WitsmlException(ErrorCodes.EmptyNewElementsOrAttributes);
             }
             else
             {
-                var emptyElements = element.Elements().Where(e => e.IsEmpty || string.IsNullOrWhiteSpace(e.Value)).ToList();              
+                var emptyElements = element.Elements()
+                    .Where(e => e.IsEmpty || string.IsNullOrWhiteSpace(e.Value))
+                    .ToList();
+
                 foreach (var child in emptyElements)
                 {
                     var prop = MongoDbUtility.GetPropertyInfoForAnElement(properties, child.Name.LocalName);
-                    if (prop == null)
-                        continue;
+                    if (prop == null) continue;
 
                     if (prop.IsDefined(typeof(RequiredAttribute), false))
                         throw new WitsmlException(ErrorCodes.EmptyNewElementsOrAttributes);
                 }
 
-                var emptyAttributes = element.Attributes().Where(a => string.IsNullOrWhiteSpace(a.Value)).ToList();
+                var emptyAttributes = element.Attributes()
+                    .Where(a => string.IsNullOrWhiteSpace(a.Value))
+                    .ToList();
+
                 foreach (var child in emptyAttributes)
                 {
                     var prop = MongoDbUtility.GetPropertyInfoForAnElement(properties, child.Name.LocalName);
-                    if (prop == null)
-                        continue;
+                    if (prop == null) continue;
 
                     if (prop.IsDefined(typeof(RequiredAttribute), false))
                         throw new WitsmlException(ErrorCodes.MissingRequiredData);

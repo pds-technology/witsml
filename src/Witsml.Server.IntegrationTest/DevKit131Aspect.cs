@@ -53,7 +53,8 @@ namespace PDS.Witsml.Server
                     Uid = log.IndexCurve.Value,
                     Mnemonic = log.IndexCurve.Value,
                     TypeLogData = indexType == LogIndexType.datetime ? LogDataType.datetime : LogDataType.@double,
-                    Unit = indexType == LogIndexType.datetime ? "s" : "m"
+                    Unit = indexType == LogIndexType.datetime ? "s" : "m",
+                    ColumnIndex = 0
                 });
 
             log.LogCurveInfo.Add(
@@ -62,7 +63,8 @@ namespace PDS.Witsml.Server
                     Uid = "ROP",
                     Mnemonic = "ROP",
                     TypeLogData = LogDataType.@double,
-                    Unit = "m/h"
+                    Unit = "m/h",
+                    ColumnIndex = 1
                 });
 
             log.LogCurveInfo.Add(
@@ -71,7 +73,8 @@ namespace PDS.Witsml.Server
                     Uid = "GR",
                     Mnemonic = "GR",
                     TypeLogData = LogDataType.@double,
-                    Unit = "gAPI"
+                    Unit = "gAPI",
+                    ColumnIndex = 2
                 });
 
             InitData(log, Mnemonics(log), Units(log));

@@ -186,7 +186,7 @@ namespace PDS.Witsml.Server.Data.Channels
             var entity = Parse(parser.Context.Xml);
             var reader = ExtractDataReader(entity, GetEntity(uri));
 
-            UpdateChannelDataAndIndex(uri, reader);
+            UpdateChannelDataAndIndexRange(uri, reader);
 
             return new WitsmlResult(ErrorCodes.Success);
         }
@@ -198,7 +198,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="reader">The update reader.</param>
         public void UpdateChannelData(EtpUri uri, ChannelDataReader reader)
         {
-            UpdateChannelDataAndIndex(uri, reader);
+            UpdateChannelDataAndIndexRange(uri, reader);
             }
 
         /// <summary>
@@ -277,7 +277,7 @@ namespace PDS.Witsml.Server.Data.Channels
             };
         }
 
-        private void UpdateChannelDataAndIndex(EtpUri uri, ChannelDataReader reader)
+        private void UpdateChannelDataAndIndexRange(EtpUri uri, ChannelDataReader reader)
         {
             // Get Updated ChannelSet
             var current = GetEntity(uri);

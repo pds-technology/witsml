@@ -78,20 +78,27 @@ namespace PDS.Witsml
             var xml = EnergisticsConverter.ObjectToXml(obj);
             var xmlDoc = Parse(xml);
             var root = xmlDoc.Root;
+
             foreach (var element in root.Elements())
             {
-                ProcessElement(element);
+                RemoveEmptyElements(element);
             }
 
             return root.ToString();
         }
 
-        public static void ProcessElement(XElement element)
+        /// <summary>
+        /// Removes the empty descendant nodes from the specified element.
+        /// </summary>
+        /// <param name="element">The element.</param>
+        public static void RemoveEmptyElements(XElement element)
         {
-            while (element.Descendants().Any(e => string.IsNullOrEmpty(e.Value) && !e.HasAttributes && !e.HasElements || e.Attributes().Any(a => a.Name == Xsi.GetName("nil"))))
+            Func<XElement, bool> predicate = e => e.Attributes(Xsi.GetName("nil")).Any() || 
+                (string.IsNullOrEmpty(e.Value) && !e.HasAttributes && !e.HasElements);
+
+            while (element.Descendants().Any(predicate))
             {
-                element.Descendants().Attributes().Where(a => a.Name == Xsi.GetName("nil")).Remove();
-                element.Descendants().Where(e => string.IsNullOrEmpty(e.Value) && !e.HasAttributes && !e.HasElements).Remove();
+                element.Descendants().Where(predicate).Remove();
             }
         }
     }

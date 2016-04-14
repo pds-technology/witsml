@@ -723,11 +723,17 @@ namespace PDS.Witsml.Data.Channels
         public ChannelDataReader Sort()
         {
             if (!Indices.Any()) return this;
-            var increasing = Indices.Select(x => x.Increasing).FirstOrDefault();
+            var indexChannel = Indices.First();
+            var increasing = indexChannel.Increasing;
+            var isTimeIndex = indexChannel.IsTimeIndex;
+
+            Func<List<List<object>>, object> getIndexValue = row => isTimeIndex
+                ? row.First().First()
+                : Convert.ToDouble(row.First().First());
 
             _records = increasing
-                ? _records.OrderBy(x => x.First().First()).ToList()
-                : _records.OrderByDescending(x => x.First().First()).ToList();
+                ? _records.OrderBy(getIndexValue).ToList()
+                : _records.OrderByDescending(getIndexValue).ToList();
 
             Reset();
             return this;
