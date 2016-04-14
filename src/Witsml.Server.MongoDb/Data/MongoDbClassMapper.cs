@@ -65,8 +65,6 @@ namespace PDS.Witsml.Server.Data
 
             // Custom
             Register3<ChannelDataChunk>();
-            RegisterId<LogDataValues>();
-            RegisterId<ChannelDataValues>();
             
             try
             {

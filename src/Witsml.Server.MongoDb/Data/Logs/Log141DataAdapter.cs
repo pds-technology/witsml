@@ -92,22 +92,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </returns>
         public override WitsmlResult Add(Log entity)
         {
-            entity.Uid = NewUid(entity.Uid);
-            entity.CommonData = entity.CommonData.Create();
-
-            if (!entity.Direction.HasValue)
-            {
-                entity.Direction = LogIndexDirection.increasing;
-            }
-            if (entity.LogCurveInfo != null)
-            {
-                foreach (var logCurve in entity.LogCurveInfo)
-                {
-                    if (string.IsNullOrWhiteSpace(logCurve.Uid))
-                        logCurve.Uid = logCurve.Mnemonic.Value;
-                }
-            }
-                
+            SetDefaultValues(entity);
             Logger.DebugFormat("Adding Log with uid '{0}' and name '{1}'", entity.Uid, entity.Name);
 
             Validate(Functions.AddToStore, entity);
@@ -116,10 +101,8 @@ namespace PDS.Witsml.Server.Data.Logs
             // Extract Data                    
             var reader = ExtractDataReaders(entity).FirstOrDefault();
 
-            // Insert Log
+            // Insert Log and Log Data
             InsertEntity(entity);
-
-            // Insert Log Data
             InsertLogData(entity, reader);
 
             return new WitsmlResult(ErrorCodes.Success, entity.Uid);
@@ -135,7 +118,6 @@ namespace PDS.Witsml.Server.Data.Logs
         public override WitsmlResult Update(WitsmlQueryParser parser)
         {
             var uri = parser.GetUri<Log>();
-
             Logger.DebugFormat("Updating Log with uid '{0}'.", uri.ObjectId);
 
             // Extract Data
@@ -147,9 +129,8 @@ namespace PDS.Witsml.Server.Data.Logs
             var ignored = GetIgnoredElementNames().Concat(new[] { "direction" }).ToArray();
             UpdateEntity(parser, uri, ignored);
 
-            var readers = ExtractDataReaders(entity, GetEntity(uri));
-
             // Update Log Data and Index Range
+            var readers = ExtractDataReaders(entity, GetEntity(uri));
             UpdateLogDataAndIndexRange(uri, readers);
 
             return new WitsmlResult(ErrorCodes.Success);
@@ -184,23 +165,23 @@ namespace PDS.Witsml.Server.Data.Logs
         protected override bool IsTimeLog(Log log, bool includeElapsedTime = false)
         {
             return log.IndexType.GetValueOrDefault() == LogIndexType.datetime ||
-                (log.IndexType.GetValueOrDefault() == LogIndexType.elapsedtime && includeElapsedTime);
-                }
+                   (log.IndexType.GetValueOrDefault() == LogIndexType.elapsedtime && includeElapsedTime);
+        }
 
         protected override List<LogCurveInfo> GetLogCurves(Log log)
         {
             return log.LogCurveInfo;
-                }
+        }
 
         protected override string GetMnemonic(LogCurveInfo curve)
         {
             return curve?.Mnemonic?.Value;
-            }
+        }
 
         protected override string GetIndexCurveMnemonic(Log log)
         {
             return log.IndexCurve;
-            }
+        }
 
         protected override IDictionary<int, string> GetUnitsByColumnIndex(Log log)
         {
@@ -225,7 +206,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         protected override Range<double?> GetDateTimeIndexRange(Log log, LogCurveInfo curve)
-                {
+        {
             double? start = null;
             double? end = null;
 
@@ -248,15 +229,15 @@ namespace PDS.Witsml.Server.Data.Logs
                 UnitList = string.Join(",", units),
                 Data = logDataValues
             });
-            }
+        }
 
         protected override void SetLogIndexRange(Log log)
-            {
+        {
             var isTimeLog = IsTimeLog(log);
             var reader = log.GetReaders().FirstOrDefault();
 
             if (reader != null && reader.Read())
-        {
+            {
                 if (isTimeLog)
                     log.StartDateTimeIndex = reader.GetDateTimeOffset(0);
                 else
@@ -264,7 +245,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
                 reader.MoveTo(reader.RecordsAffected - 1);
 
-                    if (isTimeLog)
+                if (isTimeLog)
                     log.EndDateTimeIndex = reader.GetDateTimeOffset(0);
                 else
                     log.EndIndex.Value = reader.GetDouble(0);
@@ -272,16 +253,16 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         protected override UpdateDefinition<Log> UpdateCommonData(MongoDbUpdate<Log> mongoUpdate, UpdateDefinition<Log> logHeaderUpdate, Log entity, TimeSpan? offset)
-                    {
+        {
             if (entity?.CommonData == null)
                 return logHeaderUpdate;
-                        
+
             if (entity.CommonData.DateTimeCreation.HasValue)
-                    {
+            {
                 var creationTime = entity.CommonData.DateTimeCreation.ToOffsetTime(offset);
                 logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, "CommonData.DateTimeCreation", creationTime?.ToString("o"));
                 Logger.DebugFormat("Updating Common Data create time to '{0}'", creationTime);
-        }
+            }
 
             if (entity.CommonData.DateTimeLastChange.HasValue)
             {
@@ -294,9 +275,9 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         protected override IndexMetadataRecord ToIndexMetadataRecord(Log entity, LogCurveInfo indexCurve, int scale = 3)
-            {
+        {
             return new IndexMetadataRecord()
-                {
+            {
                 Uri = indexCurve.GetUri(entity),
                 Mnemonic = indexCurve.Mnemonic.Value,
                 Description = indexCurve.CurveDescription,
@@ -340,10 +321,30 @@ namespace PDS.Witsml.Server.Data.Logs
             };
         }
 
+        private void SetDefaultValues(Log entity)
+        {
+            entity.Uid = NewUid(entity.Uid);
+            entity.CommonData = entity.CommonData.Create();
+
+            if (!entity.Direction.HasValue)
+            {
+                entity.Direction = LogIndexDirection.increasing;
+            }
+
+            if (entity.LogCurveInfo != null)
+            {
+                foreach (var logCurve in entity.LogCurveInfo)
+                {
+                    if (string.IsNullOrWhiteSpace(logCurve.Uid))
+                        logCurve.Uid = logCurve.Mnemonic.Value;
+                }
+            }
+        }
+
         private IEnumerable<ChannelDataReader> ExtractDataReaders(Log entity, Log existing = null)
-                    {
+        {
             if (existing == null)
-                        {
+            {
                 var readers = entity.GetReaders().ToList();
                 entity.LogData = null;
                 return readers;
