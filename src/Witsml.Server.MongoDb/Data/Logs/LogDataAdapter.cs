@@ -402,11 +402,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 SetLogIndexRange(log);
             }
 
-            // Remove LogCurveInfos from the Log header if slicing by column
-            else if (!OptionsIn.ReturnElements.All.Equals(returnElements))
-            {
-                RemoveLogCurveInfos(log, mnemonics.Values.ToArray());
-            }
+            // Remove LogCurveInfos from the Log header to account for slicing by column or filtering of blank channel columns
+            RemoveLogCurveInfos(log, mnemonics.Values.ToArray());
         }
 
         protected void RemoveLogCurveInfos(T log, string[] mnemonics)
