@@ -109,13 +109,16 @@ namespace PDS.Witsml.Server.Data.Channels
 
             try
             {
-                //reader.GetIndexRange(int i = 0);
-                var indexChannel = reader.GetIndex();
-                var increasing = indexChannel.Increasing;
-
                 // Get the full range of the reader.  
                 //... This is the range that we need to select existing ChannelDataChunks from the database to update
                 var updateRange = reader.GetIndexRange();
+
+                // Make sure we have a valid index range; otherwise, nothing to do
+                if (!updateRange.Start.HasValue || !updateRange.End.HasValue)
+                    return;
+
+                var indexChannel = reader.GetIndex();
+                var increasing = indexChannel.Increasing;
 
                 // Based on the range of the updates, compute the range of the data chunk(s) 
                 //... so we can merge updates with existing data.
@@ -224,20 +227,20 @@ namespace PDS.Witsml.Server.Data.Channels
             {
                 indexChannel = record.GetIndex();
                 var increasing = indexChannel.Increasing;
-
-                double index = record.GetIndexValue();
+                var index = record.GetIndexValue();
 
                 if (previousIndex.HasValue) 
                 {
                     if (previousIndex.Value == index)
                     {
-                        Logger.ErrorFormat("Data nodes having same index: {0}", index);
+                        Logger.ErrorFormat("Data node index repeated for uri: {0}; channel {1}; index: {2}", record.Uri, indexChannel.Mnemonic, index);
                         throw new WitsmlException(ErrorCodes.NodesWithSameIndex);
                     }
-                    else if (increasing && previousIndex.Value > index || !increasing && previousIndex.Value < index)
+                    if (increasing && previousIndex.Value > index || !increasing && previousIndex.Value < index)
                     {
-                        Logger.DebugFormat("Data nodes index not in sequence: {0}", index);
-                        throw new SequenceException();
+                        var error = string.Format("Data node index not in sequence for uri: {0}: channel: {1}; index: {2}", record.Uri, indexChannel.Mnemonic, index);
+                        Logger.Error(error);
+                        throw new InvalidOperationException(error);
                     } 
                 }
                 
@@ -272,8 +275,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     };
 
                     plannedRange = Range.ComputeRange(index, RangeSize, increasing);
-                    data = new List<string>();
-                    data.Add(record.GetJson());
+                    data = new List<string>() { record.GetJson() };
                     startIndex = index;
                     endIndex = index;
                     id = record.Id;
@@ -301,6 +303,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// </summary>
         /// <param name="existingChunks">The existing channel data chunks.</param>
         /// <param name="updatedChunks">The updated channel data chunks.</param>
+        /// <param name="updateRange">The update range.</param>
         /// <returns>The merged sequence of channel data.</returns>
         private IEnumerable<IChannelDataRecord> MergeSequence(
             IEnumerable<IChannelDataRecord> existingChunks,
@@ -309,7 +312,7 @@ namespace PDS.Witsml.Server.Data.Channels
         {
             Logger.DebugFormat("Merging existing and update ChannelDataRecords for range - start: {0}, end: {1}", updateRange.Start, updateRange.End);
 
-            string id = string.Empty;
+            var id = string.Empty;
 
             using (var existingEnum = existingChunks.GetEnumerator())
             using (var updateEnum = updatedChunks.GetEnumerator())
@@ -395,21 +398,6 @@ namespace PDS.Witsml.Server.Data.Channels
             }
 
             return existingRecord;
-        }
-
-
-        /// <summary>
-        /// A test for merging data depending on the index direction
-        /// </summary>
-        /// <param name="existingValue">The existing value.</param>
-        /// <param name="updateValue">The update value.</param>
-        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
-        /// <returns></returns>
-        private bool ExistingBefore(double existingValue, double updateValue, bool increasing)
-        {
-            return increasing
-                ? existingValue < updateValue
-                : existingValue >= updateValue;
         }
 
         /// <summary>

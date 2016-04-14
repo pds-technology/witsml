@@ -24,15 +24,6 @@ namespace PDS.Witsml.Server.Models
 {
     public static class ChunkExtensions
     {
-        public static ChannelDataReader GetReader(this ChannelDataValues channelDataValues)
-        {
-            var mnemonics = ChannelDataReader.Split(channelDataValues.MnemonicList);
-            var units = ChannelDataReader.Split(channelDataValues.UnitList);
-
-            return new ChannelDataReader(channelDataValues.Data, mnemonics, units, channelDataValues.Uid, channelDataValues.Id)
-                .WithIndices(channelDataValues.Indices);
-        }
-
         public static ChannelDataReader GetReader(this ChannelDataChunk channelDataChunk)
         {
             var mnemonics = ChannelDataReader.Split(channelDataChunk.MnemonicList);

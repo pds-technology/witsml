@@ -46,6 +46,7 @@ namespace PDS.Witsml.Data.Channels
         private static ILog _log = LogManager.GetLogger(typeof(ChannelDataReader));
         private static readonly string[] Empty = new string[0];
         private List<List<List<object>>> _records;
+        private IList<Range<double?>> _ranges; 
         private readonly int _indexCount;
         private readonly int _count;
         private int _current = -1;
@@ -84,17 +85,21 @@ namespace PDS.Witsml.Data.Channels
         {
             _log.Debug("ChannelDataReader instance created");
 
-            var items = records.ToList();
-            var record = items.FirstOrDefault();
+            var items = records
+                .Cast<ChannelDataReader>()
+                .Select(x => new { Row = x._current, Record = x })
+                .ToList();
 
-            _records = Combine(records);
+            var record = items.Select(x => x.Record).FirstOrDefault();
+            _records = items.Select(x => x.Record._records[x.Row]).ToList();
+
             _count = GetRowValues(0).Count();
             _indexCount = GetIndexValues(0).Count();
 
             Indices = record?.Indices ?? new List<ChannelIndexInfo>();
             Mnemonics = record?.Mnemonics ?? Empty;
             Units = record?.Units ?? Empty;
-            Uri = record?.Uri ?? null;
+            Uri = record?.Uri;
         }
 
         /// <summary>
@@ -169,7 +174,7 @@ namespace PDS.Witsml.Data.Channels
         /// Indexer property that gets the value with the specified numerical index in the current row referenced by the reader.
         /// </summary>
         /// <value>The <see cref="System.Object"/>.</value>
-        /// <param name="i">The i.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
         /// <returns></returns>
         public object this[int i]
         {
@@ -201,7 +206,7 @@ namespace PDS.Witsml.Data.Channels
         }
 
         /// <summary>
-        /// Gets the number of rows changed, inserted, or deleted by execution of the SQL statement.
+        /// Gets the number of rows represented by the current channel data reader.
         /// </summary>
         public int RecordsAffected
         {
@@ -238,7 +243,7 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Sets the value.
         /// </summary>
-        /// <param name="i">The position for the channel.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
         /// <param name="value">The value.</param>
         public void SetValue(int i, object value)
         {
@@ -253,7 +258,7 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Gets the channel index at the index parameter position
         /// </summary>
-        /// <param name="index">The index position for the channel index.</param>
+        /// <param name="index">The index position.</param>
         /// <returns>The index at the given index position</returns>
         public ChannelIndexInfo GetIndex(int index = 0)
         {
@@ -296,35 +301,17 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Gets the channel index range.
         /// </summary>
-        /// <param name="i">The i-th index.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
         /// <returns></returns>
         public Range<double?> GetChannelIndexRange(int i)
         {
             if (RecordsAffected < 1)
                 return GetIndexRange();
 
-            if (i < Depth)
-                return GetIndexRange(i);
+            if (_ranges == null)
+                _ranges = CalculateChannelIndexRanges();
 
-            var channelIndex = GetIndex();
-            var valueIndex = i - Depth;
-            object start = null;
-            object end = null;
-
-            _records.ForEach(x =>
-            {
-                var value = string.Format("{0}", x.Last().Skip(valueIndex).FirstOrDefault());
-                
-                if (!IsNull(value))
-                {
-                    end = x[0][0];
-
-                    if (start == null)
-                        start = end;
-                }
-            });
-
-            return Range.Parse(start, end, channelIndex.IsTimeIndex);
+            return _ranges[i];
         }
 
         /// <summary>
@@ -401,7 +388,7 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Returns an <see cref="T:System.Data.IDataReader" /> for the specified column ordinal.
         /// </summary>
-        /// <param name="i">The index of the field to find.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
         /// <returns>
         /// The <see cref="T:System.Data.IDataReader" /> for the specified column ordinal.
         /// </returns>
@@ -414,7 +401,7 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Gets the data type information for the specified field.
         /// </summary>
-        /// <param name="i">The index of the field to find.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
         /// <returns>
         /// The data type information for the specified field.
         /// </returns>
@@ -427,7 +414,7 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Gets the date and time data value of the specified field.
         /// </summary>
-        /// <param name="i">The index of the field to find.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
         /// <returns>
         /// The date and time data value of the specified field.
         /// </returns>
@@ -439,7 +426,7 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Gets the date time offset.
         /// </summary>
-        /// <param name="i">The i.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
         /// <returns></returns>
         public DateTimeOffset GetDateTimeOffset(int i)
         {
@@ -449,7 +436,7 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Gets the unix time seconds.
         /// </summary>
-        /// <param name="i">The i.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
         /// <returns></returns>
         public long GetUnixTimeSeconds(int i)
         {
@@ -459,7 +446,7 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Gets the fixed-position numeric value of the specified field.
         /// </summary>
-        /// <param name="i">The index of the field to find.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
         /// <returns>
         /// The fixed-position numeric value of the specified field.
         /// </returns>
@@ -471,7 +458,7 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Gets the double-precision floating point number of the specified field.
         /// </summary>
-        /// <param name="i">The index of the field to find.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
         /// <returns>
         /// The double-precision floating point number of the specified field.
         /// </returns>
@@ -485,7 +472,7 @@ namespace PDS.Witsml.Data.Channels
         /// Gets the <see cref="T:System.Type" /> information corresponding to the type of <see cref="T:System.Object" /> 
         /// that would be returned from <see cref="M:System.Data.IDataRecord.GetValue(System.Int32)" />.
         /// </summary>
-        /// <param name="i">The index of the field to find.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
         /// <returns>
         /// The <see cref="T:System.Type" /> information corresponding to the type of <see cref="T:System.Object" /> 
         /// that would be returned from <see cref="M:System.Data.IDataRecord.GetValue(System.Int32)" />.
@@ -499,7 +486,7 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Gets the single-precision floating point number of the specified field.
         /// </summary>
-        /// <param name="i">The index of the field to find.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
         /// <returns>
         /// The single-precision floating point number of the specified field.
         /// </returns>
@@ -512,7 +499,7 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Returns the GUID value of the specified field.
         /// </summary>
-        /// <param name="i">The index of the field to find.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
         /// <returns>
         /// The GUID value of the specified field.
         /// </returns>
@@ -525,7 +512,7 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Gets the 16-bit signed integer value of the specified field.
         /// </summary>
-        /// <param name="i">The index of the field to find.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
         /// <returns>
         /// The 16-bit signed integer value of the specified field.
         /// </returns>
@@ -537,7 +524,7 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Gets the 32-bit signed integer value of the specified field.
         /// </summary>
-        /// <param name="i">The index of the field to find.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
         /// <returns>
         /// The 32-bit signed integer value of the specified field.
         /// </returns>
@@ -549,7 +536,7 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Gets the 64-bit signed integer value of the specified field.
         /// </summary>
-        /// <param name="i">The index of the field to find.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
         /// <returns>
         /// The 64-bit signed integer value of the specified field.
         /// </returns>
@@ -561,7 +548,7 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Gets the name for the field to find.
         /// </summary>
-        /// <param name="i">The index of the field to find.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
         /// <returns>
         /// The name of the field or the empty string (""), if there is no value to return.
         /// </returns>
@@ -598,7 +585,7 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Gets the string value of the specified field.
         /// </summary>
-        /// <param name="i">The index of the field to find.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
         /// <returns>
         /// The string value of the specified field.
         /// </returns>
@@ -610,7 +597,7 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Return the value of the specified field.
         /// </summary>
-        /// <param name="i">The index of the field to find.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
         /// <returns>
         /// The <see cref="T:System.Object" /> which will contain the field value upon return.
         /// </returns>
@@ -646,7 +633,7 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Return whether the specified field is set to null.
         /// </summary>
-        /// <param name="i">The index of the field to find.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
         /// <returns>
         /// true if the specified field is set to null; otherwise, false.
         /// </returns>
@@ -729,18 +716,20 @@ namespace PDS.Witsml.Data.Channels
             }
         }
 
-        public ChannelDataReader Sort(bool increasing = true)
+        /// <summary>
+        /// Sorts the data by the primary index.
+        /// </summary>
+        /// <returns>The channel data reader instance.</returns>
+        public ChannelDataReader Sort()
         {
-            if (increasing)
-            {
-                _records = _records.OrderBy(x => x.First().First()).ToList();
-            }
-            else
-            {
-                _records = _records.OrderByDescending(x => x.First().First()).ToList();
-            }
-            Reset();
+            if (!Indices.Any()) return this;
+            var increasing = Indices.Select(x => x.Increasing).FirstOrDefault();
 
+            _records = increasing
+                ? _records.OrderBy(x => x.First().First()).ToList()
+                : _records.OrderByDescending(x => x.First().First()).ToList();
+
+            Reset();
             return this;
         }
 
@@ -793,6 +782,53 @@ namespace PDS.Witsml.Data.Channels
         }
 
         /// <summary>
+        /// Calculates the index ranges for all channels.
+        /// </summary>
+        /// <returns>A collection of channel index ranges.</returns>
+        private IList<Range<double?>> CalculateChannelIndexRanges()
+        {
+            var ranges = new List<Range<double?>>();
+            var channelIndex = GetIndex();
+
+            for (var i = 0; i < FieldCount; i++)
+            {
+                ranges.Add(i < Depth
+                    ? GetIndexRange(i)
+                    : CalculateChannelIndexRanges(i, channelIndex.IsTimeIndex));
+            }
+
+            return ranges;
+        }
+
+        /// <summary>
+        /// Calculates the index ranges for the specified channel.
+        /// </summary>
+        /// <param name="i">The zero-based column ordinal.</param>
+        /// <param name="isTimeIndex">if set to <c>true</c> [is time index].</param>
+        /// <returns>The channel index range.</returns>
+        private Range<double?> CalculateChannelIndexRanges(int i, bool isTimeIndex)
+        {
+            var valueIndex = i - Depth;
+            object start = null;
+            object end = null;
+
+            _records.ForEach(x =>
+            {
+                var value = string.Format("{0}", x.Last().Skip(valueIndex).FirstOrDefault());
+
+                if (!IsNull(value))
+                {
+                    end = x[0][0];
+
+                    if (start == null)
+                        start = end;
+                }
+            });
+
+            return Range.Parse(start, end, isTimeIndex);
+        }
+
+        /// <summary>
         /// Deserializes the specified data.
         /// </summary>
         /// <param name="data">The data.</param>
@@ -803,19 +839,6 @@ namespace PDS.Witsml.Data.Channels
                 return new List<List<List<object>>>();
             
             return JsonConvert.DeserializeObject<List<List<List<object>>>>(data, JsonSettings);       
-        }
-
-        /// <summary>
-        /// Combines the specified records.
-        /// </summary>
-        /// <param name="records">The records.</param>
-        /// <returns></returns>
-        private static List<List<List<object>>> Combine(IEnumerable<IChannelDataRecord> records)
-        {
-            return records
-                .Cast<ChannelDataReader>()
-                .Select(x => x._records[x._current])
-                .ToList();
         }
 
         /// <summary>

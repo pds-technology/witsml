@@ -103,7 +103,7 @@ namespace PDS.Witsml.Data.Channels
             reader.Indices.Add(index);
             CalculateIndexRange(reader, index, reader.Indices.Count - 1);
 
-            return reader;
+            return reader.Sort();
         }
 
         public static ChannelDataReader WithIndices(this ChannelDataReader reader, IEnumerable<ChannelIndexInfo> indices, bool calculate = false)
@@ -118,7 +118,7 @@ namespace PDS.Witsml.Data.Channels
                 }
             }
 
-            return reader;
+            return calculate ? reader.Sort() : reader;
         }
 
         public static ChannelIndexInfo ToChannelIndexInfo(this Witsml200.ComponentSchemas.ChannelIndex channelIndex)

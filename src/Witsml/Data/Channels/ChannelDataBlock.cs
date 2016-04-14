@@ -16,7 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using PDS.Framework;
@@ -40,11 +39,6 @@ namespace PDS.Witsml.Data.Channels
             Mnemonics = new List<string>();
             Units = new List<string>();
             Uri = uri;
-        }
-
-        private void ClearRecords()
-        {
-            throw new NotImplementedException();
         }
 
         public string Uri { get; private set; }
@@ -126,7 +120,7 @@ namespace PDS.Witsml.Data.Channels
         {
             var records = new List<List<List<object>>>(_records);
 
-            return new ChannelDataReader(records, Mnemonics.ToArray(), Units.ToArray(), Uri, null)
+            return new ChannelDataReader(records, Mnemonics.ToArray(), Units.ToArray(), Uri)
                 .WithIndices(Indices, true);
         }
 
