@@ -308,16 +308,24 @@ namespace PDS.Witsml.Server.Data.Logs
             return chunks.GetRecords(range, increasing);
         }
 
-        protected string[] GetUnitList(T log, int[] slices)
+        protected IDictionary<int, string> GetUnitList(T log, int[] slices)
         {
             // Get a list of all of the units
             var allUnits = GetUnitsByColumnIndex(log);
 
-            // Limit units based on slices previously calculated for mnemonics
-            return allUnits
-                .Where(x => slices.Contains(x.Key))
-                .Select(x => x.Value)
-                .ToArray();
+            // Start with all units
+            var unitIndexes = allUnits
+                .Select((unit, index) => new { Unit = unit.Value, Index = index });
+
+            // Get indexes for each slice
+            if (slices.Any())
+            {
+                // always return the index channel
+                unitIndexes = unitIndexes
+                    .Where(x => x.Index == 0 || slices.Contains(x.Index));
+            }
+
+            return unitIndexes.ToDictionary(x => x.Index, x => x.Unit);
         }
 
         protected void QueryLogDataValues(T log, T logHeader, WitsmlQueryParser parser, IDictionary<int, string> mnemonics)
@@ -325,7 +333,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var range = GetLogDataSubsetRange(logHeader, parser);
             var units = GetUnitList(logHeader, mnemonics.Keys.ToArray());
             var records = GetChannelData(logHeader.GetUri(), mnemonics[0], range, IsIncreasing(logHeader));
-            var logData = FormatLogData(records.GetReader(), mnemonics);
+            var logData = FormatLogData(records.GetReader(), mnemonics, units);
 
             SetLogDataValues(log, logData, mnemonics.Values, units);
         }
@@ -340,7 +348,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 isTimeLog);
         }
 
-        protected List<string> FormatLogData(ChannelDataReader reader, IDictionary<int, string> mnemonics)
+        protected List<string> FormatLogData(ChannelDataReader reader, IDictionary<int, string> mnemonics, IDictionary<int, string> units)
         {
             var logData = new List<string>();
             var slices = mnemonics.Keys.ToArray();
@@ -352,7 +360,10 @@ namespace PDS.Witsml.Server.Data.Logs
 
                 // Filter mnemonics with no channel values
                 if (!range.Start.HasValue)
+                {
                     mnemonics.Remove(i);
+                    units.Remove(i);
+                }
             }
 
             // Read through each row
@@ -367,9 +378,10 @@ namespace PDS.Witsml.Server.Data.Logs
 
                 for (int i = 1; i < reader.FieldCount; i++)
                 {
+                    var channelValue = reader.GetValue(i);
                     // Limit data to requested mnemonics
-                    if (!slices.Any() || slices.Contains(i))
-                        values.Add(reader.GetValue(i));
+                    if ((!slices.Any() || slices.Contains(i)) && channelValue != null)
+                        values.Add(channelValue);
                 }
 
                 // Filter rows with no channel values
@@ -660,7 +672,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
         protected abstract void SetLogIndexRange(T log);
 
-        protected abstract void SetLogDataValues(T log, List<string> logData, IEnumerable<string> mnemonics, IEnumerable<string> units);
+        protected abstract void SetLogDataValues(T log, List<string> logData, IEnumerable<string> mnemonics, IDictionary<int, string> units);
 
         protected abstract UpdateDefinition<T> UpdateCommonData(MongoDbUpdate<T> mongoUpdate, UpdateDefinition<T> logHeaderUpdate, T entity, TimeSpan? offset);
 

@@ -204,7 +204,7 @@ namespace PDS.Witsml.Server.Data.Logs
             return new Range<double?>(start, end);
         }
 
-        protected override void SetLogDataValues(Log log, List<string> logDataValues, IEnumerable<string> mnemonics, IEnumerable<string> units)
+        protected override void SetLogDataValues(Log log, List<string> logDataValues, IEnumerable<string> mnemonics, IDictionary<int, string> units)
         {
             log.LogData = logDataValues;
         }
