@@ -96,7 +96,7 @@
     <Compile Include="Data\Logs\Log200DataAdapterAddTests.cs" />
     <Compile Include="Data\Logs\Log200DataAdapterGetTests.cs" />
     <Compile Include="Data\Logs\Log200DataAdapterDeleteTests.cs" />
-    <Compile Include="Data\Logs\Log200DataAdapterTests.cs" />
+    <Compile Include="Data\Logs\Log200DataAdapterUpdateTests.cs" />
     <Compile Include="Data\Logs\Log200ValidatorTests.cs" />
     <Compile Include="Data\Wellbores\Wellbore141DataAdapterGetTests.cs" />
     <Compile Include="Data\Wellbores\Wellbore141DataAdapterDeleteTests.cs" />
