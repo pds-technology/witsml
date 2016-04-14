@@ -183,6 +183,224 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
+        public void Test_add_unsequenced_increasing_depth_log()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = CreateLog("", DevKit.Name("Log 01"), Wellbore.UidWell, Well.Name, response.SuppMsgOut, Wellbore.Name);
+            log.StartIndex = new GenericMeasure(13, "ft");
+            log.EndIndex = new GenericMeasure(17, "ft");
+            log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+
+            var logData = log.LogData.First();
+            logData.Data.Add("13,13.1,13.2");
+            logData.Data.Add("16,16.1,16.2");
+            logData.Data.Add("15,15.1,15.2");
+            logData.Data.Add("14,14.1,14.2");
+            logData.Data.Add("17,17.1,17.2");
+            
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var query = CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(1, results[0].LogData.Count);
+            Assert.AreEqual(5, results[0].LogData[0].Data.Count);
+
+            var resultLogData = results[0].LogData[0].Data;           
+            int index = 13;
+            foreach (string row in resultLogData)
+            {
+                string[] columns = row.Split(',');
+                int outIndex = int.Parse(columns[0]);
+                Assert.AreEqual(index, outIndex);
+
+                double outColumn1 = double.Parse(columns[1]);
+                Assert.AreEqual(index + 0.1, outColumn1);
+
+                double outColumn2 = double.Parse(columns[2]);
+                Assert.AreEqual(index + 0.2, outColumn2);
+                index++;
+            }
+        }
+
+        [TestMethod]
+        public void Test_add_unsequenced_decreasing_depth_log()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = CreateLog("", DevKit.Name("Log 01"), Wellbore.UidWell, Well.Name, response.SuppMsgOut, Wellbore.Name);
+            log.StartIndex = new GenericMeasure(13, "ft");
+            log.EndIndex = new GenericMeasure(17, "ft");
+            log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+
+            var logData = log.LogData.First();
+            logData.Data.Add("13,13.1,13.2");
+            logData.Data.Add("16,16.1,16.2");
+            logData.Data.Add("15,15.1,15.2");
+            logData.Data.Add("14,14.1,14.2");
+            logData.Data.Add("17,17.1,17.2");
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth, false);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var query = CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(1, results[0].LogData.Count);
+            Assert.AreEqual(5, results[0].LogData[0].Data.Count);
+
+            var resultLogData = results[0].LogData[0].Data;
+            int index = 17;
+            foreach (string row in resultLogData)
+            {
+                string[] columns = row.Split(',');
+                int outIndex = int.Parse(columns[0]);
+                Assert.AreEqual(index, outIndex);
+
+                double outColumn1 = double.Parse(columns[1]);
+                Assert.AreEqual(index + 0.1, outColumn1);
+
+                double outColumn2 = double.Parse(columns[2]);
+                Assert.AreEqual(index + 0.2, outColumn2);
+                index--;
+            }
+        }
+
+        [TestMethod]
+        public void Test_add_unsequenced_increasing_time_log()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = CreateLog("", DevKit.Name("Log 01"), Wellbore.UidWell, Well.Name, response.SuppMsgOut, Wellbore.Name);
+            log.StartDateTimeIndex = new Energistics.DataAccess.Timestamp();
+            log.EndDateTimeIndex = new Energistics.DataAccess.Timestamp();
+            log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+
+            var logData = log.LogData.First();
+            logData.Data.Add("2016-04-13T15:30:42.0000000-05:00,30.1,30.2");
+            logData.Data.Add("2016-04-13T15:35:42.0000000-05:00,35.1,35.2");
+            logData.Data.Add("2016-04-13T15:31:42.0000000-05:00,31.1,31.2");
+            logData.Data.Add("2016-04-13T15:32:42.0000000-05:00,32.1,32.2");
+            logData.Data.Add("2016-04-13T15:33:42.0000000-05:00,33.1,33.2");
+            logData.Data.Add("2016-04-13T15:34:42.0000000-05:00,34.1,34.2");
+
+            DevKit.InitHeader(log, LogIndexType.datetime);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var query = CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(1, results[0].LogData.Count);
+            Assert.AreEqual(6, results[0].LogData[0].Data.Count);
+
+            var resultLogData = results[0].LogData[0].Data;
+            int index = 30;
+            DateTimeOffset? previousDateTime = null;
+            foreach (string row in resultLogData)
+            {
+                string[] columns = row.Split(',');
+                DateTimeOffset outIndex = DateTimeOffset.Parse(columns[0]);
+                Assert.AreEqual(index, outIndex.Minute);
+                if (previousDateTime.HasValue)
+                {
+                    Assert.IsTrue((outIndex.ToUnixTimeSeconds() - previousDateTime.Value.ToUnixTimeSeconds()) == 60);
+                }
+                previousDateTime = outIndex;
+
+                double outColumn1 = double.Parse(columns[1]);
+                Assert.AreEqual(index + 0.1, outColumn1);
+
+                double outColumn2 = double.Parse(columns[2]);
+                Assert.AreEqual(index + 0.2, outColumn2);
+                index++;
+            }
+        }
+
+        [TestMethod]
+        public void Test_add_unsequenced_decreasing_time_log()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = CreateLog("", DevKit.Name("Log 01"), Wellbore.UidWell, Well.Name, response.SuppMsgOut, Wellbore.Name);
+            log.StartDateTimeIndex = new Energistics.DataAccess.Timestamp();
+            log.EndDateTimeIndex = new Energistics.DataAccess.Timestamp();
+            log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+
+            var logData = log.LogData.First();
+            logData.Data.Add("2016-04-13T15:30:42.0000000-05:00,30.1,30.2");
+            logData.Data.Add("2016-04-13T15:35:42.0000000-05:00,35.1,35.2");
+            logData.Data.Add("2016-04-13T15:31:42.0000000-05:00,31.1,31.2");
+            logData.Data.Add("2016-04-13T15:32:42.0000000-05:00,32.1,32.2");
+            logData.Data.Add("2016-04-13T15:33:42.0000000-05:00,33.1,33.2");
+            logData.Data.Add("2016-04-13T15:34:42.0000000-05:00,34.1,34.2");
+
+            DevKit.InitHeader(log, LogIndexType.datetime, false);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var query = CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(1, results[0].LogData.Count);
+            Assert.AreEqual(6, results[0].LogData[0].Data.Count);
+
+            var resultLogData = results[0].LogData[0].Data;
+            int index = 35;
+            DateTimeOffset? previousDateTime = null;
+            foreach (string row in resultLogData)
+            {
+                string[] columns = row.Split(',');
+                DateTimeOffset outIndex = DateTimeOffset.Parse(columns[0]);
+                Assert.AreEqual(index, outIndex.Minute);
+                if (previousDateTime.HasValue)
+                {
+                    Assert.IsTrue((outIndex.ToUnixTimeSeconds() - previousDateTime.Value.ToUnixTimeSeconds()) == -60);
+                }
+                previousDateTime = outIndex;
+
+                double outColumn1 = double.Parse(columns[1]);
+                Assert.AreEqual(index + 0.1, outColumn1);
+
+                double outColumn2 = double.Parse(columns[2]);
+                Assert.AreEqual(index + 0.2, outColumn2);
+                index--;
+            }
+        }
+
+        [TestMethod]
         public void Test_append_log_data()
         {
             var response = DevKit.Add<WellList, Well>(Well);
@@ -794,6 +1012,72 @@ namespace PDS.Witsml.Server.Data.Logs
             var firstIndex = int.Parse(logData.Data[0].Split(',')[0]);
             var secondIndex = int.Parse(logData.Data[1].Split(',')[0]);
             Assert.IsTrue(firstIndex > secondIndex);
+        }
+
+        [TestMethod]
+        public void Test_update_with_unsequenced_increasing_depth_log_data()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = CreateLog(null, DevKit.Name("Log 01"), Wellbore.UidWell, Well.Name, response.SuppMsgOut, Wellbore.Name);
+            log.StartIndex = new GenericMeasure(13, "ft");
+            log.EndIndex = new GenericMeasure(17, "ft");
+            log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+
+            var logData = log.LogData.First();
+            logData.Data.Add("10,10.1,10.2");           
+            logData.Data.Add("15,15.1,15.2");         
+            logData.Data.Add("16,16.1,16.2");
+            logData.Data.Add("17,17.1,17.2");
+            logData.Data.Add("18,18.1,18.2");
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            // Update
+            var updateLog = CreateLog(uidLog, log.Name, log.UidWell, log.NameWell, log.UidWellbore, log.NameWellbore);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = log.LogData.First().UnitList;
+            logData = updateLog.LogData.First();
+            logData.Data.Add("13,13.1,13.2");
+            logData.Data.Add("12,12.1,12.2");
+            logData.Data.Add("11,11.1,11.2");
+            logData.Data.Add("14,14.1,14.2");
+
+            var updateResponse = DevKit.Update<LogList, Log>(updateLog);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            // Query
+            var query = CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(1, results[0].LogData.Count);
+            Assert.AreEqual(9, results[0].LogData[0].Data.Count);
+
+            var resultLogData = results[0].LogData[0].Data;
+            double index = 10;
+            foreach (string row in resultLogData)
+            {
+                string[] columns = row.Split(',');
+                double outIndex = double.Parse(columns[0]);
+                Assert.AreEqual(index, outIndex);
+
+                double outColumn1 = double.Parse(columns[1]);
+                Assert.AreEqual(index + 0.1, outColumn1);
+
+                double outColumn2 = double.Parse(columns[2]);
+                Assert.AreEqual(index + 0.2, outColumn2);
+                index++;
+            }
         }
 
         [TestMethod]
