@@ -73,7 +73,7 @@ namespace PDS.Witsml.Studio.Plugins.ObjectInspector.ViewModels
         /// <summary>
         /// The Energistics Data Object's name.
         /// </summary>
-        public string Name => DataObject?.Name;
+        public string ObjectName => DataObject?.Name;
 
         /// <summary>
         /// The Energistics Data Object's XML type.

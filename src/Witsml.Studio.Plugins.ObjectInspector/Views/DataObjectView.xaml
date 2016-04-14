@@ -20,7 +20,7 @@
         </Grid.ColumnDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Text="Name:" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5"/>
-        <TextBox Name="Name" Grid.Row="0" Grid.Column="1" Margin="5" VerticalContentAlignment="Center" IsReadOnly="True"/>
+        <TextBox Name="ObjectName" Grid.Row="0" Grid.Column="1" Margin="5" VerticalContentAlignment="Center" IsReadOnly="True"/>
         <TextBlock Grid.Row="0" Grid.Column="2" Text="XML Type:" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5"/>
         <TextBox Name="XmlType" Grid.Row="0" Grid.Column="3" Margin="5" VerticalContentAlignment="Center" IsReadOnly="True"/>
 
