@@ -71,15 +71,18 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="OptionsInTests.cs" />
+    <Compile Include="EtpUrisTests.cs" />
+    <Compile Include="WitsmlParserTests.cs" />
+    <Compile Include="RangeTests.cs" />
+    <Compile Include="Data\Channels\ChannelDataBlockTests.cs" />
     <Compile Include="Data\Channels\ChannelDataReaderTests.cs" />
+    <Compile Include="Data\Logs\Log131GeneratorTests.cs" />
     <Compile Include="Data\Logs\Log141GeneratorTests.cs" />
     <Compile Include="Data\Logs\Log200GeneratorTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ObjectTypesTests.cs" />
     <Compile Include="ExtensionsTests.cs" />
-    <Compile Include="Validation\AttributeValidationTests.cs" />
-    <Compile Include="Validation\TestDataObjects.cs" />
-    <Compile Include="Validation\CustomValidationAttributes.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Framework\Framework.csproj">

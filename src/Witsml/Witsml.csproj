@@ -33,6 +33,10 @@
     <Reference Include="Energistics.DataAccess">
       <HintPath>..\External\DevKit\Energistics.DataAccess.dll</HintPath>
     </Reference>
+    <Reference Include="LinqExtender, Version=3.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\LinqExtender.3.0.1\lib\LinqExtender.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
       <Private>True</Private>
@@ -64,6 +68,13 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Functions.cs" />
     <Compile Include="Data\Logs\Log200Generator.cs" />
+    <Compile Include="Linq\ExpressionVisitor.cs" />
+    <Compile Include="Linq\IWitsmlQuery.cs" />
+    <Compile Include="Linq\Witsml131Context.cs" />
+    <Compile Include="Linq\Witsml141Context.cs" />
+    <Compile Include="Linq\WitsmlContext.cs" />
+    <Compile Include="Linq\WitsmlQuery.cs" />
+    <Compile Include="Linq\WitsmlQueryExtensions.cs" />
     <Compile Include="ObjectFolders.cs" />
     <Compile Include="ObjectName.cs" />
     <Compile Include="Export141Attribute.cs" />

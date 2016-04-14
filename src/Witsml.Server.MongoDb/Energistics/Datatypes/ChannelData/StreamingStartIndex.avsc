@@ -1,6 +1,0 @@
-{
-	"type": "record",
-	"namespace": "Energistics.Datatypes.ChannelData",	
-	"name": "StreamingStartIndex",
-	"fields": [{"name": "item", "type": [ "null",  "int",  "long"] }]
-}

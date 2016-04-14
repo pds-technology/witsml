@@ -79,6 +79,10 @@
     <Compile Include="AssemblyInitializer.cs" />
     <Compile Include="Data\DatabaseProviderTests.cs" />
     <Compile Include="Data\MongoDbClassMapperTests.cs" />
+    <Compile Include="Data\MongoDbUtilityTests.cs" />
+    <Compile Include="Data\MongoDbUpdateTests.cs" />
+    <Compile Include="Data\MongoDbQueryTests.cs" />
+    <Compile Include="Data\MongoDbExtensionsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Security\MembershipProviderTests.cs" />
   </ItemGroup>

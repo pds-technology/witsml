@@ -1,6 +1,0 @@
-{
-	"type": "record",
-	"namespace": "Energistics.Datatypes",	
-	"name": "AnyArray",
-	"fields": [{"name": "item", "type": [ "null",  "Energistics.Datatypes.ArrayOfBoolean",  "bytes",  "Energistics.Datatypes.ArrayOfInt",  "Energistics.Datatypes.ArrayOfLong",  "Energistics.Datatypes.ArrayOfFloat",  "Energistics.Datatypes.ArrayOfDouble"] }]
-}
