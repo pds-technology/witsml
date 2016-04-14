@@ -1015,7 +1015,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Test_update_with_unsequenced_increasing_depth_log_data()
+        public void Test_update_with_unsequenced_increasing_depth_log_data_in_same_chunk()
         {
             var response = DevKit.Add<WellList, Well>(Well);
 
@@ -1077,6 +1077,485 @@ namespace PDS.Witsml.Server.Data.Logs
                 double outColumn2 = double.Parse(columns[2]);
                 Assert.AreEqual(index + 0.2, outColumn2);
                 index++;
+            }
+        }
+
+        [TestMethod]
+        public void Test_update_with_unsequenced_increasing_depth_log_data_in_different_chunk()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = CreateLog(null, DevKit.Name("Log 01"), Wellbore.UidWell, Well.Name, response.SuppMsgOut, Wellbore.Name);
+            log.StartIndex = new GenericMeasure(13, "ft");
+            log.EndIndex = new GenericMeasure(17, "ft");
+            log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+
+            var logData = log.LogData.First();
+            logData.Data.Add("1700.0,17.1,17.2");
+            logData.Data.Add("1800.0,18.1,18.2");
+            logData.Data.Add("1900.0,19.1,19.2");
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            // Update
+            var updateLog = CreateLog(uidLog, log.Name, log.UidWell, log.NameWell, log.UidWellbore, log.NameWellbore);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = log.LogData.First().UnitList;
+            logData = updateLog.LogData.First();
+            logData.Data.Add("2000.0,20.1,20.2");
+            logData.Data.Add("2300.0,23.1,23.2");
+            logData.Data.Add("2200.0,22.1,22.2");
+            logData.Data.Add("2100.0,21.1,21.2");
+            logData.Data.Add("2400.0,24.1,24.2");
+
+            var updateResponse = DevKit.Update<LogList, Log>(updateLog);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            // Query
+            var query = CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(1, results[0].LogData.Count);
+            Assert.AreEqual(8, results[0].LogData[0].Data.Count);
+
+            var resultLogData = results[0].LogData[0].Data;
+            double index = 17;
+            foreach (string row in resultLogData)
+            {
+                string[] columns = row.Split(',');
+                double outIndex = double.Parse(columns[0]);
+                Assert.AreEqual(index * 100, outIndex);
+
+                double outColumn1 = double.Parse(columns[1]);
+                Assert.AreEqual(index + 0.1, outColumn1);
+
+                double outColumn2 = double.Parse(columns[2]);
+                Assert.AreEqual(index + 0.2, outColumn2);
+                index++;
+            }
+        }
+
+        [TestMethod]
+        public void Test_update_with_unsequenced_decreasing_depth_log_data_in_same_chunk()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = CreateLog(null, DevKit.Name("Log 01"), Wellbore.UidWell, Well.Name, response.SuppMsgOut, Wellbore.Name);
+            log.StartIndex = new GenericMeasure(10, "ft");
+            log.EndIndex = new GenericMeasure(18, "ft");
+            log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth, false);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 5);
+            var logData = log.LogData.First();
+            logData.Data.Clear();
+            logData.Data.Add("19.0,19.1,19.2");
+            logData.Data.Add("18.0,18.1,18.2");
+            logData.Data.Add("17.0,17.1,17.2");
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            // Update
+            var updateLog = CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = log.LogData.First().UnitList;
+            logData = updateLog.LogData.First();
+            logData.Data.Add("21.0,21.1,21.2");
+            logData.Data.Add("23.0,23.1,23.2");
+            logData.Data.Add("22.0,22.1,22.2");
+            logData.Data.Add("24.0,24.1,24.2");
+
+            var updateResponse = DevKit.Update<LogList, Log>(updateLog);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            // Query
+            var query = CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(1, results[0].LogData.Count);
+            Assert.AreEqual(7, results[0].LogData[0].Data.Count);
+
+            var resultLogData = results[0].LogData[0].Data;
+
+            int start = 0;
+            for (int index = 24; index < 20; index--)
+            {
+                string[] columns = resultLogData[start].Split(',');
+                double outIndex = double.Parse(columns[0]);
+                Assert.AreEqual(index, outIndex);
+
+                double outColumn1 = double.Parse(columns[1]);
+                Assert.AreEqual(index + 0.1, outColumn1);
+
+                double outColumn2 = double.Parse(columns[2]);
+                Assert.AreEqual(index + 0.2, outColumn2);
+                start++;
+            }
+        }
+
+        [TestMethod]
+        public void Test_update_with_unsequenced_decreasing_depth_log_data_in_different_chunks()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = CreateLog(null, DevKit.Name("Log 01"), Wellbore.UidWell, Well.Name, response.SuppMsgOut, Wellbore.Name);
+            log.StartIndex = new GenericMeasure(10, "ft");
+            log.EndIndex = new GenericMeasure(18, "ft");
+            log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth, false);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 5);
+            var logData = log.LogData.First();
+            logData.Data.Clear();
+            logData.Data.Add("1900.0,19.1,19.2");
+            logData.Data.Add("1800.0,18.1,18.2");
+            logData.Data.Add("1700.0,17.1,17.2");
+            logData.Data.Add("1600.0,16.1,16.2");     
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            // Update
+            var updateLog = CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = log.LogData.First().UnitList;
+            logData = updateLog.LogData.First();
+            //logData.Data.Add("2000.0,21.1,21.2");
+            logData.Data.Add("2100.0,21.1,21.2");
+            logData.Data.Add("2300.0,23.1,23.2");
+            logData.Data.Add("2200.0,22.1,22.2");
+            logData.Data.Add("2400.0,24.1,24.2");
+          
+            var updateResponse = DevKit.Update<LogList, Log>(updateLog);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            // Query
+            var query = CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(1, results[0].LogData.Count);
+            Assert.AreEqual(8, results[0].LogData[0].Data.Count);
+
+            var resultLogData = results[0].LogData[0].Data;
+            
+            int start = 0;
+            for (int index = 24; index<20; index--)
+            {
+                string[] columns = resultLogData[start].Split(',');
+                double outIndex = double.Parse(columns[0]);
+                Assert.AreEqual(index*100, outIndex);
+
+                double outColumn1 = double.Parse(columns[1]);
+                Assert.AreEqual(index + 0.1, outColumn1);
+
+                double outColumn2 = double.Parse(columns[2]);
+                Assert.AreEqual(index + 0.2, outColumn2);
+                start++;
+            }
+        }
+
+        [TestMethod]
+        public void Test_update_with_unsequenced_increasing_time_log_data_in_same_chunk()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = CreateLog("", DevKit.Name("Log 01"), Wellbore.UidWell, Well.Name, response.SuppMsgOut, Wellbore.Name);
+            log.StartDateTimeIndex = new Energistics.DataAccess.Timestamp();
+            log.EndDateTimeIndex = new Energistics.DataAccess.Timestamp();
+            log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+
+            var logData = log.LogData.First();
+            logData.Data.Add("2016-04-13T15:30:42.0000000-05:00,30.1,30.2");
+            logData.Data.Add("2016-04-13T15:31:42.0000000-05:00,31.1,31.2");
+            logData.Data.Add("2016-04-13T15:32:42.0000000-05:00,32.1,32.2");
+
+            DevKit.InitHeader(log, LogIndexType.datetime);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            // Update
+            var updateLog = CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = log.LogData.First().UnitList;
+            logData = updateLog.LogData.First();
+            logData.Data.Add("2016-04-13T15:35:42.0000000-05:00,35.1,35.2");           
+            logData.Data.Add("2016-04-13T15:34:42.0000000-05:00,34.1,34.2");
+            logData.Data.Add("2016-04-13T15:33:42.0000000-05:00,33.1,33.2");
+            logData.Data.Add("2016-04-13T15:36:42.0000000-05:00,36.1,36.2");
+
+            var updateResponse = DevKit.Update<LogList, Log>(updateLog);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            // Query
+            var query = CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(1, results[0].LogData.Count);
+            Assert.AreEqual(7, results[0].LogData[0].Data.Count);
+
+            var resultLogData = results[0].LogData[0].Data;
+            int index = 30;
+            DateTimeOffset? previousDateTime = null;
+            foreach (string row in resultLogData)
+            {
+                string[] columns = row.Split(',');
+                DateTimeOffset outIndex = DateTimeOffset.Parse(columns[0]);
+                Assert.AreEqual(index, outIndex.Minute);
+                if (previousDateTime.HasValue)
+                {
+                    Assert.IsTrue((outIndex.ToUnixTimeSeconds() - previousDateTime.Value.ToUnixTimeSeconds()) == 60);
+                }
+                previousDateTime = outIndex;
+
+                double outColumn1 = double.Parse(columns[1]);
+                Assert.AreEqual(index + 0.1, outColumn1);
+
+                double outColumn2 = double.Parse(columns[2]);
+                Assert.AreEqual(index + 0.2, outColumn2);
+                index++;
+            }
+        }
+
+        [TestMethod]
+        public void Test_update_with_unsequenced_increasing_time_log_data_in_different_chunk()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = CreateLog("", DevKit.Name("Log 01"), Wellbore.UidWell, Well.Name, response.SuppMsgOut, Wellbore.Name);
+            log.StartDateTimeIndex = new Energistics.DataAccess.Timestamp();
+            log.EndDateTimeIndex = new Energistics.DataAccess.Timestamp();
+            log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+
+            var logData = log.LogData.First();
+            logData.Data.Add("2016-04-13T15:30:42.0000000-05:00,30.1,30.2");
+            logData.Data.Add("2016-04-13T15:31:42.0000000-05:00,31.1,31.2");
+            logData.Data.Add("2016-04-13T15:32:42.0000000-05:00,32.1,32.2");
+
+            DevKit.InitHeader(log, LogIndexType.datetime);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            // Update
+            var updateLog = CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = log.LogData.First().UnitList;
+            logData = updateLog.LogData.First();
+            logData.Data.Add("2016-04-20T15:35:42.0000000-05:00,35.1,35.2");
+            logData.Data.Add("2016-04-20T15:34:42.0000000-05:00,34.1,34.2");
+            logData.Data.Add("2016-04-20T15:33:42.0000000-05:00,33.1,33.2");
+            logData.Data.Add("2016-04-20T15:36:42.0000000-05:00,36.1,36.2");
+
+            var updateResponse = DevKit.Update<LogList, Log>(updateLog);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            // Query
+            var query = CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(1, results[0].LogData.Count);
+            Assert.AreEqual(7, results[0].LogData[0].Data.Count);
+
+            var resultLogData = results[0].LogData[0].Data;
+            int index = 33;
+            DateTimeOffset? previousDateTime = null;
+            for (int i = 3; i < resultLogData.Count; i++)
+            {
+                string[] columns = resultLogData[i].Split(',');
+                DateTimeOffset outIndex = DateTimeOffset.Parse(columns[0]);
+                Assert.AreEqual(index, outIndex.Minute);
+                if (previousDateTime.HasValue)
+                {
+                    Assert.IsTrue((outIndex.ToUnixTimeSeconds() - previousDateTime.Value.ToUnixTimeSeconds()) == 60);
+                }
+                previousDateTime = outIndex;
+
+                double outColumn1 = double.Parse(columns[1]);
+                Assert.AreEqual(index + 0.1, outColumn1);
+
+                double outColumn2 = double.Parse(columns[2]);
+                Assert.AreEqual(index + 0.2, outColumn2);
+                index++;
+            }
+        }
+
+        [TestMethod]
+        public void Test_update_with_unsequenced_decreasing_time_log_data_in_same_chunk()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = CreateLog("", DevKit.Name("Log 01"), Wellbore.UidWell, Well.Name, response.SuppMsgOut, Wellbore.Name);
+            log.StartDateTimeIndex = new Energistics.DataAccess.Timestamp();
+            log.EndDateTimeIndex = new Energistics.DataAccess.Timestamp();
+            log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+
+            var logData = log.LogData.First();
+            logData.Data.Add("2016-04-13T15:32:42.0000000-05:00,32.1,32.2");
+            logData.Data.Add("2016-04-13T15:31:42.0000000-05:00,31.1,31.2");
+            logData.Data.Add("2016-04-13T15:30:42.0000000-05:00,30.1,30.2");
+
+            DevKit.InitHeader(log, LogIndexType.datetime, false);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            // Update
+            var updateLog = CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = log.LogData.First().UnitList;
+            logData = updateLog.LogData.First();
+            logData.Data.Add("2016-04-13T15:35:42.0000000-05:00,35.1,35.2");
+            logData.Data.Add("2016-04-13T15:34:42.0000000-05:00,34.1,34.2");
+            logData.Data.Add("2016-04-13T15:33:42.0000000-05:00,33.1,33.2");
+            logData.Data.Add("2016-04-13T15:36:42.0000000-05:00,36.1,36.2");
+
+            var updateResponse = DevKit.Update<LogList, Log>(updateLog);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            // Query
+            var query = CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(1, results[0].LogData.Count);
+            Assert.AreEqual(7, results[0].LogData[0].Data.Count);
+
+            var resultLogData = results[0].LogData[0].Data;
+            int index = 36;
+            DateTimeOffset? previousDateTime = null;
+            foreach (string row in resultLogData)
+            {
+                string[] columns = row.Split(',');
+                DateTimeOffset outIndex = DateTimeOffset.Parse(columns[0]);
+                Assert.AreEqual(index, outIndex.Minute);
+                if (previousDateTime.HasValue)
+                {
+                    Assert.IsTrue((outIndex.ToUnixTimeSeconds() - previousDateTime.Value.ToUnixTimeSeconds()) == -60);
+                }
+                previousDateTime = outIndex;
+
+                double outColumn1 = double.Parse(columns[1]);
+                Assert.AreEqual(index + 0.1, outColumn1);
+
+                double outColumn2 = double.Parse(columns[2]);
+                Assert.AreEqual(index + 0.2, outColumn2);
+                index--;
+            }
+        }
+
+        [TestMethod]
+        public void Test_update_with_unsequenced_decreasing_time_log_data_in_different_chunk()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = CreateLog("", DevKit.Name("Log 01"), Wellbore.UidWell, Well.Name, response.SuppMsgOut, Wellbore.Name);
+            log.StartDateTimeIndex = new Energistics.DataAccess.Timestamp();
+            log.EndDateTimeIndex = new Energistics.DataAccess.Timestamp();
+            log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+
+            var logData = log.LogData.First();
+            logData.Data.Add("2016-04-13T15:32:42.0000000-05:00,32.1,32.2");
+            logData.Data.Add("2016-04-13T15:31:42.0000000-05:00,31.1,31.2");
+            logData.Data.Add("2016-04-13T15:30:42.0000000-05:00,30.1,30.2");
+
+            DevKit.InitHeader(log, LogIndexType.datetime, false);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            // Update
+            var updateLog = CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = log.LogData.First().UnitList;
+            logData = updateLog.LogData.First();
+            logData.Data.Add("2016-04-10T15:35:42.0000000-05:00,35.1,35.2");
+            logData.Data.Add("2016-04-10T15:34:42.0000000-05:00,34.1,34.2");
+            logData.Data.Add("2016-04-10T15:33:42.0000000-05:00,33.1,33.2");
+            logData.Data.Add("2016-04-10T15:36:42.0000000-05:00,36.1,36.2");
+
+            var updateResponse = DevKit.Update<LogList, Log>(updateLog);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            // Query
+            var query = CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(1, results[0].LogData.Count);
+            Assert.AreEqual(7, results[0].LogData[0].Data.Count);
+
+            var resultLogData = results[0].LogData[0].Data;
+            int index = 36;
+            DateTimeOffset? previousDateTime = null;
+            for (int i = 3; i < resultLogData.Count; i++)
+            {
+                string[] columns = resultLogData[i].Split(',');
+                DateTimeOffset outIndex = DateTimeOffset.Parse(columns[0]);
+                Assert.AreEqual(index, outIndex.Minute);
+                if (previousDateTime.HasValue)
+                {
+                    Assert.IsTrue((outIndex.ToUnixTimeSeconds() - previousDateTime.Value.ToUnixTimeSeconds()) == -60);
+                }
+                previousDateTime = outIndex;
+
+                double outColumn1 = double.Parse(columns[1]);
+                Assert.AreEqual(index + 0.1, outColumn1);
+
+                double outColumn2 = double.Parse(columns[2]);
+                Assert.AreEqual(index + 0.2, outColumn2);
+                index--;
             }
         }
 
