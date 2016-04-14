@@ -77,6 +77,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 });
             }
 
+            SortIndex(logs);
+
             return new WitsmlResult<IEnergisticsCollection>(
                 ErrorCodes.Success,
                 CreateCollection(logs));
@@ -325,7 +327,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var range = GetLogDataSubsetRange(logHeader, parser);
             var units = GetUnitList(logHeader, mnemonics.Keys.ToArray());
             var records = GetChannelData(logHeader.GetUri(), mnemonics[0], range, IsIncreasing(logHeader));
-            var logData = FormatLogData(records.GetReader(), mnemonics);
+            var logData = FormatLogData(log, records.GetReader(), mnemonics);
 
             SetLogDataValues(log, logData, mnemonics.Values, units);
         }
@@ -340,11 +342,13 @@ namespace PDS.Witsml.Server.Data.Logs
                 isTimeLog);
         }
 
-        protected List<string> FormatLogData(ChannelDataReader reader, IDictionary<int, string> mnemonics)
+        protected List<string> FormatLogData(T log, ChannelDataReader reader, IDictionary<int, string> mnemonics)
         {
             var logData = new List<string>();
             var slices = mnemonics.Keys.ToArray();
             var isTimeIndex = reader.Indices.Select(x => x.IsTimeIndex).FirstOrDefault();
+
+            var ranges = new Dictionary<string, Range<double?>>();
 
             for (int i = 1; i < reader.FieldCount; i++)
             {
@@ -353,17 +357,22 @@ namespace PDS.Witsml.Server.Data.Logs
                 // Filter mnemonics with no channel values
                 if (!range.Start.HasValue)
                     mnemonics.Remove(i);
+                else
+                    ranges.Add(mnemonics[i], range);
             }
+
+            var indexRange = new List<double>();
 
             // Read through each row
             while (reader.Read())
             {
                 var values = new List<object>();
+                var index = reader.GetDouble(0);
 
                 // Use timestamp format for time index values
                 values.Add(isTimeIndex
                     ? reader.GetDateTimeOffset(0).ToString("o")
-                    : (object)reader.GetDouble(0));
+                    : (object)index);
 
                 for (int i = 1; i < reader.FieldCount; i++)
                 {
@@ -376,7 +385,22 @@ namespace PDS.Witsml.Server.Data.Logs
                 if (values.Count > 1)
                 {
                     logData.Add(string.Join(",", values));
+                    if (indexRange.Count == 0)
+                    {
+                        indexRange.Add(index);
+                        indexRange.Add(index);
+                    }
+                    else
+                    {
+                        indexRange[1] = index;
+                    }
                 }
+            }
+
+            if (logData.Count > 0)
+            {
+                ranges.Add(reader.GetIndex(0).Mnemonic, new Range<double?>(indexRange.First(), indexRange.Last()));
+                SetLogIndexRange(log, ranges);
             }
 
             return logData;
@@ -384,14 +408,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
         protected void FormatLogHeader(T log, IDictionary<int, string> mnemonics, string returnElements)
         {
-            // If returning all data then set the start/end indexes based on the data selected
-            if (OptionsIn.ReturnElements.All.Equals(returnElements))
-            {
-                SetLogIndexRange(log);
-            }
-
             // Remove LogCurveInfos from the Log header if slicing by column
-            else if (!OptionsIn.ReturnElements.All.Equals(returnElements))
+            if (!OptionsIn.ReturnElements.All.Equals(returnElements))
             {
                 RemoveLogCurveInfos(log, mnemonics.Values.ToArray());
             }
@@ -658,7 +676,9 @@ namespace PDS.Witsml.Server.Data.Logs
 
         protected abstract Range<double?> GetDateTimeIndexRange(T log, TChild curve);
 
-        protected abstract void SetLogIndexRange(T log);
+        protected abstract void SetLogIndexRange(T log, Dictionary<string, Range<double?>> ranges);
+
+        protected abstract void SortIndex(List<T> logs);
 
         protected abstract void SetLogDataValues(T log, List<string> logData, IEnumerable<string> mnemonics, IEnumerable<string> units);
 

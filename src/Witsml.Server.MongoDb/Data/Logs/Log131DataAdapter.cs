@@ -209,24 +209,73 @@ namespace PDS.Witsml.Server.Data.Logs
             log.LogData = logDataValues;
         }
 
-        protected override void SetLogIndexRange(Log log)
+        protected override void SetLogIndexRange(Log log, Dictionary<string, Range<double?>> ranges)
         {
             var isTimeLog = IsTimeLog(log);
-            var reader = log.GetReader();
 
-            if (reader != null && reader.Read())
+            foreach (var logCurve in log.LogCurveInfo)
             {
-                if (isTimeLog)
-                    log.StartDateTimeIndex = reader.GetDateTime(0); //.GetDateTimeOffset(0);
-                else
-                    log.StartIndex.Value = reader.GetDouble(0);
+                var mnemonic = logCurve.Mnemonic;
+                if (!ranges.ContainsKey(mnemonic))
+                    continue;
 
-                reader.MoveTo(reader.RecordsAffected - 1);
+                var range = ranges[mnemonic];
 
                 if (isTimeLog)
-                    log.EndDateTimeIndex = reader.GetDateTime(0); //.GetDateTimeOffset(0);
+                {
+                    if (!double.IsNaN(range.Start.Value))
+                        logCurve.MinDateTimeIndex = DateTimeOffset.FromUnixTimeSeconds((long)range.Start.Value).DateTime;
+                    if (!double.IsNaN(range.End.Value))
+                        logCurve.MaxDateTimeIndex = DateTimeOffset.FromUnixTimeSeconds((long)range.End.Value).DateTime;
+                    if (logCurve.ColumnIndex == log.IndexCurve.ColumnIndex)
+                    {
+                        log.StartDateTimeIndex = logCurve.MinDateTimeIndex;
+                        log.EndDateTimeIndex = logCurve.MaxDateTimeIndex;
+                    }
+                }
                 else
-                    log.EndIndex.Value = reader.GetDouble(0);
+                {
+                    logCurve.MinIndex.Value = range.Start.Value;
+                    logCurve.MaxIndex.Value = range.End.Value;
+                    if (logCurve.ColumnIndex == log.IndexCurve.ColumnIndex)
+                    {
+                        log.StartIndex.Value = logCurve.MinIndex.Value;
+                        log.EndIndex.Value = logCurve.MaxIndex.Value;
+                    }
+                }
+            }
+        }
+
+        protected override void SortIndex(List<Log> logs)
+        {
+            foreach (var log in logs)
+            {
+                if (log.LogCurveInfo != null)
+                {
+                    var isTimeLog = log.IndexType == LogIndexType.datetime || log.IndexType == LogIndexType.elapsedtime;
+                    foreach (var logCurve in log.LogCurveInfo)
+                    {
+                        if (isTimeLog)
+                        {
+                            if (logCurve.MinDateTimeIndex.HasValue && logCurve.MaxDateTimeIndex.HasValue &&
+                                 logCurve.MinDateTimeIndex.Value > logCurve.MaxDateTimeIndex.Value)
+                            {
+                                var min = logCurve.MinDateTimeIndex;
+                                logCurve.MinDateTimeIndex = logCurve.MinDateTimeIndex;
+                                logCurve.MaxDateTimeIndex = min;
+                            }
+                        }
+                        else
+                        {
+                            if (logCurve.MinIndex != null && logCurve.MaxIndex != null && logCurve.MinIndex.Value > logCurve.MaxIndex.Value)
+                            {
+                                var min = logCurve.MinIndex.Value;
+                                logCurve.MinIndex.Value = logCurve.MaxIndex.Value;
+                                logCurve.MaxIndex.Value = min;
+                            }
+                        }
+                    }
+                }
             }
         }
 
