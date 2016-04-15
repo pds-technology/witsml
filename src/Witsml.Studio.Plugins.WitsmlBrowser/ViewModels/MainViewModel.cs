@@ -419,7 +419,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
 
             Runtime.Invoke(() =>
             {
-                XmlQuery.Text = EnergisticsConverter.ObjectToXml(query);
+                XmlQuery.Text = WitsmlParser.ToXml(query);
                 DataObject = QueryTemplateText;
             });
         }

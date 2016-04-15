@@ -76,7 +76,7 @@ namespace PDS.Witsml.Linq
 #if DEBUG
             Console.WriteLine();
             Console.WriteLine("Executing query...  OptionsIn: {0}{1}", JsonConvert.SerializeObject(Options), Environment.NewLine);
-            Console.WriteLine(EnergisticsConverter.ObjectToXml(Query));
+            Console.WriteLine(WitsmlParser.ToXml(Query));
             Console.WriteLine();
 #endif
             var result = Context.Connection.Read<V>(Query, Options);

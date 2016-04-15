@@ -169,7 +169,7 @@ namespace PDS.Witsml.Server.Data
 
         private string ToXml(object instance)
         {
-            return EnergisticsConverter.ObjectToXml(instance);
+            return WitsmlParser.ToXml(instance);
         }
     }
 }

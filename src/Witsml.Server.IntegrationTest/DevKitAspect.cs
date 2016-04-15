@@ -77,7 +77,7 @@ namespace PDS.Witsml.Server
         public WitsmlQueryParser Parser<T>(Functions function, T entity, string options = null, string capabilities = null)
         {
             var context = new RequestContext(function, ObjectTypes.GetObjectType<T>(),
-                EnergisticsConverter.ObjectToXml(entity), options, capabilities);
+                WitsmlParser.ToXml(entity), options, capabilities);
 
             return new WitsmlQueryParser(context);
         }
@@ -143,7 +143,7 @@ namespace PDS.Witsml.Server
             var info = typeof(TList).GetProperty(typeof(TObject).Name);
             var list = New<TList>(x => info.SetValue(x, entityList));
             typeIn = wmlTypeIn ?? ObjectTypes.GetObjectType<TList>();
-            queryIn = EnergisticsConverter.ObjectToXml(list);
+            queryIn = WitsmlParser.ToXml(list);
         }
 
     }

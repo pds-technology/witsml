@@ -68,7 +68,7 @@ namespace PDS.Witsml.Server.Providers.Store
             }
             else
             {
-                var xml = EnergisticsConverter.ObjectToXml(entity);
+                var xml = WitsmlParser.ToXml(entity);
                 dataObject.SetXml(xml);
             }
 

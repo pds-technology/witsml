@@ -58,7 +58,7 @@ namespace PDS.Witsml.Server.Configuration
 
             if (capServer != null)
             {
-                _capServerXml = EnergisticsConverter.ObjectToXml(capServer);
+                _capServerXml = WitsmlParser.ToXml(capServer);
             }
 
             return _capServerXml;
