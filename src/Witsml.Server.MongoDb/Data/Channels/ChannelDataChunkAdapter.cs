@@ -200,7 +200,8 @@ namespace PDS.Witsml.Server.Data.Channels
                             .Set(u => u.Indices, dc.Indices)
                             .Set(u => u.MnemonicList, mnemonics)
                             .Set(u => u.UnitList, units)
-                            .Set(u => u.Data, dc.Data));
+                            .Set(u => u.Data, dc.Data)
+                            .Set(u => u.RecordCount, dc.RecordCount));
                 })
                 .ToList());
         }
@@ -271,7 +272,8 @@ namespace PDS.Witsml.Server.Data.Channels
                     {
                         Id = id,
                         Data = "[" + String.Join(",", data) + "]",
-                        Indices = new List<ChannelIndexInfo> { newIndex }
+                        Indices = new List<ChannelIndexInfo> { newIndex },
+                        RecordCount = data.Count
                     };
 
                     plannedRange = Range.ComputeRange(index, RangeSize, increasing);
@@ -293,7 +295,8 @@ namespace PDS.Witsml.Server.Data.Channels
                 {
                     Id = id,
                     Data = "[" + String.Join(",", data) + "]",
-                    Indices = new List<ChannelIndexInfo> { newIndex }
+                    Indices = new List<ChannelIndexInfo> { newIndex },
+                    RecordCount = data.Count
                 };
             }
         }
