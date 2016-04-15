@@ -63,5 +63,13 @@ namespace PDS.Witsml.Server.Models
         /// </summary>
         /// <value>The unit list.</value>
         public string UnitList { get; set; }
+
+        /// <summary>
+        /// Gets or sets the record count.
+        /// </summary>
+        /// <value>
+        /// The record count.
+        /// </value>
+        public int RecordCount { get; set; }
     }
 }
