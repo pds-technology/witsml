@@ -29,6 +29,7 @@ using Energistics.Datatypes.ChannelData;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
+using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Server.Properties;
@@ -67,19 +68,15 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="capServer">The capServer instance.</param>
         public void GetCapabilities(CapServer capServer)
         {
-            capServer.Add(Functions.GetFromStore, new ObjectWithConstraint(ObjectTypes.Log)
+            var dataObject = new ObjectWithConstraint(ObjectTypes.Log)
             {
                 MaxDataNodes = MaxDataNodes,
                 MaxDataPoints = MaxDataPoints
-            });
+            };
 
-            capServer.Add(Functions.AddToStore, new ObjectWithConstraint(ObjectTypes.Log)
-            {
-                MaxDataNodes = MaxDataNodes,
-                MaxDataPoints = MaxDataPoints
-            });
-
-            capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);
+            capServer.Add(Functions.GetFromStore, dataObject);
+            capServer.Add(Functions.AddToStore, dataObject);
+            capServer.Add(Functions.UpdateInStore, dataObject);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.Log);
         }
 
@@ -192,30 +189,9 @@ namespace PDS.Witsml.Server.Data.Logs
                 .ToDictionary(x => x.Index, x => x.Unit);
         }
 
-        protected override Range<double?> GetIndexRange(Log log, LogCurveInfo curve)
+        protected override Range<double?> GetIndexRange(LogCurveInfo curve, bool increasing = true, bool isTimeIndex = false)
         {
-            double? start = null;
-            double? end = null;
-
-            if (curve.MinIndex != null)
-                start = curve.MinIndex.Value;
-            if (curve.MaxIndex != null)
-                end = curve.MaxIndex.Value;
-
-            return new Range<double?>(start, end);
-        }
-
-        protected override Range<double?> GetDateTimeIndexRange(Log log, LogCurveInfo curve)
-        {
-            double? start = null;
-            double? end = null;
-
-            if (curve.MinDateTimeIndex.HasValue)
-                start = DateTimeOffset.Parse(curve.MinDateTimeIndex.Value.ToString("o")).ToUnixTimeSeconds();
-            if (curve.MaxDateTimeIndex.HasValue)
-                end = DateTimeOffset.Parse(curve.MaxDateTimeIndex.Value.ToString("o")).ToUnixTimeSeconds();
-
-            return new Range<double?>(start, end);
+            return curve.GetIndexRange(increasing, isTimeIndex);
         }
 
         protected override void SetLogDataValues(Log log, List<string> logDataValues, IEnumerable<string> mnemonics, IEnumerable<string> units)
@@ -236,69 +212,44 @@ namespace PDS.Witsml.Server.Data.Logs
             if (log.LogCurveInfo == null)
                 return;
 
-            var isTimeLog = IsTimeLog(log);           
+            var isTimeLog = IsTimeLog(log);
+            var increasing = IsIncreasing(log);
 
             foreach (var logCurve in log.LogCurveInfo)
             {
                 var mnemonic = logCurve.Mnemonic.Value;
-                if (!ranges.ContainsKey(mnemonic))
+                Range<double?> range;
+
+                if (!ranges.TryGetValue(mnemonic, out range))
                     continue;
 
-                var range = ranges[mnemonic];
+                // Sort range in min/max order
+                range = range.Sort();
 
                 if (isTimeLog)
                 {
-                    if (!double.IsNaN(range.Start.Value))
+                    if (range.Start.HasValue && !double.IsNaN(range.Start.Value))
                         logCurve.MinDateTimeIndex = DateTimeOffset.FromUnixTimeSeconds((long)range.Start.Value);
-                    if (!double.IsNaN(range.End.Value))
+                    if (range.End.HasValue && !double.IsNaN(range.End.Value))
                         logCurve.MaxDateTimeIndex = DateTimeOffset.FromUnixTimeSeconds((long)range.End.Value);
+
                     if (mnemonic.EqualsIgnoreCase(log.IndexCurve))
                     {
-                        log.StartDateTimeIndex = logCurve.MinDateTimeIndex;
-                        log.EndDateTimeIndex = logCurve.MaxDateTimeIndex;
+                        log.StartDateTimeIndex = increasing ? logCurve.MinDateTimeIndex : logCurve.MaxDateTimeIndex;
+                        log.EndDateTimeIndex = increasing ? logCurve.MaxDateTimeIndex : logCurve.MinDateTimeIndex;
                     }
                 }
                 else
                 {
-                    logCurve.MinIndex.Value = range.Start.Value;
-                    logCurve.MaxIndex.Value = range.End.Value;
+                    if (range.Start.HasValue)
+                        logCurve.MinIndex.Value = range.Start.Value;
+                    if (range.End.HasValue)
+                        logCurve.MaxIndex.Value = range.End.Value;
+
                     if (mnemonic.EqualsIgnoreCase(log.IndexCurve))
                     {
-                        log.StartIndex.Value = logCurve.MinIndex.Value;
-                        log.EndIndex.Value = logCurve.MaxIndex.Value;
-                    }
-                }
-            }
-        }
-
-        protected override void SortIndex(List<Log> logs)
-        {
-            foreach (var log in logs)
-            {
-                if (log.LogCurveInfo != null)
-                {
-                    var isTimeLog = log.IndexType == LogIndexType.datetime || log.IndexType == LogIndexType.elapsedtime;
-                    foreach (var logCurve in log.LogCurveInfo)
-                    {
-                        if (isTimeLog)
-                        {
-                            if (logCurve.MinDateTimeIndex.HasValue && logCurve.MaxDateTimeIndex.HasValue &&
-                                 logCurve.MinDateTimeIndex.Value > logCurve.MaxDateTimeIndex.Value)
-                            {
-                                var min = logCurve.MinDateTimeIndex;
-                                logCurve.MinDateTimeIndex = logCurve.MinDateTimeIndex;
-                                logCurve.MaxDateTimeIndex = min;
-                            }
-                        }
-                        else
-                        {
-                            if (logCurve.MinIndex != null && logCurve.MaxIndex != null && logCurve.MinIndex.Value > logCurve.MaxIndex.Value)
-                            {
-                                var min = logCurve.MinIndex.Value;
-                                logCurve.MinIndex.Value = logCurve.MaxIndex.Value;
-                                logCurve.MaxIndex.Value = min;
-                            }
-                        }
+                        log.StartIndex.Value = increasing ? logCurve.MinIndex.Value : logCurve.MaxIndex.Value;
+                        log.EndIndex.Value = increasing ? logCurve.MaxIndex.Value : logCurve.MinIndex.Value;
                     }
                 }
             }
