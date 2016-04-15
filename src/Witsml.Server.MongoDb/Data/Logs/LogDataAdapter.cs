@@ -378,7 +378,7 @@ namespace PDS.Witsml.Server.Data.Logs
             while (reader.Read())
             {
                 var values = new List<object>();
-                var index = reader.GetDouble(0);
+                var index = reader.GetIndexValue(0);
 
                 // Use timestamp format for time index values
                 values.Add(isTimeIndex
