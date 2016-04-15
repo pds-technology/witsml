@@ -95,6 +95,7 @@
     <Compile Include="DependencyResolver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Security\BasicAuthenticationModule.cs" />
+    <Compile Include="Security\CustomAuthenticationModule.cs" />
     <Compile Include="Services\ServiceContractBehavior.cs" />
     <Compile Include="Services\ServiceErrorBehavior.cs" />
     <Compile Include="Services\ServiceInstanceContextExtension.cs" />
