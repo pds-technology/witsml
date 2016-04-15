@@ -26,7 +26,7 @@ namespace Energistics
     {
         public static async Task<bool> OpenAsync(this EtpClient client)
         {
-            var task = new Task<bool>(() => true);
+            var task = new Task<bool>(() => client.IsOpen);
 
             client.SocketOpened += (s, e) =>
             {

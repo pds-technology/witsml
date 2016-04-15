@@ -16,8 +16,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Net;
 using System.Threading.Tasks;
+using Energistics.Common;
 using Energistics.Datatypes;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
 namespace Energistics.Protocol.Core
@@ -40,9 +43,10 @@ namespace Energistics.Protocol.Core
         }
 
         [Test]
-        public async Task EtpClient_can_open_connection()
+        [Description("EtpClient connects to web socket server")]
+        public async Task EtpClient_Open_Connects_To_WebSocket_Server()
         {
-            var task = new Task<bool>(() => true);
+            var task = new Task<bool>(() => _client.IsOpen);
 
             _client.SocketOpened += (s, e) =>
             {
@@ -57,8 +61,8 @@ namespace Energistics.Protocol.Core
         }
 
         [Test]
-        [Description("EtpClient can send RequestSession and receive OpenSession with a valid Session ID")]
-        public async Task EtpClient_can_request_session()
+        [Description("EtpClient sends RequestSession and receives OpenSession with a valid Session ID")]
+        public async Task EtpClient_RequestSession_Receive_OpenSession_After_Requesting_No_Protocols()
         {
             var onOpenSession = HandleAsync<OpenSession>(x => _client.Handler<ICoreClient>().OnOpenSession += x);
 
@@ -73,8 +77,41 @@ namespace Energistics.Protocol.Core
         }
 
         [Test]
-        [Description("EtpClient can send an invalid message and receive ProtocolException with the correct error code")]
-        public async Task EtpClient_can_send_invalid_message_and_receive_protocol_exception()
+        [Description("EtpClient authenticates using JWT retrieved from supported token provider")]
+        public async Task EtpClient_OpenSession_Can_Authenticate_Using_Json_Web_Token()
+        {
+            var headers = EtpBase.Authorization(Username, Password);
+            string token;
+
+            using (var client = new WebClient())
+            {
+                foreach (var header in headers)
+                    client.Headers[header.Key] = header.Value;
+
+                var response = await client.UploadStringTaskAsync(AuthTokenUrl, "grant_type=password");
+                var json = JObject.Parse(response);
+
+                token = json["access_token"].Value<string>();
+            }
+
+            _client.Dispose();
+            _client = new EtpClient(ServerUrl, _client.ApplicationName, _client.ApplicationVersion, EtpBase.Authorization(token));
+
+            var onOpenSession = HandleAsync<OpenSession>(x => _client.Handler<ICoreClient>().OnOpenSession += x);
+
+            var opened = await _client.OpenAsync();
+            Assert.IsTrue(opened, "EtpClient connection not opened");
+
+            var args = await onOpenSession.WaitAsync();
+
+            Assert.IsNotNull(args);
+            Assert.IsNotNull(args.Message);
+            Assert.IsNotNull(args.Message.SessionId);
+        }
+
+        [Test]
+        [Description("EtpClient sends an invalid message and receives ProtocolException with the correct error code")]
+        public async Task EtpClient_SendMessage_Receive_Protocol_Exception_After_Sending_Invalid_Message()
         {
             var onProtocolException = HandleAsync<ProtocolException>(x => _client.Handler<ICoreClient>().OnProtocolException += x);
 

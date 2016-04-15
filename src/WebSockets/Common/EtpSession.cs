@@ -31,7 +31,7 @@ namespace Energistics.Common
     {
         private long MessageId = 0;
 
-        public EtpSession(string application, string version, IDictionary<string, string> headers)
+        protected EtpSession(string application, string version, IDictionary<string, string> headers)
         {
             Headers = headers ?? new Dictionary<string, string>();
             Handlers = new Dictionary<object, IProtocolHandler>();
@@ -40,15 +40,15 @@ namespace Energistics.Common
             ValidateHeaders();
         }
 
-        public string ApplicationName { get; private set; }
+        public string ApplicationName { get; }
 
-        public string ApplicationVersion { get; private set; }
+        public string ApplicationVersion { get; }
 
         public string SessionId { get; set; }
 
-        protected IDictionary<string, string> Headers { get; private set; } 
+        protected IDictionary<string, string> Headers { get; } 
 
-        protected IDictionary<object, IProtocolHandler> Handlers { get; private set; }
+        protected IDictionary<object, IProtocolHandler> Handlers { get; }
 
         public T Handler<T>() where T : IProtocolHandler
         {
@@ -113,7 +113,8 @@ namespace Energistics.Common
                 Major = 1
             };
 
-            foreach (var handler in Handlers.Values)
+            // Skip Core protocol (0)
+            foreach (var handler in Handlers.Values.Where(x => x.Protocol > 0))
             {
                 var role = isSender ? handler.RequestedRole : handler.Role;
 

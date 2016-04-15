@@ -25,6 +25,15 @@ namespace Energistics.IntegrationTest {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost/witsml.web/auth")]
+        public string AuthTokenUrl {
+            get {
+                return ((string)(this["AuthTokenUrl"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("ws://localhost/witsml.web/api/etp")]
         public string ServerUrl {
             get {

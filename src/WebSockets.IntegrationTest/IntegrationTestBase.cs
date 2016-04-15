@@ -26,6 +26,7 @@ namespace Energistics
 {
     public class IntegrationTestBase
     {
+        public static readonly string AuthTokenUrl = Settings.Default.AuthTokenUrl;
         public static readonly string ServerUrl = Settings.Default.ServerUrl;
         public static readonly string Username = Settings.Default.Username;
         public static readonly string Password = Settings.Default.Password;
@@ -33,7 +34,7 @@ namespace Energistics
         public EtpClient CreateClient()
         {
             var version = GetType().Assembly.GetName().Version.ToString();
-            var headers = EtpClient.Authorization(Username, Password);
+            var headers = EtpBase.Authorization(Username, Password);
 
             return new EtpClient(ServerUrl, GetType().AssemblyQualifiedName, version, headers);
         }
@@ -52,10 +53,10 @@ namespace Energistics
             return await task.WaitAsync();
         }
 
-        protected async Task<ProtocolEventArgs<T, V>> HandleAsync<T, V>(Action<ProtocolEventHandler<T, V>> action) where T : ISpecificRecord
+        protected async Task<ProtocolEventArgs<T, TContext>> HandleAsync<T, TContext>(Action<ProtocolEventHandler<T, TContext>> action) where T : ISpecificRecord
         {
-            ProtocolEventArgs<T, V> args = null;
-            var task = new Task<ProtocolEventArgs<T, V>>(() => args);
+            ProtocolEventArgs<T, TContext> args = null;
+            var task = new Task<ProtocolEventArgs<T, TContext>>(() => args);
 
             action((s, e) =>
             {

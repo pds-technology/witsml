@@ -26,7 +26,7 @@ namespace Energistics.Common
 {
     public abstract class EtpBase : IDisposable
     {
-        public EtpBase()
+        protected EtpBase()
         {
             Logger = LogManager.GetLogger(GetType());
             SupportedObjects = new List<string>();
@@ -40,18 +40,28 @@ namespace Energistics.Common
 
         public IList<string> SupportedObjects { get; set; }
 
-        protected IDictionary<Type, Type> RegisteredHandlers { get; private set; }
+        protected IDictionary<Type, Type> RegisteredHandlers { get; }
 
-        protected IDictionary<Type, Func<object>> RegisteredFactories { get; private set; }
+        protected IDictionary<Type, Func<object>> RegisteredFactories { get; }
 
         public static IDictionary<string, string> Authorization(string username, string password)
         {
-            var encoded = Convert.ToBase64String(Encoding.Default.GetBytes(username + ":" + password));
+            return GetAuthorizationHeader("Basic", string.IsNullOrWhiteSpace(username) ? string.Empty : string.Concat(username, ":", password));
+        }
+
+        public static IDictionary<string, string> Authorization(string token)
+        {
+            return GetAuthorizationHeader("Bearer", string.IsNullOrWhiteSpace(token) ? string.Empty : token);
+        } 
+
+        private static IDictionary<string, string> GetAuthorizationHeader(string schema, string encodedString)
+        {
+            var encoded = Convert.ToBase64String(Encoding.Default.GetBytes(encodedString));
             var headers = new Dictionary<string, string>();
 
-            if (!string.IsNullOrWhiteSpace(username))
+            if (!string.IsNullOrWhiteSpace(encoded))
             {
-                headers["Authorization"] = "Basic " + encoded;
+                headers["Authorization"] = string.Concat(schema, " ", encoded);
             }
 
             return headers;
@@ -119,11 +129,11 @@ namespace Energistics.Common
 
         #region IDisposable Support
 
-        private bool disposedValue = false; // To detect redundant calls
+        private bool _disposedValue; // To detect redundant calls
 
         protected virtual void CheckDisposed()
         {
-            if (disposedValue)
+            if (_disposedValue)
             {
                 throw new ObjectDisposedException(GetType().Name);
             }
@@ -131,7 +141,7 @@ namespace Energistics.Common
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 if (disposing)
                 {
@@ -143,7 +153,7 @@ namespace Energistics.Common
                 // NOTE: set large fields to null.
                 Logger = null;
 
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
 
