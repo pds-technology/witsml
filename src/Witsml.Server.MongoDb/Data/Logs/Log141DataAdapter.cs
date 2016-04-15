@@ -286,7 +286,7 @@ namespace PDS.Witsml.Server.Data.Logs
                                  logCurve.MinDateTimeIndex.Value > logCurve.MaxDateTimeIndex.Value)
                             {
                                 var min = logCurve.MinDateTimeIndex;
-                                logCurve.MinDateTimeIndex = logCurve.MinDateTimeIndex;
+                                logCurve.MinDateTimeIndex = logCurve.MaxDateTimeIndex;
                                 logCurve.MaxDateTimeIndex = min;
                             }
                         }
