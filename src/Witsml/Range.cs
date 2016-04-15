@@ -70,6 +70,26 @@ namespace PDS.Witsml
         }
 
         /// <summary>
+        /// Sorts the specified range in numeric order.
+        /// </summary>
+        /// <param name="range">The range.</param>
+        /// <param name="increasing">if set to <c>true</c>, index values are increasing.</param>
+        /// <returns>A range sorted based on the specified increasing flag.</returns>
+        public static Range<double?> Sort(this Range<double?> range, bool increasing = true)
+        {
+            if (range.Start.HasValue && range.End.HasValue)
+            {
+                if ((increasing && range.Start.Value > range.End.Value) ||
+                    (!increasing && range.Start.Value < range.End.Value))
+                {
+                    range = new Range<double?>(range.End, range.Start);
+                }
+            }
+
+            return range;
+        }
+
+        /// <summary>
         /// Determines whether a range starts after the specified value.
         /// </summary>
         /// <param name="range">The range.</param>
