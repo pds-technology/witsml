@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using Energistics.DataAccess;
 using PDS.Framework;
@@ -146,5 +147,12 @@ namespace PDS.Witsml.Server
             queryIn = WitsmlParser.ToXml(list);
         }
 
+        public IUniqueId GetLogCurveInfoByUid(IEnumerable<IUniqueId> logCurveInfos, string uid)
+        {
+            if (logCurveInfos == null || string.IsNullOrEmpty(uid))
+                return null;
+
+            return logCurveInfos.FirstOrDefault(c => c.Uid == uid);
+        }
     }
 }

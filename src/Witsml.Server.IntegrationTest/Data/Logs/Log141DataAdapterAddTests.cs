@@ -748,7 +748,8 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(log.RunNumber, logAdded.RunNumber);
             Assert.AreEqual(log.BhaRunNumber, logAdded.BhaRunNumber);
             Assert.IsNull(logAdded.CommonData.ItemState);
-            var logCurve = logAdded.LogCurveInfo.FirstOrDefault(c => c.Uid == "ROP");
+
+            var logCurve = DevKit.GetLogCurveInfoByUid(logAdded.LogCurveInfo, "ROP") as LogCurveInfo;
             Assert.IsNull(logCurve.CurveDescription);
 
             var update = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
@@ -774,7 +775,8 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(update.RunNumber, logUpdated.RunNumber);
             Assert.AreEqual(update.BhaRunNumber, logUpdated.BhaRunNumber);
             Assert.AreEqual(update.CommonData.ItemState, logUpdated.CommonData.ItemState);
-            logCurve = logUpdated.LogCurveInfo.FirstOrDefault(c => c.Uid == "ROP");
+
+            logCurve = DevKit.GetLogCurveInfoByUid(logUpdated.LogCurveInfo, "ROP") as LogCurveInfo;
             Assert.AreEqual(updateCurve.CurveDescription, logCurve.CurveDescription);
         }
 
@@ -901,8 +903,13 @@ namespace PDS.Witsml.Server.Data.Logs
                 Wellbore.Name);
             log.StartIndex = new GenericMeasure(15, "m");
 
+            // Initialize a Log with 3 channels where the 2nd channel is blank
             DevKit.InitHeader(log, LogIndexType.measureddepth);
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 8);
+
+            // Make sure there are 3 curves
+            var lciUids = log.LogCurveInfo.Select(l => l.Uid).ToArray();
+            Assert.AreEqual(3, lciUids.Length);
 
             response = DevKit.Add<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
@@ -917,13 +924,18 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsNotNull(logAdded);
             Assert.AreEqual(15, logAdded.StartIndex.Value);
             Assert.AreEqual(22, logAdded.EndIndex.Value);
-            var mdCurve = logAdded.LogCurveInfo.FirstOrDefault(c => c.Mnemonic.Value == logAdded.IndexCurve);
+
+            // Check the range of the index curve
+            var mdCurve = DevKit.GetLogCurveInfoByUid(logAdded.LogCurveInfo, logAdded.IndexCurve) as LogCurveInfo;
             Assert.AreEqual(logAdded.StartIndex.Value, mdCurve.MinIndex.Value);
             Assert.AreEqual(logAdded.EndIndex.Value, mdCurve.MaxIndex.Value);
-            var curve2 = logAdded.LogCurveInfo[1];
-            Assert.IsNull(curve2.MinIndex);
-            Assert.IsNull(curve2.MaxIndex);
-            var curve3 = logAdded.LogCurveInfo[2];
+
+            // Look for the 2nd LogCurveInfo by Mnemonic.  It should be filtered out and not exist.
+            var curve2 = DevKit.GetLogCurveInfoByUid(logAdded.LogCurveInfo, lciUids[1]) as LogCurveInfo;
+            Assert.IsNull(curve2);
+
+            // Check the range of the 3rd curve.
+            var curve3 = DevKit.GetLogCurveInfoByUid(logAdded.LogCurveInfo, lciUids[2]) as LogCurveInfo;
             Assert.AreEqual(logAdded.StartIndex.Value, curve3.MinIndex.Value);
             Assert.AreEqual(logAdded.EndIndex.Value, curve3.MaxIndex.Value);
 
@@ -959,13 +971,16 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(11, logData.Data.Count);
             Assert.AreEqual(13, logUpdated.StartIndex.Value);
             Assert.AreEqual(23, logUpdated.EndIndex.Value);
-            mdCurve = logUpdated.LogCurveInfo.FirstOrDefault(c => c.Mnemonic.Value == logUpdated.IndexCurve);
+
+            mdCurve = DevKit.GetLogCurveInfoByUid(logUpdated.LogCurveInfo, lciUids[0]) as LogCurveInfo;
             Assert.AreEqual(logUpdated.StartIndex.Value, mdCurve.MinIndex.Value);
             Assert.AreEqual(logUpdated.EndIndex.Value, mdCurve.MaxIndex.Value);
-            curve2 = logUpdated.LogCurveInfo[1];
+
+            curve2 = DevKit.GetLogCurveInfoByUid(logUpdated.LogCurveInfo, lciUids[1]) as LogCurveInfo;
             Assert.AreEqual(13, curve2.MinIndex.Value);
             Assert.AreEqual(20, curve2.MaxIndex.Value);
-            curve3 = logUpdated.LogCurveInfo[2];
+
+            curve3 = DevKit.GetLogCurveInfoByUid(logUpdated.LogCurveInfo, lciUids[2]) as LogCurveInfo;
             Assert.AreEqual(15, curve3.MinIndex.Value);
             Assert.AreEqual(23, curve3.MaxIndex.Value);
         }

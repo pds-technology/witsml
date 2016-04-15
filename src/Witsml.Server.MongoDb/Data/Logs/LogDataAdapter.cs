@@ -420,11 +420,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
         protected void FormatLogHeader(T log, IDictionary<int, string> mnemonics, string returnElements)
         {
-            // Remove LogCurveInfos from the Log header if slicing by column
-            if (!OptionsIn.ReturnElements.All.Equals(returnElements))
-            {
-                RemoveLogCurveInfos(log, mnemonics.Values.ToArray());
-            }
+            RemoveLogCurveInfos(log, mnemonics.Values.ToArray());
         }
 
         protected void RemoveLogCurveInfos(T log, string[] mnemonics)
