@@ -378,4 +378,8 @@
     <value>Duplicate mnemonics in a query are not allowed.</value>
     <comment>-482</comment>
   </data>
+  <data name="RecurringLogData" xml:space="preserve">
+    <value>For WMLS_GetFromStore, the logData section must not recur when retrieving data.</value>
+    <comment>-429</comment>
+  </data>
 </root>

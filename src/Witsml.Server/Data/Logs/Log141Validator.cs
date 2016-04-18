@@ -72,7 +72,11 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             var logDatas = DataObject.LogData;
 
-            if (logDatas.Any(ld => DuplicateUid(ld.MnemonicList.Split(_seperator))))
+            if (logDatas.Count>1)
+            {
+                yield return new ValidationResult(ErrorCodes.RecurringLogData.ToString(), new[] { "LogData", "LogData" });
+            }
+            else if (logDatas.Any(ld => DuplicateUid(ld.MnemonicList.Split(_seperator))))
             {
                 yield return new ValidationResult(ErrorCodes.DuplicateMnemonics.ToString(), new[] { "LogData", "Mnemonics" });
             }

@@ -214,6 +214,29 @@ namespace PDS.Witsml.Server.Configuration
         }
 
         /// <summary>
+        /// Validates the request maximum return nodes.
+        /// </summary>
+        /// <param name="options">The options.</param>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="document">The document.</param>
+        /// <exception cref="WitsmlException"></exception>
+        public void ValidateRequestMaxReturnNodes(Dictionary<string, string> options)
+        {
+            string optionValue;
+            if (!options.TryGetValue(OptionsIn.MaxReturnNodes.Keyword, out optionValue))
+            {
+                return;
+            }
+
+            // Validate value 
+            int maxReturnNodes;
+            if (!int.TryParse(optionValue, out maxReturnNodes) || maxReturnNodes <= 0)
+            {
+                throw new WitsmlException(ErrorCodes.InvalidMaxReturnNodes);
+            }
+        }
+
+        /// <summary>
         /// Validates the requestObjectSelectionCapability option.
         /// </summary>
         /// <param name="options">The options.</param>

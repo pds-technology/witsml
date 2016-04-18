@@ -188,6 +188,7 @@ namespace PDS.Witsml
         /// <summary>
         /// -429 For WMLS_GetFromStore, the logData section must not recur when retrieving data.
         /// </summary>
+        RecurringLogData = -429,
 
         /// <summary>
         /// -430 A client must specify an item for data-item selection that the server supports.

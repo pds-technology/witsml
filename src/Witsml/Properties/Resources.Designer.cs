@@ -611,6 +611,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to For WMLS_GetFromStore, the logData section must not recur when retrieving data..
+        /// </summary>
+        internal static string RecurringLogData {
+            get {
+                return ResourceManager.GetString("RecurringLogData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to For the capClient object, the values of schemaVersion must match the version attribute used in the plural data-objects..
         /// </summary>
         internal static string SchemaVersionNotMatch {
