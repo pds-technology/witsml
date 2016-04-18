@@ -27,10 +27,11 @@ namespace PDS.Framework
     public struct Range<T>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Range{T}"/> struct.
+        /// Initializes a new instance of the <see cref="Range{T}" /> struct.
         /// </summary>
         /// <param name="start">The start value.</param>
         /// <param name="end">The end value.</param>
+        /// <param name="offset">The offset.</param>
         public Range(T start, T end, TimeSpan? offset = null)
         {
             Start = start;
@@ -50,6 +51,10 @@ namespace PDS.Framework
         /// <value>The end value.</value>
         public T End { get; private set; }
 
+        /// <summary>
+        /// Gets the offset.
+        /// </summary>
+        /// <value>The offset.</value>
         public TimeSpan? Offset { get; private set; }
     }
 }
