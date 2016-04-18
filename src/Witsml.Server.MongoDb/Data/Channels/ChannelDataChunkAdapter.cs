@@ -330,8 +330,6 @@ namespace PDS.Witsml.Server.Data.Channels
 
                 while (!(endOfExisting && endOfUpdate))
                 {
-                    id = endOfExisting ? string.Empty : existingEnum.Current.Id;
-
                     // If the existing data starts after the update data
                     if (!endOfUpdate &&
                         (endOfExisting ||
@@ -349,6 +347,7 @@ namespace PDS.Witsml.Server.Data.Channels
                         !(new Range<double?>(updateRange.Start.Value, updateRange.End.Value)
                         .Contains(existingEnum.Current.GetIndexValue(), increasing))))
                     {
+                        id = endOfExisting ? string.Empty : existingEnum.Current.Id;
                         yield return existingEnum.Current;
                         endOfExisting = !existingEnum.MoveNext();
                     }
@@ -358,6 +357,7 @@ namespace PDS.Witsml.Server.Data.Channels
                         {
                             if (existingEnum.Current.GetIndexValue() == updateEnum.Current.GetIndexValue())
                             {
+                                id = existingEnum.Current.Id;
                                 var mergedRow = MergeRow(existingEnum.Current, updateEnum.Current);
 
                                 if (mergedRow.HasValues())
@@ -372,6 +372,7 @@ namespace PDS.Witsml.Server.Data.Channels
                             else if ( new Range<double?>(updateEnum.Current.GetIndexValue(), null)
                                 .StartsAfter(existingEnum.Current.GetIndexValue(), increasing, inclusive:false))
                             {
+                                id = existingEnum.Current.Id;
                                 var mergedRow = MergeRow(existingEnum.Current, updateEnum.Current, clear: true);
 
                                 if (mergedRow.HasValues())

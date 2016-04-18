@@ -1259,7 +1259,7 @@ namespace PDS.Witsml.Server.Data.Logs
             updateLog.LogData[0].MnemonicList = log.LogData.First().MnemonicList;
             updateLog.LogData[0].UnitList = log.LogData.First().UnitList;
             logData = updateLog.LogData.First();
-            //logData.Data.Add("2000.0,21.1,21.2");
+            logData.Data.Add("2000.0,21.1,21.2");
             logData.Data.Add("2100.0,21.1,21.2");
             logData.Data.Add("2300.0,23.1,23.2");
             logData.Data.Add("2200.0,22.1,22.2");
@@ -1274,7 +1274,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             Assert.AreEqual(1, results.Count);
             Assert.AreEqual(1, results[0].LogData.Count);
-            Assert.AreEqual(8, results[0].LogData[0].Data.Count);
+            Assert.AreEqual(9, results[0].LogData[0].Data.Count);
 
             var resultLogData = results[0].LogData[0].Data;
             
