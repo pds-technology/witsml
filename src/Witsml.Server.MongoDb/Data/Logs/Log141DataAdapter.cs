@@ -106,6 +106,25 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
+        /// Queries the specified <see cref="Log"/> in the store.
+        /// </summary>
+        /// <param name="parser">The parser that specifies the query parameters.</param>
+        /// <returns>Queried objects.</returns>
+        public override WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
+        {
+            var uri = parser.GetUri<Log>();
+            Logger.DebugFormat("Getting Log with uid '{0}'.", uri.ObjectId);
+
+            // Extract Data
+            var entity = Parse(parser.Context.Xml);
+
+            Validate(Functions.GetFromStore, entity);
+            Logger.DebugFormat("Validated Log with uid '{0}' and name '{1}' for Update", uri, entity.Name);
+
+            return base.Query(parser);
+        }
+
+        /// <summary>
         /// Updates the specified <see cref="Log"/> instance in the store.
         /// </summary>
         /// <param name="parser">The update parser.</param>
