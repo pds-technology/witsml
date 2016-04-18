@@ -200,7 +200,8 @@ namespace PDS.Witsml.Server.Data.Channels
                             .Set(u => u.Indices, dc.Indices)
                             .Set(u => u.MnemonicList, mnemonics)
                             .Set(u => u.UnitList, units)
-                            .Set(u => u.Data, dc.Data));
+                            .Set(u => u.Data, dc.Data)
+                            .Set(u => u.RecordCount, dc.RecordCount));
                 })
                 .ToList());
         }
@@ -271,7 +272,8 @@ namespace PDS.Witsml.Server.Data.Channels
                     {
                         Id = id,
                         Data = "[" + String.Join(",", data) + "]",
-                        Indices = new List<ChannelIndexInfo> { newIndex }
+                        Indices = new List<ChannelIndexInfo> { newIndex },
+                        RecordCount = data.Count
                     };
 
                     plannedRange = Range.ComputeRange(index, RangeSize, increasing);
@@ -293,7 +295,8 @@ namespace PDS.Witsml.Server.Data.Channels
                 {
                     Id = id,
                     Data = "[" + String.Join(",", data) + "]",
-                    Indices = new List<ChannelIndexInfo> { newIndex }
+                    Indices = new List<ChannelIndexInfo> { newIndex },
+                    RecordCount = data.Count
                 };
             }
         }
@@ -320,23 +323,31 @@ namespace PDS.Witsml.Server.Data.Channels
                 var endOfExisting = !existingEnum.MoveNext();
                 var endOfUpdate = !updateEnum.MoveNext();
 
+                // Is log data increasing or decreasing?
+                var increasing = !endOfExisting 
+                    ? existingEnum.Current.Indices.First().Increasing 
+                    : (!endOfUpdate ? updateEnum.Current.Indices.First().Increasing : true);
+
                 while (!(endOfExisting && endOfUpdate))
                 {
-                    id = endOfExisting ? string.Empty : existingEnum.Current.Id;
-
+                    // If the existing data starts after the update data
                     if (!endOfUpdate &&
                         (endOfExisting ||
-                        updateEnum.Current.GetIndexValue() < existingEnum.Current.GetIndexValue()))
+                        new Range<double?>(existingEnum.Current.GetIndexValue(), null)
+                        .StartsAfter(updateEnum.Current.GetIndexValue(), increasing, inclusive: false)))
                     {
                         updateEnum.Current.Id = id;
                         yield return updateEnum.Current;
                         endOfUpdate = !updateEnum.MoveNext();
                     }
+
+                    // Existing value is not contained in the update range
                     else if (!endOfExisting &&
-                        (endOfUpdate ||
-                        existingEnum.Current.GetIndexValue() < updateRange.Start.Value ||
-                        existingEnum.Current.GetIndexValue() > updateRange.End.Value))
+                        (endOfUpdate || 
+                        !(new Range<double?>(updateRange.Start.Value, updateRange.End.Value)
+                        .Contains(existingEnum.Current.GetIndexValue(), increasing))))
                     {
+                        id = endOfExisting ? string.Empty : existingEnum.Current.Id;
                         yield return existingEnum.Current;
                         endOfExisting = !existingEnum.MoveNext();
                     }
@@ -346,6 +357,7 @@ namespace PDS.Witsml.Server.Data.Channels
                         {
                             if (existingEnum.Current.GetIndexValue() == updateEnum.Current.GetIndexValue())
                             {
+                                id = existingEnum.Current.Id;
                                 var mergedRow = MergeRow(existingEnum.Current, updateEnum.Current);
 
                                 if (mergedRow.HasValues())
@@ -356,9 +368,11 @@ namespace PDS.Witsml.Server.Data.Channels
                                 endOfExisting = !existingEnum.MoveNext();
                                 endOfUpdate = !updateEnum.MoveNext();
                             }
-
-                            else if (existingEnum.Current.GetIndexValue() < updateEnum.Current.GetIndexValue())
+                            // Update starts after existing
+                            else if ( new Range<double?>(updateEnum.Current.GetIndexValue(), null)
+                                .StartsAfter(existingEnum.Current.GetIndexValue(), increasing, inclusive:false))
                             {
+                                id = existingEnum.Current.Id;
                                 var mergedRow = MergeRow(existingEnum.Current, updateEnum.Current, clear: true);
 
                                 if (mergedRow.HasValues())
@@ -369,7 +383,7 @@ namespace PDS.Witsml.Server.Data.Channels
                                 endOfExisting = !existingEnum.MoveNext();
                             }
 
-                            else // existingEnum.Current.GetIndexValue() > updateEnum.Current.GetIndexValue()
+                            else // Update Starts Before existing
                             {
                                 updateEnum.Current.Id = id;
                                 yield return updateEnum.Current;
