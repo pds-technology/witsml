@@ -56,12 +56,14 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="range">The index range to select data for.</param>
         /// <param name="increasing">if set to <c>true</c> the primary index is increasing.</param>
         /// <returns>A collection of <see cref="List{ChannelDataChunk}" /> items.</returns>
-        public List<ChannelDataChunk> GetData(string uri, string indexChannel, Range<double?> range, bool increasing)
+        public List<ChannelDataChunk> GetData(string uri, string indexChannel, Range<double?> range, bool increasing, int? requestLatestValues = null)
         {
             try
             {
                 var filter = BuildDataFilter(uri, indexChannel, range, increasing);
-                return GetData(filter, increasing);
+
+                // Set a flag to reverse the sort order if there is a request for latest values.
+                return GetData(filter, increasing, reverseSort: requestLatestValues.HasValue);
             }
             catch (MongoException ex)
             {
@@ -436,13 +438,17 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="filter">The data filter.</param>
         /// <param name="increasing">if set to <c>true</c> the data will be sorted in ascending order.</param>
         /// <returns>The list of channel data chunks that fit the query criteria sorted by the primary index.</returns>
-        private List<ChannelDataChunk> GetData(FilterDefinition<ChannelDataChunk> filter, bool increasing)
+        private List<ChannelDataChunk> GetData(FilterDefinition<ChannelDataChunk> filter, bool increasing, bool reverseSort = false)
         {
             var collection = GetCollection();
             var sortBuilder = Builders<ChannelDataChunk>.Sort;
             var sortField = "Indices.0.Start";
 
-            var sort = increasing
+            var sortDirection = reverseSort 
+                ? !increasing 
+                : increasing;
+
+            var sort = sortDirection
                 ? sortBuilder.Ascending(sortField)
                 : sortBuilder.Descending(sortField);
 
