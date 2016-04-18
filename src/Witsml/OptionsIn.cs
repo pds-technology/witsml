@@ -139,6 +139,13 @@ namespace PDS.Witsml
             }
         }
 
+        public class RequestLatestValues : OptionsIn
+        {
+            public RequestLatestValues(int value) : base(Keyword, value.ToString()) { }
+
+            public const string Keyword = "requestLatestValues";
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="OptionsIn"/> class.
         /// </summary>

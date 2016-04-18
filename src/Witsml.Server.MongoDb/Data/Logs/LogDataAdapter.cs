@@ -302,10 +302,10 @@ namespace PDS.Witsml.Server.Data.Logs
                 .ToDictionary(x => x.Index, x => x.Mnemonic);
         }
 
-        protected IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, string indexChannel, Range<double?> range, bool increasing)
+        protected IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, string indexChannel, Range<double?> range, bool increasing, int? requestLatestValues = null)
         {
-            var chunks = ChannelDataChunkAdapter.GetData(uri, indexChannel, range, increasing);
-            return chunks.GetRecords(range, increasing);
+            var chunks = ChannelDataChunkAdapter.GetData(uri, indexChannel, range, increasing, requestLatestValues);
+            return chunks.GetRecords(range, increasing, requestLatestValues);
         }
 
         protected IDictionary<int, string> GetUnitList(T log, int[] slices)
@@ -330,9 +330,18 @@ namespace PDS.Witsml.Server.Data.Logs
 
         protected void QueryLogDataValues(T log, T logHeader, WitsmlQueryParser parser, IDictionary<int, string> mnemonics)
         {
-            var range = GetLogDataSubsetRange(logHeader, parser);
+            // Get the latest values request if one was supplied.
+            var requestLatestValues = parser.Options.ContainsKey(OptionsIn.RequestLatestValues.Keyword)
+                ? int.Parse(parser.Options[OptionsIn.RequestLatestValues.Keyword])
+                : (int?)null;
+
+            // if there is a request for latest values then the range should be ignored.
+            var range = requestLatestValues.HasValue 
+                ? new Range<double?>(null, null) 
+                : GetLogDataSubsetRange(logHeader, parser);
+
             var units = GetUnitList(logHeader, mnemonics.Keys.ToArray());
-            var records = GetChannelData(logHeader.GetUri(), mnemonics[0], range, IsIncreasing(logHeader));
+            var records = GetChannelData(logHeader.GetUri(), mnemonics[0], range, IsIncreasing(logHeader), requestLatestValues);
             var logData = FormatLogData(log, records.GetReader(), mnemonics, units);
 
             SetLogDataValues(log, logData, mnemonics.Values, units.Values);

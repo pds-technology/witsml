@@ -24,27 +24,38 @@ namespace PDS.Witsml.Server.Models
 {
     public static class ChunkExtensions
     {
-        public static ChannelDataReader GetReader(this ChannelDataChunk channelDataChunk)
+        public static ChannelDataReader GetReader(this ChannelDataChunk channelDataChunk, bool reverseSort = false)
         {
             var mnemonics = ChannelDataReader.Split(channelDataChunk.MnemonicList);
             var units = ChannelDataReader.Split(channelDataChunk.UnitList);
 
             return new ChannelDataReader(channelDataChunk.Data, mnemonics, units, channelDataChunk.Uri, channelDataChunk.Id)
-                .WithIndices(channelDataChunk.Indices);
+                .WithIndices(channelDataChunk.Indices, calculate: reverseSort, reverseSort: reverseSort);
         }
 
-        public static IEnumerable<IChannelDataRecord> GetRecords(this IEnumerable<ChannelDataChunk> channelDataChunks, Range<double?>? range = null, bool increasing = true)
+        public static IEnumerable<IChannelDataRecord> GetRecords(this IEnumerable<ChannelDataChunk> channelDataChunks, Range<double?>? range = null, bool increasing = true, int? requestLatestValues = null)
         {
             if (channelDataChunks == null)
                 yield break;
 
+            var breakValue = requestLatestValues.HasValue ? requestLatestValues.Value : 0;
+
             foreach (var chunk in channelDataChunks)
             {
-                var records = chunk.GetReader().AsEnumerable();
+                if (requestLatestValues.HasValue && breakValue <= 0)
+                    yield break;
+
+                var records = chunk.GetReader(reverseSort: requestLatestValues.HasValue).AsEnumerable();
 
                 foreach (var record in records)
                 {
-                    if (range.HasValue)
+                    if (requestLatestValues.HasValue && breakValue <= 0)
+                        yield break;
+
+                    if (requestLatestValues.HasValue)
+                        breakValue =- 1;
+
+                        if (range.HasValue)
                     {
                         var index = record.GetIndexValue();
 
