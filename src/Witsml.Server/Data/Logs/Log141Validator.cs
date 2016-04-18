@@ -65,6 +65,20 @@ namespace PDS.Witsml.Server.Data.Logs
         public IEnumerable<IWitsml141Configuration> Providers { get; set; }
 
         /// <summary>
+        /// Validates the data object while executing GetFromStore
+        /// </summary>
+        /// <returns>A collection of validation results.</returns>
+        protected override IEnumerable<ValidationResult> ValidateForGet()
+        {
+            var logDatas = DataObject.LogData;
+
+            if (logDatas.Any(ld => DuplicateUid(ld.MnemonicList.Split(_seperator))))
+            {
+                yield return new ValidationResult(ErrorCodes.DuplicateMnemonics.ToString(), new[] { "LogData", "Mnemonics" });
+            }
+        }
+
+        /// <summary>
         /// Validates the data object while executing AddToStore.
         /// </summary>
         /// <returns>A collection of validation results.</returns>

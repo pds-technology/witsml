@@ -68,6 +68,11 @@ namespace PDS.Witsml.Server.Data
         {
             switch (Function)
             {
+                case Functions.GetFromStore:
+                    foreach (var result in ValidateForGet())
+                        yield return result;
+                    break;
+
                 case Functions.AddToStore:
                     foreach (var result in ValidateProperties().Union(ValidateForInsert()))
                         yield return result;
@@ -100,6 +105,15 @@ namespace PDS.Witsml.Server.Data
             IList<ValidationResult> results;
             DataObjectValidator.TryValidate(DataObject, out results);
             ValidateResults(results);
+            yield break;
+        }
+
+        /// <summary>
+        /// Validates the data object while executing GetFromStore
+        /// </summary>
+        /// <returns></returns>
+        protected virtual IEnumerable<ValidationResult> ValidateForGet()
+        {
             yield break;
         }
 

@@ -464,6 +464,7 @@ namespace PDS.Witsml
         /// <summary>
         /// -482 Duplicate mnemonics in a query are not allowed.
         /// </summary>
+        DuplicateMnemonics = -482,
 
         /// <summary>
         /// -483 The XMLin document does not comply with the update schema.
