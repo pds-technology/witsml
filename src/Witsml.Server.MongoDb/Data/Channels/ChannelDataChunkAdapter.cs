@@ -55,7 +55,9 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="indexChannel">The index channel.</param>
         /// <param name="range">The index range to select data for.</param>
         /// <param name="increasing">if set to <c>true</c> the primary index is increasing.</param>
+        /// <param name="requestLatestValues">The request latest values.</param>
         /// <returns>A collection of <see cref="List{ChannelDataChunk}" /> items.</returns>
+        /// <exception cref="WitsmlException"></exception>
         public List<ChannelDataChunk> GetData(string uri, string indexChannel, Range<double?> range, bool increasing, int? requestLatestValues = null)
         {
             try

@@ -302,9 +302,20 @@ namespace PDS.Witsml.Server.Data.Logs
                 .ToDictionary(x => x.Index, x => x.Mnemonic);
         }
 
+        /// <summary>
+        /// Gets the channel data for a given index range.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="indexChannel">The index channel.</param>
+        /// <param name="range">The range to query the channel data.</param>
+        /// <param name="increasing">if set to <c>true</c> if the log is increasing, false otherwise.</param>
+        /// <param name="requestLatestValues">The number of latest values requested, null if not requested.</param>
+        /// <returns>The channel data records requested</returns>
         protected IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, string indexChannel, Range<double?> range, bool increasing, int? requestLatestValues = null)
         {
             var chunks = ChannelDataChunkAdapter.GetData(uri, indexChannel, range, increasing, requestLatestValues);
+
+            // TODO: Remove any processing of requestLatestValues from GetRecords
             return chunks.GetRecords(range, increasing, requestLatestValues);
         }
 
@@ -331,9 +342,7 @@ namespace PDS.Witsml.Server.Data.Logs
         protected void QueryLogDataValues(T log, T logHeader, WitsmlQueryParser parser, IDictionary<int, string> mnemonics)
         {
             // Get the latest values request if one was supplied.
-            var requestLatestValues = parser.Options.ContainsKey(OptionsIn.RequestLatestValues.Keyword)
-                ? int.Parse(parser.Options[OptionsIn.RequestLatestValues.Keyword])
-                : (int?)null;
+            var requestLatestValues = parser.RequestLatestValues();
 
             // if there is a request for latest values then the range should be ignored.
             var range = requestLatestValues.HasValue 
@@ -405,6 +414,10 @@ namespace PDS.Witsml.Server.Data.Logs
                 // Filter rows with no channel values
                 if (values.Count > 1)
                 {
+                    // if latest values requested:
+                    // Once values for all requested mnemonics are parsed then evaluate if we
+                    //... have the last "n" values for each mnemonic and stop reading data when
+                    //... we do.
                     logData.Add(string.Join(",", values));
                     start = start ?? index;
                     end = index;
