@@ -33,24 +33,18 @@ namespace PDS.Witsml.Server.Models
                 .WithIndices(channelDataChunk.Indices, calculate: reverse, reverse: reverse);
         }
 
-        public static IEnumerable<IChannelDataRecord> GetRecords(this IEnumerable<ChannelDataChunk> channelDataChunks, Range<double?>? range = null, bool increasing = true, int? requestLatestValues = null)
+        public static IEnumerable<IChannelDataRecord> GetRecords(this IEnumerable<ChannelDataChunk> channelDataChunks, Range<double?>? range = null, bool increasing = true, bool reverse = false)
         {
             if (channelDataChunks == null)
                 yield break;
 
-            var requestCount = requestLatestValues.HasValue ? requestLatestValues.Value : 0;
-
             foreach (var chunk in channelDataChunks)
             {
-                var records = chunk.GetReader(reverse: requestLatestValues.HasValue).AsEnumerable();
+                var records = chunk.GetReader(reverse: reverse).AsEnumerable();
 
                 foreach (var record in records)
                 {
-
-                    if (requestLatestValues.HasValue)
-                        requestCount =- 1;
-
-                        if (range.HasValue)
+                    if (range.HasValue)
                     {
                         var index = record.GetIndexValue();
 
@@ -62,9 +56,6 @@ namespace PDS.Witsml.Server.Models
                     }
 
                     yield return record;
-
-                    if (requestLatestValues.HasValue && requestCount <= 0)
-                        yield break;
                 }
             }
         }
