@@ -354,16 +354,19 @@ namespace PDS.Witsml
         /// -460 For getting systematically growing data-objects, if column-identifiers(mnemonics) are specified in both
         /// the header and data sections then the column-identifiers must be the same in the two sections.
         /// </summary>
+        ColumnIdentifiersNotSame = -460,
 
         /// <summary>
         /// -461 For getting systematically growing data-objects, if a column-definition(logCurveInfo) section is specified
         /// then a mnemonic element must be specified.
         /// </summary>
+        MissingMnemonicElement = -461,
 
         /// <summary>
         /// -462 For getting systematically growing data-objects, if a data-node (logData) section is specified then a
         /// mnemonicList element must be specified.
         /// </summary>
+        MissingMnemonicList = -462,
 
         /// <summary>
         /// -463 For updating systematically growing data, the update data must not contain multiple nodes with the same
@@ -430,6 +433,7 @@ namespace PDS.Witsml
         /// -475 No subset of a growing data-object is specified.A query must specify a subset of one growing data-object
         /// per query, but multiple individual queries may be included inside the query plural data-object.
         /// </summary>
+        MissingSubset = -475,
 
         /// <summary>
         /// -476 For WMLS_GetFromStore: OptionsIn keyword returnsElements=latest-change-only can only be used for
@@ -441,6 +445,7 @@ namespace PDS.Witsml
         /// -477 For getting systematically growing data-objects, both column-description and data sections must be
         /// specified.
         /// </summary>
+        MissingColumnDescriptionOrDataSection = -477,
 
         /// <summary>
         /// -478 Incorrect case on parent uid.

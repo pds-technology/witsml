@@ -121,6 +121,38 @@ namespace PDS.Witsml.Server.Data.Logs
             Validate(Functions.GetFromStore, entity);
             Logger.DebugFormat("Validated Log with uid '{0}' and name '{1}' for Update", uri, entity.Name);
 
+            var logcurveInfos = GetLogCurveInfoMnemonics(parser).ToList();
+            var mnemonicList = GetLogDataMnemonics(parser).ToList();
+           
+            if (OptionsIn.ReturnElements.Requested.Equals(parser.ReturnElements()))
+            {
+                if (!(logcurveInfos.All( x => mnemonicList.Contains(x) && mnemonicList.All(y => logcurveInfos.Contains(y)) )))
+                {
+                    throw new WitsmlException(ErrorCodes.ColumnIdentifiersNotSame);
+                }
+
+                if (parser.Contains("logCurveInfo"))
+                {
+                    var properties = parser.Properties("logCurveInfo").ToArray();
+                    if (properties.Any(x => x.IsEmpty))
+                    {
+                        throw new WitsmlException(ErrorCodes.MissingMnemonicElement);
+                    }
+                }
+
+                if (parser.Contains("logData") && !mnemonicList.Any())
+                {                    
+                    throw new WitsmlException(ErrorCodes.MissingMnemonicList);
+                }
+            }
+            else if (OptionsIn.ReturnElements.DataOnly.Equals(parser.ReturnElements()))
+            {
+                if (!(parser.Contains("startIndex") && parser.Contains("endIndex") || parser.Contains("startDateTimeIndex") && parser.Contains("endDateTimeIndex") || mnemonicList.Any()))
+                {
+                    throw new WitsmlException(ErrorCodes.MissingSubset);
+                }
+            }
+
             return base.Query(parser);
         }
 
