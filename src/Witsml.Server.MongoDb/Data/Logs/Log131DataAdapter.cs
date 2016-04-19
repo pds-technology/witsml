@@ -316,13 +316,16 @@ namespace PDS.Witsml.Server.Data.Logs
                 entity.Direction = LogIndexDirection.increasing;
             }
 
-            if (entity.LogCurveInfo != null)
+            var logCurves = entity.LogCurveInfo;
+            if (logCurves != null)
             {
-                foreach (var logCurve in entity.LogCurveInfo)
+                foreach (var logCurve in logCurves)
                 {
                     if (string.IsNullOrWhiteSpace(logCurve.Uid))
                         logCurve.Uid = logCurve.Mnemonic;
                 }
+
+                IndexCurveToFirst(logCurves, logCurves.Where(l => l.ColumnIndex == entity.IndexCurve.ColumnIndex).Select(l => l.Uid).FirstOrDefault());
             }
         }
 
