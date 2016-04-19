@@ -1259,7 +1259,7 @@ namespace PDS.Witsml.Server.Data.Logs
             updateLog.LogData[0].MnemonicList = log.LogData.First().MnemonicList;
             updateLog.LogData[0].UnitList = log.LogData.First().UnitList;
             logData = updateLog.LogData.First();
-            //logData.Data.Add("2000.0,21.1,21.2");
+            logData.Data.Add("2000.0,21.1,21.2");
             logData.Data.Add("2100.0,21.1,21.2");
             logData.Data.Add("2300.0,23.1,23.2");
             logData.Data.Add("2200.0,22.1,22.2");
@@ -1274,7 +1274,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             Assert.AreEqual(1, results.Count);
             Assert.AreEqual(1, results[0].LogData.Count);
-            Assert.AreEqual(8, results[0].LogData[0].Data.Count);
+            Assert.AreEqual(9, results[0].LogData[0].Data.Count);
 
             var resultLogData = results[0].LogData[0].Data;
             
@@ -1696,6 +1696,50 @@ namespace PDS.Witsml.Server.Data.Logs
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.IncorrectCaseParentUid, response.Result);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapater_AddToStore_Move_Index_Curve_To_First()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = CreateLog(
+                null,
+                DevKit.Name("Log can be added with depth data"),
+                Wellbore.UidWell,
+                Well.Name,
+                response.SuppMsgOut,
+                Wellbore.Name);
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            var logCurves = log.LogCurveInfo;
+            var indexCurve = logCurves.First();
+            logCurves.Remove(indexCurve);
+            logCurves.Add(indexCurve);
+            var firstCurve = log.LogCurveInfo.First();
+            Assert.AreNotEqual(indexCurve.Mnemonic.Value, firstCurve.Mnemonic.Value);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var query = new Log
+            {
+                Uid = uidLog,
+                UidWell = log.UidWell,
+                UidWellbore = log.UidWellbore
+            };
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            var logAdded = results.FirstOrDefault();
+            Assert.IsNotNull(logAdded);
+            firstCurve = logAdded.LogCurveInfo.First();
+            Assert.AreEqual(indexCurve.Mnemonic.Value, firstCurve.Mnemonic.Value);
         }
 
         #region Helper Methods

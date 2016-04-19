@@ -356,5 +356,61 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(query.EndIndex.Value, secondChannel.MinIndex.Value);
             Assert.AreEqual(95, secondChannel.MaxIndex.Value);
         }
+
+        [TestMethod]
+        public void LogDataAdapter_GetFromStore_RequestLatestValue_OptionsIn()
+        {
+            var response = DevKit.Add<WellList, Well>(_well);
+
+            _wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+
+            var log = new Log()
+            {
+                UidWell = _wellbore.UidWell,
+                NameWell = _well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = _wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            var row = 10;
+            DevKit.InitHeader(log, LogIndexType.measureddepth, false);
+
+            var startIndex = new GenericMeasure { Uom = "m", Value = 100 };
+            log.StartIndex = startIndex;
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), row, 1, true, false, false);
+            var logData = log.LogData.First();
+            logData.Data.Clear();
+            logData.Data.Add("100,1,");
+            logData.Data.Add("99,2,");
+            logData.Data.Add("98,3,");
+            logData.Data.Add("97,4,");
+            logData.Data.Add("96,5,");
+            logData.Data.Add("95,,6");
+            logData.Data.Add("94,,7");
+            logData.Data.Add("93,,8");
+            logData.Data.Add("92,,9");
+            logData.Data.Add("91,,10");
+
+            // Add a decreasing log with several values
+            response = DevKit.Add<LogList, Log>(log);
+
+            // Assert that the log was added successfully
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+
+            var uidLog = response.SuppMsgOut;
+            logData = new LogData { MnemonicList = DevKit.Mnemonics(log) };
+            var query = new Log
+            {
+                Uid = uidLog,
+                UidWell = log.UidWell,
+                UidWellbore = log.UidWellbore,
+            };
+            var result = DevKit.Query<LogList, Log>(query, ObjectTypes.Log, null, OptionsIn.ReturnElements.All + ';' + new OptionsIn.RequestLatestValues(1));
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.First().LogData.First().Data.Count);
+        }
     }
 }

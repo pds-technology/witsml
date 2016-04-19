@@ -68,7 +68,9 @@ namespace PDS.Witsml.Server.Configuration
 
             if (context.Function == Functions.GetFromStore)
             {
-                ValidateKeywords(optionsIn, OptionsIn.ReturnElements.Keyword, OptionsIn.RequestObjectSelectionCapability.Keyword, OptionsIn.RequestPrivateGroupOnly.Keyword, OptionsIn.CompressionMethod.Keyword);  
+                ValidateKeywords(optionsIn, OptionsIn.ReturnElements.Keyword, OptionsIn.RequestObjectSelectionCapability.Keyword, OptionsIn.RequestPrivateGroupOnly.Keyword, 
+                                OptionsIn.CompressionMethod.Keyword, OptionsIn.MaxReturnNodes.Keyword, OptionsIn.RequestLatestValues.Keyword);
+                ValidateRequestMaxReturnNodes(optionsIn);
                 ValidateRequestObjectSelectionCapability(optionsIn, context.ObjectType, document);
                 ValidateEmptyRootElement(context.ObjectType, document);
                 ValidateReturnElements(optionsIn, context.ObjectType);

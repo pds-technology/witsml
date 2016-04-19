@@ -65,6 +65,24 @@ namespace PDS.Witsml.Server.Data.Logs
         public IEnumerable<IWitsml141Configuration> Providers { get; set; }
 
         /// <summary>
+        /// Validates the data object while executing GetFromStore
+        /// </summary>
+        /// <returns>A collection of validation results.</returns>
+        protected override IEnumerable<ValidationResult> ValidateForGet()
+        {
+            var logDatas = DataObject.LogData;
+
+            if (logDatas.Count>1)
+            {
+                yield return new ValidationResult(ErrorCodes.RecurringLogData.ToString(), new[] { "LogData", "LogData" });
+            }
+            else if (logDatas.Any(ld => DuplicateUid(ld.MnemonicList.Split(_seperator))))
+            {
+                yield return new ValidationResult(ErrorCodes.DuplicateMnemonics.ToString(), new[] { "LogData", "Mnemonics" });
+            }
+        }
+
+        /// <summary>
         /// Validates the data object while executing AddToStore.
         /// </summary>
         /// <returns>A collection of validation results.</returns>
@@ -76,6 +94,8 @@ namespace PDS.Witsml.Server.Data.Logs
             var uriWellbore = uri.Parent;
             var uriWell = uriWellbore.Parent;
             var wellbore = _wellboreDataAdapter.Get(uriWellbore);
+
+            var logDatas = DataObject.LogData;
 
             // Validate parent uid property
             if (string.IsNullOrWhiteSpace(DataObject.UidWell))
@@ -123,9 +143,8 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             // Validate that column-identifiers in all LogData MnemonicLists are unique.
-            else if (DataObject.LogData != null
-                && DataObject.LogData.Count > 0
-                && DataObject.LogData.Any(ld => {
+            else if (logDatas != null && logDatas.Count > 0
+                && logDatas.Any(ld => {
                         var mnemonics = ld.MnemonicList.Split(',');
                         return (mnemonics.Distinct().Count() < mnemonics.Count()) && !ld.MnemonicList.Contains(",,,");
                     }))
@@ -143,27 +162,33 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Validate that Index Curve exists in all LogData mnemonicLists
             else if (!string.IsNullOrEmpty(DataObject.IndexCurve)
-                && DataObject.LogData != null
-                && DataObject.LogData.Count > 0
-                && !DataObject.LogData.All(ld => !string.IsNullOrEmpty(ld.MnemonicList) && ld.MnemonicList.Split(',').Any(mnemonic => mnemonic == DataObject.IndexCurve)))
+                && logDatas != null
+                && logDatas.Count > 0
+                && !logDatas.All(ld => !string.IsNullOrEmpty(ld.MnemonicList) && ld.MnemonicList.Split(',').Any(mnemonic => mnemonic == DataObject.IndexCurve)))
             {
                 yield return new ValidationResult(ErrorCodes.IndexCurveNotFound.ToString(), new[] { "IndexCurve" });
             }
 
             // Validate if MaxDataNodes has been exceeded
-            else if (DataObject.LogData != null && DataObject.LogData.SelectMany(ld => ld.Data).Count() > maxDataNodes)
+            else if (logDatas != null && logDatas.SelectMany(ld => ld.Data).Count() > maxDataNodes)
             {
                 yield return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "LogData", "Data" });
             }
 
             // Validate if MaxDataPoints has been exceeded
-            else if (DataObject.LogData != null 
-                && DataObject.LogData.Count > 0 
-                && DataObject.LogData.First().Data != null 
-                && DataObject.LogData.First().Data.Count > 0 
-                && (DataObject.LogData.SelectMany(ld => ld.Data).Count() * DataObject.LogData.First().Data[0].Split(',').Count()) > maxDataPoints)
+            else if (logDatas != null && logDatas.Count > 0 )
             {
-                yield return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "LogData", "Data" });
+                var logData = logDatas.First();
+                if (string.IsNullOrWhiteSpace(logData.MnemonicList))
+                    yield return new ValidationResult(ErrorCodes.MissingColumnIdentifiers.ToString(), new[] { "LogData", "MnemonicList" });
+                else
+                {
+                    var mnemonics = logData.MnemonicList.Split(_seperator);
+                    if (logData.Data != null && logData.Data.Count > 0 && (logData.Data.Count * logData.Data[0].Split(',').Count()) > maxDataPoints)
+                        yield return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "LogData", "Data" });
+                    else if (!mnemonics[0].EqualsIgnoreCase(DataObject.IndexCurve))
+                        yield return new ValidationResult(ErrorCodes.IndexNotFirstInDataColumnList.ToString(), new[] { "LogData", "MnemonicList" });
+                }
             }
 
             // Validate Index Mnemonic is first in LogCurveInfo list
@@ -186,20 +211,20 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Validate for a bad column identifier in LogData MnemonicList
             //... If the MnemonicList has more channels than the LogCurveInfo interpret as having a comma within a mnemonic which is a bad column identifier
-            else if (DataObject.LogData.Select(ld => ld.MnemonicList.Split(',')).Any(a => a.Count() > channelCount))
+            else if (logDatas.Select(ld => ld.MnemonicList.Split(',')).Any(a => a.Count() > channelCount))
             {
                 yield return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogData.MnemonicList" });
             }
 
             // Inspect each mnemonic, in each mnemonicList, in each LogData for an illeagal column identifier.
-            else if (DataObject.LogData.Select(ld => ld.MnemonicList.Split(','))
+            else if (logDatas.Select(ld => ld.MnemonicList.Split(','))
                 .Any(mnemArrary => mnemArrary
                     .Any(mnemonic => _illegalColumnIdentifiers
                         .Any(badChar => mnemonic.Contains(badChar)))))
             {
                 yield return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogData.MnemonicList" });
             }
-            else if (DataObject.LogData != null && DataObject.LogData.Count > 0 && !UnitSpecified(DataObject.LogData))
+            else if (logDatas != null && logDatas.Count > 0 && !UnitSpecified(logDatas))
             {
                 yield return new ValidationResult(ErrorCodes.MissingUnitForMeasureData.ToString(), new[] { "LogData", "UnitList" });
             }

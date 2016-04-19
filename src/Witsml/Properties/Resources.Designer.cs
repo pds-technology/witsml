@@ -178,6 +178,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Duplicate mnemonics in a query are not allowed..
+        /// </summary>
+        internal static string DuplicateMnemonics {
+            get {
+                return ResourceManager.GetString("DuplicateMnemonics", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to For WMLS_UpdateInStore, new elements or attributes must not be empty..
         /// </summary>
         internal static string EmptyNewElementsOrAttributes {
@@ -598,6 +607,15 @@ namespace PDS.Witsml.Properties {
         internal static string RecurringItemsInconsistentSelection {
             get {
                 return ResourceManager.GetString("RecurringItemsInconsistentSelection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to For WMLS_GetFromStore, the logData section must not recur when retrieving data..
+        /// </summary>
+        internal static string RecurringLogData {
+            get {
+                return ResourceManager.GetString("RecurringLogData", resourceCulture);
             }
         }
         

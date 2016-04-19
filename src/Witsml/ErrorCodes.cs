@@ -188,6 +188,7 @@ namespace PDS.Witsml
         /// <summary>
         /// -429 For WMLS_GetFromStore, the logData section must not recur when retrieving data.
         /// </summary>
+        RecurringLogData = -429,
 
         /// <summary>
         /// -430 A client must specify an item for data-item selection that the server supports.
@@ -464,6 +465,7 @@ namespace PDS.Witsml
         /// <summary>
         /// -482 Duplicate mnemonics in a query are not allowed.
         /// </summary>
+        DuplicateMnemonics = -482,
 
         /// <summary>
         /// -483 The XMLin document does not comply with the update schema.

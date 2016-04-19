@@ -374,4 +374,12 @@
     <value>When updating data in a systematically growing data-object, the unitList must be populated with units that match the header.</value>
     <comment>-452</comment>
   </data>
+  <data name="DuplicateMnemonics" xml:space="preserve">
+    <value>Duplicate mnemonics in a query are not allowed.</value>
+    <comment>-482</comment>
+  </data>
+  <data name="RecurringLogData" xml:space="preserve">
+    <value>For WMLS_GetFromStore, the logData section must not recur when retrieving data.</value>
+    <comment>-429</comment>
+  </data>
 </root>

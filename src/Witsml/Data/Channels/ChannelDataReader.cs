@@ -720,11 +720,14 @@ namespace PDS.Witsml.Data.Channels
         /// Sorts the data by the primary index.
         /// </summary>
         /// <returns>The channel data reader instance.</returns>
-        public ChannelDataReader Sort()
+        public ChannelDataReader Sort(bool reverseSort = false)
         {
             if (!Indices.Any()) return this;
             var indexChannel = Indices.First();
-            var increasing = indexChannel.Increasing;
+
+            var increasing = reverseSort 
+                ? !indexChannel.Increasing 
+                : indexChannel.Increasing;
             var isTimeIndex = indexChannel.IsTimeIndex;
 
             Func<List<List<object>>, object> getIndexValue = row => isTimeIndex

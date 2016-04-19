@@ -78,6 +78,18 @@ namespace PDS.Witsml
         }
 
         /// <summary>
+        /// Defines the maxReturnNodes option value.
+        /// </summary>
+        /// <seealso cref="PDS.Witsml.OptionsIn" />
+        public class MaxReturnNodes : OptionsIn
+        {
+            public MaxReturnNodes(string value) : base(Keyword, value) { }
+
+            public const string Keyword = "maxReturnNodes";
+
+        }
+
+        /// <summary>
         /// Defines the list of compressionMethod configuration option values.
         /// </summary>
         /// <seealso cref="PDS.Witsml.OptionsIn" />
@@ -137,6 +149,13 @@ namespace PDS.Witsml
                 yield return False;
                 yield return True;
             }
+        }
+
+        public class RequestLatestValues : OptionsIn
+        {
+            public RequestLatestValues(int value) : base(Keyword, value.ToString()) { }
+
+            public const string Keyword = "requestLatestValues";
         }
 
         /// <summary>
