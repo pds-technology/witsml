@@ -34,6 +34,7 @@ namespace PDS.Witsml.Server.Data.Logs
 {
     public abstract class LogDataAdapter<T, TChild> : MongoDbDataAdapter<T>, IChannelDataProvider where T : IWellboreObject where TChild : IUniqueId
     {
+        private static readonly int MaxRequestLatestValues = Settings.Default.MaxDataNodes;
         private readonly bool _streamIndexValuePairs;
 
         protected LogDataAdapter(IDatabaseProvider databaseProvider, string dbCollectionName) : base(databaseProvider, dbCollectionName)
@@ -51,6 +52,15 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>Queried objects.</returns>
         public override WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
         {
+            var uri = parser.GetUri<T>();
+            Logger.DebugFormat("Getting Log with uri objectId'{0}'.", uri.ObjectId);
+
+            // Extract Data
+            var entity = Parse(parser.Context.Xml);
+
+            Validate(Functions.GetFromStore, entity);
+            Logger.DebugFormat("Validated Log with uri '{0}' and name '{1}' for Query", uri, entity.Name);
+
             var returnElements = parser.ReturnElements();
             var logs = QueryEntities(parser);
 
@@ -314,9 +324,7 @@ namespace PDS.Witsml.Server.Data.Logs
         protected IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, string indexChannel, Range<double?> range, bool increasing, int? requestLatestValues = null)
         {
             var chunks = ChannelDataChunkAdapter.GetData(uri, indexChannel, range, increasing, requestLatestValues);
-
-            // TODO: Remove any processing of requestLatestValues from GetRecords
-            return chunks.GetRecords(range, increasing, requestLatestValues);
+            return chunks.GetRecords(range, increasing, reverse: requestLatestValues.HasValue);
         }
 
         protected IDictionary<int, string> GetUnitList(T log, int[] slices)
@@ -344,6 +352,15 @@ namespace PDS.Witsml.Server.Data.Logs
             // Get the latest values request if one was supplied.
             var requestLatestValues = parser.RequestLatestValues();
 
+            // If latest values have been requested then
+            //... don't allow more than the maximum.
+            if (requestLatestValues.HasValue)
+            {
+                requestLatestValues = requestLatestValues.Value > MaxRequestLatestValues 
+                    ? MaxRequestLatestValues 
+                    : requestLatestValues.Value;
+            }
+
             // if there is a request for latest values then the range should be ignored.
             var range = requestLatestValues.HasValue 
                 ? new Range<double?>(null, null) 
@@ -351,7 +368,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var units = GetUnitList(logHeader, mnemonics.Keys.ToArray());
             var records = GetChannelData(logHeader.GetUri(), mnemonics[0], range, IsIncreasing(logHeader), requestLatestValues);
-            var logData = FormatLogData(log, records.GetReader(), mnemonics, units);
+            var logData = FormatLogData(log, records.GetReader(), mnemonics, units, requestLatestValues);
 
             SetLogDataValues(log, logData, mnemonics.Values, units.Values);
         }
@@ -366,7 +383,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 isTimeLog);
         }
 
-        protected List<string> FormatLogData(T log, ChannelDataReader reader, IDictionary<int, string> mnemonics, IDictionary<int, string> units)
+        protected List<string> FormatLogData(T log, ChannelDataReader reader, IDictionary<int, string> mnemonics, IDictionary<int, string> units, int? requestLatestValues)
         {
             var logData = new List<string>();
             var slices = mnemonics.Keys.ToArray();
@@ -388,7 +405,16 @@ namespace PDS.Witsml.Server.Data.Logs
                     continue;
                 }
 
-                ranges.Add(mnemonics[i], range);
+                if (mnemonics.ContainsKey(i))
+                    ranges.Add(mnemonics[i], range);
+            }
+
+            // Create and initialize value count dictionary for channels
+            var requestedValueCount = new Dictionary<int, int>();
+            //mnemonics.Keys.ForEach(m => requestedValueCount.Add(m, 0));
+            for (var i = 0; i < mnemonics.Keys.Count; i++)
+            {
+                requestedValueCount.Add(i, 0);
             }
 
             // Read through each row
@@ -407,20 +433,28 @@ namespace PDS.Witsml.Server.Data.Logs
                     var channelValue = reader.GetValue(i);
 
                     // Limit data to requested mnemonics
-                    if ((!slices.Any() || slices.Contains(i)) && channelValue != null)
+                    if ((!slices.Any() || slices.Contains(i)))
                         values.Add(channelValue);
                 }
 
                 // Filter rows with no channel values
                 if (values.Count > 1)
                 {
-                    // if latest values requested:
-                    // Once values for all requested mnemonics are parsed then evaluate if we
-                    //... have the last "n" values for each mnemonic and stop reading data when
-                    //... we do.
-                    logData.Add(string.Join(",", values));
-                    start = start ?? index;
-                    end = index;
+                    if (!requestLatestValues.HasValue || RequestedValueAdded(values, requestedValueCount, requestLatestValues.Value))
+                    {
+                        logData.Add(string.Join(",", values));
+                        start = start ?? index;
+                        end = index;
+
+                        // Update the latest value count for each channel.
+                        UpdateRequestedValueCount(requestedValueCount, values);
+                    }
+
+                    // if latest values requested and we have all of the requested values we need, break out;
+                    if (requestLatestValues.HasValue && HaveRequestedValuesForAllChannels(requestedValueCount, requestLatestValues.Value))
+                    {
+                        break;
+                    }
                 }
             }
 
@@ -430,7 +464,56 @@ namespace PDS.Witsml.Server.Data.Logs
                 SetLogIndexRange(log, ranges);
             }
 
+            // For requested values reverse the order before output because the logData
+            //... was retrieved from the bottom up.
+            if (requestLatestValues.HasValue)
+            {
+                logData.Reverse();
+            }
+
             return logData;
+        }
+
+        private bool RequestedValueAdded(List<object> channelValues, Dictionary<int, int> requestedValueCount, int requestLatestValue)
+        {
+            var valueAdded = false;
+
+            var channelValueArray = channelValues.ToArray();
+            for (var i = 0; i < channelValueArray.Length; i++)
+            {
+                // For the current channel, if the requested value count has not already been reached and then
+                ///... current channel value is not null or blank then a value is being added.
+                valueAdded = 
+                    requestedValueCount[i] < requestLatestValue && 
+                    channelValueArray[i] != null && 
+                    !string.IsNullOrEmpty(channelValueArray[i].ToString());
+
+                // If at least one channel value is being added then no need to look further, get out.
+                if (valueAdded)
+                {
+                    break;
+                }
+            }
+
+            return valueAdded;
+        }
+
+        private void UpdateRequestedValueCount(Dictionary<int, int> requestedValueCount, List<object> values)
+        {
+            var valueArray = values.ToArray();
+
+            for (var i = 0; i < valueArray.Length; i++)
+            {
+                if (valueArray[i] != null && !string.IsNullOrEmpty(valueArray[i].ToString()))
+                {
+                    requestedValueCount[i]++;
+                }
+            }
+        }
+
+        private bool HaveRequestedValuesForAllChannels(Dictionary<int, int> requestedValueCount, int requestLatestValues)
+        {
+            return requestedValueCount.Keys.All(r => requestedValueCount[r] >= requestLatestValues);
         }
 
         protected void FormatLogHeader(T log, IDictionary<int, string> mnemonics)
@@ -684,6 +767,22 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             return logHeaderUpdate;
+        }
+
+        protected void IndexCurveToFirst(List<TChild> logCurves, string uid)
+        {
+            if (string.IsNullOrWhiteSpace(uid))
+                return;
+
+            if (logCurves[0].Uid.EqualsIgnoreCase(uid))
+                return;
+
+            var indexCurve = logCurves.FirstOrDefault(l => l.Uid.EqualsIgnoreCase(uid));
+            if (indexCurve == null)
+                return;
+
+            logCurves.Remove(indexCurve);
+            logCurves.Insert(0, indexCurve);
         }
 
         protected abstract bool IsIncreasing(T log);

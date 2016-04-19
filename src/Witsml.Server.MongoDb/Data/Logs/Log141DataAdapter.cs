@@ -112,14 +112,37 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>Queried objects.</returns>
         public override WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
         {
-            var uri = parser.GetUri<Log>();
-            Logger.DebugFormat("Getting Log with uid '{0}'.", uri.ObjectId);
+            var logcurveInfos = GetLogCurveInfoMnemonics(parser).ToList();
+            var mnemonicList = GetLogDataMnemonics(parser).ToList();
+           
+            if (OptionsIn.ReturnElements.Requested.Equals(parser.ReturnElements()))
+            {
+                if (!(logcurveInfos.All( x => mnemonicList.Contains(x) && mnemonicList.All(y => logcurveInfos.Contains(y)) )))
+                {
+                    throw new WitsmlException(ErrorCodes.ColumnIdentifiersNotSame);
+                }
 
-            // Extract Data
-            var entity = Parse(parser.Context.Xml);
+                if (parser.Contains("logCurveInfo"))
+                {
+                    var properties = parser.Properties("logCurveInfo").ToArray();
+                    if (properties.Any(x => x.IsEmpty))
+                    {
+                        throw new WitsmlException(ErrorCodes.MissingMnemonicElement);
+                    }
+                }
 
-            Validate(Functions.GetFromStore, entity);
-            Logger.DebugFormat("Validated Log with uid '{0}' and name '{1}' for Update", uri, entity.Name);
+                if (parser.Contains("logData") && !mnemonicList.Any())
+                {                    
+                    throw new WitsmlException(ErrorCodes.MissingMnemonicList);
+                }
+            }
+            else if (OptionsIn.ReturnElements.DataOnly.Equals(parser.ReturnElements()))
+            {
+                if (!(parser.Contains("startIndex") && parser.Contains("endIndex") || parser.Contains("startDateTimeIndex") && parser.Contains("endDateTimeIndex") || mnemonicList.Any()))
+                {
+                    throw new WitsmlException(ErrorCodes.MissingSubset);
+                }
+            }
 
             return base.Query(parser);
         }
@@ -361,12 +384,8 @@ namespace PDS.Witsml.Server.Data.Logs
                     if (string.IsNullOrWhiteSpace(logCurve.Uid))
                         logCurve.Uid = logCurve.Mnemonic.Value;
                 }
-                var indexCurve = entity.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value.EqualsIgnoreCase(entity.IndexCurve));
-                if (indexCurve == null)
-                    return;
 
-                logCurves.Remove(indexCurve);
-                logCurves.Insert(0, indexCurve);
+                IndexCurveToFirst(logCurves, logCurves.Where(l => l.Mnemonic.Value == entity.IndexCurve).Select(l => l.Uid).FirstOrDefault());
             }
         }
 
