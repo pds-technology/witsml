@@ -366,7 +366,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void LogDataAdapter_GetFromStore_RequestLatestValue_OptionsIn()
+        public void LogDataAdapter_GetFromStore_Decreasing_RequestLatestValue_OptionsIn()
         {
             var response = DevKit.Add<WellList, Well>(_well);
 
@@ -414,8 +414,8 @@ namespace PDS.Witsml.Server.Data.Logs
             };
 
             var result = DevKit.Query<LogList, Log>(
-                query, 
-                ObjectTypes.Log, null, OptionsIn.ReturnElements.All + ';' + 
+                query,
+                ObjectTypes.Log, null, OptionsIn.ReturnElements.All + ';' +
                 OptionsIn.RequestLatestValues.Eq(1)); // Request the latest 1 value (for each channel)
 
 
@@ -436,6 +436,90 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(2, queryData.Count, "Only rows for index values 96 and 91 should be returned.");
             Assert.AreEqual("96", queryData[0].Split(',')[0], "The first data row should be for index value 96");
             Assert.AreEqual("91", queryData[1].Split(',')[0], "The second data row should be for index value 91");
+        }
+
+        [TestMethod]
+        public void LogDataAdapter_GetFromStore_Increasing_RequestLatestValue_OptionsIn()
+        {
+            var response = DevKit.Add<WellList, Well>(_well);
+
+            _wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+
+            _log.UidWell = _wellbore.UidWell;
+            _log.UidWellbore = response.SuppMsgOut;
+
+            var row = 10;
+            DevKit.InitHeader(_log, LogIndexType.measureddepth, increasing: true);
+
+            // Add a 4th Log Curve
+            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("GR2", "gAPI"));
+
+            var startIndex = new GenericMeasure { Uom = "m", Value = 100 };
+            _log.StartIndex = startIndex;
+            DevKit.InitDataMany(_log, DevKit.Mnemonics(_log), DevKit.Units(_log), row, 1, true, false, increasing: true);
+
+            // Reset for custom LogData
+            var logData = _log.LogData.First();
+            logData.Data.Clear();
+
+            logData.Data.Add("1,1,,");
+            logData.Data.Add("2,2,,");
+            logData.Data.Add("3,3,,");
+            logData.Data.Add("4,4,,"); // returned
+            logData.Data.Add("5,5,,"); // returned
+
+            logData.Data.Add("6,,1,");
+            logData.Data.Add("7,,2,");
+            logData.Data.Add("8,,3,");
+            logData.Data.Add("9,,4,"); // returned
+            logData.Data.Add("10,,5,"); // returned
+
+            logData.Data.Add("11,,,1");
+            logData.Data.Add("12,,,2");
+            logData.Data.Add("13,,,3");
+            logData.Data.Add("14,,,4"); // returned
+            logData.Data.Add("15,,,5"); // returned
+
+            // Add a decreasing log with several values
+            response = DevKit.Add<LogList, Log>(_log);
+
+            // Assert that the log was added successfully
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+
+            var uidLog = response.SuppMsgOut;
+            logData = new LogData { MnemonicList = DevKit.Mnemonics(_log) };
+            var query = new Log
+            {
+                Uid = uidLog,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore,
+            };
+
+            var result = DevKit.Query<LogList, Log>(
+                query,
+                ObjectTypes.Log, null, OptionsIn.ReturnElements.All + ';' +
+                OptionsIn.RequestLatestValues.Eq(2)); // Request the latest 2 values (for each channel)
+
+
+            // Verify that a Log was returned with the results
+            Assert.IsNotNull(result, "No results returned from Log query");
+            Assert.IsNotNull(result.First(), "No Logs returned in results from Log query");
+
+            // Verify that a LogData element was returned with the results.
+            var queryLogData = result.First().LogData;
+            Assert.IsTrue(queryLogData != null && queryLogData.First() != null, "No LogData returned in results from Log query");
+
+            // Verify that data rows were returned with the LogData
+            var queryData = queryLogData.First().Data;
+            Assert.IsTrue(queryData != null && queryData.Count > 0, "No data returned in results from Log query");
+
+            // Verify that only the rows of data (referenced above) for index values 96 and 91 were returned 
+            //... in order to get the latest 1 value for each channel.
+            Assert.AreEqual(6, queryData.Count, "Only rows for index values 4,5,9,10,14 and 15 should be returned.");
+            Assert.AreEqual("4", queryData[0].Split(',')[0], "The first data row should be for index value 4");
+            Assert.AreEqual("15", queryData[5].Split(',')[0], "The last data row should be for index value 15");
         }
     }
 }

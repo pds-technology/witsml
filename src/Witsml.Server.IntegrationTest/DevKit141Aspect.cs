@@ -63,6 +63,11 @@ namespace PDS.Witsml.Server
             InitData(log, Mnemonics(log), Units(log));
         }
 
+        public LogCurveInfo CreateDoubleLogCurveInfo(string name, string unit)
+        {
+            return LogGenerator.CreateDoubleLogCurveInfo(name, unit);
+        }
+
         public void InitData(Log log, string mnemonics, string units, params object[] values)
         {
             if (log.LogData == null)
