@@ -393,12 +393,8 @@ namespace PDS.Witsml.Server.Data.Logs
                     if (string.IsNullOrWhiteSpace(logCurve.Uid))
                         logCurve.Uid = logCurve.Mnemonic.Value;
                 }
-                var indexCurve = entity.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value.EqualsIgnoreCase(entity.IndexCurve));
-                if (indexCurve == null)
-                    return;
 
-                logCurves.Remove(indexCurve);
-                logCurves.Insert(0, indexCurve);
+                IndexCurveToFirst(logCurves, logCurves.Where(l => l.Mnemonic.Value == entity.IndexCurve).Select(l => l.Uid).FirstOrDefault());
             }
         }
 
