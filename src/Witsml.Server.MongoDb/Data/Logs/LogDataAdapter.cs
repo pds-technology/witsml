@@ -396,12 +396,17 @@ namespace PDS.Witsml.Server.Data.Logs
                     continue;
                 }
 
-                ranges.Add(mnemonics[i], range);
+                if (mnemonics.ContainsKey(i))
+                    ranges.Add(mnemonics[i], range);
             }
 
             // Create and initialize value count dictionary for channels
             var requestedValueCount = new Dictionary<int, int>();
-            mnemonics.Keys.ForEach(m => requestedValueCount.Add(m, 0));
+            //mnemonics.Keys.ForEach(m => requestedValueCount.Add(m, 0));
+            for (var i = 0; i < mnemonics.Keys.Count; i++)
+            {
+                requestedValueCount.Add(i, 0);
+            }
 
             // Read through each row
             while (reader.Read())
