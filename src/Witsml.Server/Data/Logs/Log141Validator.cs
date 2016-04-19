@@ -76,7 +76,7 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 yield return new ValidationResult(ErrorCodes.RecurringLogData.ToString(), new[] { "LogData", "LogData" });
             }
-            else if (logDatas.Any(ld => DuplicateUid(ld.MnemonicList.Split(_seperator))))
+            else if (logDatas.Any(ld => ld.MnemonicList!=null && DuplicateUid(ld.MnemonicList.Split(_seperator))))
             {
                 yield return new ValidationResult(ErrorCodes.DuplicateMnemonics.ToString(), new[] { "LogData", "Mnemonics" });
             }

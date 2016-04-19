@@ -115,6 +115,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to For getting systematically growing data-objects, if column-identifiers(mnemonics) are specified in both the header and data sections then the column-identifiers must be the same in the two sections..
+        /// </summary>
+        internal static string ColumnIdentifiersNotSame {
+            get {
+                return ResourceManager.GetString("ColumnIdentifiersNotSame", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A data-object with the same type and unique identifier(s) must already exist in the persistent store..
         /// </summary>
         internal static string DataObjectNotExist {
@@ -403,6 +412,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to For getting systematically growing data-objects, both column-description and data sections must be specified..
+        /// </summary>
+        internal static string MissingColumnDescriptionOrDataSection {
+            get {
+                return ResourceManager.GetString("MissingColumnDescriptionOrDataSection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to For updating systematically growing data, if data-nodes are specified then the column-identifiers (mnemonic) must be specified in the data-column-list..
         /// </summary>
         internal static string MissingColumnIdentifiers {
@@ -457,6 +475,24 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to For getting systematically growing data-objects, if a column-definition(logCurveInfo) section is specified then a mnemonic element must be specified..
+        /// </summary>
+        internal static string MissingMnemonicElement {
+            get {
+                return ResourceManager.GetString("MissingMnemonicElement", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to For getting systematically growing data-objects, if a data-node (logData) section is specified then a mnemonicList element must be specified..
+        /// </summary>
+        internal static string MissingMnemonicList {
+            get {
+                return ResourceManager.GetString("MissingMnemonicList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Parent does not exist.
         /// </summary>
         internal static string MissingParentDataObject {
@@ -489,6 +525,15 @@ namespace PDS.Witsml.Properties {
         internal static string MissingRequiredData {
             get {
                 return ResourceManager.GetString("MissingRequiredData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No subset of a growing data-object is specified.A query must specify a subset of one growing data-object per query, but multiple individual queries may be included inside the query plural data-object..
+        /// </summary>
+        internal static string MissingSubset {
+            get {
+                return ResourceManager.GetString("MissingSubset", resourceCulture);
             }
         }
         
