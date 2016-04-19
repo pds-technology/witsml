@@ -143,15 +143,17 @@ namespace Energistics.Protocol.Core
                 .Where(x => protocols.Any(y => x.Protocol == y.Protocol && string.Equals(x.Role, y.Role, StringComparison.InvariantCultureIgnoreCase)))
                 .ToList();
 
+            OpenSession(header, supportedProtocols);
+
             // Only send OpenSession if there are protocols supported
-            if (supportedProtocols.Any())
-            {
-                OpenSession(header, supportedProtocols);
-            }
-            else // Otherwise, ProtocolException is sent
-            {
-                ProtocolException((int)ErrorCodes.ENOSUPPORTEDPROTOCOLS, "No protocols supported", header.MessageId);
-            }
+            //if (supportedProtocols.Any())
+            //{
+            //    OpenSession(header, supportedProtocols);
+            //}
+            //else // Otherwise, ProtocolException is sent
+            //{
+            //    ProtocolException((int)ErrorCodes.ENOSUPPORTEDPROTOCOLS, "No protocols supported", header.MessageId);
+            //}
         }
 
         /// <summary>
