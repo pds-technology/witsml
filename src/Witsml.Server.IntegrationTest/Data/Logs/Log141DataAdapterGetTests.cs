@@ -34,6 +34,7 @@ namespace PDS.Witsml.Server.Data.Logs
         private DevKit141Aspect DevKit;
         private Well _well;
         private Wellbore _wellbore;
+        private Log _log;
         private DatabaseProvider _databaseProvider;
 
         [TestInitialize]
@@ -52,6 +53,13 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 NameWell = _well.Name,
                 Name = DevKit.Name("Wellbore 01")
+            };
+
+            _log = new Log()
+            {
+                NameWell = _well.Name,
+                NameWellbore = _wellbore.Name,
+                Name = DevKit.Name("Log 01")
             };
         }
 
@@ -365,22 +373,16 @@ namespace PDS.Witsml.Server.Data.Logs
             _wellbore.UidWell = response.SuppMsgOut;
             response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
 
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = _wellbore.Name,
-                Name = DevKit.Name("Log 01")
-            };
+            _log.UidWell = _wellbore.UidWell;
+            _log.UidWellbore = response.SuppMsgOut;
 
             var row = 10;
-            DevKit.InitHeader(log, LogIndexType.measureddepth, false);
+            DevKit.InitHeader(_log, LogIndexType.measureddepth, false);
 
             var startIndex = new GenericMeasure { Uom = "m", Value = 100 };
-            log.StartIndex = startIndex;
-            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), row, 1, true, false, false);
-            var logData = log.LogData.First();
+            _log.StartIndex = startIndex;
+            DevKit.InitDataMany(_log, DevKit.Mnemonics(_log), DevKit.Units(_log), row, 1, true, false, false);
+            var logData = _log.LogData.First();
             logData.Data.Clear();
             logData.Data.Add("100,1,");
             logData.Data.Add("99,2,");
@@ -394,21 +396,21 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Add("91,,10");
 
             // Add a decreasing log with several values
-            response = DevKit.Add<LogList, Log>(log);
+            response = DevKit.Add<LogList, Log>(_log);
 
             // Assert that the log was added successfully
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
 
             var uidLog = response.SuppMsgOut;
-            logData = new LogData { MnemonicList = DevKit.Mnemonics(log) };
+            logData = new LogData { MnemonicList = DevKit.Mnemonics(_log) };
             var query = new Log
             {
                 Uid = uidLog,
-                UidWell = log.UidWell,
-                UidWellbore = log.UidWellbore,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore,
             };
-            var result = DevKit.Query<LogList, Log>(query, ObjectTypes.Log, null, OptionsIn.ReturnElements.All + ';' + new OptionsIn.RequestLatestValues(1));
+            var result = DevKit.Query<LogList, Log>(query, ObjectTypes.Log, null, OptionsIn.ReturnElements.All + ';' + OptionsIn.RequestLatestValues.Eq(1));
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.First().LogData.First().Data.Count);
         }

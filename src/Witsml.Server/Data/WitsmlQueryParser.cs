@@ -98,6 +98,17 @@ namespace PDS.Witsml.Server.Data
             return result;
         }
 
+        /// <summary>
+        /// Requests the latest values.
+        /// </summary>
+        /// <returns></returns>
+        public int? RequestLatestValues()
+        {
+            return Options.ContainsKey(OptionsIn.RequestLatestValues.Keyword)
+                ? int.Parse(Options[OptionsIn.RequestLatestValues.Keyword])
+                : (int?)null;
+        }
+
         public EtpUri GetUri<T>()
         {
             return GetUri(typeof(T));

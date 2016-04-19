@@ -156,6 +156,11 @@ namespace PDS.Witsml
             public RequestLatestValues(int value) : base(Keyword, value.ToString()) { }
 
             public const string Keyword = "requestLatestValues";
+
+            public static RequestLatestValues Eq(int value)
+            {
+                return new RequestLatestValues(value);
+            }
         }
 
         /// <summary>
