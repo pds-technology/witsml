@@ -252,35 +252,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Test_error_code_457_index_not_first_in_LogCurveInfo()
-        {
-            var response = DevKit.Add<WellList, Well>(Well);
-
-            Wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
-
-            var log = new Log()
-            {
-                UidWell = Wellbore.UidWell,
-                NameWell = Well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = Wellbore.Name,
-                Name = DevKit.Name("Log 01")
-            };
-
-            DevKit.InitHeader(log, LogIndexType.measureddepth);
-            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10);
-
-            // Move the last LogCurveInfo before the index LogCurveInfo
-            var lastLogCurveInfo = log.LogCurveInfo.LastOrDefault();
-            log.LogCurveInfo.Remove(lastLogCurveInfo);
-            log.LogCurveInfo.Insert(0, lastLogCurveInfo);
-
-            response = DevKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.IndexNotFirstInDataColumnList, response.Result);
-        }
-
-        [TestMethod]
         public void Test_error_code_458_mixed_index_types_in_Log()
         {
             var response = DevKit.Add<WellList, Well>(Well);
@@ -371,7 +342,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Test_error_code_459_bad_column_identifier_in_LogData()
+        public void Log141Validator_AddToStore_Error_459_Bad_Char_In_Mnemonics()
         {
             var response = DevKit.Add<WellList, Well>(Well);
 
@@ -433,13 +404,7 @@ namespace PDS.Witsml.Server.Data.Logs
             mnemonics[1] = "/";
             log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics);
             response = DevKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
-
-            // Test ,
-            mnemonics[1] = ",";
-            log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics);
-            response = DevKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);          
         }
 
         [TestMethod]
@@ -576,7 +541,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Test_error_code_484_missing_mandatory_field()
+        public void MongoDbUpdate_UpdateInStore_Error_484_Empty_Value_For_Mandatory_Field()
         {
             var response = DevKit.Add<WellList, Well>(Well);
             Wellbore.UidWell = response.SuppMsgOut;
@@ -600,15 +565,13 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var uidLog = response.SuppMsgOut;
 
-            var update = new Log()
-            {
-                Uid = uidLog,
-                UidWell = Wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                NameWell = string.Empty
-            };
+            var xmlIn = "<logs version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" +
+                "<log uidWell=\"" + log.UidWell + "\" uidWellbore=\"" + log.UidWellbore + "\" uid=\"" + uidLog + "\">" +
+                    "<nameWell />" +
+                "</log>" +
+                "</logs>";
 
-            var updateResponse = DevKit.Update<LogList, Log>(update);
+            var updateResponse = DevKit.UpdateInStore(ObjectTypes.Log, xmlIn, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, updateResponse.Result);
         }
 
