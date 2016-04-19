@@ -23,15 +23,34 @@ using Energistics.Datatypes.Object;
 
 namespace Energistics.Protocol.Store
 {
-    [ProtocolRole(Protocols.Store, "store", "customer")]
+    /// <summary>
+    /// Defines the interface that must be implemented by the customer role of the Store protocol.
+    /// </summary>
+    /// <seealso cref="Energistics.Common.IProtocolHandler" />
+    [ProtocolRole(Protocols.Store, "customer", "store")]
     public interface IStoreCustomer : IProtocolHandler
     {
+        /// <summary>
+        /// Sends a GetObject message to a store.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
         void GetObject(string uri);
 
+        /// <summary>
+        /// Sends a PutObject message to a store.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
         void PutObject(DataObject dataObject);
 
+        /// <summary>
+        /// Sends a DeleteObject message to a store.
+        /// </summary>
+        /// <param name="uris">The list of URIs.</param>
         void DeleteObject(IList<string> uris);
 
+        /// <summary>
+        /// Handles the Object event from a store.
+        /// </summary>
         event ProtocolEventHandler<Object> OnObject;
     }
 }

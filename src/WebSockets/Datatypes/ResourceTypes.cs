@@ -18,10 +18,24 @@
 
 namespace Energistics.Datatypes
 {
+    /// <summary>
+    /// An enumeration of resource types.
+    /// </summary>
     public enum ResourceTypes
     {
+        /// <summary>
+        /// The URI protocol resource type.
+        /// </summary>
         UriProtocol,
+
+        /// <summary>
+        /// The folder resource type.
+        /// </summary>
         Folder,
+
+        /// <summary>
+        /// The data object resource type.
+        /// </summary>
         DataObject
     }
 }

@@ -25,12 +25,25 @@ using Energistics.Datatypes.Object;
 
 namespace Energistics.Protocol.Discovery
 {
+    /// <summary>
+    /// Base implementation of the <see cref="IDiscoveryStore"/> interface.
+    /// </summary>
+    /// <seealso cref="Energistics.Common.EtpProtocolHandler" />
+    /// <seealso cref="Energistics.Protocol.Discovery.IDiscoveryStore" />
     public class DiscoveryStoreHandler : EtpProtocolHandler, IDiscoveryStore
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DiscoveryStoreHandler"/> class.
+        /// </summary>
         public DiscoveryStoreHandler() : base(Protocols.Discovery, "store", "customer")
         {
         }
 
+        /// <summary>
+        /// Sends a GetResourcesResponse message to a customer.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="resources">The list of <see cref="Resource" /> objects.</param>
         public virtual void GetResourcesResponse(MessageHeader request, IList<Resource> resources)
         {
             if (!resources.Any())
@@ -56,8 +69,16 @@ namespace Energistics.Protocol.Discovery
             }
         }
 
+        /// <summary>
+        /// Handles the GetResources event from a customer.
+        /// </summary>
         public event ProtocolEventHandler<GetResources, IList<Resource>> OnGetResources;
 
+        /// <summary>
+        /// Decodes the message based on the message type contained in the specified <see cref="MessageHeader" />.
+        /// </summary>
+        /// <param name="header">The message header.</param>
+        /// <param name="decoder">The message decoder.</param>
         protected override void HandleMessage(MessageHeader header, Decoder decoder)
         {
             switch (header.MessageType)
@@ -72,6 +93,11 @@ namespace Energistics.Protocol.Discovery
             }
         }
 
+        /// <summary>
+        /// Handles the GetResources message from a customer.
+        /// </summary>
+        /// <param name="header">The message header.</param>
+        /// <param name="getResources">The GetResources message.</param>
         protected virtual void HandleGetResources(MessageHeader header, GetResources getResources)
         {
             var args = Notify(OnGetResources, header, getResources, new List<Resource>());
@@ -80,6 +106,10 @@ namespace Energistics.Protocol.Discovery
             GetResourcesResponse(header, args.Context);
         }
 
+        /// <summary>
+        /// Handles the GetResources message from a customer.
+        /// </summary>
+        /// <param name="args">The <see cref="ProtocolEventArgs{GetResources}"/> instance containing the event data.</param>
         protected virtual void HandleGetResources(ProtocolEventArgs<GetResources, IList<Resource>> args)
         {
         }

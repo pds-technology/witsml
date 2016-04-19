@@ -22,15 +22,35 @@ using Energistics.Datatypes;
 
 namespace Energistics.Protocol.Core
 {
+    /// <summary>
+    /// Represents the interface that must be implemented from the client side of Protocol 0.
+    /// </summary>
+    /// <seealso cref="Energistics.Common.IProtocolHandler" />
     [ProtocolRole(Protocols.Core, "client", "server")]
     public interface ICoreClient : IProtocolHandler
     {
+        /// <summary>
+        /// Sends a RequestSession message to a server.
+        /// </summary>
+        /// <param name="applicationName">The application name.</param>
+        /// <param name="applicationVersion">The application version.</param>
+        /// <param name="requestedProtocols">The requested protocols.</param>
         void RequestSession(string applicationName, string applicationVersion, IList<SupportedProtocol> requestedProtocols);
 
+        /// <summary>
+        /// Sends a CloseSession message to a server.
+        /// </summary>
+        /// <param name="reason">The reason.</param>
         void CloseSession(string reason = null);
 
+        /// <summary>
+        /// Handles the OpenSession event from a server.
+        /// </summary>
         event ProtocolEventHandler<OpenSession> OnOpenSession;
 
+        /// <summary>
+        /// Handles the CloseSession event from a server.
+        /// </summary>
         event ProtocolEventHandler<CloseSession> OnCloseSession;
     }
 }

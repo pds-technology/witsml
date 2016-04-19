@@ -20,12 +20,30 @@ using System;
 
 namespace Energistics.Protocol
 {
+    /// <summary>
+    /// An enumeration of message flag values.
+    /// </summary>
     [Flags]
     public enum MessageFlags : int
     {
+        /// <summary>
+        /// None
+        /// </summary>
         None = 0x0,
+
+        /// <summary>
+        /// A part of a multi-part message.
+        /// </summary>
         MultiPart = 0x1,
+
+        /// <summary>
+        /// The final part of a multi-part message.
+        /// </summary>
         FinalPart = 0x2,
+
+        /// <summary>
+        /// No data is available.
+        /// </summary>
         NoData = 0x4
     }
 }

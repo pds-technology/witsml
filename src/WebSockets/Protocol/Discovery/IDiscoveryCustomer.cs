@@ -21,11 +21,22 @@ using Energistics.Datatypes;
 
 namespace Energistics.Protocol.Discovery
 {
+    /// <summary>
+    /// Describes the interface that must be implemented by the customer role of the Discovery protocol.
+    /// </summary>
+    /// <seealso cref="Energistics.Common.IProtocolHandler" />
     [ProtocolRole(Protocols.Discovery, "customer", "store")]
     public interface IDiscoveryCustomer : IProtocolHandler
     {
+        /// <summary>
+        /// Sends a GetResources message to a store.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
         void GetResources(string uri);
 
+        /// <summary>
+        /// Handles the GetResourcesResponse event from a store.
+        /// </summary>
         event ProtocolEventHandler<GetResourcesResponse, string> OnGetResourcesResponse;
     }
 }

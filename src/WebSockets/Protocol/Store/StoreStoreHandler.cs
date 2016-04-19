@@ -23,12 +23,24 @@ using Energistics.Datatypes.Object;
 
 namespace Energistics.Protocol.Store
 {
+    /// <summary>
+    /// Base implementation of the <see cref="IStoreStore"/> interface.
+    /// </summary>
+    /// <seealso cref="Energistics.Common.EtpProtocolHandler" />
+    /// <seealso cref="Energistics.Protocol.Store.IStoreStore" />
     public class StoreStoreHandler : EtpProtocolHandler, IStoreStore
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StoreStoreHandler"/> class.
+        /// </summary>
         public StoreStoreHandler() : base(Protocols.Store, "store", "customer")
         {
         }
 
+        /// <summary>
+        /// Sends an Object message to a customer.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
         public virtual void Object(DataObject dataObject)
         {
             var header = CreateMessageHeader(Protocols.Store, MessageTypes.Store.Object, messageFlags: MessageFlags.FinalPart);
@@ -41,12 +53,26 @@ namespace Energistics.Protocol.Store
             Session.SendMessage(header, @object);
         }
 
+        /// <summary>
+        /// Handles the GetObject event from a customer.
+        /// </summary>
         public event ProtocolEventHandler<GetObject, DataObject> OnGetObject;
 
+        /// <summary>
+        /// Handles the PutObject event from a customer.
+        /// </summary>
         public event ProtocolEventHandler<PutObject> OnPutObject;
 
+        /// <summary>
+        /// Handles the DeleteObject event from a customer.
+        /// </summary>
         public event ProtocolEventHandler<DeleteObject> OnDeleteObject;
 
+        /// <summary>
+        /// Decodes the message based on the message type contained in the specified <see cref="MessageHeader" />.
+        /// </summary>
+        /// <param name="header">The message header.</param>
+        /// <param name="decoder">The message decoder.</param>
         protected override void HandleMessage(MessageHeader header, Decoder decoder)
         {
             switch (header.MessageType)
@@ -69,6 +95,11 @@ namespace Energistics.Protocol.Store
             }
         }
 
+        /// <summary>
+        /// Handles the GetObject message from a customer.
+        /// </summary>
+        /// <param name="header">The message header.</param>
+        /// <param name="getObject">The GetObject message.</param>
         protected virtual void HandleGetObject(MessageHeader header, GetObject getObject)
         {
             var args = Notify(OnGetObject, header, getObject, new DataObject());
@@ -77,15 +108,29 @@ namespace Energistics.Protocol.Store
             Object(args.Context);
         }
 
+        /// <summary>
+        /// Handles the GetObject message from a customer.
+        /// </summary>
+        /// <param name="args">The <see cref="ProtocolEventArgs{GetObject, DataObject}"/> instance containing the event data.</param>
         protected virtual void HandleGetObject(ProtocolEventArgs<GetObject, DataObject> args)
         {
         }
 
+        /// <summary>
+        /// Handles the PutObject message from a customer.
+        /// </summary>
+        /// <param name="header">The message header.</param>
+        /// <param name="putObject">The PutObject message.</param>
         protected virtual void HandlePutObject(MessageHeader header, PutObject putObject)
         {
             Notify(OnPutObject, header, putObject);
         }
 
+        /// <summary>
+        /// Handles the DeleteObject message from a customer.
+        /// </summary>
+        /// <param name="header">The message header.</param>
+        /// <param name="deleteObject">The DeleteObject message.</param>
         protected virtual void HandleDeleteObject(MessageHeader header, DeleteObject deleteObject)
         {
             Notify(OnDeleteObject, header, deleteObject);

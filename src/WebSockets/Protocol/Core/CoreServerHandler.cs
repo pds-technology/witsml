@@ -25,17 +25,38 @@ using Energistics.Datatypes;
 
 namespace Energistics.Protocol.Core
 {
+    /// <summary>
+    /// Base implementation of the <see cref="ICoreServer"/> interface.
+    /// </summary>
+    /// <seealso cref="Energistics.Common.EtpProtocolHandler" />
+    /// <seealso cref="Energistics.Protocol.Core.ICoreServer" />
     public class CoreServerHandler : EtpProtocolHandler, ICoreServer
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CoreServerHandler"/> class.
+        /// </summary>
         public CoreServerHandler() : base(Protocols.Core, "server", "client")
         {
             RequestedProtocols = new List<SupportedProtocol>(0);
         }
 
+        /// <summary>
+        /// Gets the name of the client application.
+        /// </summary>
+        /// <value>The name of the client application.</value>
         public string ClientApplicationName { get; private set; }
 
+        /// <summary>
+        /// Gets the requested protocols.
+        /// </summary>
+        /// <value>The requested protocols.</value>
         public IList<SupportedProtocol> RequestedProtocols { get; private set; }
 
+        /// <summary>
+        /// Sends an OpenSession message to a client.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="supportedProtocols">The supported protocols.</param>
         public virtual void OpenSession(MessageHeader request, IList<SupportedProtocol> supportedProtocols)
         {
             var header = CreateMessageHeader(Protocols.Core, MessageTypes.Core.OpenSession, request.MessageId);
@@ -53,6 +74,10 @@ namespace Energistics.Protocol.Core
             Session.OnSessionOpened(supportedProtocols);
         }
 
+        /// <summary>
+        /// Sends a CloseSession message to a client.
+        /// </summary>
+        /// <param name="reason">The reason.</param>
         public virtual void CloseSession(string reason = null)
         {
             var header = CreateMessageHeader(Protocols.Core, MessageTypes.Core.CloseSession);
@@ -65,10 +90,21 @@ namespace Energistics.Protocol.Core
             Session.SendMessage(header, closeSession);
         }
 
+        /// <summary>
+        /// Handles the RequestSession event from a client.
+        /// </summary>
         public event ProtocolEventHandler<RequestSession> OnRequestSession;
 
+        /// <summary>
+        /// Handles the CloseSession event from a client.
+        /// </summary>
         public event ProtocolEventHandler<CloseSession> OnCloseSession;
 
+        /// <summary>
+        /// Decodes the message based on the message type contained in the specified <see cref="MessageHeader" />.
+        /// </summary>
+        /// <param name="header">The message header.</param>
+        /// <param name="decoder">The message decoder.</param>
         protected override void HandleMessage(MessageHeader header, Decoder decoder)
         {
             switch (header.MessageType)
@@ -87,6 +123,11 @@ namespace Energistics.Protocol.Core
             }
         }
 
+        /// <summary>
+        /// Handles the RequestSession message from a client.
+        /// </summary>
+        /// <param name="header">The message header.</param>
+        /// <param name="requestSession">The RequestSession message.</param>
         protected virtual void HandleRequestSession(MessageHeader header, RequestSession requestSession)
         {
             ClientApplicationName = requestSession.ApplicationName;
@@ -97,14 +138,27 @@ namespace Energistics.Protocol.Core
                 .Select(x => new { x.Protocol, x.Role })
                 .ToArray();
 
-            // only return details for requested protocols
+            // Only return details for requested protocols
             var supportedProtocols = Session.GetSupportedProtocols()
                 .Where(x => protocols.Any(y => x.Protocol == y.Protocol && string.Equals(x.Role, y.Role, StringComparison.InvariantCultureIgnoreCase)))
                 .ToList();
 
-            OpenSession(header, supportedProtocols);
+            // Only send OpenSession if there are protocols supported
+            if (supportedProtocols.Any())
+            {
+                OpenSession(header, supportedProtocols);
+            }
+            else // Otherwise, ProtocolException is sent
+            {
+                ProtocolException((int)ErrorCodes.ENOSUPPORTEDPROTOCOLS, "No protocols supported", header.MessageId);
+            }
         }
 
+        /// <summary>
+        /// Handles the CloseSession message from a client.
+        /// </summary>
+        /// <param name="header">The message header.</param>
+        /// <param name="closeSession">The CloseSession message.</param>
         protected virtual void HandleCloseSession(MessageHeader header, CloseSession closeSession)
         {
             Notify(OnCloseSession, header, closeSession);

@@ -27,10 +27,21 @@ using Energistics.Datatypes;
 
 namespace Energistics.Common
 {
+    /// <summary>
+    /// Provides common functionality for all ETP sessions.
+    /// </summary>
+    /// <seealso cref="Energistics.Common.EtpBase" />
+    /// <seealso cref="Energistics.Common.IEtpSession" />
     public abstract class EtpSession : EtpBase, IEtpSession
     {
-        private long MessageId = 0;
+        private long _messageId;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EtpSession"/> class.
+        /// </summary>
+        /// <param name="application">The application name.</param>
+        /// <param name="version">The application version.</param>
+        /// <param name="headers">The WebSocket or HTTP headers.</param>
         protected EtpSession(string application, string version, IDictionary<string, string> headers)
         {
             Headers = headers ?? new Dictionary<string, string>();
@@ -40,16 +51,42 @@ namespace Energistics.Common
             ValidateHeaders();
         }
 
+        /// <summary>
+        /// Gets the name of the application.
+        /// </summary>
+        /// <value>The name of the application.</value>
         public string ApplicationName { get; }
 
+        /// <summary>
+        /// Gets the application version.
+        /// </summary>
+        /// <value>The application version.</value>
         public string ApplicationVersion { get; }
 
+        /// <summary>
+        /// Gets or sets the session identifier.
+        /// </summary>
+        /// <value>The session identifier.</value>
         public string SessionId { get; set; }
 
-        protected IDictionary<string, string> Headers { get; } 
+        /// <summary>
+        /// Gets the collection of WebSocket or HTTP headers.
+        /// </summary>
+        /// <value>The headers.</value>
+        protected IDictionary<string, string> Headers { get; }
 
+        /// <summary>
+        /// Gets the collection of registered protocol handlers.
+        /// </summary>
+        /// <value>The handlers.</value>
         protected IDictionary<object, IProtocolHandler> Handlers { get; }
 
+        /// <summary>
+        /// Gets the registered protocol handler for the specified ETP interface.
+        /// </summary>
+        /// <typeparam name="T">The protocol handler interface.</typeparam>
+        /// <returns>The registered protocol handler instance.</returns>
+        /// <exception cref="System.NotSupportedException"></exception>
         public T Handler<T>() where T : IProtocolHandler
         {
             IProtocolHandler handler;
@@ -63,11 +100,22 @@ namespace Energistics.Common
             throw new NotSupportedException(string.Format("Protocol handler not registered for {0}.", typeof(T).FullName));
         }
 
+        /// <summary>
+        /// Determines whether this instance can handle the specified protocol.
+        /// </summary>
+        /// <typeparam name="T">The protocol handler interface.</typeparam>
+        /// <returns>
+        ///   <c>true</c> if the specified protocol handler has been registered; otherwise, <c>false</c>.
+        /// </returns>
         public bool CanHandle<T>() where T : IProtocolHandler
         {
             return Handlers.ContainsKey(typeof(T));
         }
 
+        /// <summary>
+        /// Called when the ETP session is opened.
+        /// </summary>
+        /// <param name="supportedProtocols">The supported protocols.</param>
         public override void OnSessionOpened(IList<SupportedProtocol> supportedProtocols)
         {
             HandleUnsupportedProtocols(supportedProtocols);
@@ -80,14 +128,24 @@ namespace Energistics.Common
             }
         }
 
+        /// <summary>
+        /// Called when WebSocket data is received.
+        /// </summary>
+        /// <param name="data">The data.</param>
         public virtual void OnDataReceived(byte[] data)
         {
             Decode(data);
         }
 
+        /// <summary>
+        /// Sends the message.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="header">The header.</param>
+        /// <param name="body">The body.</param>
         public void SendMessage<T>(MessageHeader header, T body) where T : ISpecificRecord
         {
-            byte[] data = new byte[0];
+            byte[] data;
 
             try
             {
@@ -105,6 +163,11 @@ namespace Energistics.Common
             Sent(header, body);
         }
 
+        /// <summary>
+        /// Gets the supported protocols.
+        /// </summary>
+        /// <param name="isSender">if set to <c>true</c> the current session is the sender.</param>
+        /// <returns>A list of supported protocols.</returns>
         public IList<SupportedProtocol> GetSupportedProtocols(bool isSender = false)
         {
             var supportedProtocols = new List<SupportedProtocol>();
@@ -133,15 +196,33 @@ namespace Energistics.Common
             return supportedProtocols;
         }
 
+        /// <summary>
+        /// Generates a new unique message identifier for the current session.
+        /// </summary>
+        /// <returns>The message identifier.</returns>
         public long NewMessageId()
         {
-            return Interlocked.Increment(ref MessageId);
+            return Interlocked.Increment(ref _messageId);
         }
 
-        public abstract void Close(string reason = null);
+        /// <summary>
+        /// Closes the WebSocket connection for the specified reason.
+        /// </summary>
+        /// <param name="reason">The reason.</param>
+        public abstract void Close(string reason);
 
+        /// <summary>
+        /// Sends the specified data.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        /// <param name="offset">The offset.</param>
+        /// <param name="length">The length.</param>
         protected abstract void Send(byte[] data, int offset, int length);
 
+        /// <summary>
+        /// Decodes the specified data.
+        /// </summary>
+        /// <param name="data">The data.</param>
         protected void Decode(byte[] data)
         {
             using (var inputStream = new MemoryStream(data))
@@ -162,6 +243,11 @@ namespace Energistics.Common
             }
         }
 
+        /// <summary>
+        /// Handles the message.
+        /// </summary>
+        /// <param name="header">The header.</param>
+        /// <param name="decoder">The decoder.</param>
         protected void HandleMessage(MessageHeader header, Decoder decoder)
         {
             if (Handlers.ContainsKey(header.Protocol))
@@ -178,6 +264,11 @@ namespace Energistics.Common
             }
         }
 
+        /// <summary>
+        /// Registers a protocol handler for the specified contract type.
+        /// </summary>
+        /// <param name="contractType">Type of the contract.</param>
+        /// <param name="handlerType">Type of the handler.</param>
         protected override void Register(Type contractType, Type handlerType)
         {
             base.Register(contractType, handlerType);
@@ -192,6 +283,12 @@ namespace Energistics.Common
             }
         }
 
+        /// <summary>
+        /// Get the registered handler for the specified protocol.
+        /// </summary>
+        /// <param name="protocol">The protocol.</param>
+        /// <returns>The registered protocol handler instance.</returns>
+        /// <exception cref="System.NotSupportedException"></exception>
         protected IProtocolHandler Handler(int protocol)
         {
             if (Handlers.ContainsKey(protocol))
@@ -203,6 +300,10 @@ namespace Energistics.Common
             throw new NotSupportedException(string.Format("Protocol handler not registered for protocol {0}.", protocol));
         }
 
+        /// <summary>
+        /// Handles the unsupported protocols.
+        /// </summary>
+        /// <param name="supportedProtocols">The supported protocols.</param>
         protected virtual void HandleUnsupportedProtocols(IList<SupportedProtocol> supportedProtocols)
         {
             // remove unsupported handler mappings (excluding Core protocol)
@@ -224,6 +325,12 @@ namespace Energistics.Common
             }
         }
 
+        /// <summary>
+        /// Logs the specified header and message body.
+        /// </summary>
+        /// <typeparam name="T">The type of message.</typeparam>
+        /// <param name="header">The header.</param>
+        /// <param name="body">The message body.</param>
         protected void Sent<T>(MessageHeader header, T body)
         {
             if (Output != null)
@@ -239,6 +346,9 @@ namespace Energistics.Common
             }
         }
 
+        /// <summary>
+        /// Validates the headers.
+        /// </summary>
         protected virtual void ValidateHeaders()
         {
         }

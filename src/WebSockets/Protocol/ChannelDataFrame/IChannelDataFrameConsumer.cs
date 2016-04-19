@@ -21,13 +21,29 @@ using Energistics.Datatypes;
 
 namespace Energistics.Protocol.ChannelDataFrame
 {
+    /// <summary>
+    /// Defines the interface that must be implemented by the consumer role of the ChannelDataFrame protocol.
+    /// </summary>
+    /// <seealso cref="Energistics.Common.IProtocolHandler" />
     [ProtocolRole(Protocols.ChannelDataFrame, "consumer", "producer")]
     public interface IChannelDataFrameConsumer : IProtocolHandler
     {
+        /// <summary>
+        /// Sends a RequestChannelData message to a producer.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="fromIndex">From index.</param>
+        /// <param name="toIndex">To index.</param>
         void RequestChannelData(string uri, long? fromIndex = null, long? toIndex = null);
 
+        /// <summary>
+        /// Handles the ChannelMetadata event from a producer.
+        /// </summary>
         event ProtocolEventHandler<ChannelMetadata> OnChannelMetadata;
 
+        /// <summary>
+        /// Handles the ChannelDataFrameSet event from a producer.
+        /// </summary>
         event ProtocolEventHandler<ChannelDataFrameSet> OnChannelDataFrameSet;
     }
 }

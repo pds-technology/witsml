@@ -22,15 +22,32 @@ using Energistics.Datatypes.Object;
 
 namespace Energistics.Protocol.Store
 {
-    [ProtocolRole(Protocols.Store, "customer", "store")]
+    /// <summary>
+    /// Defines the interface that must be implemented by the store role of the store protocol.
+    /// </summary>
+    /// <seealso cref="Energistics.Common.IProtocolHandler" />
+    [ProtocolRole(Protocols.Store, "store", "customer")]
     public interface IStoreStore : IProtocolHandler
     {
+        /// <summary>
+        /// Sends an Object message to a customer.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
         void Object(DataObject dataObject);
 
+        /// <summary>
+        /// Handles the GetObject event from a customer.
+        /// </summary>
         event ProtocolEventHandler<GetObject, DataObject> OnGetObject;
 
+        /// <summary>
+        /// Handles the PutObject event from a customer.
+        /// </summary>
         event ProtocolEventHandler<PutObject> OnPutObject;
 
+        /// <summary>
+        /// Handles the DeleteObject event from a customer.
+        /// </summary>
         event ProtocolEventHandler<DeleteObject> OnDeleteObject;
     }
 }

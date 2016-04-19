@@ -25,11 +25,10 @@ namespace Energistics.Datatypes
     /// </summary>
     public struct EtpContentType
     {
-        private static readonly Regex _pattern = new Regex(@"^application/x\-(witsml|resqml|prodml|energyml)\+xml;version=([0-9.]+)((;)?|(;type=((obj_)?(\w+))(;)?)?)$");
-        private static readonly string _baseFormat = "application/x-{0}+xml;version={1};";
-        private static readonly string _typeFormat = "type=obj_{0};";
-        private readonly Match _match;
-        private string _contentType;
+        private static readonly Regex Pattern = new Regex(@"^application/x\-(witsml|resqml|prodml|energyml)\+xml;version=([0-9.]+)((;)?|(;type=((obj_)?(\w+))(;)?)?)$");
+        private static readonly string BaseFormat = "application/x-{0}+xml;version={1};";
+        private static readonly string TypeFormat = "type=obj_{0};";
+        private readonly string _contentType;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EtpContentType"/> struct.
@@ -37,13 +36,14 @@ namespace Energistics.Datatypes
         /// <param name="contentType">Type of the content.</param>
         public EtpContentType(string contentType)
         {
-            _contentType = contentType;
-            _match = _pattern.Match(contentType);
-            IsValid = _match.Success;
+            var match = Pattern.Match(contentType);
 
-            Family = GetValue(_match, 1);
-            Version = GetValue(_match, 2);
-            ObjectType = GetValue(_match, 6);
+            _contentType = contentType;
+            IsValid = match.Success;
+
+            Family = GetValue(match, 1);
+            Version = GetValue(match, 2);
+            ObjectType = GetValue(match, 6);
         }
 
         /// <summary>
@@ -63,14 +63,13 @@ namespace Energistics.Datatypes
         /// <param name="objectType">Type of the object.</param>
         public EtpContentType(string family, string version, string objectType)
         {
-            _match = null;
             IsValid = true;
 
             Family = family;
             Version = version;
             ObjectType = objectType;
 
-            _contentType = string.Format(_baseFormat, family, version) + FormatType(objectType, version);
+            _contentType = string.Format(BaseFormat, family, version) + FormatType(objectType, version);
         }
 
         /// <summary>
@@ -170,7 +169,7 @@ namespace Energistics.Datatypes
                     + objectType.Substring(1);
             }
 
-            return string.Format(_typeFormat, objectType);
+            return string.Format(TypeFormat, objectType);
         }
     }
 }

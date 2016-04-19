@@ -20,7 +20,20 @@ using Avro.Specific;
 
 namespace Energistics.Common
 {
+    /// <summary>
+    /// Represents the method that will handle a protocol handler event.
+    /// </summary>
+    /// <typeparam name="T">The type of the message.</typeparam>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The <see cref="ProtocolEventArgs{T}"/> instance containing the event data.</param>
     public delegate void ProtocolEventHandler<T>(object sender, ProtocolEventArgs<T> e) where T : ISpecificRecord;
 
-    public delegate void ProtocolEventHandler<T, V>(object sender, ProtocolEventArgs<T, V> e) where T : ISpecificRecord;
+    /// <summary>
+    /// Represents the method that will handle a protocol handler event.
+    /// </summary>
+    /// <typeparam name="T">The type of the message.</typeparam>
+    /// <typeparam name="TContext">The type of the context.</typeparam>
+    /// <param name="sender">The sender.</param>
+    /// <param name="e">The <see cref="ProtocolEventArgs{T, V}"/> instance containing the event data.</param>
+    public delegate void ProtocolEventHandler<T, TContext>(object sender, ProtocolEventArgs<T, TContext> e) where T : ISpecificRecord;
 }

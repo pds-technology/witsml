@@ -31,6 +31,9 @@ using Newtonsoft.Json.Converters;
 
 namespace Energistics.Common
 {
+    /// <summary>
+    /// Provides extension methods that can be used along with ETP message types.
+    /// </summary>
     public static class EtpExtensions
     {
         private const string GzipEncoding = "gzip";
@@ -44,6 +47,13 @@ namespace Energistics.Common
             }
         };
 
+        /// <summary>
+        /// Encodes the specified message header and body.
+        /// </summary>
+        /// <typeparam name="T">The type of the message.</typeparam>
+        /// <param name="body">The message body.</param>
+        /// <param name="header">The message header.</param>
+        /// <returns>The encoded byte array containing the message data.</returns>
         public static byte[] Encode<T>(this T body, MessageHeader header) where T : ISpecificRecord
         {
             using (var stream = new MemoryStream())
@@ -63,6 +73,12 @@ namespace Energistics.Common
             }
         }
 
+        /// <summary>
+        /// Decodes the message body using the specified decoder.
+        /// </summary>
+        /// <typeparam name="T">The type of the message.</typeparam>
+        /// <param name="decoder">The decoder.</param>
+        /// <returns>The decoded message body.</returns>
         public static T Decode<T>(this Decoder decoder) where T : ISpecificRecord
         {
             var record = Activator.CreateInstance<T>();
@@ -73,23 +89,48 @@ namespace Energistics.Common
             return record;
         }
 
+        /// <summary>
+        /// Serializes the specified object instance.
+        /// </summary>
+        /// <param name="etpBase">The ETP base object.</param>
+        /// <param name="instance">The object to serialize.</param>
+        /// <returns>The serialized JSON string.</returns>
         public static string Serialize(this EtpBase etpBase, object instance)
         {
             return etpBase.Serialize(instance, false);
         }
 
+        /// <summary>
+        /// Serializes the specified object instance.
+        /// </summary>
+        /// <param name="etpBase">The ETP base object.</param>
+        /// <param name="instance">The object to serialize.</param>
+        /// <param name="indent">if set to <c>true</c> the JSON output should be indented; otherwise, <c>false</c>.</param>
+        /// <returns>The serialized JSON string.</returns>
         public static string Serialize(this EtpBase etpBase, object instance, bool indent)
         {
             var formatting = (indent) ? Formatting.Indented : Formatting.None;
             return JsonConvert.SerializeObject(instance, formatting, JsonSettings);
         }
 
+        /// <summary>
+        /// Determines whether the list of supported protocols contains the specified protocol and role combination.
+        /// </summary>
+        /// <param name="supportedProtocols">The supported protocols.</param>
+        /// <param name="protocol">The requested protocol.</param>
+        /// <param name="role">The requested role.</param>
+        /// <returns>A value indicating whether the specified protocol and role combination is supported.</returns>
         public static bool Contains(this IList<SupportedProtocol> supportedProtocols, int protocol, string role)
         {
             return supportedProtocols.Any(x => x.Protocol == protocol &&
                 string.Equals(x.Role, role, StringComparison.InvariantCultureIgnoreCase));
         }
 
+        /// <summary>
+        /// Determines whether the list of supported protocols indicates the producer is a simple streamer.
+        /// </summary>
+        /// <param name="supportedProtocols">The supported protocols.</param>
+        /// <returns></returns>
         public static bool IsSimpleStreamer(this IList<SupportedProtocol> supportedProtocols)
         {
             return supportedProtocols.Any(x =>
@@ -103,12 +144,23 @@ namespace Energistics.Common
             });
         }
 
+        /// <summary>
+        /// Decodes the data contained by the <see cref="DataObject"/> as an XML string.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns>The decoded XML string.</returns>
         public static string GetXml(this DataObject dataObject)
         {
             return System.Text.Encoding.UTF8.GetString(dataObject.GetData());
             //return System.Text.Encoding.Unicode.GetString(dataObject.GetData());
         }
 
+        /// <summary>
+        /// Encodes and optionally compresses the XML string for the <see cref="DataObject"/> data.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="xml">The XML string.</param>
+        /// <param name="compress">if set to <c>true</c> the data will be compressed.</param>
         public static void SetXml(this DataObject dataObject, string xml, bool compress = true)
         {
             if (string.IsNullOrWhiteSpace(xml))
@@ -127,6 +179,11 @@ namespace Energistics.Common
             dataObject.SetData(bytes, compress);
         }
 
+        /// <summary>
+        /// Gets the data contained by the <see cref="DataObject"/> and decompresses the byte array, if necessary.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns>The decompressed data as a byte array.</returns>
         private static byte[] GetData(this DataObject dataObject)
         {
             if (string.IsNullOrWhiteSpace(dataObject.ContentEncoding))
@@ -147,6 +204,12 @@ namespace Energistics.Common
             }
         }
 
+        /// <summary>
+        /// Sets and optionally compresses the data for the <see cref="DataObject"/>.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="data">The data.</param>
+        /// <param name="compress">if set to <c>true</c> the data will be compressed.</param>
         private static void SetData(this DataObject dataObject, byte[] data, bool compress = true)
         {
             var encoding = string.Empty;

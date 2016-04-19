@@ -20,13 +20,29 @@ using System;
 
 namespace Energistics.Datatypes
 {
+    /// <summary>
+    /// Specifies protocol and role requirements for a protocol handler.
+    /// </summary>
+    /// <seealso cref="System.Attribute" />
     [AttributeUsage(AttributeTargets.Interface, Inherited = true, AllowMultiple = false)]
     public class ProtocolRoleAttribute : Attribute
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProtocolRoleAttribute"/> class.
+        /// </summary>
+        /// <param name="protocol">The protocol.</param>
+        /// <param name="role">The role.</param>
+        /// <param name="requestedRole">The requested role.</param>
         public ProtocolRoleAttribute(Protocols protocol, string role, string requestedRole) : this((int)protocol, role, requestedRole)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProtocolRoleAttribute"/> class.
+        /// </summary>
+        /// <param name="protocol">The protocol.</param>
+        /// <param name="role">The role.</param>
+        /// <param name="requestedRole">The requested role.</param>
         public ProtocolRoleAttribute(int protocol, string role, string requestedRole)
         {
             Protocol = protocol;
@@ -34,10 +50,22 @@ namespace Energistics.Datatypes
             RequestedRole = requestedRole;
         }
 
+        /// <summary>
+        /// Gets the protocol.
+        /// </summary>
+        /// <value>The protocol.</value>
         public int Protocol { get; private set; }
 
+        /// <summary>
+        /// Gets the role.
+        /// </summary>
+        /// <value>The role.</value>
         public string Role { get; private set; }
 
+        /// <summary>
+        /// Gets the requested role.
+        /// </summary>
+        /// <value>The requested role.</value>
         public string RequestedRole { get; private set; }
     }
 }

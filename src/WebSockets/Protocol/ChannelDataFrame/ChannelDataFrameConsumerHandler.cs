@@ -22,12 +22,26 @@ using Energistics.Datatypes;
 
 namespace Energistics.Protocol.ChannelDataFrame
 {
+    /// <summary>
+    /// Base implementation of the <see cref="IChannelDataFrameConsumer"/> interface.
+    /// </summary>
+    /// <seealso cref="Energistics.Common.EtpProtocolHandler" />
+    /// <seealso cref="Energistics.Protocol.ChannelDataFrame.IChannelDataFrameConsumer" />
     public class ChannelDataFrameConsumerHandler : EtpProtocolHandler, IChannelDataFrameConsumer
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ChannelDataFrameConsumerHandler"/> class.
+        /// </summary>
         public ChannelDataFrameConsumerHandler() : base(Protocols.ChannelDataFrame, "consumer", "producer")
         {
         }
 
+        /// <summary>
+        /// Sends a RequestChannelData message to a producer.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="fromIndex">From index.</param>
+        /// <param name="toIndex">To index.</param>
         public virtual void RequestChannelData(string uri, long? fromIndex = null, long? toIndex = null)
         {
             var header = CreateMessageHeader(Protocols.ChannelDataFrame, MessageTypes.ChannelDataFrame.RequestChannelData);
@@ -42,10 +56,21 @@ namespace Energistics.Protocol.ChannelDataFrame
             Session.SendMessage(header, requestChannelData);
         }
 
+        /// <summary>
+        /// Handles the ChannelMetadata event from a producer.
+        /// </summary>
         public event ProtocolEventHandler<ChannelMetadata> OnChannelMetadata;
 
+        /// <summary>
+        /// Handles the ChannelDataFrameSet event from a producer.
+        /// </summary>
         public event ProtocolEventHandler<ChannelDataFrameSet> OnChannelDataFrameSet;
 
+        /// <summary>
+        /// Decodes the message based on the message type contained in the specified <see cref="MessageHeader" />.
+        /// </summary>
+        /// <param name="header">The message header.</param>
+        /// <param name="decoder">The message decoder.</param>
         protected override void HandleMessage(MessageHeader header, Decoder decoder)
         {
             switch (header.MessageType)
@@ -64,11 +89,21 @@ namespace Energistics.Protocol.ChannelDataFrame
             }
         }
 
+        /// <summary>
+        /// Handles the ChannelMetadata message from a producer.
+        /// </summary>
+        /// <param name="header">The message header.</param>
+        /// <param name="channelMetadata">The ChannelMetadata message.</param>
         protected virtual void HandleChannelMetadata(MessageHeader header, ChannelMetadata channelMetadata)
         {
             Notify(OnChannelMetadata, header, channelMetadata);
         }
 
+        /// <summary>
+        /// Handles the ChannelDataFrameSet message from a producer.
+        /// </summary>
+        /// <param name="header">The message header.</param>
+        /// <param name="channelDataFrameSet">The ChannelDataFrameSet message.</param>
         protected virtual void HandleChannelDataFrameSet(MessageHeader header, ChannelDataFrameSet channelDataFrameSet)
         {
             Notify(OnChannelDataFrameSet, header, channelDataFrameSet);

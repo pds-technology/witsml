@@ -23,11 +23,23 @@ using Energistics.Datatypes.Object;
 
 namespace Energistics.Protocol.Discovery
 {
+    /// <summary>
+    /// Describes the interface that must be implemented by the store role of the Discovery protocol.
+    /// </summary>
+    /// <seealso cref="Energistics.Common.IProtocolHandler" />
     [ProtocolRole(Protocols.Discovery, "store", "customer")]
     public interface IDiscoveryStore : IProtocolHandler
     {
+        /// <summary>
+        /// Sends a GetResourcesResponse message to a customer.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="resources">The list of <see cref="Resource"/> objects.</param>
         void GetResourcesResponse(MessageHeader request, IList<Resource> resources);
 
+        /// <summary>
+        /// Handles the GetResources event from a customer.
+        /// </summary>
         event ProtocolEventHandler<GetResources, IList<Resource>> OnGetResources;
     }
 }

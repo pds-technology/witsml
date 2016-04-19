@@ -22,26 +22,60 @@ using Energistics.Datatypes;
 
 namespace Energistics.Common
 {
+    /// <summary>
+    /// Provides data for protocol handler events.
+    /// </summary>
+    /// <typeparam name="T">The type of the message.</typeparam>
+    /// <seealso cref="System.EventArgs" />
     public class ProtocolEventArgs<T> : EventArgs where T : ISpecificRecord
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProtocolEventArgs{T}"/> class.
+        /// </summary>
+        /// <param name="header">The message header.</param>
+        /// <param name="message">The message body.</param>
         public ProtocolEventArgs(MessageHeader header, T message)
         {
             Header = header;
             Message = message;
         }
 
+        /// <summary>
+        /// Gets the message header.
+        /// </summary>
+        /// <value>The message header.</value>
         public MessageHeader Header { get; private set; }
 
+        /// <summary>
+        /// Gets the message body.
+        /// </summary>
+        /// <value>The message body.</value>
         public T Message { get; private set; }
     }
 
-    public class ProtocolEventArgs<T, V> : ProtocolEventArgs<T> where T : ISpecificRecord
+    /// <summary>
+    /// Provides data for protocol handler events.
+    /// </summary>
+    /// <typeparam name="T">The type of the message.</typeparam>
+    /// <typeparam name="TContext">The type of the context.</typeparam>
+    /// <seealso cref="System.EventArgs" />
+    public class ProtocolEventArgs<T, TContext> : ProtocolEventArgs<T> where T : ISpecificRecord
     {
-        public ProtocolEventArgs(MessageHeader header, T message, V context) : base(header, message)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProtocolEventArgs{T, TContext}"/> class.
+        /// </summary>
+        /// <param name="header">The message header.</param>
+        /// <param name="message">The message body.</param>
+        /// <param name="context">The additional message context.</param>
+        public ProtocolEventArgs(MessageHeader header, T message, TContext context) : base(header, message)
         {
             Context = context;
         }
 
-        public V Context { get; private set; }
+        /// <summary>
+        /// Gets the additional message context.
+        /// </summary>
+        /// <value>The message context.</value>
+        public TContext Context { get; private set; }
     }
 }

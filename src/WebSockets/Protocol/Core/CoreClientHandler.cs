@@ -23,18 +23,40 @@ using Energistics.Datatypes;
 
 namespace Energistics.Protocol.Core
 {
+    /// <summary>
+    /// Base implementation of the <see cref="ICoreClient"/> interface.
+    /// </summary>
+    /// <seealso cref="Energistics.Common.EtpProtocolHandler" />
+    /// <seealso cref="Energistics.Protocol.Core.ICoreClient" />
     public class CoreClientHandler : EtpProtocolHandler, ICoreClient
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CoreClientHandler"/> class.
+        /// </summary>
         public CoreClientHandler() : base(Protocols.Core, "client", "server")
         {
             ServerProtocols = new List<SupportedProtocol>(0);
             ServerObjects = new List<string>(0);
         }
 
+        /// <summary>
+        /// Gets the list of supported server protocols.
+        /// </summary>
+        /// <value>The server protocols.</value>
         public IList<SupportedProtocol> ServerProtocols { get; private set; }
 
+        /// <summary>
+        /// Gets the list of supported server objects.
+        /// </summary>
+        /// <value>The server objects.</value>
         public IList<string> ServerObjects { get; private set; }
 
+        /// <summary>
+        /// Sends a RequestSession message to a server.
+        /// </summary>
+        /// <param name="applicationName">The application name.</param>
+        /// <param name="applicationVersion">The application version.</param>
+        /// <param name="requestedProtocols">The requested protocols.</param>
         public virtual void RequestSession(string applicationName, string applicationVersion, IList<SupportedProtocol> requestedProtocols)
         {
             var header = CreateMessageHeader(Protocols.Core, MessageTypes.Core.RequestSession);
@@ -50,6 +72,10 @@ namespace Energistics.Protocol.Core
             Session.SendMessage(header, requestSession);
         }
 
+        /// <summary>
+        /// Sends a CloseSession message to a server.
+        /// </summary>
+        /// <param name="reason">The reason.</param>
         public virtual void CloseSession(string reason = null)
         {
             var header = CreateMessageHeader(Protocols.Core, MessageTypes.Core.CloseSession);
@@ -62,10 +88,21 @@ namespace Energistics.Protocol.Core
             Session.SendMessage(header, closeSession);
         }
 
+        /// <summary>
+        /// Handles the OpenSession event from a server.
+        /// </summary>
         public event ProtocolEventHandler<OpenSession> OnOpenSession;
 
+        /// <summary>
+        /// Handles the CloseSession event from a server.
+        /// </summary>
         public event ProtocolEventHandler<CloseSession> OnCloseSession;
 
+        /// <summary>
+        /// Decodes the message based on the message type contained in the specified <see cref="MessageHeader" />.
+        /// </summary>
+        /// <param name="header">The message header.</param>
+        /// <param name="decoder">The message decoder.</param>
         protected override void HandleMessage(MessageHeader header, Decoder decoder)
         {
             switch (header.MessageType)
@@ -84,6 +121,11 @@ namespace Energistics.Protocol.Core
             }
         }
 
+        /// <summary>
+        /// Handles the OpenSession message from the server.
+        /// </summary>
+        /// <param name="header">The message header.</param>
+        /// <param name="openSession">The OpenSession message.</param>
         protected virtual void HandleOpenSession(MessageHeader header, OpenSession openSession)
         {
             ServerProtocols = openSession.SupportedProtocols;
@@ -93,6 +135,11 @@ namespace Energistics.Protocol.Core
             Session.OnSessionOpened(ServerProtocols);
         }
 
+        /// <summary>
+        /// Handles the CloseSession message from the server.
+        /// </summary>
+        /// <param name="header">The message header.</param>
+        /// <param name="closeSession">The CloseSession message.</param>
         protected virtual void HandleCloseSession(MessageHeader header, CloseSession closeSession)
         {
             Notify(OnCloseSession, header, closeSession);

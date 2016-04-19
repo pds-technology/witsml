@@ -28,7 +28,7 @@ namespace Energistics.Datatypes
     /// </summary>
     public struct EtpUri
     {
-        private static readonly Regex _pattern = new Regex(@"^eml:\/\/((witsml|resqml|prodml|energyml)([0-9]+))(\/((obj_)?(\w+))(\(([\-\w]+)\))?)*?$", RegexOptions.IgnoreCase);
+        private static readonly Regex Pattern = new Regex(@"^eml:\/\/((witsml|resqml|prodml|energyml)([0-9]+))(\/((obj_)?(\w+))(\(([\-\w]+)\))?)*?$", RegexOptions.IgnoreCase);
         private readonly Match _match;
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace Energistics.Datatypes
         /// <param name="uri">The URI string.</param>
         public EtpUri(string uri)
         {
-            _match = _pattern.Match(uri);
+            _match = Pattern.Match(uri);
 
             Uri = uri;
             IsValid = _match.Success;
@@ -53,56 +53,55 @@ namespace Energistics.Datatypes
             ObjectType = null;
             ObjectId = null;
 
-            if (HasRepeatValues(_match))
-            {
-                var last = GetObjectIds().Last();
-                ObjectType = last.Key;
-                ObjectId = last.Value;
-                ContentType = new EtpContentType(Family, Version, ObjectType);
-            }
+            if (!HasRepeatValues(_match)) return;
+
+            var last = GetObjectIds().Last();
+            ObjectType = last.Key;
+            ObjectId = last.Value;
+            ContentType = new EtpContentType(Family, Version, ObjectType);
         }
 
         /// <summary>
         /// Gets the original URI string.
         /// </summary>
         /// <value>The URI.</value>
-        public string Uri { get; private set; }
+        public string Uri { get; }
 
         /// <summary>
         /// Gets the ML family name.
         /// </summary>
         /// <value>The ML family.</value>
-        public string Family { get; private set; }
+        public string Family { get; }
 
         /// <summary>
         /// Gets the version.
         /// </summary>
         /// <value>The version.</value>
-        public string Version { get; private set; }
+        public string Version { get; }
 
         /// <summary>
         /// Gets the type of the object.
         /// </summary>
         /// <value>The type of the object.</value>
-        public string ObjectType { get; private set; }
+        public string ObjectType { get; }
 
         /// <summary>
         /// Gets the object identifier.
         /// </summary>
         /// <value>The object identifier.</value>
-        public string ObjectId { get; private set; }
+        public string ObjectId { get; }
 
         /// <summary>
         /// Gets the content type.
         /// </summary>
         /// <value>The type of the content.</value>
-        public EtpContentType ContentType { get; private set; }
+        public EtpContentType ContentType { get; }
 
         /// <summary>
         /// Returns true if a valid URI was specified.
         /// </summary>
         /// <value><c>true</c> if this instance is valid; otherwise, <c>false</c>.</value>
-        public bool IsValid { get; private set; }
+        public bool IsValid { get; }
 
         /// <summary>
         /// Gets a value indicating whether this instance is a base URI.
@@ -194,7 +193,7 @@ namespace Energistics.Datatypes
         /// </returns>
         public override bool Equals(object obj)
         {
-            if (obj == null || !(obj is EtpUri))
+            if (!(obj is EtpUri))
                 return false;
 
             return Equals((EtpUri)obj);
@@ -203,7 +202,7 @@ namespace Energistics.Datatypes
         /// <summary>
         /// Determines whether the specified <see cref="EtpUri" />, is equal to this instance.
         /// </summary>
-        /// <param name="obj">The <see cref="EtpUri" /> to compare with this instance.</param>
+        /// <param name="other">The <see cref="EtpUri" /> to compare with this instance.</param>
         /// <returns>
         ///   <c>true</c> if the specified <see cref="EtpUri" /> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>

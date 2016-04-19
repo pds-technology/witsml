@@ -18,8 +18,14 @@
 
 namespace Energistics.Protocol
 {
+    /// <summary>
+    /// Provides enumerations of protocol message types.
+    /// </summary>
     public static class MessageTypes
     {
+        /// <summary>
+        /// An enumeration of Core protocol message types.
+        /// </summary>
         public enum Core
         {
             RequestSession = 1,
@@ -29,21 +35,27 @@ namespace Energistics.Protocol
             Acknowledge = 1001
         }
 
+        /// <summary>
+        /// An enumeration of Channel Streaming protocol message types.
+        /// </summary>
         public enum ChannelStreaming
         {
             Start = 0,
-            ChannelDescribe,
-            ChannelMetadata,
-            ChannelData,
-            ChannelStreamingStart,
-            ChannelStreamingStop,
-            ChannelDataChange,
-            ChannelNotUsed,
-            ChannelDelete,
-            ChannelRangeRequest,
-            ChannelStatusChange
+            ChannelDescribe = 1,
+            ChannelMetadata = 2,
+            ChannelData = 3,
+            ChannelStreamingStart = 4,
+            ChannelStreamingStop = 5,
+            ChannelDataChange = 6,
+            //NotUsed = 7,
+            ChannelDelete = 8,
+            ChannelRangeRequest = 9,
+            ChannelStatusChange = 10
         }
 
+        /// <summary>
+        /// An enumeration of Channel Data Frame protocol message types.
+        /// </summary>
         public enum ChannelDataFrame
         {
             RequestChannelData = 1,
@@ -52,12 +64,18 @@ namespace Energistics.Protocol
             ChannelDataFrameSet
         }
 
+        /// <summary>
+        /// An enumeration of Discovery protocol message types.
+        /// </summary>
         public enum Discovery
         {
             GetResources = 1,
             GetResourcesResponse
         }
 
+        /// <summary>
+        /// An enumeration of Store protocol message types.
+        /// </summary>
         public enum Store
         {
             GetObject = 1,
@@ -66,18 +84,30 @@ namespace Energistics.Protocol
             Object
         }
 
+        /// <summary>
+        /// An enumeration of Store Notification protocol message types.
+        /// </summary>
         public enum StoreNotification
         {
         }
 
+        /// <summary>
+        /// An enumeration of Growing Object protocol message types.
+        /// </summary>
         public enum GrowingObject
         {
         }
 
+        /// <summary>
+        /// An enumeration of Data Array protocol message types.
+        /// </summary>
         public enum DataArray
         {
         }
 
+        /// <summary>
+        /// An enumeration of Query protocol message types.
+        /// </summary>
         public enum Query
         {
         }

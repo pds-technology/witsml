@@ -25,12 +25,22 @@ using SuperWebSocket.SubProtocol;
 
 namespace Energistics
 {
+    /// <summary>
+    /// A wrapper for the SuperWebSocket library providing a base ETP server implementation.
+    /// </summary>
+    /// <seealso cref="Energistics.Common.EtpBase" />
     public class EtpSocketServer : EtpBase
     {
         private static readonly string EtpSubProtocolName = Settings.Default.EtpSubProtocolName;
         private static readonly object EtpSessionKey = typeof(IEtpSession);
         private WebSocketServer _server;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EtpSocketServer"/> class.
+        /// </summary>
+        /// <param name="port">The port.</param>
+        /// <param name="application">The server application name.</param>
+        /// <param name="version">The server application version.</param>
         public EtpSocketServer(int port, string application, string version)
         {
             _server = new WebSocketServer(new BasicSubProtocol(EtpSubProtocolName));
@@ -45,10 +55,24 @@ namespace Energistics
             Register<ICoreServer, CoreServerHandler>();
         }
 
+        /// <summary>
+        /// Gets the name of the application.
+        /// </summary>
+        /// <value>The name of the application.</value>
         public string ApplicationName { get; private set; }
 
+        /// <summary>
+        /// Gets the application version.
+        /// </summary>
+        /// <value>The application version.</value>
         public string ApplicationVersion { get; private set; }
 
+        /// <summary>
+        /// Gets a value indicating whether the WebSocket server is running.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if the WebSocket server is running; otherwise, <c>false</c>.
+        /// </value>
         public bool IsRunning
         {
             get
@@ -58,6 +82,9 @@ namespace Energistics
             }
         }
 
+        /// <summary>
+        /// Starts the WebSocket server.
+        /// </summary>
         public void Start()
         {
             if (!IsRunning)
@@ -66,6 +93,9 @@ namespace Energistics
             }
         }
 
+        /// <summary>
+        /// Stops the WebSocket server.
+        /// </summary>
         public void Stop()
         {
             if (IsRunning)
@@ -75,6 +105,10 @@ namespace Energistics
             }
         }
 
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && _server != null)
@@ -87,6 +121,10 @@ namespace Energistics
             base.Dispose(disposing);
         }
 
+        /// <summary>
+        /// Called when a WebSocket session is connected.
+        /// </summary>
+        /// <param name="session">The session.</param>
         private void OnNewSessionConnected(WebSocketSession session)
         {
             Logger.Debug(Format("[{0}] Socket session connected.", session.SessionID));
@@ -98,6 +136,11 @@ namespace Energistics
             session.Items[EtpSessionKey] = etpServer;
         }
 
+        /// <summary>
+        /// Called when a WebSocket session is closed.
+        /// </summary>
+        /// <param name="session">The session.</param>
+        /// <param name="value">The value.</param>
         private void OnSessionClosed(WebSocketSession session, CloseReason value)
         {
             Logger.Debug(Format("[{0}] Socket session closed.", session.SessionID));
@@ -111,31 +154,37 @@ namespace Energistics
             }
         }
 
+        /// <summary>
+        /// Called when new WebSocket data is received.
+        /// </summary>
+        /// <param name="session">The WebSocket session.</param>
+        /// <param name="data">The data.</param>
         private void OnNewDataReceived(WebSocketSession session, byte[] data)
         {
             var etpSession = GetEtpSession(session);
-
-            if (etpSession != null)
-            {
-                etpSession.OnDataReceived(data);
-            }
+            etpSession?.OnDataReceived(data);
         }
 
+        /// <summary>
+        /// Closes all connected WebSocket sessions.
+        /// </summary>
         private void CloseSessions()
         {
             CheckDisposed();
+            const string reason = "Server stopping";
 
             foreach (var session in _server.GetAllSessions())
             {
                 var etpSession = GetEtpSession(session);
-
-                if (etpSession != null)
-                {
-                    etpSession.Close();
-                }
+                etpSession?.Close(reason);
             }
         }
 
+        /// <summary>
+        /// Gets the ETP session associated with the specified WebSocket session.
+        /// </summary>
+        /// <param name="session">The WebSocket session.</param>
+        /// <returns>The <see cref="IEtpSession"/> associated with the WebSocket session.</returns>
         private IEtpSession GetEtpSession(WebSocketSession session)
         {
             IEtpSession etpSession = null;
