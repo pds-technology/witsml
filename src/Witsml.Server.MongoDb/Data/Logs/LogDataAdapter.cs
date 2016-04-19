@@ -686,6 +686,22 @@ namespace PDS.Witsml.Server.Data.Logs
             return logHeaderUpdate;
         }
 
+        protected void IndexCurveToFirst(List<TChild> logCurves, string uid)
+        {
+            if (string.IsNullOrWhiteSpace(uid))
+                return;
+
+            if (logCurves[0].Uid.EqualsIgnoreCase(uid))
+                return;
+
+            var indexCurve = logCurves.FirstOrDefault(l => l.Uid.EqualsIgnoreCase(uid));
+            if (indexCurve == null)
+                return;
+
+            logCurves.Remove(indexCurve);
+            logCurves.Insert(0, indexCurve);
+        }
+
         protected abstract bool IsIncreasing(T log);
 
         protected abstract bool IsTimeLog(T log, bool includeElapsedTime = false);
