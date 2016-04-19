@@ -24,13 +24,13 @@ namespace PDS.Witsml.Server.Models
 {
     public static class ChunkExtensions
     {
-        public static ChannelDataReader GetReader(this ChannelDataChunk channelDataChunk, bool reverseSort = false)
+        public static ChannelDataReader GetReader(this ChannelDataChunk channelDataChunk, bool reverse = false)
         {
             var mnemonics = ChannelDataReader.Split(channelDataChunk.MnemonicList);
             var units = ChannelDataReader.Split(channelDataChunk.UnitList);
 
             return new ChannelDataReader(channelDataChunk.Data, mnemonics, units, channelDataChunk.Uri, channelDataChunk.Id)
-                .WithIndices(channelDataChunk.Indices, calculate: reverseSort, reverseSort: reverseSort);
+                .WithIndices(channelDataChunk.Indices, calculate: reverse, reverse: reverse);
         }
 
         public static IEnumerable<IChannelDataRecord> GetRecords(this IEnumerable<ChannelDataChunk> channelDataChunks, Range<double?>? range = null, bool increasing = true, int? requestLatestValues = null)
@@ -38,22 +38,17 @@ namespace PDS.Witsml.Server.Models
             if (channelDataChunks == null)
                 yield break;
 
-            var breakValue = requestLatestValues.HasValue ? requestLatestValues.Value : 0;
+            var requestCount = requestLatestValues.HasValue ? requestLatestValues.Value : 0;
 
             foreach (var chunk in channelDataChunks)
             {
-                if (requestLatestValues.HasValue && breakValue <= 0)
-                    yield break;
-
-                var records = chunk.GetReader(reverseSort: requestLatestValues.HasValue).AsEnumerable();
+                var records = chunk.GetReader(reverse: requestLatestValues.HasValue).AsEnumerable();
 
                 foreach (var record in records)
                 {
-                    if (requestLatestValues.HasValue && breakValue <= 0)
-                        yield break;
 
                     if (requestLatestValues.HasValue)
-                        breakValue =- 1;
+                        requestCount =- 1;
 
                         if (range.HasValue)
                     {
@@ -67,6 +62,9 @@ namespace PDS.Witsml.Server.Models
                     }
 
                     yield return record;
+
+                    if (requestLatestValues.HasValue && requestCount <= 0)
+                        yield break;
                 }
             }
         }

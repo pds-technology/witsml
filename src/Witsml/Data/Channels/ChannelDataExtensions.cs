@@ -106,7 +106,7 @@ namespace PDS.Witsml.Data.Channels
             return reader.Sort();
         }
 
-        public static ChannelDataReader WithIndices(this ChannelDataReader reader, IEnumerable<ChannelIndexInfo> indices, bool calculate = false, bool reverseSort = false)
+        public static ChannelDataReader WithIndices(this ChannelDataReader reader, IEnumerable<ChannelIndexInfo> indices, bool calculate = false, bool reverse = false)
         {
             foreach (var index in indices)
             {
@@ -118,7 +118,7 @@ namespace PDS.Witsml.Data.Channels
                 }
             }
 
-            return calculate ? reader.Sort(reverseSort) : reader;
+            return calculate ? reader.Sort(reverse) : reader;
         }
 
         public static ChannelIndexInfo ToChannelIndexInfo(this Witsml200.ComponentSchemas.ChannelIndex channelIndex)
