@@ -323,7 +323,9 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>The channel data records requested</returns>
         protected IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, string indexChannel, Range<double?> range, bool increasing, int? requestLatestValues = null)
         {
-            var chunks = ChannelDataChunkAdapter.GetData(uri, indexChannel, range, increasing, requestLatestValues);
+            increasing = requestLatestValues.HasValue ? !increasing : increasing;
+
+            var chunks = ChannelDataChunkAdapter.GetData(uri, indexChannel, range, increasing);
             return chunks.GetRecords(range, increasing, reverse: requestLatestValues.HasValue);
         }
 
@@ -356,11 +358,10 @@ namespace PDS.Witsml.Server.Data.Logs
             //... don't allow more than the maximum.
             if (requestLatestValues.HasValue)
             {
-                requestLatestValues = requestLatestValues.Value > MaxRequestLatestValues 
-                    ? MaxRequestLatestValues 
-                    : requestLatestValues.Value;
+                requestLatestValues = Math.Min(MaxRequestLatestValues, requestLatestValues.Value);
             }
-
+            
+            // TODO: If requesting latest values figure out a range that will contain the last values that we want.
             // if there is a request for latest values then the range should be ignored.
             var range = requestLatestValues.HasValue 
                 ? new Range<double?>(null, null) 
@@ -410,8 +411,13 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             // Create and initialize value count dictionary for channels
-            var requestedValueCount = new Dictionary<int, int>();
-            mnemonics.Keys.ForEach(m => requestedValueCount.Add(m, 0));
+            Dictionary<int, int> requestedValueCount = null;
+
+            if (requestLatestValues.HasValue)
+            {
+                requestedValueCount = new Dictionary<int, int>();
+                mnemonics.Keys.ForEach(m => requestedValueCount.Add(m, 0));
+            }
 
             // Read through each row
             while (reader.Read())
@@ -436,18 +442,21 @@ namespace PDS.Witsml.Server.Data.Logs
                 // Filter rows with no channel values
                 if (values.Count > 1)
                 {
-                    if (!requestLatestValues.HasValue || RequestedValueAdded(values, requestedValueCount, requestLatestValues.Value))
+                    if (!requestLatestValues.HasValue || IsRequestedValueNeeded(values, requestedValueCount, requestLatestValues.Value))
                     {
                         logData.Add(string.Join(",", values));
                         start = start ?? index;
                         end = index;
 
                         // Update the latest value count for each channel.
-                        UpdateRequestedValueCount(requestedValueCount, values);
+                        if (requestLatestValues.HasValue)
+                        {
+                            UpdateRequestedValueCount(requestedValueCount, values);
+                        }
                     }
 
                     // if latest values requested and we have all of the requested values we need, break out;
-                    if (requestLatestValues.HasValue && HaveRequestedValuesForAllChannels(requestedValueCount, requestLatestValues.Value))
+                    if (requestLatestValues.HasValue && HasRequestedValuesForAllChannels(requestedValueCount, requestLatestValues.Value))
                     {
                         break;
                     }
@@ -470,19 +479,18 @@ namespace PDS.Witsml.Server.Data.Logs
             return logData;
         }
 
-        private bool RequestedValueAdded(List<object> channelValues, Dictionary<int, int> requestedValueCount, int requestLatestValue)
+        private bool IsRequestedValueNeeded(List<object> channelValues, Dictionary<int, int> requestedValueCount, int requestLatestValue)
         {
             var valueAdded = false;
 
-            var channelValueArray = channelValues.ToArray();
-            for (var i = 0; i < channelValueArray.Length; i++)
+            //var channelValueArray = channelValues.ToArray();
+            for (var i = 0; i < channelValues.Count; i++)
             {
                 // For the current channel, if the requested value count has not already been reached and then
                 ///... current channel value is not null or blank then a value is being added.
-                valueAdded = 
-                    requestedValueCount[i] < requestLatestValue && 
-                    channelValueArray[i] != null && 
-                    !string.IsNullOrEmpty(channelValueArray[i].ToString());
+                valueAdded =
+                    requestedValueCount[i] < requestLatestValue &&
+                    channelValues[i] != null;
 
                 // If at least one channel value is being added then no need to look further, get out.
                 if (valueAdded)
@@ -500,14 +508,14 @@ namespace PDS.Witsml.Server.Data.Logs
 
             for (var i = 0; i < valueArray.Length; i++)
             {
-                if (requestedValueCount.ContainsKey(i) && valueArray[i] != null && !string.IsNullOrEmpty(valueArray[i].ToString()))
+                if (requestedValueCount.ContainsKey(i) && valueArray[i] != null)
                 {
                     requestedValueCount[i]++;
                 }
             }
         }
 
-        private bool HaveRequestedValuesForAllChannels(Dictionary<int, int> requestedValueCount, int requestLatestValues)
+        private bool HasRequestedValuesForAllChannels(Dictionary<int, int> requestedValueCount, int requestLatestValues)
         {
             return requestedValueCount.Keys.All(r => requestedValueCount[r] >= requestLatestValues);
         }

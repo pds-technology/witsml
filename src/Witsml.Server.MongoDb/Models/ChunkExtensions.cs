@@ -33,7 +33,15 @@ namespace PDS.Witsml.Server.Models
                 .WithIndices(channelDataChunk.Indices, calculate: reverse, reverse: reverse);
         }
 
-        public static IEnumerable<IChannelDataRecord> GetRecords(this IEnumerable<ChannelDataChunk> channelDataChunks, Range<double?>? range = null, bool increasing = true, bool reverse = false)
+        /// <summary>
+        /// Gets the records from each of the chunks.
+        /// </summary>
+        /// <param name="channelDataChunks">The channel data chunks.</param>
+        /// <param name="range">The range.</param>
+        /// <param name="ascending">if set to <c>true</c> the data will be sorted in ascending order.</param>
+        /// <param name="reverse">if set to <c>true</c> [reverse].</param>
+        /// <returns></returns>
+        public static IEnumerable<IChannelDataRecord> GetRecords(this IEnumerable<ChannelDataChunk> channelDataChunks, Range<double?>? range = null, bool ascending = true, bool reverse = false)
         {
             if (channelDataChunks == null)
                 yield break;
@@ -48,10 +56,10 @@ namespace PDS.Witsml.Server.Models
                     {
                         var index = record.GetIndexValue();
 
-                        if (range.Value.StartsAfter(index, increasing))
+                        if (range.Value.StartsAfter(index, ascending))
                             continue;
 
-                        if (range.Value.EndsBefore(index, increasing))
+                        if (range.Value.EndsBefore(index, ascending))
                             yield break;
                     }
 

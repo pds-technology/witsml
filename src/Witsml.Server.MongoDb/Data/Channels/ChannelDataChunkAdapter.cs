@@ -54,18 +54,17 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="uri">The data object URI.</param>
         /// <param name="indexChannel">The index channel.</param>
         /// <param name="range">The index range to select data for.</param>
-        /// <param name="increasing">if set to <c>true</c> the primary index is increasing.</param>
+        /// <param name="ascending">if set to <c>true</c> the data will be sorted in ascending order.</param>
         /// <param name="requestLatestValues">The request latest values.</param>
         /// <returns>A collection of <see cref="List{ChannelDataChunk}" /> items.</returns>
         /// <exception cref="WitsmlException"></exception>
-        public List<ChannelDataChunk> GetData(string uri, string indexChannel, Range<double?> range, bool increasing, int? requestLatestValues = null)
+        public List<ChannelDataChunk> GetData(string uri, string indexChannel, Range<double?> range, bool ascending)
         {
             try
             {
-                var filter = BuildDataFilter(uri, indexChannel, range, increasing);
+                var filter = BuildDataFilter(uri, indexChannel, range, ascending);
 
-                // Set a flag to reverse the sort order if there is a request for latest values.
-                return GetData(filter, increasing, reverseSort: requestLatestValues.HasValue);
+                return GetData(filter, ascending);
             }
             catch (MongoException ex)
             {
@@ -438,19 +437,15 @@ namespace PDS.Witsml.Server.Data.Channels
         /// Gets the channel data stored in a unified format.
         /// </summary>
         /// <param name="filter">The data filter.</param>
-        /// <param name="increasing">if set to <c>true</c> the data will be sorted in ascending order.</param>
+        /// <param name="ascending">if set to <c>true</c> the data will be sorted in ascending order.</param>
         /// <returns>The list of channel data chunks that fit the query criteria sorted by the primary index.</returns>
-        private List<ChannelDataChunk> GetData(FilterDefinition<ChannelDataChunk> filter, bool increasing, bool reverseSort = false)
+        private List<ChannelDataChunk> GetData(FilterDefinition<ChannelDataChunk> filter, bool ascending)
         {
             var collection = GetCollection();
             var sortBuilder = Builders<ChannelDataChunk>.Sort;
             var sortField = "Indices.0.Start";
 
-            var sortDirection = reverseSort 
-                ? !increasing 
-                : increasing;
-
-            var sort = sortDirection
+            var sort = ascending
                 ? sortBuilder.Ascending(sortField)
                 : sortBuilder.Descending(sortField);
 
@@ -472,9 +467,9 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="uri">The URI of the data object.</param>
         /// <param name="indexChannel">The index channel mnemonic.</param>
         /// <param name="range">The request range.</param>
-        /// <param name="increasing">if set to <c>true</c> the index is increasing.</param>
+        /// <param name="ascending">if set to <c>true</c> the data will be sorted in ascending order.</param>
         /// <returns>The query filter.</returns>
-        private FilterDefinition<ChannelDataChunk> BuildDataFilter(string uri, string indexChannel, Range<double?> range, bool increasing)
+        private FilterDefinition<ChannelDataChunk> BuildDataFilter(string uri, string indexChannel, Range<double?> range, bool ascending)
         {
             var builder = Builders<ChannelDataChunk>.Filter;
             var filters = new List<FilterDefinition<ChannelDataChunk>>();
@@ -484,7 +479,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
             if (range.Start.HasValue)
             {
-                var endFilter = increasing
+                var endFilter = ascending
                     ? builder.Gte("Indices.End", range.Start.Value)
                     : builder.Lte("Indices.End", range.Start.Value);
                 Logger.DebugFormat("Building end filter with start range '{0}'.", range.Start.Value);
@@ -494,7 +489,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
             if (range.End.HasValue)
             {
-                var startFilter = increasing
+                var startFilter = ascending
                     ? builder.Lte("Indices.Start", range.End)
                     : builder.Gte("Indices.Start", range.End);
                 Logger.DebugFormat("Building start filter with end range '{0}'.", range.End.Value);
