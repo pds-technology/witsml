@@ -166,39 +166,10 @@ namespace PDS.Witsml.Server.Data.Logs
                 yield return new ValidationResult(ErrorCodes.MixedStructuralRangeIndices.ToString(), new[] { "StartIndex", "EndIndex", "StartDateTimeIndex", "EndDateTimeIndex" });
             }
 
-            // Validate if MaxDataNodes has been exceeded
-            else if (logDatas != null && logDatas.SelectMany(ld => ld.Data).Count() > maxDataNodes)
-            {
-                yield return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "LogData", "Data" });
-            }
-
             // Validate if MaxDataPoints has been exceeded
             else if (logDatas != null && logDatas.Count > 0 )
             {
-                if (logDatas.Any(l => string.IsNullOrWhiteSpace(l.MnemonicList)))
-                    yield return new ValidationResult(ErrorCodes.MissingColumnIdentifiers.ToString(), new[] { "LogData", "MnemonicList" });
-                else
-                {
-                    foreach (var logData in logDatas)
-                    {
-                        var mnemonics = logData.MnemonicList.Split(_seperator);
-                        if (logData.Data != null && logData.Data.Count > 0 && (logData.Data.Count * logData.Data[0].Split(',').Count()) > maxDataPoints)
-                            yield return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "LogData", "Data" });
-                        else if (mnemonics.Distinct().Count() < mnemonics.Count())
-                            yield return new ValidationResult(ErrorCodes.DuplicateColumnIdentifiers.ToString(), new[] { "LogData", "MnemonicList" });
-                        else if (mnemonics.Any(m => _illegalColumnIdentifiers.Any(c => m.Contains(c))))
-                            yield return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogData", "MnemonicList" });
-                        else if (!string.IsNullOrEmpty(indexCurve) && !mnemonics.Any(m => m == indexCurve))
-                            yield return new ValidationResult(ErrorCodes.IndexCurveNotFound.ToString(), new[] { "IndexCurve" });
-                        else if (!mnemonics[0].EqualsIgnoreCase(DataObject.IndexCurve))
-                            yield return new ValidationResult(ErrorCodes.IndexNotFirstInDataColumnList.ToString(), new[] { "LogData", "MnemonicList" });
-                        else if (!UnitSpecified(logDatas))
-                            yield return new ValidationResult(ErrorCodes.MissingUnitForMeasureData.ToString(), new[] { "LogData", "UnitList" });
-                        else if (mnemonics.Count() > channelCount)
-                            yield return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogData", "MnemonicList" });
-                    }
-                    
-                }
+                yield return ValidateLogData(indexCurve, logCurves, logDatas);
             }
         }
 
@@ -258,19 +229,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     yield return new ValidationResult(ErrorCodes.DuplicateColumnIdentifiers.ToString(), new[] { "LogCurveInfo", "Mnemonic" });
                 }
 
-                // Validate that uids in LogCurveInfo are unique
-                else if (logData != null && logData.Any(d => string.IsNullOrWhiteSpace(d.MnemonicList)))
-                {
-                    yield return new ValidationResult(ErrorCodes.MissingColumnIdentifiers.ToString(), new[] { "LogData", "MnemonicList" });
-                }
-
-                // Validate that uids in LogCurveInfo are unique
-                else if (logData != null && logData.Any(d => string.IsNullOrWhiteSpace(d.UnitList)))
-                {
-                    yield return new ValidationResult(ErrorCodes.MissingUnitList.ToString(), new[] { "LogData", "UnitList" });
-                }
-
-                // Validate that LogCurveInfo index should not be specified
+                // Validate LogCurveInfo
                 else if (logCurves != null)
                 {
                     var isTimeLog = current.IndexType == LogIndexType.datetime || current.IndexType == LogIndexType.elapsedtime;
@@ -289,14 +248,14 @@ namespace PDS.Witsml.Server.Data.Logs
                     else if (logData != null && logData.Count > 0)
                     {
                         var indexCurve = logCurves.Count > 0 ? logCurves.First().Mnemonic.Value : current.IndexCurve;
-                        yield return ValidateLogData(indexCurve, logCurves, logData);
+                        yield return ValidateLogData(indexCurve, logCurves, logData, false);
                     }
                 }
 
-                // Validate LogData mnemonic list
+                // Validate LogData
                 else if (logData != null && logData.Count > 0)
                 {
-                    yield return ValidateLogData(current.IndexCurve, logCurves, logData);
+                    yield return ValidateLogData(current.IndexCurve, logCurves, logData, false);
                 }
             }
         }
@@ -337,46 +296,88 @@ namespace PDS.Witsml.Server.Data.Logs
             return true;
         }
 
-        private ValidationResult ValidateLogData(string indexCurve, List<LogCurveInfo> logCurves, List<LogData> logData)
+        private ValidationResult ValidateLogData(string indexCurve, List<LogCurveInfo> logCurves, List<LogData> logDatas, bool insert = true)
         {
-            if (logData.Any(ld => !ld.MnemonicList.Split(_seperator).Contains(indexCurve)))
+            var totalPoints = 0;
+
+            if (logDatas.SelectMany(ld => ld.Data).Count() > maxDataNodes)
             {
-                return new ValidationResult(ErrorCodes.IndexCurveNotFound.ToString(), new[] { "LogData", "MnemonicList" });
+                return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "LogData", "Data" });
             }
-            else if (logData.Any(ld => DuplicateUid(ld.MnemonicList.Split(_seperator))))
+            else
             {
-                return new ValidationResult(ErrorCodes.MnemonicsNotUnique.ToString(), new[] { "LogData", "MnemonicList" });
-            }
-            else if (!UnitSpecified(logData))
-            {
-                return new ValidationResult(ErrorCodes.MissingUnitForMeasureData.ToString(), new[] { "LogData", "UnitList" });
-            }
-            else if (logCurves != null && logData.Any(ld => !UnitsMatch(logCurves, ld)))
-            {
-                return new ValidationResult(ErrorCodes.UnitListNotMatch.ToString(), new[] { "LogData", "UnitList" });
+                foreach (var logData in logDatas)
+                {
+                    if (string.IsNullOrWhiteSpace(logData.MnemonicList))
+                        return new ValidationResult(ErrorCodes.MissingColumnIdentifiers.ToString(), new[] { "LogData", "MnemonicList" });
+                    else
+                    {
+                        var mnemonics = logData.MnemonicList.Split(_seperator);
+                        if (logData.Data != null && logData.Data.Count > 0)
+                            totalPoints += logData.Data.Count * logData.Data[0].Split(',').Count();
+
+                        if (totalPoints > maxDataPoints)
+                        {
+                            return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "LogData", "Data" });
+                        }
+                        else if (mnemonics.Distinct().Count() < mnemonics.Count())
+                        {
+                            return new ValidationResult(ErrorCodes.DuplicateColumnIdentifiers.ToString(), new[] { "LogData", "MnemonicList" });
+                        }
+                        else if (mnemonics.Any(m => _illegalColumnIdentifiers.Any(c => m.Contains(c))))
+                        {
+                            return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogData", "MnemonicList" });
+                        } 
+                        else if (insert && logCurves != null && mnemonics.Count() > logCurves.Count)
+                        {
+                            return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogData", "MnemonicList" });
+                        }
+                        else if (string.IsNullOrWhiteSpace(logData.UnitList))
+                        {
+                            return new ValidationResult(ErrorCodes.MissingUnitList.ToString(), new[] { "LogData", "UnitList" });
+                        }
+                        else if (!UnitSpecified(logData))
+                        {
+                            return new ValidationResult(ErrorCodes.MissingUnitForMeasureData.ToString(), new[] { "LogData", "UnitList" });
+                        }
+                        else if (!string.IsNullOrEmpty(indexCurve) && !mnemonics.Any(m => m == indexCurve))
+                        {
+                            return new ValidationResult(ErrorCodes.IndexCurveNotFound.ToString(), new[] { "IndexCurve" });
+                        }
+                        else if (!mnemonics[0].EqualsIgnoreCase(DataObject.IndexCurve))
+                        {
+                            return new ValidationResult(ErrorCodes.IndexNotFirstInDataColumnList.ToString(), new[] { "LogData", "MnemonicList" });
+                        }
+                        else if (DuplicateUid(mnemonics))
+                        {
+                            return new ValidationResult(ErrorCodes.MnemonicsNotUnique.ToString(), new[] { "LogData", "MnemonicList" });
+                        }                      
+                        else if (logCurves != null && !UnitsMatch(logCurves, logData))
+                        {
+                            return new ValidationResult(ErrorCodes.UnitListNotMatch.ToString(), new[] { "LogData", "UnitList" });
+                        }
+                    }
+                }
             }
 
             return null;
         }
 
-        private bool UnitSpecified(List<LogData> logDatas)
+        private bool UnitSpecified(LogData logData)
         {
-            foreach (var logData in logDatas)
-            {
-                var data = logData.Data;
-                if (data == null || data.Count == 0)
-                    continue;
+            var data = logData.Data;
+            if (data == null || data.Count == 0)
+                return true;
 
-                var firstRow = data.First().Split(_seperator);
-                var units = logData.UnitList.Split(_seperator);
-                for (var i = 0; i < firstRow.Length; i++)
-                {
-                    if (units.Length <= i || string.IsNullOrWhiteSpace(units[i]))
-                        return false;
-                }
+            var firstRow = data.First().Split(_seperator);
+            var units = logData.UnitList.Split(_seperator);
+            for (var i = 0; i < firstRow.Length; i++)
+            {
+                if (units.Length <= i || string.IsNullOrWhiteSpace(units[i]))
+                    return false;
             }
 
-            return true; ;
+            return true;
         }
     }
 }
