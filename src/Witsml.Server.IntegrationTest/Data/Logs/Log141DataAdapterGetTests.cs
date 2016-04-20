@@ -521,5 +521,96 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual("4", queryData[0].Split(',')[0], "The first data row should be for index value 4");
             Assert.AreEqual("15", queryData[5].Split(',')[0], "The last data row should be for index value 15");
         }
+
+        [TestMethod]
+        public void LogDataAdapter_GetFromStore_Error_402_MaxReturnNodes_Not_Greater_Than_Zero()
+        {
+            var result = DevKit.Get<LogList, Log>(DevKit.List(_log), ObjectTypes.Log, optionsIn: "maxReturnNodes=0");
+
+            Assert.AreEqual((short)ErrorCodes.InvalidMaxReturnNodes, result.Result);
+        }
+
+        [TestMethod]
+        public void LogDataAdapter_GetFromStore_Error_438_Recurring_Elements_Have_Inconsistent_Selection()
+        {
+            _log.LogCurveInfo = new List<LogCurveInfo>();
+            _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "MD", DataSource = "abc" });
+            _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "GR", CurveDescription = "efg" });
+
+            var result = DevKit.Get<LogList, Log>(DevKit.List(_log), ObjectTypes.Log, null, optionsIn: OptionsIn.ReturnElements.Requested);
+
+            Assert.AreEqual((short)ErrorCodes.RecurringItemsInconsistentSelection, result.Result);
+        }
+
+        [TestMethod]
+        public void LogDataAdapter_GetFromStore_Error_439_Recurring_Elements_Has_Empty_Selection_Value()
+        {
+            _log.LogCurveInfo = new List<LogCurveInfo>();
+            _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "MD", Mnemonic = new ShortNameStruct("MD") });
+            _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = string.Empty, Mnemonic = new ShortNameStruct("ROP") });
+
+            var result = DevKit.Get<LogList, Log>(DevKit.List(_log), ObjectTypes.Log, null, optionsIn: OptionsIn.ReturnElements.Requested);
+
+            Assert.AreEqual((short)ErrorCodes.RecurringItemsEmptySelection, result.Result);
+        }
+
+        [TestMethod]
+        public void LogDataAdapter_GetFromStore_Error_460_Column_Identifiers_In_Header_And_Data_Not_Same()
+        {
+            _log.LogCurveInfo = new List<LogCurveInfo>();
+            _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "MD", Mnemonic = new ShortNameStruct("MD") });
+            _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "GR", Mnemonic = new ShortNameStruct("GR") });
+
+            _log.LogData = new List<LogData>() { new LogData() { MnemonicList = "MD" } };
+
+            var result = DevKit.Get<LogList, Log>(DevKit.List(_log), ObjectTypes.Log, null, optionsIn: OptionsIn.ReturnElements.Requested);
+
+            Assert.AreEqual((short)ErrorCodes.ColumnIdentifiersNotSame, result.Result);
+        }
+
+        [TestMethod]
+        public void LogDataAdapter_GetFromStore_Error_461_Missing_Mnemonic_Element_In_Column_Definition()
+        {
+            _log.LogCurveInfo = new List<LogCurveInfo>();
+            _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "MD" });
+
+            var result = DevKit.Get<LogList, Log>(DevKit.List(_log), ObjectTypes.Log, null, optionsIn: OptionsIn.ReturnElements.Requested);
+
+            Assert.AreEqual((short)ErrorCodes.MissingMnemonicElement, result.Result);
+        }
+
+        [TestMethod]
+        public void LogDataAdapter_GetFromStore_Error_462_Missing_MnemonicList_In_Data_Section()
+        {
+            string queryIn = "<logs version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
+                     "<log uidWell = \"abc\" uidWellbore = \"abc\" uid = \"abc\">" + Environment.NewLine +
+                     "    <logData/>" + Environment.NewLine +
+                     "</log>" + Environment.NewLine +
+                     "</logs>";
+
+            var result = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
+
+            Assert.AreEqual((short)ErrorCodes.MissingMnemonicList, result.Result);
+        }
+
+        [TestMethod]
+        public void LogDataAdapter_GetFromStore_Error_429_Has_Recurring_Data_Section()
+        {
+            _log.LogData = new List<LogData>() { new LogData() { MnemonicList = "MD,GR" }, new LogData() { MnemonicList = "MD,ROP" } };
+
+            var result = DevKit.Get<LogList, Log>(DevKit.List(_log), ObjectTypes.Log, null, optionsIn: OptionsIn.ReturnElements.Requested);
+
+            Assert.AreEqual((short)ErrorCodes.RecurringLogData, result.Result);
+        }
+
+        [TestMethod]
+        public void LogDataAdapter_GetFromStore_Error_482_LogData_Has_Duplicate_Mnemonics()
+        {
+            _log.LogData = new List<LogData>() { new LogData() { MnemonicList = "MD,GR,MD" } };
+
+            var result = DevKit.Get<LogList, Log>(DevKit.List(_log), ObjectTypes.Log, null, optionsIn: OptionsIn.ReturnElements.Requested);
+
+            Assert.AreEqual((short)ErrorCodes.DuplicateMnemonics, result.Result);
+        }
     }
 }

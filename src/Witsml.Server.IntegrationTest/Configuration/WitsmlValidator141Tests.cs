@@ -63,7 +63,6 @@ namespace PDS.Witsml.Server.Configuration
         }
 
         [TestMethod]
-        [Ignore]
         public void WitsmlValidator_GetFromStore_ReturnElement_HeaderOnly_For_Growing_Object()
         {
             var query = new Log { Uid = "", Name = "" };
