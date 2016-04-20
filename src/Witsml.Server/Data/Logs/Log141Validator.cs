@@ -344,7 +344,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         {
                             return new ValidationResult(ErrorCodes.IndexCurveNotFound.ToString(), new[] { "IndexCurve" });
                         }
-                        else if (!mnemonics[0].EqualsIgnoreCase(DataObject.IndexCurve))
+                        else if (!mnemonics[0].EqualsIgnoreCase(indexCurve))
                         {
                             return new ValidationResult(ErrorCodes.IndexNotFirstInDataColumnList.ToString(), new[] { "LogData", "MnemonicList" });
                         }
