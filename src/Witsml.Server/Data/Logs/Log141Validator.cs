@@ -327,7 +327,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 if (logCurve == null)
                     continue;
 
-                if (!units[i].EqualsIgnoreCase(logCurve.Unit))
+                if (!units[i].Trim().EqualsIgnoreCase(logCurve.Unit))
                     return false;
             }
             return true;
