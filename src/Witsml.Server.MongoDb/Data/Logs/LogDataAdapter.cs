@@ -411,16 +411,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Create and initialize value count dictionary for channels
             var requestedValueCount = new Dictionary<int, int>();
-            //mnemonics.Keys.ForEach(m => requestedValueCount.Add(m, 0));
-            //for (var i = 0; i < mnemonics.Keys.Count; i++)
-            //{
-            //    requestedValueCount.Add(mnemonics.Keys.get, 0);
-            //}
-
-            foreach (KeyValuePair<int, string> entry in mnemonics)
-            {
-                requestedValueCount.Add(entry.Key, 0);
-            }
+            mnemonics.Keys.ForEach(m => requestedValueCount.Add(m, 0));
 
             // Read through each row
             while (reader.Read())
