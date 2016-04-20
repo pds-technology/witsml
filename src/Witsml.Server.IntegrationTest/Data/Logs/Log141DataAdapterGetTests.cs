@@ -593,24 +593,5 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.MissingMnemonicList, result.Result);
         }
 
-        [TestMethod]
-        public void LogDataAdapter_GetFromStore_Error_429_Has_Recurring_Data_Section()
-        {
-            _log.LogData = new List<LogData>() { new LogData() { MnemonicList = "MD,GR" }, new LogData() { MnemonicList = "MD,ROP" } };
-
-            var result = DevKit.Get<LogList, Log>(DevKit.List(_log), ObjectTypes.Log, null, optionsIn: OptionsIn.ReturnElements.Requested);
-
-            Assert.AreEqual((short)ErrorCodes.RecurringLogData, result.Result);
-        }
-
-        [TestMethod]
-        public void LogDataAdapter_GetFromStore_Error_482_LogData_Has_Duplicate_Mnemonics()
-        {
-            _log.LogData = new List<LogData>() { new LogData() { MnemonicList = "MD,GR,MD" } };
-
-            var result = DevKit.Get<LogList, Log>(DevKit.List(_log), ObjectTypes.Log, null, optionsIn: OptionsIn.ReturnElements.Requested);
-
-            Assert.AreEqual((short)ErrorCodes.DuplicateMnemonics, result.Result);
-        }
     }
 }
