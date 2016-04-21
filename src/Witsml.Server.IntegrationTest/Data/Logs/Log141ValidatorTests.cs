@@ -34,6 +34,7 @@ namespace PDS.Witsml.Server.Data.Logs
         private DevKit141Aspect DevKit;
         private Well Well;
         private Wellbore Wellbore;
+        private Log Log;
 
         [TestInitialize]
         public void TestSetUp()
@@ -50,6 +51,13 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 NameWell = Well.Name,
                 Name = DevKit.Name("Wellbore 01")
+            };
+
+            Log = new Log()
+            {
+                NameWell = Well.Name,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
             };
         }
 
@@ -243,7 +251,7 @@ namespace PDS.Witsml.Server.Data.Logs
             };
 
             DevKit.InitHeader(log, LogIndexType.measureddepth);
-            
+
             // Create a Data set with one more row than maxNodes
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), (maxDataPoints / log.LogCurveInfo.Count) + 1);
 
@@ -404,7 +412,7 @@ namespace PDS.Witsml.Server.Data.Logs
             mnemonics[1] = "/";
             log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics);
             response = DevKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);          
+            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
         }
 
         [TestMethod]
@@ -513,7 +521,7 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.InitHeader(log, LogIndexType.measureddepth);
 
             var update = DevKit.Update<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.DataObjectNotExist, update.Result);          
+            Assert.AreEqual((short)ErrorCodes.DataObjectNotExist, update.Result);
         }
 
         [TestMethod]
@@ -839,7 +847,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 UidWellbore = uidWellbore
             };
 
-            DevKit.InitHeader(update, LogIndexType.measureddepth);          
+            DevKit.InitHeader(update, LogIndexType.measureddepth);
 
             var logData = update.LogData.First();
             logData.Data.Add("13,13.1,");
@@ -1120,7 +1128,7 @@ namespace PDS.Witsml.Server.Data.Logs
             log.LogParam = new List<IndexedObject> { logParam };
 
             response = DevKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.MissingElementUid, response.Result);          
+            Assert.AreEqual((short)ErrorCodes.MissingElementUid, response.Result);
         }
 
         [TestMethod]
@@ -1164,6 +1172,38 @@ namespace PDS.Witsml.Server.Data.Logs
             var logAdded = results.First();
             indexCurve = logAdded.LogCurveInfo.First();
             Assert.AreEqual(indexCurve.Mnemonic.Value, indexCurve.Uid);
+        }
+
+
+        [TestMethod]
+        public void Log141Validator_GetFromStore_Error_429_Has_Recurring_Data_Section()
+        {
+            Log.LogData = new List<LogData>() { new LogData() { MnemonicList = "MD,GR" }, new LogData() { MnemonicList = "MD,ROP" } };
+
+            var result = DevKit.Get<LogList, Log>(DevKit.List(Log), ObjectTypes.Log, null, optionsIn: OptionsIn.ReturnElements.Requested);
+
+            Assert.AreEqual((short)ErrorCodes.RecurringLogData, result.Result);
+        }
+
+        [TestMethod]
+        public void Log141Validator_GetFromStore_Error_482_LogData_Has_Duplicate_Mnemonics()
+        {
+            Log.LogData = new List<LogData>() { new LogData() { MnemonicList = "MD,GR,MD" } };
+
+            var result = DevKit.Get<LogList, Log>(DevKit.List(Log), ObjectTypes.Log, null, optionsIn: OptionsIn.ReturnElements.Requested);
+
+            Assert.AreEqual((short)ErrorCodes.DuplicateMnemonics, result.Result);
+        }
+
+        [TestMethod]
+        public void Log141Validator_GetFromStore_Error_458_Has_Mixed_Structural_Range_Indices()
+        {
+            Log.StartIndex = new GenericMeasure(1000.0, "ft");
+            Log.EndDateTimeIndex = new Timestamp();
+
+            var result = DevKit.Get<LogList, Log>(DevKit.List(Log), ObjectTypes.Log, null, optionsIn: OptionsIn.ReturnElements.Requested);
+
+            Assert.AreEqual((short)ErrorCodes.MixedStructuralRangeIndices, result.Result);
         }
     }
 }

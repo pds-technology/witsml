@@ -43,7 +43,7 @@ namespace PDS.Witsml.Server.Data.Channels
     public class ChannelSet200DataAdapter : MongoDbDataAdapter<ChannelSet>, IChannelDataProvider
     {
         private readonly ChannelDataChunkAdapter _channelDataChunkAdapter;
-        private readonly string _utcFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffK";
+        private readonly string _utcFormat = "u";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelSet200DataAdapter" /> class.
@@ -356,7 +356,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     indexValue = new TimeIndexValue();
                 else
                     indexValue = current;
-                ((TimeIndexValue)indexValue).Time = DateTimeOffset.FromUnixTimeSeconds((long)value).ToString(_utcFormat);
+                ((TimeIndexValue)indexValue).Time = DateTimeOffset.FromUnixTimeSeconds((long)value).ToUniversalTime().ToString(_utcFormat);
             }
             else if (indexType == ChannelIndexType.passindexeddepth)
             {
@@ -415,12 +415,12 @@ namespace PDS.Witsml.Server.Data.Channels
                 if (entity.Citation.Creation.HasValue)
                 {
                     var creationTime = entity.Citation.Creation;
-                    channelIndexUpdate = MongoDbUtility.BuildUpdate(channelIndexUpdate, "Citation.Creation", creationTime.Value.ToString(_utcFormat));
+                    channelIndexUpdate = MongoDbUtility.BuildUpdate(channelIndexUpdate, "Citation.Creation", creationTime.Value.ToUniversalTime().ToString(_utcFormat));
                 }
                 if (entity.Citation.LastUpdate.HasValue)
                 {
                     var updateTime = entity.Citation.LastUpdate;
-                    channelIndexUpdate = MongoDbUtility.BuildUpdate(channelIndexUpdate, "Citation.LastUpdate", updateTime.Value.ToString(_utcFormat));
+                    channelIndexUpdate = MongoDbUtility.BuildUpdate(channelIndexUpdate, "Citation.LastUpdate", updateTime.Value.ToUniversalTime().ToString(_utcFormat));
                 }
             }
 

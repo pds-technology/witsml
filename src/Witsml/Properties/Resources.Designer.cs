@@ -531,9 +531,9 @@ namespace PDS.Witsml.Properties {
         /// <summary>
         ///   Looks up a localized string similar to No subset of a growing data-object is specified.A query must specify a subset of one growing data-object per query, but multiple individual queries may be included inside the query plural data-object..
         /// </summary>
-        internal static string MissingSubset {
+        internal static string MissingSubsetOfGrowingDataObject {
             get {
-                return ResourceManager.GetString("MissingSubset", resourceCulture);
+                return ResourceManager.GetString("MissingSubsetOfGrowingDataObject", resourceCulture);
             }
         }
         

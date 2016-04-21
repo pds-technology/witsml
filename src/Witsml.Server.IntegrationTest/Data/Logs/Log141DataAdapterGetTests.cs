@@ -521,5 +521,107 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual("4", queryData[0].Split(',')[0], "The first data row should be for index value 4");
             Assert.AreEqual("15", queryData[5].Split(',')[0], "The last data row should be for index value 15");
         }
+
+        [TestMethod]
+        public void LogDataAdapter_GetFromStore_Error_402_MaxReturnNodes_Not_Greater_Than_Zero()
+        {
+            var result = DevKit.Get<LogList, Log>(DevKit.List(_log), ObjectTypes.Log, optionsIn: "maxReturnNodes=0");
+
+            Assert.AreEqual((short)ErrorCodes.InvalidMaxReturnNodes, result.Result);
+        }
+
+        [TestMethod]
+        public void LogDataAdapter_GetFromStore_Error_438_Recurring_Elements_Have_Inconsistent_Selection()
+        {
+            _log.LogCurveInfo = new List<LogCurveInfo>();
+            _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "MD", DataSource = "abc" });
+            _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "GR", CurveDescription = "efg" });
+
+            var result = DevKit.Get<LogList, Log>(DevKit.List(_log), ObjectTypes.Log, null, optionsIn: OptionsIn.ReturnElements.Requested);
+
+            Assert.AreEqual((short)ErrorCodes.RecurringItemsInconsistentSelection, result.Result);
+        }
+
+        [TestMethod]
+        public void LogDataAdapter_GetFromStore_Error_439_Recurring_Elements_Has_Empty_Selection_Value()
+        {
+            _log.LogCurveInfo = new List<LogCurveInfo>();
+            _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "MD", Mnemonic = new ShortNameStruct("MD") });
+            _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = string.Empty, Mnemonic = new ShortNameStruct("ROP") });
+
+            var result = DevKit.Get<LogList, Log>(DevKit.List(_log), ObjectTypes.Log, null, optionsIn: OptionsIn.ReturnElements.Requested);
+
+            Assert.AreEqual((short)ErrorCodes.RecurringItemsEmptySelection, result.Result);
+        }
+
+        [TestMethod]
+        public void LogDataAdapter_GetFromStore_Error_460_Column_Identifiers_In_Header_And_Data_Not_Same()
+        {
+            _log.LogCurveInfo = new List<LogCurveInfo>();
+            _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "MD", Mnemonic = new ShortNameStruct("MD") });
+            _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "GR", Mnemonic = new ShortNameStruct("GR") });
+
+            _log.LogData = new List<LogData>() { new LogData() { MnemonicList = "MD" } };
+
+            var result = DevKit.Get<LogList, Log>(DevKit.List(_log), ObjectTypes.Log, null, optionsIn: OptionsIn.ReturnElements.Requested);
+
+            Assert.AreEqual((short)ErrorCodes.ColumnIdentifiersNotSame, result.Result);
+        }
+
+        [TestMethod]
+        public void LogDataAdapter_GetFromStore_Error_461_Missing_Mnemonic_Element_In_Column_Definition()
+        {
+            _log.LogCurveInfo = new List<LogCurveInfo>();
+            _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "MD" });
+
+            var result = DevKit.Get<LogList, Log>(DevKit.List(_log), ObjectTypes.Log, null, optionsIn: OptionsIn.ReturnElements.Requested);
+
+            Assert.AreEqual((short)ErrorCodes.MissingMnemonicElement, result.Result);
+        }
+
+        [TestMethod]
+        public void LogDataAdapter_GetFromStore_Error_462_Missing_MnemonicList_In_Data_Section()
+        {
+            string queryIn = "<logs version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
+                     "<log uidWell = \"abc\" uidWellbore = \"abc\" uid = \"abc\">" + Environment.NewLine +
+                     "    <logData/>" + Environment.NewLine +
+                     "</log>" + Environment.NewLine +
+                     "</logs>";
+
+            var result = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
+
+            Assert.AreEqual((short)ErrorCodes.MissingMnemonicList, result.Result);
+        }
+
+        [TestMethod]
+        public void LogDataAdapter_GetFromStore_Error_475_No_Subset_When_Getting_Growing_Object()
+        {
+            var response = DevKit.Add<WellList, Well>(_well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            _wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add first log
+            _log.UidWell = _wellbore.UidWell;
+            _log.UidWellbore = response.SuppMsgOut;
+            DevKit.InitHeader(_log, LogIndexType.measureddepth);
+            response = DevKit.Add<LogList, Log>(_log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add second log
+            var log2 = DevKit.CreateLog(null, DevKit.Name("Log 02"), _log.UidWell, _log.NameWell, _log.UidWellbore, _log.NameWellbore);
+            DevKit.InitHeader(log2, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log2);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Query
+            var query = DevKit.CreateLog(null, null, log2.UidWell, null, log2.UidWellbore, null);
+
+            var result = DevKit.Get<LogList, Log>(DevKit.List(query), ObjectTypes.Log, null, OptionsIn.ReturnElements.DataOnly);
+            Assert.AreEqual((short)ErrorCodes.MissingSubsetOfGrowingDataObject, result.Result);
+        }
     }
 }

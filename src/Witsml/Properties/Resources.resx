@@ -398,7 +398,7 @@
     <value>For getting systematically growing data-objects, if a data-node (logData) section is specified then a mnemonicList element must be specified.</value>
     <comment>-462</comment>
   </data>
-  <data name="MissingSubset" xml:space="preserve">
+  <data name="MissingSubsetOfGrowingDataObject" xml:space="preserve">
     <value>No subset of a growing data-object is specified.A query must specify a subset of one growing data-object per query, but multiple individual queries may be included inside the query plural data-object.</value>
     <comment>-475</comment>
   </data>

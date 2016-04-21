@@ -35,6 +35,7 @@ namespace PDS.Witsml.Server.Configuration
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class CapServer141Provider : CapServerProvider<Witsml141.CapServers>
     {
+        private static readonly int MaxRequestLatestValues = Properties.Settings.Default.MaxDataNodes;
         private static readonly ILog _log = LogManager.GetLogger(typeof(CapServer141Provider));
 
         private const string Namespace141 = "http://www.witsml.org/schemas/1series";
@@ -134,6 +135,7 @@ namespace PDS.Witsml.Server.Configuration
             capServer.SchemaVersion = DataSchemaVersion;
             capServer.SupportUomConversion = false; // TODO: update after UoM conversion implemented
             capServer.CompressionMethod = OptionsIn.CompressionMethod.None.Value; // TODO: update when compression is supported
+            capServer.MaxRequestLatestValues = MaxRequestLatestValues;
 
             capServer.Name = Settings.Default.DefaultServerName;
             capServer.Version = Settings.Default.DefaultServerVersion;
