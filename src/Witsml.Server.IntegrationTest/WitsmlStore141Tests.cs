@@ -280,7 +280,7 @@ namespace PDS.Witsml.Server
             Assert.AreEqual((short)ErrorCodes.MissingPluralRootElement, response.Result);
         }
 
-        [Ignore]
+        [Ignore, Description("Not Implemented")]
         [TestMethod]
         public void Test_error_code_404_invalid_schema_version()
         {
@@ -314,7 +314,7 @@ namespace PDS.Witsml.Server
             Assert.AreEqual((short)ErrorCodes.MissingDataVersion, response.Result);
         }
 
-        [Ignore]
+        [Ignore, Description("Not Implemented")]
         [TestMethod]
         public void Test_error_code_465_api_version_not_match()
         {
@@ -328,7 +328,7 @@ namespace PDS.Witsml.Server
             Assert.AreEqual((short)ErrorCodes.ApiVersionNotMatch, response.Result);
         }
 
-        [Ignore]
+        [Ignore, Description("Not Implemented")]
         [TestMethod]
         public void Test_error_code_467_unsupported_data_schema_version()
         {
@@ -342,7 +342,7 @@ namespace PDS.Witsml.Server
             Assert.AreEqual((short)ErrorCodes.ApiVersionNotSupported, response.Result);
         }
 
-        [Ignore]
+        [Ignore, Description("Not Implemented")]
         [TestMethod]
         public void Test_error_code_473_schema_version_not_match()
         {
