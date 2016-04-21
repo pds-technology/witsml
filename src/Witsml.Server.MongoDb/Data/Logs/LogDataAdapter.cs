@@ -391,7 +391,7 @@ namespace PDS.Witsml.Server.Data.Logs
         protected List<string> FormatLogData(T log, ChannelDataReader reader, IDictionary<int, string> mnemonics, IDictionary<int, string> units, int? requestLatestValues)
         {
             var logData = new List<string>();
-            var slices = mnemonics.Keys.ToArray();
+            //var slices = mnemonics.Keys.ToArray();
             var isTimeIndex = reader.Indices.Select(x => x.IsTimeIndex).FirstOrDefault();
 
             var ranges = new Dictionary<string, Range<double?>>();
@@ -422,6 +422,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 requestedValueCount = new Dictionary<int, int>();
                 mnemonics.Keys.ForEach(m => requestedValueCount.Add(m, 0));
             }
+
+            var slices = mnemonics.Keys.ToArray();
 
             // Read through each row
             while (reader.Read())

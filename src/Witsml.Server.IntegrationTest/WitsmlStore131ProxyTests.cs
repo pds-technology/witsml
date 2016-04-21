@@ -270,7 +270,7 @@ namespace PDS.Witsml.Server
 
             Assert.IsNotNull(result.Log[0].LogData);
             Assert.AreEqual(1, result.Log[0].LogData.Count);
-            Assert.AreEqual("0,,0", result.Log[0].LogData[0]);
+            Assert.AreEqual("0,0", result.Log[0].LogData[0]);
         }
 
         [TestMethod]
@@ -308,9 +308,9 @@ namespace PDS.Witsml.Server
 
             Assert.IsNotNull(result.Log[0].LogData);
             Assert.AreEqual(3, result.Log[0].LogData.Count);
-            Assert.AreEqual("0,,0", result.Log[0].LogData[0]);
-            Assert.AreEqual("0.1,,1", result.Log[0].LogData[1]);
-            Assert.AreEqual("0.2,,2", result.Log[0].LogData[2]);
+            Assert.AreEqual("0,0", result.Log[0].LogData[0]);
+            Assert.AreEqual("0.1,1", result.Log[0].LogData[1]);
+            Assert.AreEqual("0.2,2", result.Log[0].LogData[2]);
         }
 
         [TestMethod]
@@ -376,43 +376,43 @@ namespace PDS.Witsml.Server
             // EndIndex on start of range
             result = DevKit.QueryLogByRange(log1, -2, 0);
             Assert.AreEqual(1, result.Log[0].LogData.Count);
-            Assert.AreEqual("0,,0", result.Log[0].LogData[0]);
+            Assert.AreEqual("0,0", result.Log[0].LogData[0]);
 
             // StartIndex and EndIndex spans range
             result = DevKit.QueryLogByRange(log1, -2, 2.5);
             Assert.AreEqual(3, result.Log[0].LogData.Count);
-            Assert.AreEqual("0,,0", result.Log[0].LogData[0]);
-            Assert.AreEqual("1,,1", result.Log[0].LogData[1]);
-            Assert.AreEqual("2,,2", result.Log[0].LogData[2]);
+            Assert.AreEqual("0,0", result.Log[0].LogData[0]);
+            Assert.AreEqual("1,1", result.Log[0].LogData[1]);
+            Assert.AreEqual("2,2", result.Log[0].LogData[2]);
 
             // StartIndex on start of range
             result = DevKit.QueryLogByRange(log1, 0, 1.5);
             Assert.AreEqual(2, result.Log[0].LogData.Count);
-            Assert.AreEqual("0,,0", result.Log[0].LogData[0]);
-            Assert.AreEqual("1,,1", result.Log[0].LogData[1]);
+            Assert.AreEqual("0,0", result.Log[0].LogData[0]);
+            Assert.AreEqual("1,1", result.Log[0].LogData[1]);
 
             // StartIndex and EndIndex within range
             result = DevKit.QueryLogByRange(log1, 1.5, 3.5);
             Assert.AreEqual(2, result.Log[0].LogData.Count);
-            Assert.AreEqual("2,,2", result.Log[0].LogData[0]);
-            Assert.AreEqual("3,,3", result.Log[0].LogData[1]);
+            Assert.AreEqual("2,2", result.Log[0].LogData[0]);
+            Assert.AreEqual("3,3", result.Log[0].LogData[1]);
 
             // EndIndex on end of range
             result = DevKit.QueryLogByRange(log1, 7.5, 9);
             Assert.AreEqual(2, result.Log[0].LogData.Count);
-            Assert.AreEqual("8,,8", result.Log[0].LogData[0]);
-            Assert.AreEqual("9,,9", result.Log[0].LogData[1]);
+            Assert.AreEqual("8,8", result.Log[0].LogData[0]);
+            Assert.AreEqual("9,9", result.Log[0].LogData[1]);
 
             // StartIndex and EndIndex span range
             result = DevKit.QueryLogByRange(log1, 7.5, 11);
             Assert.AreEqual(2, result.Log[0].LogData.Count);
-            Assert.AreEqual("8,,8", result.Log[0].LogData[0]);
-            Assert.AreEqual("9,,9", result.Log[0].LogData[1]);
+            Assert.AreEqual("8,8", result.Log[0].LogData[0]);
+            Assert.AreEqual("9,9", result.Log[0].LogData[1]);
 
             // StartIndex on end of range
             result = DevKit.QueryLogByRange(log1, 9, 11);
             Assert.AreEqual(1, result.Log[0].LogData.Count);
-            Assert.AreEqual("9,,9", result.Log[0].LogData[0]);
+            Assert.AreEqual("9,9", result.Log[0].LogData[0]);
 
             // StartIndex and End Index below range
             result = DevKit.QueryLogByRange(log1, 10, 11);
@@ -439,41 +439,41 @@ namespace PDS.Witsml.Server
             // StartIndex is above range
             LogList result = DevKit.QueryLogByRange(log1, -2, null);
             Assert.AreEqual(10, result.Log[0].LogData.Count);
-            Assert.AreEqual("0,,0", result.Log[0].LogData[0]);
-            Assert.AreEqual("1,,1", result.Log[0].LogData[1]);
-            Assert.AreEqual("2,,2", result.Log[0].LogData[2]);
-            Assert.AreEqual("3,,3", result.Log[0].LogData[3]);
-            Assert.AreEqual("4,,4", result.Log[0].LogData[4]);
-            Assert.AreEqual("5,,5", result.Log[0].LogData[5]);
-            Assert.AreEqual("6,,6", result.Log[0].LogData[6]);
-            Assert.AreEqual("7,,7", result.Log[0].LogData[7]);
-            Assert.AreEqual("8,,8", result.Log[0].LogData[8]);
-            Assert.AreEqual("9,,9", result.Log[0].LogData[9]);
+            Assert.AreEqual("0,0", result.Log[0].LogData[0]);
+            Assert.AreEqual("1,1", result.Log[0].LogData[1]);
+            Assert.AreEqual("2,2", result.Log[0].LogData[2]);
+            Assert.AreEqual("3,3", result.Log[0].LogData[3]);
+            Assert.AreEqual("4,4", result.Log[0].LogData[4]);
+            Assert.AreEqual("5,5", result.Log[0].LogData[5]);
+            Assert.AreEqual("6,6", result.Log[0].LogData[6]);
+            Assert.AreEqual("7,7", result.Log[0].LogData[7]);
+            Assert.AreEqual("8,8", result.Log[0].LogData[8]);
+            Assert.AreEqual("9,9", result.Log[0].LogData[9]);
 
             // StartIndex is on range
             result = DevKit.QueryLogByRange(log1, 0, null);
             Assert.AreEqual(10, result.Log[0].LogData.Count);
-            Assert.AreEqual("0,,0", result.Log[0].LogData[0]);
-            Assert.AreEqual("1,,1", result.Log[0].LogData[1]);
-            Assert.AreEqual("2,,2", result.Log[0].LogData[2]);
-            Assert.AreEqual("3,,3", result.Log[0].LogData[3]);
-            Assert.AreEqual("4,,4", result.Log[0].LogData[4]);
-            Assert.AreEqual("5,,5", result.Log[0].LogData[5]);
-            Assert.AreEqual("6,,6", result.Log[0].LogData[6]);
-            Assert.AreEqual("7,,7", result.Log[0].LogData[7]);
-            Assert.AreEqual("8,,8", result.Log[0].LogData[8]);
-            Assert.AreEqual("9,,9", result.Log[0].LogData[9]);
+            Assert.AreEqual("0,0", result.Log[0].LogData[0]);
+            Assert.AreEqual("1,1", result.Log[0].LogData[1]);
+            Assert.AreEqual("2,2", result.Log[0].LogData[2]);
+            Assert.AreEqual("3,3", result.Log[0].LogData[3]);
+            Assert.AreEqual("4,4", result.Log[0].LogData[4]);
+            Assert.AreEqual("5,5", result.Log[0].LogData[5]);
+            Assert.AreEqual("6,6", result.Log[0].LogData[6]);
+            Assert.AreEqual("7,7", result.Log[0].LogData[7]);
+            Assert.AreEqual("8,8", result.Log[0].LogData[8]);
+            Assert.AreEqual("9,9", result.Log[0].LogData[9]);
 
             // StartIndex is within range
             result = DevKit.QueryLogByRange(log1, 7.5, null);
             Assert.AreEqual(2, result.Log[0].LogData.Count);
-            Assert.AreEqual("8,,8", result.Log[0].LogData[0]);
-            Assert.AreEqual("9,,9", result.Log[0].LogData[1]);
+            Assert.AreEqual("8,8", result.Log[0].LogData[0]);
+            Assert.AreEqual("9,9", result.Log[0].LogData[1]);
 
             // StartIndex is on end of range
             result = DevKit.QueryLogByRange(log1, 9, null);
             Assert.AreEqual(1, result.Log[0].LogData.Count);
-            Assert.AreEqual("9,,9", result.Log[0].LogData[0]);
+            Assert.AreEqual("9,9", result.Log[0].LogData[0]);
 
             // StartIndex is below end of range
             result = DevKit.QueryLogByRange(log1, 11, null);
@@ -504,43 +504,43 @@ namespace PDS.Witsml.Server
             // EndIndex is on start of range
             result = DevKit.QueryLogByRange(log1, null, 0);
             Assert.AreEqual(1, result.Log[0].LogData.Count);
-            Assert.AreEqual("0,,0", result.Log[0].LogData[0]);
+            Assert.AreEqual("0,0", result.Log[0].LogData[0]);
 
             // EndIndex is within range
             result = DevKit.QueryLogByRange(log1, null, 3.5);
             Assert.AreEqual(4, result.Log[0].LogData.Count);
-            Assert.AreEqual("0,,0", result.Log[0].LogData[0]);
-            Assert.AreEqual("1,,1", result.Log[0].LogData[1]);
-            Assert.AreEqual("2,,2", result.Log[0].LogData[2]);
-            Assert.AreEqual("3,,3", result.Log[0].LogData[3]);
+            Assert.AreEqual("0,0", result.Log[0].LogData[0]);
+            Assert.AreEqual("1,1", result.Log[0].LogData[1]);
+            Assert.AreEqual("2,2", result.Log[0].LogData[2]);
+            Assert.AreEqual("3,3", result.Log[0].LogData[3]);
 
             // EndIndex is on end of range
             result = DevKit.QueryLogByRange(log1, null, 9);
             Assert.AreEqual(10, result.Log[0].LogData.Count);
-            Assert.AreEqual("0,,0", result.Log[0].LogData[0]);
-            Assert.AreEqual("1,,1", result.Log[0].LogData[1]);
-            Assert.AreEqual("2,,2", result.Log[0].LogData[2]);
-            Assert.AreEqual("3,,3", result.Log[0].LogData[3]);
-            Assert.AreEqual("4,,4", result.Log[0].LogData[4]);
-            Assert.AreEqual("5,,5", result.Log[0].LogData[5]);
-            Assert.AreEqual("6,,6", result.Log[0].LogData[6]);
-            Assert.AreEqual("7,,7", result.Log[0].LogData[7]);
-            Assert.AreEqual("8,,8", result.Log[0].LogData[8]);
-            Assert.AreEqual("9,,9", result.Log[0].LogData[9]);
+            Assert.AreEqual("0,0", result.Log[0].LogData[0]);
+            Assert.AreEqual("1,1", result.Log[0].LogData[1]);
+            Assert.AreEqual("2,2", result.Log[0].LogData[2]);
+            Assert.AreEqual("3,3", result.Log[0].LogData[3]);
+            Assert.AreEqual("4,4", result.Log[0].LogData[4]);
+            Assert.AreEqual("5,5", result.Log[0].LogData[5]);
+            Assert.AreEqual("6,6", result.Log[0].LogData[6]);
+            Assert.AreEqual("7,7", result.Log[0].LogData[7]);
+            Assert.AreEqual("8,8", result.Log[0].LogData[8]);
+            Assert.AreEqual("9,9", result.Log[0].LogData[9]);
 
             // EndIndex is below end of range
             result = DevKit.QueryLogByRange(log1, null, 10);
             Assert.AreEqual(10, result.Log[0].LogData.Count);
-            Assert.AreEqual("0,,0", result.Log[0].LogData[0]);
-            Assert.AreEqual("1,,1", result.Log[0].LogData[1]);
-            Assert.AreEqual("2,,2", result.Log[0].LogData[2]);
-            Assert.AreEqual("3,,3", result.Log[0].LogData[3]);
-            Assert.AreEqual("4,,4", result.Log[0].LogData[4]);
-            Assert.AreEqual("5,,5", result.Log[0].LogData[5]);
-            Assert.AreEqual("6,,6", result.Log[0].LogData[6]);
-            Assert.AreEqual("7,,7", result.Log[0].LogData[7]);
-            Assert.AreEqual("8,,8", result.Log[0].LogData[8]);
-            Assert.AreEqual("9,,9", result.Log[0].LogData[9]);
+            Assert.AreEqual("0,0", result.Log[0].LogData[0]);
+            Assert.AreEqual("1,1", result.Log[0].LogData[1]);
+            Assert.AreEqual("2,2", result.Log[0].LogData[2]);
+            Assert.AreEqual("3,3", result.Log[0].LogData[3]);
+            Assert.AreEqual("4,4", result.Log[0].LogData[4]);
+            Assert.AreEqual("5,5", result.Log[0].LogData[5]);
+            Assert.AreEqual("6,6", result.Log[0].LogData[6]);
+            Assert.AreEqual("7,7", result.Log[0].LogData[7]);
+            Assert.AreEqual("8,8", result.Log[0].LogData[8]);
+            Assert.AreEqual("9,9", result.Log[0].LogData[9]);
         }
 
         [TestMethod]
