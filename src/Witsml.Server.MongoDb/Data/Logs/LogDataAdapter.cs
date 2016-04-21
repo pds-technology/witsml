@@ -355,14 +355,17 @@ namespace PDS.Witsml.Server.Data.Logs
 
         protected void QueryLogDataValues(T log, T logHeader, WitsmlQueryParser parser, IDictionary<int, string> mnemonics)
         {
+            Logger.DebugFormat("Query data values for log. Log Uid = {0}", log.Uid);
+
             // Get the latest values request if one was supplied.
             var requestLatestValues = parser.RequestLatestValues();
 
             // If latest values have been requested then
             //... don't allow more than the maximum.
             if (requestLatestValues.HasValue)
-            {
+            {                
                 requestLatestValues = Math.Min(MaxRequestLatestValues, requestLatestValues.Value);
+                Logger.DebugFormat("Request latest value = {0}", requestLatestValues);
             }
             
             // TODO: If requesting latest values figure out a range that will contain the last values that we want.

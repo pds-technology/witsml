@@ -67,6 +67,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
                 if (logCurveInfoMnemonics.Any() && mnemonicList.Any() && !(logCurveInfoMnemonics.All(x => mnemonicList.Contains(x)) && mnemonicList.All(y => logCurveInfoMnemonics.Contains(y))))
                 {
+                    var error = string.Format("Column identifiers not the same. LogCurveInfo mnemonics = {{{0}}}, LogData mnemonicList = {{{1}}}", string.Join(",", logCurveInfoMnemonics), string.Join(",", mnemonicList));
+                    Logger.Error(error);
                     throw new WitsmlException(ErrorCodes.ColumnIdentifiersNotSame);
                 }
                
