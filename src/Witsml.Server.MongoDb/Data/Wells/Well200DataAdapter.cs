@@ -28,9 +28,7 @@ namespace PDS.Witsml.Server.Data.Wells
     /// Data adapter that encapsulates CRUD functionality for <see cref="Well" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Well}" />
-    [Export(typeof(IEtpDataAdapter))]
-    [Export(typeof(IEtpDataAdapter<Well>))]
-    [Export200(ObjectTypes.Well, typeof(IEtpDataAdapter))]
+    [Export(typeof(IWitsmlDataAdapter<Well>))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class Well200DataAdapter : MongoDbDataAdapter<Well>
     {
@@ -41,27 +39,6 @@ namespace PDS.Witsml.Server.Data.Wells
         [ImportingConstructor]
         public Well200DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Well200, ObjectTypes.Uuid)
         {
-        }
-
-        /// <summary>
-        /// Adds a <see cref="Well"/> to the data store.
-        /// </summary>
-        /// <param name="entity">The <see cref="Well"/> to be added.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public override WitsmlResult Add(Well entity)
-        {
-            entity.Uuid = NewUid(entity.Uuid);
-            entity.Citation = entity.Citation.Create();
-            Logger.DebugFormat("Adding Well with uid '{0}' and name '{1}'.", entity.Uuid, entity.Citation.Title);
-
-            Validate(Functions.AddToStore, entity);
-            Logger.DebugFormat("Validated Well with uid '{0}' and name '{1}' for Add", entity.Uuid, entity.Citation.Title);
-
-            InsertEntity(entity);
-
-            return new WitsmlResult(ErrorCodes.Success, entity.Uuid);
         }
 
         /// <summary>

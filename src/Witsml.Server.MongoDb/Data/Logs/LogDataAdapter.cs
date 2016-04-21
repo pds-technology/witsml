@@ -52,14 +52,14 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>Queried objects.</returns>
         public override WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
         {
-            var uri = parser.GetUri<T>();
-            Logger.DebugFormat("Getting Log with uri objectId'{0}'.", uri.ObjectId);
+            //var uri = parser.GetUri<T>();
+            //Logger.DebugFormat("Getting Log with uri objectId'{0}'.", uri.ObjectId);
 
-            // Extract Data
-            var entity = Parse(parser.Context.Xml);
+            //// Extract Data
+            //var entity = Parse(parser.Context.Xml);
 
-            Validate(Functions.GetFromStore, entity);
-            Logger.DebugFormat("Validated Log with uri '{0}' and name '{1}' for Query", uri, entity.Name);
+            //Validate(Functions.GetFromStore, entity);
+            //Logger.DebugFormat("Validated Log with uri '{0}' and name '{1}' for Query", uri, entity.Name);
 
             var returnElements = parser.ReturnElements();
             var logs = QueryEntities(parser);

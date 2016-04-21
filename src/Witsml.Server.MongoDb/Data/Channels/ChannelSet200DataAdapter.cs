@@ -37,9 +37,7 @@ namespace PDS.Witsml.Server.Data.Channels
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{ChannelSet}" />
     /// <seealso cref="PDS.Witsml.Server.Data.Channels.IChannelDataProvider" />
-    [Export(typeof(IEtpDataAdapter))]
-    [Export(typeof(IEtpDataAdapter<ChannelSet>))]
-    [Export200(ObjectTypes.ChannelSet, typeof(IEtpDataAdapter))]
+    [Export(typeof(IWitsmlDataAdapter<ChannelSet>))]
     [Export200(ObjectTypes.ChannelSet, typeof(IChannelDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class ChannelSet200DataAdapter : MongoDbDataAdapter<ChannelSet>, IChannelDataProvider
@@ -122,36 +120,29 @@ namespace PDS.Witsml.Server.Data.Channels
         }
 
         /// <summary>
-        /// Adds <see cref="ChannelSet"/> to the data store.
+        /// Adds <see cref="ChannelSet" /> to the data store.
         /// </summary>
-        /// <param name="entity">The <see cref="ChannelSet"/> to be added.</param>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The <see cref="ChannelSet" /> to be added.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        public override WitsmlResult Add(ChannelSet entity)
+        public override WitsmlResult Add(WitsmlQueryParser parser, ChannelSet dataObject)
         {
-            entity.Uuid = NewUid(entity.Uuid);
-            entity.Channel.ForEach(c => c.Uuid = NewUid(c.Uuid));
-            entity.Citation = entity.Citation.Create();
-            Logger.DebugFormat("Adding ChannelSet with uid '{0}' and name '{1}'", entity.Uuid, entity.Citation.Title);
-
-            Validate(Functions.AddToStore, entity);
-            Logger.DebugFormat("Validated ChannelSet with uid '{0}' and name '{1}' for Add", entity.Uuid, entity.Citation.Title);
-
             // Extract Data
-            var reader = ExtractDataReader(entity);
+            var reader = ExtractDataReader(dataObject);
 
-            InsertEntity(entity);
+            InsertEntity(dataObject);
 
             if (reader != null)
             {
-                Logger.DebugFormat("Adding log data with uid '{0}' and name '{1}'", entity.Uuid, entity.Citation.Title);
-                var increasing = entity.Index.FirstOrDefault().Direction == IndexDirection.increasing;
+                Logger.DebugFormat("Adding ChannelSet data with uid '{0}' and name '{1}'", dataObject.Uuid, dataObject.Citation.Title);
+                var increasing = dataObject.Index.FirstOrDefault().Direction == IndexDirection.increasing;
                 var allMnemonics = reader.Indices.Select(i => i.Mnemonic).Concat(reader.Mnemonics).ToArray();
 
                 // Get current index information
-                var ranges = GetCurrentIndexRange(entity);
-                var indexCurve = entity.Index[0];
+                var ranges = GetCurrentIndexRange(dataObject);
+                var indexCurve = dataObject.Index[0];
                 Logger.DebugFormat("Index curve mnemonic: {0}.", indexCurve.Mnemonic);
 
                 GetUpdatedLogHeaderIndexRange(reader, allMnemonics, ranges, increasing);
@@ -160,33 +151,29 @@ namespace PDS.Witsml.Server.Data.Channels
                 _channelDataChunkAdapter.Add(reader);
 
                 // Update index range
-                UpdateIndexRange(entity.GetUri(), entity, ranges, allMnemonics);
+                UpdateIndexRange(dataObject.GetUri(), dataObject, ranges, allMnemonics);
             }
 
-            return new WitsmlResult(ErrorCodes.Success, entity.Uuid);
+            return new WitsmlResult(ErrorCodes.Success, dataObject.Uuid);
         }
 
         /// <summary>
-        /// Updates the specified <see cref="Log"/> instance in the store.
+        /// Updates the specified <see cref="Log" /> instance in the store.
         /// </summary>
         /// <param name="parser">The update parser.</param>
+        /// <param name="dataObject">The data object to be updated.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        public override WitsmlResult Update(WitsmlQueryParser parser)
+        public override WitsmlResult Update(WitsmlQueryParser parser, ChannelSet dataObject)
         {
-            var uri = parser.GetUri<Log>();
-
-            Logger.DebugFormat("Updating Log with uid '{0}'.", uri.ObjectId);
-            //Validate(Functions.UpdateInStore, entity);
-
+            var uri = dataObject.GetUri();
             var ignored = new[] { "Data" };
+
             UpdateEntity(parser, uri, ignored);
 
             // Extract Data
-            var entity = Parse(parser.Context.Xml);
-            var reader = ExtractDataReader(entity, GetEntity(uri));
-
+            var reader = ExtractDataReader(dataObject, GetEntity(uri));
             UpdateChannelDataAndIndexRange(uri, reader);
 
             return new WitsmlResult(ErrorCodes.Success);
@@ -200,7 +187,7 @@ namespace PDS.Witsml.Server.Data.Channels
         public void UpdateChannelData(EtpUri uri, ChannelDataReader reader)
         {
             UpdateChannelDataAndIndexRange(uri, reader);
-            }
+        }
 
         /// <summary>
         /// Deletes a data object by the specified identifier.
@@ -231,6 +218,11 @@ namespace PDS.Witsml.Server.Data.Channels
 
             existing.Data = entity.Data;
             return existing.GetReader();
+        }
+
+        protected override List<string> GetIgnoredElementNames()
+        {
+            return new List<string> { "Data" };
         }
 
         private ChannelMetadataRecord ToChannelMetadataRecord(ChannelSet entity, Channel channel, IList<IndexMetadataRecord> indexMetadata)

@@ -22,7 +22,6 @@ using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
 using Energistics.Datatypes;
-using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
@@ -30,14 +29,9 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// Data adapter that encapsulates CRUD functionality for <see cref="Wellbore" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Wellbore}" />
-    /// <seealso cref="PDS.Witsml.Server.Configuration.IWitsml131Configuration" />
-    [Export(typeof(IEtpDataAdapter))]
-    [Export(typeof(IWitsml131Configuration))]
     [Export(typeof(IWitsmlDataAdapter<Wellbore>))]
-    [Export(typeof(IEtpDataAdapter<Wellbore>))]
-    [Export131(ObjectTypes.Wellbore, typeof(IEtpDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Wellbore131DataAdapter : MongoDbDataAdapter<Wellbore>, IWitsml131Configuration
+    public class Wellbore131DataAdapter : MongoDbDataAdapter<Wellbore>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Wellbore131DataAdapter"/> class.
@@ -46,18 +40,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [ImportingConstructor]
         public Wellbore131DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Wellbore131)
         {
-        }
-
-        /// <summary>
-        /// Gets the supported capabilities for the <see cref="Wellbore"/> object.
-        /// </summary>
-        /// <param name="capServer">The capServer instance.</param>
-        public void GetCapabilities(CapServer capServer)
-        {
-            capServer.Add(Functions.GetFromStore, ObjectTypes.Wellbore);
-            capServer.Add(Functions.AddToStore, ObjectTypes.Wellbore);
-            capServer.Add(Functions.UpdateInStore, ObjectTypes.Wellbore);
-            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Wellbore);
         }
 
         /// <summary>
@@ -88,27 +70,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
         }
 
         /// <summary>
-        /// Adds a <see cref="Wellbore"/> to the data store.
-        /// </summary>
-        /// <param name="entity">The <see cref="Wellbore"/> to be added.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public override WitsmlResult Add(Wellbore entity)
-        {
-            entity.Uid = NewUid(entity.Uid);
-            entity.CommonData = entity.CommonData.Create();
-            Logger.DebugFormat("Adding Wellbore with uid '{0}' and name '{1}'", entity.Uid, entity.Name);
-
-            Validate(Functions.AddToStore, entity);
-            Logger.DebugFormat("Validated Wellbore with uid '{0}' and name '{1}' for Add", entity.Uid, entity.Name);
-
-            InsertEntity(entity);
-
-            return new WitsmlResult(ErrorCodes.Success, entity.Uid);
-        }
-
-        /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
@@ -126,17 +87,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
             return query
                 .OrderBy(x => x.Name)
                 .ToList();
-        }
-
-        /// <summary>
-        /// Parses the specified XML string.
-        /// </summary>
-        /// <param name="xml">The XML string.</param>
-        /// <returns>An instance of <see cref="Wellbore" />.</returns>
-        protected override Wellbore Parse(string xml)
-        {
-            var list = WitsmlParser.Parse<WellboreList>(xml);
-            return list.Wellbore.FirstOrDefault();
         }
     }
 }

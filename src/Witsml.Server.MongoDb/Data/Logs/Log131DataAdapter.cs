@@ -30,7 +30,6 @@ using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Data.Logs;
-using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -39,15 +38,10 @@ namespace PDS.Witsml.Server.Data.Logs
     /// Data adapter that encapsulates CRUD functionality for a 131 <see cref="Log" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.Logs.LogDataAdapter{Log, LogCurveInfo}" />
-    /// <seealso cref="PDS.Witsml.Server.Configuration.IWitsml131Configuration" />
-    [Export(typeof(IEtpDataAdapter))]
-    [Export(typeof(IWitsml131Configuration))]
     [Export(typeof(IWitsmlDataAdapter<Log>))]
-    [Export(typeof(IEtpDataAdapter<Log>))]
-    [Export131(ObjectTypes.Log, typeof(IEtpDataAdapter))]
     [Export131(ObjectTypes.Log, typeof(IChannelDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Log131DataAdapter : LogDataAdapter<Log, LogCurveInfo>, IWitsml131Configuration
+    public class Log131DataAdapter : LogDataAdapter<Log, LogCurveInfo>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Log131DataAdapter"/> class.
@@ -59,79 +53,45 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Gets the supported capabilities for the <see cref="Log"/> object.
+        /// Adds a <see cref="Log" /> entity to the data store.
         /// </summary>
-        /// <param name="capServer">The capServer instance.</param>
-        public void GetCapabilities(CapServer capServer)
-        {
-            capServer.Add(Functions.GetFromStore, ObjectTypes.Log);
-            capServer.Add(Functions.AddToStore, ObjectTypes.Log);
-            capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);
-            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Log);
-        }
-
-        /// <summary>
-        /// Adds a <see cref="Log"/> entity to the data store.
-        /// </summary>
-        /// <param name="entity">The Log instance to add to the store.</param>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The Log instance to add to the store.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        public override WitsmlResult Add(Log entity)
+        public override WitsmlResult Add(WitsmlQueryParser parser, Log dataObject)
         {
-            SetDefaultValues(entity);
-            Logger.DebugFormat("Adding Log with uid '{0}' and name '{1}'", entity.Uid, entity.Name);
-
-            //Validate(Functions.AddToStore, entity);
-            //Logger.DebugFormat("Validated Log with uid '{0}' and name '{1}' for Add", entity.Uid, entity.Name);
-
             // Extract Data
-            var reader = ExtractDataReader(entity);
+            var reader = ExtractDataReader(dataObject);
 
             // Insert Log and Log Data
-            InsertEntity(entity);
-            InsertLogData(entity, reader);
+            InsertEntity(dataObject);
+            InsertLogData(dataObject, reader);
 
-            return new WitsmlResult(ErrorCodes.Success, entity.Uid);
+            return new WitsmlResult(ErrorCodes.Success, dataObject.Uid);
         }
 
         /// <summary>
-        /// Updates the specified <see cref="Log"/> instance in the store.
+        /// Updates the specified <see cref="Log" /> instance in the store.
         /// </summary>
         /// <param name="parser">The update parser.</param>
+        /// <param name="dataObject">The data object to be updated.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        public override WitsmlResult Update(WitsmlQueryParser parser)
+        public override WitsmlResult Update(WitsmlQueryParser parser, Log dataObject)
         {
-            var uri = parser.GetUri<Log>();
-            Logger.DebugFormat("Updating Log with uid '{0}'.", uri.ObjectId);
-
-            // Extract Data
-            var entity = Parse(parser.Context.Xml);
-
-            //Validate(Functions.UpdateInStore, entity);
-            //Logger.DebugFormat("Validated Log with uid '{0}' and name '{1}' for Update", uri, entity.Name);
-
+            var uri = dataObject.GetUri();
             var ignored = GetIgnoredElementNames().Concat(new[] { "direction" }).ToArray();
+
             UpdateEntity(parser, uri, ignored);
 
             // Update Log Data and Index Range
-            var reader = ExtractDataReader(entity, GetEntity(uri));
+            var reader = ExtractDataReader(dataObject, GetEntity(uri));
             UpdateLogDataAndIndexRange(uri, new[] { reader });
 
             return new WitsmlResult(ErrorCodes.Success);
-        }
-
-        /// <summary>
-        /// Parses the specified XML string.
-        /// </summary>
-        /// <param name="xml">The XML string.</param>
-        /// <returns>An instance of <see cref="Log" />.</returns>
-        protected override Log Parse(string xml)
-        {
-            var list = WitsmlParser.Parse<LogList>(xml);
-            return list.Log.FirstOrDefault();
         }
 
         protected override IEnergisticsCollection CreateCollection(List<Log> entities)
@@ -308,7 +268,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private void SetDefaultValues(Log entity)
         {
-            entity.Uid = NewUid(entity.Uid);
+            entity.Uid = entity.NewUid();
             entity.CommonData = entity.CommonData.Create();
 
             if (!entity.Direction.HasValue)

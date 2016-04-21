@@ -22,7 +22,6 @@ using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.Datatypes;
-using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
@@ -30,14 +29,9 @@ namespace PDS.Witsml.Server.Data.Wells
     /// Data adapter that encapsulates CRUD functionality for <see cref="Well" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Well}" />
-    /// <seealso cref="PDS.Witsml.Server.Configuration.IWitsml141Configuration" />
-    [Export(typeof(IEtpDataAdapter))]
-    [Export(typeof(IWitsml141Configuration))]
     [Export(typeof(IWitsmlDataAdapter<Well>))]
-    [Export(typeof(IEtpDataAdapter<Well>))]
-    [Export141(ObjectTypes.Well, typeof(IEtpDataAdapter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Well141DataAdapter : MongoDbDataAdapter<Well>, IWitsml141Configuration
+    public class Well141DataAdapter : MongoDbDataAdapter<Well>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Well141DataAdapter"/> class.
@@ -47,20 +41,6 @@ namespace PDS.Witsml.Server.Data.Wells
         public Well141DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Well141)
         {
             Logger.Debug("Instance created.");
-        }
-
-        /// <summary>
-        /// Gets the supported capabilities for the <see cref="Well"/> object.
-        /// </summary>
-        /// <param name="capServer">The capServer object.</param>
-        public void GetCapabilities(CapServer capServer)
-        {
-            Logger.DebugFormat("Getting capabilities for server '{0}'.", capServer.Name);
-
-            capServer.Add(Functions.GetFromStore, ObjectTypes.Well);
-            capServer.Add(Functions.AddToStore, ObjectTypes.Well);
-            capServer.Add(Functions.UpdateInStore, ObjectTypes.Well);
-            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Well);
         }
 
         /// <summary>
@@ -79,27 +59,6 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         /// <summary>
-        /// Adds a <see cref="Well"/> to the data store.
-        /// </summary>
-        /// <param name="entity">The <see cref="Well"/> to be added.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public override WitsmlResult Add(Well entity)
-        {
-            entity.Uid = NewUid(entity.Uid);
-            entity.CommonData = entity.CommonData.Create();
-            Logger.DebugFormat("Adding Well with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
-
-            Validate(Functions.AddToStore, entity);
-            Logger.DebugFormat("Validated Well with uid '{0}' and name {1} for Add", entity.Uid, entity.Name);
-
-            InsertEntity(entity);
-
-            return new WitsmlResult(ErrorCodes.Success, entity.Uid);
-        }
-
-        /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
@@ -111,17 +70,6 @@ namespace PDS.Witsml.Server.Data.Wells
             return GetQuery()
                 .OrderBy(x => x.Name)
                 .ToList();
-        }
-
-        /// <summary>
-        /// Parses the specified XML string.
-        /// </summary>
-        /// <param name="xml">The XML string.</param>
-        /// <returns>An instance of <see cref="Well" />.</returns>
-        protected override Well Parse(string xml)
-        {
-            var list = WitsmlParser.Parse<WellList>(xml);
-            return list.Well.FirstOrDefault();
         }
     }
 }

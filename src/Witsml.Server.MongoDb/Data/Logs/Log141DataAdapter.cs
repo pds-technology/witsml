@@ -30,9 +30,7 @@ using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Data.Logs;
-using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
-using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -40,19 +38,11 @@ namespace PDS.Witsml.Server.Data.Logs
     /// Data adapter that encapsulates CRUD functionality for a 141 <see cref="Log" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.Logs.LogDataAdapter{Log, LogCurveInfo}" />
-    /// <seealso cref="PDS.Witsml.Server.Configuration.IWitsml141Configuration" />
-    [Export(typeof(IEtpDataAdapter))]
-    [Export(typeof(IWitsml141Configuration))]
     [Export(typeof(IWitsmlDataAdapter<Log>))]
-    [Export(typeof(IEtpDataAdapter<Log>))]
-    [Export141(ObjectTypes.Log, typeof(IEtpDataAdapter))]
     [Export141(ObjectTypes.Log, typeof(IChannelDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Log141DataAdapter : LogDataAdapter<Log, LogCurveInfo>, IWitsml141Configuration
+    public class Log141DataAdapter : LogDataAdapter<Log, LogCurveInfo>
     {
-        private static readonly int MaxDataNodes = Settings.Default.MaxDataNodes;
-        private static readonly int MaxDataPoints = Settings.Default.MaxDataPoints;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="Log141DataAdapter"/> class.
         /// </summary>
@@ -60,49 +50,6 @@ namespace PDS.Witsml.Server.Data.Logs
         [ImportingConstructor]
         public Log141DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Log141)
         {
-        }
-
-        /// <summary>
-        /// Gets the supported capabilities for the <see cref="Log"/> object.
-        /// </summary>
-        /// <param name="capServer">The capServer instance.</param>
-        public void GetCapabilities(CapServer capServer)
-        {
-            var dataObject = new ObjectWithConstraint(ObjectTypes.Log)
-            {
-                MaxDataNodes = MaxDataNodes,
-                MaxDataPoints = MaxDataPoints
-            };
-
-            capServer.Add(Functions.GetFromStore, dataObject);
-            capServer.Add(Functions.AddToStore, dataObject);
-            capServer.Add(Functions.UpdateInStore, dataObject);
-            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Log);
-        }
-
-        /// <summary>
-        /// Adds a <see cref="Log"/> entity to the data store.
-        /// </summary>
-        /// <param name="entity">The <see cref="Log"/> to be added.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public override WitsmlResult Add(Log entity)
-        {
-            SetDefaultValues(entity);
-            Logger.DebugFormat("Adding Log with uid '{0}' and name '{1}'", entity.Uid, entity.Name);
-
-            Validate(Functions.AddToStore, entity);
-            Logger.DebugFormat("Validated Log with uid '{0}' and name '{1}' for Add", entity.Uid, entity.Name);
-
-            // Extract Data                    
-            var reader = ExtractDataReaders(entity).FirstOrDefault();
-
-            // Insert Log and Log Data
-            InsertEntity(entity);
-            InsertLogData(entity, reader);
-
-            return new WitsmlResult(ErrorCodes.Success, entity.Uid);
         }
 
         /// <summary>
@@ -114,10 +61,10 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             var logcurveInfos = GetLogCurveInfoMnemonics(parser).ToList();
             var mnemonicList = GetLogDataMnemonics(parser).ToList();
-           
+
             if (OptionsIn.ReturnElements.Requested.Equals(parser.ReturnElements()))
             {
-                if (!(logcurveInfos.All( x => mnemonicList.Contains(x) && mnemonicList.All(y => logcurveInfos.Contains(y)) )))
+                if (!(logcurveInfos.All(x => mnemonicList.Contains(x) && mnemonicList.All(y => logcurveInfos.Contains(y)))))
                 {
                     throw new WitsmlException(ErrorCodes.ColumnIdentifiersNotSame);
                 }
@@ -132,7 +79,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 }
 
                 if (parser.Contains("logData") && !mnemonicList.Any())
-                {                    
+                {
                     throw new WitsmlException(ErrorCodes.MissingMnemonicList);
                 }
             }
@@ -148,42 +95,45 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Updates the specified <see cref="Log"/> instance in the store.
+        /// Adds a <see cref="Log" /> entity to the data store.
         /// </summary>
-        /// <param name="parser">The update parser.</param>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The <see cref="Log" /> to be added.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        public override WitsmlResult Update(WitsmlQueryParser parser)
+        public override WitsmlResult Add(WitsmlQueryParser parser, Log dataObject)
         {
-            var uri = parser.GetUri<Log>();
-            Logger.DebugFormat("Updating Log with uid '{0}'.", uri.ObjectId);
+            // Extract Data                    
+            var reader = ExtractDataReaders(dataObject).FirstOrDefault();
 
-            // Extract Data
-            var entity = Parse(parser.Context.Xml);
+            // Insert Log and Log Data
+            InsertEntity(dataObject);
+            InsertLogData(dataObject, reader);
 
-            Validate(Functions.UpdateInStore, entity);
-            Logger.DebugFormat("Validated Log with uid '{0}' and name '{1}' for Update", uri, entity.Name);
-
-            var ignored = GetIgnoredElementNames().Concat(new[] { "direction" }).ToArray();
-            UpdateEntity(parser, uri, ignored);
-
-            // Update Log Data and Index Range
-            var readers = ExtractDataReaders(entity, GetEntity(uri));
-            UpdateLogDataAndIndexRange(uri, readers);
-
-            return new WitsmlResult(ErrorCodes.Success);
+            return new WitsmlResult(ErrorCodes.Success, dataObject.Uid);
         }
 
         /// <summary>
-        /// Parses the specified XML string.
+        /// Updates the specified <see cref="Log" /> instance in the store.
         /// </summary>
-        /// <param name="xml">The XML string.</param>
-        /// <returns>An instance of <see cref="Log" />.</returns>
-        protected override Log Parse(string xml)
+        /// <param name="parser">The update parser.</param>
+        /// <param name="dataObject">The data object to be updated.</param>
+        /// <returns>
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
+        /// </returns>
+        public override WitsmlResult Update(WitsmlQueryParser parser, Log dataObject)
         {
-            var list = WitsmlParser.Parse<LogList>(xml);
-            return list.Log.FirstOrDefault();
+            var uri = dataObject.GetUri();
+            var ignored = GetIgnoredElementNames().Concat(new[] { "direction" }).ToArray();
+
+            UpdateEntity(parser, uri, ignored);
+
+            // Update Log Data and Index Range
+            var readers = ExtractDataReaders(dataObject, GetEntity(uri));
+            UpdateLogDataAndIndexRange(uri, readers);
+
+            return new WitsmlResult(ErrorCodes.Success);
         }
 
         protected override IEnergisticsCollection CreateCollection(List<Log> entities)
@@ -368,7 +318,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private void SetDefaultValues(Log entity)
         {
-            entity.Uid = NewUid(entity.Uid);
+            entity.Uid = entity.NewUid();
             entity.CommonData = entity.CommonData.Create();
 
             if (!entity.Direction.HasValue)

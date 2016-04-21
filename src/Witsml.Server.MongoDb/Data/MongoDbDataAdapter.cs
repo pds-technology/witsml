@@ -28,7 +28,7 @@ namespace PDS.Witsml.Server.Data
     /// <summary>
     /// MongoDb data adapter that encapsulates CRUD functionality for WITSML objects.
     /// </summary>
-    /// <typeparam name="T">Type of the object</typeparam>
+    /// <typeparam name="T">Type of the data object</typeparam>
     /// <seealso cref="Data.WitsmlDataAdapter{T}" />
     public abstract class MongoDbDataAdapter<T> : WitsmlDataAdapter<T>
     {
@@ -72,21 +72,6 @@ namespace PDS.Witsml.Server.Data
         protected string NamePropertyName { get; private set; }
 
         /// <summary>
-        /// Parses the specified XML string.
-        /// </summary>
-        /// <param name="parser">The query parser.</param>
-        /// <returns>An instance of <see cref="!:T" />.</returns>
-        public override T Parse(WitsmlQueryParser parser)
-        {
-            Logger.DebugFormat("Validating {0} input template.", DbCollectionName);
-
-            var inputValidator = new MongoDbQuery<T>(GetCollection(), parser, null);
-            inputValidator.Validate();
-
-            return Parse(parser.Context.Xml);
-        }
-
-        /// <summary>
         /// Gets a data object by the specified UUID.
         /// </summary>
         /// <param name="uri">The data object URI.</param>
@@ -97,43 +82,32 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Puts a data object into the data store.
+        /// Adds a data object to the data store.
         /// </summary>
-        /// <param name="parser">The input parser.</param>
-        /// <returns>A WITSML result.</returns>
-        public override WitsmlResult Put(WitsmlQueryParser parser)
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The data object to be added.</param>
+        /// <returns>
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
+        /// </returns>
+        public override WitsmlResult Add(WitsmlQueryParser parser, T dataObject)
         {
-            var uri = parser.GetUri<T>();
+            var uri = GetUri(dataObject);
+            InsertEntity(dataObject);
 
-            Logger.DebugFormat("Putting {0} with uid '{1}'.", typeof(T).Name, uri.ObjectId);
-
-            if (!string.IsNullOrWhiteSpace(uri.ObjectId) && Exists(uri))
-            {
-                return Update(parser);
-            }
-            else
-            {
-                var entity = Parse(parser.Context.Xml);
-                return Add(entity);
-            }
+            return new WitsmlResult(ErrorCodes.Success, uri.ObjectId);
         }
 
         /// <summary>
         /// Updates a data object in the data store.
         /// </summary>
-        /// <param name="parser">The update parser.</param>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The data object to be updated.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        public override WitsmlResult Update(WitsmlQueryParser parser)
+        public override WitsmlResult Update(WitsmlQueryParser parser, T dataObject)
         {
-            var uri = parser.GetUri<T>();
-
-            Logger.DebugFormat("Updating {0} with uid '{1}'.", typeof(T).Name, uri.ObjectId);
-
-            //Validate(Functions.UpdateInStore, entity);
-            //Logger.DebugFormat("Validated {0} with uid '{1}' for Update", typeof(T).Name, uri.ObjectId);
-
+            var uri = GetUri(dataObject);
             UpdateEntity(parser, uri);
 
             return new WitsmlResult(ErrorCodes.Success);
@@ -161,6 +135,18 @@ namespace PDS.Witsml.Server.Data
         {
             DeleteEntity(uri);
             return new WitsmlResult(ErrorCodes.Success);
+        }
+
+        /// <summary>
+        /// Validates the input template using the specified parser.
+        /// </summary>
+        /// <param name="parser">The query parser.</param>
+        public override void Validate(WitsmlQueryParser parser)
+        {
+            Logger.DebugFormat("Validating {0} input template.", DbCollectionName);
+
+            var inputValidator = new MongoDbQuery<T>(GetCollection(), parser, null);
+            inputValidator.Validate();
         }
 
         /// <summary>
@@ -409,21 +395,6 @@ namespace PDS.Witsml.Server.Data
                 Logger.ErrorFormat("Error deleting from {0} MongoDb collection: {1}", dbCollectionName, ex);
                 throw new WitsmlException(ErrorCodes.ErrorDeletingFromDataStore, ex);
             }
-        }
-
-        /// <summary>
-        /// Initializes a new UID value if one was not supplied.
-        /// </summary>
-        /// <param name="uid">The supplied UID (default value null).</param>
-        /// <returns>The supplied UID if not null; otherwise, a generated UID.</returns>
-        protected string NewUid(string uid = null)
-        {
-            if (string.IsNullOrEmpty(uid))
-            {
-                uid = Guid.NewGuid().ToString();
-            }
-
-            return uid;
         }
 
         /// <summary>

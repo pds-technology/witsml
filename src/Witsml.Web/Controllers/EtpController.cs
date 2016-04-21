@@ -57,11 +57,11 @@ namespace PDS.Witsml.Web.Controllers
         public EtpController(IContainer container)
         {
             _container = container;
-            DataAdapters = new List<IEtpDataAdapter>();
+            DataAdapters = new List<IEtpDataProvider>();
         }
 
         [ImportMany]
-        public List<IEtpDataAdapter> DataAdapters { get; set; }
+        public List<IEtpDataProvider> DataAdapters { get; set; }
 
         // GET: api/etp
         public HttpResponseMessage Get()
