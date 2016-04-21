@@ -78,7 +78,7 @@ namespace PDS.Witsml.Server
         public WitsmlQueryParser Parser<T>(Functions function, T entity, string options = null, string capabilities = null)
         {
             var context = new RequestContext(function, ObjectTypes.GetObjectType<T>(),
-                WitsmlParser.ToXml(entity), options, capabilities);
+                EnergisticsConverter.ObjectToXml(entity), options, capabilities);
 
             return new WitsmlQueryParser(context);
         }

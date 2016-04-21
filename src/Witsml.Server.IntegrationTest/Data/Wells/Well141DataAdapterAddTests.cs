@@ -185,7 +185,7 @@ namespace PDS.Witsml.Server.Data.Wells
             // update Version property to an unsupported data schema version
             wells.Version = "1.4.x.y";
 
-            var xmlIn = WitsmlParser.ToXml(wells);
+            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
             var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
 
             Assert.IsNotNull(response);
@@ -247,7 +247,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var well2 = new Well { Name = DevKit.Name("Well-to-02"), TimeZone = DevKit.TimeZone, Uid = DevKit.Uid() };
             var wells = new WellList { Well = DevKit.List(well1, well2) };
 
-            var xmlIn = WitsmlParser.ToXml(wells);
+            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
             var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
 
             Assert.IsNotNull(response);
@@ -304,7 +304,7 @@ namespace PDS.Witsml.Server.Data.Wells
             // update Version property to an unsupported data schema version
             wells.Version = null;
 
-            var xmlIn = WitsmlParser.ToXml(wells);
+            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
             var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
 
             Assert.IsNotNull(response);
@@ -317,7 +317,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var well = new Well { Name = DevKit.Name("Well-to-add-data-type-not-match") };
             var wells = new WellList { Well = DevKit.List(well) };
 
-            var xmlIn = WitsmlParser.ToXml(wells);
+            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
             var response = DevKit.AddToStore(ObjectTypes.Wellbore, xmlIn, null, null);
 
             Assert.IsNotNull(response);
@@ -330,7 +330,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var entity = new Target { Name = "Entity-to-test-unsupported-error" };
             var list = new TargetList { Target = DevKit.List(entity) };
 
-            var xmlIn = WitsmlParser.ToXml(list);
+            var xmlIn = EnergisticsConverter.ObjectToXml(list);
             var response = DevKit.AddToStore("target", xmlIn, null, null);
 
             Assert.IsNotNull(response);

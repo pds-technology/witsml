@@ -82,7 +82,7 @@ namespace PDS.Witsml.Server.Data.Wells
             AssertTestWell(well, returnWell);
 
             query = new Well { Uid = uid };
-            var queryIn = WitsmlParser.ToXml(new WellList { Well = new List<Well> { query } });
+            var queryIn = EnergisticsConverter.ObjectToXml(new WellList { Well = new List<Well> { query } });
             var xmlOut = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, optionsIn: OptionsIn.ReturnElements.IdOnly).XMLout;
             var context = new RequestContext(Functions.GetFromStore, ObjectTypes.Well, xmlOut, null, null);
             var parser = new WitsmlQueryParser(context);
@@ -116,7 +116,7 @@ namespace PDS.Witsml.Server.Data.Wells
             AssertTestWell(well, returnWell);
 
             query = new Well { Uid = uid, Country = string.Empty, CommonData = new CommonData() };
-            var queryIn = WitsmlParser.ToXml(new WellList { Well = new List<Well> { query } });
+            var queryIn = EnergisticsConverter.ObjectToXml(new WellList { Well = new List<Well> { query } });
             var xmlOut = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, optionsIn: OptionsIn.ReturnElements.IdOnly).XMLout;
             var context = new RequestContext(Functions.GetFromStore, ObjectTypes.Well, xmlOut, null, null);
             var parser = new WitsmlQueryParser(context);
@@ -156,7 +156,7 @@ namespace PDS.Witsml.Server.Data.Wells
             AssertTestWell(well, returnWell);
 
             query = new Well { Uid = uid, WellDatum = new List<WellDatum> { new WellDatum() } };
-            var queryIn = WitsmlParser.ToXml(new WellList { Well = new List<Well> { query } });
+            var queryIn = EnergisticsConverter.ObjectToXml(new WellList { Well = new List<Well> { query } });
             var xmlOut = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, null).XMLout;
             var context = new RequestContext(Functions.GetFromStore, ObjectTypes.Well, xmlOut, null, null);
             var parser = new WitsmlQueryParser(context);
@@ -197,7 +197,7 @@ namespace PDS.Witsml.Server.Data.Wells
             AssertTestWell(well, returnWell);
 
             query = new Well { Uid = uid, CommonData = new CommonData { Comments = string.Empty } };
-            var queryIn = WitsmlParser.ToXml(new WellList { Well = new List<Well> { query } });
+            var queryIn = EnergisticsConverter.ObjectToXml(new WellList { Well = new List<Well> { query } });
             var xmlOut = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, optionsIn: OptionsIn.ReturnElements.Requested).XMLout;
             var context = new RequestContext(Functions.GetFromStore, ObjectTypes.Well, xmlOut, null, null);
             var parser = new WitsmlQueryParser(context);
@@ -237,8 +237,8 @@ namespace PDS.Witsml.Server.Data.Wells
            
             well.Uid = uid;
             well.CommonData.DateTimeLastChange = returnWell.CommonData.DateTimeLastChange;                        
-            string wellXml = WitsmlParser.ToXml(well);
-            string returnXml = WitsmlParser.ToXml(returnWell);
+            string wellXml = EnergisticsConverter.ObjectToXml(well);
+            string returnXml = EnergisticsConverter.ObjectToXml(returnWell);
 
             Assert.AreEqual(wellXml, returnXml);
         }
@@ -270,8 +270,8 @@ namespace PDS.Witsml.Server.Data.Wells
 
             well.Uid = uid;
             well.CommonData = returnWell.CommonData;
-            string wellXml = WitsmlParser.ToXml(well);
-            string returnXml = WitsmlParser.ToXml(returnWell);
+            string wellXml = EnergisticsConverter.ObjectToXml(well);
+            string returnXml = EnergisticsConverter.ObjectToXml(returnWell);
 
             Assert.AreEqual(wellXml, returnXml);
         }

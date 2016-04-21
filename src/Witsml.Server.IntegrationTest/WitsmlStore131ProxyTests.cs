@@ -68,7 +68,7 @@ namespace PDS.Witsml.Server
         public void WitsmlStore_can_get_capabilities()
         {
             var response = DevKit.Proxy.GetCap<CapServers>();
-            Console.WriteLine(WitsmlParser.ToXml(response));
+            Console.WriteLine(EnergisticsConverter.ObjectToXml(response));
             Assert.IsNotNull(response);
         }
 

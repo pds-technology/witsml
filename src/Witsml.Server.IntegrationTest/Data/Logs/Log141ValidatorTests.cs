@@ -492,7 +492,7 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10);
 
             var logs = new LogList { Log = DevKit.List(log) };
-            var xmlIn = WitsmlParser.ToXml(logs);
+            var xmlIn = EnergisticsConverter.ObjectToXml(logs);
             response = DevKit.AddToStore(ObjectTypes.Wellbore, xmlIn, null, null);
 
             Assert.IsNotNull(response);
