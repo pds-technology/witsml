@@ -65,9 +65,11 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Ensure Direction
             if (!dataObject.Direction.HasValue)
-            {
                 dataObject.Direction = LogIndexDirection.increasing;
-            }
+
+            // Ensure ObjectGrowing
+            if (!dataObject.ObjectGrowing.HasValue)
+                dataObject.ObjectGrowing = true;
 
             if (dataObject.LogCurveInfo != null)
             {
