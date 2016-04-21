@@ -19,7 +19,6 @@
 using System.Linq;
 using System.Xml.Linq;
 using System.Xml.XPath;
-using Energistics.DataAccess;
 using log4net;
 
 namespace PDS.Witsml.Server.Configuration
