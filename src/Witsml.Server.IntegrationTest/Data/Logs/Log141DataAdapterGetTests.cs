@@ -537,7 +537,9 @@ namespace PDS.Witsml.Server.Data.Logs
             _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "MD", DataSource = "abc" });
             _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "GR", CurveDescription = "efg" });
 
-            var result = DevKit.Get<LogList, Log>(DevKit.List(_log), ObjectTypes.Log, null, optionsIn: OptionsIn.ReturnElements.Requested);
+            var list = DevKit.New<LogList>(x => x.Log = DevKit.List(_log));
+            var queryIn = WitsmlParser.ToXml(list);
+            var result = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
 
             Assert.AreEqual((short)ErrorCodes.RecurringItemsInconsistentSelection, result.Result);
         }
@@ -563,7 +565,9 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _log.LogData = new List<LogData>() { new LogData() { MnemonicList = "MD" } };
 
-            var result = DevKit.Get<LogList, Log>(DevKit.List(_log), ObjectTypes.Log, null, optionsIn: OptionsIn.ReturnElements.Requested);
+            var list = DevKit.New<LogList>(x => x.Log = DevKit.List(_log));
+            var queryIn = WitsmlParser.ToXml(list);
+            var result = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
 
             Assert.AreEqual((short)ErrorCodes.ColumnIdentifiersNotSame, result.Result);
         }
@@ -574,8 +578,10 @@ namespace PDS.Witsml.Server.Data.Logs
             _log.LogCurveInfo = new List<LogCurveInfo>();
             _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "MD" });
 
-            var result = DevKit.Get<LogList, Log>(DevKit.List(_log), ObjectTypes.Log, null, optionsIn: OptionsIn.ReturnElements.Requested);
-
+            var list = DevKit.New<LogList>(x => x.Log = DevKit.List(_log));
+            var queryIn = WitsmlParser.ToXml(list);
+            var result = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
+           
             Assert.AreEqual((short)ErrorCodes.MissingMnemonicElement, result.Result);
         }
 
