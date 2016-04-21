@@ -433,7 +433,7 @@ namespace PDS.Witsml
         /// -475 No subset of a growing data-object is specified.A query must specify a subset of one growing data-object
         /// per query, but multiple individual queries may be included inside the query plural data-object.
         /// </summary>
-        MissingSubset = -475,
+        MissingSubsetOfGrowingDataObject = -475,
 
         /// <summary>
         /// -476 For WMLS_GetFromStore: OptionsIn keyword returnsElements=latest-change-only can only be used for

@@ -63,6 +63,10 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var returnElements = parser.ReturnElements();
             var logs = QueryEntities(parser);
+            if (OptionsIn.ReturnElements.DataOnly.Equals(parser.ReturnElements()) && logs.Count > 1)
+            {
+                throw new WitsmlException(ErrorCodes.MissingSubsetOfGrowingDataObject);
+            }
 
             if (IncludeLogData(parser, returnElements))
             {

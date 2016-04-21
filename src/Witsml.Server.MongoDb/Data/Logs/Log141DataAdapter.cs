@@ -136,13 +136,6 @@ namespace PDS.Witsml.Server.Data.Logs
                     throw new WitsmlException(ErrorCodes.MissingMnemonicList);
                 }
             }
-            else if (OptionsIn.ReturnElements.DataOnly.Equals(parser.ReturnElements()))
-            {
-                if (!(parser.Contains("startIndex") && parser.Contains("endIndex") || parser.Contains("startDateTimeIndex") && parser.Contains("endDateTimeIndex") || mnemonicList.Any()))
-                {
-                    throw new WitsmlException(ErrorCodes.MissingSubset);
-                }
-            }
 
             return base.Query(parser);
         }
