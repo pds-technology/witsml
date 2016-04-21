@@ -593,5 +593,35 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.MissingMnemonicList, result.Result);
         }
 
+        [TestMethod]
+        public void LogDataAdapter_GetFromStore_Error_475_No_Subset_When_Getting_Growing_Object()
+        {
+            var response = DevKit.Add<WellList, Well>(_well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            _wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add first log
+            _log.UidWell = _wellbore.UidWell;
+            _log.UidWellbore = response.SuppMsgOut;
+            DevKit.InitHeader(_log, LogIndexType.measureddepth);
+            response = DevKit.Add<LogList, Log>(_log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add second log
+            var log2 = DevKit.CreateLog(null, DevKit.Name("Log 02"), _log.UidWell, _log.NameWell, _log.UidWellbore, _log.NameWellbore);
+            DevKit.InitHeader(log2, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log2);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Query
+            var query = DevKit.CreateLog(null, null, log2.UidWell, null, log2.UidWellbore, null);
+
+            var result = DevKit.Get<LogList, Log>(DevKit.List(query), ObjectTypes.Log, null, OptionsIn.ReturnElements.DataOnly);
+            Assert.AreEqual((short)ErrorCodes.MissingSubsetOfGrowingDataObject, result.Result);
+        }
     }
 }
