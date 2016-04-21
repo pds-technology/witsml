@@ -165,7 +165,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
         }
 
-        [Ignore]
+        [Ignore, Description("Not Implemented")]
         [TestMethod]
         public void Test_error_code_411_optionsIn_invalid_format()
         {
@@ -284,7 +284,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.ChildUidNotUnique, response.Result);
         }
 
-        [Ignore]
+        [Ignore, Description("Not Implemented")]
         [TestMethod]
         public void Test_error_code_466_non_conforming_capabilities_in()
         {
