@@ -16,12 +16,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
-using PDS.Framework;
 using PDS.Witsml.Server.Data.Wells;
 
 namespace PDS.Witsml.Server.Data.Wellbores
@@ -30,10 +29,9 @@ namespace PDS.Witsml.Server.Data.Wellbores
     public class Wellbore200DataAdapterAddTests
     {
         private DevKit200Aspect DevKit;
-        private IContainer Container;
         private IDatabaseProvider Provider;
-        private IEtpDataAdapter<Well> WellAdapter;
-        private IEtpDataAdapter<Wellbore> WellboreAdapter;
+        private IWitsmlDataAdapter<Well> WellAdapter;
+        private IWitsmlDataAdapter<Wellbore> WellboreAdapter;
 
         private Well Well1;
         private Well Well2;
@@ -45,11 +43,10 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public void TestSetUp()
         {
             DevKit = new DevKit200Aspect();
-            Container = ContainerFactory.Create();
             Provider = new DatabaseProvider(new MongoDbClassMapper());
 
-            WellAdapter = new Well200DataAdapter(Provider) { Container = Container };
-            WellboreAdapter = new Wellbore200DataAdapter(Provider) { Container = Container };
+            WellAdapter = new Well200DataAdapter(Provider);
+            WellboreAdapter = new Wellbore200DataAdapter(Provider);
 
             Well1 = new Well() { Citation = DevKit.Citation("Well 01"), TimeZone = DevKit.TimeZone, Uuid = DevKit.Uid() };
             Well2 = new Well() { Citation = DevKit.Citation("Well 02"), TimeZone = DevKit.TimeZone, Uuid = DevKit.Uid() };
@@ -71,8 +68,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod]
         public void CanAddAndGetSingleWellboreWithUuid()
         {
-            WellAdapter.Put(DevKit.Parser(Well1));
-            WellboreAdapter.Put(DevKit.Parser(Wellbore1));
+            WellAdapter.Add(DevKit.Parser(Well1), Well1);
+            WellboreAdapter.Add(DevKit.Parser(Wellbore1), Wellbore1);
 
             var wellbore1 = WellboreAdapter.Get(Wellbore1.GetUri());
 
@@ -82,12 +79,11 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod]
         public void CanAddAndGetSingleWellboreWithoutUuid()
         {
-            WellAdapter.Put(DevKit.Parser(Well1));
-            WellboreAdapter.Put(DevKit.Parser(Wellbore2));
+            WellAdapter.Add(DevKit.Parser(Well1), Well1);
+            WellboreAdapter.Add(DevKit.Parser(Wellbore2), Wellbore2);
 
             var wellbore2 = Provider.GetDatabase().GetCollection<Wellbore>(ObjectNames.Wellbore200).AsQueryable()
-                .Where(x => x.Citation.Title == Wellbore2.Citation.Title)
-                .FirstOrDefault();
+                .First(x => x.Citation.Title == Wellbore2.Citation.Title);
 
             Assert.AreEqual(Wellbore2.Citation.Title, wellbore2.Citation.Title);
         }

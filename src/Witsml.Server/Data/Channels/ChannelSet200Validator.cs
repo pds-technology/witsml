@@ -26,19 +26,19 @@ namespace PDS.Witsml.Server.Data.Channels
     /// <summary>
     /// Provides validation for <see cref="ChannelSet" /> data objects.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Energistics.DataAccess.WITSML200.ChannelSet}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{ChannelSet}" />
     [Export(typeof(IDataObjectValidator<ChannelSet>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class ChannelSet200Validator : DataObjectValidator<ChannelSet>
     {
-        private readonly IEtpDataAdapter<ChannelSet> _channelSetDataAdapter;
+        private readonly IWitsmlDataAdapter<ChannelSet> _channelSetDataAdapter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelSet200Validator" /> class.
         /// </summary>
         /// <param name="channelSetDataAdapter">The channel set data adapter.</param>
         [ImportingConstructor]
-        public ChannelSet200Validator(IEtpDataAdapter<ChannelSet> channelSetDataAdapter)
+        public ChannelSet200Validator(IWitsmlDataAdapter<ChannelSet> channelSetDataAdapter)
         {
             _channelSetDataAdapter = channelSetDataAdapter;
         }

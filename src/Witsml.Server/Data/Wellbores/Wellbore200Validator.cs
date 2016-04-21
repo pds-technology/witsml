@@ -26,13 +26,13 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// <summary>
     /// Provides validation for <see cref="Wellbore" /> data objects.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Energistics.DataAccess.WITSML200.Wellbore}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Wellbore}" />
     [Export(typeof(IDataObjectValidator<Wellbore>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class Wellbore200Validator : DataObjectValidator<Wellbore>
     {
-        private readonly IEtpDataAdapter<Wellbore> _wellboreDataAdapter;
-        private readonly IEtpDataAdapter<Well> _wellDataAdapter;
+        private readonly IWitsmlDataAdapter<Wellbore> _wellboreDataAdapter;
+        private readonly IWitsmlDataAdapter<Well> _wellDataAdapter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Wellbore200Validator"/> class.
@@ -40,7 +40,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
         /// <param name="wellDataAdapter">The well data adapter.</param>
         [ImportingConstructor]
-        public Wellbore200Validator(IEtpDataAdapter<Wellbore> wellboreDataAdapter, IEtpDataAdapter<Well> wellDataAdapter)
+        public Wellbore200Validator(IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter)
         {
             _wellboreDataAdapter = wellboreDataAdapter;
             _wellDataAdapter = wellDataAdapter;

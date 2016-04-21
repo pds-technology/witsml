@@ -70,14 +70,14 @@ namespace PDS.Witsml.Server.Providers.Store
         public void GetObject(ProtocolEventArgs<GetObject, DataObject> args)
         {
             var uri = new EtpUri(args.Message.Uri);
-            var dataAdapter = Container.Resolve<IEtpDataAdapter>(new ObjectName(uri.ObjectType, uri.Version));
+            var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
             var entity = dataAdapter.Get(uri) as IDataObject;
-            var list = GetList(uri.ObjectType, entity);
+            var list = GetList(entity);
 
             StoreStoreProvider.SetDataObject(args.Context, list, uri, GetName(entity));
         }
 
-        private IEnergisticsCollection GetList(string objectType, IDataObject entity)
+        private IEnergisticsCollection GetList(IDataObject entity)
         {
             if (entity == null)
                 return null;
@@ -88,6 +88,7 @@ namespace PDS.Witsml.Server.Providers.Store
 
             var group = Activator.CreateInstance(groupType) as IEnergisticsCollection;
             var list = Activator.CreateInstance(property.PropertyType) as IList;
+            if (list == null) return group;
 
             list.Add(entity);
             property.SetValue(group, list);

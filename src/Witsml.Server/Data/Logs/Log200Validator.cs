@@ -26,13 +26,13 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Provides validation for <see cref="Log" /> data objects.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Energistics.DataAccess.WITSML200.Log}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Log}" />
     [Export(typeof(IDataObjectValidator<Log>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class Log200Validator : DataObjectValidator<Log>
     {
-        private readonly IEtpDataAdapter<Log> _logDataAdapter;
-        private readonly IEtpDataAdapter<Wellbore> _wellboreDataAdapter;
+        private readonly IWitsmlDataAdapter<Log> _logDataAdapter;
+        private readonly IWitsmlDataAdapter<Wellbore> _wellboreDataAdapter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Log200Validator" /> class.
@@ -40,7 +40,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="logDataAdapter">The log data adapter.</param>
         /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
         [ImportingConstructor]
-        public Log200Validator(IEtpDataAdapter<Log> logDataAdapter, IEtpDataAdapter<Wellbore> wellboreDataAdapter)
+        public Log200Validator(IWitsmlDataAdapter<Log> logDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter)
         {
             _logDataAdapter = logDataAdapter;
             _wellboreDataAdapter = wellboreDataAdapter;

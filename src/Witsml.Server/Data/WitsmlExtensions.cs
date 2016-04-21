@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Witsml131 = Energistics.DataAccess.WITSML131;
@@ -24,7 +25,6 @@ using Witsml200 = Energistics.DataAccess.WITSML200;
 using Witsml131Schemas = Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Witsml141Schemas = Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Witsml200Schemas = Energistics.DataAccess.WITSML200.ComponentSchemas;
-using System;
 
 namespace PDS.Witsml.Server.Data
 {

@@ -17,12 +17,10 @@
 //-----------------------------------------------------------------------
 
 using System;
-using Energistics.DataAccess;
+using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
-using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
@@ -31,9 +29,8 @@ namespace PDS.Witsml.Server.Data.Wells
     public class Well200DataAdapterAddTests
     {
         private DevKit200Aspect DevKit;
-        private IContainer Container;
         private IDatabaseProvider Provider;
-        private IEtpDataAdapter<Well> WellAdapter;
+        private IWitsmlDataAdapter<Well> WellAdapter;
 
         private Well Well1;
         private Well Well2;
@@ -42,10 +39,9 @@ namespace PDS.Witsml.Server.Data.Wells
         public void TestSetUp()
         {
             DevKit = new DevKit200Aspect();
-            Container = ContainerFactory.Create();
             Provider = new DatabaseProvider(new MongoDbClassMapper());
 
-            WellAdapter = new Well200DataAdapter(Provider) { Container = Container };
+            WellAdapter = new Well200DataAdapter(Provider);
 
             Well1 = new Well()
             {
@@ -95,15 +91,14 @@ namespace PDS.Witsml.Server.Data.Wells
 
             var context = new RequestContext(Functions.AddToStore, ObjectTypes.Well, xml, null, null);
             var parser = new WitsmlQueryParser(context);
-            var well = WellAdapter.Parse(parser);
 
-            Assert.IsNotNull(well);
+            WellAdapter.Validate(parser);
         }
 
         [TestMethod]
         public void CanAddAndGetSingleWellWithUuid()
         {
-            WellAdapter.Put(DevKit.Parser(Well1));
+            WellAdapter.Add(DevKit.Parser(Well1), Well1);
 
             var well1 = WellAdapter.Get(Well1.GetUri());
 
@@ -113,11 +108,10 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void CanAddAndGetSingleWellWithoutUuid()
         {
-            WellAdapter.Put(DevKit.Parser(Well2));
+            WellAdapter.Add(DevKit.Parser(Well2), Well2);
 
             var well2 = Provider.GetDatabase().GetCollection<Well>(ObjectNames.Well200).AsQueryable()
-                .Where(x => x.Citation.Title == Well2.Citation.Title)
-                .FirstOrDefault();
+                .First(x => x.Citation.Title == Well2.Citation.Title);
 
             Assert.AreEqual(Well2.Citation.Title, well2.Citation.Title);
         }

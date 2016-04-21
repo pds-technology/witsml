@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
 
@@ -28,9 +29,9 @@ namespace PDS.Witsml.Server.Data
     public interface IWitsmlDataAdapter<T>
     {
         /// <summary>
-        /// Queries the data object(s) specified by the parser.
+        /// Retrieves data objects from the data store using the specified parser.
         /// </summary>
-        /// <param name="parser">The parser that specifies the query parameters.</param>
+        /// <param name="parser">The query template parser.</param>
         /// <returns>
         /// A collection of data objects retrieved from the data store.
         /// </returns>
@@ -39,36 +40,45 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Adds a data object to the data store.
         /// </summary>
-        /// <param name="entity">The data object to be added.</param>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The data object to be added.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        WitsmlResult Add(T entity);
+        WitsmlResult Add(WitsmlQueryParser parser, T dataObject);
 
         /// <summary>
         /// Updates a data object in the data store.
         /// </summary>
-        /// <param name="parser">The update parser.</param>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The data object to be updated.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        WitsmlResult Update(WitsmlQueryParser parser);
+        WitsmlResult Update(WitsmlQueryParser parser, T dataObject);
 
         /// <summary>
         /// Deletes or partially updates the specified object in the data store.
         /// </summary>
-        /// <param name="parser">The parser that specifiee the object to delete.</param>
+        /// <param name="parser">The input template parser.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
         WitsmlResult Delete(WitsmlQueryParser parser);
 
         /// <summary>
-        /// Determines whether the entity exists in the data store.
+        /// Determines whether the data object exists in the data store.
         /// </summary>
         /// <param name="uri">The data object URI.</param>
-        /// <returns>true if the entity exists; otherwise, false</returns>
+        /// <returns>true if the data object exists; otherwise, false</returns>
         bool Exists(EtpUri uri);
+
+        /// <summary>
+        /// Gets a collection of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        List<T> GetAll(EtpUri? parentUri = null);
 
         /// <summary>
         /// Gets a data object by the specified URI.
@@ -78,10 +88,16 @@ namespace PDS.Witsml.Server.Data
         T Get(EtpUri uri);
 
         /// <summary>
-        /// Parses the specified XML string.
+        /// Deletes a data object by the specified URI.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        /// <returns>A WITSML result.</returns>
+        WitsmlResult Delete(EtpUri uri);
+
+        /// <summary>
+        /// Validates the input template using the specified parser.
         /// </summary>
         /// <param name="parser">The query parser.</param>
-        /// <returns>An instance of <see cref="T"/>.</returns>
-        T Parse(WitsmlQueryParser parser);
+        void Validate(WitsmlQueryParser parser);
     }
 }

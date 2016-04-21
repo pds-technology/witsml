@@ -26,7 +26,7 @@ namespace PDS.Witsml.Server.Data.Wells
     /// <summary>
     /// Provides validation for <see cref="Well" /> data objects.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Energistics.DataAccess.WITSML131.Well}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Well}" />
     [Export(typeof(IDataObjectValidator<Well>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class Well131Validator : DataObjectValidator<Well>

@@ -37,29 +37,29 @@ namespace PDS.Witsml.Server.Providers.Discovery
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class DiscoveryStore200Provider : IDiscoveryStoreProvider
     {
-        private readonly IEtpDataAdapter<Well> _wellDataAdapter;
-        private readonly IEtpDataAdapter<Wellbore> _wellboreDataAdapter;
-        private readonly IEtpDataAdapter<Log> _logDataAdapter;
-        private readonly IEtpDataAdapter<ChannelSet> _channelSetDataAdapter;
+        private readonly IEtpDataProvider<Well> _wellDataProvider;
+        private readonly IEtpDataProvider<Wellbore> _wellboreDataProvider;
+        private readonly IEtpDataProvider<Log> _logDataProvider;
+        private readonly IEtpDataProvider<ChannelSet> _channelSetDataProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DiscoveryStore200Provider" /> class.
         /// </summary>
-        /// <param name="wellDataAdapter">The well data adapter.</param>
-        /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
-        /// <param name="logDataAdapter">The log data adapter.</param>
-        /// <param name="channelSetDataAdapter">The channel set data adapter.</param>
+        /// <param name="wellDataProvider">The well data Provider.</param>
+        /// <param name="wellboreDataProvider">The wellbore data Provider.</param>
+        /// <param name="logDataProvider">The log data Provider.</param>
+        /// <param name="channelSetDataProvider">The channel set data Provider.</param>
         [ImportingConstructor]
         public DiscoveryStore200Provider(
-            IEtpDataAdapter<Well> wellDataAdapter,
-            IEtpDataAdapter<Wellbore> wellboreDataAdapter,
-            IEtpDataAdapter<Log> logDataAdapter,
-            IEtpDataAdapter<ChannelSet> channelSetDataAdapter)
+            IEtpDataProvider<Well> wellDataProvider,
+            IEtpDataProvider<Wellbore> wellboreDataProvider,
+            IEtpDataProvider<Log> logDataProvider,
+            IEtpDataProvider<ChannelSet> channelSetDataProvider)
         {
-            _wellDataAdapter = wellDataAdapter;
-            _wellboreDataAdapter = wellboreDataAdapter;
-            _logDataAdapter = logDataAdapter;
-            _channelSetDataAdapter = channelSetDataAdapter;
+            _wellDataProvider = wellDataProvider;
+            _wellboreDataProvider = wellboreDataProvider;
+            _logDataProvider = logDataProvider;
+            _channelSetDataProvider = channelSetDataProvider;
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
         /// <summary>
         /// Gets a collection of resources associated to the specified URI.
         /// </summary>
-        /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList{Resource}}"/> instance containing the event data.</param>
+        /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList}"/> instance containing the event data.</param>
         public void GetResources(ProtocolEventArgs<GetResources, IList<Resource>> args)
         {
             if (EtpUri.IsRoot(args.Message.Uri))
@@ -89,9 +89,9 @@ namespace PDS.Witsml.Server.Providers.Discovery
             {
                 return;
             }
-            else if (args.Message.Uri == EtpUris.Witsml200)
+            if (args.Message.Uri == EtpUris.Witsml200)
             {
-                _wellDataAdapter.GetAll()
+                _wellDataProvider.GetAll()
                     .ForEach(x => args.Context.Add(ToResource(x)));
             }
             else if (string.IsNullOrWhiteSpace(uri.ObjectId))
@@ -108,14 +108,14 @@ namespace PDS.Witsml.Server.Providers.Discovery
                 {
                     var wellboreUri = parentUri.Parent;
 
-                    _logDataAdapter.GetAll(wellboreUri)
+                    _logDataProvider.GetAll(wellboreUri)
                         .Where(x => x.TimeDepth.EqualsIgnoreCase(uri.ObjectType))
                         .ForEach(x => args.Context.Add(ToResource(x)));
                 }
             }
             else if (uri.ObjectType == ObjectTypes.Well)
             {
-                _wellboreDataAdapter.GetAll(uri)
+                _wellboreDataProvider.GetAll(uri)
                     .ForEach(x => args.Context.Add(ToResource(x)));
             }
             else if (uri.ObjectType == ObjectTypes.Wellbore)
@@ -127,19 +127,19 @@ namespace PDS.Witsml.Server.Providers.Discovery
             }
             else if (uri.ObjectType == ObjectTypes.Log)
             {
-                var log = _logDataAdapter.Get(uri);
+                var log = _logDataProvider.Get(uri);
                 log.ChannelSet.ForEach(x => args.Context.Add(ToResource(x)));
             }
             else if (uri.ObjectType == ObjectTypes.ChannelSet)
             {
-                var uid = uri.GetObjectIds()
-                    .Where(x => x.Key == ObjectTypes.Log)
-                    .Select(x => x.Value)
-                    .FirstOrDefault();
-
-                var set = _channelSetDataAdapter.Get(uri);
+                //var uid = uri.GetObjectIds()
+                //    .Where(x => x.Key == ObjectTypes.Log)
+                //    .Select(x => x.Value)
+                //    .FirstOrDefault();
+                //
                 //var set = log.ChannelSet.FirstOrDefault(x => x.Uuid == uri.ObjectId);
 
+                var set = _channelSetDataProvider.Get(uri);
                 set.Channel.ForEach(x => args.Context.Add(ToResource(set, x)));
             }
         }
@@ -190,8 +190,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
                 uuid: entity.Uuid,
                 uri: entity.GetUri(channelSet),
                 resourceType: ResourceTypes.DataObject,
-                name: entity.Mnemonic,
-                count: 0);
+                name: entity.Mnemonic);
         }
     }
 }

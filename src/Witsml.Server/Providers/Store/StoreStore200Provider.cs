@@ -68,7 +68,7 @@ namespace PDS.Witsml.Server.Providers.Store
         public void GetObject(ProtocolEventArgs<GetObject, DataObject> args)
         {
             var uri = new EtpUri(args.Message.Uri);
-            var dataAdapter = Container.Resolve<IEtpDataAdapter>(new ObjectName(uri.ObjectType, uri.Version));
+            var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
             var entity = dataAdapter.Get(uri) as AbstractObject;
 
             StoreStoreProvider.SetDataObject(args.Context, entity, uri, GetName(entity));

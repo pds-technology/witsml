@@ -36,7 +36,7 @@ namespace PDS.Witsml
         {
             if (type.Namespace.Contains("WITSML131"))
                 return Witsml131;
-            else if (type.Namespace.Contains("WITSML200"))
+            if (type.Namespace.Contains("WITSML200"))
                 return Witsml200;
 
             return Witsml141;

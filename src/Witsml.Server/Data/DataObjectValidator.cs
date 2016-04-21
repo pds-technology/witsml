@@ -44,15 +44,23 @@ namespace PDS.Witsml.Server.Data
         public Functions Function { get; private set; }
 
         /// <summary>
+        /// Gets the input template parser.
+        /// </summary>
+        /// <value>The input template parser.</value>
+        public WitsmlQueryParser Parser { get; private set; }
+
+        /// <summary>
         /// Validates the specified data object while executing a WITSML API method.
         /// </summary>
         /// <param name="function">The WITSML API method.</param>
+        /// <param name="parser">The input template parser.</param>
         /// <param name="dataObject">The data object.</param>
         /// <exception cref="PDS.Witsml.WitsmlException">If any validation errors are detected.</exception>
-        public void Validate(Functions function, T dataObject)
+        public void Validate(Functions function, WitsmlQueryParser parser, T dataObject)
         {
             DataObject = dataObject;
             Function = function;
+            Parser = parser;
 
             IList<ValidationResult> results;
             DataObjectValidator.TryValidate(this, out results);

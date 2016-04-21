@@ -117,7 +117,7 @@ namespace PDS.Witsml.Server.Providers.Store
 
             try
             {
-                var dataAdapter = Container.Resolve<IEtpDataAdapter>(new ObjectName(uri.ObjectType, uri.Version));
+                var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
                 dataAdapter.Put(putObject.Data);
             }
             catch (ContainerException ex)
@@ -147,7 +147,7 @@ namespace PDS.Witsml.Server.Providers.Store
         {
             try
             {
-                var dataAdapter = Container.Resolve<IEtpDataAdapter>(new ObjectName(uri.ObjectType, uri.Version));
+                var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
                 dataAdapter.Delete(uri);
             }
             catch (ContainerException ex)

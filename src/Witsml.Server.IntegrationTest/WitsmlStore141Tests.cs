@@ -249,7 +249,6 @@ namespace PDS.Witsml.Server
 
             var dbProvider = new DatabaseProvider(new MongoDbClassMapper(), string.Empty);
             var wellboreAdapter = new Wellbore141DataAdapter(dbProvider);
-            wellboreAdapter.Container = ContainerFactory.Create();
 
             var caught = false;
             WitsmlException exception = null;
@@ -257,7 +256,7 @@ namespace PDS.Witsml.Server
             try
             {
                 var wellbore = new Wellbore { Name = DevKit.Name("Wellbore-to-test-add-error"), NameWell = well.Name, UidWell = response.SuppMsgOut };
-                wellboreAdapter.Add(wellbore);
+                wellboreAdapter.Add(DevKit.Parser(Functions.AddToStore, wellbore), wellbore);
             }
             catch (WitsmlException ex)
             {

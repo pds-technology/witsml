@@ -18,17 +18,54 @@
 
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML131;
+using Energistics.DataAccess.WITSML131.ReferenceData;
+using PDS.Framework;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
+    [Export(typeof(IEtpDataProvider))]
+    [Export(typeof(IWitsml131Configuration))]
+    [Export141(ObjectTypes.Log, typeof(IEtpDataProvider))]
     [Export131(ObjectTypes.Log, typeof(IWitsmlDataProvider))]
-    [Export131(ObjectTypes.Log, typeof(IWitsmlDataWriter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Log131DataProvider : WitsmlDataProvider<LogList, Log>
+    public class Log131DataProvider : WitsmlDataProvider<LogList, Log>, IWitsml131Configuration
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Log131DataProvider"/> class.
+        /// </summary>
+        /// <param name="container">The composition container.</param>
+        /// <param name="dataAdapter">The data adapter.</param>
         [ImportingConstructor]
-        public Log131DataProvider(IWitsmlDataAdapter<Log> dataAdapter) : base(dataAdapter)
+        public Log131DataProvider(IContainer container, IWitsmlDataAdapter<Log> dataAdapter) : base(container, dataAdapter)
         {
+        }
+
+        /// <summary>
+        /// Gets the supported capabilities for the <see cref="Log"/> object.
+        /// </summary>
+        /// <param name="capServer">The capServer instance.</param>
+        public void GetCapabilities(CapServer capServer)
+        {
+            capServer.Add(Functions.GetFromStore, ObjectTypes.Log);
+            capServer.Add(Functions.AddToStore, ObjectTypes.Log);
+            capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);
+            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Log);
+        }
+
+        /// <summary>
+        /// Sets the default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        protected override void SetDefaultValues(Log dataObject)
+        {
+            dataObject.Uid = dataObject.NewUid();
+            dataObject.CommonData = dataObject.CommonData.Create();
+
+            if (!dataObject.Direction.HasValue)
+            {
+                dataObject.Direction = LogIndexDirection.increasing;
+            }
         }
     }
 }

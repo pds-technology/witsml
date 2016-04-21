@@ -187,7 +187,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 {
                     if (string.IsNullOrWhiteSpace(dc.Id))
                     {
-                        dc.Id = NewUid();
+                        dc.Id = Guid.NewGuid().ToString();
                         dc.Uri = uri;
                         dc.MnemonicList = mnemonics;
                         dc.UnitList = units;

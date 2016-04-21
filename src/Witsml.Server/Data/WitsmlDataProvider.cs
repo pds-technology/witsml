@@ -16,92 +16,255 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections;
+using System.Collections.Generic;
+using Energistics.Common;
 using Energistics.DataAccess;
+using Energistics.Datatypes;
+using Energistics.Datatypes.Object;
 using log4net;
+using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data
 {
-    /// <summary>
-    /// Data provider that encapsulates CRUD service calls for WITSML query.
-    /// </summary>
-    /// <typeparam name="TList">Type of the object list.</typeparam>
-    /// <typeparam name="TObject">Type of the object.</typeparam>
-    /// <seealso cref="PDS.Witsml.Server.Data.IWitsmlDataProvider" />
-    /// <seealso cref="PDS.Witsml.Server.Data.IWitsmlDataWriter" />
-    public abstract class WitsmlDataProvider<TList, TObject> : IWitsmlDataProvider, IWitsmlDataWriter where TList : IEnergisticsCollection
+    public abstract class WitsmlDataProvider<TObject> : IEtpDataProvider<TObject>, IEtpDataProvider
     {
-        private readonly IWitsmlDataAdapter<TObject> _dataAdapter;
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="WitsmlDataProvider{TList, TObject}"/> class.
+        /// Initializes a new instance of the <see cref="WitsmlDataProvider{TObject}" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="dataAdapter">The data adapter.</param>
-        protected WitsmlDataProvider(IWitsmlDataAdapter<TObject> dataAdapter)
+        protected WitsmlDataProvider(IContainer container, IWitsmlDataAdapter<TObject> dataAdapter)
         {
             Logger = LogManager.GetLogger(GetType());
-            _dataAdapter = dataAdapter;
+            Container = container;
+            DataAdapter = dataAdapter;
         }
 
         /// <summary>
         /// Gets the logger.
         /// </summary>
         /// <value>The logger.</value>
-        protected ILog Logger { get; private set; }
+        protected ILog Logger { get; }
 
         /// <summary>
-        /// Gets object(s) from store.
+        /// Gets the composition container.
         /// </summary>
-        /// <param name="context">The request context.</param>
-        /// <returns>Queried objects.</returns>
-        public virtual WitsmlResult<IEnergisticsCollection> GetFromStore(RequestContext context)
+        /// <value>The composition container.</value>
+        protected IContainer Container { get; }
+
+        /// <summary>
+        /// Gets the data adapter.
+        /// </summary>
+        /// <value>The data adapter.</value>
+        protected IWitsmlDataAdapter<TObject> DataAdapter { get; }
+
+        /// <summary>
+        /// Adds the content types managed by this data adapter to the collection of <see cref="EtpContentType"/>.
+        /// </summary>
+        /// <param name="contentTypes">A collection of content types.</param>
+        public virtual void GetSupportedObjects(IList<EtpContentType> contentTypes)
         {
-            Logger.Debug("Executing query");
-            var parser = new WitsmlQueryParser(context);
-            return _dataAdapter.Query(parser);
+            var type = typeof(TObject);
+
+            if (type.Assembly != typeof(IDataObject).Assembly)
+                return;
+
+            var contentType = EtpUris.GetUriFamily(type)
+                .Append(ObjectTypes.GetObjectType(type))
+                .ContentType;
+
+            contentTypes.Add(contentType);
         }
 
         /// <summary>
-        /// Adds an object to the data store.
+        /// Determines whether the data object exists in the data store.
         /// </summary>
-        /// <param name="context">The request context.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public virtual WitsmlResult AddToStore(RequestContext context)
+        /// <param name="uri">The data object URI.</param>
+        /// <returns>true if the data object exists; otherwise, false</returns>
+        public virtual bool Exists(EtpUri uri)
         {
-            Logger.Debug("Executing insert");
-            var parser = new WitsmlQueryParser(context);
-            var entity = _dataAdapter.Parse(parser);
-            return _dataAdapter.Add(entity);
+            return DataAdapter.Exists(uri);
         }
 
         /// <summary>
-        /// Updates an object in the data store.
+        /// Gets a collection of data objects related to the specified URI.
         /// </summary>
-        /// <param name="context">The request context.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public virtual WitsmlResult UpdateInStore(RequestContext context)
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        IList IEtpDataProvider.GetAll(EtpUri? parentUri)
         {
-            Logger.Debug("Executing update");
-            var parser = new WitsmlQueryParser(context);
-            return _dataAdapter.Update(parser);
+            return GetAll(parentUri);
         }
 
         /// <summary>
-        /// Deletes or partially update object from store.
+        /// Gets a collection of data objects related to the specified URI.
         /// </summary>
-        /// <param name="context">The request context.</param>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        public virtual List<TObject> GetAll(EtpUri? parentUri = null)
+        {
+            return DataAdapter.GetAll(parentUri);
+        }
+
+        /// <summary>
+        /// Gets a data object by the specified URI.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        /// <returns>The data object instance.</returns>
+        object IEtpDataProvider.Get(EtpUri uri)
+        {
+            return Get(uri);
+        }
+
+        /// <summary>
+        /// Gets a data object by the specified URI.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        /// <returns>The data object instance.</returns>
+        public virtual TObject Get(EtpUri uri)
+        {
+            return DataAdapter.Get(uri);
+        }
+
+        /// <summary>
+        /// Puts the specified data object into the data store.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns>A WITSML result.</returns>
+        public virtual WitsmlResult Put(DataObject dataObject)
+        {
+            var context = new RequestContext(Functions.PutObject, ObjectTypes.GetObjectType<TObject>(),
+                dataObject.GetXml(), null, null);
+
+            var parser = new WitsmlQueryParser(context);
+
+            return Put(parser);
+        }
+
+        /// <summary>
+        /// Puts a data object into the data store.
+        /// </summary>
+        /// <param name="parser">The input template parser.</param>
+        /// <returns>A WITSML result.</returns>
+        public virtual WitsmlResult Put(WitsmlQueryParser parser)
+        {
+            var uri = parser.GetUri<TObject>();
+            Logger.DebugFormat("Putting {0} with URI '{1}'", typeof(TObject).Name, uri);
+
+            if (!string.IsNullOrWhiteSpace(uri.ObjectId) && Exists(uri))
+            {
+                return Update(parser);
+            }
+
+            return Add(parser);
+        }
+
+        /// <summary>
+        /// Deletes a data object by the specified URI.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        /// <returns>A WITSML result.</returns>
+        public virtual WitsmlResult Delete(EtpUri uri)
+        {
+            return DataAdapter.Delete(uri);
+        }
+
+        /// <summary>
+        /// Gets the URI for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns></returns>
+        protected abstract EtpUri GetUri(TObject dataObject);
+
+        /// <summary>
+        /// Adds a data object to the data store.
+        /// </summary>
+        /// <param name="parser">The input template parser.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        public virtual WitsmlResult DeleteFromStore(RequestContext context)
+        protected virtual WitsmlResult Add(WitsmlQueryParser parser)
         {
-            Logger.Debug("Executing delete");
-            var parser = new WitsmlQueryParser(context);
-            return _dataAdapter.Delete(parser);
+            var dataObject = Parse(parser.Context.Xml);
+
+            SetDefaultValues(dataObject);
+            var uri = GetUri(dataObject);
+            Logger.DebugFormat("Adding {0} with URI '{1}'", typeof(TObject).Name, uri);
+
+            Validate(Functions.AddToStore, parser, dataObject);
+            Logger.DebugFormat("Validated {0} with URI '{1}' for Add", typeof(TObject).Name, uri);
+
+            return DataAdapter.Add(parser, dataObject);
+        }
+
+        /// <summary>
+        /// Updates a data object in the data store.
+        /// </summary>
+        /// <param name="parser">The input template parser.</param>
+        /// <returns>
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
+        /// </returns>
+        protected virtual WitsmlResult Update(WitsmlQueryParser parser)
+        {
+            var dataObject = Parse(parser.Context.Xml);
+
+            var uri = GetUri(dataObject);
+            Logger.DebugFormat("Updating {0} with URI '{1}'", typeof(TObject).Name, uri);
+
+            Validate(Functions.UpdateInStore, parser, dataObject);
+            Logger.DebugFormat("Validated {0} with URI '{1}' for Update", typeof(TObject).Name, uri);
+
+            return DataAdapter.Update(parser, dataObject);
+        }
+
+        /// <summary>
+        /// Deletes or partially updates an object in the data store.
+        /// </summary>
+        /// <param name="parser">The input template parser.</param>
+        /// <returns>
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
+        /// </returns>
+        protected virtual WitsmlResult Delete(WitsmlQueryParser parser)
+        {
+            var dataObject = Parse(parser.Context.Xml);
+            Logger.DebugFormat("Deleting {0}", typeof(TObject).Name);
+
+            Validate(Functions.DeleteFromStore, parser, dataObject);
+            Logger.DebugFormat("Validated {0} for Delete", typeof(TObject).Name);
+
+            return DataAdapter.Delete(parser);
+        }
+
+        /// <summary>
+        /// Parses the specified XML string.
+        /// </summary>
+        /// <param name="xml">The XML string.</param>
+        /// <returns>The data object instance.</returns>
+        protected virtual TObject Parse(string xml)
+        {
+            return WitsmlParser.Parse<TObject>(xml);
+        }
+
+        /// <summary>
+        /// Validates the input template for the specified function.
+        /// </summary>
+        /// <param name="function">The WITSML API method.</param>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The data object.</param>
+        protected virtual void Validate(Functions function, WitsmlQueryParser parser, TObject dataObject)
+        {
+            var validator = Container.Resolve<IDataObjectValidator<TObject>>();
+            validator.Validate(function, parser, dataObject);
+        }
+
+        /// <summary>
+        /// Sets the default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        protected virtual void SetDefaultValues(TObject dataObject)
+        {
         }
     }
 }

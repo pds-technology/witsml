@@ -32,7 +32,7 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Provides validation for <see cref="Log" /> data objects.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Energistics.DataAccess.WITSML141.Log}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Log}" />
     [Export(typeof(IDataObjectValidator<Log>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class Log141Validator : DataObjectValidator<Log>

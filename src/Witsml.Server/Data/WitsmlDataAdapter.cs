@@ -17,16 +17,10 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using Energistics.Common;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
-using Energistics.Datatypes.Object;
 using log4net;
-using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -35,8 +29,7 @@ namespace PDS.Witsml.Server.Data
     /// </summary>
     /// <typeparam name="T">Type of the object.</typeparam>
     /// <seealso cref="PDS.Witsml.Server.Data.IWitsmlDataAdapter{T}" />
-    /// <seealso cref="PDS.Witsml.Server.Data.IEtpDataAdapter{T}" />
-    public abstract class WitsmlDataAdapter<T> : IWitsmlDataAdapter<T>, IEtpDataAdapter<T>, IEtpDataAdapter
+    public abstract class WitsmlDataAdapter<T> : IWitsmlDataAdapter<T>
     {
         protected WitsmlDataAdapter()
         {
@@ -47,22 +40,16 @@ namespace PDS.Witsml.Server.Data
         /// Gets the logger.
         /// </summary>
         /// <value>The logger.</value>
-        protected ILog Logger { get; private set; }
+        protected ILog Logger { get; }
 
         /// <summary>
-        /// Gets or sets the composition container.
+        /// Retrieves data objects from the data store using the specified parser.
         /// </summary>
-        /// <value>The composition container.</value>
-        [Import]
-        public IContainer Container { get; set; }
-
-        /// <summary>
-        /// Queries the data object(s) specified by the parser.
-        /// </summary>
-        /// <param name="parser">The parser that specifies the query parameters.</param>
+        /// <param name="parser">The query template parser.</param>
         /// <returns>
         /// A collection of data objects retrieved from the data store.
         /// </returns>
+        /// <exception cref="System.NotImplementedException"></exception>
         public virtual WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
         {
             throw new NotImplementedException();
@@ -71,11 +58,12 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Adds a data object to the data store.
         /// </summary>
-        /// <param name="entity">The data object to be added.</param>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The data object to be added.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        public virtual WitsmlResult Add(T entity)
+        public virtual WitsmlResult Add(WitsmlQueryParser parser, T dataObject)
         {
             throw new NotImplementedException();
         }
@@ -83,19 +71,20 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Updates a data object in the data store.
         /// </summary>
-        /// <param name="parser">The update parser.</param>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The data object to be updated.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
-        public virtual WitsmlResult Update(WitsmlQueryParser parser)
+        public virtual WitsmlResult Update(WitsmlQueryParser parser, T dataObject)
         {
             throw new NotImplementedException();
         }
 
         /// <summary>
-        /// Deletes or partially updates a data object in the data store.
+        /// Deletes or partially updates the specified object in the data store.
         /// </summary>
-        /// <param name="parser">The parser that specifies the object to delete.</param>
+        /// <param name="parser">The input template parser.</param>
         /// <returns>
         /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
         /// </returns>
@@ -115,34 +104,6 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Adds the content types managed by this data adapter to the collection of <see cref="EtpContentType"/>.
-        /// </summary>
-        /// <param name="contentTypes">A collection of content types.</param>
-        public virtual void GetSupportedObjects(IList<EtpContentType> contentTypes)
-        {
-            var type = typeof(T);
-
-            if (type.Assembly != typeof(IDataObject).Assembly)
-                return;
-
-            var contentType = EtpUris.GetUriFamily(type)
-                .Append(ObjectTypes.GetObjectType(type))
-                .ContentType;
-
-            contentTypes.Add(contentType);
-        }
-
-        /// <summary>
-        /// Gets a collection of data objects related to the specified URI.
-        /// </summary>
-        /// <param name="parentUri">The parent URI.</param>
-        /// <returns>A collection of data objects.</returns>
-        IList IEtpDataAdapter.GetAll(EtpUri? parentUri)
-        {
-            return GetAll(parentUri);
-        }
-
-        /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
@@ -157,42 +118,7 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="uri">The data object URI.</param>
         /// <returns>The data object instance.</returns>
-        object IEtpDataAdapter.Get(EtpUri uri)
-        {
-            return Get(uri);
-        }
-
-        /// <summary>
-        /// Gets a data object by the specified URI.
-        /// </summary>
-        /// <param name="uri">The data object URI.</param>
-        /// <returns>The data object instance.</returns>
         public virtual T Get(EtpUri uri)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Puts the specified data object into the data store.
-        /// </summary>
-        /// <param name="dataObject">The data object.</param>
-        /// <returns>A WITSML result.</returns>
-        public virtual WitsmlResult Put(DataObject dataObject)
-        {
-            var context = new RequestContext(Functions.PutObject, ObjectTypes.GetObjectType<T>(),
-                dataObject.GetXml(), null, null);
-
-            var parser = new WitsmlQueryParser(context);
-
-            return Put(parser);
-        }
-
-        /// <summary>
-        /// Puts the specified data object into the data store.
-        /// </summary>
-        /// <param name="parser">The input parser.</param>
-        /// <returns>A WITSML result.</returns>
-        public virtual WitsmlResult Put(WitsmlQueryParser parser)
         {
             throw new NotImplementedException();
         }
@@ -208,23 +134,12 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Parses the specified XML string.
+        /// Validates the input template using the specified parser.
         /// </summary>
         /// <param name="parser">The query parser.</param>
-        /// <returns>An instance of <see cref="T"/>.</returns>
-        public virtual T Parse(WitsmlQueryParser parser)
+        public virtual void Validate(WitsmlQueryParser parser)
         {
             throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Parses the specified XML string.
-        /// </summary>
-        /// <param name="xml">The XML string.</param>
-        /// <returns>An instance of <see cref="T"/>.</returns>
-        protected virtual T Parse(string xml)
-        {
-            return WitsmlParser.Parse<T>(xml);
         }
 
         /// <summary>
@@ -237,14 +152,26 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Validates the entity based on the specified function.
+        /// Gets the URI for the specified data object.
         /// </summary>
-        /// <param name="function">The WITSML API function.</param>
-        /// <param name="entity">The entity to validate.</param>
-        protected void Validate(Functions function, T entity)
+        /// <param name="instance">The data object.</param>
+        /// <returns>The URI representing the data object.</returns>
+        /// <exception cref="System.InvalidOperationException"></exception>
+        protected virtual EtpUri GetUri(T instance)
         {
-            var validator = Container.Resolve<IDataObjectValidator<T>>();
-            validator.Validate(function, entity);
+            var wellboreObject = instance as IWellboreObject;
+            if (wellboreObject != null) return wellboreObject.GetUri();
+
+            var wellObject = instance as IWellObject;
+            if (wellObject != null) return wellObject.GetUri();
+
+            var dataObject = instance as IDataObject;
+            if (dataObject != null) return dataObject.GetUri();
+
+            var abstractObject = instance as Energistics.DataAccess.WITSML200.ComponentSchemas.AbstractObject;
+            if (abstractObject != null) return abstractObject.GetUri();
+
+            throw new InvalidOperationException();
         }
     }
 }

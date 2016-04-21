@@ -21,7 +21,6 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.ServiceModel.Web;
-using Energistics.DataAccess;
 using log4net;
 using PDS.Framework;
 using PDS.Witsml.Properties;
@@ -191,7 +190,7 @@ namespace PDS.Witsml.Server
 
                 WitsmlValidator.ValidateRequest(CapServerProviders, context, out version);
 
-                var dataWriter = Container.Resolve<IWitsmlDataWriter>(new ObjectName(context.ObjectType, version));
+                var dataWriter = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
                 var result = dataWriter.AddToStore(context);
 
                 var response = new WMLS_AddToStoreResponse((short)result.Code, result.Message);
@@ -227,7 +226,7 @@ namespace PDS.Witsml.Server
 
                 WitsmlValidator.ValidateRequest(CapServerProviders, context, out version);
 
-                var dataWriter = Container.Resolve<IWitsmlDataWriter>(new ObjectName(context.ObjectType, version));
+                var dataWriter = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
                 var result = dataWriter.UpdateInStore(context);
 
                 return new WMLS_UpdateInStoreResponse((short)result.Code, result.Message);
@@ -256,7 +255,7 @@ namespace PDS.Witsml.Server
 
                 WitsmlValidator.ValidateRequest(CapServerProviders, context, out version);
 
-                var dataWriter = Container.Resolve<IWitsmlDataWriter>(new ObjectName(context.ObjectType, version));
+                var dataWriter = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
                 var result = dataWriter.DeleteFromStore(context);
 
                 return new WMLS_DeleteFromStoreResponse((short)result.Code, result.Message);
@@ -281,8 +280,7 @@ namespace PDS.Witsml.Server
         public WMLS_GetBaseMsgResponse WMLS_GetBaseMsg(WMLS_GetBaseMsgRequest request)
         {
             _log.Debug(WebOperationContext.Current.ToLogMessage());
-
-            var message = string.Empty;
+            string message;
 
             if (Enum.IsDefined(typeof(ErrorCodes), request.ReturnValueIn))
             {

@@ -28,13 +28,11 @@ namespace PDS.Witsml.Server.Data.Logs
     /// Data adapter that encapsulates CRUD functionality for <see cref="Log" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Log}" />
-    [Export(typeof(IEtpDataAdapter))]
-    [Export(typeof(IEtpDataAdapter<Log>))]
-    [Export200(ObjectTypes.Log, typeof(IEtpDataAdapter))]
+    [Export(typeof(IWitsmlDataAdapter<Log>))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class Log200DataAdapter : MongoDbDataAdapter<Log>
     {
-        private readonly IEtpDataAdapter<ChannelSet> _channelSetDataAdapter;
+        private readonly IWitsmlDataAdapter<ChannelSet> _channelSetDataAdapter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Log200DataAdapter" /> class.
@@ -42,7 +40,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="databaseProvider">The database provider.</param>
         /// <param name="channelSetDataAdapter">The channel set data adapter.</param>
         [ImportingConstructor]
-        public Log200DataAdapter(IDatabaseProvider databaseProvider, IEtpDataAdapter<ChannelSet> channelSetDataAdapter) : base(databaseProvider, ObjectNames.Log200, ObjectTypes.Uuid)
+        public Log200DataAdapter(IDatabaseProvider databaseProvider, IWitsmlDataAdapter<ChannelSet> channelSetDataAdapter) : base(databaseProvider, ObjectNames.Log200, ObjectTypes.Uuid)
         {
             _channelSetDataAdapter = channelSetDataAdapter;
         }
@@ -68,51 +66,54 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Puts the specified data object into the data store.
+        /// Adds a data object to the data store.
         /// </summary>
-        /// <param name="parser">The input parser.</param>
-        /// <returns>A WITSML result.</returns>
-        public override WitsmlResult Put(WitsmlQueryParser parser)
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The data object to be added.</param>
+        /// <returns>
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
+        /// </returns>
+        public override WitsmlResult Add(WitsmlQueryParser parser, Log dataObject)
         {
-            var uri = parser.GetUri<Log>();
-
-            Logger.DebugFormat("Putting Log with uid '{0}'.", uri.ObjectId);
-
-            // save ChannelSets + data via the ChannelSet data adapter
+            // Add ChannelSets + data via the ChannelSet data adapter
             foreach (var childParser in parser.ForkProperties("ChannelSet", ObjectTypes.ChannelSet))
             {
-                _channelSetDataAdapter.Put(childParser);
+                var channelSet = WitsmlParser.Parse<ChannelSet>(childParser.Context.Xml);
+                _channelSetDataAdapter.Add(childParser, channelSet);
             }
 
-            if (!string.IsNullOrWhiteSpace(uri.ObjectId) && Exists(uri))
+            // Clear ChannelSet data properties
+            foreach (var channelSet in dataObject.ChannelSet)
             {
-                //Validate(Functions.UpdateInStore, entity);
-                //Logger.DebugFormat("Validated Log with uid '{0}' for Update", uri.ObjectId);
-
-                var ignored = new[] { "Data" };
-                UpdateEntity(parser, uri, ignored);
-
-                return new WitsmlResult(ErrorCodes.Success);
+                channelSet.Data = null;
             }
-            else
+
+            return base.Add(parser, dataObject);
+        }
+
+        /// <summary>
+        /// Updates a data object in the data store.
+        /// </summary>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The data object to be updated.</param>
+        /// <returns>
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
+        /// </returns>
+        public override WitsmlResult Update(WitsmlQueryParser parser, Log dataObject)
+        {
+            // Update ChannelSets + data via the ChannelSet data adapter
+            foreach (var childParser in parser.ForkProperties("ChannelSet", ObjectTypes.ChannelSet))
             {
-                var entity = Parse(parser.Context.Xml);
-
-                // Clear ChannelSet data properties
-                foreach (var channelSet in entity.ChannelSet)
-                {
-                    channelSet.Data = null;
-                }
-
-                entity.Uuid = NewUid(entity.Uuid);
-                entity.Citation = entity.Citation.Create();
-                Logger.DebugFormat("Adding Log with uid '{0}' and name '{1}'", entity.Uuid, entity.Citation.Title);
-
-                Validate(Functions.AddToStore, entity);
-                InsertEntity(entity);
-
-                return new WitsmlResult(ErrorCodes.Success, entity.Uuid);
+                var channelSet = WitsmlParser.Parse<ChannelSet>(childParser.Context.Xml);
+                _channelSetDataAdapter.Update(childParser, channelSet);
             }
+
+            var uri = GetUri(dataObject);
+            var ignored = new[] { "Data" };
+
+            UpdateEntity(parser, uri, ignored);
+
+            return new WitsmlResult(ErrorCodes.Success);
         }
     }
 }

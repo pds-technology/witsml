@@ -36,25 +36,25 @@ namespace PDS.Witsml.Server.Providers.Discovery
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class DiscoveryStore131Provider : IDiscoveryStoreProvider
     {
-        private readonly IEtpDataAdapter<Well> _wellDataAdapter;
-        private readonly IEtpDataAdapter<Wellbore> _wellboreDataAdapter;
-        private readonly IEtpDataAdapter<Log> _logDataAdapter;
+        private readonly IEtpDataProvider<Well> _wellDataProvider;
+        private readonly IEtpDataProvider<Wellbore> _wellboreDataProvider;
+        private readonly IEtpDataProvider<Log> _logDataProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DiscoveryStore131Provider" /> class.
         /// </summary>
-        /// <param name="wellDataAdapter">The well data adapter.</param>
-        /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
-        /// <param name="logDataAdapter">The log data adapter.</param>
+        /// <param name="wellDataProvider">The well data provider.</param>
+        /// <param name="wellboreDataProvider">The wellbore data provider.</param>
+        /// <param name="logDataProvider">The log data provider.</param>
         [ImportingConstructor]
         public DiscoveryStore131Provider(
-            IEtpDataAdapter<Well> wellDataAdapter,
-            IEtpDataAdapter<Wellbore> wellboreDataAdapter,
-            IEtpDataAdapter<Log> logDataAdapter)
+            IEtpDataProvider<Well> wellDataProvider,
+            IEtpDataProvider<Wellbore> wellboreDataProvider,
+            IEtpDataProvider<Log> logDataProvider)
         {
-            _wellDataAdapter = wellDataAdapter;
-            _wellboreDataAdapter = wellboreDataAdapter;
-            _logDataAdapter = logDataAdapter;
+            _wellDataProvider = wellDataProvider;
+            _wellboreDataProvider = wellboreDataProvider;
+            _logDataProvider = logDataProvider;
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
         /// <summary>
         /// Gets a collection of resources associated to the specified URI.
         /// </summary>
-        /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList{Resource}}"/> instance containing the event data.</param>
+        /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList}"/> instance containing the event data.</param>
         public void GetResources(ProtocolEventArgs<GetResources, IList<Resource>> args)
         {
             if (EtpUri.IsRoot(args.Message.Uri))
@@ -84,24 +84,24 @@ namespace PDS.Witsml.Server.Providers.Discovery
             {
                 return;
             }
-            else if (args.Message.Uri == EtpUris.Witsml131)
+            if (args.Message.Uri == EtpUris.Witsml131)
             {
-                _wellDataAdapter.GetAll()
+                _wellDataProvider.GetAll()
                     .ForEach(x => args.Context.Add(ToResource(x)));
             }
             else if (uri.ObjectType == ObjectTypes.Well)
             {
-                _wellboreDataAdapter.GetAll(uri)
+                _wellboreDataProvider.GetAll(uri)
                     .ForEach(x => args.Context.Add(ToResource(x)));
             }
             else if (uri.ObjectType == ObjectTypes.Wellbore)
             {
-                _logDataAdapter.GetAll(uri)
+                _logDataProvider.GetAll(uri)
                     .ForEach(x => args.Context.Add(ToResource(x)));
             }
             else if (uri.ObjectType == ObjectTypes.Log)
             {
-                var log = _logDataAdapter.Get(uri);
+                var log = _logDataProvider.Get(uri);
                 log.LogCurveInfo.ForEach(x => args.Context.Add(ToResource(log, x)));
             }
         }
@@ -142,8 +142,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
                 uuid: curve.Uid,
                 uri: curve.GetUri(log),
                 resourceType: ResourceTypes.DataObject,
-                name: curve.Mnemonic,
-                count: 0);
+                name: curve.Mnemonic);
         }
     }
 }

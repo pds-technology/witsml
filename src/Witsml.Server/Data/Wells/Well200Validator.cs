@@ -26,19 +26,19 @@ namespace PDS.Witsml.Server.Data.Wells
     /// <summary>
     /// Provides validation for <see cref="Well" /> data objects.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Energistics.DataAccess.WITSML200.Well}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Well}" />
     [Export(typeof(IDataObjectValidator<Well>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class Well200Validator : DataObjectValidator<Well>
     {
-        private readonly IEtpDataAdapter<Well> _wellDataAdapter;
+        private readonly IWitsmlDataAdapter<Well> _wellDataAdapter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Well200Validator"/> class.
         /// </summary>
         /// <param name="wellDataAdapter">The well data adapter.</param>
         [ImportingConstructor]
-        public Well200Validator(IEtpDataAdapter<Well> wellDataAdapter)
+        public Well200Validator(IWitsmlDataAdapter<Well> wellDataAdapter)
         {
             _wellDataAdapter = wellDataAdapter;
         }

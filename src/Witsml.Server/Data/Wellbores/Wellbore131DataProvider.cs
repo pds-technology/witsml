@@ -18,17 +18,48 @@
 
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML131;
+using PDS.Framework;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
+    [Export(typeof(IEtpDataProvider))]
+    [Export(typeof(IWitsml131Configuration))]
+    [Export131(ObjectTypes.Wellbore, typeof(IEtpDataProvider))]
     [Export131(ObjectTypes.Wellbore, typeof(IWitsmlDataProvider))]
-    [Export131(ObjectTypes.Wellbore, typeof(IWitsmlDataWriter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Wellbore131DataProvider : WitsmlDataProvider<WellboreList, Wellbore>
+    public class Wellbore131DataProvider : WitsmlDataProvider<WellboreList, Wellbore>, IWitsml131Configuration
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Wellbore131DataProvider"/> class.
+        /// </summary>
+        /// <param name="container">The composition container.</param>
+        /// <param name="dataAdapter">The data adapter.</param>
         [ImportingConstructor]
-        public Wellbore131DataProvider(IWitsmlDataAdapter<Wellbore> dataAdapter) : base(dataAdapter)
+        public Wellbore131DataProvider(IContainer container, IWitsmlDataAdapter<Wellbore> dataAdapter) : base(container, dataAdapter)
         {
+        }
+
+        /// <summary>
+        /// Gets the supported capabilities for the <see cref="Wellbore"/> object.
+        /// </summary>
+        /// <param name="capServer">The capServer instance.</param>
+        public void GetCapabilities(CapServer capServer)
+        {
+            capServer.Add(Functions.GetFromStore, ObjectTypes.Wellbore);
+            capServer.Add(Functions.AddToStore, ObjectTypes.Wellbore);
+            capServer.Add(Functions.UpdateInStore, ObjectTypes.Wellbore);
+            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Wellbore);
+        }
+
+        /// <summary>
+        /// Sets the default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        protected override void SetDefaultValues(Wellbore dataObject)
+        {
+            dataObject.Uid = dataObject.NewUid();
+            dataObject.CommonData = dataObject.CommonData.Create();
         }
     }
 }

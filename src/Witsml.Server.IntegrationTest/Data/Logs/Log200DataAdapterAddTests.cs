@@ -38,10 +38,10 @@ namespace PDS.Witsml.Server.Data.Logs
         private Log200Generator LogGenerator;
         private IContainer Container;
         private IDatabaseProvider Provider;
-        private IEtpDataAdapter<Well> WellAdapter;
-        private IEtpDataAdapter<Wellbore> WellboreAdapter;
-        private IEtpDataAdapter<Log> LogAdapter;
-        private IEtpDataAdapter<ChannelSet> ChannelSetAdapter;
+        private IWitsmlDataAdapter<Well> WellAdapter;
+        private IWitsmlDataAdapter<Wellbore> WellboreAdapter;
+        private IWitsmlDataAdapter<Log> LogAdapter;
+        private IWitsmlDataAdapter<ChannelSet> ChannelSetAdapter;
 
         private Well Well1;
         private Wellbore Wellbore1;
@@ -59,10 +59,10 @@ namespace PDS.Witsml.Server.Data.Logs
             Container = ContainerFactory.Create();
             Provider = new DatabaseProvider(new MongoDbClassMapper());
 
-            WellAdapter = new Well200DataAdapter(Provider) { Container = Container };
-            WellboreAdapter = new Wellbore200DataAdapter(Provider) { Container = Container };
-            ChannelSetAdapter = new ChannelSet200DataAdapter(Provider, new ChannelDataChunkAdapter(Provider)) { Container = Container };
-            LogAdapter = new Log200DataAdapter(Provider, ChannelSetAdapter) { Container = Container };
+            WellAdapter = new Well200DataAdapter(Provider);
+            WellboreAdapter = new Wellbore200DataAdapter(Provider);
+            ChannelSetAdapter = new ChannelSet200DataAdapter(Provider, new ChannelDataChunkAdapter(Provider));
+            LogAdapter = new Log200DataAdapter(Provider, ChannelSetAdapter);
 
             Well1 = new Well() { Citation = DevKit.Citation("Well 01"), TimeZone = DevKit.TimeZone, Uuid = DevKit.Uid() };
             Well1.GeographicLocationWGS84 = DevKit.Location();
@@ -99,9 +99,9 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log_can_be_added_with_uuid()
         {
-            WellAdapter.Put(DevKit.Parser(Well1));
-            WellboreAdapter.Put(DevKit.Parser(Wellbore1));
-            LogAdapter.Put(DevKit.Parser(Log1));
+            WellAdapter.Add(DevKit.Parser(Well1), Well1);
+            WellboreAdapter.Add(DevKit.Parser(Wellbore1), Wellbore1);
+            LogAdapter.Add(DevKit.Parser(Log1), Log1);
 
             var log1 = LogAdapter.Get(Log1.GetUri());
 
@@ -111,13 +111,12 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log_can_be_added_without_uuid()
         {
-            WellAdapter.Put(DevKit.Parser(Well1));
-            WellboreAdapter.Put(DevKit.Parser(Wellbore1));
-            LogAdapter.Put(DevKit.Parser(Log2));
+            WellAdapter.Add(DevKit.Parser(Well1), Well1);
+            WellboreAdapter.Add(DevKit.Parser(Wellbore1), Wellbore1);
+            LogAdapter.Add(DevKit.Parser(Log2), Log2);
 
             var log2 = Provider.GetDatabase().GetCollection<Log>(ObjectNames.Log200).AsQueryable()
-                .Where(x => x.Citation.Title == Log2.Citation.Title)
-                .FirstOrDefault();
+                .First(x => x.Citation.Title == Log2.Citation.Title);
 
             Assert.AreEqual(Log2.Citation.Title, log2.Citation.Title);
         }
@@ -131,9 +130,9 @@ namespace PDS.Witsml.Server.Data.Logs
             
             DevKit.CreateMockChannelSetData(channelSet, channelSet.Index);
 
-            WellAdapter.Put(DevKit.Parser(Well1));
-            WellboreAdapter.Put(DevKit.Parser(Wellbore1));
-            LogAdapter.Put(DevKit.Parser(Log1));
+            WellAdapter.Add(DevKit.Parser(Well1), Well1);
+            WellboreAdapter.Add(DevKit.Parser(Wellbore1), Wellbore1);
+            LogAdapter.Add(DevKit.Parser(Log1), Log1);
 
             var log1 = LogAdapter.Get(Log1.GetUri());
 
@@ -149,12 +148,12 @@ namespace PDS.Witsml.Server.Data.Logs
             channelSet.Index.Add(secondaryIndex);
 
             // Save the Well and Wellbore
-            WellAdapter.Put(DevKit.Parser(Well1));
-            WellboreAdapter.Put(DevKit.Parser(Wellbore1));
+            WellAdapter.Add(DevKit.Parser(Well1), Well1);
+            WellboreAdapter.Add(DevKit.Parser(Wellbore1), Wellbore1);
 
             // Generate 150 rows of data
             LogGenerator.GenerateChannelData(Log1.ChannelSet, numDataValue);
-            LogAdapter.Put(DevKit.Parser(Log1));
+            LogAdapter.Add(DevKit.Parser(Log1), Log1);
 
             var cda = new ChannelDataChunkAdapter(Provider);
 
@@ -184,12 +183,12 @@ namespace PDS.Witsml.Server.Data.Logs
             channelSet.Index.Add(secondaryIndex);
 
             // Save the Well and Wellbore
-            WellAdapter.Put(DevKit.Parser(Well1));
-            WellboreAdapter.Put(DevKit.Parser(Wellbore1));
+            WellAdapter.Add(DevKit.Parser(Well1), Well1);
+            WellboreAdapter.Add(DevKit.Parser(Wellbore1), Wellbore1);
 
             // Generate 150 rows of data
             LogGenerator.GenerateChannelData(LogDecreasing.ChannelSet, numDataValue);
-            LogAdapter.Put(DevKit.Parser(LogDecreasing));
+            LogAdapter.Add(DevKit.Parser(LogDecreasing), LogDecreasing);
 
             var cda = new ChannelDataChunkAdapter(Provider);
 
@@ -219,15 +218,13 @@ namespace PDS.Witsml.Server.Data.Logs
             channelSet.Index.Add(secondaryIndex);
 
             // Save the Well and Wellbore
-            WellAdapter.Put(DevKit.Parser(Well1));
-            WellboreAdapter.Put(DevKit.Parser(Wellbore1));
+            WellAdapter.Add(DevKit.Parser(Well1), Well1);
+            WellboreAdapter.Add(DevKit.Parser(Wellbore1), Wellbore1);
 
             // Generate 150 rows of data
             LogGenerator.GenerateChannelData(Log2.ChannelSet, numDataValue);
-            var response = LogAdapter.Put(DevKit.Parser(Log2));
+            var response = LogAdapter.Add(DevKit.Parser(Log2), Log2);
             Assert.AreEqual(ErrorCodes.Success, response.Code);
-
-            var uuidLog = response.Message;           
         }
     }
 }

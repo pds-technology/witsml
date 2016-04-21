@@ -27,7 +27,7 @@ namespace PDS.Witsml.Server.Data.Channels
     /// <summary>
     /// Defines a method that can be used to retrieve channel data.
     /// </summary>
-    public interface IChannelDataProvider : IEtpDataAdapter
+    public interface IChannelDataProvider
     {
         /// <summary>
         /// Gets the channel metadata for the specified data object URI.

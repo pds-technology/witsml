@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using Energistics.DataAccess;
+using Witsml200 = Energistics.DataAccess.WITSML200;
 using PDS.Witsml.Properties;
 
 namespace PDS.Witsml
@@ -28,6 +29,32 @@ namespace PDS.Witsml
     /// </summary>
     public static class Extensions
     {
+        /// <summary>
+        /// Initializes a new UID value if one was not specified.
+        /// </summary>
+        /// <typeparam name="T">The type of data object.</typeparam>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns>The supplied UID if not null; otherwise, a generated UID.</returns>
+        public static string NewUid<T>(this T dataObject) where T : IUniqueId
+        {
+            return string.IsNullOrEmpty(dataObject.Uid)
+                ? Guid.NewGuid().ToString()
+                : dataObject.Uid;
+        }
+
+        /// <summary>
+        /// Initializes a new UUID value if one was not specified.
+        /// </summary>
+        /// <typeparam name="T">The type of data object.</typeparam>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns>The supplied UUID if not null; otherwise, a generated UID.</returns>
+        public static string NewUuid<T>(this T dataObject) where T : Witsml200.ComponentSchemas.AbstractObject
+        {
+            return string.IsNullOrEmpty(dataObject.Uuid)
+                ? Guid.NewGuid().ToString()
+                : dataObject.Uuid;
+        }
+
         /// <summary>
         /// Gets the description associated with the specified WITSML error code.
         /// </summary>

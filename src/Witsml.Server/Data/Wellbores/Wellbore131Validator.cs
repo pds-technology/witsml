@@ -26,7 +26,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// <summary>
     /// Provides validation for <see cref="Wellbore" /> data objects.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Energistics.DataAccess.WITSML131.Wellbore}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Wellbore}" />
     [Export(typeof(IDataObjectValidator<Wellbore>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class Wellbore131Validator : DataObjectValidator<Wellbore>

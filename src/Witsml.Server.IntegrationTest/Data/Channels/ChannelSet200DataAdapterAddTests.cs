@@ -21,7 +21,6 @@ using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Framework;
 using PDS.Witsml.Data.Logs;
 
 namespace PDS.Witsml.Server.Data.Channels
@@ -31,9 +30,8 @@ namespace PDS.Witsml.Server.Data.Channels
     {
         private DevKit200Aspect DevKit;
         private Log200Generator LogGenerator;
-        private IContainer Container;
         private IDatabaseProvider Provider;
-        private IEtpDataAdapter<ChannelSet> ChannelSetAdapter;
+        private IWitsmlDataAdapter<ChannelSet> ChannelSetAdapter;
         private ChannelDataChunkAdapter ChunkAdapter;
         private ChannelSet ChannelSet;
 
@@ -42,11 +40,10 @@ namespace PDS.Witsml.Server.Data.Channels
         {
             DevKit = new DevKit200Aspect();
             LogGenerator = new Log200Generator();
-            Container = ContainerFactory.Create();
             Provider = new DatabaseProvider(new MongoDbClassMapper());
 
-            ChunkAdapter = new ChannelDataChunkAdapter(Provider) { Container = Container };
-            ChannelSetAdapter = new ChannelSet200DataAdapter(Provider, ChunkAdapter) { Container = Container };
+            ChunkAdapter = new ChannelDataChunkAdapter(Provider);
+            ChannelSetAdapter = new ChannelSet200DataAdapter(Provider, ChunkAdapter);
 
             var log = new Log();
             var mdChannelIndex = LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
@@ -58,7 +55,7 @@ namespace PDS.Witsml.Server.Data.Channels
         [TestMethod]
         public void ChannelSet_can_be_added_with_depth_data()
         {
-            var result = ChannelSetAdapter.Put(DevKit.Parser(ChannelSet));
+            var result = ChannelSetAdapter.Add(DevKit.Parser(ChannelSet), ChannelSet);
             Assert.AreEqual(ErrorCodes.Success, result.Code);
         }
 
@@ -66,7 +63,7 @@ namespace PDS.Witsml.Server.Data.Channels
         public void ChannelSet_can_be_updated_with_middle_depth_data()
         {
             // Create
-            var result = ChannelSetAdapter.Put(DevKit.Parser(ChannelSet));
+            var result = ChannelSetAdapter.Add(DevKit.Parser(ChannelSet), ChannelSet);
             Assert.AreEqual(ErrorCodes.Success, result.Code);
 
             ChannelSet.Data = new ChannelData();
@@ -81,7 +78,7 @@ namespace PDS.Witsml.Server.Data.Channels
                         ]";
 
             // Update
-            result = ChannelSetAdapter.Put(DevKit.Parser(ChannelSet));
+            result = ChannelSetAdapter.Update(DevKit.Parser(ChannelSet), ChannelSet);
             Assert.AreEqual(ErrorCodes.Success, result.Code);
         }
     }

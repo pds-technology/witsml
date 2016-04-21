@@ -18,17 +18,50 @@
 
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML141;
+using PDS.Framework;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
+    [Export(typeof(IEtpDataProvider))]
+    [Export(typeof(IWitsml141Configuration))]
+    [Export141(ObjectTypes.Well, typeof(IEtpDataProvider))]
     [Export141(ObjectTypes.Well, typeof(IWitsmlDataProvider))]
-    [Export141(ObjectTypes.Well, typeof(IWitsmlDataWriter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Well141DataProvider : WitsmlDataProvider<WellList, Well>
+    public class Well141DataProvider : WitsmlDataProvider<WellList, Well>, IWitsml141Configuration
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Well141DataProvider"/> class.
+        /// </summary>
+        /// <param name="container">The composition container.</param>
+        /// <param name="dataAdapter">The data adapter.</param>
         [ImportingConstructor]
-        public Well141DataProvider(IWitsmlDataAdapter<Well> dataAdapter) : base(dataAdapter)
+        public Well141DataProvider(IContainer container, IWitsmlDataAdapter<Well> dataAdapter) : base(container, dataAdapter)
         {
+        }
+
+        /// <summary>
+        /// Gets the supported capabilities for the <see cref="Well"/> object.
+        /// </summary>
+        /// <param name="capServer">The capServer instance.</param>
+        public void GetCapabilities(CapServer capServer)
+        {
+            Logger.DebugFormat("Getting capabilities for server '{0}'.", capServer.Name);
+
+            capServer.Add(Functions.GetFromStore, ObjectTypes.Well);
+            capServer.Add(Functions.AddToStore, ObjectTypes.Well);
+            capServer.Add(Functions.UpdateInStore, ObjectTypes.Well);
+            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Well);
+        }
+
+        /// <summary>
+        /// Sets the default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        protected override void SetDefaultValues(Well dataObject)
+        {
+            dataObject.Uid = dataObject.NewUid();
+            dataObject.CommonData = dataObject.CommonData.Create();
         }
     }
 }

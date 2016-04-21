@@ -37,10 +37,17 @@ namespace PDS.Witsml.Server.Data
         Functions Function { get; }
 
         /// <summary>
+        /// Gets the input template parser.
+        /// </summary>
+        /// <value>The input template parser.</value>
+        WitsmlQueryParser Parser { get; }
+
+        /// <summary>
         /// Validates the specified data object while executing a WITSML API method.
         /// </summary>
         /// <param name="function">The WITSML API method.</param>
+        /// <param name="parser">The input template parser.</param>
         /// <param name="dataObject">The data object.</param>
-        void Validate(Functions function, T dataObject);
+        void Validate(Functions function, WitsmlQueryParser parser, T dataObject);
     }
 }
