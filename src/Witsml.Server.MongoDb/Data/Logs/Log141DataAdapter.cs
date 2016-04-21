@@ -96,11 +96,11 @@ namespace PDS.Witsml.Server.Data.Logs
         public override WitsmlResult Add(WitsmlQueryParser parser, Log dataObject)
         {
             // Extract Data                    
-            var reader = ExtractDataReaders(dataObject).FirstOrDefault();
+            var readers = ExtractDataReaders(dataObject);
 
             // Insert Log and Log Data
             InsertEntity(dataObject);
-            InsertLogData(dataObject, reader);
+            UpdateLogDataAndIndexRange(dataObject.GetUri(), readers);
 
             return new WitsmlResult(ErrorCodes.Success, dataObject.Uid);
         }
