@@ -266,29 +266,6 @@ namespace PDS.Witsml.Server.Data.Logs
             };
         }
 
-        private void SetDefaultValues(Log entity)
-        {
-            entity.Uid = entity.NewUid();
-            entity.CommonData = entity.CommonData.Create();
-
-            if (!entity.Direction.HasValue)
-            {
-                entity.Direction = LogIndexDirection.increasing;
-            }
-
-            var logCurves = entity.LogCurveInfo;
-            if (logCurves != null)
-            {
-                foreach (var logCurve in logCurves)
-                {
-                    if (string.IsNullOrWhiteSpace(logCurve.Uid))
-                        logCurve.Uid = logCurve.Mnemonic;
-                }
-
-                IndexCurveToFirst(logCurves, logCurves.Where(l => l.ColumnIndex == entity.IndexCurve.ColumnIndex).Select(l => l.Uid).FirstOrDefault());
-            }
-        }
-
         private ChannelDataReader ExtractDataReader(Log entity, Log existing = null)
         {
             if (existing == null)

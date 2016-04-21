@@ -22,7 +22,6 @@ using System.Linq;
 using System.Xml.Linq;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
-using log4net;
 using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Configuration
@@ -30,13 +29,11 @@ namespace PDS.Witsml.Server.Configuration
     /// <summary>
     /// Provides common WITSML server capabilities for data schema version 1.3.1.1.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Configuration.CapServerProvider{Energistics.DataAccess.WITSML131.CapServers}" />
+    /// <seealso cref="PDS.Witsml.Server.Configuration.CapServerProvider{CapServers}" />
     [Export(typeof(ICapServerProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class CapServer131Provider : CapServerProvider<Witsml131.CapServers>
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(CapServer131Provider));
-
         private const string Namespace131 = "http://www.witsml.org/schemas/131";
 
         /// <summary>
@@ -76,7 +73,7 @@ namespace PDS.Witsml.Server.Configuration
         {
             if (!Providers.Any())
             {
-                _log.WarnFormat("No WITSML configuration providers loaded for data schema version {0}", DataSchemaVersion);
+                Logger.WarnFormat("No WITSML configuration providers loaded for data schema version {0}", DataSchemaVersion);
                 return null;
             }
 

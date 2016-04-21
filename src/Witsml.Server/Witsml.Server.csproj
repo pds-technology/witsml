@@ -85,6 +85,7 @@
     <Compile Include="Configuration\ICapServerProvider.cs" />
     <Compile Include="Data\IEtpDataProviderOfT.cs" />
     <Compile Include="Data\Logs\Log200DataProvider.cs" />
+    <Compile Include="Data\Logs\LogExtensions.cs" />
     <Compile Include="Data\Wellbores\Wellbore200DataProvider.cs" />
     <Compile Include="Data\WitsmlDataProvider.cs" />
     <Compile Include="Data\EtpDataProvider.cs" />

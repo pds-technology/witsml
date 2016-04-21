@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System.ComponentModel.Composition;
+using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
@@ -73,9 +74,21 @@ namespace PDS.Witsml.Server.Data.Logs
             dataObject.Uid = dataObject.NewUid();
             dataObject.CommonData = dataObject.CommonData.Create();
 
+            // Ensure Direction
             if (!dataObject.Direction.HasValue)
             {
                 dataObject.Direction = LogIndexDirection.increasing;
+            }
+
+            if (dataObject.LogCurveInfo != null)
+            {
+                // Ensure UID
+                dataObject.LogCurveInfo
+                    .Where(x => string.IsNullOrWhiteSpace(x.Uid))
+                    .ForEach(x => x.Uid = x.Mnemonic?.Value);
+
+                // Ensure index curve is first
+                dataObject.LogCurveInfo.MoveToFirst(dataObject.IndexCurve);
             }
         }
     }

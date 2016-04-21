@@ -22,7 +22,6 @@ using System.Linq;
 using System.Xml.Linq;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
-using log4net;
 using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Configuration
@@ -30,14 +29,12 @@ namespace PDS.Witsml.Server.Configuration
     /// <summary>
     /// Provides common WITSML server capabilities for data schema version 1.4.1.1.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Configuration.CapServerProvider{Energistics.DataAccess.WITSML141.CapServers}" />
+    /// <seealso cref="PDS.Witsml.Server.Configuration.CapServerProvider{CapServers}" />
     [Export(typeof(ICapServerProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class CapServer141Provider : CapServerProvider<Witsml141.CapServers>
     {
-        private static readonly int MaxRequestLatestValues = Properties.Settings.Default.MaxDataNodes;
-        private static readonly ILog _log = LogManager.GetLogger(typeof(CapServer141Provider));
-
+        private static readonly int MaxRequestLatestValues = Settings.Default.MaxDataNodes;
         private const string Namespace141 = "http://www.witsml.org/schemas/1series";
 
         /// <summary>
@@ -120,7 +117,7 @@ namespace PDS.Witsml.Server.Configuration
         {
             if (!Providers.Any())
             {
-                _log.WarnFormat("No WITSML configuration providers loaded for data schema version {0}", DataSchemaVersion);
+                Logger.WarnFormat("No WITSML configuration providers loaded for data schema version {0}", DataSchemaVersion);
                 return null;
             }
 

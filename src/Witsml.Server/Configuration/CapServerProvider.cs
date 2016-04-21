@@ -30,11 +30,20 @@ namespace PDS.Witsml.Server.Configuration
     /// <seealso cref="PDS.Witsml.Server.Configuration.ICapServerProvider" />
     public abstract class CapServerProvider<T> : WitsmlValidator, ICapServerProvider
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(CapServerProvider<T>));
-
         private T _capServer;
         private XDocument _capServerDoc;
         private string _capServerXml;
+
+        protected CapServerProvider()
+        {
+            Logger = LogManager.GetLogger(GetType());
+        }
+
+        /// <summary>
+        /// Gets the logger.
+        /// </summary>
+        /// <value>The logger.</value>
+        protected ILog Logger { get; }
 
         /// <summary>
         /// Gets the data schema version.
@@ -74,13 +83,14 @@ namespace PDS.Witsml.Server.Configuration
         public override bool IsSupported(Functions function, string objectType)
         {
             var capServerDoc = GetCapServerDocument();
+            if (capServerDoc?.Root == null) return false;
+
             var ns = XNamespace.Get(capServerDoc.Root.CreateNavigator().GetNamespace(string.Empty));
 
             var supported = capServerDoc.Descendants(ns + "dataObject")
-                .Where(x => x.Value == objectType && x.Parent.Attribute("name").Value == "WMLS_" + function)
-                .Any();
+                .Any(x => x.Value == objectType && x.Parent != null && x.Parent.Attribute("name").Value == "WMLS_" + function);
 
-            _log.DebugFormat("Function: {0}; Data Object: {1}; IsSupported: {2}", function, objectType, supported);
+            Logger.DebugFormat("Function: {0}; Data Object: {1}; IsSupported: {2}", function, objectType, supported);
 
             return supported;
         }
