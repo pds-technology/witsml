@@ -144,7 +144,7 @@ namespace PDS.Witsml.Server
             var info = typeof(TList).GetProperty(typeof(TObject).Name);
             var list = New<TList>(x => info.SetValue(x, entityList));
             typeIn = wmlTypeIn ?? ObjectTypes.GetObjectType<TList>();
-            queryIn = WitsmlParser.ToXml(list);
+            queryIn = EnergisticsConverter.ObjectToXml(list); // WitsmlParser.ToXml(list);
         }
 
         public IUniqueId GetLogCurveInfoByUid(IEnumerable<IUniqueId> logCurveInfos, string uid)
