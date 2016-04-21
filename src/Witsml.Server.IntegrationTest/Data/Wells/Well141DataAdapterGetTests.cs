@@ -220,7 +220,7 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
-        public void Test_Well_Selection_Uid_ReturnElement_All()
+        public void WitsmlDataProvider_GetFromStore_Get_Full_Well()
         {
             var well = DevKit.CreateFullWell();
             var response = DevKit.Add<WellList, Well>(well);
@@ -236,6 +236,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var returnWell = result.FirstOrDefault();
            
             well.Uid = uid;
+            well.CommonData.DateTimeCreation = returnWell.CommonData.DateTimeCreation;
             well.CommonData.DateTimeLastChange = returnWell.CommonData.DateTimeLastChange;                        
             string wellXml = EnergisticsConverter.ObjectToXml(well);
             string returnXml = EnergisticsConverter.ObjectToXml(returnWell);

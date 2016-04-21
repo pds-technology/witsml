@@ -34,6 +34,9 @@ namespace PDS.Witsml.Data.Channels
 
         public static ChannelDataReader GetReader(this Witsml131.Log log)
         {
+            if (log.LogData == null || !log.LogData.Any())
+                return null;
+
             var isTimeIndex = log.IndexType.GetValueOrDefault() == Witsml131.ReferenceData.LogIndexType.datetime;
             var increasing = log.Direction.GetValueOrDefault() == Witsml131.ReferenceData.LogIndexDirection.increasing;
 
@@ -57,6 +60,9 @@ namespace PDS.Witsml.Data.Channels
 
             foreach (var logData in log.LogData)
             {
+                if (logData.Data == null || !logData.Data.Any())
+                    continue;
+
                 // Split index curve from other value curves
                 var indexCurve = log.LogCurveInfo.FirstOrDefault(x => x.Mnemonic.Value.EqualsIgnoreCase(log.IndexCurve));
                 var mnemonics = ChannelDataReader.Split(logData.MnemonicList).Skip(1).ToArray();
@@ -75,12 +81,19 @@ namespace PDS.Witsml.Data.Channels
 
             foreach (var channelSet in log.ChannelSet)
             {
-                yield return channelSet.GetReader();
+                var reader = channelSet.GetReader();
+                if (reader == null)
+                    continue;
+
+                yield return reader;
             }
         }
 
         public static ChannelDataReader GetReader(this Witsml200.ChannelSet channelSet)
         {
+            if (channelSet.Data == null || string.IsNullOrWhiteSpace(channelSet.Data.Data))
+                return null;
+
             // Not including index channels with value channels
             var mnemonics = channelSet.Channel.Select(x => x.Mnemonic).ToArray();
             var units = channelSet.Channel.Select(x => x.UoM).ToArray();
