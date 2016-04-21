@@ -43,7 +43,7 @@ namespace PDS.Witsml.Server.Data.Channels
     public class ChannelSet200DataAdapter : MongoDbDataAdapter<ChannelSet>, IChannelDataProvider
     {
         private readonly ChannelDataChunkAdapter _channelDataChunkAdapter;
-        private readonly string _utcFormat = "u";
+        private readonly string _utcFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffK";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelSet200DataAdapter" /> class.
