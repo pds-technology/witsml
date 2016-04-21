@@ -145,7 +145,7 @@
     </logCurveInfo>
     <logData>
       <mnemonicList>DEPT,CALD,TEND,PEFZ,RHOZ,NPOR,HDRA,GRS,DTSM,GRR,TENR,SPR,HLLD,HLLS,HRLD</mnemonicList>
-      <unitList>f,in,lbs,b/e,g/c3,dec,g/c3,gapi,us/f,gapi,lbs,mv,ohmm,ohmm,ohmm</unitList>
+      <unitList>ft,in,lbf,b/elec,g/cm3,Euc,g/cm3,gAPI,us/ft,gAPI,lbf,mV,ohm.m,ohm.m,ohm.m</unitList>
       <data>60.0000,-999.2500,-999.2500,-999.2500,-999.2500,-999.2500,-999.2500,-999.2500,-999.2500,55.7340,-999.2500,-999.2500,-999.2500,-999.2500,-999.2500</data>
       <data>60.5000,-999.2500,-999.2500,-999.2500,-999.2500,-999.2500,-999.2500,-999.2500,-999.2500,57.9620,-999.2500,-999.2500,-999.2500,-999.2500,-999.2500</data>
       <data>61.0000,-999.2500,-999.2500,-999.2500,-999.2500,-999.2500,-999.2500,-999.2500,-999.2500,61.3040,-999.2500,-999.2500,-999.2500,-999.2500,-999.2500</data>
