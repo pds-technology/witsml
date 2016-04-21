@@ -1575,6 +1575,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
+        [Ignore, Description("Not Implemented")]
         public void Test_error_code_443_invalid_unit_of_measure_value()
         {
 

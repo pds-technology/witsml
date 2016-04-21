@@ -121,29 +121,31 @@ namespace PDS.Witsml.Linq
             }
         }
 
-        [TestMethod]
-        public void Query_for_log_header()
-        {
-            var log = _context.Logs
-                .Include(x => x.LogCurveInfo = _context.One<LogCurveInfo>())
-                .With(OptionsIn.ReturnElements.HeaderOnly)
-                .Where(x => x.NameWell == "Well 0" && x.NameWellbore == "Wellbore 0-1" && x.Name == "Depth Log 0-1")
-                .FirstOrDefault();
+        //[TestMethod]
+        //[Ignore, Description("Invalid Test")]
+        //public void Query_for_log_header()
+        //{
+        //    var log = _context.Logs
+        //        .Include(x => x.LogCurveInfo = _context.One<LogCurveInfo>())
+        //        .With(OptionsIn.ReturnElements.HeaderOnly)
+        //        .Where(x => x.NameWell == "Well 0" && x.NameWellbore == "Wellbore 0-1" && x.Name == "Depth Log 0-1")
+        //        .FirstOrDefault();
 
-            Console.WriteLine("{0} - Uid: {1}; Name: {2}", log.GetType().Name, log.Uid, log.Name);
-        }
+        //    Console.WriteLine("{0} - Uid: {1}; Name: {2}", log.GetType().Name, log.Uid, log.Name);
+        //}
 
-        [TestMethod]
-        public void Query_for_log_data()
-        {
-            var log = _context.Logs
-                .Include(x => x.LogData = _context.One<LogData>())
-                .With(OptionsIn.ReturnElements.DataOnly)
-                .Where(x => x.NameWell == "Well 0" && x.NameWellbore == "Wellbore 0-1" && x.Name == "Time Log 0-1" &&
-                            x.StartIndex == new GenericMeasure(0, "m") && x.EndIndex == new GenericMeasure(1000, "m"))
-                .FirstOrDefault();
+        //[TestMethod]
+        //[Ignore, Description("Invalid Test")]
+        //public void Query_for_log_data()
+        //{
+        //    var log = _context.Logs
+        //        .Include(x => x.LogData = _context.One<LogData>())
+        //        .With(OptionsIn.ReturnElements.DataOnly)
+        //        .Where(x => x.NameWell == "Well 0" && x.NameWellbore == "Wellbore 0-1" && x.Name == "Time Log 0-1" &&
+        //                    x.StartIndex == new GenericMeasure(0, "m") && x.EndIndex == new GenericMeasure(1000, "m"))
+        //        .FirstOrDefault();
 
-            Console.WriteLine("{0} - Uid: {1}; Name: {2}", log.GetType().Name, log.Uid, log.Name);
-        }
+        //    Console.WriteLine("{0} - Uid: {1}; Name: {2}", log.GetType().Name, log.Uid, log.Name);
+        //}
     }
 }

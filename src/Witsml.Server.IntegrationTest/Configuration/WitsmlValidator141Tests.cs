@@ -81,7 +81,7 @@ namespace PDS.Witsml.Server.Configuration
         }
 
         [TestMethod]
-        [Ignore]
+        [Ignore, Description("Not Implemented")]
         public void WitsmlValidator_GetFromStore_ReturnElement_StationLocationOnly_For_Trajectory()
         {
             var query = new Trajectory { Uid = "", Name = "" };
@@ -100,7 +100,7 @@ namespace PDS.Witsml.Server.Configuration
         }
 
         [TestMethod]
-        [Ignore]
+        [Ignore, Description("Not Implemented")]
         public void WitsmlValidator_GetFromStore_ReturnElement_LatestChangeOnly_For_ChangeLog()
         {
             var query = new ChangeLog { Uid = "", NameWell = ""};

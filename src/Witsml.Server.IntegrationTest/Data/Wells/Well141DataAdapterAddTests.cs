@@ -224,6 +224,7 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
+        [Ignore, Description("Not Implemented")]
         public void Test_error_code_443_invalid_unit_of_measure_value()
         {
             string xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
