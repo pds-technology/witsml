@@ -59,23 +59,21 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>Queried objects.</returns>
         public override WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
         {
-            var logcurveInfos = GetLogCurveInfoMnemonics(parser).ToList();
-            var mnemonicList = GetLogDataMnemonics(parser).ToList();
-
+            
             if (OptionsIn.ReturnElements.Requested.Equals(parser.ReturnElements()))
             {
-                if (logcurveInfos.Any() && mnemonicList.Any() && !(logcurveInfos.All(x => mnemonicList.Contains(x)) && mnemonicList.All(y => logcurveInfos.Contains(y))))
+                var logCurveInfoMnemonics = GetLogCurveInfoMnemonics(parser).ToList();
+                var mnemonicList = GetLogDataMnemonics(parser).ToList();
+
+                if (logCurveInfoMnemonics.Any() && mnemonicList.Any() && !(logCurveInfoMnemonics.All(x => mnemonicList.Contains(x)) && mnemonicList.All(y => logCurveInfoMnemonics.Contains(y))))
                 {
                     throw new WitsmlException(ErrorCodes.ColumnIdentifiersNotSame);
                 }
-
-                if (parser.Contains("logCurveInfo"))
+               
+                var logCurveInfos = parser.Properties("logCurveInfo").ToArray();
+                if (logCurveInfoMnemonics.Count() != logCurveInfos.Count())
                 {
-                    var properties = parser.Properties("logCurveInfo").ToArray();
-                    if (properties.Any(x => x.IsEmpty))
-                    {
-                        throw new WitsmlException(ErrorCodes.MissingMnemonicElement);
-                    }
+                    throw new WitsmlException(ErrorCodes.MissingMnemonicElement);
                 }
 
                 if (parser.Contains("logData") && !mnemonicList.Any())
