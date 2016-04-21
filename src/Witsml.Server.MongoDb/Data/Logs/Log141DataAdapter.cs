@@ -64,7 +64,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             if (OptionsIn.ReturnElements.Requested.Equals(parser.ReturnElements()))
             {
-                if (!(logcurveInfos.All(x => mnemonicList.Contains(x) && mnemonicList.All(y => logcurveInfos.Contains(y)))))
+                if (logcurveInfos.Any() && mnemonicList.Any() && !(logcurveInfos.All(x => mnemonicList.Contains(x)) && mnemonicList.All(y => logcurveInfos.Contains(y))))
                 {
                     throw new WitsmlException(ErrorCodes.ColumnIdentifiersNotSame);
                 }
