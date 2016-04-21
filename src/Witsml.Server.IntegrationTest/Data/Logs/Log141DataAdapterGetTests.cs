@@ -521,6 +521,86 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
+        public void LogDataAdapter_GetFromStore_Increasing_Time_RequestLatestValue_OptionsIn()
+        {
+            var response = DevKit.Add<WellList, Well>(_well);
+
+            _wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+
+            _log.UidWell = _wellbore.UidWell;
+            _log.UidWellbore = response.SuppMsgOut;
+
+            //var row = 10;
+            DevKit.InitHeader(_log, LogIndexType.datetime, increasing: true);
+            DevKit.InitDataMany(_log, DevKit.Mnemonics(_log), DevKit.Units(_log), numRows: 1,factor: 1, isDepthLog: false, hasEmptyChannel: false, increasing: true);
+
+            // Reset for custom LogData
+            var logData = _log.LogData.First();
+            logData.Data.Clear();
+
+            logData.Data.Add("2012-07-26T15:17:20.0000000+00:00,1,0");
+            logData.Data.Add("2012-07-26T15:17:30.0000000+00:00,2,1");
+            logData.Data.Add("2012-07-26T15:17:40.0000000+00:00,,2");
+            logData.Data.Add("2012-07-26T15:17:50.0000000+00:00,,3");
+
+            // Add a decreasing log with several values
+            response = DevKit.Add<LogList, Log>(_log);
+
+            // Assert that the log was added successfully
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var query = new Log
+            {
+                Uid = uidLog,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore,
+            };
+
+            var result = DevKit.Query<LogList, Log>(
+                query,
+                ObjectTypes.Log, null, OptionsIn.ReturnElements.All + ';' +
+                OptionsIn.RequestLatestValues.Eq(1)); // Request the latest 1 values (for each channel)
+
+
+
+            // Verify that a Log was returned with the results
+            Assert.IsNotNull(result, "No results returned from Log query");
+            Assert.IsNotNull(result.First(), "No Logs returned in results from Log query");
+
+            var logInfos = result.First().LogCurveInfo;
+            Assert.AreEqual(_log.LogCurveInfo.Count, logInfos.Count, "There should be 3 LogCurveInfos");
+
+            // Verify that a LogData element was returned with the results.
+            var queryLogData = result.First().LogData;
+            Assert.IsTrue(queryLogData != null && queryLogData.First() != null, "No LogData returned in results from Log query");
+
+            // Verify that data rows were returned with the LogData
+            var queryData = queryLogData.First().Data;
+            Assert.IsTrue(queryData != null && queryData.Count > 0, "No data returned in results from Log query");
+
+            // Verify that only the rows of data (referenced above) for index values 96 and 91 were returned 
+            //... in order to get the latest 1 value for each channel.
+            Assert.AreEqual(2, queryData.Count, "Only rows for index values 4,5,9,10,14 and 15 should be returned.");
+            Assert.AreEqual("2012-07-26T15:17:30.0000000+00:00", queryData[0].Split(',')[0], "The first data row should be for index value 2012-07-26T15:17:30.0000000+00:00");
+            Assert.AreEqual("2012-07-26T15:17:50.0000000+00:00", queryData[1].Split(',')[0], "The last data row should be for index value 2012-07-26T15:17:50.0000000+00:00");
+
+            // Validate the Min and Max of each LogCurveInfo #1
+            Assert.AreEqual(logInfos[0].MinDateTimeIndex.Value, new Energistics.DataAccess.Timestamp(DateTimeOffset.Parse(queryData[0].Split(',')[0])));
+            Assert.AreEqual(logInfos[0].MaxDateTimeIndex.Value, new Energistics.DataAccess.Timestamp(DateTimeOffset.Parse(queryData[1].Split(',')[0])));
+
+            // Validate the Min and Max of each LogCurveInfo #2
+            Assert.AreEqual(logInfos[1].MinDateTimeIndex.Value, new Energistics.DataAccess.Timestamp(DateTimeOffset.Parse(queryData[0].Split(',')[0])));
+            Assert.AreEqual(logInfos[1].MaxDateTimeIndex.Value, new Energistics.DataAccess.Timestamp(DateTimeOffset.Parse(queryData[0].Split(',')[0])));
+
+            // Validate the Min and Max of each LogCurveInfo #3
+            Assert.AreEqual(logInfos[2].MinDateTimeIndex.Value, new Energistics.DataAccess.Timestamp(DateTimeOffset.Parse(queryData[0].Split(',')[0])));
+            Assert.AreEqual(logInfos[2].MaxDateTimeIndex.Value, new Energistics.DataAccess.Timestamp(DateTimeOffset.Parse(queryData[1].Split(',')[0])));
+        }
+
+        [TestMethod]
         public void LogDataAdapter_GetFromStore_Error_402_MaxReturnNodes_Not_Greater_Than_Zero()
         {
             var result = DevKit.Get<LogList, Log>(DevKit.List(_log), ObjectTypes.Log, optionsIn: "maxReturnNodes=0");
