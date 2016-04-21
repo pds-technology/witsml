@@ -56,7 +56,7 @@ namespace PDS.Witsml.Linq
         public void Get_server_capabilities()
         {
             var response = _context.Connection.GetCap<CapServers>(OptionsIn.DataVersion.Version141);
-            Console.WriteLine(WitsmlParser.ToXml(response));
+            Console.WriteLine(EnergisticsConverter.ObjectToXml(response));
         }
 
         [TestMethod]

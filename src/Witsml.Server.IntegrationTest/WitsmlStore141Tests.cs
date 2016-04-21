@@ -273,7 +273,7 @@ namespace PDS.Witsml.Server
         public void Test_error_code_401_missing_plural_root_element_xmlIn()
         {
             var list = new LogList();
-            var xmlIn = WitsmlParser.ToXml(list).Replace("logs", "log");
+            var xmlIn = EnergisticsConverter.ObjectToXml(list).Replace("logs", "log");
             var response = DevKit.GetFromStore(ObjectTypes.Log, xmlIn, null, null);
 
             Assert.IsNotNull(response);
@@ -286,7 +286,7 @@ namespace PDS.Witsml.Server
         {
             var client = new CapClient { ApiVers = "1.4.1.1", SchemaVersion = "1.4.1.1,1.3.1.1" };
             var clients = new CapClients { Version = "1.4.1.1", CapClient = client };
-            var capabilitiesIn = WitsmlParser.ToXml(clients);
+            var capabilitiesIn = EnergisticsConverter.ObjectToXml(clients);
             var well = new Well { Name = "Well-to-add-invalid-schema-version" };
             var response = DevKit.Add<WellList, Well>(well, capClient: capabilitiesIn);
 
@@ -320,7 +320,7 @@ namespace PDS.Witsml.Server
         {
             var client = new CapClient { ApiVers = "1.3.1.1", SchemaVersion = "1.3.1.1" };
             var clients = new CapClients { Version = "1.4.1.1", CapClient = client };
-            var capabilitiesIn = WitsmlParser.ToXml(clients);
+            var capabilitiesIn = EnergisticsConverter.ObjectToXml(clients);
             var well = new Well { Name = DevKit.Name("Well-to-add-apiVers-not-match"), TimeZone = DevKit.TimeZone };
             var response = DevKit.Add<WellList, Well>(well, capClient: capabilitiesIn);
 
@@ -334,7 +334,7 @@ namespace PDS.Witsml.Server
         {
             var client = new CapClient { ApiVers = "1.4.1.1"};
             var clients = new CapClients { Version = "1.4.x.y", CapClient = client };
-            var capabilitiesIn = WitsmlParser.ToXml(clients);
+            var capabilitiesIn = EnergisticsConverter.ObjectToXml(clients);
             var well = new Well { Name = DevKit.Name("Well-to-add-unsupported-schema-version"), TimeZone = DevKit.TimeZone };
             var response = DevKit.Add<WellList, Well>(well, capClient: capabilitiesIn);
 
@@ -348,7 +348,7 @@ namespace PDS.Witsml.Server
         {
             var client = new CapClient { ApiVers = "1.4.1.1", SchemaVersion = "1.3.1.1" };
             var clients = new CapClients { Version = "1.4.1.1", CapClient = client };
-            var capabilitiesIn = WitsmlParser.ToXml(clients);
+            var capabilitiesIn = EnergisticsConverter.ObjectToXml(clients);
             var well = new Well { Name = DevKit.Name("Well-to-add-schema-version-not-match"), TimeZone = DevKit.TimeZone };
             var response = DevKit.Add<WellList, Well>(well, capClient: capabilitiesIn);
 

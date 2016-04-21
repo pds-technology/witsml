@@ -18,6 +18,7 @@
 
 using System;
 using System.Linq;
+using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML200;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Driver;
@@ -62,7 +63,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well_can_be_serialized_to_xml()
         {
-            var xml = WitsmlParser.ToXml(Well1);
+            var xml = EnergisticsConverter.ObjectToXml(Well1);
             Console.WriteLine(xml);
             Assert.IsNotNull(xml);
         }
