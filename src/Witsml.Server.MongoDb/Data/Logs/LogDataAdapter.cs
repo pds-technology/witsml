@@ -493,7 +493,7 @@ namespace PDS.Witsml.Server.Data.Logs
             for (var i = 0; i < channelValues.Count; i++)
             {
                 // For the current channel, if the requested value count has not already been reached and then
-                ///... current channel value is not null or blank then a value is being added.
+                // ... current channel value is not null or blank then a value is being added.
                 valueAdded =
                     requestedValueCount[i] < requestLatestValue &&
                     channelValues[i] != null;
@@ -777,22 +777,6 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             return logHeaderUpdate;
-        }
-
-        protected void IndexCurveToFirst(List<TChild> logCurves, string uid)
-        {
-            if (string.IsNullOrWhiteSpace(uid))
-                return;
-
-            if (logCurves[0].Uid.EqualsIgnoreCase(uid))
-                return;
-
-            var indexCurve = logCurves.FirstOrDefault(l => l.Uid.EqualsIgnoreCase(uid));
-            if (indexCurve == null)
-                return;
-
-            logCurves.Remove(indexCurve);
-            logCurves.Insert(0, indexCurve);
         }
 
         protected abstract bool IsIncreasing(T log);
