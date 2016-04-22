@@ -122,7 +122,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Test_error_code_447_duplicate_column_identifiers_in_LogData_MnemonicList()
+        public void Log141Validator_AddToStore_Error_450_mnemonics_not_unique()
         {
             var response = DevKit.Add<WellList, Well>(Well);
 
@@ -147,7 +147,7 @@ namespace PDS.Witsml.Server.Data.Logs
             log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics);
 
             response = DevKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.DuplicateColumnIdentifiers, response.Result);
+            Assert.AreEqual((short)ErrorCodes.MnemonicsNotUnique, response.Result);
         }
 
         [TestMethod]
@@ -1204,6 +1204,100 @@ namespace PDS.Witsml.Server.Data.Logs
             var result = DevKit.Get<LogList, Log>(DevKit.List(Log), ObjectTypes.Log, null, optionsIn: OptionsIn.ReturnElements.Requested);
 
             Assert.AreEqual((short)ErrorCodes.MixedStructuralRangeIndices, result.Result);
+        }
+
+        [TestMethod]
+        public void Log141Validator_UpdateInStore_Error_450_mnemonics_not_unique()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+            Wellbore.UidWell = response.SuppMsgOut;
+
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            var uidWellbore = response.SuppMsgOut;
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = uidWellbore,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var update = new Log
+            {
+                Uid = uidLog,
+                UidWell = Wellbore.UidWell,
+                UidWellbore = uidWellbore,
+            };
+
+            update.LogData = new List<LogData> { new LogData
+            {
+                MnemonicList = "MD,MD,GR",
+                UnitList = "m,m,gAPI",
+                Data = new List<string> {"1,1,1" }
+            } };
+
+            var updateResponse = DevKit.Update<LogList, Log>(update);
+            Assert.AreEqual((short)ErrorCodes.MnemonicsNotUnique, updateResponse.Result);
+        }
+
+        [TestMethod]
+        public void Log141Validator_AddToStore_Error_481_Well_Missing()
+        {
+            var log = new Log
+            {
+                UidWell = DevKit.Uid(),
+                UidWellbore = DevKit.Uid(),
+                NameWell = "Well 01",
+                NameWellbore = "Wellbore 01",
+                Name = "Log missing well parent"
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            var response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.MissingParentDataObject, response.Result);
+        }
+
+        [TestMethod]
+        public void Log141Validator_AddToStore_Error_405_Log_Already_Exists()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+            Wellbore.UidWell = response.SuppMsgOut;
+
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            var uidWellbore = response.SuppMsgOut;
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = uidWellbore,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            log.Uid = uidLog;
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.DataObjectUidAlreadyExists, response.Result);
         }
     }
 }

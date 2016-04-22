@@ -355,7 +355,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         }
                         else if (mnemonics.Distinct().Count() < mnemonics.Count())
                         {
-                            return new ValidationResult(ErrorCodes.DuplicateColumnIdentifiers.ToString(), new[] { "LogData", "MnemonicList" });
+                            return new ValidationResult(ErrorCodes.MnemonicsNotUnique.ToString(), new[] { "LogData", "MnemonicList" });
                         }
                         else if (mnemonics.Any(m => _illegalColumnIdentifiers.Any(c => m.Contains(c))))
                         {
