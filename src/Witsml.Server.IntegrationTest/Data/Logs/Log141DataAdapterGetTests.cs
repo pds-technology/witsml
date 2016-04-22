@@ -635,49 +635,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void LogDataAdapter_GetFromStore_Error_460_Column_Identifiers_In_Header_And_Data_Not_Same()
-        {
-            _log.LogCurveInfo = new List<LogCurveInfo>();
-            _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "MD", Mnemonic = new ShortNameStruct("MD") });
-            _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "GR", Mnemonic = new ShortNameStruct("GR") });
-
-            _log.LogData = new List<LogData>() { new LogData() { MnemonicList = "MD" } };
-
-            var list = DevKit.New<LogList>(x => x.Log = DevKit.List(_log));
-            var queryIn = WitsmlParser.ToXml(list);
-            var result = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
-
-            Assert.AreEqual((short)ErrorCodes.ColumnIdentifiersNotSame, result.Result);
-        }
-
-        [TestMethod]
-        public void LogDataAdapter_GetFromStore_Error_461_Missing_Mnemonic_Element_In_Column_Definition()
-        {
-            _log.LogCurveInfo = new List<LogCurveInfo>();
-            _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "MD" });
-
-            var list = DevKit.New<LogList>(x => x.Log = DevKit.List(_log));
-            var queryIn = WitsmlParser.ToXml(list);
-            var result = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
-           
-            Assert.AreEqual((short)ErrorCodes.MissingMnemonicElement, result.Result);
-        }
-
-        [TestMethod]
-        public void LogDataAdapter_GetFromStore_Error_462_Missing_MnemonicList_In_Data_Section()
-        {
-            string queryIn = "<logs version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
-                     "<log uidWell = \"abc\" uidWellbore = \"abc\" uid = \"abc\">" + Environment.NewLine +
-                     "    <logData/>" + Environment.NewLine +
-                     "</log>" + Environment.NewLine +
-                     "</logs>";
-
-            var result = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
-
-            Assert.AreEqual((short)ErrorCodes.MissingMnemonicList, result.Result);
-        }
-
-        [TestMethod]
         public void LogDataAdapter_GetFromStore_Error_475_No_Subset_When_Getting_Growing_Object()
         {
             var response = DevKit.Add<WellList, Well>(_well);
