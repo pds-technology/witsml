@@ -70,52 +70,50 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>A collection of validation results.</returns>
         protected override IEnumerable<ValidationResult> ValidateForGet()
         {
-            // TODO: Use Parser to validate with support for multiple queries
-            yield break;
+            if ( (Parser.HasElements("startIndex") || Parser.HasElements("endIndex")) && (Parser.HasElements("startDateTimeIndex") || Parser.HasElements("endDateTimeIndex") ))
+            {
+                yield return new ValidationResult(ErrorCodes.MixedStructuralRangeIndices.ToString(), new[] { "StartIndex", "EndIndex", "StartDateTimeIndex", "EndDateTimeIndex" });
+            }
 
-            //if (OptionsIn.ReturnElements.DataOnly.Equals(parser.ReturnElements()) && logs.Count > 1)
-            //{
-            //    throw new WitsmlException(ErrorCodes.MissingSubsetOfGrowingDataObject);
-            //}
+            var logDatas = Parser.Properties("logData").ToArray();
+            if (logDatas.Length > 1)
+            {
+                yield return new ValidationResult(ErrorCodes.RecurringLogData.ToString(), new[] { "LogData", "LogData" });
+            }
 
-            //if (OptionsIn.ReturnElements.Requested.Equals(parser.ReturnElements()))
-            //{
-            //    var logCurveInfoMnemonics = GetLogCurveInfoMnemonics(parser).ToList();
-            //    var mnemonicList = GetLogDataMnemonics(parser).ToList();
+            var mnemonicList = Parser.GetLogDataMnemonics().ToArray();
+            if (logDatas.Length == 1)
+            {
+                var logData = logDatas.First();
+                if (mnemonicList.Any() && DuplicateUid(mnemonicList))
+                {
+                    yield return new ValidationResult(ErrorCodes.DuplicateMnemonics.ToString(), new[] { "LogData", "MnemonicsList" });
+                }            
+            }
 
-            //    if (logCurveInfoMnemonics.Any() && mnemonicList.Any() && !(logCurveInfoMnemonics.All(x => mnemonicList.Contains(x)) && mnemonicList.All(y => logCurveInfoMnemonics.Contains(y))))
-            //    {
-            //        var error = string.Format("Column identifiers not the same. LogCurveInfo mnemonics = {{{0}}}, LogData mnemonicList = {{{1}}}", string.Join(",", logCurveInfoMnemonics), string.Join(",", mnemonicList));
-            //        Logger.Error(error);
-            //        throw new WitsmlException(ErrorCodes.ColumnIdentifiersNotSame);
-            //    }
+            if (OptionsIn.ReturnElements.Requested.Equals(Parser.ReturnElements()))
+            {
+                var logCurveInfoMnemonics = Parser.GetLogCurveInfoMnemonics().ToList();                
+                var logCurveInfos = Parser.Properties("logCurveInfo").ToArray();
 
-            //    var logCurveInfos = parser.Properties("logCurveInfo").ToArray();
-            //    if (logCurveInfoMnemonics.Count() != logCurveInfos.Count())
-            //    {
-            //        throw new WitsmlException(ErrorCodes.MissingMnemonicElement);
-            //    }
+                if (logCurveInfoMnemonics.Count() != logCurveInfos.Length)
+                {
+                    yield return new ValidationResult(ErrorCodes.MissingMnemonicElement.ToString(), new[] { "LogCurveInfo", "Mnemonic" });
+                }
 
-            //    if (parser.Contains("logData") && !mnemonicList.Any())
-            //    {
-            //        throw new WitsmlException(ErrorCodes.MissingMnemonicList);
-            //    }
-            //}
+                if (logDatas.Length == 1)
+                {                 
+                    if (logCurveInfoMnemonics.Any() && mnemonicList.Any() && !(logCurveInfoMnemonics.All(x => mnemonicList.Contains(x)) && mnemonicList.All(y => logCurveInfoMnemonics.Contains(y))))
+                    {
+                        yield return new ValidationResult(ErrorCodes.ColumnIdentifiersNotSame.ToString(), new[] { "LogData", "MnemonicList" });
+                    }
 
-            //var logDatas = DataObject.LogData;
-
-            //if (logDatas.Count>1)
-            //{
-            //    yield return new ValidationResult(ErrorCodes.RecurringLogData.ToString(), new[] { "LogData", "LogData" });
-            //}
-            //else if (logDatas.Any(ld => ld.MnemonicList!=null && DuplicateUid(ld.MnemonicList.Split(_seperator))))
-            //{
-            //    yield return new ValidationResult(ErrorCodes.DuplicateMnemonics.ToString(), new[] { "LogData", "Mnemonics" });
-            //}
-            //else if ((DataObject.StartIndex != null || DataObject.EndIndex != null) && (DataObject.StartDateTimeIndex != null || DataObject.EndDateTimeIndex != null))
-            //{
-            //    yield return new ValidationResult(ErrorCodes.MixedStructuralRangeIndices.ToString(), new[] { "StartIndex", "EndIndex", "StartDateTimeIndex", "EndDateTimeIndex" });
-            //}
+                    if (!mnemonicList.Any())
+                    {
+                        yield return new ValidationResult(ErrorCodes.MissingMnemonicList.ToString(), new[] { "LogData", "MnemonicsList" });
+                    }
+                }
+            }
         }
 
         /// <summary>

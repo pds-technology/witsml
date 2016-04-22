@@ -56,7 +56,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             if (IncludeLogData(parser, returnElements))
             {
-                //ValidateGrowingObjectDataRequest(parser, logs);
+                ValidateGrowingObjectDataRequest(parser, logs);
 
                 var logHeaders = GetEntities(logs.Select(x => x.GetUri()))
                     .ToDictionary(x => x.GetUri());
@@ -243,10 +243,10 @@ namespace PDS.Witsml.Server.Data.Logs
                 return new Dictionary<int, string>(0);
             }
 
-            var queryMnemonics = GetLogDataMnemonics(parser).ToArray();
+            var queryMnemonics = parser.GetLogDataMnemonics().ToArray();
             if (!queryMnemonics.Any())
             {
-                queryMnemonics = GetLogCurveInfoMnemonics(parser).ToArray();
+                queryMnemonics = parser.GetLogCurveInfoMnemonics().ToArray();
             }
 
             return ComputeMnemonicIndexes(allMnemonics, queryMnemonics, parser.ReturnElements());
@@ -256,44 +256,6 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             var logCurves = GetLogCurves(log);
             return logCurves?.Select(GetMnemonic).ToArray();
-        }
-
-        protected IEnumerable<string> GetLogCurveInfoMnemonics(WitsmlQueryParser parser)
-        {
-            var mnemonics = Enumerable.Empty<string>();
-            var logCurveInfos = parser.Properties("logCurveInfo").ToArray();
-
-            if (logCurveInfos.Any())
-            {
-                var mnemonicList = parser.Properties(logCurveInfos, "mnemonic").ToArray();
-
-                if (mnemonicList.Any())
-                {
-                    mnemonics = mnemonicList.Select(x => x.Value);
-                }
-            }
-
-            return mnemonics;
-        }
-
-        protected IEnumerable<string> GetLogDataMnemonics(WitsmlQueryParser parser)
-        {
-            var mnemonics = Enumerable.Empty<string>();
-            var logData = parser.Property("logData");
-
-            if (logData != null)
-            {
-                var mnemonicList = parser.Properties(logData, "mnemonicList")
-                    .Take(1)
-                    .ToArray();
-
-                if (mnemonicList.Any())
-                {
-                    mnemonics = mnemonicList.First().Value.Split(',');
-                }
-            }
-
-            return mnemonics;
         }
 
         protected IDictionary<int, string> ComputeMnemonicIndexes(string[] allMnemonics, string[] queryMnemonics, string returnElements)
