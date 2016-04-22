@@ -278,7 +278,7 @@ namespace PDS.Witsml.Server.Data
                 Logger.DebugFormat("Querying with return elements '{0}'", returnElements);
 
                 var fields = GetProjectionPropertyNames(returnElements);
-                var ignored = GetIgnoredElementNames();
+                var ignored = GetIgnoredElementNamesForQuery();
 
                 Logger.DebugFormat("Querying {0} MongoDb collection.", DbCollectionName);
                 var query = new MongoDbQuery<T>(GetCollection(), parser, fields, ignored);
@@ -327,10 +327,9 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="parser">The WITSML query parser.</param>
         /// <param name="uri">The data object URI.</param>
-        /// <param name="ignored">The list of ignored elements.</param>
-        protected void UpdateEntity(WitsmlQueryParser parser, EtpUri uri, string[] ignored = null)
+        protected void UpdateEntity(WitsmlQueryParser parser, EtpUri uri)
         {
-            UpdateEntity<T>(DbCollectionName, parser, uri, ignored);
+            UpdateEntity<T>(DbCollectionName, parser, uri);
         }
 
         /// <summary>
@@ -340,9 +339,8 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dbCollectionName">The name of the database collection.</param>
         /// <param name="parser">The WITSML query parser.</param>
         /// <param name="uri">The data object URI.</param>
-        /// <param name="ignored">The list of ignored elements.</param>
         /// <exception cref="WitsmlException"></exception>
-        protected void UpdateEntity<TObject>(string dbCollectionName, WitsmlQueryParser parser, EtpUri uri, string[] ignored = null)
+        protected void UpdateEntity<TObject>(string dbCollectionName, WitsmlQueryParser parser, EtpUri uri)
         {
             try
             {
@@ -351,7 +349,7 @@ namespace PDS.Witsml.Server.Data
                 var collection = GetCollection<TObject>(dbCollectionName);
                 var current = GetEntity<TObject>(uri, dbCollectionName);
                 var updates = MongoDbUtility.CreateUpdateFields<TObject>();
-                var ignores = MongoDbUtility.CreateIgnoreFields<TObject>(ignored);
+                var ignores = MongoDbUtility.CreateIgnoreFields<TObject>(GetIgnoredElementNamesForUpdate());
 
                 var update = new MongoDbUpdate<TObject>(collection, parser, IdPropertyName, ignores);
                 update.Update(current, uri, updates);
@@ -413,7 +411,16 @@ namespace PDS.Witsml.Server.Data
         /// Gets a list of the element names to ignore during a query.
         /// </summary>
         /// <returns>A list of element names.</returns>
-        protected virtual List<string> GetIgnoredElementNames()
+        protected virtual List<string> GetIgnoredElementNamesForQuery()
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Gets a list of the element names to ignore during an update.
+        /// </summary>
+        /// <returns>A list of element names.</returns>
+        protected virtual List<string> GetIgnoredElementNamesForUpdate()
         {
             return null;
         }
