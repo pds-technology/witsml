@@ -88,5 +88,14 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 .OrderBy(x => x.Name)
                 .ToList();
         }
+
+        /// <summary>
+        /// Gets a list of the element names to ignore during an update.
+        /// </summary>
+        /// <returns>A list of element names.</returns>
+        protected override List<string> GetIgnoredElementNamesForUpdate()
+        {
+            return new List<string> { "isActive" };
+        }
     }
 }

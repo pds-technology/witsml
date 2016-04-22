@@ -224,9 +224,20 @@ namespace PDS.Witsml.Server.Data.Logs
         /// Gets a list of the element names to ignore during a query.
         /// </summary>
         /// <returns>A list of element names.</returns>
-        protected override List<string> GetIgnoredElementNames()
+        protected override List<string> GetIgnoredElementNamesForQuery()
         {
             return new List<string> { "startIndex", "endIndex", "startDateTimeIndex", "endDateTimeIndex", "logData" };
+        }
+
+        /// <summary>
+        /// Gets a list of the element names to ignore during an update.
+        /// </summary>
+        /// <returns>A list of element names.</returns>
+        protected override List<string> GetIgnoredElementNamesForUpdate()
+        {
+            return GetIgnoredElementNamesForQuery()
+                .Concat(new [] { "direction", "objectGrowing" })
+                .ToList();
         }
 
         protected bool IncludeLogData(WitsmlQueryParser parser, string returnElements)
@@ -460,7 +471,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         // Update the latest value count for each channel.
                         if (requestLatestValues.HasValue)
                         {
-                            UpdateRequestedValueCount(requestedValueCount, values);
+                            UpdateRequestedValueCount(requestedValueCount, values, mnemonics, ranges, index);
                         }
                     }
 
@@ -472,17 +483,20 @@ namespace PDS.Witsml.Server.Data.Logs
                 }
             }
 
-            if (logData.Count > 0)
-            {
-                ranges.Add(reader.GetIndex().Mnemonic, new Range<double?>(start, end));
-                SetLogIndexRange(log, ranges);
-            }
-
             // For requested values reverse the order before output because the logData
             //... was retrieved from the bottom up.
             if (requestLatestValues.HasValue)
             {
                 logData.Reverse();
+            }
+
+            if (logData.Count > 0)
+            {
+                if (!ranges.ContainsKey(reader.GetIndex().Mnemonic))
+                {
+                    ranges.Add(reader.GetIndex().Mnemonic, new Range<double?>(start, end));
+                }
+                SetLogIndexRange(log, ranges);
             }
 
             return logData;
@@ -511,7 +525,7 @@ namespace PDS.Witsml.Server.Data.Logs
             return valueAdded;
         }
 
-        private void UpdateRequestedValueCount(Dictionary<int, int> requestedValueCount, List<object> values)
+        private void UpdateRequestedValueCount(Dictionary<int, int> requestedValueCount, List<object> values, IDictionary<int, string> mnemonics, Dictionary<string, Range<double?>> ranges, double index)
         {
             var valueArray = values.ToArray();
 
@@ -519,6 +533,18 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 if (requestedValueCount.ContainsKey(i) && valueArray[i] != null)
                 {
+                    // If first time update for this channel value then start and end index are the same
+                    if (requestedValueCount[i] == 0)
+                    {
+                        ranges[mnemonics[i]] = new Range<double?>(index, index);
+                    }
+                    // Move the end index for subsequent updates to the current channel value
+                    else
+                    {
+                        ranges[mnemonics[i]] = new Range<double?>(ranges[mnemonics[i]].Start, index);
+                    }
+
+                    // Update the count
                     requestedValueCount[i]++;
                 }
             }
@@ -538,29 +564,6 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             var logCurves = GetLogCurves(log);
             logCurves?.RemoveAll(x => !mnemonics.Contains(GetMnemonic(x)));
-        }
-
-        protected void InsertLogData(T entity, ChannelDataReader reader)
-        {
-            if (entity == null || reader == null) return;
-
-            var indexCurve = reader.Indices[0];
-            Logger.DebugFormat("Index curve mnemonic from reader: {0}.", indexCurve == null ? "'null'" : indexCurve.Mnemonic);
-            if (indexCurve == null) return;
-
-            var allMnemonics = new[] { indexCurve.Mnemonic }.Concat(reader.Mnemonics).ToArray();
-            Logger.DebugFormat("All Mnemonics from reader: {0}", string.Join(", ", allMnemonics));
-
-            var ranges = GetCurrentIndexRange(entity);
-            GetUpdatedIndexRange(reader, allMnemonics, ranges, IsIncreasing(entity));
-
-            // Add ChannelDataChunks
-            ChannelDataChunkAdapter.Add(reader);
-
-            // Update index range
-            var isTimeLog = IsTimeLog(entity, true);
-            var offset = isTimeLog ? reader.GetIndexRange().Offset : null;
-            UpdateIndexRange(entity.GetUri(), entity, ranges, allMnemonics, isTimeLog, indexCurve.Unit, offset);
         }
 
         protected void UpdateLogDataAndIndexRange(EtpUri uri, IEnumerable<ChannelDataReader> readers)
@@ -585,6 +588,9 @@ namespace PDS.Witsml.Server.Data.Logs
             // Merge ChannelDataChunks
             foreach (var reader in readers)
             {
+                if (reader == null)
+                    continue;
+
                 var indexCurve = reader.Indices[0];
 
                 if (string.IsNullOrEmpty(indexUnit))

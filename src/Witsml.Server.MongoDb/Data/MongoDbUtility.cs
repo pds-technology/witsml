@@ -267,7 +267,7 @@ namespace PDS.Witsml.Server.Data
         /// <typeparam name="T">The data object type</typeparam>
         /// <param name="ignored">A custom list of elements to ignore.</param>
         /// <returns></returns>
-        public static string[] CreateIgnoreFields<T>(string[] ignored)
+        public static string[] CreateIgnoreFields<T>(IEnumerable<string> ignored)
         {
             var creationTime = typeof(IDataObject).IsAssignableFrom(typeof(T))
                 ? new[] { "dTimCreation", "dTimLastChange" }
