@@ -566,29 +566,6 @@ namespace PDS.Witsml.Server.Data.Logs
             logCurves?.RemoveAll(x => !mnemonics.Contains(GetMnemonic(x)));
         }
 
-        protected void InsertLogData(T entity, ChannelDataReader reader)
-        {
-            if (entity == null || reader == null) return;
-
-            var indexCurve = reader.Indices[0];
-            Logger.DebugFormat("Index curve mnemonic from reader: {0}.", indexCurve == null ? "'null'" : indexCurve.Mnemonic);
-            if (indexCurve == null) return;
-
-            var allMnemonics = new[] { indexCurve.Mnemonic }.Concat(reader.Mnemonics).ToArray();
-            Logger.DebugFormat("All Mnemonics from reader: {0}", string.Join(", ", allMnemonics));
-
-            var ranges = GetCurrentIndexRange(entity);
-            GetUpdatedIndexRange(reader, allMnemonics, ranges, IsIncreasing(entity));
-
-            // Add ChannelDataChunks
-            ChannelDataChunkAdapter.Add(reader);
-
-            // Update index range
-            var isTimeLog = IsTimeLog(entity, true);
-            var offset = isTimeLog ? reader.GetIndexRange().Offset : null;
-            UpdateIndexRange(entity.GetUri(), entity, ranges, allMnemonics, isTimeLog, indexCurve.Unit, offset);
-        }
-
         protected void UpdateLogDataAndIndexRange(EtpUri uri, IEnumerable<ChannelDataReader> readers)
         {
             Logger.DebugFormat("Updating log data and index for log uri '{0}'.", uri.Uri);
@@ -611,6 +588,9 @@ namespace PDS.Witsml.Server.Data.Logs
             // Merge ChannelDataChunks
             foreach (var reader in readers)
             {
+                if (reader == null)
+                    continue;
+
                 var indexCurve = reader.Indices[0];
 
                 if (string.IsNullOrEmpty(indexUnit))
