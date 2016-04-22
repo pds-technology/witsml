@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
 using log4net;
@@ -140,6 +141,20 @@ namespace PDS.Witsml.Server.Data
         public virtual void Validate(WitsmlQueryParser parser)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Validates the growing object data request.
+        /// </summary>
+        /// <param name="parser">The query parser.</param>
+        /// <param name="dataObjects">The data object headers.</param>
+        protected virtual void ValidateGrowingObjectDataRequest(WitsmlQueryParser parser, List<T> dataObjects)
+        {
+            var queryCount = parser.Elements().Count();
+            if (dataObjects.Count > queryCount)
+            {
+                throw new WitsmlException(ErrorCodes.MissingSubsetOfGrowingDataObject);
+            }
         }
 
         /// <summary>

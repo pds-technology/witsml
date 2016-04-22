@@ -34,12 +34,11 @@ namespace PDS.Witsml.Server.Data.Logs
 {
     public abstract class LogDataAdapter<T, TChild> : MongoDbDataAdapter<T>, IChannelDataProvider where T : IWellboreObject where TChild : IUniqueId
     {
-        private static readonly int MaxRequestLatestValues = Settings.Default.MaxDataNodes;
-        private readonly bool _streamIndexValuePairs;
+        private readonly int _maxRequestLatestValues = Settings.Default.MaxDataNodes;
+        private readonly bool _streamIndexValuePairs = Settings.Default.StreamIndexValuePairs;
 
         protected LogDataAdapter(IDatabaseProvider databaseProvider, string dbCollectionName) : base(databaseProvider, dbCollectionName)
         {
-            _streamIndexValuePairs = Settings.Default.StreamIndexValuePairs;
         }
 
         [Import]
@@ -52,24 +51,13 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>Queried objects.</returns>
         public override WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
         {
-            //var uri = parser.GetUri<T>();
-            //Logger.DebugFormat("Getting Log with uri objectId'{0}'.", uri.ObjectId);
-
-            //// Extract Data
-            //var entity = Parse(parser.Context.Xml);
-
-            //Validate(Functions.GetFromStore, entity);
-            //Logger.DebugFormat("Validated Log with uri '{0}' and name '{1}' for Query", uri, entity.Name);
-
             var returnElements = parser.ReturnElements();
             var logs = QueryEntities(parser);
-            //if (OptionsIn.ReturnElements.DataOnly.Equals(parser.ReturnElements()) && logs.Count > 1)
-            //{
-            //    throw new WitsmlException(ErrorCodes.MissingSubsetOfGrowingDataObject);
-            //}
 
             if (IncludeLogData(parser, returnElements))
             {
+                //ValidateGrowingObjectDataRequest(parser, logs);
+
                 var logHeaders = GetEntities(logs.Select(x => x.GetUri()))
                     .ToDictionary(x => x.GetUri());
 
@@ -375,7 +363,7 @@ namespace PDS.Witsml.Server.Data.Logs
             //... don't allow more than the maximum.
             if (requestLatestValues.HasValue)
             {                
-                requestLatestValues = Math.Min(MaxRequestLatestValues, requestLatestValues.Value);
+                requestLatestValues = Math.Min(_maxRequestLatestValues, requestLatestValues.Value);
                 Logger.DebugFormat("Request latest value = {0}", requestLatestValues);
             }
             

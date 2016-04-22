@@ -32,7 +32,7 @@ namespace PDS.Witsml.Server.Data
     /// <seealso cref="PDS.Witsml.Server.Data.IWitsmlDataProvider" />
     public abstract class WitsmlDataProvider<TList, TObject> : WitsmlDataProvider<TObject>, IWitsmlDataProvider
         where TList : IEnergisticsCollection
-        where TObject : IDataObject
+        where TObject : class, IDataObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="WitsmlDataProvider{TList, TObject}" /> class.
@@ -51,11 +51,10 @@ namespace PDS.Witsml.Server.Data
         public virtual WitsmlResult<IEnergisticsCollection> GetFromStore(RequestContext context)
         {
             var parser = new WitsmlQueryParser(context);
-            //var dataObject = Parse(parser.Context.Xml);
             Logger.DebugFormat("Getting {0}", typeof(TObject).Name);
 
-            //Validate(Functions.GetFromStore, parser, dataObject);
-            //Logger.DebugFormat("Validated {0} for Query", typeof(TObject).Name);
+            Validate(Functions.GetFromStore, parser, null);
+            Logger.DebugFormat("Validated {0} for Query", typeof(TObject).Name);
 
             return DataAdapter.Query(parser);
         }

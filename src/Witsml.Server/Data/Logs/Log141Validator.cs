@@ -40,8 +40,8 @@ namespace PDS.Witsml.Server.Data.Logs
         private readonly IWitsmlDataAdapter<Log> _logDataAdapter;
         private readonly IWitsmlDataAdapter<Wellbore> _wellboreDataAdapter;
         private readonly IWitsmlDataAdapter<Well> _wellDataAdapter;
-        private static readonly int maxDataNodes = Settings.Default.MaxDataNodes;
-        private static readonly int maxDataPoints = Settings.Default.MaxDataPoints;
+        private static readonly int MaxDataNodes = Settings.Default.MaxDataNodes;
+        private static readonly int MaxDataPoints = Settings.Default.MaxDataPoints;
 
         private static readonly char _seperator = ',';
         private readonly string[] _illegalColumnIdentifiers = new string[] { "'", "\"", "<", ">", "/", "\\", "&", "," };
@@ -70,20 +70,52 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>A collection of validation results.</returns>
         protected override IEnumerable<ValidationResult> ValidateForGet()
         {
-            var logDatas = DataObject.LogData;
+            // TODO: Use Parser to validate with support for multiple queries
+            yield break;
 
-            if (logDatas.Count>1)
-            {
-                yield return new ValidationResult(ErrorCodes.RecurringLogData.ToString(), new[] { "LogData", "LogData" });
-            }
-            else if (logDatas.Any(ld => ld.MnemonicList!=null && DuplicateUid(ld.MnemonicList.Split(_seperator))))
-            {
-                yield return new ValidationResult(ErrorCodes.DuplicateMnemonics.ToString(), new[] { "LogData", "Mnemonics" });
-            }
-            else if ((DataObject.StartIndex != null || DataObject.EndIndex != null) && (DataObject.StartDateTimeIndex != null || DataObject.EndDateTimeIndex != null))
-            {
-                yield return new ValidationResult(ErrorCodes.MixedStructuralRangeIndices.ToString(), new[] { "StartIndex", "EndIndex", "StartDateTimeIndex", "EndDateTimeIndex" });
-            }
+            //if (OptionsIn.ReturnElements.DataOnly.Equals(parser.ReturnElements()) && logs.Count > 1)
+            //{
+            //    throw new WitsmlException(ErrorCodes.MissingSubsetOfGrowingDataObject);
+            //}
+
+            //if (OptionsIn.ReturnElements.Requested.Equals(parser.ReturnElements()))
+            //{
+            //    var logCurveInfoMnemonics = GetLogCurveInfoMnemonics(parser).ToList();
+            //    var mnemonicList = GetLogDataMnemonics(parser).ToList();
+
+            //    if (logCurveInfoMnemonics.Any() && mnemonicList.Any() && !(logCurveInfoMnemonics.All(x => mnemonicList.Contains(x)) && mnemonicList.All(y => logCurveInfoMnemonics.Contains(y))))
+            //    {
+            //        var error = string.Format("Column identifiers not the same. LogCurveInfo mnemonics = {{{0}}}, LogData mnemonicList = {{{1}}}", string.Join(",", logCurveInfoMnemonics), string.Join(",", mnemonicList));
+            //        Logger.Error(error);
+            //        throw new WitsmlException(ErrorCodes.ColumnIdentifiersNotSame);
+            //    }
+
+            //    var logCurveInfos = parser.Properties("logCurveInfo").ToArray();
+            //    if (logCurveInfoMnemonics.Count() != logCurveInfos.Count())
+            //    {
+            //        throw new WitsmlException(ErrorCodes.MissingMnemonicElement);
+            //    }
+
+            //    if (parser.Contains("logData") && !mnemonicList.Any())
+            //    {
+            //        throw new WitsmlException(ErrorCodes.MissingMnemonicList);
+            //    }
+            //}
+
+            //var logDatas = DataObject.LogData;
+
+            //if (logDatas.Count>1)
+            //{
+            //    yield return new ValidationResult(ErrorCodes.RecurringLogData.ToString(), new[] { "LogData", "LogData" });
+            //}
+            //else if (logDatas.Any(ld => ld.MnemonicList!=null && DuplicateUid(ld.MnemonicList.Split(_seperator))))
+            //{
+            //    yield return new ValidationResult(ErrorCodes.DuplicateMnemonics.ToString(), new[] { "LogData", "Mnemonics" });
+            //}
+            //else if ((DataObject.StartIndex != null || DataObject.EndIndex != null) && (DataObject.StartDateTimeIndex != null || DataObject.EndDateTimeIndex != null))
+            //{
+            //    yield return new ValidationResult(ErrorCodes.MixedStructuralRangeIndices.ToString(), new[] { "StartIndex", "EndIndex", "StartDateTimeIndex", "EndDateTimeIndex" });
+            //}
         }
 
         /// <summary>
@@ -93,7 +125,6 @@ namespace PDS.Witsml.Server.Data.Logs
         protected override IEnumerable<ValidationResult> ValidateForInsert()
         {
             var logCurves = DataObject.LogCurveInfo;
-            var channelCount = logCurves != null ? logCurves.Count : 0;
             var uri = DataObject.GetUri();
             var uriWellbore = uri.Parent;
             var uriWell = uriWellbore.Parent;
@@ -252,6 +283,8 @@ namespace PDS.Witsml.Server.Data.Logs
                     }
                 }
 
+                // TODO: check if this is still needed
+
                 // Validate LogData
                 else if (logData != null && logData.Count > 0)
                 {
@@ -300,7 +333,7 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             var totalPoints = 0;
 
-            if (logDatas.SelectMany(ld => ld.Data).Count() > maxDataNodes)
+            if (logDatas.SelectMany(ld => ld.Data).Count() > MaxDataNodes)
             {
                 return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "LogData", "Data" });
             }
@@ -316,7 +349,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         if (logData.Data != null && logData.Data.Count > 0)
                             totalPoints += logData.Data.Count * logData.Data[0].Split(',').Count();
 
-                        if (totalPoints > maxDataPoints)
+                        if (totalPoints > MaxDataPoints)
                         {
                             return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "LogData", "Data" });
                         }
