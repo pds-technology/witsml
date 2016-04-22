@@ -118,9 +118,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public override WitsmlResult Update(WitsmlQueryParser parser, Log dataObject)
         {
             var uri = dataObject.GetUri();
-            var ignored = GetIgnoredElementNames().Concat(new[] { "direction" }).ToArray();
-
-            UpdateEntity(parser, uri, ignored);
+            UpdateEntity(parser, uri);
 
             // Update Log Data and Index Range
             var readers = ExtractDataReaders(dataObject, GetEntity(uri));

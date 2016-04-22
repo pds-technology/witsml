@@ -51,11 +51,11 @@ namespace PDS.Witsml.Server.Data
         public virtual WitsmlResult<IEnergisticsCollection> GetFromStore(RequestContext context)
         {
             var parser = new WitsmlQueryParser(context);
-            var dataObject = Parse(parser.Context.Xml);
+            //var dataObject = Parse(parser.Context.Xml);
             Logger.DebugFormat("Getting {0}", typeof(TObject).Name);
 
-            Validate(Functions.GetFromStore, parser, dataObject);
-            Logger.DebugFormat("Validated {0} for Query", typeof(TObject).Name);
+            //Validate(Functions.GetFromStore, parser, dataObject);
+            //Logger.DebugFormat("Validated {0} for Query", typeof(TObject).Name);
 
             return DataAdapter.Query(parser);
         }

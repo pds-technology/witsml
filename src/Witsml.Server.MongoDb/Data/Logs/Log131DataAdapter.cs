@@ -67,7 +67,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Insert Log and Log Data
             InsertEntity(dataObject);
-            InsertLogData(dataObject, reader);
+            UpdateLogDataAndIndexRange(dataObject.GetUri(), new[] { reader });
 
             return new WitsmlResult(ErrorCodes.Success, dataObject.Uid);
         }
@@ -83,9 +83,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public override WitsmlResult Update(WitsmlQueryParser parser, Log dataObject)
         {
             var uri = dataObject.GetUri();
-            var ignored = GetIgnoredElementNames().Concat(new[] { "direction" }).ToArray();
-
-            UpdateEntity(parser, uri, ignored);
+            UpdateEntity(parser, uri);
 
             // Update Log Data and Index Range
             var reader = ExtractDataReader(dataObject, GetEntity(uri));

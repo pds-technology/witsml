@@ -109,11 +109,27 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             var uri = GetUri(dataObject);
-            var ignored = new[] { "Data" };
-
-            UpdateEntity(parser, uri, ignored);
+            UpdateEntity(parser, uri);
 
             return new WitsmlResult(ErrorCodes.Success);
+        }
+
+        /// <summary>
+        /// Gets a list of the element names to ignore during a query.
+        /// </summary>
+        /// <returns>A list of element names.</returns>
+        protected override List<string> GetIgnoredElementNamesForQuery()
+        {
+            return new List<string> { "Data" };
+        }
+
+        /// <summary>
+        /// Gets a list of the element names to ignore during an update.
+        /// </summary>
+        /// <returns>A list of element names.</returns>
+        protected override List<string> GetIgnoredElementNamesForUpdate()
+        {
+            return GetIgnoredElementNamesForQuery();
         }
     }
 }

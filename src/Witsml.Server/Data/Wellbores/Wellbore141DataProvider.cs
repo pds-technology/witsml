@@ -60,6 +60,9 @@ namespace PDS.Witsml.Server.Data.Wellbores
         {
             dataObject.Uid = dataObject.NewUid();
             dataObject.CommonData = dataObject.CommonData.Create();
+
+            // Ensure IsActive is false during AddToStore
+            dataObject.IsActive = false;
         }
     }
 }
