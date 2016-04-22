@@ -151,6 +151,10 @@ namespace PDS.Witsml
             }
         }
 
+        /// <summary>
+        /// Defines a RequestLatestValues OptionIn for a given value.
+        /// </summary>
+        /// <seealso cref="PDS.Witsml.OptionsIn" />
         public class RequestLatestValues : OptionsIn
         {
             public RequestLatestValues(int value) : base(Keyword, value.ToString()) { }
