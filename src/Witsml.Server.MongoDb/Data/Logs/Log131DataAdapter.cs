@@ -67,7 +67,6 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Insert Log and Log Data
             InsertEntity(dataObject);
-            //InsertLogData(dataObject, reader);
             UpdateLogDataAndIndexRange(dataObject.GetUri(), new[] { reader });
 
             return new WitsmlResult(ErrorCodes.Success, dataObject.Uid);
