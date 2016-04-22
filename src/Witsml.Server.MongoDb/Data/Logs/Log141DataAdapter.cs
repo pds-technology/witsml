@@ -53,41 +53,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Queries the specified <see cref="Log"/> in the store.
-        /// </summary>
-        /// <param name="parser">The parser that specifies the query parameters.</param>
-        /// <returns>Queried objects.</returns>
-        public override WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
-        {
-            
-            if (OptionsIn.ReturnElements.Requested.Equals(parser.ReturnElements()))
-            {
-                var logCurveInfoMnemonics = GetLogCurveInfoMnemonics(parser).ToList();
-                var mnemonicList = GetLogDataMnemonics(parser).ToList();
-
-                if (logCurveInfoMnemonics.Any() && mnemonicList.Any() && !(logCurveInfoMnemonics.All(x => mnemonicList.Contains(x)) && mnemonicList.All(y => logCurveInfoMnemonics.Contains(y))))
-                {
-                    var error = string.Format("Column identifiers not the same. LogCurveInfo mnemonics = {{{0}}}, LogData mnemonicList = {{{1}}}", string.Join(",", logCurveInfoMnemonics), string.Join(",", mnemonicList));
-                    Logger.Error(error);
-                    throw new WitsmlException(ErrorCodes.ColumnIdentifiersNotSame);
-                }
-               
-                var logCurveInfos = parser.Properties("logCurveInfo").ToArray();
-                if (logCurveInfoMnemonics.Count() != logCurveInfos.Count())
-                {
-                    throw new WitsmlException(ErrorCodes.MissingMnemonicElement);
-                }
-
-                if (parser.Contains("logData") && !mnemonicList.Any())
-                {
-                    throw new WitsmlException(ErrorCodes.MissingMnemonicList);
-                }
-            }
-
-            return base.Query(parser);
-        }
-
-        /// <summary>
         /// Adds a <see cref="Log" /> entity to the data store.
         /// </summary>
         /// <param name="parser">The input template parser.</param>
