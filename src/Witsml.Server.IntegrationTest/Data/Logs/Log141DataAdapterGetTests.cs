@@ -596,7 +596,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(logInfos[1].MaxDateTimeIndex.Value, new Energistics.DataAccess.Timestamp(DateTimeOffset.Parse(queryData[0].Split(',')[0])));
 
             // Validate the Min and Max of each LogCurveInfo #3
-            Assert.AreEqual(logInfos[2].MinDateTimeIndex.Value, new Energistics.DataAccess.Timestamp(DateTimeOffset.Parse(queryData[0].Split(',')[0])));
+            Assert.AreEqual(logInfos[2].MinDateTimeIndex.Value, new Energistics.DataAccess.Timestamp(DateTimeOffset.Parse(queryData[1].Split(',')[0])));
             Assert.AreEqual(logInfos[2].MaxDateTimeIndex.Value, new Energistics.DataAccess.Timestamp(DateTimeOffset.Parse(queryData[1].Split(',')[0])));
         }
 
