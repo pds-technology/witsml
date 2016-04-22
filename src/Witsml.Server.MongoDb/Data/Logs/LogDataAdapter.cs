@@ -499,14 +499,13 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 // For the current channel, if the requested value count has not already been reached and then
                 // ... current channel value is not null or blank then a value is being added.
-                valueAdded =
-                    requestedValueCount[i] < requestLatestValue &&
-                    channelValues[i] != null;
-
-                // If at least one channel value is being added then no need to look further, get out.
-                if (valueAdded)
+                if (requestedValueCount[i] < requestLatestValue && channelValues[i] != null)
                 {
-                    break;
+                    valueAdded = true;
+                }
+                else if (i > 0)
+                {
+                    channelValues[i] = null;
                 }
             }
 
