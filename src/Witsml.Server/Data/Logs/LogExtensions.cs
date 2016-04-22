@@ -62,5 +62,54 @@ namespace PDS.Witsml.Server.Data.Logs
             list.Remove(indexCurve);
             list.Insert(0, indexCurve);
         }
+
+        /// <summary>
+        /// Gets the log curve information mnemonics.
+        /// </summary>
+        /// <param name="parser">The parser.</param>
+        /// <returns></returns>
+        public static IEnumerable<string> GetLogCurveInfoMnemonics(this WitsmlQueryParser parser)
+        {
+            var mnemonics = Enumerable.Empty<string>();
+            var logCurveInfos = parser.Properties("logCurveInfo").ToArray();
+
+            if (logCurveInfos.Any())
+            {
+                var mnemonicList = parser.Properties(logCurveInfos, "mnemonic").ToArray();
+
+                if (mnemonicList.Any())
+                {
+                    mnemonics = mnemonicList.Select(x => x.Value);
+                }
+            }
+
+            return mnemonics;
+        }
+
+        /// <summary>
+        /// Gets the log data mnemonics.
+        /// </summary>
+        /// <param name="parser">The parser.</param>
+        /// <returns></returns>
+        public static IEnumerable<string> GetLogDataMnemonics(this WitsmlQueryParser parser)
+        {
+            var mnemonics = Enumerable.Empty<string>();
+            var logData = parser.Property("logData");
+
+            if (logData != null)
+            {
+                var mnemonicList = parser.Properties(logData, "mnemonicList")
+                    .Take(1)
+                    .ToArray();
+
+                if (mnemonicList.Any())
+                {
+                    mnemonics = mnemonicList.First().Value.Split(',');
+                }
+            }
+
+            return mnemonics;
+        }
+
     }
 }
