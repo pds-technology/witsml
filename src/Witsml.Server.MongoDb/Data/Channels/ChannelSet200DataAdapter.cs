@@ -168,9 +168,7 @@ namespace PDS.Witsml.Server.Data.Channels
         public override WitsmlResult Update(WitsmlQueryParser parser, ChannelSet dataObject)
         {
             var uri = dataObject.GetUri();
-            var ignored = new[] { "Data" };
-
-            UpdateEntity(parser, uri, ignored);
+            UpdateEntity(parser, uri);
 
             // Extract Data
             var reader = ExtractDataReader(dataObject, GetEntity(uri));
@@ -220,9 +218,22 @@ namespace PDS.Witsml.Server.Data.Channels
             return existing.GetReader();
         }
 
-        protected override List<string> GetIgnoredElementNames()
+        /// <summary>
+        /// Gets a list of the element names to ignore during a query.
+        /// </summary>
+        /// <returns>A list of element names.</returns>
+        protected override List<string> GetIgnoredElementNamesForQuery()
         {
             return new List<string> { "Data" };
+        }
+
+        /// <summary>
+        /// Gets a list of the element names to ignore during an update.
+        /// </summary>
+        /// <returns>A list of element names.</returns>
+        protected override List<string> GetIgnoredElementNamesForUpdate()
+        {
+            return GetIgnoredElementNamesForQuery();
         }
 
         private ChannelMetadataRecord ToChannelMetadataRecord(ChannelSet entity, Channel channel, IList<IndexMetadataRecord> indexMetadata)
