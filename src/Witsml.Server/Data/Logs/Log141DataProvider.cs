@@ -19,7 +19,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
@@ -96,11 +95,11 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Creates an <see cref="IEnergisticsCollection" /> instance containing the specified data objects.
+        /// Creates an <see cref="LogList" /> instance containing the specified data objects.
         /// </summary>
         /// <param name="dataObjects">The data objects.</param>
-        /// <returns>The <see cref="IEnergisticsCollection" /> instance.</returns>
-        protected override IEnergisticsCollection CreateCollection(IEnumerable<Log> dataObjects)
+        /// <returns>The <see cref="LogList" /> instance.</returns>
+        protected override LogList CreateCollection(IEnumerable<Log> dataObjects)
         {
             return new LogList { Log = dataObjects.ToList() };
         }

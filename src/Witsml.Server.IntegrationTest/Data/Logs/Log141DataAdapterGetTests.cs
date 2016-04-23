@@ -733,7 +733,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        [Ignore]
         public void LogDataAdapter_GetFromStore_ReturnElements_Requested_Supports_Plural_Query()
         {
             var response = DevKit.Add<WellList, Well>(_well);

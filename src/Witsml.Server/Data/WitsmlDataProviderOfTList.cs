@@ -62,9 +62,12 @@ namespace PDS.Witsml.Server.Data
 
             Logger.DebugFormat("Validated {0} for Query", typeof(TObject).Name);
 
+            // Execute each query separately
+            var queries = childParsers.SelectMany(DataAdapter.Query);
+
             return new WitsmlResult<IEnergisticsCollection>(
                 ErrorCodes.Success,
-                CreateCollection(childParsers.SelectMany(DataAdapter.Query)));
+                CreateCollection(queries));
         }
 
         /// <summary>
@@ -128,10 +131,10 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Creates an <see cref="IEnergisticsCollection"/> instance containing the specified data objects.
+        /// Creates an <see cref="TList"/> instance containing the specified data objects.
         /// </summary>
         /// <param name="dataObjects">The data objects.</param>
-        /// <returns>The <see cref="IEnergisticsCollection"/> instance.</returns>
-        protected abstract IEnergisticsCollection CreateCollection(IEnumerable<TObject> dataObjects);
+        /// <returns>The <see cref="TList"/> instance.</returns>
+        protected abstract TList CreateCollection(IEnumerable<TObject> dataObjects);
     }
 }

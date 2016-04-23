@@ -84,6 +84,8 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 channelSet.Data = null;
             }
+
+            InsertEntity(dataObject);
         }
 
         /// <summary>
