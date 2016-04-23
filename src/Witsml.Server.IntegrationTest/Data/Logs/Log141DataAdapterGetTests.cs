@@ -19,12 +19,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Witsml.Server.Configuration;
-using PDS.Witsml.Server.Data.Channels;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -635,49 +635,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void LogDataAdapter_GetFromStore_Error_460_Column_Identifiers_In_Header_And_Data_Not_Same()
-        {
-            _log.LogCurveInfo = new List<LogCurveInfo>();
-            _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "MD", Mnemonic = new ShortNameStruct("MD") });
-            _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "GR", Mnemonic = new ShortNameStruct("GR") });
-
-            _log.LogData = new List<LogData>() { new LogData() { MnemonicList = "MD" } };
-
-            var list = DevKit.New<LogList>(x => x.Log = DevKit.List(_log));
-            var queryIn = WitsmlParser.ToXml(list);
-            var result = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
-
-            Assert.AreEqual((short)ErrorCodes.ColumnIdentifiersNotSame, result.Result);
-        }
-
-        [TestMethod]
-        public void LogDataAdapter_GetFromStore_Error_461_Missing_Mnemonic_Element_In_Column_Definition()
-        {
-            _log.LogCurveInfo = new List<LogCurveInfo>();
-            _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "MD" });
-
-            var list = DevKit.New<LogList>(x => x.Log = DevKit.List(_log));
-            var queryIn = WitsmlParser.ToXml(list);
-            var result = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
-           
-            Assert.AreEqual((short)ErrorCodes.MissingMnemonicElement, result.Result);
-        }
-
-        [TestMethod]
-        public void LogDataAdapter_GetFromStore_Error_462_Missing_MnemonicList_In_Data_Section()
-        {
-            string queryIn = "<logs version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
-                     "<log uidWell = \"abc\" uidWellbore = \"abc\" uid = \"abc\">" + Environment.NewLine +
-                     "    <logData/>" + Environment.NewLine +
-                     "</log>" + Environment.NewLine +
-                     "</logs>";
-
-            var result = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
-
-            Assert.AreEqual((short)ErrorCodes.MissingMnemonicList, result.Result);
-        }
-
-        [TestMethod]
         public void LogDataAdapter_GetFromStore_Error_475_No_Subset_When_Getting_Growing_Object()
         {
             var response = DevKit.Add<WellList, Well>(_well);
@@ -706,6 +663,156 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var result = DevKit.Get<LogList, Log>(DevKit.List(query), ObjectTypes.Log, null, OptionsIn.ReturnElements.DataOnly);
             Assert.AreEqual((short)ErrorCodes.MissingSubsetOfGrowingDataObject, result.Result);
+        }
+
+        [TestMethod]
+        public void LogDataAdapter_GetFromStore_ReturnElements_DataOnly_Supports_Plural_Query()
+        {
+            var response = DevKit.Add<WellList, Well>(_well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            _wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add first log
+            _log.UidWell = _wellbore.UidWell;
+            _log.UidWellbore = response.SuppMsgOut;
+            DevKit.InitHeader(_log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(_log, DevKit.Mnemonics(_log), DevKit.Units(_log), 3, hasEmptyChannel:false);
+
+            response = DevKit.Add<LogList, Log>(_log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog1 = response.SuppMsgOut;
+
+            // Add second log
+            var log2 = DevKit.CreateLog(null, DevKit.Name("Log 02"), _log.UidWell, _log.NameWell, _log.UidWellbore, _log.NameWellbore);
+            DevKit.InitHeader(log2, LogIndexType.datetime);
+            log2.LogCurveInfo.Clear();
+            log2.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("TIME", "s"));
+            log2.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("AAA", "m/h"));
+            log2.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("BBB", "gAPI"));
+            log2.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("CCC", "gAPI"));
+
+            var logData = log2.LogData.First();
+            logData.Data.Clear();
+            logData.MnemonicList = "TIME,AAA,BBB,CCC";
+            logData.UnitList = "s,m/h,gAPI,gAPI";
+            logData.Data.Add("2012-07-26T15:17:20.0000000+00:00,1,0,1");
+            logData.Data.Add("2012-07-26T15:17:30.0000000+00:00,2,1,2");
+            logData.Data.Add("2012-07-26T15:17:40.0000000+00:00,3,2,3");
+            logData.Data.Add("2012-07-26T15:17:50.0000000+00:00,4,3,4");
+
+            response = DevKit.Add<LogList, Log>(log2);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog2 = response.SuppMsgOut;
+
+            // Query
+            var query1 = DevKit.CreateLog(uidLog1, null, log2.UidWell, null, log2.UidWellbore, null);
+            var query2 = DevKit.CreateLog(uidLog2, null, log2.UidWell, null, log2.UidWellbore, null);
+
+            var result = DevKit.Get<LogList, Log>(DevKit.List(query1, query2), ObjectTypes.Log, null, OptionsIn.ReturnElements.DataOnly);
+            Assert.AreEqual((short)ErrorCodes.Success, result.Result);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(result.XMLout);
+            Assert.AreEqual(2, logList.Log.Count);
+
+            // Query result of Depth log
+            var mnemonicList1 = logList.Log[0].LogData[0].MnemonicList.Split(',');
+            Assert.AreEqual(3, mnemonicList1.Length);
+            Assert.IsTrue(!mnemonicList1.Except(new List<string>() { "MD", "ROP", "GR" }).Any());
+            Assert.AreEqual(3, logList.Log[0].LogData[0].Data.Count);
+
+            // Query result of Time log
+            var mnemonicList2 = logList.Log[1].LogData[0].MnemonicList.Split(',');
+            Assert.AreEqual(4, mnemonicList2.Length);
+            Assert.IsTrue(!mnemonicList2.Except(new List<string>() { "TIME", "AAA", "BBB", "CCC" }).Any());
+            Assert.AreEqual(4, logList.Log[1].LogData[0].Data.Count);
+        }
+
+        [TestMethod]
+        [Ignore]
+        public void LogDataAdapter_GetFromStore_ReturnElements_Requested_Supports_Plural_Query()
+        {
+            var response = DevKit.Add<WellList, Well>(_well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            _wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add first log
+            _log.UidWell = _wellbore.UidWell;
+            _log.UidWellbore = response.SuppMsgOut;
+            DevKit.InitHeader(_log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(_log, DevKit.Mnemonics(_log), DevKit.Units(_log), 3, hasEmptyChannel: false);
+
+            response = DevKit.Add<LogList, Log>(_log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog1 = response.SuppMsgOut;
+
+            // Add second log
+            var log2 = DevKit.CreateLog(null, DevKit.Name("Log 02"), _log.UidWell, _log.NameWell, _log.UidWellbore, _log.NameWellbore);
+            DevKit.InitHeader(log2, LogIndexType.datetime);
+            log2.LogCurveInfo.Clear();
+            log2.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("TIME", "s"));
+            log2.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("AAA", "m/h"));
+            log2.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("BBB", "gAPI"));
+            log2.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("CCC", "gAPI"));
+
+            var logData = log2.LogData.First();
+            logData.Data.Clear();
+            logData.MnemonicList = "TIME,AAA,BBB,CCC";
+            logData.UnitList = "s,m/h,gAPI,gAPI";
+            logData.Data.Add("2012-07-26T15:17:20.0000000+00:00,1,0,1");
+            logData.Data.Add("2012-07-26T15:17:30.0000000+00:00,2,1,2");
+            logData.Data.Add("2012-07-26T15:17:40.0000000+00:00,3,2,3");
+            logData.Data.Add("2012-07-26T15:17:50.0000000+00:00,4,3,4");
+
+            response = DevKit.Add<LogList, Log>(log2);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog2 = response.SuppMsgOut;
+
+            // Query
+            var query1 = DevKit.CreateLog(uidLog1, null, log2.UidWell, null, log2.UidWellbore, null);
+            query1.LogCurveInfo = new List<LogCurveInfo>();
+            query1.LogCurveInfo.Add(new LogCurveInfo() { Uid = "MD", Mnemonic = new ShortNameStruct("MD") });
+            query1.LogCurveInfo.Add(new LogCurveInfo() { Uid = "ROP", Mnemonic = new ShortNameStruct("ROP") });
+            query1.LogCurveInfo.Add(new LogCurveInfo() { Uid = "GR", Mnemonic = new ShortNameStruct("GR") });
+            query1.LogData = new List<LogData>() { new LogData() };
+            query1.LogData.First().MnemonicList = "MD,ROP,GR";
+            var query2 = DevKit.CreateLog(uidLog2, null, log2.UidWell, null, log2.UidWellbore, null);
+            query2.LogCurveInfo = new List<LogCurveInfo>();
+            query2.LogCurveInfo.Add(new LogCurveInfo() { Uid = "TIME", Mnemonic = new ShortNameStruct("TIME") });
+            query2.LogCurveInfo.Add(new LogCurveInfo() { Uid = "AAA", Mnemonic = new ShortNameStruct("AAA") });
+            query2.LogCurveInfo.Add(new LogCurveInfo() { Uid = "BBB", Mnemonic = new ShortNameStruct("BBB") });
+            query2.LogCurveInfo.Add(new LogCurveInfo() { Uid = "CCC", Mnemonic = new ShortNameStruct("CCC") });
+            query2.LogData = new List<LogData>() { new LogData() };
+            query2.LogData.First().MnemonicList = "TIME,AAA,BBB,CCC";
+
+            var list = DevKit.New<LogList>(x => x.Log = DevKit.List(query1, query2));
+            var queryIn = WitsmlParser.ToXml(list);
+            var result = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
+            Assert.AreEqual((short)ErrorCodes.Success, result.Result);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(result.XMLout);
+            Assert.AreEqual(2, logList.Log.Count);
+
+            // Query result of Depth log
+            var mnemonicList1 = logList.Log[0].LogData[0].MnemonicList.Split(',');
+            Assert.AreEqual(3, mnemonicList1.Length);
+            Assert.IsTrue(!mnemonicList1.Except(new List<string>() { "MD", "ROP", "GR" }).Any());
+            Assert.AreEqual(3, logList.Log[0].LogData[0].Data.Count);
+
+            // Query result of Time log
+            var mnemonicList2 = logList.Log[1].LogData[0].MnemonicList.Split(',');
+            Assert.AreEqual(4, mnemonicList2.Length); // TODO: It is returning 1 right now.
+            Assert.IsTrue(!mnemonicList2.Except(new List<string>() { "TIME", "AAA", "BBB", "CCC" }).Any());
+            Assert.AreEqual(4, logList.Log[1].LogData[0].Data.Count);
         }
     }
 }
