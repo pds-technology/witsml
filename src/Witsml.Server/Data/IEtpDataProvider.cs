@@ -52,14 +52,12 @@ namespace PDS.Witsml.Server.Data
         /// Puts the specified data object into the data store.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-        /// <returns>A WITSML result.</returns>
-        WitsmlResult Put(DataObject dataObject);
+        void Put(DataObject dataObject);
 
         /// <summary>
         /// Deletes a data object by the specified URI.
         /// </summary>
         /// <param name="uri">The data object URI.</param>
-        /// <returns>A WITSML result.</returns>
-        WitsmlResult Delete(EtpUri uri);
+        void Delete(EtpUri uri);
     }
 }

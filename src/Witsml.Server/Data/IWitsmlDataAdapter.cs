@@ -17,7 +17,6 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
-using Energistics.DataAccess;
 using Energistics.Datatypes;
 
 namespace PDS.Witsml.Server.Data
@@ -35,36 +34,27 @@ namespace PDS.Witsml.Server.Data
         /// <returns>
         /// A collection of data objects retrieved from the data store.
         /// </returns>
-        WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser);
+        List<T> Query(WitsmlQueryParser parser);
 
         /// <summary>
         /// Adds a data object to the data store.
         /// </summary>
         /// <param name="parser">The input template parser.</param>
         /// <param name="dataObject">The data object to be added.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        WitsmlResult Add(WitsmlQueryParser parser, T dataObject);
+        void Add(WitsmlQueryParser parser, T dataObject);
 
         /// <summary>
         /// Updates a data object in the data store.
         /// </summary>
         /// <param name="parser">The input template parser.</param>
         /// <param name="dataObject">The data object to be updated.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        WitsmlResult Update(WitsmlQueryParser parser, T dataObject);
+        void Update(WitsmlQueryParser parser, T dataObject);
 
         /// <summary>
         /// Deletes or partially updates the specified object in the data store.
         /// </summary>
         /// <param name="parser">The input template parser.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        WitsmlResult Delete(WitsmlQueryParser parser);
+        void Delete(WitsmlQueryParser parser);
 
         /// <summary>
         /// Determines whether the data object exists in the data store.
@@ -92,7 +82,7 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="uri">The data object URI.</param>
         /// <returns>A WITSML result.</returns>
-        WitsmlResult Delete(EtpUri uri);
+        void Delete(EtpUri uri);
 
         /// <summary>
         /// Validates the input template using the specified parser.

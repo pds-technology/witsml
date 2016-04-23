@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
@@ -53,10 +54,17 @@ namespace PDS.Witsml.Server.Data
             var parser = new WitsmlQueryParser(context);
             Logger.DebugFormat("Getting {0}", typeof(TObject).Name);
 
-            Validate(Functions.GetFromStore, parser, null);
+            var childParsers = parser.ForkElements().ToArray();
+
+            // Validate each query template separately
+            foreach (var childParser in childParsers)
+                Validate(Functions.GetFromStore, childParser, null);
+
             Logger.DebugFormat("Validated {0} for Query", typeof(TObject).Name);
 
-            return DataAdapter.Query(parser);
+            return new WitsmlResult<IEnergisticsCollection>(
+                ErrorCodes.Success,
+                CreateCollection(childParsers.SelectMany(DataAdapter.Query)));
         }
 
         /// <summary>
@@ -118,5 +126,12 @@ namespace PDS.Witsml.Server.Data
             var list = WitsmlParser.Parse<TList>(xml);
             return list.Items.Cast<TObject>().FirstOrDefault();
         }
+
+        /// <summary>
+        /// Creates an <see cref="IEnergisticsCollection"/> instance containing the specified data objects.
+        /// </summary>
+        /// <param name="dataObjects">The data objects.</param>
+        /// <returns>The <see cref="IEnergisticsCollection"/> instance.</returns>
+        protected abstract IEnergisticsCollection CreateCollection(IEnumerable<TObject> dataObjects);
     }
 }

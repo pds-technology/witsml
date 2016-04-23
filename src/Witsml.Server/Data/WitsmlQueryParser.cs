@@ -241,5 +241,10 @@ namespace PDS.Witsml.Server.Data
         {
             return Fork(Properties(name), objectType);
         }
+
+        public IEnumerable<WitsmlQueryParser> ForkElements()
+        {
+            return Fork(Elements(), Context.ObjectType);
+        }
     }
 }

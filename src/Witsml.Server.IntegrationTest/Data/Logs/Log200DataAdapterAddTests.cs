@@ -223,8 +223,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Generate 150 rows of data
             LogGenerator.GenerateChannelData(Log2.ChannelSet, numDataValue);
-            var response = LogAdapter.Add(DevKit.Parser(Log2), Log2);
-            Assert.AreEqual(ErrorCodes.Success, response.Code);
+            LogAdapter.Add(DevKit.Parser(Log2), Log2);
         }
     }
 }

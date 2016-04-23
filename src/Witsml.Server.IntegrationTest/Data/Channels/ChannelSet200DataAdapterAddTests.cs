@@ -55,16 +55,14 @@ namespace PDS.Witsml.Server.Data.Channels
         [TestMethod]
         public void ChannelSet_can_be_added_with_depth_data()
         {
-            var result = ChannelSetAdapter.Add(DevKit.Parser(ChannelSet), ChannelSet);
-            Assert.AreEqual(ErrorCodes.Success, result.Code);
+            ChannelSetAdapter.Add(DevKit.Parser(ChannelSet), ChannelSet);
         }
 
         [TestMethod]
         public void ChannelSet_can_be_updated_with_middle_depth_data()
         {
             // Create
-            var result = ChannelSetAdapter.Add(DevKit.Parser(ChannelSet), ChannelSet);
-            Assert.AreEqual(ErrorCodes.Success, result.Code);
+            ChannelSetAdapter.Add(DevKit.Parser(ChannelSet), ChannelSet);
 
             ChannelSet.Data = new ChannelData();
 
@@ -78,8 +76,7 @@ namespace PDS.Witsml.Server.Data.Channels
                         ]";
 
             // Update
-            result = ChannelSetAdapter.Update(DevKit.Parser(ChannelSet), ChannelSet);
-            Assert.AreEqual(ErrorCodes.Success, result.Code);
+            ChannelSetAdapter.Update(DevKit.Parser(ChannelSet), ChannelSet);
         }
     }
 }

@@ -57,10 +57,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="parser">The input template parser.</param>
         /// <param name="dataObject">The Log instance to add to the store.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public override WitsmlResult Add(WitsmlQueryParser parser, Log dataObject)
+        public override void Add(WitsmlQueryParser parser, Log dataObject)
         {
             // Extract Data
             var reader = ExtractDataReader(dataObject);
@@ -68,8 +65,6 @@ namespace PDS.Witsml.Server.Data.Logs
             // Insert Log and Log Data
             InsertEntity(dataObject);
             UpdateLogDataAndIndexRange(dataObject.GetUri(), new[] { reader });
-
-            return new WitsmlResult(ErrorCodes.Success, dataObject.Uid);
         }
 
         /// <summary>
@@ -77,10 +72,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="parser">The update parser.</param>
         /// <param name="dataObject">The data object to be updated.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public override WitsmlResult Update(WitsmlQueryParser parser, Log dataObject)
+        public override void Update(WitsmlQueryParser parser, Log dataObject)
         {
             var uri = dataObject.GetUri();
             UpdateEntity(parser, uri);
@@ -88,13 +80,6 @@ namespace PDS.Witsml.Server.Data.Logs
             // Update Log Data and Index Range
             var reader = ExtractDataReader(dataObject, GetEntity(uri));
             UpdateLogDataAndIndexRange(uri, new[] { reader });
-
-            return new WitsmlResult(ErrorCodes.Success);
-        }
-
-        protected override IEnergisticsCollection CreateCollection(List<Log> entities)
-        {
-            return new LogList() { Log = entities };
         }
 
         protected override object CreateGenericMeasure(double value, string uom)

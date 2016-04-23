@@ -16,12 +16,16 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ReferenceData;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
+using Wellbore = Energistics.DataAccess.WITSML141.Wellbore;
+using WellboreList = Energistics.DataAccess.WITSML141.WellboreList;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -80,6 +84,16 @@ namespace PDS.Witsml.Server.Data.Logs
                 // Ensure index curve is first
                 dataObject.LogCurveInfo.MoveToFirst(dataObject.IndexCurve.Value);
             }
+        }
+
+        /// <summary>
+        /// Creates an <see cref="IEnergisticsCollection" /> instance containing the specified data objects.
+        /// </summary>
+        /// <param name="dataObjects">The data objects.</param>
+        /// <returns>The <see cref="IEnergisticsCollection" /> instance.</returns>
+        protected override IEnergisticsCollection CreateCollection(IEnumerable<Log> dataObjects)
+        {
+            return new LogList { Log = dataObjects.ToList() };
         }
     }
 }

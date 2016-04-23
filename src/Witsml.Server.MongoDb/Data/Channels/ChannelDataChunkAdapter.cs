@@ -152,14 +152,12 @@ namespace PDS.Witsml.Server.Data.Channels
         /// Deletes all <see cref="ChannelDataChunk"/> entries for the data object represented by the specified URI.
         /// </summary>
         /// <param name="uri">The URI.</param>
-        public override WitsmlResult Delete(EtpUri uri)
+        public override void Delete(EtpUri uri)
         {
             try
             {
                 var filter = Builders<ChannelDataChunk>.Filter.EqIgnoreCase("Uri", uri.Uri);
                 GetCollection().DeleteMany(filter);
-
-                return new WitsmlResult(ErrorCodes.Success);
             }
             catch (MongoException ex)
             {

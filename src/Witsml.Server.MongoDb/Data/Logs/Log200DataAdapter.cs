@@ -70,10 +70,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="parser">The input template parser.</param>
         /// <param name="dataObject">The data object to be added.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public override WitsmlResult Add(WitsmlQueryParser parser, Log dataObject)
+        public override void Add(WitsmlQueryParser parser, Log dataObject)
         {
             // Add ChannelSets + data via the ChannelSet data adapter
             foreach (var childParser in parser.ForkProperties("ChannelSet", ObjectTypes.ChannelSet))
@@ -87,8 +84,6 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 channelSet.Data = null;
             }
-
-            return base.Add(parser, dataObject);
         }
 
         /// <summary>
@@ -96,10 +91,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="parser">The input template parser.</param>
         /// <param name="dataObject">The data object to be updated.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public override WitsmlResult Update(WitsmlQueryParser parser, Log dataObject)
+        public override void Update(WitsmlQueryParser parser, Log dataObject)
         {
             // Update ChannelSets + data via the ChannelSet data adapter
             foreach (var childParser in parser.ForkProperties("ChannelSet", ObjectTypes.ChannelSet))
@@ -110,8 +102,6 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var uri = GetUri(dataObject);
             UpdateEntity(parser, uri);
-
-            return new WitsmlResult(ErrorCodes.Success);
         }
 
         /// <summary>

@@ -132,43 +132,40 @@ namespace PDS.Witsml.Server.Data
         /// Puts the specified data object into the data store.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-        /// <returns>A WITSML result.</returns>
-        public virtual WitsmlResult Put(DataObject dataObject)
+        public virtual void Put(DataObject dataObject)
         {
             var context = new RequestContext(Functions.PutObject, ObjectTypes.GetObjectType<TObject>(),
                 dataObject.GetXml(), null, null);
 
             var parser = new WitsmlQueryParser(context);
 
-            return Put(parser);
+            Put(parser);
         }
 
         /// <summary>
         /// Puts a data object into the data store.
         /// </summary>
         /// <param name="parser">The input template parser.</param>
-        /// <returns>A WITSML result.</returns>
-        public virtual WitsmlResult Put(WitsmlQueryParser parser)
+        public virtual void Put(WitsmlQueryParser parser)
         {
             var uri = parser.GetUri<TObject>();
             Logger.DebugFormat("Putting {0} with URI '{1}'", typeof(TObject).Name, uri);
 
             if (!string.IsNullOrWhiteSpace(uri.ObjectId) && Exists(uri))
             {
-                return Update(parser);
+                Update(parser);
             }
 
-            return Add(parser);
+            Add(parser);
         }
 
         /// <summary>
         /// Deletes a data object by the specified URI.
         /// </summary>
         /// <param name="uri">The data object URI.</param>
-        /// <returns>A WITSML result.</returns>
-        public virtual WitsmlResult Delete(EtpUri uri)
+        public virtual void Delete(EtpUri uri)
         {
-            return DataAdapter.Delete(uri);
+            DataAdapter.Delete(uri);
         }
 
         /// <summary>
@@ -196,7 +193,8 @@ namespace PDS.Witsml.Server.Data
             Validate(Functions.AddToStore, parser, dataObject);
             Logger.DebugFormat("Validated {0} with URI '{1}' for Add", typeof(TObject).Name, uri);
 
-            return DataAdapter.Add(parser, dataObject);
+            DataAdapter.Add(parser, dataObject);
+            return new WitsmlResult(ErrorCodes.Success, uri.ObjectId);
         }
 
         /// <summary>
@@ -216,7 +214,8 @@ namespace PDS.Witsml.Server.Data
             Validate(Functions.UpdateInStore, parser, dataObject);
             Logger.DebugFormat("Validated {0} with URI '{1}' for Update", typeof(TObject).Name, uri);
 
-            return DataAdapter.Update(parser, dataObject);
+            DataAdapter.Update(parser, dataObject);
+            return new WitsmlResult(ErrorCodes.Success);
         }
 
         /// <summary>
@@ -234,7 +233,8 @@ namespace PDS.Witsml.Server.Data
             Validate(Functions.DeleteFromStore, parser, dataObject);
             Logger.DebugFormat("Validated {0} for Delete", typeof(TObject).Name);
 
-            return DataAdapter.Delete(parser);
+            DataAdapter.Delete(parser);
+            return new WitsmlResult(ErrorCodes.Success);
         }
 
         /// <summary>

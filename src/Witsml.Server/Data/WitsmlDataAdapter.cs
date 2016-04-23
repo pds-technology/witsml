@@ -50,8 +50,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>
         /// A collection of data objects retrieved from the data store.
         /// </returns>
-        /// <exception cref="System.NotImplementedException"></exception>
-        public virtual WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
+        public virtual List<T> Query(WitsmlQueryParser parser)
         {
             throw new NotImplementedException();
         }
@@ -61,10 +60,7 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="parser">The input template parser.</param>
         /// <param name="dataObject">The data object to be added.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public virtual WitsmlResult Add(WitsmlQueryParser parser, T dataObject)
+        public virtual void Add(WitsmlQueryParser parser, T dataObject)
         {
             throw new NotImplementedException();
         }
@@ -74,10 +70,7 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="parser">The input template parser.</param>
         /// <param name="dataObject">The data object to be updated.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public virtual WitsmlResult Update(WitsmlQueryParser parser, T dataObject)
+        public virtual void Update(WitsmlQueryParser parser, T dataObject)
         {
             throw new NotImplementedException();
         }
@@ -86,10 +79,7 @@ namespace PDS.Witsml.Server.Data
         /// Deletes or partially updates the specified object in the data store.
         /// </summary>
         /// <param name="parser">The input template parser.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public virtual WitsmlResult Delete(WitsmlQueryParser parser)
+        public virtual void Delete(WitsmlQueryParser parser)
         {
             throw new NotImplementedException();
         }
@@ -128,8 +118,7 @@ namespace PDS.Witsml.Server.Data
         /// Deletes a data object by the specified URI.
         /// </summary>
         /// <param name="uri">The data object URI.</param>
-        /// <returns>A WITSML result.</returns>
-        public virtual WitsmlResult Delete(EtpUri uri)
+        public virtual void Delete(EtpUri uri)
         {
             throw new NotImplementedException();
         }

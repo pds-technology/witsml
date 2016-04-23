@@ -16,7 +16,10 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
+using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
@@ -60,6 +63,16 @@ namespace PDS.Witsml.Server.Data.Wellbores
         {
             dataObject.Uid = dataObject.NewUid();
             dataObject.CommonData = dataObject.CommonData.Create();
+        }
+
+        /// <summary>
+        /// Creates an <see cref="IEnergisticsCollection" /> instance containing the specified data objects.
+        /// </summary>
+        /// <param name="dataObjects">The data objects.</param>
+        /// <returns>The <see cref="IEnergisticsCollection" /> instance.</returns>
+        protected override IEnergisticsCollection CreateCollection(IEnumerable<Wellbore> dataObjects)
+        {
+            return new WellboreList { Wellbore = dataObjects.ToList() };
         }
     }
 }
