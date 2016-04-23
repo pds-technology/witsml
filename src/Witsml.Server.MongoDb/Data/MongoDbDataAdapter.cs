@@ -82,19 +82,25 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Retrieves data objects from the data store using the specified parser.
+        /// </summary>
+        /// <param name="parser">The query template parser.</param>
+        /// <returns>
+        /// A collection of data objects retrieved from the data store.
+        /// </returns>
+        public override List<T> Query(WitsmlQueryParser parser)
+        {
+            return QueryEntities(parser);
+        }
+
+        /// <summary>
         /// Adds a data object to the data store.
         /// </summary>
         /// <param name="parser">The input template parser.</param>
         /// <param name="dataObject">The data object to be added.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public override WitsmlResult Add(WitsmlQueryParser parser, T dataObject)
+        public override void Add(WitsmlQueryParser parser, T dataObject)
         {
-            var uri = GetUri(dataObject);
             InsertEntity(dataObject);
-
-            return new WitsmlResult(ErrorCodes.Success, uri.ObjectId);
         }
 
         /// <summary>
@@ -102,39 +108,29 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="parser">The input template parser.</param>
         /// <param name="dataObject">The data object to be updated.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public override WitsmlResult Update(WitsmlQueryParser parser, T dataObject)
+        public override void Update(WitsmlQueryParser parser, T dataObject)
         {
             var uri = GetUri(dataObject);
             UpdateEntity(parser, uri);
-
-            return new WitsmlResult(ErrorCodes.Success);
         }
 
         /// <summary>
         /// Deletes or partially updates the specified object by uid.
         /// </summary>
         /// <param name="parser">The query parser that specifies the object.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public override WitsmlResult Delete(WitsmlQueryParser parser)
+        public override void Delete(WitsmlQueryParser parser)
         {
             var uri = parser.GetUri<T>();
-            return Delete(uri);
+            Delete(uri);
         }
 
         /// <summary>
         /// Deletes a data object by the specified identifier.
         /// </summary>
         /// <param name="uri">The data object URI.</param>
-        /// <returns>A WITSML result.</returns>
-        public override WitsmlResult Delete(EtpUri uri)
+        public override void Delete(EtpUri uri)
         {
             DeleteEntity(uri);
-            return new WitsmlResult(ErrorCodes.Success);
         }
 
         /// <summary>

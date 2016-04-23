@@ -124,10 +124,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// </summary>
         /// <param name="parser">The input template parser.</param>
         /// <param name="dataObject">The <see cref="ChannelSet" /> to be added.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public override WitsmlResult Add(WitsmlQueryParser parser, ChannelSet dataObject)
+        public override void Add(WitsmlQueryParser parser, ChannelSet dataObject)
         {
             // Extract Data
             var reader = ExtractDataReader(dataObject);
@@ -153,8 +150,6 @@ namespace PDS.Witsml.Server.Data.Channels
                 // Update index range
                 UpdateIndexRange(dataObject.GetUri(), dataObject, ranges, allMnemonics);
             }
-
-            return new WitsmlResult(ErrorCodes.Success, dataObject.Uuid);
         }
 
         /// <summary>
@@ -162,10 +157,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// </summary>
         /// <param name="parser">The update parser.</param>
         /// <param name="dataObject">The data object to be updated.</param>
-        /// <returns>
-        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
-        /// </returns>
-        public override WitsmlResult Update(WitsmlQueryParser parser, ChannelSet dataObject)
+        public override void Update(WitsmlQueryParser parser, ChannelSet dataObject)
         {
             var uri = dataObject.GetUri();
             UpdateEntity(parser, uri);
@@ -173,8 +165,6 @@ namespace PDS.Witsml.Server.Data.Channels
             // Extract Data
             var reader = ExtractDataReader(dataObject, GetEntity(uri));
             UpdateChannelDataAndIndexRange(uri, reader);
-
-            return new WitsmlResult(ErrorCodes.Success);
         }
 
         /// <summary>
@@ -191,15 +181,10 @@ namespace PDS.Witsml.Server.Data.Channels
         /// Deletes a data object by the specified identifier.
         /// </summary>
         /// <param name="uri">The data object URI.</param>
-        /// <returns>A WITSML result.</returns>
-        public override WitsmlResult Delete(EtpUri uri)
+        public override void Delete(EtpUri uri)
         {
-            var result = base.Delete(uri);
-
-            if (result.Code == ErrorCodes.Success)
-                result = _channelDataChunkAdapter.Delete(uri);
-
-            return result;
+            base.Delete(uri);
+            _channelDataChunkAdapter.Delete(uri);
         }
 
         internal ChannelDataReader ExtractDataReader(ChannelSet entity, ChannelSet existing = null)

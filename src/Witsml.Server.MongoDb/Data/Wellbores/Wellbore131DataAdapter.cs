@@ -19,7 +19,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
 using Energistics.Datatypes;
 
@@ -52,21 +51,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
             return OptionsIn.ReturnElements.IdOnly.Equals(returnElements)
                 ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell" }
                 : null;
-        }
-
-        /// <summary>
-        /// Queries the object(s) specified by the parser.
-        /// </summary>
-        /// <param name="parser">The parser that specifies the query parameters.</param>
-        /// <returns>Queried objects.</returns>
-        public override WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
-        {
-            return new WitsmlResult<IEnergisticsCollection>(
-                ErrorCodes.Success,
-                new WellboreList()
-                {
-                    Wellbore = QueryEntities(parser)
-                });
         }
 
         /// <summary>

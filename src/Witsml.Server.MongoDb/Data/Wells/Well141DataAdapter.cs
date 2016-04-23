@@ -19,7 +19,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.Datatypes;
 
@@ -41,21 +40,6 @@ namespace PDS.Witsml.Server.Data.Wells
         public Well141DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Well141)
         {
             Logger.Debug("Instance created.");
-        }
-
-        /// <summary>
-        /// Queries the object(s) specified by the parser.
-        /// </summary>
-        /// <param name="parser">The parser that specifies the query parameters.</param>
-        /// <returns>Queried objects.</returns>
-        public override WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
-        {
-            return new WitsmlResult<IEnergisticsCollection>(
-                ErrorCodes.Success,
-                new WellList()
-                {
-                    Well = QueryEntities(parser)
-                });
         }
 
         /// <summary>

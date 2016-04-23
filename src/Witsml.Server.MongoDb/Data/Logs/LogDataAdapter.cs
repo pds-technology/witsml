@@ -45,11 +45,13 @@ namespace PDS.Witsml.Server.Data.Logs
         public ChannelDataChunkAdapter ChannelDataChunkAdapter { get; set; }
 
         /// <summary>
-        /// Queries the object(s) specified by the parser.
+        /// Retrieves data objects from the data store using the specified parser.
         /// </summary>
-        /// <param name="parser">The parser that specifies the query parameters.</param>
-        /// <returns>Queried objects.</returns>
-        public override WitsmlResult<IEnergisticsCollection> Query(WitsmlQueryParser parser)
+        /// <param name="parser">The query template parser.</param>
+        /// <returns>
+        /// A collection of data objects retrieved from the data store.
+        /// </returns>
+        public override List<T> Query(WitsmlQueryParser parser)
         {
             var returnElements = parser.ReturnElements();
             var logs = QueryEntities(parser);
@@ -79,9 +81,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 });
             }
 
-            return new WitsmlResult<IEnergisticsCollection>(
-                ErrorCodes.Success,
-                CreateCollection(logs));
+            return logs;
         }
 
         /// <summary>
@@ -179,17 +179,12 @@ namespace PDS.Witsml.Server.Data.Logs
         /// Deletes a data object by the specified identifier.
         /// </summary>
         /// <param name="uri">The data object URI.</param>
-        /// <returns>A WITSML result.</returns>
-        public override WitsmlResult Delete(EtpUri uri)
+        public override void Delete(EtpUri uri)
         {
             Logger.DebugFormat("Delete for Log with uri '{0}'.", uri.Uri);
 
-            var result = base.Delete(uri);
-
-            if (result.Code == ErrorCodes.Success)
-                result = ChannelDataChunkAdapter.Delete(uri);
-
-            return result;
+            base.Delete(uri);
+            ChannelDataChunkAdapter.Delete(uri);
         }
 
         /// <summary>
@@ -796,8 +791,6 @@ namespace PDS.Witsml.Server.Data.Logs
         protected abstract UpdateDefinition<T> UpdateCommonData(MongoDbUpdate<T> mongoUpdate, UpdateDefinition<T> logHeaderUpdate, T entity, TimeSpan? offset);
 
         protected abstract object CreateGenericMeasure(double value, string uom);
-
-        protected abstract IEnergisticsCollection CreateCollection(List<T> entities);
 
         protected abstract IndexMetadataRecord ToIndexMetadataRecord(T entity, TChild indexCurve, int scale = 3);
 
