@@ -666,7 +666,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void LogDataAdapter_GetFromStore_ReturnElements_DataOnly_Supports_Plural_Query()
+        public void LogDataAdapter_GetFromStore_ReturnElements_DataOnly_Supports_Multiple_Queries()
         {
             var response = DevKit.Add<WellList, Well>(_well);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
@@ -728,12 +728,12 @@ namespace PDS.Witsml.Server.Data.Logs
             // Query result of Time log
             var mnemonicList2 = logList.Log[1].LogData[0].MnemonicList.Split(',');
             Assert.AreEqual(4, mnemonicList2.Length);
-            Assert.IsTrue(!mnemonicList2.Except(new List<string>() { "TIME", "AAA", "BBB", "CCC" }).Any());
+            Assert.IsFalse(mnemonicList2.Except(new List<string>() { "TIME", "AAA", "BBB", "CCC" }).Any());
             Assert.AreEqual(4, logList.Log[1].LogData[0].Data.Count);
         }
 
         [TestMethod]
-        public void LogDataAdapter_GetFromStore_ReturnElements_Requested_Supports_Plural_Query()
+        public void LogDataAdapter_GetFromStore_ReturnElements_Requested_Supports_Multiple_Queries()
         {
             var response = DevKit.Add<WellList, Well>(_well);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
@@ -784,6 +784,7 @@ namespace PDS.Witsml.Server.Data.Logs
             query1.LogCurveInfo.Add(new LogCurveInfo() { Uid = "GR", Mnemonic = new ShortNameStruct("GR") });
             query1.LogData = new List<LogData>() { new LogData() };
             query1.LogData.First().MnemonicList = "MD,ROP,GR";
+
             var query2 = DevKit.CreateLog(uidLog2, null, log2.UidWell, null, log2.UidWellbore, null);
             query2.LogCurveInfo = new List<LogCurveInfo>();
             query2.LogCurveInfo.Add(new LogCurveInfo() { Uid = "TIME", Mnemonic = new ShortNameStruct("TIME") });
@@ -809,8 +810,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Query result of Time log
             var mnemonicList2 = logList.Log[1].LogData[0].MnemonicList.Split(',');
-            Assert.AreEqual(4, mnemonicList2.Length); // TODO: It is returning 1 right now.
-            Assert.IsTrue(!mnemonicList2.Except(new List<string>() { "TIME", "AAA", "BBB", "CCC" }).Any());
+            Assert.AreEqual(4, mnemonicList2.Length);
+            Assert.IsFalse(mnemonicList2.Except(new List<string>() { "TIME", "AAA", "BBB", "CCC" }).Any());
             Assert.AreEqual(4, logList.Log[1].LogData[0].Data.Count);
         }
     }
