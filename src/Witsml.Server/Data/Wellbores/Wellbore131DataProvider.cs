@@ -21,16 +21,14 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML131;
 using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
     [Export(typeof(IEtpDataProvider))]
-    [Export(typeof(IWitsml131Configuration))]
     [Export131(ObjectTypes.Wellbore, typeof(IEtpDataProvider))]
     [Export131(ObjectTypes.Wellbore, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Wellbore131DataProvider : WitsmlDataProvider<WellboreList, Wellbore>, IWitsml131Configuration
+    public class Wellbore131DataProvider : WitsmlDataProvider<WellboreList, Wellbore>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Wellbore131DataProvider"/> class.
@@ -40,18 +38,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [ImportingConstructor]
         public Wellbore131DataProvider(IContainer container, IWitsmlDataAdapter<Wellbore> dataAdapter) : base(container, dataAdapter)
         {
-        }
-
-        /// <summary>
-        /// Gets the supported capabilities for the <see cref="Wellbore"/> object.
-        /// </summary>
-        /// <param name="capServer">The capServer instance.</param>
-        public void GetCapabilities(CapServer capServer)
-        {
-            capServer.Add(Functions.GetFromStore, ObjectTypes.Wellbore);
-            capServer.Add(Functions.AddToStore, ObjectTypes.Wellbore);
-            capServer.Add(Functions.UpdateInStore, ObjectTypes.Wellbore);
-            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Wellbore);
         }
 
         /// <summary>
