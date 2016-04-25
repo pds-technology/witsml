@@ -21,6 +21,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.Datatypes;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
@@ -29,8 +30,9 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Wellbore}" />
     [Export(typeof(IWitsmlDataAdapter<Wellbore>))]
+    [Export(typeof(IWitsml131Configuration))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Wellbore131DataAdapter : MongoDbDataAdapter<Wellbore>
+    public class Wellbore131DataAdapter : MongoDbDataAdapter<Wellbore>, IWitsml131Configuration
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Wellbore131DataAdapter"/> class.
@@ -39,6 +41,18 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [ImportingConstructor]
         public Wellbore131DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Wellbore131)
         {
+        }
+
+        /// <summary>
+        /// Gets the supported capabilities for the <see cref="Wellbore"/> object.
+        /// </summary>
+        /// <param name="capServer">The capServer instance.</param>
+        public void GetCapabilities(CapServer capServer)
+        {
+            capServer.Add(Functions.GetFromStore, ObjectTypes.Wellbore);
+            capServer.Add(Functions.AddToStore, ObjectTypes.Wellbore);
+            capServer.Add(Functions.UpdateInStore, ObjectTypes.Wellbore);
+            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Wellbore);
         }
 
         /// <summary>
