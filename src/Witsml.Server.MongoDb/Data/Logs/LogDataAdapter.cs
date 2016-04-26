@@ -53,10 +53,9 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </returns>
         public override List<T> Query(WitsmlQueryParser parser)
         {
-            var returnElements = parser.ReturnElements();
             var logs = QueryEntities(parser);
 
-            if (IncludeLogData(parser, returnElements))
+            if (parser.IncludeLogData())
             {
                 ValidateGrowingObjectDataRequest(parser, logs);
 
@@ -221,13 +220,6 @@ namespace PDS.Witsml.Server.Data.Logs
             return GetIgnoredElementNamesForQuery()
                 .Concat(new [] { "direction", "objectGrowing" })
                 .ToList();
-        }
-
-        protected bool IncludeLogData(WitsmlQueryParser parser, string returnElements)
-        {
-            return OptionsIn.ReturnElements.All.Equals(returnElements) ||
-                   OptionsIn.ReturnElements.DataOnly.Equals(returnElements) ||
-                   parser.Contains("logData");
         }
 
         protected IDictionary<int, string> GetMnemonicList(T log, WitsmlQueryParser parser)

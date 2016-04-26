@@ -21,6 +21,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.Datatypes;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
@@ -29,8 +30,9 @@ namespace PDS.Witsml.Server.Data.Wells
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Well}" />
     [Export(typeof(IWitsmlDataAdapter<Well>))]
+    [Export(typeof(IWitsml141Configuration))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Well141DataAdapter : MongoDbDataAdapter<Well>
+    public class Well141DataAdapter : MongoDbDataAdapter<Well>, IWitsml141Configuration
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Well141DataAdapter"/> class.
@@ -40,6 +42,18 @@ namespace PDS.Witsml.Server.Data.Wells
         public Well141DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Well141)
         {
             Logger.Debug("Instance created.");
+        }
+
+        /// <summary>
+        /// Gets the supported capabilities for the <see cref="Well"/> object.
+        /// </summary>
+        /// <param name="capServer">The capServer instance.</param>
+        public void GetCapabilities(CapServer capServer)
+        {
+            capServer.Add(Functions.GetFromStore, ObjectTypes.Well);
+            capServer.Add(Functions.AddToStore, ObjectTypes.Well);
+            capServer.Add(Functions.UpdateInStore, ObjectTypes.Well);
+            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Well);
         }
 
         /// <summary>

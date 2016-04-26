@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
@@ -30,6 +29,7 @@ using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Data.Logs;
+using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -39,9 +39,10 @@ namespace PDS.Witsml.Server.Data.Logs
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.Logs.LogDataAdapter{Log, LogCurveInfo}" />
     [Export(typeof(IWitsmlDataAdapter<Log>))]
+    [Export(typeof(IWitsml131Configuration))]
     [Export131(ObjectTypes.Log, typeof(IChannelDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Log131DataAdapter : LogDataAdapter<Log, LogCurveInfo>
+    public class Log131DataAdapter : LogDataAdapter<Log, LogCurveInfo>, IWitsml131Configuration
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Log131DataAdapter"/> class.
@@ -50,6 +51,18 @@ namespace PDS.Witsml.Server.Data.Logs
         [ImportingConstructor]
         public Log131DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Log131)
         {
+        }
+
+        /// <summary>
+        /// Gets the supported capabilities for the <see cref="Log"/> object.
+        /// </summary>
+        /// <param name="capServer">The capServer instance.</param>
+        public void GetCapabilities(CapServer capServer)
+        {
+            capServer.Add(Functions.GetFromStore, ObjectTypes.Log);
+            capServer.Add(Functions.AddToStore, ObjectTypes.Log);
+            capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);
+            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Log);
         }
 
         /// <summary>
