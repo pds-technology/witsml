@@ -357,6 +357,8 @@ namespace PDS.Witsml.Server.Data.Logs
             double? start = null;
             double? end = null;
 
+            //ranges = reader.GetChannelRanges();
+
             for (var i = 1; i < reader.FieldCount; i++)
             {
                 var range = reader.GetChannelIndexRange(i);
