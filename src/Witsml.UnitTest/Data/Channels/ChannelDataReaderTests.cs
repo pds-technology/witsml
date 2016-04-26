@@ -17,9 +17,11 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Witsml.Server.Models;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
@@ -222,6 +224,49 @@ namespace PDS.Witsml.Data.Channels
             Console.WriteLine();
             Console.WriteLine(json.Append("]"));
         }
+
+        [TestMethod]
+        public void ChannelDataReader_can_slice()
+        {
+            var data = 
+                "[" +
+                "[[1],[1,1,1,1,1]]," +
+                "[[2],[2,2,2,2,2]]," +
+                "[[3],[3,3,3,3,3]]," +
+                "[[4],[4,4,4,4,4]]," +
+                "[[5],[5,5,5,5,5]]," +
+                "[[6],[6,6,6,6,6]]," +
+                "[[7],[7,7,7,7,7]]" +
+                "]";
+
+            // Create a Reader
+            var reader = new ChannelDataReader(data, "MD,CH1,CH2,CH3,CH4,CH5".Split(','), "ft,ft1,ft2,ft3,ft4,ft5".Split(','), "eml://witsml1411/well(Energistics-well-0001)/wellbore(Energistics-w1-wellbore-0001)/log(Energistics-w1-wb1-log-0002)", "06e4dff8-3de4-4057-a21b-92026e89a6d4");
+
+            // Slice the Reader
+            var slices = new string[] { "MD", "CH2", "CH5" };
+            reader.Slice(slices);
+
+            // Test Mnemonic Slices
+            var mnemonics = reader.Mnemonics;
+            for (var i = 0; i < mnemonics.Length; i++)
+            {
+                Assert.AreEqual(mnemonics[i], slices[i]);
+            }
+
+            // Test Unit Slices
+            var units = reader.Units;
+            Assert.AreEqual(slices.Length, units.Length);
+            Assert.AreEqual(units[0], "ft");
+            Assert.AreEqual(units[1], "ft2");
+            Assert.AreEqual(units[2], "ft5");
+
+            var values = new object[6];
+            var valueCount = reader.GetValues(values);
+
+            Assert.AreEqual(slices.Length, valueCount);
+        }
+
+
 
         //[TestMethod]
         //public void ChannelDataReader_can_read_Log_131()
