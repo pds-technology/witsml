@@ -36,6 +36,7 @@ namespace PDS.Witsml.Server.Data
         private static readonly IList<Type> ExcludeTypes = new List<Type>();
         private static readonly DateTime DefaultDateTime = new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         private static readonly DateTimeOffset DefaultDateTimeOffset = DateTimeOffset.MinValue.AddYears(1899);
+        private T _instance;
 
         static WitsmlQueryTemplate()
         {
@@ -48,6 +49,15 @@ namespace PDS.Witsml.Server.Data
             Exclude<Witsml141.ComponentSchemas.ExtensionNameValue>();
         }
 
+        public WitsmlQueryTemplate()
+        {
+        }
+
+        public WitsmlQueryTemplate(T instance)
+        {
+            _instance = instance;
+        }
+
         private static void Exclude<V>()
         {
             ExcludeTypes.Add(typeof(V));
@@ -55,7 +65,10 @@ namespace PDS.Witsml.Server.Data
 
         public T AsObject()
         {
-            return (T)CreateTemplate(typeof(T));
+            if (_instance == null)
+                _instance = (T)CreateTemplate(typeof(T));
+
+            return _instance;
         }
 
         public List<T> AsList()

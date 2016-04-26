@@ -20,24 +20,17 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
-using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
-using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
     [Export(typeof(IEtpDataProvider))]
-    [Export(typeof(IWitsml141Configuration))]
     [Export141(ObjectTypes.Log, typeof(IEtpDataProvider))]
     [Export141(ObjectTypes.Log, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Log141DataProvider : WitsmlDataProvider<LogList, Log>, IWitsml141Configuration
+    public class Log141DataProvider : WitsmlDataProvider<LogList, Log>
     {
-        private static readonly int MaxDataNodes = Settings.Default.MaxDataNodes;
-        private static readonly int MaxDataPoints = Settings.Default.MaxDataPoints;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="Log141DataProvider"/> class.
         /// </summary>
@@ -46,24 +39,6 @@ namespace PDS.Witsml.Server.Data.Logs
         [ImportingConstructor]
         public Log141DataProvider(IContainer container, IWitsmlDataAdapter<Log> dataAdapter) : base(container, dataAdapter)
         {
-        }
-
-        /// <summary>
-        /// Gets the supported capabilities for the <see cref="Log"/> object.
-        /// </summary>
-        /// <param name="capServer">The capServer instance.</param>
-        public void GetCapabilities(CapServer capServer)
-        {
-            var dataObject = new ObjectWithConstraint(ObjectTypes.Log)
-            {
-                MaxDataNodes = MaxDataNodes,
-                MaxDataPoints = MaxDataPoints
-            };
-
-            capServer.Add(Functions.GetFromStore, dataObject);
-            capServer.Add(Functions.AddToStore, dataObject);
-            capServer.Add(Functions.UpdateInStore, dataObject);
-            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Log);
         }
 
         /// <summary>

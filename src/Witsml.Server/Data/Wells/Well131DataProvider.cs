@@ -21,16 +21,14 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML131;
 using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
     [Export(typeof(IEtpDataProvider))]
-    [Export(typeof(IWitsml131Configuration))]
     [Export131(ObjectTypes.Well, typeof(IEtpDataProvider))]
     [Export131(ObjectTypes.Well, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Well131DataProvider : WitsmlDataProvider<WellList, Well>, IWitsml131Configuration
+    public class Well131DataProvider : WitsmlDataProvider<WellList, Well>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Well131DataProvider"/> class.
@@ -40,20 +38,6 @@ namespace PDS.Witsml.Server.Data.Wells
         [ImportingConstructor]
         public Well131DataProvider(IContainer container, IWitsmlDataAdapter<Well> dataAdapter) : base(container, dataAdapter)
         {
-        }
-
-        /// <summary>
-        /// Gets the supported capabilities for the <see cref="Well"/> object.
-        /// </summary>
-        /// <param name="capServer">The capServer instance.</param>
-        public void GetCapabilities(CapServer capServer)
-        {
-            Logger.DebugFormat("Getting capabilities for server '{0}'.", capServer.Name);
-
-            capServer.Add(Functions.GetFromStore, ObjectTypes.Well);
-            capServer.Add(Functions.AddToStore, ObjectTypes.Well);
-            capServer.Add(Functions.UpdateInStore, ObjectTypes.Well);
-            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Well);
         }
 
         /// <summary>

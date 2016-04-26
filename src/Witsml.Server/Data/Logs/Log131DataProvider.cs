@@ -22,16 +22,14 @@ using System.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ReferenceData;
 using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
     [Export(typeof(IEtpDataProvider))]
-    [Export(typeof(IWitsml131Configuration))]
     [Export141(ObjectTypes.Log, typeof(IEtpDataProvider))]
     [Export131(ObjectTypes.Log, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Log131DataProvider : WitsmlDataProvider<LogList, Log>, IWitsml131Configuration
+    public class Log131DataProvider : WitsmlDataProvider<LogList, Log>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Log131DataProvider"/> class.
@@ -41,18 +39,6 @@ namespace PDS.Witsml.Server.Data.Logs
         [ImportingConstructor]
         public Log131DataProvider(IContainer container, IWitsmlDataAdapter<Log> dataAdapter) : base(container, dataAdapter)
         {
-        }
-
-        /// <summary>
-        /// Gets the supported capabilities for the <see cref="Log"/> object.
-        /// </summary>
-        /// <param name="capServer">The capServer instance.</param>
-        public void GetCapabilities(CapServer capServer)
-        {
-            capServer.Add(Functions.GetFromStore, ObjectTypes.Log);
-            capServer.Add(Functions.AddToStore, ObjectTypes.Log);
-            capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);
-            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Log);
         }
 
         /// <summary>

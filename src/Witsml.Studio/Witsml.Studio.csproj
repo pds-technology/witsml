@@ -70,8 +70,7 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>
-    </ApplicationIcon>
+    <ApplicationIcon>WitsmlStudio.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Caliburn.Micro, Version=2.0.2.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL">
@@ -161,6 +160,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Resource Include="WitsmlStudio.ico" />
     <None Include="Samples\SmartSensorTimeSimulation1311.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

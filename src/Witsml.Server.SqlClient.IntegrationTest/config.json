@@ -1,0 +1,20 @@
+﻿{
+  "version": "1.4.1.1",
+  "database": {
+    "connectionString": "Data Source=(local)\\SQLEXPRESS;Initial Catalog=WitsmlStore;Integrated Security=True;",
+    "providerName": "System.Data.SqlClient"
+  },
+  "mappings": {
+    "well": {
+      "table": "Well",
+      "alias": "w",
+      "filter": "w.ParentWellId = 0",
+      "columns": [
+        { "column": "w.WellId", "alias": "Uid", "selection":  true, "isUid": true },
+        { "column": "w.WellName", "alias": "Name", "selection":  true, "isName": true },
+        { "column": "w.Operator" },
+        { "column": "w.Country" }
+      ]
+    } 
+  } 
+}
