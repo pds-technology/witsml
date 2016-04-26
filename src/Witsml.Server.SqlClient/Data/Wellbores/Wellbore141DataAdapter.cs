@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML141;
 using PDS.Witsml.Server.Configuration;
@@ -25,13 +26,14 @@ namespace PDS.Witsml.Server.Data.Wellbores
     [Export(typeof(IWitsmlDataAdapter<Wellbore>))]
     [Export(typeof(IWitsml141Configuration))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Wellbore141DataAdapter : WitsmlDataAdapter<Wellbore>, IWitsml141Configuration
+    public class Wellbore141DataAdapter : SqlWitsmlDataAdapter<Wellbore>, IWitsml141Configuration
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Wellbore141DataAdapter"/> class.
+        /// Initializes a new instance of the <see cref="Wellbore141DataAdapter" /> class.
         /// </summary>
+        /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public Wellbore141DataAdapter()
+        public Wellbore141DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Wellbore141)
         {
         }
 
@@ -41,10 +43,24 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// <param name="capServer">The capServer instance.</param>
         public void GetCapabilities(CapServer capServer)
         {
+            if (!IsObjectMappingAvailable) return;
+
             capServer.Add(Functions.GetFromStore, ObjectTypes.Wellbore);
             //capServer.Add(Functions.AddToStore, ObjectTypes.Wellbore);
             //capServer.Add(Functions.UpdateInStore, ObjectTypes.Wellbore);
             //capServer.Add(Functions.DeleteFromStore, ObjectTypes.Wellbore);
+        }
+
+        protected override List<Wellbore> CreateQueryTemplateList()
+        {
+            return new Wellbore()
+            {
+                UidWell = "abc",
+                NameWell = "abc",
+                Uid = "abc",
+                Name = "abc"
+            }
+            .AsList();
         }
     }
 }

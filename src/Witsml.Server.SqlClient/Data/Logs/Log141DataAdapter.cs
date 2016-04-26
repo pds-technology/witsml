@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
@@ -27,16 +28,17 @@ namespace PDS.Witsml.Server.Data.Logs
     [Export(typeof(IWitsmlDataAdapter<Log>))]
     [Export(typeof(IWitsml141Configuration))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Log141DataAdapter : WitsmlDataAdapter<Log>, IWitsml141Configuration
+    public class Log141DataAdapter : SqlWitsmlDataAdapter<Log>, IWitsml141Configuration
     {
         private static readonly int MaxDataNodes = Settings.Default.MaxDataNodes;
         private static readonly int MaxDataPoints = Settings.Default.MaxDataPoints;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Log141DataAdapter"/> class.
+        /// Initializes a new instance of the <see cref="Log141DataAdapter" /> class.
         /// </summary>
+        /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public Log141DataAdapter()
+        public Log141DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Log141)
         {
         }
 
@@ -46,6 +48,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="capServer">The capServer instance.</param>
         public void GetCapabilities(CapServer capServer)
         {
+            if (!IsObjectMappingAvailable) return;
+
             var dataObject = new ObjectWithConstraint(ObjectTypes.Log)
             {
                 MaxDataNodes = MaxDataNodes,
@@ -56,6 +60,80 @@ namespace PDS.Witsml.Server.Data.Logs
             //capServer.Add(Functions.AddToStore, dataObject);
             //capServer.Add(Functions.UpdateInStore, dataObject);
             //capServer.Add(Functions.DeleteFromStore, ObjectTypes.Log);
+        }
+
+        /// <summary>
+        /// Retrieves data objects from the data store using the specified parser.
+        /// </summary>
+        /// <param name="parser">The query template parser.</param>
+        /// <returns>
+        /// A collection of data objects retrieved from the data store.
+        /// </returns>
+        public override List<Log> Query(WitsmlQueryParser parser)
+        {
+            if (OptionsIn.RequestObjectSelectionCapability.True.Equals(parser.RequestObjectSelectionCapability()))
+            {
+                return CreateQueryTemplateList();
+            }
+
+            var logs = base.Query(parser);
+
+            if (parser.IncludeLogData())
+            {
+                ValidateGrowingObjectDataRequest(parser, logs);
+
+                logs.ForEach(l =>
+                {
+                    var logHeader = GetLogHeader(l);
+                    var mnemonics = GetMnemonicList(logHeader, parser);
+
+                    QueryLogDataValues(l, logHeader, parser, mnemonics);
+                    FormatLogHeader(l, mnemonics);
+                });
+            }
+            else if (!OptionsIn.RequestObjectSelectionCapability.True.Equals(parser.RequestObjectSelectionCapability()))
+            {
+                logs.ForEach(l =>
+                {
+                    var logHeader = GetLogHeader(l);
+                    var mnemonics = GetMnemonicList(logHeader, parser);
+                    FormatLogHeader(l, mnemonics);
+                });
+            }
+
+            return logs;
+        }
+
+        private Log GetLogHeader(Log log)
+        {
+            return log;
+        }
+
+        private IDictionary<int, string> GetMnemonicList(object log, WitsmlQueryParser parser)
+        {
+            return new Dictionary<int, string>();
+        }
+
+        private void QueryLogDataValues(Log log, Log logHeader, WitsmlQueryParser parser, IDictionary<int, string> mnemonics)
+        {
+        }
+
+        private void FormatLogHeader(Log log, IDictionary<int, string> mnemonics)
+        {
+        }
+
+        protected override List<Log> CreateQueryTemplateList()
+        {
+            return new Log()
+            {
+                UidWell = "abc",
+                NameWell = "abc",
+                UidWellbore = "abc",
+                NameWellbore = "abc",
+                Uid = "abc",
+                Name = "abc"
+            }
+            .AsList();
         }
     }
 }

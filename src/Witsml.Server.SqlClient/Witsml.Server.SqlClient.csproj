@@ -51,7 +51,9 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
@@ -59,9 +61,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\DatabaseProvider.cs" />
+    <Compile Include="Data\IDatabaseProvider.cs" />
     <Compile Include="Data\Logs\Log141DataAdapter.cs" />
+    <Compile Include="Data\SqlSchemaMapper.cs" />
+    <Compile Include="Data\SqlWitsmlDataAdapter.cs" />
     <Compile Include="Data\Wellbores\Wellbore141DataAdapter.cs" />
     <Compile Include="Data\Wells\Well141DataAdapter.cs" />
+    <Compile Include="Data\PetaPoco.cs" />
+    <Compile Include="Models\ColumnMapping.cs" />
+    <Compile Include="Models\DatabaseMapping.cs" />
+    <Compile Include="Models\ObjectMapping.cs" />
+    <Compile Include="Models\SchemaMapping.cs" />
+    <Compile Include="Models\TableMapping.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -85,6 +97,9 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

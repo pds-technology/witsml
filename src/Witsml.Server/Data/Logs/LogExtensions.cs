@@ -64,6 +64,20 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
+        /// Determines whether Log data should be included in the query response.
+        /// </summary>
+        /// <param name="parser">The query parser.</param>
+        /// <returns><c>true</c> if Log data should be included; otherwise, <c>false</c>.</returns>
+        public static bool IncludeLogData(this WitsmlQueryParser parser)
+        {
+            var returnElements = parser.ReturnElements();
+
+            return OptionsIn.ReturnElements.All.Equals(returnElements) ||
+                   OptionsIn.ReturnElements.DataOnly.Equals(returnElements) ||
+                   parser.Contains("logData");
+        }
+
+        /// <summary>
         /// Gets the log curve information mnemonics.
         /// </summary>
         /// <param name="parser">The parser.</param>

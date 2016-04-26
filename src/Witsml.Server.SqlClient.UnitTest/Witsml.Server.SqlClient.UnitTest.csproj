@@ -43,6 +43,10 @@
       <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Shouldly, Version=2.6.0.0, Culture=neutral, PublicKeyToken=6042cbcb05cbc941, processorArchitecture=MSIL">
+      <HintPath>..\packages\Shouldly.2.6.0\lib\net40\Shouldly.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <Choose>
@@ -58,12 +62,17 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Data\SqlSchemaMapperTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Witsml.Server.SqlClient\Witsml.Server.SqlClient.csproj">
       <Project>{0ae08c73-92e8-49ac-9101-56dac34b2276}</Project>
       <Name>Witsml.Server.SqlClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Witsml\Witsml.csproj">
+      <Project>{0EF1D73F-E7A0-40B0-803B-7CE4B6B27112}</Project>
+      <Name>Witsml</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
