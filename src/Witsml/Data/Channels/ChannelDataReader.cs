@@ -255,6 +255,10 @@ namespace PDS.Witsml.Data.Channels
             return string.IsNullOrWhiteSpace(value) ? Empty : value.Split(',');
         }
 
+        /// <summary>
+        /// Sets the ordinal positions for a given set of mnemonic slices.
+        /// </summary>
+        /// <param name="mnemonicSlices">The mnemonic slices.</param>
         public void Slice(string[] mnemonicSlices)
         {
             _allMnemonics = null;
@@ -999,11 +1003,21 @@ namespace PDS.Witsml.Data.Channels
                 NaN.EqualsIgnoreCase(value);
         }
 
+        /// <summary>
+        /// Tests if a slice exists for the given ordinal position.
+        /// </summary>
+        /// <param name="ordinal">The ordinal position being tested.</param>
+        /// <returns>true if the ordinal position exists in the list of slice ordinal positions, false otherwise.</returns>
         private bool SliceExists(int ordinal)
         {
             return _sliceOrdinals == null || _sliceOrdinals.Contains(ordinal);
         }
 
+        /// <summary>
+        /// Tests if a slice exists for the given mnemonic.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic being tested.</param>
+        /// <returns>true if the ordinal position exists in the list of slice ordinal positions for the given mnemonic, false otherwise.</returns>
         private bool SliceExists(string mnemonic)
         {            
             return SliceExists(GetOrdinal(mnemonic));
