@@ -16,7 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML141;
 using PDS.Witsml.Server.Configuration;
@@ -43,7 +42,8 @@ namespace PDS.Witsml.Server.Data.Wells
         /// <param name="capServer">The capServer instance.</param>
         public void GetCapabilities(CapServer capServer)
         {
-            if (!IsObjectMappingAvailable) return;
+            if (!DatabaseProvider.SchemaMapper.IsAvailable(ObjectName))
+                return;
 
             capServer.Add(Functions.GetFromStore, ObjectTypes.Well);
             //capServer.Add(Functions.AddToStore, ObjectTypes.Well);
@@ -51,14 +51,18 @@ namespace PDS.Witsml.Server.Data.Wells
             //capServer.Add(Functions.DeleteFromStore, ObjectTypes.Well);
         }
 
-        protected override List<Well> CreateQueryTemplateList()
+        /// <summary>
+        /// Creates the query template.
+        /// </summary>
+        /// <returns>A query template.</returns>
+        protected override WitsmlQueryTemplate<Well> CreateQueryTemplate()
         {
-            return new Well()
-            {
-                Uid = "abc",
-                Name = "abc"
-            }
-            .AsList();
+            return new WitsmlQueryTemplate<Well>(
+                new Well()
+                {
+                    Uid = "abc",
+                    Name = "abc"
+                });
         }
     }
 }

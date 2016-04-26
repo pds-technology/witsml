@@ -24,30 +24,58 @@ using PDS.Witsml.Server.Models;
 
 namespace PDS.Witsml.Server.Data
 {
+    /// <summary>
+    /// Manages SQL database schema mapping configuration settings.
+    /// </summary>
     [Export]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class SqlSchemaMapper
     {
+        /// <summary>
+        /// Gets the schema mapping.
+        /// </summary>
+        /// <value>The schema mapping.</value>
         public SchemaMapping Schema { get; private set; }
 
+        /// <summary>
+        /// Determines whether an object mapping is available for the specified <see cref="ObjectName"/>.
+        /// </summary>
+        /// <param name="objectName">The name and version of the data object.</param>
+        /// <returns><c>true</c> if an object mapping is available; otherwise, <c>false</c>.</returns>
+        public bool IsAvailable(ObjectName objectName)
+        {
+            if (Schema == null) return false;
+
+            return Schema.Version == objectName.Version &&
+                   Schema.Mappings.ContainsKey(objectName.Name);
+        }
+
+        /// <summary>
+        /// Configures the current instance.
+        /// </summary>
         public void Configure()
         {
             var path = ContainerConfiguration.MapWorkingDirectory("config.json");
             var json = File.ReadAllText(path);
 
-            Schema = Configure(json);
+            Configure(json);
         }
 
+        /// <summary>
+        /// Configures a <see cref="SchemaMapping"/> using the specified json.
+        /// </summary>
+        /// <param name="json">The json configuration.</param>
+        /// <returns>A <see cref="SchemaMapping"/> instance.</returns>
         internal SchemaMapping Configure(string json)
         {
-            var schema = !string.IsNullOrWhiteSpace(json)
+            Schema = !string.IsNullOrWhiteSpace(json)
                 ? JsonConvert.DeserializeObject<SchemaMapping>(json)
                 : new SchemaMapping();
 
-            if (schema.Database == null)
-                schema.Database = new DatabaseMapping();
+            if (Schema.Database == null)
+                Schema.Database = new DatabaseMapping();
 
-            return schema;
+            return Schema;
         }
     }
 }

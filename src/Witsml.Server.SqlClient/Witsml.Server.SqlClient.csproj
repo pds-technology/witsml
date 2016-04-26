@@ -75,6 +75,7 @@
     <Compile Include="Models\SchemaMapping.cs" />
     <Compile Include="Models\TableMapping.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Data\SqlQuery.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Framework.Web\Framework.Web.csproj">

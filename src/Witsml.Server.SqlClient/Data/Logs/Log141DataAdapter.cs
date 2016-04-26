@@ -48,7 +48,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="capServer">The capServer instance.</param>
         public void GetCapabilities(CapServer capServer)
         {
-            if (!IsObjectMappingAvailable) return;
+            if (!DatabaseProvider.SchemaMapper.IsAvailable(ObjectName))
+                return;
 
             var dataObject = new ObjectWithConstraint(ObjectTypes.Log)
             {
@@ -71,12 +72,16 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </returns>
         public override List<Log> Query(WitsmlQueryParser parser)
         {
+            var mapping = DatabaseProvider.SchemaMapper.Schema.Mappings[ObjectName.Name];
+
             if (OptionsIn.RequestObjectSelectionCapability.True.Equals(parser.RequestObjectSelectionCapability()))
             {
-                return CreateQueryTemplateList();
+                Logger.DebugFormat("Requesting {0} query template.", mapping.Table);
+                var template = CreateQueryTemplate();
+                return template.AsList();
             }
 
-            var logs = base.Query(parser);
+            var logs = QueryEntities(parser);
 
             if (parser.IncludeLogData())
             {
@@ -122,18 +127,22 @@ namespace PDS.Witsml.Server.Data.Logs
         {
         }
 
-        protected override List<Log> CreateQueryTemplateList()
+        /// <summary>
+        /// Creates the query template.
+        /// </summary>
+        /// <returns>A query template.</returns>
+        protected override WitsmlQueryTemplate<Log> CreateQueryTemplate()
         {
-            return new Log()
-            {
-                UidWell = "abc",
-                NameWell = "abc",
-                UidWellbore = "abc",
-                NameWellbore = "abc",
-                Uid = "abc",
-                Name = "abc"
-            }
-            .AsList();
+            return new WitsmlQueryTemplate<Log>(
+                new Log()
+                {
+                    UidWell = "abc",
+                    NameWell = "abc",
+                    UidWellbore = "abc",
+                    NameWellbore = "abc",
+                    Uid = "abc",
+                    Name = "abc"
+                });
         }
     }
 }

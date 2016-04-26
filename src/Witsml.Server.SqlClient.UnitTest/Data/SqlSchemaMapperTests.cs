@@ -51,6 +51,19 @@ namespace PDS.Witsml.Server.Data
         }
 
         [TestMethod]
+        public void SqlSchemaMapper_IsAvailable_Returns_False_When_Not_Configured()
+        {
+            Assert.IsFalse(_mapper.IsAvailable(ObjectNames.Well141));
+        }
+
+        [TestMethod]
+        public void SqlSchemaMapper_IsAvailable_Returns_True_When_Configured()
+        {
+            _mapper.Configure(Json);
+            Assert.IsTrue(_mapper.IsAvailable(ObjectNames.Well141));
+        }
+
+        [TestMethod]
         public void SqlSchemaMapper_Configure_Handles_Null_Configuration()
         {
             var schema = _mapper.Configure(null);
