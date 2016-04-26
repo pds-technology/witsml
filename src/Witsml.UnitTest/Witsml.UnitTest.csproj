@@ -93,6 +93,10 @@
       <Project>{30DE888B-A6B7-4528-AD89-324A7F9B0F4C}</Project>
       <Name>WebSockets</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Witsml.Server.MongoDb\Witsml.Server.MongoDb.csproj">
+      <Project>{692d27d9-2f4c-44a6-8d71-8b291e0dc1a3}</Project>
+      <Name>Witsml.Server.MongoDb</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Witsml.Server\Witsml.Server.csproj">
       <Project>{93faae2f-13aa-46df-a94b-36155b51ebfa}</Project>
       <Name>Witsml.Server</Name>
