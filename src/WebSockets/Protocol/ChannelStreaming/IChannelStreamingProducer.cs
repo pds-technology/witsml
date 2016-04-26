@@ -48,15 +48,17 @@ namespace Energistics.Protocol.ChannelStreaming
         /// Sends a ChannelMetadata message to a consumer.
         /// </summary>
         /// <param name="request">The request.</param>
-        /// <param name="channelMetadataRecords">The list of <see cref="ChannelMetadataRecord"/> objects.</param>
-        void ChannelMetadata(MessageHeader request, IList<ChannelMetadataRecord> channelMetadataRecords);
+        /// <param name="channelMetadataRecords">The list of <see cref="ChannelMetadataRecord" /> objects.</param>
+        /// <param name="messageFlag">The message flag.</param>
+        void ChannelMetadata(MessageHeader request, IList<ChannelMetadataRecord> channelMetadataRecords, MessageFlags messageFlag = MessageFlags.FinalPart);
 
         /// <summary>
         /// Sends a ChannelData message to a consumer.
         /// </summary>
         /// <param name="request">The request.</param>
-        /// <param name="dataItems">The list of <see cref="DataItem"/> objects.</param>
-        void ChannelData(MessageHeader request, IList<DataItem> dataItems);
+        /// <param name="dataItems">The list of <see cref="DataItem" /> objects.</param>
+        /// <param name="messageFlag">The message flag.</param>
+        void ChannelData(MessageHeader request, IList<DataItem> dataItems, MessageFlags messageFlag = MessageFlags.MultiPart);
 
         /// <summary>
         /// Sends a ChannelDataChange message to a consumer.

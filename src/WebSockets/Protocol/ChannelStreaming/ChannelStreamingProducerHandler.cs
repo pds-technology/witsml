@@ -95,9 +95,10 @@ namespace Energistics.Protocol.ChannelStreaming
         /// </summary>
         /// <param name="request">The request.</param>
         /// <param name="channelMetadataRecords">The list of <see cref="ChannelMetadataRecord" /> objects.</param>
-        public virtual void ChannelMetadata(MessageHeader request, IList<ChannelMetadataRecord> channelMetadataRecords)
+        /// <param name="messageFlag">The message flag.</param>
+        public virtual void ChannelMetadata(MessageHeader request, IList<ChannelMetadataRecord> channelMetadataRecords, MessageFlags messageFlag = MessageFlags.FinalPart)
         {
-            var header = CreateMessageHeader(Protocols.ChannelStreaming, MessageTypes.ChannelStreaming.ChannelMetadata, request.MessageId, MessageFlags.FinalPart);
+            var header = CreateMessageHeader(Protocols.ChannelStreaming, MessageTypes.ChannelStreaming.ChannelMetadata, request.MessageId, messageFlag);
 
             var channelMetadata = new ChannelMetadata()
             {
@@ -112,11 +113,16 @@ namespace Energistics.Protocol.ChannelStreaming
         /// </summary>
         /// <param name="request">The request.</param>
         /// <param name="dataItems">The list of <see cref="DataItem" /> objects.</param>
-        public virtual void ChannelData(MessageHeader request, IList<DataItem> dataItems)
+        /// <param name="messageFlag">The message flag.</param>
+        public virtual void ChannelData(MessageHeader request, IList<DataItem> dataItems, MessageFlags messageFlag = MessageFlags.MultiPart)
         {
+            var correlationId = 0L;
+
             // NOTE: CorrelationId is only specified when responding to a ChannelRangeRequest message
-            var correlationId = request == null ? 0 : request.MessageId;
-            var header = CreateMessageHeader(Protocols.ChannelStreaming, MessageTypes.ChannelStreaming.ChannelData, correlationId, MessageFlags.MultiPart);
+            if (request != null && request.MessageType == (int)MessageTypes.ChannelStreaming.ChannelRangeRequest)
+                correlationId = request.MessageId;
+
+            var header = CreateMessageHeader(Protocols.ChannelStreaming, MessageTypes.ChannelStreaming.ChannelData, correlationId, messageFlag);
 
             var channelData = new ChannelData()
             {

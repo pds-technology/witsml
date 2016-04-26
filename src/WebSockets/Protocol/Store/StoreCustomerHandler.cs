@@ -42,9 +42,10 @@ namespace Energistics.Protocol.Store
         /// Sends a GetObject message to a store.
         /// </summary>
         /// <param name="uri">The URI.</param>
-        public virtual void GetObject(string uri)
+        /// <param name="messageFlag">The message flag.</param>
+        public virtual void GetObject(string uri, MessageFlags messageFlag = MessageFlags.FinalPart)
         {
-            var header = CreateMessageHeader(Protocols.Store, MessageTypes.Store.GetObject);
+            var header = CreateMessageHeader(Protocols.Store, MessageTypes.Store.GetObject, messageFlags: messageFlag);
 
             var getObject = new GetObject()
             {

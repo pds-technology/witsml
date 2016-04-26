@@ -41,9 +41,10 @@ namespace Energistics.Protocol.Store
         /// Sends an Object message to a customer.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-        public virtual void Object(DataObject dataObject)
+        /// <param name="messageFlag">The message flag.</param>
+        public virtual void Object(DataObject dataObject, MessageFlags messageFlag = MessageFlags.FinalPart)
         {
-            var header = CreateMessageHeader(Protocols.Store, MessageTypes.Store.Object, messageFlags: MessageFlags.FinalPart);
+            var header = CreateMessageHeader(Protocols.Store, MessageTypes.Store.Object, messageFlags: messageFlag);
 
             var @object = new Object()
             {

@@ -33,7 +33,8 @@ namespace Energistics.Protocol.Store
         /// Sends an Object message to a customer.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-        void Object(DataObject dataObject);
+        /// <param name="messageFlag">The message flag.</param>
+        void Object(DataObject dataObject, MessageFlags messageFlag = MessageFlags.FinalPart);
 
         /// <summary>
         /// Handles the GetObject event from a customer.

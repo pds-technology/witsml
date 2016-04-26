@@ -324,11 +324,11 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// <param name="e">The <see cref="ProtocolEventArgs{OpenSession}" /> instance containing the event data.</param>
         public void OnSessionOpened(ProtocolEventArgs<OpenSession> e)
         {
-            if (!e.Message.SupportedProtocols.Any(x => x.Protocol == (int)Protocols.ChannelStreaming))
+            if (e.Message.SupportedProtocols.All(x => x.Protocol != (int) Protocols.ChannelStreaming))
                 return;
 
             var protocol = e.Message.SupportedProtocols
-                .FirstOrDefault(x => x.Protocol == (int)Protocols.ChannelStreaming);
+                .First(x => x.Protocol == (int)Protocols.ChannelStreaming);
 
             IsSimpleStreamer = protocol.ProtocolCapabilities
                 .Where(x => x.Key.EqualsIgnoreCase(ChannelStreamingProducerHandler.SimpleStreamer))
@@ -477,7 +477,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
 
                     Parent.Details.Append(string.Format(
                         "[ \"{0}\", {1}, {2} ],{3}",
-                        valueChannel.Mnemonic,
+                        valueChannel?.Mnemonic,
                         dataItems[i].Value.Item,
                         dataItems[i + 1].Value.Item,
                         Environment.NewLine));
@@ -490,7 +490,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                     var valueChannel = Channels.Where(c => c.ChannelId == x.ChannelId).FirstOrDefault();
 
                     return string.Format("[ \"{0}\", {1}, {2} ]",
-                        valueChannel.Mnemonic,
+                        valueChannel?.Mnemonic,
                         x.Indexes[0],
                         x.Value.Item);
                 }));

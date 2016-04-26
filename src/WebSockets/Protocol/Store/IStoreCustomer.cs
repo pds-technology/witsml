@@ -34,7 +34,8 @@ namespace Energistics.Protocol.Store
         /// Sends a GetObject message to a store.
         /// </summary>
         /// <param name="uri">The URI.</param>
-        void GetObject(string uri);
+        /// <param name="messageFlag">The message flag.</param>
+        void GetObject(string uri, MessageFlags messageFlag = MessageFlags.FinalPart);
 
         /// <summary>
         /// Sends a PutObject message to a store.
