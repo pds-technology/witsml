@@ -68,7 +68,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     var mnemonics = GetMnemonicList(logHeader, parser);
 
                     QueryLogDataValues(l, logHeader, parser, mnemonics);
-                    FormatLogHeader(l, mnemonics);
+                    FormatLogHeader(l, mnemonics.Values.ToArray());
                 });
             }
             else if (!OptionsIn.RequestObjectSelectionCapability.True.Equals(parser.RequestObjectSelectionCapability()))
@@ -76,7 +76,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 logs.ForEach(l =>
                 {
                     var mnemonics = GetMnemonicList(l, parser);
-                    FormatLogHeader(l, mnemonics);
+                    FormatLogHeader(l, mnemonics.Values.ToArray());
                 });
             }
 
@@ -324,9 +324,14 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var units = GetUnitList(logHeader, mnemonics.Keys.ToArray());
             var records = GetChannelData(logHeader.GetUri(), mnemonics[0], range, IsIncreasing(logHeader), requestLatestValues);
-            var logData = FormatLogData(log, records.GetReader(), mnemonics, units, requestLatestValues);
 
-            SetLogDataValues(log, logData, mnemonics.Values, units.Values);
+            // Get a reader for the log's channel data
+            var reader = records.GetReader();
+
+            // Slice the reader for the requested mnemonics
+            reader.Slice(mnemonics.Values.ToArray());
+            var logData = FormatLogData(log, reader, requestLatestValues, mnemonics, units);
+            SetLogDataValues(log, logData, reader.AllMnemonics, reader.AllUnits);
         }
 
         protected Range<double?> GetLogDataSubsetRange(T log, WitsmlQueryParser parser)
@@ -339,6 +344,30 @@ namespace PDS.Witsml.Server.Data.Logs
                 isTimeLog);
         }
 
+        protected List<string> FormatLogData(T log, ChannelDataReader reader, int? requestLatestValues, IDictionary<int, string> mnemonics, IDictionary<int, string> units)
+        {
+            Dictionary<string, Range<double?>> ranges;
+
+            var logData = reader.FormatLogData(requestLatestValues, out ranges);
+
+            if (logData.Count > 0)
+            {
+                // Get mnemonic ids for mnemonics that are not in the reader's mnemonics
+                var removeKeys = mnemonics.Where(m => !reader.AllMnemonics.Contains(m.Value)).Select(m => m.Key).ToArray();
+
+                // Remove mnemonics and corresponding units that are not in the reader
+                removeKeys.ForEach(k =>
+                {
+                    mnemonics.Remove(k);
+                    units.Remove(k);
+                });
+
+                SetLogIndexRange(log, ranges);
+            }
+
+            return logData;
+        }
+
         protected List<string> FormatLogData(T log, ChannelDataReader reader, IDictionary<int, string> mnemonics, IDictionary<int, string> units, int? requestLatestValues)
         {
             var logData = new List<string>();
@@ -348,8 +377,6 @@ namespace PDS.Witsml.Server.Data.Logs
             var ranges = new Dictionary<string, Range<double?>>();
             double? start = null;
             double? end = null;
-
-            //ranges = reader.GetChannelRanges();
 
             for (var i = 1; i < reader.FieldCount; i++)
             {
@@ -493,9 +520,9 @@ namespace PDS.Witsml.Server.Data.Logs
             return requestedValueCount.Keys.All(r => requestedValueCount[r] >= requestLatestValues);
         }
 
-        protected void FormatLogHeader(T log, IDictionary<int, string> mnemonics)
+        protected void FormatLogHeader(T log, string[] mnemonics)
         {
-            RemoveLogCurveInfos(log, mnemonics.Values.ToArray());
+            RemoveLogCurveInfos(log, mnemonics);
         }
 
         protected void RemoveLogCurveInfos(T log, string[] mnemonics)
