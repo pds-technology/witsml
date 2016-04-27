@@ -145,21 +145,33 @@ namespace PDS.Witsml
         /// <param name="xml">The XML.</param>
         /// <returns>The xml with NaN removed.</returns>
         public static string RemoveNaNElements(string xml)
-        {           
+        {  
+            if (xml==null)
+            {
+                return null;
+            }        
+             
             Func<XElement, bool> predicate = e => e.Value.Equals("NaN") && IsNumericField(e);
 
-            var xmlDoc = Parse(xml);
-            var root = xmlDoc.Root;
-
-            foreach (var element in root.Elements())
+            try
             {
-                if (element.Descendants().Any(predicate))
-                {
-                    element.Descendants().Where(predicate).Remove();
-                }
-            }
+                var xmlDoc = Parse(xml);
+                var root = xmlDoc.Root;
 
-            return xmlDoc.ToString();
+                foreach (var element in root.Elements())
+                {
+                    if (element.Descendants().Any(predicate))
+                    {
+                        element.Descendants().Where(predicate).Remove();
+                    }
+                }
+
+                return xmlDoc.ToString();
+            }
+            catch (WitsmlException)
+            {
+                return xml;
+            }
         }
     }
 }
