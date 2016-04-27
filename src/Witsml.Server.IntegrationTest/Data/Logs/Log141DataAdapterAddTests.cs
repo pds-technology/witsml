@@ -1801,6 +1801,50 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsNull(results.First().LogCurveInfo[1].ClassIndex);
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_AddToStore_Rollback_When_Adding_Invalid_Data()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = new Log()
+            {
+                Uid = DevKit.Uid(),
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01"),
+                LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() })
+            };
+
+            var logData = log.LogData.First();
+            logData.Data.Add("997,13.1,");
+            logData.Data.Add("998,14.1,");
+            logData.Data.Add("999,15.1,");
+            logData.Data.Add("1000,16.1,");
+            logData.Data.Add("1001,17.1,");
+            logData.Data.Add("1002,,21.2");
+            logData.Data.Add("1002,,22.2");
+            logData.Data.Add("1003,,23.2");
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.NodesWithSameIndex, response.Result);
+
+            var query = new Log
+            {
+                Uid = log.Uid,
+                UidWell = log.UidWell,
+                UidWellbore = log.UidWellbore
+            };
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(0, results.Count);
+        }
+
         #region Helper Methods
 
         private Log CreateLog(string uid, string name, Well well, Wellbore wellbore)
