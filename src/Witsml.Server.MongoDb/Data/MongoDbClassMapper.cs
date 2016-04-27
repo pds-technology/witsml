@@ -108,7 +108,8 @@ namespace PDS.Witsml.Server.Data
         {
             if (!BsonClassMap.IsClassMapRegistered(typeof(T)))
             {
-                BsonClassMap.RegisterClassMap<T>();
+                var cm = BsonClassMap.RegisterClassMap<T>();
+                cm.SetIgnoreExtraElements(true);
             }
         }
 
