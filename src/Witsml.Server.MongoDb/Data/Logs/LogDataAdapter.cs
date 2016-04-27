@@ -510,7 +510,7 @@ namespace PDS.Witsml.Server.Data.Logs
             logCurves?.RemoveAll(x => !mnemonics.Contains(GetMnemonic(x)));
         }
 
-        protected void UpdateLogDataAndIndexRange(EtpUri uri, IEnumerable<ChannelDataReader> readers)
+        protected void UpdateLogDataAndIndexRange(EtpUri uri, IEnumerable<ChannelDataReader> readers, string tid = null)
         {
             Logger.DebugFormat("Updating log data and index for log uri '{0}'.", uri.Uri);
 
@@ -556,7 +556,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 GetUpdatedIndexRange(reader, updateMnemonics.ToArray(), ranges, IsIncreasing(current));
 
                 // Update log data
-                ChannelDataChunkAdapter.Merge(reader);
+                ChannelDataChunkAdapter.Merge(reader, tid);
                 updateIndexRanges = true;
             }
 

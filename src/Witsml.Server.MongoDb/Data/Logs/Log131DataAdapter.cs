@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
@@ -63,8 +62,18 @@ namespace PDS.Witsml.Server.Data.Logs
             var reader = ExtractDataReader(dataObject);
 
             // Insert Log and Log Data
-            InsertEntity(dataObject);
-            UpdateLogDataAndIndexRange(dataObject.GetUri(), new[] { reader });
+            var tid = Guid.NewGuid().ToString();
+            InsertEntity(dataObject, tid);
+            try
+            {
+                UpdateLogDataAndIndexRange(dataObject.GetUri(), new[] { reader }, tid);
+                CommitTransactions<Log>(tid);
+            }
+            catch (WitsmlException ex)
+            {
+                RollbackTransactions<Log>(tid);
+                throw ex;
+            }
         }
 
         /// <summary>
@@ -75,11 +84,22 @@ namespace PDS.Witsml.Server.Data.Logs
         public override void Update(WitsmlQueryParser parser, Log dataObject)
         {
             var uri = dataObject.GetUri();
-            UpdateEntity(parser, uri);
+ 
+            var tid = Guid.NewGuid().ToString();
+            UpdateEntity(parser, uri, tid);
 
             // Update Log Data and Index Range
             var reader = ExtractDataReader(dataObject, GetEntity(uri));
-            UpdateLogDataAndIndexRange(uri, new[] { reader });
+            try
+            {
+                UpdateLogDataAndIndexRange(uri, new[] { reader }, tid);
+                CommitTransactions<Log>(tid);
+            }
+            catch (WitsmlException ex)
+            {
+                RollbackTransactions<Log>(tid);
+                throw ex;
+            }
         }
 
         protected override object CreateGenericMeasure(double value, string uom)
