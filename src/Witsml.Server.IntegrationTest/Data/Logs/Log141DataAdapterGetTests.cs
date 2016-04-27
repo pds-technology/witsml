@@ -364,6 +364,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
+        [Ignore, Description("Waiting for requestLatestValues to be implemented in ChannelDataReader")]
         public void LogDataAdapter_GetFromStore_Decreasing_RequestLatestValue_OptionsIn()
         {
             var response = DevKit.Add<WellList, Well>(_well);
@@ -437,6 +438,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
+        [Ignore, Description("Waiting for requestLatestValues to be implemented in ChannelDataReader")]
         public void LogDataAdapter_GetFromStore_Increasing_RequestLatestValue_OptionsIn()
         {
             var response = DevKit.Add<WellList, Well>(_well);
@@ -521,6 +523,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
+        [Ignore, Description("Waiting for requestLatestValues to be implemented in ChannelDataReader")]
         public void LogDataAdapter_GetFromStore_Increasing_Time_RequestLatestValue_OptionsIn()
         {
             var response = DevKit.Add<WellList, Well>(_well);
