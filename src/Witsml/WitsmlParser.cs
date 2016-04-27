@@ -122,14 +122,16 @@ namespace PDS.Witsml
                     {
                         PropertyInfo propertyInfo = type.GetProperty(elementPropertyName);
                         Type propertyType = (propertyInfo != null) ? propertyInfo.PropertyType : null;
+
                         if (propertyType != null && propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
                         {                           
-                            propertyType = Nullable.GetUnderlyingType(propertyType);
-                            if (propertyType == typeof(short) || propertyType == typeof(int) || propertyType == typeof(long) ||
+                            propertyType = Nullable.GetUnderlyingType(propertyType);                            
+                        }
+
+                        if (propertyType == typeof(short) || propertyType == typeof(int) || propertyType == typeof(long) ||
                             propertyType == typeof(double) || propertyType == typeof(float) || propertyType == typeof(decimal))
-                            {
-                                return true;
-                            }
+                        {
+                            return true;
                         }
                     }
                 }
