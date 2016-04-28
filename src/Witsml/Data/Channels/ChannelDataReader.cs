@@ -841,7 +841,7 @@ namespace PDS.Witsml.Data.Channels
             Mnemonics = Mnemonics.Where(m => ranges.Keys.Contains(m)).ToArray();
             _sliceOrdinals = Mnemonics
                 .Select(m => GetOrdinal(m)).ToArray();
-            Units = Mnemonics.Select(m => _originalUnits[GetOrdinal(m) - Depth]).ToArray();
+            Units = Mnemonics.Select(m => _originalUnits[GetOrdinal(m)]).ToArray();
 
             // If there is data then update the mnemonics and units from the caller.
             if (RecordsAffected > 0)
