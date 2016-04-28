@@ -62,12 +62,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converters\CommonData141Converter.cs" />
     <Compile Include="Converters\DbValueConverter.cs" />
     <Compile Include="Converters\GenericMeasure141Converter.cs" />
     <Compile Include="Converters\IDbValueConverter.cs" />
+    <Compile Include="Converters\TimestampConverter.cs" />
     <Compile Include="Data\DatabaseProvider.cs" />
     <Compile Include="Data\IDatabaseProvider.cs" />
     <Compile Include="Data\Logs\BinaryLogData141Converter.cs" />
+    <Compile Include="Data\Logs\CsvLogCurveInfo141Converter.cs" />
     <Compile Include="Data\Logs\Log141DataAdapter.cs" />
     <Compile Include="Data\PetaPoco.cs" />
     <Compile Include="Data\SqlSchemaMapper.cs" />

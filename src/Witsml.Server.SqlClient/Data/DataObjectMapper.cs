@@ -113,6 +113,13 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         protected IDbValueConverter Resolve(Type type)
         {
+            var valueType = Nullable.GetUnderlyingType(type);
+            type = valueType ?? type;
+
+            // NOTE: not attempting to find a converter for System types
+            if (type.Namespace == typeof(string).Namespace)
+                return null;
+
             return Resolve<IDbValueConverter>(type.FullName);
         }
 
