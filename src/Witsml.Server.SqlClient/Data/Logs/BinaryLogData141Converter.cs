@@ -28,10 +28,16 @@ using PDS.Witsml.Server.Models;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
+    /// <summary>
+    /// Converts log data to and from provider specific data types.
+    /// </summary>
+    /// <seealso cref="PDS.Witsml.Server.Converters.DbValueConverter" />
     [ExportType(typeof(BinaryLogData141Converter), typeof(IDbValueConverter))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class BinaryLogData141Converter : DbValueConverter
     {
+        private const string MnemonicListExtensionKey = "mnemonicList";
+        private const string UnitListExtensionKey = "unitList";
         private const string ColumnCountExtensionKey = "columnCount";
         private const string SkipBytesExtensionKey = "skipBytes";
         private const string Separator = ",";
@@ -46,15 +52,10 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>The converted value.</returns>
         public override object ConvertFromDb(ObjectMapping mapping, IDataReader dataReader, string columnName, object columnValue)
         {
-            var columnCount = mapping
-                .GetColumn(columnName)
-                .GetExtension(ColumnCountExtensionKey)
-                .GetValue<int>(dataReader);
-
-            var skipBytes = mapping
-                .GetColumn(columnName)
-                .GetExtension(SkipBytesExtensionKey)
-                .GetValue<int>(dataReader);
+            var mnemonicList = mapping.GetColumn(columnName).GetExtension(MnemonicListExtensionKey).GetString(dataReader);
+            var unitList = mapping.GetColumn(columnName).GetExtension(UnitListExtensionKey).GetString(dataReader);
+            var columnCount = mapping.GetColumn(columnName).GetExtension(ColumnCountExtensionKey).GetValue<int>(dataReader);
+            var skipBytes = mapping.GetColumn(columnName).GetExtension(SkipBytesExtensionKey).GetValue<int>(dataReader);
 
             var logData = new List<string>();
             var row = new List<object>();
@@ -82,14 +83,12 @@ namespace PDS.Witsml.Server.Data.Logs
                 row.Clear();
             }
 
-            var emptyList = string.Join(Separator, Enumerable.Repeat(string.Empty, columnCount));
-
             return new List<LogData>
             {
                 new LogData
                 {
-                    MnemonicList = emptyList,
-                    UnitList = emptyList,
+                    MnemonicList = mnemonicList,
+                    UnitList = unitList,
                     Data = logData
                 }
             };
