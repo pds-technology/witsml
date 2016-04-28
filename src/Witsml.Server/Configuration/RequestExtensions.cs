@@ -45,11 +45,10 @@ namespace PDS.Witsml.Server.Configuration
         /// <returns>The request context instance.</returns>
         public static RequestContext ToContext(this WMLS_AddToStoreRequest request)
         {
-            var xmlIn = WitsmlParser.RemoveNaNElements(request.XMLin);
             return new RequestContext(
                 function: Functions.AddToStore,
                 objectType: request.WMLtypeIn,
-                xml: xmlIn,
+                xml: request.XMLin,
                 options: request.OptionsIn,
                 capabilities: request.CapabilitiesIn);
         }
@@ -61,11 +60,10 @@ namespace PDS.Witsml.Server.Configuration
         /// <returns>The request context instance.</returns>
         public static RequestContext ToContext(this WMLS_UpdateInStoreRequest request)
         {
-            var xmlIn = WitsmlParser.RemoveNaNElements(request.XMLin);
             return new RequestContext(
                 function: Functions.UpdateInStore,
                 objectType: request.WMLtypeIn,
-                xml: xmlIn,
+                xml: request.XMLin,
                 options: request.OptionsIn,
                 capabilities: request.CapabilitiesIn);
         }

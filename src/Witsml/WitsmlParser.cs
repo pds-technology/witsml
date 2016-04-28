@@ -62,6 +62,7 @@ namespace PDS.Witsml
         {
             try
             {
+                xml = RemoveNaNElements<T>(xml);
                 return EnergisticsConverter.XmlToObject<T>(xml);
             }
             catch (Exception ex)
@@ -109,33 +110,23 @@ namespace PDS.Witsml
         /// </summary>
         /// <param name="element">The element.</param>
         /// <returns>True if it is a numeric type.</returns>
-        public static bool IsNumericField(XElement element)
+        public static bool IsNumericField<T>(XElement element)
         {
-            var elementPropertyName = char.ToUpper(element.Name.LocalName[0]) + element.Name.LocalName.Substring(1);
-            var parentName = element.Parent.Name.LocalName;
-
-            foreach (var a in AppDomain.CurrentDomain.GetAssemblies())
-            {                
-                foreach (Type type in a.GetTypes())
+            var assembly = Assembly.GetAssembly(typeof(T));
+            foreach (Type type in assembly.GetTypes())
+            {
+                if (type.Name.EqualsIgnoreCase(element.Parent.Name.LocalName))
                 {
-                    if (type.Name.EqualsIgnoreCase(parentName))
+                    PropertyInfo propertyInfo = type.GetProperty(element.Name.LocalName.ToPascalCase());
+                    Type propertyType = (propertyInfo != null) ? propertyInfo.PropertyType : null;
+
+                    if (propertyType.IsNumeric())
                     {
-                        PropertyInfo propertyInfo = type.GetProperty(elementPropertyName);
-                        Type propertyType = (propertyInfo != null) ? propertyInfo.PropertyType : null;
-
-                        if (propertyType != null && propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                        {                           
-                            propertyType = Nullable.GetUnderlyingType(propertyType);                            
-                        }
-
-                        if (propertyType == typeof(short) || propertyType == typeof(int) || propertyType == typeof(long) ||
-                            propertyType == typeof(double) || propertyType == typeof(float) || propertyType == typeof(decimal))
-                        {
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }
+
             return false;
         }
 
@@ -144,34 +135,22 @@ namespace PDS.Witsml
         /// </summary>
         /// <param name="xml">The XML.</param>
         /// <returns>The xml with NaN removed.</returns>
-        public static string RemoveNaNElements(string xml)
+        public static string RemoveNaNElements<T>(string xml)
         {  
-            if (xml==null)
-            {
-                return null;
-            }        
-             
-            Func<XElement, bool> predicate = e => e.Value.Equals("NaN") && IsNumericField(e);
+            Func<XElement, bool> predicate = e => e.Value.Equals("NaN") && IsNumericField<T>(e);
 
-            try
-            {
-                var xmlDoc = Parse(xml);
-                var root = xmlDoc.Root;
+            var xmlDoc = Parse(xml);
+            var root = xmlDoc.Root;
 
-                foreach (var element in root.Elements())
+            foreach (var element in root.Elements())
+            {
+                if (element.Descendants().Any(predicate))
                 {
-                    if (element.Descendants().Any(predicate))
-                    {
-                        element.Descendants().Where(predicate).Remove();
-                    }
+                    element.Descendants().Where(predicate).Remove();
                 }
+            }
 
-                return xmlDoc.ToString();
-            }
-            catch (WitsmlException)
-            {
-                return xml;
-            }
+            return xmlDoc.ToString();           
         }
     }
 }
