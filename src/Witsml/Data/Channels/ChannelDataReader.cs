@@ -270,8 +270,10 @@ namespace PDS.Witsml.Data.Channels
         /// Mnemonics for channels without any data will be excluded from the slices.
         /// </summary>
         /// <param name="mnemonicSlices">The mnemonic slices.</param>
-        public void Slice(string[] mnemonicSlices)
+        public void Slice(IDictionary<int, string> mnemonics, IDictionary<int, string> units)
         {
+            string[] mnemonicSlices = mnemonics.Values.ToArray();
+
             _allMnemonics = null;
             _slicedMnemonics = null;
             _slicedUnits = null;
@@ -287,6 +289,19 @@ namespace PDS.Witsml.Data.Channels
 
             // Remove from the Sliced Mnemonics any mnemonic that does have data (i.e., and index range)
             _slicedMnemonics = _slicedMnemonics.Where(m => ranges.Keys.Contains(m)).ToArray();
+
+            if (RecordsAffected > 0)
+            {
+                // Get mnemonic ids for mnemonics that are not in the reader's mnemonics
+                var removeKeys = mnemonics.Where(m => !AllMnemonics.Contains(m.Value)).Select(m => m.Key).ToArray();
+
+                // Remove mnemonics and corresponding units that are not in the reader
+                removeKeys.ForEach(k =>
+                {
+                    mnemonics.Remove(k);
+                    units.Remove(k);
+                });
+            }
         }
 
         /// <summary>
@@ -410,9 +425,9 @@ namespace PDS.Witsml.Data.Channels
             return _ranges[i];
         }
 
-        public List<string> FormatLogData(int? requestLatestValues, out Dictionary<string, Range<double?>> ranges)
+        public List<List<object>> GetData(int? requestLatestValues, out Dictionary<string, Range<double?>> ranges)
         {
-            var logData = new List<string>();
+            var logData = new List<List<object>>();
             var isTimeIndex = Indices.Select(x => x.IsTimeIndex).FirstOrDefault();
 
             // Ranges will only be returned for channels that are included in slicing
@@ -449,7 +464,7 @@ namespace PDS.Witsml.Data.Channels
                 {
                     //if (!requestLatestValues.HasValue || IsRequestedValueNeeded(values, requestedValueCount, requestLatestValues.Value))
                     //{
-                        logData.Add(string.Join(",", values));
+                        logData.Add(values);
                         //start = start ?? index;
                         //end = index;
 
