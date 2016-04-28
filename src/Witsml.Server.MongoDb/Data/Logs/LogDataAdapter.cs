@@ -329,8 +329,8 @@ namespace PDS.Witsml.Server.Data.Logs
             var reader = records.GetReader();
 
             // Slice the reader for the requested mnemonics
-            reader.Slice(mnemonics.Values.ToArray());
-            var logData = FormatLogData(log, reader, requestLatestValues, mnemonics, units);
+            reader.Slice(mnemonics, units);
+            var logData = FormatLogData(log, reader, requestLatestValues);
             SetLogDataValues(log, logData, reader.AllMnemonics, reader.AllUnits);
         }
 
@@ -344,28 +344,20 @@ namespace PDS.Witsml.Server.Data.Logs
                 isTimeLog);
         }
 
-        protected List<string> FormatLogData(T log, ChannelDataReader reader, int? requestLatestValues, IDictionary<int, string> mnemonics, IDictionary<int, string> units)
+        protected List<string> FormatLogData(T log, ChannelDataReader reader, int? requestLatestValues)
         {
             Dictionary<string, Range<double?>> ranges;
 
-            var logData = reader.FormatLogData(requestLatestValues, out ranges);
+            var logData = reader.GetData(requestLatestValues, out ranges);
 
             if (logData.Count > 0)
             {
-                // Get mnemonic ids for mnemonics that are not in the reader's mnemonics
-                var removeKeys = mnemonics.Where(m => !reader.AllMnemonics.Contains(m.Value)).Select(m => m.Key).ToArray();
-
-                // Remove mnemonics and corresponding units that are not in the reader
-                removeKeys.ForEach(k =>
-                {
-                    mnemonics.Remove(k);
-                    units.Remove(k);
-                });
-
                 SetLogIndexRange(log, ranges);
             }
 
-            return logData;
+            return logData
+                .Select(row => string.Join(",", row))
+                .ToList();
         }
 
         protected List<string> FormatLogData(T log, ChannelDataReader reader, IDictionary<int, string> mnemonics, IDictionary<int, string> units, int? requestLatestValues)
