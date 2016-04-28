@@ -45,6 +45,9 @@ namespace PDS.Witsml.Server.Models
         public bool Selection { get; set; }
 
         [DataMember]
+        public string Converter { get; set; }
+
+        [DataMember]
         public Dictionary<string, ExtensionMapping> Extensions { get; set; } 
     }
 }

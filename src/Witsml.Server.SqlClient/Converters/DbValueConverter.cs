@@ -17,8 +17,6 @@
 //-----------------------------------------------------------------------
 
 using System.Data;
-using System.Linq;
-using PDS.Framework;
 using PDS.Witsml.Server.Models;
 
 namespace PDS.Witsml.Server.Converters
@@ -43,29 +41,13 @@ namespace PDS.Witsml.Server.Converters
         /// Converts the supplied value from a provider specific data type.
         /// </summary>
         /// <param name="mapping">The data object mapping.</param>
-        /// <param name="reader">The data reader.</param>
+        /// <param name="dataReader">The data reader.</param>
         /// <param name="columnName">The column name.</param>
         /// <param name="columnValue">The column value.</param>
         /// <returns>The converted value.</returns>
-        public virtual object ConvertFromDb(ObjectMapping mapping, IDataReader reader, string columnName, object columnValue)
+        public virtual object ConvertFromDb(ObjectMapping mapping, IDataReader dataReader, string columnName, object columnValue)
         {
             return columnValue;
-        }
-
-        /// <summary>
-        /// Gets the column extension having the specified key from the data object mapping.
-        /// </summary>
-        /// <param name="mapping">The data object mapping.</param>
-        /// <param name="columnName">The column name.</param>
-        /// <param name="key">The extension key.</param>
-        /// <returns>The <see cref="ExtensionMapping"/> instance, if found; otherwise, null.</returns>
-        protected virtual ExtensionMapping GetExtension(ObjectMapping mapping, string columnName, string key)
-        {
-            var column = mapping.Columns.FirstOrDefault(x => columnName.EqualsIgnoreCase(x.Alias));
-            ExtensionMapping extension = null;
-
-            column?.Extensions.TryGetValue(key, out extension);
-            return extension;
         }
     }
 }

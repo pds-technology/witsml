@@ -16,13 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Framework;
-using PetaPoco;
 using Shouldly;
 
 namespace PDS.Witsml.Server.Data
@@ -71,48 +67,6 @@ namespace PDS.Witsml.Server.Data
                     database.ExecuteScalar<int>("select null");
                 }
             });
-        }
-
-        [TestMethod]
-        public void DatabaseProvider_Test()
-        {
-            var provider = new DatabaseProvider(_schemaMapper);
-
-            using (var db = provider.GetDatabase())
-            {
-                var dataset = db.Single<dynamic>(Sql.Builder
-                    .Select("*")
-                    .From("Dataset")
-                    .Where("DatasetId = @0 AND WellId = @1", 30, 38));
-
-                byte[] data = dataset.Data;
-                
-                //string decoded = Encoding.Unicode.GetString(data);
-                //int columnSize = dataset.TextColumnSize;
-
-                int columnCount = dataset.TotalDataColumns;
-                int recordCount = dataset.TotalRecords;
-                var row = new List<object>();
-
-                Console.WriteLine("Column Count: {0}", columnCount);
-                Console.WriteLine("Record Count: {0}", recordCount);
-                Console.WriteLine();
-
-                using (var stream = new MemoryStream(data))
-                using (var reader = new BinaryReader(stream))
-                {
-                    while (stream.Position < stream.Length)
-                    {
-                        row.Add(reader.ReadSingle());
-
-                        if (row.Count >= columnCount)
-                        {
-                            Console.WriteLine(string.Join(", ", row));
-                            row.Clear();
-                        }
-                    }
-                }
-            }
         }
     }
 }

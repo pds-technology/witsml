@@ -37,10 +37,10 @@ namespace PDS.Witsml.Server.Converters
         /// Converts the supplied value from a provider specific data type.
         /// </summary>
         /// <param name="mapping">The data object mapping.</param>
-        /// <param name="reader">The data reader.</param>
+        /// <param name="dataReader">The data reader.</param>
         /// <param name="columnName">The column name.</param>
         /// <param name="columnValue">The column value.</param>
         /// <returns>The converted value.</returns>
-        object ConvertFromDb(ObjectMapping mapping, IDataReader reader, string columnName, object columnValue);
+        object ConvertFromDb(ObjectMapping mapping, IDataReader dataReader, string columnName, object columnValue);
     }
 }

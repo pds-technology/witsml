@@ -86,8 +86,20 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The method to use for converting from a provider specific data type.</returns>
         protected virtual Func<IDataReader, object, object> ResolveFromDbConverter(PropertyInfo targetProperty, Type sourceType)
         {
-            var converter = Resolve(targetProperty.PropertyType);
-            if (converter == null) return null;
+            var mapping = Mapping.GetColumn(targetProperty.Name);
+            IDbValueConverter converter = null;
+
+            // Resolve converter from column configuration
+            if (!string.IsNullOrWhiteSpace(mapping?.Converter))
+                converter = Resolve<IDbValueConverter>(mapping.Converter);
+
+            // Resolve converter based on property type
+            if (converter == null)
+                converter = Resolve(targetProperty.PropertyType);
+
+            // Return null if no converter resolved
+            if (converter == null)
+                return null;
 
             return (reader, value) => converter.ConvertFromDb(Mapping, reader, targetProperty.Name, value);
         }

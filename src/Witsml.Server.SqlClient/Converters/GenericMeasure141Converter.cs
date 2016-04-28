@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.ComponentModel.Composition;
 using System.Data;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using PDS.Witsml.Server.Models;
@@ -28,25 +29,27 @@ namespace PDS.Witsml.Server.Converters
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Converters.DbValueConverter" />
     [ExportType(typeof(GenericMeasure), typeof(IDbValueConverter))]
+    [PartCreationPolicy(CreationPolicy.Shared)]
     public class GenericMeasure141Converter : DbValueConverter
     {
+        private const string UomExtensionKey = "uom";
+
         /// <summary>
         /// Converts the supplied value from a provider specific data type.
         /// </summary>
         /// <param name="mapping">The data object mapping.</param>
-        /// <param name="reader">The data reader.</param>
+        /// <param name="dataReader">The data reader.</param>
         /// <param name="columnName">The column name.</param>
         /// <param name="columnValue">The column value.</param>
         /// <returns>The converted value.</returns>
-        public override object ConvertFromDb(ObjectMapping mapping, IDataReader reader, string columnName, object columnValue)
+        public override object ConvertFromDb(ObjectMapping mapping, IDataReader dataReader, string columnName, object columnValue)
         {
             if (columnValue == null) return null;
 
-            var extension = GetExtension(mapping, columnName, "uom");
-
-            var uom = extension != null
-                ? extension.Value ?? reader.GetString(reader.GetOrdinal(extension.Alias))
-                : string.Empty;
+            var uom = mapping
+                .GetColumn(columnName)
+                .GetExtension(UomExtensionKey)
+                .GetString(dataReader) ?? string.Empty;
 
             return new GenericMeasure(Convert.ToDouble(columnValue), uom);
         }

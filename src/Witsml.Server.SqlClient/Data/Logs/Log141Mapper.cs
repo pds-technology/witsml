@@ -27,7 +27,7 @@ namespace PDS.Witsml.Server.Data.Logs
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.DataObjectMapper" />
     [ExportType(typeof(Log141Mapper), typeof(DataObjectMapper))]
-    [PartCreationPolicy(CreationPolicy.NonShared)]
+    [PartCreationPolicy(CreationPolicy.Shared)]
     public class Log141Mapper : DataObjectMapper
     {
         /// <summary>

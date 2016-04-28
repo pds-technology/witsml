@@ -67,6 +67,7 @@
     <Compile Include="Converters\IDbValueConverter.cs" />
     <Compile Include="Data\DatabaseProvider.cs" />
     <Compile Include="Data\IDatabaseProvider.cs" />
+    <Compile Include="Data\Logs\BinaryLogData141Converter.cs" />
     <Compile Include="Data\Logs\Log141DataAdapter.cs" />
     <Compile Include="Data\PetaPoco.cs" />
     <Compile Include="Data\SqlSchemaMapper.cs" />
@@ -78,6 +79,7 @@
     <Compile Include="Models\ColumnMapping.cs" />
     <Compile Include="Models\DatabaseMapping.cs" />
     <Compile Include="Models\ExtensionMapping.cs" />
+    <Compile Include="Models\ModelExtensions.cs" />
     <Compile Include="Models\ObjectMapping.cs" />
     <Compile Include="Models\SchemaMapping.cs" />
     <Compile Include="Models\TableMapping.cs" />
