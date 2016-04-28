@@ -20,8 +20,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Energistics.Datatypes;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
+using Newtonsoft.Json;
+using PDS.Witsml.Server.Data.Transactions;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -32,6 +36,11 @@ namespace PDS.Witsml.Server.Data
     /// <seealso cref="Data.WitsmlDataAdapter{T}" />
     public abstract class MongoDbDataAdapter<T> : WitsmlDataAdapter<T>
     {
+        private static readonly string _idField = "_id";
+        private static readonly string _transactionField = "Transaction";
+        private static readonly string _uidWell = "UidWell";
+        private static readonly string _uidWellbore = "UidWellbore";
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDbDataAdapter{T}" /> class.
         /// </summary>
@@ -291,9 +300,10 @@ namespace PDS.Witsml.Server.Data
         /// Inserts an object into the data store.
         /// </summary>
         /// <param name="entity">The object to be inserted.</param>
-        protected void InsertEntity(T entity)
+        /// <param name="tid">The transaction Id.</param>
+        protected void InsertEntity(T entity, string tid = null)
         {
-            InsertEntity(entity, DbCollectionName);
+            InsertEntity(entity, DbCollectionName, tid);
         }
 
         /// <summary>
@@ -301,15 +311,26 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="entity">The object to be inserted.</param>
         /// <param name="dbCollectionName">The name of the database collection.</param>
+        /// <param name="tid">The transaction Id.</param>
         /// <typeparam name="TObject">The data object type.</typeparam>
-        protected void InsertEntity<TObject>(TObject entity, string dbCollectionName)
+        protected void InsertEntity<TObject>(TObject entity, string dbCollectionName, string tid = null)
         {
             try
             {
-                Logger.DebugFormat("Inserting into {0} MongoDb collection.", dbCollectionName);
+                if (string.IsNullOrEmpty(tid))
+                {
+                    Logger.DebugFormat("Inserting into {0} MongoDb collection.", dbCollectionName);
 
-                var collection = GetCollection<TObject>(dbCollectionName);
-                collection.InsertOne(entity);
+                    var collection = GetCollection<TObject>(dbCollectionName);
+                    collection.InsertOne(entity);
+                }
+                else
+                {
+                    var database = DatabaseProvider.GetDatabase();
+                    var doc = database.GetCollection<BsonDocument>(dbCollectionName);
+                    var document = GetBsonDocument(entity, tid, MongoDbAction.Add);
+                    doc.InsertOne(document);
+                }               
             }
             catch (MongoException ex)
             {
@@ -323,9 +344,10 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="parser">The WITSML query parser.</param>
         /// <param name="uri">The data object URI.</param>
-        protected void UpdateEntity(WitsmlQueryParser parser, EtpUri uri)
+        /// <param name="tid">The transaction Id.</param>
+        protected void UpdateEntity(WitsmlQueryParser parser, EtpUri uri, string tid = null)
         {
-            UpdateEntity<T>(DbCollectionName, parser, uri);
+            UpdateEntity<T>(DbCollectionName, parser, uri, tid);
         }
 
         /// <summary>
@@ -335,8 +357,9 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dbCollectionName">The name of the database collection.</param>
         /// <param name="parser">The WITSML query parser.</param>
         /// <param name="uri">The data object URI.</param>
+        /// <param name="tid">The transaction Id.</param>
         /// <exception cref="WitsmlException"></exception>
-        protected void UpdateEntity<TObject>(string dbCollectionName, WitsmlQueryParser parser, EtpUri uri)
+        protected void UpdateEntity<TObject>(string dbCollectionName, WitsmlQueryParser parser, EtpUri uri, string tid = null)
         {
             try
             {
@@ -349,6 +372,8 @@ namespace PDS.Witsml.Server.Data
 
                 var update = new MongoDbUpdate<TObject>(collection, parser, IdPropertyName, ignores);
                 update.Update(current, uri, updates);
+
+                UpdateDocumentTransaction(current, tid);                   
             }
             catch (MongoException ex)
             {
@@ -419,6 +444,157 @@ namespace PDS.Witsml.Server.Data
         protected virtual List<string> GetIgnoredElementNamesForUpdate()
         {
             return null;
+        }
+
+        /// <summary>
+        /// Commits the transactions.
+        /// </summary>
+        /// <typeparam name="TObject">The type of the object.</typeparam>
+        /// <param name="tid">The transaction Id.</param>
+        protected void CommitTransactions<TObject>(string tid)
+        {
+            if (string.IsNullOrEmpty(tid))
+                return;
+
+            var database = DatabaseProvider.GetDatabase();
+            var doc = database.GetCollection<BsonDocument>(DbCollectionName);
+            var filter = MongoDbUtility.BuildFilter<BsonDocument>(_transactionField + ".Tid", tid);
+            var documents = GetPendingDocumnets(database, doc, filter);
+
+            foreach (var document in documents)
+            {
+                filter = GetDocumentFilter(document);
+                var transaction = BsonSerializer.Deserialize<MongoTransaction>(document[_transactionField].ToJson());
+                var action = transaction.Action;              
+
+                if (action == MongoDbAction.Delete)
+                {
+                    doc.DeleteOne(filter);
+                }
+                else
+                {
+                    var update = Builders<BsonDocument>.Update.Unset(_transactionField);
+                    doc.UpdateOne(filter, update);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Rollbacks the transactions.
+        /// </summary>
+        /// <typeparam name="TObject">The type of the object.</typeparam>
+        /// <param name="tid">The transaction Id.</param>
+        protected void RollbackTransactions<TObject>(string tid)
+        {
+            if (string.IsNullOrEmpty(tid))
+                return;
+
+            var database = DatabaseProvider.GetDatabase();
+            var doc = database.GetCollection<BsonDocument>(DbCollectionName);
+            var filter = MongoDbUtility.BuildFilter<BsonDocument>(_transactionField + ".Tid", tid);
+            var documents = GetPendingDocumnets(database, doc, filter);
+
+            foreach (var document in documents)
+            {
+                filter = GetDocumentFilter(document);
+                var transaction = BsonSerializer.Deserialize<MongoTransaction>(document[_transactionField].ToJson());
+                var action = transaction.Action;
+
+                if (action == MongoDbAction.Add)
+                {
+                    doc.DeleteOne(filter);
+                }
+                else if (action == MongoDbAction.Update)
+                {
+                    var entity = JsonConvert.DeserializeObject<TObject>(transaction.Value);
+                    doc.ReplaceOne(filter, entity.ToBsonDocument());
+                }
+                else if (action == MongoDbAction.Delete)
+                {
+                    var update = Builders<BsonDocument>.Update.Unset(_transactionField);
+                    doc.UpdateOne(filter, update);
+                }
+            }
+        }
+
+        private List<BsonDocument> GetPendingDocumnets(IMongoDatabase database, IMongoCollection<BsonDocument> doc, FilterDefinition<BsonDocument> filter)
+        {
+            var filterJson = filter.Render(doc.DocumentSerializer, doc.Settings.SerializerRegistry);
+            return doc.Find(filter).ToList();
+        }
+
+        private MongoTransaction GetTransaction(IMongoDatabase database, IMongoCollection<BsonDocument> doc, FilterDefinition<BsonDocument> filter)
+        {
+            var current = doc.Find(filter).FirstOrDefault();
+            return BsonSerializer.Deserialize<MongoTransaction>(current[_transactionField].ToJson());
+        }
+
+        private BsonDocument GetBsonDocument<TObject>(TObject entity, string tid, MongoDbAction action)
+        {
+            var mongoTransaction = new MongoTransaction
+            {
+                Tid = tid,
+                Action = action
+            };
+            if (action == MongoDbAction.Update)
+                mongoTransaction.Value = JsonConvert.SerializeObject(entity);
+
+            var bsonDocument = entity.ToBsonDocument();
+            bsonDocument.Add(_transactionField, mongoTransaction.ToBsonDocument());
+
+            return bsonDocument;
+        }
+
+        private FilterDefinition<BsonDocument> GetDocumentFilter(BsonDocument document)
+        {
+            var filters = new List<FilterDefinition<BsonDocument>>();
+            if (document.Contains(ObjectTypes.Uid))
+            {
+                filters.Add(MongoDbUtility.BuildFilter<BsonDocument>(ObjectTypes.Uid, document[ObjectTypes.Uid].ToString()));
+                if (document.Contains(_uidWell))
+                {
+                    filters.Add(MongoDbUtility.BuildFilter<BsonDocument>(_uidWell, document[_uidWell].ToString()));
+                    if (document.Contains(_uidWellbore))
+                    {
+                        filters.Add(MongoDbUtility.BuildFilter<BsonDocument>(_uidWellbore, document[_uidWellbore].ToString()));
+                    }
+                }
+            }
+            else if (document.Contains(ObjectTypes.Uuid))
+            {
+                filters.Add(MongoDbUtility.BuildFilter<BsonDocument>(ObjectTypes.Uuid, document[ObjectTypes.Uuid]).ToString());
+            }
+            else if (document.Contains(ObjectTypes.Id))
+            {
+                filters.Add(MongoDbUtility.BuildFilter<BsonDocument>(ObjectTypes.Id, document[ObjectTypes.Id]));
+            }
+            else
+            {
+                filters.Add(MongoDbUtility.BuildFilter<BsonDocument>(_idField, document[_idField]));
+            }
+
+            return filters.Count > 0 
+                ? Builders<BsonDocument>.Filter.And(filters)
+                : null;
+        }   
+        
+        private void UpdateDocumentTransaction<TObject>(TObject entity, string tid)
+        {
+            if (string.IsNullOrEmpty(tid))
+                return;
+
+            var mongoTransaction = new MongoTransaction
+            {
+                Tid = tid,
+                Action = MongoDbAction.Update,
+                Value = JsonConvert.SerializeObject(entity)
+            };
+
+            var database = DatabaseProvider.GetDatabase();
+            var doc = database.GetCollection<BsonDocument>(DbCollectionName);
+            var filter = GetDocumentFilter(entity.ToBsonDocument());
+            var update = MongoDbUtility.BuildUpdate<BsonDocument>(null, _transactionField, mongoTransaction);
+            doc.UpdateOne(filter, update);
         }
     }
 }

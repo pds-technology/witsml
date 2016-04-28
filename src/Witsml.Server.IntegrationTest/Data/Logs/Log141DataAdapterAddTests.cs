@@ -1743,6 +1743,108 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(indexCurve.Mnemonic.Value, firstCurve.Mnemonic.Value);
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_AddToStore_Supports_NaN_In_Numeric_Fields()
+        {
+            // Add well
+            var response = DevKit.Add<WellList, Well>(Well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add wellbore
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWellbore = response.SuppMsgOut;
+
+            // Add log
+            var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
+                "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
+                "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
+                    "<log uid=\"" + "\" uidWell=\"" + Wellbore.UidWell + "\" uidWellbore=\"" + uidWellbore + "\">" + Environment.NewLine +
+                        "<nameWell>" + Well.Name + "</nameWell>" + Environment.NewLine +
+                        "<nameWellbore>" + Wellbore.Name + "</nameWellbore>" + Environment.NewLine +
+                        "<name>" + DevKit.Name("Log 01") + "</name>" + Environment.NewLine +
+                        "<indexType>measured depth</indexType>" + Environment.NewLine +
+                        "<direction>increasing</direction>" + Environment.NewLine +
+                        "<bhaRunNumber>NaN</bhaRunNumber>" + Environment.NewLine +
+                        "<indexCurve>MD</indexCurve>" + Environment.NewLine +
+                        "<logCurveInfo uid=\"MD\">" + Environment.NewLine +
+                        "  <mnemonic>MD</mnemonic>" + Environment.NewLine +
+                        "  <unit>m</unit>" + Environment.NewLine +
+                        "  <classIndex>NaN</classIndex>" + Environment.NewLine +
+                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
+                        "</logCurveInfo>" + Environment.NewLine +
+                        "<logCurveInfo uid=\"GR\">" + Environment.NewLine +
+                        "  <mnemonic>GR</mnemonic>" + Environment.NewLine +
+                        "  <unit>gAPI</unit>" + Environment.NewLine +
+                        "  <classIndex>NaN</classIndex>" + Environment.NewLine +
+                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
+                        "</logCurveInfo>" + Environment.NewLine +
+                    "</log>" + Environment.NewLine +
+               "</logs>";
+
+            var result = DevKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
+            Assert.AreEqual((short)ErrorCodes.Success, result.Result);
+            
+            var uidLog = result.SuppMsgOut;
+
+            // Query log
+            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.HeaderOnly);
+            Assert.IsTrue(results.Any());
+
+            Assert.IsNull(results.First().BhaRunNumber);
+            Assert.AreEqual(2, results.First().LogCurveInfo.Count);
+            Assert.IsNull(results.First().LogCurveInfo[0].ClassIndex);
+            Assert.IsNull(results.First().LogCurveInfo[1].ClassIndex);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_AddToStore_Rollback_When_Adding_Invalid_Data()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = new Log()
+            {
+                Uid = DevKit.Uid(),
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01"),
+                LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() })
+            };
+
+            var logData = log.LogData.First();
+            logData.Data.Add("997,13.1,");
+            logData.Data.Add("998,14.1,");
+            logData.Data.Add("999,15.1,");
+            logData.Data.Add("1000,16.1,");
+            logData.Data.Add("1001,17.1,");
+            logData.Data.Add("1002,,21.2");
+            logData.Data.Add("1002,,22.2");
+            logData.Data.Add("1003,,23.2");
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.NodesWithSameIndex, response.Result);
+
+            var query = new Log
+            {
+                Uid = log.Uid,
+                UidWell = log.UidWell,
+                UidWellbore = log.UidWellbore
+            };
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(0, results.Count);
+        }
+
         #region Helper Methods
 
         private Log CreateLog(string uid, string name, Well well, Wellbore wellbore)

@@ -364,7 +364,8 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void LogDataAdapter_GetFromStore_Decreasing_RequestLatestValue_OptionsIn()
+        [Ignore, Description("Waiting for requestLatestValues to be implemented in ChannelDataReader")]
+        public void Log141DataAdapter_GetFromStore_Decreasing_RequestLatestValue_OptionsIn()
         {
             var response = DevKit.Add<WellList, Well>(_well);
 
@@ -437,7 +438,8 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void LogDataAdapter_GetFromStore_Increasing_RequestLatestValue_OptionsIn()
+        [Ignore, Description("Waiting for requestLatestValues to be implemented in ChannelDataReader")]
+        public void Log141DataAdapter_GetFromStore_Increasing_RequestLatestValue_OptionsIn()
         {
             var response = DevKit.Add<WellList, Well>(_well);
 
@@ -521,7 +523,8 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void LogDataAdapter_GetFromStore_Increasing_Time_RequestLatestValue_OptionsIn()
+        [Ignore, Description("Waiting for requestLatestValues to be implemented in ChannelDataReader")]
+        public void Log141DataAdapter_GetFromStore_Increasing_Time_RequestLatestValue_OptionsIn()
         {
             var response = DevKit.Add<WellList, Well>(_well);
 
@@ -601,7 +604,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void LogDataAdapter_GetFromStore_Error_402_MaxReturnNodes_Not_Greater_Than_Zero()
+        public void Log141DataAdapter_GetFromStore_Error_402_MaxReturnNodes_Not_Greater_Than_Zero()
         {
             var result = DevKit.Get<LogList, Log>(DevKit.List(_log), ObjectTypes.Log, optionsIn: "maxReturnNodes=0");
 
@@ -609,7 +612,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void LogDataAdapter_GetFromStore_Error_438_Recurring_Elements_Have_Inconsistent_Selection()
+        public void Log141DataAdapter_GetFromStore_Error_438_Recurring_Elements_Have_Inconsistent_Selection()
         {
             _log.LogCurveInfo = new List<LogCurveInfo>();
             _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "MD", DataSource = "abc" });
@@ -623,7 +626,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void LogDataAdapter_GetFromStore_Error_439_Recurring_Elements_Has_Empty_Selection_Value()
+        public void Log141DataAdapter_GetFromStore_Error_439_Recurring_Elements_Has_Empty_Selection_Value()
         {
             _log.LogCurveInfo = new List<LogCurveInfo>();
             _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "MD", Mnemonic = new ShortNameStruct("MD") });
@@ -635,7 +638,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void LogDataAdapter_GetFromStore_Error_475_No_Subset_When_Getting_Growing_Object()
+        public void Log141DataAdapter_GetFromStore_Error_475_No_Subset_When_Getting_Growing_Object()
         {
             var response = DevKit.Add<WellList, Well>(_well);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
@@ -666,7 +669,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void LogDataAdapter_GetFromStore_ReturnElements_DataOnly_Supports_Multiple_Queries()
+        public void Log141DataAdapter_GetFromStore_ReturnElements_DataOnly_Supports_Multiple_Queries()
         {
             var response = DevKit.Add<WellList, Well>(_well);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
@@ -733,7 +736,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void LogDataAdapter_GetFromStore_ReturnElements_Requested_Supports_Multiple_Queries()
+        public void Log141DataAdapter_GetFromStore_ReturnElements_Requested_Supports_Multiple_Queries()
         {
             var response = DevKit.Add<WellList, Well>(_well);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
@@ -813,6 +816,62 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(4, mnemonicList2.Length);
             Assert.IsFalse(mnemonicList2.Except(new List<string>() { "TIME", "AAA", "BBB", "CCC" }).Any());
             Assert.AreEqual(4, logList.Log[1].LogData[0].Data.Count);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Supports_NaN_In_Numeric_Fields()
+        {
+            // Add well
+            var response = DevKit.Add<WellList, Well>(_well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add wellbore
+            _wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWellbore = response.SuppMsgOut;
+
+            // Add log
+            _log.UidWell = _wellbore.UidWell;
+            _log.UidWellbore = uidWellbore;
+            DevKit.InitHeader(_log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(_log, DevKit.Mnemonics(_log), DevKit.Units(_log), 3);
+            _log.BhaRunNumber = 123;
+            _log.LogCurveInfo[0].ClassIndex = 1;
+            _log.LogCurveInfo[1].ClassIndex = 2;
+
+            response = DevKit.Add<LogList, Log>(_log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            // Query log
+            var queryIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
+                "<logs version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
+                    "<log uid=\"" + uidLog + "\" uidWell=\"" + _wellbore.UidWell + "\" uidWellbore=\"" + uidWellbore + "\">" + Environment.NewLine +
+                        "<bhaRunNumber>NaN</bhaRunNumber>" + Environment.NewLine +
+                        "<logCurveInfo uid=\"MD\">" + Environment.NewLine +
+                        "  <mnemonic>MD</mnemonic>" + Environment.NewLine +
+                        "  <classIndex>NaN</classIndex>" + Environment.NewLine +
+                        "</logCurveInfo>" + Environment.NewLine +
+                        "<logCurveInfo uid=\"ROP\">" + Environment.NewLine +
+                        "  <mnemonic>ROP</mnemonic>" + Environment.NewLine +
+                        "  <classIndex>NaN</classIndex>" + Environment.NewLine +
+                        "</logCurveInfo>" + Environment.NewLine +
+                    "</log>" + Environment.NewLine +
+               "</logs>";
+
+            var results = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(results.XMLout);
+            Assert.AreEqual(1, logList.Log.Count);
+        
+            Assert.AreEqual((short)123, logList.Log.First().BhaRunNumber);
+            Assert.AreEqual(2, logList.Log.First().LogCurveInfo.Count);
+            Assert.AreEqual((short)1, logList.Log.First().LogCurveInfo[0].ClassIndex);
+            Assert.AreEqual((short)2, logList.Log.First().LogCurveInfo[1].ClassIndex);
         }
     }
 }

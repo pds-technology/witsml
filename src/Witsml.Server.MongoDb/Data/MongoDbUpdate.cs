@@ -268,6 +268,10 @@ namespace PDS.Witsml.Server.Data
 
                 return update.Set(propertyPath, new Timestamp(value));
             }
+            else if (propertyValue.Equals("NaN") && propertyType.IsNumeric())
+            {
+                return update;
+            }
             else if (typeof(IConvertible).IsAssignableFrom(propertyType))
             {
                 var value = Convert.ChangeType(propertyValue, propertyType);

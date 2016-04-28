@@ -21,7 +21,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Witsml.Server.Models;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;

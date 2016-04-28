@@ -150,5 +150,21 @@ namespace PDS.Framework
 
             return value.ToString();
         }
+
+        /// <summary>
+        /// Determines whether the specified type is numeric.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns>true if the type is numeric; otherwise, false</returns>
+        public static bool IsNumeric(this Type type)
+        {
+            if (type != null && type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                type = Nullable.GetUnderlyingType(type);
+            }
+
+            var typeCode = Type.GetTypeCode(type);
+            return typeCode >= TypeCode.Char && typeCode <= TypeCode.Decimal;
+        }
     }
 }

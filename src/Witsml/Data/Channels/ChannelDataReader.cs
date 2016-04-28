@@ -25,6 +25,7 @@ using log4net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PDS.Framework;
+using PDS.Witsml;
 
 namespace PDS.Witsml.Data.Channels
 {
@@ -143,6 +144,12 @@ namespace PDS.Witsml.Data.Channels
         public string Uri { get; set; }
 
         private string[] _mnemonics = Empty;
+        private string[] _slicedMnemonics = null;
+
+        public string[] AllMnemonics
+        {
+            get { return Indices.Select(i => i.Mnemonic).Union(Mnemonics).ToArray(); }
+        }
 
         /// <summary>
         /// Gets the mnemonics included in slicing or all mnemonics if not sliced.
@@ -151,12 +158,22 @@ namespace PDS.Witsml.Data.Channels
         public string[] Mnemonics
         {
             get
-            {                
-                return _mnemonics.Where(m => SliceExists(m)).ToArray();
+            {
+                if (_slicedMnemonics == null || _slicedMnemonics.Length == 0)
+                {
+                    _slicedMnemonics = _mnemonics.Where(m => SliceExists(m)).ToArray();
+                }
+                return _slicedMnemonics;
             }
         }
 
+        public string[] AllUnits
+        {
+            get { return Indices.Select(i => i.Unit).Union(Units).ToArray(); }
+        }
+
         private string[] _units = Empty;
+        private string[] _slicedUnits = null;
 
         /// <summary>
         /// Gets the units included in slicing or all units if not sliced.
@@ -166,7 +183,11 @@ namespace PDS.Witsml.Data.Channels
         {
             get
             {
-                return _units.Where((u,i) => SliceExists(i)).ToArray();
+                if (_slicedUnits == null)
+                {
+                    _slicedUnits = Mnemonics.Select(m => _units[GetOrdinal(m)-1]).ToArray();
+                }
+                return _slicedUnits;
             }
         }
 
@@ -244,9 +265,28 @@ namespace PDS.Witsml.Data.Channels
             return string.IsNullOrWhiteSpace(value) ? Empty : value.Split(',');
         }
 
+        /// <summary>
+        /// Sets the ordinal positions for a given set of mnemonic slices.
+        /// Mnemonics for channels without any data will be excluded from the slices.
+        /// </summary>
+        /// <param name="mnemonicSlices">The mnemonic slices.</param>
         public void Slice(string[] mnemonicSlices)
         {
-            _sliceOrdinals = mnemonicSlices.Select(m => GetOrdinal(m)).ToArray();
+            _allMnemonics = null;
+            _slicedMnemonics = null;
+            _slicedUnits = null;
+
+
+            // Calculate ranges before any slicing starts
+            //... Mnemonics without a range are excluded
+            var ranges = GetChannelRanges();
+
+            _sliceOrdinals = mnemonicSlices
+                .Where(m => ranges.Keys.Contains(m))        // Don't include any mnemonic slices for channels that don't have any data.
+                .Select(m => GetOrdinal(m)).ToArray();      // Get the ordinal position of each slice.
+
+            // Remove from the Sliced Mnemonics any mnemonic that does have data (i.e., and index range)
+            _slicedMnemonics = _slicedMnemonics.Where(m => ranges.Keys.Contains(m)).ToArray();
         }
 
         /// <summary>
@@ -316,12 +356,37 @@ namespace PDS.Witsml.Data.Channels
             var channelIndex = GetIndex(index);
 
             if (channelIndex == null)
-                return new Range<double?>(null, null);
+                return Range.Empty;
 
             var start = GetIndexValues(0).Skip(index).FirstOrDefault();
             var end = GetIndexValues(RecordsAffected - 1).Skip(index).FirstOrDefault();
 
             return Range.Parse(start, end, channelIndex.IsTimeIndex);
+        }
+
+        /// <summary>
+        /// Gets the index ranges for each channel.
+        /// </summary>
+        /// <returns>Gets the index ranges for each channel in the public Mnemonics property that has a range.</returns>
+        public Dictionary<string, Range<double?>> GetChannelRanges()
+        {
+            // Calculate the ranges if we haven't done so already.
+            if (_ranges == null)
+                _ranges = CalculateChannelIndexRanges();
+
+            var channelRanges = new Dictionary<string, Range<double?>>();
+            var allSlices = Indices.Select(i => i.Mnemonic).Union(Mnemonics).ToArray();
+
+            allSlices.ForEach(m =>
+            {
+                var range = _ranges[GetOrdinal(m)];
+                if (range.Start.HasValue)
+                {
+                    channelRanges.Add(m, range);
+                }
+            });
+
+            return channelRanges;
         }
 
         /// <summary>
@@ -333,7 +398,7 @@ namespace PDS.Witsml.Data.Channels
         {
             if (!SliceExists(i))
             {
-                return new Range<double?>(null, null);
+                return Range.Empty;
             }
 
             if (RecordsAffected < 1)
@@ -343,6 +408,67 @@ namespace PDS.Witsml.Data.Channels
                 _ranges = CalculateChannelIndexRanges();
 
             return _ranges[i];
+        }
+
+        public List<string> FormatLogData(int? requestLatestValues, out Dictionary<string, Range<double?>> ranges)
+        {
+            var logData = new List<string>();
+            var isTimeIndex = Indices.Select(x => x.IsTimeIndex).FirstOrDefault();
+
+            // Ranges will only be returned for channels that are included in slicing
+            //... and contain data.
+            ranges = GetChannelRanges();
+
+            // TODO: Add support for requestLatestValues
+
+            // Read through all of the data
+            while (Read())
+            {
+                var values = new List<object>();
+                var index = GetIndexValue();
+
+                // Add the index value to the values list and 
+                //... use timestamp format for time index values
+                values.Add(isTimeIndex
+                    ? GetDateTimeOffset(0).ToString("o")
+                    : (object)index);
+
+                // Only add channel values to the list of values
+                //... if the are included in current slices
+                for (int i = 1; i < FieldCount; i++)
+                {
+                    var channelValue = GetValue(i);
+
+                    // Limit data to mnemonics slices                    
+                    if (SliceExists(i))
+                        values.Add(channelValue);
+                }
+
+                // Filter rows with no channel values
+                if (values.Count > 1)
+                {
+                    //if (!requestLatestValues.HasValue || IsRequestedValueNeeded(values, requestedValueCount, requestLatestValues.Value))
+                    //{
+                        logData.Add(string.Join(",", values));
+                        //start = start ?? index;
+                        //end = index;
+
+                        // Update the latest value count for each channel.
+                        //if (requestLatestValues.HasValue)
+                        //{
+                        //    UpdateRequestedValueCount(requestedValueCount, values, mnemonics, ranges, index);
+                        //}
+                    //}
+
+                    // if latest values requested and we have all of the requested values we need, break out;
+                    //if (requestLatestValues.HasValue && HasRequestedValuesForAllChannels(requestedValueCount, requestLatestValues.Value))
+                    //{
+                    //    break;
+                    //}
+                }
+            }
+
+            return logData;
         }
 
         /// <summary>
@@ -588,6 +714,8 @@ namespace PDS.Witsml.Data.Channels
             return _mnemonics.Skip(i).FirstOrDefault();
         }
 
+        private string[] _allMnemonics = null;
+
         /// <summary>
         /// Return the index of the named field.
         /// </summary>
@@ -597,8 +725,12 @@ namespace PDS.Witsml.Data.Channels
         /// </returns>
         public int GetOrdinal(string name)
         {
-            var allMnemonics = Indices.Select(i => i.Mnemonic).Union(_mnemonics).ToArray();
-            return Array.IndexOf(allMnemonics, name);
+            if (_allMnemonics == null)
+            {
+                _allMnemonics = Indices.Select(i => i.Mnemonic).Union(_mnemonics).ToArray();
+            }
+            
+            return Array.IndexOf(_allMnemonics, name);
         }
 
         /// <summary>
@@ -661,7 +793,7 @@ namespace PDS.Witsml.Data.Channels
         public int GetValues(object[] values)
         {
             // Slice the results of GetRowValues
-            var rowValues = GetRowValues(_current).Where((r, i) => _sliceOrdinals == null || _sliceOrdinals.Contains(i));
+            var rowValues = GetRowValues(_current).Where((r, i) => SliceExists(i));
             
             var count = Math.Min(values.Length, rowValues.Count());
 
@@ -827,14 +959,12 @@ namespace PDS.Witsml.Data.Channels
             if (IsClosed)
                 return Enumerable.Empty<object>();
 
-            var values = _records
+            // Slice row
+            return _records
                 .Skip(row)
                 .Take(1)
-                .SelectMany(x => x.Last());
-
-            // Slice row
-            return values.Where((r, i) => _sliceOrdinals == null || _sliceOrdinals.Contains(i));
-            
+                .SelectMany(x => x.Last())
+                .Where((r, i) => SliceExists(i));
         }
 
         /// <summary>
@@ -868,18 +998,22 @@ namespace PDS.Witsml.Data.Channels
             object start = null;
             object end = null;
 
-            _records.ForEach(x =>
+
+            if (SliceExists(i))
             {
-                var value = string.Format("{0}", x.Last().Skip(valueIndex).FirstOrDefault());
-
-                if (!IsNull(value))
+                _records.ForEach(x =>
                 {
-                    end = x[0][0];
+                    var value = string.Format("{0}", x.Last().Skip(valueIndex).FirstOrDefault());
 
-                    if (start == null)
-                        start = end;
-                }
-            });
+                    if (!IsNull(value))
+                    {
+                        end = x[0][0];
+
+                        if (start == null)
+                            start = end;
+                    }
+                });
+            }
 
             return Range.Parse(start, end, isTimeIndex);
         }
@@ -958,14 +1092,24 @@ namespace PDS.Witsml.Data.Channels
                 NaN.EqualsIgnoreCase(value);
         }
 
+        /// <summary>
+        /// Tests if a slice exists for the given ordinal position.
+        /// </summary>
+        /// <param name="ordinal">The ordinal position being tested.</param>
+        /// <returns>true if the ordinal position exists in the list of slice ordinal positions, false otherwise.</returns>
         private bool SliceExists(int ordinal)
         {
-            return _sliceOrdinals == null || _sliceOrdinals.Contains(ordinal);
+            return ordinal < Depth || _sliceOrdinals == null || _sliceOrdinals.Contains(ordinal);
         }
 
+        /// <summary>
+        /// Tests if a slice exists for the given mnemonic.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic being tested.</param>
+        /// <returns>true if the ordinal position exists in the list of slice ordinal positions for the given mnemonic, false otherwise.</returns>
         private bool SliceExists(string mnemonic)
         {            
-            return _sliceOrdinals == null || _sliceOrdinals.Contains(GetOrdinal(mnemonic));
+            return SliceExists(GetOrdinal(mnemonic));
         }
     }
 }

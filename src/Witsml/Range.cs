@@ -26,6 +26,8 @@ namespace PDS.Witsml
     /// </summary>
     public static class Range
     {
+        public static readonly Range<double?> Empty = new Range<double?>(null, null);
+
         /// <summary>
         /// Parses the specified start and end range values.
         /// </summary>

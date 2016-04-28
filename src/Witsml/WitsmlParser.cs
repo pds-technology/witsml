@@ -18,9 +18,11 @@
 
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Xml;
 using System.Xml.Linq;
 using Energistics.DataAccess;
+using PDS.Framework;
 
 namespace PDS.Witsml
 {
@@ -60,6 +62,7 @@ namespace PDS.Witsml
         {
             try
             {
+                xml = RemoveNaNElements<T>(xml);
                 return EnergisticsConverter.XmlToObject<T>(xml);
             }
             catch (Exception ex)
@@ -100,6 +103,54 @@ namespace PDS.Witsml
             {
                 element.Descendants().Where(predicate).Remove();
             }
+        }
+
+        /// <summary>
+        /// Determines whether the specified element is a numeric type.
+        /// </summary>
+        /// <param name="element">The element.</param>
+        /// <returns>True if it is a numeric type.</returns>
+        public static bool IsNumericField<T>(XElement element)
+        {
+            var assembly = Assembly.GetAssembly(typeof(T));
+            foreach (Type type in assembly.GetTypes())
+            {
+                if (type.Name.EqualsIgnoreCase(element.Parent.Name.LocalName))
+                {
+                    PropertyInfo propertyInfo = type.GetProperty(element.Name.LocalName.ToPascalCase());
+                    Type propertyType = (propertyInfo != null) ? propertyInfo.PropertyType : null;
+
+                    if (propertyType.IsNumeric())
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Removes elements that are numeric type and have NaN value.
+        /// </summary>
+        /// <param name="xml">The XML.</param>
+        /// <returns>The xml with NaN removed.</returns>
+        public static string RemoveNaNElements<T>(string xml)
+        {  
+            Func<XElement, bool> predicate = e => e.Value.Equals("NaN") && IsNumericField<T>(e);
+
+            var xmlDoc = Parse(xml);
+            var root = xmlDoc.Root;
+
+            foreach (var element in root.Elements())
+            {
+                if (element.Descendants().Any(predicate))
+                {
+                    element.Descendants().Where(predicate).Remove();
+                }
+            }
+
+            return xmlDoc.ToString();           
         }
     }
 }
