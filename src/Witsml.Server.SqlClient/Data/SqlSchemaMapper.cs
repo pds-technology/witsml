@@ -16,9 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
+using System.Linq;
 using Newtonsoft.Json;
+using PDS.Framework;
 using PDS.Framework.Web;
 using PDS.Witsml.Server.Models;
 
@@ -29,8 +32,17 @@ namespace PDS.Witsml.Server.Data
     /// </summary>
     [Export]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class SqlSchemaMapper
+    public class SqlSchemaMapper : DataObjectMapper
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SqlSchemaMapper"/> class.
+        /// </summary>
+        /// <param name="container">The composition container.</param>
+        [ImportingConstructor]
+        public SqlSchemaMapper(IContainer container) : base(container)
+        {
+        }
+
         /// <summary>
         /// Gets the schema mapping.
         /// </summary>
@@ -75,7 +87,37 @@ namespace PDS.Witsml.Server.Data
             if (Schema.Database == null)
                 Schema.Database = new DatabaseMapping();
 
+            Register(Schema.Mappings);
+
             return Schema;
+        }
+
+        /// <summary>
+        /// Registers the mappers for the specified data object mappings.
+        /// </summary>
+        /// <param name="mappings">The mappings.</param>
+        private void Register(Dictionary<string, ObjectMapping> mappings)
+        {
+            mappings?.Values.ForEach(Register);
+        }
+
+        /// <summary>
+        /// Registers the mappers for the specified data object mapping.
+        /// </summary>
+        /// <param name="mapping">The data object mapping.</param>
+        private void Register(ObjectMapping mapping)
+        {
+            mapping.Mappers
+                .Select(Resolve<DataObjectMapper>)
+                .Where(mapper => mapper != null && mapper.DataObjectTypes.Any())
+                .ForEach(mapper =>
+                {
+                    mapper.Mapping = mapping;
+                    mapper.DataObjectTypes.ForEach(t =>
+                    {
+                        PetaPoco.Mappers.Register(t, mapper);
+                    });
+                });
         }
     }
 }

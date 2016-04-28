@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -47,7 +48,8 @@ namespace PDS.Witsml.Server.Data
         [TestInitialize]
         public void TestSetUp()
         {
-            _mapper = new SqlSchemaMapper();
+            var container = ContainerFactory.Create();
+            _mapper = new SqlSchemaMapper(container);
         }
 
         [TestMethod]

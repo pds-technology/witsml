@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PDS.Witsml.Server.Models
@@ -23,6 +24,11 @@ namespace PDS.Witsml.Server.Models
     [DataContract]
     public class ColumnMapping
     {
+        public ColumnMapping()
+        {
+            Extensions = new Dictionary<string, ExtensionMapping>();
+        }
+
         [DataMember]
         public string Column { get; set; }
 
@@ -37,5 +43,8 @@ namespace PDS.Witsml.Server.Models
 
         [DataMember]
         public bool Selection { get; set; }
+
+        [DataMember]
+        public Dictionary<string, ExtensionMapping> Extensions { get; set; } 
     }
 }

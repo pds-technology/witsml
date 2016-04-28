@@ -29,23 +29,25 @@ namespace PDS.Witsml.Server.Data
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class DatabaseProvider : IDatabaseProvider
     {
+        private IProvider _provider;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseProvider" /> class.
         /// </summary>
-        /// <param name="mapper">The SQL schema mapper.</param>
+        /// <param name="schemaMapper">The SQL schema mapper.</param>
         [ImportingConstructor]
-        public DatabaseProvider(SqlSchemaMapper mapper)
+        public DatabaseProvider(SqlSchemaMapper schemaMapper)
         {
-            SchemaMapper = mapper;
+            SchemaMapper = schemaMapper;
             SchemaMapper.Configure();
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseProvider" /> class.
         /// </summary>
-        /// <param name="mapper">The SQL schema mapper.</param>
+        /// <param name="schemaMapper">The SQL schema mapper.</param>
         /// <param name="connectionString">The connection string.</param>
-        internal DatabaseProvider(SqlSchemaMapper mapper, string connectionString) : this(mapper)
+        internal DatabaseProvider(SqlSchemaMapper schemaMapper, string connectionString) : this(schemaMapper)
         {
             SchemaMapper.Schema.Database.ConnectionString = connectionString;
         }
@@ -62,9 +64,12 @@ namespace PDS.Witsml.Server.Data
         /// <returns>A <see cref="IDatabase" /> instance.</returns>
         public IDatabase GetDatabase()
         {
-            return new Database(
-                SchemaMapper.Schema.Database.ConnectionString,
-                SchemaMapper.Schema.Database.ProviderName);
+            var config = SchemaMapper.Schema.Database;
+
+            if (_provider == null)
+                _provider = PetaPoco.DatabaseProvider.Resolve(config.ProviderName, false, config.ConnectionString);
+
+            return new Database(config.ConnectionString, _provider, SchemaMapper);
         }
     }
 }

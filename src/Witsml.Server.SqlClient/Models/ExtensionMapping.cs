@@ -16,28 +16,17 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace PDS.Witsml.Server.Models
 {
     [DataContract]
-    public class ObjectMapping : TableMapping
+    public class ExtensionMapping
     {
-        public ObjectMapping()
-        {
-            Columns = new List<ColumnMapping>();
-            Joins = new List<TableMapping>();
-            Mappers = new List<string>();
-        }
+        [DataMember]
+        public string Alias { get; set; }
 
         [DataMember]
-        public List<ColumnMapping> Columns { get; set; }
-
-        [DataMember]
-        public List<TableMapping> Joins { get; set; }
-
-        [DataMember]
-        public List<string> Mappers { get; set; }
+        public string Value { get; set; }
     }
 }

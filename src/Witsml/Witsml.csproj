@@ -66,6 +66,7 @@
     <Compile Include="ErrorCodes.cs" />
     <Compile Include="Export131Attribute.cs" />
     <Compile Include="Export200Attribute.cs" />
+    <Compile Include="ExportType.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Functions.cs" />
     <Compile Include="Data\Logs\Log200Generator.cs" />

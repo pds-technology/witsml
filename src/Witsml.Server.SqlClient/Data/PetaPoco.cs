@@ -4304,7 +4304,7 @@ namespace PetaPoco
         /// <summary>
         ///     Gets or sets the from db convert logic.
         /// </summary>
-        public Func<PropertyInfo, Type, Func<object, object>> FromDbConverter { get; set; }
+        public Func<PropertyInfo, Type, Func<IDataReader, object, object>> FromDbConverter { get; set; }
 
         /// <summary>
         ///     Gets or sets the to db converter logic.
@@ -4436,7 +4436,7 @@ namespace PetaPoco
         /// <param name="targetProperty">The target property</param>
         /// <param name="sourceType">The type of data returned by the DB</param>
         /// <returns>A Func that can do the conversion, or null for no conversion</returns>
-        public Func<object, object> GetFromDbConverter(PropertyInfo targetProperty, Type sourceType)
+        public Func<IDataReader, object, object> GetFromDbConverter(PropertyInfo targetProperty, Type sourceType)
         {
             return FromDbConverter != null ? FromDbConverter(targetProperty, sourceType) : null;
         }
@@ -4763,7 +4763,7 @@ namespace PetaPoco
         /// <param name="targetProperty">The target property</param>
         /// <param name="sourceType">The type of data returned by the DB</param>
         /// <returns>A Func that can do the conversion, or null for no conversion</returns>
-        Func<object, object> GetFromDbConverter(PropertyInfo targetProperty, Type sourceType);
+        Func<IDataReader, object, object> GetFromDbConverter(PropertyInfo targetProperty, Type sourceType);
 
         /// <summary>
         ///     Supply a function to convert a property value into a database value
@@ -5248,12 +5248,12 @@ namespace PetaPoco
     public class PocoData
     {
         private static Cache<Type, PocoData> _pocoDatas = new Cache<Type, PocoData>();
-        private static List<Func<object, object>> _converters = new List<Func<object, object>>();
+        private static List<Func<IDataReader, object, object>> _converters = new List<Func<IDataReader, object, object>>();
         private static MethodInfo fnGetValue = typeof(IDataRecord).GetMethod("GetValue", new Type[] {typeof(int)});
         private static MethodInfo fnIsDBNull = typeof(IDataRecord).GetMethod("IsDBNull");
         private static FieldInfo fldConverters = typeof(PocoData).GetField("_converters", BindingFlags.Static | BindingFlags.GetField | BindingFlags.NonPublic);
-        private static MethodInfo fnListGetItem = typeof(List<Func<object, object>>).GetProperty("Item").GetGetMethod();
-        private static MethodInfo fnInvoke = typeof(Func<object, object>).GetMethod("Invoke");
+        private static MethodInfo fnListGetItem = typeof(List<Func<IDataReader, object, object>>).GetProperty("Item").GetGetMethod();
+        private static MethodInfo fnInvoke = typeof(Func<IDataReader, object, object>).GetMethod("Invoke");
         private Cache<Tuple<string, string, int, int>, Delegate> PocoFactories = new Cache<Tuple<string, string, int, int>, Delegate>();
         public Type Type;
         public string[] QueryColumns { get; private set; }
@@ -5360,7 +5360,7 @@ namespace PetaPoco
                         il.Emit(OpCodes.Ldstr, reader.GetName(i)); // obj, obj, fieldname
 
                         // Get the converter
-                        Func<object, object> converter = mapper.GetFromDbConverter((PropertyInfo) null, srcType);
+                        Func<IDataReader, object, object> converter = mapper.GetFromDbConverter((PropertyInfo) null, srcType);
 
                         /*
 						if (ForceDateTimesToUtc && converter == null && srcType == typeof(DateTime))
@@ -5420,6 +5420,9 @@ namespace PetaPoco
 
                     // Setup stack for call to converter
                     AddConverterToStack(il, converter);
+
+                    if (converter != null)
+                        il.Emit(OpCodes.Ldarg_0); // rdr
 
                     il.Emit(OpCodes.Ldarg_0); // rdr
                     il.Emit(OpCodes.Ldc_I4_0); // rdr,0
@@ -5495,6 +5498,9 @@ namespace PetaPoco
                             // Setup stack for call to converter
                             AddConverterToStack(il, converter);
 
+                            if (converter != null)
+                                il.Emit(OpCodes.Ldarg_0); // *,rdr
+
                             // "value = rdr.GetValue(i)"
                             il.Emit(OpCodes.Ldarg_0); // *,rdr
                             il.Emit(OpCodes.Ldc_I4, i); // *,rdr,i
@@ -5529,7 +5535,7 @@ namespace PetaPoco
                 );
         }
 
-        private static void AddConverterToStack(ILGenerator il, Func<object, object> converter)
+        private static void AddConverterToStack(ILGenerator il, Func<IDataReader, object, object> converter)
         {
             if (converter != null)
             {
@@ -5544,9 +5550,9 @@ namespace PetaPoco
             }
         }
 
-        private static Func<object, object> GetConverter(IMapper mapper, PocoColumn pc, Type srcType, Type dstType)
+        private static Func<IDataReader, object, object> GetConverter(IMapper mapper, PocoColumn pc, Type srcType, Type dstType)
         {
-            Func<object, object> converter = null;
+            Func<IDataReader, object, object> converter = null;
 
             // Get converter from the mapper
             if (pc != null)
@@ -5559,7 +5565,7 @@ namespace PetaPoco
             // Standard DateTime->Utc mapper
             if (pc != null && pc.ForceToUtc && srcType == typeof(DateTime) && (dstType == typeof(DateTime) || dstType == typeof(DateTime?)))
             {
-                return delegate(object src) { return new DateTime(((DateTime) src).Ticks, DateTimeKind.Utc); };
+                return delegate(IDataReader reader, object src) { return new DateTime(((DateTime) src).Ticks, DateTimeKind.Utc); };
             }
 
             // unwrap nullable types
@@ -5576,26 +5582,26 @@ namespace PetaPoco
                 if (underlyingDstType != null)
                 {
                     // if dstType is Nullable<Enum>, convert to enum value
-                    return delegate (object src) { return Enum.ToObject(dstType, src); };
+                    return delegate (IDataReader reader, object src) { return Enum.ToObject(dstType, src); };
                 }
                 else if (srcType != backingDstType)
                 {
-                    return delegate (object src) { return Convert.ChangeType(src, backingDstType, null); };
+                    return delegate (IDataReader reader, object src) { return Convert.ChangeType(src, backingDstType, null); };
                 }
             }
             else if (!dstType.IsAssignableFrom(srcType))
             {
                 if (dstType.IsEnum && srcType == typeof(string))
                 {
-                    return delegate(object src) { return EnumMapper.EnumFromString(dstType, (string) src); };
+                    return delegate(IDataReader reader, object src) { return EnumMapper.EnumFromString(dstType, (string) src); };
                 }
                 else if (dstType == typeof(Guid) && srcType == typeof(string))
                 {
-                    return delegate(object src) { return Guid.Parse((string) src); };
+                    return delegate(IDataReader reader, object src) { return Guid.Parse((string) src); };
                 }
                 else
                 {
-                    return delegate(object src) { return Convert.ChangeType(src, dstType, null); };
+                    return delegate(IDataReader reader, object src) { return Convert.ChangeType(src, dstType, null); };
                 }
             }
 
@@ -5923,7 +5929,7 @@ namespace PetaPoco
         /// <param name="targetProperty">The target property</param>
         /// <param name="sourceType">The type of data returned by the DB</param>
         /// <returns>A Func that can do the conversion, or null for no conversion</returns>
-        public virtual Func<object, object> GetFromDbConverter(PropertyInfo targetProperty, Type sourceType)
+        public virtual Func<IDataReader, object, object> GetFromDbConverter(PropertyInfo targetProperty, Type sourceType)
         {
             return null;
         }

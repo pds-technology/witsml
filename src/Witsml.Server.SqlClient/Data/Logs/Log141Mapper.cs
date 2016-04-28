@@ -16,28 +16,27 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Runtime.Serialization;
+using System.ComponentModel.Composition;
+using Energistics.DataAccess.WITSML141;
+using PDS.Framework;
 
-namespace PDS.Witsml.Server.Models
+namespace PDS.Witsml.Server.Data.Logs
 {
-    [DataContract]
-    public class ObjectMapping : TableMapping
+    /// <summary>
+    /// Provides mappings for <see cref="Log" /> data object types.
+    /// </summary>
+    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectMapper" />
+    [ExportType(typeof(Log141Mapper), typeof(DataObjectMapper))]
+    [PartCreationPolicy(CreationPolicy.NonShared)]
+    public class Log141Mapper : DataObjectMapper
     {
-        public ObjectMapping()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Log141Mapper"/> class.
+        /// </summary>
+        /// <param name="container">The composition container.</param>
+        [ImportingConstructor]
+        public Log141Mapper(IContainer container) : base(container, typeof(Log))
         {
-            Columns = new List<ColumnMapping>();
-            Joins = new List<TableMapping>();
-            Mappers = new List<string>();
         }
-
-        [DataMember]
-        public List<ColumnMapping> Columns { get; set; }
-
-        [DataMember]
-        public List<TableMapping> Joins { get; set; }
-
-        [DataMember]
-        public List<string> Mappers { get; set; }
     }
 }
