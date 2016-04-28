@@ -75,7 +75,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser
             mainViewModel.Items.Add(requestViewModel);
             requestViewModel.LoadScreens();
 
-            Assert.AreEqual(2, requestViewModel.Items.Count);
+            Assert.AreEqual(3, requestViewModel.Items.Count);
         }
     }
 }
