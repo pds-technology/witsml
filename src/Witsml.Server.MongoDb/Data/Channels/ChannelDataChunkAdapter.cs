@@ -22,8 +22,10 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.Datatypes;
 using MongoDB.Driver;
+using Newtonsoft.Json;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
+using PDS.Witsml.Server.Data.Transactions;
 using PDS.Witsml.Server.Models;
 using PDS.Witsml.Server.Properties;
 
@@ -43,7 +45,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// </summary>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public ChannelDataChunkAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectTypes.ChannelDataChunk, ObjectTypes.Id)
+        public ChannelDataChunkAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectTypes.ChannelDataChunk, ObjectTypes.Uid)
         {
             Logger.Debug("Creating instance.");
         }
@@ -77,7 +79,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// Adds ChannelDataChunks using the specified reader.
         /// </summary>
         /// <param name="reader">The <see cref="ChannelDataReader"/> used to parse the data.</param>
-        public void Add(ChannelDataReader reader)
+        public void Add(ChannelDataReader reader, string tid = null)
         {
             Logger.Debug("Adding ChannelDataChunk records with a ChannelDataReader.");
 
@@ -91,11 +93,15 @@ namespace PDS.Witsml.Server.Data.Channels
                         reader.AsEnumerable()),
                     reader.Uri,
                     string.Join(",", reader.Mnemonics),
-                    string.Join(",", reader.Units));
+                    string.Join(",", reader.Units),
+                    tid);
+
+                CommitTransactions<ChannelDataChunk>(tid);
             }
             catch (MongoException ex)
             {
                 Logger.ErrorFormat("Error when adding data chunks: {0}", ex);
+                RollbackTransactions<ChannelDataChunk>(tid);
                 throw new WitsmlException(ErrorCodes.ErrorAddingToDataStore, ex);
             }
         }
@@ -105,7 +111,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// Merges <see cref="ChannelDataChunk"/> data for updates.
         /// </summary>
         /// <param name="reader">The reader.</param>
-        public void Merge(ChannelDataReader reader)
+        public void Merge(ChannelDataReader reader, string tid = null)
         {
             if (reader == null || reader.RecordsAffected <= 0)
                 return;
@@ -139,11 +145,15 @@ namespace PDS.Witsml.Server.Data.Channels
                         MergeSequence(results.GetRecords(), reader.AsEnumerable(), updateRange)),
                     reader.Uri,
                     string.Join(",", reader.Mnemonics),
-                    string.Join(",", reader.Units));
+                    string.Join(",", reader.Units),
+                    tid);
+
+                CommitTransactions<ChannelDataChunk>(tid);
             }
             catch (MongoException ex)
             {
                 Logger.ErrorFormat("Error when merging data: {0}", ex);
+                RollbackTransactions<ChannelDataChunk>(tid);
                 throw new WitsmlException(ErrorCodes.ErrorUpdatingInDataStore, ex);
             }
         }
@@ -173,7 +183,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="uri">The URI.</param>
         /// <param name="mnemonics">The mnemonics.</param>
         /// <param name="units">The units.</param>
-        private void BulkWriteChunks(IEnumerable<ChannelDataChunk> chunks, string uri, string mnemonics, string units)
+        private void BulkWriteChunks(IEnumerable<ChannelDataChunk> chunks, string uri, string mnemonics, string units, string tid = null)
         {
             Logger.DebugFormat("Bulk writing ChannelDataChunks for uri '{0}', mnemonics '{1}' and units '{2}'.", uri, mnemonics, units);
 
@@ -182,27 +192,42 @@ namespace PDS.Witsml.Server.Data.Channels
             collection.BulkWrite(chunks
                 .Select(dc =>
                 {
-                    if (string.IsNullOrWhiteSpace(dc.Id))
+                    if (string.IsNullOrWhiteSpace(dc.Uid))
                     {
-                        dc.Id = Guid.NewGuid().ToString();
+                        dc.Uid = Guid.NewGuid().ToString();
                         dc.Uri = uri;
                         dc.MnemonicList = mnemonics;
                         dc.UnitList = units;
 
-                        return (WriteModel<ChannelDataChunk>) new InsertOneModel<ChannelDataChunk>(dc);
+                        if (!string.IsNullOrEmpty(tid))
+                        {
+                            dc.Transaction = new MongoTransaction
+                            {
+                                Tid = tid,
+                                Action = MongoDbAction.Add
+                            };
+                        }
+
+                        return (WriteModel<ChannelDataChunk>)new InsertOneModel<ChannelDataChunk>(dc);
                     }
 
                     var filter = Builders<ChannelDataChunk>.Filter;
                     var update = Builders<ChannelDataChunk>.Update;
 
                     return new UpdateOneModel<ChannelDataChunk>(
-                        filter.Eq(f => f.Uri, uri) & filter.Eq(f => f.Id, dc.Id),
+                        filter.Eq(f => f.Uri, uri) & filter.Eq(f => f.Uid, dc.Uid),
                         update
                             .Set(u => u.Indices, dc.Indices)
                             .Set(u => u.MnemonicList, mnemonics)
                             .Set(u => u.UnitList, units)
                             .Set(u => u.Data, dc.Data)
-                            .Set(u => u.RecordCount, dc.RecordCount));
+                            .Set(u => u.RecordCount, dc.RecordCount)
+                            .Set(u => u.Transaction, new MongoTransaction
+                            {
+                                Tid = tid,
+                                Action = MongoDbAction.Update,
+                                Value = JsonConvert.SerializeObject(dc)
+                            }));
                 })
                 .ToList());
         }
@@ -271,7 +296,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
                     yield return new ChannelDataChunk()
                     {
-                        Id = id,
+                        Uid = id,
                         Data = "[" + String.Join(",", data) + "]",
                         Indices = new List<ChannelIndexInfo> { newIndex },
                         RecordCount = data.Count
@@ -294,7 +319,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
                 yield return new ChannelDataChunk()
                 {
-                    Id = id,
+                    Uid = id,
                     Data = "[" + String.Join(",", data) + "]",
                     Indices = new List<ChannelIndexInfo> { newIndex },
                     RecordCount = data.Count

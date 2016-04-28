@@ -86,8 +86,18 @@ namespace PDS.Witsml.Server.Data.Logs
             var readers = ExtractDataReaders(dataObject);
 
             // Insert Log and Log Data
-            InsertEntity(dataObject);
-            UpdateLogDataAndIndexRange(dataObject.GetUri(), readers);
+            var tid = Guid.NewGuid().ToString();
+            InsertEntity(dataObject, tid);
+            try
+            {
+                UpdateLogDataAndIndexRange(dataObject.GetUri(), readers, tid);
+                CommitTransactions<Log>(tid);
+            }
+            catch (WitsmlException ex)
+            {
+                RollbackTransactions<Log>(tid);
+                throw ex;
+            }
         }
 
         /// <summary>
@@ -98,11 +108,22 @@ namespace PDS.Witsml.Server.Data.Logs
         public override void Update(WitsmlQueryParser parser, Log dataObject)
         {
             var uri = dataObject.GetUri();
-            UpdateEntity(parser, uri);
+
+            var tid = Guid.NewGuid().ToString();
+            UpdateEntity(parser, uri, tid);
 
             // Update Log Data and Index Range
             var readers = ExtractDataReaders(dataObject, GetEntity(uri));
-            UpdateLogDataAndIndexRange(uri, readers);
+            try
+            {
+                UpdateLogDataAndIndexRange(uri, readers, tid);
+                CommitTransactions<Log>(tid);
+            }
+            catch (WitsmlException ex)
+            {
+                RollbackTransactions<Log>(tid);
+                throw ex;
+            }
         }
 
         protected override object CreateGenericMeasure(double value, string uom)
