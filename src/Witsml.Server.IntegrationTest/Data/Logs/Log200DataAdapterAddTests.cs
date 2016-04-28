@@ -54,10 +54,11 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestInitialize]
         public void TestSetUp()
         {
+            var container = ContainerFactory.Create();
             DevKit = new DevKit200Aspect();
             LogGenerator = new Log200Generator();
             Container = ContainerFactory.Create();
-            Provider = new DatabaseProvider(new MongoDbClassMapper());
+            Provider = new DatabaseProvider(container, new MongoDbClassMapper());
 
             WellAdapter = new Well200DataAdapter(Provider);
             WellboreAdapter = new Wellbore200DataAdapter(Provider);

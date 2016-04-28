@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.Datatypes;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using PDS.Framework;
@@ -79,7 +80,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// Adds ChannelDataChunks using the specified reader.
         /// </summary>
         /// <param name="reader">The <see cref="ChannelDataReader"/> used to parse the data.</param>
-        public void Add(ChannelDataReader reader, string tid = null)
+        public void Add(ChannelDataReader reader, MongoTransaction transaction = null)
         {
             Logger.Debug("Adding ChannelDataChunk records with a ChannelDataReader.");
 
@@ -94,14 +95,11 @@ namespace PDS.Witsml.Server.Data.Channels
                     reader.Uri,
                     string.Join(",", reader.Mnemonics),
                     string.Join(",", reader.Units),
-                    tid);
-
-                CommitTransactions<ChannelDataChunk>(tid);
+                    transaction);
             }
             catch (MongoException ex)
             {
                 Logger.ErrorFormat("Error when adding data chunks: {0}", ex);
-                RollbackTransactions<ChannelDataChunk>(tid);
                 throw new WitsmlException(ErrorCodes.ErrorAddingToDataStore, ex);
             }
         }
@@ -111,7 +109,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// Merges <see cref="ChannelDataChunk"/> data for updates.
         /// </summary>
         /// <param name="reader">The reader.</param>
-        public void Merge(ChannelDataReader reader, string tid = null)
+        public void Merge(ChannelDataReader reader, MongoTransaction transaction = null)
         {
             if (reader == null || reader.RecordsAffected <= 0)
                 return;
@@ -146,14 +144,11 @@ namespace PDS.Witsml.Server.Data.Channels
                     reader.Uri,
                     string.Join(",", reader.Mnemonics),
                     string.Join(",", reader.Units),
-                    tid);
-
-                CommitTransactions<ChannelDataChunk>(tid);
+                    transaction);               
             }
             catch (MongoException ex)
             {
                 Logger.ErrorFormat("Error when merging data: {0}", ex);
-                RollbackTransactions<ChannelDataChunk>(tid);
                 throw new WitsmlException(ErrorCodes.ErrorUpdatingInDataStore, ex);
             }
         }
@@ -183,7 +178,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="uri">The URI.</param>
         /// <param name="mnemonics">The mnemonics.</param>
         /// <param name="units">The units.</param>
-        private void BulkWriteChunks(IEnumerable<ChannelDataChunk> chunks, string uri, string mnemonics, string units, string tid = null)
+        private void BulkWriteChunks(IEnumerable<ChannelDataChunk> chunks, string uri, string mnemonics, string units, MongoTransaction transaction = null)
         {
             Logger.DebugFormat("Bulk writing ChannelDataChunks for uri '{0}', mnemonics '{1}' and units '{2}'.", uri, mnemonics, units);
 
@@ -199,17 +194,17 @@ namespace PDS.Witsml.Server.Data.Channels
                         dc.MnemonicList = mnemonics;
                         dc.UnitList = units;
 
-                        if (!string.IsNullOrEmpty(tid))
+                        if (transaction != null)
                         {
-                            dc.Transaction = new MongoTransaction
-                            {
-                                Tid = tid,
-                                Action = MongoDbAction.Add
-                            };
+                            var chunk = new ChannelDataChunk { Uid = dc.Uid };
+                            transaction.AddATransaction(MongoDbAction.Add, DbCollectionName, chunk.ToBsonDocument());
                         }
 
                         return (WriteModel<ChannelDataChunk>)new InsertOneModel<ChannelDataChunk>(dc);
                     }
+
+                    if (transaction != null)
+                        transaction.AddATransaction(MongoDbAction.Update, DbCollectionName, dc.ToBsonDocument());
 
                     var filter = Builders<ChannelDataChunk>.Filter;
                     var update = Builders<ChannelDataChunk>.Update;
@@ -221,15 +216,12 @@ namespace PDS.Witsml.Server.Data.Channels
                             .Set(u => u.MnemonicList, mnemonics)
                             .Set(u => u.UnitList, units)
                             .Set(u => u.Data, dc.Data)
-                            .Set(u => u.RecordCount, dc.RecordCount)
-                            .Set(u => u.Transaction, new MongoTransaction
-                            {
-                                Tid = tid,
-                                Action = MongoDbAction.Update,
-                                Value = JsonConvert.SerializeObject(dc)
-                            }));
+                            .Set(u => u.RecordCount, dc.RecordCount));
                 })
                 .ToList());
+
+            if (transaction != null)
+                transaction.AddTransactions();
         }
 
 

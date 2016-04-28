@@ -53,6 +53,7 @@ namespace PDS.Witsml
         public const string ChannelIndex = "channelIndex";
         public const string ChannelDataValues = "channelDataValues";
         public const string ChannelDataChunk = "channelDataChunk";
+        public const string MongoDbTransaction = "mongoTransaction";
 
         private static readonly string[] GrowingObjects = new [] { Log, MudLog, Trajectory };
 

@@ -24,6 +24,7 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -40,7 +41,8 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestInitialize]
         public void TestSetUp()
         {
-            _databaseProvider = new DatabaseProvider(new MongoDbClassMapper());
+            var container = ContainerFactory.Create();
+            _databaseProvider = new DatabaseProvider(container, new MongoDbClassMapper());
 
             DevKit = new DevKit141Aspect();
 

@@ -21,6 +21,7 @@ using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Framework;
 using PDS.Witsml.Data.Logs;
 
 namespace PDS.Witsml.Server.Data.Channels
@@ -38,9 +39,10 @@ namespace PDS.Witsml.Server.Data.Channels
         [TestInitialize]
         public void TestSetUp()
         {
+            var container = ContainerFactory.Create();
             DevKit = new DevKit200Aspect();
             LogGenerator = new Log200Generator();
-            Provider = new DatabaseProvider(new MongoDbClassMapper());
+            Provider = new DatabaseProvider(container, new MongoDbClassMapper());
 
             ChunkAdapter = new ChannelDataChunkAdapter(Provider);
             ChannelSetAdapter = new ChannelSet200DataAdapter(Provider, ChunkAdapter);
