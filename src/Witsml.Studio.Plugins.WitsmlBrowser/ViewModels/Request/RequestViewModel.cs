@@ -84,7 +84,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         {
             _log.Debug("Loading RequestViewModel screens");
             Items.Add(new SettingsViewModel(Runtime));
-            //Items.Add(new TreeViewViewModel());
+            Items.Add(new TreeViewViewModel(Runtime));
             //Items.Add(new TemplatesViewModel());
             Items.Add(new QueryViewModel(Runtime, Parent.XmlQuery));
 

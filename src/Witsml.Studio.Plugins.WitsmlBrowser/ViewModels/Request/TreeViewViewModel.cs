@@ -18,6 +18,7 @@
 
 using Caliburn.Micro;
 using PDS.Witsml.Studio.Core.Runtime;
+using PDS.Witsml.Studio.Core.ViewModels;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 {
@@ -37,7 +38,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         {
             _log.Debug("Creating view model instance");
             Runtime = runtime;
-            DisplayName = "Tree View";
+            DisplayName = "Hierarchy";
+            TreeViewModel = new WitsmlTreeViewModel(runtime);
         }
 
         /// <summary>
@@ -64,5 +66,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         /// </summary>
         /// <value>The runtime.</value>
         public IRuntimeService Runtime { get; private set; }
+
+        public WitsmlTreeViewModel TreeViewModel { get; }
     }
 }

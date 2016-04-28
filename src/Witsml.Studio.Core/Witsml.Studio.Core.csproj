@@ -157,6 +157,7 @@
     <Compile Include="ViewModels\IShellViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="ViewModels\TextEditorViewModel.cs" />
+    <Compile Include="ViewModels\WitsmlTreeViewModel.cs" />
     <Compile Include="Views\ConnectionView.xaml.cs">
       <DependentUpon>ConnectionView.xaml</DependentUpon>
     </Compile>
@@ -165,6 +166,9 @@
     </Compile>
     <Compile Include="Views\TextEditorView.xaml.cs">
       <DependentUpon>TextEditorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\WitsmlTreeView.xaml.cs">
+      <DependentUpon>WitsmlTreeView.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -192,6 +196,10 @@
     <Page Include="Views\TextEditorView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\WitsmlTreeView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
