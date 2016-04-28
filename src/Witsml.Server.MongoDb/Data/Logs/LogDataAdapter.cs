@@ -27,6 +27,7 @@ using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Data.Channels;
+using PDS.Witsml.Server.Data.Transactions;
 using PDS.Witsml.Server.Models;
 using PDS.Witsml.Server.Properties;
 
@@ -523,7 +524,7 @@ namespace PDS.Witsml.Server.Data.Logs
             logCurves?.RemoveAll(x => !mnemonics.Contains(GetMnemonic(x)));
         }
 
-        protected void UpdateLogDataAndIndexRange(EtpUri uri, IEnumerable<ChannelDataReader> readers, string tid = null)
+        protected void UpdateLogDataAndIndexRange(EtpUri uri, IEnumerable<ChannelDataReader> readers, MongoTransaction transaction = null)
         {
             Logger.DebugFormat("Updating log data and index for log uri '{0}'.", uri.Uri);
 
@@ -569,7 +570,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 GetUpdatedIndexRange(reader, updateMnemonics.ToArray(), ranges, IsIncreasing(current));
 
                 // Update log data
-                ChannelDataChunkAdapter.Merge(reader, tid);
+                ChannelDataChunkAdapter.Merge(reader, transaction);
                 updateIndexRanges = true;
             }
 

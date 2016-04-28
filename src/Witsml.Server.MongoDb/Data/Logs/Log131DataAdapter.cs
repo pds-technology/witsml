@@ -31,6 +31,7 @@ using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
+using PDS.Witsml.Server.Data.Transactions;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -72,22 +73,14 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="dataObject">The Log instance to add to the store.</param>
         public override void Add(WitsmlQueryParser parser, Log dataObject)
         {
-            // Extract Data
-            var reader = ExtractDataReader(dataObject);
-
-            // Insert Log and Log Data
-            var tid = Guid.NewGuid().ToString();
-            InsertEntity(dataObject, tid);
-            try
+            using (var transaction = DatabaseProvider.BeginTransaction())
             {
-                UpdateLogDataAndIndexRange(dataObject.GetUri(), new[] { reader }, tid);
-                CommitTransactions<Log>(tid);
-            }
-            catch (WitsmlException ex)
-            {
-                RollbackTransactions<Log>(tid);
-                throw ex;
-            }
+                // Extract Data
+                var reader = ExtractDataReader(dataObject);
+                InsertEntity(dataObject, transaction);
+                UpdateLogDataAndIndexRange(dataObject.GetUri(), new[] { reader }, transaction);
+                transaction.Commit();
+            }               
         }
 
         /// <summary>
@@ -97,22 +90,15 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="dataObject">The data object to be updated.</param>
         public override void Update(WitsmlQueryParser parser, Log dataObject)
         {
-            var uri = dataObject.GetUri();
- 
-            var tid = Guid.NewGuid().ToString();
-            UpdateEntity(parser, uri, tid);
+            using (var transaction = DatabaseProvider.BeginTransaction())
+            {
+                var uri = dataObject.GetUri();
+                UpdateEntity(parser, uri, transaction);
 
-            // Update Log Data and Index Range
-            var reader = ExtractDataReader(dataObject, GetEntity(uri));
-            try
-            {
-                UpdateLogDataAndIndexRange(uri, new[] { reader }, tid);
-                CommitTransactions<Log>(tid);
-            }
-            catch (WitsmlException ex)
-            {
-                RollbackTransactions<Log>(tid);
-                throw ex;
+                // Update Log Data and Index Range
+                var reader = ExtractDataReader(dataObject, GetEntity(uri));
+                UpdateLogDataAndIndexRange(uri, new[] { reader }, transaction);
+                transaction.Commit();
             }
         }
 

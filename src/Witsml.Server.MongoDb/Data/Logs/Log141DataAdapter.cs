@@ -82,21 +82,13 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="dataObject">The <see cref="Log" /> to be added.</param>
         public override void Add(WitsmlQueryParser parser, Log dataObject)
         {
-            // Extract Data                    
-            var readers = ExtractDataReaders(dataObject);
-
-            // Insert Log and Log Data
-            var tid = Guid.NewGuid().ToString();
-            InsertEntity(dataObject, tid);
-            try
+            using (var transaction = DatabaseProvider.BeginTransaction())
             {
-                UpdateLogDataAndIndexRange(dataObject.GetUri(), readers, tid);
-                CommitTransactions<Log>(tid);
-            }
-            catch (WitsmlException ex)
-            {
-                RollbackTransactions<Log>(tid);
-                throw ex;
+                // Extract Data                    
+                var readers = ExtractDataReaders(dataObject);
+                InsertEntity(dataObject, transaction);
+                UpdateLogDataAndIndexRange(dataObject.GetUri(), readers, transaction);
+                transaction.Commit();
             }
         }
 
@@ -107,22 +99,13 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="dataObject">The data object to be updated.</param>
         public override void Update(WitsmlQueryParser parser, Log dataObject)
         {
-            var uri = dataObject.GetUri();
-
-            var tid = Guid.NewGuid().ToString();
-            UpdateEntity(parser, uri, tid);
-
-            // Update Log Data and Index Range
-            var readers = ExtractDataReaders(dataObject, GetEntity(uri));
-            try
+            using (var transaction = DatabaseProvider.BeginTransaction())
             {
-                UpdateLogDataAndIndexRange(uri, readers, tid);
-                CommitTransactions<Log>(tid);
-            }
-            catch (WitsmlException ex)
-            {
-                RollbackTransactions<Log>(tid);
-                throw ex;
+                var uri = dataObject.GetUri();
+                UpdateEntity(parser, uri, transaction);
+                var readers = ExtractDataReaders(dataObject, GetEntity(uri));
+                UpdateLogDataAndIndexRange(uri, readers, transaction);
+                transaction.Commit();
             }
         }
 

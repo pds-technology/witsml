@@ -247,7 +247,7 @@ namespace PDS.Witsml.Server
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            var dbProvider = new DatabaseProvider(new MongoDbClassMapper(), string.Empty);
+            var dbProvider = new DatabaseProvider(ContainerFactory.Create(), new MongoDbClassMapper(), string.Empty);
             var wellboreAdapter = new Wellbore141DataAdapter(dbProvider);
 
             var caught = false;

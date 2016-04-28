@@ -21,6 +21,7 @@ using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Driver;
+using PDS.Framework;
 using PDS.Witsml.Server.Data.Wells;
 
 namespace PDS.Witsml.Server.Data.Wellbores
@@ -42,8 +43,9 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestInitialize]
         public void TestSetUp()
         {
+            var container = ContainerFactory.Create();
             DevKit = new DevKit200Aspect();
-            Provider = new DatabaseProvider(new MongoDbClassMapper());
+            Provider = new DatabaseProvider(container, new MongoDbClassMapper());
 
             WellAdapter = new Well200DataAdapter(Provider);
             WellboreAdapter = new Wellbore200DataAdapter(Provider);
