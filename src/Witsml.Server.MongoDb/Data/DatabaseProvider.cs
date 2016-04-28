@@ -20,6 +20,8 @@ using System;
 using System.ComponentModel.Composition;
 using System.Configuration;
 using MongoDB.Driver;
+using PDS.Framework;
+using PDS.Witsml.Server.Data.Transactions;
 using PDS.Witsml.Server.MongoDb;
 
 namespace PDS.Witsml.Server.Data
@@ -37,13 +39,16 @@ namespace PDS.Witsml.Server.Data
         private readonly Lazy<IMongoClient> _client;
         private readonly string _connectionString;
 
+        private readonly IContainer _container;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseProvider"/> class.
         /// </summary>
         /// <param name="mapper">The MongoDb class mapper.</param>
         [ImportingConstructor]
-        public DatabaseProvider(MongoDbClassMapper mapper)
+        public DatabaseProvider(IContainer container, MongoDbClassMapper mapper)
         {
+            _container = container;
             _client = new Lazy<IMongoClient>(CreateMongoClient);
             _connectionString = GetConnectionString();
             mapper.Register();
@@ -54,7 +59,7 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="mapper">The MongoDb class mapper.</param>
         /// <param name="connectionString">The connection string.</param>
-        internal DatabaseProvider(MongoDbClassMapper mapper, string connectionString) : this(mapper)
+        internal DatabaseProvider(IContainer container, MongoDbClassMapper mapper, string connectionString) : this(container, mapper)
         {
             _connectionString = connectionString;
         }
@@ -75,6 +80,11 @@ namespace PDS.Witsml.Server.Data
         public IMongoDatabase GetDatabase()
         {
             return Client.GetDatabase(DefaultDatabaseName);
+        }
+
+        public MongoTransaction BeginTransaction()
+        {
+            return _container.Resolve<MongoTransaction>();
         }
 
         /// <summary>
