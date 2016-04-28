@@ -360,6 +360,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 .ToList();
         }
 
+        // TODO: Remove once all refactoring is completed
         protected List<string> FormatLogData(T log, ChannelDataReader reader, IDictionary<int, string> mnemonics, IDictionary<int, string> units, int? requestLatestValues)
         {
             var logData = new List<string>();
@@ -460,6 +461,7 @@ namespace PDS.Witsml.Server.Data.Logs
             return logData;
         }
 
+        // TODO: Remove once all refactoring is completed
         private bool IsRequestedValueNeeded(List<object> channelValues, Dictionary<int, int> requestedValueCount, int requestLatestValue)
         {
             var valueAdded = false;
@@ -482,6 +484,7 @@ namespace PDS.Witsml.Server.Data.Logs
             return valueAdded;
         }
 
+        // TODO: Remove once all refactoring is completed
         private void UpdateRequestedValueCount(Dictionary<int, int> requestedValueCount, List<object> values, IDictionary<int, string> mnemonics, Dictionary<string, Range<double?>> ranges, double index)
         {
             var valueArray = values.ToArray();
@@ -507,6 +510,7 @@ namespace PDS.Witsml.Server.Data.Logs
             }
         }
 
+        // TODO: Remove once all refactoring is completed
         private bool HasRequestedValuesForAllChannels(Dictionary<int, int> requestedValueCount, int requestLatestValues)
         {
             return requestedValueCount.Keys.All(r => requestedValueCount[r] >= requestLatestValues);
