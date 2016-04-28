@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using PDS.Witsml.Data.Channels;
-using PDS.Witsml.Server.Data.Transactions;
 
 namespace PDS.Witsml.Server.Models
 {
@@ -72,14 +71,6 @@ namespace PDS.Witsml.Server.Models
         /// The record count.
         /// </value>
         public int RecordCount { get; set; }
-
-        /// <summary>
-        /// Gets or sets the transaction.
-        /// </summary>
-        /// <value>
-        /// The transaction.
-        /// </value>
-        public MongoTransaction Transaction { get; set; }
 
         /// <summary>
         /// Gets or sets the unique identifier.

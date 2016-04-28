@@ -65,7 +65,8 @@ namespace PDS.Witsml.Server.Data
 
             // Custom
             Register3<ChannelDataChunk>();
-            
+            Register3<MongoDbTransaction>();
+
             try
             {
                 BsonSerializer.RegisterSerializer(new TimestampSerializer());

@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using MongoDB.Driver;
+using PDS.Witsml.Server.Data.Transactions;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -36,5 +37,7 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <returns>The database interface.</returns>
         IMongoDatabase GetDatabase();
+
+        MongoTransaction BeginTransaction();
     }
 }

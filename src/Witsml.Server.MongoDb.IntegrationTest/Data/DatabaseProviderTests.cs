@@ -20,6 +20,7 @@ using Energistics.DataAccess.WITSML141;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -35,7 +36,8 @@ namespace PDS.Witsml.Server.Data
         [TestInitialize]
         public void TestSetUp()
         {
-            Provider = new DatabaseProvider(new MongoDbClassMapper());
+            var container = ContainerFactory.Create();
+            Provider = new DatabaseProvider(container, new MongoDbClassMapper());
             DevKit = new DevKit141Aspect();
 
             Well1 = new Well() { Name = DevKit.Name("Mongo Well 01"), TimeZone = DevKit.TimeZone, Uid = DevKit.Uid() };
