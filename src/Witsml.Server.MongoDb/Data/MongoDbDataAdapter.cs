@@ -19,13 +19,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Energistics.DataAccess;
 using Energistics.Datatypes;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using PDS.Witsml.Server.Data.Transactions;
-using PDS.Witsml.Server.Models;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -37,7 +35,7 @@ namespace PDS.Witsml.Server.Data
     public abstract class MongoDbDataAdapter<T> : WitsmlDataAdapter<T>
     {
         public static readonly string ChannelDataChunk = "channelDataChunk";
-        public static readonly string MongoDbTransaction = "mongoTransaction";
+        public static readonly string MongoDbTransaction = "dbTransaction";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDbDataAdapter{T}" /> class.
@@ -145,7 +143,11 @@ namespace PDS.Witsml.Server.Data
         /// <param name="uri">The data object URI.</param>
         public override void Delete(EtpUri uri)
         {
-            DeleteEntity(uri);
+            using (var transaction = DatabaseProvider.BeginTransaction())
+            {
+                DeleteEntity(uri, transaction);
+                transaction.Commit();
+            }
         }
 
         /// <summary>
@@ -394,9 +396,9 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="uri">The data object URI.</param>
         /// <exception cref="WitsmlException"></exception>
-        protected void DeleteEntity(EtpUri uri)
+        protected void DeleteEntity(EtpUri uri, MongoTransaction transaction = null)
         {
-            DeleteEntity<T>(uri, DbCollectionName);
+            DeleteEntity<T>(uri, DbCollectionName, transaction);
         }
 
         /// <summary>
@@ -406,7 +408,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="uri">The data object URI.</param>
         /// <param name="dbCollectionName">The name of the database collection.</param>
         /// <exception cref="WitsmlException"></exception>
-        protected void DeleteEntity<TObject>(EtpUri uri, string dbCollectionName)
+        protected void DeleteEntity<TObject>(EtpUri uri, string dbCollectionName, MongoTransaction transaction = null)
         {
             try
             {

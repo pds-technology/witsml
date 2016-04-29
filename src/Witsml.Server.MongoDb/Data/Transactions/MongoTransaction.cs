@@ -22,7 +22,6 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using PDS.Witsml.Server.Models;
 
 namespace PDS.Witsml.Server.Data.Transactions
 {
