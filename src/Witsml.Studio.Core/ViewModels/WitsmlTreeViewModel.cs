@@ -121,19 +121,25 @@ namespace PDS.Witsml.Studio.Core.ViewModels
 
         private void LoadWells()
         {
+            Runtime.ShowBusy();
+
             Task.Run(async () =>
             {
                 var wells = Context.GetAllWells();
                 await LoadDataItems(wells, Items, LoadWellbores, x => x.GetUri());
+                Runtime.ShowBusy(false);
             });
         }
 
         private void LoadWellbores(ResourceViewModel parent, string uri)
         {
+            Runtime.ShowBusy();
+
             Task.Run(async () =>
             {
                 var wellbores = Context.GetWellbores(uri);
                 await LoadDataItems(wellbores, parent.Children, LoadWellboreFolders, x => x.GetUri());
+                Runtime.ShowBusy(false);
             });
         }
 
@@ -148,6 +154,8 @@ namespace PDS.Witsml.Studio.Core.ViewModels
 
         private void LoadWellboreObjects(ResourceViewModel parent, string uri)
         {
+            Runtime.ShowBusy();
+
             Task.Run(async () =>
             {
                 var objectType = parent.Resource.Name;
@@ -155,11 +163,15 @@ namespace PDS.Witsml.Studio.Core.ViewModels
 
                 await LoadDataItems(dataObjects, parent.Children, LoadGrowingObjectChildren, x => x.GetUri(),
                     ObjectTypes.IsGrowingDataObject(objectType) ? -1 : 0);
+
+                Runtime.ShowBusy(false);
             });
         }
 
         private void LoadGrowingObjectChildren(ResourceViewModel parent, string uri)
         {
+            Runtime.ShowBusy();
+
             Task.Run(async () =>
             {
                 var etpUri = new EtpUri(uri);
@@ -169,6 +181,7 @@ namespace PDS.Witsml.Studio.Core.ViewModels
                     LoadLogCurveInfo(parent.Children, dataObject);
 
                 await Task.Yield();
+                Runtime.ShowBusy(false);
             });
         }
 
