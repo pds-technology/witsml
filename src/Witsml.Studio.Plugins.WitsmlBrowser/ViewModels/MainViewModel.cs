@@ -27,6 +27,7 @@ using Caliburn.Micro;
 using Energistics.DataAccess;
 using ICSharpCode.AvalonEdit.Document;
 using PDS.Framework;
+using PDS.Witsml.Studio.Core.Connections;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.Properties;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request;
@@ -39,9 +40,9 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
     /// <summary>
     /// Manages the behavior of the main user interface for the Witsml Browser plug-in.
     /// </summary>
-    /// <seealso cref="Caliburn.Micro.Conductor{Caliburn.Micro.IScreen}.Collection.AllActive" />
+    /// <seealso cref="Caliburn.Micro.Conductor{IScreen}.Collection.AllActive" />
     /// <seealso cref="PDS.Witsml.Studio.Core.ViewModels.IPluginViewModel" />
-    public class MainViewModel : Conductor<IScreen>.Collection.AllActive, IPluginViewModel
+    public class MainViewModel : Conductor<IScreen>.Collection.AllActive, IPluginViewModel, IConnectionAware
     {
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MainViewModel));
         private const string QueryTemplateText = "Query Templates";
@@ -60,7 +61,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             DataObjects = new BindableCollection<string>() { QueryTemplateText };
 
             // Create the model for our witsml settings
-            Model = new Models.WitsmlSettings();
+            Model = new WitsmlSettings();
 
             // Create documents used by Avalon Editors used on query/result tabs.
             XmlQuery = new TextDocument();
@@ -126,7 +127,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             }
         }
 
-        private Models.WitsmlSettings _model;
+        private WitsmlSettings _model;
 
         /// <summary>
         /// Gets or sets the data model.
@@ -134,7 +135,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// <value>
         /// The WitsmlSettings data model.
         /// </value>
-        public Models.WitsmlSettings Model
+        public WitsmlSettings Model
         {
             get { return _model; }
             set
@@ -227,6 +228,24 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         }
 
         /// <summary>
+        /// Called when the selected WITSML version has changed.
+        /// </summary>
+        /// <param name="version">The WITSML version.</param>
+        public void OnWitsmlVersionChanged(string version)
+        {
+            // Reset the Proxy when the version changes
+            Proxy = CreateProxy();
+
+            // Get the server capabilities for the newly selected version.
+            if (!string.IsNullOrEmpty(version))
+            {
+                GetCapabilities();
+            }
+
+            RequestControl.OnWitsmlVersionChanged(version);
+        }
+
+        /// <summary>
         /// Submits an asynchronous query to the WITSML server for a given function type.
         /// The results of a query are displayed in the Results and Messages tabs.
         /// </summary>
@@ -267,7 +286,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         internal async Task<WitsmlResult> SubmitQuery(Functions functionType, string xmlIn)
         {
             string xmlOut = null;
-            string suppMsgOut = null;
             string optionsIn = null;
             short returnCode = 0;
 
@@ -275,7 +293,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             {
                 using (var client = Proxy.CreateClientProxy())
                 {
-                    var wmls = client as IWitsmlClient;
+                    var wmls = (IWitsmlClient)client;
+                    string suppMsgOut;
 
                     // Compute the object type of the incoming xml.
                     var objectType = ObjectTypes.GetObjectTypeFromGroup(xmlIn);
@@ -336,16 +355,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// <returns></returns>
         internal WITSMLWebServiceConnection CreateProxy()
         {
-            _log.DebugFormat("A new Proxy is being created with {2}{2}uri: {0}{2}{2}WitsmlVersion: {1}{2}{2}", Model.Connection.Uri, Model.WitsmlVersion, Environment.NewLine);
-            var proxy = new WITSMLWebServiceConnection(Model.Connection.Uri, GetWitsmlVersionEnum(Model.WitsmlVersion));
-
-            if (!string.IsNullOrWhiteSpace(Model.Connection.Username))
-            {
-                proxy.Username = Model.Connection.Username;
-                proxy.SetSecurePassword(Model.Connection.SecurePassword);
-            }
-
-            return proxy;
+            _log.DebugFormat("A new Proxy is being created with URI: {0}; WitsmlVersion: {1}", Model.Connection.Uri, Model.WitsmlVersion);
+            return Model.Connection.CreateProxy(GetWitsmlVersionEnum(Model.WitsmlVersion));
         }
 
         /// <summary>
@@ -363,6 +374,29 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         }
 
         /// <summary>
+        /// Logs and displays the results of a WITSML submitted query.
+        /// </summary>
+        /// <param name="functionType">Type of the function.</param>
+        /// <param name="result">The WITSML Store API method result.</param>
+        internal void ShowSubmitResult(Functions functionType, WitsmlResult result)
+        {
+            _log.DebugFormat("Query returned with{3}{3}xmlOut: {0}{3}{3}suppMsgOut: {1}{3}{3}optionsIn: {2}{3}{3}",
+                GetLogStringText(result.XmlOut),
+                GetLogStringText(result.MessageOut),
+                GetLogStringText(result.OptionsIn),
+                Environment.NewLine);
+
+            // Output query results to the Results tab
+            OutputResults(result.XmlOut, result.MessageOut, result.ReturnCode);
+
+            // Don't display query contents when GetCap is executed.
+            var xmlIn = functionType == Functions.GetCap ? string.Empty : XmlQuery.Text;
+
+            // Append these results to the Messages tab
+            OutputMessages(functionType, xmlIn, result.XmlOut, result.MessageOut, result.OptionsIn, result.ReturnCode);
+        }
+
+        /// <summary>
         /// Called when initializing the MainViewModel.
         /// </summary>
         protected override void OnInitialize()
@@ -375,7 +409,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// <summary>
         /// Processes the capServer response recieved.
         /// </summary>
-        /// <param name="xmlOut">The XML out.</param>
+        /// <param name="capServers">The cap servers.</param>
         private void ProcessCapServer(string capServers)
         {
             if (string.IsNullOrWhiteSpace(capServers))
@@ -425,29 +459,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         }
 
         /// <summary>
-        /// Logs and displays the results of a WITSML submitted query.
-        /// </summary>
-        /// <param name="functionType">Type of the function.</param>
-        /// <param name="result">The WITSML Store API method result.</param>
-        private void ShowSubmitResult(Functions functionType, WitsmlResult result)
-        {
-            _log.DebugFormat("Query returned with{3}{3}xmlOut: {0}{3}{3}suppMsgOut: {1}{3}{3}optionsIn: {2}{3}{3}",
-                GetLogStringText(result.XmlOut),
-                GetLogStringText(result.MessageOut),
-                GetLogStringText(result.OptionsIn),
-                Environment.NewLine);
-
-            // Output query results to the Results tab
-            OutputResults(result.XmlOut, result.MessageOut, result.ReturnCode);
-
-            // Don't display query contents when GetCap is executed.
-            var xmlIn = functionType == Functions.GetCap ? string.Empty : XmlQuery.Text;
-
-            // Append these results to the Messages tab
-            OutputMessages(functionType, xmlIn, result.XmlOut, result.MessageOut, result.OptionsIn, result.ReturnCode);
-        }
-
-        /// <summary>
         /// Handles the PropertyChanged event of the Model control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
@@ -458,17 +469,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             if (e.PropertyName.Equals("WitsmlVersion"))
             {
                 _log.Debug("WitsmlVersion property changed");
-
-                // Reset the Proxy when the version changes
-                Proxy = CreateProxy();
-
-                // Get the server capabilities for the newly selected version.
-                if (!string.IsNullOrEmpty(Model.WitsmlVersion))
-                {
-                    GetCapabilities();
-                }
-
-                // TODO: GetWells for the TreeView
+                OnWitsmlVersionChanged(Model.WitsmlVersion);
             }
         }
 
@@ -534,7 +535,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// Gets the log string text.
         /// </summary>
         /// <param name="logString">The log string.</param>
-        /// <returns>Returns the logString text if it is not null, otherwise "<None>" is returned as the string.</returns>
+        /// <returns>Returns the logString text if it is not null, otherwise "&lt;None&gt;" is returned as the string.</returns>
         private string GetLogStringText(string logString)
         {
             return string.IsNullOrEmpty(logString) ? "<None>" : logString;

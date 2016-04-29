@@ -71,6 +71,7 @@
     <Compile Include="Functions.cs" />
     <Compile Include="Data\Logs\Log200Generator.cs" />
     <Compile Include="Linq\ExpressionVisitor.cs" />
+    <Compile Include="Linq\IWitsmlContext.cs" />
     <Compile Include="Linq\IWitsmlQuery.cs" />
     <Compile Include="Linq\Witsml131Context.cs" />
     <Compile Include="Linq\Witsml141Context.cs" />

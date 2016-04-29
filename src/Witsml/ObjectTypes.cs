@@ -114,13 +114,13 @@ namespace PDS.Witsml
 
             if (typeof(IDataObject).IsAssignableFrom(type))
             {
-                return type.GetCustomAttributes(typeof(XmlTypeAttribute), false)
+                return type.GetCustomAttributes(typeof(XmlTypeAttribute), true)
                     .OfType<XmlTypeAttribute>()
                     .Select(x => x.TypeName.Substring(4).ToCamelCase())
                     .FirstOrDefault();
             }
 
-            return type.GetCustomAttributes(typeof(XmlRootAttribute), false)
+            return type.GetCustomAttributes(typeof(XmlRootAttribute), true)
                 .OfType<XmlRootAttribute>()
                 .Select(x =>
                 {

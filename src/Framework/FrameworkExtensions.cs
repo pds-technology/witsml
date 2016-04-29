@@ -138,7 +138,7 @@ namespace PDS.Framework
 
             if (fieldInfo != null)
             {
-                var attribute = fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false)
+                var attribute = fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), true)
                     .Cast<DescriptionAttribute>()
                     .FirstOrDefault();
 

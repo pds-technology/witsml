@@ -3,11 +3,33 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:PDS.Witsml.Studio.Core.Views"
+             xmlns:cal="http://www.caliburnproject.org"
+             xmlns:vm="clr-namespace:PDS.Witsml.Studio.Core.ViewModels"
              mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
-        <TreeView>
-            
+        <TreeView ItemsSource="{Binding Items}"> <!-- cal:Message.Attach="[Event SelectedItemChanged] = [Action RefreshContextMenu()]" -->
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="{x:Type TreeViewItem}">
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                </Style>
+            </TreeView.ItemContainerStyle>
+            <TreeView.Resources>
+                <HierarchicalDataTemplate DataType="{x:Type vm:ResourceViewModel}" ItemsSource="{Binding Children}">
+                    <TextBlock Text="{Binding Resource.Name}" />
+                </HierarchicalDataTemplate>
+            </TreeView.Resources>
+            <!--
+            <TreeView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Get Object" cal:Message.Attach="GetObject" />
+                    <MenuItem Header="Delete Object" cal:Message.Attach="DeleteObject" />
+                    <Separator />
+                    <MenuItem Header="Describe" cal:Message.Attach="DescribeChannels" />
+                    <MenuItem Header="Refresh" cal:Message.Attach="RefreshHierarchy" />
+                </ContextMenu>
+            </TreeView.ContextMenu>
+            -->
         </TreeView>
     </Grid>
 </UserControl>

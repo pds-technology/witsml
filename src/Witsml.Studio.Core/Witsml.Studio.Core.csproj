@@ -136,6 +136,7 @@
   <ItemGroup>
     <Compile Include="Behaviors\DropDownButtonBehavior.cs" />
     <Compile Include="Connections\Connection.cs" />
+    <Compile Include="Connections\ConnectionExtensions.cs" />
     <Compile Include="Connections\ConnectionTypes.cs" />
     <Compile Include="Connections\EtpConnectionTest.cs" />
     <Compile Include="Connections\IConnectionTest.cs" />
@@ -155,6 +156,7 @@
     <Compile Include="ViewModels\ConnectionViewModel.cs" />
     <Compile Include="ViewModels\IPluginViewModel.cs" />
     <Compile Include="ViewModels\IShellViewModel.cs" />
+    <Compile Include="ViewModels\ResourceViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="ViewModels\TextEditorViewModel.cs" />
     <Compile Include="ViewModels\WitsmlTreeViewModel.cs" />
@@ -210,6 +212,10 @@
     <ProjectReference Include="..\WebSockets\WebSockets.csproj">
       <Project>{30de888b-a6b7-4528-ad89-324a7f9b0f4c}</Project>
       <Name>WebSockets</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Witsml\Witsml.csproj">
+      <Project>{0EF1D73F-E7A0-40B0-803B-7CE4B6B27112}</Project>
+      <Name>Witsml</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

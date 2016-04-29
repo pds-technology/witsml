@@ -22,7 +22,6 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using Energistics.DataAccess;
-using Newtonsoft.Json;
 using Ast = LinqExtender.Ast;
 
 namespace PDS.Witsml.Linq
@@ -31,8 +30,8 @@ namespace PDS.Witsml.Linq
     /// Default context to be queried.
     /// </summary>
     /// <typeparam name="T">Target type</typeparam>
-    /// <typeparam name="V">List type</typeparam>
-    public class WitsmlQuery<T, V> : ExpressionVisitor, IWitsmlQuery<T>, LinqExtender.IQueryContext<T> where V : IEnergisticsCollection
+    /// <typeparam name="TList">List type</typeparam>
+    public class WitsmlQuery<T, TList> : ExpressionVisitor, IWitsmlQuery<T>, LinqExtender.IQueryContext<T> where TList : IEnergisticsCollection
     {
         /// <summary>
         /// WitsmlQuery
@@ -41,7 +40,7 @@ namespace PDS.Witsml.Linq
         public WitsmlQuery(WitsmlContext context)
         {
             Context = context;
-            Query = WITSMLWebServiceConnection.BuildEmptyQuery<V>();
+            Query = WITSMLWebServiceConnection.BuildEmptyQuery<TList>();
             Queryable = LinqExtender.Queryable.Select(this, x => x);
             Options = new Dictionary<string, string>();
 
@@ -57,7 +56,7 @@ namespace PDS.Witsml.Linq
         /// <summary>
         /// Query
         /// </summary>
-        public V Query { get; private set; }
+        public TList Query { get; private set; }
 
         /// <summary>
         /// Options
@@ -72,16 +71,14 @@ namespace PDS.Witsml.Linq
         /// <returns>Expected result</returns>
         public IEnumerable<T> Execute(Ast.Expression expression)
         {
-            this.Visit(expression);
-#if DEBUG
-            Console.WriteLine();
-            Console.WriteLine("Executing query...  OptionsIn: {0}{1}", JsonConvert.SerializeObject(Options), Environment.NewLine);
-            Console.WriteLine(WitsmlParser.ToXml(Query));
-            Console.WriteLine();
-#endif
-            var result = Context.Connection.Read<V>(Query, Options);
+            Visit(expression);
+            Context.LogQuery(Functions.GetFromStore, Query, Options);
 
-            return (IEnumerable<T>)result.Items;
+            var response = Context.Connection.Read(Query, Options);
+            var result = (IEnumerable<T>)response.Items;
+
+            Context.LogResponse(Functions.GetFromStore, Query, Options, response);
+            return result;
         }
 
         /// <summary>

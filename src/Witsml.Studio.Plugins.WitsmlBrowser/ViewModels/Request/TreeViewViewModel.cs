@@ -16,9 +16,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.Linq;
 using Caliburn.Micro;
+using Energistics.DataAccess;
 using PDS.Witsml.Studio.Core.Runtime;
 using PDS.Witsml.Studio.Core.ViewModels;
+using PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 {
@@ -26,7 +30,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
     /// Manages the behavior for the TreeView view UI elements.
     /// </summary>
     /// <seealso cref="Caliburn.Micro.Screen" />
-    public class TreeViewViewModel : Screen
+    public class TreeViewViewModel : Screen, IConnectionAware
     {
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(TreeViewViewModel));
 
@@ -56,7 +60,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         /// <value>
         /// The WitsmlSettings data model.
         /// </value>
-        public Models.WitsmlSettings Model
+        public WitsmlSettings Model
         {
             get { return Parent.Model; }
         }
@@ -67,6 +71,59 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         /// <value>The runtime.</value>
         public IRuntimeService Runtime { get; private set; }
 
+        /// <summary>
+        /// Gets the TreeView view model.
+        /// </summary>
+        /// <value>The TreeView view model.</value>
         public WitsmlTreeViewModel TreeViewModel { get; }
+
+        /// <summary>
+        /// Called when the selected WITSML version has changed.
+        /// </summary>
+        /// <param name="version">The WITSML version.</param>
+        public void OnWitsmlVersionChanged(string version)
+        {
+            var witsmlVersion = Parent.Parent.GetWitsmlVersionEnum(version);
+            TreeViewModel.CreateContext(Parent.Parent.Model.Connection, witsmlVersion);
+
+            TreeViewModel.Context.LogQuery = LogQuery;
+            TreeViewModel.Context.LogResponse = LogResponse;
+        }
+
+        /// <summary>
+        /// Called the first time the page's LayoutUpdated event fires after it is navigated to.
+        /// </summary>
+        /// <param name="view"></param>
+        protected override void OnViewReady(object view)
+        {
+            base.OnViewReady(view);
+            TreeViewModel.OnViewReady();
+        }
+
+        private void LogQuery(Functions function, IEnergisticsCollection query, IDictionary<string, string> options)
+        {
+            Runtime.InvokeAsync(() =>
+            {
+                Parent.Parent.Model.StoreFunction = function;
+                Parent.Parent.XmlQuery.Text = EnergisticsConverter.ObjectToXml(query);
+            });
+        }
+
+        private void LogResponse(Functions function, IEnergisticsCollection query, IDictionary<string, string> options, IEnergisticsCollection response)
+        {
+            var optionsIn = options != null
+                ? string.Join(";", options.Select(x => $"{x.Key}={x.Value}"))
+                : string.Empty;
+
+            var result = new WitsmlResult(
+                xmlIn: EnergisticsConverter.ObjectToXml(query),
+                optionsIn: optionsIn,
+                capClientIn: null,
+                xmlOut: WitsmlParser.ToXml(response),
+                messageOut: null,
+                returnCode: 1);
+
+            Runtime.InvokeAsync(() => Parent.Parent.ShowSubmitResult(function, result));
+        }
     }
 }

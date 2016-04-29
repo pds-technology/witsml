@@ -19,6 +19,7 @@
 using System.Linq;
 using Caliburn.Micro;
 using Energistics.DataAccess;
+using PDS.Framework;
 using PDS.Witsml.Studio.Core.Runtime;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
@@ -26,8 +27,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
     /// <summary>
     /// Manages the behavior for the request UI elements.
     /// </summary>
-    /// <seealso cref="Caliburn.Micro.Conductor{Caliburn.Micro.IScreen}.Collection.OneActive" />
-    public class RequestViewModel : Conductor<IScreen>.Collection.OneActive
+    /// <seealso cref="Caliburn.Micro.Conductor{IScreen}.Collection.OneActive" />
+    public class RequestViewModel : Conductor<IScreen>.Collection.OneActive, IConnectionAware
     {
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(RequestViewModel));
 
@@ -76,6 +77,17 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         /// </summary>
         /// <value>The runtime.</value>
         public IRuntimeService Runtime { get; private set; }
+
+        /// <summary>
+        /// Called when the selected WITSML version has changed.
+        /// </summary>
+        /// <param name="version">The WITSML version.</param>
+        public void OnWitsmlVersionChanged(string version)
+        {
+            Items
+                .OfType<IConnectionAware>()
+                .ForEach(x => x.OnWitsmlVersionChanged(version));
+        }
 
         /// <summary>
         /// Loads the screens for the request view model.

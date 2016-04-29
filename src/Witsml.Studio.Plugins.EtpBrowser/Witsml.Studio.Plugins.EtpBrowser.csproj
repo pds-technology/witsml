@@ -128,7 +128,6 @@
     <Compile Include="ViewModels\HierarchyViewModel.cs" />
     <Compile Include="ViewModels\ISessionAware.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
-    <Compile Include="ViewModels\ResourceViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\StoreViewModel.cs" />
     <Compile Include="ViewModels\StreamingViewModel.cs" />

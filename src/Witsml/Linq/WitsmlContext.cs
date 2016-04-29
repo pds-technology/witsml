@@ -23,26 +23,36 @@ using Energistics.DataAccess;
 
 namespace PDS.Witsml.Linq
 {
-    public abstract class WitsmlContext : IDisposable
+    public abstract class WitsmlContext : IWitsmlContext, IDisposable
     {
-        public WitsmlContext(string url, double timeoutInMinutes, WMLSVersion version)
+        protected WitsmlContext(string url, double timeoutInMinutes, WMLSVersion version) : this()
         {
             Connect(url, timeoutInMinutes, version);
         }
 
-        public WitsmlContext(string url, string username, string password, double timeoutInMinutes, WMLSVersion version)
+        protected WitsmlContext(string url, string username, string password, double timeoutInMinutes, WMLSVersion version) : this()
         {
             Connect(url, username, password, timeoutInMinutes, version);
         }
 
-        public WitsmlContext(string url, string username, SecureString password, double timeoutInMinutes, WMLSVersion version)
+        protected WitsmlContext(string url, string username, SecureString password, double timeoutInMinutes, WMLSVersion version) : this()
         {
             Connect(url, username, password, timeoutInMinutes, version);
+        }
+
+        private WitsmlContext()
+        {
+            LogQuery = (f, q, o) => { };
+            LogResponse = (f, q, o, r) => { };
         }
 
         public WITSMLWebServiceConnection Connection { get; private set; }
 
         public abstract string DataSchemaVersion { get; }
+
+        public Action<Functions, IEnergisticsCollection, IDictionary<string, string>> LogQuery { get; set; }
+
+        public Action<Functions, IEnergisticsCollection, IDictionary<string, string>, IEnergisticsCollection> LogResponse { get; set; }
 
         public List<T> One<T>()
         {
@@ -52,14 +62,20 @@ namespace PDS.Witsml.Linq
             };
         }
 
-        protected IWitsmlQuery<T> CreateQuery<T, V>() where V : IEnergisticsCollection
+        public abstract IEnumerable<IDataObject> GetAllWells();
+
+        public abstract IEnumerable<IWellObject> GetWellbores(string uri); 
+
+        protected IWitsmlQuery<T> CreateQuery<T, TList>() where TList : IEnergisticsCollection
         {
-            return new WitsmlQuery<T, V>(this);
+            return new WitsmlQuery<T, TList>(this);
         }
 
         private void Connect(string url, string username, string password, double timeoutInMinutes, WMLSVersion version)
         {
             Connect(url, timeoutInMinutes, version);
+
+            if (string.IsNullOrWhiteSpace(username)) return;
 
             Connection.UseDefaultNetworkCredentials = false;
             Connection.Username = username;
@@ -70,6 +86,8 @@ namespace PDS.Witsml.Linq
         {
             Connect(url, timeoutInMinutes, version);
 
+            if (string.IsNullOrWhiteSpace(username)) return;
+
             Connection.UseDefaultNetworkCredentials = false;
             Connection.Username = username;
             Connection.SetSecurePassword(password);
@@ -77,18 +95,20 @@ namespace PDS.Witsml.Linq
 
         private void Connect(string url, double timeoutInMinutes, WMLSVersion version)
         {
-            Connection = new WITSMLWebServiceConnection(url, version);
-            Connection.UseDefaultNetworkCredentials = true;
-            Connection.Timeout = (int)(60000 * timeoutInMinutes);
+            Connection = new WITSMLWebServiceConnection(url, version)
+            {
+                UseDefaultNetworkCredentials = true,
+                Timeout = (int)(60000 * timeoutInMinutes)
+            };
         }
 
         #region IDisposable Support
 
-        private bool disposedValue = false; // To detect redundant calls
+        private bool _disposedValue; // To detect redundant calls
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 if (disposing)
                 {
@@ -99,7 +119,7 @@ namespace PDS.Witsml.Linq
                 // NOTE: set large fields to null.
                 Connection = null;
 
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
 

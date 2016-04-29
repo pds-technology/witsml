@@ -4,8 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:cal="http://www.caliburnproject.org"
-             xmlns:local="clr-namespace:PDS.Witsml.Studio.Plugins.EtpBrowser.Views"
-             xmlns:vm="clr-namespace:PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels"
+             xmlns:vm="clr-namespace:PDS.Witsml.Studio.Core.ViewModels;assembly=PDS.Witsml.Studio.Core"
              mc:Ignorable="d" d:DesignHeight="400" d:DesignWidth="300">
     <Grid Margin="5">
         <TreeView ItemsSource="{Binding Parent.Resources}" cal:Message.Attach="[Event SelectedItemChanged] = [Action RefreshContextMenu()]">

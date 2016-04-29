@@ -16,9 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Security;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
+using Energistics.Datatypes;
 
 namespace PDS.Witsml.Linq
 {
@@ -67,6 +70,21 @@ namespace PDS.Witsml.Linq
         public IWitsmlQuery<Trajectory> Trajectories
         {
             get { return CreateQuery<Trajectory, TrajectoryList>(); }
+        }
+
+        public override IEnumerable<IDataObject> GetAllWells()
+        {
+            return Wells.With(OptionsIn.ReturnElements.IdOnly)
+                .OrderBy(x => x.Name);
+        }
+
+        public override IEnumerable<IWellObject> GetWellbores(string uri)
+        {
+            var etpUri = new EtpUri(uri);
+
+            return Wellbores.With(OptionsIn.ReturnElements.IdOnly)
+                .Where(x => x.UidWell == etpUri.ObjectId)
+                .OrderBy(x => x.Name);
         }
     }
 }
