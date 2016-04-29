@@ -281,7 +281,6 @@ namespace PDS.Witsml.Data.Channels
             Assert.AreEqual(requestedMnemonics.Keys.Count, valueCount);
         }
 
-
         [TestMethod]
         public void ChannelDataReader_Can_Slice_With_Empty_Channels()
         {           
@@ -321,14 +320,14 @@ namespace PDS.Witsml.Data.Channels
         }
 
         [TestMethod]
-        public void ChannelDataReader_Can_Slice_With_Request_Has_Empty_Channel()
+        public void ChannelDataReader_Can_Slice_With_Request_Has_Empty_Channels()
         {
             // Create a Reader
             var reader = new ChannelDataReader(HasEmptyChannels, "CH1,CH2,CH3,CH4,CH5,CH6,CH7,CH8,CH9".Split(','), "ft1,ft2,ft3,ft4,ft5,ft6,ft7,ft8,ft9".Split(','), "eml://witsml1411/well(Energistics-well-0001)/wellbore(Energistics-w1-wellbore-0001)/log(Energistics-w1-wb1-log-0002)", "06e4dff8-3de4-4057-a21b-92026e89a6d4")
                 .WithIndex("MD", "ft", true, false);
 
-            Dictionary<int, string> requestedMnemonics = new Dictionary<int, string>() { { 0, "MD" }, { 2, "CH2" }, { 5, "CH5" }, { 6, "CH6" }};
-            Dictionary<int, string> requestedUnits = new Dictionary<int, string>() { { 0, "ft" }, { 2, "ft2" }, { 5, "ft5" }, { 6, "ft6" } };
+            Dictionary<int, string> requestedMnemonics = new Dictionary<int, string>() { { 0, "MD" }, { 1, "CH1" }, { 2, "CH2" }, { 5, "CH5" }, { 6, "CH6" }, { 7, "CH7" }, { 9, "CH9" } };
+            Dictionary<int, string> requestedUnits = new Dictionary<int, string>() { { 0, "ft" }, { 1, "ft1" }, { 2, "ft2" }, { 5, "ft5" }, { 6, "ft6" }, { 7, "ft7" }, { 9, "ft9" } };
 
             reader.Slice(requestedMnemonics, requestedUnits);
 
