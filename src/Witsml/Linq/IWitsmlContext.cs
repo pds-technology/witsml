@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using Energistics.DataAccess;
+using Energistics.Datatypes;
 
 namespace PDS.Witsml.Linq
 {
@@ -30,10 +31,14 @@ namespace PDS.Witsml.Linq
 
         IEnumerable<IDataObject> GetAllWells();
 
-        IEnumerable<IWellObject> GetWellbores(string parentUri);
+        IEnumerable<IWellObject> GetWellbores(EtpUri parentUri);
 
-        IEnumerable<IWellboreObject> GetWellboreObjects(string objectType, string parentUri);
+        IEnumerable<IWellboreObject> GetWellboreObjects(string objectType, EtpUri parentUri);
 
-        IWellboreObject GetGrowingObjectHeaderOnly(string objectType, string uri);
+        IWellboreObject GetGrowingObjectHeaderOnly(string objectType, EtpUri uri);
+
+        IDataObject GetObjectIdOnly(string objectType, EtpUri uri);
+
+        IDataObject GetObjectDetails(string objectType, EtpUri uri);
     }
 }

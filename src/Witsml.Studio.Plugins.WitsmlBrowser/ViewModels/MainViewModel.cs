@@ -474,11 +474,11 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// <param name="returnCode">The return code.</param>
         private void OutputResults(string xmlOut, string suppMsgOut, short returnCode)
         {
-            QueryResults.Text = string.IsNullOrEmpty(suppMsgOut)
-                ? xmlOut ?? string.Empty
-                : (returnCode < 0
+            QueryResults.Text = string.IsNullOrEmpty(xmlOut)
+                ? (returnCode < 0
                     ? string.Format("{0}{1}{1}Error Code: {2}", suppMsgOut, Environment.NewLine, returnCode)
-                    : suppMsgOut);
+                    : suppMsgOut)
+                : xmlOut;
         }
 
         /// <summary>

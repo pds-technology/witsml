@@ -24,6 +24,7 @@ using System.Reflection;
 using System.Security;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
+using PDS.Framework;
 
 namespace PDS.Witsml.Linq
 {
@@ -68,53 +69,66 @@ namespace PDS.Witsml.Linq
 
         public abstract IEnumerable<IDataObject> GetAllWells();
 
-        public abstract IEnumerable<IWellObject> GetWellbores(string uri);
+        public abstract IEnumerable<IWellObject> GetWellbores(EtpUri uri);
 
-        public virtual IEnumerable<IWellboreObject> GetWellboreObjects(string objectType, string uri)
+        public IEnumerable<IWellboreObject> GetWellboreObjects(string objectType, EtpUri uri)
         {
-            var etpUri = new EtpUri(uri);
+            return GetObjects<IWellboreObject>(objectType, uri, OptionsIn.ReturnElements.IdOnly);
+        }
 
-            var objectIds = etpUri.GetObjectIds()
+        public IWellboreObject GetGrowingObjectHeaderOnly(string objectType, EtpUri uri)
+        {
+            return GetObjects<IWellboreObject>(objectType, uri, OptionsIn.ReturnElements.HeaderOnly).FirstOrDefault();
+        }
+
+        public IDataObject GetObjectIdOnly(string objectType, EtpUri uri)
+        {
+            return GetObjects<IDataObject>(objectType, uri, OptionsIn.ReturnElements.IdOnly).FirstOrDefault();
+        }
+
+        public IDataObject GetObjectDetails(string objectType, EtpUri uri)
+        {
+            return GetObjects<IDataObject>(objectType, uri, OptionsIn.ReturnElements.All).FirstOrDefault();
+        }
+
+        protected IEnumerable<T> GetObjects<T>(string objectType, EtpUri uri, OptionsIn optionsIn) where T : IDataObject
+        {
+            var filters = new List<string>();
+            var values = new List<object>();
+            var count = 0;
+
+            var objectIds = uri.GetObjectIds()
                 .ToDictionary(x => x.Key, x => x.Value);
 
-            var uidWell = objectIds[ObjectTypes.Well];
-            var uidWellbore = etpUri.ObjectId;
+            if (!string.IsNullOrWhiteSpace(uri.ObjectId))
+            {
+                filters.Add("Uid = @" + (count++));
+                values.Add(uri.ObjectId);
+            }
+            if (objectIds.ContainsKey(ObjectTypes.Well) && !ObjectTypes.Well.EqualsIgnoreCase(objectType))
+            {
+                filters.Add("UidWell = @" + (count++));
+                values.Add(objectIds[ObjectTypes.Well]);
+            }
+            if (objectIds.ContainsKey(ObjectTypes.Wellbore) && !ObjectTypes.Wellbore.EqualsIgnoreCase(objectType))
+            {
+                filters.Add("UidWellbore = @" + count);
+                values.Add(objectIds[ObjectTypes.Wellbore]);
+            }
 
             var result = CreateWitsmlQuery(objectType)
-                .With(OptionsIn.ReturnElements.IdOnly)
-                .Where("UidWell = @0 && UidWellbore = @1", uidWell, uidWellbore)
+                .With(optionsIn)
+                .Where(string.Join(" && ", filters), values.ToArray())
                 .GetEnumerator();
 
-            var dataObjects = new List<IWellboreObject>();
+            var dataObjects = new List<T>();
 
             while (result.MoveNext())
             {
-                dataObjects.Add((IWellboreObject)result.Current);
+                dataObjects.Add((T)result.Current);
             }
 
             return dataObjects.OrderBy(x => x.Name);
-        }
-
-        public virtual IWellboreObject GetGrowingObjectHeaderOnly(string objectType, string uri)
-        {
-            var etpUri = new EtpUri(uri);
-
-            var objectIds = etpUri.GetObjectIds()
-                .ToDictionary(x => x.Key, x => x.Value);
-
-            var uidWell = objectIds[ObjectTypes.Well];
-            var uidWellbore = objectIds[ObjectTypes.Wellbore];
-            var uid = etpUri.ObjectId;
-
-            var result = CreateWitsmlQuery(objectType)
-                .With(OptionsIn.ReturnElements.HeaderOnly)
-                .Where("UidWell = @0 && UidWellbore = @1 && Uid = @2", uidWell, uidWellbore, uid)
-                .GetEnumerator();
-
-            if (result.MoveNext())
-                return (IWellboreObject) result.Current;
-
-            return null;
         }
 
         protected IWitsmlQuery CreateWitsmlQuery(string objectType)

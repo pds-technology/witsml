@@ -159,6 +159,7 @@
     <Compile Include="ViewModels\ResourceViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="ViewModels\TextEditorViewModel.cs" />
+    <Compile Include="ViewModels\ViewModelExtensions.cs" />
     <Compile Include="ViewModels\WitsmlTreeViewModel.cs" />
     <Compile Include="Views\ConnectionView.xaml.cs">
       <DependentUpon>ConnectionView.xaml</DependentUpon>

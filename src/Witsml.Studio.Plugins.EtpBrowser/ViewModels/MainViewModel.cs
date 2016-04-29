@@ -17,7 +17,6 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Avro.Specific;
@@ -40,9 +39,9 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
     /// <summary>
     /// Manages the behavior of the main user interface for the ETP Browser plug-in.
     /// </summary>
-    /// <seealso cref="Caliburn.Micro.Conductor{Caliburn.Micro.IScreen}.Collection.OneActive" />
+    /// <seealso cref="Caliburn.Micro.Conductor{IScreen}.Collection.OneActive" />
     /// <seealso cref="PDS.Witsml.Studio.Core.ViewModels.IPluginViewModel" />
-    public class MainViewModel : Conductor<IScreen>.Collection.OneActive, IPluginViewModel
+    public sealed class MainViewModel : Conductor<IScreen>.Collection.OneActive, IPluginViewModel
     {
         private static readonly string PluginDisplayName = Settings.Default.PluginDisplayName;
         private static readonly string PluginVersion = typeof(MainViewModel).GetAssemblyVersion();
@@ -112,7 +111,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// <value>The selected resource.</value>
         public ResourceViewModel SelectedResource
         {
-            get { return FindResource(Resources, x => x.IsSelected); }
+            get { return Resources.FindSelected(); }
         }
 
         private TextEditorViewModel _details;
@@ -273,7 +272,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             try
             {
                 Runtime.Invoke(() => Runtime.Shell.StatusBarText = "Connecting...");
-                var headers = EtpClient.Authorization(Model.Connection.Username, Model.Connection.Password);
+                var headers = EtpBase.Authorization(Model.Connection.Username, Model.Connection.Password);
 
                 _client = new EtpClient(Model.Connection.Uri, Model.ApplicationName, Model.ApplicationVersion, headers);
                 _client.Register<IChannelStreamingConsumer, ChannelStreamingConsumerHandler>();
@@ -340,7 +339,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// Called when the GetResources response is received.
         /// </summary>
         /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="ProtocolEventArgs{GetResourcesResponse, System.String}"/> instance containing the event data.</param>
+        /// <param name="e">The <see cref="ProtocolEventArgs{GetResourcesResponse, String}"/> instance containing the event data.</param>
         private void OnGetResourcesResponse(object sender, ProtocolEventArgs<GetResourcesResponse, string> e)
         {
             var viewModel = ResourceViewModel.NoData;
@@ -362,7 +361,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 return;
             }
 
-            var parent = FindResource(Resources, e.Context);
+            var parent = Resources.FindByUri(e.Context);
 
             if (parent != null)
             {
@@ -373,45 +372,10 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         }
 
         /// <summary>
-        /// Finds the resource associated with the specified URI.
-        /// </summary>
-        /// <param name="resources">The resources.</param>
-        /// <param name="uri">The URI.</param>
-        /// <returns>A <see cref="ResourceViewModel"/> instance.</returns>
-        private ResourceViewModel FindResource(IEnumerable<ResourceViewModel> resources, string uri)
-        {
-            return FindResource(resources, x => x.Resource.Uri == uri);
-        }
-
-        /// <summary>
-        /// Finds a resource by evaluating the specified predicate on each item in the collection.
-        /// </summary>
-        /// <param name="resources">The resources.</param>
-        /// <param name="predicate">The predicate.</param>
-        /// <returns>A <see cref="ResourceViewModel" /> instance.</returns>
-        private ResourceViewModel FindResource(IEnumerable<ResourceViewModel> resources, Func<ResourceViewModel, bool> predicate)
-        {
-            foreach (var resource in resources)
-            {
-                if (predicate(resource))
-                    return resource;
-
-                var found = FindResource(resource.Children, predicate);
-
-                if (found != null)
-                {
-                    return found;
-                }
-            }
-
-            return null;
-        }
-
-        /// <summary>
         /// Called when the GetObject response is received.
         /// </summary>
         /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="ProtocolEventArgs{Energistics.Protocol.Store.Object}"/> instance containing the event data.</param>
+        /// <param name="e">The <see cref="ProtocolEventArgs{Object}"/> instance containing the event data.</param>
         private void OnObject(object sender, ProtocolEventArgs<Energistics.Protocol.Store.Object> e)
         {
             Details.SetText(string.Format(
@@ -440,9 +404,9 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// Logs the object details.
         /// </summary>
         /// <typeparam name="T">The message type.</typeparam>
-        /// <typeparam name="V">The context type.</typeparam>
-        /// <param name="e">The <see cref="ProtocolEventArgs{T, V}"/> instance containing the event data.</param>
-        private void LogObjectDetails<T, V>(ProtocolEventArgs<T, V> e) where T : ISpecificRecord
+        /// <typeparam name="TContext">The context type.</typeparam>
+        /// <param name="e">The <see cref="ProtocolEventArgs{T, TContext}"/> instance containing the event data.</param>
+        private void LogObjectDetails<T, TContext>(ProtocolEventArgs<T, TContext> e) where T : ISpecificRecord
         {
             Details.SetText(string.Format(
                 "// Header:{3}{0}{3}{3}// Body:{3}{1}{3}{3}// Context:{3}{2}{3}",

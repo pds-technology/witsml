@@ -97,7 +97,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         protected override void OnViewReady(object view)
         {
             base.OnViewReady(view);
-            var exclude = new[] { MainViewModel.QueryTemplateText, ObjectTypes.Well, ObjectTypes.Wellbore, ObjectTypes.CapServer };
+            var exclude = new[] { MainViewModel.QueryTemplateText, ObjectTypes.Well, ObjectTypes.Wellbore, ObjectTypes.ChangeLog, ObjectTypes.CapServer };
             TreeViewModel.OnViewReady(Parent.Parent.DataObjects.Where(x => !exclude.Contains(x)));
         }
 
