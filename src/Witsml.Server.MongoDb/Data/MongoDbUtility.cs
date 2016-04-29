@@ -28,6 +28,7 @@ using MongoDB.Driver;
 using PDS.Framework;
 using Energistics.Datatypes;
 using MongoDB.Bson.Serialization;
+using MongoDB.Bson;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -276,6 +277,13 @@ namespace PDS.Witsml.Server.Data
             return ignored == null ? creationTime : creationTime.Union(ignored).ToArray();
         }
 
+        /// <summary>
+        /// Builds the filter for a MongoDb field.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="field">The MongoDb field.</param>
+        /// <param name="value">The value.</param>
+        /// <returns>The filter.</returns>
         public static FilterDefinition<T> BuildFilter<T>(string field, object value)
         {
             if (value is string)
@@ -284,6 +292,14 @@ namespace PDS.Witsml.Server.Data
             return Builders<T>.Filter.Eq(field, value);
         }
 
+        /// <summary>
+        /// Builds the update for a MongoDb field.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="updates">The updates.</param>
+        /// <param name="field">The MongoDb field.</param>
+        /// <param name="value">The value.</param>
+        /// <returns>The update.</returns>
         public static UpdateDefinition<T> BuildUpdate<T>(UpdateDefinition<T> updates, string field, object value)
         {
             if (updates == null)
@@ -292,6 +308,12 @@ namespace PDS.Witsml.Server.Data
             return updates.Set(field, value);
         }
 
+        /// <summary>
+        /// Looks up identifier field.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="defaultField">The default field.</param>
+        /// <returns>The identifier field.</returns>
         public static string LookUpIdField(Type type, string defaultField = "Uid")
         {
             var idField = defaultField;
@@ -301,6 +323,31 @@ namespace PDS.Witsml.Server.Data
                 idField = classMap.IdMemberMap.MemberName;
 
             return idField;
+        }
+
+        /// <summary>
+        /// Gets the identifier in BsonDocument format.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="entity">The entity.</param>
+        /// <returns>The identifier in BsonDocument format.</returns>
+        public static BsonDocument GetDocumentId<T>(T entity)
+        {
+            var copy = Activator.CreateInstance<T>();
+            if (entity is IDataObject)
+            {
+                ((IDataObject)copy).Uid = ((IDataObject)entity).Uid;
+            }
+            if (entity is IWellObject)
+            {
+                ((IWellObject)copy).UidWell = ((IWellObject)entity).UidWell;
+            }
+            if (entity is IWellboreObject)
+            {
+                ((IWellboreObject)copy).UidWellbore = ((IWellboreObject)entity).UidWellbore;
+            }
+
+            return copy.ToBsonDocument();
         }
     }
 }

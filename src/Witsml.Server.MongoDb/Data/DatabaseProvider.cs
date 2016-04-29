@@ -82,6 +82,10 @@ namespace PDS.Witsml.Server.Data
             return Client.GetDatabase(DefaultDatabaseName);
         }
 
+        /// <summary>
+        /// Creates a transaction.
+        /// </summary>
+        /// <returns>The transaction</returns>
         public MongoTransaction BeginTransaction()
         {
             return _container.Resolve<MongoTransaction>();

@@ -50,10 +50,7 @@ namespace PDS.Witsml
         public const string ChangeLog = "changeLog";
         public const string ChannelSet = "channelSet";
         public const string Channel = "channel";
-        public const string ChannelIndex = "channelIndex";
-        public const string ChannelDataValues = "channelDataValues";
-        public const string ChannelDataChunk = "channelDataChunk";
-        public const string MongoDbTransaction = "mongoTransaction";
+        public const string ChannelIndex = "channelIndex";      
 
         private static readonly string[] GrowingObjects = new [] { Log, MudLog, Trajectory };
 

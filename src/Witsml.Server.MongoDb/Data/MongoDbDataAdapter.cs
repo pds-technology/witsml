@@ -36,6 +36,9 @@ namespace PDS.Witsml.Server.Data
     /// <seealso cref="Data.WitsmlDataAdapter{T}" />
     public abstract class MongoDbDataAdapter<T> : WitsmlDataAdapter<T>
     {
+        public static readonly string ChannelDataChunk = "channelDataChunk";
+        public static readonly string MongoDbTransaction = "mongoTransaction";
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDbDataAdapter{T}" /> class.
         /// </summary>
@@ -303,7 +306,7 @@ namespace PDS.Witsml.Server.Data
         /// Inserts an object into the data store.
         /// </summary>
         /// <param name="entity">The object to be inserted.</param>
-        /// <param name="tid">The transaction Id.</param>
+        /// <param name="transaction">The transaction.</param>
         protected void InsertEntity(T entity, MongoTransaction transaction = null)
         {
             InsertEntity(entity, DbCollectionName, transaction);
@@ -327,9 +330,9 @@ namespace PDS.Witsml.Server.Data
                 
                 if (transaction != null)
                 {
-                    var document = GetIDDocument(entity);
-                    transaction.AddATransaction(MongoDbAction.Add, dbCollectionName, document);
-                    transaction.AddTransactions();
+                    var document = MongoDbUtility.GetDocumentId(entity);
+                    transaction.Attach(MongoDbAction.Add, dbCollectionName, document);
+                    transaction.Save();
                 }               
             }
             catch (MongoException ex)
@@ -357,7 +360,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dbCollectionName">The name of the database collection.</param>
         /// <param name="parser">The WITSML query parser.</param>
         /// <param name="uri">The data object URI.</param>
-        /// <param name="tid">The transaction Id.</param>
+        /// <param name="transaction">The transaction.</param>
         /// <exception cref="WitsmlException"></exception>
         protected void UpdateEntity<TObject>(string dbCollectionName, WitsmlQueryParser parser, EtpUri uri, MongoTransaction transaction = null)
         {
@@ -375,8 +378,8 @@ namespace PDS.Witsml.Server.Data
 
                 if (transaction != null)
                 {
-                    transaction.AddATransaction(MongoDbAction.Update, dbCollectionName, current.ToBsonDocument());
-                    transaction.AddTransactions();
+                    transaction.Attach(MongoDbAction.Update, dbCollectionName, current.ToBsonDocument());
+                    transaction.Save();
                 }                  
             }
             catch (MongoException ex)
@@ -448,25 +451,6 @@ namespace PDS.Witsml.Server.Data
         protected virtual List<string> GetIgnoredElementNamesForUpdate()
         {
             return null;
-        } 
-
-        private BsonDocument GetIDDocument<TObject>(TObject entity)
-        {
-            var copy = Activator.CreateInstance<TObject>();
-            if (entity is IDataObject)
-            {
-                ((IDataObject)copy).Uid = ((IDataObject)entity).Uid;
-            }
-            if (entity is IWellObject)
-            {
-                ((IWellObject)copy).UidWell = ((IWellObject)entity).UidWell;
-            }
-            if (entity is IWellboreObject)
-            {
-                ((IWellboreObject)copy).UidWellbore = ((IWellboreObject)entity).UidWellbore;
-            }
-
-            return copy.ToBsonDocument();
         }
     }
 }
