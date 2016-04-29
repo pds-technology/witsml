@@ -60,6 +60,7 @@ namespace PDS.Witsml.Data.Channels
         /// Ordinal position of mnemonics that are included in slicing.  Null if reader is not sliced.
         /// </summary>
         private int[] _sliceOrdinals;
+        private int[] _allSliceOrdinals;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelDataReader"/> class.
@@ -843,6 +844,11 @@ namespace PDS.Witsml.Data.Channels
             Mnemonics = Mnemonics.Where(m => ranges.Keys.Contains(m)).ToArray();
             _sliceOrdinals = Mnemonics
                 .Select(m => GetOrdinal(m)).ToArray();
+
+            // All Slice Ordinals including the ordinals for indexes
+            _allSliceOrdinals = Enumerable.Range(0, Depth).ToArray()
+                .Concat(_sliceOrdinals).ToArray();
+
             Units = Mnemonics.Select(m => GetAllUnits()[GetOrdinal(m)]).ToArray();
 
             // If there is data then update the mnemonics and units from the caller.
@@ -873,30 +879,26 @@ namespace PDS.Witsml.Data.Channels
             Dictionary<int, int> requestedValueCount = null;
 
             // Support for requestLatestValues if supplied
-            //if (requestLatestValues.HasValue)
-            //{
-            //    // TODO: Create a variable named _allSliceOrdinals that includes the index ordinals
-            //    //... and use it for the key in requestedValueCount
-            //    requestedValueCount = new Dictionary<int, int>();
-            //    Mnemonics.ForEach(m => requestedValueCount.Add(GetOrdinal(m), 0));
-            //}
+            if (requestLatestValues.HasValue)
+            {
+                // Use _allSliceOrdinals that includes the index ordinals
+                //... to initialize requestedValueCount.
+                requestedValueCount = new Dictionary<int, int>();
+                _allSliceOrdinals.ForEach(s => requestedValueCount.Add(s, 0));
+            }
 
             // Read through all of the data
             while (Read())
             {
                 var values = new List<object>();
-                var index = GetIndexValue();
+                var primaryIndex = GetIndexValue();
 
-                // TODO: Properly add values for index(es) - There could be more than 1
-
-                // Add the index value to the values list and 
+                // Add the primary index value to the values list and 
                 //... use timestamp format for time index values
                 values.Add(isTimeIndex
                     ? GetDateTimeOffset(0).ToString("o")
-                    : (object)index);
+                    : (object)primaryIndex);
 
-
-                // TODO: Start from i = Depth
 
                 // Only add channel values to the list of values
                 //... if the are included in current slices
@@ -912,25 +914,30 @@ namespace PDS.Witsml.Data.Channels
                 // Filter rows with no channel values
                 if (values.Count > 1)
                 {
-                    //if (!requestLatestValues.HasValue || IsRequestedValueNeeded(values, requestedValueCount, requestLatestValues.Value))
-                    //{
+                    if (!requestLatestValues.HasValue || IsRequestedValueNeeded(values, requestedValueCount, requestLatestValues.Value))
+                    {
                         logData.Add(values);
-                        //start = start ?? index;
-                        //end = index;
 
                         // Update the latest value count for each channel.
-                        //if (requestLatestValues.HasValue)
-                        //{
-                        //    UpdateRequestedValueCount(requestedValueCount, values, Mnemonics, ranges, index);
-                        //}
-                    //}
+                        if (requestLatestValues.HasValue)
+                        {
+                            UpdateRequestedValueCount(requestedValueCount, values, Mnemonics, ranges, primaryIndex);
+                        }
+                    }
 
                     // if latest values requested and we have all of the requested values we need, break out;
-                    //if (requestLatestValues.HasValue && HasRequestedValuesForAllChannels(requestedValueCount, requestLatestValues.Value))
-                    //{
-                    //    break;
-                    //}
+                    if (requestLatestValues.HasValue && HasRequestedValuesForAllChannels(requestedValueCount, requestLatestValues.Value))
+                    {
+                        break;
+                    }
                 }
+            }
+
+            // For requested values reverse the order before output because the logData
+            //... was retrieved from the bottom up.
+            if (requestLatestValues.HasValue)
+            {
+                logData.Reverse();
             }
 
             return logData;
@@ -940,14 +947,11 @@ namespace PDS.Witsml.Data.Channels
         {
             var valueAdded = false;
 
-            //var channelValueArray = channelValues.ToArray();
             for (var i = 0; i < channelValues.Count; i++)
             {
-                // TODO: use _allSliceOrdinals[i] as the index for requestedValueCount
-
                 // For the current channel, if the requested value count has not already been reached and then
                 // ... current channel value is not null or blank then a value is being added.
-                if (requestedValueCount[i] < requestLatestValue && channelValues[i] != null)
+                if (requestedValueCount[_allSliceOrdinals[i]] < requestLatestValue && channelValues[i] != null)
                 {
                     valueAdded = true;
                 }
@@ -960,30 +964,30 @@ namespace PDS.Witsml.Data.Channels
             return valueAdded;
         }
 
-        private void UpdateRequestedValueCount(Dictionary<int, int> requestedValueCount, List<object> values, string[] mnemonics, Dictionary<string, Range<double?>> ranges, double index)
+        private void UpdateRequestedValueCount(Dictionary<int, int> requestedValueCount, List<object> values, string[] mnemonics, Dictionary<string, Range<double?>> ranges, double primaryIndex)
         {
             var valueArray = values.ToArray();
 
             for (var i = 0; i < valueArray.Length; i++)
             {
-                // TODO: use _allSliceOrdinals[i] as the index for requestedValueCount
-                // TODO: use GetName(_allSliceOrdinals[i]) as the index for ranges
+                var mnemonic = GetName(_allSliceOrdinals[i]);
+                var ordinal = _allSliceOrdinals[i];
 
                 if (requestedValueCount.ContainsKey(i) && valueArray[i] != null)
                 {
                     // If first time update for this channel value then start and end index are the same
-                    if (requestedValueCount[i] == 0)
+                    if (requestedValueCount[ordinal] == 0)
                     {
-                        ranges[mnemonics[i]] = new Range<double?>(index, index);
+                        ranges[mnemonic] = new Range<double?>(primaryIndex, primaryIndex);
                     }
                     // Move the end index for subsequent updates to the current channel value
                     else
                     {
-                        ranges[mnemonics[i]] = new Range<double?>(ranges[mnemonics[i]].Start, index);
+                        ranges[mnemonic] = new Range<double?>(ranges[mnemonic].Start, primaryIndex);
                     }
 
                     // Update the count
-                    requestedValueCount[i]++;
+                    requestedValueCount[ordinal]++;
                 }
             }
         }
