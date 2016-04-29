@@ -18,7 +18,7 @@
 
 using MongoDB.Bson;
 
-namespace PDS.Witsml.Server.Models
+namespace PDS.Witsml.Server.Data.Transactions
 {
     /// <summary>
     /// Class for transaction entry in MongoDb
@@ -60,26 +60,5 @@ namespace PDS.Witsml.Server.Models
         /// </summary>
         /// <value>The data object value in BsonDocumnet format.</value>
         public BsonDocument Value { get; set; }
-    }
-
-    /// <summary>
-    /// An enumeration of data object operations, e.g. add
-    /// </summary>
-    public enum MongoDbAction
-    {
-        Add,
-        Update,
-        Delete
-    }
-
-    /// <summary>
-    /// An enumeration of transaction record status
-    /// </summary>
-    public enum TransactionStatus
-    {
-        Created,
-        Pending,
-        Commited,
-        RolledBack
     }
 }

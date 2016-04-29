@@ -160,7 +160,7 @@ namespace PDS.Witsml.Data.Channels
         [TestMethod]
         public void ChannelDataReader_can_calculate_channel_min_max_indices_with_single_value()
         {
-            var reader = new ChannelDataReader(UpdateLogData2, new[] { "MD", "ROP", "GR", "HKLD" })
+            var reader = new ChannelDataReader(UpdateLogData2, new[] { "ROP", "GR", "HKLD" })
                 .WithIndex("MD", "m", true, false);
 
             Assert.AreEqual(1, reader.Depth);
@@ -176,7 +176,7 @@ namespace PDS.Witsml.Data.Channels
         [TestMethod]
         public void ChannelDataReader_can_calculate_channel_min_max_indices_with_multiple_values()
         {
-            var reader = new ChannelDataReader(UpdateLogData3, new[] { "MD", "ROP", "GR", "HKLD" })
+            var reader = new ChannelDataReader(UpdateLogData3, new[] { "ROP", "GR", "HKLD" })
                 .WithIndex("MD", "m", true, false);
 
             Assert.AreEqual(1, reader.Depth);
@@ -239,7 +239,7 @@ namespace PDS.Witsml.Data.Channels
                 "]";
 
             // Create a Reader
-            var reader = new ChannelDataReader(data, "MD,CH1,CH2,CH3,CH4,CH5".Split(','), "ft,ft1,ft2,ft3,ft4,ft5".Split(','), "eml://witsml1411/well(Energistics-well-0001)/wellbore(Energistics-w1-wellbore-0001)/log(Energistics-w1-wb1-log-0002)", "06e4dff8-3de4-4057-a21b-92026e89a6d4")
+            var reader = new ChannelDataReader(data, "CH1,CH2,CH3,CH4,CH5".Split(','), "ft1,ft2,ft3,ft4,ft5".Split(','), "eml://witsml1411/well(Energistics-well-0001)/wellbore(Energistics-w1-wellbore-0001)/log(Energistics-w1-wb1-log-0002)", "06e4dff8-3de4-4057-a21b-92026e89a6d4")
                 .WithIndex("MD", "ft", true, false);
 
             // Slice the Reader

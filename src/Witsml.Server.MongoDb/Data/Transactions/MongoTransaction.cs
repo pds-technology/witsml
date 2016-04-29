@@ -22,8 +22,6 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using PDS.Framework;
-using PDS.Witsml.Server.Models;
 
 namespace PDS.Witsml.Server.Data.Transactions
 {
@@ -38,6 +36,16 @@ namespace PDS.Witsml.Server.Data.Transactions
         private static readonly string _idField = "_id";
         private static readonly string _uidWell = "UidWell";
         private static readonly string _uidWellbore = "UidWellbore";
+
+        [ImportingConstructor]
+        public MongoTransaction(IDatabaseProvider databaseProvider, MongoDbTransactionAdapter adapter)
+        {
+            DatabaseProvider = databaseProvider;
+            Adapter = adapter;
+            Id = Guid.NewGuid().ToString();
+            Transactions = new List<MongoDbTransaction>();
+            Committed = false;
+        }
 
         /// <summary>
         /// Gets or sets the transaction identifier.
@@ -55,20 +63,18 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// The list of transaction records. 
         /// </summary>
         public List<MongoDbTransaction> Transactions;
-          
+
+        /// <summary>
+        /// Gets the database provider.
+        /// </summary>
+        /// <value>The database provider.</value>
         public IDatabaseProvider DatabaseProvider { get; }
 
+        /// <summary>
+        /// Gets the transaction adapter.
+        /// </summary>
+        /// <value>The adapter.</value>
         public MongoDbTransactionAdapter Adapter { get; }
-
-        [ImportingConstructor]
-        public MongoTransaction(IDatabaseProvider databaseProvider, MongoDbTransactionAdapter adapter)
-        {
-            DatabaseProvider = databaseProvider;
-            Adapter = adapter;
-            Id = Guid.NewGuid().ToString();
-            Transactions = new List<MongoDbTransaction>();
-            Committed = false;
-        }
 
         /// <summary>
         /// Commits the transaction in MongoDb.
@@ -78,7 +84,7 @@ namespace PDS.Witsml.Server.Data.Transactions
             var database = DatabaseProvider.GetDatabase();
             foreach (var transaction in Transactions.Where(t => t.Status == TransactionStatus.Pending && t.Action == MongoDbAction.Delete))
             {
-                DeleteADocument(database, transaction);
+                Delete(database, transaction);
             }
 
             ClearTransactions();
@@ -101,11 +107,11 @@ namespace PDS.Witsml.Server.Data.Transactions
 
                 if (action == MongoDbAction.Add)
                 {
-                    DeleteADocument(database, transaction);
+                    Delete(database, transaction);
                 }
                 else if (action == MongoDbAction.Update)
                 {
-                    UpdateADocument(database, transaction);
+                    Update(database, transaction);
                 }
             }
 
@@ -113,12 +119,12 @@ namespace PDS.Witsml.Server.Data.Transactions
         }
 
         /// <summary>
-        /// Creates a transaction record and add to the collection.
+        /// Creates a transaction record and attach to the transaction.
         /// </summary>
         /// <param name="action">The MongoDb operation, e.g. add.</param>
         /// <param name="collection">The MongoDb collection name.</param>
         /// <param name="document">The data obejct in BsonDocument format.</param>
-        public void AddATransaction(MongoDbAction action, string collection, BsonDocument document)
+        public void Attach(MongoDbAction action, string collection, BsonDocument document)
         {
             var transaction = new MongoDbTransaction
             {
@@ -134,9 +140,9 @@ namespace PDS.Witsml.Server.Data.Transactions
         }
 
         /// <summary>
-        /// Creates the transaction records in MongoDb and change status to pending
+        /// Saves the transaction records in MongoDb and change status to pending
         /// </summary>
-        public void AddTransactions()
+        public void Save()
         {
             var created = Transactions.Where(t => t.Status == TransactionStatus.Created).ToList();
             if (!created.Any())
@@ -166,14 +172,14 @@ namespace PDS.Witsml.Server.Data.Transactions
             Transactions.Clear();
         }
 
-        private void UpdateADocument(IMongoDatabase database, MongoDbTransaction transaction)
+        private void Update(IMongoDatabase database, MongoDbTransaction transaction)
         {
             var collection = database.GetCollection<BsonDocument>(transaction.Collection);
             var filter = GetDocumentFilter(transaction.Value);
             collection.ReplaceOne(filter, transaction.Value);
         }
 
-        private void DeleteADocument(IMongoDatabase database, MongoDbTransaction transaction)
+        private void Delete(IMongoDatabase database, MongoDbTransaction transaction)
         {
             var collection = database.GetCollection<BsonDocument>(transaction.Collection);
             var filter = GetDocumentFilter(transaction.Value);

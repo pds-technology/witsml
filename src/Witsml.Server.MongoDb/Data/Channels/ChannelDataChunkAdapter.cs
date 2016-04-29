@@ -46,7 +46,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// </summary>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public ChannelDataChunkAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectTypes.ChannelDataChunk, ObjectTypes.Uid)
+        public ChannelDataChunkAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ChannelDataChunk, ObjectTypes.Uid)
         {
             Logger.Debug("Creating instance.");
         }
@@ -197,14 +197,14 @@ namespace PDS.Witsml.Server.Data.Channels
                         if (transaction != null)
                         {
                             var chunk = new ChannelDataChunk { Uid = dc.Uid };
-                            transaction.AddATransaction(MongoDbAction.Add, DbCollectionName, chunk.ToBsonDocument());
+                            transaction.Attach(MongoDbAction.Add, DbCollectionName, chunk.ToBsonDocument());
                         }
 
                         return (WriteModel<ChannelDataChunk>)new InsertOneModel<ChannelDataChunk>(dc);
                     }
 
                     if (transaction != null)
-                        transaction.AddATransaction(MongoDbAction.Update, DbCollectionName, dc.ToBsonDocument());
+                        transaction.Attach(MongoDbAction.Update, DbCollectionName, dc.ToBsonDocument());
 
                     var filter = Builders<ChannelDataChunk>.Filter;
                     var update = Builders<ChannelDataChunk>.Update;
@@ -221,7 +221,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 .ToList());
 
             if (transaction != null)
-                transaction.AddTransactions();
+                transaction.Save();
         }
 
 

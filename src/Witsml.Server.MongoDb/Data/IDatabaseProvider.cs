@@ -38,6 +38,10 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The database interface.</returns>
         IMongoDatabase GetDatabase();
 
+        /// <summary>
+        /// Creates a transaction.
+        /// </summary>
+        /// <returns>The transaction</returns>
         MongoTransaction BeginTransaction();
     }
 }
