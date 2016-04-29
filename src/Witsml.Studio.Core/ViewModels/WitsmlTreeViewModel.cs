@@ -22,6 +22,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Caliburn.Micro;
 using Energistics.DataAccess;
+using Witsml131 = Energistics.DataAccess.WITSML131;
+using Witsml141 = Energistics.DataAccess.WITSML141;
+using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using PDS.Framework;
 using PDS.Witsml.Linq;
@@ -44,6 +47,7 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         {
             Runtime = runtime;
             Items = new BindableCollection<ResourceViewModel>();
+            DataObjects = new BindableCollection<string>();
         }
 
         /// <summary>
@@ -56,7 +60,13 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         /// Gets the TreeView items.
         /// </summary>
         /// <value>The TreeView items.</value>
-        public BindableCollection<ResourceViewModel> Items { get; } 
+        public BindableCollection<ResourceViewModel> Items { get; }
+
+        /// <summary>
+        /// Gets the collection of supported data objects.
+        /// </summary>
+        /// <value>The data objects.</value>
+        public BindableCollection<string> DataObjects { get; } 
 
         private IWitsmlContext _context;
 
@@ -100,8 +110,11 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         /// <summary>
         /// Called when the parent view is ready.
         /// </summary>
-        public void OnViewReady()
+        public void OnViewReady(IEnumerable<string> dataObjects)
         {
+            DataObjects.Clear();
+            DataObjects.AddRange(dataObjects);
+
             if (!Items.Any())
                 LoadWells();
         }
@@ -111,7 +124,7 @@ namespace PDS.Witsml.Studio.Core.ViewModels
             Task.Run(async () =>
             {
                 var wells = Context.GetAllWells();
-                await LoadDataItems(wells, Items, LoadWellbores);
+                await LoadDataItems(wells, Items, LoadWellbores, x => x.GetUri());
             });
         }
 
@@ -120,43 +133,94 @@ namespace PDS.Witsml.Studio.Core.ViewModels
             Task.Run(async () =>
             {
                 var wellbores = Context.GetWellbores(uri);
-                await LoadDataItems(wellbores, parent.Children, LoadWellboreFolders);
+                await LoadDataItems(wellbores, parent.Children, LoadWellboreFolders, x => x.GetUri());
             });
         }
 
         private void LoadWellboreFolders(ResourceViewModel parent, string uri)
         {
+            var etpUri = new EtpUri(uri);
+
+            DataObjects
+                .Select(x => ToResourceViewModel(etpUri, x, LoadWellboreObjects))
+                .ForEach(parent.Children.Add);
+        }
+
+        private void LoadWellboreObjects(ResourceViewModel parent, string uri)
+        {
+            Task.Run(async () =>
+            {
+                var objectType = parent.Resource.Name;
+                var dataObjects = Context.GetWellboreObjects(objectType, uri);
+
+                await LoadDataItems(dataObjects, parent.Children, LoadGrowingObjectChildren, x => x.GetUri(),
+                    ObjectTypes.IsGrowingDataObject(objectType) ? -1 : 0);
+            });
+        }
+
+        private void LoadGrowingObjectChildren(ResourceViewModel parent, string uri)
+        {
+            Task.Run(async () =>
+            {
+                var etpUri = new EtpUri(uri);
+                var dataObject = Context.GetGrowingObjectHeaderOnly(etpUri.ObjectType, uri);
+
+                if (ObjectTypes.Log.EqualsIgnoreCase(etpUri.ObjectType))
+                    LoadLogCurveInfo(parent.Children, dataObject);
+
+                await Task.Yield();
+            });
+        }
+
+        private void LoadLogCurveInfo(IList<ResourceViewModel> items, IWellboreObject dataObject)
+        {
+            var log131 = dataObject as Witsml131.Log;
+            var log141 = dataObject as Witsml141.Log;
+
+            log131?.LogCurveInfo
+                .Select(x => ToResourceViewModel(x.GetUri(log131), x.Mnemonic, null, 0))
+                .ForEach(items.Add);
+
+            log141?.LogCurveInfo
+                .Select(x => ToResourceViewModel(x.GetUri(log141), x.Mnemonic.Value, null, 0))
+                .ForEach(items.Add);
         }
 
         private async Task LoadDataItems<T>(
             IEnumerable<T> dataObjects,
-            BindableCollection<ResourceViewModel> items,
+            IList<ResourceViewModel> items,
             Action<ResourceViewModel, string> action,
+            Func<T, EtpUri> getUri,
             int children = -1)
             where T : IDataObject
         {
             await Runtime.InvokeAsync(() =>
             {
                 dataObjects
-                    .Select(x => ToResourceViewModel(x, action, children))
+                    .Select(x => ToResourceViewModel(x, action, getUri, children))
                     .ForEach(items.Add);
             });
         }
 
-        private ResourceViewModel ToResourceViewModel<T>(T dataObject, Action<ResourceViewModel, string> action, int children = -1) where T : IDataObject
+        private ResourceViewModel ToResourceViewModel<T>(T dataObject, Action<ResourceViewModel, string> action, Func<T, EtpUri> getUri, int children = -1) where T : IDataObject
         {
-            var uri = dataObject.GetUri();
+            return ToResourceViewModel(getUri(dataObject), dataObject.Name, action, children);
+        }
 
+        private ResourceViewModel ToResourceViewModel(EtpUri uri, string name, Action<ResourceViewModel, string> action, int children = -1)
+        {
             var resource = new Resource()
             {
                 Uri = uri,
-                Name = dataObject.Name,
+                Name = name,
                 ContentType = uri.ContentType,
                 HasChildren = children
             };
 
             var viewModel = new ResourceViewModel(resource);
-            viewModel.LoadChildren = x => action(viewModel, x);
+
+            if (children != 0 && action != null)
+                viewModel.LoadChildren = x => action(viewModel, x);
 
             return viewModel;
         }

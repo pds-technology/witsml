@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Energistics.DataAccess;
 using Witsml200 = Energistics.DataAccess.WITSML200;
 using PDS.Witsml.Properties;
@@ -90,12 +91,31 @@ namespace PDS.Witsml
         }
 
         /// <summary>
+        /// Builds an emtpy WITSML query for the specified data object type and data schema version.
+        /// </summary>
+        /// <param name="connection">The WITSML connection.</param>
+        /// <param name="type">The data object type.</param>
+        /// <param name="version">The data schema version.</param>
+        /// <returns>An <see cref="IEnergisticsCollection"/> instance.</returns>
+        public static IEnergisticsCollection BuildEmtpyQuery(this WITSMLWebServiceConnection connection, Type type, string version)
+        {
+            var method = connection.GetType()
+                .GetMethod("BuildEmptyQuery", BindingFlags.Static | BindingFlags.Public)
+                .MakeGenericMethod(type);
+
+            var query = method.Invoke(null, null) as IEnergisticsCollection;
+            query.SetVersion(version);
+
+            return query;
+        }
+
+        /// <summary>
         /// Wraps the specified data object in a <see cref="List{TObject}"/>.
         /// </summary>
         /// <typeparam name="TObject">The type of data object.</typeparam>
         /// <param name="instance">The data object instance.</param>
         /// <returns>A <see cref="List{TObject}"/> instance containing a single item.</returns>
-        public static List<TObject> AsList<TObject>(this TObject instance) where TObject : IDataObject
+        public static List<TObject> AsList<TObject>(this TObject instance) where TObject : IUniqueId
         {
             return new List<TObject>() { instance };
         }

@@ -31,7 +31,7 @@ namespace PDS.Witsml.Linq
     /// </summary>
     /// <typeparam name="T">Target type</typeparam>
     /// <typeparam name="TList">List type</typeparam>
-    public class WitsmlQuery<T, TList> : ExpressionVisitor, IWitsmlQuery<T>, LinqExtender.IQueryContext<T> where TList : IEnergisticsCollection
+    public class WitsmlQuery<T, TList> : ExpressionVisitor, IWitsmlQuery<T>, IWitsmlQuery, LinqExtender.IQueryContext<T> where TList : IEnergisticsCollection
     {
         /// <summary>
         /// WitsmlQuery
@@ -100,6 +100,17 @@ namespace PDS.Witsml.Linq
         public IWitsmlQuery<T> With(OptionsIn optionsIn)
         {
             Options[optionsIn.Key] = optionsIn.Value;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the options that will be passed in to the GetFromStore query.
+        /// </summary>
+        /// <param name="optionsIn"></param>
+        /// <returns></returns>
+        IWitsmlQuery IWitsmlQuery.With(OptionsIn optionsIn)
+        {
+            With(optionsIn);
             return this;
         }
 

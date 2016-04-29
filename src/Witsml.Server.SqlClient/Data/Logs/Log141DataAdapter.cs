@@ -103,6 +103,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     var logHeader = GetLogHeader(l);
                     var mnemonics = GetMnemonicList(logHeader, parser);
                     FormatLogHeader(l, mnemonics);
+                    l.LogData = null;
                 });
             }
 

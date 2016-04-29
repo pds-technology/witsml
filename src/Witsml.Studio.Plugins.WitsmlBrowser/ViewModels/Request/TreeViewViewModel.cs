@@ -97,7 +97,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         protected override void OnViewReady(object view)
         {
             base.OnViewReady(view);
-            TreeViewModel.OnViewReady();
+            var exclude = new[] { MainViewModel.QueryTemplateText, ObjectTypes.Well, ObjectTypes.Wellbore };
+            TreeViewModel.OnViewReady(Parent.Parent.DataObjects.Where(x => !exclude.Contains(x)));
         }
 
         private void LogQuery(Functions function, IEnergisticsCollection query, IDictionary<string, string> options)
@@ -105,7 +106,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             Runtime.InvokeAsync(() =>
             {
                 Parent.Parent.Model.StoreFunction = function;
-                Parent.Parent.XmlQuery.Text = EnergisticsConverter.ObjectToXml(query);
+                Parent.Parent.XmlQuery.Text = WitsmlParser.ToXml(query);
             });
         }
 
@@ -116,7 +117,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
                 : string.Empty;
 
             var result = new WitsmlResult(
-                xmlIn: EnergisticsConverter.ObjectToXml(query),
+                xmlIn: WitsmlParser.ToXml(query),
                 optionsIn: optionsIn,
                 capClientIn: null,
                 xmlOut: WitsmlParser.ToXml(response),

@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Caliburn.Micro;
@@ -42,10 +41,10 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
     /// </summary>
     /// <seealso cref="Caliburn.Micro.Conductor{IScreen}.Collection.AllActive" />
     /// <seealso cref="PDS.Witsml.Studio.Core.ViewModels.IPluginViewModel" />
-    public class MainViewModel : Conductor<IScreen>.Collection.AllActive, IPluginViewModel, IConnectionAware
+    public sealed class MainViewModel : Conductor<IScreen>.Collection.AllActive, IPluginViewModel, IConnectionAware
     {
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MainViewModel));
-        private const string QueryTemplateText = "Query Templates";
+        public const string QueryTemplateText = "Query Templates";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainViewModel"/> class.
@@ -438,18 +437,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             if (DataObject == QueryTemplateText)
                 return;
 
-            var ns = OptionsIn.DataVersion.Version131.Equals(Model.WitsmlVersion)
-                ? "Energistics.DataAccess.WITSML131."
-                : "Energistics.DataAccess.WITSML141.";
-
-            var type = Proxy.GetType().Assembly.GetType(ns + DataObject.ToPascalCase() + "List");
-
-            var method = Proxy.GetType()
-                .GetMethod("BuildEmptyQuery", BindingFlags.Static | BindingFlags.Public)
-                .MakeGenericMethod(type);
-
-            var query = method.Invoke(null, null) as IEnergisticsCollection;
-            query.SetVersion(Model.WitsmlVersion);
+            var type = ObjectTypes.GetObjectGroupType(DataObject, Model.WitsmlVersion);
+            var query = Proxy.BuildEmtpyQuery(type, Model.WitsmlVersion);
 
             Runtime.Invoke(() =>
             {

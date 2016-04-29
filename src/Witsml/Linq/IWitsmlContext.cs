@@ -31,5 +31,9 @@ namespace PDS.Witsml.Linq
         IEnumerable<IDataObject> GetAllWells();
 
         IEnumerable<IWellObject> GetWellbores(string parentUri);
+
+        IEnumerable<IWellboreObject> GetWellboreObjects(string objectType, string parentUri);
+
+        IWellboreObject GetGrowingObjectHeaderOnly(string objectType, string uri);
     }
 }

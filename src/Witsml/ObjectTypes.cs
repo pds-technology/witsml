@@ -109,7 +109,7 @@ namespace PDS.Witsml
                 !typeof(IDataObject).IsAssignableFrom(type) &&
                 !typeof(AbstractObject).IsAssignableFrom(type))
             {
-                throw new ArgumentException("Invalid WITSML object type, does not implement IEnergisticsCollection, IDataObject or AbstractObject", "type");
+                throw new ArgumentException("Invalid WITSML object type, does not implement IEnergisticsCollection, IDataObject or AbstractObject", nameof(type));
             }
 
             if (typeof(IDataObject).IsAssignableFrom(type))
@@ -145,20 +145,72 @@ namespace PDS.Witsml
         /// <summary>
         /// Gets the type of the object.
         /// </summary>
-        /// <param name="xml">The XML document.</param>
+        /// <param name="document">The XML document.</param>
         /// <returns>The WITSML data object type, as a string.</returns>
         public static string GetObjectType(XDocument document)
         {
             try
             {
-                return document.Root.Elements()
+                return document.Root?.Elements()
                     .Select(x => x.Name.LocalName)
-                    .FirstOrDefault();
+                    .FirstOrDefault() ?? Unknown;
             }
             catch
             {
                 return Unknown;
             }
+        }
+
+        /// <summary>
+        /// Gets the .NET type for the specified object type and WITSML version.
+        /// </summary>
+        /// <param name="objectType">The data object type.</param>
+        /// <param name="version">The WITSML version.</param>
+        /// <returns>The .NET type for the data object.</returns>
+        public static Type GetObjectType(string objectType, WMLSVersion version)
+        {
+            return GetObjectType(objectType, version == WMLSVersion.WITSML131
+                ? OptionsIn.DataVersion.Version131.Value
+                : OptionsIn.DataVersion.Version141.Value);
+        }
+
+        /// <summary>
+        /// Gets the .NET type for the specified object type and WITSML version.
+        /// </summary>
+        /// <param name="objectType">The data object type.</param>
+        /// <param name="version">The WITSML version.</param>
+        /// <returns>The .NET type for the data object.</returns>
+        public static Type GetObjectType(string objectType, string version)
+        {
+            var ns = OptionsIn.DataVersion.Version131.Equals(version)
+                ? "Energistics.DataAccess.WITSML131."
+                : OptionsIn.DataVersion.Version200.Equals(version)
+                ? "Energistics.DataAccess.WITSML200."
+                : "Energistics.DataAccess.WITSML141.";
+
+            return typeof(IDataObject).Assembly.GetType(ns + objectType.ToPascalCase());
+        }
+
+        /// <summary>
+        /// Gets the .NET type of the collection for the specified data object type and WITSML version.
+        /// </summary>
+        /// <param name="objectType">The data object type.</param>
+        /// <param name="version">The WITSML version.</param>
+        /// <returns>The .NET type for the data object collection.</returns>
+        public static Type GetObjectGroupType(string objectType, WMLSVersion version)
+        {
+            return GetObjectType(objectType + "List", version);
+        }
+
+        /// <summary>
+        /// Gets the .NET type of the collection for the specified data object type and WITSML version.
+        /// </summary>
+        /// <param name="objectType">The data object type.</param>
+        /// <param name="version">The WITSML version.</param>
+        /// <returns>The .NET type for the data object collection.</returns>
+        public static Type GetObjectGroupType(string objectType, string version)
+        {
+            return GetObjectType(objectType + "List", version);
         }
 
         /// <summary>
@@ -194,13 +246,13 @@ namespace PDS.Witsml
         /// <summary>
         /// Gets the type of the object group.
         /// </summary>
-        /// <param name="xml">The XML document.</param>
+        /// <param name="document">The XML document.</param>
         /// <returns>The WITSML data object group type, as a string.</returns>
         public static string GetObjectGroupType(XDocument document)
         {
             try
             {
-                return document.Root.Name.LocalName;
+                return document.Root?.Name.LocalName ?? Unknown;
             }
             catch
             {
@@ -222,13 +274,13 @@ namespace PDS.Witsml
         /// <summary>
         /// Gets the data schema version.
         /// </summary>
-        /// <param name="xml">The XML document.</param>
+        /// <param name="document">The XML document.</param>
         /// <returns>The data schema version.</returns>
         public static string GetVersion(XDocument document)
         {
             try
             {
-                return (string)document.Root.Attribute("version");
+                return (string)document.Root?.Attribute("version") ?? string.Empty;
             }
             catch
             {

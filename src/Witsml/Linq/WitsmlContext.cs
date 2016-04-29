@@ -18,8 +18,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Dynamic;
+using System.Reflection;
 using System.Security;
 using Energistics.DataAccess;
+using Energistics.Datatypes;
 
 namespace PDS.Witsml.Linq
 {
@@ -64,7 +68,65 @@ namespace PDS.Witsml.Linq
 
         public abstract IEnumerable<IDataObject> GetAllWells();
 
-        public abstract IEnumerable<IWellObject> GetWellbores(string uri); 
+        public abstract IEnumerable<IWellObject> GetWellbores(string uri);
+
+        public virtual IEnumerable<IWellboreObject> GetWellboreObjects(string objectType, string uri)
+        {
+            var etpUri = new EtpUri(uri);
+
+            var objectIds = etpUri.GetObjectIds()
+                .ToDictionary(x => x.Key, x => x.Value);
+
+            var uidWell = objectIds[ObjectTypes.Well];
+            var uidWellbore = etpUri.ObjectId;
+
+            var result = CreateWitsmlQuery(objectType)
+                .With(OptionsIn.ReturnElements.IdOnly)
+                .Where("UidWell = @0 && UidWellbore = @1", uidWell, uidWellbore)
+                .GetEnumerator();
+
+            var dataObjects = new List<IWellboreObject>();
+
+            while (result.MoveNext())
+            {
+                dataObjects.Add((IWellboreObject)result.Current);
+            }
+
+            return dataObjects.OrderBy(x => x.Name);
+        }
+
+        public virtual IWellboreObject GetGrowingObjectHeaderOnly(string objectType, string uri)
+        {
+            var etpUri = new EtpUri(uri);
+
+            var objectIds = etpUri.GetObjectIds()
+                .ToDictionary(x => x.Key, x => x.Value);
+
+            var uidWell = objectIds[ObjectTypes.Well];
+            var uidWellbore = objectIds[ObjectTypes.Wellbore];
+            var uid = etpUri.ObjectId;
+
+            var result = CreateWitsmlQuery(objectType)
+                .With(OptionsIn.ReturnElements.HeaderOnly)
+                .Where("UidWell = @0 && UidWellbore = @1 && Uid = @2", uidWell, uidWellbore, uid)
+                .GetEnumerator();
+
+            if (result.MoveNext())
+                return (IWellboreObject) result.Current;
+
+            return null;
+        }
+
+        protected IWitsmlQuery CreateWitsmlQuery(string objectType)
+        {
+            var listType = ObjectTypes.GetObjectGroupType(objectType, DataSchemaVersion);
+            var dataType = ObjectTypes.GetObjectType(objectType, DataSchemaVersion);
+
+            return GetType()
+                .GetMethod("CreateQuery", BindingFlags.NonPublic | BindingFlags.Instance)
+                .MakeGenericMethod(dataType, listType)
+                .Invoke(this, new object[0]) as IWitsmlQuery;
+        }
 
         protected IWitsmlQuery<T> CreateQuery<T, TList>() where TList : IEnergisticsCollection
         {

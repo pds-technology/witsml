@@ -21,6 +21,16 @@ using System.Linq;
 
 namespace PDS.Witsml.Linq
 {
+    public interface IWitsmlQuery : IQueryable
+    {
+        /// <summary>
+        /// Sets the options that will be passed in to the GetFromStore query.
+        /// </summary>
+        /// <param name="optionsIn"></param>
+        /// <returns></returns>
+        IWitsmlQuery With(OptionsIn optionsIn);
+    }
+
     public interface IWitsmlQuery<T> : IQueryable<T>
     {
         /// <summary>
