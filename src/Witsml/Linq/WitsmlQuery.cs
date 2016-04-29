@@ -19,6 +19,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Energistics.DataAccess;
@@ -72,13 +73,26 @@ namespace PDS.Witsml.Linq
         public IEnumerable<T> Execute(Ast.Expression expression)
         {
             Visit(expression);
-            Context.LogQuery(Functions.GetFromStore, Query, Options);
 
-            var response = Context.Connection.Read(Query, Options);
-            var result = (IEnumerable<T>)response.Items;
+            var optionsIn = string.Join(";", Options.Select(x => $"{x.Key}={x.Value}"));
 
-            Context.LogResponse(Functions.GetFromStore, Query, Options, response);
-            return result;
+            Context.LogQuery(Functions.GetFromStore, Query, optionsIn);
+
+            using (var client = Context.Connection.CreateClientProxy())
+            {
+                var wmls = (IWitsmlClient)client;
+                string suppMsgOut, xmlOut;
+
+                var objectType = ObjectTypes.GetObjectType<T>();
+                var xmlIn = WitsmlParser.ToXml(Query);
+
+                var returnCode = wmls.WMLS_GetFromStore(objectType, xmlIn, optionsIn, null, out xmlOut, out suppMsgOut);
+                var response = WitsmlParser.Parse<TList>(xmlOut);
+                var result = (IEnumerable<T>) response.Items;
+
+                Context.LogResponse(Functions.GetFromStore, Query, optionsIn, response, returnCode, suppMsgOut);
+                return result;
+            }
         }
 
         /// <summary>
@@ -121,7 +135,7 @@ namespace PDS.Witsml.Linq
 
         #region IQueryable<T> Members
 
-        private System.Linq.IQueryable<T> Queryable;
+        private IQueryable<T> Queryable;
 
         public Expression Expression
         {
@@ -133,7 +147,7 @@ namespace PDS.Witsml.Linq
             get { return Queryable.ElementType; }
         }
 
-        public System.Linq.IQueryProvider Provider
+        public IQueryProvider Provider
         {
             get { return Queryable.Provider; }
         }

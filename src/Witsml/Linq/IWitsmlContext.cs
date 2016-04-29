@@ -24,9 +24,9 @@ namespace PDS.Witsml.Linq
 {
     public interface IWitsmlContext
     {
-        Action<Functions, IEnergisticsCollection, IDictionary<string, string>> LogQuery { get; set; }
+        Action<Functions, IEnergisticsCollection, string> LogQuery { get; set; }
 
-        Action<Functions, IEnergisticsCollection, IDictionary<string, string>, IEnergisticsCollection> LogResponse { get; set; }
+        Action<Functions, IEnergisticsCollection, string, IEnergisticsCollection, short, string> LogResponse { get; set; }
 
         IEnumerable<IDataObject> GetAllWells();
 

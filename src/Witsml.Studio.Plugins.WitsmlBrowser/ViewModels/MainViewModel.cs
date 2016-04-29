@@ -419,14 +419,18 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             DataObject = QueryTemplateText;
 
             var xml = XDocument.Parse(capServers);
+            var dataObjects = new List<string>();
 
             xml.Descendants()
                 .Where(x => x.Name.LocalName == "dataObject")
                 .ForEach(x =>
                 {
-                    if (!DataObjects.Contains(x.Value))
-                        DataObjects.Add(x.Value);
+                    if (!dataObjects.Contains(x.Value))
+                        dataObjects.Add(x.Value);
                 });
+
+            dataObjects.Sort();
+            DataObjects.AddRange(dataObjects);
         }
 
         /// <summary>
@@ -434,7 +438,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// </summary>
         private void OnDataObjectSelected()
         {
-            if (DataObject == QueryTemplateText)
+            if (DataObject == null || DataObject == QueryTemplateText)
                 return;
 
             var type = ObjectTypes.GetObjectGroupType(DataObject, Model.WitsmlVersion);

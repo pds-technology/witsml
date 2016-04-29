@@ -47,16 +47,16 @@ namespace PDS.Witsml.Linq
         private WitsmlContext()
         {
             LogQuery = (f, q, o) => { };
-            LogResponse = (f, q, o, r) => { };
+            LogResponse = (f, q, o, r, c, s) => { };
         }
 
         public WITSMLWebServiceConnection Connection { get; private set; }
 
         public abstract string DataSchemaVersion { get; }
 
-        public Action<Functions, IEnergisticsCollection, IDictionary<string, string>> LogQuery { get; set; }
+        public Action<Functions, IEnergisticsCollection, string> LogQuery { get; set; }
 
-        public Action<Functions, IEnergisticsCollection, IDictionary<string, string>, IEnergisticsCollection> LogResponse { get; set; }
+        public Action<Functions, IEnergisticsCollection, string, IEnergisticsCollection, short, string> LogResponse { get; set; }
 
         public List<T> One<T>()
         {

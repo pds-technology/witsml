@@ -75,6 +75,7 @@ namespace PDS.Witsml.Linq
         public override IEnumerable<IDataObject> GetAllWells()
         {
             return Wells.With(OptionsIn.ReturnElements.IdOnly)
+                .ToList() // execute query before sorting
                 .OrderBy(x => x.Name);
         }
 
@@ -84,6 +85,7 @@ namespace PDS.Witsml.Linq
 
             return Wellbores.With(OptionsIn.ReturnElements.IdOnly)
                 .Where(x => x.UidWell == etpUri.ObjectId)
+                .ToList() // execute query before sorting
                 .OrderBy(x => x.Name);
         }
     }
