@@ -91,13 +91,13 @@ namespace PDS.Witsml.Data.Channels
         ]";
 
         private const string HasEmptyChannels = @"[
-               [[1],[,1,1,,,1,,,]],
-               [[2],[,2,2,,,2,,,]],
-               [[3],[,3,3,,,3,,,]],
-               [[4],[,4,4,,,4,,,]],
-               [[5],[,5,5,,,5,,,]],
-               [[6],[,6,6,,,6,,,]],
-               [[7],[,7,7,,,7,,,]],
+               [[10],[,11,12,,,13,,,]],
+               [[20],[,21,22,,,23,,,]],
+               [[30],[,31,32,,,33,,,]],
+               [[40],[,41,42,,,43,,,]],
+               [[50],[,51,52,,,53,,,]],
+               [[60],[,61,62,,,63,,,]],
+               [[70],[,71,72,,,73,,,]],
         ]";
 
         [TestMethod]
@@ -314,8 +314,48 @@ namespace PDS.Witsml.Data.Channels
 
             var values = new object[9];
             var valueCount = reader.GetValues(values);
+            Assert.AreEqual(3, valueCount);
+            Assert.AreEqual((long)10, values[0]);
+            Assert.AreEqual((long)11, values[1]);
+            Assert.AreEqual((long)13, values[2]);          
+        }
 
-            Assert.AreEqual(requestedMnemonics.Keys.Count, valueCount);
+        [TestMethod]
+        public void ChannelDataReader_Can_Slice_With_Request_Has_Empty_Channel()
+        {
+            // Create a Reader
+            var reader = new ChannelDataReader(HasEmptyChannels, "CH1,CH2,CH3,CH4,CH5,CH6,CH7,CH8,CH9".Split(','), "ft1,ft2,ft3,ft4,ft5,ft6,ft7,ft8,ft9".Split(','), "eml://witsml1411/well(Energistics-well-0001)/wellbore(Energistics-w1-wellbore-0001)/log(Energistics-w1-wb1-log-0002)", "06e4dff8-3de4-4057-a21b-92026e89a6d4")
+                .WithIndex("MD", "ft", true, false);
+
+            Dictionary<int, string> requestedMnemonics = new Dictionary<int, string>() { { 0, "MD" }, { 2, "CH2" }, { 5, "CH5" }, { 6, "CH6" }};
+            Dictionary<int, string> requestedUnits = new Dictionary<int, string>() { { 0, "ft" }, { 2, "ft2" }, { 5, "ft5" }, { 6, "ft6" } };
+
+            reader.Slice(requestedMnemonics, requestedUnits);
+
+            // Test Mnemonic Slices
+            var mnemonics = reader.AllMnemonics;
+            var requestedMnemonicValues = requestedMnemonics.Values.ToArray();
+            Assert.AreEqual(3, mnemonics.Count());
+            Assert.AreEqual(mnemonics.Count(), requestedMnemonicValues.Count());
+            for (var i = 0; i < mnemonics.Length; i++)
+            {
+                Assert.AreEqual(requestedMnemonicValues[i], mnemonics[i]);
+            }
+
+            // Test Unit Slices
+            var units = reader.AllUnits;
+            Assert.AreEqual(3, units.Count());
+            Assert.AreEqual(requestedMnemonics.Keys.Count, units.Length);
+            Assert.AreEqual("ft", units[0]);
+            Assert.AreEqual("ft2", units[1]);
+            Assert.AreEqual("ft6", units[2]);
+
+            var values = new object[9];
+            var valueCount = reader.GetValues(values);
+            Assert.AreEqual(3, valueCount);
+            Assert.AreEqual((long)10, values[0]);
+            Assert.AreEqual((long)11, values[1]);
+            Assert.AreEqual((long)13, values[2]);
         }
 
         //[TestMethod]
