@@ -24,6 +24,7 @@ using Witsml200 = Energistics.DataAccess.WITSML200;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using PDS.Witsml.Server.Models;
+using PDS.Witsml.Server.Data.Transactions;
 
 namespace PDS.Witsml.Server.Data
 {

@@ -181,10 +181,14 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="uri">The data object URI.</param>
         public override void Delete(EtpUri uri)
         {
-            Logger.DebugFormat("Delete for Log with uri '{0}'.", uri.Uri);
+            using (var transaction = DatabaseProvider.BeginTransaction())
+            {
+                Logger.DebugFormat("Delete for Log with uri '{0}'.", uri.Uri);
 
-            base.Delete(uri);
-            ChannelDataChunkAdapter.Delete(uri);
+                DeleteEntity(uri, transaction);
+                ChannelDataChunkAdapter.Delete(uri);
+                transaction.Commit();
+            }
         }
 
         /// <summary>
