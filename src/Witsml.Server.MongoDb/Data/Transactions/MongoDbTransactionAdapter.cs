@@ -27,6 +27,7 @@ namespace PDS.Witsml.Server.Data.Transactions
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{PDS.Witsml.Server.Models.MongoDbTransaction}" />
     [Export]
+    [PartCreationPolicy(CreationPolicy.Shared)]
     public class MongoDbTransactionAdapter : MongoDbDataAdapter<MongoDbTransaction>
     {
         private readonly string _idField = "TransactionId";
@@ -36,7 +37,7 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// </summary>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public MongoDbTransactionAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectTypes.MongoDbTransaction, ObjectTypes.Uid)
+        public MongoDbTransactionAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, MongoDbTransaction, ObjectTypes.Uid)
         {
             Logger.Debug("Creating instance.");
         }

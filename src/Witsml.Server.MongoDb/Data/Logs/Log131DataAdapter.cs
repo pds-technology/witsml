@@ -31,7 +31,6 @@ using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
-using PDS.Witsml.Server.Data.Transactions;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
