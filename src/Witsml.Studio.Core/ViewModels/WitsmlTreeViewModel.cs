@@ -109,7 +109,13 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         {
             var resource = Items.FindSelected();
             var uri = new EtpUri(resource.Resource.Uri);
-            Context.GetObjectIdOnly(uri.ObjectType, uri);
+
+            Runtime.ShowBusy();
+            Runtime.InvokeAsync(() =>
+            {
+                Context.GetObjectIdOnly(uri.ObjectType, uri);
+                Runtime.ShowBusy(false);
+            });
         }
 
         /// <summary>
@@ -137,7 +143,13 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         {
             var resource = Items.FindSelected();
             var uri = new EtpUri(resource.Resource.Uri);
-            Context.GetGrowingObjectHeaderOnly(uri.ObjectType, uri);
+
+            Runtime.ShowBusy();
+            Runtime.InvokeAsync(() =>
+            {
+                Context.GetGrowingObjectHeaderOnly(uri.ObjectType, uri);
+                Runtime.ShowBusy(false);
+            });
         }
 
         /// <summary>
@@ -162,7 +174,13 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         {
             var resource = Items.FindSelected();
             var uri = new EtpUri(resource.Resource.Uri);
-            Context.GetObjectDetails(uri.ObjectType, uri);
+
+            Runtime.ShowBusy();
+            Runtime.InvokeAsync(() =>
+            {
+                Context.GetObjectDetails(uri.ObjectType, uri);
+                Runtime.ShowBusy(false);
+            });
         }
 
         /// <summary>

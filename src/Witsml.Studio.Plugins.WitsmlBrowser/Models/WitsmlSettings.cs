@@ -27,6 +27,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
         {
             Connection = new Connection();
             StoreFunction = Functions.GetFromStore;
+            OutputPath = "./Data/Results";
+            TruncateSize = 1000000; // 1M char
             MaxDataRows = 1000;
         }
 
@@ -87,6 +89,34 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
             }
         }
 
+        private bool _isSaveAllQueryResults;
+        public bool IsSaveAllQueryResults
+        {
+            get { return _isSaveAllQueryResults; }
+            set
+            {
+                if (_isSaveAllQueryResults != value)
+                {
+                    _isSaveAllQueryResults = value;
+                    NotifyOfPropertyChange(() => IsSaveAllQueryResults);
+                }
+            }
+        }
+
+        private string _outputPath;
+        public string OutputPath
+        {
+            get { return _outputPath; }
+            set
+            {
+                if (_outputPath != value)
+                {
+                    _outputPath = value;
+                    NotifyOfPropertyChange(() => OutputPath);
+                }
+            }
+        }
+
         private string _witsmlVersion;
         public string WitsmlVersion
         {
@@ -111,6 +141,20 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
                 {
                     _maxDataRows = value;
                     NotifyOfPropertyChange(() => MaxDataRows);
+                }
+            }
+        }
+
+        private int _truncateSize;
+        public int TruncateSize
+        {
+            get { return _truncateSize; }
+            set
+            {
+                if (_truncateSize != value)
+                {
+                    _truncateSize = value;
+                    NotifyOfPropertyChange(() => TruncateSize);
                 }
             }
         }

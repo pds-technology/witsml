@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -379,20 +380,24 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// <param name="result">The WITSML Store API method result.</param>
         internal void ShowSubmitResult(Functions functionType, WitsmlResult result)
         {
+            var xmlOut = functionType == Functions.GetFromStore
+                ? ProcessQueryResult(result.XmlOut, result.OptionsIn)
+                : result.XmlOut;
+
             _log.DebugFormat("Query returned with{3}{3}xmlOut: {0}{3}{3}suppMsgOut: {1}{3}{3}optionsIn: {2}{3}{3}",
-                GetLogStringText(result.XmlOut),
+                GetLogStringText(xmlOut),
                 GetLogStringText(result.MessageOut),
                 GetLogStringText(result.OptionsIn),
                 Environment.NewLine);
 
             // Output query results to the Results tab
-            OutputResults(result.XmlOut, result.MessageOut, result.ReturnCode);
+            OutputResults(xmlOut, result.MessageOut, result.ReturnCode);
 
             // Don't display query contents when GetCap is executed.
             var xmlIn = functionType == Functions.GetCap ? string.Empty : XmlQuery.Text;
 
             // Append these results to the Messages tab
-            OutputMessages(functionType, xmlIn, result.XmlOut, result.MessageOut, result.OptionsIn, result.ReturnCode);
+            OutputMessages(functionType, xmlIn, xmlOut, result.MessageOut, result.OptionsIn, result.ReturnCode);
         }
 
         /// <summary>
@@ -403,6 +408,74 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             _log.Debug("Initializing screen");
             base.OnInitialize();
             LoadScreens();
+        }
+
+        /// <summary>
+        /// Processes the GetFromStore query result.
+        /// </summary>
+        /// <param name="xmlOut">The XML out.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <returns>An XML string.</returns>
+        private string ProcessQueryResult(string xmlOut, string optionsIn)
+        {
+            if (string.IsNullOrWhiteSpace(xmlOut)) return xmlOut;
+            if (string.IsNullOrWhiteSpace(Model.OutputPath)) return xmlOut;
+
+            var options = OptionsIn.Parse(optionsIn);
+            var returnElements = OptionsIn.GetValue(options, OptionsIn.ReturnElements.Requested);
+            var outputPath = new DirectoryInfo(Path.Combine(Model.OutputPath, returnElements)).FullName;
+            var document = WitsmlParser.Parse(xmlOut);
+
+            if (Model.IsSaveAllQueryResults || xmlOut.Length > Model.TruncateSize)
+                outputPath = SaveQueryResult(outputPath, document);
+
+            if (xmlOut.Length > Model.TruncateSize)
+            {
+                xmlOut = $"<!-- WARNING: Response larger than { Model.TruncateSize } characters -->" + Environment.NewLine +
+                         $"<!-- Results automatically saved to { outputPath } -->";
+            }
+            else if (!xmlOut.Contains(Environment.NewLine))
+            {
+                xmlOut = document.ToString();
+            }
+
+            return xmlOut;
+        }
+
+        /// <summary>
+        /// Saves the query result to the file system.
+        /// </summary>
+        /// <param name="outputPath">The output path.</param>
+        /// <param name="document">The XML document.</param>
+        /// <returns>The full output path.</returns>
+        private string SaveQueryResult(string outputPath, XDocument document)
+        {
+            if (document?.Root == null) return outputPath;
+
+            var ns = document.Root.GetDefaultNamespace();
+            var objectPath = outputPath;
+
+            document.Root.Elements().ForEach(x =>
+            {
+                var ids = new[]
+                {
+                    x.Element(ns + "nameWell")?.Value,
+                    x.Element(ns + "nameWellbore")?.Value,
+                    x.Element(ns + "name")?.Value,
+                };
+
+                var fileName = string.Join("_", ids.Where(id => !string.IsNullOrWhiteSpace(id))) + ".xml";
+                objectPath = Path.Combine(outputPath, x.Name.LocalName);
+
+                var clone = new XElement(document.Root);
+                clone.RemoveNodes();
+                clone.Add(new XElement(x));
+
+                Directory.CreateDirectory(objectPath);
+                File.WriteAllText(Path.Combine(objectPath, fileName), clone.ToString());
+            });
+
+            return objectPath;
         }
 
         /// <summary>
