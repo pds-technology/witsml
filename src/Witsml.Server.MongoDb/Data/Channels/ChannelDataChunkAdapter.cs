@@ -23,7 +23,6 @@ using System.Linq;
 using Energistics.Datatypes;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using Newtonsoft.Json;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Data.Transactions;
@@ -40,6 +39,7 @@ namespace PDS.Witsml.Server.Data.Channels
     public class ChannelDataChunkAdapter : MongoDbDataAdapter<ChannelDataChunk>
     {
         private static readonly int RangeSize = Settings.Default.ChannelDataChunkRangeSize;
+        private const string ChannelDataChunk = "channelDataChunk";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelDataChunkAdapter"/> class.
@@ -58,7 +58,6 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="indexChannel">The index channel.</param>
         /// <param name="range">The index range to select data for.</param>
         /// <param name="ascending">if set to <c>true</c> the data will be sorted in ascending order.</param>
-        /// <param name="requestLatestValues">The request latest values.</param>
         /// <returns>A collection of <see cref="List{ChannelDataChunk}" /> items.</returns>
         /// <exception cref="WitsmlException"></exception>
         public List<ChannelDataChunk> GetData(string uri, string indexChannel, Range<double?> range, bool ascending)
@@ -79,7 +78,9 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <summary>
         /// Adds ChannelDataChunks using the specified reader.
         /// </summary>
-        /// <param name="reader">The <see cref="ChannelDataReader"/> used to parse the data.</param>
+        /// <param name="reader">The <see cref="ChannelDataReader" /> used to parse the data.</param>
+        /// <param name="transaction">The transaction.</param>
+        /// <exception cref="WitsmlException"></exception>
         public void Add(ChannelDataReader reader, MongoTransaction transaction = null)
         {
             Logger.Debug("Adding ChannelDataChunk records with a ChannelDataReader.");
@@ -106,9 +107,11 @@ namespace PDS.Witsml.Server.Data.Channels
 
 
         /// <summary>
-        /// Merges <see cref="ChannelDataChunk"/> data for updates.
+        /// Merges <see cref="ChannelDataChunk" /> data for updates.
         /// </summary>
         /// <param name="reader">The reader.</param>
+        /// <param name="transaction">The transaction.</param>
+        /// <exception cref="WitsmlException"></exception>
         public void Merge(ChannelDataReader reader, MongoTransaction transaction = null)
         {
             if (reader == null || reader.RecordsAffected <= 0)
@@ -172,12 +175,13 @@ namespace PDS.Witsml.Server.Data.Channels
         }
 
         /// <summary>
-        /// Bulks writes <see cref="ChannelDataChunk"/> records for insert and update
+        /// Bulks writes <see cref="ChannelDataChunk" /> records for insert and update
         /// </summary>
         /// <param name="chunks">The chunks.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="mnemonics">The mnemonics.</param>
         /// <param name="units">The units.</param>
+        /// <param name="transaction">The transaction.</param>
         private void BulkWriteChunks(IEnumerable<ChannelDataChunk> chunks, string uri, string mnemonics, string units, MongoTransaction transaction = null)
         {
             Logger.DebugFormat("Bulk writing ChannelDataChunks for uri '{0}', mnemonics '{1}' and units '{2}'.", uri, mnemonics, units);
@@ -220,8 +224,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 })
                 .ToList());
 
-            if (transaction != null)
-                transaction.Save();
+            transaction?.Save();
         }
 
 

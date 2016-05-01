@@ -58,11 +58,11 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// <summary>
         /// Gets a list of the property names to project during a query.
         /// </summary>
-        /// <param name="returnElements">The return elements.</param>
+        /// <param name="parser">The WITSML parser.</param>
         /// <returns>A list of property names.</returns>
-        protected override List<string> GetProjectionPropertyNames(string returnElements)
+        protected override List<string> GetProjectionPropertyNames(WitsmlQueryParser parser)
         {
-            return OptionsIn.ReturnElements.IdOnly.Equals(returnElements)
+            return OptionsIn.ReturnElements.IdOnly.Equals(parser.ReturnElements())
                 ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell" }
                 : null;
         }
