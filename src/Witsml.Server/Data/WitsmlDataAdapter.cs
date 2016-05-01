@@ -147,6 +147,36 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Gets a list of the property names to project during a query.
+        /// </summary>
+        /// <param name="parser">The WITSML parser.</param>
+        /// <returns>A list of property names.</returns>
+        protected virtual List<string> GetProjectionPropertyNames(WitsmlQueryParser parser)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Gets a list of the element names to ignore during a query.
+        /// </summary>
+        /// <param name="parser">The WITSML parser.</param>
+        /// <returns>A list of element names.</returns>
+        protected virtual List<string> GetIgnoredElementNamesForQuery(WitsmlQueryParser parser)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Gets a list of the element names to ignore during an update.
+        /// </summary>
+        /// <param name="parser">The WITSML parser.</param>
+        /// <returns>A list of element names.</returns>
+        protected virtual List<string> GetIgnoredElementNamesForUpdate(WitsmlQueryParser parser)
+        {
+            return null;
+        }
+
+        /// <summary>
         /// Creates the query template.
         /// </summary>
         /// <returns>A query template.</returns>
