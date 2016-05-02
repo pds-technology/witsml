@@ -48,6 +48,14 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
             Runtime = runtime;
             DisplayName = "Channels";
             WitsmlVersions = new BindableCollection<string>();
+            WitsmlConnectionPicker = new ConnectionPickerViewModel(runtime, ConnectionTypes.Witsml)
+            {
+                OnConnectionChanged = OnWitsmlConnectionChanged
+            };
+            EtpConnectionPicker = new ConnectionPickerViewModel(runtime, ConnectionTypes.Etp)
+            {
+                OnConnectionChanged = OnEtpConnectionChanged
+            };
             Messages = new TextEditorViewModel(runtime, "JavaScript", true)
             {
                 IsScrollingEnabled = true
@@ -60,6 +68,18 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
         }
 
         public IRuntimeService Runtime { get; private set; }
+
+        /// <summary>
+        /// Gets the WITSML connection picker view model.
+        /// </summary>
+        /// <value>The connection picker view model.</value>
+        public ConnectionPickerViewModel WitsmlConnectionPicker { get; }
+
+        /// <summary>
+        /// Gets the ETP connection picker view model.
+        /// </summary>
+        /// <value>The connection picker view model.</value>
+        public ConnectionPickerViewModel EtpConnectionPicker { get; }
 
         /// <summary>
         /// Gets or sets the messages editor.
@@ -154,36 +174,6 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
                 {
                     Runtime.ShowError("Error importing Channel Metadata", ex);
                 }
-            }
-        }
-
-        public void ShowWitsmlConnectionDialog()
-        {
-            var viewModel = new ConnectionViewModel(Runtime, ConnectionTypes.Witsml)
-            {
-                DataItem = Model.WitsmlConnection
-            };
-
-            if (Runtime.ShowDialog(viewModel))
-            {
-                Model.WitsmlConnection = viewModel.DataItem;
-                WitsmlClientProxy = CreateWitsmlClientProxy();
-                GetVersions();
-            }
-        }
-
-        public void ShowEtpConnectionDialog()
-        {
-            var viewModel = new ConnectionViewModel(Runtime, ConnectionTypes.Etp)
-            {
-                DataItem = Model.EtpConnection
-            };
-
-            if (Runtime.ShowDialog(viewModel))
-            {
-                Model.EtpConnection = viewModel.DataItem;
-                EtpClientProxy = CreateEtpClientProxy();
-                Messages.Clear();
             }
         }
 
@@ -408,10 +398,44 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Simulation
             }
         }
 
+        private void OnWitsmlConnectionChanged(Connection connection)
+        {
+            Model.WitsmlConnection = connection;
+
+            //_log.DebugFormat("Selected connection changed: Name: {0}; Uri: {1}; Username: {2}",
+            //    Model.Connection.Name, Model.Connection.Uri, Model.Connection.Username);
+
+            // Make connection and get version
+            Runtime.ShowBusy();
+            Runtime.InvokeAsync(() =>
+            {
+                Runtime.ShowBusy(false);
+                WitsmlClientProxy = CreateWitsmlClientProxy();
+                GetVersions();
+            });
+        }
+
+        private void OnEtpConnectionChanged(Connection connection)
+        {
+            Model.EtpConnection = connection;
+
+            //_log.DebugFormat("Selected connection changed: Name: {0}; Uri: {1}; Username: {2}",
+            //    Model.Connection.Name, Model.Connection.Uri, Model.Connection.Username);
+
+            // Make connection and get version
+            Runtime.ShowBusy();
+            Runtime.InvokeAsync(() =>
+            {
+                Runtime.ShowBusy(false);
+                EtpClientProxy = CreateEtpClientProxy();
+                Messages.Clear();
+            });
+        }
+
         private WitsmlProxyViewModel CreateWitsmlClientProxy()
         {
             return OptionsIn.DataVersion.Version131.Equals(Model.WitsmlVersion)
-                ? new Log131ProxyViewModel(Runtime, Model.WitsmlConnection) as WitsmlProxyViewModel
+                ? new Log131ProxyViewModel(Runtime, Model.WitsmlConnection)
                 : new Log141ProxyViewModel(Runtime, Model.WitsmlConnection) as WitsmlProxyViewModel;
         }
 

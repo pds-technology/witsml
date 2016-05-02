@@ -40,6 +40,10 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         {
             Runtime = runtime;
             DisplayName =  string.Format("{0:D} - {0}", Protocols.Core);
+            ConnectionPicker = new ConnectionPickerViewModel(runtime, ConnectionTypes.Etp)
+            {
+                OnConnectionChanged = OnConnectionChanged
+            };
         }
 
         /// <summary>
@@ -63,24 +67,13 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// Gets the runtime service.
         /// </summary>
         /// <value>The runtime.</value>
-        public IRuntimeService Runtime { get; private set; }
+        public IRuntimeService Runtime { get; }
 
         /// <summary>
-        /// Shows the connection dialog.
+        /// Gets the connection picker view model.
         /// </summary>
-        public void ShowConnectionDialog()
-        {
-            var viewModel = new ConnectionViewModel(Runtime, ConnectionTypes.Etp)
-            {
-                DataItem = Model.Connection
-            };
-
-            if (Runtime.ShowDialog(viewModel))
-            {
-                Model.Connection = viewModel.DataItem;
-                RequestSession();
-            }
-        }
+        /// <value>The connection picker view model.</value>
+        public ConnectionPickerViewModel ConnectionPicker { get; }
 
         /// <summary>
         /// Requests a new ETP session.
@@ -97,6 +90,22 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         {
             Parent.Client.Handler<ICoreClient>()
                 .CloseSession();
+        }
+
+        private void OnConnectionChanged(Connection connection)
+        {
+            Model.Connection = connection;
+
+            //_log.DebugFormat("Selected connection changed: Name: {0}; Uri: {1}; Username: {2}",
+            //    Model.Connection.Name, Model.Connection.Uri, Model.Connection.Username);
+
+            // Make connection and get version
+            Runtime.ShowBusy();
+            Runtime.InvokeAsync(() =>
+            {
+                Runtime.ShowBusy(false);
+                RequestSession();
+            });
         }
     }
 }
