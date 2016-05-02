@@ -91,13 +91,13 @@ namespace PDS.Witsml.Data.Channels
         ]";
 
         private const string HasEmptyChannels = @"[
-               [[10],[,11,12,,,13,,,]],
-               [[20],[,21,22,,,23,,,]],
-               [[30],[,31,32,,,33,,,]],
-               [[40],[,41,42,,,43,,,]],
-               [[50],[,51,52,,,53,,,]],
-               [[60],[,61,62,,,63,,,]],
-               [[70],[,71,72,,,73,,,]],
+               [[10],[null,11,12,null,null,13,null,null,null]],
+               [[20],[null,21,22,null,null,23,null,null,null]],
+               [[30],[null,31,32,null,null,33,null,null,null]],
+               [[40],[null,41,42,null,null,43,null,null,null]],
+               [[50],[null,51,52,null,null,53,null,null,null]],
+               [[60],[null,61,62,null,null,63,null,null,null]],
+               [[70],[null,71,72,null,null,73,null,null,null]],
         ]";
 
         [TestMethod]
