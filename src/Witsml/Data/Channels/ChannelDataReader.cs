@@ -59,7 +59,6 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Ordinal position of mnemonics that are included in slicing.  Null if reader is not sliced.
         /// </summary>
-        private int[] _sliceOrdinals;
         private int[] _allSliceOrdinals;
 
         /// <summary>
@@ -829,11 +828,12 @@ namespace PDS.Witsml.Data.Channels
 
             _allMnemonics = null;
             _allUnits = null;
+            _allSliceOrdinals = null;
             Mnemonics = slices;
             Units = null;
 
             // Slice by requestedMnemonics first
-            _sliceOrdinals = slices
+            var sliceOrdinals = slices
                 .Select(m => GetOrdinal(m)).ToArray(); // Get the ordinal position of each slice.
 
             // Call GetChannelRanges so we can see which ranges have data or not.  
@@ -842,12 +842,12 @@ namespace PDS.Witsml.Data.Channels
 
             // Apply slicing to mnemonics and units without and data (range)
             Mnemonics = Mnemonics.Where(m => ranges.Keys.Contains(m)).ToArray();
-            _sliceOrdinals = Mnemonics
+            sliceOrdinals = Mnemonics
                 .Select(m => GetOrdinal(m)).ToArray();
 
             // All Slice Ordinals including the ordinals for indexes
             _allSliceOrdinals = Enumerable.Range(0, Depth).ToArray()
-                .Concat(_sliceOrdinals).ToArray();
+                .Concat(sliceOrdinals).ToArray();
 
             Units = Mnemonics.Select(m => GetAllUnits()[GetOrdinal(m)]).ToArray();
 
@@ -1205,7 +1205,7 @@ namespace PDS.Witsml.Data.Channels
         /// <returns>true if the ordinal position exists in the list of slice ordinal positions, false otherwise.</returns>
         private bool SliceExists(int ordinal)
         {
-            return ordinal < Depth || _sliceOrdinals == null || _sliceOrdinals.Contains(ordinal);
+            return _allSliceOrdinals == null || _allSliceOrdinals.Contains(ordinal);
         }
 
         /// <summary>
