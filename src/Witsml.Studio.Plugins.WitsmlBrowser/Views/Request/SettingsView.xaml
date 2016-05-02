@@ -4,9 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-             xmlns:cal="http://www.caliburnproject.org"
              xmlns:conv="clr-namespace:PDS.Witsml.Studio.Core.Converters;assembly=PDS.Witsml.Studio.Core"
-             xmlns:local="clr-namespace:PDS.Witsml.Studio.Plugins.WitsmlBrowser.Views.Request"
              mc:Ignorable="d" d:DesignHeight="600" d:DesignWidth="400">
 
     <UserControl.Resources>
@@ -39,15 +37,14 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Column="0" Grid.Row="0" Text="Connection:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
-            <TextBox Text="{Binding Model.Connection.Uri}" Grid.Column="1" Grid.Row="0" Margin="5" Padding="5" VerticalContentAlignment="Center" IsReadOnly="True" />
-            <Button x:Name="ShowConnectionDialog" Grid.Column="2" Grid.Row="0" Margin="5" Content="..." Width="40" HorizontalAlignment="Right" />
-
+            <ContentControl x:Name="ConnectionPicker" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" />
+            
             <TextBlock Grid.Column="0" Grid.Row="1" Text="Version:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
             <ComboBox x:Name="WitsmlVersionControl" SelectedItem="{Binding Model.WitsmlVersion}" ItemsSource="{Binding WitsmlVersions}" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" Margin="5" VerticalContentAlignment="Center" IsEnabled="{Binding ElementName=WitsmlVersionControl, Path=HasItems}" />
 
             <Button x:Name="GetCapabilities" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Width="80" Margin="5" Content="Get Cap" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" HorizontalAlignment="Right" />
 
-            <Border Grid.Row="3" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="0,1,0,0" VerticalAlignment="Center" />
+            <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="0,1,0,0" VerticalAlignment="Center" />
 
             <TextBlock Grid.Column="0" Grid.Row="4" Text="Return Elements:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
             <ComboBox SelectedItem="{Binding Model.ReturnElementType, Mode=TwoWay}" DisplayMemberPath="Value" ItemsSource="{Binding ReturnElements}" Grid.Column="1" Grid.Row="4" Grid.ColumnSpan="2" Margin="5" VerticalContentAlignment="Center" IsEnabled="{Binding Model.IsRequestObjectSelectionCapability, Converter={StaticResource BooleanInverseConverter}}" />
@@ -59,13 +56,13 @@
             <!--<TextBlock Grid.Column="0" Grid.Row="6" Text="Max Data Rows:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
             <xctk:IntegerUpDown Value="{Binding Model.MaxDataRows}" Grid.Column="1" Grid.Row="6" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" />-->
 
-            <Border Grid.Row="8" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="0,1,0,0" VerticalAlignment="Center" />
+            <Border Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="0,1,0,0" VerticalAlignment="Center" />
 
             <TextBlock Grid.Row="9" Grid.Column="0" Text="Output Path:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
             <TextBox Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" Padding="5" Text="{Binding Model.OutputPath}" VerticalContentAlignment="Center" />
 
             <TextBlock Grid.Row="10" Grid.Column="0" Text="Truncate Size:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
-            <xctk:IntegerUpDown Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" Padding="5" Text="{Binding Model.TruncateSize}" VerticalContentAlignment="Center" />
+            <xctk:IntegerUpDown Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" Padding="5" Text="{Binding Model.TruncateSize}" FormatString="N0" VerticalContentAlignment="Center" />
             
             <CheckBox Grid.Row="11" Grid.Column="1" Grid.ColumnSpan="2" Margin="5,10,5,5" Content="Save All Query Results" VerticalAlignment="Center" IsChecked="{Binding Model.IsSaveAllQueryResults}" />
         </Grid>

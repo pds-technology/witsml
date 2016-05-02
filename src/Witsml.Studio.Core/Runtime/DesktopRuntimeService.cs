@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -55,7 +54,7 @@ namespace PDS.Witsml.Studio.Core.Runtime
         /// <value>The application shell.</value>
         public IShellViewModel Shell
         {
-            get { return Application.Current.MainWindow.DataContext as IShellViewModel; }
+            get { return Application.Current.MainWindow?.DataContext as IShellViewModel; }
         }
 
         /// <summary>

@@ -168,10 +168,9 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         public void GetObject()
         {
             var resource = SelectedResource;
-            if (resource != null)
-            {
-                SendGetObject(resource.Resource.Uri);
-            }
+            if (resource == null) return;
+
+            SendGetObject(resource.Resource.Uri);
         }
 
         /// <summary>
@@ -190,11 +189,10 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         public void DeleteObject()
         {
             var resource = SelectedResource;
-            if (resource != null)
-            {
-                SendDeleteObject(resource.Resource.Uri);
-                resource.Parent.Children.Remove(resource);
-            }
+            if (resource == null) return;
+
+            SendDeleteObject(resource.Resource.Uri);
+            resource.Parent.Children.Remove(resource);
         }
 
         /// <summary>
@@ -244,7 +242,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
 
             Runtime.Invoke(() =>
             {
-                Runtime.Shell.SetBreadcrumb(DisplayName, item.DisplayName);
+                Runtime.Shell?.SetBreadcrumb(DisplayName, item.DisplayName);
             });
         }
 
@@ -299,12 +297,11 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// </summary>
         private void CloseEtpClient()
         {
-            if (_client != null)
-            {
-                _client.SocketClosed -= OnClientSocketClosed;
-                _client.Dispose();
-                _client = null;
-            }
+            if (_client == null) return;
+
+            _client.SocketClosed -= OnClientSocketClosed;
+            _client.Dispose();
+            _client = null;
         }
 
         /// <summary>
@@ -362,13 +359,11 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             }
 
             var parent = Resources.FindByUri(e.Context);
+            if (parent == null) return;
 
-            if (parent != null)
-            {
-                viewModel.Parent = parent;
-                viewModel.Level = parent.Level + 1;
-                parent.Children.Add(viewModel);
-            }
+            viewModel.Parent = parent;
+            viewModel.Level = parent.Level + 1;
+            parent.Children.Add(viewModel);
         }
 
         /// <summary>
@@ -422,10 +417,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// <param name="message">The message.</param>
         private void LogClientOutput(string message)
         {
-            if (string.IsNullOrWhiteSpace(message))
-            {
-                return;
-            }
+            if (string.IsNullOrWhiteSpace(message)) return;
 
             Messages.Append(string.Concat(
                 message.StartsWith("{") ? string.Empty : "// ",

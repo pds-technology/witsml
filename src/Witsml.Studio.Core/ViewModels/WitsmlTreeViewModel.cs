@@ -211,7 +211,7 @@ namespace PDS.Witsml.Studio.Core.ViewModels
             DataObjects.Clear();
             DataObjects.AddRange(dataObjects);
 
-            if (!Items.Any())
+            if (!Items.Any() && Context != null)
                 LoadWells();
         }
 
