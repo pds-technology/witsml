@@ -52,6 +52,17 @@ namespace PDS.Framework
         }
 
         /// <summary>
+        /// Determines whether the collection contains the specified value, ignoring case.
+        /// </summary>
+        /// <param name="source">The source.</param>
+        /// <param name="value">The value.</param>
+        /// <returns><c>true</c> if the collection contains the specified value; otherwise, false.</returns>
+        public static bool ContainsIgnoreCase(this IEnumerable<string> source, string value)
+        {
+            return source.Any(x => x.EqualsIgnoreCase(value));
+        }
+
+        /// <summary>
         /// Determines whether two specified strings have the same value, ignoring case.
         /// </summary>
         /// <param name="a">The first string to compare, or null.</param>

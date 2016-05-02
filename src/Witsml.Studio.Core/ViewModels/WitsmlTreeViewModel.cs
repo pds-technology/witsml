@@ -88,6 +88,102 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         }
 
         /// <summary>
+        /// Determines whether a GetFromStore request can be sent for the selected item.
+        /// </summary>
+        /// <returns><c>true</c> if the selected item is not a folder; otherwise, <c>false</c>.</returns>
+        public bool CanGetObjectIds
+        {
+            get
+            {
+                var resource = Items.FindSelected();
+
+                return resource != null &&
+                    !string.IsNullOrWhiteSpace(new EtpUri(resource.Resource.Uri).ObjectId);
+            }
+        }
+
+        /// <summary>
+        /// Gets the selected item's IDs using a GetFromStore request.
+        /// </summary>
+        public void GetObjectIds()
+        {
+            var resource = Items.FindSelected();
+            var uri = new EtpUri(resource.Resource.Uri);
+
+            Runtime.ShowBusy();
+            Runtime.InvokeAsync(() =>
+            {
+                Context.GetObjectIdOnly(uri.ObjectType, uri);
+                Runtime.ShowBusy(false);
+            });
+        }
+
+        /// <summary>
+        /// Determines whether a GetFromStore request can be sent for the selected item.
+        /// </summary>
+        /// <returns><c>true</c> if the selected item is not a folder; otherwise, <c>false</c>.</returns>
+        public bool CanGetObjectHeader
+        {
+            get
+            {
+                var resource = Items.FindSelected();
+                if (resource == null) return false;
+
+                var uri = new EtpUri(resource.Resource.Uri);
+
+                return !string.IsNullOrWhiteSpace(uri.ObjectId)
+                    && ObjectTypes.IsGrowingDataObject(uri.ObjectType);
+            }
+        }
+
+        /// <summary>
+        /// Gets the selected item's details using a GetFromStore request.
+        /// </summary>
+        public void GetObjectHeader()
+        {
+            var resource = Items.FindSelected();
+            var uri = new EtpUri(resource.Resource.Uri);
+
+            Runtime.ShowBusy();
+            Runtime.InvokeAsync(() =>
+            {
+                Context.GetGrowingObjectHeaderOnly(uri.ObjectType, uri);
+                Runtime.ShowBusy(false);
+            });
+        }
+
+        /// <summary>
+        /// Determines whether a GetFromStore request can be sent for the selected item.
+        /// </summary>
+        /// <returns><c>true</c> if the selected item is not a folder; otherwise, <c>false</c>.</returns>
+        public bool CanGetObjectDetails
+        {
+            get
+            {
+                var resource = Items.FindSelected();
+
+                return resource != null &&
+                    !string.IsNullOrWhiteSpace(new EtpUri(resource.Resource.Uri).ObjectId);
+            }
+        }
+
+        /// <summary>
+        /// Gets the selected item's details using a GetFromStore request.
+        /// </summary>
+        public void GetObjectDetails()
+        {
+            var resource = Items.FindSelected();
+            var uri = new EtpUri(resource.Resource.Uri);
+
+            Runtime.ShowBusy();
+            Runtime.InvokeAsync(() =>
+            {
+                Context.GetObjectDetails(uri.ObjectType, uri);
+                Runtime.ShowBusy(false);
+            });
+        }
+
+        /// <summary>
         /// Creates a WITSML proxy for the specified version.
         /// </summary>
         /// <param name="connection">The connection.</param>
@@ -115,8 +211,28 @@ namespace PDS.Witsml.Studio.Core.ViewModels
             DataObjects.Clear();
             DataObjects.AddRange(dataObjects);
 
-            if (!Items.Any())
+            if (!Items.Any() && Context != null)
                 LoadWells();
+        }
+
+        /// <summary>
+        /// Refreshes the hierarchy.
+        /// </summary>
+        public void RefreshHierarchy()
+        {
+            Items.Clear();
+            LoadWells();
+        }
+
+        /// <summary>
+        /// Refreshes the context menu.
+        /// </summary>
+        public void RefreshContextMenu()
+        {
+            NotifyOfPropertyChange(() => CanGetObjectIds);
+            NotifyOfPropertyChange(() => CanGetObjectHeader);
+            NotifyOfPropertyChange(() => CanGetObjectDetails);
+            //NotifyOfPropertyChange(() => CanDeleteObject);
         }
 
         private void LoadWells()
@@ -137,7 +253,7 @@ namespace PDS.Witsml.Studio.Core.ViewModels
 
             Task.Run(async () =>
             {
-                var wellbores = Context.GetWellbores(uri);
+                var wellbores = Context.GetWellbores(new EtpUri(uri));
                 await LoadDataItems(wellbores, parent.Children, LoadWellboreFolders, x => x.GetUri());
                 Runtime.ShowBusy(false);
             });
@@ -148,7 +264,7 @@ namespace PDS.Witsml.Studio.Core.ViewModels
             var etpUri = new EtpUri(uri);
 
             DataObjects
-                .Select(x => ToResourceViewModel(etpUri, x, LoadWellboreObjects))
+                .Select(x => ToResourceViewModel(etpUri.Append(x), x, LoadWellboreObjects))
                 .ForEach(parent.Children.Add);
         }
 
@@ -158,11 +274,11 @@ namespace PDS.Witsml.Studio.Core.ViewModels
 
             Task.Run(async () =>
             {
-                var objectType = parent.Resource.Name;
-                var dataObjects = Context.GetWellboreObjects(objectType, uri);
+                var etpUri = new EtpUri(uri);
+                var dataObjects = Context.GetWellboreObjects(etpUri.ObjectType, etpUri);
 
                 await LoadDataItems(dataObjects, parent.Children, LoadGrowingObjectChildren, x => x.GetUri(),
-                    ObjectTypes.IsGrowingDataObject(objectType) ? -1 : 0);
+                    ObjectTypes.IsGrowingDataObject(etpUri.ObjectType) ? -1 : 0);
 
                 Runtime.ShowBusy(false);
             });
@@ -175,7 +291,7 @@ namespace PDS.Witsml.Studio.Core.ViewModels
             Task.Run(async () =>
             {
                 var etpUri = new EtpUri(uri);
-                var dataObject = Context.GetGrowingObjectHeaderOnly(etpUri.ObjectType, uri);
+                var dataObject = Context.GetGrowingObjectHeaderOnly(etpUri.ObjectType, etpUri);
 
                 if (ObjectTypes.Log.EqualsIgnoreCase(etpUri.ObjectType))
                     LoadLogCurveInfo(parent.Children, dataObject);

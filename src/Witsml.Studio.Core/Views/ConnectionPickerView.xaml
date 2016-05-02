@@ -1,0 +1,47 @@
+﻿<UserControl x:Class="PDS.Witsml.Studio.Core.Views.ConnectionPickerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:cal="http://www.caliburnproject.org"
+             xmlns:conn="clr-namespace:PDS.Witsml.Studio.Core.Connections"
+             xmlns:conv="clr-namespace:PDS.Witsml.Studio.Core.Converters"
+             mc:Ignorable="d" d:DesignHeight="40" d:DesignWidth="300"
+             x:Name="ConnectionPicker">
+    
+    <UserControl.Resources>
+        <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+    </UserControl.Resources>
+    
+    <Grid>
+        <ComboBox
+            IsEditable="False"
+            HorizontalContentAlignment="Stretch"
+            VerticalContentAlignment="Center"
+            ItemsSource="{Binding Connections}"
+            SelectedItem="{Binding Connection}">
+            <ComboBox.ItemTemplate>
+                <DataTemplate DataType="{x:Type conn:Connection}">
+                    <Grid HorizontalAlignment="Stretch">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0" Text="{Binding Name}" />
+                        <TextBlock Grid.Column="1" Text="edit" Foreground="SteelBlue" TextDecorations="Underline" Cursor="Hand" Margin="5,0"
+                                   Visibility="{Binding Uri, Converter={StaticResource NullToVisibilityConverter}}"
+                                   cal:Action.TargetWithoutContext="{Binding ElementName=ConnectionPicker, Path=DataContext}"
+                                   cal:Message.Attach="[Event MouseUp] = [Action EditConnection($dataContext, $eventArgs)]"
+                                   x:Name="EditLink" />
+                    </Grid>
+                    <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ComboBoxItem}}" Value="{x:Null}">
+                            <Setter TargetName="EditLink" Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </DataTemplate.Triggers>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+    </Grid>
+</UserControl>

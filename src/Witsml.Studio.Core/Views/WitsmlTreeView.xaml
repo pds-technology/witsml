@@ -7,7 +7,7 @@
              xmlns:vm="clr-namespace:PDS.Witsml.Studio.Core.ViewModels"
              mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
-        <TreeView ItemsSource="{Binding Items}"> <!-- cal:Message.Attach="[Event SelectedItemChanged] = [Action RefreshContextMenu()]" -->
+        <TreeView ItemsSource="{Binding Items}" cal:Message.Attach="[Event SelectedItemChanged] = [Action RefreshContextMenu()]">
             <TreeView.ItemContainerStyle>
                 <Style TargetType="{x:Type TreeViewItem}">
                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
@@ -19,17 +19,16 @@
                     <TextBlock Text="{Binding Resource.Name}" />
                 </HierarchicalDataTemplate>
             </TreeView.Resources>
-            <!--
             <TreeView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Get Object" cal:Message.Attach="GetObject" />
-                    <MenuItem Header="Delete Object" cal:Message.Attach="DeleteObject" />
+                    <MenuItem Header="Get IDs" cal:Message.Attach="GetObjectIds" />
+                    <MenuItem Header="Get Header" cal:Message.Attach="GetObjectHeader" />
+                    <MenuItem Header="Get Details" cal:Message.Attach="GetObjectDetails" />
+                    <MenuItem Header="Delete" cal:Message.Attach="DeleteObject" IsEnabled="False" />
                     <Separator />
-                    <MenuItem Header="Describe" cal:Message.Attach="DescribeChannels" />
                     <MenuItem Header="Refresh" cal:Message.Attach="RefreshHierarchy" />
                 </ContextMenu>
             </TreeView.ContextMenu>
-            -->
         </TreeView>
     </Grid>
 </UserControl>

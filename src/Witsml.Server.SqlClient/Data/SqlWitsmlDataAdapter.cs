@@ -70,7 +70,19 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The query results collection.</returns>
         protected virtual List<T> QueryEntities(WitsmlQueryParser parser)
         {
-            var mapping = DatabaseProvider.SchemaMapper.Schema.Mappings[ObjectName.Name];
+            return QueryEntities(parser, ObjectName.Name);
+        }
+
+        /// <summary>
+        /// Queries the data store using the specified <see cref="WitsmlQueryParser" />.
+        /// </summary>
+        /// <param name="parser">The query parser.</param>
+        /// <param name="objectMappingKey">The object mapping key.</param>
+        /// <returns>The query results collection.</returns>
+        /// <exception cref="WitsmlException"></exception>
+        protected virtual List<T> QueryEntities(WitsmlQueryParser parser, string objectMappingKey)
+        {
+            var mapping = DatabaseProvider.SchemaMapper.Schema.Mappings[objectMappingKey];
 
             if (OptionsIn.RequestObjectSelectionCapability.True.Equals(parser.RequestObjectSelectionCapability()))
             {
@@ -84,10 +96,13 @@ namespace PDS.Witsml.Server.Data
 
             try
             {
+                var fields = GetProjectionPropertyNames(parser);
+                var ignored = GetIgnoredElementNamesForQuery(parser);
+
                 using (var db = DatabaseProvider.GetDatabase())
                 {
                     Logger.DebugFormat("Querying {0} data table.", mapping.Table);
-                    var query = new SqlQuery<T>(db, mapping, parser);
+                    var query = new SqlQuery<T>(db, mapping, parser, fields, ignored);
                     return query.Execute();
                 }
             }

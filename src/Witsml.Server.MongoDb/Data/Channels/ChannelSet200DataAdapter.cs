@@ -206,8 +206,9 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <summary>
         /// Gets a list of the element names to ignore during a query.
         /// </summary>
+        /// <param name="parser">The WITSML parser.</param>
         /// <returns>A list of element names.</returns>
-        protected override List<string> GetIgnoredElementNamesForQuery()
+        protected override List<string> GetIgnoredElementNamesForQuery(WitsmlQueryParser parser)
         {
             return new List<string> { "Data" };
         }
@@ -215,10 +216,11 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <summary>
         /// Gets a list of the element names to ignore during an update.
         /// </summary>
+        /// <param name="parser">The WITSML parser.</param>
         /// <returns>A list of element names.</returns>
-        protected override List<string> GetIgnoredElementNamesForUpdate()
+        protected override List<string> GetIgnoredElementNamesForUpdate(WitsmlQueryParser parser)
         {
-            return GetIgnoredElementNamesForQuery();
+            return GetIgnoredElementNamesForQuery(parser);
         }
 
         private ChannelMetadataRecord ToChannelMetadataRecord(ChannelSet entity, Channel channel, IList<IndexMetadataRecord> indexMetadata)

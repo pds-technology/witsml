@@ -35,19 +35,18 @@ namespace PDS.Witsml.Server.Data
     /// <typeparam name="T">The type of queried data object.</typeparam>
     public class MongoDbQuery<T>
     {
-        private static readonly XNamespace xsi = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
-
         private readonly IMongoCollection<T> _collection;
         private readonly WitsmlQueryParser _parser;    
         private List<string> _fields;
         private List<string> _ignored;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MongoDbQuery{T}"/> class.
+        /// Initializes a new instance of the <see cref="MongoDbQuery{T}" /> class.
         /// </summary>
         /// <param name="collection">The Mongo database collection.</param>
         /// <param name="parser">The parser.</param>
         /// <param name="fields">The fields of the data object to be selected.</param>
+        /// <param name="ignored">The fields of the data object to be ignored.</param>
         public MongoDbQuery(IMongoCollection<T> collection, WitsmlQueryParser parser, List<string> fields, List<string> ignored = null)
         {
             Logger = LogManager.GetLogger(GetType());
@@ -132,12 +131,12 @@ namespace PDS.Witsml.Server.Data
 
             var privateGroupOnly = _parser.RequestPrivateGroupOnly();
             var privateGroupOnlyFilter = privateGroupOnly
-                ? Builders<T>.Filter.Eq("CommonData.PrivateGroupOnly", privateGroupOnly)
-                : Builders<T>.Filter.Ne("CommonData.PrivateGroupOnly", !privateGroupOnly);
+                ? Builders<T>.Filter.Eq("CommonData.PrivateGroupOnly", true)
+                : Builders<T>.Filter.Ne("CommonData.PrivateGroupOnly", false);
 
             filters.Add(privateGroupOnlyFilter);
 
-            var filter = BuildFilterForAnElement(element, typeof(T), null);
+            var filter = BuildFilterForAnElement(element, typeof(T));
 
             if (filter != null)
                 filters.Add(filter);
@@ -226,7 +225,7 @@ namespace PDS.Witsml.Server.Data
                     if (genericType == typeof(Nullable<>))
                     {
                         var underlyingType = Nullable.GetUnderlyingType(propType);
-                        return BuildFilterForAnElementType(underlyingType, element, fieldName); ;
+                        return BuildFilterForAnElementType(underlyingType, element, fieldName);
                     }
                     else if (genericType == typeof(List<>))
                     {
@@ -387,7 +386,7 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Builds the projection for the query.
         /// </summary>
-        /// <param name="parser">The parser.</param>
+        /// <param name="element">The XML element.</param>
         /// <returns>The projection object that contains the fields to be selected.</returns>
         private ProjectionDefinition<T> BuildProjection(XElement element)
         {
