@@ -20,8 +20,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
-using System.Web.Security;
 using PDS.Framework.Properties;
 
 namespace PDS.Framework
@@ -193,8 +193,11 @@ namespace PDS.Framework
         {
             if (value == null) return null;
 
-            var bytes = MachineKey.Protect(Encoding.UTF8.GetBytes(value), key ?? DefaultEncryptionKey);
-            return bytes == null ? null : Convert.ToBase64String(bytes);
+            var bytes = Encoding.Unicode.GetBytes(value);
+            var entropy = Encoding.Unicode.GetBytes(key ?? DefaultEncryptionKey);
+
+            bytes = ProtectedData.Protect(bytes, entropy, DataProtectionScope.CurrentUser);
+            return Convert.ToBase64String(bytes);
         }
 
         /// <summary>
@@ -207,8 +210,11 @@ namespace PDS.Framework
         {
             if (value == null) return null;
 
-            var bytes = MachineKey.Unprotect(Convert.FromBase64String(value), key ?? DefaultEncryptionKey);
-            return bytes == null ? null : Encoding.UTF8.GetString(bytes);
+            var bytes = Convert.FromBase64String(value);
+            var entropy = Encoding.Unicode.GetBytes(key ?? DefaultEncryptionKey);
+
+            bytes = ProtectedData.Unprotect(bytes, entropy, DataProtectionScope.CurrentUser);
+            return Encoding.Unicode.GetString(bytes);
         }
     }
 }
