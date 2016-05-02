@@ -18,10 +18,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows.Input;
 using Caliburn.Micro;
+using Newtonsoft.Json;
+using PDS.Framework;
 using PDS.Witsml.Studio.Core.Connections;
+using PDS.Witsml.Studio.Core.Properties;
 using PDS.Witsml.Studio.Core.Runtime;
 
 namespace PDS.Witsml.Studio.Core.ViewModels
@@ -34,6 +38,8 @@ namespace PDS.Witsml.Studio.Core.ViewModels
     {
         private static readonly Connection SelectConnectionItem = new Connection { Name = "Select Connection..." };
         private static readonly Connection AddNewConnectionItem = new Connection { Name = "(Add New Connection...)" };
+        private static readonly string PersistedDataFolderName = Settings.Default.PersistedDataFolderName;
+        private static readonly string ConnectionListBaseFileName = Settings.Default.ConnectionListBaseFileName;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConnectionPickerViewModel" /> class.
@@ -158,7 +164,10 @@ namespace PDS.Witsml.Studio.Core.ViewModels
                 .OrderBy(x => x.Name)
                 .ToList();
 
-            SaveConnectionsToFile(list);
+            if (Connections.Any())
+            {
+                SaveConnectionsToFile(list);
+            }
 
             Connections.Clear();
             Connections.Add(SelectConnectionItem);
@@ -169,11 +178,50 @@ namespace PDS.Witsml.Studio.Core.ViewModels
 
         private IEnumerable<Connection> LoadConnectionsFromFile()
         {
+            var fileName = GetConnectionFileName();
+
+            if (File.Exists(fileName))
+            {
+                //_log.DebugFormat("Reading persisted Connection from '{0}'", filename);
+                var json = File.ReadAllText(fileName);
+                var connections = JsonConvert.DeserializeObject<List<Connection>>(json);
+                connections.ForEach(x => x.Password = x.Password.Decrypt());
+                return connections;
+            }
+
             return new Connection[0];
         } 
 
         private void SaveConnectionsToFile(List<Connection> connections)
         {
+            EnsureDataFolder();
+            var fileName = GetConnectionFileName();
+            //_log.DebugFormat("Persisting Connection to '{0}'", filename);
+            connections.ForEach(x => x.Password = x.Password.Encrypt());
+            File.WriteAllText(fileName, JsonConvert.SerializeObject(connections));
+            connections.ForEach(x => x.Password = x.Password.Decrypt());
+        }
+
+        /// <summary>
+        /// Gets the connection list file name.
+        /// </summary>
+        /// <returns>The path and file name for the connection list file with format "[data-folder]/[connection-type]ConnectionList.json".</returns>
+        internal string GetConnectionFileName()
+        {
+            return string.Format("{0}/{1}/{2}{3}",
+                Environment.CurrentDirectory,
+                PersistedDataFolderName,
+                ConnectionType,
+                ConnectionListBaseFileName);
+        }
+
+        /// <summary>
+        /// Checks for the existance of the data folder and creates it if necessary.
+        /// </summary>
+        private void EnsureDataFolder()
+        {
+            var directory = new DirectoryInfo(PersistedDataFolderName);
+            Directory.CreateDirectory(directory.FullName);
         }
     }
 }

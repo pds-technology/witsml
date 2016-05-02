@@ -426,8 +426,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             var outputPath = new DirectoryInfo(Path.Combine(Model.OutputPath, returnElements)).FullName;
             var document = WitsmlParser.Parse(xmlOut);
 
-            if (Model.IsSaveAllQueryResults || xmlOut.Length > Model.TruncateSize)
-                outputPath = SaveQueryResult(outputPath, document);
+            if (Model.IsSaveQueryResponse || xmlOut.Length > Model.TruncateSize)
+                outputPath = SaveQueryResult(outputPath, document, Model.IsSplitResults);
 
             if (xmlOut.Length > Model.TruncateSize)
             {
@@ -447,10 +447,19 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// </summary>
         /// <param name="outputPath">The output path.</param>
         /// <param name="document">The XML document.</param>
+        /// <param name="splitResults">if set to <c>true</c> results will be split into multiple files.</param>
         /// <returns>The full output path.</returns>
-        private string SaveQueryResult(string outputPath, XDocument document)
+        private string SaveQueryResult(string outputPath, XDocument document, bool splitResults)
         {
             if (document?.Root == null) return outputPath;
+
+            if (!splitResults)
+            {
+                Directory.CreateDirectory(outputPath);
+                outputPath = Path.Combine(outputPath, DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + ".xml");
+                document.Save(outputPath);
+                return outputPath;
+            }
 
             var ns = document.Root.GetDefaultNamespace();
             var objectPath = outputPath;
@@ -466,13 +475,12 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
 
                 var fileName = string.Join("_", ids.Where(id => !string.IsNullOrWhiteSpace(id))) + ".xml";
                 objectPath = Path.Combine(outputPath, x.Name.LocalName);
+                Directory.CreateDirectory(objectPath);
 
                 var clone = new XElement(document.Root);
                 clone.RemoveNodes();
                 clone.Add(new XElement(x));
-
-                Directory.CreateDirectory(objectPath);
-                File.WriteAllText(Path.Combine(objectPath, fileName), clone.ToString());
+                clone.Save(Path.Combine(objectPath, fileName));
             });
 
             return objectPath;

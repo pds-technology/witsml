@@ -89,16 +89,30 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
             }
         }
 
-        private bool _isSaveAllQueryResults;
-        public bool IsSaveAllQueryResults
+        private bool _isSaveQueryResponse;
+        public bool IsSaveQueryResponse
         {
-            get { return _isSaveAllQueryResults; }
+            get { return _isSaveQueryResponse; }
             set
             {
-                if (_isSaveAllQueryResults != value)
+                if (_isSaveQueryResponse != value)
                 {
-                    _isSaveAllQueryResults = value;
-                    NotifyOfPropertyChange(() => IsSaveAllQueryResults);
+                    _isSaveQueryResponse = value;
+                    NotifyOfPropertyChange(() => IsSaveQueryResponse);
+                }
+            }
+        }
+
+        private bool _isSplitResults;
+        public bool IsSplitResults
+        {
+            get { return _isSplitResults; }
+            set
+            {
+                if (_isSplitResults != value)
+                {
+                    _isSplitResults = value;
+                    NotifyOfPropertyChange(() => IsSplitResults);
                 }
             }
         }

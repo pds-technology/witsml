@@ -160,7 +160,12 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
                 Model.Connection.Name, Model.Connection.Uri, Model.Connection.Username);
 
             // Make connection and get version
-            GetVersions();
+            Runtime.ShowBusy();
+            Runtime.InvokeAsync(() =>
+            {
+                Runtime.ShowBusy(false);
+                GetVersions();
+            });
         }
 
         /// <summary>

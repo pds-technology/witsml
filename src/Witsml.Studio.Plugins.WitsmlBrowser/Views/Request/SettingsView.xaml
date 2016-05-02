@@ -63,8 +63,11 @@
 
             <TextBlock Grid.Row="10" Grid.Column="0" Text="Truncate Size:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
             <xctk:IntegerUpDown Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" Padding="5" Text="{Binding Model.TruncateSize}" FormatString="N0" VerticalContentAlignment="Center" />
-            
-            <CheckBox Grid.Row="11" Grid.Column="1" Grid.ColumnSpan="2" Margin="5,10,5,5" Content="Save All Query Results" VerticalAlignment="Center" IsChecked="{Binding Model.IsSaveAllQueryResults}" />
+
+            <StackPanel Grid.Row="11" Grid.Column="1" Grid.ColumnSpan="2" Margin="5,10,5,5" Orientation="Horizontal">
+                <CheckBox Content="Save All Query Responses" VerticalAlignment="Center" IsChecked="{Binding Model.IsSaveQueryResponse}" />
+                <CheckBox Content="Split Results" VerticalAlignment="Center" Margin="40,0,0,0" IsChecked="{Binding Model.IsSplitResults}" />
+            </StackPanel>
         </Grid>
     </DockPanel>
 </UserControl>

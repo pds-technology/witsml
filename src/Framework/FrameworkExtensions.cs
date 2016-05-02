@@ -20,6 +20,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using PDS.Framework.Properties;
 
 namespace PDS.Framework
 {
@@ -28,6 +31,8 @@ namespace PDS.Framework
     /// </summary>
     public static class FrameworkExtensions
     {
+        private static readonly string DefaultEncryptionKey = Settings.Default.DefaultEncryptionKey;
+
         /// <summary>
         /// Gets the version for the <see cref="System.Reflection.Assembly"/> containing the specified <see cref="Type"/>.
         /// </summary>
@@ -176,6 +181,40 @@ namespace PDS.Framework
 
             var typeCode = Type.GetTypeCode(type);
             return typeCode >= TypeCode.Char && typeCode <= TypeCode.Decimal;
+        }
+
+        /// <summary>
+        /// Encrypts the specified value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="key">The encryption key.</param>
+        /// <returns>The encrypted value.</returns>
+        public static string Encrypt(this string value, string key = null)
+        {
+            if (value == null) return null;
+
+            var bytes = Encoding.Unicode.GetBytes(value);
+            var entropy = Encoding.Unicode.GetBytes(key ?? DefaultEncryptionKey);
+
+            bytes = ProtectedData.Protect(bytes, entropy, DataProtectionScope.CurrentUser);
+            return Convert.ToBase64String(bytes);
+        }
+
+        /// <summary>
+        /// Decrypts the specified value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="key">The encryption key.</param>
+        /// <returns>The decrypted value.</returns>
+        public static string Decrypt(this string value, string key = null)
+        {
+            if (value == null) return null;
+
+            var bytes = Convert.FromBase64String(value);
+            var entropy = Encoding.Unicode.GetBytes(key ?? DefaultEncryptionKey);
+
+            bytes = ProtectedData.Unprotect(bytes, entropy, DataProtectionScope.CurrentUser);
+            return Encoding.Unicode.GetString(bytes);
         }
     }
 }

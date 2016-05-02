@@ -23,6 +23,7 @@ using System.Windows.Controls;
 using AutoMapper;
 using Caliburn.Micro;
 using Newtonsoft.Json;
+using PDS.Framework;
 using PDS.Witsml.Studio.Core.Connections;
 using PDS.Witsml.Studio.Core.Properties;
 using PDS.Witsml.Studio.Core.Runtime;
@@ -37,10 +38,12 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(ConnectionViewModel));
         private static readonly string PersistedDataFolderName = Settings.Default.PersistedDataFolderName;
         private static readonly string ConnectionBaseFileName = Settings.Default.ConnectionBaseFileName;
+        private PasswordBox _passwordControl;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConnectionViewModel"/> class.
+        /// Initializes a new instance of the <see cref="ConnectionViewModel" /> class.
         /// </summary>
+        /// <param name="runtime">The runtime service.</param>
         /// <param name="connectionType">Type of the connection.</param>
         public ConnectionViewModel(IRuntimeService runtime, ConnectionTypes connectionType)
         {
@@ -170,7 +173,7 @@ namespace PDS.Witsml.Studio.Core.ViewModels
                 Runtime.ShowBusy();
                 CanTestConnection = false;
 
-                return Task.Run<bool>(async() =>
+                return Task.Run(async() =>
                 {
                     var result = await connectionTest.CanConnect(EditItem);
                     await Runtime.InvokeAsync(() => ShowTestResult(result));
@@ -184,6 +187,16 @@ namespace PDS.Witsml.Studio.Core.ViewModels
             }
 
             return Task.FromResult(IsTestSuccess);
+        }
+
+        /// <summary>
+        /// Called when the password control is loaded.
+        /// </summary>
+        /// <param name="control">The control.</param>
+        public void OnPasswordLoaded(PasswordBox control)
+        {
+            _passwordControl = control;
+            _passwordControl.Password = EditItem.Password;
         }
 
         /// <summary>
@@ -251,7 +264,9 @@ namespace PDS.Witsml.Studio.Core.ViewModels
             {
                 _log.DebugFormat("Reading persisted Connection from '{0}'", filename);
                 var json = File.ReadAllText(filename);
-                return JsonConvert.DeserializeObject<Connection>(json);
+                var connection = JsonConvert.DeserializeObject<Connection>(json);
+                connection.Password = connection.Password.Decrypt();
+                return connection;
             }
 
             return null;
@@ -266,7 +281,9 @@ namespace PDS.Witsml.Studio.Core.ViewModels
             EnsureDataFolder();
             string filename = GetConnectionFilename();
             _log.DebugFormat("Persisting Connection to '{0}'", filename);
+            connection.Password = connection.Password.Encrypt();
             File.WriteAllText(filename, JsonConvert.SerializeObject(connection));
+            connection.Password = connection.Password.Decrypt();
         }
 
         /// <summary>
@@ -291,7 +308,7 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         /// </summary>
         internal void InitializeEditItem()
         {
-            if (DataItem != null && !string.IsNullOrWhiteSpace(DataItem.Uri))
+            if (!string.IsNullOrWhiteSpace(DataItem?.Uri))
             {
                 EditItem = Mapper.Map(DataItem, new Connection());
             }
@@ -307,7 +324,6 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         protected override void OnActivate()
         {
             base.OnActivate();
-
             InitializeEditItem();
         }
 
