@@ -20,6 +20,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Text;
+using System.Web.Security;
+using PDS.Framework.Properties;
 
 namespace PDS.Framework
 {
@@ -28,6 +31,8 @@ namespace PDS.Framework
     /// </summary>
     public static class FrameworkExtensions
     {
+        private static readonly string DefaultEncryptionKey = Settings.Default.DefaultEncryptionKey;
+
         /// <summary>
         /// Gets the version for the <see cref="System.Reflection.Assembly"/> containing the specified <see cref="Type"/>.
         /// </summary>
@@ -176,6 +181,34 @@ namespace PDS.Framework
 
             var typeCode = Type.GetTypeCode(type);
             return typeCode >= TypeCode.Char && typeCode <= TypeCode.Decimal;
+        }
+
+        /// <summary>
+        /// Encrypts the specified value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="key">The encryption key.</param>
+        /// <returns>The encrypted value.</returns>
+        public static string Encrypt(this string value, string key = null)
+        {
+            if (value == null) return null;
+
+            var bytes = MachineKey.Protect(Encoding.UTF8.GetBytes(value), key ?? DefaultEncryptionKey);
+            return bytes == null ? null : Convert.ToBase64String(bytes);
+        }
+
+        /// <summary>
+        /// Decrypts the specified value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="key">The encryption key.</param>
+        /// <returns>The decrypted value.</returns>
+        public static string Decrypt(this string value, string key = null)
+        {
+            if (value == null) return null;
+
+            var bytes = MachineKey.Unprotect(Convert.FromBase64String(value), key ?? DefaultEncryptionKey);
+            return bytes == null ? null : Encoding.UTF8.GetString(bytes);
         }
     }
 }

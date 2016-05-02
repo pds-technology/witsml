@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace PDS.Witsml.Studio.Core.Properties {
+namespace PDS.Framework.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -25,28 +25,10 @@ namespace PDS.Witsml.Studio.Core.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Data")]
-        public string PersistedDataFolderName {
+        [global::System.Configuration.DefaultSettingValueAttribute("PDS.Framework")]
+        public string DefaultEncryptionKey {
             get {
-                return ((string)(this["PersistedDataFolderName"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("ConnectionData.json")]
-        public string ConnectionBaseFileName {
-            get {
-                return ((string)(this["ConnectionBaseFileName"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("ConnectionList.json")]
-        public string ConnectionListBaseFileName {
-            get {
-                return ((string)(this["ConnectionListBaseFileName"]));
+                return ((string)(this["DefaultEncryptionKey"]));
             }
         }
     }

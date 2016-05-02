@@ -5,7 +5,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:cal="http://www.caliburnproject.org"
         xmlns:conv="clr-namespace:PDS.Witsml.Studio.Core.Converters"
-        xmlns:local="clr-namespace:PDS.Witsml.Studio.Core.Views"
         mc:Ignorable="d" Height="300" Width="600"
         MinHeight="300"
         MinWidth="600">
@@ -33,15 +32,17 @@
 
         <TextBlock Grid.Row="1" Text="Name:" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Right" />
         <TextBox Grid.Row="1" Grid.Column="1" Margin="5" Padding="5" Text="{Binding EditItem.Name}" VerticalAlignment="Center" />
-        
-        <TextBlock Grid.Row="2" Text="URL:" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Right" />
-        <TextBox Grid.Row="2" Grid.Column="1" Margin="5" Padding="5" Text="{Binding EditItem.Uri, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" cal:Message.Attach="[Event TextChanged] = [Action OnUrlChanged($this.Text)]"/>
-        
-        <TextBlock Grid.Row="3" Text="User Name:" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Right" />
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="URL:" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Right" />
+        <TextBox Grid.Row="2" Grid.Column="1" Margin="5" Padding="5" Text="{Binding EditItem.Uri, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"
+                 cal:Message.Attach="[Event TextChanged] = [Action OnUrlChanged($this.Text)]"/>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="User Name:" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Right" />
         <TextBox Grid.Row="3" Grid.Column="1" Margin="5" Padding="5" Text="{Binding EditItem.Username}" VerticalAlignment="Center" />
-        
-        <TextBlock Grid.Row="4" Text="Password:" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Right" />
-        <PasswordBox x:Name="ConnectionPassword" Grid.Row="4" Grid.Column="1" Margin="5" Padding="5" PasswordChar="*" VerticalAlignment="Center" cal:Message.Attach="[Event PasswordChanged] = [Action OnPasswordChanged($source)]" />
+
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="Password:" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Right" />
+        <PasswordBox Grid.Row="4" Grid.Column="1" Margin="5" Padding="5" PasswordChar="*" VerticalAlignment="Center"
+                     cal:Message.Attach="[Event Loaded] = [Action OnPasswordLoaded($source)]; [Event PasswordChanged] = [Action OnPasswordChanged($source)]" />
 
         <Button x:Name="TestConnection" Grid.Row="6" Grid.Column="0" Margin="5" Width="80" HorizontalContentAlignment="Stretch" IsEnabled="{Binding EditItem.Uri, Converter={StaticResource NullToBooleanConverter}}">
             <Grid>
@@ -55,8 +56,8 @@
             <TextBlock Text="Connection successful" Visibility="{Binding IsTestSuccess, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBlock Text="Connection failed" Visibility="{Binding IsTestFailure, Converter={StaticResource BooleanToVisibilityConverter}}" />
         </StackPanel>
-        
-        <StackPanel Grid.Row="6" Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+
+        <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button x:Name="Accept" Margin="5" Content="OK" Width="80" IsEnabled="{Binding EditItem.Uri, Converter={StaticResource NullToBooleanConverter}}" />
             <Button x:Name="Cancel" Margin="5" Content="Cancel" Width="80" />
         </StackPanel>

@@ -93,6 +93,7 @@ namespace PDS.Witsml.Studio.Core.Connections
         /// <summary>
         /// Gets or sets the password.
         /// </summary>
+        [DataMember]
         public string Password { get; set; }
 
         /// <summary>
