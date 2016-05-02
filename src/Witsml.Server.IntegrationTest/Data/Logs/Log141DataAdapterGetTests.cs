@@ -872,5 +872,51 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)1, logList.Log.First().LogCurveInfo[0].ClassIndex);
             Assert.AreEqual((short)2, logList.Log.First().LogCurveInfo[1].ClassIndex);
         }
+
+
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_With_Start_And_End_Index_On_Increasing_Depth_Log_Data_In_Different_Chunk()
+        {
+            var response = DevKit.Add<WellList, Well>(_well);
+
+            _wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+
+            _log.UidWell = _wellbore.UidWell;
+            _log.UidWellbore = response.SuppMsgOut;
+
+            _log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+
+            var logData = _log.LogData.First();
+            logData.Data.Add("1700.0,17.1,17.2");
+            logData.Data.Add("1800.0,18.1,18.2");
+            logData.Data.Add("1900.0,19.1,19.2");
+            logData.Data.Add("2700.0,27.1,27.2");
+            logData.Data.Add("2800.0,28.1,28.2");
+            logData.Data.Add("2900.0,29.1,29.2");
+
+            DevKit.InitHeader(_log, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(_log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            // Query
+            var query = DevKit.CreateLog(uidLog, null, _log.UidWell, null, _log.UidWellbore, null);
+            query.StartIndex = new GenericMeasure(1800, "ft");
+            query.EndIndex = new GenericMeasure(2700, "ft");
+
+            var result = DevKit.Get<LogList, Log>(DevKit.List(query), ObjectTypes.Log, null, OptionsIn.ReturnElements.DataOnly);
+            Assert.AreEqual((short)ErrorCodes.Success, result.Result);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(result.XMLout);
+            var resultLog = logList.Log;
+            Assert.AreEqual(1, resultLog.Count);
+            Assert.AreEqual(3, resultLog[0].LogData[0].Data.Count);
+            Assert.AreEqual(1800, Convert.ToDouble(resultLog[0].LogData[0].Data[0].Split(',').First()));
+            Assert.AreEqual(1900, Convert.ToDouble(resultLog[0].LogData[0].Data[1].Split(',').First()));
+            Assert.AreEqual(2700, Convert.ToDouble(resultLog[0].LogData[0].Data[2].Split(',').First()));
+        }
     }
 }
