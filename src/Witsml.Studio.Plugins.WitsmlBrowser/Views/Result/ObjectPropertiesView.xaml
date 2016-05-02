@@ -7,7 +7,7 @@
              mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
         <xctk:PropertyGrid
-            IsReadOnly="True"
+            IsReadOnly="False"
             AutoGenerateProperties="True"
             SelectedObject="{Binding CurrentObject}">
             
