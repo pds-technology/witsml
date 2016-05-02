@@ -18,19 +18,19 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using PDS.Witsml.Server.Models;
 
 namespace PDS.Witsml.Server.Data.Transactions
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for a <see cref="MongoDbTransaction"/>
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{PDS.Witsml.Server.Models.MongoDbTransaction}" />
+    /// <seealso cref="Transactions.MongoDbTransaction" />
     [Export]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class MongoDbTransactionAdapter : MongoDbDataAdapter<MongoDbTransaction>
     {
-        private readonly string _idField = "TransactionId";
+        private const string MongoDbTransaction = "dbTransaction";
+        private const string TransactionIdField = "TransactionId";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDbTransactionAdapter"/> class.
@@ -59,7 +59,7 @@ namespace PDS.Witsml.Server.Data.Transactions
         public void DeleteTransactions(string transactionId)
         {
             var collection = GetCollection();
-            var filter = MongoDbUtility.BuildFilter<MongoDbTransaction>(_idField, transactionId);
+            var filter = MongoDbUtility.BuildFilter<MongoDbTransaction>(TransactionIdField, transactionId);
             collection.DeleteMany(filter);
         }
     }
