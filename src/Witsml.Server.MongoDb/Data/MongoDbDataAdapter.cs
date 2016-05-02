@@ -34,9 +34,6 @@ namespace PDS.Witsml.Server.Data
     /// <seealso cref="Data.WitsmlDataAdapter{T}" />
     public abstract class MongoDbDataAdapter<T> : WitsmlDataAdapter<T>
     {
-        public static readonly string ChannelDataChunk = "channelDataChunk";
-        public static readonly string MongoDbTransaction = "dbTransaction";
-
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDbDataAdapter{T}" /> class.
         /// </summary>
@@ -290,8 +287,8 @@ namespace PDS.Witsml.Server.Data
                 var returnElements = parser.ReturnElements();
                 Logger.DebugFormat("Querying with return elements '{0}'", returnElements);
 
-                var fields = GetProjectionPropertyNames(returnElements);
-                var ignored = GetIgnoredElementNamesForQuery();
+                var fields = GetProjectionPropertyNames(parser);
+                var ignored = GetIgnoredElementNamesForQuery(parser);
 
                 Logger.DebugFormat("Querying {0} MongoDb collection.", DbCollectionName);
                 var query = new MongoDbQuery<T>(GetCollection(), parser, fields, ignored);
@@ -317,10 +314,11 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Inserts an object into the data store.
         /// </summary>
+        /// <typeparam name="TObject">The data object type.</typeparam>
         /// <param name="entity">The object to be inserted.</param>
         /// <param name="dbCollectionName">The name of the database collection.</param>
-        /// <param name="tid">The transaction Id.</param>
-        /// <typeparam name="TObject">The data object type.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <exception cref="WitsmlException"></exception>
         protected void InsertEntity<TObject>(TObject entity, string dbCollectionName, MongoTransaction transaction = null)
         {
             try
@@ -349,7 +347,7 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="parser">The WITSML query parser.</param>
         /// <param name="uri">The data object URI.</param>
-        /// <param name="tid">The transaction Id.</param>
+        /// <param name="transaction">The transaction.</param>
         protected void UpdateEntity(WitsmlQueryParser parser, EtpUri uri, MongoTransaction transaction = null)
         {
             UpdateEntity<T>(DbCollectionName, parser, uri, transaction);
@@ -373,7 +371,7 @@ namespace PDS.Witsml.Server.Data
                 var collection = GetCollection<TObject>(dbCollectionName);
                 var current = GetEntity<TObject>(uri, dbCollectionName);
                 var updates = MongoDbUtility.CreateUpdateFields<TObject>();
-                var ignores = MongoDbUtility.CreateIgnoreFields<TObject>(GetIgnoredElementNamesForUpdate());
+                var ignores = MongoDbUtility.CreateIgnoreFields<TObject>(GetIgnoredElementNamesForUpdate(parser));
 
                 var update = new MongoDbUpdate<TObject>(collection, parser, IdPropertyName, ignores);
                 update.Update(current, uri, updates);
@@ -395,6 +393,7 @@ namespace PDS.Witsml.Server.Data
         /// Deletes a data object by the specified identifier.
         /// </summary>
         /// <param name="uri">The data object URI.</param>
+        /// <param name="transaction">The transaction.</param>
         /// <exception cref="WitsmlException"></exception>
         protected void DeleteEntity(EtpUri uri, MongoTransaction transaction = null)
         {
@@ -407,6 +406,7 @@ namespace PDS.Witsml.Server.Data
         /// <typeparam name="TObject">The type of data object.</typeparam>
         /// <param name="uri">The data object URI.</param>
         /// <param name="dbCollectionName">The name of the database collection.</param>
+        /// <param name="transaction">The transaction.</param>
         /// <exception cref="WitsmlException"></exception>
         protected void DeleteEntity<TObject>(EtpUri uri, string dbCollectionName, MongoTransaction transaction = null)
         {
@@ -428,31 +428,13 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Gets a list of the property names to project during a query.
         /// </summary>
-        /// <param name="returnElements">The return elements.</param>
+        /// <param name="parser">The WITSML parser.</param>
         /// <returns>A list of property names.</returns>
-        protected virtual List<string> GetProjectionPropertyNames(string returnElements)
+        protected override List<string> GetProjectionPropertyNames(WitsmlQueryParser parser)
         {
-            return OptionsIn.ReturnElements.IdOnly.Equals(returnElements)
+            return OptionsIn.ReturnElements.IdOnly.Equals(parser.ReturnElements())
                 ? new List<string> { IdPropertyName, NamePropertyName }
                 : null;
-        }
-
-        /// <summary>
-        /// Gets a list of the element names to ignore during a query.
-        /// </summary>
-        /// <returns>A list of element names.</returns>
-        protected virtual List<string> GetIgnoredElementNamesForQuery()
-        {
-            return null;
-        }
-
-        /// <summary>
-        /// Gets a list of the element names to ignore during an update.
-        /// </summary>
-        /// <returns>A list of element names.</returns>
-        protected virtual List<string> GetIgnoredElementNamesForUpdate()
-        {
-            return null;
         }
     }
 }
