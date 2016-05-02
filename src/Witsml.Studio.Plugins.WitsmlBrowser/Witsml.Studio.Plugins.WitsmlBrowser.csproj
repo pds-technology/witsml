@@ -122,6 +122,7 @@
     <Compile Include="ViewModels\Request\SettingsViewModel.cs" />
     <Compile Include="ViewModels\Request\TemplatesViewModel.cs" />
     <Compile Include="ViewModels\Request\TreeViewViewModel.cs" />
+    <Compile Include="ViewModels\Result\ObjectPropertiesViewModel.cs" />
     <Compile Include="ViewModels\Result\ResultViewModel.cs" />
     <Compile Include="Views\MainView.xaml.cs">
       <DependentUpon>MainView.xaml</DependentUpon>
@@ -140,6 +141,9 @@
     </Compile>
     <Compile Include="Views\Request\TreeViewView.xaml.cs">
       <DependentUpon>TreeViewView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Result\ObjectPropertiesView.xaml.cs">
+      <DependentUpon>ObjectPropertiesView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Result\ResultView.xaml.cs">
       <DependentUpon>ResultView.xaml</DependentUpon>
@@ -193,6 +197,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Request\TreeViewView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Result\ObjectPropertiesView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

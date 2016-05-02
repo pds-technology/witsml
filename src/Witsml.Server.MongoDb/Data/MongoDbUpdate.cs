@@ -315,10 +315,7 @@ namespace PDS.Witsml.Server.Data
                     var xmlType = type.GetCustomAttribute<XmlTypeAttribute>();
                     element.Name = xmlType != null ? xmlType.TypeName : element.Name;
 
-                    var item = typeof(WitsmlParser).GetMethods(BindingFlags.Public | BindingFlags.Static)
-                        .FirstOrDefault(x=>x.GetGenericArguments().Any())
-                        .MakeGenericMethod(type)
-                        .Invoke(null, new object[] { element.ToString() });
+                    var item = WitsmlParser.Parse(type, element.ToString());
 
                     var update = updateBuilder.Push(parentPath, item);
                     _collection.UpdateOne(filterBuilder.And(filters), update);

@@ -3,12 +3,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:PDS.Witsml.Studio.Plugins.WitsmlBrowser.Views.Result"
              mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
         <TabControl x:Name="Items">
             <TabItem Header="Results">
                 <ContentControl x:Name="QueryResults" />
+            </TabItem>
+
+            <TabItem Header="Properties">
+                <ContentControl x:Name="ObjectProperties" />
             </TabItem>
 
             <TabItem Header="Messages">

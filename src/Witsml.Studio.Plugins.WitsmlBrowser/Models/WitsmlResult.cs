@@ -26,14 +26,16 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
         /// <summary>
         /// Initializes a new instance of the <see cref="WitsmlResult" /> struct.
         /// </summary>
+        /// <param name="objectType">The data object type.</param>
         /// <param name="xmlIn">The XML in.</param>
         /// <param name="optionsIn">The options in.</param>
         /// <param name="capClientIn">The cap client in.</param>
         /// <param name="xmlOut">The XML out.</param>
         /// <param name="messageOut">The message out.</param>
         /// <param name="returnCode">The return code.</param>
-        public WitsmlResult(string xmlIn, string optionsIn, string capClientIn, string xmlOut, string messageOut, short returnCode)
+        public WitsmlResult(string objectType, string xmlIn, string optionsIn, string capClientIn, string xmlOut, string messageOut, short returnCode)
         {
+            ObjectType = objectType;
             XmlIn = xmlIn;
             OptionsIn = optionsIn;
             CapClientIn = capClientIn;
@@ -43,9 +45,15 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
         }
 
         /// <summary>
+        /// Gets the type of the object.
+        /// </summary>
+        /// <value>The type of the object.</value>
+        public string ObjectType { get; private set; }
+
+        /// <summary>
         /// Gets the XML in.
         /// </summary>
-        /// <valueThe XML in.</value>
+        /// <value>The XML in.</value>
         public string XmlIn { get; private set; }
 
         /// <summary>
@@ -63,13 +71,13 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
         /// <summary>
         /// Gets the XML out.
         /// </summary>
-        /// <valueThe XML out.</value>
+        /// <value>The XML out.</value>
         public string XmlOut { get; private set; }
 
         /// <summary>
         /// Gets the message out.
         /// </summary>
-        /// <value>The message outvalue>
+        /// <value>The message out.</value>
         public string MessageOut { get; private set; }
 
         /// <summary>

@@ -113,6 +113,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         private void LogResponse(Functions function, IEnergisticsCollection query, string optionsIn, IEnergisticsCollection response, short returnCode, string suppMsgOut)
         {
             var result = new WitsmlResult(
+                objectType: ObjectTypes.GetObjectType(query),
                 xmlIn: WitsmlParser.ToXml(query),
                 optionsIn: optionsIn,
                 capClientIn: null,

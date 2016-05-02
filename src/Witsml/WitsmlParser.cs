@@ -71,6 +71,15 @@ namespace PDS.Witsml
             }
         }
 
+        public static object Parse(Type type, string xml)
+        {
+            var method = typeof(WitsmlParser).GetMethods(BindingFlags.Public | BindingFlags.Static)
+                .FirstOrDefault(x => x.Name == "Parse" && x.GetGenericArguments().Any());
+
+            return method?.MakeGenericMethod(type)
+                .Invoke(null, new object[] { xml });
+        }
+
         /// <summary>
         /// Serialize WITSML query results to XML and remove empty elements and xsi:nil attributes.
         /// </summary>

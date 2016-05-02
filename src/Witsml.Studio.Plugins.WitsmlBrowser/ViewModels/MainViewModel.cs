@@ -289,15 +289,15 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             string optionsIn = null;
             short returnCode = 0;
 
+            // Compute the object type of the incoming xml.
+            var objectType = ObjectTypes.GetObjectTypeFromGroup(xmlIn);
+
             try
             {
                 using (var client = Proxy.CreateClientProxy())
                 {
                     var wmls = (IWitsmlClient)client;
                     string suppMsgOut;
-
-                    // Compute the object type of the incoming xml.
-                    var objectType = ObjectTypes.GetObjectTypeFromGroup(xmlIn);
 
                     // Execute the WITSML server function for the given functionType
                     switch (functionType)
@@ -323,7 +323,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                             break;
                     }
 
-                    return await Task.FromResult(new WitsmlResult(xmlIn, optionsIn, null, xmlOut, suppMsgOut, returnCode));
+                    return await Task.FromResult(new WitsmlResult(objectType, xmlIn, optionsIn, null, xmlOut, suppMsgOut, returnCode));
                 }
             }
             catch (Exception ex)
@@ -335,7 +335,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                 _log.Error(message);
 
                 // Return the error to the caller so message and call stack can be displayed to the user
-                return await Task.FromResult(new WitsmlResult(xmlIn, optionsIn, null, xmlOut, message, returnCode));
+                return await Task.FromResult(new WitsmlResult(objectType, xmlIn, optionsIn, null, xmlOut, message, returnCode));
             }
         }
 
@@ -398,6 +398,10 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
 
             // Append these results to the Messages tab
             OutputMessages(functionType, xmlIn, xmlOut, result.MessageOut, result.OptionsIn, result.ReturnCode);
+
+            // Show data object on the Properties tab
+            if (functionType == Functions.GetFromStore)
+                ShowObjectProperties(result);
         }
 
         /// <summary>
@@ -408,6 +412,15 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             _log.Debug("Initializing screen");
             base.OnInitialize();
             LoadScreens();
+        }
+
+        /// <summary>
+        /// Shows the object properties.
+        /// </summary>
+        /// <param name="result">The WITSML query result.</param>
+        private void ShowObjectProperties(WitsmlResult result)
+        {
+            ResultControl.ObjectProperties.SetCurrentObject(result, Model.WitsmlVersion);
         }
 
         /// <summary>
