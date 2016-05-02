@@ -189,7 +189,6 @@ namespace PDS.Witsml.Server.Data
         public bool HasElements(XElement element, string name)
         {
             return element != null &&
-                element.Elements(_namespace + name) != null &&
                 element.Elements(_namespace + name).Any();
         }
 

@@ -25,6 +25,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Linq
 {
+    [Ignore] // "Tests not finalized, missing Assert statements"
     [TestClass]
     public class Witsml141ContextTests
     {
@@ -103,6 +104,7 @@ namespace PDS.Witsml.Linq
         }
 
         [TestMethod]
+        [Ignore, Description("Invalid Test - Needs filter criteria to limit results")]
         public void Query_for_well_hiererchy()
         {
             foreach (var well in _context.Wells.With(OptionsIn.ReturnElements.IdOnly))

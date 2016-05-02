@@ -265,7 +265,7 @@ namespace PDS.Witsml
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="OptionsIn"/> to <see cref="Dictionary{System.String, System.String}"/>.
+        /// Performs an implicit conversion from <see cref="OptionsIn"/> to <see cref="Dictionary{String, String}"/>.
         /// </summary>
         /// <param name="option">The option.</param>
         /// <returns>The result of the conversion.</returns>

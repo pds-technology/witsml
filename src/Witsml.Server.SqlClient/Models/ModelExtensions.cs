@@ -31,6 +31,16 @@ namespace PDS.Witsml.Server.Models
                 .FirstOrDefault(x => alias.EqualsIgnoreCase(x.Alias));
         }
 
+        public static string GetName(this ColumnMapping column)
+        {
+            if (!string.IsNullOrWhiteSpace(column.Alias))
+                return column.Alias;
+
+            return column.Column.Contains('.')
+                ? column.Column.Split('.').Last()
+                : column.Column;
+        }
+
         public static ExtensionMapping GetExtension(this ColumnMapping mapping, string key)
         {
             return mapping?.Extensions

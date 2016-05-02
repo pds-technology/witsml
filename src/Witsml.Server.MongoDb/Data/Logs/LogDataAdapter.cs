@@ -194,10 +194,12 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <summary>
         /// Gets a list of the property names to project during a query.
         /// </summary>
-        /// <param name="returnElements">The return elements.</param>
+        /// <param name="parser">The WITSML parser.</param>
         /// <returns>A list of property names.</returns>
-        protected override List<string> GetProjectionPropertyNames(string returnElements)
+        protected override List<string> GetProjectionPropertyNames(WitsmlQueryParser parser)
         {
+            var returnElements = parser.ReturnElements();
+
             return OptionsIn.ReturnElements.IdOnly.Equals(returnElements)
                 ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell", "UidWellbore", "NameWellbore" }
                 : OptionsIn.ReturnElements.DataOnly.Equals(returnElements)
@@ -210,8 +212,9 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <summary>
         /// Gets a list of the element names to ignore during a query.
         /// </summary>
+        /// <param name="parser">The WITSML parser.</param>
         /// <returns>A list of element names.</returns>
-        protected override List<string> GetIgnoredElementNamesForQuery()
+        protected override List<string> GetIgnoredElementNamesForQuery(WitsmlQueryParser parser)
         {
             return new List<string> { "startIndex", "endIndex", "startDateTimeIndex", "endDateTimeIndex", "logData" };
         }
@@ -219,10 +222,11 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <summary>
         /// Gets a list of the element names to ignore during an update.
         /// </summary>
+        /// <param name="parser">The WITSML parser.</param>
         /// <returns>A list of element names.</returns>
-        protected override List<string> GetIgnoredElementNamesForUpdate()
+        protected override List<string> GetIgnoredElementNamesForUpdate(WitsmlQueryParser parser)
         {
-            return GetIgnoredElementNamesForQuery()
+            return GetIgnoredElementNamesForQuery(parser)
                 .Concat(new [] { "direction", "objectGrowing" })
                 .ToList();
         }

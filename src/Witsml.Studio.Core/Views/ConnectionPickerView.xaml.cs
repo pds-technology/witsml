@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2016.1
+// PDS.Witsml.Studio, 2016.1
 //
 // Copyright 2016 Petrotechnical Data Systems
 // 
@@ -18,27 +18,29 @@
 
 using System;
 using System.Collections.Generic;
-using Energistics.DataAccess;
-using Energistics.Datatypes;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
 
-namespace PDS.Witsml.Linq
+namespace PDS.Witsml.Studio.Core.Views
 {
-    public interface IWitsmlContext
+    /// <summary>
+    /// Interaction logic for ConnectionPickerView.xaml
+    /// </summary>
+    public partial class ConnectionPickerView : UserControl
     {
-        Action<Functions, IEnergisticsCollection, string> LogQuery { get; set; }
-
-        Action<Functions, IEnergisticsCollection, string, IEnergisticsCollection, short, string> LogResponse { get; set; }
-
-        IEnumerable<IDataObject> GetAllWells();
-
-        IEnumerable<IWellObject> GetWellbores(EtpUri parentUri);
-
-        IEnumerable<IWellboreObject> GetWellboreObjects(string objectType, EtpUri parentUri);
-
-        IWellboreObject GetGrowingObjectHeaderOnly(string objectType, EtpUri uri);
-
-        IDataObject GetObjectIdOnly(string objectType, EtpUri uri);
-
-        IDataObject GetObjectDetails(string objectType, EtpUri uri);
+        public ConnectionPickerView()
+        {
+            InitializeComponent();
+        }
     }
 }

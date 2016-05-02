@@ -45,6 +45,10 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             Runtime = runtime;
             DisplayName = "Settings";
             WitsmlVersions = new BindableCollection<string>();
+            ConnectionPicker = new ConnectionPickerViewModel(runtime, ConnectionTypes.Witsml)
+            {
+                OnConnectionChanged = OnConnectionChanged
+            };
         }
 
         /// <summary>
@@ -81,7 +85,13 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         /// Gets the runtime service.
         /// </summary>
         /// <value>The runtime.</value>
-        public IRuntimeService Runtime { get; private set; }
+        public IRuntimeService Runtime { get; }
+
+        /// <summary>
+        /// Gets the connection picker view model.
+        /// </summary>
+        /// <value>The connection picker view model.</value>
+        public ConnectionPickerViewModel ConnectionPicker { get; }
 
         /// <summary>
         /// Gets the witsml versions retrieved from the server.
@@ -100,30 +110,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         public IEnumerable<OptionsIn.ReturnElements> ReturnElements
         {
             get { return OptionsIn.ReturnElements.GetValues(); }
-        }
-
-        /// <summary>
-        /// Shows the connection dialog to add or update connection settings.
-        /// </summary>
-        public void ShowConnectionDialog()
-        {
-            var viewModel = new ConnectionViewModel(Runtime, ConnectionTypes.Witsml)
-            {
-                DataItem = Model.Connection,
-            };
-
-            _log.Debug("Opening connection dialog");
-
-            if (Runtime.ShowDialog(viewModel))
-            {
-                Model.Connection = viewModel.DataItem;
-
-                _log.DebugFormat("Connection details updated from dialog:{3}Name: {0}{3}Uri: {1}{3}Username: {2}{3}{3}", 
-                    Model.Connection.Name, Model.Connection.Uri, Model.Connection.Username, Environment.NewLine);
-
-                // Make connection and get version
-                GetVersions();
-            }
         }
 
         /// <summary>
@@ -164,6 +150,17 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             _log.Debug("Initializing screen");
             base.OnInitialize();
             Model.ReturnElementType = OptionsIn.ReturnElements.All;
+        }
+
+        private void OnConnectionChanged(Connection connection)
+        {
+            Model.Connection = connection;
+
+            _log.DebugFormat("Selected connection changed: Name: {0}; Uri: {1}; Username: {2}",
+                Model.Connection.Name, Model.Connection.Uri, Model.Connection.Username);
+
+            // Make connection and get version
+            GetVersions();
         }
 
         /// <summary>

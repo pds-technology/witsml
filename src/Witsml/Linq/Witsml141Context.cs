@@ -75,15 +75,15 @@ namespace PDS.Witsml.Linq
         public override IEnumerable<IDataObject> GetAllWells()
         {
             return Wells.With(OptionsIn.ReturnElements.IdOnly)
+                .ToList() // execute query before sorting
                 .OrderBy(x => x.Name);
         }
 
-        public override IEnumerable<IWellObject> GetWellbores(string uri)
+        public override IEnumerable<IWellObject> GetWellbores(EtpUri uri)
         {
-            var etpUri = new EtpUri(uri);
-
             return Wellbores.With(OptionsIn.ReturnElements.IdOnly)
-                .Where(x => x.UidWell == etpUri.ObjectId)
+                .Where(x => x.UidWell == uri.ObjectId)
+                .ToList() // execute query before sorting
                 .OrderBy(x => x.Name);
         }
     }

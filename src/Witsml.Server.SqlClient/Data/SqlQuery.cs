@@ -18,6 +18,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using PDS.Framework;
 using PDS.Witsml.Server.Models;
 using PetaPoco;
 
@@ -32,18 +33,24 @@ namespace PDS.Witsml.Server.Data
         private readonly IDatabase _database;
         private readonly ObjectMapping _mapping;
         private readonly WitsmlQueryParser _parser;
+        private readonly List<string> _fields;
+        private readonly List<string> _ignored;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SqlQuery{T}"/> class.
+        /// Initializes a new instance of the <see cref="SqlQuery{T}" /> class.
         /// </summary>
         /// <param name="database">The database instance.</param>
         /// <param name="mapping">The object mapping.</param>
         /// <param name="parser">The query parser.</param>
-        public SqlQuery(IDatabase database, ObjectMapping mapping, WitsmlQueryParser parser)
+        /// <param name="fields">The fields to project.</param>
+        /// <param name="ignored">The ignored columns.</param>
+        public SqlQuery(IDatabase database, ObjectMapping mapping, WitsmlQueryParser parser, List<string> fields, List<string> ignored)
         {
             _database = database;
             _mapping = mapping;
             _parser = parser;
+            _fields = fields;
+            _ignored = ignored ?? new List<string>();
         }
 
         /// <summary>
@@ -69,6 +76,9 @@ namespace PDS.Witsml.Server.Data
 
             foreach (var column in mapping.Columns)
             {
+                if (_fields != null && !_fields.ContainsIgnoreCase(column.GetName()))
+                    continue;
+
                 sql.Append(count > 0 ? ", " : " ");
                 sql.Append(Combine(column.Column, column.Alias));
                 count++;
@@ -96,7 +106,10 @@ namespace PDS.Witsml.Server.Data
 
             foreach (var column in mapping.Columns.Where(x => x.Selection))
             {
-                var name = ToCamelCase(column.Alias);
+                var name = Inflector.Instance.Camelise(column.GetName());
+
+                if (_ignored.ContainsIgnoreCase(name))
+                    continue;
 
                 if (parser.HasAttribute(name))
                     sql.Append("AND " + column.Column + " = @0", parser.Attribute(name));
@@ -118,14 +131,6 @@ namespace PDS.Witsml.Server.Data
         private string Combine(string name, string alias)
         {
             return string.Concat(name, " ", alias);
-        }
-
-        private string ToCamelCase(string alias)
-        {
-            if (alias.Contains('.'))
-                alias = alias.Split('.').Last();
-
-            return Inflector.Instance.Camelise(alias);
         }
     }
 }

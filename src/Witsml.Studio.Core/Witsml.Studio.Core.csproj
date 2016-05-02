@@ -153,13 +153,18 @@
     </Compile>
     <Compile Include="Runtime\DesktopRuntimeService.cs" />
     <Compile Include="Runtime\IRuntimeService.cs" />
+    <Compile Include="ViewModels\ConnectionPickerViewModel.cs" />
     <Compile Include="ViewModels\ConnectionViewModel.cs" />
     <Compile Include="ViewModels\IPluginViewModel.cs" />
     <Compile Include="ViewModels\IShellViewModel.cs" />
     <Compile Include="ViewModels\ResourceViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="ViewModels\TextEditorViewModel.cs" />
+    <Compile Include="ViewModels\ViewModelExtensions.cs" />
     <Compile Include="ViewModels\WitsmlTreeViewModel.cs" />
+    <Compile Include="Views\ConnectionPickerView.xaml.cs">
+      <DependentUpon>ConnectionPickerView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ConnectionView.xaml.cs">
       <DependentUpon>ConnectionView.xaml</DependentUpon>
     </Compile>
@@ -187,6 +192,10 @@
     <Content Include="Images\WitsmlStudio.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Views\ConnectionPickerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\ConnectionView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
