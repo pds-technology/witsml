@@ -382,7 +382,7 @@ namespace PDS.Witsml.Server.Data
                 {
                     transaction.Attach(MongoDbAction.Update, dbCollectionName, current.ToBsonDocument());
                     transaction.Save();
-                }                  
+                }
             }
             catch (MongoException ex)
             {

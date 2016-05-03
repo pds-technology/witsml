@@ -200,5 +200,54 @@ namespace PDS.Witsml.Server.Data.Logs
                 Assert.AreEqual(logDataAdded.Data[i], logDataUpdated.Data[i]);
             }
         }
+
+        /// <summary>
+        /// To test concurrency lock for update: open 2 visual studio and debug the following test at the same time;
+        /// lock one test, i.e. break at the commit statement and check if the 2nd thread is repeatedly checking if
+        /// the transaction has been released every 2 seconds
+        /// </summary>
+        [TestMethod]
+        public void Log141DataAdapter_UpdateInStore_Lock_Transaction()
+        {
+            Well.Uid = "Parent Well - Testing Lock";
+            Wellbore.UidWell = Well.Uid;
+            Wellbore.Uid = "Parent Wellbore - Testing Lock";           
+            Log.UidWell = Well.Uid;
+            Log.UidWellbore = Wellbore.Uid;
+            Log.Uid = "Log - Testing Lock";
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+
+            var queryWell = new Well { Uid = Well.Uid };
+            var resultWell = DevKit.Query<WellList, Well>(queryWell, optionsIn: OptionsIn.ReturnElements.All);
+            if (resultWell.Count == 0)
+            {
+                var addWell = DevKit.Add<WellList, Well>(Well);
+            }
+
+            var queryWellbore = new Wellbore { Uid = Wellbore.Uid, UidWell = Wellbore.UidWell };
+            var resultWellbore = DevKit.Query<WellboreList, Wellbore>(queryWellbore, optionsIn: OptionsIn.ReturnElements.All);
+            if (resultWellbore.Count == 0)
+            {
+                var addWellbore = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            }
+
+            var queryLog = new Log { Uid = Log.Uid, UidWell = Log.UidWell, UidWellbore = Log.UidWellbore };
+            var resultLog = DevKit.Query<LogList, Log>(queryLog, optionsIn: OptionsIn.ReturnElements.HeaderOnly);
+            if (resultLog.Count == 0)
+            {
+                var addLog = DevKit.Add<LogList, Log>(Log);
+            }
+
+            var update = new Log
+            {
+                Uid = Log.Uid,
+                UidWell = Log.UidWell,
+                UidWellbore = Log.UidWellbore,
+                Description = "Update Description"
+            };
+
+            var response = DevKit.Update<LogList, Log>(update);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+        }
     }
 }
