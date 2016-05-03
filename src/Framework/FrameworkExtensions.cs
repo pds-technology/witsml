@@ -233,5 +233,29 @@ namespace PDS.Framework
             secure.MakeReadOnly();
             return secure;
         }
+
+        /// <summary>
+        /// Gets the base exception of the specified type.
+        /// </summary>
+        /// <typeparam name="T">The exception type.</typeparam>
+        /// <param name="ex">The exception.</param>
+        /// <returns>An exception of the specified type, or null.</returns>
+        public static T GetBaseException<T>(this Exception ex) where T : Exception
+        {
+            var typed = ex as T;
+            if (typed != null) return typed;
+
+            var inner = ex.InnerException;
+
+            while (inner != null)
+            {
+                typed = inner as T;
+                if (typed != null) return typed;
+
+                inner = inner.InnerException;
+            }
+
+            return null;
+        }
     }
 }

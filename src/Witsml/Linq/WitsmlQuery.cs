@@ -23,6 +23,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Energistics.DataAccess;
+using log4net;
 using Ast = LinqExtender.Ast;
 
 namespace PDS.Witsml.Linq
@@ -41,6 +42,7 @@ namespace PDS.Witsml.Linq
         public WitsmlQuery(WitsmlContext context)
         {
             Context = context;
+            Logger = LogManager.GetLogger(GetType());
             Query = WITSMLWebServiceConnection.BuildEmptyQuery<TList>();
             Queryable = LinqExtender.Queryable.Select(this, x => x);
             Options = new Dictionary<string, string>();
@@ -52,17 +54,23 @@ namespace PDS.Witsml.Linq
         /// <summary>
         /// WitsmlContext
         /// </summary>
-        public WitsmlContext Context { get; private set; }
+        public WitsmlContext Context { get; }
+
+        /// <summary>
+        /// Gets the logger.
+        /// </summary>
+        /// <value>The logger.</value>
+        public ILog Logger { get; }
 
         /// <summary>
         /// Query
         /// </summary>
-        public TList Query { get; private set; }
+        public TList Query { get; }
 
         /// <summary>
         /// Options
         /// </summary>
-        public Dictionary<string, string> Options { get; private set; }
+        public Dictionary<string, string> Options { get; }
 
         /// <summary>
         /// Invoked during execution of the query , with the
@@ -75,8 +83,9 @@ namespace PDS.Witsml.Linq
             Visit(expression);
 
             var optionsIn = string.Join(";", Options.Select(x => $"{x.Key}={x.Value}"));
+            var xmlIn = WitsmlParser.ToXml(Query);
 
-            Context.LogQuery(Functions.GetFromStore, Query, optionsIn);
+            Context.LogQuery(Functions.GetFromStore, xmlIn, optionsIn);
 
             using (var client = Context.Connection.CreateClientProxy())
             {
@@ -84,13 +93,26 @@ namespace PDS.Witsml.Linq
                 string suppMsgOut, xmlOut;
 
                 var objectType = ObjectTypes.GetObjectType<T>();
-                var xmlIn = WitsmlParser.ToXml(Query);
+                var result = Enumerable.Empty<T>();
 
                 var returnCode = wmls.WMLS_GetFromStore(objectType, xmlIn, optionsIn, null, out xmlOut, out suppMsgOut);
-                var response = WitsmlParser.Parse<TList>(xmlOut);
-                var result = (IEnumerable<T>) response.Items;
 
-                Context.LogResponse(Functions.GetFromStore, Query, optionsIn, response, returnCode, suppMsgOut);
+                try
+                {
+                    if (returnCode > 0)
+                    {
+                        var response = WitsmlParser.Parse<TList>(xmlOut);
+                        result = (IEnumerable<T>)response.Items;
+                    }
+                }
+                catch (WitsmlException ex)
+                {
+                    Logger.ErrorFormat("Error parsing query response: {0}{2}{2}{1}", xmlOut, ex, Environment.NewLine);
+                    returnCode = (short)ex.ErrorCode;
+                    suppMsgOut = ex.Message + " " + ex.GetBaseException().Message;
+                }
+
+                Context.LogResponse(Functions.GetFromStore, xmlIn, optionsIn, xmlOut, returnCode, suppMsgOut);
                 return result;
             }
         }

@@ -16,10 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
 using System.Linq;
 using Caliburn.Micro;
-using Energistics.DataAccess;
 using PDS.Witsml.Studio.Core.Runtime;
 using PDS.Witsml.Studio.Core.ViewModels;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models;
@@ -101,23 +99,23 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             TreeViewModel.OnViewReady(Parent.Parent.DataObjects.Where(x => !exclude.Contains(x)));
         }
 
-        private void LogQuery(Functions function, IEnergisticsCollection query, string optionsIn)
+        private void LogQuery(Functions function, string xmlIn, string optionsIn)
         {
             Runtime.InvokeAsync(() =>
             {
                 Parent.Parent.Model.StoreFunction = function;
-                Parent.Parent.XmlQuery.Text = WitsmlParser.ToXml(query);
+                Parent.Parent.XmlQuery.Text = xmlIn;
             });
         }
 
-        private void LogResponse(Functions function, IEnergisticsCollection query, string optionsIn, IEnergisticsCollection response, short returnCode, string suppMsgOut)
+        private void LogResponse(Functions function, string xmlIn, string optionsIn, string xmlOut, short returnCode, string suppMsgOut)
         {
             var result = new WitsmlResult(
-                objectType: ObjectTypes.GetObjectType(query),
-                xmlIn: WitsmlParser.ToXml(query),
+                objectType: ObjectTypes.GetObjectType(xmlIn),
+                xmlIn: xmlIn,
                 optionsIn: optionsIn,
                 capClientIn: null,
-                xmlOut: WitsmlParser.ToXml(response),
+                xmlOut: xmlOut,
                 messageOut: suppMsgOut,
                 returnCode: returnCode);
 

@@ -16,7 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Linq;
 using Caliburn.Micro;
 using Energistics.DataAccess;
 using PDS.Witsml.Studio.Core.Models;
@@ -73,7 +72,6 @@ namespace PDS.Witsml.Studio.Core.ViewModels
             var collection = dataObject as IEnergisticsCollection;
 
             TypeDecorationManager.Register(dataType);
-            CurrentObject = dataObject;
 
             CurrentObject = collection == null
                 ? dataObject

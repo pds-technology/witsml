@@ -71,13 +71,29 @@ namespace PDS.Witsml
             }
         }
 
+        /// <summary>
+        /// Parses the specified XML document.
+        /// </summary>
+        /// <param name="type">The data object type.</param>
+        /// <param name="xml">The XML string.</param>
+        /// <returns>The data object instance.</returns>
+        /// <exception cref="WitsmlException"></exception>
         public static object Parse(Type type, string xml)
         {
             var method = typeof(WitsmlParser).GetMethods(BindingFlags.Public | BindingFlags.Static)
                 .FirstOrDefault(x => x.Name == "Parse" && x.GetGenericArguments().Any());
 
-            return method?.MakeGenericMethod(type)
-                .Invoke(null, new object[] { xml });
+            try
+            {
+                return method?.MakeGenericMethod(type)
+                    .Invoke(null, new object[] { xml });
+            }
+            catch (Exception ex)
+            {
+                var witsmlException = ex.GetBaseException<WitsmlException>();
+                if (witsmlException == null) throw;
+                throw witsmlException;
+            }
         }
 
         /// <summary>
@@ -87,6 +103,7 @@ namespace PDS.Witsml
         /// <returns>The serialized XML string.</returns>
         public static string ToXml(object obj)
         {
+            if (obj == null) return string.Empty;
             var xml = EnergisticsConverter.ObjectToXml(obj);
             var xmlDoc = Parse(xml);
             var root = xmlDoc.Root;

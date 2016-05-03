@@ -55,9 +55,9 @@ namespace PDS.Witsml.Linq
 
         public abstract string DataSchemaVersion { get; }
 
-        public Action<Functions, IEnergisticsCollection, string> LogQuery { get; set; }
+        public Action<Functions, string, string> LogQuery { get; set; }
 
-        public Action<Functions, IEnergisticsCollection, string, IEnergisticsCollection, short, string> LogResponse { get; set; }
+        public Action<Functions, string, string, string, short, string> LogResponse { get; set; }
 
         public List<T> One<T>()
         {

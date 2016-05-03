@@ -420,7 +420,18 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// <param name="result">The WITSML query result.</param>
         private void ShowObjectProperties(WitsmlResult result)
         {
-            ResultControl.ObjectProperties.SetCurrentObject(result.ObjectType, result.XmlOut, Model.WitsmlVersion);
+            try
+            {
+                ResultControl.ObjectProperties.SetCurrentObject(result.ObjectType, result.XmlOut, Model.WitsmlVersion);
+            }
+            catch (WitsmlException ex)
+            {
+                _log.ErrorFormat("Error parsing query response: {0}{2}{2}{1}", result.XmlOut, ex, Environment.NewLine);
+                var message = string.Format("{0}{2}{2}{1}", ex.Message, ex.GetBaseException().Message, Environment.NewLine);
+
+                OutputResults(string.Empty, message, (short)ex.ErrorCode);
+                OutputMessages(Functions.GetFromStore, string.Empty, string.Empty, message, string.Empty, (short) ex.ErrorCode);
+            }
         }
 
         /// <summary>
