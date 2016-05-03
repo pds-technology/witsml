@@ -121,6 +121,8 @@ namespace PDS.Witsml.Server.Data
             using (var transaction = DatabaseProvider.BeginTransaction())
             {
                 var uri = GetUri(dataObject);
+                transaction.Wait(uri);
+
                 UpdateEntity(parser, uri, transaction);
                 transaction.Commit();
             }
@@ -417,8 +419,21 @@ namespace PDS.Witsml.Server.Data
                 Logger.DebugFormat("Deleting from {0} MongoDb collection", dbCollectionName);
 
                 var collection = GetCollection<TObject>(dbCollectionName);
-                var filter = MongoDbUtility.GetEntityFilter<TObject>(uri, IdPropertyName);
-                collection.DeleteOne(filter);
+                var current = GetEntity<TObject>(uri, dbCollectionName);
+                if (current == null)
+                    return;
+
+                if (transaction != null)
+                {                   
+                    var document = MongoDbUtility.GetDocumentId(current);
+                    transaction.Attach(MongoDbAction.Delete, dbCollectionName, document);
+                    transaction.Save();
+                }
+                else
+                {
+                    var filter = MongoDbUtility.GetEntityFilter<TObject>(uri, IdPropertyName);
+                    collection.DeleteOne(filter);
+                }
             }
             catch (MongoException ex)
             {
