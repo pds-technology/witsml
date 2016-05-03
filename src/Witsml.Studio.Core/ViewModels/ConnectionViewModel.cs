@@ -266,6 +266,7 @@ namespace PDS.Witsml.Studio.Core.ViewModels
                 var json = File.ReadAllText(filename);
                 var connection = JsonConvert.DeserializeObject<Connection>(json);
                 connection.Password = connection.Password.Decrypt();
+                connection.SecurePassword = connection.Password.ToSecureString();
                 return connection;
             }
 

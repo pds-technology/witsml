@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 using PDS.Framework.Properties;
@@ -215,6 +216,22 @@ namespace PDS.Framework
 
             bytes = ProtectedData.Unprotect(bytes, entropy, DataProtectionScope.CurrentUser);
             return Encoding.Unicode.GetString(bytes);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="SecureString"/> from the specified value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>A <see cref="SecureString"/> instance.</returns>
+        public static SecureString ToSecureString(this string value)
+        {
+            var secure = new SecureString();
+
+            if (!string.IsNullOrWhiteSpace(value))
+                value.ForEach(secure.AppendChar);
+
+            secure.MakeReadOnly();
+            return secure;
         }
     }
 }

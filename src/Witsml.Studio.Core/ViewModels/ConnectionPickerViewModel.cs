@@ -185,7 +185,13 @@ namespace PDS.Witsml.Studio.Core.ViewModels
                 //_log.DebugFormat("Reading persisted Connection from '{0}'", filename);
                 var json = File.ReadAllText(fileName);
                 var connections = JsonConvert.DeserializeObject<List<Connection>>(json);
-                connections.ForEach(x => x.Password = x.Password.Decrypt());
+
+                connections.ForEach(x =>
+                {
+                    x.Password = x.Password.Decrypt();
+                    x.SecurePassword = x.Password.ToSecureString();
+                });
+
                 return connections;
             }
 
