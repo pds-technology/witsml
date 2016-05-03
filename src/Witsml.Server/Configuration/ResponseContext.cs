@@ -54,10 +54,11 @@ namespace PDS.Witsml.Server.Configuration
                 QueryMaxDataPoints = _maxDataPoints;
 
                 ResponseMaxDataNodes = Math.Min(QueryMaxDataNodes * queryCount, _maxDataNodes);
-                ResponseMaxDataPoints = _maxDataPoints;
+                //ResponseMaxDataPoints = _maxDataPoints;
 
                 ResponseDataNodeTotal = 0;
                 ResponseDataPointTotal = 0;
+                DataTruncated = false;
             }
         }
 
@@ -101,7 +102,7 @@ namespace PDS.Witsml.Server.Configuration
         /// <value>
         /// The response maximum data points.
         /// </value>
-        public int ResponseMaxDataPoints { get; private set; }
+        //public int ResponseMaxDataPoints { get; private set; } // TODO: May not need this.  Just use QueryMaxDataPoints
 
         /// <summary>
         /// Gets the current response data node total and is 
@@ -120,6 +121,14 @@ namespace PDS.Witsml.Server.Configuration
         /// The response data point total.
         /// </value>
         public int ResponseDataPointTotal { get; private set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether data has been truncated.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if data has been truncated; otherwise, <c>false</c>.
+        /// </value>
+        public bool DataTruncated { get; set; }
 
         /// <summary>
         /// Updates the growing object totals.

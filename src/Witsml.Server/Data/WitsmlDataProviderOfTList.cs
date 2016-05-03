@@ -68,7 +68,7 @@ namespace PDS.Witsml.Server.Data
             var queries = childParsers.SelectMany(p => DataAdapter.Query(p, responseContext));
 
             return new WitsmlResult<IEnergisticsCollection>(
-                ErrorCodes.Success,
+                responseContext.DataTruncated ? ErrorCodes.ParialSuccess : ErrorCodes.Success,
                 CreateCollection(queries));
         }
 
