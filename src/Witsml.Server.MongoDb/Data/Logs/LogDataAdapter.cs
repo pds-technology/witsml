@@ -192,6 +192,8 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 Logger.DebugFormat("Delete for Log with uri '{0}'.", uri.Uri);
 
+                transaction.Wait(uri);
+
                 DeleteEntity(uri, transaction);
                 ChannelDataChunkAdapter.Delete(uri);
                 transaction.Commit();

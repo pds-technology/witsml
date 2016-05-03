@@ -126,7 +126,6 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// <param name="action">The MongoDb operation, e.g. add.</param>
         /// <param name="collection">The MongoDb collection name.</param>
         /// <param name="document">The data obejct in BsonDocument format.</param>
-        /// <param name="uri">The uri of the data object.</param>
         public void Attach(MongoDbAction action, string collection, BsonDocument document)
         {
             var transaction = new MongoDbTransaction
@@ -146,6 +145,7 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// <summary>
         /// Waits this instance if the transaction is attached.
         /// </summary>
+        /// <param name="uri">The uri of the data object.</param>
         public void Wait(EtpUri uri)
         {
             while (Adapter.Exists(uri))
