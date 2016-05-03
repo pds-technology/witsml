@@ -70,10 +70,11 @@ namespace PDS.Witsml.Server.Data.Logs
         /// Retrieves data objects from the data store using the specified parser.
         /// </summary>
         /// <param name="parser">The query template parser.</param>
+        /// <param name="context">The response context.</param>
         /// <returns>
         /// A collection of data objects retrieved from the data store.
         /// </returns>
-        public override List<Log> Query(WitsmlQueryParser parser)
+        public override List<Log> Query(WitsmlQueryParser parser, ResponseContext context)
         {
             var logs = QueryEntities(parser);
 

@@ -77,6 +77,7 @@
     <Compile Include="Configuration\CapServerProvider.cs" />
     <Compile Include="Configuration\RequestContext.cs" />
     <Compile Include="Configuration\RequestExtensions.cs" />
+    <Compile Include="Configuration\ResponseContext.cs" />
     <Compile Include="Configuration\WitsmlValidator.cs" />
     <Compile Include="Data\Channels\ChannelSet200Validator.cs" />
     <Compile Include="Data\Channels\IChannelDataProvider.cs" />

@@ -18,6 +18,7 @@
 
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -55,10 +56,11 @@ namespace PDS.Witsml.Server.Data
         /// Retrieves data objects from the data store using the specified parser.
         /// </summary>
         /// <param name="parser">The query template parser.</param>
+        /// <param name="context">The response context.</param>
         /// <returns>
         /// A collection of data objects retrieved from the data store.
         /// </returns>
-        public override List<T> Query(WitsmlQueryParser parser)
+        public override List<T> Query(WitsmlQueryParser parser, ResponseContext context)
         {
             return QueryEntities(parser);
         }
