@@ -26,6 +26,7 @@ using Energistics.Datatypes.ChannelData;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
+using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Server.Data.Transactions;
 using PDS.Witsml.Server.Models;
@@ -49,10 +50,11 @@ namespace PDS.Witsml.Server.Data.Logs
         /// Retrieves data objects from the data store using the specified parser.
         /// </summary>
         /// <param name="parser">The query template parser.</param>
+        /// <param name="context">The response context.</param>
         /// <returns>
         /// A collection of data objects retrieved from the data store.
         /// </returns>
-        public override List<T> Query(WitsmlQueryParser parser)
+        public override List<T> Query(WitsmlQueryParser parser, ResponseContext context)
         {
             var logs = QueryEntities(parser);
 
@@ -68,7 +70,12 @@ namespace PDS.Witsml.Server.Data.Logs
                     var logHeader = logHeaders[l.GetUri()];
                     var mnemonics = GetMnemonicList(logHeader, parser);
 
-                    QueryLogDataValues(l, logHeader, parser, mnemonics);
+                    // Query the log data and get the number of nodes returned.
+                    var queryNodeCount = QueryLogDataValues(l, logHeader, parser, mnemonics, context.QueryMaxDataNodes, context.QueryMaxDataPoints);
+
+                    // Update the response context growing object totals
+                    context.UpdateGrowingObjectTotals(queryNodeCount, mnemonics.Keys.Count);
+
                     FormatLogHeader(l, mnemonics.Values.ToArray());
                 });
             }
@@ -310,7 +317,7 @@ namespace PDS.Witsml.Server.Data.Logs
             return unitIndexes.ToDictionary(x => x.Index, x => x.Unit);
         }
 
-        protected void QueryLogDataValues(T log, T logHeader, WitsmlQueryParser parser, IDictionary<int, string> mnemonics)
+        protected int QueryLogDataValues(T log, T logHeader, WitsmlQueryParser parser, IDictionary<int, string> mnemonics, int maxDataNodes, int maxDataPoints)
         {
             Logger.DebugFormat("Query data values for log. Log Uid = {0}", log.Uid);
 
@@ -341,6 +348,8 @@ namespace PDS.Witsml.Server.Data.Logs
             reader.Slice(mnemonics, units);
             var logData = FormatLogData(log, reader, requestLatestValues);
             SetLogDataValues(log, logData, reader.AllMnemonics, reader.AllUnits);
+
+            return logData.Count;
         }
 
         protected Range<double?> GetLogDataSubsetRange(T log, WitsmlQueryParser parser)
