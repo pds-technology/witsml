@@ -62,8 +62,10 @@ namespace PDS.Witsml.Server.Data
 
             Logger.DebugFormat("Validated {0} for Query", typeof(TObject).Name);
 
+            var responseContext = new ResponseContext(parser);
+
             // Execute each query separately
-            var queries = childParsers.SelectMany(DataAdapter.Query);
+            var queries = childParsers.SelectMany(p => DataAdapter.Query(p, responseContext));
 
             return new WitsmlResult<IEnergisticsCollection>(
                 ErrorCodes.Success,

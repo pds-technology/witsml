@@ -83,10 +83,14 @@ namespace PDS.Witsml
         /// <seealso cref="PDS.Witsml.OptionsIn" />
         public class MaxReturnNodes : OptionsIn
         {
-            public MaxReturnNodes(string value) : base(Keyword, value) { }
+            public MaxReturnNodes(int value) : base(Keyword, value.ToString()) { }
 
             public const string Keyword = "maxReturnNodes";
 
+            public static MaxReturnNodes Eq(int value)
+            {
+                return new MaxReturnNodes(value);
+            }
         }
 
         /// <summary>

@@ -99,9 +99,20 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// The maximum number of nodes that can be returned to the client.
+        /// </summary>
+        /// <returns>The number of maximum nodes to returned if it exists in the Options In, null otherwise.</returns>
+        public int? MaxReturnNodes()
+        {
+            return Options.ContainsKey(OptionsIn.MaxReturnNodes.Keyword)
+                ? int.Parse(Options[OptionsIn.MaxReturnNodes.Keyword])
+                : (int?)null;
+        }
+
+        /// <summary>
         /// Requests the latest values.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The number of latest values requested in it exists in the Options In, null otherwise.</returns>
         public int? RequestLatestValues()
         {
             return Options.ContainsKey(OptionsIn.RequestLatestValues.Keyword)
