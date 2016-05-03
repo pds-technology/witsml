@@ -102,6 +102,8 @@ namespace PDS.Witsml.Server.Data.Logs
             using (var transaction = DatabaseProvider.BeginTransaction())
             {
                 var uri = dataObject.GetUri();
+                transaction.Wait(uri);
+
                 UpdateEntity(parser, uri, transaction);
                 var readers = ExtractDataReaders(dataObject, GetEntity(uri));
                 UpdateLogDataAndIndexRange(uri, readers, transaction);
