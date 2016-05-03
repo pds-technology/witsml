@@ -34,15 +34,6 @@ namespace PDS.Witsml.Server.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("300000")]
-        public int MaxDataPoints {
-            get {
-                return ((int)(this["MaxDataPoints"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("PDS.Witsml.Server")]
         public string DefaultServerName {
             get {
@@ -128,6 +119,15 @@ namespace PDS.Witsml.Server.Properties {
         public int MaxMessageRate {
             get {
                 return ((int)(this["MaxMessageRate"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5000000")]
+        public int MaxDataPoints {
+            get {
+                return ((int)(this["MaxDataPoints"]));
             }
         }
     }
