@@ -8,5 +8,11 @@
     <Setting Name="DefaultDatabaseName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">WitsmlStore</Value>
     </Setting>
+    <Setting Name="DefaultTransactionWaitInterval" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">2000</Value>
+    </Setting>
+    <Setting Name="DefaultMaximumTransactionAttempt" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

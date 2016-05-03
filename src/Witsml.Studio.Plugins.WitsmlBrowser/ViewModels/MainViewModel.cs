@@ -400,7 +400,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             OutputMessages(functionType, xmlIn, xmlOut, result.MessageOut, result.OptionsIn, result.ReturnCode);
 
             // Show data object on the Properties tab
-            if (functionType == Functions.GetFromStore)
+            if (functionType == Functions.GetFromStore && result.ReturnCode > 0)
                 ShowObjectProperties(result);
         }
 

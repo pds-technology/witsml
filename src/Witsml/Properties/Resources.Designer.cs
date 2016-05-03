@@ -232,6 +232,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error transaction deadlock.
+        /// </summary>
+        internal static string ErrorTransactionDeadlock {
+            get {
+                return ResourceManager.GetString("ErrorTransactionDeadlock", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error updating in data store.
         /// </summary>
         internal static string ErrorUpdatingInDataStore {

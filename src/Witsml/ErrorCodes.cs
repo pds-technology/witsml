@@ -516,5 +516,10 @@ namespace PDS.Witsml
         /// -1004 Error deleting from data store
         /// </summary>
         ErrorDeletingFromDataStore = -1004,
+
+        /// <summary>
+        /// -1005 Error transaction deadlock
+        /// </summary>
+        ErrorTransactionDeadlock = -1005,
     }
 }
