@@ -40,5 +40,23 @@ namespace PDS.Witsml.Server.MongoDb {
                 return ((string)(this["DefaultDatabaseName"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2000")]
+        public int DefaultTransactionWaitInterval {
+            get {
+                return ((int)(this["DefaultTransactionWaitInterval"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public int DefaultMaximumTransactionAttempt {
+            get {
+                return ((int)(this["DefaultMaximumTransactionAttempt"]));
+            }
+        }
     }
 }

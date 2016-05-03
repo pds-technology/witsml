@@ -24,6 +24,7 @@ using System.Threading;
 using Energistics.Datatypes;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using PDS.Witsml.Server.MongoDb;
 
 namespace PDS.Witsml.Server.Data.Transactions
 {
@@ -35,6 +36,9 @@ namespace PDS.Witsml.Server.Data.Transactions
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class MongoTransaction : IDisposable
     {
+        internal static readonly int DefaultInterval = Settings.Default.DefaultTransactionWaitInterval;
+        internal static readonly int MaximumAttempt = Settings.Default.DefaultMaximumTransactionAttempt;
+
         private static readonly string _idField = "_id";
         private static readonly string _uidWell = "UidWell";
         private static readonly string _uidWellbore = "UidWellbore";
@@ -148,8 +152,19 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// <param name="uri">The uri of the data object.</param>
         public void Wait(EtpUri uri)
         {
+            var count = MaximumAttempt;
+
             while (Adapter.Exists(uri))
-                Thread.Sleep(2000);
+            {
+                Thread.Sleep(DefaultInterval);
+                count--;
+
+                if (count == 0)
+                {
+                    var message = string.Format("Transaction deadlock on data object with Uri: {0}", uri);
+                    throw new WitsmlException(ErrorCodes.ErrorTransactionDeadlock);
+                }
+            }
         }
 
         /// <summary>

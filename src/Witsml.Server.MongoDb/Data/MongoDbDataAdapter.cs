@@ -118,11 +118,9 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dataObject">The data object to be updated.</param>
         public override void Update(WitsmlQueryParser parser, T dataObject)
         {
-            using (var transaction = DatabaseProvider.BeginTransaction())
+            var uri = GetUri(dataObject);
+            using (var transaction = DatabaseProvider.BeginTransaction(uri))
             {
-                var uri = GetUri(dataObject);
-                transaction.Wait(uri);
-
                 UpdateEntity(parser, uri, transaction);
                 transaction.Commit();
             }
@@ -144,7 +142,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="uri">The data object URI.</param>
         public override void Delete(EtpUri uri)
         {
-            using (var transaction = DatabaseProvider.BeginTransaction())
+            using (var transaction = DatabaseProvider.BeginTransaction(uri))
             {
                 DeleteEntity(uri, transaction);
                 transaction.Commit();

@@ -99,11 +99,9 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="dataObject">The data object to be updated.</param>
         public override void Update(WitsmlQueryParser parser, Log dataObject)
         {
-            using (var transaction = DatabaseProvider.BeginTransaction())
+            var uri = dataObject.GetUri();
+            using (var transaction = DatabaseProvider.BeginTransaction(uri))
             {
-                var uri = dataObject.GetUri();
-                transaction.Wait(uri);
-
                 UpdateEntity(parser, uri, transaction);
                 var readers = ExtractDataReaders(dataObject, GetEntity(uri));
                 UpdateLogDataAndIndexRange(uri, readers, transaction);

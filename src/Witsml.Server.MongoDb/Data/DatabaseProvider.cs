@@ -19,6 +19,7 @@
 using System;
 using System.ComponentModel.Composition;
 using System.Configuration;
+using Energistics.Datatypes;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Server.Data.Transactions;
@@ -86,9 +87,16 @@ namespace PDS.Witsml.Server.Data
         /// Creates a transaction.
         /// </summary>
         /// <returns>The transaction</returns>
-        public MongoTransaction BeginTransaction()
+        public MongoTransaction BeginTransaction(EtpUri? uri = null)
         {
-            return _container.Resolve<MongoTransaction>();
+            var transaction = _container.Resolve<MongoTransaction>();
+
+            if (uri.HasValue)
+            {
+                transaction.Wait(uri.Value);
+            }
+
+            return transaction;
         }
 
         /// <summary>
