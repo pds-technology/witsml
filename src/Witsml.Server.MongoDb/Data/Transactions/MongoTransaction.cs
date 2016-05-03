@@ -20,6 +20,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Threading;
+using Energistics.Datatypes;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -45,7 +47,7 @@ namespace PDS.Witsml.Server.Data.Transactions
             Id = Guid.NewGuid().ToString();
             Transactions = new List<MongoDbTransaction>();
             Committed = false;
-        }
+        }       
 
         /// <summary>
         /// Gets or sets the transaction identifier.
@@ -124,6 +126,7 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// <param name="action">The MongoDb operation, e.g. add.</param>
         /// <param name="collection">The MongoDb collection name.</param>
         /// <param name="document">The data obejct in BsonDocument format.</param>
+        /// <param name="uri">The uri of the data object.</param>
         public void Attach(MongoDbAction action, string collection, BsonDocument document)
         {
             var transaction = new MongoDbTransaction
@@ -133,10 +136,20 @@ namespace PDS.Witsml.Server.Data.Transactions
                 Action = action,
                 Status = TransactionStatus.Created
             };
+
             if (document != null)
-                transaction.Value = document;
+                transaction.Value = document;          
 
             Transactions.Add(transaction);
+        }
+
+        /// <summary>
+        /// Waits this instance if the transaction is attached.
+        /// </summary>
+        public void Wait(EtpUri uri)
+        {
+            while (Adapter.Exists(uri))
+                Thread.Sleep(2000);
         }
 
         /// <summary>
