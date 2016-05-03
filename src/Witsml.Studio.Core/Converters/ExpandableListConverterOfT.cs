@@ -18,28 +18,32 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using System.ComponentModel;
+using PDS.Witsml.Studio.Core.Models;
 
-namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Views.Result
+namespace PDS.Witsml.Studio.Core.Converters
 {
-    /// <summary>
-    /// Interaction logic for ObjectPropertiesView.xaml
-    /// </summary>
-    public partial class ObjectPropertiesView : UserControl
+    public class ExpandableListConverter<T> : ExpandableObjectConverter
     {
-        public ObjectPropertiesView()
+        public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)
         {
-            InitializeComponent();
+            var list = value as IList<T>;
+
+            if (list == null)
+            {
+                return base.GetProperties(context, value, attributes);
+            }
+
+            var descriptors = new PropertyDescriptorCollection(null);
+            var enumerator = list.GetEnumerator();
+            var counter = 0;
+
+            while (enumerator.MoveNext())
+            {
+                descriptors.Add(new ListItemPropertyDescriptor<T>(list, counter++));
+            }
+
+            return descriptors;
         }
     }
 }

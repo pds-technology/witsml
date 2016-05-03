@@ -39,7 +39,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
         {
             _log.Debug("Creating view model instance");
             Runtime = runtime;
-            ObjectProperties = new ObjectPropertiesViewModel(runtime);
+            ObjectProperties = new PropertyGridViewModel(runtime);
 
             QueryResults = new TextEditorViewModel(runtime, "XML", true)
             {
@@ -77,10 +77,10 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
         public IRuntimeService Runtime { get; private set; }
 
         /// <summary>
-        /// Gets or sets the object properties view model.
+        /// Gets or sets the property grid view model.
         /// </summary>
-        /// <value>The object properties view model.</value>
-        public ObjectPropertiesViewModel ObjectProperties { get; set; }
+        /// <value>The property grid view model.</value>
+        public PropertyGridViewModel ObjectProperties { get; set; }
 
         private TextEditorViewModel _queryResults;
 

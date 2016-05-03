@@ -420,7 +420,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// <param name="result">The WITSML query result.</param>
         private void ShowObjectProperties(WitsmlResult result)
         {
-            ResultControl.ObjectProperties.SetCurrentObject(result, Model.WitsmlVersion);
+            ResultControl.ObjectProperties.SetCurrentObject(result.ObjectType, result.XmlOut, Model.WitsmlVersion);
         }
 
         /// <summary>

@@ -19,18 +19,18 @@
 using System.Linq;
 using Caliburn.Micro;
 using Energistics.DataAccess;
+using PDS.Witsml.Studio.Core.Models;
 using PDS.Witsml.Studio.Core.Runtime;
-using PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models;
 
-namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
+namespace PDS.Witsml.Studio.Core.ViewModels
 {
-    public class ObjectPropertiesViewModel : Screen
+    public class PropertyGridViewModel : Screen
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ObjectPropertiesViewModel"/> class.
+        /// Initializes a new instance of the <see cref="PropertyGridViewModel"/> class.
         /// </summary>
         /// <param name="runtime">The runtime service.</param>
-        public ObjectPropertiesViewModel(IRuntimeService runtime)
+        public PropertyGridViewModel(IRuntimeService runtime)
         {
             Runtime = runtime;
         }
@@ -63,16 +63,25 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
         /// <summary>
         /// Sets the current object.
         /// </summary>
-        /// <param name="result">The WITSML result.</param>
+        /// <param name="objectType">The data object type.</param>
+        /// <param name="xml">The XML string.</param>
         /// <param name="version">The WITSML version.</param>
-        public void SetCurrentObject(WitsmlResult result, string version)
+        public void SetCurrentObject(string objectType, string xml, string version)
         {
-            var dataType = ObjectTypes.GetObjectGroupType(result.ObjectType, version);
-            var dataObject = (IEnergisticsCollection) WitsmlParser.Parse(dataType, result.XmlOut);
+            var dataType = ObjectTypes.GetObjectGroupType(objectType, version);
+            var dataObject = WitsmlParser.Parse(dataType, xml);
+            var collection = dataObject as IEnergisticsCollection;
 
-            CurrentObject = dataObject.Items
-                .Cast<object>()
-                .FirstOrDefault();
+            TypeDecorationManager.Register(dataType);
+            CurrentObject = dataObject;
+
+            CurrentObject = collection == null
+                ? dataObject
+                : collection.Items.Count > 1
+                ? collection.Items
+                : collection.Items.Count == 1
+                ? collection.Items[0]
+                : collection;
         }
     }
 }
