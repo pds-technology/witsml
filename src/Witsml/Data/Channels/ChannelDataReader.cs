@@ -866,8 +866,19 @@ namespace PDS.Witsml.Data.Channels
             }
         }
 
-        public List<List<object>> GetData(int? requestLatestValues, out Dictionary<string, Range<double?>> ranges)
+        public List<List<object>> GetData(
+            IQueryContext context,
+            out Dictionary<string, Range<double?>> ranges)
         {
+
+            int? requestLatestValues = context.RequestLatestValues;
+            int maxDataNodes = context.MaxDataNodes;
+            int maxDataPoints = context.MaxDataPoints;
+
+            var dataNodeCount = 0;
+            var dataPointCount = 0;
+            var channelCount = AllMnemonics.Length;
+
             var logData = new List<List<object>>();
             var isTimeIndex = Indices.Select(x => x.IsTimeIndex).FirstOrDefault();
 
@@ -890,6 +901,22 @@ namespace PDS.Witsml.Data.Channels
             // Read through all of the data
             while (Read())
             {
+                // If there is no channel data in the current row then don't process it
+                if (!HasValues())
+                    continue;
+
+                // If processing the next row will exceed our maxDataNodes or maxDataPoints limits then stop
+                if ((dataNodeCount + 1) > maxDataNodes || (dataPointCount + dataNodeCount * channelCount) > maxDataPoints)
+                {
+                    context.DataTruncated = true;
+                    _log.DebugFormat("GetData truncated with {0} data nodes and {1} data points.", dataNodeCount, dataPointCount);
+                    break;
+                }
+
+                // Update our data node and data point counts
+                dataNodeCount++;
+                dataPointCount += dataNodeCount * channelCount;
+
                 var values = new List<object>();
                 var primaryIndex = GetIndexValue();
 
@@ -900,15 +927,17 @@ namespace PDS.Witsml.Data.Channels
                     : (object)primaryIndex);
 
 
-                // Only add channel values to the list of values
+                // Only add channel value to the list of values
                 //... if the are included in current slices
                 for (int i = 1; i < FieldCount; i++)
                 {
-                    var channelValue = GetValue(i);
-
                     // Limit data to mnemonics slices                    
                     if (SliceExists(i))
+                    {
+                        // Check if channelValue IsNull (including Null Indicator Value)
+                        var channelValue = IsNull(GetString(i)) ? null : GetValue(i);
                         values.Add(channelValue);
+                    }
                 }
 
                 // Filter rows with no channel values
@@ -973,7 +1002,7 @@ namespace PDS.Witsml.Data.Channels
                 var mnemonic = GetName(_allSliceOrdinals[i]);
                 var ordinal = _allSliceOrdinals[i];
 
-                if (requestedValueCount.ContainsKey(i) && valueArray[i] != null)
+                if (requestedValueCount.ContainsKey(i) && valueArray[i] != null && !IsNull(valueArray[i].ToString())) 
                 {
                     // If first time update for this channel value then start and end index are the same
                     if (requestedValueCount[ordinal] == 0)
@@ -1070,7 +1099,7 @@ namespace PDS.Witsml.Data.Channels
                 .Skip(row)
                 .Take(1)
                 .SelectMany(x => x.Last())
-                .Where((r, i) => SliceExists(i));
+                .Where((r, i) => SliceExists(i+1)); // We need to look at the i-th + 1 slice since we're only looking at channel values
         }
 
         /// <summary>
