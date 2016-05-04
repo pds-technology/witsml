@@ -71,7 +71,7 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="uri">The URI.</param>
         /// <param name="id">The identifier.</param>
         public ChannelDataReader(IList<string> data, string[] mnemonics = null, string[] units = null, string[] nullValues = null, string uri = null, string id = null) 
-            : this(Combine(data, nullValues), mnemonics, units, nullValues, uri, id)
+            : this(Combine(data), mnemonics, units, nullValues, uri, id)
         {
         }
 
@@ -1178,7 +1178,7 @@ namespace PDS.Witsml.Data.Channels
         /// </summary>
         /// <param name="data">The data.</param>
         /// <returns>A JSON arrary of string values from the data list.</returns>
-        private static string Combine(IList<string> data, string[] nullValues)
+        private static string Combine(IList<string> data)
         {
             var json = new StringBuilder("[");
             var rows = new List<string>();
@@ -1188,7 +1188,7 @@ namespace PDS.Witsml.Data.Channels
                 foreach (var row in data)
                 {
                     var values = row.Split(new[] { ',' })
-                        .Select( (v, i) => Format(v, i, nullValues))
+                        .Select(Format)
                         .ToArray();
 
                     rows.Add(string.Format(
@@ -1209,17 +1209,9 @@ namespace PDS.Witsml.Data.Channels
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>A value formated for null, string or double.</returns>
-        private static string Format(string value, int channelIndex, string[] nullValues)
+        private static string Format(string value)
         {
             double number;
-
-            if (channelIndex < nullValues.Length && !string.IsNullOrWhiteSpace(nullValues[channelIndex]))
-            {
-                if (nullValues[channelIndex].EqualsIgnoreCase(value.Trim()) || IsNull(value))
-                {
-                    return nullValues[channelIndex];
-                }
-            }
 
             if (IsNull(value))
                 return "null";
