@@ -36,7 +36,6 @@ namespace PDS.Witsml.Server.Data.Logs
 {
     public abstract class LogDataAdapter<T, TChild> : MongoDbDataAdapter<T>, IChannelDataProvider where T : IWellboreObject where TChild : IUniqueId
     {
-        private readonly int _maxRequestLatestValues = Settings.Default.MaxDataNodes;
         private readonly bool _streamIndexValuePairs = Settings.Default.StreamIndexValuePairs;
 
         protected LogDataAdapter(IDatabaseProvider databaseProvider, string dbCollectionName) : base(databaseProvider, dbCollectionName)
@@ -331,7 +330,7 @@ namespace PDS.Witsml.Server.Data.Logs
             //... don't allow more than the maximum.
             if (requestLatestValues.HasValue)
             {                
-                requestLatestValues = Math.Min(_maxRequestLatestValues, requestLatestValues.Value);
+                requestLatestValues = Math.Min(WitsmlSettings.MaxDataNodes, requestLatestValues.Value);
                 Logger.DebugFormat("Request latest value = {0}", requestLatestValues);
             }
             
