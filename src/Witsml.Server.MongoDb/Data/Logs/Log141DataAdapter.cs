@@ -45,9 +45,6 @@ namespace PDS.Witsml.Server.Data.Logs
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class Log141DataAdapter : LogDataAdapter<Log, LogCurveInfo>, IWitsml141Configuration
     {
-        private static readonly int MaxDataNodes = Settings.Default.MaxDataNodes;
-        private static readonly int MaxDataPoints = Settings.Default.MaxDataPoints;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="Log141DataAdapter"/> class.
         /// </summary>
@@ -65,8 +62,8 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             var dataObject = new ObjectWithConstraint(ObjectTypes.Log)
             {
-                MaxDataNodes = MaxDataNodes,
-                MaxDataPoints = MaxDataPoints
+                MaxDataNodes = WitsmlSettings.MaxDataNodes,
+                MaxDataPoints = WitsmlSettings.MaxDataPoints
             };
 
             capServer.Add(Functions.GetFromStore, dataObject);

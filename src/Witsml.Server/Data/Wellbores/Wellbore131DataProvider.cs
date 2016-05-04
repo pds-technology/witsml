@@ -55,9 +55,9 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// </summary>
         /// <param name="dataObjects">The data objects.</param>
         /// <returns>The <see cref="WellboreList" /> instance.</returns>
-        protected override WellboreList CreateCollection(IEnumerable<Wellbore> dataObjects)
+        protected override WellboreList CreateCollection(List<Wellbore> dataObjects)
         {
-            return new WellboreList { Wellbore = dataObjects.ToList() };
+            return new WellboreList { Wellbore = dataObjects };
         }
     }
 }

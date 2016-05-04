@@ -98,12 +98,19 @@ namespace PDS.Witsml.Server
 
         public List<TObject> Query<TList, TObject>(TObject entity, string wmlTypeIn = null, string capClient = null, string optionsIn = null) where TList : IEnergisticsCollection
         {
+            short result;
+            return QueryWithErrorCode<TList, TObject>(entity, out result, wmlTypeIn, capClient, optionsIn);
+        }
+
+        public List<TObject> QueryWithErrorCode<TList, TObject>(TObject entity, out short result, string wmlTypeIn = null, string capClient = null, string optionsIn = null) where TList : IEnergisticsCollection
+        {
             var response = Get<TList, TObject>(List(entity), wmlTypeIn, capClient, optionsIn);
             var results = EnergisticsConverter.XmlToObject<TList>(response.XMLout);
+            result = response.Result;
 
             return (List<TObject>)results.Items;
         }
-        
+
         public WMLS_GetFromStoreResponse Get<TList, TObject>(List<TObject> entityList, string wmlTypeIn = null, string capClient = null, string optionsIn = null) where TList : IEnergisticsCollection
         {
             string typeIn, queryIn;

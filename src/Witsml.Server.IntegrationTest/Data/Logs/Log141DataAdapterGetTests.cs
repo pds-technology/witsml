@@ -1128,5 +1128,211 @@ namespace PDS.Witsml.Server.Data.Logs
                 value++;
             }
         }
+
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_MaxReturnNodes_OptionsIn()
+        {
+            var numRows = 20;
+            var maxReturnNodes = 5;
+
+            // Add the Setup Well, Wellbore and Log to the store.
+            WMLS_AddToStoreResponse logResponse = 
+                AddSetupWellWellboreLog(numRows, isDepthLog: true, hasEmptyChannel: false, increasing: true);
+
+            // Assert that the log was added successfully
+            Assert.AreEqual((short)ErrorCodes.Success, logResponse.Result);
+
+            var uidLog = logResponse.SuppMsgOut;
+            var logData = new LogData { MnemonicList = DevKit.Mnemonics(_log) };
+            var query = new Log
+            {
+                Uid = uidLog,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore,
+            };
+
+            short errorCode;
+            var result = DevKit.QueryWithErrorCode<LogList, Log>(
+                query, out errorCode,
+                ObjectTypes.Log, null, OptionsIn.ReturnElements.All + ';' +
+                OptionsIn.MaxReturnNodes.Eq(maxReturnNodes));
+
+            Assert.AreEqual((short)ErrorCodes.ParialSuccess, errorCode, "Error code should indicate partial success");
+
+            // Verify that a Log was returned with the results
+            Assert.IsNotNull(result, "No results returned from Log query");
+
+            var queriedLog = result.First();
+            Assert.IsNotNull(queriedLog, "No Logs returned in results from Log query");
+
+            // Verify that a LogData element was returned with the results.
+            var queryLogData = queriedLog.LogData;
+            Assert.IsTrue(queryLogData != null && queryLogData.First() != null, "No LogData returned in results from Log query");
+
+            // Verify that data rows were returned with the LogData
+            var queryData = queryLogData.First().Data;
+            Assert.IsTrue(queryData != null && queryData.Count == maxReturnNodes, 
+                string.Format("Expected {0} rows returned because MaxReturnNodes = {0}", maxReturnNodes));
+        }
+
+
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Slice_Empty_Channel_MaxReturnNodes_OptionsIn()
+        {
+            var numRows = 20;
+            var maxReturnNodes = 5;
+
+            // Add the Setup Well, Wellbore and Log to the store.
+            WMLS_AddToStoreResponse logResponse = 
+                AddSetupWellWellboreLog(numRows, isDepthLog: true, hasEmptyChannel: true, increasing: true);
+
+            // Assert that the log was added successfully
+            Assert.AreEqual((short)ErrorCodes.Success, logResponse.Result);
+
+            var uidLog = logResponse.SuppMsgOut;
+            var logData = new LogData { MnemonicList = DevKit.Mnemonics(_log) };
+            var query = new Log
+            {
+                Uid = uidLog,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore,
+            };
+
+            short errorCode;
+            var result = DevKit.QueryWithErrorCode<LogList, Log>(
+                query, out errorCode,
+                ObjectTypes.Log, null, OptionsIn.ReturnElements.All + ';' +
+                OptionsIn.MaxReturnNodes.Eq(maxReturnNodes));
+
+            Assert.AreEqual((short)ErrorCodes.ParialSuccess, errorCode, "Error code should indicate partial success");
+
+            // Verify that a Log was returned with the results
+            Assert.IsNotNull(result, "No results returned from Log query");
+
+            var queriedLog = result.First();
+            Assert.IsNotNull(queriedLog, "No Logs returned in results from Log query");
+
+            // Test that the column count returned is reduced by one.
+            Assert.AreEqual(_log.LogCurveInfo.Count - 1, queriedLog.LogCurveInfo.Count);
+
+            // Verify that a LogData element was returned with the results.
+            var queryLogData = queriedLog.LogData;
+            Assert.IsTrue(queryLogData != null && queryLogData.First() != null, "No LogData returned in results from Log query");
+
+            // Verify that data rows were returned with the LogData
+            var queryData = queryLogData.First().Data;
+            Assert.IsTrue(queryData != null && queryData.Count == maxReturnNodes,
+                string.Format("Expected {0} rows returned because MaxReturnNodes = {0}", maxReturnNodes));
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Multiple_MaxReturnNodes_OptionsIn()
+        {
+            var numRows = 20;
+            var maxReturnNodes = 5;
+
+            // Add the Setup Well, Wellbore and Log to the store.
+            WMLS_AddToStoreResponse log1Response =
+                AddSetupWellWellboreLog(numRows, isDepthLog: true, hasEmptyChannel: false, increasing: true);
+
+            Assert.AreEqual((short)ErrorCodes.Success, log1Response.Result);
+
+            // Add a second Log to the same wellbore as Setup log (_log)
+            var log2 = DevKit.CreateLog(null, DevKit.Name("Log 02"), _log.UidWell, _well.Name, _log.UidWellbore, _wellbore.Name);
+            DevKit.InitHeader(log2, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log2, DevKit.Mnemonics(log2), DevKit.Units(log2), numRows, hasEmptyChannel: false);
+
+            // Add the 2nd log
+            var log2Response = DevKit.Add<LogList, Log>(log2);
+
+            var query1 = DevKit.CreateLog(log1Response.SuppMsgOut, null, _log.UidWell, null, _log.UidWellbore, null);
+            var query2 = DevKit.CreateLog(log2Response.SuppMsgOut, null, log2.UidWell, null, log2.UidWellbore, null);
+
+            // Perform a GetFromStore with multiple log queries
+            var result = DevKit.Get<LogList, Log>(
+                DevKit.List(query1, query2),
+                ObjectTypes.Log,
+                null,
+                OptionsIn.ReturnElements.All + ';' + OptionsIn.MaxReturnNodes.Eq(maxReturnNodes));
+            Assert.AreEqual((short)ErrorCodes.ParialSuccess, result.Result);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(result.XMLout);
+            Assert.AreEqual(2, logList.Items.Count, "Two logs should be returned");
+
+            // Test that each log has maxRetunNodes number of log data rows.
+            foreach (var l in logList.Items)
+            {
+                var log = l as Log;
+                Assert.AreEqual(maxReturnNodes, log.LogData[0].Data.Count);
+            }
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Multiple_MaxDataNodes_MaxReturnNodes_OptionsIn()
+        {
+            var numRows = 20;
+            var maxReturnNodes = 5;
+
+            // Add the Setup Well, Wellbore and Log to the store.
+            WMLS_AddToStoreResponse log1Response =
+                AddSetupWellWellboreLog(numRows, isDepthLog: true, hasEmptyChannel: false, increasing: true);
+
+            Assert.AreEqual((short)ErrorCodes.Success, log1Response.Result);
+
+            // Add a second Log to the same wellbore as Setup log (_log)
+            var log2 = DevKit.CreateLog(null, DevKit.Name("Log 02"), _log.UidWell, _well.Name, _log.UidWellbore, _wellbore.Name);
+            DevKit.InitHeader(log2, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log2, DevKit.Mnemonics(log2), DevKit.Units(log2), numRows, hasEmptyChannel: false);
+
+            // Add the 2nd log
+            var log2Response = DevKit.Add<LogList, Log>(log2);
+
+            var query1 = DevKit.CreateLog(log1Response.SuppMsgOut, null, _log.UidWell, null, _log.UidWellbore, null);
+            var query2 = DevKit.CreateLog(log2Response.SuppMsgOut, null, log2.UidWell, null, log2.UidWellbore, null);
+
+            // This will cap the total response nodes to 8 instead of 10 if this was not specified.
+            WitsmlSettings.MaxDataNodes = 8;
+
+            // Perform a GetFromStore with multiple log queries
+            var result = DevKit.Get<LogList, Log>(
+                DevKit.List(query1, query2),
+                ObjectTypes.Log,
+                null,
+                OptionsIn.ReturnElements.All + ';' + OptionsIn.MaxReturnNodes.Eq(maxReturnNodes));
+            Assert.AreEqual((short)ErrorCodes.ParialSuccess, result.Result);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(result.XMLout);
+            Assert.AreEqual(2, logList.Items.Count, "Two logs should be returned");
+
+            // The first log should have maxReturnNodes log data rows
+            Assert.AreEqual(maxReturnNodes, (logList.Items[0] as Log).LogData[0].Data.Count);
+
+            // Since there is a total cap of 8 rows the last log should have only 3 rows.
+            Assert.AreEqual(WitsmlSettings.MaxDataNodes - maxReturnNodes, (logList.Items[1] as Log).LogData[0].Data.Count);
+        }
+
+        #region Helper Methods
+
+        private WMLS_AddToStoreResponse AddSetupWellWellboreLog(int numRows, bool isDepthLog, bool hasEmptyChannel, bool increasing)
+        {
+            var response = DevKit.Add<WellList, Well>(_well);
+
+            _wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+
+            _log.UidWell = _wellbore.UidWell;
+            _log.UidWellbore = response.SuppMsgOut;
+
+            DevKit.InitHeader(_log, LogIndexType.measureddepth, increasing: true);
+
+            var startIndex = new GenericMeasure { Uom = "m", Value = 100 };
+            _log.StartIndex = startIndex;
+            DevKit.InitDataMany(_log, DevKit.Mnemonics(_log), DevKit.Units(_log), numRows, 1, true, true, increasing: true);
+
+            // Add a log
+            response = DevKit.Add<LogList, Log>(_log);
+            return response;
+        }
+        #endregion Helper Methods
     }
 }

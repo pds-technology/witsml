@@ -74,9 +74,9 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="dataObjects">The data objects.</param>
         /// <returns>The <see cref="LogList" /> instance.</returns>
-        protected override LogList CreateCollection(IEnumerable<Log> dataObjects)
+        protected override LogList CreateCollection(List<Log> dataObjects)
         {
-            return new LogList { Log = dataObjects.ToList() };
+            return new LogList { Log = dataObjects };
         }
     }
 }

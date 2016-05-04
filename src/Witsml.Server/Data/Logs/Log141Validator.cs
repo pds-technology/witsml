@@ -25,7 +25,6 @@ using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
-using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -40,8 +39,6 @@ namespace PDS.Witsml.Server.Data.Logs
         private readonly IWitsmlDataAdapter<Log> _logDataAdapter;
         private readonly IWitsmlDataAdapter<Wellbore> _wellboreDataAdapter;
         private readonly IWitsmlDataAdapter<Well> _wellDataAdapter;
-        private static readonly int MaxDataNodes = Settings.Default.MaxDataNodes;
-        private static readonly int MaxDataPoints = Settings.Default.MaxDataPoints;
 
         private static readonly char _seperator = ',';
         private readonly string[] _illegalColumnIdentifiers = new string[] { "'", "\"", "<", ">", "/", "\\", "&", "," };
@@ -331,7 +328,7 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             var totalPoints = 0;
 
-            if (logDatas.SelectMany(ld => ld.Data).Count() > MaxDataNodes)
+            if (logDatas.SelectMany(ld => ld.Data).Count() > WitsmlSettings.MaxDataNodes)
             {
                 return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "LogData", "Data" });
             }
@@ -347,7 +344,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         if (logData.Data != null && logData.Data.Count > 0)
                             totalPoints += logData.Data.Count * logData.Data[0].Split(',').Count();
 
-                        if (totalPoints > MaxDataPoints)
+                        if (totalPoints > WitsmlSettings.MaxDataPoints)
                         {
                             return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "LogData", "Data" });
                         }
