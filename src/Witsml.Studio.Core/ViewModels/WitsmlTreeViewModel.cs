@@ -96,9 +96,13 @@ namespace PDS.Witsml.Studio.Core.ViewModels
             get
             {
                 var resource = Items.FindSelected();
+                if (resource == null) return false;
 
-                return resource != null &&
-                    !string.IsNullOrWhiteSpace(new EtpUri(resource.Resource.Uri).ObjectId);
+                var uri = new EtpUri(resource.Resource.Uri);
+                var parentUri = uri.Parent;
+
+                return !string.IsNullOrWhiteSpace(uri.ObjectId)
+                    && !ObjectTypes.IsGrowingDataObject(parentUri.ObjectType);
             }
         }
 
@@ -158,13 +162,7 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         /// <returns><c>true</c> if the selected item is not a folder; otherwise, <c>false</c>.</returns>
         public bool CanGetObjectDetails
         {
-            get
-            {
-                var resource = Items.FindSelected();
-
-                return resource != null &&
-                    !string.IsNullOrWhiteSpace(new EtpUri(resource.Resource.Uri).ObjectId);
-            }
+            get { return CanGetObjectIds; }
         }
 
         /// <summary>

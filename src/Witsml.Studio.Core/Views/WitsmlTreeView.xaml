@@ -24,7 +24,7 @@
                     <MenuItem Header="Get IDs" cal:Message.Attach="GetObjectIds" />
                     <MenuItem Header="Get Header" cal:Message.Attach="GetObjectHeader" />
                     <MenuItem Header="Get Details" cal:Message.Attach="GetObjectDetails" />
-                    <MenuItem Header="Delete" cal:Message.Attach="DeleteObject" IsEnabled="False" />
+                    <!--<MenuItem Header="Delete" cal:Message.Attach="DeleteObject" IsEnabled="False" />-->
                     <Separator />
                     <MenuItem Header="Refresh" cal:Message.Attach="RefreshHierarchy" />
                 </ContextMenu>
