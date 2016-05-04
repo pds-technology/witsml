@@ -1291,24 +1291,34 @@ namespace PDS.Witsml.Server.Data.Logs
             var query2 = DevKit.CreateLog(log2Response.SuppMsgOut, null, log2.UidWell, null, log2.UidWellbore, null);
 
             // This will cap the total response nodes to 8 instead of 10 if this was not specified.
+            var previousMaxDataNodes = WitsmlSettings.MaxDataNodes;
             WitsmlSettings.MaxDataNodes = 8;
 
-            // Perform a GetFromStore with multiple log queries
-            var result = DevKit.Get<LogList, Log>(
-                DevKit.List(query1, query2),
-                ObjectTypes.Log,
-                null,
-                OptionsIn.ReturnElements.All + ';' + OptionsIn.MaxReturnNodes.Eq(maxReturnNodes));
-            Assert.AreEqual((short)ErrorCodes.ParialSuccess, result.Result);
+            try
+            {
+                // Perform a GetFromStore with multiple log queries
+                var result = DevKit.Get<LogList, Log>(
+                    DevKit.List(query1, query2),
+                    ObjectTypes.Log,
+                    null,
+                    OptionsIn.ReturnElements.All + ';' + OptionsIn.MaxReturnNodes.Eq(maxReturnNodes));
+                Assert.AreEqual((short)ErrorCodes.ParialSuccess, result.Result);
 
-            var logList = EnergisticsConverter.XmlToObject<LogList>(result.XMLout);
-            Assert.AreEqual(2, logList.Items.Count, "Two logs should be returned");
+                var logList = EnergisticsConverter.XmlToObject<LogList>(result.XMLout);
+                Assert.AreEqual(2, logList.Items.Count, "Two logs should be returned");
 
-            // The first log should have maxReturnNodes log data rows
-            Assert.AreEqual(maxReturnNodes, (logList.Items[0] as Log).LogData[0].Data.Count);
+                // The first log should have maxReturnNodes log data rows
+                Assert.AreEqual(maxReturnNodes, (logList.Items[0] as Log).LogData[0].Data.Count);
 
-            // Since there is a total cap of 8 rows the last log should have only 3 rows.
-            Assert.AreEqual(WitsmlSettings.MaxDataNodes - maxReturnNodes, (logList.Items[1] as Log).LogData[0].Data.Count);
+                // Since there is a total cap of 8 rows the last log should have only 3 rows.
+                Assert.AreEqual(WitsmlSettings.MaxDataNodes - maxReturnNodes, (logList.Items[1] as Log).LogData[0].Data.Count);
+
+                WitsmlSettings.MaxDataNodes = previousMaxDataNodes;
+            }
+            catch
+            {
+                WitsmlSettings.MaxDataNodes = previousMaxDataNodes;
+            }
         }
 
         #region Helper Methods
