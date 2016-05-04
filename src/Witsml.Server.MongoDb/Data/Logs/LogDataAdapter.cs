@@ -318,8 +318,11 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             Logger.DebugFormat("Query data values for log. Log Uid = {0}", log.Uid);
 
-            if (context.QueryMaxDataNodes <= 0 || context.QueryMaxDataPoints <= 0)
+            if (context.MaxDataNodes <= 0 || context.MaxDataPoints <= 0)
+            {
+                // TODO: Log why we are skipping.
                 return;
+            }
 
             // Get the latest values request if one was supplied.
             var requestLatestValues = parser.RequestLatestValues();
@@ -366,12 +369,10 @@ namespace PDS.Witsml.Server.Data.Logs
         protected List<string> FormatLogData(T log, ChannelDataReader reader, int? requestLatestValues, ResponseContext context)
         {
             Dictionary<string, Range<double?>> ranges;
-            bool dataTruncated = false;
 
-            var logData = reader.GetData(requestLatestValues, context.QueryMaxDataNodes, context.QueryMaxDataPoints, out ranges, out dataTruncated);
+            var logData = reader.GetData(context, out ranges);
             if (logData.Count > 0)
             {
-                context.DataTruncated = context.DataTruncated || dataTruncated;
                 SetLogIndexRange(log, ranges);
             }
 
