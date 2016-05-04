@@ -23,6 +23,7 @@ using System.Linq;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
+using log4net;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
@@ -40,10 +41,18 @@ namespace PDS.Witsml.Server.Data.Logs
 
         protected LogDataAdapter(IDatabaseProvider databaseProvider, string dbCollectionName) : base(databaseProvider, dbCollectionName)
         {
+            Logger = LogManager.GetLogger(GetType());
         }
 
         [Import]
         public ChannelDataChunkAdapter ChannelDataChunkAdapter { get; set; }
+
+
+        /// <summary>
+        /// Gets the logger.
+        /// </summary>
+        /// <value>The logger.</value>
+        protected ILog Logger { get; private set; }
 
         /// <summary>
         /// Retrieves data objects from the data store using the specified parser.
@@ -342,7 +351,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
             if (context.MaxDataNodes <= 0 || context.MaxDataPoints <= 0)
             {
-                // TODO: Log why we are skipping.
+                // Log why we are skipping.
+                Logger.Debug("Query Response maximum data nodes or data points has been reached.");
                 return;
             }
 
