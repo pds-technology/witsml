@@ -65,10 +65,14 @@ namespace PDS.Witsml.Server.Data
             var responseContext = parser.ToContext();
 
             // Execute each query separately
-            var queries = childParsers.SelectMany(p => DataAdapter.Query(p, responseContext));
+            var queries = childParsers
+                .SelectMany(p => DataAdapter.Query(p, responseContext))
+                .ToList(); // Fully evaluate before setting the error code.
 
             return new WitsmlResult<IEnergisticsCollection>(
-                responseContext.DataTruncated ? ErrorCodes.ParialSuccess : ErrorCodes.Success,
+                responseContext.DataTruncated 
+                    ? ErrorCodes.ParialSuccess 
+                    : ErrorCodes.Success,
                 CreateCollection(queries));
         }
 
@@ -137,6 +141,6 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="dataObjects">The data objects.</param>
         /// <returns>The <see cref="TList"/> instance.</returns>
-        protected abstract TList CreateCollection(IEnumerable<TObject> dataObjects);
+        protected abstract TList CreateCollection(List<TObject> dataObjects);
     }
 }

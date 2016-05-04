@@ -25,9 +25,6 @@ namespace PDS.Witsml.Server.Configuration
 {
     public static class ResponseExtensions
     {
-        private static readonly int _maxDataNodes = Settings.Default.MaxDataNodes;
-        private static readonly int _maxDataPoints = Settings.Default.MaxDataPoints;
-
         /// <summary>
         /// Initializes the ResponseContext with the specified parser.
         /// </summary>
@@ -45,10 +42,10 @@ namespace PDS.Witsml.Server.Configuration
                 context.RequestLatestValues = parser.RequestLatestValues();
 
                 context.MaxDataNodes = context.MaxReturnNodes.HasValue
-                    ? Math.Min(context.MaxReturnNodes.Value, _maxDataNodes)
-                    : _maxDataNodes;
-                context.MaxDataPoints = _maxDataPoints;
-                context.TotalMaxDataNodes = Math.Min(context.MaxDataNodes * parser.QueryCount, _maxDataNodes);
+                    ? Math.Min(context.MaxReturnNodes.Value, WitsmlSettings.MaxDataNodes)
+                    : WitsmlSettings.MaxDataNodes;
+                context.MaxDataPoints = WitsmlSettings.MaxDataPoints;
+                context.TotalMaxDataNodes = Math.Min(context.MaxDataNodes * parser.QueryCount, WitsmlSettings.MaxDataNodes);
 
                 context.TotalDataNodes = 0;
                 context.TotalDataPoints = 0;
@@ -76,7 +73,7 @@ namespace PDS.Witsml.Server.Configuration
 
                 // Update query maximums for the next query
                 context.MaxDataNodes = Math.Min(context.MaxDataNodes, context.TotalMaxDataNodes - context.TotalDataNodes);
-                context.MaxDataPoints = _maxDataPoints - context.TotalDataPoints;
+                context.MaxDataPoints = WitsmlSettings.MaxDataPoints - context.TotalDataPoints;
             }
         }
 
