@@ -162,7 +162,7 @@ namespace PDS.Witsml.Server.Data.Transactions
                 if (count == 0)
                 {
                     var message = string.Format("Transaction deadlock on data object with Uri: {0}", uri);
-                    throw new WitsmlException(ErrorCodes.ErrorTransactionDeadlock);
+                    throw new WitsmlException(ErrorCodes.ErrorTransactionDeadlock, message);
                 }
             }
         }
