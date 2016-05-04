@@ -22,11 +22,21 @@ using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
+    /// <summary>
+    /// Data provider that implements support for ETP API functions for <see cref="Wellbore"/>.
+    /// </summary>
+    /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{Wellbore}" />
     [Export(typeof(IEtpDataProvider))]
     [Export200(ObjectTypes.Wellbore, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class Wellbore200DataProvider : EtpDataProvider<Wellbore>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Wellbore200DataProvider"/> class.
+        /// </summary>
+        /// <param name="container">The composition container.</param>
+        /// <param name="dataAdapter">The data adapter.</param>
+        [ImportingConstructor]
         public Wellbore200DataProvider(IContainer container, IWitsmlDataAdapter<Wellbore> dataAdapter) : base(container, dataAdapter)
         {
         }

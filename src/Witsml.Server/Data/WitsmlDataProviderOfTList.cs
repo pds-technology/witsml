@@ -26,7 +26,7 @@ using PDS.Witsml.Server.Configuration;
 namespace PDS.Witsml.Server.Data
 {
     /// <summary>
-    /// Data provider that encapsulates CRUD service calls for WITSML query.
+    /// Data provider that implements support for WITSML API functions.
     /// </summary>
     /// <typeparam name="TList">Type of the object list.</typeparam>
     /// <typeparam name="TObject">Type of the object.</typeparam>

@@ -28,6 +28,12 @@ using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data
 {
+    /// <summary>
+    /// Data provider that implements support for WITSML API functions.
+    /// </summary>
+    /// <typeparam name="TObject">The type of the object.</typeparam>
+    /// <seealso cref="PDS.Witsml.Server.Data.IEtpDataProvider{TObject}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.IEtpDataProvider" />
     public abstract class WitsmlDataProvider<TObject> : IEtpDataProvider<TObject>, IEtpDataProvider
     {
         /// <summary>

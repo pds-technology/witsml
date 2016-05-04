@@ -25,6 +25,10 @@ using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
+    /// <summary>
+    /// Data provider that implements support for WITSML API functions for <see cref="Log"/>.
+    /// </summary>
+    /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{LogList, Log}" />
     [Export(typeof(IEtpDataProvider))]
     [Export141(ObjectTypes.Log, typeof(IEtpDataProvider))]
     [Export141(ObjectTypes.Log, typeof(IWitsmlDataProvider))]

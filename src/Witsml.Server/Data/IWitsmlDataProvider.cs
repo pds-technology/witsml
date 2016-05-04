@@ -22,7 +22,7 @@ using PDS.Witsml.Server.Configuration;
 namespace PDS.Witsml.Server.Data
 {
     /// <summary>
-    /// Represents a data provider that implements support for WITSML queries
+    /// Represents a data provider that implements support for WITSML API functions.
     /// </summary>
     public interface IWitsmlDataProvider
     {

@@ -22,6 +22,11 @@ using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data
 {
+    /// <summary>
+    /// Data provider that implements support for ETP API functions.
+    /// </summary>
+    /// <typeparam name="TObject">The type of the object.</typeparam>
+    /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{TObject}" />
     public abstract class EtpDataProvider<TObject> : WitsmlDataProvider<TObject>
         where TObject : AbstractObject
     {

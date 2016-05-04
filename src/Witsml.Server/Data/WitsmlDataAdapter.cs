@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
 using log4net;

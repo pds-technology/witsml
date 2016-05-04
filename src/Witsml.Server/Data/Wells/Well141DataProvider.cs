@@ -24,6 +24,10 @@ using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
+    /// <summary>
+    /// Data provider that implements support for WITSML API functions for <see cref="Well"/>.
+    /// </summary>
+    /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{WellList, Well}" />
     [Export(typeof(IEtpDataProvider))]
     [Export141(ObjectTypes.Well, typeof(IEtpDataProvider))]
     [Export141(ObjectTypes.Well, typeof(IWitsmlDataProvider))]

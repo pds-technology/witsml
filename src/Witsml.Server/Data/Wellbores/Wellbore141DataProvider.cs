@@ -24,6 +24,10 @@ using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
+    /// <summary>
+    /// Data provider that implements support for WITSML API functions for <see cref="Wellbore"/>.
+    /// </summary>
+    /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{WellboreList, Wellbore}" />
     [Export(typeof(IEtpDataProvider))]
     [Export141(ObjectTypes.Wellbore, typeof(IEtpDataProvider))]
     [Export141(ObjectTypes.Wellbore, typeof(IWitsmlDataProvider))]
