@@ -626,6 +626,12 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             optionsIn.Add(Model.IsRequestObjectSelectionCapability ? OptionsIn.RequestObjectSelectionCapability.True : string.Empty);
             optionsIn.Add(Model.IsRequestPrivateGroupOnly ? OptionsIn.RequestPrivateGroupOnly.True : string.Empty);
 
+            if (Model.MaxDataRows.HasValue && Model.MaxDataRows.Value > 0)
+                optionsIn.Add(new OptionsIn.MaxReturnNodes(Model.MaxDataRows.Value));
+
+            if (Model.RequestLatestValues.HasValue && Model.RequestLatestValues.Value > 0)
+                optionsIn.Add(new OptionsIn.RequestLatestValues(Model.RequestLatestValues.Value));
+
             return string.Join(";", optionsIn.Where(o => !string.IsNullOrEmpty(o)));
         }
 

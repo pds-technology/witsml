@@ -25,20 +25,65 @@ namespace PDS.Witsml.Linq
 {
     public interface IWitsmlContext
     {
+        /// <summary>
+        /// Gets or sets the log query action.
+        /// </summary>
+        /// <value>
+        /// The log query action.
+        /// </value>
         Action<Functions, string, string> LogQuery { get; set; }
 
+        /// <summary>
+        /// Gets or sets the log response action.
+        /// </summary>
+        /// <value>
+        /// The log response action.
+        /// </value>
         Action<Functions, string, string, string, short, string> LogResponse { get; set; }
 
+        /// <summary>
+        /// Gets all wells.
+        /// </summary>
+        /// <returns>The wells.</returns>
         IEnumerable<IDataObject> GetAllWells();
 
+        /// <summary>
+        /// Gets the wellbores.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>The wellbores.</returns>
         IEnumerable<IWellObject> GetWellbores(EtpUri parentUri);
 
+        /// <summary>
+        /// Gets the wellbore objects.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>The wellbore objects of specified type.</returns>
         IEnumerable<IWellboreObject> GetWellboreObjects(string objectType, EtpUri parentUri);
 
+        /// <summary>
+        /// Gets the growing object header only.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="uri">The URI.</param>
+        /// <returns>The header for the specified growing objects.</returns>
         IWellboreObject GetGrowingObjectHeaderOnly(string objectType, EtpUri uri);
 
+        /// <summary>
+        /// Gets the object identifier only.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="uri">The URI.</param>
+        /// <returns>The object identifier.</returns>
         IDataObject GetObjectIdOnly(string objectType, EtpUri uri);
 
+        /// <summary>
+        /// Gets the object details.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="uri">The URI.</param>
+        /// <returns>The object detail.</returns>
         IDataObject GetObjectDetails(string objectType, EtpUri uri);
     }
 }

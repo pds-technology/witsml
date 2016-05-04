@@ -21,7 +21,8 @@
                 <RowDefinition Height="30" />
                 <RowDefinition Height="40" />
                 <RowDefinition Height="40" />
-                <RowDefinition Height="30" />
+                <RowDefinition Height="40" />
+                <RowDefinition Height="40" />
                 <RowDefinition Height="40" />
                 <RowDefinition Height="30" />
                 <RowDefinition Height="40" />
@@ -53,18 +54,21 @@
             <CheckBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" Content="Request Private Group Only" VerticalAlignment="Center" IsChecked="{Binding Model.IsRequestPrivateGroupOnly}" IsEnabled="{Binding Model.IsRequestObjectSelectionCapability, Converter={StaticResource BooleanInverseConverter}}" />
 
             <!-- TODO: Implement with Logs -->
-            <!--<TextBlock Grid.Column="0" Grid.Row="6" Text="Max Data Rows:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
-            <xctk:IntegerUpDown Value="{Binding Model.MaxDataRows}" Grid.Column="1" Grid.Row="6" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" />-->
+            <TextBlock Grid.Column="0" Grid.Row="7" Text="Max Data Rows:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
+            <xctk:IntegerUpDown Value="{Binding Model.MaxDataRows}" Minimum="0" Grid.Column="1" Grid.Row="7" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" />
 
-            <Border Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="0,1,0,0" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="0" Grid.Row="8" Text="Request Return Values:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
+            <xctk:IntegerUpDown Value="{Binding Model.RequestLatestValues}" Minimum="0" Grid.Column="1" Grid.Row="8" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" />
 
-            <TextBlock Grid.Row="9" Grid.Column="0" Text="Output Path:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
-            <TextBox Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" Padding="5" Text="{Binding Model.OutputPath}" VerticalContentAlignment="Center" />
+            <Border Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="0,1,0,0" VerticalAlignment="Center" />
 
-            <TextBlock Grid.Row="10" Grid.Column="0" Text="Truncate Size:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
-            <xctk:IntegerUpDown Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" Padding="5" Text="{Binding Model.TruncateSize}" FormatString="N0" VerticalContentAlignment="Center" />
+            <TextBlock Grid.Row="10" Grid.Column="0" Text="Output Path:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
+            <TextBox Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" Padding="5" Text="{Binding Model.OutputPath}" VerticalContentAlignment="Center" />
 
-            <StackPanel Grid.Row="11" Grid.Column="1" Grid.ColumnSpan="2" Margin="5,10,5,5" Orientation="Horizontal">
+            <TextBlock Grid.Row="11" Grid.Column="0" Text="Truncate Size:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
+            <xctk:IntegerUpDown Grid.Row="11" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" Padding="5" Text="{Binding Model.TruncateSize}" FormatString="N0" VerticalContentAlignment="Center" />
+
+            <StackPanel Grid.Row="12" Grid.Column="1" Grid.ColumnSpan="2" Margin="5,10,5,5" Orientation="Horizontal">
                 <CheckBox Content="Save All Query Responses" VerticalAlignment="Center" IsChecked="{Binding Model.IsSaveQueryResponse}" />
                 <CheckBox Content="Split Results" VerticalAlignment="Center" Margin="40,0,0,0" IsChecked="{Binding Model.IsSplitResults}" />
             </StackPanel>

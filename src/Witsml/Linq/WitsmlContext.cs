@@ -55,8 +55,20 @@ namespace PDS.Witsml.Linq
 
         public abstract string DataSchemaVersion { get; }
 
+        /// <summary>
+        /// Gets or sets the log query action.
+        /// </summary>
+        /// <value>
+        /// The log query action.
+        /// </value>
         public Action<Functions, string, string> LogQuery { get; set; }
 
+        /// <summary>
+        /// Gets or sets the log response action.
+        /// </summary>
+        /// <value>
+        /// The log response action.
+        /// </value>
         public Action<Functions, string, string, string, short, string> LogResponse { get; set; }
 
         public List<T> One<T>()
@@ -71,21 +83,45 @@ namespace PDS.Witsml.Linq
 
         public abstract IEnumerable<IWellObject> GetWellbores(EtpUri uri);
 
+        /// <summary>
+        /// Gets the wellbore objects.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>The wellbore objects of specified type.</returns>
         public IEnumerable<IWellboreObject> GetWellboreObjects(string objectType, EtpUri uri)
         {
             return GetObjects<IWellboreObject>(objectType, uri, OptionsIn.ReturnElements.IdOnly);
         }
 
+        /// <summary>
+        /// Gets the growing object header only.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="uri">The URI.</param>
+        /// <returns>The header for the specified growing objects.</returns>
         public IWellboreObject GetGrowingObjectHeaderOnly(string objectType, EtpUri uri)
         {
             return GetObjects<IWellboreObject>(objectType, uri, OptionsIn.ReturnElements.HeaderOnly).FirstOrDefault();
         }
 
+        /// <summary>
+        /// Gets the object identifier only.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="uri">The URI.</param>
+        /// <returns>The object identifier.</returns>
         public IDataObject GetObjectIdOnly(string objectType, EtpUri uri)
         {
             return GetObjects<IDataObject>(objectType, uri, OptionsIn.ReturnElements.IdOnly).FirstOrDefault();
         }
 
+        /// <summary>
+        /// Gets the object details.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="uri">The URI.</param>
+        /// <returns>The object detail.</returns>
         public IDataObject GetObjectDetails(string objectType, EtpUri uri)
         {
             return GetObjects<IDataObject>(objectType, uri, OptionsIn.ReturnElements.All).FirstOrDefault();
