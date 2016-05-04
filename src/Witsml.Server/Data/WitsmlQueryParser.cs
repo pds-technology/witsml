@@ -46,6 +46,7 @@ namespace PDS.Witsml.Server.Data
             _document = parser._document;
             _namespace = parser._namespace;
             _elements = new[] { element };
+            QueryCount = 1;
         }
 
         public WitsmlQueryParser(RequestContext context)
@@ -63,11 +64,15 @@ namespace PDS.Witsml.Server.Data
             {
                 _elements = _document.Elements();
             }
+
+            QueryCount = _elements.Count();
         }
 
         public RequestContext Context { get; private set; }
 
         public Dictionary<string, string> Options { get; private set; }
+
+        public int QueryCount { get; }
 
         public string ReturnElements()
         {

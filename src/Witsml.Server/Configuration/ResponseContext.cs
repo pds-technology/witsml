@@ -16,51 +16,37 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
-using System.Linq;
-using PDS.Witsml.Server.Data;
-using PDS.Witsml.Server.Properties;
+using PDS.Witsml.Data.Channels;
 
 namespace PDS.Witsml.Server.Configuration
 {
     /// <summary>
     /// Encapsulates data for responses to WITSML Store API methods.
     /// </summary>
-    public class ResponseContext
+    public class ResponseContext : IQueryContext
     {
-        private readonly int _maxDataNodes = Settings.Default.MaxDataNodes;
-        private readonly int _maxDataPoints = Settings.Default.MaxDataPoints;
-        private readonly WitsmlQueryParser _parser;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ResponseContext"/> class.
         /// </summary>
-        /// <param name="parser">The Witsml query parser.</param>
-        public ResponseContext(WitsmlQueryParser parser)
+        public ResponseContext()
         {
-            _parser = parser;
-
-            var queryCount = _parser.Elements().ToArray().Length;
-
-            if (IsGrowingDataObject())
-            {
-                int? maxReturnNodes = _parser.MaxReturnNodes();
-                MaxReturnNodes = maxReturnNodes;
-
-                QueryMaxDataNodes = MaxReturnNodes.HasValue
-                    ? Math.Min(MaxReturnNodes.Value, _maxDataNodes)
-                    : _maxDataNodes;
-
-                QueryMaxDataPoints = _maxDataPoints;
-
-                ResponseMaxDataNodes = Math.Min(QueryMaxDataNodes * queryCount, _maxDataNodes);
-                //ResponseMaxDataPoints = _maxDataPoints;
-
-                ResponseDataNodeTotal = 0;
-                ResponseDataPointTotal = 0;
-                DataTruncated = false;
-            }
+            ObjectType = string.Empty;
+            DataTruncated = false;
+            MaxReturnNodes = null;
+            MaxDataNodes = 0;
+            MaxDataPoints = 0;
+            TotalMaxDataNodes = 0;
+            TotalDataNodes = 0;
+            TotalDataPoints = 0;
         }
+
+        /// <summary>
+        /// Gets or sets the type of the object for the response.
+        /// </summary>
+        /// <value>
+        /// The type of the object.
+        /// </value>
+        public string ObjectType { get; set; }
 
         /// <summary>
         /// Gets the maximum return nodes OptionsIn from the parser.
@@ -68,7 +54,15 @@ namespace PDS.Witsml.Server.Configuration
         /// <value>
         /// The maximum return nodes.
         /// </value>
-        public int? MaxReturnNodes { get; private set; }
+        public int? MaxReturnNodes { get; set; }
+
+        /// <summary>
+        /// Gets or sets the request latest values OptionsIn from the parser.
+        /// </summary>
+        /// <value>
+        /// The request latest values.
+        /// </value>
+        public int? RequestLatestValues { get; set; }
 
         /// <summary>
         /// Gets the current query maximum data nodes and is 
@@ -77,7 +71,7 @@ namespace PDS.Witsml.Server.Configuration
         /// <value>
         /// The query maximum data nodes.
         /// </value>
-        public int QueryMaxDataNodes { get; private set; }
+        public int MaxDataNodes { get; set; }
 
         /// <summary>
         /// Gets the current query maximum data points and is 
@@ -86,7 +80,7 @@ namespace PDS.Witsml.Server.Configuration
         /// <value>
         /// The query maximum data points.
         /// </value>
-        public int QueryMaxDataPoints { get; private set; }
+        public int MaxDataPoints { get; set; }
 
         /// <summary>
         /// Gets the response maximum data nodes.
@@ -94,15 +88,7 @@ namespace PDS.Witsml.Server.Configuration
         /// <value>
         /// The response maximum data nodes.
         /// </value>
-        public int ResponseMaxDataNodes { get; private set; }
-
-        /// <summary>
-        /// Gets the response maximum data points.
-        /// </summary>
-        /// <value>
-        /// The response maximum data points.
-        /// </value>
-        //public int ResponseMaxDataPoints { get; private set; } // TODO: May not need this.  Just use QueryMaxDataPoints
+        public int TotalMaxDataNodes { get; set; }
 
         /// <summary>
         /// Gets the current response data node total and is 
@@ -111,7 +97,7 @@ namespace PDS.Witsml.Server.Configuration
         /// <value>
         /// The response data node total.
         /// </value>
-        public int ResponseDataNodeTotal { get; private set; }
+        public int TotalDataNodes { get; set; }
 
         /// <summary>
         /// Gets the current response data point total and is 
@@ -120,7 +106,7 @@ namespace PDS.Witsml.Server.Configuration
         /// <value>
         /// The response data point total.
         /// </value>
-        public int ResponseDataPointTotal { get; private set; }
+        public int TotalDataPoints { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether data has been truncated.
@@ -129,35 +115,5 @@ namespace PDS.Witsml.Server.Configuration
         ///   <c>true</c> if data has been truncated; otherwise, <c>false</c>.
         /// </value>
         public bool DataTruncated { get; set; }
-
-        /// <summary>
-        /// Updates the growing object totals.
-        /// </summary>
-        /// <param name="queryNodeCount">The number data nodes returned by the last query.</param>
-        /// <param name="channelCount">The channel count returned by the last query.</param>
-        public void UpdateGrowingObjectTotals(int queryNodeCount, int channelCount)
-        {
-            if (IsGrowingDataObject())
-            {
-                int queryPointCount = queryNodeCount * channelCount;
-
-                // Update response totals
-                ResponseDataNodeTotal += queryNodeCount;
-                ResponseDataPointTotal += queryPointCount;
-
-                // Update query maximums for the next query
-                QueryMaxDataNodes = Math.Min(QueryMaxDataNodes, ResponseMaxDataNodes - ResponseDataNodeTotal);
-                QueryMaxDataPoints = _maxDataPoints - ResponseDataPointTotal;
-            }
-        }
-
-        /// <summary>
-        /// Determines whether data object for the parser is a growing data object.
-        /// </summary>
-        /// <returns>True if the data object for the parser is a growing data object, false otherwise.</returns>
-        private bool IsGrowingDataObject()
-        {
-            return ObjectTypes.IsGrowingDataObject(_parser.Context.ObjectType);
-        }
     }
 }

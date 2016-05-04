@@ -866,12 +866,18 @@ namespace PDS.Witsml.Data.Channels
             }
         }
 
-        public List<List<object>> GetData(int? requestLatestValues, int maxDataNodes, int maxDataPoints, out Dictionary<string, Range<double?>> ranges, out bool dataTruncated)
+        public List<List<object>> GetData(
+            IQueryContext context,
+            out Dictionary<string, Range<double?>> ranges)
         {
+
+            int? requestLatestValues = context.RequestLatestValues;
+            int maxDataNodes = context.MaxDataNodes;
+            int maxDataPoints = context.MaxDataPoints;
+
             var dataNodeCount = 0;
             var dataPointCount = 0;
             var channelCount = AllMnemonics.Length;
-            dataTruncated = false;
 
             var logData = new List<List<object>>();
             var isTimeIndex = Indices.Select(x => x.IsTimeIndex).FirstOrDefault();
@@ -902,7 +908,7 @@ namespace PDS.Witsml.Data.Channels
                 // If processing the next row will exceed our maxDataNodes or maxDataPoints limits then stop
                 if ((dataNodeCount + 1) > maxDataNodes || (dataPointCount + dataNodeCount * channelCount) > maxDataPoints)
                 {
-                    dataTruncated = true;
+                    context.DataTruncated = true;
                     _log.DebugFormat("GetData truncated with {0} data nodes and {1} data points.", dataNodeCount, dataPointCount);
                     break;
                 }
