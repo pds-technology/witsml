@@ -70,11 +70,8 @@ namespace PDS.Witsml.Server.Data.Logs
                     var logHeader = logHeaders[l.GetUri()];
                     var mnemonics = GetMnemonicList(logHeader, parser);
 
-                    // Query the log data and get the number of nodes returned.
-                    var queryNodeCount = QueryLogDataValues(l, logHeader, parser, mnemonics, context.QueryMaxDataNodes, context.QueryMaxDataPoints);
-
-                    // Update the response context growing object totals
-                    context.UpdateGrowingObjectTotals(queryNodeCount, mnemonics.Keys.Count);
+                    // Query the log data
+                    QueryLogDataValues(l, logHeader, parser, mnemonics, context);
 
                     FormatLogHeader(l, mnemonics.Values.ToArray());
                 });
@@ -317,9 +314,15 @@ namespace PDS.Witsml.Server.Data.Logs
             return unitIndexes.ToDictionary(x => x.Index, x => x.Unit);
         }
 
-        protected int QueryLogDataValues(T log, T logHeader, WitsmlQueryParser parser, IDictionary<int, string> mnemonics, int maxDataNodes, int maxDataPoints)
+        protected void QueryLogDataValues(T log, T logHeader, WitsmlQueryParser parser, IDictionary<int, string> mnemonics, ResponseContext context)
         {
             Logger.DebugFormat("Query data values for log. Log Uid = {0}", log.Uid);
+
+            if (context.MaxDataNodes <= 0 || context.MaxDataPoints <= 0)
+            {
+                // TODO: Log why we are skipping.
+                return;
+            }
 
             // Get the latest values request if one was supplied.
             var requestLatestValues = parser.RequestLatestValues();
@@ -346,10 +349,11 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Slice the reader for the requested mnemonics
             reader.Slice(mnemonics, units);
-            var logData = FormatLogData(log, reader, requestLatestValues);
+            var logData = FormatLogData(log, reader, requestLatestValues, context);
             SetLogDataValues(log, logData, reader.AllMnemonics, reader.AllUnits);
 
-            return logData.Count;
+            // Update the response context growing object totals
+            context.UpdateGrowingObjectTotals(logData.Count, mnemonics.Keys.Count);
         }
 
         protected Range<double?> GetLogDataSubsetRange(T log, WitsmlQueryParser parser)
@@ -362,12 +366,11 @@ namespace PDS.Witsml.Server.Data.Logs
                 isTimeLog);
         }
 
-        protected List<string> FormatLogData(T log, ChannelDataReader reader, int? requestLatestValues)
+        protected List<string> FormatLogData(T log, ChannelDataReader reader, int? requestLatestValues, ResponseContext context)
         {
             Dictionary<string, Range<double?>> ranges;
 
-            var logData = reader.GetData(requestLatestValues, out ranges);
-
+            var logData = reader.GetData(context, out ranges);
             if (logData.Count > 0)
             {
                 SetLogIndexRange(log, ranges);
