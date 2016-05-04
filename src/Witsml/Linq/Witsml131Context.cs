@@ -72,6 +72,10 @@ namespace PDS.Witsml.Linq
             get { return CreateQuery<Trajectory, TrajectoryList>(); }
         }
 
+        /// <summary>
+        /// Gets all wells.
+        /// </summary>
+        /// <returns>The wells.</returns>
         public override IEnumerable<IDataObject> GetAllWells()
         {
             return Wells.With(OptionsIn.ReturnElements.IdOnly)
@@ -79,6 +83,11 @@ namespace PDS.Witsml.Linq
                 .OrderBy(x => x.Name);
         }
 
+        /// <summary>
+        /// Gets the wellbores.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>The wellbores.</returns>
         public override IEnumerable<IWellObject> GetWellbores(EtpUri uri)
         {
             return Wellbores.With(OptionsIn.ReturnElements.IdOnly)

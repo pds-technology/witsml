@@ -29,10 +29,17 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
             StoreFunction = Functions.GetFromStore;
             OutputPath = "./Data/Results";
             TruncateSize = 1000000; // 1M char
-            MaxDataRows = 1000;
+            MaxDataRows = 10000;
         }
 
         private Connection _connection;
+
+        /// <summary>
+        /// Gets or sets the connection.
+        /// </summary>
+        /// <value>
+        /// The connection.
+        /// </value>
         public Connection Connection
         {
             get { return _connection; }
@@ -47,6 +54,13 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
         }
 
         private OptionsIn.ReturnElements _returnElementType;
+
+        /// <summary>
+        /// Gets or sets the type of the return element.
+        /// </summary>
+        /// <value>
+        /// The type of the return element.
+        /// </value>
         public OptionsIn.ReturnElements ReturnElementType
         {
             get { return _returnElementType; }
@@ -61,6 +75,13 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
         }
 
         private bool _isRequestObjectSelectionCapability;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to request object selection capability.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if to request object selection capability; otherwise, <c>false</c>.
+        /// </value>
         public bool IsRequestObjectSelectionCapability
         {
             get { return _isRequestObjectSelectionCapability; }
@@ -76,6 +97,13 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
         }
 
         private bool _isRequestPrivateGroupOnly;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to request private group only.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if to request private group only; otherwise, <c>false</c>.
+        /// </value>
         public bool IsRequestPrivateGroupOnly
         {
             get { return _isRequestPrivateGroupOnly; }
@@ -90,6 +118,13 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
         }
 
         private bool _isSaveQueryResponse;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to save query response.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if to save query response; otherwise, <c>false</c>.
+        /// </value>
         public bool IsSaveQueryResponse
         {
             get { return _isSaveQueryResponse; }
@@ -104,6 +139,13 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
         }
 
         private bool _isSplitResults;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to split results.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if to split results; otherwise, <c>false</c>.
+        /// </value>
         public bool IsSplitResults
         {
             get { return _isSplitResults; }
@@ -118,6 +160,13 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
         }
 
         private string _outputPath;
+
+        /// <summary>
+        /// Gets or sets the output path.
+        /// </summary>
+        /// <value>
+        /// The output path.
+        /// </value>
         public string OutputPath
         {
             get { return _outputPath; }
@@ -132,6 +181,13 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
         }
 
         private string _witsmlVersion;
+
+        /// <summary>
+        /// Gets or sets the witsml version.
+        /// </summary>
+        /// <value>
+        /// The witsml version.
+        /// </value>
         public string WitsmlVersion
         {
             get { return _witsmlVersion; }
@@ -145,8 +201,15 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
             }
         }
 
-        private int _maxDataRows;
-        public int MaxDataRows
+        private int? _maxDataRows;
+
+        /// <summary>
+        /// Gets or sets the maximum number of return data rows.
+        /// </summary>
+        /// <value>
+        /// The maximum number of return data rows.
+        /// </value>
+        public int? MaxDataRows
         {
             get { return _maxDataRows; }
             set
@@ -159,7 +222,35 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
             }
         }
 
+        private int? _requestLatestValues;
+
+        /// <summary>
+        /// Gets or sets the number of latest values for the request (growing object only).
+        /// </summary>
+        /// <value>
+        /// The the number of latest values for the request.
+        /// </value>
+        public int? RequestLatestValues
+        {
+            get { return _requestLatestValues; }
+            set
+            {
+                if (_requestLatestValues != value)
+                {
+                    _requestLatestValues = value;
+                    NotifyOfPropertyChange(() => _requestLatestValues);
+                }
+            }
+        }
+
         private int _truncateSize;
+
+        /// <summary>
+        /// Gets or sets the size of the truncate.
+        /// </summary>
+        /// <value>
+        /// The size of the truncate.
+        /// </value>
         public int TruncateSize
         {
             get { return _truncateSize; }
@@ -174,6 +265,13 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
         }
 
         private Functions _storeFunction;
+
+        /// <summary>
+        /// Gets or sets the store function.
+        /// </summary>
+        /// <value>
+        /// The store function.
+        /// </value>
         public Functions StoreFunction
         {
             get { return _storeFunction; }
