@@ -132,7 +132,7 @@ namespace PDS.Witsml.Server.Data
             var privateGroupOnly = _parser.RequestPrivateGroupOnly();
             var privateGroupOnlyFilter = privateGroupOnly
                 ? Builders<T>.Filter.Eq("CommonData.PrivateGroupOnly", true)
-                : Builders<T>.Filter.Ne("CommonData.PrivateGroupOnly", false);
+                : Builders<T>.Filter.Ne("CommonData.PrivateGroupOnly", true);
 
             filters.Add(privateGroupOnlyFilter);
 
