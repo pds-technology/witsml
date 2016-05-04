@@ -29,7 +29,7 @@ namespace PDS.Witsml.Server.Models
             var mnemonics = ChannelDataReader.Split(channelDataChunk.MnemonicList);
             var units = ChannelDataReader.Split(channelDataChunk.UnitList);
 
-            return new ChannelDataReader(channelDataChunk.Data, mnemonics, units, channelDataChunk.Uri, channelDataChunk.Uid)
+            return new ChannelDataReader(channelDataChunk.Data, mnemonics, units, null, channelDataChunk.Uri, channelDataChunk.Uid)
                 .WithIndices(channelDataChunk.Indices, calculate: reverse, reverse: reverse);
         }
 

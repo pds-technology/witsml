@@ -120,7 +120,7 @@ namespace PDS.Witsml.Data.Channels
         {
             var records = new List<List<List<object>>>(_records);
 
-            return new ChannelDataReader(records, Mnemonics.ToArray(), Units.ToArray(), Uri)
+            return new ChannelDataReader(records, Mnemonics.ToArray(), Units.ToArray(), null, Uri)
                 .WithIndices(Indices, true);
         }
 

@@ -317,6 +317,29 @@ namespace PDS.Witsml.Server.Data.Logs
             return unitIndexes.ToDictionary(x => x.Index, x => x.Unit);
         }
 
+        protected IDictionary<int, string> GetNullValueList(T log, int[] slices)
+        {
+            // Get the default null value
+            var defaultNullValue = GetDefaultNullValue(log);
+
+            // Get a list of all of the null values
+            var allNullValues = GetNullValuesByColumnIndex(log);
+
+            // Start with all units
+            var nullValuesIndexes = allNullValues
+                .Select((nullValue, index) => new { NullValue = nullValue.Value, Index = index });
+
+            // Get indexes for each slice
+            if (slices.Any())
+            {
+                // always return the index channel
+                nullValuesIndexes = nullValuesIndexes
+                    .Where(x => x.Index == 0 || slices.Contains(x.Index));
+            }
+
+            return nullValuesIndexes.ToDictionary(x => x.Index, x => x.NullValue);
+        }
+
         protected int QueryLogDataValues(T log, T logHeader, WitsmlQueryParser parser, IDictionary<int, string> mnemonics, int maxDataNodes, int maxDataPoints)
         {
             Logger.DebugFormat("Query data values for log. Log Uid = {0}", log.Uid);
@@ -339,10 +362,11 @@ namespace PDS.Witsml.Server.Data.Logs
                 : GetLogDataSubsetRange(logHeader, parser);
 
             var units = GetUnitList(logHeader, mnemonics.Keys.ToArray());
+            var nullValueList = GetNullValueList(logHeader, mnemonics.Keys.ToArray());
             var records = GetChannelData(logHeader.GetUri(), mnemonics[0], range, IsIncreasing(logHeader), requestLatestValues);
 
             // Get a reader for the log's channel data
-            var reader = records.GetReader();
+            var reader = records.GetReader(nullValueList);
 
             // Slice the reader for the requested mnemonics
             reader.Slice(mnemonics, units);
@@ -398,6 +422,9 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Get current index information
             var ranges = GetCurrentIndexRange(current);
+
+            // Get null values
+            var nullValues = GetNullValueList(current, new int[]{});
 
             TimeSpan? offset = null;
             var isTimeLog = IsTimeLog(current, true);
@@ -619,9 +646,13 @@ namespace PDS.Witsml.Server.Data.Logs
 
         protected abstract string GetMnemonic(TChild curve);
 
+        protected abstract string GetDefaultNullValue(T log);
+
         protected abstract string GetIndexCurveMnemonic(T log);
 
         protected abstract IDictionary<int, string> GetUnitsByColumnIndex(T log);
+
+        protected abstract IDictionary<int, string> GetNullValuesByColumnIndex(T log);
 
         protected abstract Range<double?> GetIndexRange(TChild curve, bool increasing = true, bool isTimeIndex = false);
 

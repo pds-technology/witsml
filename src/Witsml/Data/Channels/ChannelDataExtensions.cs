@@ -27,9 +27,9 @@ namespace PDS.Witsml.Data.Channels
 {
     public static class ChannelDataExtensions
     {
-        public static ChannelDataReader GetReader(this IEnumerable<IChannelDataRecord> records)
+        public static ChannelDataReader GetReader(this IEnumerable<IChannelDataRecord> records, IDictionary<int, string> nullValues)
         {
-            return new ChannelDataReader(records);
+            return new ChannelDataReader(records, nullValues);
         }
 
         public static ChannelDataReader GetReader(this Witsml131.Log log)
@@ -44,10 +44,19 @@ namespace PDS.Witsml.Data.Channels
             var indexCurve = log.LogCurveInfo.FirstOrDefault(x => x.Mnemonic.EqualsIgnoreCase(log.IndexCurve.Value));
             var mnemonics = log.LogCurveInfo.Where(x => x.Mnemonic != indexCurve.Mnemonic).Select(x => x.Mnemonic).ToArray();
             var units = log.LogCurveInfo.Where(x => x.Mnemonic != indexCurve.Mnemonic).Select(x => x.Unit).ToArray();
+            var nullValues = log.LogCurveInfo.Select(x => x.NullValue).Skip(1).ToArray();
 
-            return new ChannelDataReader(log.LogData, mnemonics, units, log.GetUri())
+            return new ChannelDataReader(log.LogData, mnemonics, units, nullValues, log.GetUri())
                 // Add index curve to separate collection
                 .WithIndex(indexCurve.Mnemonic, indexCurve.Unit, increasing, isTimeIndex);
+        }
+        public static IDictionary<int, string> GetNullValuesByColumnIndex(this Witsml131.Log log)
+        {
+            return log.LogCurveInfo
+                .Select(x => x.NullValue)
+                .ToArray()
+                .Select((nullValue, index) => new { NullValue = string.IsNullOrWhiteSpace(nullValue) ? log.NullValue : nullValue, Index = index })
+                .ToDictionary(x => x.Index, x => x.NullValue);
         }
 
         public static IEnumerable<ChannelDataReader> GetReaders(this Witsml141.Log log)
@@ -67,12 +76,24 @@ namespace PDS.Witsml.Data.Channels
                 var indexCurve = log.LogCurveInfo.FirstOrDefault(x => x.Mnemonic.Value.EqualsIgnoreCase(log.IndexCurve));
                 var mnemonics = ChannelDataReader.Split(logData.MnemonicList).Skip(1).ToArray();
                 var units = ChannelDataReader.Split(logData.UnitList).Skip(1).ToArray();
+                var nullValues = GetNullValuesByColumnIndex(log).Values.ToArray();
 
-                yield return new ChannelDataReader(logData.Data, mnemonics, units, log.GetUri())
+                yield return new ChannelDataReader(logData.Data, mnemonics, units, nullValues, log.GetUri())
                     // Add index curve to separate collection
                     .WithIndex(indexCurve.Mnemonic.Value, indexCurve.Unit, increasing, isTimeIndex);
             }
         }
+
+
+        public static IDictionary<int, string> GetNullValuesByColumnIndex(this Witsml141.Log log)
+        {
+            return log.LogCurveInfo
+                .Select(x => x.NullValue)
+                .ToArray()
+                .Select((nullValue, index) => new { NullValue = string.IsNullOrWhiteSpace(nullValue) ? log.NullValue : nullValue, Index = index })
+                .ToDictionary(x => x.Index, x => x.NullValue);
+        }
+
 
         public static IEnumerable<ChannelDataReader> GetReaders(this Witsml200.Log log)
         {
@@ -98,7 +119,7 @@ namespace PDS.Witsml.Data.Channels
             var mnemonics = channelSet.Channel.Select(x => x.Mnemonic).ToArray();
             var units = channelSet.Channel.Select(x => x.UoM).ToArray();
 
-            return new ChannelDataReader(channelSet.Data.Data, mnemonics, units, channelSet.GetUri())
+            return new ChannelDataReader(channelSet.Data.Data, mnemonics, units, null, channelSet.GetUri())
                 // Add index channels to separate collection
                 .WithIndices(channelSet.Index.Select(ToChannelIndexInfo), true);
         }

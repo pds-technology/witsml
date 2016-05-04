@@ -1845,6 +1845,62 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(0, results.Count);
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_AddToStore_Can_Add_With_Null_Indicator()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = CreateLog(null, DevKit.Name("Log 01"), Wellbore.UidWell, Well.Name, response.SuppMsgOut, Wellbore.Name);
+            log.StartIndex = new GenericMeasure(13, "ft");
+            log.EndIndex = new GenericMeasure(17, "ft");
+            log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+
+            log.NullValue = "-999.25";
+
+            var logData = log.LogData.First();
+            logData.Data.Add("1700.0,17.1,-999.25");
+            logData.Data.Add("1800.0,18.1,-999.25");
+            logData.Data.Add("1900.0,19.1,-999.25");
+            logData.Data.Add("2000.0,20.1,-999.25");
+            logData.Data.Add("2100.0,21.1,-999.25");
+            logData.Data.Add("2200.0,22.1,-999.25");
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            // Query
+            var query = CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(1, results[0].LogData.Count);
+            Assert.AreEqual(6, results[0].LogData[0].Data.Count);
+
+            var resultLogData = results[0].LogData[0].Data;
+            Assert.AreEqual(2, results[0].LogData[0].MnemonicList.Split(',').Length);
+            double index = 17;
+            foreach (string row in resultLogData)
+            {
+                string[] columns = row.Split(',');
+                Assert.AreEqual(2, columns.Length);
+
+                double outIndex = double.Parse(columns[0]);
+                Assert.AreEqual(index * 100, outIndex);
+
+                double outColumn1 = double.Parse(columns[1]);
+                Assert.AreEqual(index + 0.1, outColumn1);
+
+                index++;
+            }
+        }
+
         #region Helper Methods
 
         private Log CreateLog(string uid, string name, Well well, Wellbore wellbore)

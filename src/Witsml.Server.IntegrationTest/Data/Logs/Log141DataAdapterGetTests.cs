@@ -1047,7 +1047,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        [Ignore, Description("Waiting for the start/end and min/max calculations to account for null indicator")]
         public void Log141DataAdapter_GetFromStore_With_Start_And_End_Index_On_Channel_With_Null_Indicator_Values()
         {
             var response = DevKit.Add<WellList, Well>(_well);
@@ -1101,7 +1100,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Result log header
             var logCurveInfoList = resultLog[0].LogCurveInfo;
-            Assert.AreEqual(4, logCurveInfoList.Count());    // TODO: Returning 5 right now but should be 4 after the null indicator is taken into account.
+            Assert.AreEqual(4, logCurveInfoList.Count());   
             var lciMnemonics = logCurveInfoList.Select(x => x.Mnemonic.Value).ToArray();
             Assert.IsFalse(lciMnemonics.Except(new List<string>() { "MD", "AAA", "BBB", "DDD" }).Any());
 
