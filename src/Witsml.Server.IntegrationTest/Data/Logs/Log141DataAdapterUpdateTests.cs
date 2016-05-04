@@ -19,6 +19,7 @@
 using System;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -201,53 +202,192 @@ namespace PDS.Witsml.Server.Data.Logs
             }
         }
 
-        /// <summary>
-        /// To test concurrency lock for update: open 2 visual studio and debug the following test at the same time;
-        /// lock one test, i.e. break at the commit statement and check if the 2nd thread is repeatedly checking if
-        /// the transaction has been released every 2 seconds
-        /// </summary>
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_Lock_Transaction()
+        public void Log141DataAdapter_UpdataInStore_To_Append_With_Null_Indicator_And_Query_With_Start_And_End_Index()
         {
-            Well.Uid = "Parent Well - Testing Lock";
-            Wellbore.UidWell = Well.Uid;
-            Wellbore.Uid = "Parent Wellbore - Testing Lock";           
-            Log.UidWell = Well.Uid;
-            Log.UidWellbore = Wellbore.Uid;
-            Log.Uid = "Log - Testing Lock";
-            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            var response = DevKit.Add<WellList, Well>(Well);
 
-            var queryWell = new Well { Uid = Well.Uid };
-            var resultWell = DevKit.Query<WellList, Well>(queryWell, optionsIn: OptionsIn.ReturnElements.All);
-            if (resultWell.Count == 0)
-            {
-                var addWell = DevKit.Add<WellList, Well>(Well);
-            }
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
 
-            var queryWellbore = new Wellbore { Uid = Wellbore.Uid, UidWell = Wellbore.UidWell };
-            var resultWellbore = DevKit.Query<WellboreList, Wellbore>(queryWellbore, optionsIn: OptionsIn.ReturnElements.All);
-            if (resultWellbore.Count == 0)
-            {
-                var addWellbore = DevKit.Add<WellboreList, Wellbore>(Wellbore);
-            }
+            var log = DevKit.CreateLog(null, DevKit.Name("Log 01"), Wellbore.UidWell, Well.Name, response.SuppMsgOut, Wellbore.Name);
+            log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
 
-            var queryLog = new Log { Uid = Log.Uid, UidWell = Log.UidWell, UidWellbore = Log.UidWellbore };
-            var resultLog = DevKit.Query<LogList, Log>(queryLog, optionsIn: OptionsIn.ReturnElements.HeaderOnly);
-            if (resultLog.Count == 0)
-            {
-                var addLog = DevKit.Add<LogList, Log>(Log);
-            }
+            log.NullValue = "-999.25";
 
-            var update = new Log
-            {
-                Uid = Log.Uid,
-                UidWell = Log.UidWell,
-                UidWellbore = Log.UidWellbore,
-                Description = "Update Description"
-            };
+            var logData = log.LogData.First();
+            logData.Data.Add("1700.0,17.1,-999.25");
+            logData.Data.Add("1800.0,18.1,-999.25");
+            logData.Data.Add("1900.0,19.1,-999.25");
 
-            var response = DevKit.Update<LogList, Log>(update);
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            //Update
+            var updateLog = DevKit.CreateLog(uidLog, log.Name, log.UidWell, log.NameWell, log.UidWellbore, log.NameWellbore);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = log.LogData.First().UnitList;
+            logData = updateLog.LogData.First();
+            logData.Data.Add("2000.0,20.1,-999.25");
+            logData.Data.Add("2100.0,21.1,-999.25");
+            logData.Data.Add("2200.0,22.1,-999.25");
+            logData.Data.Add("2300.0,23.1,23.2");
+
+            var updateResponse = DevKit.Update<LogList, Log>(updateLog);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            // Query
+            var query = DevKit.CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+            query.StartIndex = new GenericMeasure(1700, "ft");
+            query.EndIndex = new GenericMeasure(2200, "ft");
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.DataOnly);
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(1, results[0].LogData.Count);
+            Assert.AreEqual(6, results[0].LogData[0].Data.Count);
+            Assert.AreEqual(2, results[0].LogData[0].MnemonicList.Split(',').Length);
+
+            var resultLogData = results[0].LogData[0].Data;          
+            double index = 17;
+            foreach (string row in resultLogData)
+            {
+                string[] columns = row.Split(',');
+                Assert.AreEqual(2, columns.Length);
+
+                double outIndex = double.Parse(columns[0]);
+                Assert.AreEqual(index * 100, outIndex);
+
+                double outColumn1 = double.Parse(columns[1]);
+                Assert.AreEqual(index + 0.1, outColumn1);
+
+                index++;
+            }
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_UpdataInStore_Can_Update_With_Null_Indicator_And_Query_With_Start_And_End_Index()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = DevKit.CreateLog(null, DevKit.Name("Log 01"), Wellbore.UidWell, Well.Name, response.SuppMsgOut, Wellbore.Name);
+            log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+
+            log.NullValue = "-999.25";
+
+            var logData = log.LogData.First();
+            logData.Data.Add("1700.0, 17.1, -999.25");
+            logData.Data.Add("1800.0, 18.1, -999.25");
+            logData.Data.Add("1900.0, 19.1, -999.25");
+            logData.Data.Add("2000.0, 20.1,    20.1");
+            logData.Data.Add("2100.0, 21.1,    21.1");
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            //Update
+            var updateLog = DevKit.CreateLog(uidLog, log.Name, log.UidWell, log.NameWell, log.UidWellbore, log.NameWellbore);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = log.LogData.First().UnitList;
+            logData = updateLog.LogData.First();
+            logData.Data.Add("2000.0, 200.1, -999.25");
+            logData.Data.Add("2100.0, 210.1, -999.25");
+            logData.Data.Add("2200.0, 220.1,   22.1");
+
+            var updateResponse = DevKit.Update<LogList, Log>(updateLog);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            // Query
+            var query = DevKit.CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+            query.StartIndex = new GenericMeasure(1700, "ft");
+            query.EndIndex = new GenericMeasure(2200, "ft");
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.DataOnly);
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(1, results[0].LogData.Count);
+            Assert.AreEqual(6, results[0].LogData[0].Data.Count);
+            Assert.AreEqual(3, results[0].LogData[0].MnemonicList.Split(',').Length);
+
+            var resultLogData = results[0].LogData[0].Data;
+
+            Assert.IsTrue(resultLogData[0].Equals("1700,17.1,-999.25"));
+            Assert.IsTrue(resultLogData[1].Equals("1800,18.1,-999.25"));
+            Assert.IsTrue(resultLogData[2].Equals("1900,19.1,-999.25"));
+            Assert.IsTrue(resultLogData[3].Equals("2000,200.1,20.1"));
+            Assert.IsTrue(resultLogData[4].Equals("2100,210.1,21.1"));
+            Assert.IsTrue(resultLogData[5].Equals("2200,220.1,22.1"));
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_UpdataInStore_Can_Replace_Range_With_Null_Indicator_And_Query_With_Start_And_End_Index()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = DevKit.CreateLog(null, DevKit.Name("Log 01"), Wellbore.UidWell, Well.Name, response.SuppMsgOut, Wellbore.Name);
+            log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+
+            log.NullValue = "-999.25";
+
+            var logData = log.LogData.First();
+            logData.Data.Add("1700.0, 17.1, 17.2");
+            logData.Data.Add("1800.0, 18.1, 18.2");
+            logData.Data.Add("1900.0, 19.1, 19.2");
+            logData.Data.Add("2000.0, 20.1, 20.1");
+            logData.Data.Add("2100.0, 21.1, 21.1");
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            //Update
+            var updateLog = DevKit.CreateLog(uidLog, log.Name, log.UidWell, log.NameWell, log.UidWellbore, log.NameWellbore);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = log.LogData.First().UnitList;
+            logData = updateLog.LogData.First();
+            logData.Data.Add("1800.0, 180.1, -999.25");
+            logData.Data.Add("2200.0, 220.1, 22.1");
+
+            var updateResponse = DevKit.Update<LogList, Log>(updateLog);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            // Query
+            var query = DevKit.CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+            query.StartIndex = new GenericMeasure(1700, "ft");
+            query.EndIndex = new GenericMeasure(2200, "ft");
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.DataOnly);
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(1, results[0].LogData.Count);
+            Assert.AreEqual(6, results[0].LogData[0].Data.Count);
+            Assert.AreEqual(3, results[0].LogData[0].MnemonicList.Split(',').Length);
+
+            var resultLogData = results[0].LogData[0].Data;
+
+            Assert.IsTrue(resultLogData[0].Equals("1700,17.1,17.2"));
+            Assert.IsTrue(resultLogData[1].Equals("1800,180.1,18.2"));
+            Assert.IsTrue(resultLogData[2].Equals("1900,-999.25,19.2"));
+            Assert.IsTrue(resultLogData[3].Equals("2000,-999.25,20.1"));
+            Assert.IsTrue(resultLogData[4].Equals("2100,-999.25,21.1"));
+            Assert.IsTrue(resultLogData[5].Equals("2200,220.1,22.1"));
         }
     }
 }

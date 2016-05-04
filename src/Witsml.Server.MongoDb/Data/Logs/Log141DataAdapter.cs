@@ -135,6 +135,11 @@ namespace PDS.Witsml.Server.Data.Logs
             return curve?.Mnemonic?.Value;
         }
 
+        protected override string GetDefaultNullValue(Log log)
+        {
+            return log.NullValue;
+        }
+
         protected override string GetIndexCurveMnemonic(Log log)
         {
             return log.IndexCurve;
@@ -147,6 +152,15 @@ namespace PDS.Witsml.Server.Data.Logs
                 .ToArray()
                 .Select((unit, index) => new { Unit = unit, Index = index })
                 .ToDictionary(x => x.Index, x => x.Unit);
+        }
+
+        protected override IDictionary<int, string> GetNullValuesByColumnIndex(Log log)
+        {
+            return log.LogCurveInfo
+                .Select(x => x.NullValue)
+                .ToArray()
+                .Select((nullValue, index) => new { NullValue = string.IsNullOrWhiteSpace(nullValue) ? log.NullValue : nullValue, Index = index })
+                .ToDictionary(x => x.Index, x => x.NullValue);
         }
 
         protected override Range<double?> GetIndexRange(LogCurveInfo curve, bool increasing = true, bool isTimeIndex = false)

@@ -50,6 +50,7 @@ namespace PDS.Witsml.Data.Channels
         private IList<Range<double?>> _ranges;
         private string[] _originalMnemonics = Empty;
         private string[] _originalUnits = Empty;
+        private string[] _originalNullValues = Empty;
         private string[] _allMnemonics = null;
         private string[] _allUnits = null;
         private readonly int _indexCount;
@@ -69,8 +70,8 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="units">The channel units.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="id">The identifier.</param>
-        public ChannelDataReader(IList<string> data, string[] mnemonics = null, string[] units = null, string uri = null, string id = null) 
-            : this(Combine(data), mnemonics, units, uri, id)
+        public ChannelDataReader(IList<string> data, string[] mnemonics = null, string[] units = null, string[] nullValues = null, string uri = null, string id = null) 
+            : this(Combine(data, nullValues), mnemonics, units, nullValues, uri, id)
         {
         }
 
@@ -82,8 +83,8 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="units">The channel units.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="id">The identifier.</param>
-        public ChannelDataReader(string data, string[] mnemonics = null, string[] units = null, string uri = null, string id = null)
-            : this(Deserialize(data), mnemonics, units, uri, id)
+        public ChannelDataReader(string data, string[] mnemonics = null, string[] units = null, string[] nullValues = null, string uri = null, string id = null)
+            : this(Deserialize(data), mnemonics, units, nullValues, uri, id)
         {
         }
 
@@ -91,7 +92,7 @@ namespace PDS.Witsml.Data.Channels
         /// Initializes a new instance of the <see cref="ChannelDataReader"/> class.
         /// </summary>
         /// <param name="records">The collection of data records.</param>
-        public ChannelDataReader(IEnumerable<IChannelDataRecord> records)
+        public ChannelDataReader(IEnumerable<IChannelDataRecord> records, IDictionary<int, string> nullValues)
         {
             _log.Debug("ChannelDataReader instance created");
 
@@ -107,10 +108,12 @@ namespace PDS.Witsml.Data.Channels
             _indexCount = GetIndexValues(0).Count();
             _originalMnemonics = record?.Mnemonics ?? Empty;
             _originalUnits = record?.Units ?? Empty;
+            _originalNullValues = nullValues?.Values?.ToArray() ?? Empty;
 
             Indices = record?.Indices ?? new List<ChannelIndexInfo>();
             Mnemonics = _originalMnemonics;
             Units = _originalUnits;
+            NullValues = _originalNullValues;
             Uri = record?.Uri;
         }
 
@@ -122,7 +125,7 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="units">The channel units.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="id">The identifier.</param>
-        internal ChannelDataReader(List<List<List<object>>> records, string[] mnemonics = null, string[] units = null, string uri = null, string id = null)
+        internal ChannelDataReader(List<List<List<object>>> records, string[] mnemonics = null, string[] units = null, string[] nullValues = null, string uri = null, string id = null)
         {
             _log.Debug("ChannelDataReader instance created");
 
@@ -131,10 +134,12 @@ namespace PDS.Witsml.Data.Channels
             _indexCount = GetIndexValues(0).Count();
             _originalMnemonics = mnemonics ?? Empty;
             _originalUnits = units ?? Empty;
+            _originalNullValues = nullValues ?? Empty;
 
             Indices = new List<ChannelIndexInfo>();
             Mnemonics = _originalMnemonics;
             Units = _originalUnits;
+            NullValues = _originalNullValues;
             Uri = uri;
             Id = id;
         }
@@ -172,6 +177,8 @@ namespace PDS.Witsml.Data.Channels
         /// </summary>
         /// <value>The list of channel units.</value>
         public string[] Units { get; private set; }
+
+        public string[] NullValues { get; private set; }
 
         /// <summary>
         /// Gets the indices.
@@ -709,7 +716,7 @@ namespace PDS.Witsml.Data.Channels
         /// </returns>
         public bool IsDBNull(int i)
         {
-            return IsNull(GetString(i));
+            return IsChannelValueNull(i, GetString(i));
         }
 
         /// <summary>
@@ -1140,7 +1147,7 @@ namespace PDS.Witsml.Data.Channels
                 {
                     var value = string.Format("{0}", x.Last().Skip(valueIndex).FirstOrDefault());
 
-                    if (!IsNull(value))
+                    if (!IsChannelValueNull(i, value))
                     {
                         end = x[0][0];
 
@@ -1171,7 +1178,7 @@ namespace PDS.Witsml.Data.Channels
         /// </summary>
         /// <param name="data">The data.</param>
         /// <returns>A JSON arrary of string values from the data list.</returns>
-        private static string Combine(IList<string> data)
+        private static string Combine(IList<string> data, string[] nullValues)
         {
             var json = new StringBuilder("[");
             var rows = new List<string>();
@@ -1181,7 +1188,7 @@ namespace PDS.Witsml.Data.Channels
                 foreach (var row in data)
                 {
                     var values = row.Split(new[] { ',' })
-                        .Select(Format)
+                        .Select( (v, i) => Format(v, i, nullValues))
                         .ToArray();
 
                     rows.Add(string.Format(
@@ -1202,9 +1209,17 @@ namespace PDS.Witsml.Data.Channels
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>A value formated for null, string or double.</returns>
-        private static string Format(string value)
+        private static string Format(string value, int channelIndex, string[] nullValues)
         {
             double number;
+
+            if (channelIndex < nullValues.Length && !string.IsNullOrWhiteSpace(nullValues[channelIndex]))
+            {
+                if (nullValues[channelIndex].EqualsIgnoreCase(value.Trim()) || IsNull(value))
+                {
+                    return nullValues[channelIndex];
+                }
+            }
 
             if (IsNull(value))
                 return "null";
@@ -1225,6 +1240,19 @@ namespace PDS.Witsml.Data.Channels
             return string.IsNullOrWhiteSpace(value) || 
                 Null.EqualsIgnoreCase(value) || 
                 NaN.EqualsIgnoreCase(value);
+        }
+
+        private bool IsChannelValueNull(int channelIndex, string value)
+        {
+            var isNull = string.IsNullOrWhiteSpace(value) ||
+                Null.EqualsIgnoreCase(value) ||
+                NaN.EqualsIgnoreCase(value);
+
+            if (!isNull && channelIndex < NullValues.Length && !string.IsNullOrWhiteSpace(NullValues[channelIndex]))
+            {
+                return NullValues[channelIndex].EqualsIgnoreCase(value);
+            }
+            return isNull;
         }
 
         /// <summary>

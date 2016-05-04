@@ -33,6 +33,8 @@ namespace PDS.Witsml.Data.Channels
 
         string[] Units { get; }
 
+        string[] NullValues { get; }
+
         int Depth { get; }
 
         List<ChannelIndexInfo> Indices { get; }
