@@ -29,7 +29,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
             StoreFunction = Functions.GetFromStore;
             OutputPath = "./Data/Results";
             TruncateSize = 1000000; // 1M char
-            MaxDataRows = 10000;
         }
 
         private Connection _connection;
@@ -239,6 +238,20 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
                 {
                     _requestLatestValues = value;
                     NotifyOfPropertyChange(() => _requestLatestValues);
+                }
+            }
+        }
+
+        private bool _retrievePartialResults;
+        public bool RetrievePartialResults
+        {
+            get { return _retrievePartialResults; }
+            set
+            {
+                if (_retrievePartialResults != value)
+                {
+                    _retrievePartialResults = value;
+                    NotifyOfPropertyChange(() => RetrievePartialResults);
                 }
             }
         }
