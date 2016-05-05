@@ -1,0 +1,157 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Energistics.EtpClient" Collapsed="true">
+    <Position X="0.5" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAgAAAAAGAAKAAAAUAAAAQAAAAAAAgAAAAAQACAAgA=</HashCode>
+      <FileName>EtpClient.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Energistics.EtpServer" Collapsed="true">
+    <Position X="2.5" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAAAAAEAAAAAAAAAAAAAgAAAAAACAAAA=</HashCode>
+      <FileName>EtpServer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Energistics.EtpServerHandler" Collapsed="true">
+    <Position X="4.5" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IIAAAAAAACAAAAAACGAAAAAAAAAAAAAAAAAAQACAABA=</HashCode>
+      <FileName>EtpServerHandler.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Energistics.EtpSocketServer" Collapsed="true">
+    <Position X="6.5" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEEIAACAEgAAIQAAAQAAQAAAAAAAAIAAAACAAAgA=</HashCode>
+      <FileName>EtpSocketServer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Energistics.Common.EtpBase" Collapsed="true">
+    <Position X="6.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAABAIAACIAAAAAAAMKAAAAAAgBQAIAAAAACAAAAAA=</HashCode>
+      <FileName>Common\EtpBase.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Energistics.Common.EtpSession" Collapsed="true">
+    <Position X="2.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAABAABAMgAAAAWACQAAKCEABABoAAAAAQACAABA=</HashCode>
+      <FileName>Common\EtpSession.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Energistics.Common.EtpProtocolHandler" Collapsed="true">
+    <Position X="6.5" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAAABBAAAAAQAAEAAAAABAAAAAAIBBYABCAAIAAQA=</HashCode>
+      <FileName>Common\EtpProtocolHandler.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Energistics.Protocol.MessageTypes">
+    <Position X="10.75" Y="1" Width="2" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Enum Name="Energistics.Protocol.MessageTypes.Core" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Protocol\MessageTypes.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="Energistics.Protocol.MessageTypes.ChannelStreaming" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Protocol\MessageTypes.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="Energistics.Protocol.MessageTypes.ChannelDataFrame" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Protocol\MessageTypes.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="Energistics.Protocol.MessageTypes.Discovery" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Protocol\MessageTypes.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="Energistics.Protocol.MessageTypes.Store" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Protocol\MessageTypes.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="Energistics.Protocol.MessageTypes.StoreNotification" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Protocol\MessageTypes.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="Energistics.Protocol.MessageTypes.GrowingObject" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Protocol\MessageTypes.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="Energistics.Protocol.MessageTypes.DataArray" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Protocol\MessageTypes.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Protocol\MessageTypes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Energistics.Security.Authorization" Collapsed="true">
+    <Position X="8.75" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAEAAAACAAAA=</HashCode>
+      <FileName>Security\Authorization.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="Energistics.Datatypes.EtpContentType" Collapsed="true">
+    <Position X="8.75" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAKQAAIAAAAAAEAIgAAAAQIAAAAAAAAIAAAgCABAA=</HashCode>
+      <FileName>Datatypes\EtpContentType.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Energistics.Datatypes.EtpUri" Collapsed="true">
+    <Position X="8.75" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>YAEAKEAAIAoAIAAEgAgAQAAQIAAAAYAACYAQAAAABAA=</HashCode>
+      <FileName>Datatypes\EtpUri.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Interface Name="Energistics.Common.IEtpSession">
+    <Position X="0.5" Y="2.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABAMgAAAACAKAAAKAAgAQBIAAAAAAACAAAA=</HashCode>
+      <FileName>Common\IEtpSession.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Energistics.Common.IProtocolHandler">
+    <Position X="4.5" Y="4.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>ABAAAABAAAAAAQAAEAACAABAAAAAAAABIABAAAAAAQA=</HashCode>
+      <FileName>Common\IProtocolHandler.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="Energistics.Protocol.MessageFlags">
+    <Position X="8.75" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAAAEAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>Protocol\MessageFlags.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Energistics.Datatypes.ResourceTypes">
+    <Position X="8.75" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABIAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAA=</HashCode>
+      <FileName>Datatypes\ResourceTypes.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

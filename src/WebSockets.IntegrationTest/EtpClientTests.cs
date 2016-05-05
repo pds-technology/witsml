@@ -57,10 +57,5 @@ namespace Energistics
                 //client.Close("reason");
             }
         }
-
-        [TestMethod]
-        public async Task EtpClient_Open_Sends_RequestSession_And_Receives_OpenSession()
-        {
-        }
     }
 }

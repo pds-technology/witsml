@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Energistics.Common.EtpProtocolHandler">
+    <Position X="10.75" Y="2.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAAABBAAAAAQAAEAAAAABAAAAAAIBBYABCAAIAAQA=</HashCode>
+      <FileName>Common\EtpProtocolHandler.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Energistics.Protocol.Discovery.DiscoveryCustomerHandler">
+    <Position X="7.25" Y="0.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAABAgAAAAAAAQAAAAAAAEAAAAAAAAAAACAIAAAA=</HashCode>
+      <FileName>Protocol\Discovery\DiscoveryCustomerHandler.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Energistics.Protocol.Discovery.DiscoveryStoreHandler">
+    <Position X="6.25" Y="4" Width="2.75" />
+    <InheritanceLine Type="Energistics.Common.EtpProtocolHandler" FixedToPoint="true">
+      <Path>
+        <Point X="10.75" Y="5.125" />
+        <Point X="9" Y="5.125" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAABAAAAAAQAAAAAAAAAAAAAAgAAAAAAACAAAAAA=</HashCode>
+      <FileName>Protocol\Discovery\DiscoveryStoreHandler.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Energistics.Protocol.Store.StoreCustomerHandler">
+    <Position X="6.75" Y="7.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAABAAAAAMAAAAAIAAAAQAAAAAAEAAAAAAAAAAAA=</HashCode>
+      <FileName>Protocol\Store\StoreCustomerHandler.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Energistics.Protocol.Store.StoreStoreHandler">
+    <Position X="9.5" Y="8.5" Width="2" />
+    <InheritanceLine Type="Energistics.Common.EtpProtocolHandler" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="11.125" Y="7.771" />
+        <Point X="11.125" Y="8.5" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAABAAAAAAAAgAgAAJAAgAAAAAAAAAQAABAAAAAA=</HashCode>
+      <FileName>Protocol\Store\StoreStoreHandler.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="Energistics.Common.IProtocolHandler">
+    <Position X="0.5" Y="2.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>ABAAAABAAAAAAQAAEAACAABAAAAAAAABIABAAAAAAQA=</HashCode>
+      <FileName>Common\IProtocolHandler.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Energistics.Protocol.Discovery.IDiscoveryCustomer">
+    <Position X="4.25" Y="0.5" Width="1.75" />
+    <InheritanceLine Type="Energistics.Common.IProtocolHandler" FixedToPoint="true">
+      <Path>
+        <Point X="1.375" Y="2.75" />
+        <Point X="1.375" Y="1.062" />
+        <Point X="4.25" Y="1.062" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAA=</HashCode>
+      <FileName>Protocol\Discovery\IDiscoveryCustomer.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Energistics.Protocol.Discovery.IDiscoveryStore">
+    <Position X="3.75" Y="3.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAACAAAAAA=</HashCode>
+      <FileName>Protocol\Discovery\IDiscoveryStore.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Energistics.Protocol.Store.IStoreCustomer">
+    <Position X="3.25" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAMAAAAAIAAAAQAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Protocol\Store\IStoreCustomer.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Energistics.Protocol.Store.IStoreStore">
+    <Position X="0.75" Y="7.5" Width="1.5" />
+    <InheritanceLine Type="Energistics.Common.IProtocolHandler" FixedFromPoint="true">
+      <Path>
+        <Point X="1.5" Y="6.295" />
+        <Point X="1.5" Y="7.5" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAgAAAAIAAgAAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>Protocol\Store\IStoreStore.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

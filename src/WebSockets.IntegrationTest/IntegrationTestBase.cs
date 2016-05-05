@@ -25,14 +25,22 @@ using Energistics.Security;
 
 namespace Energistics
 {
-    public class IntegrationTestBase
+    /// <summary>
+    /// Common base class for all ETP DevKit integration tests.
+    /// </summary>
+    public abstract class IntegrationTestBase
     {
-        public static readonly string AuthTokenUrl = Settings.Default.AuthTokenUrl;
-        public static readonly string ServerUrl = Settings.Default.ServerUrl;
-        public static readonly string Username = Settings.Default.Username;
-        public static readonly string Password = Settings.Default.Password;
+        protected static readonly string AuthTokenUrl = Settings.Default.AuthTokenUrl;
+        protected static readonly string ServerUrl = Settings.Default.ServerUrl;
+        protected static readonly string Username = Settings.Default.Username;
+        protected static readonly string Password = Settings.Default.Password;
 
-        public EtpClient CreateClient()
+        /// <summary>
+        /// Creates an <see cref="EtpClient"/> instance configurated with the
+        /// current connection and authorization parameters.
+        /// </summary>
+        /// <returns></returns>
+        protected EtpClient CreateClient()
         {
             var version = GetType().Assembly.GetName().Version.ToString();
             var headers = Authorization.Basic(Username, Password);
@@ -40,6 +48,12 @@ namespace Energistics
             return new EtpClient(ServerUrl, GetType().AssemblyQualifiedName, version, headers);
         }
 
+        /// <summary>
+        /// Handles an event asynchronously and waits for it to complete.
+        /// </summary>
+        /// <typeparam name="T">The type of ETP message.</typeparam>
+        /// <param name="action">The action to execute.</param>
+        /// <returns>An awaitable task.</returns>
         protected async Task<ProtocolEventArgs<T>> HandleAsync<T>(Action<ProtocolEventHandler<T>> action)
             where T : ISpecificRecord
         {
@@ -55,6 +69,13 @@ namespace Energistics
             return await task.WaitAsync();
         }
 
+        /// <summary>
+        /// Handles an event asynchronously and waits for it to complete.
+        /// </summary>
+        /// <typeparam name="T">The type of ETP message.</typeparam>
+        /// <typeparam name="TContext">The type of the context.</typeparam>
+        /// <param name="action">The action to execute.</param>
+        /// <returns>An awaitable task.</returns>
         protected async Task<ProtocolEventArgs<T, TContext>> HandleAsync<T, TContext>(Action<ProtocolEventHandler<T, TContext>> action)
             where T : ISpecificRecord
         {
