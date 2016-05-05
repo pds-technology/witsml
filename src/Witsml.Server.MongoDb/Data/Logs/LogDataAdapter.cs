@@ -41,18 +41,10 @@ namespace PDS.Witsml.Server.Data.Logs
 
         protected LogDataAdapter(IDatabaseProvider databaseProvider, string dbCollectionName) : base(databaseProvider, dbCollectionName)
         {
-            Logger = LogManager.GetLogger(GetType());
         }
 
         [Import]
         public ChannelDataChunkAdapter ChannelDataChunkAdapter { get; set; }
-
-
-        /// <summary>
-        /// Gets the logger.
-        /// </summary>
-        /// <value>The logger.</value>
-        protected ILog Logger { get; private set; }
 
         /// <summary>
         /// Retrieves data objects from the data store using the specified parser.
