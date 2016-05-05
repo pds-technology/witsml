@@ -371,7 +371,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Slice the reader for the requested mnemonics
             reader.Slice(mnemonics, units, nullValues);
-            var logData = FormatLogData(log, reader, requestLatestValues, context);
+            var logData = FormatLogData(log, reader, requestLatestValues, context, mnemonics, units, nullValues);
             SetLogDataValues(log, logData, reader.AllMnemonics, reader.AllUnits);
 
             // Update the response context growing object totals
@@ -388,11 +388,13 @@ namespace PDS.Witsml.Server.Data.Logs
                 isTimeLog);
         }
 
-        protected List<string> FormatLogData(T log, ChannelDataReader reader, int? requestLatestValues, ResponseContext context)
+        protected List<string> FormatLogData(
+            T log, ChannelDataReader reader, int? requestLatestValues, ResponseContext context, 
+            IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units, IDictionary<int, string> nullValues)
         {
             Dictionary<string, Range<double?>> ranges;
 
-            var logData = reader.GetData(context, out ranges);
+            var logData = reader.GetData(context, mnemonicSlices, units, nullValues, out ranges);
             if (logData.Count > 0)
             {
                 SetLogIndexRange(log, ranges);
