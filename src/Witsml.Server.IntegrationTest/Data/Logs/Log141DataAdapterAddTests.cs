@@ -1902,61 +1902,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_AddToStore_With_Null_Indicator_On_Channels_Start_and_End_Index()
-        {
-            var response = DevKit.Add<WellList, Well>(Well);
-
-            Wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
-
-            var log = CreateLog(null, DevKit.Name("Log 01"), Wellbore.UidWell, Well.Name, response.SuppMsgOut, Wellbore.Name);
-            log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
-
-            log.NullValue = "-999.25";
-
-            var logData = log.LogData.First();
-            logData.Data.Add("1700.0,17.1,-999.25");
-            logData.Data.Add("1800.0,-999.25,18.2");
-            logData.Data.Add("1900.0,19.1,-999.25");
-            logData.Data.Add("2000.0,-999.25,-999.25");
-            logData.Data.Add("2100.0,21.1,-999.25");
-            logData.Data.Add("2200.0,-999.25,22.2");
-
-            DevKit.InitHeader(log, LogIndexType.measureddepth);
-
-            response = DevKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidLog = response.SuppMsgOut;
-
-            // Query
-            var query = CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
-
-            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
-            Assert.AreEqual(1, results.Count);
-            Assert.AreEqual(3, results[0].LogCurveInfo.Count);
-            Assert.AreEqual(1700, results[0].LogCurveInfo[0].MinIndex.Value);
-            Assert.AreEqual(2200, results[0].LogCurveInfo[0].MaxIndex.Value);
-            Assert.AreEqual(1700, results[0].LogCurveInfo[1].MinIndex.Value);
-            Assert.AreEqual(2100, results[0].LogCurveInfo[1].MaxIndex.Value);
-            Assert.AreEqual(1800, results[0].LogCurveInfo[2].MinIndex.Value);
-            Assert.AreEqual(2200, results[0].LogCurveInfo[2].MaxIndex.Value);
-
-            Assert.AreEqual(1, results[0].LogData.Count);
-            Assert.AreEqual(6, results[0].LogData[0].Data.Count);
-
-            var resultLogData = results[0].LogData[0].Data;
-            Assert.AreEqual(3, results[0].LogData[0].MnemonicList.Split(',').Length);
-
-            Assert.IsTrue(resultLogData[0].Equals("1700,17.1,-999.25"));
-            Assert.IsTrue(resultLogData[1].Equals("1800,-999.25,18.2"));
-            Assert.IsTrue(resultLogData[2].Equals("1900,19.1,-999.25"));
-            Assert.IsTrue(resultLogData[3].Equals("2000,-999.25,-999.25"));
-            Assert.IsTrue(resultLogData[4].Equals("2100,21.1,-999.25"));
-            Assert.IsTrue(resultLogData[5].Equals("2200,-999.25,22.2"));
-        }
-
-        [TestMethod]
         public void Log141DataAdapter_AddToStore_With_Null_Indicator_And_An_Empty_Channel_Of_Blanks()
         {
             var response = DevKit.Add<WellList, Well>(Well);
