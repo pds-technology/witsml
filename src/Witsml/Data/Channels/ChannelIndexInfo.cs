@@ -30,6 +30,8 @@ namespace PDS.Witsml.Data.Channels
 
         public string Unit { get; set; }
 
+        public string NullValue { get; set; }
+
         public bool Increasing { get; set; }
 
         public bool IsTimeIndex { get; set; }

@@ -65,6 +65,14 @@ namespace PDS.Witsml.Server.Models
         public string UnitList { get; set; }
 
         /// <summary>
+        /// Gets or sets the null value list.
+        /// </summary>
+        /// <value>
+        /// The null value list.
+        /// </value>
+        public string NullValueList { get; set; }
+
+        /// <summary>
         /// Gets or sets the record count.
         /// </summary>
         /// <value>
