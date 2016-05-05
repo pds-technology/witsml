@@ -19,6 +19,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using PDS.Framework;
+using PDS.Witsml.Data.Logs;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
@@ -44,21 +45,13 @@ namespace PDS.Witsml.Data.Channels
             var indexCurve = log.LogCurveInfo.FirstOrDefault(x => x.Mnemonic.EqualsIgnoreCase(log.IndexCurve.Value));
             var mnemonics = log.LogCurveInfo.Where(x => x.Mnemonic != indexCurve.Mnemonic).Select(x => x.Mnemonic).ToArray();
             var units = log.LogCurveInfo.Where(x => x.Mnemonic != indexCurve.Mnemonic).Select(x => x.Unit).ToArray();
-            var nullValues = GetNullValuesByColumnIndex(log).Values.Skip(1).ToArray();
+            var nullValues = log.GetNullValuesByColumnIndex().Values.Skip(1).ToArray();
 
             return new ChannelDataReader(log.LogData, mnemonics, units, nullValues, log.GetUri())
                 // Add index curve to separate collection
                 .WithIndex(indexCurve.Mnemonic, indexCurve.Unit, increasing, isTimeIndex);
         }
-        public static IDictionary<int, string> GetNullValuesByColumnIndex(this Witsml131.Log log)
-        {
-            return log.LogCurveInfo
-                .Select(x => x.NullValue)
-                .ToArray()
-                .Select((nullValue, index) => new { NullValue = string.IsNullOrWhiteSpace(nullValue) ? log.NullValue : nullValue, Index = index })
-                .ToDictionary(x => x.Index, x => x.NullValue);
-        }
-
+      
         public static IEnumerable<ChannelDataReader> GetReaders(this Witsml141.Log log)
         {
             if (log.LogData == null)
@@ -76,24 +69,13 @@ namespace PDS.Witsml.Data.Channels
                 var indexCurve = log.LogCurveInfo.FirstOrDefault(x => x.Mnemonic.Value.EqualsIgnoreCase(log.IndexCurve));
                 var mnemonics = ChannelDataReader.Split(logData.MnemonicList).Skip(1).ToArray();
                 var units = ChannelDataReader.Split(logData.UnitList).Skip(1).ToArray();
-                var nullValues = GetNullValuesByColumnIndex(log).Values.Skip(1).ToArray();
+                var nullValues = log.GetNullValuesByColumnIndex().Values.Skip(1).ToArray();
 
                 yield return new ChannelDataReader(logData.Data, mnemonics, units, nullValues, log.GetUri())
                     // Add index curve to separate collection
                     .WithIndex(indexCurve.Mnemonic.Value, indexCurve.Unit, increasing, isTimeIndex);
             }
         }
-
-
-        public static IDictionary<int, string> GetNullValuesByColumnIndex(this Witsml141.Log log)
-        {
-            return log.LogCurveInfo
-                .Select(x => x.NullValue)
-                .ToArray()
-                .Select((nullValue, index) => new { NullValue = string.IsNullOrWhiteSpace(nullValue) ? log.NullValue : nullValue, Index = index })
-                .ToDictionary(x => x.Index, x => x.NullValue);
-        }
-
 
         public static IEnumerable<ChannelDataReader> GetReaders(this Witsml200.Log log)
         {

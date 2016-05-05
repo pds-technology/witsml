@@ -19,8 +19,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Witsml131 = Energistics.DataAccess.WITSML131.ComponentSchemas;
-using Witsml141 = Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Witsml131 = Energistics.DataAccess.WITSML131;
+using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
 using PDS.Framework;
 
@@ -34,18 +34,18 @@ namespace PDS.Witsml.Data.Logs
         /// <param name="logCurveInfos">The collection of log curves.</param>
         /// <param name="uid">The uid.</param>
         /// <returns>The <see cref="Witsml131.LogCurveInfo"/> specified by the uid.</returns>
-        public static Witsml131.LogCurveInfo GetByUid(this IEnumerable<Witsml131.LogCurveInfo> logCurveInfos, string uid)
+        public static Witsml131.ComponentSchemas.LogCurveInfo GetByUid(this IEnumerable<Witsml131.ComponentSchemas.LogCurveInfo> logCurveInfos, string uid)
         {
             return logCurveInfos?.FirstOrDefault(x => x.Uid.EqualsIgnoreCase(uid));
         }
 
         /// <summary>
-        /// Gets the <see cref="Witsml141.LogCurveInfo"/> by uid.
+        /// Gets the <see cref="Witsml141.ComponentSchemas.LogCurveInfo"/> by uid.
         /// </summary>
         /// <param name="logCurveInfos">The collection of log curves.</param>
         /// <param name="uid">The uid.</param>
-        /// <returns>The <see cref="Witsml141.LogCurveInfo"/> specified by the uid.</returns>
-        public static Witsml141.LogCurveInfo GetByUid(this IEnumerable<Witsml141.LogCurveInfo> logCurveInfos, string uid)
+        /// <returns>The <see cref="Witsml141.ComponentSchemas.LogCurveInfo"/> specified by the uid.</returns>
+        public static Witsml141.ComponentSchemas.LogCurveInfo GetByUid(this IEnumerable<Witsml141.ComponentSchemas.LogCurveInfo> logCurveInfos, string uid)
         {
             return logCurveInfos?.FirstOrDefault(x => x.Uid.EqualsIgnoreCase(uid));
         }
@@ -67,18 +67,18 @@ namespace PDS.Witsml.Data.Logs
         /// <param name="logCurveInfos">The collection of log curves.</param>
         /// <param name="mnemonic">The mnemonic.</param>
         /// <returns>The <see cref="Witsml131.LogCurveInfo"/> specified by the mnemonic.</returns>
-        public static Witsml131.LogCurveInfo GetByMnemonic(this IEnumerable<Witsml131.LogCurveInfo> logCurveInfos, string mnemonic)
+        public static Witsml131.ComponentSchemas.LogCurveInfo GetByMnemonic(this IEnumerable<Witsml131.ComponentSchemas.LogCurveInfo> logCurveInfos, string mnemonic)
         {
             return logCurveInfos?.FirstOrDefault(x => x.Mnemonic.EqualsIgnoreCase(mnemonic));
         }
 
         /// <summary>
-        /// Gets the <see cref="Witsml141.LogCurveInfo"/> by mnemonic.
+        /// Gets the <see cref="Witsml141.ComponentSchemas.LogCurveInfo"/> by mnemonic.
         /// </summary>
         /// <param name="logCurveInfos">The collection of log curves.</param>
         /// <param name="mnemonic">The mnemonic.</param>
-        /// <returns>The <see cref="Witsml141.LogCurveInfo"/> specified by the mnemonic.</returns>
-        public static Witsml141.LogCurveInfo GetByMnemonic(this IEnumerable<Witsml141.LogCurveInfo> logCurveInfos, string mnemonic)
+        /// <returns>The <see cref="Witsml141.ComponentSchemas.LogCurveInfo"/> specified by the mnemonic.</returns>
+        public static Witsml141.ComponentSchemas.LogCurveInfo GetByMnemonic(this IEnumerable<Witsml141.ComponentSchemas.LogCurveInfo> logCurveInfos, string mnemonic)
         {
             return logCurveInfos?.FirstOrDefault(x => x.Mnemonic.Value.EqualsIgnoreCase(mnemonic));
         }
@@ -101,7 +101,7 @@ namespace PDS.Witsml.Data.Logs
         /// <param name="increasing">if set to <c>true</c>, index values are increasing.</param>
         /// <param name="isTimeIndex">if set to <c>true</c> when using a datetime index.</param>
         /// <returns>The index range for the specified log curve.</returns>
-        public static Range<double?> GetIndexRange(this Witsml131.LogCurveInfo logCurveInfo, bool increasing = true, bool isTimeIndex = false)
+        public static Range<double?> GetIndexRange(this Witsml131.ComponentSchemas.LogCurveInfo logCurveInfo, bool increasing = true, bool isTimeIndex = false)
         {
             double? start = null;
             double? end = null;
@@ -126,13 +126,13 @@ namespace PDS.Witsml.Data.Logs
         }
 
         /// <summary>
-        /// Gets the index range for the specified <see cref="Witsml141.LogCurveInfo" />.
+        /// Gets the index range for the specified <see cref="Witsml141.ComponentSchemas.LogCurveInfo" />.
         /// </summary>
         /// <param name="logCurveInfo">The log curve.</param>
         /// <param name="increasing">if set to <c>true</c>, index values are increasing.</param>
         /// <param name="isTimeIndex">if set to <c>true</c> the log is using a datetime index.</param>
         /// <returns>The index range for the specified log curve.</returns>
-        public static Range<double?> GetIndexRange(this Witsml141.LogCurveInfo logCurveInfo, bool increasing = true, bool isTimeIndex = false)
+        public static Range<double?> GetIndexRange(this Witsml141.ComponentSchemas.LogCurveInfo logCurveInfo, bool increasing = true, bool isTimeIndex = false)
         {
             double? start = null;
             double? end = null;
@@ -154,6 +154,24 @@ namespace PDS.Witsml.Data.Logs
 
             return new Range<double?>(start, end)
                 .Sort(increasing);
+        }
+
+        public static IDictionary<int, string> GetNullValuesByColumnIndex(this Witsml131.Log log)
+        {
+            return log.LogCurveInfo
+                .Select(x => x.NullValue)
+                .ToArray()
+                .Select((nullValue, index) => new { NullValue = string.IsNullOrWhiteSpace(nullValue) ? log.NullValue : nullValue, Index = index })
+                .ToDictionary(x => x.Index, x => x.NullValue);
+        }
+
+        public static IDictionary<int, string> GetNullValuesByColumnIndex(this Witsml141.Log log)
+        {
+            return log.LogCurveInfo
+                .Select(x => x.NullValue)
+                .ToArray()
+                .Select((nullValue, index) => new { NullValue = string.IsNullOrWhiteSpace(nullValue) ? log.NullValue : nullValue, Index = index })
+                .ToDictionary(x => x.Index, x => x.NullValue);
         }
     }
 }
