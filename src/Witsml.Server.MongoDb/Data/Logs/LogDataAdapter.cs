@@ -231,7 +231,7 @@ namespace PDS.Witsml.Server.Data.Logs
         protected override List<string> GetIgnoredElementNamesForUpdate(WitsmlQueryParser parser)
         {
             return GetIgnoredElementNamesForQuery(parser)
-                .Concat(new [] { "direction", "objectGrowing" })
+                .Concat(new[] { "direction", "objectGrowing" })
                 .ToList();
         }
 
@@ -351,15 +351,15 @@ namespace PDS.Witsml.Server.Data.Logs
             // If latest values have been requested then
             //... don't allow more than the maximum.
             if (requestLatestValues.HasValue)
-            {                
+            {
                 requestLatestValues = Math.Min(WitsmlSettings.MaxDataNodes, requestLatestValues.Value);
                 Logger.DebugFormat("Request latest value = {0}", requestLatestValues);
             }
-            
+
             // TODO: If requesting latest values figure out a range that will contain the last values that we want.
             // if there is a request for latest values then the range should be ignored.
-            var range = requestLatestValues.HasValue 
-                ? new Range<double?>(null, null) 
+            var range = requestLatestValues.HasValue
+                ? new Range<double?>(null, null)
                 : GetLogDataSubsetRange(logHeader, parser);
 
             var units = GetUnitList(logHeader, mnemonics.Keys.ToArray());
@@ -371,7 +371,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Slice the reader for the requested mnemonics
             reader.Slice(mnemonics, units, nullValues);
-            var logData = FormatLogData(log, reader, requestLatestValues, context, mnemonics, units, nullValues);
+            var logData = FormatLogData(log, reader, requestLatestValues, context);
             SetLogDataValues(log, logData, reader.AllMnemonics, reader.AllUnits);
 
             // Update the response context growing object totals
@@ -388,13 +388,11 @@ namespace PDS.Witsml.Server.Data.Logs
                 isTimeLog);
         }
 
-        protected List<string> FormatLogData(
-            T log, ChannelDataReader reader, int? requestLatestValues, ResponseContext context, 
-            IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units, IDictionary<int, string> nullValues)
+        protected List<string> FormatLogData(T log, ChannelDataReader reader, int? requestLatestValues, ResponseContext context)
         {
             Dictionary<string, Range<double?>> ranges;
 
-            var logData = reader.GetData(context, mnemonicSlices, units, nullValues, out ranges);
+            var logData = reader.GetData(context, out ranges);
             if (logData.Count > 0)
             {
                 SetLogIndexRange(log, ranges);
@@ -427,7 +425,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var ranges = GetCurrentIndexRange(current);
 
             // Get null values
-            var nullValues = GetNullValueList(current, new int[]{});
+            var nullValues = GetNullValueList(current, new int[] { });
 
             TimeSpan? offset = null;
             var isTimeLog = IsTimeLog(current, true);
@@ -543,8 +541,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 var range = ranges[mnemonic];
                 var isIndexCurve = mnemonic == GetIndexCurveMnemonic(entity);
 
-                logHeaderUpdate = isTimeLog 
-                    ? UpdateDateTimeIndexRange(mongoUpdate, curveFilter, logHeaderUpdate, range, increasing, isIndexCurve, offset) 
+                logHeaderUpdate = isTimeLog
+                    ? UpdateDateTimeIndexRange(mongoUpdate, curveFilter, logHeaderUpdate, range, increasing, isIndexCurve, offset)
                     : UpdateIndexRange(mongoUpdate, curveFilter, logHeaderUpdate, range, increasing, isIndexCurve, indexUnit);
             }
 
