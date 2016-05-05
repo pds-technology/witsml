@@ -96,6 +96,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     reader.Uri,
                     string.Join(",", reader.Mnemonics),
                     string.Join(",", reader.Units),
+                    string.Join(",", reader.NullValues),
                     transaction);
             }
             catch (MongoException ex)
@@ -143,10 +144,11 @@ namespace PDS.Witsml.Server.Data.Channels
 
                 BulkWriteChunks(
                     ToChunks(
-                        MergeSequence(results.GetRecords(), reader.AsEnumerable(), updateRange, reader.NullValues)),
+                        MergeSequence(results.GetRecords(), reader.AsEnumerable(), updateRange)),
                     reader.Uri,
                     string.Join(",", reader.Mnemonics),
                     string.Join(",", reader.Units),
+                    string.Join(",", reader.NullValues),
                     transaction);               
             }
             catch (MongoException ex)
@@ -182,7 +184,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="mnemonics">The mnemonics.</param>
         /// <param name="units">The units.</param>
         /// <param name="transaction">The transaction.</param>
-        private void BulkWriteChunks(IEnumerable<ChannelDataChunk> chunks, string uri, string mnemonics, string units, MongoTransaction transaction = null)
+        private void BulkWriteChunks(IEnumerable<ChannelDataChunk> chunks, string uri, string mnemonics, string units, string nullValues, MongoTransaction transaction = null)
         {
             Logger.DebugFormat("Bulk writing ChannelDataChunks for uri '{0}', mnemonics '{1}' and units '{2}'.", uri, mnemonics, units);
 
@@ -197,6 +199,7 @@ namespace PDS.Witsml.Server.Data.Channels
                         dc.Uri = uri;
                         dc.MnemonicList = mnemonics;
                         dc.UnitList = units;
+                        dc.NullValueList = nullValues;
 
                         if (transaction != null)
                         {
@@ -219,6 +222,7 @@ namespace PDS.Witsml.Server.Data.Channels
                             .Set(u => u.Indices, dc.Indices)
                             .Set(u => u.MnemonicList, mnemonics)
                             .Set(u => u.UnitList, units)
+                            .Set(u => u.NullValueList, nullValues)
                             .Set(u => u.Data, dc.Data)
                             .Set(u => u.RecordCount, dc.RecordCount));
                 })
@@ -332,8 +336,7 @@ namespace PDS.Witsml.Server.Data.Channels
         private IEnumerable<IChannelDataRecord> MergeSequence(
             IEnumerable<IChannelDataRecord> existingChunks,
             IEnumerable<IChannelDataRecord> updatedChunks,
-            Range<double?> updateRange,
-            string[] nullvalues)
+            Range<double?> updateRange)
         {
             Logger.DebugFormat("Merging existing and update ChannelDataRecords for range - start: {0}, end: {1}", updateRange.Start, updateRange.End);
 
@@ -380,7 +383,7 @@ namespace PDS.Witsml.Server.Data.Channels
                             if (existingEnum.Current.GetIndexValue() == updateEnum.Current.GetIndexValue())
                             {
                                 id = existingEnum.Current.Id;
-                                var mergedRow = MergeRow(existingEnum.Current, updateEnum.Current, nullvalues);
+                                var mergedRow = MergeRow(existingEnum.Current, updateEnum.Current);
 
                                 if (mergedRow.HasValues())
                                 {
@@ -395,7 +398,7 @@ namespace PDS.Witsml.Server.Data.Channels
                                 .StartsAfter(existingEnum.Current.GetIndexValue(), increasing, inclusive:false))
                             {
                                 id = existingEnum.Current.Id;
-                                var mergedRow = MergeRow(existingEnum.Current, updateEnum.Current, nullvalues, clear: true);
+                                var mergedRow = MergeRow(existingEnum.Current, updateEnum.Current, clear: true);
 
                                 if (mergedRow.HasValues())
                                 {
@@ -417,7 +420,7 @@ namespace PDS.Witsml.Server.Data.Channels
             }
         }
 
-        private IChannelDataRecord MergeRow(IChannelDataRecord existingRecord, IChannelDataRecord updateRecord, string[] nullValues, bool clear = false)
+        private IChannelDataRecord MergeRow(IChannelDataRecord existingRecord, IChannelDataRecord updateRecord, bool clear = false)
         {
             Logger.DebugFormat("Merging existing record with index '{0}' with update record with index '{1}'.", existingRecord.GetIndexValue(), updateRecord.GetIndexValue());
 
@@ -429,7 +432,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 var mnemonicRange = updateRecord.GetChannelIndexRange(i);
                 if (mnemonicRange.Contains(existingIndexValue, increasing))
                 {
-                    existingRecord.SetValue(i, clear ? GetChannelNullValue(i, nullValues) : updateRecord.GetValue(i));
+                    existingRecord.SetValue(i, clear ? GetChannelNullValue(i, existingRecord.NullValues) : updateRecord.GetValue(i));
                 }
             }
 

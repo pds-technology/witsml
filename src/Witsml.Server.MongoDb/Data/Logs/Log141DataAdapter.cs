@@ -132,11 +132,6 @@ namespace PDS.Witsml.Server.Data.Logs
             return curve?.Mnemonic?.Value;
         }
 
-        protected override string GetDefaultNullValue(Log log)
-        {
-            return log.NullValue;
-        }
-
         protected override string GetIndexCurveMnemonic(Log log)
         {
             return log.IndexCurve;
