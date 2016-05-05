@@ -53,6 +53,7 @@ namespace PDS.Witsml.Data.Channels
         private string[] _originalNullValues = Empty;
         private string[] _allMnemonics = null;
         private string[] _allUnits = null;
+        private string[] _allNulValues = null;
         private readonly int _indexCount;
         private readonly int _count;
         private int _current = -1;
@@ -825,7 +826,7 @@ namespace PDS.Witsml.Data.Channels
         /// Mnemonics for channels without any data will be excluded from the slices.
         /// </summary>
         /// <param name="mnemonicSlices">The mnemonic slices.</param>
-        public void Slice(IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units)
+        public void Slice(IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units, IDictionary<int, string> nullValues)
         {
             // Remove the index mnemonic from the mnemonicSlices
             var indices = Indices.Select(i => i.Mnemonic);
@@ -838,6 +839,7 @@ namespace PDS.Witsml.Data.Channels
             _allSliceOrdinals = null;
             Mnemonics = slices;
             Units = null;
+            NullValues = null;
 
             // Slice by requestedMnemonics first
             var sliceOrdinals = slices
@@ -857,6 +859,7 @@ namespace PDS.Witsml.Data.Channels
                 .Concat(sliceOrdinals).ToArray();
 
             Units = Mnemonics.Select(m => GetAllUnits()[GetOrdinal(m)]).ToArray();
+            NullValues = Mnemonics.Select(m => GetAllNullValues()[GetOrdinal(m)]).ToArray();
 
             // If there is data then update the mnemonics and units from the caller.
             if (RecordsAffected > 0)
@@ -869,6 +872,7 @@ namespace PDS.Witsml.Data.Channels
                 {
                     mnemonicSlices.Remove(k);
                     units.Remove(k);
+                    nullValues.Remove(k);
                 });
             }
         }
@@ -1060,6 +1064,20 @@ namespace PDS.Witsml.Data.Channels
         }
 
         /// <summary>
+        /// Gets all null values.
+        /// </summary>
+        /// <returns></returns>
+        private string[] GetAllNullValues()
+        {
+            if (_allNulValues == null)
+            {
+                _allNulValues = Indices.Select(i => i.NullValue).Concat(_originalNullValues).ToArray();
+            }
+
+            return _allNulValues;
+        }
+
+        /// <summary>
         /// Gets the row values.
         /// </summary>
         /// <param name="row">The row.</param>
@@ -1240,9 +1258,9 @@ namespace PDS.Witsml.Data.Channels
                 Null.EqualsIgnoreCase(value) ||
                 NaN.EqualsIgnoreCase(value);
 
-            if (!isNull && channelIndex < NullValues.Length && !string.IsNullOrWhiteSpace(NullValues[channelIndex]))
+            if (!isNull && channelIndex < GetAllNullValues().Length && !string.IsNullOrWhiteSpace(GetAllNullValues()[channelIndex]))
             {
-                return NullValues[channelIndex].EqualsIgnoreCase(value);
+                return GetAllNullValues()[channelIndex].EqualsIgnoreCase(value);
             }
             return isNull;
         }

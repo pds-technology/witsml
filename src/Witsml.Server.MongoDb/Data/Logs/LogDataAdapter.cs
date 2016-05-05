@@ -315,9 +315,6 @@ namespace PDS.Witsml.Server.Data.Logs
 
         protected IDictionary<int, string> GetNullValueList(T log, int[] slices)
         {
-            // Get the default null value
-            var defaultNullValue = GetDefaultNullValue(log);
-
             // Get a list of all of the null values
             var allNullValues = GetNullValuesByColumnIndex(log);
 
@@ -364,14 +361,14 @@ namespace PDS.Witsml.Server.Data.Logs
                 : GetLogDataSubsetRange(logHeader, parser);
 
             var units = GetUnitList(logHeader, mnemonics.Keys.ToArray());
-            var nullValueList = GetNullValueList(logHeader, mnemonics.Keys.ToArray());
+            var nullValues = GetNullValueList(logHeader, mnemonics.Keys.ToArray());
             var records = GetChannelData(logHeader.GetUri(), mnemonics[0], range, IsIncreasing(logHeader), requestLatestValues);
 
             // Get a reader for the log's channel data
-            var reader = records.GetReader(nullValueList);
+            var reader = records.GetReader(nullValues);
 
             // Slice the reader for the requested mnemonics
-            reader.Slice(mnemonics, units);
+            reader.Slice(mnemonics, units, nullValues);
             var logData = FormatLogData(log, reader, requestLatestValues, context);
             SetLogDataValues(log, logData, reader.AllMnemonics, reader.AllUnits);
 
@@ -647,8 +644,6 @@ namespace PDS.Witsml.Server.Data.Logs
         protected abstract List<TChild> GetLogCurves(T log);
 
         protected abstract string GetMnemonic(TChild curve);
-
-        protected abstract string GetDefaultNullValue(T log);
 
         protected abstract string GetIndexCurveMnemonic(T log);
 

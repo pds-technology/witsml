@@ -44,7 +44,7 @@ namespace PDS.Witsml.Data.Channels
             var indexCurve = log.LogCurveInfo.FirstOrDefault(x => x.Mnemonic.EqualsIgnoreCase(log.IndexCurve.Value));
             var mnemonics = log.LogCurveInfo.Where(x => x.Mnemonic != indexCurve.Mnemonic).Select(x => x.Mnemonic).ToArray();
             var units = log.LogCurveInfo.Where(x => x.Mnemonic != indexCurve.Mnemonic).Select(x => x.Unit).ToArray();
-            var nullValues = log.LogCurveInfo.Select(x => x.NullValue).Skip(1).ToArray();
+            var nullValues = GetNullValuesByColumnIndex(log).Values.Skip(1).ToArray();
 
             return new ChannelDataReader(log.LogData, mnemonics, units, nullValues, log.GetUri())
                 // Add index curve to separate collection
@@ -76,7 +76,7 @@ namespace PDS.Witsml.Data.Channels
                 var indexCurve = log.LogCurveInfo.FirstOrDefault(x => x.Mnemonic.Value.EqualsIgnoreCase(log.IndexCurve));
                 var mnemonics = ChannelDataReader.Split(logData.MnemonicList).Skip(1).ToArray();
                 var units = ChannelDataReader.Split(logData.UnitList).Skip(1).ToArray();
-                var nullValues = GetNullValuesByColumnIndex(log).Values.ToArray();
+                var nullValues = GetNullValuesByColumnIndex(log).Values.Skip(1).ToArray();
 
                 yield return new ChannelDataReader(logData.Data, mnemonics, units, nullValues, log.GetUri())
                     // Add index curve to separate collection
@@ -118,8 +118,9 @@ namespace PDS.Witsml.Data.Channels
             // Not including index channels with value channels
             var mnemonics = channelSet.Channel.Select(x => x.Mnemonic).ToArray();
             var units = channelSet.Channel.Select(x => x.UoM).ToArray();
+            var nullValues = new string[units.Length];
 
-            return new ChannelDataReader(channelSet.Data.Data, mnemonics, units, null, channelSet.GetUri())
+            return new ChannelDataReader(channelSet.Data.Data, mnemonics, units, nullValues, channelSet.GetUri())
                 // Add index channels to separate collection
                 .WithIndices(channelSet.Index.Select(ToChannelIndexInfo), true);
         }

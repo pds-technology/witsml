@@ -249,7 +249,7 @@ namespace PDS.Witsml.Data.Channels
                 "]";
 
             // Create a Reader
-            var reader = new ChannelDataReader(data, "CH1,CH2,CH3,CH4,CH5".Split(','), "ft1,ft2,ft3,ft4,ft5".Split(','), null, "eml://witsml1411/well(Energistics-well-0001)/wellbore(Energistics-w1-wellbore-0001)/log(Energistics-w1-wb1-log-0002)", "06e4dff8-3de4-4057-a21b-92026e89a6d4")
+            var reader = new ChannelDataReader(data, "CH1,CH2,CH3,CH4,CH5".Split(','), "ft1,ft2,ft3,ft4,ft5".Split(','), ",,,,".Split(','), "eml://witsml1411/well(Energistics-well-0001)/wellbore(Energistics-w1-wellbore-0001)/log(Energistics-w1-wb1-log-0002)", "06e4dff8-3de4-4057-a21b-92026e89a6d4")
                 .WithIndex("MD", "ft", true, false);
 
             // Slice the Reader
@@ -257,8 +257,9 @@ namespace PDS.Witsml.Data.Channels
 
             Dictionary<int, string> requestedMnemonics = new Dictionary<int, string>() { { 0, "MD" }, { 2, "CH2" }, { 5, "CH5" } };
             Dictionary<int, string> requestedUnits = new Dictionary<int, string>() { { 0, "ft" }, { 2, "ft2" }, { 5, "ft5" } };
+            Dictionary<int, string> requestedNullValues = new Dictionary<int, string>() { { 0, string.Empty }, { 2, string.Empty }, { 5, string.Empty } };
 
-            reader.Slice(requestedMnemonics, requestedUnits);
+            reader.Slice(requestedMnemonics, requestedUnits, requestedNullValues);
 
             // Test Mnemonic Slices
             var mnemonics = reader.AllMnemonics;
@@ -285,13 +286,14 @@ namespace PDS.Witsml.Data.Channels
         public void ChannelDataReader_Can_Slice_With_Empty_Channels()
         {           
             // Create a Reader
-            var reader = new ChannelDataReader(HasEmptyChannels, "CH1,CH2,CH3,CH4,CH5,CH6,CH7,CH8,CH9".Split(','), "ft1,ft2,ft3,ft4,ft5,ft6,ft7,ft8,ft9".Split(','), null, "eml://witsml1411/well(Energistics-well-0001)/wellbore(Energistics-w1-wellbore-0001)/log(Energistics-w1-wb1-log-0002)", "06e4dff8-3de4-4057-a21b-92026e89a6d4")
+            var reader = new ChannelDataReader(HasEmptyChannels, "CH1,CH2,CH3,CH4,CH5,CH6,CH7,CH8,CH9".Split(','), "ft1,ft2,ft3,ft4,ft5,ft6,ft7,ft8,ft9".Split(','), ",,,,,,,,".Split(','), "eml://witsml1411/well(Energistics-well-0001)/wellbore(Energistics-w1-wellbore-0001)/log(Energistics-w1-wb1-log-0002)", "06e4dff8-3de4-4057-a21b-92026e89a6d4")
                 .WithIndex("MD", "ft", true, false);
 
             Dictionary<int, string> requestedMnemonics = new Dictionary<int, string>() { { 0, "MD" }, { 2, "CH2" }, { 6, "CH6" } };
             Dictionary<int, string> requestedUnits = new Dictionary<int, string>() { { 0, "ft" }, { 2, "ft2" }, { 6, "ft6" } };
+            Dictionary<int, string> requestedNullValues = new Dictionary<int, string>() { { 0, string.Empty }, { 2, string.Empty }, { 6, string.Empty } };
 
-            reader.Slice(requestedMnemonics, requestedUnits);
+            reader.Slice(requestedMnemonics, requestedUnits, requestedNullValues);
 
             // Test Mnemonic Slices
             var mnemonics = reader.AllMnemonics;
@@ -323,13 +325,14 @@ namespace PDS.Witsml.Data.Channels
         public void ChannelDataReader_Can_Slice_With_Request_Has_Empty_Channels()
         {
             // Create a Reader
-            var reader = new ChannelDataReader(HasEmptyChannels, "CH1,CH2,CH3,CH4,CH5,CH6,CH7,CH8,CH9".Split(','), "ft1,ft2,ft3,ft4,ft5,ft6,ft7,ft8,ft9".Split(','), null, "eml://witsml1411/well(Energistics-well-0001)/wellbore(Energistics-w1-wellbore-0001)/log(Energistics-w1-wb1-log-0002)", "06e4dff8-3de4-4057-a21b-92026e89a6d4")
+            var reader = new ChannelDataReader(HasEmptyChannels, "CH1,CH2,CH3,CH4,CH5,CH6,CH7,CH8,CH9".Split(','), "ft1,ft2,ft3,ft4,ft5,ft6,ft7,ft8,ft9".Split(','), ",,,,,,,,".Split(','), "eml://witsml1411/well(Energistics-well-0001)/wellbore(Energistics-w1-wellbore-0001)/log(Energistics-w1-wb1-log-0002)", "06e4dff8-3de4-4057-a21b-92026e89a6d4")
                 .WithIndex("MD", "ft", true, false);
 
             Dictionary<int, string> requestedMnemonics = new Dictionary<int, string>() { { 0, "MD" }, { 1, "CH1" }, { 2, "CH2" }, { 5, "CH5" }, { 6, "CH6" }, { 7, "CH7" }, { 9, "CH9" } };
             Dictionary<int, string> requestedUnits = new Dictionary<int, string>() { { 0, "ft" }, { 1, "ft1" }, { 2, "ft2" }, { 5, "ft5" }, { 6, "ft6" }, { 7, "ft7" }, { 9, "ft9" } };
+            Dictionary<int, string> requestedNullValues = new Dictionary<int, string>() { { 0, string.Empty }, { 1, string.Empty }, { 2, string.Empty }, { 5, string.Empty }, { 6, string.Empty }, { 7, string.Empty }, { 9, string.Empty } };
 
-            reader.Slice(requestedMnemonics, requestedUnits);
+            reader.Slice(requestedMnemonics, requestedUnits, requestedNullValues);
 
             // Test Mnemonic Slices
             var mnemonics = reader.AllMnemonics;
