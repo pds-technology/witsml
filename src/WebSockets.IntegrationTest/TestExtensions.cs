@@ -22,27 +22,46 @@ using System.Threading.Tasks;
 
 namespace Energistics
 {
+    /// <summary>
+    /// Provides static helper methods that can be used to process ETP messages asynchronously.
+    /// </summary>
     public static class TestExtensions
     {
+        /// <summary>
+        /// Opens a WebSocket connection and waits for the SocketOpened event to be called.
+        /// </summary>
+        /// <param name="client">The client.</param>
+        /// <returns>An awaitable task.</returns>
         public static async Task<bool> OpenAsync(this EtpClient client)
         {
             var task = new Task<bool>(() => client.IsOpen);
 
-            client.SocketOpened += (s, e) =>
-            {
-                task.Start();
-            };
-
+            client.SocketOpened += (s, e) => task.Start();
             client.Open();
 
             return await task.WaitAsync();
         }
 
+        /// <summary>
+        /// Executes a task asynchronously and waits the specified timeout period for it to complete.
+        /// </summary>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="task">The task to execute.</param>
+        /// <param name="milliseconds">The timeout, in milliseconds.</param>
+        /// <returns>An awaitable task.</returns>
         public static async Task<TResult> WaitAsync<TResult>(this Task<TResult> task, int milliseconds = 5000)
         {
             return await task.WaitAsync(TimeSpan.FromMilliseconds(milliseconds));
         }
 
+        /// <summary>
+        /// Executes a task asynchronously and waits the specified timeout period for it to complete.
+        /// </summary>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="task">The task to execute.</param>
+        /// <param name="timeout">The timeout.</param>
+        /// <returns>An awaitable task.</returns>
+        /// <exception cref="System.TimeoutException">The operation has timed out.</exception>
         public static async Task<TResult> WaitAsync<TResult>(this Task<TResult> task, TimeSpan timeout)
         {
             var tokenSource = new CancellationTokenSource();

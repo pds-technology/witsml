@@ -33,18 +33,34 @@ namespace Energistics
         private const string AppVersion = "1.0";
 
         [TestMethod]
-        public async Task EtpClient_Open_Sends_RequestSession_And_Receives_OpenSession_Successfully()
+        public async Task EtpClient_Opens_WebSocket_Connection()
         {
-            var auth = Authorization.Basic("witsml.user", "P@$$^0rd!");
+            // Create a Basic authorization header dictionary
+            var auth = Authorization.Basic("witsml.user", "Pd$@meric@$");
 
+            // Initialize an EtpClient with a valid Uri, app name and version, and auth header
             using (var client = new EtpClient(Uri, AppName, AppVersion, auth))
             {
+                // Register protocol handlers to be used in later tests
                 client.Register<IChannelStreamingConsumer, ChannelStreamingConsumerHandler>();
                 client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();
                 client.Register<IStoreCustomer, StoreCustomerHandler>();
 
+                // Open the connection (uses an async extension method)
                 await client.OpenAsync();
+
+                // Assert the current state of the connection
+                Assert.IsTrue(client.IsOpen);
+
+                // Explicit Close not needed as the WebSocket connection will be closed
+                // automatically after leaving the scope of the using statement
+                //client.Close("reason");
             }
+        }
+
+        [TestMethod]
+        public async Task EtpClient_Open_Sends_RequestSession_And_Receives_OpenSession()
+        {
         }
     }
 }
