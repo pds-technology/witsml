@@ -31,13 +31,6 @@ namespace PDS.Witsml.Server.Configuration
         public ResponseContext()
         {
             ObjectType = string.Empty;
-            DataTruncated = false;
-            MaxReturnNodes = null;
-            MaxDataNodes = 0;
-            MaxDataPoints = 0;
-            TotalMaxDataNodes = 0;
-            TotalDataNodes = 0;
-            TotalDataPoints = 0;
         }
 
         /// <summary>
