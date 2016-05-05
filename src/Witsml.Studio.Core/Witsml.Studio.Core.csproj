@@ -157,6 +157,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Providers\GrowingObjectQueryProvider.cs" />
     <Compile Include="Runtime\DesktopRuntimeService.cs" />
     <Compile Include="Runtime\IRuntimeService.cs" />
     <Compile Include="ViewModels\ConnectionPickerViewModel.cs" />

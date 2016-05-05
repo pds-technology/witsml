@@ -34,6 +34,7 @@ using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request;
 using PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result;
 using PDS.Witsml.Studio.Core.Runtime;
 using PDS.Witsml.Studio.Core.ViewModels;
+using PDS.Witsml.Studio.Core.Providers;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
 {
@@ -46,6 +47,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
     {
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MainViewModel));
         public const string QueryTemplateText = "Query Templates";
+
+        private List<string> _xmls = new List<string>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainViewModel"/> class.
@@ -389,7 +392,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                 GetLogStringText(result.MessageOut),
                 GetLogStringText(result.OptionsIn),
                 Environment.NewLine);
-
+           
             // Output query results to the Results tab
             OutputResults(xmlOut, result.MessageOut, result.ReturnCode);
 
@@ -401,7 +404,16 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
 
             // Show data object on the Properties tab
             if (functionType == Functions.GetFromStore && result.ReturnCode > 0)
-                ShowObjectProperties(result);
+            {
+                if (result.ReturnCode > 0)
+                    ShowObjectProperties(result);
+                if (result.ReturnCode > 1 && Model.RetrievePartialResults)
+                {
+                    var provider = new GrowingObjectQueryProvider();
+                    XmlQuery.Text = provider.UpdateDataQuery(result.ObjectType, XmlQuery.Text, xmlOut);
+                    SubmitQuery(Functions.GetFromStore);
+                }
+            }
         }
 
         /// <summary>
@@ -579,11 +591,20 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// <param name="returnCode">The return code.</param>
         private void OutputResults(string xmlOut, string suppMsgOut, short returnCode)
         {
-            QueryResults.Text = string.IsNullOrEmpty(xmlOut)
-                ? (returnCode < 0
-                    ? string.Format("{0}{1}{1}Error Code: {2}", suppMsgOut, Environment.NewLine, returnCode)
-                    : suppMsgOut)
-                : xmlOut;
+            var text = string.IsNullOrEmpty(xmlOut)
+                    ? (returnCode < 0
+                        ? string.Format("{0}{1}{1}Error Code: {2}", suppMsgOut, Environment.NewLine, returnCode)
+                        : suppMsgOut)
+                    : xmlOut;
+
+            _xmls.Add(text);
+
+            if (returnCode <= 1 || !Model.RetrievePartialResults)
+            {
+                var separator = string.Format("{0}{0}<!-- Partial Result -->{0}{0}", Environment.NewLine);
+                QueryResults.Text = string.Join(separator, _xmls);
+                _xmls.Clear();
+            }
         }
 
         /// <summary>
