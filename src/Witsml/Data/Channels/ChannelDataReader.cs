@@ -53,7 +53,7 @@ namespace PDS.Witsml.Data.Channels
         private string[] _originalNullValues = Empty;
         private string[] _allMnemonics = null;
         private string[] _allUnits = null;
-        private string[] _allNulValues = null;
+        private string[] _allNullValues = null;
         private readonly int _indexCount;
         private readonly int _count;
         private int _current = -1;
@@ -1069,12 +1069,12 @@ namespace PDS.Witsml.Data.Channels
         /// <returns></returns>
         private string[] GetAllNullValues()
         {
-            if (_allNulValues == null)
+            if (_allNullValues == null)
             {
-                _allNulValues = Indices.Select(i => i.NullValue).Concat(_originalNullValues).ToArray();
+                _allNullValues = Indices.Select(i => i.NullValue).Concat(_originalNullValues).ToArray();
             }
 
-            return _allNulValues;
+            return _allNullValues;
         }
 
         /// <summary>
