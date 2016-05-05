@@ -17,9 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Linq;
 using PDS.Witsml.Server.Data;
-using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Configuration
 {
@@ -28,13 +26,10 @@ namespace PDS.Witsml.Server.Configuration
         /// <summary>
         /// Initializes the ResponseContext with the specified parser.
         /// </summary>
-        /// <param name="context">The response context.</param>
         /// <param name="parser">The parser.</param>
         public static ResponseContext ToContext(this WitsmlQueryParser parser)
         {
-            var context = new ResponseContext();
-
-            context.ObjectType = parser.Context.ObjectType;
+            var context = new ResponseContext() { ObjectType = parser.Context.ObjectType };
 
             if (IsGrowingDataObject(context))
             {
