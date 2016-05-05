@@ -28,6 +28,7 @@ using Energistics.Protocol.ChannelStreaming;
 using Energistics.Protocol.Core;
 using Energistics.Protocol.Discovery;
 using Energistics.Protocol.Store;
+using Energistics.Security;
 using PDS.Framework;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Models;
 using PDS.Witsml.Studio.Plugins.EtpBrowser.Properties;
@@ -270,7 +271,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             try
             {
                 Runtime.Invoke(() => Runtime.Shell.StatusBarText = "Connecting...");
-                var headers = EtpBase.Authorization(Model.Connection.Username, Model.Connection.Password);
+                var headers = Authorization.Basic(Model.Connection.Username, Model.Connection.Password);
 
                 _client = new EtpClient(Model.Connection.Uri, Model.ApplicationName, Model.ApplicationVersion, headers);
                 _client.Register<IChannelStreamingConsumer, ChannelStreamingConsumerHandler>();

@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Energistics.Datatypes;
 using log4net;
 
@@ -70,46 +69,6 @@ namespace Energistics.Common
         /// </summary>
         /// <value>The registered protocol handler factories.</value>
         protected IDictionary<Type, Func<object>> RegisteredFactories { get; }
-
-        /// <summary>
-        /// Creates a dictionary containing an Authorization header for the specified username and password.
-        /// </summary>
-        /// <param name="username">The username.</param>
-        /// <param name="password">The password.</param>
-        /// <returns>A dictionary containing an Authorization header.</returns>
-        public static IDictionary<string, string> Authorization(string username, string password)
-        {
-            return GetAuthorizationHeader("Basic", string.IsNullOrWhiteSpace(username) ? string.Empty : string.Concat(username, ":", password));
-        }
-
-        /// <summary>
-        /// Creates a dictionary containing an Authorization header for the specified JSON web token.
-        /// </summary>
-        /// <param name="token">The JSON web token.</param>
-        /// <returns>A dictionary containing an Authorization header.</returns>
-        public static IDictionary<string, string> Authorization(string token)
-        {
-            return GetAuthorizationHeader("Bearer", string.IsNullOrWhiteSpace(token) ? string.Empty : token);
-        }
-
-        /// <summary>
-        /// Creates a dictionary containing an Authorization header for the specified schema and encoded string.
-        /// </summary>
-        /// <param name="schema">The schema.</param>
-        /// <param name="encodedString">The encoded string.</param>
-        /// <returns>A dictionary containing an Authorization header.</returns>
-        private static IDictionary<string, string> GetAuthorizationHeader(string schema, string encodedString)
-        {
-            var encoded = Convert.ToBase64String(Encoding.Default.GetBytes(encodedString));
-            var headers = new Dictionary<string, string>();
-
-            if (!string.IsNullOrWhiteSpace(encoded))
-            {
-                headers["Authorization"] = string.Concat(schema, " ", encoded);
-            }
-
-            return headers;
-        }
 
         /// <summary>
         /// Formats the specified message.

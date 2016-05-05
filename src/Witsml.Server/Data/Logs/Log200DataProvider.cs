@@ -27,6 +27,7 @@ namespace PDS.Witsml.Server.Data.Logs
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{Log}" />
     [Export(typeof(IEtpDataProvider))]
+    [Export(typeof(IEtpDataProvider<Log>))]
     [Export200(ObjectTypes.Log, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class Log200DataProvider : EtpDataProvider<Log>

@@ -119,6 +119,7 @@
     <Compile Include="EtpSocketServer.cs" />
     <Compile Include="Protocol\Store\StoreCustomerHandler.cs" />
     <Compile Include="Protocol\Store\StoreStoreHandler.cs" />
+    <Compile Include="Security\Authorization.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

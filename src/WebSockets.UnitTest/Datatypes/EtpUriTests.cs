@@ -18,20 +18,20 @@
 
 using System;
 using System.Linq;
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Energistics.Datatypes
 {
-    [TestFixture]
+    [TestClass]
     public class EtpUriTests
     {
-        [Test]
+        [TestMethod]
         public void EtpUri_IsRoot_Can_Detect_Root_Uri()
         {
             Assert.IsTrue(EtpUri.IsRoot("/"));
         }
 
-        [Test]
+        [TestMethod]
         public void EtpUri_Can_Detect_Invalid_Uri()
         {
             var expected = "eml://witsml/well";
@@ -42,7 +42,7 @@ namespace Energistics.Datatypes
             Assert.AreEqual(uri, uri.Parent);
         }
 
-        [Test]
+        [TestMethod]
         public void EtpUri_Can_Parse_Witsml_20_Base_Uri()
         {
             var uri = new EtpUri("eml://witsml20");
@@ -53,7 +53,7 @@ namespace Energistics.Datatypes
             Assert.AreEqual("2.0", uri.Version);
         }
 
-        [Test]
+        [TestMethod]
         public void EtpUri_Can_Parse_Witsml_20_Well_Uri()
         {
             var uuid = Uuid();
@@ -72,7 +72,7 @@ namespace Energistics.Datatypes
             Assert.AreEqual(uri.GetHashCode(), clone.GetHashCode());
         }
 
-        [Test]
+        [TestMethod]
         public void EtpUri_Can_Parse_Witsml_20_Log_Channel_Uri()
         {
             var uuid = Uuid();
@@ -89,7 +89,7 @@ namespace Energistics.Datatypes
             Assert.AreEqual(uuid, ids.Value);
         }
 
-        [Test]
+        [TestMethod]
         public void EtpUri_IsRelatedTo_Can_Detect_Different_Families()
         {
             var uriResqml = new EtpUri("eml://resqml20");
@@ -100,7 +100,7 @@ namespace Energistics.Datatypes
             Assert.IsFalse(uriResqml.IsRelatedTo(uriWitsml));
         }
 
-        [Test]
+        [TestMethod]
         public void EtpUri_IsRelatedTo_Can_Detect_Different_Versions()
         {
             var uri14 = new EtpUri("eml://witsml14/well");
@@ -111,7 +111,7 @@ namespace Energistics.Datatypes
             Assert.IsFalse(uri14.IsRelatedTo(uri20));
         }
 
-        [Test]
+        [TestMethod]
         public void EtpUri_Can_Parse_Witsml_1411_Base_Uri()
         {
             var uri = new EtpUri("eml://witsml1411");
@@ -121,7 +121,7 @@ namespace Energistics.Datatypes
             Assert.AreEqual("1.4.1.1", uri.Version);
         }
 
-        [Test]
+        [TestMethod]
         public void EtpUri_Append_Can_Append_Object_Type_To_Base_Uri()
         {
             var uri14 = new EtpUri("eml://witsml1411");
@@ -136,7 +136,7 @@ namespace Energistics.Datatypes
             Assert.IsTrue(uri14.IsRelatedTo(uriWell));
         }
 
-        [Test]
+        [TestMethod]
         public void EtpUri_Append_Can_Append_Object_Type_And_Id_To_Base_Uri()
         {
             var uri = new EtpUri("eml://witsml1411").Append("well", "w-01");
@@ -148,7 +148,7 @@ namespace Energistics.Datatypes
             Assert.AreEqual("w-01", uri.ObjectId);
         }
 
-        [Test]
+        [TestMethod]
         public void EtpUri_Can_Parse_Witsml_1411_Well_Uri()
         {
             var uuid = Uuid();
@@ -164,7 +164,7 @@ namespace Energistics.Datatypes
             Assert.AreEqual(type, uri.ContentType.ToString());
         }
 
-        [Test]
+        [TestMethod]
         public void EtpUri_Can_Parse_Witsml_1411_Wellbore_Uri()
         {
             var uuid = Uuid();
@@ -181,7 +181,7 @@ namespace Energistics.Datatypes
             Assert.AreEqual(uriWell, uriWellbore.Parent);
         }
 
-        [Test]
+        [TestMethod]
         public void EtpUri_Can_Parse_Witsml_1411_Log_Uri()
         {
             var uuid = Uuid();

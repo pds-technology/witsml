@@ -28,6 +28,7 @@ using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
 using Energistics.Protocol.ChannelStreaming;
 using Energistics.Protocol.Core;
+using Energistics.Security;
 using PDS.Framework;
 using PDS.Witsml.Studio.Core.Runtime;
 
@@ -52,7 +53,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
         {
             Model = model;
 
-            var headers = EtpClient.Authorization(Model.EtpConnection.Username, Model.EtpConnection.Password);
+            var headers = Authorization.Basic(Model.EtpConnection.Username, Model.EtpConnection.Password);
 
             using (Client = new EtpClient(Model.EtpConnection.Uri, Model.Name, Model.Version, headers))
             {

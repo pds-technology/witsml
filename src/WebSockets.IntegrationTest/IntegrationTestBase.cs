@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 using Avro.Specific;
 using Energistics.Common;
 using Energistics.IntegrationTest;
+using Energistics.Security;
 
 namespace Energistics
 {
@@ -34,12 +35,13 @@ namespace Energistics
         public EtpClient CreateClient()
         {
             var version = GetType().Assembly.GetName().Version.ToString();
-            var headers = EtpBase.Authorization(Username, Password);
+            var headers = Authorization.Basic(Username, Password);
 
             return new EtpClient(ServerUrl, GetType().AssemblyQualifiedName, version, headers);
         }
 
-        protected async Task<ProtocolEventArgs<T>> HandleAsync<T>(Action<ProtocolEventHandler<T>> action) where T : ISpecificRecord
+        protected async Task<ProtocolEventArgs<T>> HandleAsync<T>(Action<ProtocolEventHandler<T>> action)
+            where T : ISpecificRecord
         {
             ProtocolEventArgs<T> args = null;
             var task = new Task<ProtocolEventArgs<T>>(() => args);
@@ -53,7 +55,8 @@ namespace Energistics
             return await task.WaitAsync();
         }
 
-        protected async Task<ProtocolEventArgs<T, TContext>> HandleAsync<T, TContext>(Action<ProtocolEventHandler<T, TContext>> action) where T : ISpecificRecord
+        protected async Task<ProtocolEventArgs<T, TContext>> HandleAsync<T, TContext>(Action<ProtocolEventHandler<T, TContext>> action)
+            where T : ISpecificRecord
         {
             ProtocolEventArgs<T, TContext> args = null;
             var task = new Task<ProtocolEventArgs<T, TContext>>(() => args);

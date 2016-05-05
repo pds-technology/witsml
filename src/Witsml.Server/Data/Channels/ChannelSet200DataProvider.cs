@@ -22,16 +22,30 @@ using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Channels
 {
+    /// <summary>
+    /// Data provider that implements support for WITSML API functions for <see cref="ChannelSet"/>.
+    /// </summary>
+    /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{ChannelSet}" />
     [Export(typeof(IEtpDataProvider))]
+    [Export(typeof(IEtpDataProvider<ChannelSet>))]
     [Export200(ObjectTypes.ChannelSet, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class ChannelSet200DataProvider : EtpDataProvider<ChannelSet>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ChannelSet200DataProvider"/> class.
+        /// </summary>
+        /// <param name="container">The composition container.</param>
+        /// <param name="dataAdapter">The data adapter.</param>
         [ImportingConstructor]
         public ChannelSet200DataProvider(IContainer container, IWitsmlDataAdapter<ChannelSet> dataAdapter) : base(container, dataAdapter)
         {
         }
 
+        /// <summary>
+        /// Sets the default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
         protected override void SetDefaultValues(ChannelSet dataObject)
         {
             base.SetDefaultValues(dataObject);

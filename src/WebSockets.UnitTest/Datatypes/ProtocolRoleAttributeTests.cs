@@ -18,14 +18,14 @@
 
 using System.Reflection;
 using Energistics.Protocol.Core;
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Energistics.Datatypes
 {
-    [TestFixture]
+    [TestClass]
     public class ProtocolRoleAttributeTests
     {
-        [Test]
+        [TestMethod]
         public void ProtocolRoleAttribute_Can_Provide_Protocol_And_Role_Details()
         {
             var attrib = typeof(ICoreClient).GetCustomAttribute(typeof(ProtocolRoleAttribute)) as ProtocolRoleAttribute;

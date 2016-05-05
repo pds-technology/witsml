@@ -29,6 +29,7 @@ namespace PDS.Witsml.Server.Data.Wells
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{WellList, Well}" />
     [Export(typeof(IEtpDataProvider))]
+    [Export(typeof(IEtpDataProvider<Well>))]
     [Export131(ObjectTypes.Well, typeof(IEtpDataProvider))]
     [Export131(ObjectTypes.Well, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]

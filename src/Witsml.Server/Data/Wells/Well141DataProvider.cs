@@ -18,7 +18,6 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using PDS.Framework;
 
@@ -29,6 +28,7 @@ namespace PDS.Witsml.Server.Data.Wells
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{WellList, Well}" />
     [Export(typeof(IEtpDataProvider))]
+    [Export(typeof(IEtpDataProvider<Well>))]
     [Export141(ObjectTypes.Well, typeof(IEtpDataProvider))]
     [Export141(ObjectTypes.Well, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]

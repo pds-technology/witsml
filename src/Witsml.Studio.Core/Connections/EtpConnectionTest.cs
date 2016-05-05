@@ -22,6 +22,7 @@ using Energistics;
 using Energistics.Protocol.ChannelStreaming;
 using Energistics.Protocol.Discovery;
 using Energistics.Protocol.Store;
+using Energistics.Security;
 using PDS.Framework;
 
 namespace PDS.Witsml.Studio.Core.Connections
@@ -46,7 +47,7 @@ namespace PDS.Witsml.Studio.Core.Connections
             {
                 var applicationName = GetType().Assembly.FullName;
                 var applicationVersion = GetType().GetAssemblyVersion();
-                var headers = EtpClient.Authorization(connection.Username, connection.Password);
+                var headers = Authorization.Basic(connection.Username, connection.Password);
 
                 using (var client = new EtpClient(connection.Uri, applicationName, applicationVersion, headers))
                 {

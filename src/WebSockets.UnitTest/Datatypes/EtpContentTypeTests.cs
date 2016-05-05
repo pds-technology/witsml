@@ -16,14 +16,14 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Energistics.Datatypes
 {
-    [TestFixture]
+    [TestClass]
     public class EtpContentTypeTests
     {
-        [Test]
+        [TestMethod]
         public void EtpContentType_Can_Parse_Base_Content_Type_Without_Trailing_Semicolon()
         {
             var expected = "application/x-witsml+xml;version=2.0";
@@ -35,7 +35,7 @@ namespace Energistics.Datatypes
             Assert.AreEqual("2.0", contentType.Version);
         }
 
-        [Test]
+        [TestMethod]
         public void EtpContentType_Can_Parse_Base_Content_Type_With_Trailing_Semicolon()
         {
             var expected = "application/x-witsml+xml;version=2.0;";
@@ -47,7 +47,7 @@ namespace Energistics.Datatypes
             Assert.AreEqual("2.0", contentType.Version);
         }
 
-        [Test]
+        [TestMethod]
         public void EtpContentType_Rejects_Content_Type_Without_Version()
         {
             var expected = "application/x-witsml+xml;";
@@ -56,7 +56,7 @@ namespace Energistics.Datatypes
             Assert.IsFalse(contentType.IsValid);
         }
 
-        [Test]
+        [TestMethod]
         public void EtpContentType_For_Can_Create_1411_Well_Content_Type()
         {
             var expected = "application/x-witsml+xml;version=1.4.1.1";
@@ -68,7 +68,7 @@ namespace Energistics.Datatypes
             Assert.AreEqual(expected + ";type=obj_well;", (string)contentType);
         }
 
-        [Test]
+        [TestMethod]
         public void EtpContentType_Can_Parse_Witsml_20_Well_Content_Type()
         {
             var expected = "application/x-witsml+xml;version=2.0;type=well;";
@@ -79,7 +79,7 @@ namespace Energistics.Datatypes
             Assert.AreEqual("2.0", contentType.Version);
         }
 
-        [Test]
+        [TestMethod]
         public void EtpContentType_Can_Parse_Witsml_1411_Well_Content_Type()
         {
             var expected = "application/x-witsml+xml;version=1.4.1.1;type=well;";

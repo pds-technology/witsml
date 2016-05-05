@@ -16,33 +16,32 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Net;
 using System.Threading.Tasks;
-using Energistics.Common;
 using Energistics.Datatypes;
+using Energistics.Security;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
-using NUnit.Framework;
 
 namespace Energistics.Protocol.Core
 {
-    [TestFixture]
+    [TestClass]
     public class CoreProtocolTests : IntegrationTestBase
     {
         private EtpClient _client;
 
-        [SetUp]
+        [TestInitialize]
         public void TestSetUp()
         {
             _client = CreateClient();
         }
 
-        [TearDown]
+        [TestCleanup]
         public void TestTearDown()
         {
             _client.Dispose();
         }
 
-        [Test]
+        [TestMethod]
         [Description("EtpClient connects to web socket server")]
         public async Task EtpClient_Open_Connects_To_WebSocket_Server()
         {
@@ -60,7 +59,7 @@ namespace Energistics.Protocol.Core
             Assert.IsTrue(result, "EtpClient connection not opened");
         }
 
-        [Test]
+        [TestMethod]
         [Description("EtpClient sends RequestSession and receives OpenSession with a valid Session ID")]
         public async Task EtpClient_RequestSession_Receive_OpenSession_After_Requesting_No_Protocols()
         {
@@ -76,15 +75,15 @@ namespace Energistics.Protocol.Core
             Assert.IsNotNull(args.Message.SessionId);
         }
 
-        //[Test]
-        [Ignore("Bearer Authentication not enabled")]
+        [Ignore]
+        //[TestMethod]
         [Description("EtpClient authenticates using JWT retrieved from supported token provider")]
         public async Task EtpClient_OpenSession_Can_Authenticate_Using_Json_Web_Token()
         {
-            var headers = EtpBase.Authorization(Username, Password);
+            var headers = Authorization.Basic(Username, Password);
             string token;
 
-            using (var client = new WebClient())
+            using (var client = new System.Net.WebClient())
             {
                 foreach (var header in headers)
                     client.Headers[header.Key] = header.Value;
@@ -96,7 +95,7 @@ namespace Energistics.Protocol.Core
             }
 
             _client.Dispose();
-            _client = new EtpClient(ServerUrl, _client.ApplicationName, _client.ApplicationVersion, EtpBase.Authorization(token));
+            _client = new EtpClient(ServerUrl, _client.ApplicationName, _client.ApplicationVersion, Authorization.Bearer(token));
 
             var onOpenSession = HandleAsync<OpenSession>(x => _client.Handler<ICoreClient>().OnOpenSession += x);
 
@@ -110,7 +109,7 @@ namespace Energistics.Protocol.Core
             Assert.IsNotNull(args.Message.SessionId);
         }
 
-        [Test]
+        [TestMethod]
         [Description("EtpClient sends an invalid message and receives ProtocolException with the correct error code")]
         public async Task EtpClient_SendMessage_Receive_Protocol_Exception_After_Sending_Invalid_Message()
         {
