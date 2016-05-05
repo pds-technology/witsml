@@ -766,8 +766,8 @@ namespace PDS.Witsml.Data.Channels
         /// <returns>true if the current row has values, false otherwise.</returns>
         public bool HasValues()
         {
-            return GetChannelValues(_current)
-                .Any(x => x != null && !IsNull(x.ToString()));
+            return GetChannelValuesWithIndex(_current)
+                .Any(x => !IsChannelValueNull(x.Key, x.Value?.ToString()));
         }
 
         /// <summary>
@@ -1125,6 +1125,28 @@ namespace PDS.Witsml.Data.Channels
                 .Take(1)
                 .SelectMany(x => x.Last())
                 .Where((r, i) => SliceExists(i+1)); // We need to look at the i-th + 1 slice since we're only looking at channel values
+        }
+
+        /// <summary>
+        /// Gets the channel values with the index.
+        /// </summary>
+        /// <param name="row">The row.</param>
+        /// <returns> A <see cref="IDictionary{TKey, TValue}"/></returns>
+        private IDictionary<int, object> GetChannelValuesWithIndex(int row)
+        {
+            if (IsClosed)
+                return new Dictionary<int, object>();
+
+            // Slice row
+            var dict = _records
+                .Skip(row)
+                .Take(1)
+                .SelectMany(x => x.Last())
+                .Select((v, i) => new { Value = v, Index = i })
+                .Where((r, i) => SliceExists(i + 1))
+                .ToDictionary(x => x.Index+1, x => x.Value );
+
+            return dict;
         }
 
         /// <summary>

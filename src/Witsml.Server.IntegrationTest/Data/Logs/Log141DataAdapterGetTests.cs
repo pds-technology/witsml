@@ -1047,7 +1047,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_GetFromStore_With_Start_And_End_Index_On_Channel_With_Null_Indicator_Values()
+        public void Log141DataAdapter_GetFromStore_Can_Slice_On_Channel_On_Range_Of_Null_Indicator_Values()
         {
             var response = DevKit.Add<WellList, Well>(_well);
 
@@ -1126,6 +1126,146 @@ namespace PDS.Witsml.Server.Data.Logs
                 Assert.AreEqual(value + 0.4, Convert.ToDouble(row[3]));
                 value++;
             }
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Can_Calculate_Channels_Range_With_Different_Null_Indicators()
+        {
+            var response = DevKit.Add<WellList, Well>(_well);
+
+            _wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+
+            _log.UidWell = _wellbore.UidWell;
+            _log.UidWellbore = response.SuppMsgOut;
+
+            DevKit.InitHeader(_log, LogIndexType.measureddepth);
+
+            _log.NullValue = "-999.25";
+
+            _log.LogCurveInfo.Clear();
+            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("MD", "ft"));
+            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("AAA", "m/h"));
+            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("BBB", "gAPI"));
+            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("CCC", "gAPI"));
+            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("DDD", "s"));
+
+            // Set channels null value except channel "CCC"
+            _log.LogCurveInfo[1].NullValue = "-1111.1";
+            _log.LogCurveInfo[2].NullValue = "-2222.2";
+            _log.LogCurveInfo[4].NullValue = "-4444.4";
+
+            _log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            var logData = _log.LogData.First();
+            logData.Data.Clear();
+            logData.MnemonicList = "MD,AAA,BBB,CCC,DDD";
+            logData.UnitList = "ft,m/h,gAPI,gAPI,s";
+            logData.Data.Add("1700.0, -1111.1,    17.2, -999.25, -4444.4");
+            logData.Data.Add("1800.0,    18.1,    18.2, -999.25, -4444.4");
+            logData.Data.Add("1900.0,    19.1,    19.2, -999.25,    19.4");
+            logData.Data.Add("2000.0,    20.1,    20.2, -999.25,    20.4");
+            logData.Data.Add("2100.0,    21.1,    21.2, -999.25,    21.4");
+            logData.Data.Add("2200.0,    22.1,    22.2, -999.25, -4444.4");
+            logData.Data.Add("2300.0,    23.1, -2222.2,    23.3, -4444.4");
+
+            response = DevKit.Add<LogList, Log>(_log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            // Query
+            var query = DevKit.CreateLog(uidLog, null, _log.UidWell, null, _log.UidWellbore, null);
+            query.StartIndex = new GenericMeasure(1.0, "ft");
+            query.EndIndex = new GenericMeasure(2.0, "ft");
+
+            var result = DevKit.Get<LogList, Log>(DevKit.List(query), ObjectTypes.Log, null, OptionsIn.ReturnElements.All);
+            Assert.AreEqual((short)ErrorCodes.Success, result.Result);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(result.XMLout);
+            var resultLog = logList.Log;
+            Assert.AreEqual(1, resultLog.Count);
+
+            // Result log header
+            var logCurveInfoList = resultLog[0].LogCurveInfo;
+            Assert.AreEqual(5, logCurveInfoList.Count());
+            var lciMnemonics = logCurveInfoList.Select(x => x.Mnemonic.Value).ToArray();
+            Assert.IsFalse(lciMnemonics.Except(new List<string>() { "MD", "AAA", "BBB", "CCC", "DDD" }).Any());
+            Assert.AreEqual(1800.0, logCurveInfoList[1].MinIndex.Value);
+            Assert.AreEqual(2300.0, logCurveInfoList[1].MaxIndex.Value);
+            Assert.AreEqual(1700.0, logCurveInfoList[2].MinIndex.Value);
+            Assert.AreEqual(2200.0, logCurveInfoList[2].MaxIndex.Value);
+            Assert.AreEqual(2300.0, logCurveInfoList[3].MinIndex.Value);
+            Assert.AreEqual(2300.0, logCurveInfoList[3].MaxIndex.Value);
+            Assert.AreEqual(1900.0, logCurveInfoList[4].MinIndex.Value);
+            Assert.AreEqual(2100.0, logCurveInfoList[4].MaxIndex.Value);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_With_Null_Indicator_Empty_Row_Should_Not_Be_Returned()
+        {
+            var response = DevKit.Add<WellList, Well>(_well);
+
+            _wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+
+            _log.UidWell = _wellbore.UidWell;
+            _log.UidWellbore = response.SuppMsgOut;
+
+            DevKit.InitHeader(_log, LogIndexType.measureddepth);
+
+            _log.NullValue = "-999.25";
+
+            _log.LogCurveInfo.Clear();
+            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("MD", "ft"));
+            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("AAA", "m/h"));
+            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("BBB", "gAPI"));
+            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("CCC", "gAPI"));
+
+            _log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            var logData = _log.LogData.First();
+            logData.Data.Clear();
+            logData.MnemonicList = "MD,AAA,BBB,CCC";
+            logData.UnitList = "ft,m/h,gAPI,gAPI";
+            logData.Data.Add("1700.0, 17.1, 17.2, -999.25");
+            logData.Data.Add("1800.0, 18.1, 18.2, -999.25");
+            logData.Data.Add("1900.0, -999.25, -999.25, -999.25");
+            logData.Data.Add("2000.0, 20.1, 20.2, -999.25");
+
+            response = DevKit.Add<LogList, Log>(_log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            // Query
+            var query = DevKit.CreateLog(uidLog, null, _log.UidWell, null, _log.UidWellbore, null);
+
+            var result = DevKit.Get<LogList, Log>(DevKit.List(query), ObjectTypes.Log, null, OptionsIn.ReturnElements.All);
+            Assert.AreEqual((short)ErrorCodes.Success, result.Result);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(result.XMLout);
+            var resultLog = logList.Log;
+            Assert.AreEqual(1, resultLog.Count);
+
+            // Result log header
+            var logCurveInfoList = resultLog[0].LogCurveInfo;
+            Assert.AreEqual(3, logCurveInfoList.Count());
+            var lciMnemonics = logCurveInfoList.Select(x => x.Mnemonic.Value).ToArray();
+            Assert.IsFalse(lciMnemonics.Except(new List<string>() { "MD", "AAA", "BBB", "CCC"}).Any());
+
+            // Result log data
+            var mnemonicList = resultLog[0].LogData[0].MnemonicList.Split(',');
+            Assert.AreEqual(3, mnemonicList.Count());
+            Assert.IsFalse(mnemonicList.Except(new List<string>() { "MD", "AAA", "BBB" }).Any());
+            var unitList = resultLog[0].LogData[0].UnitList.Split(',');
+            Assert.AreEqual(3, unitList.Count());
+            Assert.IsFalse(unitList.Except(new List<string>() { "ft", "m/h", "gAPI" }).Any());
+
+            var data = resultLog[0].LogData[0].Data;
+            Assert.AreEqual(3, data.Count);
+
+            Assert.IsTrue(data[0].Equals("1700,17.1,17.2"));
+            Assert.IsTrue(data[1].Equals("1800,18.1,18.2"));
+            Assert.IsTrue(data[2].Equals("2000,20.1,20.2"));
         }
 
         [TestMethod]
