@@ -156,22 +156,29 @@ namespace PDS.Witsml.Data.Logs
                 .Sort(increasing);
         }
 
-        public static IDictionary<int, string> GetNullValuesByColumnIndex(this Witsml131.Log log)
+        /// <summary>
+        /// Gets the channels null value of the m
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="mnemonics">The mnemonics.</param>
+        /// <returns></returns>
+        public static IEnumerable<string> GetNullValues(this Witsml131.Log log, string[] mnemonics)
         {
             return log.LogCurveInfo
-                .Select(x => x.NullValue)
-                .ToArray()
-                .Select((nullValue, index) => new { NullValue = GetNullValue(log.NullValue, nullValue),  Index = index })
-                .ToDictionary(x => x.Index, x => x.NullValue);
+               .Where(x => mnemonics.ToList().Any(m => m.EqualsIgnoreCase(x.Mnemonic)))
+               .Select(n => GetNullValue(log.NullValue, n.NullValue)).ToList();
         }
 
-        public static IDictionary<int, string> GetNullValuesByColumnIndex(this Witsml141.Log log)
+        /// <summary>
+        /// Gets the null values with the column index
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns>A <see cref="IDictionary{TKey, TValue}" with the column index as key and the log curve null value as the value./></returns>
+        public static IEnumerable<string> GetNullValues(this Witsml141.Log log, string[] mnemonics)
         {
             return log.LogCurveInfo
-                .Select(x => x.NullValue)
-                .ToArray()
-                .Select((nullValue, index) => new { NullValue = GetNullValue(log.NullValue, nullValue), Index = index })
-                .ToDictionary(x => x.Index, x => x.NullValue);
+              .Where(x => mnemonics.ToList().Any(m => m.EqualsIgnoreCase(x.Mnemonic.Value)))
+              .Select(n => GetNullValue(log.NullValue, n.NullValue)).ToList();
         }
 
         private static string GetNullValue(string logNullValue, string logCurveInfoNullValue)
