@@ -925,7 +925,7 @@ namespace PDS.Witsml.Data.Channels
 
                 // Update our data node and data point counts
                 dataNodeCount++;
-                dataPointCount += dataNodeCount * channelCount;
+                dataPointCount = dataNodeCount * channelCount;
 
                 var indexValues = new List<object>();
                 var channelValues = new List<object>();
