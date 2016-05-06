@@ -93,7 +93,7 @@ namespace PDS.Witsml.Data.Channels
         /// Initializes a new instance of the <see cref="ChannelDataReader"/> class.
         /// </summary>
         /// <param name="records">The collection of data records.</param>
-        public ChannelDataReader(IEnumerable<IChannelDataRecord> records, IDictionary<int, string> nullValues)
+        public ChannelDataReader(IEnumerable<IChannelDataRecord> records)
         {
             _log.Debug("ChannelDataReader instance created");
 
@@ -109,7 +109,7 @@ namespace PDS.Witsml.Data.Channels
             _indexCount = GetIndexValues(0).Count();
             _originalMnemonics = record?.Mnemonics ?? Empty;
             _originalUnits = record?.Units ?? Empty;
-            _originalNullValues = nullValues?.Values?.ToArray() ?? Empty;
+            _originalNullValues = record?.NullValues ?? Empty;
 
             Indices = record?.Indices ?? new List<ChannelIndexInfo>();
             Mnemonics = _originalMnemonics;
@@ -1138,15 +1138,13 @@ namespace PDS.Witsml.Data.Channels
                 return new Dictionary<int, object>();
 
             // Slice row
-            var dict = _records
+            return _records
                 .Skip(row)
                 .Take(1)
                 .SelectMany(x => x.Last())
                 .Select((v, i) => new { Value = v, Index = i })
-                .Where((r, i) => SliceExists(i + 1))
+                .Where((r, i) => SliceExists(i + Depth))  // We need to look at the i-th + Depth slice since we're only looking at channel values
                 .ToDictionary(x => x.Index+1, x => x.Value );
-
-            return dict;
         }
 
         /// <summary>
