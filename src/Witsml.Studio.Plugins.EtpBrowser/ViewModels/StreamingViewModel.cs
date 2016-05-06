@@ -472,8 +472,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             {
                 for (int i=0; i<dataItems.Count; i+=2)
                 {
-                    //var indexChannel = Channels.Where(c => c.ChannelId == dataItems[i].ChannelId).FirstOrDefault();
-                    var valueChannel = Channels.Where(c => c.ChannelId == dataItems[i + 1].ChannelId).FirstOrDefault();
+                    var valueChannel = Channels.FirstOrDefault(c => c.ChannelId == dataItems[i + 1].ChannelId);
 
                     Parent.Details.Append(string.Format(
                         "[ \"{0}\", {1}, {2} ],{3}",
@@ -487,12 +486,13 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             {
                 var dataValues = string.Join(Environment.NewLine, dataItems.Select(x =>
                 {
-                    var valueChannel = Channels.Where(c => c.ChannelId == x.ChannelId).FirstOrDefault();
+                    var valueChannel = Channels.FirstOrDefault(c => c.ChannelId == x.ChannelId);
 
-                    return string.Format("[ \"{0}\", {1}, {2} ]",
+                    return string.Format("[ \"{0}\", {1}, {2} ] // Channel ID: {3}",
                         valueChannel?.Mnemonic,
-                        x.Indexes[0],
-                        x.Value.Item);
+                        x.Indexes.FirstOrDefault(),
+                        x.Value.Item,
+                        x.ChannelId);
                 }));
 
                 Parent.Details.Append(string.Format(

@@ -16,14 +16,14 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Linq;
 using System.Threading.Tasks;
+using Energistics.Datatypes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Energistics.Protocol.ChannelStreaming
+namespace Energistics.Protocol.Discovery
 {
     [TestClass]
-    public class ChannelStreamingProtocolTests : IntegrationTestBase
+    public class DiscoveryProtocolTests : IntegrationTestBase
     {
         private EtpClient _client;
 
@@ -40,36 +40,39 @@ namespace Energistics.Protocol.ChannelStreaming
         }
 
         [TestMethod]
-        public async Task IChannelStreamingConsumer_Start_Connected_To_Simple_Producer()
+        public async Task IDiscoveryCustomer_GetResource_Request_Default_Uri()
         {
             // Register protocol handler
-            _client.Register<IChannelStreamingConsumer, ChannelStreamingConsumerHandler>();
-            var handler = _client.Handler<IChannelStreamingConsumer>();
+            _client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();
+            var handler = _client.Handler<IDiscoveryCustomer>();
 
             // Register event handlers
-            var onChannelMetadata = HandleAsync<ChannelMetadata>(x => handler.OnChannelMetadata += x);
-            var onChannelData = HandleAsync<ChannelData>(x => handler.OnChannelData += x);
+            var onGetResourcesResponse = HandleAsync<GetResourcesResponse, string>(x => handler.OnGetResourcesResponse += x);
 
             // Wait for Open connection
             var isOpen = await _client.OpenAsync();
             Assert.IsTrue(isOpen);
 
-            // Send Start message
-            handler.Start();
+            // Send GetResources message for root URI
+            handler.GetResources(EtpUri.RootUri);
 
-            // Wait for ChannelMetadata message
-            var argsMetadata = await onChannelMetadata.WaitAsync();
+            // Wait for GetResourcesResponse for top level resources
+            var args = await onGetResourcesResponse.WaitAsync();
 
-            Assert.IsNotNull(argsMetadata);
-            Assert.IsNotNull(argsMetadata.Message.Channels);
-            Assert.IsTrue(argsMetadata.Message.Channels.Any());
+            Assert.IsNotNull(args);
+            Assert.IsNotNull(args.Message.Resource);
+            Assert.IsNotNull(args.Message.Resource.Uri);
 
-            // Wait for ChannelData message
-            var argsData = await onChannelData.WaitAsync();
+            // Send GetResources message for child resources
+            var resource = args.Message.Resource;
+            handler.GetResources(resource.Uri);
 
-            Assert.IsNotNull(argsData);
-            Assert.IsNotNull(argsData.Message.Data);
-            Assert.IsTrue(argsData.Message.Data.Any());
+            // Wait for GetResourcesResponse for child resources
+            args = await onGetResourcesResponse.WaitAsync();
+
+            Assert.IsNotNull(args);
+            Assert.IsNotNull(args.Message.Resource);
+            Assert.AreNotEqual(resource.Uri, args.Message.Resource.Uri);
         }
     }
 }
