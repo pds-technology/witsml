@@ -21,8 +21,15 @@ using PDS.Witsml.Studio.Core.Connections;
 
 namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
 {
+    /// <summary>
+    /// Encapsulates Witsml settings and options sent to the store.
+    /// </summary>
+    /// <seealso cref="Caliburn.Micro.PropertyChangedBase" />
     public class WitsmlSettings : PropertyChangedBase
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WitsmlSettings"/> class.
+        /// </summary>
         public WitsmlSettings()
         {
             Connection = new Connection();
