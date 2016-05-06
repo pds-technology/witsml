@@ -108,5 +108,14 @@ namespace PDS.Witsml.Server.Configuration
         ///   <c>true</c> if data has been truncated; otherwise, <c>false</c>.
         /// </value>
         public bool DataTruncated { get; set; }
+
+        /// <summary>
+        /// Clones this instance.
+        /// </summary>
+        /// <returns>A clone of this instance</returns>
+        public IQueryContext Clone()
+        {
+            return MemberwiseClone() as ResponseContext;
+        }
     }
 }

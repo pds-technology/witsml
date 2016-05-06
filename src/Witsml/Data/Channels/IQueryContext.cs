@@ -20,9 +20,11 @@ namespace PDS.Witsml.Data.Channels
 {
     public interface IQueryContext
     {
-        int? RequestLatestValues { get; }
+        int? RequestLatestValues { get; set; }
         int MaxDataNodes { get; set; }
         int MaxDataPoints { get; set; }
         bool DataTruncated { get; set; }
+
+        IQueryContext Clone();
     }
 }

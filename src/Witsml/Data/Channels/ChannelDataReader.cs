@@ -53,7 +53,7 @@ namespace PDS.Witsml.Data.Channels
         private string[] _originalNullValues = Empty;
         private string[] _allMnemonics = null;
         private string[] _allUnits = null;
-        private string[] _allNulValues = null;
+        private string[] _allNullValues = null;
         private readonly int _indexCount;
         private readonly int _count;
         private int _current = -1;
@@ -877,8 +877,8 @@ namespace PDS.Witsml.Data.Channels
             }
         }
 
-        public List<List<object>> GetData(
-            IQueryContext context,
+        public List<List<List<object>>> GetData(
+            IQueryContext context, IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units, IDictionary<int, string> nullValues,
             out Dictionary<string, Range<double?>> ranges)
         {
 
@@ -890,8 +890,7 @@ namespace PDS.Witsml.Data.Channels
             var dataPointCount = 0;
             var channelCount = AllMnemonics.Length;
 
-            var logData = new List<List<object>>();
-            var isTimeIndex = Indices.Select(x => x.IsTimeIndex).FirstOrDefault();
+            var logData = new List<List<List<object>>>();
 
             // Ranges will only be returned for channels that are included in slicing
             //... and contain data.
@@ -928,46 +927,56 @@ namespace PDS.Witsml.Data.Channels
                 dataNodeCount++;
                 dataPointCount += dataNodeCount * channelCount;
 
-                var values = new List<object>();
+                var indexValues = new List<object>();
+                var channelValues = new List<object>();
                 var primaryIndex = GetIndexValue();
 
-                // Add the primary index value to the values list and 
+                // Add each index value to the values list and 
                 //... use timestamp format for time index values
-                values.Add(isTimeIndex
-                    ? GetDateTimeOffset(0).ToString("o")
-                    : (object)primaryIndex);
+                for (var i = 0; i < Depth; i++)
+                {
+                    var isTimeIndex = Indices.Skip(i)
+                        .Select(x => x.IsTimeIndex)
+                        .FirstOrDefault();
+
+                    indexValues.Add(isTimeIndex
+                        ? GetDateTimeOffset(i).ToString("o")
+                        : (object)GetIndexValue(i));
+                }
 
 
                 // Only add channel value to the list of values
                 //... if the are included in current slices
-                for (int i = 1; i < FieldCount; i++)
+                for (int i = Depth; i < FieldCount; i++)
                 {
                     // Limit data to mnemonics slices                    
                     if (SliceExists(i))
                     {
-                        // Check if channelValue IsNull (including Null Indicator Value)
+                        // Check if channelValue IsNull
                         var channelValue = IsNull(GetString(i)) ? null : GetValue(i);
-                        values.Add(channelValue);
+                        channelValues.Add(channelValue);
                     }
                 }
 
                 // Filter rows with no channel values
-                if (values.Count > 1)
+                if (channelValues.Count > 0)
                 {
-                    if (!requestLatestValues.HasValue || IsRequestedValueNeeded(values, requestedValueCount, requestLatestValues.Value))
+                    var allValues = indexValues.Concat(channelValues).ToList();
+
+                    if (!requestLatestValues.HasValue || IsRequestedValueNeeded(allValues, requestedValueCount, requestLatestValues.Value))
                     {
-                        logData.Add(values);
+                        logData.Add(new List<List<object>>() { indexValues, channelValues });
 
                         // Update the latest value count for each channel.
                         if (requestLatestValues.HasValue)
                         {
-                            UpdateRequestedValueCount(requestedValueCount, values, Mnemonics, ranges, primaryIndex);
+                            UpdateRequestedValueCount(requestedValueCount, allValues, Mnemonics, ranges, primaryIndex);
                         }
                         // if it's not a lastest values request then update indexes
                         else
                         {
                             // Update ranges for the current primaryIndex
-                            UpdateRanges(values, ranges, primaryIndex);
+                            UpdateRanges(allValues, ranges, primaryIndex);
                         }
                     }
 
@@ -986,8 +995,24 @@ namespace PDS.Witsml.Data.Channels
                 logData.Reverse();
             }
 
+            // if any ranges are empty, then we must (re)slice
+            if (ranges.Values.Any(r => !r.Start.HasValue))
+            {
+                var reader = new ChannelDataReader(logData, Mnemonics, Units, NullValues)
+                    .WithIndices(Indices);
+                    
+                reader.Slice(mnemonicSlices, units, nullValues);
+
+                // Clone the context without RequestLatestValues
+                var resliceContext = context.Clone();
+                resliceContext.RequestLatestValues = null;
+
+                logData = reader.GetData(resliceContext, mnemonicSlices, units, nullValues, out ranges);
+            }
+
             return logData;
         }
+
         private Dictionary<string, Range<double?>> InitializeSliceRanges()
         {
             var emptyRanges = new Dictionary<string, Range<double?>>();
@@ -1104,12 +1129,12 @@ namespace PDS.Witsml.Data.Channels
         /// <returns></returns>
         private string[] GetAllNullValues()
         {
-            if (_allNulValues == null)
+            if (_allNullValues == null)
             {
-                _allNulValues = Indices.Select(i => i.NullValue).Concat(_originalNullValues).ToArray();
+                _allNullValues = Indices.Select(i => i.NullValue).Concat(_originalNullValues).ToArray();
             }
 
-            return _allNulValues;
+            return _allNullValues;
         }
 
         /// <summary>
