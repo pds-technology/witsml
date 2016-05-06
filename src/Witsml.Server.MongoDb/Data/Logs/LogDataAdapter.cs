@@ -367,7 +367,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var records = GetChannelData(logHeader.GetUri(), mnemonics[0], range, IsIncreasing(logHeader), requestLatestValues);
 
             // Get a reader for the log's channel data
-            var reader = records.GetReader(nullValues);
+            var reader = records.GetReader();
 
             // Slice the reader for the requested mnemonics
             reader.Slice(mnemonics, units, nullValues);
