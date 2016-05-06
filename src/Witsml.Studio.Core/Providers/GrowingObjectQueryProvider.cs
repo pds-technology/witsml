@@ -21,6 +21,9 @@ using System.Xml.Linq;
 
 namespace PDS.Witsml.Studio.Core.Providers
 {
+    /// <summary>
+    /// Manages updates to growing object queries for partial results.
+    /// </summary>
     public class GrowingObjectQueryProvider
     {
         /// <summary>
