@@ -122,7 +122,10 @@
     <Compile Include="Security\Authorization.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="!Protocols 3-4.cd" />
+    <None Include="!Protocols 0-1.cd" />
     <None Include="app.config" />
+    <None Include="!BaseTypes.cd" />
     <None Include="Energistics\Datatypes\AnyArray.avsc" />
     <None Include="Energistics\Datatypes\ArrayOfBoolean.avsc" />
     <None Include="Energistics\Datatypes\ArrayOfDouble.avsc" />

@@ -599,7 +599,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
 
             _xmls.Add(text);
 
-            if (returnCode <= 1)
+            if (returnCode <= 1 || !Model.RetrievePartialResults)
             {
                 var separator = string.Format("{0}{0}<!-- Partial Result -->{0}{0}", Environment.NewLine);
                 QueryResults.Text = string.Join(separator, _xmls);

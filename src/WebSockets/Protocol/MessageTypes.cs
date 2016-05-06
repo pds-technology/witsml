@@ -104,12 +104,5 @@ namespace Energistics.Protocol
         public enum DataArray
         {
         }
-
-        /// <summary>
-        /// An enumeration of Query protocol message types.
-        /// </summary>
-        public enum Query
-        {
-        }
     }
 }

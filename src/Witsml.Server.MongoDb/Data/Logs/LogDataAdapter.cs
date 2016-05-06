@@ -429,9 +429,6 @@ namespace PDS.Witsml.Server.Data.Logs
             // Get current index information
             var ranges = GetCurrentIndexRange(current);
 
-            // Get null values
-            var nullValues = GetNullValueList(current, new int[] { });
-
             TimeSpan? offset = null;
             var isTimeLog = IsTimeLog(current, true);
             var updateMnemonics = new List<string>();
