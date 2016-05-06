@@ -18,13 +18,47 @@
 
 namespace PDS.Witsml.Data.Channels
 {
+    /// <summary>
+    /// An interface for query context
+    /// </summary>
     public interface IQueryContext
     {
+        /// <summary>
+        /// Gets or sets the request latest values OptionsIn from the parser.
+        /// </summary>
+        /// <value>
+        /// The request latest values.
+        /// </value>
         int? RequestLatestValues { get; set; }
+
+        /// <summary>
+        /// Gets the current query maximum data nodes .
+        /// </summary>
+        /// <value>
+        /// The query maximum data nodes.
+        /// </value>
         int MaxDataNodes { get; set; }
+
+        /// <summary>
+        /// Gets the current query maximum data points.
+        /// </summary>
+        /// <value>
+        /// The query maximum data points.
+        /// </value>
         int MaxDataPoints { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether data has been truncated.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if data has been truncated; otherwise, <c>false</c>.
+        /// </value>
         bool DataTruncated { get; set; }
 
+        /// <summary>
+        /// Clones this instance.
+        /// </summary>
+        /// <returns>A clone of this instance</returns>
         IQueryContext Clone();
     }
 }
