@@ -63,7 +63,9 @@ namespace Energistics
             action((s, e) =>
             {
                 args = e;
-                task.Start();
+
+                if (task.Status == TaskStatus.Created)
+                    task.Start();
             });
 
             return await task.WaitAsync();
@@ -76,7 +78,8 @@ namespace Energistics
         /// <typeparam name="TContext">The type of the context.</typeparam>
         /// <param name="action">The action to execute.</param>
         /// <returns>An awaitable task.</returns>
-        protected async Task<ProtocolEventArgs<T, TContext>> HandleAsync<T, TContext>(Action<ProtocolEventHandler<T, TContext>> action)
+        protected async Task<ProtocolEventArgs<T, TContext>> HandleAsync<T, TContext>(
+            Action<ProtocolEventHandler<T, TContext>> action)
             where T : ISpecificRecord
         {
             ProtocolEventArgs<T, TContext> args = null;
@@ -85,7 +88,9 @@ namespace Energistics
             action((s, e) =>
             {
                 args = e;
-                task.Start();
+
+                if (task.Status == TaskStatus.Created)
+                    task.Start();
             });
 
             return await task.WaitAsync();

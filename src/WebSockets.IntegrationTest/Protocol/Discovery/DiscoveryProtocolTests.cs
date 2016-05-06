@@ -46,33 +46,46 @@ namespace Energistics.Protocol.Discovery
             _client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();
             var handler = _client.Handler<IDiscoveryCustomer>();
 
-            // Register event handlers
-            var onGetResourcesResponse = HandleAsync<GetResourcesResponse, string>(x => handler.OnGetResourcesResponse += x);
-
             // Wait for Open connection
             var isOpen = await _client.OpenAsync();
             Assert.IsTrue(isOpen);
+
+            // Register event handler for root URI
+            var onGetRootResourcesResponse = HandleAsync<GetResourcesResponse, string>(
+                x => handler.OnGetResourcesResponse += x);
 
             // Send GetResources message for root URI
             handler.GetResources(EtpUri.RootUri);
 
             // Wait for GetResourcesResponse for top level resources
-            var args = await onGetResourcesResponse.WaitAsync();
+            var argsRoot = await onGetRootResourcesResponse.WaitAsync();
 
-            Assert.IsNotNull(args);
-            Assert.IsNotNull(args.Message.Resource);
-            Assert.IsNotNull(args.Message.Resource.Uri);
+            Assert.IsNotNull(argsRoot);
+            Assert.IsNotNull(argsRoot.Message.Resource);
+            Assert.IsNotNull(argsRoot.Message.Resource.Uri);
+
+            // Register event handler for child resources
+            var onGetChildResourcesResponse = HandleAsync<GetResourcesResponse, string>(
+                x => handler.OnGetResourcesResponse += x);
 
             // Send GetResources message for child resources
-            var resource = args.Message.Resource;
+            var resource = argsRoot.Message.Resource;
             handler.GetResources(resource.Uri);
 
             // Wait for GetResourcesResponse for child resources
-            args = await onGetResourcesResponse.WaitAsync();
+            var argsChild = await onGetChildResourcesResponse.WaitAsync();
 
-            Assert.IsNotNull(args);
-            Assert.IsNotNull(args.Message.Resource);
-            Assert.AreNotEqual(resource.Uri, args.Message.Resource.Uri);
+            Assert.IsNotNull(argsChild);
+
+            if (argsChild.Header.MessageFlags == (int) MessageFlags.NoData)
+            {
+                Assert.IsNull(argsChild.Message.Resource);
+            }
+            else
+            {
+                Assert.IsNotNull(argsChild.Message.Resource);
+                Assert.AreNotEqual(resource.Uri, argsChild.Message.Resource.Uri);
+            }
         }
     }
 }
