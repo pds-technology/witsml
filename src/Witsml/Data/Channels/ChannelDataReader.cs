@@ -925,7 +925,7 @@ namespace PDS.Witsml.Data.Channels
                     continue;
 
                 // If processing the next row will exceed our maxDataNodes or maxDataPoints limits then stop
-                if ((dataNodeCount + 1) > maxDataNodes || (dataPointCount + dataNodeCount * channelCount) > maxDataPoints)
+                if ((dataNodeCount + 1) > maxDataNodes || (dataPointCount + channelCount) > maxDataPoints)
                 {
                     context.DataTruncated = true;
                     _log.DebugFormat("GetData truncated with {0} data nodes and {1} data points.", dataNodeCount, dataPointCount);
