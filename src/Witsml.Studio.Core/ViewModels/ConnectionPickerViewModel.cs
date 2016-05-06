@@ -137,6 +137,21 @@ namespace PDS.Witsml.Studio.Core.ViewModels
             ShowConnectionDialog(connection);
         }
 
+        public void DeleteConnection(Connection connection, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+
+            if (Runtime.ShowConfirm($"Are you sure you want to delete the connection?\nName: { connection.Name }"))
+            {
+                var selected = connection == Connection
+                    ? SelectConnectionItem
+                    : Connection;
+
+                Connections.Remove(connection);
+                InsertConnections(new Connection[0], selected, true);
+            }
+        }
+
         protected override void OnViewLoaded(object view)
         {
             if (Connections.Any()) return;
@@ -161,7 +176,7 @@ namespace PDS.Witsml.Studio.Core.ViewModels
             OnConnectionChanged?.Invoke(Connection);
         }
 
-        private void InsertConnections(Connection[] connections, Connection selected)
+        private void InsertConnections(Connection[] connections, Connection selected, bool force = false)
         {
             var names = connections.Select(x => x.Name).ToArray();
 
@@ -173,7 +188,7 @@ namespace PDS.Witsml.Studio.Core.ViewModels
                 .OrderBy(x => x.Name)
                 .ToList();
 
-            if (Connections.Any())
+            if (Connections.Any() || force)
             {
                 SaveConnectionsToFile(list);
             }

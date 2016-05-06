@@ -29,15 +29,24 @@
                         </Grid.ColumnDefinitions>
                         
                         <TextBlock Grid.Column="0" Text="{Binding Name}" />
-                        <TextBlock Grid.Column="1" Text="edit" Foreground="SteelBlue" TextDecorations="Underline" Cursor="Hand" Margin="5,0"
-                                   Visibility="{Binding Uri, Converter={StaticResource NullToVisibilityConverter}}"
+
+                        <StackPanel x:Name="Links" Grid.Column="1" Orientation="Horizontal" Margin="5,0,0,0"
+                                    Visibility="{Binding Uri, Converter={StaticResource NullToVisibilityConverter}}">
+                            
+                            <TextBlock Text="edit" Foreground="SteelBlue" TextDecorations="Underline" Cursor="Hand"
                                    cal:Action.TargetWithoutContext="{Binding ElementName=ConnectionPicker, Path=DataContext}"
-                                   cal:Message.Attach="[Event MouseUp] = [Action EditConnection($dataContext, $eventArgs)]"
-                                   x:Name="EditLink" />
+                                   cal:Message.Attach="[Event MouseUp] = [Action EditConnection($dataContext, $eventArgs)]" />
+
+                            <TextBlock Text="|" Margin="5,0" />
+                            
+                            <TextBlock Text="delete" Foreground="SteelBlue" TextDecorations="Underline" Cursor="Hand"
+                                   cal:Action.TargetWithoutContext="{Binding ElementName=ConnectionPicker, Path=DataContext}"
+                                   cal:Message.Attach="[Event MouseUp] = [Action DeleteConnection($dataContext, $eventArgs)]" />
+                        </StackPanel>
                     </Grid>
                     <DataTemplate.Triggers>
                         <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ComboBoxItem}}" Value="{x:Null}">
-                            <Setter TargetName="EditLink" Property="Visibility" Value="Collapsed"/>
+                            <Setter TargetName="Links" Property="Visibility" Value="Collapsed"/>
                         </DataTrigger>
                     </DataTemplate.Triggers>
                 </DataTemplate>
