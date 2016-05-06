@@ -19,12 +19,12 @@
 namespace PDS.Witsml.Data.Channels
 {
     /// <summary>
-    /// An interface for query context
+    /// Defines properties and methods used by the ChannelDataReader to control how data is returned.  
     /// </summary>
     public interface IQueryContext
     {
         /// <summary>
-        /// Gets or sets the request latest values OptionsIn from the parser.
+        /// Gets or sets the request latest values OptionsIn.
         /// </summary>
         /// <value>
         /// The request latest values.

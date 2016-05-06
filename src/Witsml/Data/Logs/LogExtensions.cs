@@ -161,7 +161,7 @@ namespace PDS.Witsml.Data.Logs
             return log.LogCurveInfo
                 .Select(x => x.NullValue)
                 .ToArray()
-                .Select((nullValue, index) => new { NullValue = !string.IsNullOrWhiteSpace(nullValue) ? nullValue : !string.IsNullOrWhiteSpace(log.NullValue) ? log.NullValue : "null",  Index = index })
+                .Select((nullValue, index) => new { NullValue = GetNullValue(log.NullValue, nullValue),  Index = index })
                 .ToDictionary(x => x.Index, x => x.NullValue);
         }
 
@@ -170,8 +170,14 @@ namespace PDS.Witsml.Data.Logs
             return log.LogCurveInfo
                 .Select(x => x.NullValue)
                 .ToArray()
-                .Select((nullValue, index) => new { NullValue = !string.IsNullOrWhiteSpace(nullValue) ? nullValue : !string.IsNullOrWhiteSpace(log.NullValue) ? log.NullValue : "null", Index = index })
+                .Select((nullValue, index) => new { NullValue = GetNullValue(log.NullValue, nullValue), Index = index })
                 .ToDictionary(x => x.Index, x => x.NullValue);
         }
+
+        private static string GetNullValue(string logNullValue, string logCurveInfoNullValue)
+        {
+            return !string.IsNullOrWhiteSpace(logCurveInfoNullValue) ? logCurveInfoNullValue : !string.IsNullOrWhiteSpace(logNullValue) ? logNullValue : "null";
+        }
+
     }
 }

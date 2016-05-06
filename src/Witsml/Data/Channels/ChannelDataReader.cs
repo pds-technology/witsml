@@ -878,14 +878,14 @@ namespace PDS.Witsml.Data.Channels
         }
 
         /// <summary>
-        /// Gets the log data.
+        /// Manages the amount and format of the channel data managed by the reader based on the current query context.
         /// </summary>
         /// <param name="context">The query context.</param>
         /// <param name="mnemonicSlices">The index map for requested mnemonics in current log.</param>
         /// <param name="units">The units for the log curve.</param>
         /// <param name="nullValues">The null value map for log curve.</param>
         /// <param name="ranges">The ranges map.</param>
-        /// <returns>The log data in storage format.</returns>
+        /// <returns>The channel data managed by the reader.</returns>
         public List<List<List<object>>> GetData(
             IQueryContext context, IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units, IDictionary<int, string> nullValues,
             out Dictionary<string, Range<double?>> ranges)
@@ -925,7 +925,7 @@ namespace PDS.Witsml.Data.Channels
                     continue;
 
                 // If processing the next row will exceed our maxDataNodes or maxDataPoints limits then stop
-                if ((dataNodeCount + 1) > maxDataNodes || (dataPointCount + dataNodeCount * channelCount) > maxDataPoints)
+                if ((dataNodeCount + 1) > maxDataNodes || (dataPointCount + channelCount) > maxDataPoints)
                 {
                     context.DataTruncated = true;
                     _log.DebugFormat("GetData truncated with {0} data nodes and {1} data points.", dataNodeCount, dataPointCount);
