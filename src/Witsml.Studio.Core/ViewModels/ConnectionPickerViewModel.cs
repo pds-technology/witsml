@@ -103,9 +103,15 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         /// </summary>
         public void ShowConnectionDialog(Connection connection = null)
         {
+            var existing = Connections
+                .Where(x => x != connection)
+                .Select(x => x.Name)
+                .ToArray();
+
             var viewModel = new ConnectionViewModel(Runtime, ConnectionType)
             {
                 DataItem = connection ?? new Connection(),
+                ConnectionNames = existing
             };
 
             if (Runtime.ShowDialog(viewModel))
@@ -155,11 +161,14 @@ namespace PDS.Witsml.Studio.Core.ViewModels
             OnConnectionChanged?.Invoke(Connection);
         }
 
-        private void InsertConnections(IEnumerable<Connection> connections, Connection selected)
+        private void InsertConnections(Connection[] connections, Connection selected)
         {
+            var names = connections.Select(x => x.Name).ToArray();
+
             var list = Connections
                 .Skip(1)
                 .Take(Connections.Count - 2)
+                .Where(x => !names.Contains(x.Name))
                 .Concat(connections)
                 .OrderBy(x => x.Name)
                 .ToList();
@@ -176,7 +185,7 @@ namespace PDS.Witsml.Studio.Core.ViewModels
             Connection = selected;
         }
 
-        private IEnumerable<Connection> LoadConnectionsFromFile()
+        private Connection[] LoadConnectionsFromFile()
         {
             var fileName = GetConnectionFileName();
 
@@ -192,7 +201,7 @@ namespace PDS.Witsml.Studio.Core.ViewModels
                     x.SecurePassword = x.Password.ToSecureString();
                 });
 
-                return connections;
+                return connections.ToArray();
             }
 
             return new Connection[0];

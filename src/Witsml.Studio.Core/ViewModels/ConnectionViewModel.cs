@@ -17,8 +17,11 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using AutoMapper;
 using Caliburn.Micro;
@@ -51,6 +54,7 @@ namespace PDS.Witsml.Studio.Core.ViewModels
 
             Runtime = runtime;
             ConnectionType = connectionType;
+            ConnectionNames = new string[0];
             DisplayName = string.Format("{0} Connection", ConnectionType.ToString().ToUpper());
             CanTestConnection = true;
         }
@@ -59,12 +63,18 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         /// Gets the runtime service.
         /// </summary>
         /// <value>The runtime.</value>
-        public IRuntimeService Runtime { get; private set; }
+        public IRuntimeService Runtime { get; }
 
         /// <summary>
         /// Gets the connection type
         /// </summary>
-        public ConnectionTypes ConnectionType { get; private set; }
+        public ConnectionTypes ConnectionType { get; }
+
+        /// <summary>
+        /// Gets the list of connection names.
+        /// </summary>
+        /// <value>The list of connection names.</value>
+        public string[] ConnectionNames { get; set; }
 
         private Connection _editItem;
 
@@ -224,6 +234,13 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         /// </summary>
         public void Accept()
         {
+            if (ConnectionNames != null && ConnectionNames.Any(x => x == EditItem.Name) && !Runtime.ShowConfirm(
+                "A connection with the same name already exists. Would you like to overwrite the existing connection?",
+                MessageBoxButton.YesNo))
+            {
+                return;
+            }
+
             TestConnection()
                 .ContinueWith(x =>
                 {
