@@ -372,9 +372,9 @@ namespace PDS.Witsml.Server.Data.Channels
                         !(new Range<double?>(updateRange.Start.Value, updateRange.End.Value)
                         .Contains(existingEnum.Current.GetIndexValue(), increasing))))
                     {
-                        id = endOfExisting ? string.Empty : existingEnum.Current.Id;
                         yield return existingEnum.Current;
                         endOfExisting = !existingEnum.MoveNext();
+                        id = endOfExisting ? string.Empty : existingEnum.Current.Id;
                     }
                     else // existing and update overlap
                     {
