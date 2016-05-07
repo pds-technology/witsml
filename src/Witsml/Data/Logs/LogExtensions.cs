@@ -164,9 +164,9 @@ namespace PDS.Witsml.Data.Logs
         /// <returns></returns>
         public static IEnumerable<string> GetNullValues(this Witsml131.Log log, string[] mnemonics)
         {
-            return log.LogCurveInfo
-               .Where(x => mnemonics.ToList().Any(m => m.EqualsIgnoreCase(x.Mnemonic)))
-               .Select(n => GetNullValue(log.NullValue, n.NullValue)).ToList();
+            return mnemonics
+            .Select(x => log.LogCurveInfo.First(lci => lci.Mnemonic.EqualsIgnoreCase(x)))
+            .Select(n => GetNullValue(log.NullValue, n.NullValue));
         }
 
         /// <summary>
@@ -176,9 +176,9 @@ namespace PDS.Witsml.Data.Logs
         /// <returns>A <see cref="IDictionary{TKey, TValue}" with the column index as key and the log curve null value as the value./></returns>
         public static IEnumerable<string> GetNullValues(this Witsml141.Log log, string[] mnemonics)
         {
-            return log.LogCurveInfo
-              .Where(x => mnemonics.ToList().Any(m => m.EqualsIgnoreCase(x.Mnemonic.Value)))
-              .Select(n => GetNullValue(log.NullValue, n.NullValue)).ToList();
+            return mnemonics
+            .Select(x => log.LogCurveInfo.First(lci => lci.Mnemonic.Value.EqualsIgnoreCase(x)))
+            .Select(n => GetNullValue(log.NullValue, n.NullValue));
         }
 
         private static string GetNullValue(string logNullValue, string logCurveInfoNullValue)
