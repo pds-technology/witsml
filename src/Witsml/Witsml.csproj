@@ -33,6 +33,9 @@
     <Reference Include="Energistics.DataAccess">
       <HintPath>..\External\DevKit\Energistics.DataAccess.dll</HintPath>
     </Reference>
+    <Reference Include="ETP.WebSockets">
+      <HintPath>..\External\DevKit\ETP.WebSockets.dll</HintPath>
+    </Reference>
     <Reference Include="FluentValidationNA, Version=1.2.16.24816, Culture=neutral, PublicKeyToken=0950390b87309e14, processorArchitecture=MSIL">
       <HintPath>..\packages\FluentValidationNA.1.2.16\lib\net40\FluentValidationNA.dll</HintPath>
       <Private>True</Private>
@@ -114,10 +117,6 @@
     <ProjectReference Include="..\Framework\Framework.csproj">
       <Project>{fae228aa-4917-4b02-b239-0a24df883898}</Project>
       <Name>Framework</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WebSockets\WebSockets.csproj">
-      <Project>{30de888b-a6b7-4528-ad89-324a7f9b0f4c}</Project>
-      <Name>WebSockets</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

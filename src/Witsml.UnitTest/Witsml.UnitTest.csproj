@@ -38,6 +38,9 @@
     <Reference Include="Energistics.DataAccess">
       <HintPath>..\External\DevKit\Energistics.DataAccess.dll</HintPath>
     </Reference>
+    <Reference Include="ETP.WebSockets">
+      <HintPath>..\External\DevKit\ETP.WebSockets.dll</HintPath>
+    </Reference>
     <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
       <Private>True</Private>
@@ -89,10 +92,6 @@
     <ProjectReference Include="..\Framework\Framework.csproj">
       <Project>{fae228aa-4917-4b02-b239-0a24df883898}</Project>
       <Name>Framework</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WebSockets\WebSockets.csproj">
-      <Project>{30DE888B-A6B7-4528-AD89-324A7F9B0F4C}</Project>
-      <Name>WebSockets</Name>
     </ProjectReference>
     <ProjectReference Include="..\Witsml.Server\Witsml.Server.csproj">
       <Project>{93faae2f-13aa-46df-a94b-36155b51ebfa}</Project>

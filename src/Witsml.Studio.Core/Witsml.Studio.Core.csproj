@@ -62,6 +62,9 @@
       <HintPath>..\packages\ETP.1.3.0-BUILD55\lib\ETP.Messages.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="ETP.WebSockets">
+      <HintPath>..\External\DevKit\ETP.WebSockets.dll</HintPath>
+    </Reference>
     <Reference Include="ICSharpCode.AvalonEdit, Version=5.0.1.0, Culture=neutral, PublicKeyToken=9cc39be672370310, processorArchitecture=MSIL">
       <HintPath>..\packages\AvalonEdit.5.0.2\lib\Net40\ICSharpCode.AvalonEdit.dll</HintPath>
       <Private>True</Private>
@@ -232,10 +235,6 @@
     <ProjectReference Include="..\Framework\Framework.csproj">
       <Project>{fae228aa-4917-4b02-b239-0a24df883898}</Project>
       <Name>Framework</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WebSockets\WebSockets.csproj">
-      <Project>{30de888b-a6b7-4528-ad89-324a7f9b0f4c}</Project>
-      <Name>WebSockets</Name>
     </ProjectReference>
     <ProjectReference Include="..\Witsml\Witsml.csproj">
       <Project>{0EF1D73F-E7A0-40B0-803B-7CE4B6B27112}</Project>
