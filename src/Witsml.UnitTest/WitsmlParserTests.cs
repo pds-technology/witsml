@@ -16,6 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using Energistics.DataAccess;
+using Energistics.DataAccess.WITSML141;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml
@@ -30,5 +33,42 @@ namespace PDS.Witsml
         //public void WitsmlParser_MethodName_ExpectedBehavior()
         //{
         //}
+
+        [TestMethod]
+        public void WitsmlParser_Can_Remove_NaN_Elements_Of_Different_Property_Name()
+        {
+            string wellXml = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+           "<well>" + Environment.NewLine +
+           "<name>Test Full Well</name>" + Environment.NewLine +
+           "<pcInterest uom=\"%\">NaN</pcInterest>" + Environment.NewLine +
+           "</well>" + Environment.NewLine +
+           "</wells>";
+
+           var result = WitsmlParser.RemoveNaNElements<WellList>(wellXml);
+           WellList welllist = EnergisticsConverter.XmlToObject<WellList>(result);
+
+            Assert.IsNull(welllist.Well[0].PercentInterest);
+        }
+
+
+        [TestMethod]
+        public void WitsmlParser_Can_Remove_NaN_Elements_Of_Not_Primitive_Property_Type()
+        {
+            string wellXml = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+           "<well>" + Environment.NewLine +
+           "<name>Test Full Well</name>" + Environment.NewLine +
+            "<wellDatum uid=\"KB\">" + Environment.NewLine +
+           "    <name>Kelly Bushing</name>" + Environment.NewLine +
+           "    <code>KB</code>" + Environment.NewLine +
+           "    <elevation uom=\"ft\" datum=\"SL\">NaN</elevation>" + Environment.NewLine +
+           "</wellDatum>" + Environment.NewLine +
+           "</well>" + Environment.NewLine +
+           "</wells>";
+
+            var result = WitsmlParser.RemoveNaNElements<WellList>(wellXml);
+            WellList welllist = EnergisticsConverter.XmlToObject<WellList>(result);
+
+            Assert.IsNull(welllist.Well[0].WellDatum[0].Elevation);
+        }
     }
 }

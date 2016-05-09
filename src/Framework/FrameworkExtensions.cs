@@ -175,9 +175,20 @@ namespace PDS.Framework
         /// <returns>true if the type is numeric; otherwise, false</returns>
         public static bool IsNumeric(this Type type)
         {
-            if (type != null && type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            if (type==null)
+            {
+                return false;
+            }
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
                 type = Nullable.GetUnderlyingType(type);
+            }
+            else if (type.IsClass)
+            {
+                var propertyInfo = type.GetProperty("Value");
+                type = (propertyInfo != null) ? propertyInfo.PropertyType : null;
+                if (type == null)
+                    return false;
             }
 
             var typeCode = Type.GetTypeCode(type);

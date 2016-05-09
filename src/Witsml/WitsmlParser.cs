@@ -140,12 +140,22 @@ namespace PDS.Witsml
         {
             var assembly = Assembly.GetAssembly(typeof(T));
             foreach (Type type in assembly.GetTypes())
-            {
+            {               
                 if (type.Name.EqualsIgnoreCase(element.Parent.Name.LocalName))
                 {
                     PropertyInfo propertyInfo = type.GetProperty(element.Name.LocalName.ToPascalCase());
                     Type propertyType = (propertyInfo != null) ? propertyInfo.PropertyType : null;
 
+                    if (propertyInfo==null)
+                    {
+                        propertyInfo = type.GetProperties()
+                                       .Where(x => x.CustomAttributes
+                                                    .Where(y => y.AttributeType.Name.Equals("XmlElementAttribute")
+                                                                && y.ConstructorArguments.Count > 0
+                                                                && y.ConstructorArguments[0].Value.Equals(element.Name.LocalName)).Any()).FirstOrDefault();
+                    }
+
+                    propertyType = (propertyInfo != null) ? propertyInfo.PropertyType : null;
                     if (propertyType.IsNumeric())
                     {
                         return true;
