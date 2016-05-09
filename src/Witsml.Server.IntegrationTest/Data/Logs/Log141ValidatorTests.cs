@@ -24,7 +24,7 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Witsml.Server.Properties;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -209,7 +209,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Test_error_code_456_max_data_exceeded_for_nodes()
         {
             var response = DevKit.Add<WellList, Well>(Well);
-            var maxDataNodes = Settings.Default.MaxDataNodes;
+            var maxDataNodes = WitsmlSettings.MaxDataNodes;
 
             Wellbore.UidWell = response.SuppMsgOut;
             response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
@@ -236,7 +236,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Test_error_code_456_max_data_exceeded_for_points()
         {
             var response = DevKit.Add<WellList, Well>(Well);
-            var maxDataPoints = Settings.Default.MaxDataPoints;
+            var maxDataPoints = WitsmlSettings.MaxDataPoints;
 
             Wellbore.UidWell = response.SuppMsgOut;
             response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
