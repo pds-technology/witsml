@@ -36,7 +36,7 @@ namespace PDS.Witsml.Data.Logs
         }
 
         [TestMethod]
-        public void Log_Can_Return_Null_Values_In_The_Order_Of_Mnemonics()
+        public void LogExtensions_Can_Return_Null_Values_In_The_Order_Of_Mnemonics()
         {
             var log = new Log();
             log.LogCurveInfo = new List<LogCurveInfo>();
@@ -64,7 +64,7 @@ namespace PDS.Witsml.Data.Logs
         }
 
         [TestMethod]
-        public void Log_Has_Null_Indicator_Can_Return_Null_Values_In_The_Order_Of_Mnemonics()
+        public void LogExtensions_Has_Null_Indicator_Can_Return_Null_Values_In_The_Order_Of_Mnemonics()
         {
             var log = new Log();
             log.NullValue = "-9999.25";
