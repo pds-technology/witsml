@@ -310,7 +310,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="transaction">The transaction.</param>
         protected void InsertEntity(T entity, MongoTransaction transaction = null)
         {
-            InsertEntity(entity, DbCollectionName, transaction);
+            InsertEntity(entity, DbCollectionName, GetUri(entity), transaction);
         }
 
         /// <summary>
@@ -319,9 +319,10 @@ namespace PDS.Witsml.Server.Data
         /// <typeparam name="TObject">The data object type.</typeparam>
         /// <param name="entity">The object to be inserted.</param>
         /// <param name="dbCollectionName">The name of the database collection.</param>
+        /// <param name="uri">The data object URI.</param>
         /// <param name="transaction">The transaction.</param>
         /// <exception cref="WitsmlException"></exception>
-        protected void InsertEntity<TObject>(TObject entity, string dbCollectionName, MongoTransaction transaction = null)
+        protected void InsertEntity<TObject>(TObject entity, string dbCollectionName, EtpUri uri, MongoTransaction transaction = null)
         {
             try
             {
@@ -380,7 +381,7 @@ namespace PDS.Witsml.Server.Data
 
                 if (transaction != null)
                 {
-                    transaction.Attach(MongoDbAction.Update, dbCollectionName, current.ToBsonDocument());
+                    transaction.Attach(MongoDbAction.Update, dbCollectionName, current.ToBsonDocument(), uri);
                     transaction.Save();
                 }
             }
@@ -424,7 +425,7 @@ namespace PDS.Witsml.Server.Data
                 if (transaction != null)
                 {                   
                     var document = MongoDbUtility.GetDocumentId(current);
-                    transaction.Attach(MongoDbAction.Delete, dbCollectionName, document);
+                    transaction.Attach(MongoDbAction.Delete, dbCollectionName, document, uri);
                     transaction.Save();
                 }
                 else

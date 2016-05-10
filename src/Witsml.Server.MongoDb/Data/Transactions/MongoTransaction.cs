@@ -130,7 +130,7 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// <param name="action">The MongoDb operation, e.g. add.</param>
         /// <param name="collection">The MongoDb collection name.</param>
         /// <param name="document">The data obejct in BsonDocument format.</param>
-        public void Attach(MongoDbAction action, string collection, BsonDocument document)
+        public void Attach(MongoDbAction action, string collection, BsonDocument document, EtpUri? uri = null)
         {
             var transaction = new MongoDbTransaction
             {
@@ -139,6 +139,9 @@ namespace PDS.Witsml.Server.Data.Transactions
                 Action = action,
                 Status = TransactionStatus.Created
             };
+
+            if (uri.HasValue)
+                transaction.Uid = uri.Value;
 
             if (document != null)
                 transaction.Value = document;          
