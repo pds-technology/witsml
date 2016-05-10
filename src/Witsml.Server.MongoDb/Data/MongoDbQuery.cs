@@ -32,8 +32,9 @@ namespace PDS.Witsml.Server.Data
     /// <typeparam name="T">The type of queried data object.</typeparam>
     public class MongoDbQuery<T> : DataObjectNavigator<MongoDbQueryContext<T>>
     {
+        private readonly Dictionary<string, List<FilterDefinition<T>>> _filters;
         private readonly IMongoCollection<T> _collection;
-        private readonly WitsmlQueryParser _parser;    
+        private readonly WitsmlQueryParser _parser;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDbQuery{T}" /> class.
@@ -47,6 +48,7 @@ namespace PDS.Witsml.Server.Data
             Context.Fields = fields;
             Context.Ignored = ignored;
 
+            _filters = new Dictionary<string, List<FilterDefinition<T>>>();
             _collection = collection;
             _parser = parser;
         }
@@ -175,6 +177,29 @@ namespace PDS.Witsml.Server.Data
         {
             if (!Context.IsBuildFilter)
                 AddProjectionProperty(propertyPath);
+        }
+
+        protected override void InitializeRecurringElementHandler(string propertyPath)
+        {
+            if (!Context.IsBuildFilter) return;
+
+            _filters[propertyPath] = Context.Filters;
+            Context.Filters = new List<FilterDefinition<T>>();
+        }
+
+        protected override void HandleRecurringElements(string propertyPath)
+        {
+            if (!Context.IsBuildFilter) return;
+
+            var filters = _filters[propertyPath];
+
+            if (Context.Filters.Any())
+            {
+                filters.Add(Builders<T>.Filter.Or(Context.Filters));
+            }
+
+            Context.Filters = filters;
+            _filters.Remove(propertyPath);
         }
 
         /// <summary>
