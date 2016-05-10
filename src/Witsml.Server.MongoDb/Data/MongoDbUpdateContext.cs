@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using MongoDB.Driver;
 using PDS.Witsml.Data;
@@ -26,8 +27,11 @@ namespace PDS.Witsml.Server.Data
     {
         public MongoDbUpdateContext()
         {
+            DataObjectType = typeof(T);
             Updates = new List<UpdateDefinition<T>>();
         }
+
+        public override Type DataObjectType { get; }
 
         public List<UpdateDefinition<T>> Updates { get; }
     }

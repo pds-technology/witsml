@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using MongoDB.Driver;
 using PDS.Witsml.Data;
@@ -26,9 +27,16 @@ namespace PDS.Witsml.Server.Data
     {
         public MongoDbQueryContext()
         {
+            DataObjectType = typeof(T);
             Filters = new List<FilterDefinition<T>>();
         }
 
+        public override Type DataObjectType { get; }
+
         public List<FilterDefinition<T>> Filters { get; }
+
+        public List<string> Fields { get; set; }
+
+        public bool IsBuildFilter { get; set; }
     }
 }

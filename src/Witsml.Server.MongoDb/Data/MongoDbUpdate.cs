@@ -26,7 +26,6 @@ using System.Xml.Linq;
 using System.Xml.Serialization;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
-using log4net;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data;
@@ -44,19 +43,11 @@ namespace PDS.Witsml.Server.Data
 
         public MongoDbUpdate(IMongoCollection<T> collection, WitsmlQueryParser parser, string idPropertyName = "Uid", string[] ignored = null) : base(new MongoDbUpdateContext<T>())
         {
-            Logger = LogManager.GetLogger(GetType());
-
             _collection = collection;
             _parser = parser;
             _idPropertyName = idPropertyName;
             _ignored = ignored ?? new string[0];
         }
-
-        /// <summary>
-        /// Gets the logger.
-        /// </summary>
-        /// <value>The logger.</value>
-        protected ILog Logger { get; private set; }
 
         public void Update(T entity, EtpUri uri, Dictionary<string, object> updates)
         {
