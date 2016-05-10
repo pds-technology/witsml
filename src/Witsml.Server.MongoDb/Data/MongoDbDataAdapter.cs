@@ -235,7 +235,7 @@ namespace PDS.Witsml.Server.Data
             {
                 Logger.DebugFormat("Querying {0} MongoDb collection; uid: {1}", dbCollectionName, uri.ObjectId);
 
-                var filter = MongoDbUtility.GetEntityFilter<TObject>(uri, IdPropertyName);
+                var filter = GetEntityFilter<TObject>(uri, IdPropertyName);
 
                 return GetCollection<TObject>(dbCollectionName)
                     .Find(filter)
@@ -246,6 +246,11 @@ namespace PDS.Witsml.Server.Data
                 Logger.ErrorFormat("Error querying {0} MongoDb collection:{1}{2}", dbCollectionName, Environment.NewLine, ex);
                 throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, ex);
             }
+        }
+
+        protected virtual FilterDefinition<TObject> GetEntityFilter<TObject>(EtpUri uri, string idPropertyName)
+        {
+            return MongoDbUtility.GetEntityFilter<TObject>(uri, idPropertyName);
         }
 
         protected List<T> GetEntities(IEnumerable<EtpUri> uris)

@@ -18,6 +18,8 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using Energistics.Datatypes;
+using MongoDB.Driver;
 
 namespace PDS.Witsml.Server.Data.Transactions
 {
@@ -61,6 +63,11 @@ namespace PDS.Witsml.Server.Data.Transactions
             var collection = GetCollection();
             var filter = MongoDbUtility.BuildFilter<MongoDbTransaction>(TransactionIdField, transactionId);
             collection.DeleteMany(filter);
+        }
+
+        protected override FilterDefinition<TObject> GetEntityFilter<TObject>(EtpUri uri, string idPropertyName)
+        {
+            return MongoDbUtility.BuildFilter<TObject>(idPropertyName, uri.ToString());
         }
     }
 }
