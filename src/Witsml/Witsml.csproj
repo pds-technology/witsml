@@ -65,6 +65,8 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\DataObjectNavigationContext.cs" />
+    <Compile Include="Data\DataObjectNavigator.cs" />
     <Compile Include="Data\Channels\ChannelDataBlock.cs" />
     <Compile Include="Data\Channels\ChannelDataExtensions.cs" />
     <Compile Include="Data\Channels\ChannelDataReader.cs" />

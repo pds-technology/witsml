@@ -108,6 +108,7 @@
     <Compile Include="Data\MongoDbClassMapper.cs" />
     <Compile Include="Data\MongoDbDataAdapter.cs" />
     <Compile Include="Data\MongoDbExtensions.cs" />
+    <Compile Include="Data\MongoDbQueryContext.cs" />
     <Compile Include="Data\MongoDbUtility.cs" />
     <Compile Include="Data\MongoDbQuery.cs" />
     <Compile Include="Data\MongoDbUpdate.cs" />
@@ -125,6 +126,7 @@
     <Compile Include="Models\ChannelDataChunk.cs" />
     <Compile Include="Models\ChunkExtensions.cs" />
     <Compile Include="Data\Transactions\MongoDbTransaction.cs" />
+    <Compile Include="Data\MongoDbUpdateContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
