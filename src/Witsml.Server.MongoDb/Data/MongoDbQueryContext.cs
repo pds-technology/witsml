@@ -33,7 +33,7 @@ namespace PDS.Witsml.Server.Data
 
         public override Type DataObjectType { get; }
 
-        public List<FilterDefinition<T>> Filters { get; }
+        public List<FilterDefinition<T>> Filters { get; set; }
 
         public List<string> Fields { get; set; }
 

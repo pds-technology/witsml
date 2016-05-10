@@ -100,8 +100,8 @@ namespace PDS.Witsml.Data
         {
             if (propertyInfo == null) return;
 
-            var fieldName = GetPropertyPath(parentPath, propertyInfo.Name);
-            var propType = propertyInfo.PropertyType;
+            var propertyPath = GetPropertyPath(parentPath, propertyInfo.Name);
+            var propertyType = propertyInfo.PropertyType;
             var values = elements.ToList();
             var count = values.Count;
 
@@ -109,39 +109,43 @@ namespace PDS.Witsml.Data
             {
                 var element = values.FirstOrDefault();
 
-                if (propType.IsGenericType)
+                if (propertyType.IsGenericType)
                 {
-                    var genericType = propType.GetGenericTypeDefinition();
+                    var genericType = propertyType.GetGenericTypeDefinition();
 
                     if (genericType == typeof(Nullable<>))
                     {
-                        var underlyingType = Nullable.GetUnderlyingType(propType);
-                        NavigateElementType(underlyingType, element, fieldName);
+                        var underlyingType = Nullable.GetUnderlyingType(propertyType);
+                        NavigateElementType(underlyingType, element, propertyPath);
                     }
                     else if (genericType == typeof(List<>))
                     {
-                        var childType = propType.GetGenericArguments()[0];
-                        NavigateElementType(childType, element, fieldName);
+                        var childType = propertyType.GetGenericArguments()[0];
+                        NavigateElementType(childType, element, propertyPath);
                     }
                 }
-                else if (propType.IsAbstract)
+                else if (propertyType.IsAbstract)
                 {
-                    var concreteType = GetConcreteType(element, propType);
-                    NavigateElementType(concreteType, element, fieldName);
+                    var concreteType = GetConcreteType(element, propertyType);
+                    NavigateElementType(concreteType, element, propertyPath);
                 }
                 else
                 {
-                    NavigateElementType(propType, element, fieldName);
+                    NavigateElementType(propertyType, element, propertyPath);
                 }
             }
             else
             {
-                var childType = propType.GetGenericArguments()[0];
+                InitializeRecurringElementHandler(propertyPath);
+
+                var childType = propertyType.GetGenericArguments()[0];
 
                 foreach (var value in values)
                 {
-                    NavigateElementType(childType, value, fieldName);
+                    NavigateElementType(childType, value, propertyPath);
                 }
+
+                HandleRecurringElements(propertyPath);
             }
         }
 
@@ -152,8 +156,8 @@ namespace PDS.Witsml.Data
             if (textProperty != null)
             {
                 var uomProperty = elementType.GetProperty("Uom");
-                var fieldName = GetPropertyPath(propertyPath, textProperty.Name);
-                var fieldType = textProperty.PropertyType;
+                var propertyName = GetPropertyPath(propertyPath, textProperty.Name);
+                var propertyType = textProperty.PropertyType;
 
                 if (uomProperty != null)
                 {
@@ -163,7 +167,7 @@ namespace PDS.Witsml.Data
                     NavigateProperty(uomProperty.PropertyType, uomPath, uomValue);
                 }
 
-                NavigateProperty(fieldType, fieldName, element.Value);
+                NavigateProperty(propertyType, propertyName, element.Value);
             }
             else if (element.HasElements || element.HasAttributes)
             {
@@ -252,6 +256,14 @@ namespace PDS.Witsml.Data
         }
 
         protected virtual void HandleNullValue(Type propertyType, string propertyPath, string propertyValue)
+        {
+        }
+
+        protected virtual void InitializeRecurringElementHandler(string propertyPath)
+        {
+        }
+
+        protected virtual void HandleRecurringElements(string propertyPath)
         {
         }
 
@@ -381,11 +393,11 @@ namespace PDS.Witsml.Data
         }
 
         /// <summary>
-        /// Gets the Mongo collection field path for the property.
+        /// Gets the full path for the property.
         /// </summary>
         /// <param name="parentPath">The parent path.</param>
-        /// <param name="propertyName">Name of the property.</param>
-        /// <returns>The Mongo collection field path for the property.</returns>
+        /// <param name="propertyName">The property name.</param>
+        /// <returns>The full path for the property.</returns>
         protected string GetPropertyPath(string parentPath, string propertyName)
         {
             var prefix = string.IsNullOrEmpty(parentPath) ? string.Empty : string.Format("{0}.", parentPath);
