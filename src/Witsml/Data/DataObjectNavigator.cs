@@ -23,18 +23,237 @@ using System.Reflection;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using Energistics.DataAccess;
+using log4net;
 using PDS.Framework;
 
 namespace PDS.Witsml.Data
 {
     public abstract class DataObjectNavigator<TContext> where TContext : DataObjectNavigationContext
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DataObjectNavigator{TContext}"/> class.
+        /// </summary>
+        /// <param name="context">The context.</param>
         protected DataObjectNavigator(TContext context)
         {
+            Logger = LogManager.GetLogger(GetType());
             Context = context;
         }
 
-        public TContext Context { get; }
+        /// <summary>
+        /// Gets the context.
+        /// </summary>
+        /// <value>The context.</value>
+        protected TContext Context { get; }
+
+        /// <summary>
+        /// Gets the logger.
+        /// </summary>
+        /// <value>The logger.</value>
+        protected ILog Logger { get; private set; }
+
+        /// <summary>
+        /// Determines whether the specified element name is ignored.
+        /// </summary>
+        /// <param name="elementName">Name of the element.</param>
+        /// <returns></returns>
+        protected virtual bool IsIgnored(string elementName)
+        {
+            return Context.Ignored != null && Context.Ignored.Contains(elementName);
+        }
+
+        /// <summary>
+        /// Navigates the specified element.
+        /// </summary>
+        /// <param name="element">The XML element.</param>
+        protected void Navigate(XElement element)
+        {
+            NavigateElement(element, Context.DataObjectType);
+        }
+
+        protected void NavigateElement(XElement element, Type type, string parentPath = null)
+        {
+            if (IsIgnored(element.Name.LocalName)) return;
+
+            var properties = GetPropertyInfo(type);
+            var groupings = element.Elements().GroupBy(e => e.Name.LocalName);
+
+            foreach (var group in groupings)
+            {
+                if (IsIgnored(group.Key)) continue;
+
+                var propertyInfo = GetPropertyInfoForAnElement(properties, group.Key);
+                NavigateElementGroup(propertyInfo, group, parentPath);
+            }
+
+            foreach (var attribute in element.Attributes())
+            {
+                if (attribute.IsNamespaceDeclaration || attribute.Name == Xsi("nil") || attribute.Name == Xsi("type"))
+                    continue;
+
+                var attributeProp = GetPropertyInfoForAnElement(properties, attribute.Name.LocalName);
+                NavigateAttribute(attributeProp, attribute, parentPath);
+            }
+        }
+
+        protected void NavigateElementGroup(PropertyInfo propertyInfo, IGrouping<string, XElement> elements, string parentPath)
+        {
+            if (propertyInfo == null) return;
+
+            var fieldName = GetPropertyPath(parentPath, propertyInfo.Name);
+            var propType = propertyInfo.PropertyType;
+            var values = elements.ToList();
+            var count = values.Count;
+
+            if (count == 1)
+            {
+                var element = values.FirstOrDefault();
+
+                if (propType.IsGenericType)
+                {
+                    var genericType = propType.GetGenericTypeDefinition();
+
+                    if (genericType == typeof(Nullable<>))
+                    {
+                        var underlyingType = Nullable.GetUnderlyingType(propType);
+                        NavigateElementType(underlyingType, element, fieldName);
+                    }
+                    else if (genericType == typeof(List<>))
+                    {
+                        var childType = propType.GetGenericArguments()[0];
+                        NavigateElementType(childType, element, fieldName);
+                    }
+                }
+                else if (propType.IsAbstract)
+                {
+                    var concreteType = GetConcreteType(element, propType);
+                    NavigateElementType(concreteType, element, fieldName);
+                }
+                else
+                {
+                    NavigateElementType(propType, element, fieldName);
+                }
+            }
+            else
+            {
+                var childType = propType.GetGenericArguments()[0];
+
+                foreach (var value in values)
+                {
+                    NavigateElementType(childType, value, fieldName);
+                }
+            }
+        }
+
+        protected void NavigateElementType(Type elementType, XElement element, string propertyPath)
+        {
+            var textProperty = elementType.GetProperties().FirstOrDefault(x => x.IsDefined(typeof(XmlTextAttribute), false));
+
+            if (textProperty != null)
+            {
+                var uomProperty = elementType.GetProperty("Uom");
+                var fieldName = GetPropertyPath(propertyPath, textProperty.Name);
+                var fieldType = textProperty.PropertyType;
+
+                if (uomProperty != null)
+                {
+                    var uomPath = GetPropertyPath(propertyPath, uomProperty.Name);
+                    var uomValue = ValidateMeasureUom(element, uomProperty, element.Value);
+
+                    NavigateProperty(uomProperty.PropertyType, uomPath, uomValue);
+                }
+
+                NavigateProperty(fieldType, fieldName, element.Value);
+            }
+            else if (element.HasElements || element.HasAttributes)
+            {
+                NavigateElement(element, elementType, propertyPath);
+            }
+            else
+            {
+                NavigateProperty(elementType, propertyPath, element.Value);
+            }
+        }
+
+        protected void NavigateAttribute(PropertyInfo propertyInfo, XAttribute attribute, string parentPath = null)
+        {
+            var propertyPath = GetPropertyPath(parentPath, propertyInfo.Name);
+            var propertyType = propertyInfo.PropertyType;
+
+            NavigateProperty(propertyType, propertyPath, attribute.Value);
+        }
+
+        protected void NavigateProperty(Type propertyType, string propertyPath, string propertyValue)
+        {
+            if (string.IsNullOrWhiteSpace(propertyValue))
+            {
+                HandleNullValue(propertyType, propertyPath, propertyValue);
+            }
+            else if (propertyType == typeof(string))
+            {
+                HandleStringValue(propertyType, propertyPath, propertyValue);
+            }
+            else if (propertyType.IsEnum)
+            {
+                var value = ParseEnum(propertyType, propertyValue);
+                HandleObjectValue(propertyType, propertyPath, propertyValue, value);
+            }
+            else if (propertyType == typeof(DateTime))
+            {
+                DateTime value;
+
+                if (!DateTime.TryParse(propertyValue, out value))
+                    throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
+
+                HandleDateTimeValue(propertyType, propertyPath, propertyValue, value);
+            }
+            else if (propertyType == typeof(Timestamp))
+            {
+                DateTimeOffset value;
+
+                if (!DateTimeOffset.TryParse(propertyValue, out value))
+                    throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
+
+                HandleTimestampValue(propertyType, propertyPath, propertyValue, new Timestamp(value));
+            }
+            else if (propertyValue.Equals("NaN") && propertyType.IsNumeric())
+            {
+                HandleNaNValue(propertyType, propertyPath, propertyValue);
+            }
+            else if (typeof(IConvertible).IsAssignableFrom(propertyType))
+            {
+                var value = Convert.ChangeType(propertyValue, propertyType);
+                HandleObjectValue(propertyType, propertyPath, propertyValue, value);
+            }
+            else
+            {
+                HandleStringValue(propertyType, propertyPath, propertyValue);
+            }
+        }
+
+        protected virtual void HandleStringValue(Type propertyType, string propertyPath, string propertyValue)
+        {
+        }
+
+        protected virtual void HandleDateTimeValue(Type propertyType, string propertyPath, string propertyValue, DateTime dateTimeValue)
+        {
+        }
+
+        protected virtual void HandleTimestampValue(Type propertyType, string propertyPath, string propertyValue, Timestamp timestampValue)
+        {
+        }
+
+        protected virtual void HandleObjectValue(Type propertyType, string propertyPath, string propertyValue, object objectValue)
+        {
+        }
+
+        protected virtual void HandleNaNValue(Type propertyType, string propertyPath, string propertyValue)
+        {
+        }
+
+        protected virtual void HandleNullValue(Type propertyType, string propertyPath, string propertyValue)
+        {
+        }
 
         /// <summary>
         /// Gets the property information for an element.
@@ -170,25 +389,7 @@ namespace PDS.Witsml.Data
         protected string GetPropertyPath(string parentPath, string propertyName)
         {
             var prefix = string.IsNullOrEmpty(parentPath) ? string.Empty : string.Format("{0}.", parentPath);
-            return string.Format("{0}{1}", prefix, CaptalizeString(propertyName));
-        }
-
-        /// <summary>
-        /// Captalizes the string.
-        /// </summary>
-        /// <param name="input">The input.</param>
-        /// <returns></returns>
-        protected string CaptalizeString(string input)
-        {
-            if (string.IsNullOrEmpty(input))
-                return input;
-
-            var result = char.ToUpper(input[0]).ToString();
-
-            if (input.Length > 1)
-                result += input.Substring(1);
-
-            return result;
+            return string.Format("{0}{1}", prefix, propertyName.ToPascalCase());
         }
 
         protected XName Xmlns(string attributeName)
@@ -200,6 +401,5 @@ namespace PDS.Witsml.Data
         {
             return WitsmlParser.Xsi.GetName(attributeName);
         }
-
     }
 }

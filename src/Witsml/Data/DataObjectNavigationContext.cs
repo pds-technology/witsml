@@ -16,9 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+
 namespace PDS.Witsml.Data
 {
-    public class DataObjectNavigationContext
+    public abstract class DataObjectNavigationContext
     {
+        public abstract Type DataObjectType { get; }
+
+        public List<string> Ignored { get; set; }
     }
 }
