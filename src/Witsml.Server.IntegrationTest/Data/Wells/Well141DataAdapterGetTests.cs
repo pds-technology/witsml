@@ -576,6 +576,41 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual(99.8, wellList.Well[0].PercentInterest.Value);
         }
 
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Supports_NaN_On_Class_Property()
+        {
+            // Add well
+            _well.WellDatum = new List<WellDatum>();
+            var datum = DevKit.WellDatum("Kelly Bushing", code: ElevCodeEnum.KB, uid: ElevCodeEnum.KB.ToString());
+            datum.Elevation = new WellElevationCoord() { Uom = WellVerticalCoordinateUom.ft, Value = 99.8 };
+            _well.WellDatum.Add(datum);
+
+            var response = DevKit.Add<WellList, Well>(_well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWell = response.SuppMsgOut;
+
+            // Query well with NaN
+            var queryIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
+                "<wells version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
+                    "<well uid=\"" + uidWell + "\">" + Environment.NewLine +
+                           "<wellDatum uid=\"KB\">" + Environment.NewLine +
+                           "    <name>Kelly Bushing</name>" + Environment.NewLine +
+                           "    <code>KB</code>" + Environment.NewLine +
+                           "    <elevation uom=\"ft\">NaN</elevation>" + Environment.NewLine +
+                           "</wellDatum>" + Environment.NewLine +
+                    "</well>" + Environment.NewLine +
+               "</wells>";
+
+            var results = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, "returnElements=requested");
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            var wellList = EnergisticsConverter.XmlToObject<WellList>(results.XMLout);
+            Assert.AreEqual(1, wellList.Well.Count);
+            Assert.AreEqual("Kelly Bushing", wellList.Well[0].WellDatum[0].Name);
+            Assert.AreEqual(99.8, wellList.Well[0].WellDatum[0].Elevation.Value);
+        }
+
         private void AssertTestWell(Well expected, Well actual)
         {
             Assert.AreEqual(expected.Name, actual.Name);
