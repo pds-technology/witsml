@@ -29,11 +29,14 @@ namespace PDS.Witsml.Server.Data
         {
             DataObjectType = typeof(T);
             Filters = new List<FilterDefinition<T>>();
+            ParentFilters = new Dictionary<string, List<FilterDefinition<T>>>();
         }
 
         public override Type DataObjectType { get; }
 
         public List<FilterDefinition<T>> Filters { get; set; }
+
+        public Dictionary<string, List<FilterDefinition<T>>> ParentFilters { get; set; }
 
         public List<string> Fields { get; set; }
 
