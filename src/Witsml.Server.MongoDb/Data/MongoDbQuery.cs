@@ -32,7 +32,6 @@ namespace PDS.Witsml.Server.Data
     /// <typeparam name="T">The type of queried data object.</typeparam>
     public class MongoDbQuery<T> : DataObjectNavigator<MongoDbQueryContext<T>>
     {
-        private readonly Dictionary<string, List<FilterDefinition<T>>> _filters;
         private readonly IMongoCollection<T> _collection;
         private readonly WitsmlQueryParser _parser;
 
@@ -48,7 +47,6 @@ namespace PDS.Witsml.Server.Data
             Context.Fields = fields;
             Context.Ignored = ignored;
 
-            _filters = new Dictionary<string, List<FilterDefinition<T>>>();
             _collection = collection;
             _parser = parser;
         }
@@ -72,32 +70,31 @@ namespace PDS.Witsml.Server.Data
             if (Context.Fields == null)
                 Context.Fields = new List<string>();
 
-            foreach (var element in _parser.Elements())
+            var element = _parser.Element();
+
+            // Navigate the root element and create filter and projection fields
+            Navigate(element);
+
+            // Build Mongo filter
+            var filter = BuildFilter(element);
+            var results = _collection.Find(filter ?? "{}");
+
+            // Format response using MongoDb projection, i.e. selecting specified fields only
+            if (OptionsIn.ReturnElements.All.Equals(returnElements) ||
+                OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements))
             {
-                // Navigate the root element and create filter and projection fields
-                Navigate(element);
+                entities.AddRange(results.ToList());
+            }
+            else if (Context.Project)
+            {
+                var projection = BuildProjection();
 
-                // Build Mongo filter
-                var filter = BuildFilter(element);
-                var results = _collection.Find(filter ?? "{}");
-
-                // Format response using MongoDb projection, i.e. selecting specified fields only
-                if (OptionsIn.ReturnElements.All.Equals(returnElements) || 
-                    OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements))
+                if (projection != null)
                 {
-                    entities.AddRange(results.ToList());
+                    results = results.Project<T>(projection);
                 }
-                else if (Context.Project)
-                {
-                    var projection = BuildProjection();
 
-                    if (projection != null)
-                    {
-                        results = results.Project<T>(projection);
-                    }
-
-                    entities.AddRange(results.ToList());
-                }
+                entities.AddRange(results.ToList());
             }
 
             return entities;
@@ -107,9 +104,7 @@ namespace PDS.Witsml.Server.Data
         protected override void HandleStringValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
             Context.Filters.Add(Builders<T>.Filter.EqIgnoreCase(propertyPath, propertyValue));
-
-            if (Context.Project)
-                AddProjectionProperty(propertyPath);
+            AddProjectionProperty(propertyPath);
         }
 
         protected override void HandleDateTimeValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, DateTime dateTimeValue)
@@ -122,9 +117,7 @@ namespace PDS.Witsml.Server.Data
             {
                 Context.Filters.Add(Builders<T>.Filter.Eq(propertyPath, dateTimeValue));
             }
-
-            if (Context.Project)
-                AddProjectionProperty(propertyPath);
+            AddProjectionProperty(propertyPath);
         }
 
         protected override void HandleTimestampValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, Timestamp timestampValue)
@@ -137,40 +130,34 @@ namespace PDS.Witsml.Server.Data
             {
                 Context.Filters.Add(Builders<T>.Filter.Eq(propertyPath, timestampValue));
             }
-
-            if (Context.Project)
-                AddProjectionProperty(propertyPath);
+            AddProjectionProperty(propertyPath);
         }
 
         protected override void HandleObjectValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, object objectValue)
         {
             Context.Filters.Add(Builders<T>.Filter.Eq(propertyPath, objectValue));
-
-            if (Context.Project)
-                AddProjectionProperty(propertyPath);
+            AddProjectionProperty(propertyPath);
         }
 
         protected override void HandleNullValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
-            if (Context.Project)
-                AddProjectionProperty(propertyPath);
+            AddProjectionProperty(propertyPath);
         }
 
         protected override void HandleNaNValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
-            if (Context.Project)
-                AddProjectionProperty(propertyPath);
+            AddProjectionProperty(propertyPath);
         }
 
         protected override void InitializeRecurringElementHandler(string propertyPath)
         {
-            _filters[propertyPath] = Context.Filters;
+            Context.ParentFilters[propertyPath] = Context.Filters;
             Context.Filters = new List<FilterDefinition<T>>();
         }
 
         protected override void HandleRecurringElements(string propertyPath)
         {
-            var filters = _filters[propertyPath];
+            var filters = Context.ParentFilters[propertyPath];
 
             if (Context.Filters.Any())
             {
@@ -178,7 +165,7 @@ namespace PDS.Witsml.Server.Data
             }
 
             Context.Filters = filters;
-            _filters.Remove(propertyPath);
+            Context.ParentFilters.Remove(propertyPath);
         }
 
         /// <summary>
@@ -242,7 +229,7 @@ namespace PDS.Witsml.Server.Data
 
         private void AddProjectionProperty(string propertyPath)
         {
-            if (Context.Fields.Contains(propertyPath))
+            if (!Context.Project || Context.Fields.Contains(propertyPath))
                 return;
 
             Context.Fields.Add(propertyPath);
