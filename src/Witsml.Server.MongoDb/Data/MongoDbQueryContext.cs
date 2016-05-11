@@ -37,6 +37,6 @@ namespace PDS.Witsml.Server.Data
 
         public List<string> Fields { get; set; }
 
-        public bool IsBuildFilter { get; set; }
+        public bool Project { get; set; }
     }
 }

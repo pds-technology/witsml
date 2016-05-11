@@ -64,8 +64,19 @@ namespace PDS.Witsml.Server.Data
             var returnElements = _parser.ReturnElements();
             var entities = new List<T>();
 
+            // Check if to project fields
+            Context.Project = OptionsIn.ReturnElements.IdOnly.Equals(returnElements) ||
+                OptionsIn.ReturnElements.Requested.Equals(returnElements) ||
+                OptionsIn.ReturnElements.DataOnly.Equals(returnElements);
+
+            if (Context.Fields == null)
+                Context.Fields = new List<string>();
+
             foreach (var element in _parser.Elements())
             {
+                // Navigate the root element and create filter and projection fields
+                Navigate(element);
+
                 // Build Mongo filter
                 var filter = BuildFilter(element);
                 var results = _collection.Find(filter ?? "{}");
@@ -76,11 +87,9 @@ namespace PDS.Witsml.Server.Data
                 {
                     entities.AddRange(results.ToList());
                 }
-                else if (OptionsIn.ReturnElements.IdOnly.Equals(returnElements) ||
-                         OptionsIn.ReturnElements.Requested.Equals(returnElements) ||
-                         OptionsIn.ReturnElements.DataOnly.Equals(returnElements))
+                else if (Context.Project)
                 {
-                    var projection = BuildProjection(element);
+                    var projection = BuildProjection();
 
                     if (projection != null)
                     {
@@ -108,89 +117,72 @@ namespace PDS.Witsml.Server.Data
             }
         }
 
-        protected override bool IsIgnored(string elementName)
-        {
-            return Context.IsBuildFilter && base.IsIgnored(elementName);
-        }
-
         protected override void HandleStringValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
-            if (Context.IsBuildFilter)
-                Context.Filters.Add(Builders<T>.Filter.EqIgnoreCase(propertyPath, propertyValue));
-            else
+            Context.Filters.Add(Builders<T>.Filter.EqIgnoreCase(propertyPath, propertyValue));
+
+            if (Context.Project)
                 AddProjectionProperty(propertyPath);
         }
 
         protected override void HandleDateTimeValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, DateTime dateTimeValue)
         {
-            if (Context.IsBuildFilter)
+            if (propertyPath.EndsWith(".DateTimeCreation") || propertyPath.EndsWith(".DateTimeLastChange"))
             {
-                if (propertyPath.EndsWith(".DateTimeCreation") || propertyPath.EndsWith(".DateTimeLastChange"))
-                {
-                    Context.Filters.Add(Builders<T>.Filter.Gt(propertyPath, propertyValue));
-                }
-                else
-                {
-                    Context.Filters.Add(Builders<T>.Filter.Eq(propertyPath, dateTimeValue));
-                }
+                Context.Filters.Add(Builders<T>.Filter.Gt(propertyPath, propertyValue));
             }
             else
             {
-                AddProjectionProperty(propertyPath);
+                Context.Filters.Add(Builders<T>.Filter.Eq(propertyPath, dateTimeValue));
             }
+
+            if (Context.Project)
+                AddProjectionProperty(propertyPath);
         }
 
         protected override void HandleTimestampValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, Timestamp timestampValue)
         {
-            if (Context.IsBuildFilter)
+            if (propertyPath.EndsWith(".DateTimeCreation") || propertyPath.EndsWith(".DateTimeLastChange"))
             {
-                if (propertyPath.EndsWith(".DateTimeCreation") || propertyPath.EndsWith(".DateTimeLastChange"))
-                {
-                    Context.Filters.Add(Builders<T>.Filter.Gt(propertyPath, propertyValue));
-                }
-                else
-                {
-                    Context.Filters.Add(Builders<T>.Filter.Eq(propertyPath, timestampValue));
-                }
+                Context.Filters.Add(Builders<T>.Filter.Gt(propertyPath, propertyValue));
             }
             else
             {
-                AddProjectionProperty(propertyPath);
+                Context.Filters.Add(Builders<T>.Filter.Eq(propertyPath, timestampValue));
             }
+
+            if (Context.Project)
+                AddProjectionProperty(propertyPath);
         }
 
         protected override void HandleObjectValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, object objectValue)
         {
-            if (Context.IsBuildFilter)
-                Context.Filters.Add(Builders<T>.Filter.Eq(propertyPath, objectValue));
-            else
+            Context.Filters.Add(Builders<T>.Filter.Eq(propertyPath, objectValue));
+
+            if (Context.Project)
                 AddProjectionProperty(propertyPath);
         }
 
         protected override void HandleNullValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
-            if (!Context.IsBuildFilter)
+            if (Context.Project)
                 AddProjectionProperty(propertyPath);
         }
 
         protected override void HandleNaNValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
-            if (!Context.IsBuildFilter)
+            if (Context.Project)
                 AddProjectionProperty(propertyPath);
         }
 
         protected override void InitializeRecurringElementHandler(string propertyPath)
         {
-            if (!Context.IsBuildFilter) return;
-
             _filters[propertyPath] = Context.Filters;
             Context.Filters = new List<FilterDefinition<T>>();
         }
 
         protected override void HandleRecurringElements(string propertyPath)
         {
-            if (!Context.IsBuildFilter) return;
-
             var filters = _filters[propertyPath];
 
             if (Context.Filters.Any())
@@ -205,7 +197,6 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Builds the query filter.
         /// </summary>
-        /// <param name="element">The element.</param>
         /// <returns>The filter object that for the selection criteria for the queried entity.</returns>
         private FilterDefinition<T> BuildFilter(XElement element)
         {
@@ -219,9 +210,6 @@ namespace PDS.Witsml.Server.Data
                 : Builders<T>.Filter.Ne("CommonData.PrivateGroupOnly", true);
 
             filters.Add(privateGroupOnlyFilter);
-
-            Context.IsBuildFilter = true;
-            Navigate(element);
 
             var resultFilter = Builders<T>.Filter.And(filters);
 
@@ -237,20 +225,10 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Builds the projection for the query.
         /// </summary>
-        /// <param name="element">The XML element.</param>
         /// <returns>The projection object that contains the fields to be selected.</returns>
-        private ProjectionDefinition<T> BuildProjection(XElement element)
+        private ProjectionDefinition<T> BuildProjection()
         {
             Logger.DebugFormat("Building projection fields for entity: {0}", _parser.Context.ObjectType);
-
-            if (element == null)
-                return null;
-
-            if (Context.Fields == null)
-                Context.Fields = new List<string>();
-
-            Context.IsBuildFilter = false;
-            Navigate(element);
 
             if (Context.Fields.Count == 0)
             {
