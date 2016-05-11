@@ -113,7 +113,7 @@ namespace PDS.Witsml.Server.Data
             return Context.IsBuildFilter && base.IsIgnored(elementName);
         }
 
-        protected override void HandleStringValue(Type propertyType, string propertyPath, string propertyValue)
+        protected override void HandleStringValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
             if (Context.IsBuildFilter)
                 Context.Filters.Add(Builders<T>.Filter.EqIgnoreCase(propertyPath, propertyValue));
@@ -121,7 +121,7 @@ namespace PDS.Witsml.Server.Data
                 AddProjectionProperty(propertyPath);
         }
 
-        protected override void HandleDateTimeValue(Type propertyType, string propertyPath, string propertyValue, DateTime dateTimeValue)
+        protected override void HandleDateTimeValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, DateTime dateTimeValue)
         {
             if (Context.IsBuildFilter)
             {
@@ -140,7 +140,7 @@ namespace PDS.Witsml.Server.Data
             }
         }
 
-        protected override void HandleTimestampValue(Type propertyType, string propertyPath, string propertyValue, Timestamp timestampValue)
+        protected override void HandleTimestampValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, Timestamp timestampValue)
         {
             if (Context.IsBuildFilter)
             {
@@ -159,7 +159,7 @@ namespace PDS.Witsml.Server.Data
             }
         }
 
-        protected override void HandleObjectValue(Type propertyType, string propertyPath, string propertyValue, object objectValue)
+        protected override void HandleObjectValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, object objectValue)
         {
             if (Context.IsBuildFilter)
                 Context.Filters.Add(Builders<T>.Filter.Eq(propertyPath, objectValue));
@@ -167,13 +167,13 @@ namespace PDS.Witsml.Server.Data
                 AddProjectionProperty(propertyPath);
         }
 
-        protected override void HandleNullValue(Type propertyType, string propertyPath, string propertyValue)
+        protected override void HandleNullValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
             if (!Context.IsBuildFilter)
                 AddProjectionProperty(propertyPath);
         }
 
-        protected override void HandleNaNValue(Type propertyType, string propertyPath, string propertyValue)
+        protected override void HandleNaNValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
             if (!Context.IsBuildFilter)
                 AddProjectionProperty(propertyPath);
