@@ -33,6 +33,7 @@ namespace PDS.Witsml.Server.Data.Wells
     public class Well141DataAdapterGetTests
     {
         private DevKit141Aspect DevKit;
+        private Well _well;
 
         [TestInitialize]
         public void TestSetUp()
@@ -42,6 +43,8 @@ namespace PDS.Witsml.Server.Data.Wells
             DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
                 .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
                 .ToArray();
+
+            _well = new Well { Name = DevKit.Name("Well 01"), TimeZone = DevKit.TimeZone };
         }
 
         [TestMethod]
@@ -544,6 +547,33 @@ namespace PDS.Witsml.Server.Data.Wells
             // Section 4.1.5
             Assert.IsTrue(result.Where(x => x.Uid == uid_01).Any());
             Assert.IsTrue(result.Where(x => x.Uid == uid_02).Any());
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Supports_NaN_With_Property_And_XElement_Name_Not_Same()
+        {
+            // Add well
+            _well.PercentInterest = new DimensionlessMeasure(99.8, DimensionlessUom.Euc);
+            var response = DevKit.Add<WellList, Well>(_well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWell = response.SuppMsgOut;
+
+            // Query well with NaN
+            var queryIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
+                "<wells version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
+                    "<well uid=\"" + uidWell + "\">" + Environment.NewLine +
+                         "<pcInterest uom=\"Euc\">NaN</pcInterest>" + Environment.NewLine +
+                    "</well>" + Environment.NewLine +
+               "</wells>";
+
+            var results = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, "returnElements=requested");
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            var wellList = EnergisticsConverter.XmlToObject<WellList>(results.XMLout);
+            Assert.AreEqual(1, wellList.Well.Count);
+            Assert.AreEqual("Euc", wellList.Well[0].PercentInterest.Uom.ToString());
+            Assert.AreEqual(99.8, wellList.Well[0].PercentInterest.Value);
         }
 
         private void AssertTestWell(Well expected, Well actual)
