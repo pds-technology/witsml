@@ -94,20 +94,6 @@ namespace PDS.Witsml.Server.Data
             return entities;
         }
 
-        /// <summary>
-        /// Validates the values provided in the input template to catch any errors that 
-        /// would be lost or hidden during data object deserialization.
-        /// </summary>
-        public void Validate()
-        {
-            Logger.DebugFormat("Validating input template for entity: {0}", _parser.Context.ObjectType);
-
-            foreach (var element in _parser.Elements())
-            {
-                BuildFilter(element);
-            }
-        }
-
         protected override bool IsIgnored(string elementName)
         {
             return Context.IsBuildFilter && base.IsIgnored(elementName);

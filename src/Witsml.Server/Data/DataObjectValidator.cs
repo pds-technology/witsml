@@ -21,6 +21,8 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Energistics.DataAccess.Validation;
+using PDS.Framework;
+using PDS.Witsml.Data;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -28,9 +30,18 @@ namespace PDS.Witsml.Server.Data
     /// Defines common validation functionality for WITSML data objects.
     /// </summary>
     /// <typeparam name="T">The data object type.</typeparam>
+    /// <seealso cref="PDS.Witsml.Data.DataObjectNavigator{DataObjectValidationContext}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.IDataObjectValidator{T}" />
     /// <seealso cref="System.ComponentModel.DataAnnotations.IValidatableObject" />
-    public abstract class DataObjectValidator<T> : IDataObjectValidator<T>, IValidatableObject
+    public abstract class DataObjectValidator<T> : DataObjectNavigator<DataObjectValidationContext<T>>,  IDataObjectValidator<T>, IValidatableObject
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DataObjectValidator{T}"/> class.
+        /// </summary>
+        protected DataObjectValidator() : base(new DataObjectValidationContext<T>())
+        {
+        }
+
         /// <summary>
         /// Gets the data object being validated.
         /// </summary>
@@ -61,6 +72,9 @@ namespace PDS.Witsml.Server.Data
             DataObject = dataObject;
             Function = function;
             Parser = parser;
+
+            if (function == Functions.AddToStore || function == Functions.UpdateInStore)
+                parser.Elements().ForEach(Navigate);
 
             IList<ValidationResult> results;
             DataObjectValidator.TryValidate(this, out results);
@@ -166,22 +180,21 @@ namespace PDS.Witsml.Server.Data
             if (!results.Any())
                 return;
 
-            var errorCode = ErrorCodes.Unset;
+            ErrorCodes errorCode;
             var witsmlValidationResult = results.OfType<WitsmlValidationResult>().FirstOrDefault();
 
             if (witsmlValidationResult != null)
             {
                 throw new WitsmlException((ErrorCodes)witsmlValidationResult.ErrorCode);
             }
-            else if (Enum.TryParse(results.First().ErrorMessage, out errorCode))
+
+            if (Enum.TryParse(results.First().ErrorMessage, out errorCode))
             {
                 throw new WitsmlException(errorCode);
             }
-            else
-            {
-                throw new WitsmlException(ErrorCodes.InputTemplateNonConforming,
-                    string.Join("; ", results.Select(x => x.ErrorMessage)));
-            }
+
+            throw new WitsmlException(ErrorCodes.InputTemplateNonConforming,
+                string.Join("; ", results.Select(x => x.ErrorMessage)));
         }
     }
 }

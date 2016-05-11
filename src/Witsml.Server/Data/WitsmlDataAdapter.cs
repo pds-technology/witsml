@@ -125,15 +125,6 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Validates the input template using the specified parser.
-        /// </summary>
-        /// <param name="parser">The query parser.</param>
-        public virtual void Validate(WitsmlQueryParser parser)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// Validates the growing object data request.
         /// </summary>
         /// <param name="parser">The query parser.</param>

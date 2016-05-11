@@ -28,6 +28,10 @@ using PDS.Framework;
 
 namespace PDS.Witsml.Data
 {
+    /// <summary>
+    /// Provides a framework for navigating a WITSML document while providing additional data object type information.
+    /// </summary>
+    /// <typeparam name="TContext">The type of the context.</typeparam>
     public abstract class DataObjectNavigator<TContext> where TContext : DataObjectNavigationContext
     {
         private static readonly XNamespace _xsi = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
@@ -62,6 +66,30 @@ namespace PDS.Witsml.Data
         protected virtual bool IsIgnored(string elementName)
         {
             return Context.Ignored != null && Context.Ignored.Contains(elementName);
+        }
+
+        /// <summary>
+        /// Creates an <see cref="XName"/> for the xmlns namespace using the specified local name.
+        /// </summary>
+        /// <param name="attributeName">The attribute name.</param>
+        /// <returns>
+        /// An <see cref="XName"/> created from the xmlns namepsace and the specified local name.
+        /// </returns>
+        protected static XName Xmlns(string attributeName)
+        {
+            return XNamespace.Xmlns.GetName(attributeName);
+        }
+
+        /// <summary>
+        /// Creates an <see cref="XName"/> for the xsi namespace using the specified local name.
+        /// </summary>
+        /// <param name="attributeName">The attribute name.</param>
+        /// <returns>
+        /// An <see cref="XName"/> created from the xsi namepsace and the specified local name.
+        /// </returns>
+        protected static XName Xsi(string attributeName)
+        {
+            return _xsi.GetName(attributeName);
         }
 
         /// <summary>
@@ -416,16 +444,6 @@ namespace PDS.Witsml.Data
         {
             var prefix = string.IsNullOrEmpty(parentPath) ? string.Empty : string.Format("{0}.", parentPath);
             return string.Format("{0}{1}", prefix, propertyName.ToPascalCase());
-        }
-
-        public static XName Xmlns(string attributeName)
-        {
-            return XNamespace.Xmlns.GetName(attributeName);
-        }
-
-        public static XName Xsi(string attributeName)
-        {
-            return _xsi.GetName(attributeName);
         }
     }
 }

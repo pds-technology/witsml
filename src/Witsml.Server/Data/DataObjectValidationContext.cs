@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2016.1
+// PDS.Witsml.Server, 2016.1
 //
 // Copyright 2016 Petrotechnical Data Systems
 // 
@@ -17,25 +17,20 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
+using PDS.Witsml.Data;
 
-namespace PDS.Witsml.Data
+namespace PDS.Witsml.Server.Data
 {
     /// <summary>
-    /// Encapsulates common properties used for navigating WITSML documents.
+    /// Encapsulates common properties used for validating WITSML documents.
     /// </summary>
-    public abstract class DataObjectNavigationContext
+    /// <typeparam name="T">The type of the data object.</typeparam>
+    public class DataObjectValidationContext<T> : DataObjectNavigationContext
     {
         /// <summary>
         /// Gets the type of the data object.
         /// </summary>
         /// <value>The type of the data object.</value>
-        public abstract Type DataObjectType { get; }
-
-        /// <summary>
-        /// Gets or sets the list of ignored element names.
-        /// </summary>
-        /// <value>The list of ignored element names.</value>
-        public List<string> Ignored { get; set; }
+        public override Type DataObjectType => typeof(T);
     }
 }

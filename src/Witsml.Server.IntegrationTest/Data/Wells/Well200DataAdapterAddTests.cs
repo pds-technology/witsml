@@ -95,7 +95,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var context = new RequestContext(Functions.AddToStore, ObjectTypes.Well, xml, null, null);
             var parser = new WitsmlQueryParser(context);
 
-            WellAdapter.Validate(parser);
+            //WellAdapter.Validate(parser);
         }
 
         [TestMethod]

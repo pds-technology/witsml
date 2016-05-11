@@ -263,9 +263,6 @@ namespace PDS.Witsml.Server.Data
         {
             var validator = Container.Resolve<IDataObjectValidator<TObject>>();
             validator.Validate(function, parser, dataObject);
-
-            if (function == Functions.AddToStore || function == Functions.UpdateInStore)
-                DataAdapter.Validate(parser);
         }
 
         /// <summary>

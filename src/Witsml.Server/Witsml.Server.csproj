@@ -87,6 +87,7 @@
     <Compile Include="Data\Channels\ChannelSet200Validator.cs" />
     <Compile Include="Data\Channels\IChannelDataProvider.cs" />
     <Compile Include="Data\Channels\ChannelSet200DataProvider.cs" />
+    <Compile Include="Data\DataObjectValidationContext.cs" />
     <Compile Include="Data\DataObjectValidator.cs" />
     <Compile Include="Configuration\ICapServerProvider.cs" />
     <Compile Include="Data\IEtpDataProviderOfT.cs" />

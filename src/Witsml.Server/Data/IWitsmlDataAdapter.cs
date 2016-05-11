@@ -85,11 +85,5 @@ namespace PDS.Witsml.Server.Data
         /// <param name="uri">The data object URI.</param>
         /// <returns>A WITSML result.</returns>
         void Delete(EtpUri uri);
-
-        /// <summary>
-        /// Validates the input template using the specified parser.
-        /// </summary>
-        /// <param name="parser">The query parser.</param>
-        void Validate(WitsmlQueryParser parser);
     }
 }
