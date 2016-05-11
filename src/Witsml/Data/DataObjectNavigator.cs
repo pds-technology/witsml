@@ -30,6 +30,8 @@ namespace PDS.Witsml.Data
 {
     public abstract class DataObjectNavigator<TContext> where TContext : DataObjectNavigationContext
     {
+        private static readonly XNamespace _xsi = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DataObjectNavigator{TContext}"/> class.
         /// </summary>
@@ -102,12 +104,11 @@ namespace PDS.Witsml.Data
 
             var propertyPath = GetPropertyPath(parentPath, propertyInfo.Name);
             var propertyType = propertyInfo.PropertyType;
-            var values = elements.ToList();
-            var count = values.Count;
+            var elementList = elements.ToList();
 
-            if (count == 1)
+            if (elementList.Count == 1)
             {
-                var element = values.FirstOrDefault();
+                var element = elementList.FirstOrDefault();
 
                 if (propertyType.IsGenericType)
                 {
@@ -140,9 +141,9 @@ namespace PDS.Witsml.Data
 
                 var childType = propertyType.GetGenericArguments()[0];
 
-                foreach (var value in values)
+                foreach (var element in elementList)
                 {
-                    NavigateElementType(childType, value, propertyPath);
+                    NavigateElementType(childType, element, propertyPath);
                 }
 
                 HandleRecurringElements(propertyPath);
@@ -164,10 +165,10 @@ namespace PDS.Witsml.Data
                     var uomPath = GetPropertyPath(propertyPath, uomProperty.Name);
                     var uomValue = ValidateMeasureUom(element, uomProperty, element.Value);
 
-                    NavigateProperty(uomProperty.PropertyType, uomPath, uomValue);
+                    NavigateProperty(element.Attribute("uom"), uomProperty.PropertyType, uomPath, uomValue);
                 }
 
-                NavigateProperty(propertyType, propertyName, element.Value);
+                NavigateProperty(element, propertyType, propertyName, element.Value);
             }
             else if (element.HasElements || element.HasAttributes)
             {
@@ -175,7 +176,7 @@ namespace PDS.Witsml.Data
             }
             else
             {
-                NavigateProperty(elementType, propertyPath, element.Value);
+                NavigateProperty(element, elementType, propertyPath, element.Value);
             }
         }
 
@@ -184,23 +185,23 @@ namespace PDS.Witsml.Data
             var propertyPath = GetPropertyPath(parentPath, propertyInfo.Name);
             var propertyType = propertyInfo.PropertyType;
 
-            NavigateProperty(propertyType, propertyPath, attribute.Value);
+            NavigateProperty(attribute, propertyType, propertyPath, attribute.Value);
         }
 
-        protected void NavigateProperty(Type propertyType, string propertyPath, string propertyValue)
+        protected void NavigateProperty(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
             if (string.IsNullOrWhiteSpace(propertyValue))
             {
-                HandleNullValue(propertyType, propertyPath, propertyValue);
+                HandleNullValue(xmlObject, propertyType, propertyPath, propertyValue);
             }
             else if (propertyType == typeof(string))
             {
-                HandleStringValue(propertyType, propertyPath, propertyValue);
+                HandleStringValue(xmlObject, propertyType, propertyPath, propertyValue);
             }
             else if (propertyType.IsEnum)
             {
                 var value = ParseEnum(propertyType, propertyValue);
-                HandleObjectValue(propertyType, propertyPath, propertyValue, value);
+                HandleObjectValue(xmlObject, propertyType, propertyPath, propertyValue, value);
             }
             else if (propertyType == typeof(DateTime))
             {
@@ -209,7 +210,7 @@ namespace PDS.Witsml.Data
                 if (!DateTime.TryParse(propertyValue, out value))
                     throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
 
-                HandleDateTimeValue(propertyType, propertyPath, propertyValue, value);
+                HandleDateTimeValue(xmlObject, propertyType, propertyPath, propertyValue, value);
             }
             else if (propertyType == typeof(Timestamp))
             {
@@ -218,44 +219,44 @@ namespace PDS.Witsml.Data
                 if (!DateTimeOffset.TryParse(propertyValue, out value))
                     throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
 
-                HandleTimestampValue(propertyType, propertyPath, propertyValue, new Timestamp(value));
+                HandleTimestampValue(xmlObject, propertyType, propertyPath, propertyValue, new Timestamp(value));
             }
             else if (propertyValue.Equals("NaN") && propertyType.IsNumeric())
             {
-                HandleNaNValue(propertyType, propertyPath, propertyValue);
+                HandleNaNValue(xmlObject, propertyType, propertyPath, propertyValue);
             }
             else if (typeof(IConvertible).IsAssignableFrom(propertyType))
             {
                 var value = Convert.ChangeType(propertyValue, propertyType);
-                HandleObjectValue(propertyType, propertyPath, propertyValue, value);
+                HandleObjectValue(xmlObject, propertyType, propertyPath, propertyValue, value);
             }
             else
             {
-                HandleStringValue(propertyType, propertyPath, propertyValue);
+                HandleStringValue(xmlObject, propertyType, propertyPath, propertyValue);
             }
         }
 
-        protected virtual void HandleStringValue(Type propertyType, string propertyPath, string propertyValue)
+        protected virtual void HandleStringValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
         }
 
-        protected virtual void HandleDateTimeValue(Type propertyType, string propertyPath, string propertyValue, DateTime dateTimeValue)
+        protected virtual void HandleDateTimeValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, DateTime dateTimeValue)
         {
         }
 
-        protected virtual void HandleTimestampValue(Type propertyType, string propertyPath, string propertyValue, Timestamp timestampValue)
+        protected virtual void HandleTimestampValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, Timestamp timestampValue)
         {
         }
 
-        protected virtual void HandleObjectValue(Type propertyType, string propertyPath, string propertyValue, object objectValue)
+        protected virtual void HandleObjectValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, object objectValue)
         {
         }
 
-        protected virtual void HandleNaNValue(Type propertyType, string propertyPath, string propertyValue)
+        protected virtual void HandleNaNValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
         }
 
-        protected virtual void HandleNullValue(Type propertyType, string propertyPath, string propertyValue)
+        protected virtual void HandleNullValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
         }
 
@@ -265,6 +266,19 @@ namespace PDS.Witsml.Data
 
         protected virtual void HandleRecurringElements(string propertyPath)
         {
+        }
+
+        /// <summary>
+        /// Removes the specified XML object from it's parent.
+        /// </summary>
+        /// <param name="xmlObject">The XML object.</param>
+        protected void Remove(XObject xmlObject)
+        {
+            var attribute = xmlObject as XAttribute;
+            attribute?.Remove();
+
+            var node = xmlObject as XNode;
+            node?.Remove();
         }
 
         /// <summary>
@@ -404,14 +418,14 @@ namespace PDS.Witsml.Data
             return string.Format("{0}{1}", prefix, propertyName.ToPascalCase());
         }
 
-        protected XName Xmlns(string attributeName)
+        public static XName Xmlns(string attributeName)
         {
             return XNamespace.Xmlns.GetName(attributeName);
         }
 
-        protected XName Xsi(string attributeName)
+        public static XName Xsi(string attributeName)
         {
-            return WitsmlParser.Xsi.GetName(attributeName);
+            return _xsi.GetName(attributeName);
         }
     }
 }

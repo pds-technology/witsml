@@ -23,15 +23,22 @@ using System.Xml;
 using System.Xml.Linq;
 using Energistics.DataAccess;
 using PDS.Framework;
+using PDS.Witsml.Data;
 
 namespace PDS.Witsml
 {
     /// <summary>
     /// Provides static helper methods that can be used to parse WITSML XML strings.
     /// </summary>
-    public static class WitsmlParser
+    public class WitsmlParser : DataObjectNavigator<WitsmlParserContext>
     {
-        public static readonly XNamespace Xsi = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WitsmlParser"/> class.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        private WitsmlParser(WitsmlParserContext context) : base(context)
+        {
+        }
 
         /// <summary>
         /// Parses the specified XML document using LINQ to XML.
@@ -104,9 +111,12 @@ namespace PDS.Witsml
         public static string ToXml(object obj)
         {
             if (obj == null) return string.Empty;
+
             var xml = EnergisticsConverter.ObjectToXml(obj);
             var xmlDoc = Parse(xml);
             var root = xmlDoc.Root;
+
+            if (root == null) return string.Empty;
 
             foreach (var element in root.Elements())
             {
@@ -122,7 +132,7 @@ namespace PDS.Witsml
         /// <param name="element">The element.</param>
         public static void RemoveEmptyElements(XElement element)
         {
-            Func<XElement, bool> predicate = e => e.Attributes(Xsi.GetName("nil")).Any() || 
+            Func<XElement, bool> predicate = e => e.Attributes(Xsi("nil")).Any() || 
                 (string.IsNullOrEmpty(e.Value) && !e.HasAttributes && !e.HasElements);
 
             while (element.Descendants().Any(predicate))
@@ -132,61 +142,25 @@ namespace PDS.Witsml
         }
 
         /// <summary>
-        /// Determines whether the specified element is a numeric type.
-        /// </summary>
-        /// <param name="element">The element.</param>
-        /// <returns>True if it is a numeric type.</returns>
-        public static bool IsNumericField<T>(XElement element)
-        {
-            var assembly = Assembly.GetAssembly(typeof(T));
-            foreach (Type type in assembly.GetTypes())
-            {               
-                if (type.Name.EqualsIgnoreCase(element.Parent.Name.LocalName))
-                {
-                    PropertyInfo propertyInfo = type.GetProperty(element.Name.LocalName.ToPascalCase());
-                    Type propertyType = (propertyInfo != null) ? propertyInfo.PropertyType : null;
-
-                    if (propertyInfo==null)
-                    {
-                        propertyInfo = type.GetProperties()
-                                       .Where(x => x.CustomAttributes
-                                                    .Where(y => y.AttributeType.Name.Equals("XmlElementAttribute")
-                                                                && y.ConstructorArguments.Count > 0
-                                                                && y.ConstructorArguments[0].Value.Equals(element.Name.LocalName)).Any()).FirstOrDefault();
-                    }
-
-                    propertyType = (propertyInfo != null) ? propertyInfo.PropertyType : null;
-                    if (propertyType.IsNumeric())
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
         /// Removes elements that are numeric type and have NaN value.
         /// </summary>
         /// <param name="xml">The XML.</param>
         /// <returns>The xml with NaN removed.</returns>
         public static string RemoveNaNElements<T>(string xml)
-        {  
-            Func<XElement, bool> predicate = e => e.Value.Equals("NaN") && IsNumericField<T>(e);
+        {
+            var context = new WitsmlParserContext<T>(Parse(xml));
+            var parser = new WitsmlParser(context);
 
-            var xmlDoc = Parse(xml);
-            var root = xmlDoc.Root;
+            context.RemoveNaNElements = true;
+            parser.Navigate(context.Document.Root);
 
-            foreach (var element in root.Elements())
-            {
-                if (element.Descendants().Any(predicate))
-                {
-                    element.Descendants().Where(predicate).Remove();
-                }
-            }
+            return context.Document.ToString();
+        }
 
-            return xmlDoc.ToString();           
+        protected override void HandleNaNValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
+        {
+            if (Context.RemoveNaNElements)
+                Remove(xmlObject);
         }
     }
 }
