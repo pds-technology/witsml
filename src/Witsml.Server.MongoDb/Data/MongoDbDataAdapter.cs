@@ -150,18 +150,6 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Validates the input template using the specified parser.
-        /// </summary>
-        /// <param name="parser">The query parser.</param>
-        public override void Validate(WitsmlQueryParser parser)
-        {
-            Logger.DebugFormat("Validating {0} input template.", DbCollectionName);
-
-            var inputValidator = new MongoDbQuery<T>(GetCollection(), parser, null);
-            inputValidator.Validate();
-        }
-
-        /// <summary>
         /// Determines whether the entity exists in the data store.
         /// </summary>
         /// <param name="uri">The data object URI.</param>
