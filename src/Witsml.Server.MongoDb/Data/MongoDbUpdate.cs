@@ -152,14 +152,12 @@ namespace PDS.Witsml.Server.Data
     
         protected override void HandleNullValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
-            if (Context.PropertyInfoList.Last().IsDefined(typeof(RequiredAttribute), false))
-                throw new WitsmlException(ErrorCodes.MissingRequiredData);
-
-            Context.Update = Context.Update.Unset(propertyPath);
+            UnsetProperty(xmlObject, propertyType, propertyPath, propertyValue);
         }
 
         protected override void HandleNaNValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
+            UnsetProperty(xmlObject, propertyType, propertyPath, propertyValue);
         }
 
         protected override void NavigateRecurringElement(List<XElement> elements, Type childType, string propertyPath, PropertyInfo propertyInfo)
@@ -170,6 +168,14 @@ namespace PDS.Witsml.Server.Data
         protected override void NavigateArrayElementType(List<XElement> elements, Type childType, XElement element, string propertyPath, PropertyInfo propertyInfo)
         {
             UpdateArrayElements(elements, propertyInfo, Context.PropertyValueList.Last(), childType, propertyPath);
+        }
+
+        private void UnsetProperty(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
+        {
+            if (Context.PropertyInfoList.Last().IsDefined(typeof(RequiredAttribute), false))
+                throw new WitsmlException(ErrorCodes.MissingRequiredData);
+
+            Context.Update = Context.Update.Unset(propertyPath);
         }
 
         private void UpdateArrayElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
