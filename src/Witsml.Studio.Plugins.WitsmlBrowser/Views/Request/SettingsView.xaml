@@ -47,8 +47,11 @@
                       SelectedItem="{Binding Model.WitsmlVersion}"
                       IsEnabled="{Binding ElementName=WitsmlVersionControl, Path=HasItems}" />
 
-            <Button x:Name="GetCapabilities" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Width="80" Margin="5" HorizontalAlignment="Right" Content="Get Cap"
-                    IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" />
+            <StackPanel Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right"
+                        IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}">
+                <Button x:Name="GetVersions" Width="80" Margin="5" Content="Get Version" />
+                <Button x:Name="GetCapabilities" Width="80" Margin="5" Content="Get Cap" />
+            </StackPanel>
 
             <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="0,1,0,0" VerticalAlignment="Center" />
 

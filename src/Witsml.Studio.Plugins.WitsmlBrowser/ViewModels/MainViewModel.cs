@@ -590,7 +590,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// <param name="xmlOut">The XML out.</param>
         /// <param name="suppMsgOut">The supplemental message out.</param>
         /// <param name="returnCode">The return code.</param>
-        private void OutputResults(string xmlOut, string suppMsgOut, short returnCode)
+        internal void OutputResults(string xmlOut, string suppMsgOut, short returnCode)
         {
             var text = string.IsNullOrEmpty(xmlOut)
                     ? (returnCode < 0
@@ -617,7 +617,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// <param name="suppMsgOut">The supplemental message out.</param>
         /// <param name="optionsIn">The OptionsIn settings to the server.</param>
         /// <param name="returnCode">The return code.</param>
-        private void OutputMessages(Functions functionType, string queryText, string xmlOut, string suppMsgOut, string optionsIn, short returnCode)
+        internal void OutputMessages(Functions functionType, string queryText, string xmlOut, string suppMsgOut, string optionsIn, short returnCode)
         {
             var none = "<!-- None -->";
             var now = DateTime.Now.ToString("G");

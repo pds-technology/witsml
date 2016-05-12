@@ -103,6 +103,14 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         public BindableCollection<string> WitsmlVersions { get; }
 
         /// <summary>
+        /// Gets the supported versions from the server.
+        /// </summary>
+        public void GetVersions()
+        {
+            GetVersions(Proxy, Model.Connection);
+        }
+
+        /// <summary>
         /// Gets the capabilities from the server.
         /// </summary>
         public void GetCapabilities()
@@ -131,11 +139,11 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         }
 
         /// <summary>
-        /// Gets the supported versions crom the server.
+        /// Gets the supported versions from the server.
         /// </summary>
         /// <param name="proxy">The proxy.</param>
         /// <param name="connection">The connection.</param>
-        /// <returns></returns>
+        /// <returns>The supported versions.</returns>
         internal string GetVersions(WITSMLWebServiceConnection proxy, Connection connection)
         {
             proxy.Url = connection.Uri;
@@ -148,6 +156,10 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
 
             var supportedVersions = proxy.GetVersion();
             _log.DebugFormat("Supported versions '{0}' found on WITSML server with uri '{1}'", supportedVersions, connection.Uri);
+
+            var parent = Parent.Parent;
+            parent.OutputResults(null, supportedVersions, 0);
+            parent.OutputMessages(Functions.GetVersion, null, null, supportedVersions, null, 0);
 
             return supportedVersions;
         }
@@ -162,6 +174,10 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             Model.ReturnElementType = OptionsIn.ReturnElements.All;
         }
 
+        /// <summary>
+        /// Called when the selected connection has changed.
+        /// </summary>
+        /// <param name="connection">The connection.</param>
         private void OnConnectionChanged(Connection connection)
         {
             Model.Connection = connection;
@@ -174,14 +190,14 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             Runtime.InvokeAsync(() =>
             {
                 Runtime.ShowBusy(false);
-                GetVersions();
+                GetWitsmlVersions();
             });
         }
 
         /// <summary>
         /// Gets the supported versions from the server and initializes the UI element for version selection.
         /// </summary>
-        private void GetVersions()
+        private void GetWitsmlVersions()
         {
             _log.Debug("Selecting supported versions from WITSML server.");
             try
@@ -203,7 +219,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
             }
             catch (Exception ex)
             {
-                var errorMessage = string.Format("{0}{1}{1}{2}", "Error connecting to server.", Environment.NewLine, "Invalid URL");
+                var errorMessage = "Error connecting to server.";
                 
                 // Log the error
                 _log.Error(errorMessage, ex);
