@@ -113,7 +113,9 @@ namespace PDS.Witsml.Data
                 if (IsIgnored(group.Key)) continue;
 
                 var propertyInfo = GetPropertyInfoForAnElement(properties, group.Key);
+                PushPropertyInfo(propertyInfo);
                 NavigateElementGroup(propertyInfo, group, parentPath);
+                PopPropertyInfo();
             }
 
             foreach (var attribute in element.Attributes())
@@ -124,6 +126,14 @@ namespace PDS.Witsml.Data
                 var attributeProp = GetPropertyInfoForAnElement(properties, attribute.Name.LocalName);
                 NavigateAttribute(attributeProp, attribute, parentPath);
             }
+        }
+
+        protected virtual void PopPropertyInfo()
+        {
+        }
+
+        protected virtual void PushPropertyInfo(PropertyInfo propertyInfo)
+        {
         }
 
         protected void NavigateElementGroup(PropertyInfo propertyInfo, IGrouping<string, XElement> elements, string parentPath)
@@ -145,12 +155,12 @@ namespace PDS.Witsml.Data
                     if (genericType == typeof(Nullable<>))
                     {
                         var underlyingType = Nullable.GetUnderlyingType(propertyType);
-                        NavigateElementType(underlyingType, element, propertyPath);
+                        NavigateNullableElementType(underlyingType, element, propertyPath, propertyInfo);
                     }
                     else if (genericType == typeof(List<>))
                     {
                         var childType = propertyType.GetGenericArguments()[0];
-                        NavigateElementType(childType, element, propertyPath);
+                        NavigateArrayElementType(elementList, childType, element, propertyPath, propertyInfo);
                     }
                 }
                 else if (propertyType.IsAbstract)
@@ -168,15 +178,30 @@ namespace PDS.Witsml.Data
                 InitializeRecurringElementHandler(propertyPath);
 
                 var childType = propertyType.GetGenericArguments()[0];
-
-                foreach (var element in elementList)
-                {
-                    NavigateElementType(childType, element, propertyPath);
-                }
+           
+                NavigateRecurringElement(elementList, childType, propertyPath, propertyInfo);
 
                 HandleRecurringElements(propertyPath);
             }
         }
+
+        protected virtual void NavigateRecurringElement(List<XElement> elements, Type childType, string propertyPath, PropertyInfo propertyInfo)
+        {
+            foreach (var value in elements)
+            {
+                NavigateElementType(childType, value, propertyPath);
+            }
+        }
+
+        protected virtual void NavigateArrayElementType(List<XElement> elements, Type childType, XElement element, string propertyPath, PropertyInfo propertyInfo)
+        {
+            NavigateElementType(childType, element, propertyPath);
+        }
+
+        protected virtual void NavigateNullableElementType(Type elementType, XElement element, string propertyPath, PropertyInfo propertyInfo)
+        {
+            NavigateElementType(elementType, element, propertyPath);
+        }     
 
         protected void NavigateElementType(Type elementType, XElement element, string propertyPath)
         {

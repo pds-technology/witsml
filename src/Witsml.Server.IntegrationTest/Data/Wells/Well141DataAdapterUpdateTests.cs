@@ -16,6 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Linq;
+using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Server.Data.Wells
@@ -26,9 +29,69 @@ namespace PDS.Witsml.Server.Data.Wells
     [TestClass]
     public class Well141DataAdapterUpdateTests
     {
+        private DevKit141Aspect DevKit;
+        private Well _well;
+
         //[TestMethod]
         //public void Well141DataAdapter_MethodName_ExpectedBehavior()
         //{
         //}
+
+        [TestInitialize]
+        public void TestSetUp()
+        {
+            DevKit = new DevKit141Aspect();
+
+            DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
+                .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
+                .ToArray();
+
+            _well = new Well { Name = DevKit.Name("Well 01"), TimeZone = DevKit.TimeZone };
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_UpdateInStore_Can_Update_A_List_Element()
+        {
+            // Add well
+            var well = DevKit.CreateFullWell();
+            var response = DevKit.Add<WellList, Well>(well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uid = response.SuppMsgOut;
+
+            // Query well 
+            var query = new Well { Uid = uid };
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+
+            Assert.AreEqual(1, result.Count);
+            var returnWell = result.FirstOrDefault();
+
+            var welldatum = returnWell.WellDatum.Where(x => x.Uid.Equals("SL")).FirstOrDefault();
+            Assert.IsNotNull(welldatum);
+            Assert.AreEqual("Sea Level", welldatum.Name);
+            Assert.AreEqual(ElevCodeEnum.SL, welldatum.Code);
+
+            // Update well
+            var datumSL = DevKit.WellDatum("Sea Level", ElevCodeEnum.LAT, "SL");
+
+            var updateWell = new Well() { Uid = uid, WellDatum = DevKit.List(datumSL) };
+            var updateResponse = DevKit.Update<WellList, Well>(updateWell);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            // Query updated well
+            query = new Well { Uid = uid };
+            result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+
+            Assert.AreEqual(1, result.Count);
+            returnWell = result.FirstOrDefault();
+
+            welldatum = returnWell.WellDatum.Where(x => x.Uid.Equals("SL")).FirstOrDefault();
+            Assert.IsNotNull(welldatum);
+            Assert.AreEqual("Sea Level", welldatum.Name);
+            Assert.AreEqual(ElevCodeEnum.LAT, welldatum.Code);
+
+        }
     }
 }
