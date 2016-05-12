@@ -113,9 +113,7 @@ namespace PDS.Witsml.Data
                 if (IsIgnored(group.Key)) continue;
 
                 var propertyInfo = GetPropertyInfoForAnElement(properties, group.Key);
-                PushPropertyInfo(propertyInfo);
                 NavigateElementGroup(propertyInfo, group, parentPath);
-                PopPropertyInfo();
             }
 
             foreach (var attribute in element.Attributes())
@@ -128,15 +126,7 @@ namespace PDS.Witsml.Data
             }
         }
 
-        protected virtual void PopPropertyInfo()
-        {
-        }
-
-        protected virtual void PushPropertyInfo(PropertyInfo propertyInfo)
-        {
-        }
-
-        protected void NavigateElementGroup(PropertyInfo propertyInfo, IGrouping<string, XElement> elements, string parentPath)
+        protected virtual void NavigateElementGroup(PropertyInfo propertyInfo, IGrouping<string, XElement> elements, string parentPath)
         {
             if (propertyInfo == null) return;
 
@@ -179,13 +169,13 @@ namespace PDS.Witsml.Data
 
                 var childType = propertyType.GetGenericArguments()[0];
            
-                NavigateRecurringElement(elementList, childType, propertyPath, propertyInfo);
+                NavigateRecurringElements(elementList, childType, propertyPath, propertyInfo);
 
                 HandleRecurringElements(propertyPath);
             }
         }
 
-        protected virtual void NavigateRecurringElement(List<XElement> elements, Type childType, string propertyPath, PropertyInfo propertyInfo)
+        protected virtual void NavigateRecurringElements(List<XElement> elements, Type childType, string propertyPath, PropertyInfo propertyInfo)
         {
             foreach (var value in elements)
             {
@@ -218,7 +208,7 @@ namespace PDS.Witsml.Data
                     var uomPath = GetPropertyPath(propertyPath, uomProperty.Name);
                     var uomValue = ValidateMeasureUom(element, uomProperty, element.Value);
 
-                    NavigateProperty(element.Attribute("uom"), uomProperty.PropertyType, uomPath, uomValue);
+                    NavigateUomAttribute(element.Attribute("uom"), uomProperty.PropertyType, uomPath, element.Value, uomValue);
                 }
 
                 NavigateProperty(element, propertyType, propertyName, element.Value);
@@ -231,6 +221,14 @@ namespace PDS.Witsml.Data
             {
                 NavigateProperty(element, elementType, propertyPath, element.Value);
             }
+        }
+
+        protected virtual void NavigateUomAttribute(XObject xmlObject, Type propertyType, string propertyPath, string measureValue, string uomValue)
+        {
+            // By default, ignore the uomValue if there is no measureValue provided
+            if (string.IsNullOrWhiteSpace(measureValue) || measureValue.EqualsIgnoreCase("NaN")) return;
+
+            NavigateProperty(xmlObject, propertyType, propertyPath, uomValue);
         }
 
         protected void NavigateAttribute(PropertyInfo propertyInfo, XAttribute attribute, string parentPath = null)
@@ -340,7 +338,7 @@ namespace PDS.Witsml.Data
         /// <param name="properties">The properties.</param>
         /// <param name="name">The name of the property.</param>
         /// <returns>The property info for the element.</returns>
-        protected PropertyInfo GetPropertyInfoForAnElement(IEnumerable<PropertyInfo> properties, string name)
+        protected PropertyInfo GetPropertyInfoForAnElement(IList<PropertyInfo> properties, string name)
         {
             foreach (var prop in properties)
             {

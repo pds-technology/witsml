@@ -406,4 +406,8 @@
     <value>Error transaction deadlock</value>
     <comment>-1005</comment>
   </data>
+  <data name="MissingMeasureDataForUnit" xml:space="preserve">
+    <value>For WMLS_UpdateInStore, a uom attribute must not be specified unless its corresponding value is specified.</value>
+    <comment>-446</comment>
+  </data>
 </root>

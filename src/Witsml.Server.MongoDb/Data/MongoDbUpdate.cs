@@ -47,23 +47,20 @@ namespace PDS.Witsml.Server.Data
 
             _collection = collection;
             _parser = parser;
-            _idPropertyName = idPropertyName;            
+            _idPropertyName = idPropertyName;
         }
 
         public void Update(T entity, EtpUri uri, Dictionary<string, object> updates)
         {
-             _entityFilter = MongoDbUtility.GetEntityFilter<T>(uri, _idPropertyName);       
-
-            var update = Update(updates, uri.ObjectId);
-            var element = _parser.Element();
-
-            Context.Update = update;
+             _entityFilter = MongoDbUtility.GetEntityFilter<T>(uri, _idPropertyName);
             _entity = entity;
-            BuildUpdate(element);
+
+            Context.Update = Update(updates, uri.ObjectId);
+            BuildUpdate(_parser.Element());
 
             if (Logger.IsDebugEnabled)
             {
-                var updateJson = update.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
+                var updateJson = Context.Update.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
                 Logger.DebugFormat("Detected update elements: {0}", updateJson);
             }
 
@@ -86,48 +83,45 @@ namespace PDS.Witsml.Server.Data
             {
                 var filterJson = filter.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
                 var updateJson = update.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
+                Logger.DebugFormat("Detected update parameters: {0}", updateJson);
+                Logger.DebugFormat("Detected update filters: {0}", filterJson);
             }
+
             _collection.UpdateOne(filter, update);
         }
 
-        private void BuildUpdate(XElement element)
+        protected override void NavigateElementGroup(PropertyInfo propertyInfo, IGrouping<string, XElement> elements, string parentPath)
         {
-            NavigateElement(element, Context.DataObjectType, null);
-        }
-
-        protected override void PushPropertyInfo(PropertyInfo propertyInfo)
-        {
-            object propertyValue;
-            if (Context.PropertyValueList.Count == 0)
-            {
-                propertyValue = propertyInfo.GetValue(_entity);
-            }
-            else
-            {
-                propertyValue = propertyInfo.GetValue(Context.PropertyValueList.Last());
-            }
-
-            PushPropertyInfo(propertyInfo, propertyValue);
-        }
-
-        protected void PushPropertyInfo(PropertyInfo propertyInfo, object propertyValue)
-        {
-            Context.PropertyInfoList.Add(propertyInfo);
-            Context.PropertyValueList.Add(propertyValue);
-        }
-
-        protected override void PopPropertyInfo()
-        {
-            Context.PropertyInfoList.Remove(Context.PropertyInfoList.Last());
-            Context.PropertyValueList.Remove(Context.PropertyValueList.Last());
+            PushPropertyInfo(propertyInfo);
+            base.NavigateElementGroup(propertyInfo, elements, parentPath);
+            PopPropertyInfo();
         }
 
         protected override void NavigateNullableElementType(Type elementType, XElement element, string propertyPath, PropertyInfo propertyInfo)
         {
             NavigateElementType(elementType, element, propertyPath);
 
-            if (propertyInfo.DeclaringType.GetProperty(propertyInfo.Name + "Specified") != null)
+            if (propertyInfo.DeclaringType?.GetProperty(propertyInfo.Name + "Specified") != null)
                 Context.Update = Context.Update.Set(propertyPath + "Specified", true);                
+        }
+
+        protected override void NavigateRecurringElements(List<XElement> elements, Type childType, string propertyPath, PropertyInfo propertyInfo)
+        {
+            NavigateArrayElementType(elements, childType, null, propertyPath, propertyInfo);
+        }
+
+        protected override void NavigateArrayElementType(List<XElement> elements, Type childType, XElement element, string propertyPath, PropertyInfo propertyInfo)
+        {
+            UpdateArrayElements(elements, propertyInfo, Context.PropertyValues.Last(), childType, propertyPath);
+        }
+
+        protected override void NavigateUomAttribute(XObject xmlObject, Type propertyType, string propertyPath, string measureValue, string uomValue)
+        {
+            // Throw error -446 if uomValue is specified but measureValue is missing or NaN
+            if (!string.IsNullOrWhiteSpace(uomValue) && (string.IsNullOrWhiteSpace(measureValue) || measureValue.EqualsIgnoreCase("NaN")))
+                throw new WitsmlException(ErrorCodes.MissingMeasureDataForUnit);
+
+            NavigateProperty(xmlObject, propertyType, propertyPath, uomValue);
         }
 
         protected override void HandleStringValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
@@ -152,27 +146,43 @@ namespace PDS.Witsml.Server.Data
     
         protected override void HandleNullValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
-            UnsetProperty(xmlObject, propertyType, propertyPath, propertyValue);
+            UnsetProperty(propertyPath);
         }
 
         protected override void HandleNaNValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
-            UnsetProperty(xmlObject, propertyType, propertyPath, propertyValue);
+            UnsetProperty(propertyPath);
         }
 
-        protected override void NavigateRecurringElement(List<XElement> elements, Type childType, string propertyPath, PropertyInfo propertyInfo)
-        {           
-            NavigateArrayElementType(elements, childType, null, propertyPath, propertyInfo);
-        }
-
-        protected override void NavigateArrayElementType(List<XElement> elements, Type childType, XElement element, string propertyPath, PropertyInfo propertyInfo)
+        private void BuildUpdate(XElement element)
         {
-            UpdateArrayElements(elements, propertyInfo, Context.PropertyValueList.Last(), childType, propertyPath);
+            NavigateElement(element, Context.DataObjectType);
         }
 
-        private void UnsetProperty(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
+        private void PushPropertyInfo(PropertyInfo propertyInfo)
         {
-            if (Context.PropertyInfoList.Last().IsDefined(typeof(RequiredAttribute), false))
+            var propertyValue = Context.PropertyValues.Count == 0
+                ? propertyInfo.GetValue(_entity)
+                : propertyInfo.GetValue(Context.PropertyValues.Last());
+
+            PushPropertyInfo(propertyInfo, propertyValue);
+        }
+
+        private void PushPropertyInfo(PropertyInfo propertyInfo, object propertyValue)
+        {
+            Context.PropertyInfos.Add(propertyInfo);
+            Context.PropertyValues.Add(propertyValue);
+        }
+
+        private void PopPropertyInfo()
+        {
+            Context.PropertyInfos.Remove(Context.PropertyInfos.Last());
+            Context.PropertyValues.Remove(Context.PropertyValues.Last());
+        }
+
+        private void UnsetProperty(string propertyPath)
+        {
+            if (Context.PropertyInfos.Last().IsDefined(typeof(RequiredAttribute), false))
                 throw new WitsmlException(ErrorCodes.MissingRequiredData);
 
             Context.Update = Context.Update.Unset(propertyPath);
@@ -230,6 +240,8 @@ namespace PDS.Witsml.Server.Data
                     {
                         var filterJson = filter.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
                         var updateJson = update.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
+                        Logger.DebugFormat("Detected update parameters: {0}", updateJson);
+                        Logger.DebugFormat("Detected update filters: {0}", filterJson);
                     }
 
                     _collection.UpdateOne(filter, Context.Update);
@@ -251,7 +263,7 @@ namespace PDS.Witsml.Server.Data
             return string.Empty;
         }
 
-        private object GetCurrentElementValue(string idField, string elementId, IEnumerable<PropertyInfo> properties, object propertyValue)
+        private object GetCurrentElementValue(string idField, string elementId, IList<PropertyInfo> properties, object propertyValue)
         {
             var list = (IEnumerable)propertyValue;
             foreach (var item in list)

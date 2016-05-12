@@ -484,6 +484,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to For WMLS_UpdateInStore, a uom attribute must not be specified unless its corresponding value is specified..
+        /// </summary>
+        internal static string MissingMeasureDataForUnit {
+            get {
+                return ResourceManager.GetString("MissingMeasureDataForUnit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to For getting systematically growing data-objects, if a column-definition(logCurveInfo) section is specified then a mnemonic element must be specified..
         /// </summary>
         internal static string MissingMnemonicElement {
