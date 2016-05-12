@@ -37,26 +37,29 @@ namespace PDS.Witsml.Server.Data
         private readonly IMongoCollection<T> _collection;
         private readonly WitsmlQueryParser _parser;
         private readonly string _idPropertyName;
-        private readonly string[] _ignored;
 
         private FilterDefinition<T> _entityFilter;
+        private T _entity;
 
-        public MongoDbUpdate(IMongoCollection<T> collection, WitsmlQueryParser parser, string idPropertyName = "Uid", string[] ignored = null) : base(new MongoDbUpdateContext<T>())
+        public MongoDbUpdate(IMongoCollection<T> collection, WitsmlQueryParser parser, string idPropertyName = "Uid", List<string> ignored = null) : base(new MongoDbUpdateContext<T>())
         {
+            Context.Ignored = ignored;
+
             _collection = collection;
             _parser = parser;
-            _idPropertyName = idPropertyName;
-            _ignored = ignored ?? new string[0];
+            _idPropertyName = idPropertyName;            
         }
 
         public void Update(T entity, EtpUri uri, Dictionary<string, object> updates)
         {
-            _entityFilter = MongoDbUtility.GetEntityFilter<T>(uri, _idPropertyName);
+             _entityFilter = MongoDbUtility.GetEntityFilter<T>(uri, _idPropertyName);       
 
             var update = Update(updates, uri.ObjectId);
             var element = _parser.Element();
 
-            update = BuildUpdate(update, element, entity);
+            Context.Update = update;
+            _entity = entity;
+            BuildUpdate(element);
 
             if (Logger.IsDebugEnabled)
             {
@@ -64,7 +67,7 @@ namespace PDS.Witsml.Server.Data
                 Logger.DebugFormat("Detected update elements: {0}", updateJson);
             }
 
-            var result = _collection.UpdateOne(_entityFilter, update);
+            _collection.UpdateOne(_entityFilter, Context.Update);
         }
 
         public UpdateDefinition<T> Update(Dictionary<string, object> updates, string uidValue)
@@ -77,15 +80,6 @@ namespace PDS.Witsml.Server.Data
             return update;
         }
 
-        public void Update(Dictionary<string, T> replacements, string field = null)
-        {
-            foreach (var key in replacements.Keys)
-            {
-                var filter = BuildIdFilter(field ?? _idPropertyName, key);
-                _collection.ReplaceOne(filter, replacements[key]);
-            }
-        }
-
         public void UpdateFields(FilterDefinition<T> filter, UpdateDefinition<T> update)
         {
             if (Logger.IsDebugEnabled)
@@ -96,193 +90,89 @@ namespace PDS.Witsml.Server.Data
             _collection.UpdateOne(filter, update);
         }
 
-        private FilterDefinition<T> BuildIdFilter(XElement element)
+        private void BuildUpdate(XElement element)
         {
-            return null;
+            NavigateElement(element, Context.DataObjectType, null);
         }
 
-        private FilterDefinition<T> BuildIdFilter(string field, string value)
+        protected override void PushPropertyInfo(PropertyInfo propertyInfo)
         {
-            return Builders<T>.Filter.Eq(field, value);
-        }
-
-        private UpdateDefinition<T> BuildUpdate(UpdateDefinition<T> update, XElement element, T entity)
-        {
-            return BuildUpdateForAnElement(update, entity, element, typeof(T));
-        }
-
-        private UpdateDefinition<T> BuildUpdateForAnElement(UpdateDefinition<T> update, object obj, XElement element, Type type, string parentPath = null)
-        {
-            var properties = GetPropertyInfo(type);
-
-            var groupings = element.Elements().GroupBy(e => e.Name.LocalName);
-
-            foreach (var group in groupings)
+            object propertyValue;
+            if (Context.PropertyValueList.Count == 0)
             {
-                if (_ignored.Contains(group.Key))
-                    continue;
-
-                var propertyInfo = GetPropertyInfoForAnElement(properties, group.Key);
-                var propertyValue = propertyInfo.GetValue(obj);
-                update = BuildUpdateForAnElementGroup(update, propertyInfo, propertyValue, group, new List<FilterDefinition<T>> { _entityFilter }, parentPath);
-            }
-
-            foreach (var attribute in element.Attributes())
-            {
-                if (attribute.IsNamespaceDeclaration || attribute.Name == Xsi("nil") || attribute.Name == Xsi("type"))
-                    continue;
-
-                var attributeProp = GetPropertyInfoForAnElement(properties, attribute.Name.LocalName);
-                update = BuildUpdateForAttribute(update, attributeProp, attribute, parentPath);
-            }
-
-            return update;
-        }
-
-        private UpdateDefinition<T> BuildUpdateForAnElementGroup(UpdateDefinition<T> update, PropertyInfo propertyInfo, object propertyValue, IEnumerable<XElement> elements, List<FilterDefinition<T>> filters, string parentPath = null)
-        {
-            if (propertyInfo == null)
-                return update;
-
-            var fieldName = GetPropertyPath(parentPath, propertyInfo.Name);
-            var propType = propertyInfo.PropertyType;
-            var values = elements.ToList();
-            var count = values.Count;
-
-            if (count == 1)
-            {
-                var element = values.FirstOrDefault();
-
-                if (propType.IsGenericType)
-                {
-                    var genericType = propType.GetGenericTypeDefinition();
-
-                    if (genericType == typeof(Nullable<>))
-                    {
-                        var underlyingType = Nullable.GetUnderlyingType(propType);
-                        update = BuildUpdateForAnElementType(update, propertyInfo, underlyingType, propertyValue, element, fieldName);
-
-                        // set the *Specified property when updating nullable elements
-                        if (propertyInfo.DeclaringType.GetProperty(propertyInfo.Name + "Specified") != null)
-                            update = update.Set(fieldName + "Specified", true);
-
-                        return update;
-                    }
-                    else if (genericType == typeof(List<>))
-                    {
-                        var childType = propType.GetGenericArguments()[0];
-                        UpdateArrayElements(values, propertyInfo, propertyValue, childType, fieldName, filters);
-                        return update;
-                    }
-                }
-                else if (propType.IsAbstract)
-                {
-                    var concreteType = GetConcreteType(element, propType);
-                    return BuildUpdateForAnElementType(update, propertyInfo, concreteType, propertyValue, element, fieldName);
-                }
-                else
-                {
-                    return BuildUpdateForAnElementType(update, propertyInfo, propType, propertyValue, element, fieldName);
-                }
+                propertyValue = propertyInfo.GetValue(_entity);
             }
             else
             {
-                var childType = propType.GetGenericArguments()[0];
-                UpdateArrayElements(values, propertyInfo, propertyValue, childType, fieldName, filters);
-                return update;
+                propertyValue = propertyInfo.GetValue(Context.PropertyValueList.Last());
             }
 
-            return update;
+            PushPropertyInfo(propertyInfo, propertyValue);
         }
 
-        private UpdateDefinition<T> BuildUpdateForAnElementType(UpdateDefinition<T> update, PropertyInfo prop, Type elementType, object value, XElement element, string propertyPath)
+        protected void PushPropertyInfo(PropertyInfo propertyInfo, object propertyValue)
         {
-            var textProperty = elementType.GetProperties().FirstOrDefault(x => x.IsDefined(typeof(XmlTextAttribute), false));
-
-            if (textProperty != null)
-            {
-                var uomProperty = elementType.GetProperty("Uom");
-                var fieldName = GetPropertyPath(propertyPath, textProperty.Name);
-                var fieldType = textProperty.PropertyType;
-
-                if (uomProperty != null)
-                {
-                    var uomPath = GetPropertyPath(propertyPath, uomProperty.Name);
-                    var uomValue = ValidateMeasureUom(element, uomProperty, element.Value);
-                    update = BuildUpdateForProperty(update, uomProperty, uomProperty.PropertyType, uomPath, uomValue);
-                }
-
-                return BuildUpdateForProperty(update, textProperty, fieldType, fieldName, element.Value);
-            }
-
-            if (element.HasElements || element.HasAttributes)
-            {
-                return BuildUpdateForAnElement(update, value, element, elementType, propertyPath);
-            }
-
-            return BuildUpdateForProperty(update, prop, elementType, propertyPath, element.Value);
+            Context.PropertyInfoList.Add(propertyInfo);
+            Context.PropertyValueList.Add(propertyValue);
         }
 
-        private UpdateDefinition<T> BuildUpdateForProperty(UpdateDefinition<T> update, PropertyInfo prop, Type propertyType, string propertyPath, string propertyValue)
+        protected override void PopPropertyInfo()
         {
-            if (string.IsNullOrEmpty(propertyValue))
-            {
-                if (prop.IsDefined(typeof(RequiredAttribute), false))
-                    throw new WitsmlException(ErrorCodes.MissingRequiredData);
-
-                return update.Unset(propertyPath);
-            }
-
-            if (propertyType == typeof(string))
-            {
-                return update.Set(propertyPath, propertyValue);
-            }
-            else if (propertyType.IsEnum)
-            {
-                var value = ParseEnum(propertyType, propertyValue);
-                return update.Set(propertyPath, value);
-            }
-            else if (propertyType == typeof(DateTime))
-            {
-                DateTime value;
-
-                if (!DateTime.TryParse(propertyValue, out value))
-                    throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
-
-                return update.Set(propertyPath, value);
-            }
-            else if (propertyType == typeof(Timestamp))
-            {
-                DateTimeOffset value;
-
-                if (!DateTimeOffset.TryParse(propertyValue, out value))
-                    throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
-
-                return update.Set(propertyPath, new Timestamp(value));
-            }
-            else if (propertyValue.Equals("NaN") && propertyType.IsNumeric())
-            {
-                return update;
-            }
-            else if (typeof(IConvertible).IsAssignableFrom(propertyType))
-            {
-                var value = Convert.ChangeType(propertyValue, propertyType);
-                return update.Set(propertyPath, value);
-            }
-            else
-            {
-                return update.Set(propertyPath, propertyValue);
-            }
+            Context.PropertyInfoList.Remove(Context.PropertyInfoList.Last());
+            Context.PropertyValueList.Remove(Context.PropertyValueList.Last());
         }
 
-        private UpdateDefinition<T> BuildUpdateForAttribute(UpdateDefinition<T> update, PropertyInfo propertyInfo, XAttribute attribute, string parentPath = null)
+        protected override void NavigateNullableElementType(Type elementType, XElement element, string propertyPath, PropertyInfo propertyInfo)
         {
-            var propertyPath = GetPropertyPath(parentPath, propertyInfo.Name);
+            NavigateElementType(elementType, element, propertyPath);
 
-            return BuildUpdateForProperty(update, propertyInfo, propertyInfo.PropertyType, propertyPath, attribute.Value);
+            if (propertyInfo.DeclaringType.GetProperty(propertyInfo.Name + "Specified") != null)
+                Context.Update = Context.Update.Set(propertyPath + "Specified", true);                
         }
 
-        private void UpdateArrayElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath, List<FilterDefinition<T>> filters)
+        protected override void HandleStringValue(Type propertyType, string propertyPath, string propertyValue)
+        {
+            Context.Update = Context.Update.Set(propertyPath, propertyValue);
+        }
+
+        protected override void HandleDateTimeValue(Type propertyType, string propertyPath, string propertyValue, DateTime dateTimeValue)
+        {
+            Context.Update = Context.Update.Set(propertyPath, dateTimeValue);
+        }
+
+        protected override void HandleTimestampValue(Type propertyType, string propertyPath, string propertyValue, Timestamp timestampValue)
+        {
+            Context.Update = Context.Update.Set(propertyPath, timestampValue);
+        }
+
+        protected override void HandleObjectValue(Type propertyType, string propertyPath, string propertyValue, object objectValue)
+        {
+            Context.Update = Context.Update.Set(propertyPath, objectValue);
+        }
+    
+        protected override void HandleNullValue(Type propertyType, string propertyPath, string propertyValue)
+        {
+            if (Context.PropertyInfoList.Last().IsDefined(typeof(RequiredAttribute), false))
+                throw new WitsmlException(ErrorCodes.MissingRequiredData);
+
+            Context.Update = Context.Update.Unset(propertyPath);
+        }
+
+        protected override void HandleNaNValue(Type propertyType, string propertyPath, string propertyValue)
+        {
+        }
+
+        protected override void NavigateRecurringElement(List<XElement> elements, Type childType, string propertyPath, PropertyInfo propertyInfo)
+        {           
+            NavigateArrayElementType(elements, childType, null, propertyPath, propertyInfo);
+        }
+
+        protected override void NavigateArrayElementType(List<XElement> elements, Type childType, XElement element, string propertyPath, PropertyInfo propertyInfo)
+        {
+            UpdateArrayElements(elements, propertyInfo, Context.PropertyValueList.Last(), childType, propertyPath);
+        }
+
+        private void UpdateArrayElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
         {
             var updateBuilder = Builders<T>.Update;
             var filterBuilder = Builders<T>.Filter;
@@ -290,6 +180,7 @@ namespace PDS.Witsml.Server.Data
             var filterPath = GetPropertyPath(parentPath, idField);
             var properties = GetPropertyInfo(type);
             var positionPath = parentPath + ".$";
+            var filters = new List<FilterDefinition<T>>() { _entityFilter };
 
             foreach (var element in elements)
             {
@@ -321,7 +212,13 @@ namespace PDS.Witsml.Server.Data
                     var filter = filterBuilder.And(filters);
 
                     var update = updateBuilder.Set(GetPropertyPath(positionPath, idField), elementId);
-                    update = BuildUpdateForAnElement(update, current, element, type, positionPath);
+
+                    var saveUpdate = Context.Update;
+                    Context.Update = update;
+                  
+                    PushPropertyInfo(propertyInfo, current);
+                    NavigateElement(element, type, positionPath);
+                    PopPropertyInfo();
 
                     if (Logger.IsDebugEnabled)
                     {
@@ -329,7 +226,8 @@ namespace PDS.Witsml.Server.Data
                         var updateJson = update.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
                     }
 
-                    _collection.UpdateOne(filter, update);
+                    _collection.UpdateOne(filter, Context.Update);
+                    Context.Update = saveUpdate;                   
                 }
             }
         }
