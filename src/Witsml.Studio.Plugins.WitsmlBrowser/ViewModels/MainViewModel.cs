@@ -619,21 +619,33 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// <param name="returnCode">The return code.</param>
         internal void OutputMessages(Functions functionType, string queryText, string xmlOut, string suppMsgOut, string optionsIn, short returnCode)
         {
-            var none = "<!-- None -->";
             var now = DateTime.Now.ToString("G");
 
             Messages.Insert(
                 Messages.TextLength,
                 string.Format(
-                    "<!-- {5}: {4} -->{3}<!-- OptionsIn: {6} -->{3}{0}{3}{3}<!-- Message: {4} -->{3}<!-- {1} -->{3}{3}<!-- Output: {4} -->{3}<!-- Return Code: {7} -->{3}{2}{3}{3}",
-                    queryText == null ? string.Empty : queryText,
-                    string.IsNullOrEmpty(suppMsgOut) ? "None" : suppMsgOut,
-                    string.IsNullOrEmpty(xmlOut) ? none : xmlOut,
-                    Environment.NewLine,
+                    "<!---------- Request : {0} ----------{9}" +
+                    "   Function    : {1}{9}" +
+                    "   OptionsIn   : {2}{9}" +
+                    "   XmlIn       : {3}{9}" +
+                    "-->{9}" +
+                    "{4}{9}{9}" +
+                    "<!---------- Response : {0} ----------{9}" +
+                    "   Return Code : {5}{9}" +
+                    "   SuppMsgOut  : {6}{9}" +
+                    "   XmlOut      : {7}{9}" +
+                    "-->{9}" +
+                    "{8}{9}{9}",
                     now,
-                    functionType.GetDescription(),
+                    functionType,
                     string.IsNullOrEmpty(optionsIn) ? "None" : optionsIn,
-                    returnCode));
+                    string.IsNullOrEmpty(queryText) ? "None" : string.Empty,
+                    string.IsNullOrEmpty(queryText) ? string.Empty : queryText,
+                    returnCode,
+                    string.IsNullOrEmpty(suppMsgOut) ? "None" : suppMsgOut,
+                    string.IsNullOrEmpty(xmlOut) ? "None" : string.Empty,
+                    string.IsNullOrEmpty(xmlOut) ? string.Empty : xmlOut,
+                    Environment.NewLine));
         }
 
         /// <summary>
