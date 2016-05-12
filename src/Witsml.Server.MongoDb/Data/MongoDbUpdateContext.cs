@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using MongoDB.Driver;
 using PDS.Witsml.Data;
 
@@ -28,11 +29,17 @@ namespace PDS.Witsml.Server.Data
         public MongoDbUpdateContext()
         {
             DataObjectType = typeof(T);
-            Updates = new List<UpdateDefinition<T>>();
+            PropertyInfoList = new List<PropertyInfo>();
+            PropertyValueList = new List<object>();
+            Update = null;           
         }
 
         public override Type DataObjectType { get; }
 
-        public List<UpdateDefinition<T>> Updates { get; }
+        public List<PropertyInfo> PropertyInfoList { get; }
+
+        public List<object> PropertyValueList { get; }
+
+        public UpdateDefinition<T> Update { get; set; }
     }
 }
