@@ -274,7 +274,7 @@ namespace PDS.Witsml.Data
 
                 HandleTimestampValue(xmlObject, propertyType, propertyPath, propertyValue, new Timestamp(value));
             }
-            else if (propertyValue.Equals("NaN") && propertyType.IsNumeric())
+            else if (propertyValue.EqualsIgnoreCase("NaN") && propertyType.IsNumeric())
             {
                 HandleNaNValue(xmlObject, propertyType, propertyPath, propertyValue);
             }
