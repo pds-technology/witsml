@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.Linq;
 using Caliburn.Micro;
 using Energistics.DataAccess;
@@ -77,6 +78,17 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         /// </summary>
         /// <value>The runtime.</value>
         public IRuntimeService Runtime { get; private set; }
+
+        /// <summary>
+        /// Gets the options in return elements.
+        /// </summary>
+        /// <value>
+        /// The options in return elements.
+        /// </value>
+        public IEnumerable<OptionsIn.ReturnElements> ReturnElements
+        {
+            get { return OptionsIn.ReturnElements.GetValues(); }
+        }
 
         /// <summary>
         /// Called when the selected WITSML version has changed.

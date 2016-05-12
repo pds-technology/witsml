@@ -12,6 +12,7 @@
 
     <UserControl.Resources>
         <conv:NullToBooleanConverter x:Key="NullToBooleanConverter" />
+        <conv:BooleanInverseConverter x:Key="BooleanInverseConverter" />
     </UserControl.Resources>
     
     <Grid>
@@ -22,22 +23,29 @@
 
         <ContentControl x:Name="XmlQuery" />
 
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="1" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0" Orientation="Horizontal">
-                <ComboBox Width="120" Margin="5,5,0,5" IsEditable="False" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" 
-                          SelectedItem="{Binding Model.StoreFunction}" ItemsSource="{Binding StoreFunctions}" VerticalContentAlignment="Center" />
-                
-                <Button x:Name="SubmitQuery" Content="Execute" Width="70" Margin="5,5,0,5" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" />
+                <ComboBox Width="120" Margin="5,5,0,5" VerticalContentAlignment="Center" ToolTip="API Function" IsEditable="False" 
+                          ItemsSource="{Binding StoreFunctions}"
+                          SelectedItem="{Binding Model.StoreFunction}" />
+
+                <ComboBox Width="140" Margin="5,5,0,5" DisplayMemberPath="Value" VerticalContentAlignment="Center" ToolTip="Return Elements" IsEditable="False"
+                          ItemsSource="{Binding Parent.ReturnElements}"
+                          SelectedItem="{Binding Model.ReturnElementType, Mode=TwoWay}"
+                          IsEnabled="{Binding Model.IsRequestObjectSelectionCapability, Converter={StaticResource BooleanInverseConverter}}" />
+
+                <Button x:Name="SubmitQuery" Content="Execute" Width="70" Margin="5,5,0,5" />
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <ComboBox Width="120" Margin="0,5,5,5" IsEditable="False" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}"
-                          SelectedItem="{Binding Parent.Parent.DataObject}" ItemsSource="{Binding Parent.Parent.DataObjects}" VerticalContentAlignment="Center" />
+                <ComboBox Width="100" Margin="0,5,5,5" VerticalContentAlignment="Center" ToolTip="Minimum Query Templates" IsEditable="False"
+                          ItemsSource="{Binding Parent.Parent.DataObjects}"
+                          SelectedItem="{Binding Parent.Parent.DataObject}" />
 
                 <!--
                 <Button x:Name="OpenQuery" Content="Open" Width="60" Margin="0,5,5,5" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" />

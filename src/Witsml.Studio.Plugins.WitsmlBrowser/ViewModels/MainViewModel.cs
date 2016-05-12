@@ -46,7 +46,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
     public sealed class MainViewModel : Conductor<IScreen>.Collection.AllActive, IPluginViewModel, IConnectionAware
     {
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MainViewModel));
-        public const string QueryTemplateText = "Query Templates";
+        public const string QueryTemplateText = "Templates";
 
         private List<string> _xmls = new List<string>();
 
@@ -62,6 +62,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             Runtime = runtime;
             DisplayName = Settings.Default.PluginDisplayName;
             DataObjects = new BindableCollection<string>() { QueryTemplateText };
+            DataObject = QueryTemplateText;
 
             // Create the model for our witsml settings
             Model = new WitsmlSettings();

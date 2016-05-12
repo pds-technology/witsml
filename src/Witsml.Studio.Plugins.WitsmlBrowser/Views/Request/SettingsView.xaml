@@ -35,44 +35,60 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition />
-                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="40"/>
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Column="0" Grid.Row="0" Text="Connection:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
             <ContentControl x:Name="ConnectionPicker" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" />
             
             <TextBlock Grid.Column="0" Grid.Row="1" Text="Version:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
-            <ComboBox x:Name="WitsmlVersionControl" SelectedItem="{Binding Model.WitsmlVersion}" ItemsSource="{Binding WitsmlVersions}" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" Margin="5" VerticalContentAlignment="Center" IsEnabled="{Binding ElementName=WitsmlVersionControl, Path=HasItems}" />
+            <ComboBox x:Name="WitsmlVersionControl" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" Margin="5" VerticalContentAlignment="Center"
+                      ItemsSource="{Binding WitsmlVersions}"
+                      SelectedItem="{Binding Model.WitsmlVersion}"
+                      IsEnabled="{Binding ElementName=WitsmlVersionControl, Path=HasItems}" />
 
-            <Button x:Name="GetCapabilities" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Width="80" Margin="5" Content="Get Cap" IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" HorizontalAlignment="Right" />
+            <Button x:Name="GetCapabilities" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Width="80" Margin="5" HorizontalAlignment="Right" Content="Get Cap"
+                    IsEnabled="{Binding Model.WitsmlVersion, Converter={StaticResource NullToBooleanConverter}}" />
 
             <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="0,1,0,0" VerticalAlignment="Center" />
 
             <TextBlock Grid.Column="0" Grid.Row="4" Text="Return Elements:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
-            <ComboBox SelectedItem="{Binding Model.ReturnElementType, Mode=TwoWay}" DisplayMemberPath="Value" ItemsSource="{Binding ReturnElements}" Grid.Column="1" Grid.Row="4" Grid.ColumnSpan="2" Margin="5" VerticalContentAlignment="Center" IsEnabled="{Binding Model.IsRequestObjectSelectionCapability, Converter={StaticResource BooleanInverseConverter}}" />
+            <ComboBox Grid.Column="1" Grid.Row="4" Grid.ColumnSpan="2" Margin="5" VerticalContentAlignment="Center" DisplayMemberPath="Value"
+                      ItemsSource="{Binding Parent.ReturnElements}"
+                      SelectedItem="{Binding Model.ReturnElementType, Mode=TwoWay}"
+                      IsEnabled="{Binding Model.IsRequestObjectSelectionCapability, Converter={StaticResource BooleanInverseConverter}}" />
 
-            <CheckBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" Margin="5,10,5,5" Content="Request Object Selection" VerticalAlignment="Center" IsChecked="{Binding Model.IsRequestObjectSelectionCapability}" />
-            <CheckBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" Content="Request Private Group Only" VerticalAlignment="Center" IsChecked="{Binding Model.IsRequestPrivateGroupOnly}" IsEnabled="{Binding Model.IsRequestObjectSelectionCapability, Converter={StaticResource BooleanInverseConverter}}" />
+            <CheckBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" Margin="5,10,5,5" Content="Request Object Selection" VerticalAlignment="Center"
+                      IsChecked="{Binding Model.IsRequestObjectSelectionCapability}" />
+            
+            <CheckBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" Content="Request Private Group Only" VerticalAlignment="Center"
+                      IsChecked="{Binding Model.IsRequestPrivateGroupOnly}"
+                      IsEnabled="{Binding Model.IsRequestObjectSelectionCapability, Converter={StaticResource BooleanInverseConverter}}" />
 
             <TextBlock Grid.Column="0" Grid.Row="7" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right">Latest <Italic>n</Italic> Values:</TextBlock>
-            <xctk:IntegerUpDown Value="{Binding Model.RequestLatestValues}" Minimum="0" Grid.Column="1" Grid.Row="7" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" />
+            <xctk:IntegerUpDown Grid.Column="1" Grid.Row="7" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" Minimum="0"
+                                Value="{Binding Model.RequestLatestValues}"/>
 
             <TextBlock Grid.Column="0" Grid.Row="8" Text="Max Data Rows:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
-            <xctk:IntegerUpDown Value="{Binding Model.MaxDataRows}" Minimum="0" Grid.Column="1" Grid.Row="8" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" />
+            <xctk:IntegerUpDown Grid.Column="1" Grid.Row="8" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" Minimum="0"
+                                Value="{Binding Model.MaxDataRows}"/>
 
-            <CheckBox Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" Margin="5,10,5,5" Content="Retrieve Partial Results" VerticalAlignment="Center" IsChecked="{Binding Model.RetrievePartialResults}" />
+            <CheckBox Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" Margin="5,10,5,5" Content="Retrieve Partial Results" VerticalAlignment="Center"
+                      IsChecked="{Binding Model.RetrievePartialResults}" />
 
             <Border Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="0,1,0,0" VerticalAlignment="Center" />
 
             <TextBlock Grid.Row="11" Grid.Column="0" Text="Output Path:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
-            <TextBox Grid.Row="11" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" Padding="5" Text="{Binding Model.OutputPath}" VerticalContentAlignment="Center" />
+            <TextBox Grid.Row="11" Grid.Column="1" Margin="5" Padding="5" VerticalContentAlignment="Center" Text="{Binding Model.OutputPath}" />
+            <Button Grid.Row="11" Grid.Column="2" Margin="0,5,5,5" Content="..." ToolTip="Select Folder" x:Name="SelectOutputPath" />
 
-            <TextBlock Grid.Row="12" Grid.Column="0" Text="Truncate Size:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
-            <xctk:IntegerUpDown Grid.Row="12" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" Padding="5" Text="{Binding Model.TruncateSize}" FormatString="N0" VerticalContentAlignment="Center" />
+            <TextBlock Grid.Row="12" Grid.Column="0" Text="Auto-Save Size:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
+            <xctk:IntegerUpDown Grid.Row="12" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" Padding="5" FormatString="N0" VerticalContentAlignment="Center"
+                                Text="{Binding Model.TruncateSize}" />
 
             <StackPanel Grid.Row="13" Grid.Column="1" Grid.ColumnSpan="2" Margin="5,10,5,5" Orientation="Horizontal">
-                <CheckBox Content="Save All Query Responses" VerticalAlignment="Center" IsChecked="{Binding Model.IsSaveQueryResponse}" />
-                <CheckBox Content="Split Results" VerticalAlignment="Center" Margin="40,0,0,0" IsChecked="{Binding Model.IsSplitResults}" />
+                <CheckBox Content="Save Responses to Disk" VerticalAlignment="Center" IsChecked="{Binding Model.IsSaveQueryResponse}" />
+                <CheckBox Content="Split Files by Data Object" VerticalAlignment="Center" Margin="30,0,0,0" IsChecked="{Binding Model.IsSplitResults}" />
             </StackPanel>
         </Grid>
     </DockPanel>

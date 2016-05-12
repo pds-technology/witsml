@@ -17,8 +17,9 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Windows;
 using Caliburn.Micro;
 using Energistics.DataAccess;
 using PDS.Witsml.Studio.Core.Connections;
@@ -102,22 +103,31 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         public BindableCollection<string> WitsmlVersions { get; }
 
         /// <summary>
-        /// Gets the options in return elements.
-        /// </summary>
-        /// <value>
-        /// The options in return elements.
-        /// </value>
-        public IEnumerable<OptionsIn.ReturnElements> ReturnElements
-        {
-            get { return OptionsIn.ReturnElements.GetValues(); }
-        }
-
-        /// <summary>
         /// Gets the capabilities from the server.
         /// </summary>
         public void GetCapabilities()
         {
             Parent.Parent.GetCapabilities();
+        }
+
+        /// <summary>
+        /// Selects the output path.
+        /// </summary>
+        public void SelectOutputPath()
+        {
+            var info = new DirectoryInfo(Model.OutputPath);
+            var owner = new Win32WindowHandle(Application.Current.MainWindow);
+            var dialog = new System.Windows.Forms.FolderBrowserDialog
+            {
+                Description = "Select Output Path",
+                SelectedPath = info.FullName,
+                ShowNewFolderButton = true,
+            };
+
+            if (dialog.ShowDialog(owner) == System.Windows.Forms.DialogResult.OK)
+            {
+                Model.OutputPath = dialog.SelectedPath;
+            }
         }
 
         /// <summary>
