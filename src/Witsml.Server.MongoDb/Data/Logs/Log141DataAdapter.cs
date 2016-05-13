@@ -80,6 +80,8 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             using (var transaction = DatabaseProvider.BeginTransaction())
             {
+                ClearIndexValues(dataObject);
+
                 // Extract Data                    
                 var readers = ExtractDataReaders(dataObject);
                 InsertEntity(dataObject, transaction);
@@ -300,6 +302,36 @@ namespace PDS.Witsml.Server.Data.Logs
 
             existing.LogData = entity.LogData;
             return existing.GetReaders().ToList();
+        }
+
+        private void ClearIndexValues(Log dataObject)
+        {
+            var isTimeLog = dataObject.IndexType.GetValueOrDefault() == LogIndexType.datetime;
+
+            if (dataObject.IndexType.GetValueOrDefault() == LogIndexType.datetime)
+            {
+                dataObject.StartDateTimeIndex = null;
+                dataObject.StartDateTimeIndexSpecified = false;
+                dataObject.EndDateTimeIndex = null;
+                dataObject.EndDateTimeIndexSpecified = false;
+                foreach (var curve in dataObject.LogCurveInfo)
+                {
+                    curve.MinDateTimeIndex = null;
+                    curve.MinDateTimeIndexSpecified = false;
+                    curve.MaxDateTimeIndex = null;
+                    curve.MaxDateTimeIndexSpecified = false;
+                }
+            }
+            else
+            {
+                dataObject.StartIndex = null;
+                dataObject.EndIndex = null;
+                foreach (var curve in dataObject.LogCurveInfo)
+                {
+                    curve.MinIndex = null;
+                    curve.MaxIndex = null;
+                }
+            }
         }
     }
 }
