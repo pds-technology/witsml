@@ -611,6 +611,66 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual(99.8, wellList.Well[0].WellDatum[0].Elevation.Value);
         }
 
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Can_Get_Measure_Data_With_Uom_And_Null()
+        {
+            // Add well
+            var well = DevKit.CreateFullWell();
+            var response = DevKit.Add<WellList, Well>(well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uid = response.SuppMsgOut;
+
+            string xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                           "   <well> uid=\"" + uid + "\"" + Environment.NewLine +
+                           "     <name>" + well.Name + "</name>" + Environment.NewLine +
+                           "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
+                           "     <wellheadElevation uom=\"ft\"></wellheadElevation>" + Environment.NewLine +
+                           "   </well>" + Environment.NewLine +
+                           "</wells>";
+
+            var getResponse = DevKit.GetFromStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(getResponse);
+            Assert.AreEqual((short)ErrorCodes.Success, getResponse.Result);
+
+            var wellList = EnergisticsConverter.XmlToObject<WellList>(getResponse.XMLout);
+            Assert.AreEqual(1, wellList.Well.Count);
+            Assert.AreEqual(500, wellList.Well[0].WellheadElevation.Value);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Can_Get_Measure_Data_With_Uom_And_NaN()
+        {
+            // Add well
+            var well = DevKit.CreateFullWell();
+            var response = DevKit.Add<WellList, Well>(well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uid = response.SuppMsgOut;
+
+            string xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                           "   <well> uid=\"" + uid + "\"" + Environment.NewLine +
+                            "     <name>" + well.Name + "</name>" + Environment.NewLine +
+                           "     <wellheadElevation uom=\"ft\">NaN</wellheadElevation>" + Environment.NewLine +
+                           "   </well>" + Environment.NewLine +
+                           "</wells>";
+
+            var getResponse = DevKit.GetFromStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(getResponse);
+            Assert.AreEqual((short)ErrorCodes.Success, getResponse.Result);
+
+            var wellList = EnergisticsConverter.XmlToObject<WellList>(getResponse.XMLout);
+            Assert.AreEqual(1, wellList.Well.Count);
+            Assert.AreEqual(500, wellList.Well[0].WellheadElevation.Value);
+        }
+
         private void AssertTestWell(Well expected, Well actual)
         {
             Assert.AreEqual(expected.Name, actual.Name);

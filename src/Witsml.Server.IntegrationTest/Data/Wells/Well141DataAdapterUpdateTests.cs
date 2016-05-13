@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ReferenceData;
@@ -91,7 +92,56 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.IsNotNull(welldatum);
             Assert.AreEqual("Sea Level", welldatum.Name);
             Assert.AreEqual(ElevCodeEnum.LAT, welldatum.Code);
+        }
 
+        [TestMethod]
+        public void Well141DataAdapter_UpdateInStore_Error_446_Uom_With_Null_Measure_Data()
+        {
+            // Add well
+            var well = DevKit.CreateFullWell();
+            var response = DevKit.Add<WellList, Well>(well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uid = response.SuppMsgOut;
+
+            string xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                           "   <well> uid=\"" + uid + "\"" + Environment.NewLine +                          
+                           "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
+                           "     <wellheadElevation uom=\"ft\"></wellheadElevation>" + Environment.NewLine +
+                           "   </well>" + Environment.NewLine +
+                           "</wells>";
+
+            var updateResponse = DevKit.UpdateInStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.MissingMeasureDataForUnit, updateResponse.Result);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_UpdateInStore_Error_446_Uom_With_NaN_Measure_Data()
+        {
+            // Add well
+            var well = DevKit.CreateFullWell();
+            var response = DevKit.Add<WellList, Well>(well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uid = response.SuppMsgOut;
+
+            string xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                           "   <well> uid=\"" + uid + "\"" + Environment.NewLine +
+                           "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
+                           "     <wellheadElevation uom=\"ft\">NaN</wellheadElevation>" + Environment.NewLine +
+                           "   </well>" + Environment.NewLine +
+                           "</wells>";
+
+            var updateResponse = DevKit.UpdateInStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.MissingMeasureDataForUnit, updateResponse.Result);
         }
     }
 }

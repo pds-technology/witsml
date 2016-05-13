@@ -72,10 +72,13 @@ namespace PDS.Witsml
                 xml = RemoveNaNElements<T>(xml);
                 return EnergisticsConverter.XmlToObject<T>(xml);
             }
+            catch (WitsmlException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
-                throw ex is WitsmlException? ex :
-                    new WitsmlException(ErrorCodes.InputTemplateNonConforming, ex);
+                throw new WitsmlException(ErrorCodes.InputTemplateNonConforming, ex);
             }
         }
 

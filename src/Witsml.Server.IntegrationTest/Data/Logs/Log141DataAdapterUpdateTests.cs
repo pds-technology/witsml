@@ -126,9 +126,9 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsNotNull(mdLogCurveInfo);
             Assert.IsNull(mdLogCurveInfo.ClassIndex);
 
-            var grLogCurveInfo = logCurveInfoList.Where(x => x.Uid.Equals("ROP")).FirstOrDefault();
-            Assert.IsNotNull(grLogCurveInfo);
-            Assert.IsNull(grLogCurveInfo.ClassIndex);
+            var ropLogCurveInfo = logCurveInfoList.Where(x => x.Uid.Equals("ROP")).FirstOrDefault();
+            Assert.IsNotNull(ropLogCurveInfo);
+            Assert.IsNull(ropLogCurveInfo.ClassIndex);
         }
 
         [TestMethod]
