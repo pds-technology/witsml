@@ -103,7 +103,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         "<logCurveInfo uid=\"MD\">" + Environment.NewLine +                                            
                         "  <classIndex>NaN</classIndex>" + Environment.NewLine +                       
                         "</logCurveInfo>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"GR\">" + Environment.NewLine +                                       
+                        "<logCurveInfo uid=\"ROP\">" + Environment.NewLine +                                       
                         "  <classIndex>NaN</classIndex>" + Environment.NewLine +                       
                         "</logCurveInfo>" + Environment.NewLine +
                     "</log>" + Environment.NewLine +
@@ -118,10 +118,17 @@ namespace PDS.Witsml.Server.Data.Logs
             var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.HeaderOnly);
             Assert.IsTrue(results.Any());
 
-            Assert.AreEqual((short)123, results.First().BhaRunNumber);
+            Assert.IsNull(results.First().BhaRunNumber);
             Assert.AreEqual(3, results.First().LogCurveInfo.Count);
-            Assert.AreEqual((short)1, results.First().LogCurveInfo[0].ClassIndex);
-            Assert.AreEqual((short)2, results.First().LogCurveInfo[1].ClassIndex);
+            var logCurveInfoList = results.First().LogCurveInfo;
+
+            var mdLogCurveInfo = logCurveInfoList.Where(x => x.Uid.Equals("MD")).FirstOrDefault();
+            Assert.IsNotNull(mdLogCurveInfo);
+            Assert.IsNull(mdLogCurveInfo.ClassIndex);
+
+            var grLogCurveInfo = logCurveInfoList.Where(x => x.Uid.Equals("ROP")).FirstOrDefault();
+            Assert.IsNotNull(grLogCurveInfo);
+            Assert.IsNull(grLogCurveInfo.ClassIndex);
         }
 
         [TestMethod]

@@ -272,9 +272,9 @@ namespace PDS.Witsml
         EmptyNewElementsOrAttributes = -445,
 
         /// <summary>
-        /// -446 For WMLS_UpdateInStore, a uom attribute must not be specified unless its corresponding value is
-        /// specified.
+        /// -446 For WMLS_UpdateInStore, a uom attribute must not be specified unless its corresponding value is specified.
         /// </summary>
+        MissingMeasureDataForUnit = -446,
 
         /// <summary>
         /// -447 When adding or updating curves, column-identifiers must be unique.

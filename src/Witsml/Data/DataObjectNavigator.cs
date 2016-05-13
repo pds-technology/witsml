@@ -126,7 +126,7 @@ namespace PDS.Witsml.Data
             }
         }
 
-        protected void NavigateElementGroup(PropertyInfo propertyInfo, IGrouping<string, XElement> elements, string parentPath)
+        protected virtual void NavigateElementGroup(PropertyInfo propertyInfo, IGrouping<string, XElement> elements, string parentPath)
         {
             if (propertyInfo == null) return;
 
@@ -145,12 +145,12 @@ namespace PDS.Witsml.Data
                     if (genericType == typeof(Nullable<>))
                     {
                         var underlyingType = Nullable.GetUnderlyingType(propertyType);
-                        NavigateElementType(underlyingType, element, propertyPath);
+                        NavigateNullableElementType(underlyingType, element, propertyPath, propertyInfo);
                     }
                     else if (genericType == typeof(List<>))
                     {
                         var childType = propertyType.GetGenericArguments()[0];
-                        NavigateElementType(childType, element, propertyPath);
+                        NavigateArrayElementType(elementList, childType, element, propertyPath, propertyInfo);
                     }
                 }
                 else if (propertyType.IsAbstract)
@@ -168,15 +168,30 @@ namespace PDS.Witsml.Data
                 InitializeRecurringElementHandler(propertyPath);
 
                 var childType = propertyType.GetGenericArguments()[0];
-
-                foreach (var element in elementList)
-                {
-                    NavigateElementType(childType, element, propertyPath);
-                }
+           
+                NavigateRecurringElements(elementList, childType, propertyPath, propertyInfo);
 
                 HandleRecurringElements(propertyPath);
             }
         }
+
+        protected virtual void NavigateRecurringElements(List<XElement> elements, Type childType, string propertyPath, PropertyInfo propertyInfo)
+        {
+            foreach (var value in elements)
+            {
+                NavigateElementType(childType, value, propertyPath);
+            }
+        }
+
+        protected virtual void NavigateArrayElementType(List<XElement> elements, Type childType, XElement element, string propertyPath, PropertyInfo propertyInfo)
+        {
+            NavigateElementType(childType, element, propertyPath);
+        }
+
+        protected virtual void NavigateNullableElementType(Type elementType, XElement element, string propertyPath, PropertyInfo propertyInfo)
+        {
+            NavigateElementType(elementType, element, propertyPath);
+        }     
 
         protected void NavigateElementType(Type elementType, XElement element, string propertyPath)
         {
@@ -193,7 +208,7 @@ namespace PDS.Witsml.Data
                     var uomPath = GetPropertyPath(propertyPath, uomProperty.Name);
                     var uomValue = ValidateMeasureUom(element, uomProperty, element.Value);
 
-                    NavigateProperty(element.Attribute("uom"), uomProperty.PropertyType, uomPath, uomValue);
+                    NavigateUomAttribute(element.Attribute("uom"), uomProperty.PropertyType, uomPath, element.Value, uomValue);
                 }
 
                 NavigateProperty(element, propertyType, propertyName, element.Value);
@@ -206,6 +221,14 @@ namespace PDS.Witsml.Data
             {
                 NavigateProperty(element, elementType, propertyPath, element.Value);
             }
+        }
+
+        protected virtual void NavigateUomAttribute(XObject xmlObject, Type propertyType, string propertyPath, string measureValue, string uomValue)
+        {
+            // By default, ignore the uomValue if there is no measureValue provided
+            if (string.IsNullOrWhiteSpace(measureValue) || measureValue.EqualsIgnoreCase("NaN")) return;
+
+            NavigateProperty(xmlObject, propertyType, propertyPath, uomValue);
         }
 
         protected void NavigateAttribute(PropertyInfo propertyInfo, XAttribute attribute, string parentPath = null)
@@ -249,7 +272,7 @@ namespace PDS.Witsml.Data
 
                 HandleTimestampValue(xmlObject, propertyType, propertyPath, propertyValue, new Timestamp(value));
             }
-            else if (propertyValue.Equals("NaN") && propertyType.IsNumeric())
+            else if (propertyValue.EqualsIgnoreCase("NaN") && propertyType.IsNumeric())
             {
                 HandleNaNValue(xmlObject, propertyType, propertyPath, propertyValue);
             }
@@ -315,7 +338,7 @@ namespace PDS.Witsml.Data
         /// <param name="properties">The properties.</param>
         /// <param name="name">The name of the property.</param>
         /// <returns>The property info for the element.</returns>
-        protected PropertyInfo GetPropertyInfoForAnElement(IEnumerable<PropertyInfo> properties, string name)
+        protected PropertyInfo GetPropertyInfoForAnElement(IList<PropertyInfo> properties, string name)
         {
             foreach (var prop in properties)
             {

@@ -18,21 +18,52 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using MongoDB.Driver;
 using PDS.Witsml.Data;
 
 namespace PDS.Witsml.Server.Data
 {
+    /// <summary>
+    /// Encapsulates common properties used for updating the data store.
+    /// </summary>
+    /// <typeparam name="T">The data object type.</typeparam>
+    /// <seealso cref="PDS.Witsml.Data.DataObjectNavigationContext" />
     public class MongoDbUpdateContext<T> : DataObjectNavigationContext
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MongoDbUpdateContext{T}"/> class.
+        /// </summary>
         public MongoDbUpdateContext()
         {
             DataObjectType = typeof(T);
-            Updates = new List<UpdateDefinition<T>>();
+            PropertyInfos = new List<PropertyInfo>();
+            PropertyValues = new List<object>();
+            Update = null;           
         }
 
+        /// <summary>
+        /// Gets the type of the data object.
+        /// </summary>
+        /// <value>The type of the data object.</value>
         public override Type DataObjectType { get; }
 
-        public List<UpdateDefinition<T>> Updates { get; }
+        /// <summary>
+        /// Gets the property information list.
+        /// </summary>
+        /// <value>The property information list.</value>
+        public List<PropertyInfo> PropertyInfos { get; }
+
+        /// <summary>
+        /// Gets the property value list.
+        /// </summary>
+        /// <value>The property value list.</value>
+        public List<object> PropertyValues { get; }
+
+        /// <summary>
+        /// Gets or sets the update definition.
+        /// </summary>
+        /// <value>The update definition.</value>
+        public UpdateDefinition<T> Update { get; set; }
     }
 }

@@ -74,7 +74,8 @@ namespace PDS.Witsml
             }
             catch (Exception ex)
             {
-                throw new WitsmlException(ErrorCodes.InputTemplateNonConforming, ex);
+                throw ex is WitsmlException? ex :
+                    new WitsmlException(ErrorCodes.InputTemplateNonConforming, ex);
             }
         }
 
