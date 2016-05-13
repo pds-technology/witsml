@@ -101,17 +101,6 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Request
         }
 
         /// <summary>
-        /// Gets the store functions that can be executed.
-        /// </summary>
-        /// <value>
-        /// The executable store functions.
-        /// </value>
-        public IEnumerable<Functions> StoreFunctions
-        {
-            get { return new Functions[] { Functions.AddToStore, Functions.GetFromStore, Functions.UpdateInStore, Functions.DeleteFromStore }; }
-        }
-
-        /// <summary>
         /// Submits a query to the WITSML server for the given function type.
         /// </summary>
         public void SubmitQuery()

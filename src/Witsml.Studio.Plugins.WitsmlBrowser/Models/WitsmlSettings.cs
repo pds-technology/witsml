@@ -284,6 +284,27 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
             }
         }
 
+        private bool _cascadedDelete;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether CascadedDelete is enabled.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if CascadedDelete is enabled; otherwise, <c>false</c>.
+        /// </value>
+        public bool CascadedDelete
+        {
+            get { return _cascadedDelete; }
+            set
+            {
+                if (_cascadedDelete != value)
+                {
+                    _cascadedDelete = value;
+                    NotifyOfPropertyChange(() => CascadedDelete);
+                }
+            }
+        }
+
         private Functions _storeFunction;
 
         /// <summary>
@@ -301,10 +322,31 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.Models
                 {
                     _storeFunction = value;
                     NotifyOfPropertyChange(() => StoreFunction);
+                    NotifyOfPropertyChange(() => IsGetFromStore);
+                    NotifyOfPropertyChange(() => IsDeleteFromStore);
                 }
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether StoreFunction equals GetFromStore.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if StoreFunction equals GetFromStore; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsGetFromStore => StoreFunction == Functions.GetFromStore;
+
+        /// <summary>
+        /// Gets a value indicating whether StoreFunction equals DeleteFromStore.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if StoreFunction equals DeleteFromStore; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsDeleteFromStore => StoreFunction == Functions.DeleteFromStore;
+
+        /// <summary>
+        /// Called when RequestObjectSelectionCapability has changed.
+        /// </summary>
         private void OnRequestObjectSelectionCapabilityChanged()
         {
             ReturnElementType = IsRequestObjectSelectionCapability ? null : OptionsIn.ReturnElements.All;

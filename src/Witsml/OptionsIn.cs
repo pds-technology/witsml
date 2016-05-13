@@ -172,6 +172,30 @@ namespace PDS.Witsml
         }
 
         /// <summary>
+        /// Defines the choices for the CascadedDelete configuration option value.
+        /// </summary>
+        /// <seealso cref="PDS.Witsml.OptionsIn" />
+        public class CascadedDelete : OptionsIn
+        {
+            public CascadedDelete(string value) : base(Keyword, value) { }
+
+            public const string Keyword = "cascadedDelete";
+
+            public static readonly CascadedDelete False = new CascadedDelete("false");
+            public static readonly CascadedDelete True = new CascadedDelete("true");
+
+            /// <summary>
+            /// Gets a collection of CascadedDelete option values.
+            /// </summary>
+            /// <returns>A collection of all CascadedDelete option values.</returns>
+            public static IEnumerable<CascadedDelete> GetValues()
+            {
+                yield return False;
+                yield return True;
+            }
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="OptionsIn"/> class.
         /// </summary>
         /// <param name="key">The key.</param>
@@ -265,7 +289,7 @@ namespace PDS.Witsml
         /// </returns>
         public static implicit operator string(OptionsIn option)
         {
-            return option.ToString();
+            return option?.ToString();
         }
 
         /// <summary>

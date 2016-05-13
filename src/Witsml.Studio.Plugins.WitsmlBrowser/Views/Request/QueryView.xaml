@@ -31,13 +31,13 @@
 
             <StackPanel Grid.Column="0" Orientation="Horizontal">
                 <ComboBox Width="120" Margin="5,5,0,5" VerticalContentAlignment="Center" ToolTip="API Function" IsEditable="False" 
-                          ItemsSource="{Binding StoreFunctions}"
+                          ItemsSource="{Binding Parent.StoreFunctions}"
                           SelectedItem="{Binding Model.StoreFunction}" />
 
                 <ComboBox Width="140" Margin="5,5,0,5" DisplayMemberPath="Value" VerticalContentAlignment="Center" ToolTip="Return Elements" IsEditable="False"
                           ItemsSource="{Binding Parent.ReturnElements}"
                           SelectedItem="{Binding Model.ReturnElementType, Mode=TwoWay}"
-                          IsEnabled="{Binding Model.IsRequestObjectSelectionCapability, Converter={StaticResource BooleanInverseConverter}}" />
+                          IsEnabled="{Binding Model.IsGetFromStore}" />
 
                 <Button x:Name="SubmitQuery" Content="Execute" Width="70" Margin="5,5,0,5" />
             </StackPanel>

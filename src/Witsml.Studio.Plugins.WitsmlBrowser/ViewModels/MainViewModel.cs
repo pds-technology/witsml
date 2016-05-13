@@ -256,7 +256,8 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         /// <param name="functionType">Type of the function.</param>
         public void SubmitQuery(Functions functionType)
         {
-            string xmlIn = XmlQuery.Text;
+            // Trim query text before submitting request
+            string xmlIn = XmlQuery.Text = XmlQuery.Text.Trim();
 
             _log.DebugFormat("Query submitted for function '{0}'", functionType);
 
@@ -319,6 +320,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                             returnCode = wmls.WMLS_UpdateInStore(objectType, xmlIn, null, null, out suppMsgOut);
                             break;
                         case Functions.DeleteFromStore:
+                            optionsIn = Model.CascadedDelete ? OptionsIn.CascadedDelete.True : null;
                             returnCode = wmls.WMLS_DeleteFromStore(objectType, xmlIn, null, null, out suppMsgOut);
                             break;
                         default:
