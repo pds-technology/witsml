@@ -93,13 +93,13 @@ namespace PDS.Witsml.Server.Data
         /// <typeparam name="T">The data object type</typeparam>
         /// <param name="ignored">A custom list of elements to ignore.</param>
         /// <returns></returns>
-        public static string[] CreateIgnoreFields<T>(IEnumerable<string> ignored)
+        public static List<string> CreateIgnoreFields<T>(IEnumerable<string> ignored)
         {
             var creationTime = typeof(IDataObject).IsAssignableFrom(typeof(T))
-                ? new[] { "dTimCreation", "dTimLastChange" }
-                : new[] { "Creation", "LastUpdate" };
+                ? new List<string> { "dTimCreation", "dTimLastChange" }
+                : new List<string> { "Creation", "LastUpdate" };
 
-            return ignored == null ? creationTime : creationTime.Union(ignored).ToArray();
+            return ignored == null ? creationTime : creationTime.Union(ignored).ToList();
         }
 
         /// <summary>

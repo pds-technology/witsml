@@ -63,7 +63,7 @@ namespace PDS.Witsml.Server.Data
             var entities = new List<T>();
 
             // Check if to project fields
-            Context.Project = OptionsIn.ReturnElements.IdOnly.Equals(returnElements) ||
+            Context.IsProjection = OptionsIn.ReturnElements.IdOnly.Equals(returnElements) ||
                 OptionsIn.ReturnElements.Requested.Equals(returnElements) ||
                 OptionsIn.ReturnElements.DataOnly.Equals(returnElements);
 
@@ -76,7 +76,7 @@ namespace PDS.Witsml.Server.Data
             Navigate(element);
 
             // Build Mongo filter
-            var filter = BuildFilter(element);
+            var filter = BuildFilter();
             var results = _collection.Find(filter ?? "{}");
 
             // Format response using MongoDb projection, i.e. selecting specified fields only
@@ -85,7 +85,7 @@ namespace PDS.Witsml.Server.Data
             {
                 entities.AddRange(results.ToList());
             }
-            else if (Context.Project)
+            else if (Context.IsProjection)
             {
                 var projection = BuildProjection();
 
@@ -117,6 +117,7 @@ namespace PDS.Witsml.Server.Data
             {
                 Context.Filters.Add(Builders<T>.Filter.Eq(propertyPath, dateTimeValue));
             }
+
             AddProjectionProperty(propertyPath);
         }
 
@@ -130,6 +131,7 @@ namespace PDS.Witsml.Server.Data
             {
                 Context.Filters.Add(Builders<T>.Filter.Eq(propertyPath, timestampValue));
             }
+
             AddProjectionProperty(propertyPath);
         }
 
@@ -172,7 +174,7 @@ namespace PDS.Witsml.Server.Data
         /// Builds the query filter.
         /// </summary>
         /// <returns>The filter object that for the selection criteria for the queried entity.</returns>
-        private FilterDefinition<T> BuildFilter(XElement element)
+        private FilterDefinition<T> BuildFilter()
         {
             Logger.DebugFormat("Building filter criteria for entity: {0}", _parser.Context.ObjectType);
 
@@ -229,7 +231,7 @@ namespace PDS.Witsml.Server.Data
 
         private void AddProjectionProperty(string propertyPath)
         {
-            if (!Context.Project || Context.Fields.Contains(propertyPath))
+            if (!Context.IsProjection || Context.Fields.Contains(propertyPath))
                 return;
 
             Context.Fields.Add(propertyPath);

@@ -23,8 +23,16 @@ using PDS.Witsml.Data;
 
 namespace PDS.Witsml.Server.Data
 {
+    /// <summary>
+    /// Encapsulates common properties used for querying the data store.
+    /// </summary>
+    /// <typeparam name="T">The data object type.</typeparam>
+    /// <seealso cref="PDS.Witsml.Data.DataObjectNavigationContext" />
     public class MongoDbQueryContext<T> : DataObjectNavigationContext
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MongoDbQueryContext{T}"/> class.
+        /// </summary>
         public MongoDbQueryContext()
         {
             DataObjectType = typeof(T);
@@ -32,14 +40,36 @@ namespace PDS.Witsml.Server.Data
             ParentFilters = new Dictionary<string, List<FilterDefinition<T>>>();
         }
 
+        /// <summary>
+        /// Gets the type of the data object.
+        /// </summary>
+        /// <value>The type of the data object.</value>
         public override Type DataObjectType { get; }
 
+        /// <summary>
+        /// Gets or sets the list of filters.
+        /// </summary>
+        /// <value>The list of filters.</value>
         public List<FilterDefinition<T>> Filters { get; set; }
 
-        public Dictionary<string, List<FilterDefinition<T>>> ParentFilters { get; set; }
+        /// <summary>
+        /// Gets the collection of parent filters.
+        /// </summary>
+        /// <value>The parent filters.</value>
+        public Dictionary<string, List<FilterDefinition<T>>> ParentFilters { get; }
 
+        /// <summary>
+        /// Gets or sets the list of fields.
+        /// </summary>
+        /// <value>The list of fields.</value>
         public List<string> Fields { get; set; }
 
-        public bool Project { get; set; }
+        /// <summary>
+        /// Gets or sets a value indicating whether the query is a projection.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if the query is a projection; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsProjection { get; set; }
     }
 }
