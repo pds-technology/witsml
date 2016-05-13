@@ -14,8 +14,12 @@
                 <ContentControl x:Name="ObjectProperties" />
             </TabItem>
 
-            <TabItem Header="Messages">
+            <TabItem Header="WITSML Messages">
                 <ContentControl x:Name="Messages" />
+            </TabItem>
+
+            <TabItem Header="SOAP Messages">
+                <ContentControl x:Name="SoapMessages" />
             </TabItem>
         </TabControl>
     </Grid>

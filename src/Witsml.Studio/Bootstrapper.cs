@@ -18,14 +18,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition.Hosting;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
 using Caliburn.Micro;
 using PDS.Framework;
-using PDS.Witsml.Studio.Properties;
 using PDS.Witsml.Studio.Core.Runtime;
 using PDS.Witsml.Studio.Core.ViewModels;
 
@@ -104,8 +102,9 @@ namespace PDS.Witsml.Studio
         {
             var assemblyPath = Assembly.GetExecutingAssembly().Location;
 
-            IEnumerable<Assembly> assemblies = Directory.GetFiles(Path.GetDirectoryName(assemblyPath), "*.dll")
-                .Select(x => Assembly.LoadFrom(x));
+            var assemblies = Directory.GetFiles(Path.GetDirectoryName(assemblyPath), "*.dll")
+                .Select(x => Assembly.LoadFrom(x))
+                .ToList();
 
             if (_log.IsDebugEnabled)
             {

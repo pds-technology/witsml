@@ -43,7 +43,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
     /// </summary>
     /// <seealso cref="Caliburn.Micro.Conductor{IScreen}.Collection.AllActive" />
     /// <seealso cref="PDS.Witsml.Studio.Core.ViewModels.IPluginViewModel" />
-    public sealed class MainViewModel : Conductor<IScreen>.Collection.AllActive, IPluginViewModel, IConnectionAware
+    public sealed class MainViewModel : Conductor<IScreen>.Collection.AllActive, IPluginViewModel, IConnectionAware, ISoapMessageHandler
     {
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MainViewModel));
         public const string QueryTemplateText = "Templates";
@@ -71,13 +71,14 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             XmlQuery = new TextDocument();
             QueryResults = new TextDocument();
             Messages = new TextDocument();
+            SoapMessages = new TextDocument();
 
             // Create a default client proxy object.
             Proxy = CreateProxy();
 
             // Create view models displayed within this view model.
             RequestControl = new RequestViewModel(Runtime);
-            ResultControl = new ResultViewModel(Runtime, QueryResults, Messages);
+            ResultControl = new ResultViewModel(Runtime, QueryResults, Messages, SoapMessages);
 
             // Handle notifications for our witsml settings model changes
             Model.PropertyChanged += Model_PropertyChanged;
@@ -202,7 +203,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             get { return _queryResults; }
             set
             {
-                if (!string.Equals(_queryResults, value))
+                if (!ReferenceEquals(_queryResults, value))
                 {
                     _queryResults = value;
                     NotifyOfPropertyChange(() => QueryResults);
@@ -213,20 +214,41 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         private TextDocument _messages;
 
         /// <summary>
-        /// Gets or sets the messages document.
+        /// Gets or sets the WITSML messages document.
         /// </summary>
         /// <value>
-        /// The messages document.
+        /// The WITSML messages document.
         /// </value>
         public TextDocument Messages
         {
             get { return _messages; }
             set
             {
-                if (!string.Equals(_messages, value))
+                if (!ReferenceEquals(_messages, value))
                 {
                     _messages = value;
                     NotifyOfPropertyChange(() => Messages);
+                }
+            }
+        }
+
+        private TextDocument _soapMessages;
+
+        /// <summary>
+        /// Gets or sets the SOAP messages document.
+        /// </summary>
+        /// <value>
+        /// The SOAP messages document.
+        /// </value>
+        public TextDocument SoapMessages
+        {
+            get { return _soapMessages; }
+            set
+            {
+                if (!ReferenceEquals(_soapMessages, value))
+                {
+                    _soapMessages = value;
+                    NotifyOfPropertyChange(() => SoapMessages);
                 }
             }
         }
@@ -647,6 +669,53 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
                     string.IsNullOrEmpty(suppMsgOut) ? "None" : suppMsgOut,
                     string.IsNullOrEmpty(xmlOut) ? "None" : string.Empty,
                     string.IsNullOrEmpty(xmlOut) ? string.Empty : xmlOut,
+                    Environment.NewLine));
+        }
+
+        /// <summary>
+        /// Logs the SOAP request message.
+        /// </summary>
+        /// <param name="action">The SOAP action.</param>
+        /// <param name="message">The SOAP message.</param>
+        void ISoapMessageHandler.LogRequest(string action, string message)
+        {
+            Runtime.InvokeAsync(() => LogSoapMessage("Request", action, message));
+        }
+
+        /// <summary>
+        /// Logs the SOAP response message.
+        /// </summary>
+        /// <param name="action">The SOAP action.</param>
+        /// <param name="message">The SOAP message.</param>
+        void ISoapMessageHandler.LogResponse(string action, string message)
+        {
+            Runtime.InvokeAsync(() => LogSoapMessage("Response", action, message));
+        }
+
+        /// <summary>
+        /// Logs the SOAP message.
+        /// </summary>
+        /// <param name="type">The SOAP message type.</param>
+        /// <param name="action">The SOAP action.</param>
+        /// <param name="message">The SOAP message.</param>
+        private void LogSoapMessage(string type, string action, string message)
+        {
+            if (string.IsNullOrWhiteSpace(message)) return;
+
+            var xml = message.Trim().Replace("\x00", string.Empty);
+            var now = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff");
+
+            SoapMessages.Insert(
+                SoapMessages.TextLength,
+                string.Format(
+                    "<!---------- {0} : {1} ----------{4}" +
+                    "   Action : {2}{4}" +
+                    "-->{4}" +
+                    "{3}{4}{4}",
+                    type,
+                    now,
+                    action,
+                    XDocument.Parse(xml),
                     Environment.NewLine));
         }
 

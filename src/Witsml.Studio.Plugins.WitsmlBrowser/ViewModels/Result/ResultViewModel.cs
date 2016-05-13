@@ -32,10 +32,13 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
         private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(ResultViewModel));
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResultViewModel"/> class.
+        /// Initializes a new instance of the <see cref="ResultViewModel" /> class.
         /// </summary>
         /// <param name="runtime">The runtime service.</param>
-        public ResultViewModel(IRuntimeService runtime, TextDocument queryResults, TextDocument messages)
+        /// <param name="queryResults">The query results.</param>
+        /// <param name="messages">The WITSML messages.</param>
+        /// <param name="soapMessages">The SOAP messages.</param>
+        public ResultViewModel(IRuntimeService runtime, TextDocument queryResults, TextDocument messages, TextDocument soapMessages)
         {
             _log.Debug("Creating view model instance");
             Runtime = runtime;
@@ -48,6 +51,10 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
             Messages = new TextEditorViewModel(runtime, "XML", true)
             {
                 Document = messages
+            };
+            SoapMessages = new TextEditorViewModel(runtime, "XML", true)
+            {
+                Document = soapMessages
             };
         }
 
@@ -104,9 +111,9 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
         private TextEditorViewModel _messages;
 
         /// <summary>
-        /// Gets or sets the messages editor.
+        /// Gets or sets the WITSML messages editor.
         /// </summary>
-        /// <value>The messages editor.</value>
+        /// <value>The WITSML messages editor.</value>
         public TextEditorViewModel Messages
         {
             get { return _messages; }
@@ -116,6 +123,25 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels.Result
                 {
                     _messages = value;
                     NotifyOfPropertyChange(() => Messages);
+                }
+            }
+        }
+
+        private TextEditorViewModel _soapMessages;
+
+        /// <summary>
+        /// Gets or sets the SOAP messages editor.
+        /// </summary>
+        /// <value>The SOAP messages editor.</value>
+        public TextEditorViewModel SoapMessages
+        {
+            get { return _soapMessages; }
+            set
+            {
+                if (!string.Equals(_soapMessages, value))
+                {
+                    _soapMessages = value;
+                    NotifyOfPropertyChange(() => SoapMessages);
                 }
             }
         }
