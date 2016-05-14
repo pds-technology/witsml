@@ -25,7 +25,6 @@ using log4net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PDS.Framework;
-using PDS.Witsml;
 
 namespace PDS.Witsml.Data.Channels
 {
@@ -1334,15 +1333,23 @@ namespace PDS.Witsml.Data.Channels
 
         private bool IsChannelValueNull(int channelIndex, string value)
         {
-            var isNull = string.IsNullOrWhiteSpace(value) ||
-                Null.EqualsIgnoreCase(value) ||
-                NaN.EqualsIgnoreCase(value);
+            if (IsNull(value))
+                return true;
 
-            if (!isNull && channelIndex < GetAllNullValues().Length && !string.IsNullOrWhiteSpace(GetAllNullValues()[channelIndex]))
+            var nullValues = GetAllNullValues();
+
+            if (channelIndex < nullValues.Length && !string.IsNullOrWhiteSpace(nullValues[channelIndex]))
             {
-                return GetAllNullValues()[channelIndex].EqualsIgnoreCase(value);
+                var nullValue = nullValues[channelIndex];
+
+                double dNull, dValue;
+                if (!double.TryParse(nullValue, out dNull) || !double.TryParse(value, out dValue))
+                    return false;
+
+                return dNull == dValue;
             }
-            return isNull;
+
+            return false;
         }
 
         /// <summary>
