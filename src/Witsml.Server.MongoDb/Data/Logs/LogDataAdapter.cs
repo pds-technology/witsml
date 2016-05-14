@@ -231,7 +231,7 @@ namespace PDS.Witsml.Server.Data.Logs
         protected override List<string> GetIgnoredElementNamesForUpdate(WitsmlQueryParser parser)
         {
             return GetIgnoredElementNamesForQuery(parser)
-                .Concat(new[] { "direction", "objectGrowing" })
+                .Concat(new[] { "direction", "objectGrowing", "startIndex", "endIndex", "startDateTimeIndex", "endDateTimeIndex" })
                 .ToList();
         }
 
