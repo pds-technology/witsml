@@ -14,6 +14,10 @@
                 <ContentControl x:Name="ObjectProperties" />
             </TabItem>
 
+            <TabItem Header="Data">
+                <ContentControl x:Name="ObjectData" />
+            </TabItem>
+
             <TabItem Header="WITSML Messages">
                 <ContentControl x:Name="Messages" />
             </TabItem>

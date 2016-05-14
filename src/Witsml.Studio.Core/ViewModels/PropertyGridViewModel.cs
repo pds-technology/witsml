@@ -26,12 +26,14 @@ namespace PDS.Witsml.Studio.Core.ViewModels
     public class PropertyGridViewModel : Screen
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PropertyGridViewModel"/> class.
+        /// Initializes a new instance of the <see cref="PropertyGridViewModel" /> class.
         /// </summary>
         /// <param name="runtime">The runtime service.</param>
-        public PropertyGridViewModel(IRuntimeService runtime)
+        /// <param name="objectData">The object data view model.</param>
+        public PropertyGridViewModel(IRuntimeService runtime, DataGridViewModel objectData = null)
         {
             Runtime = runtime;
+            ObjectData = objectData;
         }
 
         /// <summary>
@@ -39,6 +41,12 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         /// </summary>
         /// <value>The runtime.</value>
         public IRuntimeService Runtime { get; private set; }
+
+        /// <summary>
+        /// Gets the object data view model.
+        /// </summary>
+        /// <value>The object data view model.</value>
+        public DataGridViewModel ObjectData { get; }
 
         private object _currentObject;
 
@@ -80,6 +88,11 @@ namespace PDS.Witsml.Studio.Core.ViewModels
                 : collection.Items.Count == 1
                 ? collection.Items[0]
                 : collection;
+
+            if (collection == null || collection.Items.Count == 1)
+            {
+                ObjectData?.SetCurrentObject(objectType, CurrentObject);
+            }
         }
     }
 }

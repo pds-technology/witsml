@@ -544,10 +544,9 @@ namespace PDS.Witsml.Data.Channels
         /// The <see cref="T:System.Type" /> information corresponding to the type of <see cref="T:System.Object" /> 
         /// that would be returned from <see cref="M:System.Data.IDataRecord.GetValue(System.Int32)" />.
         /// </returns>
-        /// <exception cref="System.NotImplementedException"></exception>
         public Type GetFieldType(int i)
         {
-            throw new NotImplementedException();
+            return typeof(object);
         }
 
         /// <summary>
@@ -640,13 +639,23 @@ namespace PDS.Witsml.Data.Channels
         /// <summary>
         /// Returns a <see cref="T:System.Data.DataTable" /> that describes the column metadata of the <see cref="T:System.Data.IDataReader" />.
         /// </summary>
+        /// <remarks>
+        /// For more information about columns that can be included in the schema table:
+        /// https://msdn.microsoft.com/en-us/library/system.data.datatablereader.getschematable(v=vs.110).aspx
+        /// </remarks>
         /// <returns>
         /// A <see cref="T:System.Data.DataTable" /> that describes the column metadata.
         /// </returns>
-        /// <exception cref="System.NotImplementedException"></exception>
         public DataTable GetSchemaTable()
         {
-            throw new NotImplementedException();
+            var table = new DataTable();
+            var columns = new[] { "ColumnOrdinal", "ColumnName" };
+
+            columns.ForEach(x => table.Columns.Add(x));
+            Indices.ForEach((x, i) => table.Rows.Add(i, x.Mnemonic));
+            Mnemonics.ForEach((x, i) => table.Rows.Add(i + Indices.Count, x));
+
+            return table;
         }
 
         /// <summary>
