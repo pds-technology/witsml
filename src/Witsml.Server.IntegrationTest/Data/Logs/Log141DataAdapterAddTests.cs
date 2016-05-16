@@ -1948,6 +1948,60 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsTrue(resultLogData[5].Equals("2200,22.1"));
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_AddToStore_Structural_Ranges_Ignored()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = CreateLog(
+                null,
+                DevKit.Name("Log can be added with depth data"),
+                Wellbore.UidWell,
+                Well.Name,
+                response.SuppMsgOut,
+                Wellbore.Name);
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            log.StartIndex = new GenericMeasure {Uom = "m", Value = 1.0};
+            log.EndIndex = new GenericMeasure { Uom = "m", Value = 10.0 };
+
+            foreach (var curve in log.LogCurveInfo)
+            {
+                curve.MinIndex = log.StartIndex;
+                curve.MaxIndex = log.EndIndex;
+            }
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var query = new Log
+            {
+                Uid = response.SuppMsgOut,
+                UidWell = log.UidWell,
+                UidWellbore = log.UidWellbore
+            };
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.HeaderOnly);
+            Assert.AreEqual(1, results.Count);
+
+            var result = results.First();
+            Assert.IsNotNull(result);
+
+            Assert.IsNull(result.StartIndex);
+            Assert.IsNull(result.EndIndex);
+
+            Assert.AreEqual(log.LogCurveInfo.Count, result.LogCurveInfo.Count);
+            foreach (var curve in result.LogCurveInfo)
+            {
+                Assert.IsNull(curve.MinIndex);
+                Assert.IsNull(curve.MaxIndex);
+            }
+        }
+
         #region Helper Methods
 
         private Log CreateLog(string uid, string name, Well well, Wellbore wellbore)
