@@ -196,9 +196,9 @@ namespace PDS.Witsml.Server.Data.Logs
                 if (isTimeLog)
                 {
                     if (range.Start.HasValue && !double.IsNaN(range.Start.Value))
-                        logCurve.MinDateTimeIndex = DateTimeOffset.FromUnixTimeSeconds((long)range.Start.Value);
+                        logCurve.MinDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.Start.Value);
                     if (range.End.HasValue && !double.IsNaN(range.End.Value))
-                        logCurve.MaxDateTimeIndex = DateTimeOffset.FromUnixTimeSeconds((long)range.End.Value);
+                        logCurve.MaxDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.End.Value);
 
                     if (mnemonic.EqualsIgnoreCase(log.IndexCurve))
                     {

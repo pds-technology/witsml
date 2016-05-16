@@ -25,9 +25,9 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
+using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Transactions;
 using PDS.Witsml.Server.Models;
-using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Data.Channels
 {
@@ -38,7 +38,6 @@ namespace PDS.Witsml.Server.Data.Channels
     [Export]
     public class ChannelDataChunkAdapter : MongoDbDataAdapter<ChannelDataChunk>
     {
-        private static readonly int RangeSize = Settings.Default.ChannelDataChunkRangeSize;
         private const string ChannelDataChunk = "channelDataChunk";
 
         /// <summary>
@@ -130,12 +129,13 @@ namespace PDS.Witsml.Server.Data.Channels
 
                 var indexChannel = reader.GetIndex();
                 var increasing = indexChannel.Increasing;
+                var rangeSize = WitsmlSettings.GetRangeSize(indexChannel.IsTimeIndex);
 
                 // Based on the range of the updates, compute the range of the data chunk(s) 
                 //... so we can merge updates with existing data.
                 var existingRange = new Range<double?>(
-                    Range.ComputeRange(updateRange.Start.Value, RangeSize, increasing).Start,
-                    Range.ComputeRange(updateRange.End.Value, RangeSize, increasing).End
+                    Range.ComputeRange(updateRange.Start.Value, rangeSize, increasing).Start,
+                    Range.ComputeRange(updateRange.End.Value, rangeSize, increasing).End
                 );                
 
                 // Get DataChannelChunk list from database for the computed range and URI
@@ -244,7 +244,7 @@ namespace PDS.Witsml.Server.Data.Channels
             var data = new List<string>();
             var id = string.Empty;
             ChannelIndexInfo indexChannel = null;
-            Range<int>? plannedRange = null;
+            Range<long>? plannedRange = null;
             double startIndex = 0;
             double endIndex = 0;
             double? previousIndex = null;
@@ -254,6 +254,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 indexChannel = record.GetIndex();
                 var increasing = indexChannel.Increasing;
                 var index = record.GetIndexValue();
+                var rangeSize = WitsmlSettings.GetRangeSize(indexChannel.IsTimeIndex);
 
                 if (previousIndex.HasValue) 
                 {
@@ -274,7 +275,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
                 if (!plannedRange.HasValue)
                 {
-                    plannedRange = Range.ComputeRange(index, RangeSize, increasing);
+                    plannedRange = Range.ComputeRange(index, rangeSize, increasing);
                     id = record.Id;
                     startIndex = index;
                 }
@@ -301,7 +302,7 @@ namespace PDS.Witsml.Server.Data.Channels
                         RecordCount = data.Count
                     };
 
-                    plannedRange = Range.ComputeRange(index, RangeSize, increasing);
+                    plannedRange = Range.ComputeRange(index, rangeSize, increasing);
                     data = new List<string>() { record.GetJson() };
                     startIndex = index;
                     endIndex = index;
