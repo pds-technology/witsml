@@ -62,7 +62,9 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         public void SetCurrentObject(string objectType, object dataObject)
         {
             if (!ObjectTypes.IsGrowingDataObject(objectType)) return;
+
             DataTable.Clear();
+            DataTable.Columns.Clear();
 
             var log131 = dataObject as Witsml131.Log;
             if (log131 != null) SetLogData(log131);
