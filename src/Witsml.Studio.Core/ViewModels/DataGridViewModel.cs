@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System.Data;
+using System.Linq;
 using Caliburn.Micro;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
@@ -97,7 +98,17 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         /// <param name="reader">The reader.</param>
         private void SetChannelData(ChannelDataReader reader)
         {
+            // Load data
             DataTable.Load(reader);
+
+            // Update column names with units
+            var metadata = reader.GetSchemaTable();
+            metadata?.Rows.Cast<DataRow>().ForEach(x =>
+            {
+                var column = DataTable.Columns[(int)x["ColumnOrdinal"]];
+                column.ColumnName = x["ColumnName"].ToString();
+            });
+
             NotifyOfPropertyChange(() => DataTable);
         }
     }

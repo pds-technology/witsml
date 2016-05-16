@@ -649,10 +649,11 @@ namespace PDS.Witsml.Data.Channels
         {
             var table = new DataTable();
             var columns = new[] { "ColumnOrdinal", "ColumnName" };
+            var types = new Type[] { typeof(int), typeof(string) };
 
-            columns.ForEach(x => table.Columns.Add(x));
-            Indices.ForEach((x, i) => table.Rows.Add(i, x.Mnemonic));
-            Mnemonics.ForEach((x, i) => table.Rows.Add(i + Indices.Count, x));
+            columns.ForEach((x, i) => table.Columns.Add(x, types[i]));
+            Indices.ForEach((x, i) => table.Rows.Add(i, FormatColumnName(x.Mnemonic, x.Unit)));
+            Mnemonics.ForEach((x, i) => table.Rows.Add(i + Indices.Count, FormatColumnName(x, Units[i])));
 
             return table;
         }
@@ -1370,6 +1371,19 @@ namespace PDS.Witsml.Data.Channels
         private bool SliceExists(string mnemonic)
         {
             return SliceExists(GetOrdinal(mnemonic));
+        }
+
+        /// <summary>
+        /// Formats the name of the column.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic.</param>
+        /// <param name="units">The units.</param>
+        /// <returns>The formatted column name.</returns>
+        private string FormatColumnName(string mnemonic, string units)
+        {
+            return string.IsNullOrWhiteSpace(units)
+                ? mnemonic
+                : $"{ mnemonic } [{ units }]";
         }
     }
 }
