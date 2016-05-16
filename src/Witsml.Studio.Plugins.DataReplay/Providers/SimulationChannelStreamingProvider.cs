@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
 using Energistics.Protocol.ChannelStreaming;
+using PDS.Framework;
 
 namespace PDS.Witsml.Studio.Plugins.DataReplay.Providers
 {
@@ -98,7 +99,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.Providers
                             ValueAttributes = new DataAttribute[0],
                             Value = new DataValue()
                             {
-                               Item = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+                               Item = DateTimeOffset.UtcNow.ToUnixTimeMicroseconds()
                             }
                         })
                     .ToList());

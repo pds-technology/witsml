@@ -20,7 +20,15 @@ namespace PDS.Witsml.Server.Configuration
 {
     public static class WitsmlSettings
     {
+        public static bool StreamIndexValuePairs = Properties.Settings.Default.StreamIndexValuePairs;
+        public static long DepthRangeSize = Properties.Settings.Default.ChannelDataChunkDepthRangeSize;
+        public static long TimeRangeSize = Properties.Settings.Default.ChannelDataChunkTimeRangeSize;
         public static int MaxDataNodes = Properties.Settings.Default.MaxDataNodes;
         public static int MaxDataPoints = Properties.Settings.Default.MaxDataPoints;
+
+        public static long GetRangeSize(bool isTimeIndex)
+        {
+            return isTimeIndex ? TimeRangeSize : DepthRangeSize;
+        }
     }
 }

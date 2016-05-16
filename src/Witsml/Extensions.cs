@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Energistics.DataAccess;
 using Witsml200 = Energistics.DataAccess.WITSML200;
+using PDS.Framework;
 using PDS.Witsml.Properties;
 
 namespace PDS.Witsml
@@ -180,23 +181,38 @@ namespace PDS.Witsml
                 );
         }
 
+        /// <summary>
+        /// Applies a time zone offset to the current <see cref="Timestamp"/> instance.
+        /// </summary>
+        /// <param name="value">The timestamp value.</param>
+        /// <param name="offset">The offset time span.</param>
+        /// <returns>A <see cref="DateTimeOffset"/> instance, or null.</returns>
         public static DateTimeOffset? ToOffsetTime(this Timestamp? value, TimeSpan? offset)
         {
             if (!value.HasValue || !offset.HasValue)
                 return value;
 
-            return ToOffsetTime(value.Value, offset);
+            return ((DateTimeOffset)value.Value).ToOffsetTime(offset);
         }
 
-        public static DateTimeOffset ToOffsetTime(this DateTimeOffset value, TimeSpan? offset)
+        /// <summary>
+        /// Converts the <see cref="Timestamp"/> to unix time microseconds.
+        /// </summary>
+        /// <param name="timestamp">The timestamp.</param>
+        /// <returns>The timestamp in unix time microseconds</returns>
+        public static long ToUnixTimeMicroseconds(this Timestamp timestamp)
         {
-            if (!offset.HasValue)
-                return value;
+            return ((DateTimeOffset) timestamp).ToUnixTimeMicroseconds();
+        }
 
-            if (value.Offset.CompareTo(offset) == 0)
-                return value;
-
-            return DateTimeOffset.FromUnixTimeSeconds(value.ToUnixTimeSeconds()).ToOffset(offset.Value);
+        /// <summary>
+        /// Converts the <see cref="Timestamp"/> to unix time microseconds.
+        /// </summary>
+        /// <param name="timestamp">The timestamp.</param>
+        /// <returns>The timestamp in unix time microseconds</returns>
+        public static long? ToUnixTimeMicroseconds(this Timestamp? timestamp)
+        {
+            return timestamp?.ToUnixTimeMicroseconds();
         }
     }
 }

@@ -318,10 +318,10 @@ namespace PDS.Witsml.Server.Data.Channels
             {
                 var startTime = start as TimeIndexValue;
                 if (startTime != null && !string.IsNullOrEmpty(startTime.Time))
-                    startValue = DateTimeOffset.Parse(startTime.Time).ToUnixTimeSeconds();
+                    startValue = DateTimeOffset.Parse(startTime.Time).ToUnixTimeMicroseconds();
                 var endTime = end as TimeIndexValue;
                 if (endTime != null && !string.IsNullOrEmpty(endTime.Time))
-                    endValue = DateTimeOffset.Parse(endTime.Time).ToUnixTimeSeconds();
+                    endValue = DateTimeOffset.Parse(endTime.Time).ToUnixTimeMicroseconds();
             }
             else if (start is DepthIndexValue)
             {
@@ -354,7 +354,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     indexValue = new TimeIndexValue();
                 else
                     indexValue = current;
-                ((TimeIndexValue)indexValue).Time = DateTimeOffset.FromUnixTimeSeconds((long)value).ToUniversalTime().ToString(_utcFormat);
+                ((TimeIndexValue)indexValue).Time = DateTimeExtensions.FromUnixTimeMicroseconds((long)value).ToUniversalTime().ToString(_utcFormat);
             }
             else if (indexType == ChannelIndexType.passindexeddepth)
             {

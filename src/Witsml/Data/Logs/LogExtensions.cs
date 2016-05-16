@@ -29,11 +29,11 @@ namespace PDS.Witsml.Data.Logs
     public static class LogExtensions
     {
         /// <summary>
-        /// Gets the <see cref="Witsml131.LogCurveInfo"/> by uid.
+        /// Gets the <see cref="Witsml131.ComponentSchemas.LogCurveInfo"/> by uid.
         /// </summary>
         /// <param name="logCurveInfos">The collection of log curves.</param>
         /// <param name="uid">The uid.</param>
-        /// <returns>The <see cref="Witsml131.LogCurveInfo"/> specified by the uid.</returns>
+        /// <returns>The <see cref="Witsml131.ComponentSchemas.LogCurveInfo"/> specified by the uid.</returns>
         public static Witsml131.ComponentSchemas.LogCurveInfo GetByUid(this IEnumerable<Witsml131.ComponentSchemas.LogCurveInfo> logCurveInfos, string uid)
         {
             return logCurveInfos?.FirstOrDefault(x => x.Uid.EqualsIgnoreCase(uid));
@@ -62,11 +62,11 @@ namespace PDS.Witsml.Data.Logs
         }
 
         /// <summary>
-        /// Gets the <see cref="Witsml131.LogCurveInfo"/> by mnemonic.
+        /// Gets the <see cref="Witsml131.ComponentSchemas.LogCurveInfo"/> by mnemonic.
         /// </summary>
         /// <param name="logCurveInfos">The collection of log curves.</param>
         /// <param name="mnemonic">The mnemonic.</param>
-        /// <returns>The <see cref="Witsml131.LogCurveInfo"/> specified by the mnemonic.</returns>
+        /// <returns>The <see cref="Witsml131.ComponentSchemas.LogCurveInfo"/> specified by the mnemonic.</returns>
         public static Witsml131.ComponentSchemas.LogCurveInfo GetByMnemonic(this IEnumerable<Witsml131.ComponentSchemas.LogCurveInfo> logCurveInfos, string mnemonic)
         {
             return logCurveInfos?.FirstOrDefault(x => x.Mnemonic.EqualsIgnoreCase(mnemonic));
@@ -95,7 +95,7 @@ namespace PDS.Witsml.Data.Logs
         }
 
         /// <summary>
-        /// Gets the index range for the specified <see cref="Witsml131.LogCurveInfo"/>.
+        /// Gets the index range for the specified <see cref="Witsml131.ComponentSchemas.LogCurveInfo"/>.
         /// </summary>
         /// <param name="logCurveInfo">The log curve.</param>
         /// <param name="increasing">if set to <c>true</c>, index values are increasing.</param>
@@ -109,9 +109,9 @@ namespace PDS.Witsml.Data.Logs
             if (isTimeIndex)
             {
                 if (logCurveInfo.MinDateTimeIndex.HasValue)
-                    start = DateTimeOffset.Parse(logCurveInfo.MinDateTimeIndex.Value.ToString("o")).ToUnixTimeSeconds();
+                    start = logCurveInfo.MinDateTimeIndex.ToUnixTimeMicroseconds();
                 if (logCurveInfo.MaxDateTimeIndex.HasValue)
-                    end = DateTimeOffset.Parse(logCurveInfo.MaxDateTimeIndex.Value.ToString("o")).ToUnixTimeSeconds();
+                    end = logCurveInfo.MaxDateTimeIndex.ToUnixTimeMicroseconds();
             }
             else
             {
@@ -140,9 +140,9 @@ namespace PDS.Witsml.Data.Logs
             if (isTimeIndex)
             {
                 if (logCurveInfo.MinDateTimeIndex.HasValue)
-                    start = DateTimeOffset.Parse(logCurveInfo.MinDateTimeIndex.Value.ToString("o")).ToUnixTimeSeconds();
+                    start = logCurveInfo.MinDateTimeIndex.ToUnixTimeMicroseconds();
                 if (logCurveInfo.MaxDateTimeIndex.HasValue)
-                    end = DateTimeOffset.Parse(logCurveInfo.MaxDateTimeIndex.Value.ToString("o")).ToUnixTimeSeconds();
+                    end = logCurveInfo.MaxDateTimeIndex.ToUnixTimeMicroseconds();
             }
             else
             {
@@ -161,30 +161,44 @@ namespace PDS.Witsml.Data.Logs
         /// </summary>
         /// <param name="log">The log.</param>
         /// <param name="mnemonics">The mnemonics.</param>
-        /// <returns></returns>
+        /// <returns>
+        /// A <see cref="IDictionary{TKey, TValue}" /> with the column index as key and the log curve null value as the value.
+        /// </returns>
         public static IEnumerable<string> GetNullValues(this Witsml131.Log log, string[] mnemonics)
         {
             return mnemonics
-            .Select(x => log.LogCurveInfo.First(lci => lci.Mnemonic.EqualsIgnoreCase(x)))
-            .Select(n => GetNullValue(log.NullValue, n.NullValue));
+                .Select(x => log.LogCurveInfo.First(lci => lci.Mnemonic.EqualsIgnoreCase(x)))
+                .Select(n => GetNullValue(log.NullValue, n.NullValue));
         }
 
         /// <summary>
         /// Gets the null values with the column index
         /// </summary>
         /// <param name="log">The log.</param>
-        /// <returns>A <see cref="IDictionary{TKey, TValue}" with the column index as key and the log curve null value as the value./></returns>
+        /// <param name="mnemonics">The mnemonics.</param>
+        /// <returns>
+        /// A <see cref="IDictionary{TKey, TValue}" /> with the column index as key and the log curve null value as the value.
+        /// </returns>
         public static IEnumerable<string> GetNullValues(this Witsml141.Log log, string[] mnemonics)
         {
             return mnemonics
-            .Select(x => log.LogCurveInfo.First(lci => lci.Mnemonic.Value.EqualsIgnoreCase(x)))
-            .Select(n => GetNullValue(log.NullValue, n.NullValue));
+                .Select(x => log.LogCurveInfo.First(lci => lci.Mnemonic.Value.EqualsIgnoreCase(x)))
+                .Select(n => GetNullValue(log.NullValue, n.NullValue));
         }
 
+        /// <summary>
+        /// Gets the valid null value indicator from the specified values.
+        /// </summary>
+        /// <param name="logNullValue">The log null value.</param>
+        /// <param name="logCurveInfoNullValue">The log curve information null value.</param>
+        /// <returns>A valid null indicator value.</returns>
         private static string GetNullValue(string logNullValue, string logCurveInfoNullValue)
         {
-            return !string.IsNullOrWhiteSpace(logCurveInfoNullValue) ? logCurveInfoNullValue : !string.IsNullOrWhiteSpace(logNullValue) ? logNullValue : "null";
+            return !string.IsNullOrWhiteSpace(logCurveInfoNullValue)
+                ? logCurveInfoNullValue
+                : !string.IsNullOrWhiteSpace(logNullValue)
+                ? logNullValue
+                : "null";
         }
-
     }
 }

@@ -153,19 +153,13 @@ namespace PDS.Framework
             var enumType = value.GetType();
             var fieldInfo = enumType.GetField(Enum.GetName(enumType, value));
 
-            if (fieldInfo != null)
-            {
-                var attribute = fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), true)
-                    .Cast<DescriptionAttribute>()
-                    .FirstOrDefault();
+            var attribute = fieldInfo?.GetCustomAttributes(typeof(DescriptionAttribute), true)
+                .Cast<DescriptionAttribute>()
+                .FirstOrDefault();
 
-                if (attribute != null)
-                {
-                    return attribute.Description;
-                }
-            }
-
-            return value.ToString();
+            return attribute != null
+                ? attribute.Description
+                : value.ToString();
         }
 
         /// <summary>
@@ -175,10 +169,8 @@ namespace PDS.Framework
         /// <returns>true if the type is numeric; otherwise, false</returns>
         public static bool IsNumeric(this Type type)
         {
-            if (type==null)
-            {
-                return false;
-            }
+            if (type == null) return false;
+
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
                 type = Nullable.GetUnderlyingType(type);

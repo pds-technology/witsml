@@ -35,6 +35,7 @@ namespace PDS.Witsml.Studio.Core.Connections
         {
             //_log.DebugFormat("A new Proxy is being created with URI: {0}; WitsmlVersion: {1};", connection.Uri, version);
             var proxy = new WITSMLWebServiceConnection(connection.Uri, version);
+            proxy.Timeout *= 5;
 
             if (!string.IsNullOrWhiteSpace(connection.Username))
             {

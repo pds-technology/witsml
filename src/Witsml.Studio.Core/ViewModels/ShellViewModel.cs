@@ -18,6 +18,7 @@
 
 using System;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Linq;
 using Caliburn.Micro;
 using PDS.Witsml.Studio.Core.Runtime;
@@ -85,6 +86,14 @@ namespace PDS.Witsml.Studio.Core.ViewModels
                     NotifyOfPropertyChange(() => StatusBarText);
                 }
             }
+        }
+
+        /// <summary>
+        /// Opens the current working directory.
+        /// </summary>
+        public void OpenWorkingDirectory()
+        {
+            Process.Start("explorer.exe", Environment.CurrentDirectory);
         }
 
         /// <summary>

@@ -30,7 +30,7 @@ using Newtonsoft.Json.Linq;
 using PDS.Framework;
 using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Data.Channels;
-using PDS.Witsml.Server.Properties;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Providers.ChannelStreaming
 {
@@ -39,9 +39,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
     public class ChannelStreamingProducer : ChannelStreamingProducerHandler
     {
         private static readonly IList<DataItem> EmptyChannelData = new List<DataItem>(0);
-        private static readonly int RangeSize = Settings.Default.ChannelDataChunkRangeSize;
-        private static readonly bool StreamIndexValuePairs = Settings.Default.StreamIndexValuePairs;
-
         private readonly IContainer _container;
         private CancellationTokenSource _tokenSource;
 
@@ -186,6 +183,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             // Get the start index before we convert to scale
             var minStart = channelRangeInfo.StartIndex;
             var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
+            var rangeSize = WitsmlSettings.GetRangeSize(isTimeIndex);
 
             // Because we can store only longs, convert indexes to scale
             channelRangeInfo.StartIndex = ((double)channelRangeInfo.StartIndex).IndexToScale(primaryIndex.Scale, isTimeIndex);
@@ -197,10 +195,10 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 .FirstOrDefault() == IndexDirections.Decreasing);
 
             var dataProvider = GetDataProvider(uri);
-            var channelData = dataProvider.GetChannelData(uri, new Range<double?>(minStart, increasing ? minStart + RangeSize : minStart - RangeSize));
+            var channelData = dataProvider.GetChannelData(uri, new Range<double?>(minStart, increasing ? minStart + rangeSize : minStart - rangeSize));
 
             // Stream Channel Data with IndexedDataItems if StreamIndexValuePairs setting is true
-            if (StreamIndexValuePairs)
+            if (WitsmlSettings.StreamIndexValuePairs)
             {
                 await StreamIndexedChannelDataRange(channelRangeInfo, channels, channelData, increasing, token);
             }
@@ -437,6 +435,10 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             var channels = Channels[uri];
             var channelIds = channels.Select(x => x.ChannelId).ToArray();
             var channelInfos = infos.Where(x => channelIds.Contains(x.ChannelId)).ToArray();
+            var primaryIndex = channels
+                .Take(1)
+                .Select(x => x.Indexes[0])
+                .FirstOrDefault();
 
             // TODO: Handle 3 different StartIndex types
             //if (x.StartIndex.Item is int)
@@ -447,6 +449,9 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             //    // Stream Latest Value Data
 
             var minStart = channelInfos.Min(x => Convert.ToDouble(x.StartIndex.Item));
+            var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
+            var rangeSize = WitsmlSettings.GetRangeSize(isTimeIndex);
+
             var increasing = !(channels
                 .Take(1)
                 .Select(x => x.Indexes[0].Direction)
@@ -457,10 +462,10 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
 
             var dataProvider = GetDataProvider(uri);
-            var channelData = dataProvider.GetChannelData(uri, new Range<double?>(minStart, increasing ? minStart + RangeSize : minStart - RangeSize));
+            var channelData = dataProvider.GetChannelData(uri, new Range<double?>(minStart, increasing ? minStart + rangeSize : minStart - rangeSize));
 
             // Stream Channel Data with IndexedDataItems if StreamIndexValuePairs setting is true
-            if (StreamIndexValuePairs)
+            if (WitsmlSettings.StreamIndexValuePairs)
             {
                 await StreamIndexedChannelData(infos, channels, channelData, increasing, token);
             }

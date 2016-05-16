@@ -235,7 +235,7 @@ namespace PDS.Witsml.Studio.Plugins.DataReplay.ViewModels.Proxies
         private long ToChannelIndexValue(ChannelStreamingInfo streamingInfo, IndexMetadataRecord index)
         {
             if (index.IndexType == ChannelIndexTypes.Time)
-                return DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                return DateTimeOffset.UtcNow.ToUnixTimeMicroseconds();
 
             var value = 0d;
 

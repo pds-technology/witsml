@@ -73,19 +73,19 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
         /// Gets the runtime service.
         /// </summary>
         /// <value>The runtime service.</value>
-        public IRuntimeService Runtime { get; private set; }
+        public IRuntimeService Runtime { get; }
 
         /// <summary>
         /// Gets the collectino of channel metadata.
         /// </summary>
         /// <value>The channel metadata.</value>
-        public IList<ChannelMetadataRecord> Channels { get; private set; }
+        public IList<ChannelMetadataRecord> Channels { get; }
 
         /// <summary>
         /// Gets the collectino of channel streaming information.
         /// </summary>
         /// <value>The channel streaming information.</value>
-        public IList<ChannelStreamingInfo> ChannelStreamingInfos { get; private set; }
+        public IList<ChannelStreamingInfo> ChannelStreamingInfos { get; }
 
         private bool _isSimpleStreamer;
         /// <summary>
@@ -411,7 +411,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
             var isTimeIndex = "TimeIndex".EqualsIgnoreCase(Model.Streaming.StreamingType);
 
             var startIndex = isTimeIndex
-                ? new DateTimeOffset(Model.Streaming.StartTime).ToUnixTimeSeconds()
+                ? new DateTimeOffset(Model.Streaming.StartTime).ToUnixTimeMicroseconds()
                 : Model.Streaming.StartIndex;
 
             return startIndex;
@@ -428,7 +428,7 @@ namespace PDS.Witsml.Studio.Plugins.EtpBrowser.ViewModels
                 return default(long);
 
             var endIndex = isTimeIndex
-                ? new DateTimeOffset(Model.Streaming.EndTime.Value).ToUnixTimeSeconds()
+                ? new DateTimeOffset(Model.Streaming.EndTime.Value).ToUnixTimeMicroseconds()
                 : Model.Streaming.EndIndex;
 
             return endIndex;

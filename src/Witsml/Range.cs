@@ -46,14 +46,14 @@ namespace PDS.Witsml
 
                 if (start != null && DateTimeOffset.TryParse(start.ToString(), out time))
                 {
-                    rangeStart = time.ToUnixTimeSeconds();
+                    rangeStart = time.ToUnixTimeMicroseconds();
                     offset = time.Offset;
                 }
                     
 
                 if (end != null && DateTimeOffset.TryParse(end.ToString(), out time))
                 {
-                    rangeEnd = time.ToUnixTimeSeconds();
+                    rangeEnd = time.ToUnixTimeMicroseconds();
                     offset = time.Offset;
                 }                  
             }
@@ -149,12 +149,12 @@ namespace PDS.Witsml
         /// </summary>
         /// <param name="index">The index contained within the computed range.</param>
         /// <param name="rangeSize">The range size of one chunk.</param>
-        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <param name="increasing">if set to <c>true</c> the index is increasing.</param>
         /// <returns>The range.</returns>
-        public static Range<int> ComputeRange(double index, int rangeSize, bool increasing = true)
+        public static Range<long> ComputeRange(double index, long rangeSize, bool increasing = true)
         {
-            var rangeIndex = increasing ? (int)(Math.Floor(index / rangeSize)) : (int)(Math.Ceiling(index / rangeSize));
-            return new Range<int>(rangeIndex * rangeSize, rangeIndex * rangeSize + (increasing ? rangeSize : -rangeSize));
+            var rangeIndex = increasing ? (long)Math.Floor(index / rangeSize) : (long)Math.Ceiling(index / rangeSize);
+            return new Range<long>(rangeIndex * rangeSize, rangeIndex * rangeSize + (increasing ? rangeSize : -rangeSize));
         }
     }
 }

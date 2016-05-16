@@ -97,15 +97,6 @@ namespace PDS.Witsml.Server.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1000")]
-        public int ChannelDataChunkRangeSize {
-            get {
-                return ((int)(this["ChannelDataChunkRangeSize"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool StreamIndexValuePairs {
             get {
@@ -128,6 +119,24 @@ namespace PDS.Witsml.Server.Properties {
         public int MaxDataPoints {
             get {
                 return ((int)(this["MaxDataPoints"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5000")]
+        public long ChannelDataChunkDepthRangeSize {
+            get {
+                return ((long)(this["ChannelDataChunkDepthRangeSize"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5000000000")]
+        public long ChannelDataChunkTimeRangeSize {
+            get {
+                return ((long)(this["ChannelDataChunkTimeRangeSize"]));
             }
         }
     }

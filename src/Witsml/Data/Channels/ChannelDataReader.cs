@@ -307,7 +307,7 @@ namespace PDS.Witsml.Data.Channels
             var channelIndex = GetIndex(index);
 
             return channelIndex.IsTimeIndex
-                ? GetUnixTimeSeconds(index)
+                ? GetUnixTimeMicroseconds(index)
                 : GetDouble(index) * Math.Pow(10, scale);
         }
 
@@ -404,7 +404,6 @@ namespace PDS.Witsml.Data.Channels
             return byte.Parse(GetString(i));
         }
 
-
         /// <summary>
         /// Reads a stream of bytes from the specified column offset into the buffer as an array, starting at the given buffer offset.
         /// </summary>
@@ -471,10 +470,9 @@ namespace PDS.Witsml.Data.Channels
         /// <returns>
         /// The data type information for the specified field.
         /// </returns>
-        /// <exception cref="System.NotImplementedException"></exception>
         public string GetDataTypeName(int i)
         {
-            throw new NotImplementedException();
+            return GetFieldType(i).Name;
         }
 
         /// <summary>
@@ -486,7 +484,8 @@ namespace PDS.Witsml.Data.Channels
         /// </returns>
         public DateTime GetDateTime(int i)
         {
-            return DateTime.Parse(GetString(i));
+            var rawValue = GetValue(i);
+            return rawValue as DateTime? ?? DateTime.Parse(rawValue.ToString());
         }
 
         /// <summary>
@@ -496,7 +495,8 @@ namespace PDS.Witsml.Data.Channels
         /// <returns></returns>
         public DateTimeOffset GetDateTimeOffset(int i)
         {
-            return DateTimeOffset.Parse(GetString(i));
+            var rawValue = GetValue(i);
+            return rawValue as DateTimeOffset? ?? DateTimeOffset.Parse(rawValue.ToString());
         }
 
         /// <summary>
@@ -504,9 +504,9 @@ namespace PDS.Witsml.Data.Channels
         /// </summary>
         /// <param name="i">The zero-based column ordinal.</param>
         /// <returns></returns>
-        public long GetUnixTimeSeconds(int i)
+        public long GetUnixTimeMicroseconds(int i)
         {
-            return GetDateTimeOffset(i).ToUnixTimeSeconds();
+            return GetDateTimeOffset(i).ToUnixTimeMicroseconds();
         }
 
         /// <summary>
@@ -545,7 +545,8 @@ namespace PDS.Witsml.Data.Channels
         /// </returns>
         public Type GetFieldType(int i)
         {
-            return typeof(object);
+            var rawValue = GetValue(i);
+            return rawValue?.GetType() ?? typeof(object);
         }
 
         /// <summary>
@@ -568,10 +569,9 @@ namespace PDS.Witsml.Data.Channels
         /// <returns>
         /// The GUID value of the specified field.
         /// </returns>
-        /// <exception cref="System.NotImplementedException"></exception>
         public Guid GetGuid(int i)
         {
-            throw new NotImplementedException();
+            return Guid.Parse(GetString(i));
         }
 
         /// <summary>
@@ -1317,7 +1317,7 @@ namespace PDS.Witsml.Data.Channels
             if (double.TryParse(value, out number))
                 return value;
 
-            return string.Format("\"{0}\"", value.Trim());
+            return string.Format("\"{0}\"", value.Trim().Replace("\"", "\\\""));
         }
 
         /// <summary>

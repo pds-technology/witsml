@@ -611,7 +611,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             if (range.Start.HasValue)
             {
-                minDate = DateTimeOffset.FromUnixTimeSeconds((long)range.Start.Value).ToOffsetTime(offset).ToString("o");
+                minDate = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.Start.Value).ToOffsetTime(offset).ToString("o");
                 updates = MongoDbUtility.BuildUpdate<T>(null, "LogCurveInfo.$.MinDateTimeIndex", minDate);
                 updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MinDateTimeIndexSpecified", true);
                 Logger.DebugFormat("Building MongoDb Update for MinDateTimeIndex '{0}'", minDate);
@@ -619,7 +619,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             if (range.End.HasValue)
             {
-                maxDate = DateTimeOffset.FromUnixTimeSeconds((long)range.End.Value).ToOffsetTime(offset).ToString("o");
+                maxDate = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.End.Value).ToOffsetTime(offset).ToString("o");
                 updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MaxDateTimeIndex", maxDate);
                 updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MaxDateTimeIndexSpecified", true);
                 Logger.DebugFormat("Building MongoDb Update for MaxDateTimeIndex '{0}'", maxDate);

@@ -49,7 +49,7 @@ namespace PDS.Witsml.Data.Channels
 
         DateTimeOffset GetDateTimeOffset(int i);
 
-        long GetUnixTimeSeconds(int i);
+        long GetUnixTimeMicroseconds(int i);
 
         bool HasValues();
 
