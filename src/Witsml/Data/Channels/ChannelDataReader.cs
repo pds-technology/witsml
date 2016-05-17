@@ -1035,19 +1035,19 @@ namespace PDS.Witsml.Data.Channels
             }
 
             // if any ranges are empty, then we must (re)slice
-            if (ranges.Values.Any(r => !r.Start.HasValue))
-            {
-                var reader = new ChannelDataReader(logData, Mnemonics, Units, NullValues)
-                    .WithIndices(Indices);
+            if (ranges.Values.All(r => r.Start.HasValue) || Mnemonics.Length <= 0)
+                return logData;
+
+            var reader = new ChannelDataReader(logData, Mnemonics, Units, NullValues)
+                .WithIndices(Indices);
                     
-                reader.Slice(mnemonicSlices, units, nullValues);
+            reader.Slice(mnemonicSlices, units, nullValues);
 
-                // Clone the context without RequestLatestValues
-                var resliceContext = context.Clone();
-                resliceContext.RequestLatestValues = null;
+            // Clone the context without RequestLatestValues
+            var resliceContext = context.Clone();
+            resliceContext.RequestLatestValues = null;
 
-                logData = reader.GetData(resliceContext, mnemonicSlices, units, nullValues, out ranges);
-            }
+            logData = reader.GetData(resliceContext, mnemonicSlices, units, nullValues, out ranges);
 
             return logData;
         }
