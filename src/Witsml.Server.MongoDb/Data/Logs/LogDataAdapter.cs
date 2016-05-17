@@ -23,7 +23,6 @@ using System.Linq;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
-using log4net;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
