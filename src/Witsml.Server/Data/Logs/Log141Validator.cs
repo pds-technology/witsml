@@ -75,10 +75,12 @@ namespace PDS.Witsml.Server.Data.Logs
             var logDatas = Parser.Properties("logData").ToArray();
             if (logDatas.Length > 1)
             {
-                yield return new ValidationResult(ErrorCodes.RecurringLogData.ToString(), new[] { "LogData", "LogData" });
+                yield return new ValidationResult(ErrorCodes.RecurringLogData.ToString(), new[] { "LogData" });
             }
 
-            var mnemonicList = Parser.GetLogDataMnemonics().ToArray();
+            var mnemonics = Parser.GetLogDataMnemonics();
+            var mnemonicList = mnemonics?.ToArray() ?? new string[0];
+
             if (logDatas.Length == 1)
             {
                 if (mnemonicList.Any() && DuplicateUid(mnemonicList))
@@ -104,7 +106,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         yield return new ValidationResult(ErrorCodes.ColumnIdentifiersNotSame.ToString(), new[] { "LogData", "MnemonicList" });
                     }
 
-                    if (!mnemonicList.Any())
+                    if (mnemonics == null)
                     {
                         yield return new ValidationResult(ErrorCodes.MissingMnemonicList.ToString(), new[] { "LogData", "MnemonicsList" });
                     }
@@ -284,7 +286,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 // Validate LogData
                 else if (logData != null && logData.Count > 0)
                 {
-                    yield return ValidateLogData(current.IndexCurve, logCurves, logData, false);
+                    yield return ValidateLogData(current.IndexCurve, null, logData, false);
                 }
             }
         }
@@ -369,7 +371,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         {
                             return new ValidationResult(ErrorCodes.MissingUnitForMeasureData.ToString(), new[] { "LogData", "UnitList" });
                         }
-                        else if (!string.IsNullOrEmpty(indexCurve) && !mnemonics.Any(m => m == indexCurve))
+                        else if (!string.IsNullOrEmpty(indexCurve) && mnemonics.All(m => m != indexCurve))
                         {
                             return new ValidationResult(ErrorCodes.IndexCurveNotFound.ToString(), new[] { "IndexCurve" });
                         }

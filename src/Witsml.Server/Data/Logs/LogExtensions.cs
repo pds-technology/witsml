@@ -84,20 +84,14 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns></returns>
         public static IEnumerable<string> GetLogCurveInfoMnemonics(this WitsmlQueryParser parser)
         {
-            var mnemonics = Enumerable.Empty<string>();
             var logCurveInfos = parser.Properties("logCurveInfo").ToArray();
-
-            if (!logCurveInfos.Any())
-                return mnemonics;
+            if (!logCurveInfos.Any()) return new string[0];
 
             var mnemonicList = parser.Properties(logCurveInfos, "mnemonic").ToArray();
 
-            if (mnemonicList.Any())
-            {
-                mnemonics = mnemonicList.Select(x => x.Value);
-            }
-
-            return mnemonics;
+            return mnemonicList.Any()
+                ? mnemonicList.Select(x => x.Value)
+                : Enumerable.Empty<string>();
         }
 
         /// <summary>
@@ -107,20 +101,15 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns></returns>
         public static IEnumerable<string> GetLogDataMnemonics(this WitsmlQueryParser parser)
         {
-            var mnemonics = Enumerable.Empty<string>();
             var logData = parser.Property("logData");
+            if (logData == null) return null;
 
-            if (logData == null)
-                return mnemonics;
             var mnemonicList = parser.Properties(logData, "mnemonicList").FirstOrDefault();
+            if (mnemonicList == null) return null;
 
-            if (!string.IsNullOrWhiteSpace(mnemonicList?.Value))
-            {
-                mnemonics = mnemonicList.Value.Split(',');
-            }
-
-            return mnemonics;
+            return string.IsNullOrWhiteSpace(mnemonicList.Value)
+                ? Enumerable.Empty<string>()
+                : mnemonicList.Value.Split(',');
         }
-
     }
 }
