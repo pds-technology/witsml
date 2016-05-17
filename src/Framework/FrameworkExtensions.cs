@@ -175,16 +175,9 @@ namespace PDS.Framework
             {
                 type = Nullable.GetUnderlyingType(type);
             }
-            else if (type.IsClass)
-            {
-                var propertyInfo = type.GetProperty("Value");
-                type = (propertyInfo != null) ? propertyInfo.PropertyType : null;
-                if (type == null)
-                    return false;
-            }
 
             var typeCode = Type.GetTypeCode(type);
-            return typeCode >= TypeCode.Char && typeCode <= TypeCode.Decimal;
+            return typeCode >= TypeCode.SByte && typeCode <= TypeCode.Decimal;
         }
 
         /// <summary>

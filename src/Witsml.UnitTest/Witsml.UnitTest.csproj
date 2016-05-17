@@ -75,6 +75,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Data\Logs\LogExtensionsTests.cs" />
+    <Compile Include="FrameworkExtensionsTests.cs" />
     <Compile Include="OptionsInTests.cs" />
     <Compile Include="EtpUrisTests.cs" />
     <Compile Include="WitsmlParserTests.cs" />
