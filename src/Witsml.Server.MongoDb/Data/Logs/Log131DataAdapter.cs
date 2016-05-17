@@ -110,13 +110,12 @@ namespace PDS.Witsml.Server.Data.Logs
 
         protected override bool IsIncreasing(Log log)
         {
-            return log.Direction.GetValueOrDefault() == LogIndexDirection.increasing;
+            return log.IsIncreasing();
         }
 
         protected override bool IsTimeLog(Log log, bool includeElapsedTime = false)
         {
-            return log.IndexType.GetValueOrDefault() == LogIndexType.datetime ||
-                   (log.IndexType.GetValueOrDefault() == LogIndexType.elapsedtime && includeElapsedTime);
+            return log.IsTimeLog(includeElapsedTime);
         }
 
         protected override List<LogCurveInfo> GetLogCurves(Log log)
@@ -294,14 +293,13 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private void ClearIndexValues(Log dataObject)
         {
-            var isTimeLog = dataObject.IndexType.GetValueOrDefault() == LogIndexType.datetime;
-
-            if (dataObject.IndexType.GetValueOrDefault() == LogIndexType.datetime)
+            if (IsTimeLog(dataObject))
             {
                 dataObject.StartDateTimeIndex = null;
                 dataObject.StartDateTimeIndexSpecified = false;
                 dataObject.EndDateTimeIndex = null;
                 dataObject.EndDateTimeIndexSpecified = false;
+
                 foreach (var curve in dataObject.LogCurveInfo)
                 {
                     curve.MinDateTimeIndex = null;
@@ -314,6 +312,7 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 dataObject.StartIndex = null;
                 dataObject.EndIndex = null;
+
                 foreach (var curve in dataObject.LogCurveInfo)
                 {
                     curve.MinIndex = null;

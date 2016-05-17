@@ -94,7 +94,7 @@ namespace PDS.Witsml.Server.Data.Channels
         {
             var entity = GetEntity(uri);
             var indexChannel = entity.Index.FirstOrDefault();
-            var increasing = indexChannel.Direction.GetValueOrDefault() == IndexDirection.increasing;
+            var increasing = indexChannel.IsIncreasing();
             var chunks = _channelDataChunkAdapter.GetData(uri, indexChannel.Mnemonic, range, increasing);
             return chunks.GetRecords(range, increasing);
         }
@@ -134,7 +134,7 @@ namespace PDS.Witsml.Server.Data.Channels
             if (reader != null)
             {
                 Logger.DebugFormat("Adding ChannelSet data with uid '{0}' and name '{1}'", dataObject.Uuid, dataObject.Citation.Title);
-                var increasing = dataObject.Index.FirstOrDefault().Direction == IndexDirection.increasing;
+                var increasing = dataObject.IsIncreasing();
                 var allMnemonics = reader.Indices.Select(i => i.Mnemonic).Concat(reader.Mnemonics).ToArray();
 
                 // Get current index information
@@ -258,12 +258,12 @@ namespace PDS.Witsml.Server.Data.Channels
                 Description = indexChannel.Mnemonic,
                 Uom = indexChannel.Uom,
                 Scale = scale,
-                IndexType = indexChannel.IndexType == ChannelIndexType.datetime || indexChannel.IndexType == ChannelIndexType.elapsedtime
+                IndexType = indexChannel.IsTimeIndex(true)
                     ? ChannelIndexTypes.Time
                     : ChannelIndexTypes.Depth,
-                Direction = indexChannel.Direction == IndexDirection.decreasing
-                    ? IndexDirections.Decreasing
-                    : IndexDirections.Increasing,
+                Direction = indexChannel.IsIncreasing()
+                    ? IndexDirections.Increasing
+                    : IndexDirections.Decreasing,
                 CustomData = new Dictionary<string, DataValue>(0),
             };
         }
@@ -276,13 +276,11 @@ namespace PDS.Witsml.Server.Data.Channels
             // Merge ChannelDataChunks
             if (reader != null)
             {
-                var increasing = current.Index.FirstOrDefault().Direction == IndexDirection.increasing;
+                var increasing = current.IsIncreasing();
                 var allMnemonics = reader.Indices.Select(i => i.Mnemonic).Concat(reader.Mnemonics).ToArray();
 
                 // Get current index information
                 var ranges = GetCurrentIndexRange(current);
-                var indexCurve = current.Index[0];
-
                 GetUpdatedLogHeaderIndexRange(reader, allMnemonics, ranges, increasing);
 
                 // Add ChannelDataChunks
@@ -297,6 +295,7 @@ namespace PDS.Witsml.Server.Data.Channels
         {
             var ranges = new Dictionary<string, Range<double?>>();
             var index = entity.Index.FirstOrDefault();
+
             AddIndexRange(index.Mnemonic, entity.StartIndex, entity.EndIndex, ranges);
 
             foreach (var channel in entity.Channel)
@@ -309,8 +308,6 @@ namespace PDS.Witsml.Server.Data.Channels
 
         private void AddIndexRange(string mnemonic, AbstractIndexValue start, AbstractIndexValue end, Dictionary<string, Range<double?>> ranges)
         {
-            var range = new List<double?> { null, null };
-
             double? startValue = null;
             double? endValue = null;
 
@@ -341,6 +338,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 if (endPass != null && endPass.Depth.HasValue)
                     endValue = endPass.Depth.Value;
             }
+
             ranges.Add(mnemonic, new Range<double?>(startValue, endValue));
         }
 

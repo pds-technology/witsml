@@ -47,12 +47,12 @@ namespace PDS.Witsml.Data.Channels
         private static readonly string[] Empty = new string[0];
         private List<List<List<object>>> _records;
         private IList<Range<double?>> _ranges;
-        private string[] _originalMnemonics = Empty;
-        private string[] _originalUnits = Empty;
-        private string[] _originalNullValues = Empty;
-        private string[] _allMnemonics = null;
-        private string[] _allUnits = null;
-        private string[] _allNullValues = null;
+        private readonly string[] _originalMnemonics;
+        private readonly string[] _originalUnits;
+        private readonly string[] _originalNullValues;
+        private string[] _allMnemonics;
+        private string[] _allUnits;
+        private string[] _allNullValues;
         private readonly int _indexCount;
         private readonly int _count;
         private int _current = -1;
@@ -63,11 +63,12 @@ namespace PDS.Witsml.Data.Channels
         private int[] _allSliceOrdinals;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ChannelDataReader"/> class.
+        /// Initializes a new instance of the <see cref="ChannelDataReader" /> class.
         /// </summary>
         /// <param name="data">The channel data.</param>
         /// <param name="mnemonics">The channel mnemonics.</param>
         /// <param name="units">The channel units.</param>
+        /// <param name="nullValues">The null values.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="id">The identifier.</param>
         public ChannelDataReader(IList<string> data, string[] mnemonics = null, string[] units = null, string[] nullValues = null, string uri = null, string id = null)
@@ -76,11 +77,12 @@ namespace PDS.Witsml.Data.Channels
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ChannelDataReader"/> class.
+        /// Initializes a new instance of the <see cref="ChannelDataReader" /> class.
         /// </summary>
         /// <param name="data">The channel data.</param>
         /// <param name="mnemonics">The channel mnemonics.</param>
         /// <param name="units">The channel units.</param>
+        /// <param name="nullValues">The null values.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="id">The identifier.</param>
         public ChannelDataReader(string data, string[] mnemonics = null, string[] units = null, string[] nullValues = null, string uri = null, string id = null)
@@ -118,11 +120,12 @@ namespace PDS.Witsml.Data.Channels
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ChannelDataReader"/> class.
+        /// Initializes a new instance of the <see cref="ChannelDataReader" /> class.
         /// </summary>
         /// <param name="records">The channel records.</param>
         /// <param name="mnemonics">The channel mnemonics.</param>
         /// <param name="units">The channel units.</param>
+        /// <param name="nullValues">The null values.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="id">The identifier.</param>
         internal ChannelDataReader(List<List<List<object>>> records, string[] mnemonics = null, string[] units = null, string[] nullValues = null, string uri = null, string id = null)
@@ -178,7 +181,19 @@ namespace PDS.Witsml.Data.Channels
         /// <value>The list of channel units.</value>
         public string[] Units { get; private set; }
 
+        /// <summary>
+        /// Gets the null values included in slicing or all null values if not sliced.
+        /// </summary>
+        /// <value>The list of null values.</value>
         public string[] NullValues { get; private set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to include the unit with the name.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if including the unit with the name; otherwise, <c>false</c>.
+        /// </value>
+        public bool IncludeUnitWithName { get; set; }
 
         /// <summary>
         /// Gets the indices.
@@ -619,7 +634,12 @@ namespace PDS.Witsml.Data.Channels
         /// </returns>
         public string GetName(int i)
         {
-            return GetAllMnemonics().Skip(i).FirstOrDefault();
+            var name = GetAllMnemonics().Skip(i).FirstOrDefault();
+            var unit = GetAllUnits().Skip(i).FirstOrDefault();
+
+            return IncludeUnitWithName
+                ? FormatColumnName(name, unit)
+                : name;
         }
 
 
@@ -648,12 +668,12 @@ namespace PDS.Witsml.Data.Channels
         public DataTable GetSchemaTable()
         {
             var table = new DataTable();
-            var columns = new[] { "ColumnOrdinal", "ColumnName" };
-            var types = new Type[] { typeof(int), typeof(string) };
+            var columns = new[] { "ColumnOrdinal", "ColumnName", "IsKey" };
+            var types = new[] { typeof(int), typeof(string), typeof(bool) };
 
             columns.ForEach((x, i) => table.Columns.Add(x, types[i]));
-            Indices.ForEach((x, i) => table.Rows.Add(i, FormatColumnName(x.Mnemonic, x.Unit)));
-            Mnemonics.ForEach((x, i) => table.Rows.Add(i + Indices.Count, FormatColumnName(x, Units[i])));
+            Indices.ForEach((x, i) => table.Rows.Add(i, FormatColumnName(x.Mnemonic, x.Unit), i == 0));
+            Mnemonics.ForEach((x, i) => table.Rows.Add(i + Indices.Count, FormatColumnName(x, Units[i]), false));
 
             return table;
         }
@@ -706,12 +726,12 @@ namespace PDS.Witsml.Data.Channels
         public int GetValues(object[] values)
         {
             // Slice the results of GetRowValues
-            var rowValues = GetRowValues(_current).Where((r, i) => SliceExists(i));
+            var rowValues = GetRowValues(_current)
+                .Where((r, i) => SliceExists(i))
+                .ToList();
 
-            var count = Math.Min(values.Length, rowValues.Count());
-
+            var count = Math.Min(values.Length, rowValues.Count);
             var source = rowValues.Take(count).ToArray();
-
             Array.Copy(source, values, count);
 
             return count;
@@ -835,6 +855,8 @@ namespace PDS.Witsml.Data.Channels
         /// Mnemonics for channels without any data will be excluded from the slices.
         /// </summary>
         /// <param name="mnemonicSlices">The mnemonic slices.</param>
+        /// <param name="units">The units.</param>
+        /// <param name="nullValues">The null values.</param>
         public void Slice(IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units, IDictionary<int, string> nullValues)
         {
             // Remove the index mnemonic from the mnemonicSlices
@@ -852,7 +874,7 @@ namespace PDS.Witsml.Data.Channels
 
             // Slice by requestedMnemonics first
             var sliceOrdinals = slices
-                .Select(m => GetOrdinal(m)).ToArray(); // Get the ordinal position of each slice.
+                .Select(GetOrdinal).ToArray(); // Get the ordinal position of each slice.
 
             // Call GetChannelRanges so we can see which ranges have data or not.  
             //... Ranges will only be calculated for the current slices.
@@ -860,8 +882,7 @@ namespace PDS.Witsml.Data.Channels
 
             // Apply slicing to mnemonics and units without and data (range)
             Mnemonics = Mnemonics.Where(m => ranges.Keys.Contains(m)).ToArray();
-            sliceOrdinals = Mnemonics
-                .Select(m => GetOrdinal(m)).ToArray();
+            sliceOrdinals = Mnemonics.Select(GetOrdinal).ToArray();
 
             // All Slice Ordinals including the ordinals for indexes
             _allSliceOrdinals = Enumerable.Range(0, Depth).ToArray()
@@ -988,7 +1009,7 @@ namespace PDS.Witsml.Data.Channels
                         // Update the latest value count for each channel.
                         if (requestLatestValues.HasValue)
                         {
-                            UpdateRequestedValueCount(requestedValueCount, allValues, Mnemonics, ranges, primaryIndex);
+                            UpdateRequestedValueCount(requestedValueCount, allValues, ranges, primaryIndex);
                         }
                         // if it's not a lastest values request then update indexes
                         else
@@ -1082,7 +1103,7 @@ namespace PDS.Witsml.Data.Channels
             return valueAdded;
         }
 
-        private void UpdateRequestedValueCount(Dictionary<int, int> requestedValueCount, List<object> values, string[] mnemonics, Dictionary<string, Range<double?>> ranges, double primaryIndex)
+        private void UpdateRequestedValueCount(Dictionary<int, int> requestedValueCount, List<object> values, Dictionary<string, Range<double?>> ranges, double primaryIndex)
         {
             var valueArray = values.ToArray();
 

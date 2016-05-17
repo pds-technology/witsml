@@ -7,15 +7,14 @@
              mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="600">
     
     <UserControl.Resources>
-        <xcdg:DataGridCollectionViewSource x:Key="GridData" Source="{Binding DataTable}" />
+        <xcdg:DataGridCollectionViewSource x:Key="GridData" Source="{Binding DataTable.DefaultView}" AutoCreateItemProperties="True" />
     </UserControl.Resources>
     
     <Grid>
-        <xcdg:DataGridControl
-            CellEditorDisplayConditions="None"
-            ItemsSource="{Binding Source={StaticResource GridData}}">
+        <xcdg:DataGridControl AutoCreateColumns="True" AutoRemoveColumnsAndDetailConfigurations="True" CellEditorDisplayConditions="None"
+                              ItemsSource="{Binding Source={StaticResource GridData}}">
             <xcdg:DataGridControl.View>
-                <xcdg:TableflowView UseDefaultHeadersFooters="False">
+                <xcdg:TableflowView UseDefaultHeadersFooters="False" RowFadeInAnimationDuration="0" ScrollingAnimationDuration="0">
                     <xcdg:TableflowView.FixedHeaders>
                         <DataTemplate>
                             <xcdg:ColumnManagerRow />

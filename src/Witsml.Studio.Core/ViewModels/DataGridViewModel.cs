@@ -18,8 +18,8 @@
 
 using System;
 using System.Data;
-using System.Linq;
 using Caliburn.Micro;
+using Energistics.Datatypes;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Studio.Core.Runtime;
@@ -59,6 +59,12 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         public DataTable DataTable { get; }
 
         /// <summary>
+        /// Gets the URI for the current data obejct.
+        /// </summary>
+        /// <value>The URI.</value>
+        public EtpUri Uri { get; private set; }
+
+        /// <summary>
         /// Sets the current object.
         /// </summary>
         /// <param name="objectType">The object type.</param>
@@ -66,9 +72,6 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         public void SetCurrentObject(string objectType, object dataObject)
         {
             if (!ObjectTypes.IsGrowingDataObject(objectType)) return;
-
-            DataTable.Clear();
-            DataTable.Columns.Clear();
 
             try
             {
@@ -85,12 +88,31 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         }
 
         /// <summary>
+        /// Clears the data table if the URI has changed.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        private void ClearDataTable(EtpUri uri)
+        {
+            if (uri == Uri) return;
+
+            Uri = uri;
+            DataTable.BeginLoadData();
+            DataTable.PrimaryKey = new DataColumn[0];
+            DataTable.Clear();
+            DataTable.Rows.Clear();
+            DataTable.Columns.Clear();
+            DataTable.AcceptChanges();
+            DataTable.EndLoadData();
+        }
+
+        /// <summary>
         /// Sets the log data.
         /// </summary>
         /// <param name="log">The log.</param>
         private void SetLogData(Witsml131.Log log)
         {
-            SetChannelData(log.GetReader());
+            ClearDataTable(log.GetUri());
+            Runtime.InvokeAsync(() => SetChannelData(log.GetReader()));
         }
 
         /// <summary>
@@ -99,7 +121,8 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         /// <param name="log">The log.</param>
         private void SetLogData(Witsml141.Log log)
         {
-            log.GetReaders().ForEach(SetChannelData);
+            ClearDataTable(log.GetUri());
+            Runtime.InvokeAsync(() => log.GetReaders().ForEach(SetChannelData));
         }
 
         /// <summary>
@@ -108,17 +131,12 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         /// <param name="reader">The reader.</param>
         private void SetChannelData(ChannelDataReader reader)
         {
-            // Load data
-            DataTable.Load(reader);
-
-            // Update column names with units
-            var metadata = reader.GetSchemaTable();
-            metadata?.Rows.Cast<DataRow>().ForEach(x =>
-            {
-                var column = DataTable.Columns[(int)x["ColumnOrdinal"]];
-                column.ColumnName = x["ColumnName"].ToString();
-            });
-
+            reader.IncludeUnitWithName = true;
+            DataTable.BeginLoadData();
+            DataTable.Load(reader, LoadOption.Upsert);
+            DataTable.PrimaryKey = new[] { DataTable.Columns[0] };
+            DataTable.AcceptChanges();
+            DataTable.EndLoadData();
             NotifyOfPropertyChange(() => DataTable);
         }
     }

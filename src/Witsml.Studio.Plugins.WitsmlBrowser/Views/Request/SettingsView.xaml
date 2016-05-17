@@ -77,11 +77,11 @@
                       IsEnabled="{Binding Model.IsRequestObjectSelectionCapability, Converter={StaticResource BooleanInverseConverter}}" />
 
             <TextBlock Grid.Row="8" Grid.Column="0" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right">Latest <Italic>n</Italic> Values:</TextBlock>
-            <xctk:IntegerUpDown Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" Minimum="0"
+            <xctk:IntegerUpDown Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" Minimum="1"
                                 Value="{Binding Model.RequestLatestValues}" IsEnabled="{Binding Model.IsGetFromStore}" />
 
             <TextBlock Grid.Row="9" Grid.Column="0" Text="Max Data Rows:" Margin="10,5,10,5" VerticalAlignment="Center" HorizontalAlignment="Right" />
-            <xctk:IntegerUpDown Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" Minimum="0"
+            <xctk:IntegerUpDown Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" Margin="5" Padding="5" VerticalContentAlignment="Center" Minimum="2"
                                 Value="{Binding Model.MaxDataRows}" IsEnabled="{Binding Model.IsGetFromStore}" />
 
             <CheckBox Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="2" Margin="5,0" Content="Auto Query After Partial Results" VerticalAlignment="Center"

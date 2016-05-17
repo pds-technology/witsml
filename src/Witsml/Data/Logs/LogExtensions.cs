@@ -18,15 +18,67 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using PDS.Framework;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
-using PDS.Framework;
 
 namespace PDS.Witsml.Data.Logs
 {
     public static class LogExtensions
     {
+        /// <summary>
+        /// Determines whether the <see cref="Witsml131.Log"/> is increasing.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns>
+        /// <c>true</c> if the <see cref="Witsml131.Log"/> is increasing; otherwise, false.
+        /// </returns>
+        public static bool IsIncreasing(this Witsml131.Log log)
+        {
+            return log.Direction.GetValueOrDefault(Witsml131.ReferenceData.LogIndexDirection.increasing) == Witsml131.ReferenceData.LogIndexDirection.increasing;
+        }
+
+        /// <summary>
+        /// Determines whether the <see cref="Witsml141.Log"/> is increasing.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns>
+        /// <c>true</c> if the <see cref="Witsml141.Log"/> is increasing; otherwise, false.
+        /// </returns>
+        public static bool IsIncreasing(this Witsml141.Log log)
+        {
+            return log.Direction.GetValueOrDefault(Witsml141.ReferenceData.LogIndexDirection.increasing) == Witsml141.ReferenceData.LogIndexDirection.increasing;
+        }
+
+        /// <summary>
+        /// Determines whether the <see cref="Witsml131.Log"/> is a time log.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="includeElapsedTime">if set to <c>true</c>, include elapsed time.</param>
+        /// <returns>
+        /// <c>true</c> if the <see cref="Witsml131.Log"/> is a time log; otherwise, false.
+        /// </returns>
+        public static bool IsTimeLog(this Witsml131.Log log, bool includeElapsedTime = false)
+        {
+            return log.IndexType.GetValueOrDefault() == Witsml131.ReferenceData.LogIndexType.datetime ||
+                   (log.IndexType.GetValueOrDefault() == Witsml131.ReferenceData.LogIndexType.elapsedtime && includeElapsedTime);
+        }
+
+        /// <summary>
+        /// Determines whether the <see cref="Witsml141.Log"/> is a time log.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="includeElapsedTime">if set to <c>true</c>, include elapsed time.</param>
+        /// <returns>
+        /// <c>true</c> if the <see cref="Witsml141.Log"/> is a time log; otherwise, false.
+        /// </returns>
+        public static bool IsTimeLog(this Witsml141.Log log, bool includeElapsedTime = false)
+        {
+            return log.IndexType.GetValueOrDefault() == Witsml141.ReferenceData.LogIndexType.datetime ||
+                   (log.IndexType.GetValueOrDefault() == Witsml141.ReferenceData.LogIndexType.elapsedtime && includeElapsedTime);
+        }
+
         /// <summary>
         /// Gets the <see cref="Witsml131.ComponentSchemas.LogCurveInfo"/> by uid.
         /// </summary>

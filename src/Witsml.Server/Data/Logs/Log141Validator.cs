@@ -22,8 +22,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
-using Energistics.DataAccess.WITSML141.ReferenceData;
 using PDS.Framework;
+using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -81,7 +81,6 @@ namespace PDS.Witsml.Server.Data.Logs
             var mnemonicList = Parser.GetLogDataMnemonics().ToArray();
             if (logDatas.Length == 1)
             {
-                var logData = logDatas.First();
                 if (mnemonicList.Any() && DuplicateUid(mnemonicList))
                 {
                     yield return new ValidationResult(ErrorCodes.DuplicateMnemonics.ToString(), new[] { "LogData", "MnemonicsList" });
@@ -258,14 +257,16 @@ namespace PDS.Witsml.Server.Data.Logs
                 // Validate LogCurveInfo
                 else if (logCurves != null)
                 {
-                    var isTimeLog = current.IndexType == LogIndexType.datetime || current.IndexType == LogIndexType.elapsedtime;
-                    var exist = current.LogCurveInfo != null ? current.LogCurveInfo : new List<LogCurveInfo>();
+                    var isTimeLog = current.IsTimeLog(true);
+                    var exist = current.LogCurveInfo ?? new List<LogCurveInfo>();
                     var uids = exist.Select(e => e.Uid.ToUpper()).ToList();
                     var newCurves = logCurves.Where(l => !uids.Contains(l.Uid.ToUpper())).ToList();
                     var updateCurves = logCurves.Where(l => uids.Contains(l.Uid.ToUpper())).ToList();
-                    if (newCurves.Count > 0 && updateCurves.Count > 1)
-                        yield return new ValidationResult(ErrorCodes.AddingUpdatingLogCurveAtTheSameTime.ToString(), new[] { "LogCurveInfo", "Uid" });
 
+                    if (newCurves.Count > 0 && updateCurves.Count > 1)
+                    {
+                        yield return new ValidationResult(ErrorCodes.AddingUpdatingLogCurveAtTheSameTime.ToString(), new[] { "LogCurveInfo", "Uid" });
+                    }
                     else if (isTimeLog && newCurves.Any(c => c.MinDateTimeIndex.HasValue || c.MaxDateTimeIndex.HasValue)
                         || !isTimeLog && newCurves.Any(c => c.MinIndex != null || c.MaxIndex != null))
                     {

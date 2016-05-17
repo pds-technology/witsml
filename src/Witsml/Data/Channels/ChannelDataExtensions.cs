@@ -18,7 +18,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using PDS.Framework;
 using PDS.Witsml.Data.Logs;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
@@ -33,13 +32,35 @@ namespace PDS.Witsml.Data.Channels
             return new ChannelDataReader(records);
         }
 
+        public static bool IsIncreasing(this Witsml200.ChannelSet channelSet)
+        {
+            if (channelSet?.Index == null) return true;
+            return channelSet.Index.Select(x => x.IsIncreasing()).FirstOrDefault();
+        }
+
+        public static bool IsIncreasing(this Witsml200.ComponentSchemas.ChannelIndex channelIndex)
+        {
+            return channelIndex.Direction.GetValueOrDefault(Witsml200.ReferenceData.IndexDirection.increasing) == Witsml200.ReferenceData.IndexDirection.increasing;
+        }
+
+        public static bool IsTimeIndex(this Witsml200.ChannelSet channelSet, bool includeElapsedTime = false)
+        {
+            if (channelSet?.Index == null) return false;
+            return channelSet.Index.Select(x => x.IsTimeIndex(includeElapsedTime)).FirstOrDefault();
+        }
+
+        public static bool IsTimeIndex(this Witsml200.ComponentSchemas.ChannelIndex channelIndex, bool includeElapsedTime = false)
+        {
+            return channelIndex.IndexType.GetValueOrDefault() == Witsml200.ReferenceData.ChannelIndexType.datetime ||
+                   (channelIndex.IndexType.GetValueOrDefault() == Witsml200.ReferenceData.ChannelIndexType.elapsedtime && includeElapsedTime);
+        }
+
         public static ChannelDataReader GetReader(this Witsml131.Log log)
         {
-            if (log.LogData == null || !log.LogData.Any())
-                return null;
+            if (log.LogData == null || !log.LogData.Any()) return null;
 
-            var isTimeIndex = log.IndexType.GetValueOrDefault() == Witsml131.ReferenceData.LogIndexType.datetime;
-            var increasing = log.Direction.GetValueOrDefault() == Witsml131.ReferenceData.LogIndexDirection.increasing;
+            var isTimeIndex = log.IsTimeLog();
+            var increasing = log.IsIncreasing();
 
             // Split index curve from other value curves
             var indexCurve = log.LogCurveInfo.GetByMnemonic(log.IndexCurve.Value);
@@ -54,11 +75,10 @@ namespace PDS.Witsml.Data.Channels
       
         public static IEnumerable<ChannelDataReader> GetReaders(this Witsml141.Log log)
         {
-            if (log.LogData == null)
-                yield break;
+            if (log.LogData == null) yield break;
 
-            var isTimeIndex = log.IndexType.GetValueOrDefault() == Witsml141.ReferenceData.LogIndexType.datetime;
-            var increasing = log.Direction.GetValueOrDefault() == Witsml141.ReferenceData.LogIndexDirection.increasing;
+            var isTimeIndex = log.IsTimeLog();
+            var increasing = log.IsIncreasing();
 
             foreach (var logData in log.LogData)
             {
@@ -88,23 +108,19 @@ namespace PDS.Witsml.Data.Channels
 
         public static IEnumerable<ChannelDataReader> GetReaders(this Witsml200.Log log)
         {
-            if (log.ChannelSet == null)
-                yield break;
+            if (log.ChannelSet == null) yield break;
 
             foreach (var channelSet in log.ChannelSet)
             {
                 var reader = channelSet.GetReader();
-                if (reader == null)
-                    continue;
-
+                if (reader == null) continue;
                 yield return reader;
             }
         }
 
         public static ChannelDataReader GetReader(this Witsml200.ChannelSet channelSet)
         {
-            if (channelSet.Data == null || string.IsNullOrWhiteSpace(channelSet.Data.Data))
-                return null;
+            if (string.IsNullOrWhiteSpace(channelSet?.Data?.Data)) return null;
 
             // Not including index channels with value channels
             var mnemonics = channelSet.Channel.Select(x => x.Mnemonic).ToArray();
@@ -153,8 +169,8 @@ namespace PDS.Witsml.Data.Channels
             {
                 Mnemonic = channelIndex.Mnemonic,
                 Unit = channelIndex.Uom,
-                Increasing = channelIndex.Direction.GetValueOrDefault() == Witsml200.ReferenceData.IndexDirection.increasing,
-                IsTimeIndex = channelIndex.IndexType.GetValueOrDefault() == Witsml200.ReferenceData.ChannelIndexType.datetime
+                Increasing = channelIndex.IsIncreasing(),
+                IsTimeIndex = channelIndex.IsTimeIndex()
             };
         }
 
