@@ -16,7 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Witsml131 = Energistics.DataAccess.WITSML131;
@@ -167,8 +166,8 @@ namespace PDS.Witsml.Data.Logs
         public static IEnumerable<string> GetNullValues(this Witsml131.Log log, string[] mnemonics)
         {
             return mnemonics
-                .Select(x => log.LogCurveInfo.First(lci => lci.Mnemonic.EqualsIgnoreCase(x)))
-                .Select(n => GetNullValue(log.NullValue, n.NullValue));
+                .Select(x => log.LogCurveInfo.GetByMnemonic(x))
+                .Select(n => GetNullValue(log.NullValue, n?.NullValue));
         }
 
         /// <summary>
@@ -182,8 +181,8 @@ namespace PDS.Witsml.Data.Logs
         public static IEnumerable<string> GetNullValues(this Witsml141.Log log, string[] mnemonics)
         {
             return mnemonics
-                .Select(x => log.LogCurveInfo.First(lci => lci.Mnemonic.Value.EqualsIgnoreCase(x)))
-                .Select(n => GetNullValue(log.NullValue, n.NullValue));
+                .Select(x => log.LogCurveInfo.GetByMnemonic(x))
+                .Select(n => GetNullValue(log.NullValue, n?.NullValue));
         }
 
         /// <summary>

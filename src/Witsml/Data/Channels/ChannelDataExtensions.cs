@@ -42,9 +42,9 @@ namespace PDS.Witsml.Data.Channels
             var increasing = log.Direction.GetValueOrDefault() == Witsml131.ReferenceData.LogIndexDirection.increasing;
 
             // Split index curve from other value curves
-            var indexCurve = log.LogCurveInfo.FirstOrDefault(x => x.Mnemonic.EqualsIgnoreCase(log.IndexCurve.Value));
-            var mnemonics = log.LogCurveInfo.Where(x => x.Mnemonic != indexCurve.Mnemonic).Select(x => x.Mnemonic).ToArray();
-            var units = log.LogCurveInfo.Where(x => x.Mnemonic != indexCurve.Mnemonic).Select(x => x.Unit).ToArray();
+            var indexCurve = log.LogCurveInfo.GetByMnemonic(log.IndexCurve.Value);
+            var mnemonics = log.LogCurveInfo.Where(x => x != indexCurve).Select(x => x.Mnemonic).ToArray();
+            var units = log.LogCurveInfo.Where(x => x != indexCurve).Select(x => x.Unit).ToArray();
             var nullValues = log.GetNullValues(mnemonics).ToArray();
 
             return new ChannelDataReader(log.LogData, mnemonics, units, nullValues, log.GetUri())
@@ -65,11 +65,20 @@ namespace PDS.Witsml.Data.Channels
                 if (logData.Data == null || !logData.Data.Any())
                     continue;
 
+                var mnemonics = ChannelDataReader.Split(logData.MnemonicList);
+                var units = ChannelDataReader.Split(logData.UnitList);
+                var nullValues = log.GetNullValues(mnemonics).Skip(1).ToArray();
+
                 // Split index curve from other value curves
-                var indexCurve = log.LogCurveInfo.FirstOrDefault(x => x.Mnemonic.Value.EqualsIgnoreCase(log.IndexCurve));
-                var mnemonics = ChannelDataReader.Split(logData.MnemonicList).Skip(1).ToArray();
-                var units = ChannelDataReader.Split(logData.UnitList).Skip(1).ToArray();
-                var nullValues = log.GetNullValues(mnemonics).ToArray();
+                var indexCurve = log.LogCurveInfo.GetByMnemonic(log.IndexCurve) ?? new Witsml141.ComponentSchemas.LogCurveInfo
+                {
+                    Mnemonic = new Witsml141.ComponentSchemas.ShortNameStruct(mnemonics.FirstOrDefault()),
+                    Unit = units.FirstOrDefault()
+                };
+
+                // Skip index curve when passing mnemonics to reader
+                mnemonics = mnemonics.Skip(1).ToArray();
+                units = units.Skip(1).ToArray();
 
                 yield return new ChannelDataReader(logData.Data, mnemonics, units, nullValues, log.GetUri())
                     // Add index curve to separate collection

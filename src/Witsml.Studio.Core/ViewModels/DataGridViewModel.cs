@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Data;
 using System.Linq;
 using Caliburn.Micro;
@@ -33,6 +34,8 @@ namespace PDS.Witsml.Studio.Core.ViewModels
     /// <seealso cref="Caliburn.Micro.Screen" />
     public class DataGridViewModel : Screen
     {
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(DataGridViewModel));
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DataGridViewModel"/> class.
         /// </summary>
@@ -67,11 +70,18 @@ namespace PDS.Witsml.Studio.Core.ViewModels
             DataTable.Clear();
             DataTable.Columns.Clear();
 
-            var log131 = dataObject as Witsml131.Log;
-            if (log131 != null) SetLogData(log131);
+            try
+            {
+                var log131 = dataObject as Witsml131.Log;
+                if (log131 != null) SetLogData(log131);
 
-            var log141 = dataObject as Witsml141.Log;
-            if (log141 != null) SetLogData(log141);
+                var log141 = dataObject as Witsml141.Log;
+                if (log141 != null) SetLogData(log141);
+            }
+            catch (Exception ex)
+            {
+                _log.WarnFormat("Error displaying growing object data: {0}", ex);
+            }
         }
 
         /// <summary>

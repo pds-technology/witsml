@@ -74,7 +74,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             return OptionsIn.ReturnElements.All.Equals(returnElements) ||
                    OptionsIn.ReturnElements.DataOnly.Equals(returnElements) ||
-                   parser.Contains("logData");
+                   (OptionsIn.ReturnElements.Requested.Equals(returnElements) && parser.Contains("logData"));
         }
 
         /// <summary>
