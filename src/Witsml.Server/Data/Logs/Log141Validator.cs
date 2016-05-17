@@ -276,8 +276,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     }
                     else if (logData != null && logData.Count > 0)
                     {
-                        var indexCurve = logCurves.Count > 0 ? logCurves.First().Mnemonic.Value : current.IndexCurve;
-                        yield return ValidateLogData(indexCurve, logCurves, logData, false);
+                        yield return ValidateLogData(current.IndexCurve, logCurves, logData, false);
                     }
                 }
 
