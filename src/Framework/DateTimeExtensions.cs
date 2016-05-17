@@ -26,29 +26,55 @@ namespace PDS.Framework
     /// </summary>
     public static class DateTimeExtensions
     {
-        private const long EpochTimeInMicroseconds = 62135596800000000L;
         private const long MicroToNanoFactor = 10L;
 
+        /// <summary>
+        /// Converts a Unix time expressed as the number of microseconds that have elapsed
+        /// since 1970-01-01T00:00:00Z to a <see cref="System.DateTimeOffset"/> value.
+        /// </summary>
+        /// <param name="microseconds">The microseconds.</param>
+        /// <param name="offset">The offset.</param>
+        /// <returns>A <see cref="System.DateTimeOffset"/> instance.</returns>
         public static DateTimeOffset FromUnixTimeMicroseconds(long microseconds, TimeSpan? offset = null)
         {
             return new DateTimeOffset(ToUnixTicks(microseconds), offset ?? TimeSpan.Zero);
         }
 
+        /// <summary>
+        /// Returns the number of microseconds that have elapsed since 1970-01-01T00:00:00.000Z.
+        /// </summary>
+        /// <param name="dateTimeOffset">The date time offset.</param>
+        /// <returns>The number of microseconds that have elapsed since 1970-01-01T00:00:00.000Z.</returns>
         public static long ToUnixTimeMicroseconds(this DateTimeOffset dateTimeOffset)
         {
             return dateTimeOffset.UtcTicks / MicroToNanoFactor;
         }
 
+        /// <summary>
+        /// Returns the number of microseconds that have elapsed since 1970-01-01T00:00:00.000Z.
+        /// </summary>
+        /// <param name="dateTimeOffset">The date time offset.</param>
+        /// <returns>The number of microseconds that have elapsed since 1970-01-01T00:00:00.000Z.</returns>
         public static long? ToUnixTimeMicroseconds(this DateTimeOffset? dateTimeOffset)
         {
             return dateTimeOffset?.ToUnixTimeMicroseconds();
         }
 
+        /// <summary>
+        /// Returns the number of microseconds that have elapsed since 1970-01-01T00:00:00.000Z.
+        /// </summary>
+        /// <param name="dateTime">The date time offset.</param>
+        /// <returns>The number of microseconds that have elapsed since 1970-01-01T00:00:00.000Z.</returns>
         public static long ToUnixTimeMicroseconds(this DateTime dateTime)
         {
             return DateTimeOffset.Parse(dateTime.ToString("o")).ToUnixTimeMicroseconds();
         }
 
+        /// <summary>
+        /// Returns the number of microseconds that have elapsed since 1970-01-01T00:00:00.000Z.
+        /// </summary>
+        /// <param name="dateTime">The date time offset.</param>
+        /// <returns>The number of microseconds that have elapsed since 1970-01-01T00:00:00.000Z.</returns>
         public static long? ToUnixTimeMicroseconds(this DateTime? dateTime)
         {
             return dateTime?.ToUnixTimeMicroseconds();
@@ -71,6 +97,11 @@ namespace PDS.Framework
             return FromUnixTimeMicroseconds(value.ToUnixTimeMicroseconds(), value.Offset).ToOffset(offset.Value);
         }
 
+        /// <summary>
+        /// Converts microseconds to nanoseconds (ticks).
+        /// </summary>
+        /// <param name="microseconds">The microseconds.</param>
+        /// <returns>The value converted to nanoseconds (ticks).</returns>
         private static long ToUnixTicks(long microseconds)
         {
             return microseconds * MicroToNanoFactor;
