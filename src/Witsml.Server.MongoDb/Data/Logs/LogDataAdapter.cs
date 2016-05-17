@@ -525,20 +525,22 @@ namespace PDS.Witsml.Server.Data.Logs
             }
         }
 
-        protected void UpdateIndexRange(EtpUri uri, T entity, Dictionary<string, Range<double?>> ranges, IEnumerable<string> mnemonics, bool isTimeLog, string indexUnit, TimeSpan? offset)
+        private void UpdateIndexRange(EtpUri uri, T entity, Dictionary<string, Range<double?>> ranges, IEnumerable<string> mnemonics, bool isTimeLog, string indexUnit, TimeSpan? offset)
         {
             Logger.DebugFormat("Updating index range with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
 
             var mongoUpdate = new MongoDbUpdate<T>(GetCollection(), null);
             var filter = MongoDbUtility.GetEntityFilter<T>(uri);
-            var logCurves = GetLogCurves(entity);
+            GetLogCurves(entity);
             var increasing = IsIncreasing(entity);
             UpdateDefinition<T> logHeaderUpdate = null;
 
             foreach (var mnemonic in mnemonics)
             {
-                var curve = logCurves.FirstOrDefault(c => c.Uid.EqualsIgnoreCase(mnemonic));
-                if (curve == null) continue;
+                var curve = GetLogCurve(entity, mnemonic);
+
+                if (curve == null)
+                    continue;
 
                 var curveFilter = Builders<T>.Filter.And(filter,
                     MongoDbUtility.BuildFilter<T>("LogCurveInfo.Uid", curve.Uid));
@@ -671,5 +673,7 @@ namespace PDS.Witsml.Server.Data.Logs
         protected abstract IndexMetadataRecord ToIndexMetadataRecord(T entity, TChild indexCurve, int scale = 3);
 
         protected abstract ChannelMetadataRecord ToChannelMetadataRecord(T entity, TChild curve, IndexMetadataRecord indexMetadata);
+
+        protected abstract TChild GetLogCurve(T entity, string mnemonic);
     }
 }

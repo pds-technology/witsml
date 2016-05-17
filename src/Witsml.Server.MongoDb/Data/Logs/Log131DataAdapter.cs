@@ -278,6 +278,11 @@ namespace PDS.Witsml.Server.Data.Logs
             };
         }
 
+        protected override LogCurveInfo GetLogCurve(Log entity, string mnemonic)
+        {
+            return entity.LogCurveInfo.FirstOrDefault(c => c.Uid.EqualsIgnoreCase(mnemonic) || c.Mnemonic.EqualsIgnoreCase(mnemonic));
+        }
+
         private ChannelDataReader ExtractDataReader(Log entity, Log existing = null)
         {
             if (existing == null)
