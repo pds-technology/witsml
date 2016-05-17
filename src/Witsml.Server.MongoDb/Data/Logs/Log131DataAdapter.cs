@@ -118,6 +118,11 @@ namespace PDS.Witsml.Server.Data.Logs
             return log.IsTimeLog(includeElapsedTime);
         }
 
+        protected override LogCurveInfo GetLogCurve(Log log, string mnemonic)
+        {
+            return log?.LogCurveInfo.GetByUid(mnemonic) ?? log?.LogCurveInfo.GetByMnemonic(mnemonic);
+        }
+
         protected override List<LogCurveInfo> GetLogCurves(Log log)
         {
             return log.LogCurveInfo;
@@ -276,11 +281,6 @@ namespace PDS.Witsml.Server.Data.Logs
                     indexMetadata
                 }
             };
-        }
-
-        protected override LogCurveInfo GetLogCurve(Log entity, string mnemonic)
-        {
-            return entity.LogCurveInfo.FirstOrDefault(c => c.Uid.EqualsIgnoreCase(mnemonic) || c.Mnemonic.EqualsIgnoreCase(mnemonic));
         }
 
         private ChannelDataReader ExtractDataReader(Log entity, Log existing = null)
