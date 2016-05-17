@@ -531,16 +531,13 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var mongoUpdate = new MongoDbUpdate<T>(GetCollection(), null);
             var filter = MongoDbUtility.GetEntityFilter<T>(uri);
-            GetLogCurves(entity);
             var increasing = IsIncreasing(entity);
             UpdateDefinition<T> logHeaderUpdate = null;
 
             foreach (var mnemonic in mnemonics)
             {
                 var curve = GetLogCurve(entity, mnemonic);
-
-                if (curve == null)
-                    continue;
+                if (curve == null) continue;
 
                 var curveFilter = Builders<T>.Filter.And(filter,
                     MongoDbUtility.BuildFilter<T>("LogCurveInfo.Uid", curve.Uid));
@@ -650,6 +647,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
         protected abstract bool IsTimeLog(T log, bool includeElapsedTime = false);
 
+        protected abstract TChild GetLogCurve(T log, string mnemonic);
+
         protected abstract List<TChild> GetLogCurves(T log);
 
         protected abstract string GetMnemonic(TChild curve);
@@ -673,7 +672,5 @@ namespace PDS.Witsml.Server.Data.Logs
         protected abstract IndexMetadataRecord ToIndexMetadataRecord(T entity, TChild indexCurve, int scale = 3);
 
         protected abstract ChannelMetadataRecord ToChannelMetadataRecord(T entity, TChild curve, IndexMetadataRecord indexMetadata);
-
-        protected abstract TChild GetLogCurve(T entity, string mnemonic);
     }
 }

@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
@@ -121,6 +120,11 @@ namespace PDS.Witsml.Server.Data.Logs
         protected override bool IsTimeLog(Log log, bool includeElapsedTime = false)
         {
             return log.IsTimeLog(includeElapsedTime);
+        }
+
+        protected override LogCurveInfo GetLogCurve(Log log, string mnemonic)
+        {
+            return log?.LogCurveInfo.GetByUid(mnemonic) ?? log?.LogCurveInfo.GetByMnemonic(mnemonic);
         }
 
         protected override List<LogCurveInfo> GetLogCurves(Log log)
@@ -289,11 +293,6 @@ namespace PDS.Witsml.Server.Data.Logs
                     indexMetadata
                 }
             };
-        }
-
-        protected override LogCurveInfo GetLogCurve(Log entity, string mnemonic)
-        {
-           return entity.LogCurveInfo.FirstOrDefault(c => c.Uid.EqualsIgnoreCase(mnemonic) || c.Mnemonic.Value.EqualsIgnoreCase(mnemonic));
         }
 
         private IEnumerable<ChannelDataReader> ExtractDataReaders(Log entity, Log existing = null)
