@@ -272,7 +272,7 @@ namespace PDS.Witsml.Data
 
                 HandleTimestampValue(xmlObject, propertyType, propertyPath, propertyValue, new Timestamp(value));
             }
-            else if (propertyValue.EqualsIgnoreCase("NaN") && propertyType.IsNumeric())
+            else if (propertyValue.EqualsIgnoreCase("NaN") && IsNumeric(propertyType))
             {
                 HandleNaNValue(xmlObject, propertyType, propertyPath, propertyValue);
             }
@@ -467,6 +467,26 @@ namespace PDS.Witsml.Data
         {
             var prefix = string.IsNullOrEmpty(parentPath) ? string.Empty : string.Format("{0}.", parentPath);
             return string.Format("{0}{1}", prefix, propertyName.ToPascalCase());
+        }
+
+        private bool IsNumeric(Type propertyType)
+        {
+            var type = propertyType;
+
+            if (propertyType.IsClass)
+            {
+                var propertyInfo = propertyType.GetProperty("Value");
+                if (propertyInfo != null)
+                {
+                    type = propertyInfo.PropertyType;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            return type.IsNumeric();
         }
     }
 }
