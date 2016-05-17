@@ -246,7 +246,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 return new Dictionary<int, string>(0);
             }
 
-            var queryMnemonics = parser.GetLogDataMnemonics().ToArray();
+            var queryMnemonics = parser.GetLogDataMnemonics()?.ToArray() ?? new string[0];
             if (!queryMnemonics.Any())
             {
                 queryMnemonics = parser.GetLogCurveInfoMnemonics().ToArray();
