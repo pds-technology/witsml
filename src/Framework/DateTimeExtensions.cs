@@ -73,11 +73,6 @@ namespace PDS.Framework
 
         private static long ToUnixTicks(long microseconds)
         {
-            return ToTicks(microseconds) - EpochTimeInMicroseconds;
-        }
-
-        private static long ToTicks(long microseconds)
-        {
             return microseconds * MicroToNanoFactor;
         }
     }
