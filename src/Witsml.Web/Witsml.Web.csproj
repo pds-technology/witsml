@@ -207,15 +207,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="App_Data\" />
     <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
-    <Compile Include="App_Start\SecurityConfig.cs" />
-    <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Areas\HelpPage\ApiDescriptionExtensions.cs" />
     <Compile Include="Areas\HelpPage\App_Start\HelpPageConfig.cs" />
     <Compile Include="Areas\HelpPage\Controllers\HelpController.cs" />
@@ -281,9 +278,6 @@
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\Api.cshtml" />
     <Content Include="WitsmlStore.svc" />
-    <Compile Include="Security\EtpAuthenticationModule.cs" />
-    <Compile Include="Security\EtpAuthorizationServerProvider.cs" />
-    <Compile Include="Security\EtpJwtFormat.cs" />
     <Compile Include="WitsmlStore.svc.cs">
       <DependentUpon>WitsmlStore.svc</DependentUpon>
     </Compile>
@@ -328,6 +322,10 @@
     <ProjectReference Include="..\Witsml.Server.MongoDb\Witsml.Server.MongoDb.csproj">
       <Project>{692d27d9-2f4c-44a6-8d71-8b291e0dc1a3}</Project>
       <Name>Witsml.Server.MongoDb</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Witsml.Server.Web\Witsml.Server.Web.csproj">
+      <Project>{5ff377f4-56c5-49d9-ba0a-1955a33c4902}</Project>
+      <Name>Witsml.Server.Web</Name>
     </ProjectReference>
     <ProjectReference Include="..\Witsml.Server\Witsml.Server.csproj">
       <Project>{93faae2f-13aa-46df-a94b-36155b51ebfa}</Project>

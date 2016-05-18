@@ -24,6 +24,7 @@ using System.Web.Routing;
 using log4net.Config;
 using PDS.Framework.Web;
 using PDS.Witsml.Server;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Web
 {
@@ -41,8 +42,8 @@ namespace PDS.Witsml.Web
             ContainerConfiguration.Register(Server.MapPath("~/bin"));
 
             // pre-init IWitsmlStore dependencies
-            var store = GlobalConfiguration.Configuration.DependencyResolver.GetService(typeof(IWitsmlStore)) as IWitsmlStore;
-            store.WMLS_GetCap(new WMLS_GetCapRequest());
+            var store = (IWitsmlStore) GlobalConfiguration.Configuration.DependencyResolver.GetService(typeof(IWitsmlStore));
+            store.WMLS_GetCap(new WMLS_GetCapRequest(OptionsIn.DataVersion.Version141));
         }
     }
 }

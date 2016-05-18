@@ -16,28 +16,17 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.ComponentModel.Composition;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Net.WebSockets;
-using System.Threading.Tasks;
-using System.Web;
 using System.Web.Http;
 using System.Web.Http.Description;
-using System.Web.WebSockets;
 using Energistics;
 using Energistics.Datatypes;
 using Energistics.Protocol.ChannelStreaming;
-using Energistics.Protocol.Core;
 using Energistics.Protocol.Discovery;
 using Energistics.Protocol.Store;
 using PDS.Framework;
-using PDS.Witsml.Server.Data;
-using PDS.Witsml.Server.Properties;
+using PDS.Witsml.Server.Controllers;
 
 namespace PDS.Witsml.Web.Controllers
 {
@@ -47,40 +36,17 @@ namespace PDS.Witsml.Web.Controllers
     /// <seealso cref="System.Web.Http.ApiController" />
     [Export]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public class EtpController : ApiController
+    public class EtpController : EtpControllerBase
     {
-        private static readonly string DefaultServerName = Settings.Default.DefaultServerName;
-        private static readonly string DefaultServerVersion = Settings.Default.DefaultServerVersion;
-        private readonly IContainer _container;
-
         [ImportingConstructor]
-        public EtpController(IContainer container)
+        public EtpController(IContainer container) : base(container)
         {
-            _container = container;
-            DataAdapters = new List<IEtpDataProvider>();
         }
-
-        [ImportMany]
-        public List<IEtpDataProvider> DataAdapters { get; set; }
 
         // GET: api/etp
         public HttpResponseMessage Get()
         {
-            var context = HttpContext.Current;
-
-            if (context.IsWebSocketRequest || context.IsWebSocketRequestUpgrading)
-            {
-                context.AcceptWebSocketRequest(AcceptWebSocketRequest, new AspNetWebSocketOptions()
-                {
-                    SubProtocol = Energistics.Properties.Settings.Default.EtpSubProtocolName
-                });
-
-                return Request.CreateResponse(HttpStatusCode.SwitchingProtocols);
-            }
-
-            return Request.CreateResponse(
-                HttpStatusCode.UpgradeRequired,
-                new { error = "Invalid web socket request" });
+            return UpgradeRequest();
         }
 
         // GET: api/etp/ServerCapabilities
@@ -88,91 +54,22 @@ namespace PDS.Witsml.Web.Controllers
         [ResponseType(typeof(ServerCapabilities))]
         public IHttpActionResult GetServerCapabilities()
         {
-            var handler = CreateEtpServerHandler(null, null);
-            var supportedObjects = GetSupportedObjects();
-
-            var capServer = new ServerCapabilities()
-            {
-                ApplicationName = handler.ApplicationName,
-                ApplicationVersion = handler.ApplicationVersion,
-                SupportedProtocols = handler.GetSupportedProtocols(),
-                SessionId = Guid.NewGuid().ToString(),
-                SupportedObjects = supportedObjects,
-                ContactInfomration = new Contact()
-                {
-                    OrganizationName = Settings.Default.DefaultVendorName,
-                    ContactName = Settings.Default.DefaultContactName,
-                    ContactEmail = Settings.Default.DefaultContactEmail,
-                    ContactPhone = Settings.Default.DefaultContactPhone
-                }
-            };
-
-            return Ok(capServer);
+            return ServerCapabilities();
         }
 
         // GET: api/etp/Clients
         [Route("api/etp/Clients")]
         public IHttpActionResult GetClients()
         {
-            var clients = EtpServerHandler.Clients.Select(c =>
-            {
-                var handler = c.Value;
-                var core = handler.Handler<ICoreServer>() as CoreServerHandler;
-
-                return new
-                {
-                    handler.SessionId,
-                    core.ClientApplicationName,
-                    core.RequestedProtocols
-                };
-            });
-
-            return Ok(clients);
+            return ClientList();
         }
 
-        private async Task AcceptWebSocketRequest(AspNetWebSocketContext context)
+        protected override void RegisterProtocolHandlers(EtpServerHandler handler)
         {
-            var headers = GetWebSocketHeaders(context.Headers, context.QueryString);
-            var handler = CreateEtpServerHandler(context.WebSocket, headers);
-            handler.SupportedObjects = GetSupportedObjects();
-            await handler.Accept(context);
-        }
-
-        private IDictionary<string, string> GetWebSocketHeaders(NameValueCollection headers, NameValueCollection queryString)
-        {
-            var combined = new Dictionary<string, string>();
-
-            foreach (var key in headers.AllKeys)
-                combined[key] = headers[key];
-
-            foreach (var key in queryString.AllKeys)
-                combined[key] = queryString[key];
-
-            return combined;
-        }
-
-        private EtpServerHandler CreateEtpServerHandler(WebSocket socket, IDictionary<string, string> headers)
-        {
-            var handler = new EtpServerHandler(socket, DefaultServerName, DefaultServerVersion, headers);
-
-            handler.Register(() => _container.Resolve<IChannelStreamingProducer>());
-            handler.Register(() => _container.Resolve<IChannelStreamingConsumer>());
-            handler.Register(() => _container.Resolve<IDiscoveryStore>());
-            handler.Register(() => _container.Resolve<IStoreStore>());
-
-            return handler;
-        }
-
-        private List<string> GetSupportedObjects()
-        {
-            var contentTypes = new List<EtpContentType>();
-
-            DataAdapters.ForEach(x => x.GetSupportedObjects(contentTypes));
-
-            return contentTypes
-                .Select(x => x.ToString())
-                .OrderBy(x => x)
-                .ToList();
+            handler.Register(() => Container.Resolve<IChannelStreamingProducer>());
+            handler.Register(() => Container.Resolve<IChannelStreamingConsumer>());
+            handler.Register(() => Container.Resolve<IDiscoveryStore>());
+            handler.Register(() => Container.Resolve<IStoreStore>());
         }
     }
 }

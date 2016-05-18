@@ -23,11 +23,11 @@ using Microsoft.Owin;
 using Microsoft.Owin.Cors;
 using Microsoft.Owin.Security.OAuth;
 using Owin;
-using PDS.Witsml.Web.Security;
+using PDS.Witsml.Server.Security;
 
-[assembly: OwinStartup(typeof(PDS.Witsml.Web.SecurityConfig))]
+[assembly: OwinStartup(typeof(PDS.Witsml.Server.Configuration.SecurityConfig))]
 
-namespace PDS.Witsml.Web
+namespace PDS.Witsml.Server.Configuration
 {
     public class SecurityConfig
     {

@@ -55,6 +55,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{3FE5E144
 		External\nuget.config = External\nuget.config
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Server.Web", "Witsml.Server.Web\Witsml.Server.Web.csproj", "{5FF377F4-56C5-49D9-BA0A-1955A33C4902}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -149,6 +151,10 @@ Global
 		{33BCDFED-F3DC-43BC-95E0-C38C42EFF656}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33BCDFED-F3DC-43BC-95E0-C38C42EFF656}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33BCDFED-F3DC-43BC-95E0-C38C42EFF656}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FF377F4-56C5-49D9-BA0A-1955A33C4902}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FF377F4-56C5-49D9-BA0A-1955A33C4902}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FF377F4-56C5-49D9-BA0A-1955A33C4902}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FF377F4-56C5-49D9-BA0A-1955A33C4902}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

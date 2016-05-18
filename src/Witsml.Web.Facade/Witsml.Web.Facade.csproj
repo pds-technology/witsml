@@ -121,7 +121,6 @@
     <Content Include="WitsmlStore.svc" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -142,6 +141,10 @@
     <ProjectReference Include="..\Witsml.Server.SqlClient\Witsml.Server.SqlClient.csproj">
       <Project>{0ae08c73-92e8-49ac-9101-56dac34b2276}</Project>
       <Name>Witsml.Server.SqlClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Witsml.Server.Web\Witsml.Server.Web.csproj">
+      <Project>{5ff377f4-56c5-49d9-ba0a-1955a33c4902}</Project>
+      <Name>Witsml.Server.Web</Name>
     </ProjectReference>
     <ProjectReference Include="..\Witsml.Server\Witsml.Server.csproj">
       <Project>{93faae2f-13aa-46df-a94b-36155b51ebfa}</Project>

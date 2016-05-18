@@ -24,7 +24,7 @@ using Microsoft.Owin.Security.DataHandler.Encoder;
 using PDS.Framework.Web.Security;
 using Thinktecture.IdentityModel.Tokens;
 
-namespace PDS.Witsml.Web.Security
+namespace PDS.Witsml.Server.Security
 {
     public class EtpAuthenticationModule : BasicAuthenticationModule
     {

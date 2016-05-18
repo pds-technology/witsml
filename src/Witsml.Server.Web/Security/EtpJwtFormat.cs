@@ -22,7 +22,7 @@ using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.DataHandler.Encoder;
 using Thinktecture.IdentityModel.Tokens;
 
-namespace PDS.Witsml.Web.Security
+namespace PDS.Witsml.Server.Security
 {
     public class EtpJwtFormat : ISecureDataFormat<AuthenticationTicket>
     {
@@ -41,14 +41,14 @@ namespace PDS.Witsml.Web.Security
         {
             if (data == null)
             {
-                throw new ArgumentNullException("data");
+                throw new ArgumentNullException(nameof(data));
             }
 
             var keyByteArray = TextEncodings.Base64Url.Decode(_secret);
             var signingKey = new HmacSigningCredentials(keyByteArray);
 
-            var issued = data.Properties.IssuedUtc.Value;
-            var expires = data.Properties.ExpiresUtc.Value;
+            var issued = data.Properties.IssuedUtc.GetValueOrDefault(DateTimeOffset.Now);
+            var expires = data.Properties.ExpiresUtc.GetValueOrDefault(issued.AddDays(30));
 
             var token = new JwtSecurityToken(_issuer, _audience, data.Identity.Claims, issued.UtcDateTime, expires.UtcDateTime, signingKey);
             var handler = new JwtSecurityTokenHandler();

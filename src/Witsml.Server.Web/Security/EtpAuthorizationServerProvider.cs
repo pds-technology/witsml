@@ -22,7 +22,7 @@ using System.Web.Security;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.OAuth;
 
-namespace PDS.Witsml.Web.Security
+namespace PDS.Witsml.Server.Security
 {
     public class EtpAuthorizationServerProvider : OAuthAuthorizationServerProvider
     {
