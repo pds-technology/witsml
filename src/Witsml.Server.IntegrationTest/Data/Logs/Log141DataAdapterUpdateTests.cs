@@ -582,5 +582,71 @@ namespace PDS.Witsml.Server.Data.Logs
             var updateResponse = DevKit.Update<LogList, Log>(update);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
         }
+
+        [TestMethod]
+        public void LogDataAdapter_UpdateInStore_Test_Update_Index_Range()
+        {
+            const int count = 10;
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = DevKit.CreateLog(
+                null,
+                DevKit.Name("Log can be added with depth data"),
+                Wellbore.UidWell,
+                Well.Name,
+                response.SuppMsgOut,
+                Wellbore.Name);
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), count, hasEmptyChannel:false);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var update = new Log
+            {
+                Uid = uidLog,
+                UidWell = log.UidWell,
+                UidWellbore = log.UidWellbore,
+                StartIndex = new GenericMeasure
+                {
+                    Uom = "m",
+                    Value = 11
+                }
+            };
+
+            DevKit.InitHeader(update, LogIndexType.measureddepth);
+            DevKit.InitDataMany(update, DevKit.Mnemonics(update), DevKit.Units(update), count, hasEmptyChannel:false);
+
+            var updateResponse = DevKit.Update<LogList, Log>(update);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            var query = new Log
+            {
+                Uid = uidLog,
+                UidWell = log.UidWell,
+                UidWellbore = log.UidWellbore
+            };
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.HeaderOnly);
+            Assert.AreEqual(1, results.Count);
+
+            var result = results.First();
+            Assert.IsNotNull(result);
+            var start = log.StartIndex.Value;
+            var end = update.StartIndex.Value + count - 1;
+            Assert.AreEqual(start, result.StartIndex.Value);
+            Assert.AreEqual(end, result.EndIndex.Value);
+            foreach (var curve in result.LogCurveInfo)
+            {
+                Assert.AreEqual(start, curve.MinIndex.Value);
+                Assert.AreEqual(end, curve.MaxIndex.Value);
+            }
+        }
     }
 }
