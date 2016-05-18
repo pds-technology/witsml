@@ -674,6 +674,30 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         }
 
         /// <summary>
+        /// Appends requests and responses to the SOAP Messages tab.
+        /// </summary>
+        /// <param name="type">The type of data object.</param>
+        /// <param name="action">The SOAP action.</param>
+        /// <param name="message">The SOAP message.</param>
+        internal void OutputSoapMessages(string type, string action, string message)
+        {
+            var now = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff");
+
+            SoapMessages.Insert(
+                SoapMessages.TextLength,
+                string.Format(
+                    "<!---------- {0} : {1} ----------{4}" +
+                    "   Action : {2}{4}" +
+                    "-->{4}" +
+                    "{3}{4}{4}",
+                    type,
+                    now,
+                    action,
+                    message,
+                    Environment.NewLine));
+        }
+
+        /// <summary>
         /// Logs the SOAP request message.
         /// </summary>
         /// <param name="action">The SOAP action.</param>
@@ -704,20 +728,24 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
             if (string.IsNullOrWhiteSpace(message)) return;
 
             var xml = message.Trim().Replace("\x00", string.Empty);
-            var now = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff");
 
-            SoapMessages.Insert(
-                SoapMessages.TextLength,
-                string.Format(
-                    "<!---------- {0} : {1} ----------{4}" +
-                    "   Action : {2}{4}" +
-                    "-->{4}" +
-                    "{3}{4}{4}",
-                    type,
-                    now,
-                    action,
-                    XDocument.Parse(xml),
-                    Environment.NewLine));
+            if (xml.Length > Model.TruncateSize)
+            {
+                var outputPath = new DirectoryInfo(Path.Combine(Model.OutputPath, "soap")).FullName;
+                Directory.CreateDirectory(outputPath);
+
+                outputPath = Path.Combine(outputPath, DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + ".xml");
+                File.WriteAllText(outputPath, xml);
+
+                xml = $"<!-- WARNING: { type } larger than { Model.TruncateSize } characters -->" + Environment.NewLine +
+                      $"<!-- Message automatically saved to { outputPath } -->";
+            }
+            else
+            {
+                xml = XDocument.Parse(xml).ToString();
+            }
+
+            OutputSoapMessages(type, action, xml);
         }
 
         /// <summary>
