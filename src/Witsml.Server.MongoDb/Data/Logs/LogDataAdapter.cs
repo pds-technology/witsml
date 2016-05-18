@@ -156,7 +156,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             if (parentUri != null)
             {
-                var ids = parentUri.Value.GetObjectIds().ToDictionary(x => x.Key, y => y.Value);
+                var ids = parentUri.Value.GetObjectIds().ToDictionary(x => x.ObjectType, y => y.ObjectId);
                 var uidWellbore = ids[ObjectTypes.Wellbore];
                 var uidWell = ids[ObjectTypes.Well];
 
