@@ -47,7 +47,7 @@ namespace PDS.Witsml.Server.Data
             var filters = new List<FilterDefinition<T>>();
 
             var objectIds = uri.GetObjectIds()
-                .ToDictionary(x => x.Key, x => x.Value);
+                .ToDictionary(x => x.ObjectType, x => x.ObjectId);
 
             filters.Add(builder.EqIgnoreCase(idPropertyName, uri.ObjectId));
 

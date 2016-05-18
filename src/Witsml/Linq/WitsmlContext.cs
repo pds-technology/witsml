@@ -134,7 +134,7 @@ namespace PDS.Witsml.Linq
             var count = 0;
 
             var objectIds = uri.GetObjectIds()
-                .ToDictionary(x => x.Key, x => x.Value);
+                .ToDictionary(x => x.ObjectType, x => x.ObjectId);
 
             if (!string.IsNullOrWhiteSpace(uri.ObjectId))
             {
