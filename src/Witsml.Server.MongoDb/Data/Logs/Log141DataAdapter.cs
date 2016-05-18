@@ -226,7 +226,7 @@ namespace PDS.Witsml.Server.Data.Logs
             }
         }
 
-        protected override UpdateDefinition<Log> UpdateCommonData(MongoDbUpdate<Log> mongoUpdate, UpdateDefinition<Log> logHeaderUpdate, Log entity, TimeSpan? offset)
+        protected override UpdateDefinition<Log> UpdateCommonData(UpdateDefinition<Log> logHeaderUpdate, Log entity, TimeSpan? offset)
         {
             if (entity?.CommonData == null)
                 return logHeaderUpdate;

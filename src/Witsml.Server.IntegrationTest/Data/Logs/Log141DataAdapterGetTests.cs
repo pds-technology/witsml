@@ -34,6 +34,8 @@ namespace PDS.Witsml.Server.Data.Logs
     {
         private readonly long DefaultDepthChunkRange = WitsmlSettings.DepthRangeSize;
         private readonly long DefaultTimeChunkRange = WitsmlSettings.TimeRangeSize;
+        private readonly int DefaultMaxDataPoints = WitsmlSettings.MaxDataPoints;
+        private readonly int DefaultMaxDataNodes = WitsmlSettings.MaxDataNodes;
 
         private DevKit141Aspect DevKit;
         private Well _well;
@@ -69,7 +71,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Sets the depth and time chunk size
             WitsmlSettings.DepthRangeSize = 1000;
-            WitsmlSettings.TimeRangeSize = 86400000000; // 1 day
+            WitsmlSettings.TimeRangeSize = 86400000000; // Number of microseconds equals to one day
         }
 
         [TestCleanup]
@@ -77,6 +79,8 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             WitsmlSettings.DepthRangeSize = DefaultDepthChunkRange;
             WitsmlSettings.TimeRangeSize = DefaultTimeChunkRange;
+            WitsmlSettings.MaxDataPoints = DefaultMaxDataPoints;
+            WitsmlSettings.MaxDataNodes = DefaultMaxDataNodes;
         }
 
         [TestMethod]
@@ -1474,6 +1478,48 @@ namespace PDS.Witsml.Server.Data.Logs
             }
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Returns_Less_Than_MaxDataPoints()
+        {
+            int maxDataPoints = 10;
+            int numRows = 10;
+
+            // Add the Setup Well, Wellbore and Log to the store.
+            var logResponse = AddSetupWellWellboreLog(numRows, isDepthLog: true, hasEmptyChannel: false, increasing: true);
+            Assert.AreEqual((short)ErrorCodes.Success, logResponse.Result);
+
+            var query = DevKit.CreateLog(_log.Uid, null, _log.UidWell, null, _log.UidWellbore, null);
+
+            // Query the log and it returns the whole log data
+            short errorCode;            
+            var result = DevKit.QueryWithErrorCode<LogList, Log>(query, out errorCode, ObjectTypes.Log, null, OptionsIn.ReturnElements.All);
+
+            Assert.AreEqual((short)ErrorCodes.Success, errorCode);
+            Assert.IsNotNull(result);
+
+            var returnLog = result.First();
+            Assert.IsNotNull(returnLog);
+            Assert.AreEqual(1, returnLog.LogData.Count);
+
+            var returnDataPoints = returnLog.LogData[0].Data[0].Split(',').Length * returnLog.LogData[0].Data.Count;
+            Assert.IsTrue(maxDataPoints < returnDataPoints);
+
+            // Change the MaxDataPoints in Settings to a small number and query the log again
+            WitsmlSettings.MaxDataPoints = maxDataPoints;
+           
+            result = DevKit.QueryWithErrorCode<LogList, Log>(query, out errorCode, ObjectTypes.Log, null, OptionsIn.ReturnElements.All);
+
+            Assert.AreEqual((short)ErrorCodes.ParialSuccess, errorCode, "Returning partial data.");
+            Assert.IsNotNull(result);
+
+            returnLog = result.First();
+            Assert.IsNotNull(returnLog);
+            Assert.AreEqual(1, returnLog.LogData.Count);
+
+            returnDataPoints = returnLog.LogData[0].Data[0].Split(',').Length * returnLog.LogData[0].Data.Count;
+            Assert.IsFalse(maxDataPoints < returnDataPoints);
+        }
+
         #region Helper Methods
 
         private WMLS_AddToStoreResponse AddSetupWellWellboreLog(int numRows, bool isDepthLog, bool hasEmptyChannel, bool increasing)
@@ -1486,11 +1532,11 @@ namespace PDS.Witsml.Server.Data.Logs
             _log.UidWell = _wellbore.UidWell;
             _log.UidWellbore = response.SuppMsgOut;
 
-            DevKit.InitHeader(_log, LogIndexType.measureddepth, increasing: true);
+            DevKit.InitHeader(_log, LogIndexType.measureddepth, increasing);
 
             var startIndex = new GenericMeasure { Uom = "m", Value = 100 };
             _log.StartIndex = startIndex;
-            DevKit.InitDataMany(_log, DevKit.Mnemonics(_log), DevKit.Units(_log), numRows, 1, true, true, increasing: true);
+            DevKit.InitDataMany(_log, DevKit.Mnemonics(_log), DevKit.Units(_log), numRows, 1, isDepthLog, hasEmptyChannel, increasing);
 
             // Add a log
             response = DevKit.Add<LogList, Log>(_log);
