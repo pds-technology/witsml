@@ -417,21 +417,21 @@ namespace PDS.Witsml.Server.Data.Logs
             var resultWell = DevKit.Query<WellList, Well>(queryWell, optionsIn: OptionsIn.ReturnElements.All);
             if (resultWell.Count == 0)
             {
-                var addWell = DevKit.Add<WellList, Well>(Well);
+                DevKit.Add<WellList, Well>(Well);
             }
 
             var queryWellbore = new Wellbore { Uid = Wellbore.Uid, UidWell = Wellbore.UidWell };
             var resultWellbore = DevKit.Query<WellboreList, Wellbore>(queryWellbore, optionsIn: OptionsIn.ReturnElements.All);
             if (resultWellbore.Count == 0)
             {
-                var addWellbore = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+                DevKit.Add<WellboreList, Wellbore>(Wellbore);
             }
 
             var queryLog = new Log { Uid = Log.Uid, UidWell = Log.UidWell, UidWellbore = Log.UidWellbore };
             var resultLog = DevKit.Query<LogList, Log>(queryLog, optionsIn: OptionsIn.ReturnElements.HeaderOnly);
             if (resultLog.Count == 0)
             {
-                var addLog = DevKit.Add<LogList, Log>(Log);
+                DevKit.Add<LogList, Log>(Log);
             }
 
             var update = new Log
@@ -525,6 +525,48 @@ namespace PDS.Witsml.Server.Data.Logs
                 Assert.IsNull(curve.MinIndex);
                 Assert.IsNull(curve.MaxIndex);
             }
+        }
+
+        [TestMethod]
+        public void Log141Validator_UpdateInStore_Index_Curve_Not_First_In_LogCurveInfo()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = DevKit.CreateLog(
+                null,
+                DevKit.Name("Log can be added with depth data"),
+                Wellbore.UidWell,
+                Well.Name,
+                response.SuppMsgOut,
+                Wellbore.Name);
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var update = new Log
+            {
+                Uid = uidLog,
+                UidWell = log.UidWell,
+                UidWellbore = log.UidWellbore
+            };
+
+            DevKit.InitHeader(update, LogIndexType.measureddepth);
+            DevKit.InitDataMany(update, DevKit.Mnemonics(update), DevKit.Units(update), 10);
+
+            var logCurves = update.LogCurveInfo;
+            var indexCurve = logCurves.First();
+            logCurves.Remove(indexCurve);
+            logCurves.Add(indexCurve);
+
+            var updateResponse = DevKit.Update<LogList, Log>(update);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
         }
     }
 }
