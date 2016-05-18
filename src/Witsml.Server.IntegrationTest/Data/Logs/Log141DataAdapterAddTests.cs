@@ -22,15 +22,19 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
     [TestClass]
     public class Log141DataAdapterAddTests
     {
+        private readonly long DefaultDepthChunkRange = WitsmlSettings.DepthRangeSize;
+        private readonly long DefaultTimeChunkRange = WitsmlSettings.TimeRangeSize;
+
         private DevKit141Aspect DevKit;
         private Well Well;
-        private Wellbore Wellbore;
+        private Wellbore Wellbore;    
 
         [TestInitialize]
         public void TestSetUp()
@@ -48,6 +52,17 @@ namespace PDS.Witsml.Server.Data.Logs
                 NameWell = Well.Name,
                 Name = DevKit.Name("Wellbore 01")
             };
+
+            // Sets the depth and time chunk size
+            WitsmlSettings.DepthRangeSize = 1000;
+            WitsmlSettings.TimeRangeSize = 86400000000; // 1 day
+        }
+
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            WitsmlSettings.DepthRangeSize = DefaultDepthChunkRange;
+            WitsmlSettings.TimeRangeSize = DefaultTimeChunkRange;
         }
 
         [TestMethod]

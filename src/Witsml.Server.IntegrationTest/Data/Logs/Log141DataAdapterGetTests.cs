@@ -32,6 +32,9 @@ namespace PDS.Witsml.Server.Data.Logs
     [TestClass]
     public class Log141DataAdapterGetTests
     {
+        private readonly long DefaultDepthChunkRange = WitsmlSettings.DepthRangeSize;
+        private readonly long DefaultTimeChunkRange = WitsmlSettings.TimeRangeSize;
+
         private DevKit141Aspect DevKit;
         private Well _well;
         private Wellbore _wellbore;
@@ -63,6 +66,17 @@ namespace PDS.Witsml.Server.Data.Logs
                 NameWellbore = _wellbore.Name,
                 Name = DevKit.Name("Log 01")
             };
+
+            // Sets the depth and time chunk size
+            WitsmlSettings.DepthRangeSize = 1000;
+            WitsmlSettings.TimeRangeSize = 86400000000; // 1 day
+        }
+
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            WitsmlSettings.DepthRangeSize = DefaultDepthChunkRange;
+            WitsmlSettings.TimeRangeSize = DefaultTimeChunkRange;
         }
 
         [TestMethod]
@@ -1047,7 +1061,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_GetFromStore_Can_Slice_On_Channel_On_Range_Of_Null_Indicator_Values()
+        public void Log141DataAdapter_GetFromStore_Can_Slice_On_Channel_On_Range_Of_Null_Indicator_Values_In_Different_Chunks()
         {
             var response = DevKit.Add<WellList, Well>(_well);
 
@@ -1129,7 +1143,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_GetFromStore_Can_Calculate_Channels_Range_With_Different_Null_Indicators()
+        public void Log141DataAdapter_GetFromStore_Can_Calculate_Channels_Range_With_Different_Null_Indicators_In_Different_Chunks()
         {
             var response = DevKit.Add<WellList, Well>(_well);
 

@@ -22,6 +22,7 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -35,6 +36,8 @@ namespace PDS.Witsml.Server.Data.Logs
         //public void Log141DataAdapter_MethodName_ExpectedBehavior()
         //{
         //}
+        private readonly long DefaultDepthChunkRange = WitsmlSettings.DepthRangeSize;
+        private readonly long DefaultTimeChunkRange = WitsmlSettings.TimeRangeSize;
 
         private DevKit141Aspect DevKit;
         private Well Well;
@@ -64,6 +67,17 @@ namespace PDS.Witsml.Server.Data.Logs
                 NameWellbore = Wellbore.Name,
                 Name = DevKit.Name("Log 01")
             };
+
+            // Sets the depth and time chunk size
+            WitsmlSettings.DepthRangeSize = 1000;
+            WitsmlSettings.TimeRangeSize = 86400000000; // 1 day
+        }
+
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            WitsmlSettings.DepthRangeSize = DefaultDepthChunkRange;
+            WitsmlSettings.TimeRangeSize = DefaultTimeChunkRange;
         }
 
         [TestMethod]
@@ -210,7 +224,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdataInStore_To_Append_With_Null_Indicator_And_Query_With_Start_And_End_Index()
+        public void Log141DataAdapter_UpdataInStore_To_Append_With_Null_Indicator_In_Different_Chunks()
         {
             var response = DevKit.Add<WellList, Well>(Well);
 
@@ -277,7 +291,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdataInStore_Can_Update_With_Null_Indicator_And_Query_With_Start_And_End_Index()
+        public void Log141DataAdapter_UpdataInStore_Can_Update_With_Null_Indicator_And_Query_In_Range_Covers_Different_Chunks()
         {
             var response = DevKit.Add<WellList, Well>(Well);
 
@@ -338,7 +352,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdataInStore_Can_Replace_Range_With_Null_Indicator_And_Query_With_Start_And_End_Index()
+        public void Log141DataAdapter_UpdataInStore_Can_Replace_Range_In_Different_Chunks_And_With_Null_Indicator()
         {
             var response = DevKit.Add<WellList, Well>(Well);
 
