@@ -50,6 +50,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Server.SqlClient.Int
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Server.SqlClient.UnitTest", "Witsml.Server.SqlClient.UnitTest\Witsml.Server.SqlClient.UnitTest.csproj", "{33BCDFED-F3DC-43BC-95E0-C38C42EFF656}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{3FE5E144-F608-4F91-A9FA-2B9A084D1FCF}"
+	ProjectSection(SolutionItems) = preProject
+		External\nuget.config = External\nuget.config
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
