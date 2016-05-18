@@ -31,6 +31,7 @@ namespace PDS.Witsml.Server.Data.Wells
     public class Well141DataAdapterAddTests
     {
         private DevKit141Aspect DevKit;
+        private Well _well;
 
         [TestInitialize]
         public void TestSetUp()
@@ -40,6 +41,8 @@ namespace PDS.Witsml.Server.Data.Wells
             DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
                 .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
                 .ToArray();
+
+            _well = new Well { Name = DevKit.Name("Well 01"), TimeZone = DevKit.TimeZone };
         }
 
         [TestMethod]
@@ -336,6 +339,69 @@ namespace PDS.Witsml.Server.Data.Wells
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.DataObjectTypeNotSupported, response.Result);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_AddToStore_With_PrivateGroupOnly_True()
+        {
+            // Add a well with PrivateGroupOnly set to false
+            _well.CommonData = new CommonData() { PrivateGroupOnly = true };
+            var response = DevKit.Add<WellList, Well>(_well);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWell = response.SuppMsgOut;
+            Assert.IsFalse(string.IsNullOrEmpty(uidWell));
+
+            // Query all wells with default OptionsIn
+            var query = new Well();
+            var result = DevKit.Query<WellList, Well>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.IsNotNull(result);
+
+            Assert.IsFalse(result.Any(x => x.CommonData.PrivateGroupOnly ?? false));
+            Assert.IsFalse(result.Any(x => x.Uid.Equals(uidWell)));
+
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_AddToStore_With_PrivateGroupOnly_False()
+        {
+            // Add a well with PrivateGroupOnly set to false
+            _well.CommonData = new CommonData() { PrivateGroupOnly = false };
+            var response = DevKit.Add<WellList, Well>(_well);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWell = response.SuppMsgOut;
+            Assert.IsFalse(string.IsNullOrEmpty(uidWell));
+
+            // Query all wells with default OptionsIn
+            var query = new Well();
+            var result = DevKit.Query<WellList, Well>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.IsNotNull(result);
+
+            Assert.IsFalse(result.Any(x => x.CommonData.PrivateGroupOnly ?? false));
+            Assert.IsTrue(result.Any(x => x.Uid.Equals(uidWell)));
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_AddToStore_With_Default_PrivateGroupOnly()
+        {
+            // Add a well with default PrivateGroupOnly
+            var response = DevKit.Add<WellList, Well>(_well);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWell = response.SuppMsgOut;
+            Assert.IsFalse(string.IsNullOrEmpty(uidWell));
+
+            // Query all wells with default OptionsIn
+            var query = new Well();
+            var result = DevKit.Query<WellList, Well>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.IsNotNull(result);
+
+            Assert.IsFalse(result.Any(x => x.CommonData.PrivateGroupOnly ?? false));
+            Assert.IsTrue(result.Any(x => x.Uid.Equals(uidWell)));
         }
     }
 }
