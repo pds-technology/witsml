@@ -32,11 +32,6 @@ namespace PDS.Witsml.Server.Data.Logs
     [TestClass]
     public class Log141DataAdapterGetTests
     {
-        private readonly long DefaultDepthChunkRange = WitsmlSettings.DepthRangeSize;
-        private readonly long DefaultTimeChunkRange = WitsmlSettings.TimeRangeSize;
-        private readonly int DefaultMaxDataPoints = WitsmlSettings.MaxDataPoints;
-        private readonly int DefaultMaxDataNodes = WitsmlSettings.MaxDataNodes;
-
         private DevKit141Aspect DevKit;
         private Well _well;
         private Wellbore _wellbore;
@@ -77,10 +72,10 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestCleanup]
         public void TestCleanup()
         {
-            WitsmlSettings.DepthRangeSize = DefaultDepthChunkRange;
-            WitsmlSettings.TimeRangeSize = DefaultTimeChunkRange;
-            WitsmlSettings.MaxDataPoints = DefaultMaxDataPoints;
-            WitsmlSettings.MaxDataNodes = DefaultMaxDataNodes;
+            WitsmlSettings.DepthRangeSize = DevKitAspect.DefaultDepthChunkRange;
+            WitsmlSettings.TimeRangeSize = DevKitAspect.DefaultTimeChunkRange;
+            WitsmlSettings.MaxDataPoints = DevKitAspect.DefaultMaxDataPoints;
+            WitsmlSettings.MaxDataNodes = DevKitAspect.DefaultMaxDataNodes;
         }
 
         [TestMethod]

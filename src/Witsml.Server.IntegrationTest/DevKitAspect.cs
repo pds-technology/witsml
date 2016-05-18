@@ -30,6 +30,11 @@ namespace PDS.Witsml.Server
 {
     public abstract class DevKitAspect : DataGenerator
     {
+        public static readonly long DefaultDepthChunkRange = WitsmlSettings.DepthRangeSize;
+        public static readonly long DefaultTimeChunkRange = WitsmlSettings.TimeRangeSize;
+        public static readonly int DefaultMaxDataPoints = WitsmlSettings.MaxDataPoints;
+        public static readonly int DefaultMaxDataNodes = WitsmlSettings.MaxDataNodes;
+
         public readonly string TimeZone = "-06:00";
 
         public DevKitAspect(string url, WMLSVersion version)
