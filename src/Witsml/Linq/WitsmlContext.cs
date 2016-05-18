@@ -79,9 +79,18 @@ namespace PDS.Witsml.Linq
             };
         }
 
+        /// <summary>
+        /// Gets all wells.
+        /// </summary>
+        /// <returns>The wells.</returns>
         public abstract IEnumerable<IDataObject> GetAllWells();
 
-        public abstract IEnumerable<IWellObject> GetWellbores(EtpUri uri);
+        /// <summary>
+        /// Gets the wellbores.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>The wellbores.</returns>
+        public abstract IEnumerable<IWellObject> GetWellbores(EtpUri parentUri);
 
         /// <summary>
         /// Gets the wellbore objects.
@@ -89,9 +98,9 @@ namespace PDS.Witsml.Linq
         /// <param name="objectType">Type of the object.</param>
         /// <param name="parentUri">The parent URI.</param>
         /// <returns>The wellbore objects of specified type.</returns>
-        public IEnumerable<IWellboreObject> GetWellboreObjects(string objectType, EtpUri uri)
+        public IEnumerable<IWellboreObject> GetWellboreObjects(string objectType, EtpUri parentUri)
         {
-            return GetObjects<IWellboreObject>(objectType, uri, OptionsIn.ReturnElements.IdOnly);
+            return GetObjects<IWellboreObject>(objectType, parentUri, OptionsIn.ReturnElements.IdOnly);
         }
 
         /// <summary>

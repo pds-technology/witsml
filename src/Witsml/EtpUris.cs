@@ -28,12 +28,14 @@ namespace PDS.Witsml
 {
     public static class EtpUris
     {
-        public static readonly EtpUri Witsml131 = new EtpUri("eml://witsml1311");
-        public static readonly EtpUri Witsml141 = new EtpUri("eml://witsml1411");
-        public static readonly EtpUri Witsml200 = new EtpUri("eml://witsml20");
+        public static readonly EtpUri Witsml131 = new EtpUri("eml:///witsml13");
+        public static readonly EtpUri Witsml141 = new EtpUri("eml:///witsml14");
+        public static readonly EtpUri Witsml200 = new EtpUri("eml:///witsml20");
 
         public static EtpUri GetUriFamily(Type type)
         {
+            if (type?.Namespace == null)
+                return Witsml141;
             if (type.Namespace.Contains("WITSML131"))
                 return Witsml131;
             if (type.Namespace.Contains("WITSML200"))

@@ -130,10 +130,7 @@ namespace PDS.Witsml
         /// <returns>The converted index value</returns>
         public static double? IndexFromScale(this long? index, int scale, bool isTimeIndex = false)
         {
-            if (index == null)
-                return null;
-
-            return index.Value.IndexFromScale(scale, isTimeIndex);
+            return index?.IndexFromScale(scale, isTimeIndex);
         }
 
         /// <summary>
@@ -159,10 +156,7 @@ namespace PDS.Witsml
         /// <returns>The converted, scaled index value</returns>
         public static long? IndexToScale(this double? index, int scale, bool isTimeIndex = false)
         {
-            if (index == null)
-                return null;
-
-            return index.Value.IndexToScale(scale, isTimeIndex);
+            return index?.IndexToScale(scale, isTimeIndex);
         }
 
         /// <summary>
