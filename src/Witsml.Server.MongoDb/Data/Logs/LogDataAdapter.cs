@@ -233,12 +233,12 @@ namespace PDS.Witsml.Server.Data.Logs
                 .Concat(new[]
                 {
                     "direction", "objectGrowing", "startIndex", "endIndex", "startDateTimeIndex", "endDateTimeIndex",
-                    "logCurveInfo.minIndex", "logCurveInfo.maxIndex", "logCurveInfo.minDateTimeIndex", "logCurveInfo.maxDateTimeIndex"
+                    "minIndex", "maxIndex", "minDateTimeIndex", "maxDateTimeIndex"
                 })
                 .ToList();
         }
 
-        protected IDictionary<int, string> GetMnemonicList(T log, WitsmlQueryParser parser)
+        private IDictionary<int, string> GetMnemonicList(T log, WitsmlQueryParser parser)
         {
             var allMnemonics = GetLogHeaderMnemonics(log);
             if (allMnemonics == null)
@@ -255,13 +255,13 @@ namespace PDS.Witsml.Server.Data.Logs
             return ComputeMnemonicIndexes(allMnemonics, queryMnemonics, parser.ReturnElements());
         }
 
-        protected string[] GetLogHeaderMnemonics(T log)
+        private string[] GetLogHeaderMnemonics(T log)
         {
             var logCurves = GetLogCurves(log);
             return logCurves?.Select(GetMnemonic).ToArray();
         }
 
-        protected IDictionary<int, string> ComputeMnemonicIndexes(string[] allMnemonics, string[] queryMnemonics, string returnElements)
+        private IDictionary<int, string> ComputeMnemonicIndexes(string[] allMnemonics, string[] queryMnemonics, string returnElements)
         {
             // Start with all mnemonics
             var mnemonicIndexes = allMnemonics
@@ -289,7 +289,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="increasing">if set to <c>true</c> if the log is increasing, false otherwise.</param>
         /// <param name="requestLatestValues">The number of latest values requested, null if not requested.</param>
         /// <returns>The channel data records requested</returns>
-        protected IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, string indexChannel, Range<double?> range, bool increasing, int? requestLatestValues = null)
+        private IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, string indexChannel, Range<double?> range, bool increasing, int? requestLatestValues = null)
         {
             increasing = requestLatestValues.HasValue ? !increasing : increasing;
 
@@ -297,7 +297,7 @@ namespace PDS.Witsml.Server.Data.Logs
             return chunks.GetRecords(range, increasing, reverse: requestLatestValues.HasValue);
         }
 
-        protected IDictionary<int, string> GetUnitList(T log, int[] slices)
+        private IDictionary<int, string> GetUnitList(T log, int[] slices)
         {
             // Get a list of all of the units
             var allUnits = GetUnitsByColumnIndex(log);
@@ -317,7 +317,7 @@ namespace PDS.Witsml.Server.Data.Logs
             return unitIndexes.ToDictionary(x => x.Index, x => x.Unit);
         }
 
-        protected IDictionary<int, string> GetNullValueList(T log, int[] slices)
+        private IDictionary<int, string> GetNullValueList(T log, int[] slices)
         {
             // Get a list of all of the null values
             var allNullValues = GetNullValuesByColumnIndex(log);
@@ -337,7 +337,7 @@ namespace PDS.Witsml.Server.Data.Logs
             return nullValuesIndexes.ToDictionary(x => x.Index, x => x.NullValue);
         }
 
-        protected void QueryLogDataValues(T log, T logHeader, WitsmlQueryParser parser, IDictionary<int, string> mnemonics, ResponseContext context)
+        private void QueryLogDataValues(T log, T logHeader, WitsmlQueryParser parser, IDictionary<int, string> mnemonics, ResponseContext context)
         {
             Logger.DebugFormat("Query data values for log. Log Uid = {0}", log.Uid);
 
@@ -374,7 +374,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Slice the reader for the requested mnemonics
             reader.Slice(mnemonics, units, nullValues);
-            var logData = FormatLogData(log, reader, requestLatestValues, context, mnemonics, units, nullValues);
+            var logData = FormatLogData(log, reader, context, mnemonics, units, nullValues);
             if (logData.Count > 0)
             {
                 SetLogDataValues(log, logData, mnemonics.Values, units.Values);
@@ -384,7 +384,7 @@ namespace PDS.Witsml.Server.Data.Logs
             context.UpdateGrowingObjectTotals(logData.Count, mnemonics.Keys.Count);
         }
 
-        protected Range<double?> GetLogDataSubsetRange(T log, WitsmlQueryParser parser)
+        private Range<double?> GetLogDataSubsetRange(T log, WitsmlQueryParser parser)
         {
             var isTimeLog = IsTimeLog(log);
 
@@ -394,8 +394,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 isTimeLog);
         }
 
-        protected List<string> FormatLogData(
-            T log, ChannelDataReader reader, int? requestLatestValues, ResponseContext context,
+        private List<string> FormatLogData(
+            T log, ChannelDataReader reader, ResponseContext context,
             IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units, IDictionary<int, string> nullValues)
         {
             Dictionary<string, Range<double?>> ranges;
@@ -411,12 +411,12 @@ namespace PDS.Witsml.Server.Data.Logs
                 .ToList();
         }
 
-        protected void FormatLogHeader(T log, string[] mnemonics)
+        private void FormatLogHeader(T log, string[] mnemonics)
         {
             RemoveLogCurveInfos(log, mnemonics);
         }
 
-        protected void RemoveLogCurveInfos(T log, string[] mnemonics)
+        private void RemoveLogCurveInfos(T log, string[] mnemonics)
         {
             var logCurves = GetLogCurves(log);
             logCurves?.RemoveAll(x => !mnemonics.Contains(GetMnemonic(x)));
@@ -498,7 +498,7 @@ namespace PDS.Witsml.Server.Data.Logs
             return ranges;
         }
 
-        protected void GetUpdatedIndexRange(ChannelDataReader reader, string[] mnemonics, Dictionary<string, Range<double?>> ranges, bool increasing = true)
+        private void GetUpdatedIndexRange(ChannelDataReader reader, string[] mnemonics, Dictionary<string, Range<double?>> ranges, bool increasing = true)
         {
             for (var i = 0; i < mnemonics.Length; i++)
             {
@@ -545,12 +545,15 @@ namespace PDS.Witsml.Server.Data.Logs
                 var range = ranges[mnemonic];
                 var isIndexCurve = mnemonic == GetIndexCurveMnemonic(entity);
 
+                var currentRange = GetIndexRange(curve, increasing, isTimeLog);
+                var updateRange = GetUpdateRange(currentRange, range, increasing);
+
                 logHeaderUpdate = isTimeLog
-                    ? UpdateDateTimeIndexRange(mongoUpdate, curveFilter, logHeaderUpdate, range, increasing, isIndexCurve, offset)
-                    : UpdateIndexRange(mongoUpdate, curveFilter, logHeaderUpdate, range, increasing, isIndexCurve, indexUnit);
+                    ? UpdateDateTimeIndexRange(mongoUpdate, curveFilter, logHeaderUpdate, updateRange, increasing, isIndexCurve, offset)
+                    : UpdateIndexRange(mongoUpdate, curveFilter, logHeaderUpdate, updateRange, increasing, isIndexCurve, indexUnit);
             }
 
-            logHeaderUpdate = UpdateCommonData(mongoUpdate, logHeaderUpdate, entity, offset);
+            logHeaderUpdate = UpdateCommonData(logHeaderUpdate, entity, offset);
 
             if (logHeaderUpdate != null)
             {
@@ -643,6 +646,23 @@ namespace PDS.Witsml.Server.Data.Logs
             return logHeaderUpdate;
         }
 
+        private Range<double?> GetUpdateRange(Range<double?> current, Range<double?> update, bool increasing)
+        {
+            if (!update.Start.HasValue || !update.End.HasValue)
+                return current;
+
+            var start = update.Start.GetValueOrDefault();
+            var end = update.End.GetValueOrDefault();
+
+            if (current.Start.HasValue && !current.StartsAfter(start, increasing))
+                start = current.Start.GetValueOrDefault();
+
+            if (current.End.HasValue && !current.EndsBefore(end, increasing))
+                end = update.End.GetValueOrDefault();
+
+            return new Range<double?>(start, end, update.Offset);
+        }
+
         protected abstract bool IsIncreasing(T log);
 
         protected abstract bool IsTimeLog(T log, bool includeElapsedTime = false);
@@ -665,7 +685,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
         protected abstract void SetLogDataValues(T log, List<string> logData, IEnumerable<string> mnemonics, IEnumerable<string> units);
 
-        protected abstract UpdateDefinition<T> UpdateCommonData(MongoDbUpdate<T> mongoUpdate, UpdateDefinition<T> logHeaderUpdate, T entity, TimeSpan? offset);
+        protected abstract UpdateDefinition<T> UpdateCommonData(UpdateDefinition<T> logHeaderUpdate, T entity, TimeSpan? offset);
 
         protected abstract object CreateGenericMeasure(double value, string uom);
 
