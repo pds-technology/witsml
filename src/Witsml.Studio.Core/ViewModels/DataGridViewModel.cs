@@ -74,38 +74,11 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         {
             if (!ObjectTypes.IsGrowingDataObject(objectType)) return;
 
-            try
-            {
-                var log131 = dataObject as Witsml131.Log;
-                if (log131 != null) SetLogData(log131, retrievePartialResults);
+            var log131 = dataObject as Witsml131.Log;
+            if (log131 != null) SetLogData(log131, retrievePartialResults);
 
-                var log141 = dataObject as Witsml141.Log;
-                if (log141 != null) SetLogData(log141, retrievePartialResults);
-            }
-            catch (Exception ex)
-            {
-                _log.WarnFormat("Error displaying growing object data: {0}", ex);
-            }
-        }
-
-        /// <summary>
-        /// Clears the data table if the URI has changed.
-        /// </summary>
-        /// <param name="uri">The URI.</param>
-        /// <param name="retrievePartialResults">True if to automatically request partial results.</param>
-        private void ClearDataTable(EtpUri uri, bool retrievePartialResults)
-        {
-            if (uri == Uri && retrievePartialResults)
-                return;
-
-            Uri = uri;
-            DataTable.BeginLoadData();
-            DataTable.PrimaryKey = new DataColumn[0];
-            DataTable.Clear();
-            DataTable.Rows.Clear();
-            DataTable.Columns.Clear();
-            DataTable.AcceptChanges();
-            DataTable.EndLoadData();
+            var log141 = dataObject as Witsml141.Log;
+            if (log141 != null) SetLogData(log141, retrievePartialResults);
         }
 
         /// <summary>
@@ -131,18 +104,52 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         }
 
         /// <summary>
+        /// Clears the data table if the URI has changed.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="retrievePartialResults">True if to automatically request partial results.</param>
+        private void ClearDataTable(EtpUri uri, bool retrievePartialResults)
+        {
+            if (uri == Uri && retrievePartialResults)
+                return;
+
+            try
+            {
+                Uri = uri;
+                DataTable.BeginLoadData();
+                DataTable.PrimaryKey = new DataColumn[0];
+                DataTable.Clear();
+                DataTable.Rows.Clear();
+                DataTable.Columns.Clear();
+                DataTable.AcceptChanges();
+                DataTable.EndLoadData();
+            }
+            catch (Exception ex)
+            {
+                _log.WarnFormat("Error clearing growing object data: {0}", ex);
+            }
+        }
+
+        /// <summary>
         /// Sets the channel data.
         /// </summary>
         /// <param name="reader">The reader.</param>
         private void SetChannelData(ChannelDataReader reader)
         {
-            reader.IncludeUnitWithName = true;
-            DataTable.BeginLoadData();
-            DataTable.Load(reader, LoadOption.Upsert);
-            DataTable.PrimaryKey = new[] { DataTable.Columns[0] };
-            DataTable.AcceptChanges();
-            DataTable.EndLoadData();
-            NotifyOfPropertyChange(() => DataTable);
+            try
+            {
+                reader.IncludeUnitWithName = true;
+                DataTable.BeginLoadData();
+                DataTable.Load(reader, LoadOption.Upsert);
+                DataTable.PrimaryKey = new[] { DataTable.Columns[0] };
+                DataTable.AcceptChanges();
+                DataTable.EndLoadData();
+                NotifyOfPropertyChange(() => DataTable);
+            }
+            catch (Exception ex)
+            {
+                _log.WarnFormat("Error displaying growing object data: {0}", ex);
+            }
         }
     }
 }

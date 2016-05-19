@@ -668,12 +668,13 @@ namespace PDS.Witsml.Data.Channels
         public DataTable GetSchemaTable()
         {
             var table = new DataTable();
-            var columns = new[] { "ColumnOrdinal", "ColumnName", "IsKey" };
-            var types = new[] { typeof(int), typeof(string), typeof(bool) };
+            var columns = new[] { "ColumnOrdinal", "ColumnName", "ColumnSize", "DataType", "IsKey" };
+            var types = new[] { typeof(int), typeof(string), typeof(int), typeof(Type), typeof(bool) };
+            var count = Indices.Count;
 
             columns.ForEach((x, i) => table.Columns.Add(x, types[i]));
-            Indices.ForEach((x, i) => table.Rows.Add(i, FormatColumnName(x.Mnemonic, x.Unit), i == 0));
-            Mnemonics.ForEach((x, i) => table.Rows.Add(i + Indices.Count, FormatColumnName(x, Units[i]), false));
+            Indices.ForEach((x, i) => table.Rows.Add(i, FormatColumnName(x.Mnemonic, x.Unit), -1, GetFieldType(i), i == 0));
+            Mnemonics.ForEach((x, i) => table.Rows.Add(i + count, FormatColumnName(x, Units[i]), -1, GetFieldType(i + count), false));
 
             return table;
         }
