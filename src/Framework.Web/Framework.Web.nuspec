@@ -8,6 +8,11 @@
     <projectUrl>https://witsml.pds.nl/</projectUrl>
     <licenseUrl>https://witsml.pds.nl/license</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <dependencies>
+      <group targetFramework="net46">
+        <dependency id="PDS.Framework" version="$version$" />
+      </group>
+    </dependencies>
   </metadata>
   <files>
     <file src="bin/$configuration$/$id$.pdb" target="lib/net46" />
