@@ -611,7 +611,6 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual(99.8, wellList.Well[0].WellDatum[0].Elevation.Value);
         }
 
-
         [TestMethod]
         public void Well141DataAdapter_GetFromStore_Can_Get_Measure_Data_With_Uom_And_Null()
         {
@@ -640,6 +639,49 @@ namespace PDS.Witsml.Server.Data.Wells
             var wellList = EnergisticsConverter.XmlToObject<WellList>(getResponse.XMLout);
             Assert.AreEqual(1, wellList.Well.Count);
             Assert.AreEqual(500, wellList.Well[0].WellheadElevation.Value);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Can_Get_Uom_Data_OptionsIn_Requested()
+        {
+            // Add well
+            var well = DevKit.CreateFullWell();
+            var response = DevKit.Add<WellList, Well>(well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uid = response.SuppMsgOut;
+
+            string xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                           "   <well> uid=\"" + uid + "\"" + Environment.NewLine +
+                           "     <name>" + well.Name + "</name>" + Environment.NewLine +
+                           "    <pcInterest uom=\"" + well.PercentInterest.Uom + "\">" + well.PercentInterest.Value + "</pcInterest>" + Environment.NewLine +
+                           "    <wellDatum uid=\"" + well.WellDatum[0].Uid + "\">" + Environment.NewLine +
+                           "      <name>" + well.WellDatum[0].Name + "</name>" + Environment.NewLine +
+                           "      <code>" + well.WellDatum[0].Code + "</code>" + Environment.NewLine +
+                           "      <elevation uom=\"" + well.WellDatum[0].Elevation.Uom + "\">" + well.WellDatum[0].Elevation.Value + "</elevation>" + Environment.NewLine +
+                           "    </wellDatum>" + Environment.NewLine +
+                           "   </well>" + Environment.NewLine +
+                           "</wells>";
+
+            // Make a requested query
+            var getResponse = DevKit.GetFromStore(ObjectTypes.Well, xmlIn, null, "returnElements=requested");
+            Assert.IsNotNull(getResponse);
+            Assert.AreEqual((short)ErrorCodes.Success, getResponse.Result);
+
+            // Convert the XMLout to a well list.
+            var wellList = EnergisticsConverter.XmlToObject<WellList>(getResponse.XMLout);
+
+            // Test that our well was returned in the output
+            Assert.AreEqual(1, wellList.Well.Count);
+
+            // Test that the queriedWell's uom and uom values are the same as the added well after a requested query
+            var queriedWell = wellList.Well[0];
+            Assert.AreEqual(well.PercentInterest.Uom, queriedWell.PercentInterest.Uom);
+            Assert.AreEqual(well.PercentInterest.Value, queriedWell.PercentInterest.Value);
+            Assert.AreEqual(well.WellDatum[0].Elevation.Uom, queriedWell.WellDatum[0].Elevation.Uom);
+            Assert.AreEqual(well.WellDatum[0].Elevation.Value, queriedWell.WellDatum[0].Elevation.Value);
         }
 
         [TestMethod]
