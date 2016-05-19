@@ -69,17 +69,18 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         /// </summary>
         /// <param name="objectType">The object type.</param>
         /// <param name="dataObject">The data object.</param>
-        public void SetCurrentObject(string objectType, object dataObject)
+        /// <param name="retrievePartialResults">True if to automatically request partial results.</param>
+        public void SetCurrentObject(string objectType, object dataObject, bool retrievePartialResults)
         {
             if (!ObjectTypes.IsGrowingDataObject(objectType)) return;
 
             try
             {
                 var log131 = dataObject as Witsml131.Log;
-                if (log131 != null) SetLogData(log131);
+                if (log131 != null) SetLogData(log131, retrievePartialResults);
 
                 var log141 = dataObject as Witsml141.Log;
-                if (log141 != null) SetLogData(log141);
+                if (log141 != null) SetLogData(log141, retrievePartialResults);
             }
             catch (Exception ex)
             {
@@ -91,9 +92,11 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         /// Clears the data table if the URI has changed.
         /// </summary>
         /// <param name="uri">The URI.</param>
-        private void ClearDataTable(EtpUri uri)
+        /// <param name="retrievePartialResults">True if to automatically request partial results.</param>
+        private void ClearDataTable(EtpUri uri, bool retrievePartialResults)
         {
-            if (uri == Uri) return;
+            if (uri == Uri && retrievePartialResults)
+                return;
 
             Uri = uri;
             DataTable.BeginLoadData();
@@ -109,9 +112,10 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         /// Sets the log data.
         /// </summary>
         /// <param name="log">The log.</param>
-        private void SetLogData(Witsml131.Log log)
+        /// <param name="retrievePartialResults">True if to automatically request partial results.</param>
+        private void SetLogData(Witsml131.Log log, bool retrievePartialResults)
         {
-            ClearDataTable(log.GetUri());
+            ClearDataTable(log.GetUri(), retrievePartialResults);
             Runtime.InvokeAsync(() => SetChannelData(log.GetReader()));
         }
 
@@ -119,9 +123,10 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         /// Sets the log data.
         /// </summary>
         /// <param name="log">The log.</param>
-        private void SetLogData(Witsml141.Log log)
+        /// <param name="retrievePartialResults">True if to automatically request partial results.</param>
+        private void SetLogData(Witsml141.Log log, bool retrievePartialResults)
         {
-            ClearDataTable(log.GetUri());
+            ClearDataTable(log.GetUri(), retrievePartialResults);
             Runtime.InvokeAsync(() => log.GetReaders().ForEach(SetChannelData));
         }
 

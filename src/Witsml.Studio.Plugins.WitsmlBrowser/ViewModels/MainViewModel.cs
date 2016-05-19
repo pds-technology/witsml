@@ -460,7 +460,7 @@ namespace PDS.Witsml.Studio.Plugins.WitsmlBrowser.ViewModels
         {
             try
             {
-                ResultControl.ObjectProperties.SetCurrentObject(result.ObjectType, result.XmlOut, Model.WitsmlVersion);
+                ResultControl.ObjectProperties.SetCurrentObject(result.ObjectType, result.XmlOut, Model.WitsmlVersion, Model.RetrievePartialResults);
             }
             catch (WitsmlException ex)
             {

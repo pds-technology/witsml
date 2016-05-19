@@ -73,7 +73,8 @@ namespace PDS.Witsml.Studio.Core.ViewModels
         /// <param name="objectType">The data object type.</param>
         /// <param name="xml">The XML string.</param>
         /// <param name="version">The WITSML version.</param>
-        public void SetCurrentObject(string objectType, string xml, string version)
+        /// <param name="retrievePartialResults">True if to automatically request partial results.</param>
+        public void SetCurrentObject(string objectType, string xml, string version, bool retrievePartialResults)
         {
             var dataType = ObjectTypes.GetObjectGroupType(objectType, version);
             var dataObject = WitsmlParser.Parse(dataType, xml);
@@ -91,7 +92,7 @@ namespace PDS.Witsml.Studio.Core.ViewModels
 
             if (collection == null || collection.Items.Count == 1)
             {
-                ObjectData?.SetCurrentObject(objectType, CurrentObject);
+                ObjectData?.SetCurrentObject(objectType, CurrentObject, retrievePartialResults);
             }
         }
     }
