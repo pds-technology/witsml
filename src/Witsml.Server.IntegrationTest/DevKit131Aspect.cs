@@ -145,5 +145,18 @@ namespace PDS.Witsml.Server
                 ? String.Join(",", log.LogCurveInfo.Select(x => x.Mnemonic))
                 : string.Empty;
         }
+
+        public Log CreateLog(string uid, string name, string uidWell, string nameWell, string uidWellbore, string nameWellbore)
+        {
+            return new Log()
+            {
+                Uid = uid,
+                Name = name,
+                UidWell = uidWell,
+                NameWell = nameWell,
+                UidWellbore = uidWellbore,
+                NameWellbore = nameWellbore,
+            };
+        }
     }
 }
