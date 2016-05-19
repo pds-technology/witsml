@@ -1515,6 +1515,95 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsFalse(maxDataPoints < returnDataPoints);
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Empty_MneMonicList_And_ReturnElement_DataOnly()
+        {
+            // Add well
+            var response = DevKit.Add<WellList, Well>(_well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add wellbore
+            _wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWellbore = response.SuppMsgOut;
+
+            // Add log
+            _log.UidWell = _wellbore.UidWell;
+            _log.UidWellbore = uidWellbore;
+            DevKit.InitHeader(_log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(_log, DevKit.Mnemonics(_log), DevKit.Units(_log), 3);
+
+            response = DevKit.Add<LogList, Log>(_log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            // Query log
+            var queryIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
+                "<logs version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
+                    "<log uid=\"" + uidLog + "\" uidWell=\"" + _wellbore.UidWell + "\" uidWellbore=\"" + uidWellbore + "\">" + Environment.NewLine +
+                        "<logData>" + Environment.NewLine +
+                        "  <mnemonicList/>" + Environment.NewLine +
+                        "</logData>" + Environment.NewLine +
+                    "</log>" + Environment.NewLine +
+               "</logs>";
+
+            var results = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=data-only");
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(results.XMLout);
+            Assert.AreEqual(1, logList.Log.Count);
+            Assert.AreEqual(1, logList.Log[0].LogData.Count);
+            Assert.AreEqual(3, logList.Log[0].LogData[0].Data.Count);           
+        }
+
+
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Empty_MneMonicList_And_ReturnElement_Requested()
+        {
+            // Add well
+            var response = DevKit.Add<WellList, Well>(_well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add wellbore
+            _wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWellbore = response.SuppMsgOut;
+
+            // Add log
+            _log.UidWell = _wellbore.UidWell;
+            _log.UidWellbore = uidWellbore;
+            DevKit.InitHeader(_log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(_log, DevKit.Mnemonics(_log), DevKit.Units(_log), 3);
+
+            response = DevKit.Add<LogList, Log>(_log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            // Query log
+            var queryIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
+                "<logs version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
+                    "<log uid=\"" + uidLog + "\" uidWell=\"" + _wellbore.UidWell + "\" uidWellbore=\"" + uidWellbore + "\">" + Environment.NewLine +
+                        "<logData>" + Environment.NewLine +
+                        "  <mnemonicList/>" + Environment.NewLine +
+                        "</logData>" + Environment.NewLine +
+                    "</log>" + Environment.NewLine +
+               "</logs>";
+
+            var results = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(results.XMLout);
+            Assert.AreEqual(1, logList.Log.Count);
+            Assert.AreEqual(1, logList.Log[0].LogData.Count);
+            Assert.AreEqual(3, logList.Log[0].LogData[0].Data.Count);
+        }
+
         #region Helper Methods
 
         private WMLS_AddToStoreResponse AddSetupWellWellboreLog(int numRows, bool isDepthLog, bool hasEmptyChannel, bool increasing)
