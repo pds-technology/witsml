@@ -17,7 +17,9 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.IO;
 using System.Linq;
+using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
@@ -40,6 +42,8 @@ namespace PDS.Witsml.Server.Data.Logs
         private Well Well;
         private Wellbore Wellbore;
         private Log Log;
+        private string BaseDir;
+        private string DataDir;
 
         [TestInitialize]
         public void TestSetUp()
@@ -49,6 +53,10 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
                 .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
                 .ToArray();
+
+            // Test data directory
+            BaseDir = AppDomain.CurrentDomain.BaseDirectory;
+            DataDir = BaseDir + @"\Data\Data\";
 
             Well = new Well { Name = DevKit.Name("Well 01"), TimeZone = DevKit.TimeZone };
 
@@ -67,7 +75,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Sets the depth and time chunk size
             WitsmlSettings.DepthRangeSize = 1000;
-            WitsmlSettings.TimeRangeSize = 86400000000; // 1 day
+            WitsmlSettings.TimeRangeSize = 86400000000; // // Number of microseconds equivalent to one day
         }
 
         [TestCleanup]
@@ -646,6 +654,73 @@ namespace PDS.Witsml.Server.Data.Logs
                 Assert.AreEqual(start, curve.MinIndex.Value);
                 Assert.AreEqual(end, curve.MaxIndex.Value);
             }
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_UpdateInStore_Can_Append_Large_Log_Data()
+        {
+            // Add well
+            var response = DevKit.Add<WellList, Well>(Well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWell = response.SuppMsgOut;
+
+            // Add wellbore
+            Wellbore.UidWell = uidWell;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWellbore = response.SuppMsgOut;
+
+            // Add large log
+            var logXmlIn = File.ReadAllText(DataDir + "LargeLog_log.xml");
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(logXmlIn);
+            Assert.IsNotNull(logList);
+            Assert.AreEqual(1, logList.Log.Count);
+
+            var log = logList.Log[0];
+            log.UidWell = uidWell;
+            log.UidWellbore = uidWellbore; 
+                 
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            // Query added log
+            var query = new Log
+            {
+                Uid = uidLog,
+                UidWell = uidWell,
+                UidWellbore = uidWellbore
+            };
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(1, results[0].LogData.Count);
+            Assert.AreEqual(5000, results[0].LogData[0].Data.Count);
+
+            // Update log by appending 10000 rows of data
+            logXmlIn = File.ReadAllText(DataDir + "LargeLog_log_append.xml");
+
+            logList = EnergisticsConverter.XmlToObject<LogList>(logXmlIn);
+            Assert.IsNotNull(logList);
+            Assert.AreEqual(1, logList.Log.Count);
+
+            log = logList.Log[0];
+            log.UidWell = uidWell;
+            log.UidWellbore = uidWellbore;
+            log.Uid = uidLog;
+
+            var updateResponse = DevKit.Update<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            // Query log after appending data
+            results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(1, results[0].LogData.Count);
+            Assert.AreEqual(15000, results[0].LogData[0].Data.Count);
         }
     }
 }

@@ -188,6 +188,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <Content Include="Data\Data\LargeLog_log.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Data\LargeLog_log_append.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Demo\Data\Generated_Time_Log_Log.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
