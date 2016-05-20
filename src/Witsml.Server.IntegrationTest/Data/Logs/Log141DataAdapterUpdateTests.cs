@@ -72,10 +72,6 @@ namespace PDS.Witsml.Server.Data.Logs
                 NameWellbore = Wellbore.Name,
                 Name = DevKit.Name("Log 01")
             };
-
-            // Sets the depth and time chunk size
-            WitsmlSettings.DepthRangeSize = 1000;
-            WitsmlSettings.TimeRangeSize = 86400000000; // // Number of microseconds equivalent to one day
         }
 
         [TestCleanup]
@@ -233,6 +229,9 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_UpdataInStore_To_Append_With_Null_Indicator_In_Different_Chunks()
         {
+            // Set the depth range chunk size.
+            WitsmlSettings.DepthRangeSize = 1000;
+
             var response = DevKit.Add<WellList, Well>(Well);
 
             Wellbore.UidWell = response.SuppMsgOut;
@@ -300,6 +299,9 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_UpdataInStore_Can_Update_With_Null_Indicator_And_Query_In_Range_Covers_Different_Chunks()
         {
+            // Set the depth range chunk size.
+            WitsmlSettings.DepthRangeSize = 1000;
+
             var response = DevKit.Add<WellList, Well>(Well);
 
             Wellbore.UidWell = response.SuppMsgOut;
@@ -361,6 +363,9 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_UpdataInStore_Can_Replace_Range_In_Different_Chunks_And_With_Null_Indicator()
         {
+            // Set the depth range chunk size.
+            WitsmlSettings.DepthRangeSize = 1000;
+
             var response = DevKit.Add<WellList, Well>(Well);
 
             Wellbore.UidWell = response.SuppMsgOut;
@@ -657,8 +662,11 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_Can_Append_Large_Log_Data()
+        public void Log141DataAdapter_UpdateInStore_Can_Append_Large_Log_Data_In_Different_Chunks()
         {
+            // Set the depth range chunk size.
+            WitsmlSettings.DepthRangeSize = 1000;
+
             // Add well
             var response = DevKit.Add<WellList, Well>(Well);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);

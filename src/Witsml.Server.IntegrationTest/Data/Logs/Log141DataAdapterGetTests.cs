@@ -58,10 +58,6 @@ namespace PDS.Witsml.Server.Data.Logs
                 NameWellbore = _wellbore.Name,
                 Name = DevKit.Name("Log 01")
             };
-
-            // Sets the depth and time chunk size
-            WitsmlSettings.DepthRangeSize = 1000;
-            WitsmlSettings.TimeRangeSize = 86400000000; // Number of microseconds equals to one day
         }
 
         [TestCleanup]
@@ -909,9 +905,11 @@ namespace PDS.Witsml.Server.Data.Logs
 
 
         [TestMethod]
-        public void
-            Log141DataAdapter_GetFromStore_With_Start_And_End_Index_On_Increasing_Depth_Log_Data_In_Different_Chunk()
+        public void Log141DataAdapter_GetFromStore_With_Start_And_End_Index_On_Increasing_Depth_Log_Data_In_Different_Chunk()
         {
+            // Set the depth range chunk size.
+            WitsmlSettings.DepthRangeSize = 1000;
+
             var response = DevKit.Add<WellList, Well>(_well);
 
             _wellbore.UidWell = response.SuppMsgOut;
@@ -956,9 +954,11 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void
-            Log141DataAdapter_GetFromStore_With_Start_And_End_Index_On_decreasing_Depth_Log_Data_In_Different_Chunk()
+        public void Log141DataAdapter_GetFromStore_With_Start_And_End_Index_On_decreasing_Depth_Log_Data_In_Different_Chunk()
         {
+            // Set the depth range chunk size.
+            WitsmlSettings.DepthRangeSize = 1000;
+
             var response = DevKit.Add<WellList, Well>(_well);
 
             _wellbore.UidWell = response.SuppMsgOut;
@@ -1086,9 +1086,11 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void
-            Log141DataAdapter_GetFromStore_Can_Slice_On_Channel_On_Range_Of_Null_Indicator_Values_In_Different_Chunks()
+        public void Log141DataAdapter_GetFromStore_Can_Slice_On_Channel_On_Range_Of_Null_Indicator_Values_In_Different_Chunks()
         {
+            // Set the depth range chunk size.
+            WitsmlSettings.DepthRangeSize = 1000;
+
             var response = DevKit.Add<WellList, Well>(_well);
 
             _wellbore.UidWell = response.SuppMsgOut;
@@ -1170,10 +1172,11 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void
-            Log141DataAdapter_GetFromStore_Can_Calculate_Channels_Range_With_Different_Null_Indicators_In_Different_Chunks
-            ()
+        public void Log141DataAdapter_GetFromStore_Can_Calculate_Channels_Range_With_Different_Null_Indicators_In_Different_Chunks()
         {
+            // Set the depth range chunk size.
+            WitsmlSettings.DepthRangeSize = 1000;
+
             var response = DevKit.Add<WellList, Well>(_well);
 
             _wellbore.UidWell = response.SuppMsgOut;
@@ -1669,6 +1672,92 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsNotNull(logList);
             Assert.AreEqual(1, logList.Log.Count);
             Assert.AreEqual(0, logList.Log[0].LogData.Count);
+        }
+
+        [TestMethod]
+        public void LogDataAdapter_GetFromStore_Return_Latest_N_Values()
+        {
+            var response = DevKit.Add<WellList, Well>(_well);
+
+            _wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+
+            _log.UidWell = _wellbore.UidWell;
+            _log.UidWellbore = response.SuppMsgOut;
+
+            DevKit.InitHeader(_log, LogIndexType.measureddepth);
+
+            var channel3 = _log.LogCurveInfo[1];
+            var channel4 = _log.LogCurveInfo[2];
+
+            _log.LogCurveInfo.Add(new LogCurveInfo
+            {
+                Uid = "ROP1",
+                Unit = channel3.Unit,
+                TypeLogData = LogDataType.@double,
+                Mnemonic = new ShortNameStruct
+                {
+                    Value = "ROP1"
+                }
+            });
+
+            _log.LogCurveInfo.Add(new LogCurveInfo
+            {
+                Uid = "GR1",
+                Unit = channel4.Unit,
+                TypeLogData = LogDataType.@double,
+                Mnemonic = new ShortNameStruct
+                {
+                    Value = "GR1"
+                }
+            });
+
+            var logData = new LogData();
+            logData.MnemonicList = DevKit.Mnemonics(_log);
+            logData.UnitList = DevKit.Units(_log);
+            logData.Data = new List<string> {"0,,0.2,0.3,", "1,,1.2,,1.4", "2,,2.2,,2.4", "3,,3.2,,", "4,,4.2,,"};
+            _log.LogData = new List<LogData> {logData};
+
+            response = DevKit.Add<LogList, Log>(_log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var query = new Log
+            {
+                Uid = uidLog,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore
+            };
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All + ';' + OptionsIn.RequestLatestValues.Eq(1));
+            Assert.IsNotNull(results);
+
+            var result = results.First();
+            Assert.IsNotNull(result);
+
+            logData = result.LogData.First();
+            Assert.IsNotNull(logData);
+            Assert.IsTrue(logData.Data.Count > 0);
+
+            var data = new Dictionary<int, List<string>>();
+            foreach (var row in logData.Data)
+            {
+                var points = row.Split(',');
+                for (var i = 1; i < points.Length; i++)
+                {
+                    if (!data.ContainsKey(i))
+                        data.Add(i, new List<string>());
+
+                    if (!string.IsNullOrWhiteSpace(points[i]))
+                        data[i].Add(points[i]);
+                }
+            }
+
+            foreach (KeyValuePair<int, List<string>> pairs in data)
+            {
+                Assert.AreEqual(1, pairs.Value.Count);
+            }
         }
 
         #region Helper Methods

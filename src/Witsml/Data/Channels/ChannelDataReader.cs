@@ -1098,7 +1098,7 @@ namespace PDS.Witsml.Data.Channels
                 {
                     valueAdded = true;
                 }
-                else if (i > Depth)
+                else if (i > 0)
                 {
                     channelValues[i] = null;
                 }
