@@ -1670,7 +1670,10 @@ namespace PDS.Witsml.Server.Data.Logs
 
             Assert.AreEqual((short)ErrorCodes.Success, result.Result);
 
-            Assert.IsNull(queryHeaderOnly.LogData);
+            var logList = EnergisticsConverter.XmlToObject<LogList>(result.XMLout);
+            Assert.IsNotNull(logList);
+            Assert.AreEqual(1, logList.Log.Count);
+            Assert.AreEqual(0, logList.Log[0].LogData.Count);
         }
 
         #region Helper Methods
