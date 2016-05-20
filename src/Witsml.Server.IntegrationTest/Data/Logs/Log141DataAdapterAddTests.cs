@@ -49,10 +49,6 @@ namespace PDS.Witsml.Server.Data.Logs
                 NameWell = Well.Name,
                 Name = DevKit.Name("Wellbore 01")
             };
-
-            // Sets the depth and time chunk size
-            WitsmlSettings.DepthRangeSize = 1000;
-            WitsmlSettings.TimeRangeSize = 86400000000; // 1 day
         }
 
         [TestCleanup]
@@ -1046,6 +1042,9 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Test_update_with_unsequenced_increasing_depth_log_data_in_same_chunk()
         {
+            // Set the depth range chunk size.
+            WitsmlSettings.DepthRangeSize = 1000;
+
             var response = DevKit.Add<WellList, Well>(Well);
 
             Wellbore.UidWell = response.SuppMsgOut;
@@ -1112,6 +1111,9 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Test_update_with_unsequenced_increasing_depth_log_data_in_different_chunk()
         {
+            // Set the depth range chunk size.
+            WitsmlSettings.DepthRangeSize = 1000;
+
             var response = DevKit.Add<WellList, Well>(Well);
 
             Wellbore.UidWell = response.SuppMsgOut;
@@ -1177,6 +1179,9 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Test_update_with_unsequenced_decreasing_depth_log_data_in_same_chunk()
         {
+            // Set the depth range chunk size.
+            WitsmlSettings.DepthRangeSize = 1000;
+
             var response = DevKit.Add<WellList, Well>(Well);
 
             Wellbore.UidWell = response.SuppMsgOut;
@@ -1243,6 +1248,9 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Test_update_with_unsequenced_decreasing_depth_log_data_in_different_chunks()
         {
+            // Set the depth range chunk size.
+            WitsmlSettings.DepthRangeSize = 1000;
+
             var response = DevKit.Add<WellList, Well>(Well);
 
             Wellbore.UidWell = response.SuppMsgOut;
@@ -1311,6 +1319,9 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Test_update_with_unsequenced_increasing_time_log_data_in_same_chunk()
         {
+            // Set the time range chunk size to number of microseconds equivalent to one day
+            WitsmlSettings.TimeRangeSize = 86400000000;
+
             var response = DevKit.Add<WellList, Well>(Well);
 
             Wellbore.UidWell = response.SuppMsgOut;
@@ -1381,6 +1392,9 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Test_update_with_unsequenced_increasing_time_log_data_in_different_chunk()
         {
+            // Set the time range chunk size to number of microseconds equivalent to one day
+            WitsmlSettings.TimeRangeSize = 86400000000;
+
             var response = DevKit.Add<WellList, Well>(Well);
 
             Wellbore.UidWell = response.SuppMsgOut;
@@ -1451,6 +1465,9 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Test_update_with_unsequenced_decreasing_time_log_data_in_same_chunk()
         {
+            // Set the time range chunk size to number of microseconds equivalent to one day
+            WitsmlSettings.TimeRangeSize = 86400000000;
+
             var response = DevKit.Add<WellList, Well>(Well);
 
             Wellbore.UidWell = response.SuppMsgOut;
@@ -1521,6 +1538,9 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Test_update_with_unsequenced_decreasing_time_log_data_in_different_chunk()
         {
+            // Set the time range chunk size to number of microseconds equivalent to one day
+            WitsmlSettings.TimeRangeSize = 86400000000;
+
             var response = DevKit.Add<WellList, Well>(Well);
 
             Wellbore.UidWell = response.SuppMsgOut;

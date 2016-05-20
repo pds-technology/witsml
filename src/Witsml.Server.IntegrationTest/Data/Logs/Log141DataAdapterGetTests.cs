@@ -63,10 +63,6 @@ namespace PDS.Witsml.Server.Data.Logs
                 NameWellbore = _wellbore.Name,
                 Name = DevKit.Name("Log 01")
             };
-
-            // Sets the depth and time chunk size
-            WitsmlSettings.DepthRangeSize = 1000;
-            WitsmlSettings.TimeRangeSize = 86400000000; // Number of microseconds equals to one day
         }
 
         [TestCleanup]
@@ -914,9 +910,11 @@ namespace PDS.Witsml.Server.Data.Logs
 
 
         [TestMethod]
-        public void
-            Log141DataAdapter_GetFromStore_With_Start_And_End_Index_On_Increasing_Depth_Log_Data_In_Different_Chunk()
+        public void Log141DataAdapter_GetFromStore_With_Start_And_End_Index_On_Increasing_Depth_Log_Data_In_Different_Chunk()
         {
+            // Set the depth range chunk size.
+            WitsmlSettings.DepthRangeSize = 1000;
+
             var response = DevKit.Add<WellList, Well>(_well);
 
             _wellbore.UidWell = response.SuppMsgOut;
@@ -961,9 +959,11 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void
-            Log141DataAdapter_GetFromStore_With_Start_And_End_Index_On_decreasing_Depth_Log_Data_In_Different_Chunk()
+        public void Log141DataAdapter_GetFromStore_With_Start_And_End_Index_On_decreasing_Depth_Log_Data_In_Different_Chunk()
         {
+            // Set the depth range chunk size.
+            WitsmlSettings.DepthRangeSize = 1000;
+
             var response = DevKit.Add<WellList, Well>(_well);
 
             _wellbore.UidWell = response.SuppMsgOut;
@@ -1091,9 +1091,11 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void
-            Log141DataAdapter_GetFromStore_Can_Slice_On_Channel_On_Range_Of_Null_Indicator_Values_In_Different_Chunks()
+        public void Log141DataAdapter_GetFromStore_Can_Slice_On_Channel_On_Range_Of_Null_Indicator_Values_In_Different_Chunks()
         {
+            // Set the depth range chunk size.
+            WitsmlSettings.DepthRangeSize = 1000;
+
             var response = DevKit.Add<WellList, Well>(_well);
 
             _wellbore.UidWell = response.SuppMsgOut;
@@ -1175,10 +1177,11 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void
-            Log141DataAdapter_GetFromStore_Can_Calculate_Channels_Range_With_Different_Null_Indicators_In_Different_Chunks
-            ()
+        public void Log141DataAdapter_GetFromStore_Can_Calculate_Channels_Range_With_Different_Null_Indicators_In_Different_Chunks()
         {
+            // Set the depth range chunk size.
+            WitsmlSettings.DepthRangeSize = 1000;
+
             var response = DevKit.Add<WellList, Well>(_well);
 
             _wellbore.UidWell = response.SuppMsgOut;
