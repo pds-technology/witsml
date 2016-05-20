@@ -1,0 +1,1 @@
+﻿<%@ ServiceHost Language="C#" Debug="true" Factory="PDS.Framework.Web.Services.ServiceHostFactory" Service="PDS.Witsml.Web.WitsmlStore" CodeBehind="WitsmlStore.svc.cs" %>

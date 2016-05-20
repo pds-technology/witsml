@@ -1,0 +1,149 @@
+﻿//----------------------------------------------------------------------- 
+// PDS.Witsml.Server, 2016.1
+//
+// Copyright 2016 Petrotechnical Data Systems
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//   
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------
+
+using System;
+using System.Collections.Specialized;
+using System.Configuration;
+using System.Web.Security;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Framework.Web;
+
+namespace PDS.Witsml.Server.Security
+{
+    [TestClass]
+    public class MembershipProviderTests
+    {
+        private const string DbCollectionName = MongoDbMembershipProvider.DbCollectionName;
+        private MongoDbMembershipProvider Provider;
+
+        [TestInitialize]
+        public void TestSetUp()
+        {
+            var config = new NameValueCollection(ConfigurationManager.AppSettings);
+
+            ContainerConfiguration.Register(".");
+            Provider = new MongoDbMembershipProvider();
+            Provider.Initialize(MongoDbMembershipProvider.ProviderName, config);
+        }
+
+        [TestMethod]
+        public void MongoDbMembershipProvider_Initialize_resolves_mongo_database_successfully()
+        {
+            Assert.IsNotNull(Provider.Db);
+        }
+
+        [TestMethod]
+        public void MongoDbMembershipProvider_CreateUser_creates_default_user_successfully()
+        {
+            MembershipCreateStatus status;
+            var info = Tuple.Create("witsml.user", "", "bobby.diaz@pds.nl");
+
+            var user = Provider.CreateUser(
+                username: info.Item1,
+                password: info.Item2,
+                email: info.Item3,
+                passwordQuestion: null,
+                passwordAnswer: null,
+                isApproved: true,
+                providerUserKey: null,
+                status: out status);
+
+            Assert.IsNotNull(user);
+            Assert.AreEqual(MembershipCreateStatus.Success, status);
+
+            var saved = Provider.GetUser(info.Item1, false);
+            Assert.IsNotNull(saved);
+        }
+
+        [TestMethod]
+        public void MongoDbMembershipProvider_CreateUser_creates_user_successfully()
+        {
+            MembershipCreateStatus status;
+
+            var password = Membership.GeneratePassword(8, 2);
+            var info = Tuple.Create("pds.user", password, "bobby.diaz@pds.nl");
+
+            var user = Provider.CreateUser(
+                username: info.Item1,
+                password: info.Item2,
+                email: info.Item3,
+                passwordQuestion: null,
+                passwordAnswer: null,
+                isApproved: true,
+                providerUserKey: null,
+                status: out status);
+
+            Assert.IsNotNull(user);
+            Assert.AreEqual(MembershipCreateStatus.Success, status);
+
+            var saved = Provider.GetUser(info.Item1, false);
+            Assert.IsNotNull(saved);
+
+            var result = Provider.ValidateUser(info.Item1, info.Item2);
+            Assert.IsTrue(result);
+
+            Console.WriteLine("email:  {0}", info.Item3);
+            Console.WriteLine("username:  {0}", info.Item1);
+            Console.WriteLine("password:  {0}", info.Item2);
+        }
+
+        [TestMethod]
+        public void MongoDbMembershipProvider_can_validate_user()
+        {
+            var info = Tuple.Create("witsml.user", "", "bobby.diaz@pds.nl");
+
+            var result = Provider.ValidateUser(info.Item1, info.Item2);
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void MongoDbMembershipProvider_CreateUser_saves_successfully()
+        {
+            MembershipCreateStatus status;
+            var name = "witsml.user";
+            var id = "." + DateTime.Now.ToFileTimeUtc();
+
+            var user = Provider.CreateUser(
+                username: name + id,
+                password: name,
+                email: name + id + "@pds.nl",
+                passwordQuestion: null,
+                passwordAnswer: null,
+                isApproved: true,
+                providerUserKey: null,
+                status: out status);
+
+            Assert.IsNotNull(user);
+            Assert.AreEqual(MembershipCreateStatus.Success, status);
+
+            var saved = Provider.GetUser(name + id, false);
+            Assert.IsNotNull(saved);
+
+            var result = Provider.DeleteUser(name + id, true);
+            Assert.AreEqual(true, result);
+        }
+
+        //[Ignore]
+        [TestMethod]
+        public void MongoDbMembershipProvider_DeleteUser_removes_successfully()
+        {
+            var result = Provider.DeleteUser("witsml.user", true);
+            Assert.AreEqual(true, result);
+        }
+    }
+}
