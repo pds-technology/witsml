@@ -1005,7 +1005,7 @@ namespace PDS.Witsml.Data.Channels
 
                     if (!requestLatestValues.HasValue || IsRequestedValueNeeded(allValues, requestedValueCount, requestLatestValues.Value))
                     {
-                        logData.Add(new List<List<object>>() { indexValues, channelValues });
+                        logData.Add(new List<List<object>>() { indexValues, allValues.GetRange(Depth, allValues.Count - 1) });
 
                         // Update the latest value count for each channel.
                         if (requestLatestValues.HasValue)
@@ -1089,13 +1089,16 @@ namespace PDS.Witsml.Data.Channels
 
             for (var i = 0; i < channelValues.Count; i++)
             {
+                if (channelValues[i] == null)
+                    continue;
+                
                 // For the current channel, if the requested value count has not already been reached and then
                 // ... current channel value is not null or blank then a value is being added.
-                if (requestedValueCount[_allSliceOrdinals[i]] < requestLatestValue && channelValues[i] != null)
+                if (requestedValueCount[_allSliceOrdinals[i]] < requestLatestValue && !IsChannelValueNull(_allSliceOrdinals[i], channelValues[i].ToString()))
                 {
                     valueAdded = true;
                 }
-                else if (i > 0)
+                else if (i > Depth)
                 {
                     channelValues[i] = null;
                 }
@@ -1113,7 +1116,7 @@ namespace PDS.Witsml.Data.Channels
                 var ordinal = _allSliceOrdinals[i];
                 var mnemonic = GetName(ordinal);
 
-                if (requestedValueCount.ContainsKey(i) && valueArray[i] != null && !IsChannelValueNull(ordinal, valueArray[i].ToString()))
+                if (requestedValueCount.ContainsKey(ordinal) && valueArray[i] != null && !IsChannelValueNull(ordinal, valueArray[i].ToString()))
                 {
                     // If first time update for this channel value then start and end index are the same
                     if (requestedValueCount[ordinal] == 0)
