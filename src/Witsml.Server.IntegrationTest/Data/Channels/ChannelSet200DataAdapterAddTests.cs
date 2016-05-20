@@ -31,9 +31,9 @@ namespace PDS.Witsml.Server.Data.Channels
     {
         private DevKit200Aspect DevKit;
         private Log200Generator LogGenerator;
-        private IDatabaseProvider Provider;
+        //private IDatabaseProvider Provider;
         private IWitsmlDataAdapter<ChannelSet> ChannelSetAdapter;
-        private ChannelDataChunkAdapter ChunkAdapter;
+        //private ChannelDataChunkAdapter ChunkAdapter;
         private ChannelSet ChannelSet;
 
         [TestInitialize]
@@ -42,10 +42,10 @@ namespace PDS.Witsml.Server.Data.Channels
             var container = ContainerFactory.Create();
             DevKit = new DevKit200Aspect();
             LogGenerator = new Log200Generator();
-            Provider = new DatabaseProvider(container, new MongoDbClassMapper());
+            //Provider = new DatabaseProvider(container, new MongoDbClassMapper());
 
-            ChunkAdapter = new ChannelDataChunkAdapter(Provider);
-            ChannelSetAdapter = new ChannelSet200DataAdapter(Provider, ChunkAdapter);
+            //ChunkAdapter = new ChannelDataChunkAdapter(Provider);
+            //ChannelSetAdapter = new ChannelSet200DataAdapter(Provider, ChunkAdapter);
 
             var log = new Log();
             var mdChannelIndex = LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
@@ -55,12 +55,14 @@ namespace PDS.Witsml.Server.Data.Channels
         }
 
         [TestMethod]
+        [Ignore, Description("Move tests to the MongoDb.IntegrationTest library")]
         public void ChannelSet_can_be_added_with_depth_data()
         {
             ChannelSetAdapter.Add(DevKit.Parser(ChannelSet), ChannelSet);
         }
 
         [TestMethod]
+        [Ignore, Description("Move tests to the MongoDb.IntegrationTest library")]
         public void ChannelSet_can_be_updated_with_middle_depth_data()
         {
             // Create

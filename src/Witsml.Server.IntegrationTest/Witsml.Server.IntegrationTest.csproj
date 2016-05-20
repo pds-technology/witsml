@@ -169,10 +169,6 @@
       <Project>{fae228aa-4917-4b02-b239-0a24df883898}</Project>
       <Name>Framework</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Witsml.Server.MongoDb\Witsml.Server.MongoDb.csproj">
-      <Project>{692d27d9-2f4c-44a6-8d71-8b291e0dc1a3}</Project>
-      <Name>Witsml.Server.MongoDb</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Witsml.Server\Witsml.Server.csproj">
       <Project>{93faae2f-13aa-46df-a94b-36155b51ebfa}</Project>
       <Name>Witsml.Server</Name>

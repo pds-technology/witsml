@@ -34,6 +34,7 @@ namespace PDS.Witsml.Server.Data.Logs
     [TestClass]
     public class Log200DataAdapterAddTests
     {
+        /*
         private DevKit200Aspect DevKit;
         private Log200Generator LogGenerator;
         private IContainer Container;
@@ -226,5 +227,7 @@ namespace PDS.Witsml.Server.Data.Logs
             LogGenerator.GenerateChannelData(Log2.ChannelSet, numDataValue);
             LogAdapter.Add(DevKit.Parser(Log2), Log2);
         }
+
+        */
     }
 }

@@ -239,8 +239,10 @@ namespace PDS.Witsml.Server
         }
 
         [TestMethod]
+        [Ignore, Description("Move tests to the MongoDb.IntegrationTest library")]
         public void Adding_wellbore_database_configuration_error()
         {
+            /*
             var well = new Well { Name = DevKit.Name("Well-to-add-02"), TimeZone = DevKit.TimeZone };
             var response = DevKit.Add<WellList, Well>(well);
 
@@ -267,6 +269,7 @@ namespace PDS.Witsml.Server
             Assert.IsTrue(caught);
             Assert.IsNotNull(exception);
             Assert.AreEqual(ErrorCodes.ErrorAddingToDataStore, exception.ErrorCode);
+            */
         }
 
         [TestMethod]

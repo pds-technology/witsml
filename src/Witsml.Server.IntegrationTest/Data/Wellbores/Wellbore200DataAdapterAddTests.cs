@@ -29,6 +29,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
     [TestClass]
     public class Wellbore200DataAdapterAddTests
     {
+        /*
         private DevKit200Aspect DevKit;
         private IDatabaseProvider Provider;
         private IWitsmlDataAdapter<Well> WellAdapter;
@@ -89,5 +90,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
             Assert.AreEqual(Wellbore2.Citation.Title, wellbore2.Citation.Title);
         }
+
+        */
     }
 }
