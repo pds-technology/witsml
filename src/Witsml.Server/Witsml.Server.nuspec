@@ -9,12 +9,7 @@
     <licenseUrl>https://witsml.pds.nl/license</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <dependencies>
-      <group targetFramework="net40">
-        <dependency id="Energistics.DataAccess" version="2.0.20160518.2" />
-      </group>
       <group targetFramework="net46">
-        <dependency id="ETP.DevKit" version="1.0.20160517.7-BUILD55" />
-        <dependency id="PDS.Framework" version="$version$" />
         <dependency id="PDS.Witsml" version="$version$" />
       </group>
     </dependencies>
