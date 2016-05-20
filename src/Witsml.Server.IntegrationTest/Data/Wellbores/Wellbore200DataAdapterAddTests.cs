@@ -20,7 +20,7 @@ using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MongoDB.Driver;
+//using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Server.Data.Wells;
 
