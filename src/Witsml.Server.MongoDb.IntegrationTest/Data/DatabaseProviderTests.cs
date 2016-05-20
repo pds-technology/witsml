@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using Energistics.DataAccess.WITSML141;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Bson;
@@ -59,6 +60,22 @@ namespace PDS.Witsml.Server.Data
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual(Well1.Name, result[0].Name);
+        }
+    }
+
+    // TODO: remove this after adding NuGet package for PDS.Witsml.Server.IntegrationTest
+    public class DevKit141Aspect
+    {
+        public string TimeZone => "-06:00";
+
+        public string Name(string name)
+        {
+            return $"{ name }-{ DateTime.Now.ToString("yyyyMMdd-HHmmss-ffff") }";
+        }
+
+        public string Uid()
+        {
+            return Guid.NewGuid().ToString();
         }
     }
 }
