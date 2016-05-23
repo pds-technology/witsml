@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>PDS.Witsml.Server.IntegrationTest</id>
+    <version>$version$</version>
+    <authors>Petrotechnical Data Systems</authors>
+    <description>PDS WITSML Server Library Integration Tests</description>
+    <projectUrl>https://witsml.pds.nl/</projectUrl>
+    <licenseUrl>https://witsml.pds.nl/license</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <dependencies>
+      <group targetFramework="net46">
+        <dependency id="PDS.Witsml.Server" version="$version$" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin/$configuration$/PDS.Witsml.Server.IntegrationTest.dll" target="lib/net46" />
+    <file src="bin/$configuration$/PDS.Witsml.Server.IntegrationTest.pdb" target="lib/net46" />
+    <file src="bin/$configuration$/PDS.Witsml.Server.IntegrationTest.xml" target="lib/net46" />
+  </files>
+</package>

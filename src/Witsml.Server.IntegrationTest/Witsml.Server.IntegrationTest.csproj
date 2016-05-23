@@ -76,7 +76,6 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Xml" />
     <Reference Include="WebSocket4Net, Version=0.14.1.0, Culture=neutral, PublicKeyToken=eb4e154b696bf72a, processorArchitecture=MSIL">
       <HintPath>..\packages\WebSocket4Net.0.14.1\lib\net45\WebSocket4Net.dll</HintPath>
@@ -165,10 +164,6 @@
       <Project>{93faae2f-13aa-46df-a94b-36155b51ebfa}</Project>
       <Name>Witsml.Server</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Witsml.UnitTest\Witsml.UnitTest.csproj">
-      <Project>{750f795f-0c36-4cb3-9372-c4a5a716c635}</Project>
-      <Name>Witsml.UnitTest</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Witsml\Witsml.csproj">
       <Project>{0ef1d73f-e7a0-40b0-803b-7ce4b6b27112}</Project>
       <Name>Witsml</Name>
@@ -195,6 +190,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="packages.config" />
+    <None Include="Witsml.Server.IntegrationTest.nuspec" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
