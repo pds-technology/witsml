@@ -43,7 +43,7 @@ namespace PDS.Witsml.Data.Channels
             DateParseHandling = DateParseHandling.DateTimeOffset
         };
 
-        private static ILog _log = LogManager.GetLogger(typeof(ChannelDataReader));
+        private static readonly ILog _log = LogManager.GetLogger(typeof(ChannelDataReader));
         private static readonly string[] Empty = new string[0];
         private List<List<List<object>>> _records;
         private IList<Range<double?>> _ranges;
@@ -561,7 +561,9 @@ namespace PDS.Witsml.Data.Channels
         public Type GetFieldType(int i)
         {
             var rawValue = GetValue(i);
-            return rawValue?.GetType() ?? typeof(object);
+            var type = rawValue?.GetType() ?? typeof(object);
+            return type.IsNumeric() ? typeof(double) : type;
+
         }
 
         /// <summary>

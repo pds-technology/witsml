@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using PDS.Framework;
@@ -61,8 +62,19 @@ namespace PDS.Witsml.Data.Logs
         /// </returns>
         public static bool IsTimeLog(this Witsml131.Log log, bool includeElapsedTime = false)
         {
-            return log.IndexType.GetValueOrDefault() == Witsml131.ReferenceData.LogIndexType.datetime ||
-                   (log.IndexType.GetValueOrDefault() == Witsml131.ReferenceData.LogIndexType.elapsedtime && includeElapsedTime);
+            if (log.IndexType.HasValue)
+            {
+                return log.IndexType.Value == Witsml131.ReferenceData.LogIndexType.datetime ||
+                       (log.IndexType.Value == Witsml131.ReferenceData.LogIndexType.elapsedtime && includeElapsedTime);
+            }
+
+            // Use LogIndexType default if logData not available
+            if (log.LogData == null) return true;
+
+            var data = log.LogData.FirstOrDefault();
+            DateTimeOffset value;
+
+            return DateTimeOffset.TryParse(data?.Split(',').FirstOrDefault(), out value);
         }
 
         /// <summary>
@@ -75,8 +87,19 @@ namespace PDS.Witsml.Data.Logs
         /// </returns>
         public static bool IsTimeLog(this Witsml141.Log log, bool includeElapsedTime = false)
         {
-            return log.IndexType.GetValueOrDefault() == Witsml141.ReferenceData.LogIndexType.datetime ||
-                   (log.IndexType.GetValueOrDefault() == Witsml141.ReferenceData.LogIndexType.elapsedtime && includeElapsedTime);
+            if (log.IndexType.HasValue)
+            {
+                return log.IndexType.Value == Witsml141.ReferenceData.LogIndexType.datetime ||
+                       (log.IndexType.Value == Witsml141.ReferenceData.LogIndexType.elapsedtime && includeElapsedTime);
+            }
+
+            // Use LogIndexType default if logData not available
+            if (log.LogData == null) return true;
+
+            var data = log.LogData.SelectMany(x => x.Data ?? new List<string>(0)).FirstOrDefault();
+            DateTimeOffset value;
+
+            return DateTimeOffset.TryParse(data?.Split(',').FirstOrDefault(), out value);
         }
 
         /// <summary>
