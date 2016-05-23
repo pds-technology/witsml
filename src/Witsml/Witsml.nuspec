@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
-    <id>$id$</id>
+    <id>PDS.Witsml</id>
     <version>$version$</version>
-    <authors>$author$</authors>
-    <description>$description$</description>
+    <authors>Petrotechnical Data Systems</authors>
+    <description>PDS WITSML Core Library</description>
     <projectUrl>https://witsml.pds.nl/</projectUrl>
     <licenseUrl>https://witsml.pds.nl/license</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -14,11 +14,16 @@
       </group>
       <group targetFramework="net46">
         <dependency id="ETP.DevKit" version="1.0.20160517.7-BUILD55" />
+        <dependency id="FluentValidationNA" version="1.2.16" />
+        <dependency id="LinqExtender" version="3.0.1" />
         <dependency id="PDS.Framework" version="$version$" />
+        <dependency id="System.Linq.Dynamic.Library" version="1.1.14" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="bin/$configuration$/$id$.pdb" target="lib/net46" />
+    <file src="bin/$configuration$/PDS.Witsml.dll" target="lib/net46" />
+    <file src="bin/$configuration$/PDS.Witsml.pdb" target="lib/net46" />
+    <file src="bin/$configuration$/PDS.Witsml.xml" target="lib/net46" />
   </files>
 </package>

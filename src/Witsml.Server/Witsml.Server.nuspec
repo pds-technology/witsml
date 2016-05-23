@@ -1,20 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
-    <id>$id$</id>
+    <id>PDS.Witsml.Server</id>
     <version>$version$</version>
-    <authors>$author$</authors>
-    <description>$description$</description>
+    <authors>Petrotechnical Data Systems</authors>
+    <description>PDS WITSML Server Library</description>
     <projectUrl>https://witsml.pds.nl/</projectUrl>
     <licenseUrl>https://witsml.pds.nl/license</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <dependencies>
       <group targetFramework="net46">
+        <dependency id="Fare" version="1.0.2" />
         <dependency id="PDS.Witsml" version="$version$" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="bin/$configuration$/$id$.pdb" target="lib/net46" />
+    <file src="bin/$configuration$/PDS.Witsml.Server.dll" target="lib/net46" />
+    <file src="bin/$configuration$/PDS.Witsml.Server.pdb" target="lib/net46" />
+    <file src="bin/$configuration$/PDS.Witsml.Server.xml" target="lib/net46" />
   </files>
 </package>

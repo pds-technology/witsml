@@ -1,20 +1,31 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
-    <id>$id$</id>
+    <id>PDS.Framework.Web</id>
     <version>$version$</version>
-    <authors>$author$</authors>
-    <description>$description$</description>
+    <authors>Petrotechnical Data Systems</authors>
+    <description>PDS .NET Framework Web Extensions</description>
     <projectUrl>https://witsml.pds.nl/</projectUrl>
     <licenseUrl>https://witsml.pds.nl/license</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <dependencies>
       <group targetFramework="net46">
+        <dependency id="Microsoft.AspNet.Mvc" version="5.2.3" />
+        <dependency id="Microsoft.AspNet.Razor" version="3.2.3" />
+        <dependency id="Microsoft.AspNet.WebApi" version="5.2.3" />
+        <dependency id="Microsoft.AspNet.WebApi.Client" version="5.2.3" />
+        <dependency id="Microsoft.AspNet.WebApi.Core" version="5.2.3" />
+        <dependency id="Microsoft.AspNet.WebApi.WebHost" version="5.2.3" />
+        <dependency id="Microsoft.AspNet.WebPages" version="3.2.3" />
+        <dependency id="Microsoft.Web.Infrastructure" version="1.0.0.0" />
+        <dependency id="Newtonsoft.Json" version="8.0.2" />
         <dependency id="PDS.Framework" version="$version$" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="bin/$configuration$/$id$.pdb" target="lib/net46" />
+    <file src="bin/$configuration$/PDS.Framework.Web.dll" target="lib/net46" />
+    <file src="bin/$configuration$/PDS.Framework.Web.pdb" target="lib/net46" />
+    <file src="bin/$configuration$/PDS.Framework.Web.xml" target="lib/net46" />
   </files>
 </package>

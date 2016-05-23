@@ -1,22 +1,33 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
-    <id>$id$</id>
+    <id>PDS.Witsml.Server.Web</id>
     <version>$version$</version>
-    <authors>$author$</authors>
-    <description>$description$</description>
+    <authors>Petrotechnical Data Systems</authors>
+    <description>PDS WITSML Server Web Library</description>
     <projectUrl>https://witsml.pds.nl/</projectUrl>
     <licenseUrl>https://witsml.pds.nl/license</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <dependencies>
       <group targetFramework="net46">
         <dependency id="Microsoft.AspNet.Cors" version="5.2.3" />
+        <dependency id="Microsoft.AspNet.WebApi.Owin" version="5.2.3" />
+        <dependency id="Microsoft.Owin" version="3.0.1" />
+        <dependency id="Microsoft.Owin.Cors" version="3.0.1" />
+        <dependency id="Microsoft.Owin.Host.SystemWeb" version="3.0.1" />
+        <dependency id="Microsoft.Owin.Security" version="3.0.1" />
+        <dependency id="Microsoft.Owin.Security.OAuth" version="3.0.1" />
+        <dependency id="Owin" version="1.0" />
         <dependency id="PDS.Framework.Web" version="$version$" />
         <dependency id="PDS.Witsml.Server" version="$version$" />
+        <dependency id="System.IdentityModel.Tokens.Jwt" version="4.0.2.206221351" />
+        <dependency id="Thinktecture.IdentityModel.Core" version="1.4.0" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="bin/$configuration$/$id$.pdb" target="lib/net46" />
+    <file src="bin/$configuration$/PDS.Witsml.Server.Web.dll" target="lib/net46" />
+    <file src="bin/$configuration$/PDS.Witsml.Server.Web.pdb" target="lib/net46" />
+    <file src="bin/$configuration$/PDS.Witsml.Server.Web.xml" target="lib/net46" />
   </files>
 </package>
