@@ -101,12 +101,27 @@ namespace PDS.Witsml.Server.Data
         }
 
 
+        /// <summary>
+        /// Handles the string value.
+        /// </summary>
+        /// <param name="xmlObject">The XML object.</param>
+        /// <param name="propertyType">Type of the property.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <param name="propertyValue">The property value.</param>
         protected override void HandleStringValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
             Context.Filters.Add(Builders<T>.Filter.EqIgnoreCase(propertyPath, propertyValue));
             AddProjectionProperty(propertyPath);
         }
 
+        /// <summary>
+        /// Handles the date time value.
+        /// </summary>
+        /// <param name="xmlObject">The XML object.</param>
+        /// <param name="propertyType">Type of the property.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <param name="propertyValue">The property value.</param>
+        /// <param name="dateTimeValue">The date time value.</param>
         protected override void HandleDateTimeValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, DateTime dateTimeValue)
         {
             if (propertyPath.EndsWith(".DateTimeCreation") || propertyPath.EndsWith(".DateTimeLastChange"))
@@ -121,6 +136,14 @@ namespace PDS.Witsml.Server.Data
             AddProjectionProperty(propertyPath);
         }
 
+        /// <summary>
+        /// Handles the timestamp value.
+        /// </summary>
+        /// <param name="xmlObject">The XML object.</param>
+        /// <param name="propertyType">Type of the property.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <param name="propertyValue">The property value.</param>
+        /// <param name="timestampValue">The timestamp value.</param>
         protected override void HandleTimestampValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, Timestamp timestampValue)
         {
             if (propertyPath.EndsWith(".DateTimeCreation") || propertyPath.EndsWith(".DateTimeLastChange"))
@@ -135,28 +158,58 @@ namespace PDS.Witsml.Server.Data
             AddProjectionProperty(propertyPath);
         }
 
+        /// <summary>
+        /// Handles the object value.
+        /// </summary>
+        /// <param name="xmlObject">The XML object.</param>
+        /// <param name="propertyType">Type of the property.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <param name="propertyValue">The property value.</param>
+        /// <param name="objectValue">The object value.</param>
         protected override void HandleObjectValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, object objectValue)
         {
             Context.Filters.Add(Builders<T>.Filter.Eq(propertyPath, objectValue));
             AddProjectionProperty(propertyPath);
         }
 
+        /// <summary>
+        /// Handles the null value.
+        /// </summary>
+        /// <param name="xmlObject">The XML object.</param>
+        /// <param name="propertyType">Type of the property.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <param name="propertyValue">The property value.</param>
         protected override void HandleNullValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
             AddProjectionProperty(propertyPath);
         }
 
+        /// <summary>
+        /// Handles the NaN value.
+        /// </summary>
+        /// <param name="xmlObject">The XML object.</param>
+        /// <param name="propertyType">Type of the property.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <param name="propertyValue">The property value.</param>
         protected override void HandleNaNValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
             AddProjectionProperty(propertyPath);
         }
 
+        /// <summary>
+        /// Initializes the recurring element handler.
+        /// </summary>
+        /// <param name="propertyPath">The property path.</param>
         protected override void InitializeRecurringElementHandler(string propertyPath)
         {
             Context.ParentFilters[propertyPath] = Context.Filters;
             Context.Filters = new List<FilterDefinition<T>>();
         }
 
+        /// <summary>
+        /// Handles the recurring elements.
+        /// </summary>
+        /// <param name="propertyPath">The property path.</param>
         protected override void HandleRecurringElements(string propertyPath)
         {
             var filters = Context.ParentFilters[propertyPath];
@@ -229,6 +282,10 @@ namespace PDS.Witsml.Server.Data
             }
         }
 
+        /// <summary>
+        /// Adds the projection property.
+        /// </summary>
+        /// <param name="propertyPath">The property path.</param>
         private void AddProjectionProperty(string propertyPath)
         {
             if (!Context.IsProjection || Context.Fields.Contains(propertyPath))

@@ -23,8 +23,11 @@ namespace PDS.Witsml.Server.Data.Transactions
     /// </summary>
     public enum MongoDbAction
     {
+        /// <summary>An insert operation.</summary>
         Add,
+        /// <summary>An update operation.</summary>
         Update,
+        /// <summary>A delete operation.</summary>
         Delete
     }
 
@@ -33,9 +36,13 @@ namespace PDS.Witsml.Server.Data.Transactions
     /// </summary>
     public enum TransactionStatus
     {
+        /// <summary>A newly created transaction.</summary>
         Created,
+        /// <summary>A pending transaction.</summary>
         Pending,
+        /// <summary>A committed transaction.</summary>
         Commited,
+        /// <summary>A rolled back transaction.</summary>
         RolledBack
     }
 }

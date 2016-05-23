@@ -43,8 +43,9 @@ namespace PDS.Witsml.Server.Data
         private readonly IContainer _container;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseProvider"/> class.
+        /// Initializes a new instance of the <see cref="DatabaseProvider" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="mapper">The MongoDb class mapper.</param>
         [ImportingConstructor]
         public DatabaseProvider(IContainer container, MongoDbClassMapper mapper)
@@ -58,6 +59,7 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseProvider"/> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="mapper">The MongoDb class mapper.</param>
         /// <param name="connectionString">The connection string.</param>
         internal DatabaseProvider(IContainer container, MongoDbClassMapper mapper, string connectionString) : this(container, mapper)

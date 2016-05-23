@@ -179,22 +179,42 @@ namespace PDS.Witsml.Server.Data
             }
         }
 
+        /// <summary>
+        /// Gets the default collection.
+        /// </summary>
+        /// <returns></returns>
         protected IMongoCollection<T> GetCollection()
         {
             return GetCollection<T>(DbCollectionName);
         }
 
+        /// <summary>
+        /// Gets the collection having the specified name.
+        /// </summary>
+        /// <typeparam name="TObject">The type of the object.</typeparam>
+        /// <param name="dbCollectionName">Name of the database collection.</param>
+        /// <returns></returns>
         protected IMongoCollection<TObject> GetCollection<TObject>(string dbCollectionName)
         {
             var database = DatabaseProvider.GetDatabase();
             return database.GetCollection<TObject>(dbCollectionName);
         }
 
+        /// <summary>
+        /// Gets an <see cref="IQueryable{T}"/> instance for the default collection.
+        /// </summary>
+        /// <returns></returns>
         protected IMongoQueryable<T> GetQuery()
         {
             return GetQuery<T>(DbCollectionName);
         }
 
+        /// <summary>
+        /// Gets an <see cref="IQueryable{TObject}"/> instance for the specified collection.
+        /// </summary>
+        /// <typeparam name="TObject">The type of the object.</typeparam>
+        /// <param name="dbCollectionName">Name of the database collection.</param>
+        /// <returns></returns>
         protected IMongoQueryable<TObject> GetQuery<TObject>(string dbCollectionName)
         {
             return GetCollection<TObject>(dbCollectionName).AsQueryable();
@@ -236,16 +256,35 @@ namespace PDS.Witsml.Server.Data
             }
         }
 
+        /// <summary>
+        /// Gets the entity filter for the specified URI.
+        /// </summary>
+        /// <typeparam name="TObject">The type of the object.</typeparam>
+        /// <param name="uri">The URI.</param>
+        /// <param name="idPropertyName">Name of the identifier property.</param>
+        /// <returns>The entity filter.</returns>
         protected virtual FilterDefinition<TObject> GetEntityFilter<TObject>(EtpUri uri, string idPropertyName)
         {
             return MongoDbUtility.GetEntityFilter<TObject>(uri, idPropertyName);
         }
 
+        /// <summary>
+        /// Gets the entities having the specified URIs.
+        /// </summary>
+        /// <param name="uris">The uris.</param>
+        /// <returns>The query results.</returns>
         protected List<T> GetEntities(IEnumerable<EtpUri> uris)
         {
             return GetEntities<T>(uris, DbCollectionName);
         }
 
+        /// <summary>
+        /// Gets the entities having the supplied URIs found in the specified collection.
+        /// </summary>
+        /// <typeparam name="TObject">The type of the object.</typeparam>
+        /// <param name="uris">The uris.</param>
+        /// <param name="dbCollectionName">Name of the database collection.</param>
+        /// <returns>The query results.</returns>
         protected List<TObject> GetEntities<TObject>(IEnumerable<EtpUri> uris, string dbCollectionName)
         {
             var list = uris.ToList();

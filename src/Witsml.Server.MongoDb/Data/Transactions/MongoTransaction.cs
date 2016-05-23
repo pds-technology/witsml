@@ -43,6 +43,11 @@ namespace PDS.Witsml.Server.Data.Transactions
         private static readonly string _uidWell = "UidWell";
         private static readonly string _uidWellbore = "UidWellbore";
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MongoTransaction"/> class.
+        /// </summary>
+        /// <param name="databaseProvider">The database provider.</param>
+        /// <param name="adapter">The transaction adapter.</param>
         [ImportingConstructor]
         public MongoTransaction(IDatabaseProvider databaseProvider, MongoDbTransactionAdapter adapter)
         {
@@ -130,6 +135,7 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// <param name="action">The MongoDb operation, e.g. add.</param>
         /// <param name="collection">The MongoDb collection name.</param>
         /// <param name="document">The data obejct in BsonDocument format.</param>
+        /// <param name="uri">The URI.</param>
         public void Attach(MongoDbAction action, string collection, BsonDocument document, EtpUri? uri = null)
         {
             var transaction = new MongoDbTransaction

@@ -29,12 +29,6 @@ namespace PDS.Witsml.Server.Models
     public class ChannelDataChunk
     {
         /// <summary>
-        /// Gets or sets the identifier.
-        /// </summary>
-        /// <value>The identifier.</value>
-        //public string Id { get; set; }
-
-        /// <summary>
         /// Gets or sets the URI of the parent data object.
         /// </summary>
         /// <value>The parent data object URI.</value>

@@ -22,8 +22,17 @@ using PDS.Witsml.Data.Channels;
 
 namespace PDS.Witsml.Server.Models
 {
+    /// <summary>
+    /// Provides static helper methods that can be used to process <see cref="ChannelDataChunk"/> data.
+    /// </summary>
     public static class ChunkExtensions
     {
+        /// <summary>
+        /// Gets a <see cref="ChannelDataReader"/> that can be used to process the <see cref="ChannelDataChunk"/> data.
+        /// </summary>
+        /// <param name="channelDataChunk">The channel data chunk.</param>
+        /// <param name="reverse">if set to <c>true</c> the primary index should be reversed.</param>
+        /// <returns></returns>
         public static ChannelDataReader GetReader(this ChannelDataChunk channelDataChunk, bool reverse = false)
         {
             var mnemonics = ChannelDataReader.Split(channelDataChunk.MnemonicList);

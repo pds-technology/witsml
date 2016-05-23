@@ -107,41 +107,84 @@ namespace PDS.Witsml.Server.Data.Logs
             }
         }
 
+        /// <summary>
+        /// Creates a generic measure.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="uom">The uom.</param>
+        /// <returns></returns>
         protected override object CreateGenericMeasure(double value, string uom)
         {
             return new GenericMeasure() { Value = value, Uom = uom };
         }
 
+        /// <summary>
+        /// Determines whether the specified log is increasing.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns></returns>
         protected override bool IsIncreasing(Log log)
         {
             return log.IsIncreasing();
         }
 
+        /// <summary>
+        /// Determines whether the specified log is a time log.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="includeElapsedTime">if set to <c>true</c>, include elapsed time.</param>
+        /// <returns></returns>
         protected override bool IsTimeLog(Log log, bool includeElapsedTime = false)
         {
             return log.IsTimeLog(includeElapsedTime);
         }
 
+        /// <summary>
+        /// Gets the log curve.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="mnemonic">The mnemonic.</param>
+        /// <returns></returns>
         protected override LogCurveInfo GetLogCurve(Log log, string mnemonic)
         {
             return log?.LogCurveInfo.GetByUid(mnemonic) ?? log?.LogCurveInfo.GetByMnemonic(mnemonic);
         }
 
+        /// <summary>
+        /// Gets the log curves.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns></returns>
         protected override List<LogCurveInfo> GetLogCurves(Log log)
         {
             return log.LogCurveInfo;
         }
 
+        /// <summary>
+        /// Gets the mnemonic.
+        /// </summary>
+        /// <param name="curve">The curve.</param>
+        /// <returns></returns>
         protected override string GetMnemonic(LogCurveInfo curve)
         {
             return curve?.Mnemonic?.Value;
         }
 
+        /// <summary>
+        /// Gets the index curve mnemonic.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns></returns>
         protected override string GetIndexCurveMnemonic(Log log)
         {
             return log.IndexCurve;
         }
 
+        /// <summary>
+        /// Gets the units by column index.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns></returns>
         protected override IDictionary<int, string> GetUnitsByColumnIndex(Log log)
         {
             return log.LogCurveInfo
@@ -151,6 +194,11 @@ namespace PDS.Witsml.Server.Data.Logs
                 .ToDictionary(x => x.Index, x => x.Unit);
         }
 
+        /// <summary>
+        /// Gets the null values by column index.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns></returns>
         protected override IDictionary<int, string> GetNullValuesByColumnIndex(Log log)
         {
             return log.LogCurveInfo
@@ -160,11 +208,25 @@ namespace PDS.Witsml.Server.Data.Logs
                 .ToDictionary(x => x.Index, x => x.NullValue);
         }
 
+        /// <summary>
+        /// Gets the index range.
+        /// </summary>
+        /// <param name="curve">The curve.</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <param name="isTimeIndex">if set to <c>true</c> [is time index].</param>
+        /// <returns></returns>
         protected override Range<double?> GetIndexRange(LogCurveInfo curve, bool increasing = true, bool isTimeIndex = false)
         {
             return curve.GetIndexRange(increasing, isTimeIndex);
         }
 
+        /// <summary>
+        /// Sets the log data values.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="logDataValues">The log data values.</param>
+        /// <param name="mnemonics">The mnemonics.</param>
+        /// <param name="units">The units.</param>
         protected override void SetLogDataValues(Log log, List<string> logDataValues, IEnumerable<string> mnemonics, IEnumerable<string> units)
         {
             if (log.LogData == null)
@@ -178,6 +240,11 @@ namespace PDS.Witsml.Server.Data.Logs
             });
         }
 
+        /// <summary>
+        /// Sets the log index range.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="ranges">The ranges.</param>
         protected override void SetLogIndexRange(Log log, Dictionary<string, Range<double?>> ranges)
         {
             if (log.LogCurveInfo == null)
@@ -226,6 +293,13 @@ namespace PDS.Witsml.Server.Data.Logs
             }
         }
 
+        /// <summary>
+        /// Updates the common data.
+        /// </summary>
+        /// <param name="logHeaderUpdate">The log header update.</param>
+        /// <param name="entity">The entity.</param>
+        /// <param name="offset">The offset.</param>
+        /// <returns></returns>
         protected override UpdateDefinition<Log> UpdateCommonData(UpdateDefinition<Log> logHeaderUpdate, Log entity, TimeSpan? offset)
         {
             if (entity?.CommonData == null)
@@ -248,6 +322,13 @@ namespace PDS.Witsml.Server.Data.Logs
             return logHeaderUpdate;
         }
 
+        /// <summary>
+        /// Converts a logCurveInfo to an index metadata record.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="indexCurve">The index curve.</param>
+        /// <param name="scale">The scale.</param>
+        /// <returns></returns>
         protected override IndexMetadataRecord ToIndexMetadataRecord(Log entity, LogCurveInfo indexCurve, int scale = 3)
         {
             return new IndexMetadataRecord()
@@ -267,6 +348,13 @@ namespace PDS.Witsml.Server.Data.Logs
             };
         }
 
+        /// <summary>
+        /// Converts a logCurveInfo to a channel metadata record.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="curve">The curve.</param>
+        /// <param name="indexMetadata">The index metadata.</param>
+        /// <returns></returns>
         protected override ChannelMetadataRecord ToChannelMetadataRecord(Log entity, LogCurveInfo curve, IndexMetadataRecord indexMetadata)
         {
             var uri = curve.GetUri(entity);
@@ -295,6 +383,12 @@ namespace PDS.Witsml.Server.Data.Logs
             };
         }
 
+        /// <summary>
+        /// Extracts the data readers.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="existing">The existing.</param>
+        /// <returns></returns>
         private IEnumerable<ChannelDataReader> ExtractDataReaders(Log entity, Log existing = null)
         {
             if (existing == null)
@@ -308,6 +402,10 @@ namespace PDS.Witsml.Server.Data.Logs
             return existing.GetReaders().ToList();
         }
 
+        /// <summary>
+        /// Clears the index values.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
         private void ClearIndexValues(Log dataObject)
         {
             if (IsTimeLog(dataObject))

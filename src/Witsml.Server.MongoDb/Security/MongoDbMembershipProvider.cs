@@ -35,13 +35,33 @@ using PDS.Witsml.Server.Data;
 
 namespace PDS.Witsml.Server.Security
 {
+    /// <summary>
+    /// Manages storage of membership information for an ASP.NET application in a Mongo database.
+    /// </summary>
+    /// <seealso cref="System.Web.Security.MembershipProvider" />
     public class MongoDbMembershipProvider : MembershipProvider
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(MongoDbMembershipProvider));
+
+        /// <summary>The provider name.</summary>
         public static readonly string ProviderName = typeof(MongoDbMembershipProvider).Name;
 
         #region API
 
+        /// <summary>
+        /// Adds a new membership user to the data source.
+        /// </summary>
+        /// <param name="username">The user name for the new user.</param>
+        /// <param name="password">The password for the new user.</param>
+        /// <param name="email">The e-mail address for the new user.</param>
+        /// <param name="passwordQuestion">The password question for the new user.</param>
+        /// <param name="passwordAnswer">The password answer for the new user</param>
+        /// <param name="isApproved">Whether or not the new user is approved to be validated.</param>
+        /// <param name="providerUserKey">The unique identifier from the membership data source for the user.</param>
+        /// <param name="status">A <see cref="T:System.Web.Security.MembershipCreateStatus" /> enumeration value indicating whether the user was created successfully.</param>
+        /// <returns>
+        /// A <see cref="T:System.Web.Security.MembershipUser" /> object populated with the information for the newly created user.
+        /// </returns>
         public override MembershipUser CreateUser(string username, string password, string email, string passwordQuestion, string passwordAnswer, bool isApproved, object providerUserKey, out MembershipCreateStatus status)
         {
             _log.InfoFormat("Creating user: {0}; email: {1};", username, email);
@@ -91,6 +111,14 @@ namespace PDS.Witsml.Server.Security
             return GetUser(username, false);
         }
 
+        /// <summary>
+        /// Gets information from the data source for a user. Provides an option to update the last-activity date/time stamp for the user.
+        /// </summary>
+        /// <param name="username">The name of the user to get information for.</param>
+        /// <param name="userIsOnline">true to update the last-activity date/time stamp for the user; false to return user information without updating the last-activity date/time stamp for the user.</param>
+        /// <returns>
+        /// A <see cref="T:System.Web.Security.MembershipUser" /> object populated with the specified user's information from the data source.
+        /// </returns>
         public override MembershipUser GetUser(string username, bool userIsOnline)
         {
             var usr = ByUserName(username);
@@ -105,6 +133,14 @@ namespace PDS.Witsml.Server.Security
             return ToMembershipUser(usr);
         }
 
+        /// <summary>
+        /// Verifies that the specified user name and password exist in the data source.
+        /// </summary>
+        /// <param name="username">The name of the user to validate.</param>
+        /// <param name="password">The password for the specified user.</param>
+        /// <returns>
+        /// true if the specified username and password are valid; otherwise, false.
+        /// </returns>
         public override bool ValidateUser(string username, string password)
         {
             var usr = ByUserName(username);
@@ -125,6 +161,14 @@ namespace PDS.Witsml.Server.Security
             return valid;
         }
 
+        /// <summary>
+        /// Changes the password.
+        /// </summary>
+        /// <param name="username">The username.</param>
+        /// <param name="oldPwd">The old password.</param>
+        /// <param name="newPwd">The new password.</param>
+        /// <returns></returns>
+        /// <exception cref="MembershipPasswordException">Change password canceled due to new password validation failure.</exception>
         public override bool ChangePassword(string username, string oldPwd, string newPwd)
         {
             if (ValidateUser(username, oldPwd) == false)
@@ -142,6 +186,14 @@ namespace PDS.Witsml.Server.Security
             return true;
         }
 
+        /// <summary>
+        /// Removes a user from the membership data source.
+        /// </summary>
+        /// <param name="username">The name of the user to delete.</param>
+        /// <param name="deleteAllRelatedData">true to delete data related to the user from the database; false to leave data related to the user in the database.</param>
+        /// <returns>
+        /// true if the user was successfully deleted; otherwise, false.
+        /// </returns>
         public override bool DeleteUser(string username, bool deleteAllRelatedData)
         {
             _log.InfoFormat("Deleting user: {0}", username);
@@ -152,6 +204,15 @@ namespace PDS.Witsml.Server.Security
             return true;
         }
 
+        /// <summary>
+        /// Gets a collection of all the users in the data source in pages of data.
+        /// </summary>
+        /// <param name="pageIndex">The index of the page of results to return. <paramref name="pageIndex" /> is zero-based.</param>
+        /// <param name="pageSize">The size of the page of results to return.</param>
+        /// <param name="totalRecords">The total number of matched users.</param>
+        /// <returns>
+        /// A <see cref="T:System.Web.Security.MembershipUserCollection" /> collection that contains a page of <paramref name="pageSize" /><see cref="T:System.Web.Security.MembershipUser" /> objects beginning at the page specified by <paramref name="pageIndex" />.
+        /// </returns>
         public override MembershipUserCollection GetAllUsers(int pageIndex, int pageSize, out int totalRecords)
         {
             //var all = Db.All<DbUser>().Where(u => u.ApplicationName == ApplicationName);
@@ -166,6 +227,21 @@ namespace PDS.Witsml.Server.Security
             return res;
         }
 
+        /// <summary>
+        /// Resets a user's password to a new, automatically generated password.
+        /// </summary>
+        /// <param name="username">The user to reset the password for.</param>
+        /// <param name="answer">The password answer for the specified user.</param>
+        /// <returns>
+        /// The new password for the specified user.
+        /// </returns>
+        /// <exception cref="System.NotSupportedException">Password reset is not enabled.</exception>
+        /// <exception cref="ProviderException">Password answer required for password reset.</exception>
+        /// <exception cref="MembershipPasswordException">
+        /// Reset password canceled due to password validation failure.
+        /// or
+        /// The supplied user is locked out.
+        /// </exception>
         public override string ResetPassword(string username, string answer)
         {
             if (!EnablePasswordReset)
@@ -208,12 +284,32 @@ namespace PDS.Witsml.Server.Security
             return newPassword;
         }
 
+        /// <summary>
+        /// The name of the application using the custom membership provider.
+        /// </summary>
         public override string ApplicationName { get; set; }
 
+        /// <summary>
+        /// Gets the number of minutes in which a maximum number of invalid password or password-answer attempts are allowed before the membership user is locked out.
+        /// </summary>
         public override int PasswordAttemptWindow { get { return pPasswordAttemptWindow; } }
 
+        /// <summary>
+        /// Gets the number of invalid password or password-answer attempts allowed before the membership user is locked out.
+        /// </summary>
         public override int MaxInvalidPasswordAttempts { get { return pMaxInvalidPasswordAttempts; } }
 
+        /// <summary>
+        /// Initializes the provider.
+        /// </summary>
+        /// <param name="name">The friendly name of the provider.</param>
+        /// <param name="config">A collection of the name/value pairs representing the provider-specific attributes specified in the configuration for this provider.</param>
+        /// <exception cref="System.ArgumentNullException">config</exception>
+        /// <exception cref="ProviderException">
+        /// Password format not supported.
+        /// or
+        /// Hashed or Encrypted passwords are not supported with auto-generated keys.
+        /// </exception>
         public override void Initialize(string name, NameValueCollection config)
         {
             //
@@ -547,7 +643,6 @@ namespace PDS.Witsml.Server.Security
         //
         // Global connection string, generated password length, generic exception message, event log info.
         //
-
         private int newPasswordLength = 8;
         private string eventSource = "OdbcMembershipProvider";
         private string eventLog = "Application";
@@ -558,9 +653,14 @@ namespace PDS.Witsml.Server.Security
         // If false, exceptions are thrown to the caller. If true,
         // exceptions are written to the event log.
         //
-
         private bool pWriteExceptionsToEventLog;
 
+        /// <summary>
+        /// Gets or sets a value indicating whether [write exceptions to event log].
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if [write exceptions to event log]; otherwise, <c>false</c>.
+        /// </value>
         public bool WriteExceptionsToEventLog
         {
             get { return pWriteExceptionsToEventLog; }
@@ -570,7 +670,6 @@ namespace PDS.Witsml.Server.Security
         //
         // A helper function to retrieve config values from the configuration file.
         //
-
         private string GetConfigValue(string configValue, string defaultValue)
         {
             if (String.IsNullOrEmpty(configValue))
@@ -579,46 +678,52 @@ namespace PDS.Witsml.Server.Security
             return configValue;
         }
 
-
         //
         // System.Web.Security.MembershipProvider properties.
         //
-
-
         private bool pEnablePasswordReset;
         private bool pEnablePasswordRetrieval;
         private bool pRequiresQuestionAndAnswer;
         private bool pRequiresUniqueEmail;
         private MembershipPasswordFormat pPasswordFormat;
 
-
+        /// <summary>
+        /// Indicates whether the membership provider is configured to allow users to reset their passwords.
+        /// </summary>
         public override bool EnablePasswordReset
         {
             get { return pEnablePasswordReset; }
         }
 
-
+        /// <summary>
+        /// Indicates whether the membership provider is configured to allow users to retrieve their passwords.
+        /// </summary>
         public override bool EnablePasswordRetrieval
         {
             get { return pEnablePasswordRetrieval; }
         }
 
-
+        /// <summary>
+        /// Gets a value indicating whether the membership provider is configured to require the user to answer a password question for password reset and retrieval.
+        /// </summary>
         public override bool RequiresQuestionAndAnswer
         {
             get { return pRequiresQuestionAndAnswer; }
         }
 
 
+        /// <summary>
+        /// Gets a value indicating whether the membership provider is configured to require a unique e-mail address for each user name.
+        /// </summary>
         public override bool RequiresUniqueEmail
         {
             get { return pRequiresUniqueEmail; }
         }
 
 
-
-
-
+        /// <summary>
+        /// Gets a value indicating the format for storing passwords in the membership data store.
+        /// </summary>
         public override MembershipPasswordFormat PasswordFormat
         {
             get { return pPasswordFormat; }
@@ -626,6 +731,9 @@ namespace PDS.Witsml.Server.Security
 
         private int pMinRequiredNonAlphanumericCharacters;
 
+        /// <summary>
+        /// Gets the minimum number of special characters that must be present in a valid password.
+        /// </summary>
         public override int MinRequiredNonAlphanumericCharacters
         {
             get { return pMinRequiredNonAlphanumericCharacters; }
@@ -633,6 +741,9 @@ namespace PDS.Witsml.Server.Security
 
         private int pMinRequiredPasswordLength;
 
+        /// <summary>
+        /// Gets the minimum length required for a password.
+        /// </summary>
         public override int MinRequiredPasswordLength
         {
             get { return pMinRequiredPasswordLength; }
@@ -640,6 +751,9 @@ namespace PDS.Witsml.Server.Security
 
         private string pPasswordStrengthRegularExpression;
 
+        /// <summary>
+        /// Gets the regular expression used to evaluate a password.
+        /// </summary>
         public override string PasswordStrengthRegularExpression
         {
             get { return pPasswordStrengthRegularExpression; }
@@ -649,6 +763,15 @@ namespace PDS.Witsml.Server.Security
         // MembershipProvider.ChangePasswordQuestionAndAnswer
         //
 
+        /// <summary>
+        /// Changes the password question and answer.
+        /// </summary>
+        /// <param name="username">The username.</param>
+        /// <param name="password">The password.</param>
+        /// <param name="newPwdQuestion">The new password question.</param>
+        /// <param name="newPwdAnswer">The new password answer.</param>
+        /// <returns></returns>
+        /// <exception cref="ProviderException"></exception>
         public override bool ChangePasswordQuestionAndAnswer(string username,
                           string password,
                           string newPwdQuestion,
@@ -707,6 +830,13 @@ namespace PDS.Witsml.Server.Security
         // MembershipProvider.GetNumberOfUsersOnline
         //
 
+        /// <summary>
+        /// Gets the number of users currently accessing the application.
+        /// </summary>
+        /// <returns>
+        /// The number of users currently accessing the application.
+        /// </returns>
+        /// <exception cref="ProviderException"></exception>
         public override int GetNumberOfUsersOnline()
         {
 
@@ -754,6 +884,27 @@ namespace PDS.Witsml.Server.Security
         // MembershipProvider.GetPassword
         //
 
+        /// <summary>
+        /// Gets the password for the specified user name from the data source.
+        /// </summary>
+        /// <param name="username">The user to retrieve the password for.</param>
+        /// <param name="answer">The password answer for the user.</param>
+        /// <returns>
+        /// The password for the specified user name.
+        /// </returns>
+        /// <exception cref="ProviderException">
+        /// Password Retrieval Not Enabled.
+        /// or
+        /// Cannot retrieve Hashed passwords.
+        /// or
+        /// </exception>
+        /// <exception cref="MembershipPasswordException">
+        /// The supplied user is locked out.
+        /// or
+        /// The supplied user name is not found.
+        /// or
+        /// Incorrect password answer.
+        /// </exception>
         public override string GetPassword(string username, string answer)
         {
             if (!EnablePasswordRetrieval)
@@ -839,6 +990,15 @@ namespace PDS.Witsml.Server.Security
         // MembershipProvider.GetUser(object, bool)
         //
 
+        /// <summary>
+        /// Gets user information from the data source based on the unique identifier for the membership user. Provides an option to update the last-activity date/time stamp for the user.
+        /// </summary>
+        /// <param name="providerUserKey">The unique identifier for the membership user to get information for.</param>
+        /// <param name="userIsOnline">true to update the last-activity date/time stamp for the user; false to return user information without updating the last-activity date/time stamp for the user.</param>
+        /// <returns>
+        /// A <see cref="T:System.Web.Security.MembershipUser" /> object populated with the specified user's information from the data source.
+        /// </returns>
+        /// <exception cref="ProviderException"></exception>
         public override MembershipUser GetUser(object providerUserKey, bool userIsOnline)
         {
             OdbcConnection conn = new OdbcConnection(connectionString);
@@ -958,6 +1118,12 @@ namespace PDS.Witsml.Server.Security
         // MembershipProvider.UnlockUser
         //
 
+        /// <summary>
+        /// Unlocks the user.
+        /// </summary>
+        /// <param name="username">The username.</param>
+        /// <returns></returns>
+        /// <exception cref="ProviderException"></exception>
         public override bool UnlockUser(string username)
         {
             OdbcConnection conn = new OdbcConnection(connectionString);
@@ -1005,6 +1171,14 @@ namespace PDS.Witsml.Server.Security
         // MembershipProvider.GetUserNameByEmail
         //
 
+        /// <summary>
+        /// Gets the user name associated with the specified e-mail address.
+        /// </summary>
+        /// <param name="email">The e-mail address to search for.</param>
+        /// <returns>
+        /// The user name associated with the specified e-mail address. If no match is found, return null.
+        /// </returns>
+        /// <exception cref="ProviderException"></exception>
         public override string GetUserNameByEmail(string email)
         {
             OdbcConnection conn = new OdbcConnection(connectionString);
@@ -1054,6 +1228,11 @@ namespace PDS.Witsml.Server.Security
         // MembershipProvider.UpdateUser
         //
 
+        /// <summary>
+        /// Updates information about a user in the data source.
+        /// </summary>
+        /// <param name="user">A <see cref="T:System.Web.Security.MembershipUser" /> object that represents the user to update and the updated information for the user.</param>
+        /// <exception cref="ProviderException"></exception>
         public override void UpdateUser(MembershipUser user)
         {
             OdbcConnection conn = new OdbcConnection(connectionString);
@@ -1184,6 +1363,17 @@ namespace PDS.Witsml.Server.Security
         // MembershipProvider.FindUsersByName
         //
 
+        /// <summary>
+        /// Gets a collection of membership users where the user name contains the specified user name to match.
+        /// </summary>
+        /// <param name="usernameToMatch">The user name to search for.</param>
+        /// <param name="pageIndex">The index of the page of results to return. <paramref name="pageIndex" /> is zero-based.</param>
+        /// <param name="pageSize">The size of the page of results to return.</param>
+        /// <param name="totalRecords">The total number of matched users.</param>
+        /// <returns>
+        /// A <see cref="T:System.Web.Security.MembershipUserCollection" /> collection that contains a page of <paramref name="pageSize" /><see cref="T:System.Web.Security.MembershipUser" /> objects beginning at the page specified by <paramref name="pageIndex" />.
+        /// </returns>
+        /// <exception cref="ProviderException"></exception>
         public override MembershipUserCollection FindUsersByName(string usernameToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
 
@@ -1256,6 +1446,17 @@ namespace PDS.Witsml.Server.Security
         // MembershipProvider.FindUsersByEmail
         //
 
+        /// <summary>
+        /// Gets a collection of membership users where the e-mail address contains the specified e-mail address to match.
+        /// </summary>
+        /// <param name="emailToMatch">The e-mail address to search for.</param>
+        /// <param name="pageIndex">The index of the page of results to return. <paramref name="pageIndex" /> is zero-based.</param>
+        /// <param name="pageSize">The size of the page of results to return.</param>
+        /// <param name="totalRecords">The total number of matched users.</param>
+        /// <returns>
+        /// A <see cref="T:System.Web.Security.MembershipUserCollection" /> collection that contains a page of <paramref name="pageSize" /><see cref="T:System.Web.Security.MembershipUser" /> objects beginning at the page specified by <paramref name="pageIndex" />.
+        /// </returns>
+        /// <exception cref="ProviderException"></exception>
         public override MembershipUserCollection FindUsersByEmail(string emailToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
             OdbcConnection conn = new OdbcConnection(connectionString);

@@ -26,7 +26,7 @@ namespace PDS.Witsml.Server.Data
     /// <summary>
     /// Represents a serializer for <see cref="Timestamp"/> instances.
     /// </summary>
-    /// <seealso cref="MongoDB.Bson.Serialization.Serializers.SerializerBase{Energistics.DataAccess.Timestamp}" />
+    /// <seealso cref="MongoDB.Bson.Serialization.Serializers.SerializerBase{Timestamp}" />
     public class TimestampSerializer : SerializerBase<Timestamp>
     {
         private readonly DateTimeOffsetSerializer _serializer;

@@ -34,14 +34,30 @@ using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
+    /// <summary>
+    /// MongoDb data adapter that encapsulates CRUD functionality for Log objects.
+    /// </summary>
+    /// <typeparam name="T">The data object type</typeparam>
+    /// <typeparam name="TChild">The type of the child.</typeparam>
+    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{T}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.Channels.IChannelDataProvider" />
     public abstract class LogDataAdapter<T, TChild> : MongoDbDataAdapter<T>, IChannelDataProvider where T : IWellboreObject where TChild : IUniqueId
     {
         private readonly bool _streamIndexValuePairs = Settings.Default.StreamIndexValuePairs;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LogDataAdapter{T, TChild}"/> class.
+        /// </summary>
+        /// <param name="databaseProvider">The database provider.</param>
+        /// <param name="dbCollectionName">Name of the database collection.</param>
         protected LogDataAdapter(IDatabaseProvider databaseProvider, string dbCollectionName) : base(databaseProvider, dbCollectionName)
         {
         }
 
+        /// <summary>
+        /// Gets or sets the channel data chunk adapter.
+        /// </summary>
+        /// <value>The channel data chunk adapter.</value>
         [Import]
         public ChannelDataChunkAdapter ChannelDataChunkAdapter { get; set; }
 
@@ -422,6 +438,12 @@ namespace PDS.Witsml.Server.Data.Logs
             logCurves?.RemoveAll(x => !mnemonics.Contains(GetMnemonic(x)));
         }
 
+        /// <summary>
+        /// Updates the log data and index range.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="readers">The readers.</param>
+        /// <param name="transaction">The transaction.</param>
         protected void UpdateLogDataAndIndexRange(EtpUri uri, IEnumerable<ChannelDataReader> readers, MongoTransaction transaction = null)
         {
             Logger.DebugFormat("Updating log data and index for log uri '{0}'.", uri.Uri);
@@ -479,6 +501,11 @@ namespace PDS.Witsml.Server.Data.Logs
             }
         }
 
+        /// <summary>
+        /// Gets the current index range.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <returns></returns>
         protected Dictionary<string, Range<double?>> GetCurrentIndexRange(T entity)
         {
             var ranges = new Dictionary<string, Range<double?>>();
@@ -663,34 +690,122 @@ namespace PDS.Witsml.Server.Data.Logs
             return new Range<double?>(start, end, update.Offset);
         }
 
+        /// <summary>
+        /// Determines whether the specified log is increasing.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns></returns>
         protected abstract bool IsIncreasing(T log);
 
+        /// <summary>
+        /// Determines whether the specified log is a time log.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="includeElapsedTime">if set to <c>true</c> [include elapsed time].</param>
+        /// <returns></returns>
         protected abstract bool IsTimeLog(T log, bool includeElapsedTime = false);
 
+        /// <summary>
+        /// Gets the log curve.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="mnemonic">The mnemonic.</param>
+        /// <returns></returns>
         protected abstract TChild GetLogCurve(T log, string mnemonic);
 
+        /// <summary>
+        /// Gets the log curves.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns></returns>
         protected abstract List<TChild> GetLogCurves(T log);
 
+        /// <summary>
+        /// Gets the mnemonic.
+        /// </summary>
+        /// <param name="curve">The curve.</param>
+        /// <returns></returns>
         protected abstract string GetMnemonic(TChild curve);
 
+        /// <summary>
+        /// Gets the index curve mnemonic.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns></returns>
         protected abstract string GetIndexCurveMnemonic(T log);
 
+        /// <summary>
+        /// Gets the units by column index.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns></returns>
         protected abstract IDictionary<int, string> GetUnitsByColumnIndex(T log);
 
+        /// <summary>
+        /// Gets the null values by column index.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns></returns>
         protected abstract IDictionary<int, string> GetNullValuesByColumnIndex(T log);
 
+        /// <summary>
+        /// Gets the index range.
+        /// </summary>
+        /// <param name="curve">The curve.</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <param name="isTimeIndex">if set to <c>true</c> [is time index].</param>
+        /// <returns></returns>
         protected abstract Range<double?> GetIndexRange(TChild curve, bool increasing = true, bool isTimeIndex = false);
 
+        /// <summary>
+        /// Sets the log index range.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="ranges">The ranges.</param>
         protected abstract void SetLogIndexRange(T log, Dictionary<string, Range<double?>> ranges);
 
+        /// <summary>
+        /// Sets the log data values.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="logData">The log data.</param>
+        /// <param name="mnemonics">The mnemonics.</param>
+        /// <param name="units">The units.</param>
         protected abstract void SetLogDataValues(T log, List<string> logData, IEnumerable<string> mnemonics, IEnumerable<string> units);
 
+        /// <summary>
+        /// Updates the common data.
+        /// </summary>
+        /// <param name="logHeaderUpdate">The log header update.</param>
+        /// <param name="entity">The entity.</param>
+        /// <param name="offset">The offset.</param>
+        /// <returns></returns>
         protected abstract UpdateDefinition<T> UpdateCommonData(UpdateDefinition<T> logHeaderUpdate, T entity, TimeSpan? offset);
 
+        /// <summary>
+        /// Creates a generic measure.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="uom">The uom.</param>
+        /// <returns></returns>
         protected abstract object CreateGenericMeasure(double value, string uom);
 
+        /// <summary>
+        /// Converts a logCurveInfo to an index metadata record.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="indexCurve">The index curve.</param>
+        /// <param name="scale">The scale.</param>
+        /// <returns></returns>
         protected abstract IndexMetadataRecord ToIndexMetadataRecord(T entity, TChild indexCurve, int scale = 3);
 
+        /// <summary>
+        /// Converts a logCurveInfo to a channel metadata record.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="curve">The curve.</param>
+        /// <param name="indexMetadata">The index metadata.</param>
+        /// <returns></returns>
         protected abstract ChannelMetadataRecord ToChannelMetadataRecord(T entity, TChild curve, IndexMetadataRecord indexMetadata);
     }
 }

@@ -65,6 +65,13 @@ namespace PDS.Witsml.Server.Data.Transactions
             collection.DeleteMany(filter);
         }
 
+        /// <summary>
+        /// Gets the entity filter for the specified URI.
+        /// </summary>
+        /// <typeparam name="TObject">The type of the object.</typeparam>
+        /// <param name="uri">The URI.</param>
+        /// <param name="idPropertyName">Name of the identifier property.</param>
+        /// <returns>The entity filter.</returns>
         protected override FilterDefinition<TObject> GetEntityFilter<TObject>(EtpUri uri, string idPropertyName)
         {
             return MongoDbUtility.BuildFilter<TObject>(idPropertyName, uri.ToString());

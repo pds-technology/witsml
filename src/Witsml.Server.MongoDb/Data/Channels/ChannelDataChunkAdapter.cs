@@ -183,6 +183,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="uri">The URI.</param>
         /// <param name="mnemonics">The mnemonics.</param>
         /// <param name="units">The units.</param>
+        /// <param name="nullValues">The null values.</param>
         /// <param name="transaction">The transaction.</param>
         private void BulkWriteChunks(IEnumerable<ChannelDataChunk> chunks, string uri, string mnemonics, string units, string nullValues, MongoTransaction transaction = null)
         {
