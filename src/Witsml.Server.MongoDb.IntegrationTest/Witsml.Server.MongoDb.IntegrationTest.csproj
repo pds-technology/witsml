@@ -240,8 +240,9 @@
     <PreBuildEvent>powershell.exe -file "$(SolutionDir)\External\InsertCopyright.ps1" -target $(ProjectDir) -productname "PDS.Witsml.Server"</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>COPY "$(TargetPath)" "$(TargetDir)temp.dll"
+"$(SolutionDir)External\ILMerge\ILMerge.exe" /targetplatform:v4 /union /out:"$(TargetPath)" "$(TargetDir)temp.dll" "$(TargetDir)PDS.Witsml.Server.IntegrationTest.dll"
+DEL "$(TargetDir)temp.dll"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
