@@ -242,7 +242,7 @@ if "$(ConfigurationName)" == "Debug" "$(SolutionDir)External\CopyCoreLibrariesFo
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>COPY "$(TargetPath)" "$(TargetDir)temp.dll"
-"$(SolutionDir)External\ILMerge\ILMerge.exe" /targetplatform:v4 /union /out:"$(TargetPath)" "$(TargetDir)temp.dll" "$(TargetDir)PDS.Witsml.Server.IntegrationTest.dll"
+"$(SolutionDir)External\ILMerge\ILMerge.exe" /targetplatform:v4 /out:"$(TargetPath)" "$(TargetDir)temp.dll" "$(TargetDir)PDS.Witsml.Server.IntegrationTest.dll"
 DEL "$(TargetDir)temp.dll"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

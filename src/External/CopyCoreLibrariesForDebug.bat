@@ -23,3 +23,12 @@ popd
 pushd "%~dp0..\packages\PDS.Witsml.Server.Web.*\lib\net46\"
 copy "%~dp0..\..\..\witsml\src\Witsml.Server.Web\bin\Debug\PDS.Witsml.Server.Web.*"
 popd
+
+Echo.%1 | findstr /C:"IntegrationTest">nul && (
+	mkdir %1Data\Data
+	mkdir %1Demo\Data
+	copy "%~dp0..\..\..\witsml\src\Witsml.Server.IntegrationTest\bin\Debug\Data\Data\*.*" %1Data\Data
+	copy "%~dp0..\..\..\witsml\src\Witsml.Server.IntegrationTest\bin\Debug\Demo\Data\*.*" %1Demo\Data
+) || (
+    Echo.
+)
