@@ -120,14 +120,15 @@ namespace PDS.Witsml.Data.Channels
 
         public static ChannelDataReader GetReader(this Witsml200.ChannelSet channelSet)
         {
-            if (string.IsNullOrWhiteSpace(channelSet?.Data?.Data)) return null;
+            var data = Witsml200.Extensions.GetData(channelSet);
+            if (string.IsNullOrWhiteSpace(data)) return null;
 
             // Not including index channels with value channels
             var mnemonics = channelSet.Channel.Select(x => x.Mnemonic).ToArray();
             var units = channelSet.Channel.Select(x => x.UoM).ToArray();
             var nullValues = new string[units.Length];
 
-            return new ChannelDataReader(channelSet.Data.Data, mnemonics, units, nullValues, channelSet.GetUri())
+            return new ChannelDataReader(data, mnemonics, units, nullValues, channelSet.GetUri())
                 // Add index channels to separate collection
                 .WithIndices(channelSet.Index.Select(ToChannelIndexInfo), true);
         }

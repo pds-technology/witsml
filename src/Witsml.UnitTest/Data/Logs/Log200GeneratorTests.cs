@@ -81,7 +81,7 @@ namespace PDS.Witsml.Data.Logs
             Assert.AreEqual(1, channelSetList.Count);
             Assert.AreEqual(2, channelSetList[0].Channel.Count);
 
-            List<List<List<object>>> dataValues = LogGenerator.DeserializeChannelSetData(channelSetList[0].Data.Data);
+            List<List<List<object>>> dataValues = LogGenerator.DeserializeChannelSetData(channelSetList[0].GetData());
             Assert.AreEqual(5, dataValues.Count);
             Assert.AreEqual(2, dataValues[0].Count);
             Assert.AreEqual(2, dataValues[0][0].Count);
@@ -110,7 +110,7 @@ namespace PDS.Witsml.Data.Logs
             Assert.AreEqual(1, channelSetList.Count);
             Assert.AreEqual(2, channelSetList[0].Channel.Count);
 
-            List<List<List<object>>> dataValues = LogGenerator.DeserializeChannelSetData(channelSetList[0].Data.Data);
+            List<List<List<object>>> dataValues = LogGenerator.DeserializeChannelSetData(channelSetList[0].GetData());
             Assert.AreEqual(5, dataValues.Count);
             Assert.AreEqual(2, dataValues[0].Count);
         }
@@ -132,13 +132,13 @@ namespace PDS.Witsml.Data.Logs
             Assert.AreEqual(2, channelSetList[0].Channel.Count);
             Assert.AreEqual(1, channelSetList[1].Channel.Count);
 
-            List<List<List<object>>> dataValues = LogGenerator.DeserializeChannelSetData(channelSetList[0].Data.Data);
+            List<List<List<object>>> dataValues = LogGenerator.DeserializeChannelSetData(channelSetList[0].GetData());
             Assert.AreEqual(5, dataValues.Count);
             Assert.AreEqual(2, dataValues[0].Count);
             Assert.AreEqual(2, dataValues[0][0].Count);
             Assert.AreEqual(2, dataValues[0][1].Count);
 
-            dataValues = LogGenerator.DeserializeChannelSetData(channelSetList[1].Data.Data);
+            dataValues = LogGenerator.DeserializeChannelSetData(channelSetList[1].GetData());
             Assert.AreEqual(5, dataValues.Count);
             Assert.AreEqual(2, dataValues[0].Count);
             Assert.AreEqual(2, dataValues[0][0].Count);
@@ -155,7 +155,7 @@ namespace PDS.Witsml.Data.Logs
             Assert.AreEqual(1, channelSetList.Count);
             Assert.AreEqual(1, channelSetList[0].Channel.Count);
 
-            List<List<List<object>>> dataValues = LogGenerator.DeserializeChannelSetData(channelSetList[0].Data.Data);
+            List<List<List<object>>> dataValues = LogGenerator.DeserializeChannelSetData(channelSetList[0].GetData());
             Assert.AreEqual(5, dataValues.Count);
             Assert.AreEqual(2, dataValues[0].Count);
             Assert.AreEqual(1, dataValues[0][0].Count);

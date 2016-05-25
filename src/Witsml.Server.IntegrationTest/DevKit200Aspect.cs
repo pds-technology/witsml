@@ -53,8 +53,8 @@ namespace PDS.Witsml.Server
             return new Citation()
             {
                 Title = Name(name),
-                Originator = GetType().Name,
-                Format = GetType().Assembly.FullName,
+                Originator = typeof(Log200Generator).Name,
+                Format = typeof(Log200Generator).Assembly.FullName,
                 Creation = DateTime.UtcNow,
             };
         }
@@ -124,7 +124,7 @@ namespace PDS.Witsml.Server
 
         public void CreateMockChannelSetData(ChannelSet channelSet, List<ChannelIndex> indices)
         {
-            var data = new ChannelData()
+            channelSet.Data = new ChannelData()
             {
                 FileUri = "file://",
             };
@@ -133,45 +133,44 @@ namespace PDS.Witsml.Server
             {
                 if (indices[0].IndexType == ChannelIndexType.measureddepth)
                 {
-                    data.Data = @"[
+                    channelSet.SetData(@"[
                             [ [0.0 ], [ [ 1.0, true  ], 2.0,  3.0 ] ],
                             [ [0.1 ], [ [ 1.1, false ], null, 3.1 ] ],
                             [ [0.2 ], [ null,           null, 3.2 ] ],
                             [ [0.3 ], [ [ 1.3, true  ], 2.3,  3.3 ] ]
-                        ]";
+                        ]");
                 }
                 else if (indices[0].IndexType == ChannelIndexType.datetime)
                 {
-                    data.Data = @"[
+                    channelSet.SetData(@"[
                             [ [ ""2016-01-01T00:00:00.0000Z"" ], [ [ 1.0, true  ], 2.0,  3.0 ] ],
                             [ [ ""2016-01-01T00:00:01.0000Z"" ], [ [ 1.1, false ], null, 3.1 ] ],
                             [ [ ""2016-01-01T00:00:02.0000Z"" ], [ null,           null, 3.2 ] ],
                             [ [ ""2016-01-01T00:00:03.0000Z"" ], [ [ 1.3, true  ], 2.3,  3.3 ] ]
-                        ]";
+                        ]");
                 }
             }
             else if (indices.Count == 2)
             {
                 if (indices[0].IndexType == ChannelIndexType.measureddepth)
                 {
-                    data.Data = @"[
+                    channelSet.SetData(@"[
                             [ [0.0, ""2016-01-01T00:00:00.0000Z"" ], [ [1.0, true  ],  2.0,  3.0 ] ],
                             [ [0.1, ""2016-01-01T00:00:01.0000Z"" ], [ [1.1, false ],  null, 3.1 ] ],
                             [ [0.2, ""2016-01-01T00:00:02.0000Z"" ], [ null,           null, 3.2 ] ],
                             [ [0.3, ""2016-01-01T00:00:03.0000Z"" ], [ [1.3, true  ],  2.3,  3.3 ] ]
-                        ]";
+                        ]");
                 }
                 else if (indices[0].IndexType == ChannelIndexType.datetime)
                 {
-                    data.Data = @"[
+                    channelSet.SetData(@"[
                             [ [ ""2016-01-01T00:00:00.0000Z"", 0.0 ], [ [ 1.0, true  ], 2.0,  3.0 ] ],
                             [ [ ""2016-01-01T00:00:01.0000Z"", 0.1 ], [ [ 1.1, false ], null, 3.1 ] ],
                             [ [ ""2016-01-01T00:00:02.0000Z"", 0.2 ], [ null,           null, 3.2 ] ],
                             [ [ ""2016-01-01T00:00:03.0000Z"", 0.3 ], [ [ 1.3, true  ], 2.3,  3.3 ] ]
-                        ]";
+                        ]");
                 }
             }
-            channelSet.Data = data;
         }
 
         /// <summary>

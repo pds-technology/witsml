@@ -24,6 +24,7 @@ using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Newtonsoft.Json;
 using PDS.Framework;
+using PDS.Witsml.Data.Channels;
 
 namespace PDS.Witsml.Data.Logs
 {
@@ -278,8 +279,9 @@ namespace PDS.Witsml.Data.Logs
 
                     logData += "[ " + indexValues + ", " + channelValues + " ]";
                 }
+
                 logData += Environment.NewLine + " ]";
-                channelSet.Data.Data = logData;
+                channelSet.SetData(logData);
             }
         }
 
