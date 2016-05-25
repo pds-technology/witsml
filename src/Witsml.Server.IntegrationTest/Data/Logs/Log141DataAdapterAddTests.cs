@@ -2036,6 +2036,31 @@ namespace PDS.Witsml.Server.Data.Logs
             }
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_AddToStore_With_No_LogCurveInfos()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = CreateLog(
+                null,
+                DevKit.Name("Log can be added with depth data"),
+                Wellbore.UidWell,
+                Well.Name,
+                response.SuppMsgOut,
+                Wellbore.Name);
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            log.LogCurveInfo.Clear();
+            log.LogData.Clear();
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+        }
+
         #region Helper Methods
 
         private Log CreateLog(string uid, string name, Well well, Wellbore wellbore)

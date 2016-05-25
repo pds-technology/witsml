@@ -180,13 +180,6 @@ namespace PDS.Witsml.Server.Data.Logs
                 yield return new ValidationResult(ErrorCodes.DuplicateColumnIdentifiers.ToString(), new[] { "LogCurveInfo", "Mnemonic" });
             }
 
-            // Validate that IndexCurve exists in LogCurveInfo
-            else if (!string.IsNullOrEmpty(indexCurve) && logCurves != null
-                && !logCurves.Any(lci => lci.Mnemonic != null && lci.Mnemonic.Value == indexCurve))
-            {
-                yield return new ValidationResult(ErrorCodes.IndexCurveNotFound.ToString(), new[] { "IndexCurve" });
-            }
-
             // Validate structural-range indices for consistent index types
             else if ((DataObject.StartIndex != null || DataObject.EndIndex != null) && (DataObject.StartDateTimeIndex != null || DataObject.EndDateTimeIndex != null))
             {
