@@ -24,7 +24,6 @@ using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 using PDS.Framework;
 using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Server.Data.Channels;
@@ -157,6 +156,8 @@ namespace PDS.Witsml.Server.Data.Logs
             // Generate 150 rows of data
             LogGenerator.GenerateChannelData(Log1.ChannelSet, numDataValue);
 
+            File.WriteAllText("TestData/Well-for-DepthLog-2.0.xml", EnergisticsConverter.ObjectToXml(Well1));
+            File.WriteAllText("TestData/Wellbore-for-DepthLog-2.0.xml", EnergisticsConverter.ObjectToXml(Wellbore1));
             File.WriteAllText("TestData/DepthLog-2.0.xml", EnergisticsConverter.ObjectToXml(Log1));
 
             LogAdapter.Add(DevKit.Parser(Log1), Log1);
@@ -230,6 +231,8 @@ namespace PDS.Witsml.Server.Data.Logs
             // Generate 150 rows of data
             LogGenerator.GenerateChannelData(Log2.ChannelSet, numDataValue);
 
+            File.WriteAllText("TestData/Well-for-TimeLog-2.0.xml", EnergisticsConverter.ObjectToXml(Well1));
+            File.WriteAllText("TestData/Wellbore-for-TimeLog-2.0.xml", EnergisticsConverter.ObjectToXml(Wellbore1));
             File.WriteAllText("TestData/TimeLog-2.0.xml", EnergisticsConverter.ObjectToXml(Log2));
 
             LogAdapter.Add(DevKit.Parser(Log2), Log2);
