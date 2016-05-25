@@ -16,13 +16,14 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+/*
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-//using MongoDB.Driver;
-//using MongoDB.Driver.Linq;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 using PDS.Framework;
 using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Server.Data.Channels;
@@ -34,7 +35,6 @@ namespace PDS.Witsml.Server.Data.Logs
     [TestClass]
     public class Log200DataAdapterAddTests
     {
-        /*
         private DevKit200Aspect DevKit;
         private Log200Generator LogGenerator;
         private IContainer Container;
@@ -227,7 +227,6 @@ namespace PDS.Witsml.Server.Data.Logs
             LogGenerator.GenerateChannelData(Log2.ChannelSet, numDataValue);
             LogAdapter.Add(DevKit.Parser(Log2), Log2);
         }
-
-        */
     }
 }
+*/

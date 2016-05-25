@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<wells xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dc="http://purl.org/dc/terms/" xmlns:gml="http://www.opengis.net/gml/3.2" version="1.4.1.1" xmlns="http://www.witsml.org/schemas/1series">
+  <well uid="490251091700">
+    <name>25-LX-11</name>
+    <field>Teapot Dome</field>
+    <country>U.S.A.</country>
+    <state>Wyoming</state>
+    <county>Natrona</county>
+    <timeZone>-08:00</timeZone>
+    <statusWell>plugged and abandoned</statusWell>
+    <dTimSpud>1983-01-12T00:00:00.0000000+00:00</dTimSpud>
+    <wellDatum>
+      <name>Kelly Bushing</name>
+      <code>KB</code>
+      <elevation uom="ft">5196</elevation>
+    </wellDatum>
+    <groundElevation uom="ft">5186</groundElevation>
+    <referencePoint uid="WRP1">
+      <name>Sea Bed</name>
+      <type>Well Reference Point</type>
+      <location uid="loc-1">
+        <wellCRS uidRef="proj1">TWP: 38  N - Range: 78 W - Sec. 11 </wellCRS>
+        <easting uom="ft">805200.5</easting>
+        <northing uom="ft">952903.5</northing>
+      </location>
+    </referencePoint>
+    <wellCRS uid="proj1">
+      <name>TWP: 38  N - Range: 78 W - Sec. 11 </name>
+    </wellCRS>
+  </well>
+</wells>

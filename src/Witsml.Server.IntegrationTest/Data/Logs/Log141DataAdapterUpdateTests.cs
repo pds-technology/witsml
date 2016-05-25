@@ -34,15 +34,10 @@ namespace PDS.Witsml.Server.Data.Logs
     [TestClass]
     public class Log141DataAdapterUpdateTests
     {
-        //[TestMethod]
-        //public void Log141DataAdapter_MethodName_ExpectedBehavior()
-        //{
-        //}
         private DevKit141Aspect DevKit;
         private Well Well;
         private Wellbore Wellbore;
         private Log Log;
-        private string BaseDir;
         private string DataDir;
 
         [TestInitialize]
@@ -55,8 +50,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 .ToArray();
 
             // Test data directory
-            BaseDir = AppDomain.CurrentDomain.BaseDirectory;
-            DataDir = BaseDir + @"\Data\Data\";
+            DataDir = new DirectoryInfo(@".\TestData").FullName;
 
             Well = new Well { Name = DevKit.Name("Well 01"), TimeZone = DevKit.TimeZone };
 

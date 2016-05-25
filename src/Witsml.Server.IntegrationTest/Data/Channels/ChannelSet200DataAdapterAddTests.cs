@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+/*
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
@@ -31,10 +32,9 @@ namespace PDS.Witsml.Server.Data.Channels
     {
         private DevKit200Aspect DevKit;
         private Log200Generator LogGenerator;
-        //private IDatabaseProvider Provider;
+        private IDatabaseProvider Provider;
         private IWitsmlDataAdapter<ChannelSet> ChannelSetAdapter;
-        //private ChannelDataChunkAdapter ChunkAdapter;
-        private ChannelSet ChannelSet;
+        private ChannelDataChunkAdapter ChunkAdapter;
 
         [TestInitialize]
         public void TestSetUp()
@@ -42,10 +42,10 @@ namespace PDS.Witsml.Server.Data.Channels
             var container = ContainerFactory.Create();
             DevKit = new DevKit200Aspect();
             LogGenerator = new Log200Generator();
-            //Provider = new DatabaseProvider(container, new MongoDbClassMapper());
+            Provider = new DatabaseProvider(container, new MongoDbClassMapper());
 
-            //ChunkAdapter = new ChannelDataChunkAdapter(Provider);
-            //ChannelSetAdapter = new ChannelSet200DataAdapter(Provider, ChunkAdapter);
+            ChunkAdapter = new ChannelDataChunkAdapter(Provider);
+            ChannelSetAdapter = new ChannelSet200DataAdapter(Provider, ChunkAdapter);
 
             var log = new Log();
             var mdChannelIndex = LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
@@ -84,3 +84,4 @@ namespace PDS.Witsml.Server.Data.Channels
         }
     }
 }
+*/

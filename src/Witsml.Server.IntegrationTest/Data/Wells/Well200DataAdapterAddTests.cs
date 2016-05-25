@@ -16,12 +16,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+/*
 using System;
 using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML200;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-//using MongoDB.Driver;
+using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 
@@ -30,7 +31,6 @@ namespace PDS.Witsml.Server.Data.Wells
     [TestClass]
     public class Well200DataAdapterAddTests
     {
-        /*
         private DevKit200Aspect DevKit;
         private IDatabaseProvider Provider;
         private IWitsmlDataAdapter<Well> WellAdapter;
@@ -119,7 +119,6 @@ namespace PDS.Witsml.Server.Data.Wells
 
             Assert.AreEqual(Well2.Citation.Title, well2.Citation.Title);
         }
-
-        */
     }
 }
+*/
