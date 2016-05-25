@@ -381,23 +381,27 @@ namespace PDS.Witsml.Server.Data.Logs
                 ? new Range<double?>(null, null)
                 : GetLogDataSubsetRange(logHeader, parser);
 
-            var units = GetUnitList(logHeader, mnemonics.Keys.ToArray());
-            var nullValues = GetNullValueList(logHeader, mnemonics.Keys.ToArray());
-            var records = GetChannelData(logHeader.GetUri(), mnemonics[0], range, IsIncreasing(logHeader), requestLatestValues);
-
-            // Get a reader for the log's channel data
-            var reader = records.GetReader();
-
-            // Slice the reader for the requested mnemonics
-            reader.Slice(mnemonics, units, nullValues);
-            var logData = FormatLogData(log, reader, context, mnemonics, units, nullValues);
-            if (logData.Count > 0)
+            if (mnemonics.Count > 0)
             {
-                SetLogDataValues(log, logData, mnemonics.Values, units.Values);
-            }
+                var units = GetUnitList(logHeader, mnemonics.Keys.ToArray());
+                var nullValues = GetNullValueList(logHeader, mnemonics.Keys.ToArray());
+                var records = GetChannelData(logHeader.GetUri(), mnemonics[0], range, IsIncreasing(logHeader),
+                    requestLatestValues);
 
-            // Update the response context growing object totals
-            context.UpdateGrowingObjectTotals(logData.Count, mnemonics.Keys.Count);
+                // Get a reader for the log's channel data
+                var reader = records.GetReader();
+
+                // Slice the reader for the requested mnemonics
+                reader.Slice(mnemonics, units, nullValues);
+                var logData = FormatLogData(log, reader, context, mnemonics, units, nullValues);
+                if (logData.Count > 0)
+                {
+                    SetLogDataValues(log, logData, mnemonics.Values, units.Values);
+                }
+
+                // Update the response context growing object totals
+                context.UpdateGrowingObjectTotals(logData.Count, mnemonics.Keys.Count);
+            }
         }
 
         private Range<double?> GetLogDataSubsetRange(T log, WitsmlQueryParser parser)
