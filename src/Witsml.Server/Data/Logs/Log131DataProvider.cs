@@ -31,7 +31,7 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{LogList, Log}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Log>))]
-    [Export141(ObjectTypes.Log, typeof(IEtpDataProvider))]
+    [Export131(ObjectTypes.Log, typeof(IEtpDataProvider))]
     [Export131(ObjectTypes.Log, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class Log131DataProvider : WitsmlDataProvider<LogList, Log>

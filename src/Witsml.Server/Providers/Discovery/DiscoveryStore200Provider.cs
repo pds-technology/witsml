@@ -98,13 +98,13 @@ namespace PDS.Witsml.Server.Providers.Discovery
             {
                 var parentUri = uri.Parent;
 
-                if (uri.ObjectType == ObjectFolders.Logs)
+                if (ObjectFolders.Logs.EqualsIgnoreCase(uri.ObjectType))
                 {
                     args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Time));
                     args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Depth));
                 }
-                else if (parentUri.ObjectType == ObjectFolders.Logs &&
-                    (uri.ObjectType == ObjectFolders.Time || uri.ObjectType == ObjectFolders.Depth))
+                else if (ObjectFolders.Logs.EqualsIgnoreCase(parentUri.ObjectType) &&
+                    (ObjectFolders.Time.EqualsIgnoreCase(uri.ObjectType) || ObjectFolders.Depth.EqualsIgnoreCase(uri.ObjectType)))
                 {
                     var wellboreUri = parentUri.Parent;
 
