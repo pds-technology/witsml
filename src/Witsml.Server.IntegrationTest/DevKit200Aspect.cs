@@ -177,7 +177,7 @@ namespace PDS.Witsml.Server
         /// Initializes the channel set.
         /// </summary>
         /// <param name="log">The log.</param>
-        /// <param name="isIncreasing">if set to <c>true</c> [is increasing].</param>
+        /// <param name="indexList">The index list.</param>
         /// <param name="loggingMethod">The logging method.</param>
         /// <param name="numDataValue">The number data value.</param>
         public void InitChannelSet(Log log, List<ChannelIndex> indexList, LoggingMethod loggingMethod = LoggingMethod.computed, int numDataValue = 5)

@@ -21,6 +21,10 @@ using System.Linq;
 
 namespace PDS.Witsml.Linq
 {
+    /// <summary>
+    /// Defines the properties and methods for a WITSML query.
+    /// </summary>
+    /// <seealso cref="System.Linq.IQueryable" />
     public interface IWitsmlQuery : IQueryable
     {
         /// <summary>
@@ -31,6 +35,11 @@ namespace PDS.Witsml.Linq
         IWitsmlQuery With(OptionsIn optionsIn);
     }
 
+    /// <summary>
+    /// Defines the properties and methods for a type specific WITSML query.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <seealso cref="System.Linq.IQueryable" />
     public interface IWitsmlQuery<T> : IQueryable<T>
     {
         /// <summary>

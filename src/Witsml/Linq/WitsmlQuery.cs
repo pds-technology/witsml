@@ -150,6 +150,11 @@ namespace PDS.Witsml.Linq
             return this;
         }
 
+        /// <summary>
+        /// Sets the property value.
+        /// </summary>
+        /// <param name="property">The property.</param>
+        /// <param name="value">The value.</param>
         protected override void SetPropertyValue(PropertyInfo property, object value)
         {
             property.SetValue(Query.Items[0], value);
@@ -159,26 +164,47 @@ namespace PDS.Witsml.Linq
 
         private IQueryable<T> Queryable;
 
+        /// <summary>
+        /// Gets the expression tree that is associated with the instance of <see cref="T:System.Linq.IQueryable" />.
+        /// </summary>
         public Expression Expression
         {
             get { return Queryable.Expression; }
         }
 
+        /// <summary>
+        /// Gets the type of the element(s) that are returned when the expression tree associated with this instance of <see cref="T:System.Linq.IQueryable" /> is executed.
+        /// </summary>
         public Type ElementType
         {
             get { return Queryable.ElementType; }
         }
 
+        /// <summary>
+        /// Gets the query provider that is associated with this data source.
+        /// </summary>
         public IQueryProvider Provider
         {
             get { return Queryable.Provider; }
         }
 
+        /// <summary>
+        /// Returns an enumerator that iterates through the collection.
+        /// </summary>
+        /// <returns>
+        /// An enumerator that can be used to iterate through the collection.
+        /// </returns>
         public IEnumerator<T> GetEnumerator()
         {
             return Queryable.GetEnumerator();
         }
 
+        /// <summary>
+        /// Returns an enumerator that iterates through a collection.
+        /// </summary>
+        /// <returns>
+        /// An <see cref="T:System.Collections.IEnumerator" /> object that can be used to iterate through the collection.
+        /// </returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return Queryable.GetEnumerator();

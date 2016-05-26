@@ -25,36 +25,73 @@ using Witsml200 = Energistics.DataAccess.WITSML200;
 
 namespace PDS.Witsml.Data.Channels
 {
+    /// <summary>
+    /// Provides extension methods to work with channel data.  Many methods will create a
+    /// ChannelDataReader with channel data from different data structures and types.
+    /// </summary>
     public static class ChannelDataExtensions
     {
+
+        /// <summary>
+        /// Gets a ChannelDataReader for an <see cref="IEnumerable{IChannelDataRecord}"/>.
+        /// </summary>
+        /// <param name="records">The records.</param>
+        /// <returns>A <see cref="ChannelDataReader"/></returns>
         public static ChannelDataReader GetReader(this IEnumerable<IChannelDataRecord> records)
         {
             return new ChannelDataReader(records);
         }
 
+        /// <summary>
+        /// Determines whether this <see cref="Witsml200.ChannelSet"/> instance is increasing.
+        /// </summary>
+        /// <param name="channelSet">The channel set.</param>
+        /// <returns>true if increasing, false otherwise</returns>
         public static bool IsIncreasing(this Witsml200.ChannelSet channelSet)
         {
             if (channelSet?.Index == null) return true;
             return channelSet.Index.Select(x => x.IsIncreasing()).FirstOrDefault();
         }
 
+        /// <summary>
+        /// Determines whether this <see cref="Witsml200.ComponentSchemas.ChannelIndex"/> instance is increasing.
+        /// </summary>
+        /// <param name="channelIndex">Index of the channel.</param>
+        /// <returns>true if increasing, false otherwise.</returns>
         public static bool IsIncreasing(this Witsml200.ComponentSchemas.ChannelIndex channelIndex)
         {
             return channelIndex.Direction.GetValueOrDefault(Witsml200.ReferenceData.IndexDirection.increasing) == Witsml200.ReferenceData.IndexDirection.increasing;
         }
 
+        /// <summary>
+        /// Determines whether this <see cref="Witsml200.ChannelSet"/> instance is a time index.
+        /// </summary>
+        /// <param name="channelSet">The channel set.</param>
+        /// <param name="includeElapsedTime">if set to <c>true</c> elapsed time is included.</param>
+        /// <returns>true if index is time, false otherwise</returns>
         public static bool IsTimeIndex(this Witsml200.ChannelSet channelSet, bool includeElapsedTime = false)
         {
             if (channelSet?.Index == null) return false;
             return channelSet.Index.Select(x => x.IsTimeIndex(includeElapsedTime)).FirstOrDefault();
         }
 
+        /// <summary>
+        /// Determines whether this <see cref="Witsml200.ComponentSchemas.ChannelIndex"/> instance is a time index.
+        /// </summary>
+        /// <param name="channelIndex">Index of the channel.</param>
+        /// <param name="includeElapsedTime">if set to <c>true</c> [include elapsed time].</param>
+        /// <returns>true if index is time, false otherwise</returns>
         public static bool IsTimeIndex(this Witsml200.ComponentSchemas.ChannelIndex channelIndex, bool includeElapsedTime = false)
         {
             return channelIndex.IndexType.GetValueOrDefault() == Witsml200.ReferenceData.ChannelIndexType.datetime ||
                    (channelIndex.IndexType.GetValueOrDefault() == Witsml200.ReferenceData.ChannelIndexType.elapsedtime && includeElapsedTime);
         }
 
+        /// <summary>
+        /// Gets a <see cref="ChannelDataReader"/> for a <see cref="Witsml131.Log"/>.
+        /// </summary>
+        /// <param name="log">The <see cref="Witsml131.Log"/> instance.</param>
+        /// <returns>A <see cref="ChannelDataReader"/>.</returns>
         public static ChannelDataReader GetReader(this Witsml131.Log log)
         {
             if (log.LogData == null || !log.LogData.Any()) return null;
@@ -72,7 +109,12 @@ namespace PDS.Witsml.Data.Channels
                 // Add index curve to separate collection
                 .WithIndex(indexCurve.Mnemonic, indexCurve.Unit, increasing, isTimeIndex);
         }
-      
+
+        /// <summary>
+        /// Gets multiple readers for each LogData from a <see cref="Witsml141.Log"/> instance.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns>An <see cref="IEnumerable{ChannelDataReader}"/>.</returns>
         public static IEnumerable<ChannelDataReader> GetReaders(this Witsml141.Log log)
         {
             if (log.LogData == null) yield break;
@@ -106,6 +148,11 @@ namespace PDS.Witsml.Data.Channels
             }
         }
 
+        /// <summary>
+        /// Gets multiple readers for a <see cref="Witsml200.Log"/> instance.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns>An <see cref="IEnumerable{ChannelDataReader}"/>.</returns>
         public static IEnumerable<ChannelDataReader> GetReaders(this Witsml200.Log log)
         {
             if (log.ChannelSet == null) yield break;
@@ -118,6 +165,11 @@ namespace PDS.Witsml.Data.Channels
             }
         }
 
+        /// <summary>
+        /// Gets a <see cref="ChannelDataReader"/> for a <see cref="Witsml200.ChannelSet"/> instance.
+        /// </summary>
+        /// <param name="channelSet">The channel set.</param>
+        /// <returns>A <see cref="ChannelDataReader"/> </returns>
         public static ChannelDataReader GetReader(this Witsml200.ChannelSet channelSet)
         {
             var data = Witsml200.Extensions.GetData(channelSet);
@@ -133,6 +185,15 @@ namespace PDS.Witsml.Data.Channels
                 .WithIndices(channelSet.Index.Select(ToChannelIndexInfo), true);
         }
 
+        /// <summary>
+        /// Adds index data to a <see cref="ChannelDataReader"/> instance
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="mnemonic">The mnemonic.</param>
+        /// <param name="unit">The unit.</param>
+        /// <param name="increasing">if set to <c>true</c> the data is increasing, otherwise false.</param>
+        /// <param name="isTimeIndex">if set to <c>true</c> the index is time, otherwise false.</param>
+        /// <returns>The <see cref="ChannelDataReader"/> instance being updated.</returns>
         public static ChannelDataReader WithIndex(this ChannelDataReader reader, string mnemonic, string unit, bool increasing, bool isTimeIndex)
         {
             var index = new ChannelIndexInfo()
@@ -149,6 +210,14 @@ namespace PDS.Witsml.Data.Channels
             return reader.Sort();
         }
 
+        /// <summary>
+        /// Updates a <see cref="ChannelDataReader"/> with multiple the indices.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="indices">The indices.</param>
+        /// <param name="calculate">if set to <c>true</c> the index range is calculated.</param>
+        /// <param name="reverse">if set to <c>true</c> the sort order is reversed.</param>
+        /// <returns>The <see cref="ChannelDataReader"/> instance being updated.</returns>
         public static ChannelDataReader WithIndices(this ChannelDataReader reader, IEnumerable<ChannelIndexInfo> indices, bool calculate = false, bool reverse = false)
         {
             foreach (var index in indices)
@@ -164,6 +233,12 @@ namespace PDS.Witsml.Data.Channels
             return calculate ? reader.Sort(reverse) : reader;
         }
 
+        /// <summary>
+        /// Creates a <see cref="ChannelIndexInfo"/> from a 
+        /// <see cref="Witsml200.ComponentSchemas.ChannelIndex"/> instance.
+        /// </summary>
+        /// <param name="channelIndex">Index of the channel.</param>
+        /// <returns>A <see cref="ChannelIndexInfo"/> instance.</returns>
         public static ChannelIndexInfo ToChannelIndexInfo(this Witsml200.ComponentSchemas.ChannelIndex channelIndex)
         {
             return new ChannelIndexInfo()
@@ -175,6 +250,12 @@ namespace PDS.Witsml.Data.Channels
             };
         }
 
+        /// <summary>
+        /// Calculates the index range for a <see cref="ChannelDataReader"/>
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="channelIndex">Index of the channel.</param>
+        /// <param name="index">The index.</param>
         private static void CalculateIndexRange(ChannelDataReader reader, ChannelIndexInfo channelIndex, int index)
         {
             var range = reader.GetIndexRange(index);

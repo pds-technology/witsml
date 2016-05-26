@@ -159,6 +159,12 @@ namespace PDS.Witsml.Data.Channels
         /// <value>The parent data object URI.</value>
         public string Uri { get; set; }
 
+        /// <summary>
+        /// Gets all mnemonics.
+        /// </summary>
+        /// <value>
+        /// All mnemonics.
+        /// </value>
         public string[] AllMnemonics
         {
             get { return Indices.Select(i => i.Mnemonic).Concat(Mnemonics).ToArray(); }
@@ -170,6 +176,12 @@ namespace PDS.Witsml.Data.Channels
         /// <value>The list of channel mnemonics.</value>
         public string[] Mnemonics { get; private set; }
 
+        /// <summary>
+        /// Gets all units.
+        /// </summary>
+        /// <value>
+        /// All units.
+        /// </value>
         public string[] AllUnits
         {
             get { return Indices.Select(i => i.Unit).Concat(Units).ToArray(); }

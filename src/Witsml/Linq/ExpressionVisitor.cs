@@ -24,8 +24,17 @@ using Ast = LinqExtender.Ast;
 
 namespace PDS.Witsml.Linq
 {
+    /// <summary>
+    /// Manages the evaluation of an <see cref="Ast.Expression"/>
+    /// </summary>
     public class ExpressionVisitor
     {
+        /// <summary>
+        /// Visits the specified expression.
+        /// </summary>
+        /// <param name="expression">The expression.</param>
+        /// <returns>A type specific expression visitation.</returns>
+        /// <exception cref="System.ArgumentException">Expression type is not supported</exception>
         internal Ast.Expression Visit(Ast.Expression expression)
         {
             switch (expression.CodeType)
@@ -51,11 +60,21 @@ namespace PDS.Witsml.Linq
             throw new ArgumentException("Expression type is not supported");
         }
 
+        /// <summary>
+        /// Visits a <see cref="Ast.TypeExpression"/>
+        /// </summary>
+        /// <param name="typeExpression">The type expression.</param>
+        /// <returns>An <see cref="Ast.Expression"/></returns>
         public virtual Ast.Expression VisitTypeExpression(Ast.TypeExpression typeExpression)
         {
             return typeExpression;
         }
 
+        /// <summary>
+        /// Visits a <see cref="Ast.BlockExpression"/>
+        /// </summary>
+        /// <param name="blockExpression">The block expression.</param>
+        /// <returns>An <see cref="Ast.Expression"/></returns>
         public virtual Ast.Expression VisitBlockExpression(Ast.BlockExpression blockExpression)
         {
             foreach (var expression in blockExpression.Expressions)
@@ -64,6 +83,11 @@ namespace PDS.Witsml.Linq
             return blockExpression;
         }
 
+        /// <summary>
+        /// Visits a <see cref="Ast.LogicalExpression"/>
+        /// </summary>
+        /// <param name="expression">The expression.</param>
+        /// <returns>An <see cref="Ast.Expression"/></returns>
         public virtual Ast.Expression VisitLogicalExpression(Ast.LogicalExpression expression)
         {
             this.Visit(expression.Left);
@@ -71,6 +95,11 @@ namespace PDS.Witsml.Linq
             return expression;
         }
 
+        /// <summary>
+        /// Visits a <see cref="Ast.LambdaExpression"/>
+        /// </summary>
+        /// <param name="expression">The expression.</param>
+        /// <returns>An <see cref="Ast.Expression"/></returns>
         public virtual Ast.Expression VisitLambdaExpression(Ast.LambdaExpression expression)
         {
             if (expression.Body != null)
@@ -78,6 +107,11 @@ namespace PDS.Witsml.Linq
             return expression;
         }
 
+        /// <summary>
+        /// Visits a <see cref="Ast.BinaryExpression"/>
+        /// </summary>
+        /// <param name="expression">The expression.</param>
+        /// <returns>An <see cref="Ast.Expression"/></returns>
         public virtual Ast.Expression VisitBinaryExpression(Ast.BinaryExpression expression)
         {
             var left = expression.Left as Ast.MemberExpression;
@@ -99,21 +133,41 @@ namespace PDS.Witsml.Linq
             return expression;
         }
 
+        /// <summary>
+        /// Visits a <see cref="Ast.MemberExpression"/>
+        /// </summary>
+        /// <param name="expression">The expression.</param>
+        /// <returns>An <see cref="Ast.Expression"/></returns>
         public virtual Ast.Expression VisitMemberExpression(Ast.MemberExpression expression)
         {
             return expression;
         }
 
+        /// <summary>
+        /// Visits a <see cref="Ast.LiteralExpression"/>
+        /// </summary>
+        /// <param name="expression">The expression.</param>
+        /// <returns>An <see cref="Ast.Expression"/></returns>
         public virtual Ast.Expression VisitLiteralExpression(Ast.LiteralExpression expression)
         {
             return expression;
         }
 
+        /// <summary>
+        /// Visits a <see cref="Ast.OrderbyExpression"/>
+        /// </summary>
+        /// <param name="expression">The expression.</param>
+        /// <returns>An <see cref="Ast.Expression"/></returns>
         public virtual Ast.Expression VisitOrderbyExpression(Ast.OrderbyExpression expression)
         {
             return expression;
         }
 
+        /// <summary>
+        /// Sets the property value.
+        /// </summary>
+        /// <param name="property">The property.</param>
+        /// <param name="value">The value.</param>
         protected virtual void SetPropertyValue(PropertyInfo property, object value)
         {
         }

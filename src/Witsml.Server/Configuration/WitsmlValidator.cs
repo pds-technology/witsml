@@ -217,8 +217,6 @@ namespace PDS.Witsml.Server.Configuration
         /// Validates the request maximum return nodes.
         /// </summary>
         /// <param name="options">The options.</param>
-        /// <param name="objectType">Type of the object.</param>
-        /// <param name="document">The document.</param>
         /// <exception cref="WitsmlException"></exception>
         public void ValidateRequestMaxReturnNodes(Dictionary<string, string> options)
         {
@@ -377,7 +375,7 @@ namespace PDS.Witsml.Server.Configuration
         /// <summary>
         /// Gets the namespace.
         /// </summary>
-        /// <param name="xml">The XML document.</param>
+        /// <param name="document">The XML document.</param>
         /// <returns>The namespace.</returns>
         protected static string GetNamespace(XDocument document)
         {

@@ -34,6 +34,9 @@ namespace PDS.Witsml.Server.Configuration
         private XDocument _capServerDoc;
         private string _capServerXml;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CapServerProvider{T}"/> class.
+        /// </summary>
         protected CapServerProvider()
         {
             Logger = LogManager.GetLogger(GetType());
