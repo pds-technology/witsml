@@ -28,31 +28,73 @@ using PDS.Framework;
 
 namespace PDS.Witsml.Linq
 {
+    /// <summary>
+    /// Manages the context for WITSML connections and data.
+    /// </summary>
+    /// <seealso cref="PDS.Witsml.Linq.IWitsmlContext" />
+    /// <seealso cref="System.IDisposable" />
     public abstract class WitsmlContext : IWitsmlContext, IDisposable
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WitsmlContext"/> class.
+        /// </summary>
+        /// <param name="url">The URL.</param>
+        /// <param name="timeoutInMinutes">The timeout in minutes.</param>
+        /// <param name="version">The version.</param>
         protected WitsmlContext(string url, double timeoutInMinutes, WMLSVersion version) : this()
         {
             Connect(url, timeoutInMinutes, version);
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WitsmlContext"/> class.
+        /// </summary>
+        /// <param name="url">The URL.</param>
+        /// <param name="username">The username.</param>
+        /// <param name="password">The password.</param>
+        /// <param name="timeoutInMinutes">The timeout in minutes.</param>
+        /// <param name="version">The version.</param>
         protected WitsmlContext(string url, string username, string password, double timeoutInMinutes, WMLSVersion version) : this()
         {
             Connect(url, username, password, timeoutInMinutes, version);
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WitsmlContext"/> class.
+        /// </summary>
+        /// <param name="url">The URL.</param>
+        /// <param name="username">The username.</param>
+        /// <param name="password">The password.</param>
+        /// <param name="timeoutInMinutes">The timeout in minutes.</param>
+        /// <param name="version">The version.</param>
         protected WitsmlContext(string url, string username, SecureString password, double timeoutInMinutes, WMLSVersion version) : this()
         {
             Connect(url, username, password, timeoutInMinutes, version);
         }
 
+        /// <summary>
+        /// Prevents a default instance of the <see cref="WitsmlContext"/> class from being created.
+        /// </summary>
         private WitsmlContext()
         {
             LogQuery = (f, q, o) => { };
             LogResponse = (f, q, o, r, c, s) => { };
         }
 
+        /// <summary>
+        /// Gets the connection.
+        /// </summary>
+        /// <value>
+        /// The connection.
+        /// </value>
         public WITSMLWebServiceConnection Connection { get; private set; }
 
+        /// <summary>
+        /// Gets the data schema version.
+        /// </summary>
+        /// <value>
+        /// The data schema version.
+        /// </value>
         public abstract string DataSchemaVersion { get; }
 
         /// <summary>
@@ -71,6 +113,11 @@ namespace PDS.Witsml.Linq
         /// </value>
         public Action<Functions, string, string, string, short, string> LogResponse { get; set; }
 
+        /// <summary>
+        /// Creates one instance of the specified type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public List<T> One<T>()
         {
             return new List<T>()
@@ -136,6 +183,14 @@ namespace PDS.Witsml.Linq
             return GetObjects<IDataObject>(objectType, uri, OptionsIn.ReturnElements.All).FirstOrDefault();
         }
 
+        /// <summary>
+        /// Gets the objects of the specified type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="uri">The URI.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <returns></returns>
         protected IEnumerable<T> GetObjects<T>(string objectType, EtpUri uri, OptionsIn optionsIn) where T : IDataObject
         {
             var filters = new List<string>();
@@ -176,6 +231,11 @@ namespace PDS.Witsml.Linq
             return dataObjects.OrderBy(x => x.Name);
         }
 
+        /// <summary>
+        /// Creates the WITSML query.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <returns></returns>
         protected IWitsmlQuery CreateWitsmlQuery(string objectType)
         {
             var listType = ObjectTypes.GetObjectGroupType(objectType, DataSchemaVersion);
@@ -187,6 +247,12 @@ namespace PDS.Witsml.Linq
                 .Invoke(this, new object[0]) as IWitsmlQuery;
         }
 
+        /// <summary>
+        /// Creates the WITSML query.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TList">The type of the list.</typeparam>
+        /// <returns></returns>
         protected IWitsmlQuery<T> CreateQuery<T, TList>() where TList : IEnergisticsCollection
         {
             return new WitsmlQuery<T, TList>(this);
@@ -227,6 +293,10 @@ namespace PDS.Witsml.Linq
 
         private bool _disposedValue; // To detect redundant calls
 
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposedValue)
@@ -251,6 +321,9 @@ namespace PDS.Witsml.Linq
         // }
 
         // This code added to correctly implement the disposable pattern.
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.

@@ -25,14 +25,33 @@ using Energistics.DataAccess.WITSML141.ReferenceData;
 
 namespace PDS.Witsml.Data.Logs
 {
+    /// <summary>
+    /// Generates data for a 141 Log.
+    /// </summary>
+    /// <seealso cref="PDS.Witsml.Data.DataGenerator" />
     public class Log141Generator : DataGenerator
     {
+        /// <summary>
+        /// The depth index types
+        /// </summary>
         public readonly LogIndexType[] DepthIndexTypes = new LogIndexType[] { LogIndexType.length, LogIndexType.measureddepth, LogIndexType.verticaldepth };
+
+        /// <summary>
+        /// The time index types
+        /// </summary>
         public readonly LogIndexType[] TimeIndexTypes = new LogIndexType[] { LogIndexType.datetime, LogIndexType.elapsedtime };
+
+        /// <summary>
+        /// The other index types
+        /// </summary>
         public readonly LogIndexType[] OtherIndexTypes = new LogIndexType[] { LogIndexType.other, LogIndexType.unknown };
+
         private const int Seed = 123;
         private Random _random;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Log141Generator"/> class.
+        /// </summary>
         public Log141Generator()
         {
             _random = new Random(Seed);
@@ -119,6 +138,7 @@ namespace PDS.Witsml.Data.Logs
         /// <param name="log">The log.</param>
         /// <param name="numOfRows">The number of rows.</param>
         /// <param name="startIndex">The start index.</param>
+        /// <param name="interval">The interval factor.</param>
         /// <returns></returns>
         public double GenerateLogData(Log log, int numOfRows = 5, double startIndex = 0d, double interval = 1.0)
         {           

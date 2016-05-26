@@ -45,7 +45,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
         /// <summary>
         /// Handles the GetResources message of the Discovery protocol.
         /// </summary>
-        /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList{Resource}}"/> instance containing the event data.</param>
+        /// <param name="args">The ProtocolEventArgs{GetResources, IList{Resource}} instance containing the event data.</param>
         protected override void HandleGetResources(ProtocolEventArgs<GetResources, IList<Resource>> args)
         {
             foreach (var provider in Providers.OrderBy(x => x.DataSchemaVersion))

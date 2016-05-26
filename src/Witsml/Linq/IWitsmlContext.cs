@@ -23,6 +23,9 @@ using Energistics.Datatypes;
 
 namespace PDS.Witsml.Linq
 {
+    /// <summary>
+    /// Defines the properties for a WITSML data context
+    /// </summary>
     public interface IWitsmlContext
     {
         /// <summary>

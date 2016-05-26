@@ -23,13 +23,25 @@ using PDS.Witsml.Properties;
 
 namespace PDS.Witsml.Data.Channels
 {
+    /// <summary>
+    /// Encapsulates a block of Channel Data
+    /// </summary>
     public class ChannelDataBlock
     {
+
+        /// <summary>
+        /// The default batch size
+        /// </summary>
         public static readonly int BatchSize = Settings.Default.ChannelDataBlockBatchSize;
 
         private readonly List<List<List<object>>> _records;
         private readonly Dictionary<double, List<List<object>>> _recordsByIndex;
 
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ChannelDataBlock"/> class.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
         public ChannelDataBlock(string uri)
         {
             _records = new List<List<List<object>>>();
@@ -41,16 +53,54 @@ namespace PDS.Witsml.Data.Channels
             Uri = uri;
         }
 
+
+        /// <summary>
+        /// Gets the URI.
+        /// </summary>
+        /// <value>
+        /// The URI.
+        /// </value>
         public string Uri { get; private set; }
 
+        /// <summary>
+        /// Gets the indices.
+        /// </summary>
+        /// <value>
+        /// The indices.
+        /// </value>
         public List<ChannelIndexInfo> Indices { get; private set; }
 
+        /// <summary>
+        /// Gets the channel ids.
+        /// </summary>
+        /// <value>
+        /// The channel ids.
+        /// </value>
         public List<long> ChannelIds { get; private set; }
 
+        /// <summary>
+        /// Gets the mnemonics.
+        /// </summary>
+        /// <value>
+        /// The mnemonics.
+        /// </value>
         public List<string> Mnemonics { get; private set; }
 
+        /// <summary>
+        /// Gets the units.
+        /// </summary>
+        /// <value>
+        /// The units.
+        /// </value>
         public List<string> Units { get; private set; }
 
+        /// <summary>
+        /// Adds the index.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic.</param>
+        /// <param name="unit">The unit.</param>
+        /// <param name="increasing">if set to <c>true</c> if data is incresting, false otherwise.</param>
+        /// <param name="isTimeIndex">if set to <c>true</c> if index is time, false otherwise.</param>
         public void AddIndex(string mnemonic, string unit, bool increasing, bool isTimeIndex)
         {
             if (Indices.Any(x => x.Mnemonic.EqualsIgnoreCase(mnemonic)))
@@ -65,6 +115,12 @@ namespace PDS.Witsml.Data.Channels
             });
         }
 
+        /// <summary>
+        /// Adds the channel.
+        /// </summary>
+        /// <param name="channelId">The channel identifier.</param>
+        /// <param name="mnemonic">The mnemonic.</param>
+        /// <param name="unit">The unit.</param>
         public void AddChannel(long channelId, string mnemonic, string unit)
         {
             if (Mnemonics.Any(x => x.EqualsIgnoreCase(mnemonic)))
@@ -75,6 +131,12 @@ namespace PDS.Witsml.Data.Channels
             Units.Add(unit);
         }
 
+        /// <summary>
+        /// Appends the specified channel identifier.
+        /// </summary>
+        /// <param name="channelId">The channel identifier.</param>
+        /// <param name="indexes">The indexes.</param>
+        /// <param name="value">The value.</param>
         public void Append(long channelId, IList<double> indexes, object value)
         {
             var primaryIndex = indexes.First();
@@ -111,11 +173,19 @@ namespace PDS.Witsml.Data.Channels
             channelValues[position] = value;
         }
 
+        /// <summary>
+        /// The number of records of Channel Data
+        /// </summary>
+        /// <returns>The record count of channels.</returns>
         public int Count()
         {
             return _records.Count;
         }
 
+        /// <summary>
+        /// Gets the reader.
+        /// </summary>
+        /// <returns>A ChannelDataReader with indices</returns>
         public ChannelDataReader GetReader()
         {
             var records = new List<List<List<object>>>(_records);
@@ -124,6 +194,9 @@ namespace PDS.Witsml.Data.Channels
                 .WithIndices(Indices, true);
         }
 
+        /// <summary>
+        /// Clears the channel data for this instance.
+        /// </summary>
         public void Clear()
         {
             _records.Clear();

@@ -37,7 +37,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
         /// <summary>
         /// Gets a collection of resources associated to the specified URI.
         /// </summary>
-        /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList{Resource}}"/> instance containing the event data.</param>
+        /// <param name="args">The ProtocolEventArgs{GetResources, IList{Resource}} instance containing the event data.</param>
         void GetResources(ProtocolEventArgs<GetResources, IList<Resource>> args);
     }
 }

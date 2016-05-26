@@ -28,14 +28,33 @@ using PDS.Witsml.Data.Channels;
 
 namespace PDS.Witsml.Data.Logs
 {
+    /// <summary>
+    /// Generates data for a 200 Log.
+    /// </summary>
+    /// <seealso cref="PDS.Witsml.Data.DataGenerator" />
     public class Log200Generator : DataGenerator
     {
+        /// <summary>
+        /// The depth index types
+        /// </summary>
         public readonly ChannelIndexType[] DepthIndexTypes = new ChannelIndexType[] { ChannelIndexType.measureddepth, ChannelIndexType.trueverticaldepth, ChannelIndexType.passindexeddepth };
+
+        /// <summary>
+        /// The time index types
+        /// </summary>
         public readonly ChannelIndexType[] TimeIndexTypes = new ChannelIndexType[] { ChannelIndexType.datetime, ChannelIndexType.elapsedtime };
+
+        /// <summary>
+        /// The other index types
+        /// </summary>
         public readonly ChannelIndexType[] OtherIndexTypes = new ChannelIndexType[] { ChannelIndexType.pressure, ChannelIndexType.temperature };
+
         private const int Seed = 123;
         private Random _random;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Log200Generator"/> class.
+        /// </summary>
         public Log200Generator()
         {
             _random = new Random(Seed);

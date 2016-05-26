@@ -26,24 +26,58 @@ namespace PDS.Witsml
     public enum Functions
     {
         // SOAP
+        /// <summary>
+        /// Get Capabilities
+        /// </summary>
         [Description("Get Capabilities")]
         GetCap,
+
+        /// <summary>
+        /// Get Version
+        /// </summary>
         [Description("Get Version")]
         GetVersion,
+
+        /// <summary>
+        /// Get From Store
+        /// </summary>
         [Description("Get From Store")]
         GetFromStore,
+
+        /// <summary>
+        /// Add to Store
+        /// </summary>
         [Description("Add To Store")]
         AddToStore,
+
+        /// <summary>
+        /// Update in Store
+        /// </summary>
         [Description("Update In Store")]
         UpdateInStore,
+
+        /// <summary>
+        /// Delete From Store
+        /// </summary>
         [Description("Delete From Store")]
         DeleteFromStore,
 
         // ETP
+        /// <summary>
+        /// Get Object
+        /// </summary>
         [Description("Get Object")]
         GetObject,
+
+        /// <summary>
+        /// Put Object
+        /// </summary>
         [Description("Put Object")]
         PutObject,
+
+        /// <summary>
+        /// Delete Object
+        /// </summary>
         [Description("Delete Object")]
         DeleteObject
     }

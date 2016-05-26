@@ -21,6 +21,9 @@ using Energistics.DataAccess;
 
 namespace PDS.Witsml.Linq
 {
+    /// <summary>
+    /// Provides extension methods for <see cref="IWitsmlQuery{T}"/> instances.
+    /// </summary>
     public static class WitsmlQueryExtensions
     {
         public static T GetByUid<T>(this IWitsmlQuery<T> query, string uid) where T : IDataObject

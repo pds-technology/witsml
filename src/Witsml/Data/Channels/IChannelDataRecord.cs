@@ -23,38 +23,128 @@ using PDS.Framework;
 
 namespace PDS.Witsml.Data.Channels
 {
+    /// <summary>
+    /// Defines the properties and methods that define a channel data record
+    /// </summary>
+    /// <seealso cref="System.Data.IDataRecord" />
     public interface IChannelDataRecord : IDataRecord
     {
+        /// <summary>
+        /// Gets or sets the record identifier.
+        /// </summary>
+        /// <value>
+        /// The identifier.
+        /// </value>
         string Id { get; set; }
 
+        /// <summary>
+        /// Gets or sets the URI.
+        /// </summary>
+        /// <value>
+        /// The URI.
+        /// </value>
         string Uri { get; set; }
 
+        /// <summary>
+        /// Gets the channel data mnemonics.
+        /// </summary>
+        /// <value>
+        /// The channel data mnemonics.
+        /// </value>
         string[] Mnemonics { get; }
 
+        /// <summary>
+        /// Gets the channel data units.
+        /// </summary>
+        /// <value>
+        /// The channel data units.
+        /// </value>
         string[] Units { get; }
 
+        /// <summary>
+        /// Gets the channel data null values.
+        /// </summary>
+        /// <value>
+        /// The channel data null values.
+        /// </value>
         string[] NullValues { get; }
 
+        /// <summary>
+        /// Gets the number of indices for the data.
+        /// </summary>
+        /// <value>
+        /// The number of indices for the data.
+        /// </value>
         int Depth { get; }
 
+        /// <summary>
+        /// Gets the indices.
+        /// </summary>
+        /// <value>
+        /// The indices.
+        /// </value>
         List<ChannelIndexInfo> Indices { get; }
 
+        /// <summary>
+        /// Gets the Index for the given channel position
+        /// </summary>
+        /// <param name="index">The index position.</param>
+        /// <returns>The <see cref="ChannelIndexInfo"/> for the given channel index position.</returns>
         ChannelIndexInfo GetIndex(int index = 0);
 
+        /// <summary>
+        /// Gets the index value for a given channel position.
+        /// </summary>
+        /// <param name="index">The index position.</param>
+        /// <param name="scale">The scale factor.</param>
+        /// <returns>The index value for a given channel position</returns>
         double GetIndexValue(int index = 0, int scale = 0);
 
+        /// <summary>
+        /// Gets the index range for a given channel position.
+        /// </summary>
+        /// <param name="index">The index channel position.</param>
+        /// <returns>The index range</returns>
         Range<double?> GetIndexRange(int index = 0);
 
+        /// <summary>
+        /// Gets the channel index range for a given channel position
+        /// </summary>
+        /// <param name="i">The channel position.</param>
+        /// <returns></returns>
         Range<double?> GetChannelIndexRange(int i);
 
+        /// <summary>
+        /// Gets the date time offset value for a given channel position.
+        /// </summary>
+        /// <param name="i">The channel position.</param>
+        /// <returns>A <see cref="DateTimeOffset"/> value.</returns>
         DateTimeOffset GetDateTimeOffset(int i);
 
+        /// <summary>
+        /// Gets the channel value in unix time microseconds for the given channel position.
+        /// </summary>
+        /// <param name="i">The channel position.</param>
+        /// <returns></returns>
         long GetUnixTimeMicroseconds(int i);
 
+        /// <summary>
+        /// Determines whether this instance has values.
+        /// </summary>
+        /// <returns>true if there are any channel values, false otherwise.</returns>
         bool HasValues();
 
+        /// <summary>
+        /// Gets the data values formatted as JSON.
+        /// </summary>
+        /// <returns>A JSON formatted string.</returns>
         string GetJson();
 
+        /// <summary>
+        /// Sets the value for the current row for a given channel position.
+        /// </summary>
+        /// <param name="i">The channel position.</param>
+        /// <param name="value">The value.</param>
         void SetValue(int i, object value);
     }
 }

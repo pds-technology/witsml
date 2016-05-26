@@ -24,7 +24,6 @@ namespace PDS.Framework.Web.Services
     /// <summary>
     /// Service extension that provides access to the composition container used for dependency injection.
     /// </summary>
-    /// <seealso cref="System.ServiceModel.IExtension{System.ServiceModel.InstanceContext}" />
     public class ServiceInstanceContextExtension : IExtension<InstanceContext>
     {
         private IDependencyScope _scope;

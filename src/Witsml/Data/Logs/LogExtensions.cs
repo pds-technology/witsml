@@ -26,6 +26,9 @@ using Witsml200 = Energistics.DataAccess.WITSML200;
 
 namespace PDS.Witsml.Data.Logs
 {
+    /// <summary>
+    /// Provides extension methods for log instances
+    /// </summary>
     public static class LogExtensions
     {
         /// <summary>
