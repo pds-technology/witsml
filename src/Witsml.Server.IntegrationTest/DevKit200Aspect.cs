@@ -23,6 +23,7 @@ using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Framework;
 using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Server.Data;
@@ -31,12 +32,12 @@ namespace PDS.Witsml.Server
 {
     public class DevKit200Aspect : DevKitAspect
     {
-        private Log200Generator LogGenerator;
-
-        public DevKit200Aspect() : base(null, WMLSVersion.WITSML141)
+        public DevKit200Aspect(TestContext context) : base(null, (WMLSVersion)2, context)
         {
             LogGenerator = new Log200Generator();
         }
+
+        public Log200Generator LogGenerator { get; }
 
         public override string DataSchemaVersion
         {

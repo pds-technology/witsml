@@ -22,10 +22,6 @@ using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Framework;
-using PDS.Witsml.Server.Data;
-using PDS.Witsml.Server.Data.Wellbores;
-using System;
 
 namespace PDS.Witsml.Server
 {
@@ -34,10 +30,12 @@ namespace PDS.Witsml.Server
     {
         private DevKit141Aspect DevKit;
 
+        public TestContext TestContext { get; set; }
+
         [TestInitialize]
         public void TestSetUp()
         {
-            DevKit = new DevKit141Aspect();
+            DevKit = new DevKit141Aspect(TestContext);
 
             DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
                 .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
@@ -56,6 +54,7 @@ namespace PDS.Witsml.Server
                 var versions = response.Result.Split(',');
                 Assert.IsNotNull(versions);
                 Assert.IsTrue(versions.Length > 0);
+
                 foreach (var version in versions)
                     Assert.IsFalse(string.IsNullOrEmpty(version));
             }
@@ -74,8 +73,10 @@ namespace PDS.Witsml.Server
                 var versions = response.Result.Split(',');
                 Assert.IsNotNull(versions);
                 Assert.IsTrue(versions.Length > 0);
+
                 var version = versions[0];
                 Assert.IsFalse(string.IsNullOrEmpty(version));
+
                 for (var i = 1; i < versions.Length; i++)
                 {
                     if (string.Compare(version, versions[i]) >= 0)
@@ -210,6 +211,7 @@ namespace PDS.Witsml.Server
                 Assert.IsTrue(node.ChildNodes.Count <= 3);
                 Assert.AreEqual("name", node.ChildNodes[0].Name);
                 Assert.AreEqual(wellName, node.ChildNodes[0].InnerText);
+
                 if (uid.Equals(node.Attributes[0].InnerText))
                 {
                     uidExists = true;
@@ -219,6 +221,7 @@ namespace PDS.Witsml.Server
                     Assert.AreEqual("Big Field", node.ChildNodes[2].InnerText);
                 }
             }
+
             Assert.IsTrue(uidExists);
         }
 

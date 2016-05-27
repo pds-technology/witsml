@@ -36,12 +36,14 @@ namespace PDS.Witsml.Server
         private Log Log1;
         private Log Log2;
 
+        public TestContext TestContext { get; set; }
+
         [TestInitialize]
         public void TestSetUp()
         {
             var url = "http://localhost/Witsml.Web/WitsmlStore.svc"; // IIS
             //var url = "http://localhost:5050/WitsmlStore.svc"; // TestApp
-            DevKit = new DevKit141Aspect(url);
+            DevKit = new DevKit141Aspect(TestContext, url);
 
             Well1 = new Well() { Name = DevKit.Name("Well 01"), TimeZone = DevKit.TimeZone, Uid = DevKit.Uid() };
             Well2 = new Well() { Name = DevKit.Name("Well 02"), TimeZone = DevKit.TimeZone };

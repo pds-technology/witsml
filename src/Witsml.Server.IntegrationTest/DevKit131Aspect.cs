@@ -22,14 +22,19 @@ using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Witsml.Data.Logs;
 
 namespace PDS.Witsml.Server
 {
     public class DevKit131Aspect : DevKitAspect
     {
-        public DevKit131Aspect(string url = null) : base(url, WMLSVersion.WITSML131)
+        public DevKit131Aspect(TestContext context, string url = null) : base(url, WMLSVersion.WITSML131, context)
         {
+            LogGenerator = new Log131Generator();
         }
+
+        public Log131Generator LogGenerator { get; }
 
         public override string DataSchemaVersion
         {

@@ -78,6 +78,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Xml" />
     <Reference Include="WebSocket4Net, Version=0.14.1.0, Culture=neutral, PublicKeyToken=eb4e154b696bf72a, processorArchitecture=MSIL">
       <HintPath>..\packages\WebSocket4Net.0.14.1\lib\net45\WebSocket4Net.dll</HintPath>
@@ -146,6 +147,7 @@
     <Compile Include="Data\Wells\Well200DataAdapterUpdateTests.cs" />
     <Compile Include="Data\WitsmlQueryTemplateTests.cs" />
     <Compile Include="Data\WitsmlQueryParserTests.cs" />
+    <Compile Include="ITestContextProvider.cs" />
     <Compile Include="SampleDataTests.cs" />
     <Compile Include="DevKit131Aspect.cs" />
     <Compile Include="DevKit141Aspect.cs" />

@@ -18,9 +18,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Linq;
 using System.Xml;
 using Energistics.DataAccess;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Framework;
 using PDS.Witsml.Data;
 using PDS.Witsml.Server.Configuration;
@@ -37,20 +39,33 @@ namespace PDS.Witsml.Server
 
         public readonly string TimeZone = "-06:00";
 
-        public DevKitAspect(string url, WMLSVersion version)
+        protected DevKitAspect(string url, WMLSVersion version, TestContext context)
         {
-            Proxy = new WITSMLWebServiceConnection(url, version);
-            Proxy.Timeout *= 5;
+            ConnectionUrl = url;
+            Container = ContainerFactory.Create();
+            Container.BuildUp(this);
+            ContextProviders.ForEach(x => x.Configure(this, context));
+
             Store = new WitsmlStore();
-            Store.Container = ContainerFactory.Create();
-            Store.Container.BuildUp(Store);
+            Store.Container = Container;
+            Container.BuildUp(Store);
+
+            Proxy = new WITSMLWebServiceConnection(ConnectionUrl, version);
+            Proxy.Timeout *= 5;
         }
 
-        public WITSMLWebServiceConnection Proxy { get; private set; }
+        public IContainer Container { get; }
 
-        public WitsmlStore Store { get; private set; }
+        [ImportMany]
+        public List<ITestContextProvider> ContextProviders { get; set; }
+
+        public WITSMLWebServiceConnection Proxy { get; }
+
+        public WitsmlStore Store { get; }
 
         public abstract string DataSchemaVersion { get; }
+
+        public string ConnectionUrl { get; set; }
 
         public TList Query<TList>() where TList : IEnergisticsCollection
         {

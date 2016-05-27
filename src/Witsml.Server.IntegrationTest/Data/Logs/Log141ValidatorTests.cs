@@ -36,10 +36,12 @@ namespace PDS.Witsml.Server.Data.Logs
         private Wellbore Wellbore;
         private Log Log;
 
+        public TestContext TestContext { get; set; }
+
         [TestInitialize]
         public void TestSetUp()
         {
-            DevKit = new DevKit141Aspect();
+            DevKit = new DevKit141Aspect(TestContext);
 
             DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
                 .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
