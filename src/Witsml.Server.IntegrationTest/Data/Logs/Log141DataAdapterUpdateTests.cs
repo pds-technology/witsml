@@ -24,6 +24,7 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -723,6 +724,53 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(1, results.Count);
             Assert.AreEqual(1, results[0].LogData.Count);
             Assert.AreEqual(15000, results[0].LogData[0].Data.Count);
+        }
+
+        /// <summary>
+        /// This test is for bug 5782, 
+        /// which is caused by incorrect updating of recurring elements, i.e. logCurveInfo.
+        /// The updated log ends up with 1 logCurve being replaced by another logCurveInfo, hence
+        /// there were 2 identical logCurveInfos in the log and it cause the exception
+        /// when duplicated mnemonic is being added to the index map.
+        /// The test log below has 50 curves.
+        /// </summary>
+        [TestMethod]
+        public void Log141DataAdapter_UpdateInStore_Can_Update_LogCurveInfo()
+        {
+            // Add well
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            var uidWell = response.SuppMsgOut;
+
+            // Add wellbore
+            Wellbore.UidWell = uidWell;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var uidWellbore = response.SuppMsgOut;
+
+            var log = DevKit.CreateLog(
+                null,
+                DevKit.Name("Log can be added with depth data"),
+                Wellbore.UidWell,
+                Well.Name,
+                uidWellbore,
+                Wellbore.Name);
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            for (var i = log.LogCurveInfo.Count; i < 50; i++)
+            {
+                var mnemonic = $"Log Curve {i}";
+                log.LogCurveInfo.Add(DevKit.LogGenerator.CreateLogCurveInfo(mnemonic, "m", LogDataType.@double));
+            }
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            log.Uid = response.SuppMsgOut;
+
+            var updateResponse = DevKit.Update<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
         }
     }
 }

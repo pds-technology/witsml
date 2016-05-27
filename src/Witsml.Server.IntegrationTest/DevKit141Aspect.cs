@@ -28,7 +28,7 @@ namespace PDS.Witsml.Server
 {
     public class DevKit141Aspect : DevKitAspect
     {
-        private Log141Generator LogGenerator;
+        public Log141Generator LogGenerator;
 
         public DevKit141Aspect(string url = null) : base(url, WMLSVersion.WITSML141)
         {
