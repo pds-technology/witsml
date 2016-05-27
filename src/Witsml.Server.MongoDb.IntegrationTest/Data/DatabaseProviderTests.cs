@@ -16,12 +16,10 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
 using Energistics.DataAccess.WITSML141;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data
 {
