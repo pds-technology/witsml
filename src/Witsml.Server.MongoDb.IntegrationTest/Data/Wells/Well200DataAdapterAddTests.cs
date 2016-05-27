@@ -37,12 +37,13 @@ namespace PDS.Witsml.Server.Data.Wells
         private Well Well1;
         private Well Well2;
 
+        public TestContext TestContext { get; set; }
+
         [TestInitialize]
         public void TestSetUp()
         {
-            var container = ContainerFactory.Create();
-            DevKit = new DevKit200Aspect();
-            Provider = new DatabaseProvider(container, new MongoDbClassMapper());
+            DevKit = new DevKit200Aspect(TestContext);
+            Provider = DevKit.Container.Resolve<IDatabaseProvider>();
 
             WellAdapter = new Well200DataAdapter(Provider);
 

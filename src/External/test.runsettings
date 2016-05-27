@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+
+  <!-- Parameters used by tests at runtime -->
+  <TestRunParameters>
+    <Parameter name="MongoDbConnection" value="mongodb://localhost:27017" />
+    <Parameter name="WitsmlStoreUrl" value="http://localhost/Witsml.Web/api/soap" />
+    <Parameter name="WitsmlStoreUsername" value="" />
+    <Parameter name="WitsmlStorePassword" value="" />
+  </TestRunParameters>
+
+</RunSettings>

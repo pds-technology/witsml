@@ -34,12 +34,13 @@ namespace PDS.Witsml.Server.Data
         private Well Well1;
         private Well Well2;
 
+        public TestContext TestContext { get; set; }
+
         [TestInitialize]
         public void TestSetUp()
         {
-            var container = ContainerFactory.Create();
-            Provider = new DatabaseProvider(container, new MongoDbClassMapper());
-            DevKit = new DevKit141Aspect();
+            DevKit = new DevKit141Aspect(TestContext);
+            Provider = DevKit.Container.Resolve<IDatabaseProvider>();
 
             Well1 = new Well() { Name = DevKit.Name("Mongo Well 01"), TimeZone = DevKit.TimeZone, Uid = DevKit.Uid() };
             Well2 = new Well() { Name = DevKit.Name("Mongo Well 02"), TimeZone = DevKit.TimeZone };
@@ -60,22 +61,6 @@ namespace PDS.Witsml.Server.Data
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual(Well1.Name, result[0].Name);
-        }
-    }
-
-    // TODO: remove this after adding NuGet package for PDS.Witsml.Server.IntegrationTest
-    public class DevKit141Aspect
-    {
-        public string TimeZone => "-06:00";
-
-        public string Name(string name)
-        {
-            return $"{ name }-{ DateTime.Now.ToString("yyyyMMdd-HHmmss-ffff") }";
-        }
-
-        public string Uid()
-        {
-            return Guid.NewGuid().ToString();
         }
     }
 }

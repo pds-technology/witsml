@@ -25,7 +25,6 @@ using Energistics.DataAccess.WITSML200.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Driver;
 using PDS.Framework;
-using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Server.Data.Wellbores;
 using PDS.Witsml.Server.Data.Wells;
@@ -36,8 +35,6 @@ namespace PDS.Witsml.Server.Data.Logs
     public class Log200DataAdapterAddTests
     {
         private DevKit200Aspect DevKit;
-        private Log200Generator LogGenerator;
-        private IContainer Container;
         private IDatabaseProvider Provider;
         private IWitsmlDataAdapter<Well> WellAdapter;
         private IWitsmlDataAdapter<Wellbore> WellboreAdapter;
@@ -52,14 +49,13 @@ namespace PDS.Witsml.Server.Data.Logs
         private DataObjectReference WellReference;
         private DataObjectReference WellboreReference;
 
+        public TestContext TestContext { get; set; }
+
         [TestInitialize]
         public void TestSetUp()
         {
-            var container = ContainerFactory.Create();
-            DevKit = new DevKit200Aspect();
-            LogGenerator = new Log200Generator();
-            Container = ContainerFactory.Create();
-            Provider = new DatabaseProvider(container, new MongoDbClassMapper());
+            DevKit = new DevKit200Aspect(TestContext);
+            Provider = DevKit.Container.Resolve<IDatabaseProvider>();
 
             WellAdapter = new Well200DataAdapter(Provider);
             WellboreAdapter = new Wellbore200DataAdapter(Provider);
@@ -89,9 +85,9 @@ namespace PDS.Witsml.Server.Data.Logs
             Log2 = new Log() { Citation = DevKit.Citation("Log 02"), Wellbore = WellboreReference };
             LogDecreasing = new Log() { Citation = DevKit.Citation("Log Decreasing"), Wellbore = WellboreReference, Uuid = DevKit.Uid() };
 
-            ChannelIndex mdChannelIndex = LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
-            ChannelIndex mdChannelIndexDecreasing = LogGenerator.CreateMeasuredDepthIndex(IndexDirection.decreasing);
-            ChannelIndex dtChannelIndex = LogGenerator.CreateDateTimeIndex();
+            ChannelIndex mdChannelIndex = DevKit.LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
+            ChannelIndex mdChannelIndexDecreasing = DevKit.LogGenerator.CreateMeasuredDepthIndex(IndexDirection.decreasing);
+            ChannelIndex dtChannelIndex = DevKit.LogGenerator.CreateDateTimeIndex();
 
             DevKit.InitHeader(Log1, LoggingMethod.MWD, mdChannelIndex);
             DevKit.InitHeader(Log2, LoggingMethod.surface, dtChannelIndex);
@@ -126,7 +122,7 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log_can_be_added_with_secondary_index()
         {
-            var secondaryIndex = LogGenerator.CreateDateTimeIndex();
+            var secondaryIndex = DevKit.LogGenerator.CreateDateTimeIndex();
             var channelSet = Log1.ChannelSet.First();
             channelSet.Index.Add(secondaryIndex);
             
@@ -145,7 +141,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log_can_be_added_with_increasing_log_data()
         {
             var numDataValue = 150;
-            var secondaryIndex = LogGenerator.CreateDateTimeIndex();
+            var secondaryIndex = DevKit.LogGenerator.CreateDateTimeIndex();
             var channelSet = Log1.ChannelSet.First();
             channelSet.Index.Add(secondaryIndex);
 
@@ -154,7 +150,7 @@ namespace PDS.Witsml.Server.Data.Logs
             WellboreAdapter.Add(DevKit.Parser(Wellbore1), Wellbore1);
 
             // Generate 150 rows of data
-            LogGenerator.GenerateChannelData(Log1.ChannelSet, numDataValue);
+            DevKit.LogGenerator.GenerateChannelData(Log1.ChannelSet, numDataValue);
 
             File.WriteAllText("TestData/Well-for-DepthLog-2.0.xml", EnergisticsConverter.ObjectToXml(Well1));
             File.WriteAllText("TestData/Wellbore-for-DepthLog-2.0.xml", EnergisticsConverter.ObjectToXml(Wellbore1));
@@ -169,7 +165,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var range = new Range<double?>(null, null);
             var logData = cda.GetData(channelSet.GetUri(), indexCurve, range, true);
 
-            var rowCount = logData.Sum(ld => LogGenerator.DeserializeChannelSetData(ld.Data).Count);
+            var rowCount = logData.Sum(ld => DevKit.LogGenerator.DeserializeChannelSetData(ld.Data).Count);
 
             var start = logData.First().Indices.First().Start;
             var end = logData.Last().Indices.First().End;
@@ -185,7 +181,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log_can_be_added_with_decreasing_log_data()
         {
             var numDataValue = 150;
-            var secondaryIndex = LogGenerator.CreateDateTimeIndex();
+            var secondaryIndex = DevKit.LogGenerator.CreateDateTimeIndex();
             var channelSet = LogDecreasing.ChannelSet.First();
             channelSet.Index.Add(secondaryIndex);
 
@@ -194,7 +190,7 @@ namespace PDS.Witsml.Server.Data.Logs
             WellboreAdapter.Add(DevKit.Parser(Wellbore1), Wellbore1);
 
             // Generate 150 rows of data
-            LogGenerator.GenerateChannelData(LogDecreasing.ChannelSet, numDataValue);
+            DevKit.LogGenerator.GenerateChannelData(LogDecreasing.ChannelSet, numDataValue);
             LogAdapter.Add(DevKit.Parser(LogDecreasing), LogDecreasing);
 
             var cda = new ChannelDataChunkAdapter(Provider);
@@ -204,7 +200,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var range = new Range<double?>(null, null);
             var logData = cda.GetData(channelSet.GetUri(), indexCurve, range, false);
 
-            var rowCount = logData.Sum(ld => LogGenerator.DeserializeChannelSetData(ld.Data).Count);
+            var rowCount = logData.Sum(ld => DevKit.LogGenerator.DeserializeChannelSetData(ld.Data).Count);
 
             var start = logData.First().Indices.First().Start;
             var end = logData.Last().Indices.First().End;
@@ -220,7 +216,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log_can_be_added_with_increasing_time_data()
         {
             var numDataValue = 150;
-            var secondaryIndex = LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
+            var secondaryIndex = DevKit.LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
             var channelSet = Log2.ChannelSet.First();
             channelSet.Index.Add(secondaryIndex);
 
@@ -229,7 +225,7 @@ namespace PDS.Witsml.Server.Data.Logs
             WellboreAdapter.Add(DevKit.Parser(Wellbore1), Wellbore1);
 
             // Generate 150 rows of data
-            LogGenerator.GenerateChannelData(Log2.ChannelSet, numDataValue);
+            DevKit.LogGenerator.GenerateChannelData(Log2.ChannelSet, numDataValue);
 
             File.WriteAllText("TestData/Well-for-TimeLog-2.0.xml", EnergisticsConverter.ObjectToXml(Well1));
             File.WriteAllText("TestData/Wellbore-for-TimeLog-2.0.xml", EnergisticsConverter.ObjectToXml(Wellbore1));

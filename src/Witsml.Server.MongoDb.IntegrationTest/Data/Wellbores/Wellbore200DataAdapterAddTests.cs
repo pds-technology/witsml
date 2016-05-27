@@ -40,12 +40,13 @@ namespace PDS.Witsml.Server.Data.Wellbores
         private Wellbore Wellbore2;
         private DataObjectReference WellReference;
 
+        public TestContext TestContext { get; set; }
+
         [TestInitialize]
         public void TestSetUp()
         {
-            var container = ContainerFactory.Create();
-            DevKit = new DevKit200Aspect();
-            Provider = new DatabaseProvider(container, new MongoDbClassMapper());
+            DevKit = new DevKit200Aspect(TestContext);
+            Provider = DevKit.Container.Resolve<IDatabaseProvider>();
 
             WellAdapter = new Well200DataAdapter(Provider);
             WellboreAdapter = new Wellbore200DataAdapter(Provider);

@@ -37,10 +37,11 @@ namespace PDS.Witsml.Server.Data
     {
         internal static readonly string DefaultConnectionString = Settings.Default.DefaultConnectionString;
         internal static readonly string DefaultDatabaseName = Settings.Default.DefaultDatabaseName;
-        private readonly Lazy<IMongoClient> _client;
-        private readonly string _connectionString;
 
         private readonly IContainer _container;
+        private readonly Lazy<IMongoClient> _client;
+        private readonly string _connectionString;
+        private readonly string _databaseName;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseProvider" /> class.
@@ -53,6 +54,7 @@ namespace PDS.Witsml.Server.Data
             _container = container;
             _client = new Lazy<IMongoClient>(CreateMongoClient);
             _connectionString = GetConnectionString();
+            _databaseName = GetDatabaseName(_connectionString);
             mapper.Register();
         }
 
@@ -65,6 +67,7 @@ namespace PDS.Witsml.Server.Data
         internal DatabaseProvider(IContainer container, MongoDbClassMapper mapper, string connectionString) : this(container, mapper)
         {
             _connectionString = connectionString;
+            _databaseName = GetDatabaseName(_connectionString);
         }
 
         /// <summary>
@@ -82,7 +85,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The database interface.</returns>
         public IMongoDatabase GetDatabase()
         {
-            return Client.GetDatabase(DefaultDatabaseName);
+            return Client.GetDatabase(_databaseName);
         }
 
         /// <summary>
@@ -119,6 +122,20 @@ namespace PDS.Witsml.Server.Data
         {
             var settings = ConfigurationManager.ConnectionStrings["MongoDbConnection"];
             return settings == null ? DefaultConnectionString : settings.ConnectionString;
+        }
+
+        /// <summary>
+        /// Gets the name of the database.
+        /// </summary>
+        /// <param name="connectionString">The connection string.</param>
+        /// <returns>The database name.</returns>
+        private string GetDatabaseName(string connectionString)
+        {
+            var url = MongoUrl.Create(connectionString);
+
+            return string.IsNullOrWhiteSpace(url?.DatabaseName)
+                ? DefaultDatabaseName
+                : url.DatabaseName;
         }
     }
 }
