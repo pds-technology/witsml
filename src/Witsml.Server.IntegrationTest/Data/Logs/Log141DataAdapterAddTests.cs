@@ -1864,7 +1864,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Log.UidWellbore = uidWellbore;
             Log.Name = DevKit.Name("Test special characters");
             DevKit.InitHeader(Log, LogIndexType.measureddepth);
-            Log.Description = @"<description> &amp; &lt; ~ ! @ # $ % ^  * ( ) _ + { } |  > ? ; : ' "" , . / \ [ ] and \b \f \r \t \"" </description>";
+            Log.Description = @"<description> ~ ! @ # $ % ^ &amp; * ( ) _ + { } | &lt; > ? ; : ' "" , . / \ [ ] and \b \f \n \r \t \"" \\ </description>";
 
             Log.LogCurveInfo.Clear();
             Log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("MD", "ft"));
@@ -1876,7 +1876,7 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Clear();
             logData.MnemonicList = "MD,AAA,BBB";
             logData.UnitList = "ft,unitless,m/h";
-            var row = "5000.0," + @" ~ ! @ # $ % ^ &amp; * ( ) _ + { } | &lt; > ? ; : ' "" .  / [ ]" + ", 5.1";
+            var row = "5000.0," + @" ~ ! @ # $ % ^ &amp; * ( ) _ + { } | &lt; > ? ; : ' "" .  / [ ] \n \r \t" + ", 5.1";
             logData.Data.Add(row);
             response = DevKit.Add<LogList, Log>(Log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
