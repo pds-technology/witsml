@@ -32,6 +32,7 @@ namespace PDS.Witsml.Server.Data.Logs
         private DevKit141Aspect DevKit;
         private Well Well;
         private Wellbore Wellbore;
+        private Log Log;   
 
         public TestContext TestContext { get; set; }
 
@@ -50,6 +51,13 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 NameWell = Well.Name,
                 Name = DevKit.Name("Wellbore 01")
+            };
+
+            Log = new Log()
+            {
+                NameWell = Well.Name,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
             };
         }
 
@@ -1835,6 +1843,495 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(2, results.First().LogCurveInfo.Count);
             Assert.IsNull(results.First().LogCurveInfo[0].ClassIndex);
             Assert.IsNull(results.First().LogCurveInfo[1].ClassIndex);
+        }
+
+        [TestMethod, Description("To test adding a log with special characters")]
+        public void Log141DataAdapter_AddToStore_Can_Add_Log_With_Special_Characters()
+        {
+            // Add well
+            var response = DevKit.Add<WellList, Well>(Well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add wellbore
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWellbore = response.SuppMsgOut;
+
+            // Add log          
+            Log.UidWell = Wellbore.UidWell;
+            Log.UidWellbore = uidWellbore;
+            Log.Name = DevKit.Name("Test special characters");
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            Log.Description = @"<description> &amp; &lt; ~ ! @ # $ % ^  * ( ) _ + { } |  > ? ; : ' "" , . / \ [ ] and \b \f \r \t \"" </description>";
+
+            Log.LogCurveInfo.Clear();
+            Log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("MD", "ft"));
+            Log.LogCurveInfo.Add(DevKit.CreateStringLogCurveInfo("AAA", "unitless"));
+            Log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("BBB", "m/h"));
+
+            Log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            var logData = Log.LogData.First();
+            logData.Data.Clear();
+            logData.MnemonicList = "MD,AAA,BBB";
+            logData.UnitList = "ft,unitless,m/h";
+            var row = "5000.0," + @" ~ ! @ # $ % ^ &amp; * ( ) _ + { } | &lt; > ? ; : ' "" .  / [ ]" + ", 5.1";
+            logData.Data.Add(row);
+            response = DevKit.Add<LogList, Log>(Log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            // Query log
+            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.IsTrue(results.Any());
+
+            var returnLog = results.First();
+            Assert.IsNotNull(returnLog.Description);
+            Assert.AreEqual(1, returnLog.LogData.Count);
+            Assert.AreEqual(1, returnLog.LogData[0].Data.Count);
+            Assert.AreEqual(3, returnLog.LogData[0].Data[0].Split(',').Length);
+        }
+
+        [TestMethod, Description("To test adding a log with special characters & (ampersand)")]
+        [Ignore]
+        public void Log141DataAdapter_AddToStore_Can_Add_Log_With_Special_Characters_Ampersand()
+        {
+            // Add well
+            var response = DevKit.Add<WellList, Well>(Well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add wellbore
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWellbore = response.SuppMsgOut;
+
+            // Add log          
+            var description = "<description>Test special character & (ampersand) </description>";
+            var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
+                "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
+                "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
+                    "<log uid=\"" + "\" uidWell=\"" + Wellbore.UidWell + "\" uidWellbore=\"" + uidWellbore + "\">" + Environment.NewLine +
+                        "<nameWell>" + Well.Name + "</nameWell>" + Environment.NewLine +
+                        "<nameWellbore>" + Wellbore.Name + "</nameWellbore>" + Environment.NewLine +
+                        "<name>" + DevKit.Name("Test special characters") + "</name>" + Environment.NewLine +
+                        "<indexType>measured depth</indexType>" + Environment.NewLine +
+                        "<direction>increasing</direction>" + Environment.NewLine +
+                        description + Environment.NewLine +
+                        "<indexCurve>MD</indexCurve>" + Environment.NewLine +
+                        "<logCurveInfo uid=\"MD\">" + Environment.NewLine +
+                        "  <mnemonic>MD</mnemonic>" + Environment.NewLine +
+                        "  <unit>m</unit>" + Environment.NewLine +
+                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
+                        "</logCurveInfo>" + Environment.NewLine +
+                        "<logCurveInfo uid=\"AAA\">" + Environment.NewLine +
+                        "  <mnemonic>AAA</mnemonic>" + Environment.NewLine +
+                        "  <unit>unitless</unit>" + Environment.NewLine +
+                        "  <typeLogData>string</typeLogData>" + Environment.NewLine +
+                        "</logCurveInfo>" + Environment.NewLine +
+                        "<logCurveInfo uid=\"BBB\">" + Environment.NewLine +
+                        "  <mnemonic>BBB</mnemonic>" + Environment.NewLine +
+                        "  <unit>s</unit>" + Environment.NewLine +
+                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
+                        "</logCurveInfo>" + Environment.NewLine +
+                        "<logData>" + Environment.NewLine +
+                        "   <mnemonicList>MD,AAA,BBB</mnemonicList>" + Environment.NewLine +
+                        "   <unitList>m,unitless,s</unitList>"+ Environment.NewLine +
+                        "   <data>5000.1, & ampersand, 5.1</data>" + Environment.NewLine +
+                        "</logData>" + Environment.NewLine +
+                    "</log>" + Environment.NewLine +
+               "</logs>";
+
+            var result = DevKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
+            Assert.AreEqual((short)ErrorCodes.Success, result.Result);
+
+            var uidLog = result.SuppMsgOut;
+
+            // Query log
+            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.IsTrue(results.Any());
+
+            var returnLog = results.First();
+            Assert.IsNotNull(returnLog.Description);
+            Assert.AreEqual(1, returnLog.LogData.Count);
+            Assert.AreEqual(1, returnLog.LogData[0].Data.Count);
+            Assert.AreEqual(3, returnLog.LogData[0].Data[0].Split(',').Length);
+        }
+
+        [TestMethod, Description("To test adding a log with special characters < (less than)")]
+        [Ignore]
+        public void Log141DataAdapter_AddToStore_Can_Add_Log_With_Special_Characters_Less_Than()
+        {
+            // Add well
+            var response = DevKit.Add<WellList, Well>(Well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add wellbore
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWellbore = response.SuppMsgOut;
+
+            // Add log          
+            var description = "<description>Test special character < (less than) </description>";
+            var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
+                "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
+                "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
+                    "<log uid=\"" + "\" uidWell=\"" + Wellbore.UidWell + "\" uidWellbore=\"" + uidWellbore + "\">" + Environment.NewLine +
+                        "<nameWell>" + Well.Name + "</nameWell>" + Environment.NewLine +
+                        "<nameWellbore>" + Wellbore.Name + "</nameWellbore>" + Environment.NewLine +
+                        "<name>" + DevKit.Name("Test special characters") + "</name>" + Environment.NewLine +
+                        "<indexType>measured depth</indexType>" + Environment.NewLine +
+                        "<direction>increasing</direction>" + Environment.NewLine +
+                        description + Environment.NewLine +
+                        "<indexCurve>MD</indexCurve>" + Environment.NewLine +
+                        "<logCurveInfo uid=\"MD\">" + Environment.NewLine +
+                        "  <mnemonic>MD</mnemonic>" + Environment.NewLine +
+                        "  <unit>m</unit>" + Environment.NewLine +
+                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
+                        "</logCurveInfo>" + Environment.NewLine +
+                        "<logCurveInfo uid=\"AAA\">" + Environment.NewLine +
+                        "  <mnemonic>AAA</mnemonic>" + Environment.NewLine +
+                        "  <unit>unitless</unit>" + Environment.NewLine +
+                        "  <typeLogData>string</typeLogData>" + Environment.NewLine +
+                        "</logCurveInfo>" + Environment.NewLine +
+                        "<logCurveInfo uid=\"BBB\">" + Environment.NewLine +
+                        "  <mnemonic>BBB</mnemonic>" + Environment.NewLine +
+                        "  <unit>s</unit>" + Environment.NewLine +
+                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
+                        "</logCurveInfo>" + Environment.NewLine +
+                        "<logData>" + Environment.NewLine +
+                        "   <mnemonicList>MD,AAA,BBB</mnemonicList>" + Environment.NewLine +
+                        "   <unitList>m,unitless,s</unitList>" + Environment.NewLine +
+                        "   <data>5000.1, < less than, 5.1</data>" + Environment.NewLine +
+                        "</logData>" + Environment.NewLine +
+                    "</log>" + Environment.NewLine +
+               "</logs>";
+
+            var result = DevKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
+            Assert.AreEqual((short)ErrorCodes.Success, result.Result);
+
+            var uidLog = result.SuppMsgOut;
+
+            // Query log
+            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.IsTrue(results.Any());
+
+            var returnLog = results.First();
+            Assert.IsNotNull(returnLog.Description);
+            Assert.AreEqual(1, returnLog.LogData.Count);
+            Assert.AreEqual(1, returnLog.LogData[0].Data.Count);
+            Assert.AreEqual(3, returnLog.LogData[0].Data[0].Split(',').Length);
+        }
+
+        [TestMethod, Description(@"To test adding log data string channel with \ (backslash).")]
+        [Ignore]
+        public void Log141DataAdapter_AddToStore_Can_Add_Log_With_Special_Character_Backslash()
+        {
+            // Add well
+            var response = DevKit.Add<WellList, Well>(Well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add wellbore
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWellbore = response.SuppMsgOut;
+
+            Log.UidWell = Wellbore.UidWell;
+            Log.UidWellbore = uidWellbore;
+            Log.Name = DevKit.Name("Test special characters");
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+
+            Log.LogCurveInfo.Clear();
+            Log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("MD", "ft"));
+            Log.LogCurveInfo.Add(DevKit.CreateStringLogCurveInfo("AAA", "unitless"));
+            Log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("BBB", "m/h"));
+
+            Log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            var logData = Log.LogData.First();
+            logData.Data.Clear();
+            logData.MnemonicList = "MD,AAA,BBB";
+            logData.UnitList = "ft,unitless,m/h";
+            logData.Data.Add(@"5000.0, backslash \, 5.0");
+
+            response = DevKit.Add<LogList, Log>(Log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            // Query log
+            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.IsTrue(results.Any());
+
+            var returnLog = results.First();
+            Assert.IsNotNull(returnLog.Description);
+            Assert.AreEqual(1, returnLog.LogData.Count);
+            Assert.AreEqual(1, returnLog.LogData[0].Data.Count);
+            Assert.AreEqual(3, returnLog.LogData[0].Data[0].Split(',').Length);
+        }
+
+        [TestMethod, Description("As comma is a delimiter, this test is served as a reminder of the problem and will need to be updated to the decided response of the server.")]
+        [Ignore]
+        public void Log141DataAdapter_AddToStore_Can_Add_Log_With_Special_Character_Comma()
+        {
+            // Add well
+            var response = DevKit.Add<WellList, Well>(Well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add wellbore
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWellbore = response.SuppMsgOut;
+
+            Log.UidWell = Wellbore.UidWell;
+            Log.UidWellbore = uidWellbore;
+            Log.Name = DevKit.Name("Test special characters");
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+
+            Log.LogCurveInfo.Clear();
+            Log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("MD", "ft"));
+            Log.LogCurveInfo.Add(DevKit.CreateStringLogCurveInfo("AAA", "unitless"));
+            Log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("BBB", "m/h"));
+
+            Log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            var logData = Log.LogData.First();
+            logData.Data.Clear();
+            logData.MnemonicList = "MD,AAA,BBB";
+            logData.UnitList = "ft,unitless,m/h";
+            logData.Data.Add("5000.0, comma ,, 5.0");
+
+            response = DevKit.Add<LogList, Log>(Log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            // Query log
+            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.IsTrue(results.Any());
+
+            var returnLog = results.First();
+            Assert.IsNotNull(returnLog.Description);
+            Assert.AreEqual(1, returnLog.LogData.Count);
+            Assert.AreEqual(1, returnLog.LogData[0].Data.Count);
+            Assert.AreEqual(3, returnLog.LogData[0].Data[0].Split(',').Length);
+        }
+
+        [TestMethod, Description("To test adding log data string channel with JSON special character \f (form feed).")]
+        [Ignore]
+        public void Log141DataAdapter_AddToStore_Can_Add_Log_With_Special_Character_FormFeed()
+        {
+            // Add well
+            var response = DevKit.Add<WellList, Well>(Well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add wellbore
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWellbore = response.SuppMsgOut;
+
+            Log.UidWell = Wellbore.UidWell;
+            Log.UidWellbore = uidWellbore;
+            Log.Name = DevKit.Name("Test special characters");
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+
+            Log.LogCurveInfo.Clear();
+            Log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("MD", "ft"));
+            Log.LogCurveInfo.Add(DevKit.CreateStringLogCurveInfo("AAA", "unitless"));
+            Log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("BBB", "m/h"));
+
+            Log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            var logData = Log.LogData.First();
+            logData.Data.Clear();
+            logData.MnemonicList = "MD,AAA,BBB";
+            logData.UnitList = "ft,unitless,m/h";
+            logData.Data.Add("5000.0, form feed \f , 5.0");
+
+            response = DevKit.Add<LogList, Log>(Log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            // Query log
+            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.IsTrue(results.Any());
+
+            var returnLog = results.First();
+            Assert.IsNotNull(returnLog.Description);
+            Assert.AreEqual(1, returnLog.LogData.Count);
+            Assert.AreEqual(1, returnLog.LogData[0].Data.Count);
+            Assert.AreEqual(3, returnLog.LogData[0].Data[0].Split(',').Length);
+        }
+
+        [TestMethod, Description("To test adding log data string channel with JSON special character \" (slash double-quote).")]
+        [Ignore]
+        public void Log141DataAdapter_AddToStore_Can_Add_Log_With_Special_Character_Slash_Double_Quote()
+        {
+            // Add well
+            var response = DevKit.Add<WellList, Well>(Well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add wellbore
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWellbore = response.SuppMsgOut;
+
+            Log.UidWell = Wellbore.UidWell;
+            Log.UidWellbore = uidWellbore;
+            Log.Name = DevKit.Name("Test special characters");
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+
+            Log.LogCurveInfo.Clear();
+            Log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("MD", "ft"));
+            Log.LogCurveInfo.Add(DevKit.CreateStringLogCurveInfo("AAA", "unitless"));
+            Log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("BBB", "m/h"));
+
+            Log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            var logData = Log.LogData.First();
+            logData.Data.Clear();
+            logData.MnemonicList = "MD,AAA,BBB";
+            logData.UnitList = "ft,unitless,m/h";
+            logData.Data.Add(@"5000.0, slash double-quote \"" , 5.0");
+
+            response = DevKit.Add<LogList, Log>(Log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            // Query log
+            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.IsTrue(results.Any());
+
+            var returnLog = results.First();
+            Assert.IsNotNull(returnLog.Description);
+            Assert.AreEqual(1, returnLog.LogData.Count);
+            Assert.AreEqual(1, returnLog.LogData[0].Data.Count);
+            Assert.AreEqual(3, returnLog.LogData[0].Data[0].Split(',').Length);
+        }
+
+        [TestMethod, Description("To test adding log data string channel with JSON special character \b (backspace).")]
+        [Ignore]
+        public void Log141DataAdapter_AddToStore_Can_Add_Log_With_Special_Character_Backspace()
+        {
+            // Add well
+            var response = DevKit.Add<WellList, Well>(Well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add wellbore
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWellbore = response.SuppMsgOut;
+
+            Log.UidWell = Wellbore.UidWell;
+            Log.UidWellbore = uidWellbore;
+            Log.Name = DevKit.Name("Test special characters");
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+
+            Log.LogCurveInfo.Clear();
+            Log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("MD", "ft"));
+            Log.LogCurveInfo.Add(DevKit.CreateStringLogCurveInfo("AAA", "unitless"));
+            Log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("BBB", "m/h"));
+
+            Log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            var logData = Log.LogData.First();
+            logData.Data.Clear();
+            logData.MnemonicList = "MD,AAA,BBB";
+            logData.UnitList = "ft,unitless,m/h";
+            logData.Data.Add("5000.0, backspace \b , 5.0");
+
+            response = DevKit.Add<LogList, Log>(Log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            // Query log
+            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.IsTrue(results.Any());
+
+            var returnLog = results.First();
+            Assert.IsNotNull(returnLog.Description);
+            Assert.AreEqual(1, returnLog.LogData.Count);
+            Assert.AreEqual(1, returnLog.LogData[0].Data.Count);
+            Assert.AreEqual(3, returnLog.LogData[0].Data[0].Split(',').Length);
+        }
+
+        [TestMethod, Description("To test adding log data string channel with JSON special character \\ (double backslash).")]
+        [Ignore]
+        public void Log141DataAdapter_AddToStore_Can_Add_Log_With_Special_Character_Double_Backslash()
+        {
+            // Add well
+            var response = DevKit.Add<WellList, Well>(Well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add wellbore
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWellbore = response.SuppMsgOut;
+
+            Log.UidWell = Wellbore.UidWell;
+            Log.UidWellbore = uidWellbore;
+            Log.Name = DevKit.Name("Test special characters");
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+
+            Log.LogCurveInfo.Clear();
+            Log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("MD", "ft"));
+            Log.LogCurveInfo.Add(DevKit.CreateStringLogCurveInfo("AAA", "unitless"));
+            Log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("BBB", "m/h"));
+
+            Log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            var logData = Log.LogData.First();
+            logData.Data.Clear();
+            logData.MnemonicList = "MD,AAA,BBB";
+            logData.UnitList = "ft,unitless,m/h";
+            logData.Data.Add(@"5000.0, backslash \\ , 5.0");
+
+            response = DevKit.Add<LogList, Log>(Log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            // Query log
+            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.IsTrue(results.Any());
+
+            var returnLog = results.First();
+            Assert.IsNotNull(returnLog.Description);
+            Assert.AreEqual(1, returnLog.LogData.Count);
+            Assert.AreEqual(1, returnLog.LogData[0].Data.Count);
+            Assert.AreEqual(3, returnLog.LogData[0].Data[0].Split(',').Length);
         }
 
         [TestMethod]

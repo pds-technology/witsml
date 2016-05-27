@@ -64,9 +64,26 @@ namespace PDS.Witsml.Server
             InitData(log, Mnemonics(log), Units(log));
         }
 
+        /// <summary>
+        /// Creates the double log curve information.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="unit">The unit.</param>
+        /// <returns></returns>
         public LogCurveInfo CreateDoubleLogCurveInfo(string name, string unit)
         {
             return LogGenerator.CreateDoubleLogCurveInfo(name, unit);
+        }
+
+        /// <summary>
+        /// Creates the string log curve information.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="unit">The unit.</param>
+        /// <returns></returns>
+        public LogCurveInfo CreateStringLogCurveInfo(string name, string unit)
+        {
+            return LogGenerator.CreateStringLogCurveInfo(name, unit);
         }
 
         public void InitData(Log log, string mnemonics, string units, params object[] values)
