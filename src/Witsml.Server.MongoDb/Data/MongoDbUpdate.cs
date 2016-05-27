@@ -307,14 +307,14 @@ namespace PDS.Witsml.Server.Data
             var filterPath = GetPropertyPath(parentPath, idField);
             var properties = GetPropertyInfo(type);
             var positionPath = parentPath + ".$";
-            var filters = new List<FilterDefinition<T>>() { _entityFilter };
-
+            
             foreach (var element in elements)
             {
                 var elementId = GetElementId(element, idField);
                 if (string.IsNullOrEmpty(elementId))
                     continue;
 
+                var filters = new List<FilterDefinition<T>>() { _entityFilter };
                 var current = GetCurrentElementValue(idField, elementId, properties, propertyValue);
 
                 if (current == null)
