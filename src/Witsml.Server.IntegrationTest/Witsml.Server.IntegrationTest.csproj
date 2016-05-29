@@ -174,10 +174,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <Content Include="TestData\LargeLog_log.xml">
+    <Content Include="TestData\LargeLog.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="TestData\LargeLog_log_append.xml">
+    <Content Include="TestData\LargeLog_append.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="TestData\Generated_Time_Log_Log.xml">

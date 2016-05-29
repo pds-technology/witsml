@@ -678,7 +678,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var uidWellbore = response.SuppMsgOut;
 
             // Add large log
-            var logXmlIn = File.ReadAllText(DataDir + "LargeLog_log.xml");
+            var logXmlIn = File.ReadAllText(DataDir + "LargeLog.xml");
 
             var logList = EnergisticsConverter.XmlToObject<LogList>(logXmlIn);
             Assert.IsNotNull(logList);
@@ -707,7 +707,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(5000, results[0].LogData[0].Data.Count);
 
             // Update log by appending 10000 rows of data
-            logXmlIn = File.ReadAllText(DataDir + "LargeLog_log_append.xml");
+            logXmlIn = File.ReadAllText(DataDir + "LargeLog_append.xml");
 
             logList = EnergisticsConverter.XmlToObject<LogList>(logXmlIn);
             Assert.IsNotNull(logList);
