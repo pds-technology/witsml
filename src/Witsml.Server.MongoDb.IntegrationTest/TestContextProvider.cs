@@ -16,8 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.ComponentModel.Composition;
+using System.Web.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Framework.Web;
 using PDS.Witsml.Server.Data;
 
 namespace PDS.Witsml.Server
@@ -27,8 +28,6 @@ namespace PDS.Witsml.Server
     /// configuration settings for integration tests.
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.ITestContextProvider" />
-    [Export(typeof(ITestContextProvider))]
-    [PartCreationPolicy(CreationPolicy.NonShared)]
     public class TestContextProvider : ITestContextProvider
     {
         /// <summary>
@@ -38,7 +37,10 @@ namespace PDS.Witsml.Server
         /// <param name="context">The test context.</param>
         public void Configure(DevKitAspect devKit, TestContext context)
         {
-            if (devKit == null || context == null) return;
+            // Configure DependencyResolver
+            GlobalConfiguration.Configuration.DependencyResolver = new DependencyResolver(devKit.Container);
+
+            if (context == null) return;
 
             if (context.Properties.Contains("WitsmlStoreUrl"))
                 devKit.ConnectionUrl = context.Properties["WitsmlStoreUrl"].ToString();

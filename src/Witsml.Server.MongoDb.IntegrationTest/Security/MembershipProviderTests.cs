@@ -21,22 +21,23 @@ using System.Collections.Specialized;
 using System.Configuration;
 using System.Web.Security;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Framework.Web;
 
 namespace PDS.Witsml.Server.Security
 {
     [TestClass]
     public class MembershipProviderTests
     {
-        private const string DbCollectionName = MongoDbMembershipProvider.DbCollectionName;
         private MongoDbMembershipProvider Provider;
+        private DevKit141Aspect DevKit;
+
+        public TestContext TestContext { get; set; }
 
         [TestInitialize]
         public void TestSetUp()
         {
+            DevKit = new DevKit141Aspect(TestContext);
             var config = new NameValueCollection(ConfigurationManager.AppSettings);
 
-            ContainerConfiguration.Register(".");
             Provider = new MongoDbMembershipProvider();
             Provider.Initialize(MongoDbMembershipProvider.ProviderName, config);
         }
