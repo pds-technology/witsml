@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.ComponentModel.Composition;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Server
@@ -24,6 +25,7 @@ namespace PDS.Witsml.Server
     /// Defines properties and methods that can be used to provide
     /// configuration settings for integration tests.
     /// </summary>
+    [InheritedExport]
     public interface ITestContextProvider
     {
         /// <summary>
