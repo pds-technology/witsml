@@ -41,5 +41,8 @@
     <Setting Name="ChannelDataChunkTimeRangeSize" Type="System.Int64" Scope="Application">
       <Value Profile="(Default)">5000000000</Value>
     </Setting>
+    <Setting Name="TruncateXmlOutDebugSize" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

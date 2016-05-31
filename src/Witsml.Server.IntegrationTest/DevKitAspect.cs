@@ -32,6 +32,7 @@ namespace PDS.Witsml.Server
 {
     public abstract class DevKitAspect : DataGenerator
     {
+        public static readonly int DefaultXmlOutDebugSize = WitsmlSettings.TruncateXmlOutDebugSize;
         public static readonly long DefaultDepthChunkRange = WitsmlSettings.DepthRangeSize;
         public static readonly long DefaultTimeChunkRange = WitsmlSettings.TimeRangeSize;
         public static readonly int DefaultMaxDataPoints = WitsmlSettings.MaxDataPoints;

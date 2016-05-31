@@ -24,6 +24,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
@@ -45,6 +46,12 @@ namespace PDS.Witsml.Server.Data.Wells
                 .ToArray();
 
             _well = new Well { Name = DevKit.Name("Well 01"), TimeZone = DevKit.TimeZone };
+        }
+
+        [TestCleanup]
+        public void TestCleanUp()
+        {
+            WitsmlSettings.TruncateXmlOutDebugSize = DevKitAspect.DefaultXmlOutDebugSize;
         }
 
         [TestMethod]
@@ -346,6 +353,9 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well141DataAdapter_AddToStore_With_PrivateGroupOnly_True()
         {
+            // Prevent large debug log output
+            WitsmlSettings.TruncateXmlOutDebugSize = 100;
+
             // Add a well with PrivateGroupOnly set to false
             _well.CommonData = new CommonData() { PrivateGroupOnly = true };
             var response = DevKit.Add<WellList, Well>(_well);
@@ -368,6 +378,9 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well141DataAdapter_AddToStore_With_PrivateGroupOnly_False()
         {
+            // Prevent large debug log output
+            WitsmlSettings.TruncateXmlOutDebugSize = 100;
+
             // Add a well with PrivateGroupOnly set to false
             _well.CommonData = new CommonData() { PrivateGroupOnly = false };
             var response = DevKit.Add<WellList, Well>(_well);
@@ -389,7 +402,10 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well141DataAdapter_AddToStore_With_Default_PrivateGroupOnly()
         {
-            // Add a well with default PrivateGroupOnly
+            // Prevent large debug log output
+            WitsmlSettings.TruncateXmlOutDebugSize = 100;
+
+            // Add a well with zdefault PrivateGroupOnly
             var response = DevKit.Add<WellList, Well>(_well);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);

@@ -139,5 +139,14 @@ namespace PDS.Witsml.Server.Properties {
                 return ((long)(this["ChannelDataChunkTimeRangeSize"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int TruncateXmlOutDebugSize {
+            get {
+                return ((int)(this["TruncateXmlOutDebugSize"]));
+            }
+        }
     }
 }

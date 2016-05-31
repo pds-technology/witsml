@@ -22,6 +22,7 @@ using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server
 {
@@ -40,6 +41,12 @@ namespace PDS.Witsml.Server
             DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
                 .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
                 .ToArray();
+        }
+
+        [TestCleanup]
+        public void TestCleanUp()
+        {
+            WitsmlSettings.TruncateXmlOutDebugSize = DevKitAspect.DefaultXmlOutDebugSize;
         }
 
         [TestMethod]
@@ -121,6 +128,9 @@ namespace PDS.Witsml.Server
         [TestMethod]
         public void Query_OptionsIn_privateGroupOnly()
         {
+            // Prevent large debug log output
+            WitsmlSettings.TruncateXmlOutDebugSize = 100;
+
             var well = new Well { Name = DevKit.Name("Well-to-add-01"), TimeZone = DevKit.TimeZone };
             var response = DevKit.Add<WellList, Well>(well);
             Assert.IsNotNull(response);

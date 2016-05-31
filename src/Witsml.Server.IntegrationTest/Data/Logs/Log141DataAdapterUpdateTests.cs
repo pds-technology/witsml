@@ -24,7 +24,6 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -678,7 +677,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var uidWellbore = response.SuppMsgOut;
 
             // Add large log
-            var logXmlIn = File.ReadAllText(DataDir + "LargeLog.xml");
+            var logXmlIn = File.ReadAllText(Path.Combine(DataDir, "LargeLog.xml"));
 
             var logList = EnergisticsConverter.XmlToObject<LogList>(logXmlIn);
             Assert.IsNotNull(logList);
@@ -707,7 +706,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(5000, results[0].LogData[0].Data.Count);
 
             // Update log by appending 10000 rows of data
-            logXmlIn = File.ReadAllText(DataDir + "LargeLog_append.xml");
+            logXmlIn = File.ReadAllText(Path.Combine(DataDir, "LargeLog_append.xml"));
 
             logList = EnergisticsConverter.XmlToObject<LogList>(logXmlIn);
             Assert.IsNotNull(logList);

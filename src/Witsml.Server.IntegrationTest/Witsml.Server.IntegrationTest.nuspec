@@ -17,5 +17,6 @@
   <files>
     <file src="bin/$configuration$/PDS.Witsml.Server.IntegrationTest.dll" target="lib/net46" />
     <file src="bin/$configuration$/PDS.Witsml.Server.IntegrationTest.pdb" target="lib/net46" />
+    <file src="TestData/**/*" target="content/TestData" />
   </files>
 </package>

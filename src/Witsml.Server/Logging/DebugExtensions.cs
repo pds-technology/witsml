@@ -19,6 +19,7 @@
 using System;
 using System.ServiceModel.Web;
 using log4net;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Logging
 {
@@ -150,12 +151,18 @@ namespace PDS.Witsml.Server.Logging
             if (!_log.IsDebugEnabled && !isEnabled)
                 return string.Empty;
 
+            var xmlOut = response.XMLout ?? string.Empty;
+
+            xmlOut = WitsmlSettings.TruncateXmlOutDebugSize > 0 && xmlOut.Length > WitsmlSettings.TruncateXmlOutDebugSize
+                ? xmlOut.Substring(0, WitsmlSettings.TruncateXmlOutDebugSize) + " ... (truncated)"
+                : xmlOut;
+
             return string.Format(
                 "{0}: Result: {1}; Message: {2}; XML:{4}{3}{4}",
                 response.GetType().Name,
                 response.Result,
                 response.SuppMsgOut,
-                response.XMLout,
+                xmlOut,
                 Environment.NewLine);
         }
 
