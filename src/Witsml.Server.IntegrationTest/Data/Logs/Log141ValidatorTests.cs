@@ -153,33 +153,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Test_error_code_449_index_curve_not_found_in_LogCurveInfo()
-        {
-            var response = DevKit.Add<WellList, Well>(Well);
-
-            Wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
-
-            var log = new Log()
-            {
-                UidWell = Wellbore.UidWell,
-                NameWell = Well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = Wellbore.Name,
-                Name = DevKit.Name("Log 01")
-            };
-
-            DevKit.InitHeader(log, LogIndexType.measureddepth);
-            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10);
-
-            // Remove LogCurveInfo for IndexCurve
-            log.LogCurveInfo.Remove(log.LogCurveInfo.Where(l => l.Mnemonic.Value == log.IndexCurve).FirstOrDefault());
-
-            response = DevKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.IndexCurveNotFound, response.Result);
-        }
-
-        [TestMethod]
         public void Test_error_code_449_index_curve_not_found_in_LogData_MnemonicList()
         {
             var response = DevKit.Add<WellList, Well>(Well);
