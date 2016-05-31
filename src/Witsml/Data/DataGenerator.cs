@@ -21,6 +21,9 @@ using System.Collections.Generic;
 
 namespace PDS.Witsml.Data
 {
+    /// <summary>
+    /// Provides methods to generate data.
+    /// </summary>
     public class DataGenerator
     {
         public readonly string TimestampFormat = "yyMMdd-HHmmss-fff";

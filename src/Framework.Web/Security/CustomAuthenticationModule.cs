@@ -24,6 +24,10 @@ using System.Web;
 
 namespace PDS.Framework.Web.Security
 {
+    /// <summary>
+    /// Provides custom authentication to the module.
+    /// </summary>
+    /// <seealso cref="System.Web.IHttpModule" />
     public class CustomAuthenticationModule : IHttpModule
     {
         private const string AuthorizationHeaderKey = "Authorization";
@@ -31,6 +35,10 @@ namespace PDS.Framework.Web.Security
         private const string AuthenticationModeBasic = "Basic";
         private const string AuthenticationModeBearer = "Bearer";
 
+        /// <summary>
+        /// Initializes a module and prepares it to handle requests.
+        /// </summary>
+        /// <param name="context">An <see cref="T:System.Web.HttpApplication" /> that provides access to the methods, properties, and events common to all application objects within an ASP.NET application</param>
         public void Init(HttpApplication context)
         {
             // Register event handlers
@@ -38,6 +46,11 @@ namespace PDS.Framework.Web.Security
             context.EndRequest += OnApplicationEndRequest;
         }
 
+        /// <summary>
+        /// Called when application authenticate request.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         protected virtual void OnApplicationAuthenticateRequest(object sender, EventArgs e)
         {
             var request = HttpContext.Current.Request;
@@ -51,8 +64,12 @@ namespace PDS.Framework.Web.Security
             var authHeaderVal = AuthenticationHeaderValue.Parse(authHeader);
             VerifyAuthenticationHeader(authHeaderVal);
         }
-
-        // If the request was unauthorized, add the WWW-Authenticate header to the response.
+        
+        /// <summary>
+        /// Called when application end request. If the request was unauthorized, the WWW-Authenticate header is added to the response.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         protected virtual void OnApplicationEndRequest(object sender, EventArgs e)
         {
             var context = HttpContext.Current;
@@ -65,6 +82,9 @@ namespace PDS.Framework.Web.Security
             }
         }
 
+        /// <summary>
+        /// Denies the access.
+        /// </summary>
         protected virtual void DenyAccess()
         {
             var context = HttpContext.Current;
@@ -72,6 +92,10 @@ namespace PDS.Framework.Web.Security
             context.Response.End();
         }
 
+        /// <summary>
+        /// Sets the principal.
+        /// </summary>
+        /// <param name="principal">The principal.</param>
         protected virtual void SetPrincipal(IPrincipal principal)
         {
             Thread.CurrentPrincipal = principal;
@@ -82,6 +106,10 @@ namespace PDS.Framework.Web.Security
             }
         }
 
+        /// <summary>
+        /// Verifies the authentication header.
+        /// </summary>
+        /// <param name="authHeaderVal">The authentication header value.</param>
         protected virtual void VerifyAuthenticationHeader(AuthenticationHeaderValue authHeaderVal)
         {
             if (authHeaderVal.Parameter == null)
@@ -104,16 +132,27 @@ namespace PDS.Framework.Web.Security
             }
         }
 
+        /// <summary>
+        /// Verifies the basic authentication.
+        /// </summary>
+        /// <param name="parameter">The parameter.</param>
         protected virtual void VerifyBasicAuthentication(string parameter)
         {
             DenyAccess();
         }
 
+        /// <summary>
+        /// Verifies the bearer authentication.
+        /// </summary>
+        /// <param name="parameter">The parameter.</param>
         protected virtual void VerifyBearerAuthentication(string parameter)
         {
             DenyAccess();
         }
 
+        /// <summary>
+        /// Disposes of the resources (other than memory) used by the module.
+        /// </summary>
         public virtual void Dispose()
         {
         }

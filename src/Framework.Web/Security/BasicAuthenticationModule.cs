@@ -24,10 +24,18 @@ using log4net;
 
 namespace PDS.Framework.Web.Security
 {
+    /// <summary>
+    /// Provides basic authentication.
+    /// </summary>
+    /// <seealso cref="PDS.Framework.Web.Security.CustomAuthenticationModule" />
     public class BasicAuthenticationModule : CustomAuthenticationModule
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(BasicAuthenticationModule));
 
+        /// <summary>
+        /// Verifies the basic authentication.
+        /// </summary>
+        /// <param name="parameter">The parameter.</param>
         protected override void VerifyBasicAuthentication(string parameter)
         {
             AuthenticateUser(parameter);
