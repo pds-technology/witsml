@@ -1845,7 +1845,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsNull(results.First().LogCurveInfo[1].ClassIndex);
         }
 
-        [TestMethod, Description("To test adding a log with special characters")]
+        [TestMethod, Description("To test adding a log with special characters_Without_Special_Handling")]
         public void Log141DataAdapter_AddToStore_Can_Add_Log_With_Special_Characters()
         {
             // Add well
@@ -1860,8 +1860,11 @@ namespace PDS.Witsml.Server.Data.Logs
             var uidWellbore = response.SuppMsgOut;
 
             // Add log
-            var description = @"<description> ~ ! @ # $ % ^ &amp; * ( ) _ + { } | &lt; > ? ; : ' "" , . / \ [ ] and \b \f \n \r \t \"" \\ </description>";
-            var row = @"<data>5000.0, ~ ! @ # $ % ^ &amp; * ( ) _ + { } | &lt; > ? ; : ' "" .  / [ ] \n \r \t, 5.1 </data>";
+            var description         = @"~ ! @ # $ % ^ &amp; * ( ) _ + { } | &lt; > ? ; : ' "" , . / \ [ ] and \b \f \n \r \t \"" \\ ";
+            var expectedDescription = @"~ ! @ # $ % ^ & * ( ) _ + { } | < > ? ; : ' "" , . / \ [ ] and \b \f \n \r \t \"" \\";
+
+            var row         = @"~ ! @ # $ % ^ &amp; * ( ) _ + { } | &lt; > ? ; : ' "" .  / [ ] \n \r \t";
+            var expectedRow = @"~ ! @ # $ % ^ & * ( ) _ + { } | < > ? ; : ' "" .  / [ ]";
 
             var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
                 "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
@@ -1872,7 +1875,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         "<name>" + DevKit.Name("Test special characters") + "</name>" + Environment.NewLine +
                         "<indexType>measured depth</indexType>" + Environment.NewLine +
                         "<direction>increasing</direction>" + Environment.NewLine +
-                        description + Environment.NewLine +
+                        "<description>" + description + "</description>" + Environment.NewLine +
                         "<indexCurve>MD</indexCurve>" + Environment.NewLine +
                         "<logCurveInfo uid=\"MD\">" + Environment.NewLine +
                         "  <mnemonic>MD</mnemonic>" + Environment.NewLine +
@@ -1892,7 +1895,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         "<logData>" + Environment.NewLine +
                         "   <mnemonicList>MD,AAA,BBB</mnemonicList>" + Environment.NewLine +
                         "   <unitList>m,unitless,s</unitList>" + Environment.NewLine +
-                        row + Environment.NewLine +
+                        "   <data>5000.0," + row + ", 5.1 </data>" + Environment.NewLine +
                         "</logData>" + Environment.NewLine +
                     "</log>" + Environment.NewLine +
                "</logs>";
@@ -1909,14 +1912,22 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var returnLog = results.First();
             Assert.IsNotNull(returnLog.Description);
+            Assert.AreEqual(expectedDescription, returnLog.Description.Trim());
             Assert.AreEqual(1, returnLog.LogData.Count);
             Assert.AreEqual(1, returnLog.LogData[0].Data.Count);
-            Assert.AreEqual(3, returnLog.LogData[0].Data[0].Split(',').Length);
+
+            var channelData = returnLog.LogData[0].Data[0].Split(',');
+            Assert.AreEqual(3, channelData.Length);
+            Assert.AreEqual(expectedRow, channelData[1].Trim());
+
+            var length = channelData[1].Length;
+            Assert.AreEqual(10, channelData[1][length - 5]);  // \n
+            Assert.AreEqual(10, channelData[1][length - 3]);  // \r
+            Assert.AreEqual(9, channelData[1][length - 1]);   // \t
         }
 
-        [TestMethod, Description("To test adding a log with special characters & (ampersand)")]
-        [Ignore]
-        public void Log141DataAdapter_AddToStore_Can_Add_Log_With_Special_Characters_Ampersand()
+        [TestMethod, Description("To test adding a log with special characters & (ampersand) and throws error -409")]
+        public void Log141DataAdapter_AddToStore_Error_409_Log_With_Special_Characters_Ampersand()
         {
             // Add well
             var response = DevKit.Add<WellList, Well>(Well);
@@ -1930,8 +1941,8 @@ namespace PDS.Witsml.Server.Data.Logs
             var uidWellbore = response.SuppMsgOut;
 
             // Add log          
-            var description = "<description>Test special character & (ampersand) </description>";
-            var row = "<data>5000.1, & ampersand, 5.1</data>";
+            var description = "<description>Header & </description>";
+            var row = "<data>5000.1, Data & , 5.1</data>";
 
             var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
                 "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
@@ -1968,26 +1979,11 @@ namespace PDS.Witsml.Server.Data.Logs
                "</logs>";
 
             var result = DevKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
-            Assert.AreEqual((short)ErrorCodes.Success, result.Result);
-
-            var uidLog = result.SuppMsgOut;
-
-            // Query log
-            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
-
-            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
-            Assert.IsTrue(results.Any());
-
-            var returnLog = results.First();
-            Assert.IsNotNull(returnLog.Description);
-            Assert.AreEqual(1, returnLog.LogData.Count);
-            Assert.AreEqual(1, returnLog.LogData[0].Data.Count);
-            Assert.AreEqual(3, returnLog.LogData[0].Data[0].Split(',').Length);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, result.Result);
         }
 
-        [TestMethod, Description("To test adding a log with special characters < (less than)")]
-        [Ignore]
-        public void Log141DataAdapter_AddToStore_Can_Add_Log_With_Special_Characters_Less_Than()
+        [TestMethod, Description("To test adding a log with special character: &amp; (encoded ampersand)")]
+        public void Log141DataAdapter_AddToStore_Can_Add_Log_With_Special_Characters_Encoded_Ampersand()
         {
             // Add well
             var response = DevKit.Add<WellList, Well>(Well);
@@ -2001,8 +1997,138 @@ namespace PDS.Witsml.Server.Data.Logs
             var uidWellbore = response.SuppMsgOut;
 
             // Add log          
-            var description = "<description>Test special character < (less than) </description>";
-            var row = "<data>5000.1, < less than, 5.1</data>";
+            var description = "<description>Header &amp; </description>";
+            var row = "<data>5000.1, Data &amp; , 5.1</data>";
+
+            var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
+                "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
+                "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
+                    "<log uid=\"" + "\" uidWell=\"" + Wellbore.UidWell + "\" uidWellbore=\"" + uidWellbore + "\">" + Environment.NewLine +
+                        "<nameWell>" + Well.Name + "</nameWell>" + Environment.NewLine +
+                        "<nameWellbore>" + Wellbore.Name + "</nameWellbore>" + Environment.NewLine +
+                        "<name>" + DevKit.Name("Test special characters") + "</name>" + Environment.NewLine +
+                        "<indexType>measured depth</indexType>" + Environment.NewLine +
+                        "<direction>increasing</direction>" + Environment.NewLine +
+                        description + Environment.NewLine +
+                        "<indexCurve>MD</indexCurve>" + Environment.NewLine +
+                        "<logCurveInfo uid=\"MD\">" + Environment.NewLine +
+                        "  <mnemonic>MD</mnemonic>" + Environment.NewLine +
+                        "  <unit>m</unit>" + Environment.NewLine +
+                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
+                        "</logCurveInfo>" + Environment.NewLine +
+                        "<logCurveInfo uid=\"AAA\">" + Environment.NewLine +
+                        "  <mnemonic>AAA</mnemonic>" + Environment.NewLine +
+                        "  <unit>unitless</unit>" + Environment.NewLine +
+                        "  <typeLogData>string</typeLogData>" + Environment.NewLine +
+                        "</logCurveInfo>" + Environment.NewLine +
+                        "<logCurveInfo uid=\"BBB\">" + Environment.NewLine +
+                        "  <mnemonic>BBB</mnemonic>" + Environment.NewLine +
+                        "  <unit>s</unit>" + Environment.NewLine +
+                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
+                        "</logCurveInfo>" + Environment.NewLine +
+                        "<logData>" + Environment.NewLine +
+                        "   <mnemonicList>MD,AAA,BBB</mnemonicList>" + Environment.NewLine +
+                        "   <unitList>m,unitless,s</unitList>" + Environment.NewLine +
+                        row + Environment.NewLine +
+                        "</logData>" + Environment.NewLine +
+                    "</log>" + Environment.NewLine +
+               "</logs>";
+
+            var result = DevKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
+            Assert.AreEqual((short)ErrorCodes.Success, result.Result);
+
+            var uidLog = result.SuppMsgOut;
+
+            // Query log
+            var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.IsTrue(results.Any());
+
+            var returnLog = results.First();
+            Assert.IsNotNull(returnLog.Description.Trim());
+            Assert.AreEqual("Header &", returnLog.Description.Trim());
+            Assert.AreEqual(1, returnLog.LogData.Count);
+            Assert.AreEqual(1, returnLog.LogData[0].Data.Count);
+
+            var channelData = returnLog.LogData[0].Data[0].Split(',');
+            Assert.AreEqual(3, channelData.Length);
+            Assert.AreEqual("Data &", channelData[1].Trim());
+        }
+
+        [TestMethod, Description("To test adding a log with special characters < (less than) and returning error -409")]
+        public void Log141DataAdapter_AddToStore_Error_409_Log_With_Special_Characters_Less_Than()
+        {
+            // Add well
+            var response = DevKit.Add<WellList, Well>(Well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add wellbore
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWellbore = response.SuppMsgOut;
+
+            // Add log          
+            var description = "<description>Header < </description>";
+            var row = "<data>5000.1, Data < , 5.1</data>";
+
+            var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
+                "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
+                "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
+                    "<log uid=\"" + "\" uidWell=\"" + Wellbore.UidWell + "\" uidWellbore=\"" + uidWellbore + "\">" + Environment.NewLine +
+                        "<nameWell>" + Well.Name + "</nameWell>" + Environment.NewLine +
+                        "<nameWellbore>" + Wellbore.Name + "</nameWellbore>" + Environment.NewLine +
+                        "<name>" + DevKit.Name("Test special characters") + "</name>" + Environment.NewLine +
+                        "<indexType>measured depth</indexType>" + Environment.NewLine +
+                        "<direction>increasing</direction>" + Environment.NewLine +
+                        description + Environment.NewLine +
+                        "<indexCurve>MD</indexCurve>" + Environment.NewLine +
+                        "<logCurveInfo uid=\"MD\">" + Environment.NewLine +
+                        "  <mnemonic>MD</mnemonic>" + Environment.NewLine +
+                        "  <unit>m</unit>" + Environment.NewLine +
+                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
+                        "</logCurveInfo>" + Environment.NewLine +
+                        "<logCurveInfo uid=\"AAA\">" + Environment.NewLine +
+                        "  <mnemonic>AAA</mnemonic>" + Environment.NewLine +
+                        "  <unit>unitless</unit>" + Environment.NewLine +
+                        "  <typeLogData>string</typeLogData>" + Environment.NewLine +
+                        "</logCurveInfo>" + Environment.NewLine +
+                        "<logCurveInfo uid=\"BBB\">" + Environment.NewLine +
+                        "  <mnemonic>BBB</mnemonic>" + Environment.NewLine +
+                        "  <unit>s</unit>" + Environment.NewLine +
+                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
+                        "</logCurveInfo>" + Environment.NewLine +
+                        "<logData>" + Environment.NewLine +
+                        "   <mnemonicList>MD,AAA,BBB</mnemonicList>" + Environment.NewLine +
+                        "   <unitList>m,unitless,s</unitList>" + Environment.NewLine +
+                        row + Environment.NewLine +
+                        "</logData>" + Environment.NewLine +
+                    "</log>" + Environment.NewLine +
+               "</logs>";
+
+            var result = DevKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, result.Result);
+        }
+
+        [TestMethod, Description("To test adding a log with special characters &lt; (encoded less than)")]
+        public void Log141DataAdapter_AddToStore_Can_Add_Log_With_Special_Characters_Encoded_Less_Than()
+        {
+            // Add well
+            var response = DevKit.Add<WellList, Well>(Well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add wellbore
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWellbore = response.SuppMsgOut;
+
+            // Add log          
+            var description = "<description>Header &lt; </description>";
+            var row = "<data>5000.1, Data &lt; , 5.1</data>";
 
             var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
                 "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
@@ -2051,9 +2177,13 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var returnLog = results.First();
             Assert.IsNotNull(returnLog.Description);
+            Assert.AreEqual("Header <", returnLog.Description.Trim());
             Assert.AreEqual(1, returnLog.LogData.Count);
             Assert.AreEqual(1, returnLog.LogData[0].Data.Count);
-            Assert.AreEqual(3, returnLog.LogData[0].Data[0].Split(',').Length);
+
+            var channelData = returnLog.LogData[0].Data[0].Split(',');
+            Assert.AreEqual(3, channelData.Length);
+            Assert.AreEqual("Data <", channelData[1].Trim());
         }
 
         [TestMethod, Description(@"To test adding log data string channel with \ (backslash).")]
@@ -2072,8 +2202,8 @@ namespace PDS.Witsml.Server.Data.Logs
             var uidWellbore = response.SuppMsgOut;
 
             // Add log          
-            var description = @"<description>Test special character \ (backslash) </description>";
-            var row = @"<data>5000.0, backslash \, 5.0</data>";
+            var description = @"<description>Header \ </description>";
+            var row = @"<data>5000.0, Data \ , 5.0</data>";
 
             var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
                 "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
@@ -2109,7 +2239,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     "</log>" + Environment.NewLine +
                "</logs>";
 
-            var result = DevKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
+            var result = DevKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);    // TODO: Failed in AddToStore
             Assert.AreEqual((short)ErrorCodes.Success, result.Result);
 
             var uidLog = result.SuppMsgOut;
@@ -2122,9 +2252,13 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var returnLog = results.First();
             Assert.IsNotNull(returnLog.Description);
+            Assert.AreEqual(@"Header \", returnLog.Description.Trim());
             Assert.AreEqual(1, returnLog.LogData.Count);
             Assert.AreEqual(1, returnLog.LogData[0].Data.Count);
-            Assert.AreEqual(3, returnLog.LogData[0].Data[0].Split(',').Length);
+
+            var channelData = returnLog.LogData[0].Data[0].Split(',');
+            Assert.AreEqual(3, channelData.Length);
+            Assert.AreEqual(@"Data \", channelData[1].Trim());
         }
 
         [TestMethod, Description("As comma is a delimiter, this test is served as a reminder of the problem and will need to be updated to the decided response of the server.")]
@@ -2214,8 +2348,8 @@ namespace PDS.Witsml.Server.Data.Logs
             var uidWellbore = response.SuppMsgOut;
 
             // Add log          
-            var description = @"<description>Test special character \f (form feed) </description>";
-            var row = @"<data>5000.0, form feed \f , 5.0</data>";
+            var description = @"<description>Header \f </description>";
+            var row = @"<data>5000.0, Data \f , 5.0</data>";
 
             var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
                 "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
@@ -2259,19 +2393,23 @@ namespace PDS.Witsml.Server.Data.Logs
             // Query log
             var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
 
-            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);  // TODO: Failed when query
             Assert.IsTrue(results.Any());
 
             var returnLog = results.First();
             Assert.IsNotNull(returnLog.Description);
+            Assert.AreEqual(@"Header \f", returnLog.Description.Trim());
             Assert.AreEqual(1, returnLog.LogData.Count);
             Assert.AreEqual(1, returnLog.LogData[0].Data.Count);
-            Assert.AreEqual(3, returnLog.LogData[0].Data[0].Split(',').Length);
+
+            var channelData = returnLog.LogData[0].Data[0].Split(',');
+            Assert.AreEqual(3, channelData.Length);
+            Assert.AreEqual(@"Data \f", channelData[1].Trim());
         }
 
-        [TestMethod, Description("To test adding log data string channel with JSON special character \" (slash double-quote).")]
+        [TestMethod, Description("To test adding log data string channel with JSON special character \" (backslash double-quote).")]
         [Ignore]
-        public void Log141DataAdapter_AddToStore_Can_Add_Log_With_Special_Character_Slash_Double_Quote()
+        public void Log141DataAdapter_AddToStore_Can_Add_Log_With_Special_Character_Backslash_Double_Quote()
         {
             // Add well
             var response = DevKit.Add<WellList, Well>(Well);
@@ -2285,10 +2423,10 @@ namespace PDS.Witsml.Server.Data.Logs
             var uidWellbore = response.SuppMsgOut;
 
             // Add log          
-            var description = @"<description>Test special character \"" (slash double quote) </description>";
-            var row = @"<data>5000.0, slash double-quote \"" , 5.0</data>";
+            var description = @"<description>Header \""  </description>";
+            var row = @"<data>5000.0, Data \"" , 5.0</data>";
 
-            var xmlIn = " <?xml version=\"1.0\"?>" + Environment.NewLine +
+            var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
                 "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
                 "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
                     "<log uid=\"" + "\" uidWell=\"" + Wellbore.UidWell + "\" uidWellbore=\"" + uidWellbore + "\">" + Environment.NewLine +
@@ -2322,7 +2460,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     "</log>" + Environment.NewLine +
                "</logs>";
 
-            var result = DevKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
+            var result = DevKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);                   // TODO: Failed when Add
             Assert.AreEqual((short)ErrorCodes.Success, result.Result);
 
             var uidLog = result.SuppMsgOut;
@@ -2335,9 +2473,13 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var returnLog = results.First();
             Assert.IsNotNull(returnLog.Description);
+            Assert.AreEqual(@"Header \""", returnLog.Description.Trim());
             Assert.AreEqual(1, returnLog.LogData.Count);
             Assert.AreEqual(1, returnLog.LogData[0].Data.Count);
-            Assert.AreEqual(3, returnLog.LogData[0].Data[0].Split(',').Length);
+
+            var channelData = returnLog.LogData[0].Data[0].Split(',');
+            Assert.AreEqual(3, channelData.Length);
+            Assert.AreEqual(@"Data \""", channelData[1].Trim());
         }
 
         [TestMethod, Description("To test adding log data string channel with JSON special character \b (backspace).")]
@@ -2361,10 +2503,10 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.InitHeader(Log, LogIndexType.measureddepth);
 
             // Add log          
-            var description = @"<description>Test special character \b (backspace) </description>";
-            var row = @"<data>5000.0, backspace \b , 5.0</data>";
+            var description = @"<description>Header \b  </description>";
+            var row = @"<data>5000.0, Data \b , 5.0</data>";
 
-            var xmlIn = " <?xml version=\"1.0\"?>" + Environment.NewLine +
+            var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
                 "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
                 "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
                     "<log uid=\"" + "\" uidWell=\"" + Wellbore.UidWell + "\" uidWellbore=\"" + uidWellbore + "\">" + Environment.NewLine +
@@ -2398,21 +2540,25 @@ namespace PDS.Witsml.Server.Data.Logs
                     "</log>" + Environment.NewLine +
                "</logs>";
 
-            var result = DevKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
+            var result = DevKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);    
             Assert.AreEqual((short)ErrorCodes.Success, result.Result);
             var uidLog = result.SuppMsgOut;
 
             // Query log
             var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
 
-            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All); //TODO: Failed when query
             Assert.IsTrue(results.Any());
 
             var returnLog = results.First();
             Assert.IsNotNull(returnLog.Description);
+            Assert.AreEqual(@"Header \b", returnLog.Description.Trim());
             Assert.AreEqual(1, returnLog.LogData.Count);
             Assert.AreEqual(1, returnLog.LogData[0].Data.Count);
-            Assert.AreEqual(3, returnLog.LogData[0].Data[0].Split(',').Length);
+
+            var channelData = returnLog.LogData[0].Data[0].Split(',');
+            Assert.AreEqual(3, channelData.Length);
+            Assert.AreEqual(@"Data \b", channelData[1].Trim());
         }
 
         [TestMethod, Description("To test adding log data string channel with JSON special character \\ (double backslash).")]
@@ -2431,10 +2577,10 @@ namespace PDS.Witsml.Server.Data.Logs
             var uidWellbore = response.SuppMsgOut;
 
             // Add log          
-            var description = @"<description>Test special character \\ (double backslash) </description>";
-            var row = @"<data>5000.0, backslash \\ , 5.0</data>";
+            var description = @"<description>Header \\ </description>";
+            var row = @"Data \\";
 
-            var xmlIn = " <?xml version=\"1.0\"?>" + Environment.NewLine +
+            var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
                 "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
                 "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
                     "<log uid=\"" + "\" uidWell=\"" + Wellbore.UidWell + "\" uidWellbore=\"" + uidWellbore + "\">" + Environment.NewLine +
@@ -2463,7 +2609,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         "<logData>" + Environment.NewLine +
                         "   <mnemonicList>MD,AAA,BBB</mnemonicList>" + Environment.NewLine +
                         "   <unitList>m,unitless,s</unitList>" + Environment.NewLine +
-                        row + Environment.NewLine +
+                        "<data>5000.0," + row + ", 5.0</data>" + Environment.NewLine +
                         "</logData>" + Environment.NewLine +
                     "</log>" + Environment.NewLine +
                "</logs>";
@@ -2480,9 +2626,13 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var returnLog = results.First();
             Assert.IsNotNull(returnLog.Description);
+            Assert.AreEqual(@"Header \\", returnLog.Description.Trim());
             Assert.AreEqual(1, returnLog.LogData.Count);
             Assert.AreEqual(1, returnLog.LogData[0].Data.Count);
-            Assert.AreEqual(3, returnLog.LogData[0].Data[0].Split(',').Length);
+
+            var channelData = returnLog.LogData[0].Data[0].Split(',');
+            Assert.AreEqual(3, channelData.Length);
+            Assert.AreEqual(@"Data \\", channelData[1].Trim());                         //TODO: Failed. 
         }
 
         [TestMethod]
