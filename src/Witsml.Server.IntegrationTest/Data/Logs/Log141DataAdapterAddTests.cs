@@ -1845,7 +1845,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsNull(results.First().LogCurveInfo[1].ClassIndex);
         }
 
-        [TestMethod, Description("To test adding a log with special characters_Without_Special_Handling")]
+        [TestMethod, Description("To test adding a log with special characters")]
         public void Log141DataAdapter_AddToStore_Can_Add_Log_With_Special_Characters()
         {
             // Add well
@@ -1863,8 +1863,8 @@ namespace PDS.Witsml.Server.Data.Logs
             var description         = @"~ ! @ # $ % ^ &amp; * ( ) _ + { } | &lt; > ? ; : ' "" , . / \ [ ] and \b \f \n \r \t \"" \\ ";
             var expectedDescription = @"~ ! @ # $ % ^ & * ( ) _ + { } | < > ? ; : ' "" , . / \ [ ] and \b \f \n \r \t \"" \\";
 
-            var row         = @"~ ! @ # $ % ^ &amp; * ( ) _ + { } | &lt; > ? ; : ' "" .  / [ ] \n \r \t";
-            var expectedRow = @"~ ! @ # $ % ^ & * ( ) _ + { } | < > ? ; : ' "" .  / [ ]";
+            var row = @"~ ! @ # $ % ^ &amp; * ( ) _ + { } | &lt; > ? ; : ' "" . / \ [ ] and \b \f \n \r \t \"" \\ ";   // Comma omitted
+            var expectedRow = @"~ ! @ # $ % ^ & * ( ) _ + { } | < > ? ; : ' "" . / \ [ ] and \b \f \n \r \t \"" \\";
 
             var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
                 "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
@@ -1919,11 +1919,6 @@ namespace PDS.Witsml.Server.Data.Logs
             var channelData = returnLog.LogData[0].Data[0].Split(',');
             Assert.AreEqual(3, channelData.Length);
             Assert.AreEqual(expectedRow, channelData[1].Trim());
-
-            var length = channelData[1].Length;
-            Assert.AreEqual(10, channelData[1][length - 5]);  // \n
-            Assert.AreEqual(10, channelData[1][length - 3]);  // \r
-            Assert.AreEqual(9, channelData[1][length - 1]);   // \t
         }
 
         [TestMethod, Description("To test adding a log with special characters & (ampersand) and throws error -409")]
@@ -2187,7 +2182,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod, Description(@"To test adding log data string channel with \ (backslash).")]
-        [Ignore]
+    
         public void Log141DataAdapter_AddToStore_Can_Add_Log_With_Special_Character_Backslash()
         {
             // Add well
@@ -2239,7 +2234,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     "</log>" + Environment.NewLine +
                "</logs>";
 
-            var result = DevKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);    // TODO: Failed in AddToStore
+            var result = DevKit.AddToStore(ObjectTypes.Log, xmlIn, null, null); 
             Assert.AreEqual((short)ErrorCodes.Success, result.Result);
 
             var uidLog = result.SuppMsgOut;
@@ -2333,7 +2328,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod, Description("To test adding log data string channel with JSON special character \f (form feed).")]
-        [Ignore]
         public void Log141DataAdapter_AddToStore_Can_Add_Log_With_Special_Character_FormFeed()
         {
             // Add well
@@ -2393,7 +2387,7 @@ namespace PDS.Witsml.Server.Data.Logs
             // Query log
             var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
 
-            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);  // TODO: Failed when query
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All); 
             Assert.IsTrue(results.Any());
 
             var returnLog = results.First();
@@ -2408,7 +2402,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod, Description("To test adding log data string channel with JSON special character \" (backslash double-quote).")]
-        [Ignore]
         public void Log141DataAdapter_AddToStore_Can_Add_Log_With_Special_Character_Backslash_Double_Quote()
         {
             // Add well
@@ -2460,7 +2453,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     "</log>" + Environment.NewLine +
                "</logs>";
 
-            var result = DevKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);                   // TODO: Failed when Add
+            var result = DevKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);              
             Assert.AreEqual((short)ErrorCodes.Success, result.Result);
 
             var uidLog = result.SuppMsgOut;
@@ -2483,7 +2476,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod, Description("To test adding log data string channel with JSON special character \b (backspace).")]
-        [Ignore]
         public void Log141DataAdapter_AddToStore_Can_Add_Log_With_Special_Character_Backspace()
         {
             // Add well
@@ -2547,7 +2539,7 @@ namespace PDS.Witsml.Server.Data.Logs
             // Query log
             var query = CreateLog(uidLog, null, Wellbore.UidWell, null, uidWellbore, null);
 
-            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All); //TODO: Failed when query
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All); 
             Assert.IsTrue(results.Any());
 
             var returnLog = results.First();
@@ -2562,7 +2554,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod, Description("To test adding log data string channel with JSON special character \\ (double backslash).")]
-        [Ignore]
         public void Log141DataAdapter_AddToStore_Can_Add_Log_With_Special_Character_Double_Backslash()
         {
             // Add well
@@ -2632,7 +2623,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var channelData = returnLog.LogData[0].Data[0].Split(',');
             Assert.AreEqual(3, channelData.Length);
-            Assert.AreEqual(@"Data \\", channelData[1].Trim());                         //TODO: Failed. 
+            Assert.AreEqual(@"Data \\", channelData[1].Trim());                       
         }
 
         [TestMethod]
