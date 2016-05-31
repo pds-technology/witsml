@@ -1356,7 +1356,7 @@ namespace PDS.Witsml.Data.Channels
             if (double.TryParse(value, out number))
                 return value;
 
-            return string.Format("\"{0}\"", value.Trim().Replace("\"", "\\\""));
+            return JsonConvert.ToString(value);
         }
 
         /// <summary>
