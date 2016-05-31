@@ -370,8 +370,8 @@ namespace PDS.Witsml.Server.Data.Wells
             var result = DevKit.Query<WellList, Well>(query, optionsIn: OptionsIn.ReturnElements.All);
             Assert.IsNotNull(result);
 
-            Assert.IsFalse(result.Any(x => x.CommonData.PrivateGroupOnly ?? false));
-            Assert.IsFalse(result.Any(x => x.Uid.Equals(uidWell)));
+            Assert.IsFalse(result.Any(x => x.CommonData?.PrivateGroupOnly ?? false));
+            Assert.IsFalse(result.Any(x => uidWell.Equals(x.Uid)));
 
         }
 
@@ -395,8 +395,8 @@ namespace PDS.Witsml.Server.Data.Wells
             var result = DevKit.Query<WellList, Well>(query, optionsIn: OptionsIn.ReturnElements.All);
             Assert.IsNotNull(result);
 
-            Assert.IsFalse(result.Any(x => x.CommonData.PrivateGroupOnly ?? false));
-            Assert.IsTrue(result.Any(x => x.Uid.Equals(uidWell)));
+            Assert.IsFalse(result.Any(x => x.CommonData?.PrivateGroupOnly ?? false));
+            Assert.IsTrue(result.Any(x => uidWell.Equals(x.Uid)));
         }
 
         [TestMethod]
@@ -418,8 +418,8 @@ namespace PDS.Witsml.Server.Data.Wells
             var result = DevKit.Query<WellList, Well>(query, optionsIn: OptionsIn.ReturnElements.All);
             Assert.IsNotNull(result);
 
-            Assert.IsFalse(result.Any(x => x.CommonData.PrivateGroupOnly ?? false));
-            Assert.IsTrue(result.Any(x => x.Uid.Equals(uidWell)));
+            Assert.IsFalse(result.Any(x => x.CommonData?.PrivateGroupOnly ?? false));
+            Assert.IsTrue(result.Any(x => uidWell.Equals(x.Uid)));
         }
     }
 }
