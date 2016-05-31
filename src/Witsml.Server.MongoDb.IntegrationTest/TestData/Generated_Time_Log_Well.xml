@@ -1,0 +1,6 @@
+﻿<wells xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/terms/" version="1.4.1.1" xmlns="http://www.witsml.org/schemas/1series">
+  <well uid="804415d0-b5e7-4389-a3c6-cdb790f5485f">
+    <name>Test Well 1.4.1.1</name>
+    <timeZone>-06:00</timeZone>
+  </well>
+</wells>

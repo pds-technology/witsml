@@ -84,19 +84,19 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="PDS.Framework, Version=2016.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PDS.Framework.2016.1.20160530.1\lib\net46\PDS.Framework.dll</HintPath>
+      <HintPath>..\packages\PDS.Framework.2016.1.20160531.2\lib\net46\PDS.Framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="PDS.Framework.Web, Version=2016.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PDS.Framework.Web.2016.1.20160530.1\lib\net46\PDS.Framework.Web.dll</HintPath>
+      <HintPath>..\packages\PDS.Framework.Web.2016.1.20160531.2\lib\net46\PDS.Framework.Web.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="PDS.Witsml, Version=2016.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PDS.Witsml.2016.1.20160530.1-BUILD55\lib\net46\PDS.Witsml.dll</HintPath>
+      <HintPath>..\packages\PDS.Witsml.2016.1.20160531.2-BUILD55\lib\net46\PDS.Witsml.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="PDS.Witsml.Server, Version=2016.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PDS.Witsml.Server.2016.1.20160530.1-BUILD55\lib\net46\PDS.Witsml.Server.dll</HintPath>
+      <HintPath>..\packages\PDS.Witsml.Server.2016.1.20160531.2-BUILD55\lib\net46\PDS.Witsml.Server.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="SuperSocket.Common, Version=1.6.0.4, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">

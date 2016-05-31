@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<wellbores xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dc="http://purl.org/dc/terms/" xmlns:gml="http://www.opengis.net/gml/3.2" version="1.4.1.1" xmlns="http://www.witsml.org/schemas/1series">
+  <wellbore uidWell="490251090200" uid="62-TpX-11">
+    <nameWell>62-TpX-11</nameWell>
+    <name>62-TpX-11</name>
+  </wellbore>
+</wellbores>
