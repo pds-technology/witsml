@@ -20,6 +20,8 @@ using System.IO;
 using log4net.Config;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+#if !DEBUG
+
 namespace PDS.Witsml.Server
 {
     [TestClass]
@@ -32,3 +34,5 @@ namespace PDS.Witsml.Server
         }
     }
 }
+
+#endif

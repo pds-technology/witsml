@@ -100,6 +100,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AssemblyInitializer.cs" />
     <Compile Include="Configuration\CapServer131ProviderTests.cs" />
     <Compile Include="Configuration\WitsmlValidator131Tests.cs" />
     <Compile Include="Configuration\CapServer141ProviderTests.cs" />
