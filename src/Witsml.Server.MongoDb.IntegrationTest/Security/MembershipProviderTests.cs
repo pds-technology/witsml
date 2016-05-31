@@ -21,6 +21,7 @@ using System.Collections.Specialized;
 using System.Configuration;
 using System.Web.Security;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Witsml.Data;
 
 namespace PDS.Witsml.Server.Security
 {
@@ -75,32 +76,37 @@ namespace PDS.Witsml.Server.Security
         public void MongoDbMembershipProvider_CreateUser_creates_user_successfully()
         {
             MembershipCreateStatus status;
-
             var password = Membership.GeneratePassword(8, 2);
+
             var info = Tuple.Create("pds.user", password, "bobby.diaz@pds.nl");
 
-            var user = Provider.CreateUser(
-                username: info.Item1,
-                password: info.Item2,
-                email: info.Item3,
-                passwordQuestion: null,
-                passwordAnswer: null,
-                isApproved: true,
-                providerUserKey: null,
-                status: out status);
-
-            Assert.IsNotNull(user);
-            Assert.AreEqual(MembershipCreateStatus.Success, status);
-
             var saved = Provider.GetUser(info.Item1, false);
-            Assert.IsNotNull(saved);
 
-            var result = Provider.ValidateUser(info.Item1, info.Item2);
-            Assert.IsTrue(result);
+            if (saved == null)
+            {
+                var user = Provider.CreateUser(
+                    username: info.Item1,
+                    password: info.Item2,
+                    email: info.Item3,
+                    passwordQuestion: null,
+                    passwordAnswer: null,
+                    isApproved: true,
+                    providerUserKey: null,
+                    status: out status);
 
-            Console.WriteLine("email:  {0}", info.Item3);
-            Console.WriteLine("username:  {0}", info.Item1);
-            Console.WriteLine("password:  {0}", info.Item2);
+                Assert.IsNotNull(user);
+                Assert.AreEqual(MembershipCreateStatus.Success, status);
+
+                saved = Provider.GetUser(info.Item1, false);
+                Assert.IsNotNull(saved);
+
+                var result = Provider.ValidateUser(info.Item1, info.Item2);
+                Assert.IsTrue(result);
+
+                Console.WriteLine("email:  {0}", info.Item3);
+                Console.WriteLine("username:  {0}", info.Item1);
+                Console.WriteLine("password:  {0}", info.Item2);
+            }
         }
 
         [TestMethod]
