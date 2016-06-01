@@ -32,6 +32,10 @@ using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Providers.ChannelStreaming
 {
+    /// <summary>
+    /// Consumer class for channel streaming
+    /// </summary>
+    /// <seealso cref="Energistics.Protocol.ChannelStreaming.ChannelStreamingConsumerHandler" />
     [Export(typeof(IChannelStreamingConsumer))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class ChannelStreamingConsumer : ChannelStreamingConsumerHandler
@@ -42,6 +46,10 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         private readonly IDictionary<EtpUri, ChannelDataBlock> _dataBlocks;
         private readonly IDictionary<long, EtpUri> _channelParentUris;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ChannelStreamingConsumer"/> class.
+        /// </summary>
+        /// <param name="container">The container.</param>
         [ImportingConstructor]
         public ChannelStreamingConsumer(IContainer container)
         {
@@ -50,6 +58,10 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             _channelParentUris = new Dictionary<long, EtpUri>();
         }
 
+        /// <summary>
+        /// Called when [session opened].
+        /// </summary>
+        /// <param name="supportedProtocols">The supported protocols.</param>
         public override void OnSessionOpened(IList<SupportedProtocol> supportedProtocols)
         {
             // Is the client requesting the ChannelStreaming consumer role
@@ -64,6 +76,11 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             }
         }
 
+        /// <summary>
+        /// Handles the channel metadata.
+        /// </summary>
+        /// <param name="header">The header.</param>
+        /// <param name="channelMetadata">The channel metadata.</param>
         protected override void HandleChannelMetadata(MessageHeader header, ChannelMetadata channelMetadata)
         {
             // Base implementation caches ChannelMetadataRecord items sent from the producer
@@ -79,6 +96,11 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             ChannelStreamingStart(infos);
         }
 
+        /// <summary>
+        /// Handles the channel data.
+        /// </summary>
+        /// <param name="header">The header.</param>
+        /// <param name="channelData">The channel data.</param>
         protected override void HandleChannelData(MessageHeader header, ChannelData channelData)
         {
             base.HandleChannelData(header, channelData);

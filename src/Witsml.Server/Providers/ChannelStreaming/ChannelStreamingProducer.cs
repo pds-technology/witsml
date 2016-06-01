@@ -34,6 +34,11 @@ using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Providers.ChannelStreaming
 {
+
+    /// <summary>
+    /// Producer class for channel streaming
+    /// </summary>
+    /// <seealso cref="Energistics.Protocol.ChannelStreaming.ChannelStreamingProducerHandler" />
     [Export(typeof(IChannelStreamingProducer))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class ChannelStreamingProducer : ChannelStreamingProducerHandler
@@ -42,6 +47,10 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         private readonly IContainer _container;
         private CancellationTokenSource _tokenSource;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ChannelStreamingProducer"/> class.
+        /// </summary>
+        /// <param name="container">The container.</param>
         [ImportingConstructor]
         public ChannelStreamingProducer(IContainer container)
         {
@@ -50,12 +59,34 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             Channels = new Dictionary<EtpUri, List<ChannelMetadataRecord>>();
         }
 
+        /// <summary>
+        /// Gets the request.
+        /// </summary>
+        /// <value>
+        /// The request.
+        /// </value>
         public MessageHeader Request { get; private set; }
 
+        /// <summary>
+        /// Gets the uris.
+        /// </summary>
+        /// <value>
+        /// The uris.
+        /// </value>
         public List<EtpUri> Uris { get; private set; }
 
+        /// <summary>
+        /// Gets the channels.
+        /// </summary>
+        /// <value>
+        /// The channels.
+        /// </value>
         public Dictionary<EtpUri, List<ChannelMetadataRecord>> Channels { get; private set; }
 
+        /// <summary>
+        /// Handles the channel describe.
+        /// </summary>
+        /// <param name="args">The <see cref="ProtocolEventArgs{T}"/> instance containing the event data.</param>
         protected override void HandleChannelDescribe(ProtocolEventArgs<ChannelDescribe, IList<ChannelMetadataRecord>> args)
         {
             Channels.Clear();
@@ -77,6 +108,11 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             }
         }
 
+        /// <summary>
+        /// Handles the channel streaming start.
+        /// </summary>
+        /// <param name="header">The header.</param>
+        /// <param name="channelStreamingStart">The channel streaming start.</param>
         protected override void HandleChannelStreamingStart(MessageHeader header, ChannelStreamingStart channelStreamingStart)
         {
             // no action needed if streaming already started
@@ -112,6 +148,11 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             token);
         }
 
+        /// <summary>
+        /// Handles the channel range request.
+        /// </summary>
+        /// <param name="header">The header.</param>
+        /// <param name="channelRangeRequest">The channel range request.</param>
         protected override void HandleChannelRangeRequest(MessageHeader header, ChannelRangeRequest channelRangeRequest)
         {
             // no action needed if streaming already started
@@ -401,6 +442,11 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             }
         }
 
+        /// <summary>
+        /// Handles the channel streaming stop.
+        /// </summary>
+        /// <param name="header">The header.</param>
+        /// <param name="channelStreamingStop">The channel streaming stop.</param>
         protected override void HandleChannelStreamingStop(MessageHeader header, ChannelStreamingStop channelStreamingStop)
         {
             // no action needed if streaming not in progress
