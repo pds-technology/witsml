@@ -213,20 +213,48 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="TestData\49025109020000_13345_Log.xml" />
-    <Content Include="TestData\490251090200_Well.xml" />
-    <Content Include="TestData\490251090200_Wellbore.xml" />
-    <Content Include="TestData\49025109170000_13344_Log.xml" />
-    <Content Include="TestData\490251091700_Well.xml" />
-    <Content Include="TestData\490251091700_Wellbore.xml" />
-    <Content Include="TestData\49025230310000_283712_Log.xml" />
-    <Content Include="TestData\490252303100_Well.xml" />
-    <Content Include="TestData\490252303100_Wellbore.xml" />
-    <Content Include="TestData\Generated_Time_Log_Log.xml" />
-    <Content Include="TestData\Generated_Time_Log_Well.xml" />
-    <Content Include="TestData\Generated_Time_Log_Wellbore.xml" />
-    <Content Include="TestData\LargeLog.xml" />
-    <Content Include="TestData\LargeLog_append.xml" />
+    <Content Include="TestData\49025109020000_13345_Log.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\490251090200_Well.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\490251090200_Wellbore.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\49025109170000_13344_Log.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\490251091700_Well.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\490251091700_Wellbore.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\49025230310000_283712_Log.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\490252303100_Well.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\490252303100_Wellbore.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\Generated_Time_Log_Log.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\Generated_Time_Log_Well.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\Generated_Time_Log_Wellbore.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\LargeLog.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\LargeLog_append.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="app.config" />
     <Content Include="log4net.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
