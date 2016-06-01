@@ -1031,12 +1031,12 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Clear();
             logData.MnemonicList = "MD,AAA,BBB,CCC,DDD";
             logData.UnitList = "ft,m/h,gAPI,gAPI,s";
-            logData.Data.Add("1700.0, 17.1, 17.2,, 17.4");
-            logData.Data.Add("1800.0, 18.1, 18.2,, 18.4");
-            logData.Data.Add("1900.0, 19.1, 19.2,, 19.4");
-            logData.Data.Add("2000.0, 20.1, 20.2,, 20.4");
-            logData.Data.Add("2100.0, 21.1, 21.2,, 21.4");
-            logData.Data.Add("2200.0, 22.1, 22.2,, 22.4");
+            logData.Data.Add("1700.0, 17.1, 17.2, null, 17.4");
+            logData.Data.Add("1800.0, 18.1, 18.2, null, 18.4");
+            logData.Data.Add("1900.0, 19.1, 19.2, null, 19.4");
+            logData.Data.Add("2000.0, 20.1, 20.2, null, 20.4");
+            logData.Data.Add("2100.0, 21.1, 21.2, null, 21.4");
+            logData.Data.Add("2200.0, 22.1, 22.2, null, 22.4");
             logData.Data.Add("2300.0, 23.1, 23.2, 23.3, 23.4");
 
             response = DevKit.Add<LogList, Log>(_log);
