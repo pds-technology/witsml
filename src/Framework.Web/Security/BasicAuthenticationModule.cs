@@ -33,7 +33,7 @@ namespace PDS.Framework.Web.Security
         private static readonly ILog _log = LogManager.GetLogger(typeof(BasicAuthenticationModule));
 
         /// <summary>
-        /// Verifies the basic authentication.
+        /// Verifies the Basic authentication token.
         /// </summary>
         /// <param name="parameter">The parameter.</param>
         protected override void VerifyBasicAuthentication(string parameter)

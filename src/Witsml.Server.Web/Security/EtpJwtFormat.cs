@@ -24,12 +24,22 @@ using Thinktecture.IdentityModel.Tokens;
 
 namespace PDS.Witsml.Server.Security
 {
+    /// <summary>
+    /// Defines the JSON Web Token (JWT) format used for ETP.
+    /// </summary>
+    /// <seealso cref="Microsoft.Owin.Security.ISecureDataFormat{AuthenticationTicket}" />
     public class EtpJwtFormat : ISecureDataFormat<AuthenticationTicket>
     {
         private readonly string _issuer;
         private readonly string _audience;
         private readonly string _secret;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EtpJwtFormat"/> class.
+        /// </summary>
+        /// <param name="issuer">The issuer.</param>
+        /// <param name="audience">The audience.</param>
+        /// <param name="secret">The secret.</param>
         public EtpJwtFormat(string issuer, string audience, string secret)
         {
             _issuer = issuer;
@@ -37,6 +47,12 @@ namespace PDS.Witsml.Server.Security
             _secret = secret;
         }
 
+        /// <summary>
+        /// Encrypts the authentication data in JSON Web Token format.
+        /// </summary>
+        /// <param name="data">The token data.</param>
+        /// <returns>The formatted JSON Web Token.</returns>
+        /// <exception cref="System.ArgumentNullException"></exception>
         public string Protect(AuthenticationTicket data)
         {
             if (data == null)
@@ -56,6 +72,12 @@ namespace PDS.Witsml.Server.Security
             return handler.WriteToken(token);
         }
 
+        /// <summary>
+        /// Decrypts the specified authentication token.
+        /// </summary>
+        /// <param name="protectedText">The protected token.</param>
+        /// <returns>An <see cref="AuthenticationTicket"/> containing authentication data.</returns>
+        /// <exception cref="System.NotImplementedException"></exception>
         public AuthenticationTicket Unprotect(string protectedText)
         {
             throw new NotImplementedException();

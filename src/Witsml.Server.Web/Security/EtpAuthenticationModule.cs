@@ -26,6 +26,10 @@ using Thinktecture.IdentityModel.Tokens;
 
 namespace PDS.Witsml.Server.Security
 {
+    /// <summary>
+    /// Provides Basic and JSON Web Token (JWT) authentication for ETP.
+    /// </summary>
+    /// <seealso cref="PDS.Framework.Web.Security.BasicAuthenticationModule" />
     public class EtpAuthenticationModule : BasicAuthenticationModule
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(BasicAuthenticationModule));
@@ -33,6 +37,9 @@ namespace PDS.Witsml.Server.Security
         private static readonly string _audience;
         private static readonly string _secret;
 
+        /// <summary>
+        /// Initializes the <see cref="EtpAuthenticationModule"/> class.
+        /// </summary>
         static EtpAuthenticationModule()
         {
             _issuer = ConfigurationManager.AppSettings["jwt.issuer"];
@@ -40,15 +47,21 @@ namespace PDS.Witsml.Server.Security
             _secret = ConfigurationManager.AppSettings["jwt.secret"];
         }
 
+        /// <summary>
+        /// Verifies the Bearer authentication token.
+        /// </summary>
+        /// <param name="parameter">The parameter.</param>
         protected override void VerifyBearerAuthentication(string parameter)
         {
             ValidateJsonWebToken(parameter);
         }
 
+        /// <summary>
+        /// Validates the JSON Web Token (JWT).
+        /// </summary>
+        /// <param name="encryptedToken">The encrypted token.</param>
         private void ValidateJsonWebToken(string encryptedToken)
         {
-            SecurityToken validatedToken;
-
             _log.Debug("Validating JSON web token");
 
             try
@@ -62,6 +75,8 @@ namespace PDS.Witsml.Server.Security
                     ValidIssuer = _issuer,
                     IssuerSigningKey = signingCredentials.SigningKey
                 };
+
+                SecurityToken validatedToken;
 
                 var handler = new JwtSecurityTokenHandler();
                 var principal = handler.ValidateToken(encryptedToken, parameters, out validatedToken);

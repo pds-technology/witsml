@@ -30,7 +30,7 @@ using PDS.Witsml.Server.Security;
 namespace PDS.Witsml.Server.Configuration
 {
     /// <summary>
-    /// Configures JSON Web Token authorization.
+    /// Configures JSON Web Token (JWT) authorization.
     /// </summary>
     public class SecurityConfig
     {

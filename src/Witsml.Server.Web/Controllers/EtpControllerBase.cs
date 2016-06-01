@@ -34,7 +34,6 @@ using Energistics.Protocol.Core;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data;
-using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Controllers
 {
@@ -44,8 +43,8 @@ namespace PDS.Witsml.Server.Controllers
     /// <seealso cref="System.Web.Http.ApiController" />
     public abstract class EtpControllerBase : ApiController
     {
-        private static readonly string DefaultServerName = WitsmlSettings.DefaultServerName;
-        private static readonly string DefaultServerVersion = WitsmlSettings.DefaultServerVersion;
+        private static readonly string _defaultServerName = WitsmlSettings.DefaultServerName;
+        private static readonly string _defaultServerVersion = WitsmlSettings.DefaultServerVersion;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EtpControllerBase"/> class.
@@ -57,11 +56,23 @@ namespace PDS.Witsml.Server.Controllers
             DataAdapters = new List<IEtpDataProvider>();
         }
 
+        /// <summary>
+        /// Gets the composition container.
+        /// </summary>
+        /// <value>The composition container.</value>
         public IContainer Container { get; }
 
+        /// <summary>
+        /// Gets or sets the list of data adapters.
+        /// </summary>
+        /// <value>The list of data adapters.</value>
         [ImportMany]
         public List<IEtpDataProvider> DataAdapters { get; set; }
 
+        /// <summary>
+        /// Upgrades the HTTP request to a Web Socket request.
+        /// </summary>
+        /// <returns>An <see cref="HttpResponseMessage"/> with the appropriate status code.</returns>
         protected HttpResponseMessage UpgradeRequest()
         {
             var context = HttpContext.Current;
@@ -81,6 +92,10 @@ namespace PDS.Witsml.Server.Controllers
                 new { error = "Invalid web socket request" });
         }
 
+        /// <summary>
+        /// Gets the server's capabilities.
+        /// </summary>
+        /// <returns>A <see cref="ServerCapabilities"/> object.</returns>
         protected IHttpActionResult ServerCapabilities()
         {
             var handler = CreateEtpServerHandler(null, null);
@@ -105,6 +120,10 @@ namespace PDS.Witsml.Server.Controllers
             return Ok(capServer);
         }
 
+        /// <summary>
+        /// Get the list of client Web Socket connections.
+        /// </summary>
+        /// <returns>An <see cref="IHttpActionResult"/> containing the list of clients.</returns>
         protected IHttpActionResult ClientList()
         {
             var clients = EtpServerHandler.Clients.Select(c =>
@@ -123,13 +142,17 @@ namespace PDS.Witsml.Server.Controllers
             return Ok(clients);
         }
 
+        /// <summary>
+        /// Registers the protocol handlers supported by the specified <see cref="EtpServerHandler"/>.
+        /// </summary>
+        /// <param name="handler">The handler.</param>
         protected virtual void RegisterProtocolHandlers(EtpServerHandler handler)
         {
         }
 
         private EtpServerHandler CreateEtpServerHandler(WebSocket socket, IDictionary<string, string> headers)
         {
-            var handler = new EtpServerHandler(socket, DefaultServerName, DefaultServerVersion, headers);
+            var handler = new EtpServerHandler(socket, _defaultServerName, _defaultServerVersion, headers);
             RegisterProtocolHandlers(handler);
             return handler;
         }
