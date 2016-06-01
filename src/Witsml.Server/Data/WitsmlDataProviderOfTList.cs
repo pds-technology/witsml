@@ -137,10 +137,10 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Creates an <see cref="TList"/> instance containing the specified data objects.
+        /// Creates the collection.
         /// </summary>
         /// <param name="dataObjects">The data objects.</param>
-        /// <returns>The <see cref="TList"/> instance.</returns>
+        /// <returns></returns>
         protected abstract TList CreateCollection(List<TObject> dataObjects);
     }
 }
