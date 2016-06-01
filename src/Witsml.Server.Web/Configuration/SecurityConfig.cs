@@ -29,8 +29,15 @@ using PDS.Witsml.Server.Security;
 
 namespace PDS.Witsml.Server.Configuration
 {
+    /// <summary>
+    /// Configures JSON Web Token authorization.
+    /// </summary>
     public class SecurityConfig
     {
+        /// <summary>
+        /// Configures security for the specified application.
+        /// </summary>
+        /// <param name="app">The application.</param>
         public void Configuration(IAppBuilder app)
         {
             var config = GlobalConfiguration.Configuration;

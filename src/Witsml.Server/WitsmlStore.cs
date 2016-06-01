@@ -23,10 +23,10 @@ using System.Linq;
 using System.ServiceModel.Web;
 using log4net;
 using PDS.Framework;
-using PDS.Witsml.Properties;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data;
 using PDS.Witsml.Server.Logging;
+using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server
 {

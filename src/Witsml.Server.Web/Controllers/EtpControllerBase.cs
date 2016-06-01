@@ -47,6 +47,10 @@ namespace PDS.Witsml.Server.Controllers
         private static readonly string DefaultServerName = WitsmlSettings.DefaultServerName;
         private static readonly string DefaultServerVersion = WitsmlSettings.DefaultServerVersion;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EtpControllerBase"/> class.
+        /// </summary>
+        /// <param name="container">The container.</param>
         protected EtpControllerBase(IContainer container)
         {
             Container = container;

@@ -24,8 +24,15 @@ using PDS.Framework.Web.Services;
 
 namespace PDS.Witsml.Server.Configuration
 {
+    /// <summary>
+    /// Configures Web API application settings.
+    /// </summary>
     public static class WebApiConfig
     {
+        /// <summary>
+        /// Registers configuration settings for the application.
+        /// </summary>
+        /// <param name="config">The configuration.</param>
         public static void Register(HttpConfiguration config)
         {
             // Web API configuration and services
