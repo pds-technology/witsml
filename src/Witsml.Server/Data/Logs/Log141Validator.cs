@@ -57,7 +57,12 @@ namespace PDS.Witsml.Server.Data.Logs
             _wellDataAdapter = wellDataAdapter;
         }
 
-
+        /// <summary>
+        /// Gets or sets the Witsml configuration providers.
+        /// </summary>
+        /// <value>
+        /// The providers.
+        /// </value>
         [ImportMany]
         public IEnumerable<IWitsml141Configuration> Providers { get; set; }
 

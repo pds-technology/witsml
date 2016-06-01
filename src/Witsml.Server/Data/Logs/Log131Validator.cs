@@ -21,10 +21,20 @@ using Energistics.DataAccess.WITSML131;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
+    /// <summary>
+    /// Provides validation for <see cref="Log" /> data objects.
+    /// </summary>
+    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Log}" />
     [Export(typeof(IDataObjectValidator<Log>))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class Log131Validator : DataObjectValidator<Log>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Log131Validator"/> class.
+        /// </summary>
+        /// <param name="logDataAdapter">The log data adapter.</param>
+        /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
+        /// <param name="wellDataAdapter">The well data adapter.</param>
         [ImportingConstructor]
         public Log131Validator(IWitsmlDataAdapter<Log> logDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter)
         {        

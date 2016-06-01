@@ -32,6 +32,9 @@ namespace PDS.Witsml.Server.Data
     /// <seealso cref="PDS.Witsml.Server.Data.IWitsmlDataAdapter{T}" />
     public abstract class WitsmlDataAdapter<T> : IWitsmlDataAdapter<T>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WitsmlDataAdapter{T}"/> class.
+        /// </summary>
         protected WitsmlDataAdapter()
         {
             Logger = LogManager.GetLogger(GetType());

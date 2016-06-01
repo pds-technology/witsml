@@ -21,6 +21,9 @@ using PDS.Witsml.Server.Data;
 
 namespace PDS.Witsml.Server.Configuration
 {
+    /// <summary>
+    /// Defines static helper methods for <see cref="ResponseContext"/>
+    /// </summary>
     public static class ResponseExtensions
     {
         /// <summary>
