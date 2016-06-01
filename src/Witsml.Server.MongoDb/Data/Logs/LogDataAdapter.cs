@@ -30,7 +30,6 @@ using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Server.Data.Transactions;
 using PDS.Witsml.Server.Models;
-using PDS.Witsml.Server.Properties;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -43,7 +42,7 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <seealso cref="PDS.Witsml.Server.Data.Channels.IChannelDataProvider" />
     public abstract class LogDataAdapter<T, TChild> : MongoDbDataAdapter<T>, IChannelDataProvider where T : IWellboreObject where TChild : IUniqueId
     {
-        private readonly bool _streamIndexValuePairs = Settings.Default.StreamIndexValuePairs;
+        private readonly bool _streamIndexValuePairs = WitsmlSettings.StreamIndexValuePairs;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LogDataAdapter{T, TChild}"/> class.
