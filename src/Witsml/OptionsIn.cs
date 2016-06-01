@@ -34,12 +34,30 @@ namespace PDS.Witsml
         /// <seealso cref="PDS.Witsml.OptionsIn" />
         public class DataVersion : OptionsIn
         {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="DataVersion"/> class.
+            /// </summary>
+            /// <param name="value">The value.</param>
             public DataVersion(string value) : base(Keyword, value) { }
 
+            /// <summary>
+            /// The keyword for a DataVersion OptionsIn
+            /// </summary>
             public const string Keyword = "dataVersion";
 
+            /// <summary>
+            /// The DataVersion for version 1.3.1.1
+            /// </summary>
             public static readonly DataVersion Version131 = new DataVersion("1.3.1.1");
+
+            /// <summary>
+            /// The DataVersion for version 1.4.1.1
+            /// </summary>
             public static readonly DataVersion Version141 = new DataVersion("1.4.1.1");
+
+            /// <summary>
+            /// The DataVersion for version 2.0
+            /// </summary>
             public static readonly DataVersion Version200 = new DataVersion("2.0");
         }
 
@@ -49,16 +67,50 @@ namespace PDS.Witsml
         /// <seealso cref="PDS.Witsml.OptionsIn" />
         public class ReturnElements : OptionsIn
         {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ReturnElements"/> class.
+            /// </summary>
+            /// <param name="value">The value.</param>
             public ReturnElements(string value) : base(Keyword, value) { }
 
+            /// <summary>
+            /// The keyword for ReturnElements OptionsIn
+            /// </summary>
             public const string Keyword = "returnElements";
 
+            /// <summary>
+            /// ReturnElements for all object data
+            /// </summary>
             public static readonly ReturnElements All = new ReturnElements("all");
+
+            /// <summary>
+            /// ReturnElements for Id and Name object data
+            /// </summary>
             public static readonly ReturnElements IdOnly = new ReturnElements("id-only");
+
+            /// <summary>
+            /// ReturnElements for all header data (applies only to growing data objects)
+            /// </summary>
             public static readonly ReturnElements HeaderOnly = new ReturnElements("header-only");
+
+            /// <summary>
+            /// ReturnElements for all growing object data (applies only to growing data objects)
+            /// </summary>
             public static readonly ReturnElements DataOnly = new ReturnElements("data-only");
+
+            /// <summary>
+            /// ReturnElements specialization of "data-only" for trajectories
+            /// </summary>
             public static readonly ReturnElements StationLocationOnly = new ReturnElements("station-location-only");
+
+            /// <summary>
+            /// ReturnElements for the most recent changes and applies only to ChangeLogs
+            /// </summary>
             public static readonly ReturnElements LatestChangeOnly = new ReturnElements("latest-change-only");
+
+            /// <summary>
+            /// ReturnElements to return only those data elements specified in the query.
+            /// </summary>
             public static readonly ReturnElements Requested = new ReturnElements("requested");
 
             /// <summary>
@@ -83,10 +135,22 @@ namespace PDS.Witsml
         /// <seealso cref="PDS.Witsml.OptionsIn" />
         public class MaxReturnNodes : OptionsIn
         {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="MaxReturnNodes"/> class.
+            /// </summary>
+            /// <param name="value">The value.</param>
             public MaxReturnNodes(int value) : base(Keyword, value.ToString()) { }
 
+            /// <summary>
+            /// The keyword for MaxReturnNodes OptionsIn
+            /// </summary>
             public const string Keyword = "maxReturnNodes";
 
+            /// <summary>
+            /// Creates a MaxReturnNodes object for a specified value.
+            /// </summary>
+            /// <param name="value">The MaxReturnNodes value.</param>
+            /// <returns></returns>
             public static MaxReturnNodes Eq(int value)
             {
                 return new MaxReturnNodes(value);
@@ -99,11 +163,25 @@ namespace PDS.Witsml
         /// <seealso cref="PDS.Witsml.OptionsIn" />
         public class CompressionMethod : OptionsIn
         {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="CompressionMethod"/> class.
+            /// </summary>
+            /// <param name="value">The value.</param>
             public CompressionMethod(string value) : base(Keyword, value) { }
 
+            /// <summary>
+            /// The keyword for CompressionMethod OptioinsIn
+            /// </summary>
             public const string Keyword = "compressionMethod";
 
+            /// <summary>
+            /// The CompressionMethod for no compression
+            /// </summary>
             public static readonly CompressionMethod None = new CompressionMethod("None");
+
+            /// <summary>
+            /// The CompressionMethod for gzip compression
+            /// </summary>
             public static readonly CompressionMethod Gzip = new CompressionMethod("gzip");
         }
 
@@ -113,11 +191,25 @@ namespace PDS.Witsml
         /// <seealso cref="PDS.Witsml.OptionsIn" />
         public class RequestObjectSelectionCapability : OptionsIn
         {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="RequestObjectSelectionCapability"/> class.
+            /// </summary>
+            /// <param name="value">The value.</param>
             public RequestObjectSelectionCapability(string value) : base(Keyword, value) { }
 
+            /// <summary>
+            /// The keyword for RequestObjectSelectionCapability OptionsIn.
+            /// </summary>
             public const string Keyword = "requestObjectSelectionCapability";
 
+            /// <summary>
+            /// The RequestObjectSelectionCapability OptionsIn to not request object selection capabilities
+            /// </summary>
             public static readonly RequestObjectSelectionCapability None = new RequestObjectSelectionCapability("none");
+
+            /// <summary>
+            /// The RequestObjectSelectionCapability OptionsIn to request object selection capabilities
+            /// </summary>
             public static readonly RequestObjectSelectionCapability True = new RequestObjectSelectionCapability("true");
 
             /// <summary>
@@ -137,11 +229,25 @@ namespace PDS.Witsml
         /// <seealso cref="PDS.Witsml.OptionsIn" />
         public class RequestPrivateGroupOnly : OptionsIn
         {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="RequestPrivateGroupOnly"/> class.
+            /// </summary>
+            /// <param name="value">The value.</param>
             public RequestPrivateGroupOnly(string value) : base(Keyword, value) { }
 
+            /// <summary>
+            /// The keyword for RequestPrivateGroupOnly OptionsIn
+            /// </summary>
             public const string Keyword = "requestPrivateGroupOnly";
 
+            /// <summary>
+            /// The option to NOT request private group data only 
+            /// </summary>
             public static readonly RequestPrivateGroupOnly False = new RequestPrivateGroupOnly("false");
+
+            /// <summary>
+            /// The option to request private group data only 
+            /// </summary>
             public static readonly RequestPrivateGroupOnly True = new RequestPrivateGroupOnly("true");
 
             /// <summary>
@@ -161,10 +267,22 @@ namespace PDS.Witsml
         /// <seealso cref="PDS.Witsml.OptionsIn" />
         public class RequestLatestValues : OptionsIn
         {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="RequestLatestValues"/> class.
+            /// </summary>
+            /// <param name="value">The value.</param>
             public RequestLatestValues(int value) : base(Keyword, value.ToString()) { }
 
+            /// <summary>
+            /// The keyword for RequestLatestValues OptionsIn
+            /// </summary>
             public const string Keyword = "requestLatestValues";
 
+            /// <summary>
+            /// Creates a RequestLatestValues object for the specified value.
+            /// </summary>
+            /// <param name="value">The value for RequestLatestValues.</param>
+            /// <returns></returns>
             public static RequestLatestValues Eq(int value)
             {
                 return new RequestLatestValues(value);
@@ -177,11 +295,25 @@ namespace PDS.Witsml
         /// <seealso cref="PDS.Witsml.OptionsIn" />
         public class CascadedDelete : OptionsIn
         {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="CascadedDelete"/> class.
+            /// </summary>
+            /// <param name="value">The value.</param>
             public CascadedDelete(string value) : base(Keyword, value) { }
 
+            /// <summary>
+            /// The keyword for CascadeDelete OptionsIn
+            /// </summary>
             public const string Keyword = "cascadedDelete";
 
+            /// <summary>
+            /// The option to turn off cascade delete
+            /// </summary>
             public static readonly CascadedDelete False = new CascadedDelete("false");
+
+            /// <summary>
+            /// The option to turn on cascade delete
+            /// </summary>
             public static readonly CascadedDelete True = new CascadedDelete("true");
 
             /// <summary>

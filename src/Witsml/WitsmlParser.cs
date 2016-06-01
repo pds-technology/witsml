@@ -161,6 +161,13 @@ namespace PDS.Witsml
             return context.Document.ToString();
         }
 
+        /// <summary>
+        /// Handles the NaN value during parse navigation by removing NaN values.
+        /// </summary>
+        /// <param name="xmlObject">The XML object.</param>
+        /// <param name="propertyType">Type of the property.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <param name="propertyValue">The property value.</param>
         protected override void HandleNaNValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
             if (Context.RemoveNaNElements)

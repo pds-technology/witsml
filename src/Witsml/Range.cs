@@ -26,6 +26,9 @@ namespace PDS.Witsml
     /// </summary>
     public static class Range
     {
+        /// <summary>
+        /// The empty range
+        /// </summary>
         public static readonly Range<double?> Empty = new Range<double?>(null, null);
 
         /// <summary>

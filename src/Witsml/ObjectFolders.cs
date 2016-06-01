@@ -23,13 +23,39 @@ namespace PDS.Witsml
     /// </summary>
     public static class ObjectFolders
     {
+        /// <summary>
+        /// An ObjectFolders identifier for Logs.
+        /// </summary>
         public const string Logs = "Logs";
+
+        /// <summary>
+        /// An ObjectFolders identifier for Time.
+        /// </summary>
         public const string Time = "Time";
+
+        /// <summary>
+        /// An ObjectFolders identifier for Depth.
+        /// </summary>
         public const string Depth = "Depth";
+
+        /// <summary>
+        /// An ObjectFolders identifier for Other.
+        /// </summary>
         public const string Other = "Other";
 
+        /// <summary>
+        /// An ObjectFolders identifier for MudLogs.
+        /// </summary>
         public const string MudLogs = "MudLogs";
+
+        /// <summary>
+        /// An ObjectFolders identifier for Rigs.
+        /// </summary>
         public const string Rigs = "Rigs";
+
+        /// <summary>
+        /// An ObjectFolders identifier for Trajectories.
+        /// </summary>
         public const string Trajectories = "Trajectories";
     }
 }

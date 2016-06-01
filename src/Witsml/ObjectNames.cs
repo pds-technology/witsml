@@ -27,19 +27,59 @@ namespace PDS.Witsml
         private static readonly string Version141 = OptionsIn.DataVersion.Version141.Value;
         private static readonly string Version200 = OptionsIn.DataVersion.Version200.Value;
 
+        /// <summary>
+        /// The ObjectName for 131 version wells.
+        /// </summary>
         public static readonly ObjectName Well131 = new ObjectName(ObjectTypes.Well, Version131);
+
+        /// <summary>
+        /// The ObjectName for 141 version wells.
+        /// </summary>
         public static readonly ObjectName Well141 = new ObjectName(ObjectTypes.Well, Version141);
+
+        /// <summary>
+        /// The ObjectName for 2.0 version wells.
+        /// </summary>
         public static readonly ObjectName Well200 = new ObjectName(ObjectTypes.Well, Version200);
 
+        /// <summary>
+        /// The ObjectName for 131 version wellbores.
+        /// </summary>
         public static readonly ObjectName Wellbore131 = new ObjectName(ObjectTypes.Wellbore, Version131);
+
+        /// <summary>
+        /// The ObjectName for 141 version wellbores.
+        /// </summary>
         public static readonly ObjectName Wellbore141 = new ObjectName(ObjectTypes.Wellbore, Version141);
+
+        /// <summary>
+        /// The ObjectName for 2.0 version wellbores.
+        /// </summary>
         public static readonly ObjectName Wellbore200 = new ObjectName(ObjectTypes.Wellbore, Version200);
 
+        /// <summary>
+        /// The ObjectName for 131 version logs.
+        /// </summary>
         public static readonly ObjectName Log131 = new ObjectName(ObjectTypes.Log, Version131);
+
+        /// <summary>
+        /// The ObjectName for 141 version logs.
+        /// </summary>
         public static readonly ObjectName Log141 = new ObjectName(ObjectTypes.Log, Version141);
+
+        /// <summary>
+        /// The ObjectName for 2.0 version logs.
+        /// </summary>
         public static readonly ObjectName Log200 = new ObjectName(ObjectTypes.Log, Version200);
 
+        /// <summary>
+        /// The ObjectName for 2.0 version channel sets.
+        /// </summary>
         public static readonly ObjectName ChannelSet200 = new ObjectName(ObjectTypes.ChannelSet, Version200);
+
+        /// <summary>
+        /// The ObjectName for 2.0 version channels.
+        /// </summary>
         public static readonly ObjectName Channel200 = new ObjectName(ObjectTypes.Channel, Version200);
     }
 }

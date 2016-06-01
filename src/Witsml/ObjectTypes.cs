@@ -31,25 +31,95 @@ namespace PDS.Witsml
     /// </summary>
     public static class ObjectTypes
     {
+        /// <summary>
+        /// The ObjectType identifier for an Id.
+        /// </summary>
         public const string Id = "Id";
+
+        /// <summary>
+        /// The ObjectType identifier for a Uid.
+        /// </summary>
         public const string Uid = "Uid";
+
+        /// <summary>
+        /// The ObjectType identifier for a Uuid.
+        /// </summary>
         public const string Uuid = "Uuid";
+
+        /// <summary>
+        /// The ObjectType identifier for a Name.
+        /// </summary>
         public const string NameProperty = "Name";
 
+
+        /// <summary>
+        /// The ObjectType identifier for Unknown.
+        /// </summary>
         public const string Unknown = "unknown";
+
+        /// <summary>
+        /// The ObjectType identifier for a CapClient.
+        /// </summary>
         public const string CapClient = "capClient";
+
+        /// <summary>
+        /// The ObjectType identifier for a CanServer.
+        /// </summary>
         public const string CapServer = "capServer";
 
+        /// <summary>
+        /// The ObjectType identifier for a Well.
+        /// </summary>
         public const string Well = "well";
+
+        /// <summary>
+        /// The ObjectType identifier for a Wellbore.
+        /// </summary>
         public const string Wellbore = "wellbore";
+
+        /// <summary>
+        /// The ObjectType identifier for a Log.
+        /// </summary>
         public const string Log = "log";
+
+        /// <summary>
+        /// The ObjectType identifier for a LogCurveInfo.
+        /// </summary>
         public const string LogCurveInfo = "logCurveInfo";
+
+        /// <summary>
+        /// The ObjectType identifier for a Rig.
+        /// </summary>
         public const string Rig = "rig";
+
+        /// <summary>
+        /// The ObjectType identifier for a Trajectory.
+        /// </summary>
         public const string Trajectory = "trajectory";
+
+        /// <summary>
+        /// The ObjectType identifier for a MudLog.
+        /// </summary>
         public const string MudLog = "mudLog";
+
+        /// <summary>
+        /// The ObjectType identifier for a ChangeLog.
+        /// </summary>
         public const string ChangeLog = "changeLog";
+
+        /// <summary>
+        /// The ObjectType identifier for a ChannelSet.
+        /// </summary>
         public const string ChannelSet = "channelSet";
+
+        /// <summary>
+        /// The ObjectType identifier for a Channel.
+        /// </summary>
         public const string Channel = "channel";
+
+        /// <summary>
+        /// The ObjectType identifier for a ChannelIndex.
+        /// </summary>
         public const string ChannelIndex = "channelIndex";      
 
         private static readonly string[] GrowingObjects = new [] { Log, MudLog, Trajectory };

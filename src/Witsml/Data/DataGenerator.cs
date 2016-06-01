@@ -26,6 +26,9 @@ namespace PDS.Witsml.Data
     /// </summary>
     public class DataGenerator
     {
+        /// <summary>
+        /// The format applied to timestamps
+        /// </summary>
         public readonly string TimestampFormat = "yyMMdd-HHmmss-fff";
 
         /// <summary>
