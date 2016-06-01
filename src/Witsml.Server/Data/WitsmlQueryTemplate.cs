@@ -30,6 +30,10 @@ using Witsml141 = Energistics.DataAccess.WITSML141;
 
 namespace PDS.Witsml.Server.Data
 {
+    /// <summary>
+    /// Provides helper methods to create template for Witsml object
+    /// </summary>
+    /// <typeparam name="T">The type of the object</typeparam>
     public class WitsmlQueryTemplate<T>
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(WitsmlQueryTemplate<T>));
@@ -49,10 +53,17 @@ namespace PDS.Witsml.Server.Data
             Exclude<Witsml141.ComponentSchemas.ExtensionNameValue>();
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WitsmlQueryTemplate{T}"/> class.
+        /// </summary>
         public WitsmlQueryTemplate()
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WitsmlQueryTemplate{T}"/> class.
+        /// </summary>
+        /// <param name="instance">The instance.</param>
         public WitsmlQueryTemplate(T instance)
         {
             _instance = instance;
@@ -63,6 +74,10 @@ namespace PDS.Witsml.Server.Data
             ExcludeTypes.Add(typeof(V));
         }
 
+        /// <summary>
+        /// Creates an instance of the object.
+        /// </summary>
+        /// <returns>The instance of the object.</returns>
         public T AsObject()
         {
             if (_instance == null)
@@ -71,22 +86,40 @@ namespace PDS.Witsml.Server.Data
             return _instance;
         }
 
+        /// <summary>
+        /// Creates a list of object.
+        /// </summary>
+        /// <returns>The list of object.</returns>
         public List<T> AsList()
         {
             return new List<T>() { AsObject() };
         }
 
+        /// <summary>
+        /// Converts to the XML string for the template.
+        /// </summary>
+        /// <returns>The XML string.</returns>
         public string AsXml()
         {
             return ToXml(AsObject());
         }
 
+        /// <summary>
+        /// Converts to the XML string for the collection.
+        /// </summary>
+        /// <typeparam name="TList">The type of the list.</typeparam>
+        /// <returns>The XML string.</returns>
         public string AsXml<TList>() where TList : IEnergisticsCollection
         {
             var list = CreateTemplate(typeof(TList));
             return ToXml(list);
         }
 
+        /// <summary>
+        /// Creates the template.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <returns>The template.</returns>
         protected object CreateTemplate(Type objectType)
         {
             if (objectType == null || ExcludeTypes.Contains(objectType))

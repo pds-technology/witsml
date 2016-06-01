@@ -54,6 +54,36 @@ namespace PDS.Witsml.Server.Configuration
         public static int MaxDataPoints = Properties.Settings.Default.MaxDataPoints;
 
         /// <summary>
+        /// The default server name
+        /// </summary>
+        public static string DefaultServerName = Properties.Settings.Default.DefaultServerName;
+
+        /// <summary>
+        /// The default server version
+        /// </summary>
+        public static string DefaultServerVersion = Properties.Settings.Default.DefaultServerVersion;
+
+        /// <summary>
+        /// The organization name
+        /// </summary>
+        public static string DefaultVendorName = Properties.Settings.Default.DefaultVendorName;
+
+        /// <summary>
+        /// The default contact name
+        /// </summary>
+        public static string DefaultContactName = Properties.Settings.Default.DefaultContactName;
+
+        /// <summary>
+        /// The default contact email
+        /// </summary>
+        public static string DefaultContactEmail = Properties.Settings.Default.DefaultContactEmail;
+
+        /// <summary>
+        /// The default contact phone
+        /// </summary>
+        public static string DefaultContactPhone = Properties.Settings.Default.DefaultContactPhone;
+
+        /// <summary>
         /// Gets the size of the range.
         /// </summary>
         /// <param name="isTimeIndex"><c>true</c> if is time index.</param>

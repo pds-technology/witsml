@@ -32,6 +32,7 @@ using Energistics;
 using Energistics.Datatypes;
 using Energistics.Protocol.Core;
 using PDS.Framework;
+using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data;
 using PDS.Witsml.Server.Properties;
 
@@ -43,8 +44,8 @@ namespace PDS.Witsml.Server.Controllers
     /// <seealso cref="System.Web.Http.ApiController" />
     public abstract class EtpControllerBase : ApiController
     {
-        private static readonly string DefaultServerName = Settings.Default.DefaultServerName;
-        private static readonly string DefaultServerVersion = Settings.Default.DefaultServerVersion;
+        private static readonly string DefaultServerName = WitsmlSettings.DefaultServerName;
+        private static readonly string DefaultServerVersion = WitsmlSettings.DefaultServerVersion;
 
         protected EtpControllerBase(IContainer container)
         {
@@ -90,10 +91,10 @@ namespace PDS.Witsml.Server.Controllers
                 SupportedObjects = supportedObjects,
                 ContactInfomration = new Contact()
                 {
-                    OrganizationName = Settings.Default.DefaultVendorName,
-                    ContactName = Settings.Default.DefaultContactName,
-                    ContactEmail = Settings.Default.DefaultContactEmail,
-                    ContactPhone = Settings.Default.DefaultContactPhone
+                    OrganizationName = WitsmlSettings.DefaultVendorName,
+                    ContactName = WitsmlSettings.DefaultContactName,
+                    ContactEmail = WitsmlSettings.DefaultContactEmail,
+                    ContactPhone = WitsmlSettings.DefaultContactPhone
                 }
             };
 

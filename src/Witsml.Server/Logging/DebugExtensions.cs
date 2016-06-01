@@ -205,6 +205,11 @@ namespace PDS.Witsml.Server.Logging
                 response.SuppMsgOut);
         }
 
+        /// <summary>
+        /// Formats the specified XML.
+        /// </summary>
+        /// <param name="xml">The XML.</param>
+        /// <returns>The formatted XML.</returns>
         public static string Format(string xml)
         {
             if (string.IsNullOrWhiteSpace(xml))

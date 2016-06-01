@@ -27,6 +27,9 @@ using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data
 {
+    /// <summary>
+    /// Provides helper methods that can be used to parse WITSML Query.
+    /// </summary>
     public class WitsmlQueryParser
     {
         private XNamespace _namespace;
@@ -49,6 +52,10 @@ namespace PDS.Witsml.Server.Data
             QueryCount = 1;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WitsmlQueryParser"/> class.
+        /// </summary>
+        /// <param name="context">The context.</param>
         public WitsmlQueryParser(RequestContext context)
         {
             Context = context;
@@ -68,12 +75,34 @@ namespace PDS.Witsml.Server.Data
             QueryCount = _elements.Count();
         }
 
+        /// <summary>
+        /// Gets the context.
+        /// </summary>
+        /// <value>
+        /// The context.
+        /// </value>
         public RequestContext Context { get; private set; }
 
+        /// <summary>
+        /// Gets the options.
+        /// </summary>
+        /// <value>
+        /// The options.
+        /// </value>
         public Dictionary<string, string> Options { get; private set; }
 
+        /// <summary>
+        /// Gets the query count.
+        /// </summary>
+        /// <value>
+        /// The query count.
+        /// </value>
         public int QueryCount { get; }
 
+        /// <summary>
+        /// Get the ReturnElements.
+        /// </summary>
+        /// <returns>The ReturnElements.</returns>
         public string ReturnElements()
         {
             return OptionsIn.GetValue(Options, OptionsIn.ReturnElements.Requested);
@@ -125,11 +154,21 @@ namespace PDS.Witsml.Server.Data
                 : (int?)null;
         }
 
+        /// <summary>
+        /// Gets the URI.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>The URI.</returns>
         public EtpUri GetUri<T>()
         {
             return GetUri(typeof(T));
         }
 
+        /// <summary>
+        /// Gets the URI.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns>The URI.</returns>
         public EtpUri GetUri(Type type)
         {
             var objectType = ObjectTypes.GetObjectType(type);
@@ -147,16 +186,29 @@ namespace PDS.Witsml.Server.Data
             return baseUri.Append(objectType, Attribute("uid"));
         }
 
+        /// <summary>
+        /// Get the elements of the root.
+        /// </summary>
+        /// <returns>The elements of the root.</returns>
         public IEnumerable<XElement> Elements()
         {
             return _elements;
         }
 
+        /// <summary>
+        /// Returns the element.
+        /// </summary>
+        /// <returns>The element.</returns>
         public XElement Element()
         {
             return Elements().FirstOrDefault();
         }
 
+        /// <summary>
+        /// Get the attributes of the element.
+        /// </summary>
+        /// <param name="name">The name of the element.</param>
+        /// <returns>The attributes of the element.</returns>
         public String Attribute(string name)
         {
             if (HasAttribute(name))
@@ -166,48 +218,96 @@ namespace PDS.Witsml.Server.Data
             return null;
         }
 
+        /// <summary>
+        /// Determines whether the specified name has attribute.
+        /// </summary>
+        /// <param name="name">The name of the attribute.</param>
+        /// <returns>True if has the attribute.</returns>
         public bool HasAttribute(string name)
         {
             var element = Element();
             return element != null && element.Attribute(name) != null;
         }
 
+        /// <summary>
+        /// Determines whether the document contains the element.
+        /// </summary>
+        /// <param name="name">The name of the element.</param>
+        /// <returns>True if contains.</returns>
         public bool Contains(string name)
         {
             return Element().Elements(_namespace + name).Any();
         }
 
+        /// <summary>
+        /// Get the element.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns>The element</returns>
         public XElement Property(string name)
         {
             return Element().Elements(_namespace + name).FirstOrDefault();
         }
 
+        /// <summary>
+        /// Get the elements by name.
+        /// </summary>
+        /// <param name="name">The name of the element.</param>
+        /// <returns>The elements.</returns>
         public IEnumerable<XElement> Properties(string name)
         {
             return Properties(Element(), name);
         }
 
+        /// <summary>
+        /// Get the elements by name.
+        /// </summary>
+        /// <param name="element">The parent element.</param>
+        /// <param name="name">The name.</param>
+        /// <returns>The elements.</returns>
         public IEnumerable<XElement> Properties(XElement element, string name)
         {
             return element.Elements(_namespace + name);
         }
 
+        /// <summary>
+        /// Get the elements by name.
+        /// </summary>
+        /// <param name="elements">The list of parent elements.</param>
+        /// <param name="name">The name of the element.</param>
+        /// <returns>The elements</returns>
         public IEnumerable<XElement> Properties(IEnumerable<XElement> elements, string name)
         {
             return elements.Elements(_namespace + name);
         }
 
+        /// <summary>
+        /// Determines whether the specified name has elements.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns>True if has elements.</returns>
         public bool HasElements(string name)
         {
             return HasElements(Element(), name);
         }
 
+        /// <summary>
+        /// Determines whether the specified element has elements.
+        /// </summary>
+        /// <param name="element">The element.</param>
+        /// <param name="name">The name.</param>
+        /// <returns>True if has the element.</returns>
         public bool HasElements(XElement element, string name)
         {
             return element != null &&
                 element.Elements(_namespace + name).Any();
         }
 
+        /// <summary>
+        /// Get the element value.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns>The element value.</returns>
         public string PropertyValue(string name)
         {
             if (!HasElements(name))
@@ -217,6 +317,12 @@ namespace PDS.Witsml.Server.Data
             return PropertyValue(Element(), name);
         }
 
+        /// <summary>
+        /// Get the element value.
+        /// </summary>
+        /// <param name="element">The element.</param>
+        /// <param name="name">The name.</param>
+        /// <returns>The value of the element.</returns>
         public string PropertyValue(XElement element, string name)
         {
             if (!HasElements(element, name))
@@ -229,6 +335,12 @@ namespace PDS.Witsml.Server.Data
                 .FirstOrDefault();
         }
 
+        /// <summary>
+        /// Gets the attribute value.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="attribute">The attribute.</param>
+        /// <returns>The attribute value.</returns>
         public string PropertyAttribute(string name, string attribute)
         {
             if (!HasElements(name))
@@ -241,22 +353,44 @@ namespace PDS.Witsml.Server.Data
                 .FirstOrDefault();
         }
 
+        /// <summary>
+        /// Creates a Witsml query parser for the element.
+        /// </summary>
+        /// <param name="element">The element.</param>
+        /// <param name="objectType">Type of the object.</param>
+        /// <returns>The Witsml query parser.</returns>
         public WitsmlQueryParser Fork(XElement element, string objectType)
         {
             return new WitsmlQueryParser(this, element, objectType);
         }
 
+        /// <summary>
+        /// Creates a list of Witsml query parser.
+        /// </summary>
+        /// <param name="elements">The elements.</param>
+        /// <param name="objectType">Type of the object.</param>
+        /// <returns>The list of Witsml query parser.</returns>
         public IEnumerable<WitsmlQueryParser> Fork(IEnumerable<XElement> elements, string objectType)
         {
             foreach (var element in elements)
                 yield return Fork(element, objectType);
         }
 
+        /// <summary>
+        /// Create list of Witsml query parsers for the element
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="objectType">Type of the object.</param>
+        /// <returns>The list of Witsml query parsers.</returns>
         public IEnumerable<WitsmlQueryParser> ForkProperties(string name, string objectType)
         {
             return Fork(Properties(name), objectType);
         }
 
+        /// <summary>
+        /// Create a list of Witsml query parsers.
+        /// </summary>
+        /// <returns>The list of Witsml query parsers.</returns>
         public IEnumerable<WitsmlQueryParser> ForkElements()
         {
             return Fork(Elements(), Context.ObjectType);

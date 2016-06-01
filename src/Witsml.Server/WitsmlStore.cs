@@ -214,6 +214,11 @@ namespace PDS.Witsml.Server
             }
         }
 
+        /// <summary>
+        /// Returns the response for updating one WITSML data-object to the server.
+        /// </summary>
+        /// <param name="request">he request object encapsulating the method input parameters.</param>
+        /// <returns>A positive value indicates a success; a negative value indicates an error.</returns>
         public WMLS_UpdateInStoreResponse WMLS_UpdateInStore(WMLS_UpdateInStoreRequest request)
         {
             var context = request.ToContext();
@@ -243,6 +248,11 @@ namespace PDS.Witsml.Server
             }
         }
 
+        /// <summary>
+        /// Returns the response for deleting one WITSML data-object to the server.
+        /// </summary>
+        /// <param name="request">he request object encapsulating the method input parameters.</param>
+        /// <returns>A positive value indicates a success; a negative value indicates an error.</returns>
         public WMLS_DeleteFromStoreResponse WMLS_DeleteFromStore(WMLS_DeleteFromStoreRequest request)
         {
             var context = request.ToContext();
