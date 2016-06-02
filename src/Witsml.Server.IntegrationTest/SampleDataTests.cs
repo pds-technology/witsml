@@ -44,7 +44,45 @@ namespace PDS.Witsml.Server
             DataDir =  new DirectoryInfo(@".\TestData").FullName;
         }
 
-        public void Add_Log_from_file(string xmlfile)
+        /// <summary>
+        /// Add a <see cref="Well"/>, <see cref="Wellbore"/> and <see cref="Log"/> to the store
+        /// </summary>
+        [TestMethod]
+        public void Add_data()
+        {
+            Add_parents();
+            Add_logs();
+        }
+
+        #region Helper Methods
+
+        private void Add_parents()
+        {
+            string[] wellFiles = Directory.GetFiles(DataDir, "*_Well.xml");
+
+            foreach (string xmlfile in wellFiles)
+            {
+                Add_Well_from_file(xmlfile);
+            }
+
+            string[] wellboreFiles = Directory.GetFiles(DataDir, "*_Wellbore.xml");
+            foreach (string xmlfile in wellboreFiles)
+            {
+                Add_Wellbore_from_file(xmlfile);
+            }
+        }
+
+        private void Add_logs()
+        {
+            string[] logFiles = Directory.GetFiles(DataDir, "*_Log.xml");
+
+            foreach (string xmlfile in logFiles)
+            {
+                Add_Log_from_file(xmlfile);
+            }
+        }
+
+        private void Add_Log_from_file(string xmlfile)
         {
             var xmlin = File.ReadAllText(xmlfile);
 
@@ -67,7 +105,7 @@ namespace PDS.Witsml.Server
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
         }
 
-        public void Add_Well_from_file(string xmlfile)
+        private void Add_Well_from_file(string xmlfile)
         {
             var xmlin = File.ReadAllText(xmlfile);
 
@@ -90,7 +128,7 @@ namespace PDS.Witsml.Server
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
         }
 
-        public void Add_Wellbore_from_file(string xmlfile)
+        private void Add_Wellbore_from_file(string xmlfile)
         {
             var xmlin = File.ReadAllText(xmlfile);
 
@@ -112,51 +150,6 @@ namespace PDS.Witsml.Server
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
         }
-
-        /// <summary>
-        /// Add a <see cref="Well"/> and <see cref="Wellbore"/> object to the store.
-        /// </summary>
-        [TestMethod]
-        [Ignore]
-        public void Add_parents()
-        {
-            string[] wellFiles = Directory.GetFiles(DataDir, "*_Well.xml");
-
-            foreach (string xmlfile in wellFiles)
-            {
-                Add_Well_from_file(xmlfile);
-            }
-
-            string[] wellboreFiles = Directory.GetFiles(DataDir, "*_Wellbore.xml");
-            foreach (string xmlfile in wellboreFiles)
-            {
-                Add_Wellbore_from_file(xmlfile);
-            }
-        }
-
-        /// <summary>
-        /// Add a <see cref="Log"/> to the store
-        /// </summary>
-        [TestMethod]
-        [Ignore]
-        public void Add_logs()
-        {
-            string[] logFiles = Directory.GetFiles(DataDir, "*_Log.xml");
-
-            foreach (string xmlfile in logFiles)
-            {
-                Add_Log_from_file(xmlfile);
-            }
-        }
-
-        /// <summary>
-        /// Add a <see cref="Well"/>, <see cref="Wellbore"/> and <see cref="Log"/> to the store
-        /// </summary>
-        [TestMethod]
-        public void Add_data()
-        {
-            Add_parents();
-            Add_logs();
-        }
+        #endregion Helper Methods
     }
 }
