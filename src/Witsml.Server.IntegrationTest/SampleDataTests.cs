@@ -52,7 +52,7 @@ namespace PDS.Witsml.Server
             Assert.IsNotNull(logList);
             Assert.IsTrue(logList.Log.Count > 0);
 
-            var log = new Log() { Uid = logList.Log[0].Uid };
+            var log = new Log() { Uid = logList.Log[0].Uid, UidWell = logList.Log[0].UidWell, UidWellbore = logList.Log[0].UidWellbore };
             var result = DevKit.Query<LogList, Log>(log);
             Assert.IsNotNull(result);
             if (result.Count > 0)
@@ -98,7 +98,7 @@ namespace PDS.Witsml.Server
             Assert.IsNotNull(wellboreList);
             Assert.IsTrue(wellboreList.Wellbore.Count > 0);
 
-            var wellbore = new Wellbore() { Uid = wellboreList.Wellbore[0].Uid };
+            var wellbore = new Wellbore() { Uid = wellboreList.Wellbore[0].Uid, UidWell = wellboreList.Wellbore[0].UidWell };
             var result = DevKit.Query<WellboreList, Wellbore>(wellbore);
             Assert.IsNotNull(result);
             if (result.Count > 0)
@@ -117,6 +117,7 @@ namespace PDS.Witsml.Server
         /// Add a <see cref="Well"/> and <see cref="Wellbore"/> object to the store.
         /// </summary>
         [TestMethod]
+        [Ignore]
         public void Add_parents()
         {
             string[] wellFiles = Directory.GetFiles(DataDir, "*_Well.xml");
@@ -137,6 +138,7 @@ namespace PDS.Witsml.Server
         /// Add a <see cref="Log"/> to the store
         /// </summary>
         [TestMethod]
+        [Ignore]
         public void Add_logs()
         {
             string[] logFiles = Directory.GetFiles(DataDir, "*_Log.xml");
