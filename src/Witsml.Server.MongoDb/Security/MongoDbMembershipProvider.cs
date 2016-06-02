@@ -518,7 +518,6 @@ namespace PDS.Witsml.Server.Security
             cmd.Parameters.Add("@Username", OdbcType.VarChar, 255).Value = username;
             cmd.Parameters.Add("@ApplicationName", OdbcType.VarChar, 255).Value = ApplicationName;
 
-            OdbcDataReader reader = null;
             DateTime windowStart = new DateTime();
             int failureCount = 0;
 
@@ -526,26 +525,25 @@ namespace PDS.Witsml.Server.Security
             {
                 conn.Open();
 
-                reader = cmd.ExecuteReader(CommandBehavior.SingleRow);
-
-                if (reader.HasRows)
+                using (var reader = cmd.ExecuteReader(CommandBehavior.SingleRow))
                 {
-                    reader.Read();
-
-                    if (failureType == "password")
+                    if (reader.HasRows)
                     {
-                        failureCount = reader.GetInt32(0);
-                        windowStart = reader.GetDateTime(1);
-                    }
+                        reader.Read();
 
-                    if (failureType == "passwordAnswer")
-                    {
-                        failureCount = reader.GetInt32(2);
-                        windowStart = reader.GetDateTime(3);
+                        if (failureType == "password")
+                        {
+                            failureCount = reader.GetInt32(0);
+                            windowStart = reader.GetDateTime(1);
+                        }
+
+                        if (failureType == "passwordAnswer")
+                        {
+                            failureCount = reader.GetInt32(2);
+                            windowStart = reader.GetDateTime(3);
+                        }
                     }
                 }
-
-                reader.Close();
 
                 DateTime windowEnd = windowStart.AddMinutes(PasswordAttemptWindow);
 
@@ -627,15 +625,14 @@ namespace PDS.Witsml.Server.Security
                 {
                     WriteToEventLog(e, "UpdateFailureCount");
 
-                    throw new ProviderException(exceptionMessage);
+                    throw new ProviderException(exceptionMessage, e);
                 }
                 else {
-                    throw e;
+                    throw;
                 }
             }
             finally
             {
-                if (reader != null) { reader.Close(); }
                 conn.Close();
             }
         }
@@ -805,10 +802,10 @@ namespace PDS.Witsml.Server.Security
                 {
                     WriteToEventLog(e, "ChangePasswordQuestionAndAnswer");
 
-                    throw new ProviderException(exceptionMessage);
+                    throw new ProviderException(exceptionMessage, e);
                 }
                 else {
-                    throw e;
+                    throw;
                 }
             }
             finally
@@ -864,10 +861,10 @@ namespace PDS.Witsml.Server.Security
                 {
                     WriteToEventLog(e, "GetNumberOfUsersOnline");
 
-                    throw new ProviderException(exceptionMessage);
+                    throw new ProviderException(exceptionMessage, e);
                 }
                 else {
-                    throw e;
+                    throw;
                 }
             }
             finally
@@ -954,15 +951,15 @@ namespace PDS.Witsml.Server.Security
                 {
                     WriteToEventLog(e, "GetPassword");
 
-                    throw new ProviderException(exceptionMessage);
+                    throw new ProviderException(exceptionMessage, e);
                 }
                 else {
-                    throw e;
+                    throw;
                 }
             }
             finally
             {
-                if (reader != null) { reader.Close(); }
+                reader?.Close();
                 conn.Close();
             }
 
@@ -1043,16 +1040,15 @@ namespace PDS.Witsml.Server.Security
                 {
                     WriteToEventLog(e, "GetUser(Object, Boolean)");
 
-                    throw new ProviderException(exceptionMessage);
+                    throw new ProviderException(exceptionMessage, e);
                 }
                 else {
-                    throw e;
+                    throw;
                 }
             }
             finally
             {
-                if (reader != null) { reader.Close(); }
-
+                reader?.Close();
                 conn.Close();
             }
 
@@ -1149,10 +1145,10 @@ namespace PDS.Witsml.Server.Security
                 {
                     WriteToEventLog(e, "UnlockUser");
 
-                    throw new ProviderException(exceptionMessage);
+                    throw new ProviderException(exceptionMessage, e);
                 }
                 else {
-                    throw e;
+                    throw;
                 }
             }
             finally
@@ -1202,10 +1198,10 @@ namespace PDS.Witsml.Server.Security
                 {
                     WriteToEventLog(e, "GetUserNameByEmail");
 
-                    throw new ProviderException(exceptionMessage);
+                    throw new ProviderException(exceptionMessage, e);
                 }
                 else {
-                    throw e;
+                    throw;
                 }
             }
             finally
@@ -1260,10 +1256,10 @@ namespace PDS.Witsml.Server.Security
                 {
                     WriteToEventLog(e, "UpdateUser");
 
-                    throw new ProviderException(exceptionMessage);
+                    throw new ProviderException(exceptionMessage, e);
                 }
                 else {
-                    throw e;
+                    throw;
                 }
             }
             finally
@@ -1426,16 +1422,15 @@ namespace PDS.Witsml.Server.Security
                 {
                     WriteToEventLog(e, "FindUsersByName");
 
-                    throw new ProviderException(exceptionMessage);
+                    throw new ProviderException(exceptionMessage, e);
                 }
                 else {
-                    throw e;
+                    throw;
                 }
             }
             finally
             {
-                if (reader != null) { reader.Close(); }
-
+                reader?.Close();
                 conn.Close();
             }
 
@@ -1509,16 +1504,15 @@ namespace PDS.Witsml.Server.Security
                 {
                     WriteToEventLog(e, "FindUsersByEmail");
 
-                    throw new ProviderException(exceptionMessage);
+                    throw new ProviderException(exceptionMessage, e);
                 }
                 else {
-                    throw e;
+                    throw;
                 }
             }
             finally
             {
-                if (reader != null) { reader.Close(); }
-
+                reader?.Close();
                 conn.Close();
             }
 
