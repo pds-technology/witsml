@@ -322,7 +322,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 foreach (var channelId in channelRangeInfo.ChannelId)
                 {
                     var channel = channels.FirstOrDefault(c => c.ChannelId == channelId);
-                    var value = Format(record.GetValue(record.GetOrdinal(channel.Mnemonic)));
+                    var value = FormatValue(record.GetValue(record.GetOrdinal(channel.Mnemonic)));
 
                     yield return new DataItem()
                     {
@@ -425,7 +425,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     if (indexMnemonics.Any(x => x.EqualsIgnoreCase(channel.Mnemonic)))
                         continue;
 
-                    var value = Format(record.GetValue(record.GetOrdinal(channel.Mnemonic)));
+                    var value = FormatValue(record.GetValue(record.GetOrdinal(channel.Mnemonic)));
                     var valueDataItem = new DataItem()
                     {
                         ChannelId = channelId,
@@ -589,7 +589,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 // update ChannelStreamingInfo index value
                 info.StartIndex.Item = primaryIndexValue;
 
-                var value = Format(record.GetValue(record.GetOrdinal(channel.Mnemonic)));
+                var value = FormatValue(record.GetValue(record.GetOrdinal(channel.Mnemonic)));
 
                 yield return new DataItem()
                 {
@@ -681,7 +681,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 // update ChannelStreamingInfo index value
                 info.StartIndex.Item = primaryIndexValue;
 
-                var value = Format(record.GetValue(record.GetOrdinal(channel.Mnemonic)));
+                var value = FormatValue(record.GetValue(record.GetOrdinal(channel.Mnemonic)));
 
                 var valueDataItem = new DataItem()
                 {
@@ -704,7 +704,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             await Task.Delay(MaxMessageRate);
         }
 
-        private object Format(object value)
+        private object FormatValue(object value)
         {
             if (value is DateTime)
             {

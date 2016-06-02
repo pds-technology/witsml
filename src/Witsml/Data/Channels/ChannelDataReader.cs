@@ -38,13 +38,14 @@ namespace PDS.Witsml.Data.Channels
         private const string Null = "null";
         private const string NaN = "NaN";
 
-        private static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings()
+        private static readonly JsonSerializerSettings _jsonSettings = new JsonSerializerSettings()
         {
             DateParseHandling = DateParseHandling.DateTimeOffset
         };
 
         private static readonly ILog _log = LogManager.GetLogger(typeof(ChannelDataReader));
-        private static readonly string[] Empty = new string[0];
+        private static readonly string[] _empty = new string[0];
+
         private List<List<List<object>>> _records;
         private IList<Range<double?>> _ranges;
         private readonly string[] _originalMnemonics;
@@ -108,9 +109,9 @@ namespace PDS.Witsml.Data.Channels
 
             _count = GetRowValues(0).Count();
             _indexCount = GetIndexValues(0).Count();
-            _originalMnemonics = record?.Mnemonics ?? Empty;
-            _originalUnits = record?.Units ?? Empty;
-            _originalNullValues = record?.NullValues ?? Empty;
+            _originalMnemonics = record?.Mnemonics ?? _empty;
+            _originalUnits = record?.Units ?? _empty;
+            _originalNullValues = record?.NullValues ?? _empty;
 
             Indices = record?.Indices ?? new List<ChannelIndexInfo>();
             Mnemonics = _originalMnemonics;
@@ -135,9 +136,9 @@ namespace PDS.Witsml.Data.Channels
             _records = records;
             _count = GetRowValues(0).Count();
             _indexCount = GetIndexValues(0).Count();
-            _originalMnemonics = mnemonics ?? Empty;
-            _originalUnits = units ?? Empty;
-            _originalNullValues = nullValues ?? Empty;
+            _originalMnemonics = mnemonics ?? _empty;
+            _originalUnits = units ?? _empty;
+            _originalNullValues = nullValues ?? _empty;
 
             Indices = new List<ChannelIndexInfo>();
             Mnemonics = _originalMnemonics;
@@ -278,7 +279,7 @@ namespace PDS.Witsml.Data.Channels
         /// <returns></returns>
         public static string[] Split(string value)
         {
-            return string.IsNullOrWhiteSpace(value) ? Empty : value.Split(',');
+            return string.IsNullOrWhiteSpace(value) ? _empty : value.Split(',');
         }
 
         /// <summary>
@@ -288,14 +289,6 @@ namespace PDS.Witsml.Data.Channels
         {
             _records = null;
             _current = -1;
-        }
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public void Dispose()
-        {
-            Close();
         }
 
         /// <summary>
@@ -1307,7 +1300,7 @@ namespace PDS.Witsml.Data.Channels
             if (string.IsNullOrWhiteSpace(data))
                 return new List<List<List<object>>>();
 
-            return JsonConvert.DeserializeObject<List<List<List<object>>>>(data, JsonSettings);
+            return JsonConvert.DeserializeObject<List<List<List<object>>>>(data, _jsonSettings);
         }
 
         /// <summary>
@@ -1424,5 +1417,47 @@ namespace PDS.Witsml.Data.Channels
                 ? mnemonic
                 : $"{ mnemonic } [{ units }]";
         }
+
+        #region IDisposable Support
+        private bool _disposedValue; // To detect redundant calls
+
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    // NOTE: dispose managed state (managed objects).
+                    Close();
+                }
+
+                // NOTE: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // NOTE: set large fields to null.
+
+                _disposedValue = true;
+            }
+        }
+
+        // NOTE: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~ChannelDataReader() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // NOTE: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
     }
 }

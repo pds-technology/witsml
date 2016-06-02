@@ -22,15 +22,13 @@ using System.Threading.Tasks;
 
 namespace PDS.Framework
 {
-
     /// <summary>
     /// Manages the executiona and cancellation of asynchronous tasks.
     /// </summary>
-    public class TaskRunner
+    public class TaskRunner : IDisposable
     {
         private CancellationTokenSource _tokenSource;
         private CancellationToken _token;
-
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TaskRunner"/> class.
@@ -42,7 +40,6 @@ namespace PDS.Framework
             OnExecute = Stop;
         }
 
-
         /// <summary>
         /// Gets the interval.
         /// </summary>
@@ -50,7 +47,6 @@ namespace PDS.Framework
         /// The interval.
         /// </value>
         public int Interval { get; private set; }
-
 
         /// <summary>
         /// Gets or sets the Action to perform on execute.
@@ -60,7 +56,6 @@ namespace PDS.Framework
         /// </value>
         public Action OnExecute { get; set; }
 
-
         /// <summary>
         /// Gets or sets the Action to perform on error.
         /// </summary>
@@ -68,7 +63,6 @@ namespace PDS.Framework
         /// The on error.
         /// </value>
         public Action<Exception> OnError { get; set; }
-
 
         /// <summary>
         /// Gets a value indicating whether this instance is running.
@@ -80,7 +74,6 @@ namespace PDS.Framework
         {
             get { return _tokenSource != null && !_token.IsCancellationRequested; }
         }
-
 
         /// <summary>
         /// Starts an asynchronous Task
@@ -112,16 +105,13 @@ namespace PDS.Framework
             _token);
         }
 
-
         /// <summary>
         /// Stops this Task instance.
         /// </summary>
         public void Stop()
         {
-            if (_tokenSource != null)
-                _tokenSource.Cancel();
+            _tokenSource?.Cancel();
         }
-
 
         /// <summary>
         /// Starts the Task with the specified token.
@@ -136,11 +126,55 @@ namespace PDS.Framework
                 if (token.IsCancellationRequested)
                     break;
 
-                if (OnExecute != null)
-                    OnExecute();
+                OnExecute?.Invoke();
 
-                await Task.Delay(interval);
+                await Task.Delay(interval, token);
             }
         }
+
+        #region IDisposable Support
+        private bool _disposedValue; // To detect redundant calls
+
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    // NOTE: dispose managed state (managed objects).
+
+                    if (_tokenSource != null)
+                        _tokenSource.Dispose();
+                }
+
+                // NOTE: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // NOTE: set large fields to null.
+
+                _tokenSource = null;
+                _disposedValue = true;
+            }
+        }
+
+        // NOTE: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~TaskRunner() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // NOTE: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
     }
 }

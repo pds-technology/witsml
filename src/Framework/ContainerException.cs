@@ -25,6 +25,7 @@ namespace PDS.Framework
     /// Represents errors that occur during dependency resolution.
     /// </summary>
     /// <seealso cref="System.Exception" />
+    [Serializable]
     public class ContainerException : Exception
     {
         /// <summary>

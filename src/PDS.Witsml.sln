@@ -17,11 +17,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Server.IntegrationTe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.IntegrationTest", "Witsml.IntegrationTest\Witsml.IntegrationTest.csproj", "{C86299AE-B7E9-4DF6-97CF-8DCF910E5E70}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{3FE5E144-F608-4F91-A9FA-2B9A084D1FCF}"
-	ProjectSection(SolutionItems) = preProject
-		External\nuget.config = External\nuget.config
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Server.Web", "Witsml.Server.Web\Witsml.Server.Web.csproj", "{5FF377F4-56C5-49D9-BA0A-1955A33C4902}"
 EndProject
 Global

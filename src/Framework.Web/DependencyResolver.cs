@@ -69,12 +69,46 @@ namespace PDS.Framework.Web
             return _container.ResolveAll(serviceType);
         }
 
+        #region IDisposable Support
+        private bool _disposedValue; // To detect redundant calls
+
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    // NOTE: dispose managed state (managed objects).
+                    // DO NOT dispose IContainer!
+                }
+
+                // NOTE: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // NOTE: set large fields to null.
+
+                _disposedValue = true;
+            }
+        }
+
+        // NOTE: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~DependencyResolver() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
         public void Dispose()
         {
-            // DO NOT dispose IContainer!
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // NOTE: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
         }
+        #endregion
     }
 }
