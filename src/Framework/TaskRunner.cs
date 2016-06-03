@@ -24,7 +24,7 @@ namespace PDS.Framework
 {
 
     /// <summary>
-    /// Manages the executiona and cancellation of asynchronous tasks.
+    /// Manages the execution and cancellation of asynchronous tasks.
     /// </summary>
     public class TaskRunner
     {
