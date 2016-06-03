@@ -116,8 +116,8 @@ namespace PDS.Witsml.Linq
         /// <summary>
         /// Creates one instance of the specified type.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
+        /// <typeparam name="T">The specified type</typeparam>
+        /// <returns>A <see cref="List{T}"/> containig one instance of the specified tyep.</returns>
         public List<T> One<T>()
         {
             return new List<T>()
@@ -235,7 +235,7 @@ namespace PDS.Witsml.Linq
         /// Creates the WITSML query.
         /// </summary>
         /// <param name="objectType">Type of the object.</param>
-        /// <returns></returns>
+        /// <returns>An <see cref="IWitsmlQuery"/></returns>
         protected IWitsmlQuery CreateWitsmlQuery(string objectType)
         {
             var listType = ObjectTypes.GetObjectGroupType(objectType, DataSchemaVersion);
@@ -250,9 +250,9 @@ namespace PDS.Witsml.Linq
         /// <summary>
         /// Creates the WITSML query.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">The specified type</typeparam>
         /// <typeparam name="TList">The type of the list.</typeparam>
-        /// <returns></returns>
+        /// <returns>An <see cref="IWitsmlQuery{T}"/> of the specified type.</returns>
         protected IWitsmlQuery<T> CreateQuery<T, TList>() where TList : IEnergisticsCollection
         {
             return new WitsmlQuery<T, TList>(this);

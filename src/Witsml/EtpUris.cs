@@ -199,7 +199,7 @@ namespace PDS.Witsml
         /// <param name="entity">The entity.</param>
         /// <param name="log">The log.</param>
         /// <param name="channelSet">The channel set.</param>
-        /// <returns></returns>
+        /// <returns>A <see cref="EtpUri"/> instance.</returns>
         public static EtpUri GetUri(this Witsml200.ComponentSchemas.ChannelIndex entity, Witsml200.Log log, Witsml200.ChannelSet channelSet)
         {
             return channelSet.GetUri(log)

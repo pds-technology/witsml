@@ -32,7 +32,7 @@ namespace PDS.Witsml.Linq
         /// <typeparam name="T"></typeparam>
         /// <param name="query">The query.</param>
         /// <param name="uid">The uid.</param>
-        /// <returns></returns>
+        /// <returns>A data object of the specified type</returns>
         public static T GetByUid<T>(this IWitsmlQuery<T> query, string uid) where T : IDataObject
         {
             return query.FirstOrDefault(x => x.Uid == uid);
@@ -45,7 +45,7 @@ namespace PDS.Witsml.Linq
         /// <param name="query">The query.</param>
         /// <param name="uidWell">The uid well.</param>
         /// <param name="uid">The uid.</param>
-        /// <returns></returns>
+        /// <returns>A data object of the specified type</returns>
         public static T GetByUid<T>(this IWitsmlQuery<T> query, string uidWell, string uid) where T : IWellObject
         {
             return query.FirstOrDefault(x => x.UidWell == uidWell && x.Uid == uid);
@@ -59,7 +59,7 @@ namespace PDS.Witsml.Linq
         /// <param name="uidWell">The uid well.</param>
         /// <param name="uidWellbore">The uid wellbore.</param>
         /// <param name="uid">The uid.</param>
-        /// <returns></returns>
+        /// <returns>A data object of the specified type</returns>
         public static T GetByUid<T>(this IWitsmlQuery<T> query, string uidWell, string uidWellbore, string uid) where T : IWellboreObject
         {
             return query.FirstOrDefault(x => x.UidWell == uidWell && x.UidWellbore == uidWellbore && x.Uid == uid);
@@ -71,7 +71,7 @@ namespace PDS.Witsml.Linq
         /// <typeparam name="T"></typeparam>
         /// <param name="query">The query.</param>
         /// <param name="name">The name.</param>
-        /// <returns></returns>
+        /// <returns>A data object of the specified type</returns>
         public static T GetByName<T>(this IWitsmlQuery<T> query, string name) where T : IDataObject
         {
             return query.FirstOrDefault(x => x.Name == name);
@@ -84,7 +84,7 @@ namespace PDS.Witsml.Linq
         /// <param name="query">The query.</param>
         /// <param name="nameWell">The name well.</param>
         /// <param name="name">The name.</param>
-        /// <returns></returns>
+        /// <returns>A data object of the specified type</returns>
         public static T GetByName<T>(this IWitsmlQuery<T> query, string nameWell, string name) where T : IWellObject
         {
             return query.FirstOrDefault(x => x.NameWell == nameWell && x.Name == name);
@@ -98,7 +98,7 @@ namespace PDS.Witsml.Linq
         /// <param name="nameWell">The name well.</param>
         /// <param name="nameWellbore">The name wellbore.</param>
         /// <param name="name">The name.</param>
-        /// <returns></returns>
+        /// <returns>A data object of the specified type</returns>
         public static T GetByName<T>(this IWitsmlQuery<T> query, string nameWell, string nameWellbore, string name) where T : IWellboreObject
         {
             return query.FirstOrDefault(x => x.NameWell == nameWell && x.NameWellbore == nameWellbore && x.Name == name);

@@ -170,7 +170,7 @@ namespace PDS.Witsml
             public CompressionMethod(string value) : base(Keyword, value) { }
 
             /// <summary>
-            /// The keyword for CompressionMethod OptioinsIn
+            /// The keyword for CompressionMethod OptionsIn
             /// </summary>
             public const string Keyword = "compressionMethod";
 
