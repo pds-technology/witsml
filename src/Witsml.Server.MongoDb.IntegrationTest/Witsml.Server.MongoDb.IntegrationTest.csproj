@@ -191,6 +191,9 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="..\External\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="AssemblyInitializer.cs" />
     <Compile Include="Data\Channels\ChannelSet200DataAdapterAddTests.cs" />
     <Compile Include="Data\DatabaseProviderTests.cs" />

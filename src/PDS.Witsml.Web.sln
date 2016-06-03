@@ -9,6 +9,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Server.MongoDb", "Wi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Server.MongoDb.IntegrationTest", "Witsml.Server.MongoDb.IntegrationTest\Witsml.Server.MongoDb.IntegrationTest.csproj", "{F0BB0099-5016-4206-8385-312B9664DDEC}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{B01AE4D3-D6E0-4E02-8051-FDB4AB7B7518}"
+	ProjectSection(SolutionItems) = preProject
+		External\GlobalAssemblyInfo.cs = External\GlobalAssemblyInfo.cs
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

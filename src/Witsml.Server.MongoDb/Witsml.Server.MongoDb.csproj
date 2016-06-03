@@ -177,6 +177,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\External\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Data\Channels\ChannelDataChunkAdapter.cs" />
     <Compile Include="Data\Channels\ChannelSet200DataAdapter.cs" />
     <Compile Include="Data\DatabaseProvider.cs" />
