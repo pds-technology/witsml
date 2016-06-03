@@ -117,7 +117,7 @@ namespace PDS.Witsml.Linq
         /// Creates one instance of the specified type.
         /// </summary>
         /// <typeparam name="T">The specified type</typeparam>
-        /// <returns>A <see cref="List{T}"/> containig one instance of the specified tyep.</returns>
+        /// <returns>A <see cref="List{T}"/> containing one instance of the specified tyep.</returns>
         public List<T> One<T>()
         {
             return new List<T>()
