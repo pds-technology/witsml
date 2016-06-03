@@ -32,7 +32,7 @@ namespace PDS.Witsml.Server.Security
     /// <seealso cref="PDS.Framework.Web.Security.BasicAuthenticationModule" />
     public class EtpAuthenticationModule : BasicAuthenticationModule
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(BasicAuthenticationModule));
+        private static readonly ILog _log = LogManager.GetLogger(typeof(EtpAuthenticationModule));
         private static readonly string _issuer;
         private static readonly string _audience;
         private static readonly string _secret;

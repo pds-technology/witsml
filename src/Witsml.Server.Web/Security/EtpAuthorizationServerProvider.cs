@@ -25,7 +25,7 @@ using Microsoft.Owin.Security.OAuth;
 namespace PDS.Witsml.Server.Security
 {
     /// <summary>
-    /// Provides JSON Web Token (JWT) authorication services using an ASP.NET membership provider for authentication.
+    /// Provides JSON Web Token (JWT) authorization services using an ASP.NET membership provider for authentication.
     /// </summary>
     /// <seealso cref="Microsoft.Owin.Security.OAuth.OAuthAuthorizationServerProvider" />
     public class EtpAuthorizationServerProvider : OAuthAuthorizationServerProvider
