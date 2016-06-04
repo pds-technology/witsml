@@ -133,8 +133,8 @@ namespace PDS.Witsml.Server.Configuration
             capServer.CompressionMethod = OptionsIn.CompressionMethod.None.Value; // TODO: update when compression is supported
             capServer.MaxRequestLatestValues = WitsmlSettings.MaxDataNodes;
 
-            capServer.Name = Settings.Default.DefaultServerName;
-            capServer.Version = Settings.Default.DefaultServerVersion;
+            capServer.Name = WitsmlSettings.DefaultServerName;
+            capServer.Version = WitsmlSettings.OverrideServerVersion;
             capServer.Description = Settings.Default.DefaultServerDescription;
             capServer.Vendor = Settings.Default.DefaultVendorName;
             capServer.Contact = new Contact()

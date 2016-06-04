@@ -44,7 +44,7 @@ namespace PDS.Witsml.Server.Controllers
     public abstract class EtpControllerBase : ApiController
     {
         private static readonly string _defaultServerName = WitsmlSettings.DefaultServerName;
-        private static readonly string _defaultServerVersion = WitsmlSettings.DefaultServerVersion;
+        private static readonly string _overrideServerVersion = WitsmlSettings.OverrideServerVersion;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EtpControllerBase"/> class.
@@ -152,7 +152,7 @@ namespace PDS.Witsml.Server.Controllers
 
         private EtpServerHandler CreateEtpServerHandler(WebSocket socket, IDictionary<string, string> headers)
         {
-            var handler = new EtpServerHandler(socket, _defaultServerName, _defaultServerVersion, headers);
+            var handler = new EtpServerHandler(socket, _defaultServerName, _overrideServerVersion, headers);
             RegisterProtocolHandlers(handler);
             return handler;
         }

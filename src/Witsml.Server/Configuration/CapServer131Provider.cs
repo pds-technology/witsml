@@ -87,8 +87,8 @@ namespace PDS.Witsml.Server.Configuration
             capServer.ApiVers = "1.3.1";
             capServer.SchemaVersion = DataSchemaVersion;
 
-            capServer.Name = Settings.Default.DefaultServerName;
-            capServer.Version = Settings.Default.DefaultServerVersion;
+            capServer.Name = WitsmlSettings.DefaultServerName;
+            capServer.Version = WitsmlSettings.OverrideServerVersion;
             capServer.Description = Settings.Default.DefaultServerDescription;
             capServer.Vendor = Settings.Default.DefaultVendorName;
             capServer.Contact = new Contact()

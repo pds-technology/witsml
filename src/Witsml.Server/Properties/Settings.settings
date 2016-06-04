@@ -8,8 +8,8 @@
     <Setting Name="DefaultServerName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">PDS.Witsml.Server</Value>
     </Setting>
-    <Setting Name="DefaultServerVersion" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">2016.1</Value>
+    <Setting Name="OverrideServerVersion" Type="System.String" Scope="Application">
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="DefaultVendorName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">PDS Americas</Value>

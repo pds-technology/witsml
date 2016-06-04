@@ -43,10 +43,10 @@ namespace PDS.Witsml.Server.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2016.1")]
-        public string DefaultServerVersion {
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string OverrideServerVersion {
             get {
-                return ((string)(this["DefaultServerVersion"]));
+                return ((string)(this["OverrideServerVersion"]));
             }
         }
         

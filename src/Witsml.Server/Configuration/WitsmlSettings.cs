@@ -59,9 +59,9 @@ namespace PDS.Witsml.Server.Configuration
         public static string DefaultServerName = Properties.Settings.Default.DefaultServerName;
 
         /// <summary>
-        /// The default server version
+        /// The override server version
         /// </summary>
-        public static string DefaultServerVersion = Properties.Settings.Default.DefaultServerVersion;
+        public static string OverrideServerVersion = Properties.Settings.Default.OverrideServerVersion;
 
         /// <summary>
         /// The organization name
