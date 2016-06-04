@@ -19,6 +19,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.IntegrationTest", "W
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Server.Web", "Witsml.Server.Web\Witsml.Server.Web.csproj", "{5FF377F4-56C5-49D9-BA0A-1955A33C4902}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{28C18AAD-FD80-4AFD-9B42-B78D6409C955}"
+	ProjectSection(SolutionItems) = preProject
+		External\GlobalAssemblyInfo.cs = External\GlobalAssemblyInfo.cs
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

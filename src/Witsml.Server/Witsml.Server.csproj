@@ -103,6 +103,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\External\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Configuration\CapServer141Provider.cs" />
     <Compile Include="Configuration\CapServer131Provider.cs" />
     <Compile Include="Configuration\CapServerProvider.cs" />

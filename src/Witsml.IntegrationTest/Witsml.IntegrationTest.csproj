@@ -58,6 +58,9 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="..\External\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Linq\Witsml131ContextTests.cs" />
     <Compile Include="Linq\Witsml141ContextTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

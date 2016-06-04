@@ -96,6 +96,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\External\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="ContainerConfiguration.cs" />
     <Compile Include="ControllerFactory.cs" />
     <Compile Include="DependencyResolver.cs" />

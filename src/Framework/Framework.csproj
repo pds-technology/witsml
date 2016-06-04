@@ -50,6 +50,9 @@
     <Reference Include="System.Security" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\External\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="ContainerException.cs" />
     <Compile Include="Container.cs" />
     <Compile Include="ContainerFactory.cs" />

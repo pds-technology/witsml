@@ -104,6 +104,9 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="..\External\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Data\Logs\LogExtensionsTests.cs" />
     <Compile Include="FrameworkExtensionsTests.cs" />
     <Compile Include="OptionsInTests.cs" />

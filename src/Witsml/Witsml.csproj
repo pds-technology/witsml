@@ -101,6 +101,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\External\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Data\DataObjectNavigationContext.cs" />
     <Compile Include="Data\DataObjectNavigator.cs" />
     <Compile Include="Data\Channels\ChannelDataBlock.cs" />
