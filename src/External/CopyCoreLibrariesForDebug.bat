@@ -34,7 +34,7 @@ for /D %%f in (PDS.Witsml.Server.IntegrationTest.20*) do (
 
 for /D %%f in (PDS.Witsml.Server.Web.20*) do (
 	@if exist %%f\lib\net46 (
-	    copy "%%~dp0..\..\..\witsml\src\Witsml.Server.Web\bin\Debug\PDS.Witsml.Server.Web.*" %%f\lib\net46
+	    copy "%~dp0..\..\..\witsml\src\Witsml.Server.Web\bin\Debug\PDS.Witsml.Server.Web.*" %%f\lib\net46
 	)
 )
 
