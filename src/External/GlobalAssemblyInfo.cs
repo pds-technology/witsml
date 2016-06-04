@@ -19,7 +19,7 @@
 using System.Reflection;
 
 [assembly: AssemblyProduct("PDS.Witsml.Server")]
-[assembly: AssemblyCopyright("Copyright ©  2016")]
+[assembly: AssemblyCopyright("Copyright © 2016")]
 [assembly: AssemblyCompany("Petrotechnical Data Systems")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyTrademark("")]

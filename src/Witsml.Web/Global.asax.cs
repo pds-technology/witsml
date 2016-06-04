@@ -22,9 +22,11 @@ using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
 using log4net.Config;
+using PDS.Framework;
 using PDS.Framework.Web;
 using PDS.Witsml.Server;
 using PDS.Witsml.Server.Configuration;
+using PDS.Witsml.Web.Controllers;
 
 namespace PDS.Witsml.Web
 {
@@ -40,6 +42,9 @@ namespace PDS.Witsml.Web
 
             XmlConfigurator.ConfigureAndWatch(new FileInfo(Server.MapPath("~/log4net.config")));
             ContainerConfiguration.Register(Server.MapPath("~/bin"));
+
+            if (string.IsNullOrWhiteSpace(WitsmlSettings.OverrideServerVersion))
+                WitsmlSettings.OverrideServerVersion = typeof(EtpController).GetAssemblyVersion();
 
             // pre-init IWitsmlStore dependencies
             var store = (IWitsmlStore) GlobalConfiguration.Configuration.DependencyResolver.GetService(typeof(IWitsmlStore));
