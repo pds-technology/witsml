@@ -63,7 +63,7 @@ namespace PDS.Witsml
         public const string CapClient = "capClient";
 
         /// <summary>
-        /// The ObjectType identifier for a CanServer.
+        /// The ObjectType identifier for a CapServer.
         /// </summary>
         public const string CapServer = "capServer";
 

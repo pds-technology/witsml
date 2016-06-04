@@ -576,7 +576,7 @@ namespace PDS.Witsml.Data
         /// <summary>
         /// Gets the property information.
         /// </summary>
-        /// <param name="t">The t.</param>
+        /// <param name="t">The property type.</param>
         /// <returns></returns>
         protected IList<PropertyInfo> GetPropertyInfo(Type t)
         {
