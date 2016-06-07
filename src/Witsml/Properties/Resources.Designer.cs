@@ -223,6 +223,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Maximum document size exceeded.
+        /// </summary>
+        internal static string ErrorMaxDocumentSizeExceeded {
+            get {
+                return ResourceManager.GetString("ErrorMaxDocumentSizeExceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error reading from data store.
         /// </summary>
         internal static string ErrorReadingFromDataStore {

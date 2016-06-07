@@ -521,5 +521,10 @@ namespace PDS.Witsml
         /// -1005 Error transaction deadlock
         /// </summary>
         ErrorTransactionDeadlock = -1005,
+
+        /// <summary>
+        /// -1006 Error Max Document Size Exceeded
+        /// </summary>
+        ErrorMaxDocumentSizeExceeded = -1006,
     }
 }

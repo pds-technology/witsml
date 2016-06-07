@@ -410,4 +410,8 @@
     <value>For WMLS_UpdateInStore, a uom attribute must not be specified unless its corresponding value is specified.</value>
     <comment>-446</comment>
   </data>
+  <data name="ErrorMaxDocumentSizeExceeded" xml:space="preserve">
+    <value>Maximum document size exceeded</value>
+    <comment>-1006</comment>
+  </data>
 </root>

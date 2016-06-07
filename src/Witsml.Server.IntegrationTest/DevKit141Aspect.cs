@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.IO;
 using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
@@ -356,6 +357,74 @@ namespace PDS.Witsml.Server
 
             WellList wells = EnergisticsConverter.XmlToObject<WellList>(wellXml);
             return wells.Items[0] as Well;
+        }
+
+        public WMLS_AddToStoreResponse Add_Log_from_file(string xmlfile)
+        {
+            var xmlin = File.ReadAllText(xmlfile);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(xmlin);
+            Assert.IsNotNull(logList);
+            Assert.IsTrue(logList.Log.Count > 0);
+
+            var log = new Log() { Uid = logList.Log[0].Uid, UidWell = logList.Log[0].UidWell, UidWellbore = logList.Log[0].UidWellbore };
+            var result = Query<LogList, Log>(log);
+            Assert.IsNotNull(result);
+            if (result.Count > 0)
+            {
+                // Do not add if the log already exists.
+                return null;
+            }
+
+            var response = AddToStore(ObjectTypes.Log, xmlin, null, null);
+            Assert.IsNotNull(response);
+            return response;
+        }
+
+        public WMLS_AddToStoreResponse Add_Well_from_file(string xmlfile)
+        {
+            var xmlin = File.ReadAllText(xmlfile);
+
+            var wellList = EnergisticsConverter.XmlToObject<WellList>(xmlin);
+            Assert.IsNotNull(wellList);
+            Assert.IsTrue(wellList.Well.Count > 0);
+
+            var well = new Well() { Uid = wellList.Well[0].Uid };
+            var result = Query<WellList, Well>(well);
+            Assert.IsNotNull(result);
+
+            if (result.Count > 0)
+            {
+                // Do not add if the well already exists.
+                return null;
+            }
+
+            var response = AddToStore(ObjectTypes.Well, xmlin, null, null);
+            Assert.IsNotNull(response);
+            return response;
+        }
+
+        public WMLS_AddToStoreResponse Add_Wellbore_from_file(string xmlfile)
+        {
+            var xmlin = File.ReadAllText(xmlfile);
+
+            var wellboreList = EnergisticsConverter.XmlToObject<WellboreList>(xmlin);
+            Assert.IsNotNull(wellboreList);
+            Assert.IsTrue(wellboreList.Wellbore.Count > 0);
+
+            var wellbore = new Wellbore() { Uid = wellboreList.Wellbore[0].Uid, UidWell = wellboreList.Wellbore[0].UidWell };
+            var result = Query<WellboreList, Wellbore>(wellbore);
+            Assert.IsNotNull(result);
+
+            if (result.Count > 0)
+            {
+                // Do not add if the wellbore already exists.
+                return null;
+            }
+
+            var response = AddToStore(ObjectTypes.Wellbore, xmlin, null, null);
+            Assert.IsNotNull(response);
+            return response;
         }
     }
 }
