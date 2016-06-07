@@ -103,6 +103,11 @@ namespace PDS.Witsml.Server.Data.Channels
                 Logger.ErrorFormat("Error when adding data chunks: {0}", ex);
                 throw new WitsmlException(ErrorCodes.ErrorAddingToDataStore, ex);
             }
+            catch (FormatException ex)
+            {
+                Logger.ErrorFormat("Error when adding data chunks: {0}", ex);
+                throw new WitsmlException(ErrorCodes.ErrorMaxDocumentSizeExceeded, ex);
+            }
         }
 
 
@@ -142,14 +147,22 @@ namespace PDS.Witsml.Server.Data.Channels
                 var filter = BuildDataFilter(reader.Uri, indexChannel.Mnemonic, existingRange, increasing);
                 var results = GetData(filter, increasing);
 
-                BulkWriteChunks(
-                    ToChunks(
-                        MergeSequence(results.GetRecords(), reader.AsEnumerable(), updateRange)),
-                    reader.Uri,
-                    string.Join(",", reader.Mnemonics),
-                    string.Join(",", reader.Units),
-                    string.Join(",", reader.NullValues),
-                    transaction);               
+                try
+                {
+                    BulkWriteChunks(
+                        ToChunks(
+                            MergeSequence(results.GetRecords(), reader.AsEnumerable(), updateRange)),
+                        reader.Uri,
+                        string.Join(",", reader.Mnemonics),
+                        string.Join(",", reader.Units),
+                        string.Join(",", reader.NullValues),
+                        transaction);
+                }
+                catch (FormatException ex)
+                {
+                    Logger.ErrorFormat("Error when merging data: {0}", ex);
+                    throw new WitsmlException(ErrorCodes.ErrorMaxDocumentSizeExceeded, ex);
+                }
             }
             catch (MongoException ex)
             {
