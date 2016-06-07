@@ -358,6 +358,7 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Studio\Web.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Witsml.Server.MongoDb\Witsml.Server.MongoDb.csproj">
