@@ -119,7 +119,14 @@ namespace PDS.Witsml.Data
                 if (IsIgnored(group.Key)) continue;
 
                 var propertyInfo = GetPropertyInfoForAnElement(properties, group.Key);
-                NavigateElementGroup(propertyInfo, group, parentPath);
+                if (propertyInfo != null)
+                {
+                    NavigateElementGroup(propertyInfo, group, parentPath);
+                }
+                else
+                {
+                    Logger.DebugFormat("Invalid element '{0}' is ignored.", group.Key);
+                }
             }
 
             foreach (var attribute in element.Attributes())
