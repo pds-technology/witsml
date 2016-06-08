@@ -135,7 +135,15 @@ namespace PDS.Witsml.Data
                     continue;
 
                 var attributeProp = GetPropertyInfoForAnElement(properties, attribute.Name.LocalName);
-                NavigateAttribute(attributeProp, attribute, parentPath);
+
+                if (attributeProp != null)
+                {
+                    NavigateAttribute(attributeProp, attribute, parentPath);
+                }
+                else
+                {
+                    Logger.DebugFormat("Invalid attribute '{0}' is ignored.", attribute.Name.LocalName);
+                }
             }
         }
 

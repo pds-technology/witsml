@@ -715,6 +715,64 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual(500, wellList.Well[0].WellheadElevation.Value);
         }
 
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Can_Get_Well_And_Ignore_Invalid_Element()
+        {
+            _well.Name = DevKit.Name("Bug-5855-GetFromStore-Bad-Element");
+            _well.Operator = "AAA Company";
+
+            var response = DevKit.Add<WellList, Well>(_well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWell = response.SuppMsgOut;
+
+            // Query well with invalid element
+            var queryIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
+                "<wells version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
+                    "<well uid=\"" + uidWell + "\">" + Environment.NewLine +
+                         "     <operator/>" + Environment.NewLine +
+                         "     <fieldsssssss>Big Field</fieldsssssss>" + Environment.NewLine +
+                    "</well>" + Environment.NewLine +
+               "</wells>";
+
+            var results = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, "returnElements=requested");
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            var wellList = EnergisticsConverter.XmlToObject<WellList>(results.XMLout);
+            Assert.AreEqual(1, wellList.Well.Count);
+            Assert.AreEqual("AAA Company", wellList.Well[0].Operator);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Can_Get_Well_And_Ignore_Invalid_Attribute()
+        {
+            _well.Name = DevKit.Name("Bug-5855-GetFromStore-Bad-Attribute");
+            _well.Operator = "AAA Company";
+            _well.Field = "Very Big Field";
+
+            var response = DevKit.Add<WellList, Well>(_well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWell = response.SuppMsgOut;
+
+            // Query well with invalid attribute
+            var queryIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
+                "<wells version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
+                    "<well uid=\"" + uidWell + "\">" + Environment.NewLine +
+                         "     <operator/>" + Environment.NewLine +
+                         "     <field abc=\"abc\">Big Field</field>" + Environment.NewLine +
+                    "</well>" + Environment.NewLine +
+               "</wells>";
+
+            var results = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, "returnElements=requested");
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            var wellList = EnergisticsConverter.XmlToObject<WellList>(results.XMLout);
+            Assert.AreEqual(1, wellList.Well.Count);
+            Assert.AreEqual("AAA Company", wellList.Well[0].Operator);
+            Assert.IsNull(wellList.Well[0].Field);
+        }
+
         private void AssertTestWell(Well expected, Well actual)
         {
             Assert.AreEqual(expected.Name, actual.Name);

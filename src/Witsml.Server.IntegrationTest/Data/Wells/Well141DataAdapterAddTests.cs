@@ -405,7 +405,7 @@ namespace PDS.Witsml.Server.Data.Wells
             // Prevent large debug log output
             WitsmlSettings.TruncateXmlOutDebugSize = 100;
 
-            // Add a well with zdefault PrivateGroupOnly
+            // Add a well with default PrivateGroupOnly
             var response = DevKit.Add<WellList, Well>(_well);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
@@ -420,6 +420,44 @@ namespace PDS.Witsml.Server.Data.Wells
 
             Assert.IsFalse(result.Any(x => x.CommonData?.PrivateGroupOnly ?? false));
             Assert.IsTrue(result.Any(x => uidWell.Equals(x.Uid)));
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_AddToStore_Can_Add_Well_And_Ignore_Invalid_Element()
+        {
+            var wellName = DevKit.Name("Bug-5855-AddToStore-Bad-Element");
+
+            string xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                          "   <well>" + Environment.NewLine +
+                          "     <name>" + wellName + "</name>" + Environment.NewLine +
+                          "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
+                          "     <fieldsssssss>Big Field</fieldsssssss>" + Environment.NewLine +
+                          "   </well>" + Environment.NewLine +
+                          "</wells>";
+
+            var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_AddToStore_Can_Add_Well_And_Ignore_Invalid_Attribute()
+        {
+            var wellName = DevKit.Name("Bug-5855-AddToStore-Bad-Attribute");
+
+            string xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                          "   <well>" + Environment.NewLine +
+                          "     <name>" + wellName + "</name>" + Environment.NewLine +
+                          "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
+                          "     <field abc=\"cde\">Big Field</field>" + Environment.NewLine +
+                          "   </well>" + Environment.NewLine +
+                          "</wells>";
+
+            var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
         }
     }
 }

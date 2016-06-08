@@ -18,6 +18,7 @@
 
 using System;
 using System.Linq;
+using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -139,6 +140,69 @@ namespace PDS.Witsml.Server.Data.Wells
 
             Assert.IsNotNull(updateResponse);
             Assert.AreEqual((short)ErrorCodes.MissingMeasureDataForUnit, updateResponse.Result);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_UpdateInStore_Can_Update_Well_And_Ignore_Invalid_Element()
+        {
+            _well.Name = DevKit.Name("Bug-5855-UpdateInStore-Bad-Element");
+            _well.Operator = "AAA Company";
+
+            var response = DevKit.Add<WellList, Well>(_well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWell = response.SuppMsgOut;
+
+            // Update well with invalid element
+            var updateXml = "<?xml version=\"1.0\"?>" + Environment.NewLine +
+                "<wells version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
+                    "<well uid=\"" + uidWell + "\">" + Environment.NewLine +
+                         "     <operator>BBB Company</operator>" + Environment.NewLine +
+                         "     <fieldsssssss>Big Field</fieldsssssss>" + Environment.NewLine +
+                    "</well>" + Environment.NewLine +
+               "</wells>";
+
+            var results = DevKit.UpdateInStore(ObjectTypes.Well, updateXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            // Query the updated well 
+            var query = new Well { Uid = uidWell };
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+
+            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual("BBB Company", result[0].Operator);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_UpdateInStore_Can_Update_Well_And_Ignore_Invalid_Attribute()
+        {
+            _well.Name = DevKit.Name("Bug-5855-UpdateInStore-Bad-Attribute");
+            _well.Operator = "AAA Company";
+
+            var response = DevKit.Add<WellList, Well>(_well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWell = response.SuppMsgOut;
+
+            // Update well with invalid element
+            var queryIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
+                "<wells version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
+                    "<well uid=\"" + uidWell + "\">" + Environment.NewLine +
+                         "     <operator>BBB Company</operator>" + Environment.NewLine +
+                         "     <field abc=\"abc\">Big Field</field>" + Environment.NewLine +
+                    "</well>" + Environment.NewLine +
+               "</wells>";
+
+            var results = DevKit.UpdateInStore(ObjectTypes.Well, queryIn, null, null);
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            // Query the updated well 
+            var query = new Well { Uid = uidWell };
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+
+            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual("BBB Company", result[0].Operator);
+            Assert.IsNull(result[0].Field);
         }
     }
 }
