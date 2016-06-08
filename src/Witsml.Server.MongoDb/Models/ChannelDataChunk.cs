@@ -81,13 +81,5 @@ namespace PDS.Witsml.Server.Models
         /// The uid.
         /// </value>
         public string Uid { get; set; }
-
-        /// <summary>
-        /// Gets or sets the file identifier.
-        /// </summary>
-        /// <value>
-        /// The file identifier.
-        /// </value>
-        public string FileId { get; set; }
     }
 }
