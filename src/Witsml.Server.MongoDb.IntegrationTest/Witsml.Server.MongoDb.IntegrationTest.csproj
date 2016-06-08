@@ -199,6 +199,7 @@
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="AssemblyInitializer.cs" />
+    <Compile Include="Data\Channels\ChannelDataChunkAdapterAddTests.cs" />
     <Compile Include="Data\Channels\ChannelSet200DataAdapterAddTests.cs" />
     <Compile Include="Data\DatabaseProviderTests.cs" />
     <Compile Include="Data\Logs\Log200DataAdapterAddTests.cs" />
