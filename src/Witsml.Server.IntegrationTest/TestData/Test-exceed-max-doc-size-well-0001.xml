@@ -1,0 +1,44 @@
+<wells xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/terms/" version="1.4.1.1" xmlns="http://www.witsml.org/schemas/1series">
+  <well uid="Test-exceed-max-doc-size-well-0001">
+    <name>Well - Test Exceed Max Document Size</name>
+    <numGovt>Energistics-numGovt-11111</numGovt>
+    <dTimLicense>2001-05-15T13:20:00.0000000+00:00</dTimLicense>
+    <field>Big Field</field>
+    <country>US</country>
+    <state>TX</state>
+    <county>Montgomery</county>
+    <region>Region Name</region>
+    <district>District Name</district>
+    <block>Block Name</block>
+    <timeZone>-06:00</timeZone>
+    <operator>Operating Company</operator>
+    <operatorDiv>Division Name</operatorDiv>
+    <pcInterest uom="%">65</pcInterest>
+    <numAPI>Energistics-numAPI-11111</numAPI>
+    <statusWell>drilling</statusWell>
+    <purposeWell>exploration</purposeWell>
+    <dTimSpud>2001-05-31T08:15:00.0000000+00:00</dTimSpud>
+    <dTimPa>2001-07-15T15:30:00.0000000+00:00</dTimPa>
+    <wellDatum uid="KB">
+      <name>Kelly Bushing</name>
+      <code>KB</code>
+      <elevation uom="ft">78.5</elevation>
+    </wellDatum>
+    <wellCRS uid="proj1">
+      <name>ED50 / UTM Zone 31N</name>
+      <mapProjection>
+        <nameCRS namingSystem="epsg">ED50 / UTM Zone 31N</nameCRS>
+      </mapProjection>
+    </wellCRS>
+    <wellCRS uid="geog1">
+      <name>ED50</name>
+      <geographic>
+        <nameCRS namingSystem="epsg">ED50</nameCRS>
+      </geographic>
+    </wellCRS>
+    <commonData>
+      <dTimCreation>2016-04-06T20:13:54.1379221+00:00</dTimCreation>
+      <dTimLastChange>2016-04-06T20:14:12.4085200+00:00</dTimLastChange>
+    </commonData>
+  </well>
+</wells>
