@@ -1,0 +1,10 @@
+<wellbores xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/terms/" version="1.4.1.1" xmlns="http://www.witsml.org/schemas/1series">
+  <wellbore uidWell="Test-exceed-max-doc-size-well-0001" uid="Test-exceed-max-doc-size-wellbore-0001">
+    <nameWell>Well - Test Exceed Max Document Size</nameWell>
+    <name>Wellbore - Test Exceed Max Document Size</name>
+    <commonData>
+      <dTimCreation>2016-04-06T20:13:54.6688830+00:00</dTimCreation>
+      <dTimLastChange>2016-04-06T20:13:54.6688830+00:00</dTimLastChange>
+    </commonData>
+  </wellbore>
+</wellbores>
