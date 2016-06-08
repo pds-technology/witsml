@@ -19,9 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.IO;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Energistics.Datatypes;
 using MongoDB.Bson;
@@ -44,7 +42,9 @@ namespace PDS.Witsml.Server.Data.Channels
     {
         private const string ChannelDataChunk = "channelDataChunk";
         private const int MaxDataLength = 5000000;
-        private const string FileIdField = "File ID";
+        private const int ChunkSizeBytes = 10485760;
+        private const string FileName = "FileName";
+        private const string BucketName = "channelData";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelDataChunkAdapter"/> class.
@@ -583,8 +583,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
         private void UpdateMongoFile(ChannelDataChunk dc)
         {
-            var db = DatabaseProvider.GetDatabase();
-            var bucket = new GridFSBucket(db);
+            var bucket = GetMongoFileBucket();
 
             if (dc.Data.Length >= MaxDataLength)
             {
@@ -594,23 +593,21 @@ namespace PDS.Witsml.Server.Data.Channels
                 {
                     Metadata = new BsonDocument
                     {
-                        {"FileName", dc.Uid},
-                        {"Size", dc.Data.Length},
-                        {FileIdField, dc.Uid},
+                        {FileName, dc.Uid},
+                        {"DataBytes", bytes.Length}
                     }
                 };
 
-                if (!string.IsNullOrEmpty(dc.FileId))
-                    DeleteMongoFile(bucket, dc.FileId);
+                if (!string.IsNullOrEmpty(dc.Uid))
+                    DeleteMongoFile(bucket, dc.Uid);
 
                 bucket.UploadFromBytes(dc.Uid, bytes, loadOptions);
                 dc.Data = null;
-                dc.FileId = dc.Uid;
             }
             else
             {
-                if (!string.IsNullOrEmpty(dc.FileId))
-                    DeleteMongoFile(bucket, dc.FileId);
+                if (!string.IsNullOrEmpty(dc.Uid))
+                    DeleteMongoFile(bucket, dc.Uid);
             }
         }
 
@@ -619,23 +616,22 @@ namespace PDS.Witsml.Server.Data.Channels
             var filters = new List<FilterDefinition<ChannelDataChunk>>
             {
                 filter,
-                Builders<ChannelDataChunk>.Filter.Ne(c => c.FileId, null)
+                Builders<ChannelDataChunk>.Filter.Eq(c => c.Data, null)
             };
             var chunkFilter = Builders<ChannelDataChunk>.Filter.And(filters);
             var chunks = GetData(chunkFilter, true);
 
-            var db = DatabaseProvider.GetDatabase();
-            var bucket = new GridFSBucket(db);
+            var bucket = GetMongoFileBucket();
 
             foreach (var chunk in chunks)
             {
-                DeleteMongoFile(bucket, chunk.FileId);
+                DeleteMongoFile(bucket, chunk.Uid);
             }
         }
 
         private void DeleteMongoFile(IGridFSBucket bucket, string fileId)
         {
-            var filter = Builders<GridFSFileInfo>.Filter.Eq(fi => fi.Metadata[FileIdField], fileId);
+            var filter = Builders<GridFSFileInfo>.Filter.Eq(fi => fi.Metadata[FileName], fileId);
             var mongoFile = bucket.Find(filter).FirstOrDefault();
 
             if (mongoFile == null)
@@ -646,12 +642,11 @@ namespace PDS.Witsml.Server.Data.Channels
 
         private void GetMongoFileData(IEnumerable<ChannelDataChunk> dcList)
         {
-            var db = DatabaseProvider.GetDatabase();
-            var bucket = new GridFSBucket(db);
+            var bucket = GetMongoFileBucket();
 
-            foreach (var dc in dcList.Where(c => !string.IsNullOrEmpty(c.FileId)))
+            foreach (var dc in dcList.Where(c => string.IsNullOrEmpty(c.Data)))
             {
-                var filter = Builders<GridFSFileInfo>.Filter.Eq(fi => fi.Metadata[FileIdField], dc.FileId);
+                var filter = Builders<GridFSFileInfo>.Filter.Eq(fi => fi.Metadata[FileName], dc.Uid);
                 var mongoFile = bucket.Find(filter).FirstOrDefault();
 
                 if (mongoFile == null)
@@ -660,6 +655,16 @@ namespace PDS.Witsml.Server.Data.Channels
                 var bytes = bucket.DownloadAsBytes(mongoFile.Id);
                 dc.Data = Encoding.UTF8.GetString(bytes);
             }         
+        }
+
+        private IGridFSBucket GetMongoFileBucket()
+        {
+            var db = DatabaseProvider.GetDatabase();
+            return new GridFSBucket(db, new GridFSBucketOptions
+            {
+                BucketName = BucketName,
+                ChunkSizeBytes = ChunkSizeBytes
+            });
         }
     }
 }
