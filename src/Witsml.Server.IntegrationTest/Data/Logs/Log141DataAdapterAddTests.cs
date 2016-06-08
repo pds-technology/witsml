@@ -34,8 +34,6 @@ namespace PDS.Witsml.Server.Data.Logs
         private Well Well;
         private Wellbore Wellbore;
         private Log Log;
-        private string _testDataDir;
-        private string _exceedFileFormat = "Test-exceed-max-doc-size-{0}-0001.xml";
 
         public TestContext TestContext { get; set; }
 
@@ -43,8 +41,6 @@ namespace PDS.Witsml.Server.Data.Logs
         public void TestSetUp()
         {
             DevKit = new DevKit141Aspect(TestContext);
-
-            _testDataDir = new DirectoryInfo(@".\TestData").FullName;
 
             DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
                 .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
@@ -2857,36 +2853,6 @@ namespace PDS.Witsml.Server.Data.Logs
 
         }
 
-        // TODO: If document size limit issue is ever fixed this test should be changed to
-        // TODO: ... test for success and delete the log after testing.
-        [TestMethod]
-        public void Log141DataAdapter_AddToStore_Error_1006_Max_Document_Size_Exceeded()
-        {
-            // Load Well from file and assert success response
-            var response = DevKit.Add_Well_from_file(
-                BuildDataFileName(string.Format(_exceedFileFormat, "well")));
-            // There is no response if the Well already exists in the database
-            if (response != null)
-            {
-                Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-            }
-
-            // Load Wellbore from file and assert success response
-            response = DevKit.Add_Wellbore_from_file(
-                BuildDataFileName(string.Format(_exceedFileFormat, "wellbore")));
-            // There is no response if the Wellbore already exists in the database
-            if (response != null)
-            {
-                Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-            }
-
-            // Load Log from file and assert max doc size exceeded error response
-            response = DevKit.Add_Log_from_file(
-                BuildDataFileName(string.Format(_exceedFileFormat, "log")));
-            // Log should always have a response because it always fails.
-            Assert.AreEqual((short)ErrorCodes.ErrorMaxDocumentSizeExceeded, response.Result);
-        }
-
         #region Helper Methods
 
         private Log CreateLog(string uid, string name, Well well, Wellbore wellbore)
@@ -2943,11 +2909,6 @@ namespace PDS.Witsml.Server.Data.Logs
                 "</logs>";
 
             return xmlIn;
-        }
-
-        private string BuildDataFileName(string filename)
-        {
-            return Path.Combine(_testDataDir, filename);
         }
         #endregion
     }
