@@ -201,7 +201,7 @@ namespace PDS.Witsml.Server.Configuration
         }
 
         [TestMethod]
-        public void WitsmlValidator_GetFromStore_Error_403_RequestObjectSelectionCapability_True_MissingNamespace()
+        public void WitsmlValidator_GetFromStore_Well_Error_403_RequestObjectSelectionCapability_True_MissingNamespace()
         {
             string queryIn = "<wells version = \"1.4.1.1\" >" + Environment.NewLine +
                             "    <well/>" + Environment.NewLine +
@@ -213,7 +213,7 @@ namespace PDS.Witsml.Server.Configuration
         }
 
         [TestMethod]
-        public void WitsmlValidator_GetFromStore_Error_403_RequestObjectSelectionCapability_True_BadNamespace()
+        public void WitsmlValidator_GetFromStore_Well_Error_403_RequestObjectSelectionCapability_True_BadNamespace()
         {
             string badQuery = "<wells xmlns=\"www.witsml.org/schemas/131\" version = \"1.4.1.1\" >" + Environment.NewLine +
                               "</wells>";
@@ -224,7 +224,7 @@ namespace PDS.Witsml.Server.Configuration
         }
 
         [TestMethod]
-        public void WitsmlValidator_GetFromStore_Error_403_RequestObjectSelectionCapability_None_BadNamespace()
+        public void WitsmlValidator_GetFromStore_Well_Error_403_RequestObjectSelectionCapability_None_BadNamespace()
         {
             string badQuery = "<wells xmlns=\"www.witsml.org/schemas/131\" version = \"1.4.1.1\" >" + Environment.NewLine +
                               "</wells>";
@@ -244,7 +244,7 @@ namespace PDS.Witsml.Server.Configuration
         }
 
         [TestMethod]
-        public void WitsmlValidator_GetFromStore_Error_409_RequestObjectSelectionCapability_None_Minimum_Query_Template()
+        public void WitsmlValidator_GetFromStore_Well_Error_409_RequestObjectSelectionCapability_None_Minimum_Query_Template()
         {
             string badQuery = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version = \"1.4.1.1\" >" + Environment.NewLine +
                               "</wells>";
@@ -255,7 +255,7 @@ namespace PDS.Witsml.Server.Configuration
         }
 
         [TestMethod]
-        public void WitsmlValidator_GetFromStore_Error_407_Missing_Witsml_Object_Type()
+        public void WitsmlValidator_GetFromStore_Well_Error_407_Missing_Witsml_Object_Type()
         {
             var well = new Well { Name = "Well-to-query-missing-witsml-type", TimeZone = DevKit.TimeZone };
             var response = DevKit.Get<WellList, Well>(DevKit.List(well), string.Empty);
@@ -265,7 +265,7 @@ namespace PDS.Witsml.Server.Configuration
         }
 
         [TestMethod]
-        public void WitsmlValidator_GetFromStore_Error_408_Missing_Input_Template()
+        public void WitsmlValidator_GetFromStore_Error_Well_408_Missing_Input_Template()
         {
             var response = DevKit.GetFromStore(ObjectTypes.Well, null, null, null);
 
