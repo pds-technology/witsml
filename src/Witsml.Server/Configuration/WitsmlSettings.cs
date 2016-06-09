@@ -84,6 +84,16 @@ namespace PDS.Witsml.Server.Configuration
         public static string DefaultContactPhone = Properties.Settings.Default.DefaultContactPhone;
 
         /// <summary>
+        /// The maximum data length
+        /// </summary>
+        public static int MaxDataLength = Properties.Settings.Default.MaxDataLength;
+
+        /// <summary>
+        /// The chunk size bytes
+        /// </summary>
+        public static int ChunkSizeBytes = Properties.Settings.Default.ChunkSizeBytes;
+
+        /// <summary>
         /// Gets the size of the range.
         /// </summary>
         /// <param name="isTimeIndex"><c>true</c> if is time index.</param>

@@ -157,5 +157,23 @@ namespace PDS.Witsml.Server.Properties {
                 return ((string)(this["DefaultDataSchemaVersion"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5000000")]
+        public int MaxDataLength {
+            get {
+                return ((int)(this["MaxDataLength"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10485760")]
+        public int ChunkSizeBytes {
+            get {
+                return ((int)(this["ChunkSizeBytes"]));
+            }
+        }
     }
 }
