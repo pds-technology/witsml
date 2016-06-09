@@ -120,11 +120,11 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="PDS.Framework, Version=2016.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PDS.Framework.2016.1.20160609.2\lib\net46\PDS.Framework.dll</HintPath>
+      <HintPath>..\packages\PDS.Framework.2016.1.20160609.3\lib\net46\PDS.Framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="PDS.Framework.Web, Version=2016.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PDS.Framework.Web.2016.1.20160609.2\lib\net46\PDS.Framework.Web.dll</HintPath>
+      <HintPath>..\packages\PDS.Framework.Web.2016.1.20160609.3\lib\net46\PDS.Framework.Web.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="PDS.Witsml, Version=2016.1.0.0, Culture=neutral, processorArchitecture=MSIL">

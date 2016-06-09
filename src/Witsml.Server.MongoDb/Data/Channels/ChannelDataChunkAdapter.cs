@@ -41,13 +41,6 @@ namespace PDS.Witsml.Server.Data.Channels
     public class ChannelDataChunkAdapter : MongoDbDataAdapter<ChannelDataChunk>
     {
         private const string ChannelDataChunk = "channelDataChunk";
-        private const int MaxDataLength = 5000000;
-
-        /// <summary>
-        /// The chunk size bytes
-        /// </summary>
-        public const int ChunkSizeBytes = 10485760;
-
 
         /// <summary>
         /// The file name
@@ -599,7 +592,7 @@ namespace PDS.Witsml.Server.Data.Channels
         {
             var bucket = GetMongoFileBucket();
 
-            if (dc.Data.Length >= MaxDataLength)
+            if (dc.Data.Length >= WitsmlSettings.MaxDataLength)
             {
                 var bytes = Encoding.UTF8.GetBytes(dc.Data);
                 
@@ -677,7 +670,7 @@ namespace PDS.Witsml.Server.Data.Channels
             return new GridFSBucket(db, new GridFSBucketOptions
             {
                 BucketName = BucketName,
-                ChunkSizeBytes = ChunkSizeBytes
+                ChunkSizeBytes = WitsmlSettings.ChunkSizeBytes
             });
         }
     }

@@ -23,6 +23,7 @@ using Energistics.DataAccess.WITSML141;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Driver;
 using MongoDB.Driver.GridFS;
+using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Server.Models;
 
@@ -107,7 +108,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var bucket = new GridFSBucket(database, new GridFSBucketOptions
             {
                 BucketName = ChannelDataChunkAdapter.BucketName,
-                ChunkSizeBytes = ChannelDataChunkAdapter.ChunkSizeBytes
+                ChunkSizeBytes = WitsmlSettings.ChunkSizeBytes
             });
 
             foreach (var fc in fileChunks)
