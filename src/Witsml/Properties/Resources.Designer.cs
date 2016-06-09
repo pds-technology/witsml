@@ -385,6 +385,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to For WMLS_GetBaseMsg, a non-empty value must be specified for ReturnValueIn..
+        /// </summary>
+        internal static string InvalidReturnValueIn {
+            get {
+                return ResourceManager.GetString("InvalidReturnValueIn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The value of the uom attribute is must match an ‘annotation’ attribute from the WITSML Units Dictionary XML file..
         /// </summary>
         internal static string InvalidUnitOfMeasure {

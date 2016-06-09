@@ -151,6 +151,7 @@ namespace PDS.Witsml
         /// <summary>
         /// -422 For WMLS_GetBaseMsg, a non-empty value must be specified for ReturnValueIn.
         /// </summary>
+        InvalidReturnValueIn = -422,
 
         /// <summary>
         /// -423 For WMLS_GetCap, the OptionsIn keyword ‘dataVersion’ must specify a Data Schema Version that is

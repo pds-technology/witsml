@@ -371,5 +371,37 @@ namespace PDS.Witsml.Server
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.SchemaVersionNotMatch, response.Result);
         }
+
+        [TestMethod]
+        public void WitsmlStore141_GetBaseMsg_Can_Return_Message()
+        {
+            var request = new WMLS_GetBaseMsgRequest {ReturnValueIn = (short) ErrorCodes.InputTemplateNonConforming };
+            var response = DevKit.Store.WMLS_GetBaseMsg(request);
+
+            Assert.IsNotNull(response);
+            Assert.IsNotNull(response.Result);
+            Assert.AreEqual("The input template must conform to the appropriate derived schema.", response.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlStore141_GetBaseMsg_Error_422_ReturnValueIn_Is_UnSet()
+        {
+            var request = new WMLS_GetBaseMsgRequest();
+            var response = DevKit.Store.WMLS_GetBaseMsg(request);
+
+            Assert.IsNotNull(response);
+            Assert.IsNotNull(response.Result);
+            Assert.IsTrue(response.Result.Contains("-422"));
+        }
+
+        [TestMethod]
+        public void WitsmlStore141_GetBaseMsg_Can_Return_Null_On_Invalid_ReturnValueIn()
+        {
+            var request = new WMLS_GetBaseMsgRequest { ReturnValueIn = 12345 };
+            var response = DevKit.Store.WMLS_GetBaseMsg(request);
+
+            Assert.IsNotNull(response);
+            Assert.IsNull(response.Result);
+        }
     }
 }
