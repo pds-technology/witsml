@@ -414,4 +414,8 @@
     <value>Maximum document size exceeded</value>
     <comment>-1006</comment>
   </data>
+  <data name="InvalidReturnValueIn" xml:space="preserve">
+    <value>For WMLS_GetBaseMsg, a non-empty value must be specified for ReturnValueIn.</value>
+    <comment>-422</comment>
+  </data>
 </root>

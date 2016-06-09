@@ -292,7 +292,12 @@ namespace PDS.Witsml.Server
             _log.Debug(WebOperationContext.Current.ToLogMessage());
             string message;
 
-            if (Enum.IsDefined(typeof(ErrorCodes), request.ReturnValueIn))
+            if (request.ReturnValueIn == (short)ErrorCodes.Unset)
+            {
+                message = string.Format("Error {0}: {1}", (short)ErrorCodes.InvalidReturnValueIn, ErrorCodes.InvalidReturnValueIn.GetDescription());
+                _log.DebugFormat("{0} - {1}", request.ReturnValueIn, message);
+            }
+            else if (Enum.IsDefined(typeof(ErrorCodes), request.ReturnValueIn))
             {
                 var errorCode = (ErrorCodes)request.ReturnValueIn;
                 message = errorCode.GetDescription();
