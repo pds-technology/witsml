@@ -202,7 +202,7 @@
     <Compile Include="Data\Channels\ChannelDataChunkAdapterAddTests.cs" />
     <Compile Include="Data\Channels\ChannelSet200DataAdapterAddTests.cs" />
     <Compile Include="Data\DatabaseProviderTests.cs" />
-    <Compile Include="Data\Logs\Log141DataAdapterAddTests.cs" />
+    <Compile Include="Data\Logs\Log141MongoDataAdapterAddTests.cs" />
     <Compile Include="Data\Logs\Log200DataAdapterAddTests.cs" />
     <Compile Include="Data\MongoDbClassMapperTests.cs" />
     <Compile Include="Data\MongoDbUtilityTests.cs" />

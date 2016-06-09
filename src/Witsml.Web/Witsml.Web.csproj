@@ -128,7 +128,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="PDS.Witsml, Version=2016.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PDS.Witsml.2016.1.20160609.2-BUILD55\lib\net46\PDS.Witsml.dll</HintPath>
+      <HintPath>..\packages\PDS.Witsml.2016.1.20160609.3-BUILD55\lib\net46\PDS.Witsml.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="PDS.Witsml.Server, Version=2016.1.0.0, Culture=neutral, processorArchitecture=MSIL">
