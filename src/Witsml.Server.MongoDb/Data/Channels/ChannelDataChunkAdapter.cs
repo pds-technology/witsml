@@ -42,9 +42,23 @@ namespace PDS.Witsml.Server.Data.Channels
     {
         private const string ChannelDataChunk = "channelDataChunk";
         private const int MaxDataLength = 5000000;
-        private const int ChunkSizeBytes = 10485760;
-        private const string FileName = "FileName";
-        private const string BucketName = "channelData";
+
+        /// <summary>
+        /// The chunk size bytes
+        /// </summary>
+        public const int ChunkSizeBytes = 10485760;
+
+
+        /// <summary>
+        /// The file name
+        /// </summary>
+        public const string FileName = "FileName";
+
+
+        /// <summary>
+        /// The bucket name
+        /// </summary>
+        public const string BucketName = "channelData";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelDataChunkAdapter"/> class.
