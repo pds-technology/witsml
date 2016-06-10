@@ -86,6 +86,9 @@ namespace PDS.Witsml.Server.Data.Logs
             log.NameWell = _well.Name;
             log.NameWellbore = _wellbore.Name;
 
+            var logDataAdded = log.LogData.FirstOrDefault();
+            Assert.IsNotNull(logDataAdded);
+
             response = _devKit.Add<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
@@ -127,11 +130,16 @@ namespace PDS.Witsml.Server.Data.Logs
                 UidWellbore = log.UidWellbore
             };
 
-            var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.HeaderOnly);
+            var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             Assert.AreEqual(1, results.Count);
 
             var result = results.First();
             Assert.IsNotNull(result);
+
+            var logDataReturned = result.LogData.FirstOrDefault();
+            Assert.IsNotNull(logDataReturned);
+
+            Assert.AreEqual(logDataAdded.Data.Count, logDataReturned.Data.Count);
         }
     }
 }
