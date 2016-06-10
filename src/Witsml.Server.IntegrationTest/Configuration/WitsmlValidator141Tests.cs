@@ -18,7 +18,6 @@
 
 using Energistics.DataAccess.WITSML141;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Linq;
 
 namespace PDS.Witsml.Server.Configuration

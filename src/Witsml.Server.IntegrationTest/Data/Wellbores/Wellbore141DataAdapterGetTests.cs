@@ -16,11 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
-using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Server.Data.Wellbores
@@ -35,6 +32,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         private Well _well;
         private Wellbore _wellbore;
         private Wellbore _wellboreQuery;
+        private Wellbore _wellboreQueryUid;
 
         public TestContext TestContext { get; set; }
 
@@ -66,10 +64,10 @@ namespace PDS.Witsml.Server.Data.Wellbores
             {
                 Uid = response.SuppMsgOut,
                 Name = string.Empty,
-                Number = string.Empty,
-                NumGovt = string.Empty,
-                SuffixAPI = string.Empty
+                Number = string.Empty
             };
+
+            _wellboreQueryUid = new Wellbore() {Uid = response.SuppMsgOut};
         }
 
         [TestCleanup]
@@ -81,39 +79,51 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod]
         public void Wellbore141DataAdapter_GetFromStore_All()
         {
-            GetWellboreQueryWithOptionsIn(_wellboreQuery, OptionsIn.ReturnElements.All);
+            var wellbore = GetWellboreQueryWithOptionsIn(_wellboreQueryUid, OptionsIn.ReturnElements.All);
+            Assert.AreEqual(_wellboreQuery.Uid, wellbore.Uid);
+            Assert.IsNotNull(wellbore.Number);
+            Assert.AreEqual(_wellbore.Number, wellbore.Number);
         }
 
         [TestMethod]
         public void Wellbore141DataAdapter_GetFromStore_IdOnly()
         {
-            GetWellboreQueryWithOptionsIn(_wellboreQuery, OptionsIn.ReturnElements.IdOnly);
+            var wellbore = GetWellboreQueryWithOptionsIn(_wellboreQueryUid, OptionsIn.ReturnElements.IdOnly);
+            Assert.AreEqual(_wellboreQuery.Uid, wellbore.Uid);
+            Assert.AreEqual(_wellbore.Name, wellbore.Name);
+            Assert.IsNull(wellbore.Number); // Will not exist in an IdOnly query
         }
 
         [TestMethod]
         public void Wellbore141DataAdapter_GetFromStore_Requested()
         {
-            GetWellboreQueryWithOptionsIn(_wellboreQuery, OptionsIn.ReturnElements.Requested);
+            var wellbore = GetWellboreQueryWithOptionsIn(_wellboreQuery, OptionsIn.ReturnElements.Requested);
+            Assert.AreEqual(_wellboreQuery.Uid, wellbore.Uid);
+            Assert.AreEqual(_wellbore.Name, wellbore.Name);
+            Assert.AreEqual(_wellbore.Number, wellbore.Number);
+            Assert.IsNull(wellbore.NumGovt); // Will not exist because it was not requested in the query
         }
 
         [TestMethod]
         public void Wellbore141DataAdapter_GetFromStore_RequestObjectSelection()
         {
-            var result = DevKit.Query<WellboreList, Wellbore>(new Wellbore(), ObjectTypes.Wellbore, null, optionsIn: OptionsIn.ReturnElements.RequestObjectSelectionCapability.True);
+            _wellboreQueryUid.Uid = null;
+            var result = DevKit.Query<WellboreList, Wellbore>(_wellboreQueryUid, ObjectTypes.Wellbore, null, optionsIn: OptionsIn.ReturnElements.RequestObjectSelectionCapability.True);
             Assert.AreEqual(1, result.Count);
 
             var returnWell = result.FirstOrDefault();
             Assert.IsNotNull(returnWell);
+            Assert.IsNotNull(returnWell.PurposeWellbore);  // We'd only see this for Request Object Selection Cap
         }
 
-        private void GetWellboreQueryWithOptionsIn(Wellbore query, string optionsIn)
+        private Wellbore GetWellboreQueryWithOptionsIn(Wellbore query, string optionsIn)
         {
             var result = DevKit.Query<WellboreList, Wellbore>(query, ObjectTypes.Wellbore, null, optionsIn: optionsIn);
             Assert.AreEqual(1, result.Count);
 
-            var returnWell = result.FirstOrDefault();
-            Assert.IsNotNull(returnWell);
-            Assert.AreEqual(_wellboreQuery.Uid, returnWell.Uid);
+            var returnWellbore = result.FirstOrDefault();
+            Assert.IsNotNull(returnWellbore);
+            return returnWellbore;
         }
     }
 }
