@@ -122,10 +122,10 @@ namespace PDS.Witsml.Data
                 if (propertyInfo != null)
                 {
                     NavigateElementGroup(propertyInfo, group, parentPath);
-                }
+                } 
                 else
                 {
-                    Logger.DebugFormat("Invalid element '{0}' is ignored.", group.Key);
+                    Logger.DebugFormat("Invalid element '{0}' is ignored.", group.Key);                   
                 }
             }
 
@@ -227,7 +227,7 @@ namespace PDS.Witsml.Data
         /// <param name="propertyInfo">The property information.</param>
         protected virtual void NavigateArrayElementType(List<XElement> elements, Type childType, XElement element, string propertyPath, PropertyInfo propertyInfo)
         {
-            NavigateElementType(childType, element, propertyPath);
+            NavigateElementType(childType, element, propertyPath, propertyInfo);
         }
 
         /// <summary>
@@ -248,7 +248,8 @@ namespace PDS.Witsml.Data
         /// <param name="elementType">Type of the element.</param>
         /// <param name="element">The element.</param>
         /// <param name="propertyPath">The property path.</param>
-        protected void NavigateElementType(Type elementType, XElement element, string propertyPath)
+        /// <param name="parentPropertyInfo">The parent property information.</param>
+        protected void NavigateElementType(Type elementType, XElement element, string propertyPath, PropertyInfo parentPropertyInfo = null)
         {
             var textProperty = elementType.GetProperties().FirstOrDefault(x => x.IsDefined(typeof(XmlTextAttribute), false));
 
@@ -263,18 +264,24 @@ namespace PDS.Witsml.Data
                     var uomPath = GetPropertyPath(propertyPath, uomProperty.Name);
                     var uomValue = ValidateMeasureUom(element, uomProperty, element.Value);
 
-                    NavigateUomAttribute(element.Attribute("uom"), uomProperty.PropertyType, uomPath, element.Value, uomValue);
+                    NavigateUomAttribute(element.Attribute("uom"), uomProperty.PropertyType, uomPath, element.Value,
+                        uomValue);
                 }
 
                 NavigateProperty(element, propertyType, propertyName, element.Value);
             }
-            else if (element.HasElements || element.HasAttributes)
-            {
-                NavigateElement(element, elementType, propertyPath);
-            }
             else
             {
-                NavigateProperty(element, elementType, propertyPath, element.Value);
+                RemoveInvalidChildElementsAndAttributes(elementType, element, parentPropertyInfo);
+
+                if (element.HasElements || element.HasAttributes)
+                {
+                    NavigateElement(element, elementType, propertyPath);
+                }
+                else
+                {
+                    NavigateProperty(element, elementType, propertyPath, element.Value);
+                }
             }
         }
 
@@ -630,6 +637,37 @@ namespace PDS.Witsml.Data
             }
 
             return type.IsNumeric();
+        }
+
+        private void RemoveInvalidChildElementsAndAttributes(Type elementType, XElement element, PropertyInfo parentPropertyInfo)
+        {
+            // Ignore list properties that declare child elements using XmlArrayItem
+            if (parentPropertyInfo?.GetCustomAttribute<XmlArrayItemAttribute>() != null) return;
+
+            var properties = GetPropertyInfo(elementType);
+
+            foreach (var attribute in element.Attributes())
+            {
+                if (attribute.IsNamespaceDeclaration || attribute.Name == Xsi("nil") || attribute.Name == Xsi("type"))
+                    continue;
+
+                var propertyInfo = GetPropertyInfoForAnElement(properties, attribute.Name.LocalName);
+                if (propertyInfo == null)
+                {
+                    attribute.Remove();
+                    Logger.DebugFormat("Invalid attribute '{0}' is ignored.", attribute.Name.LocalName);
+                }
+            }
+
+            foreach (var child in element.Elements())
+            {
+                var propertyInfo = GetPropertyInfoForAnElement(properties, child.Name.LocalName);
+                if (propertyInfo == null)
+                {
+                    child.Remove();
+                    Logger.DebugFormat("Invalid element '{0}' is ignored.", child.Name.LocalName);
+                }
+            }
         }
     }
 }
