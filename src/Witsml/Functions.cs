@@ -27,6 +27,12 @@ namespace PDS.Witsml
     {
         // SOAP
         /// <summary>
+        /// Get Base Message
+        /// </summary>
+        [Description("Get Base Message")]
+        GetBaseMsg,
+
+        /// <summary>
         /// Get Capabilities
         /// </summary>
         [Description("Get Capabilities")]
