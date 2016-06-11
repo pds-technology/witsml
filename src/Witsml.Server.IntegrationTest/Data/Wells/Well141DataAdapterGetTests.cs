@@ -760,7 +760,7 @@ namespace PDS.Witsml.Server.Data.Wells
                 "<wells version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
                     "<well uid=\"" + uidWell + "\">" + Environment.NewLine +
                          "     <operator/>" + Environment.NewLine +
-                         "     <field abc=\"abc\">Big Field</field>" + Environment.NewLine +
+                         "     <field abc=\"abc\"></field>" + Environment.NewLine +
                     "</well>" + Environment.NewLine +
                "</wells>";
 
@@ -770,7 +770,36 @@ namespace PDS.Witsml.Server.Data.Wells
             var wellList = EnergisticsConverter.XmlToObject<WellList>(results.XMLout);
             Assert.AreEqual(1, wellList.Well.Count);
             Assert.AreEqual("AAA Company", wellList.Well[0].Operator);
-            Assert.IsNull(wellList.Well[0].Field);
+            Assert.AreEqual("Very Big Field", wellList.Well[0].Field);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Can_Get_Well_With_Invalid_Child_Element()
+        {
+            _well.Name = DevKit.Name("Bug-5855-UpdateInStore-Invalid-Child-Element");
+            _well.Operator = "AAA Company";
+
+            var response = DevKit.Add<WellList, Well>(_well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWell = response.SuppMsgOut;
+
+            // Query well with invalid attribute
+            var queryIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
+                "<wells version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
+                    "<well uid=\"" + uidWell + "\">" + Environment.NewLine +
+                         "     <name/>" + Environment.NewLine +
+                         "     <operator><abc>BBB Company</abc></operator>" + Environment.NewLine +
+                    "</well>" + Environment.NewLine +
+               "</wells>";
+
+            var results = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, "returnElements=requested");
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            var wellList = EnergisticsConverter.XmlToObject<WellList>(results.XMLout);
+            Assert.AreEqual(1, wellList.Well.Count);
+            Assert.AreEqual(_well.Name, wellList.Well[0].Name);
+            Assert.AreEqual("AAA Company", wellList.Well[0].Operator);
         }
 
         private void AssertTestWell(Well expected, Well actual)

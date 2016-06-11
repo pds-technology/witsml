@@ -202,7 +202,38 @@ namespace PDS.Witsml.Server.Data.Wells
 
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual("BBB Company", result[0].Operator);
-            Assert.IsNull(result[0].Field);
+            Assert.AreEqual("Big Field", result[0].Field);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_UpdateInStore_Can_Update_With_Invalid_Child_Element()
+        {
+            _well.Name = DevKit.Name("Bug-5855-UpdateInStore-Invalid-Child-Element");
+            _well.Operator = "AAA Company";
+
+            var response = DevKit.Add<WellList, Well>(_well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidWell = response.SuppMsgOut;
+
+            // Update well with invalid element
+            var queryIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
+                "<wells version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
+                    "<well uid=\"" + uidWell + "\">" + Environment.NewLine +
+                         "     <operator><abc>BBB Company</abc></operator>" + Environment.NewLine +
+                    "</well>" + Environment.NewLine +
+               "</wells>";
+
+            var results = DevKit.UpdateInStore(ObjectTypes.Well, queryIn, null, null);
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            // Query the updated well 
+            var query = new Well { Uid = uidWell };
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+
+            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual(_well.Name, result[0].Name);
+            Assert.IsNull(result[0].Operator);
         }
     }
 }

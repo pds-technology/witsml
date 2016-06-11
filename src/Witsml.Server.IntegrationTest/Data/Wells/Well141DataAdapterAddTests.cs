@@ -458,6 +458,40 @@ namespace PDS.Witsml.Server.Data.Wells
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Query
+            var query = new Well { Uid = response.SuppMsgOut };
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+
+            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual("Big Field", result[0].Field);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_AddToStore_Can_Add_Well_With_Invalid_Child_Element()
+        {
+            var wellName = DevKit.Name("Bug-5855-AddToStore-Invalid-Child-Element");
+
+            string xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                          "   <well>" + Environment.NewLine +
+                          "     <name>" + wellName + "</name>" + Environment.NewLine +
+                          "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
+                          "     <field><abc>Big Field</abc></field>" + Environment.NewLine +
+                          "   </well>" + Environment.NewLine +
+                          "</wells>";
+
+            var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Query
+            var query = new Well { Uid = response.SuppMsgOut };
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+
+            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual(wellName, result[0].Name);
+            Assert.IsNull(result[0].Field);
         }
     }
 }
