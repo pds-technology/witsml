@@ -59,6 +59,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="capServer">The capServer instance.</param>
         public void GetCapabilities(CapServer capServer)
         {
+            Logger.DebugFormat("Getting the supported capabilities for Log data version {0}.", capServer.Version);
+
             var dataObject = new ObjectWithConstraint(ObjectTypes.Log)
             {
                 MaxDataNodes = WitsmlSettings.MaxDataNodes,

@@ -59,6 +59,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="capServer">The capServer instance.</param>
         public void GetCapabilities(CapServer capServer)
         {
+            Logger.DebugFormat("Getting the supported capabilities for Log data version {0}.", capServer.Version);
+
             capServer.Add(Functions.GetFromStore, ObjectTypes.Log);
             capServer.Add(Functions.AddToStore, ObjectTypes.Log);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);

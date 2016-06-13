@@ -50,6 +50,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// <param name="capServer">The capServer object.</param>
         public void GetCapabilities(CapServer capServer)
         {
+            Logger.DebugFormat("Getting the supported capabilities for Wellbore data version {0}.", capServer.Version);
+
             capServer.Add(Functions.GetFromStore, ObjectTypes.Wellbore);
             capServer.Add(Functions.AddToStore, ObjectTypes.Wellbore);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Wellbore);
