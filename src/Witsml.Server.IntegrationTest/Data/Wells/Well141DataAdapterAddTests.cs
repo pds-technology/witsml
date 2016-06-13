@@ -427,7 +427,7 @@ namespace PDS.Witsml.Server.Data.Wells
         {
             var wellName = DevKit.Name("Bug-5855-AddToStore-Bad-Element");
 
-            string xmlIn = string.Format(DevKit.BasicAddWellXml(), null, wellName, "<fieldsssssss>Big Field</fieldsssssss>");
+            string xmlIn = string.Format(DevKit141Aspect.BasicAddWellXmlTemplate, null, wellName, "<fieldsssssss>Big Field</fieldsssssss>");
 
             var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
 
@@ -440,7 +440,7 @@ namespace PDS.Witsml.Server.Data.Wells
         {
             var wellName = DevKit.Name("Bug-5855-AddToStore-Bad-Attribute");
 
-            string xmlIn = string.Format(DevKit.BasicAddWellXml(), null, wellName, "<field abc=\"cde\">Big Field</field>");
+            string xmlIn = string.Format(DevKit141Aspect.BasicAddWellXmlTemplate, null, wellName, "<field abc=\"cde\">Big Field</field>");
 
             var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
 
@@ -460,7 +460,7 @@ namespace PDS.Witsml.Server.Data.Wells
         {
             var wellName = DevKit.Name("Bug-5855-AddToStore-Invalid-Child-Element");
 
-            string xmlIn = string.Format(DevKit.BasicAddWellXml(), null, wellName, "<field><abc>Big Field</abc></field>");
+            string xmlIn = string.Format(DevKit141Aspect.BasicAddWellXmlTemplate, null, wellName, "<field><abc>Big Field</abc></field>");
 
             var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
 
