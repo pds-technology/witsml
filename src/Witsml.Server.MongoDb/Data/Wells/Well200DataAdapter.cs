@@ -39,6 +39,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [ImportingConstructor]
         public Well200DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Well200, ObjectTypes.Uuid)
         {
+            Logger.Debug("Instance created.");
         }
 
         /// <summary>
@@ -48,6 +49,8 @@ namespace PDS.Witsml.Server.Data.Wells
         /// <returns>A collection of data objects.</returns>
         public override List<Well> GetAll(EtpUri? parentUri = null)
         {
+            Logger.Debug("Fetching all Wells.");
+
             return GetQuery()
                 .OrderBy(x => x.Citation.Title)
                 .ToList();

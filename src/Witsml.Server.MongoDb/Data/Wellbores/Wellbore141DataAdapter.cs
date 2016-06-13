@@ -41,6 +41,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [ImportingConstructor]
         public Wellbore141DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Wellbore141)
         {
+            Logger.Debug("Instance created.");
         }
 
         /// <summary>
@@ -74,6 +75,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// <returns>A collection of data objects.</returns>
         public override List<Wellbore> GetAll(EtpUri? parentUri = null)
         {
+            Logger.Debug("Fetching all Wellbores.");
+
             var query = GetQuery().AsQueryable();
 
             if (parentUri != null)
