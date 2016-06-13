@@ -727,13 +727,9 @@ namespace PDS.Witsml.Server.Data.Wells
             var uidWell = response.SuppMsgOut;
 
             // Query well with invalid element
-            var queryIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
-                "<wells version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
-                    "<well uid=\"" + uidWell + "\">" + Environment.NewLine +
-                         "     <operator/>" + Environment.NewLine +
-                         "     <fieldsssssss>Big Field</fieldsssssss>" + Environment.NewLine +
-                    "</well>" + Environment.NewLine +
-               "</wells>";
+            var queryIn = string.Format(DevKit.BasicWellXml(), uidWell,
+                "<operator/>" +
+                "<fieldsssssss>Big Field</fieldsssssss>");
 
             var results = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, "returnElements=requested");
             Assert.AreEqual((short)ErrorCodes.Success, results.Result);
@@ -756,13 +752,9 @@ namespace PDS.Witsml.Server.Data.Wells
             var uidWell = response.SuppMsgOut;
 
             // Query well with invalid attribute
-            var queryIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
-                "<wells version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
-                    "<well uid=\"" + uidWell + "\">" + Environment.NewLine +
-                         "     <operator/>" + Environment.NewLine +
-                         "     <field abc=\"abc\"></field>" + Environment.NewLine +
-                    "</well>" + Environment.NewLine +
-               "</wells>";
+            var queryIn = string.Format(DevKit.BasicWellXml(), uidWell,
+                "<operator/>" +
+                "<field abc=\"abc\"></field>");
 
             var results = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, "returnElements=requested");
             Assert.AreEqual((short)ErrorCodes.Success, results.Result);
@@ -785,13 +777,9 @@ namespace PDS.Witsml.Server.Data.Wells
             var uidWell = response.SuppMsgOut;
 
             // Query well with invalid attribute
-            var queryIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
-                "<wells version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
-                    "<well uid=\"" + uidWell + "\">" + Environment.NewLine +
-                         "     <name/>" + Environment.NewLine +
-                         "     <operator><abc>BBB Company</abc></operator>" + Environment.NewLine +
-                    "</well>" + Environment.NewLine +
-               "</wells>";
+            var queryIn = string.Format(DevKit.BasicWellXml(), uidWell,
+                "<name/>" +
+                "<operator><abc>BBB Company</abc></operator>");
 
             var results = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, "returnElements=requested");
             Assert.AreEqual((short)ErrorCodes.Success, results.Result);

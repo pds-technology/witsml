@@ -30,7 +30,7 @@ namespace PDS.Witsml.Server
 {
     public class DevKit141Aspect : DevKitAspect
     {
-        
+
         public DevKit141Aspect(TestContext context, string url = null) : base(url, WMLSVersion.WITSML141, context)
         {
             LogGenerator = new Log141Generator();
@@ -217,6 +217,26 @@ namespace PDS.Witsml.Server
                 UidWellbore = uidWellbore,
                 NameWellbore = nameWellbore,
             };
+        }
+
+        public string BasicAddWellXml()
+        {
+            return "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                          "   <well uid=\"{0}\">" + Environment.NewLine +
+                          "     <name>{1}</name>" + Environment.NewLine +
+                          "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
+                          "{2}" +
+                          "   </well>" + Environment.NewLine +
+                          "</wells>";
+        }
+
+        public string BasicWellXml()
+        {
+            return "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                          "   <well uid=\"{0}\">" + Environment.NewLine +
+                          "{1}" +
+                          "   </well>" + Environment.NewLine +
+                          "</wells>";
         }
 
         public Well CreateTestWell()

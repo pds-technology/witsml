@@ -427,13 +427,7 @@ namespace PDS.Witsml.Server.Data.Wells
         {
             var wellName = DevKit.Name("Bug-5855-AddToStore-Bad-Element");
 
-            string xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-                          "   <well>" + Environment.NewLine +
-                          "     <name>" + wellName + "</name>" + Environment.NewLine +
-                          "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
-                          "     <fieldsssssss>Big Field</fieldsssssss>" + Environment.NewLine +
-                          "   </well>" + Environment.NewLine +
-                          "</wells>";
+            string xmlIn = string.Format(DevKit.BasicAddWellXml(), null, wellName, "<fieldsssssss>Big Field</fieldsssssss>");
 
             var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
 
@@ -446,13 +440,7 @@ namespace PDS.Witsml.Server.Data.Wells
         {
             var wellName = DevKit.Name("Bug-5855-AddToStore-Bad-Attribute");
 
-            string xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-                          "   <well>" + Environment.NewLine +
-                          "     <name>" + wellName + "</name>" + Environment.NewLine +
-                          "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
-                          "     <field abc=\"cde\">Big Field</field>" + Environment.NewLine +
-                          "   </well>" + Environment.NewLine +
-                          "</wells>";
+            string xmlIn = string.Format(DevKit.BasicAddWellXml(), null, wellName, "<field abc=\"cde\">Big Field</field>");
 
             var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
 
@@ -472,13 +460,7 @@ namespace PDS.Witsml.Server.Data.Wells
         {
             var wellName = DevKit.Name("Bug-5855-AddToStore-Invalid-Child-Element");
 
-            string xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-                          "   <well>" + Environment.NewLine +
-                          "     <name>" + wellName + "</name>" + Environment.NewLine +
-                          "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
-                          "     <field><abc>Big Field</abc></field>" + Environment.NewLine +
-                          "   </well>" + Environment.NewLine +
-                          "</wells>";
+            string xmlIn = string.Format(DevKit.BasicAddWellXml(), null, wellName, "<field><abc>Big Field</abc></field>");
 
             var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
 
