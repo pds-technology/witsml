@@ -85,6 +85,8 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         public virtual WitsmlResult AddToStore(RequestContext context)
         {
+            Logger.DebugFormat("Adding {0}", typeof(TObject).Name);
+
             var parser = new WitsmlQueryParser(context);
             return Add(parser);
         }
@@ -98,6 +100,8 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         public virtual WitsmlResult UpdateInStore(RequestContext context)
         {
+            Logger.DebugFormat("Updating {0}", typeof(TObject).Name);
+
             var parser = new WitsmlQueryParser(context);
             return Update(parser);
         }
@@ -111,6 +115,8 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         public virtual WitsmlResult DeleteFromStore(RequestContext context)
         {
+            Logger.DebugFormat("Deleting {0}", typeof(TObject).Name);
+
             var parser = new WitsmlQueryParser(context);
             return Delete(parser);
         }
