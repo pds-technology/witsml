@@ -32,8 +32,14 @@ namespace PDS.Witsml.Server.Data.Wellbores
     {
         private DevKit141Aspect DevKit;
         private List<Wellbore> _query;
-        private string _badQueryEmptyWellboreList ;
-        private string _badQueryNamespace;
+
+        private static readonly string _badQueryEmptyWellboreList =
+            "<wellbores xmlns=\"http://www.witsml.org/schemas/1series\" version = \"1.4.1.1\" >" + Environment.NewLine +
+            "</wellbores>";
+
+        private static readonly string _badQueryNamespace = 
+            "<wellbores xmlns=\"www.witsml.org/schemas/131\" version = \"1.4.1.1\" >" + Environment.NewLine +
+            "</wellbores>";
 
         public TestContext TestContext { get; set; }
 
@@ -47,13 +53,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 .ToArray();
 
             _query = DevKit.List(new Wellbore());
-
-            _badQueryEmptyWellboreList = 
-                "<wellbores xmlns=\"http://www.witsml.org/schemas/1series\" version = \"1.4.1.1\" >" + Environment.NewLine +
-                "</wellbores>";
-            _badQueryNamespace = "<wellbores xmlns=\"www.witsml.org/schemas/131\" version = \"1.4.1.1\" >" + Environment.NewLine +
-                  "</wellbores>";
-
         }
 
         [TestCleanup]
