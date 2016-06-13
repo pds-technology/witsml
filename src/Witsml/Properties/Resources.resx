@@ -210,8 +210,7 @@
     <comment>-407</comment>
   </data>
   <data name="ParametersNotEncodedByRules" xml:space="preserve">
-    <value>The OptionsIn parameter string must be encoded utilizing a subset (semicolon separators and no
- whitespace) of the encoding rules for HTML form content type application/x-www-form-urlencoded.</value>
+    <value>The OptionsIn parameter string must be encoded utilizing a subset (semicolon separators and no whitespace) of the encoding rules for HTML form content type application/x-www-form-urlencoded.</value>
     <comment>-411</comment>
   </data>
   <data name="ParialSuccess" xml:space="preserve">

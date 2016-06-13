@@ -637,8 +637,7 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The OptionsIn parameter string must be encoded utilizing a subset (semicolon separators and no
-        /// whitespace) of the encoding rules for HTML form content type application/x-www-form-urlencoded..
+        ///   Looks up a localized string similar to The OptionsIn parameter string must be encoded utilizing a subset (semicolon separators and no whitespace) of the encoding rules for HTML form content type application/x-www-form-urlencoded..
         /// </summary>
         internal static string ParametersNotEncodedByRules {
             get {
