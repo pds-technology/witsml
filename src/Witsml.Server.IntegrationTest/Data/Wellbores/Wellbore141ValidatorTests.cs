@@ -372,5 +372,17 @@ namespace PDS.Witsml.Server.Data.Wellbores
             var response = DevKit.Get<WellboreList, Wellbore>(_query, ObjectTypes.Wellbore, optionsIn: OptionsIn.ReturnElements.LatestChangeOnly);
             Assert.AreEqual((short)ErrorCodes.InvalidOptionForChangeLogOnly, response.Result);
         }
+
+        [TestMethod]
+        public void Wellbore141Validator_GetFromStore_Error_409_Bad_Child_Element()
+        {
+            string badQuery = "<wellbores xmlns=\"http://www.witsml.org/schemas/1series\" version = \"1.4.1.1\" >" + Environment.NewLine +
+                              "   <well />" + Environment.NewLine +
+                              "</wellbores>";
+
+            var response = DevKit.GetFromStore(ObjectTypes.Wellbore, badQuery, null, optionsIn: OptionsIn.RequestObjectSelectionCapability.True);
+
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
     }
 }
