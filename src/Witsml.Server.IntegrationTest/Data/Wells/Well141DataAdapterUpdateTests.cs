@@ -154,13 +154,9 @@ namespace PDS.Witsml.Server.Data.Wells
             var uidWell = response.SuppMsgOut;
 
             // Update well with invalid element
-            var updateXml = "<?xml version=\"1.0\"?>" + Environment.NewLine +
-                "<wells version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
-                    "<well uid=\"" + uidWell + "\">" + Environment.NewLine +
-                         "     <operator>BBB Company</operator>" + Environment.NewLine +
-                         "     <fieldsssssss>Big Field</fieldsssssss>" + Environment.NewLine +
-                    "</well>" + Environment.NewLine +
-               "</wells>";
+            var updateXml = string.Format(DevKit.BasicWellXml(), uidWell,
+                "<operator>BBB Company</operator>" + 
+                "<fieldsssssss>Big Field</fieldsssssss>");
 
             var results = DevKit.UpdateInStore(ObjectTypes.Well, updateXml, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, results.Result);
@@ -185,15 +181,11 @@ namespace PDS.Witsml.Server.Data.Wells
             var uidWell = response.SuppMsgOut;
 
             // Update well with invalid element
-            var queryIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
-                "<wells version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
-                    "<well uid=\"" + uidWell + "\">" + Environment.NewLine +
-                         "     <operator>BBB Company</operator>" + Environment.NewLine +
-                         "     <field abc=\"abc\">Big Field</field>" + Environment.NewLine +
-                    "</well>" + Environment.NewLine +
-               "</wells>";
+            var updateXml = string.Format(DevKit.BasicWellXml(), uidWell,
+                "<operator>BBB Company</operator>" + 
+                "<field abc=\"abc\">Big Field</field>");
 
-            var results = DevKit.UpdateInStore(ObjectTypes.Well, queryIn, null, null);
+            var results = DevKit.UpdateInStore(ObjectTypes.Well, updateXml, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, results.Result);
 
             // Query the updated well 
@@ -217,14 +209,10 @@ namespace PDS.Witsml.Server.Data.Wells
             var uidWell = response.SuppMsgOut;
 
             // Update well with invalid element
-            var queryIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
-                "<wells version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
-                    "<well uid=\"" + uidWell + "\">" + Environment.NewLine +
-                         "     <operator><abc>BBB Company</abc></operator>" + Environment.NewLine +
-                    "</well>" + Environment.NewLine +
-               "</wells>";
+            var updateXml = string.Format(DevKit.BasicWellXml(), uidWell,
+                "<operator><abc>BBB Company</abc></operator>");
 
-            var results = DevKit.UpdateInStore(ObjectTypes.Well, queryIn, null, null);
+            var results = DevKit.UpdateInStore(ObjectTypes.Well, updateXml, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, results.Result);
 
             // Query the updated well 
