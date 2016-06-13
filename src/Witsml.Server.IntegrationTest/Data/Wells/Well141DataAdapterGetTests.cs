@@ -658,11 +658,11 @@ namespace PDS.Witsml.Server.Data.Wells
             string xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
                            "   <well> uid=\"" + uid + "\"" + Environment.NewLine +
                            "     <name>" + well.Name + "</name>" + Environment.NewLine +
-                           "    <pcInterest uom=\"" + well.PercentInterest.Uom + "\">" + well.PercentInterest.Value + "</pcInterest>" + Environment.NewLine +
+                           "    <pcInterest uom=\"" + well.PercentInterest.Uom + "\">" + "</pcInterest>" + Environment.NewLine +
                            "    <wellDatum uid=\"" + well.WellDatum[0].Uid + "\">" + Environment.NewLine +
                            "      <name>" + well.WellDatum[0].Name + "</name>" + Environment.NewLine +
                            "      <code>" + well.WellDatum[0].Code + "</code>" + Environment.NewLine +
-                           "      <elevation uom=\"" + well.WellDatum[0].Elevation.Uom + "\">" + well.WellDatum[0].Elevation.Value + "</elevation>" + Environment.NewLine +
+                           "      <elevation uom=\"" + well.WellDatum[0].Elevation.Uom + "\">" + "</elevation>" + Environment.NewLine +
                            "    </wellDatum>" + Environment.NewLine +
                            "   </well>" + Environment.NewLine +
                            "</wells>";

@@ -295,8 +295,7 @@ namespace PDS.Witsml.Data
         /// <param name="uomValue">The uom value.</param>
         protected virtual void NavigateUomAttribute(XObject xmlObject, Type propertyType, string propertyPath, string measureValue, string uomValue)
         {
-            // By default, ignore the uomValue if there is no measureValue provided
-            if (string.IsNullOrWhiteSpace(measureValue) || measureValue.EqualsIgnoreCase("NaN")) return;
+            if (measureValue.EqualsIgnoreCase("NaN")) return;
 
             NavigateProperty(xmlObject, propertyType, propertyPath, uomValue);
         }
