@@ -493,4 +493,8 @@
     <value>All datum elements or attributes for indexes in a growing data-object must implicitly or explicitly point to the same wellDatum when adding or updating data.</value>
     <comment>-455</comment>
   </data>
+  <data name="DataObjectNotSupported" xml:space="preserve">
+    <value>The data-object must be supported by the server as defined in its capability data-object.</value>
+    <comment>-413</comment>
+  </data>
 </root>

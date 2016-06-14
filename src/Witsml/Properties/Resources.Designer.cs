@@ -178,6 +178,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The data-object must be supported by the server as defined in its capability data-object..
+        /// </summary>
+        internal static string DataObjectNotSupported {
+            get {
+                return ResourceManager.GetString("DataObjectNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to In WMLS_AddToStore, the objectType being added in WMLtypeIn must be an objectType supported by the server. The server does not support the object type trying to be added..
         /// </summary>
         internal static string DataObjectTypeNotSupported {
