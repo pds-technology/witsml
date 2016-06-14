@@ -37,7 +37,7 @@ namespace PDS.Witsml
         [TestMethod]
         public void GetDescription_returns_null_for_unset_error_code()
         {
-            const string expected = null;
+            const string expected = "Unset";
 
             var actual = ErrorCodes.Unset.GetDescription();
 
