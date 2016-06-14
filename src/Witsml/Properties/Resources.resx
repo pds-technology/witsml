@@ -417,4 +417,80 @@
     <value>For WMLS_GetBaseMsg, a non-empty value must be specified for ReturnValueIn.</value>
     <comment>-422</comment>
   </data>
+  <data name="CannotDecompressQuery" xml:space="preserve">
+    <value>Unable to decompress query.</value>
+    <comment>-479</comment>
+  </data>
+  <data name="ColumnIdentifierSpecified" xml:space="preserve">
+    <value>For WMLS_DeleteFromStore with a systematically growing data-object, a column-identifier must not be specified in the data-column-list (mnemonicList).</value>
+    <comment>-437</comment>
+  </data>
+  <data name="CompressedInputNonConforming" xml:space="preserve">
+    <value>The input template must conform to the appropriate derived schema after uncompressing the string.</value>
+    <comment>-426</comment>
+  </data>
+  <data name="DataItemNotSupported" xml:space="preserve">
+    <value>A client must specify an item for data-item selection that the server supports.</value>
+    <comment>-430</comment>
+  </data>
+  <data name="DataObjectItemNotSupported" xml:space="preserve">
+    <value>A client must specify an item (element or attribute) for data-object selection that the server supports.</value>
+    <comment>-431</comment>
+  </data>
+  <data name="EmptyElementNonConforming" xml:space="preserve">
+    <value>A template containing empty values must otherwise conform to the appropriate derived schema.</value>
+    <comment>-410</comment>
+  </data>
+  <data name="EmptyMandatoryNodeSpecified" xml:space="preserve">
+    <value>For WMLS_DeleteFromStore, an empty node must not be specified for a non-recurring element or attribute that is mandatory in the write schema.</value>
+    <comment>-420</comment>
+  </data>
+  <data name="EmptyNonRecurringElementSpecified" xml:space="preserve">
+    <value>For WMLS_DeleteFromStore, an empty non-recurring container-element with no unique identifier in the schema or an empty value for logData must not be specified.</value>
+    <comment>-419</comment>
+  </data>
+  <data name="EmptyUidSpecified" xml:space="preserve">
+    <value>For WMLS_DeleteFromStore, an empty uid attribute must not be specified.</value>
+    <comment>-416</comment>
+  </data>
+  <data name="EmptyUomSpecified" xml:space="preserve">
+    <value>For WMLS_DeleteFromStore, an empty uom attribute must not be specified.</value>
+    <comment>-417</comment>
+  </data>
+  <data name="IndexDataUomNotSame" xml:space="preserve">
+    <value>For a particular WMLS_AddToStore call, a client must specify all growing data-object index data in the same unit of measure.</value>
+    <comment>-454</comment>
+  </data>
+  <data name="InsufficientOperationRights" xml:space="preserve">
+    <value>In the server configuration for the site, the user must have rights to perform the requested operation on the data-object.</value>
+    <comment>-414</comment>
+  </data>
+  <data name="MissingUidAttributeValue" xml:space="preserve">
+    <value>For WMLS_DeleteFromStore, if an element with a uid attribute in the schema is specified then it must also be specified with a value for its uid attribute.</value>
+    <comment>-418</comment>
+  </data>
+  <data name="MustRetainOneRecurringNode" xml:space="preserve">
+    <value>For WMLS_DeleteFromStore, a recurring element that is mandatory in the write schema must retain at least one occurrence after the deletion.</value>
+    <comment>-421</comment>
+  </data>
+  <data name="NodeIndexNotSpecified" xml:space="preserve">
+    <value>For growing data-objects in a query, if a node-index value is to be returned, then the client must explicitly specify it in the query(which is true for any element or attribute in a query).</value>
+    <comment>-474</comment>
+  </data>
+  <data name="NotBottomLevelDataObject" xml:space="preserve">
+    <value>If cascading deletes are not invoked, a client must only request deletion of bottom level data-objects such that all child data-objects are deleted before the parent is deleted.</value>
+    <comment>-432</comment>
+  </data>
+  <data name="PollingTooFast" xml:space="preserve">
+    <value>The client is polling too fast.</value>
+    <comment>-485</comment>
+  </data>
+  <data name="Unset" xml:space="preserve">
+    <value>Unset</value>
+    <comment>0</comment>
+  </data>
+  <data name="WellDatumNotSame" xml:space="preserve">
+    <value>All datum elements or attributes for indexes in a growing data-object must implicitly or explicitly point to the same wellDatum when adding or updating data.</value>
+    <comment>-455</comment>
+  </data>
 </root>

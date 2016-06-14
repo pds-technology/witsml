@@ -23,9 +23,6 @@ namespace PDS.Witsml
     /// </summary>
     public enum ErrorCodes : short
     {
-        // TODO: finish defining enum members
-        // TODO: add error descriptions to Resources.resx
-
         /// <summary>
         /// Unset
         /// </summary>
@@ -92,6 +89,7 @@ namespace PDS.Witsml
         /// <summary>
         /// -410 A template containing empty values must otherwise conform to the appropriate derived schema.
         /// </summary>
+        EmptyElementNonConforming = -410,
 
         /// <summary>
         /// -411 The OptionsIn parameter string must be encoded utilizing a subset (semicolon separators and no
@@ -114,6 +112,7 @@ namespace PDS.Witsml
         /// -414 In the server configuration for the site, the user must have rights to perform the requested operation on
         /// the data-object.
         /// </summary>
+        InsufficientOperationRights = -414,
 
         /// <summary>
         /// -415 The input template must specify the unique identifiers of one data-object to be processed.
@@ -123,30 +122,36 @@ namespace PDS.Witsml
         /// <summary>
         /// -416 For WMLS_DeleteFromStore, an empty uid attribute must not be specified.
         /// </summary>
+        EmptyUidSpecified = -416,
 
         /// <summary>
         /// -417 For WMLS_DeleteFromStore, an empty uom attribute must not be specified.
         /// </summary>
+        EmptyUomSpecified = -417,
 
         /// <summary>
         /// -418 For WMLS_DeleteFromStore, if an element with a uid attribute in the schema is specified then it must
         /// also be specified with a value for its uid attribute.
         /// </summary>
+        MissingUidAttributeValue = -418,
 
         /// <summary>
         /// -419 For WMLS_DeleteFromStore, an empty non-recurring container-element with no unique identifier in the
         /// schema or an empty value for logData must not be specified.
         /// </summary>
+        EmptyNonRecurringElementSpecified = -419,
 
         /// <summary>
         /// -420 For WMLS_DeleteFromStore, an empty node must not be specified for a non-recurring element or
         /// attribute that is mandatory in the write schema.
         /// </summary>
+        EmptyMandatoryNodeSpecified = -420,
 
         /// <summary>
         /// -421 For WMLS_DeleteFromStore, a recurring element that is mandatory in the write schema must retain at
         /// least one occurrence after the deletion.
         /// </summary>
+        MustRetainOneRecurringNode = -421,
 
         /// <summary>
         /// -422 For WMLS_GetBaseMsg, a non-empty value must be specified for ReturnValueIn.
@@ -173,6 +178,7 @@ namespace PDS.Witsml
         /// <summary>
         /// -426 The input template must conform to the appropriate derived schema after uncompressing the string.
         /// </summary>
+        CompressedInputNonConforming = -426,
 
         /// <summary>
         /// -427 The OptionsIn keyword ‘requestObjectSelectionCapability’ with a value other than ‘none’ must not be
@@ -194,15 +200,18 @@ namespace PDS.Witsml
         /// <summary>
         /// -430 A client must specify an item for data-item selection that the server supports.
         /// </summary>
+        DataItemNotSupported = -430,
 
         /// <summary>
         /// -431 A client must specify an item (element or attribute) for data-object selection that the server supports.
         /// </summary>
+        DataObjectItemNotSupported = -431,
 
         /// <summary>
         /// -432 If cascading deletes are not invoked, a client must only request deletion of bottom level data-objects such
         /// that all child data-objects are deleted before the parent is deleted.
         /// </summary>
+        NotBottomLevelDataObject = -432,
 
         /// <summary>
         /// -433 A data-object with the same type and unique identifier(s) must already exist in the persistent store.
@@ -229,6 +238,7 @@ namespace PDS.Witsml
         /// -437 For WMLS_DeleteFromStore with a systematically growing data-object, a column-identifier must not be
         /// specified in the data-column-list (mnemonicList).
         /// </summary>
+        ColumnIdentifierSpecified = -437,
 
         /// <summary>
         /// -438 When multiple selection criteria is are included in a recurring element, the same selection items must
@@ -320,11 +330,13 @@ namespace PDS.Witsml
         /// -454 For a particular WMLS_AddToStore call, a client must specify all growing data-object index data in the
         /// same unit of measure.
         /// </summary>
+        IndexDataUomNotSame = -454,
 
         /// <summary>
         /// -455 All datum elements or attributes for indexes in a growing data-object must implicitly or explicitly point to
         /// the same wellDatum when adding or updating data.
         /// </summary>
+        WellDatumNotSame = -455,
 
         /// <summary>
         /// -456 The client must not attempt to add or update more data than is allowed by the server’s maxDataNodes
@@ -429,6 +441,7 @@ namespace PDS.Witsml
         /// -474 For growing data-objects in a query, if a node-index value is to be returned, then the client must explicitly
         /// specify it in the query(which is true for any element or attribute in a query).
         /// </summary>
+        NodeIndexNotSpecified = -474,
 
         /// <summary>
         /// -475 No subset of a growing data-object is specified.A query must specify a subset of one growing data-object
@@ -456,6 +469,7 @@ namespace PDS.Witsml
         /// <summary>
         /// -479 Unable to decompress query.
         /// </summary>
+        CannotDecompressQuery = -479,
 
         /// <summary>
         /// -480 A new column(log curve) cannot be added at the same time an existing column(log curve) is being
@@ -486,6 +500,7 @@ namespace PDS.Witsml
         /// <summary>
         /// -485 The client is polling too fast.
         /// </summary>
+        PollingTooFast = -485,
 
         /// <summary>
         /// -486 In WMLS_AddToStore, the WMLtypeIn objectType must match the XMLin objectType. Currently, they do not match.

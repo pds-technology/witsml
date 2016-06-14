@@ -97,6 +97,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to decompress query..
+        /// </summary>
+        internal static string CannotDecompressQuery {
+            get {
+                return ResourceManager.GetString("CannotDecompressQuery", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The CapabilitiesIn XML MUST conform to the API capClient schema..
         /// </summary>
         internal static string CapabilitiesInNonConforming {
@@ -120,6 +129,42 @@ namespace PDS.Witsml.Properties {
         internal static string ColumnIdentifiersNotSame {
             get {
                 return ResourceManager.GetString("ColumnIdentifiersNotSame", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to For WMLS_DeleteFromStore with a systematically growing data-object, a column-identifier must not be specified in the data-column-list (mnemonicList)..
+        /// </summary>
+        internal static string ColumnIdentifierSpecified {
+            get {
+                return ResourceManager.GetString("ColumnIdentifierSpecified", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The input template must conform to the appropriate derived schema after uncompressing the string..
+        /// </summary>
+        internal static string CompressedInputNonConforming {
+            get {
+                return ResourceManager.GetString("CompressedInputNonConforming", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A client must specify an item for data-item selection that the server supports..
+        /// </summary>
+        internal static string DataItemNotSupported {
+            get {
+                return ResourceManager.GetString("DataItemNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A client must specify an item (element or attribute) for data-object selection that the server supports..
+        /// </summary>
+        internal static string DataObjectItemNotSupported {
+            get {
+                return ResourceManager.GetString("DataObjectItemNotSupported", resourceCulture);
             }
         }
         
@@ -196,11 +241,56 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A template containing empty values must otherwise conform to the appropriate derived schema..
+        /// </summary>
+        internal static string EmptyElementNonConforming {
+            get {
+                return ResourceManager.GetString("EmptyElementNonConforming", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to For WMLS_DeleteFromStore, an empty node must not be specified for a non-recurring element or attribute that is mandatory in the write schema..
+        /// </summary>
+        internal static string EmptyMandatoryNodeSpecified {
+            get {
+                return ResourceManager.GetString("EmptyMandatoryNodeSpecified", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to For WMLS_UpdateInStore, new elements or attributes must not be empty..
         /// </summary>
         internal static string EmptyNewElementsOrAttributes {
             get {
                 return ResourceManager.GetString("EmptyNewElementsOrAttributes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to For WMLS_DeleteFromStore, an empty non-recurring container-element with no unique identifier in the schema or an empty value for logData must not be specified..
+        /// </summary>
+        internal static string EmptyNonRecurringElementSpecified {
+            get {
+                return ResourceManager.GetString("EmptyNonRecurringElementSpecified", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to For WMLS_DeleteFromStore, an empty uid attribute must not be specified..
+        /// </summary>
+        internal static string EmptyUidSpecified {
+            get {
+                return ResourceManager.GetString("EmptyUidSpecified", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to For WMLS_DeleteFromStore, an empty uom attribute must not be specified..
+        /// </summary>
+        internal static string EmptyUomSpecified {
+            get {
+                return ResourceManager.GetString("EmptyUomSpecified", resourceCulture);
             }
         }
         
@@ -277,6 +367,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to For a particular WMLS_AddToStore call, a client must specify all growing data-object index data in the same unit of measure..
+        /// </summary>
+        internal static string IndexDataUomNotSame {
+            get {
+                return ResourceManager.GetString("IndexDataUomNotSame", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to If a column-identifier representing the index column is specified then it must be specified first in the data-column-list..
         /// </summary>
         internal static string IndexNotFirstInDataColumnList {
@@ -318,6 +417,15 @@ namespace PDS.Witsml.Properties {
         internal static string InputTemplateNonConforming {
             get {
                 return ResourceManager.GetString("InputTemplateNonConforming", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to In the server configuration for the site, the user must have rights to perform the requested operation on the data-object..
+        /// </summary>
+        internal static string InsufficientOperationRights {
+            get {
+                return ResourceManager.GetString("InsufficientOperationRights", resourceCulture);
             }
         }
         
@@ -574,6 +682,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to For WMLS_DeleteFromStore, if an element with a uid attribute in the schema is specified then it must also be specified with a value for its uid attribute..
+        /// </summary>
+        internal static string MissingUidAttributeValue {
+            get {
+                return ResourceManager.GetString("MissingUidAttributeValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to For WMLS_AddToStore and WMLS_UpdateInStore, the client must always specify the unit for all measure data..
         /// </summary>
         internal static string MissingUnitForMeasureData {
@@ -628,11 +745,38 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to For WMLS_DeleteFromStore, a recurring element that is mandatory in the write schema must retain at least one occurrence after the deletion..
+        /// </summary>
+        internal static string MustRetainOneRecurringNode {
+            get {
+                return ResourceManager.GetString("MustRetainOneRecurringNode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to For growing data-objects in a query, if a node-index value is to be returned, then the client must explicitly specify it in the query(which is true for any element or attribute in a query)..
+        /// </summary>
+        internal static string NodeIndexNotSpecified {
+            get {
+                return ResourceManager.GetString("NodeIndexNotSpecified", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to For updating systematically growing data, the update data must not contain multiple nodes with the same index..
         /// </summary>
         internal static string NodesWithSameIndex {
             get {
                 return ResourceManager.GetString("NodesWithSameIndex", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to If cascading deletes are not invoked, a client must only request deletion of bottom level data-objects such that all child data-objects are deleted before the parent is deleted..
+        /// </summary>
+        internal static string NotBottomLevelDataObject {
+            get {
+                return ResourceManager.GetString("NotBottomLevelDataObject", resourceCulture);
             }
         }
         
@@ -651,6 +795,15 @@ namespace PDS.Witsml.Properties {
         internal static string ParialSuccess {
             get {
                 return ResourceManager.GetString("ParialSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The client is polling too fast..
+        /// </summary>
+        internal static string PollingTooFast {
+            get {
+                return ResourceManager.GetString("PollingTooFast", resourceCulture);
             }
         }
         
@@ -727,11 +880,29 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unset.
+        /// </summary>
+        internal static string Unset {
+            get {
+                return ResourceManager.GetString("Unset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The XMLin document does not comply with the update schema..
         /// </summary>
         internal static string UpdateTemplateNonConforming {
             get {
                 return ResourceManager.GetString("UpdateTemplateNonConforming", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to All datum elements or attributes for indexes in a growing data-object must implicitly or explicitly point to the same wellDatum when adding or updating data..
+        /// </summary>
+        internal static string WellDatumNotSame {
+            get {
+                return ResourceManager.GetString("WellDatumNotSame", resourceCulture);
             }
         }
     }
