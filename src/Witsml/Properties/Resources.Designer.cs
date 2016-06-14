@@ -718,15 +718,6 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A QueryIn template must include a version attribute in the plural data-object that defines the Data Schema Version of the data-object..
-        /// </summary>
-        internal static string MissingVersionAttribute {
-            get {
-                return ResourceManager.GetString("MissingVersionAttribute", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to A non-empty value must be defined for WMLtypeIn..
         /// </summary>
         internal static string MissingWMLtypeIn {

@@ -201,10 +201,6 @@
     <value>For WMLS_AddToStore and WMLS_UpdateInStore, the client must always specify the unit for all measure data.</value>
     <comment>-453</comment>
   </data>
-  <data name="MissingVersionAttribute" xml:space="preserve">
-    <value>A QueryIn template must include a version attribute in the plural data-object that defines the Data Schema Version of the data-object.</value>
-    <comment>-468</comment>
-  </data>
   <data name="MissingWMLtypeIn" xml:space="preserve">
     <value>A non-empty value must be defined for WMLtypeIn.</value>
     <comment>-407</comment>
