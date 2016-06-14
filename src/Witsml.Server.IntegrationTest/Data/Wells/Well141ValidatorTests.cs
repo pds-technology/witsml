@@ -180,14 +180,14 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
-        public void WitsmlValidator_GetFromStore_Error_428_RequestObjectSelectionCapability_True_With_Bad_Minimum_Query_Template_BadChild()
+        public void WitsmlValidator_GetFromStore_Error_409_RequestObjectSelectionCapability_True_With_Bad_Minimum_Query_Template_BadChild()
         {
             string badQuery = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version = \"1.4.1.1\" >" + Environment.NewLine +
                               "   <log/>" + Environment.NewLine +
                               "</wells>";
 
             var response = DevKit.GetFromStore(ObjectTypes.Well, badQuery, null, optionsIn: OptionsIn.RequestObjectSelectionCapability.True);
-            Assert.AreEqual((short)ErrorCodes.InvalidMinimumQueryTemplate, response.Result);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
         }
 
         [TestMethod]
