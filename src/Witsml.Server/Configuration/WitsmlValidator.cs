@@ -73,7 +73,8 @@ namespace PDS.Witsml.Server.Configuration
         public virtual void ValidateRequest(RequestContext context, XDocument document)
         {
             ValidateNamespace(document);
-            ValidateObjectType(context.Function, context.ObjectType, ObjectTypes.GetObjectType(document));
+            document?.Root?.Elements()
+                .ForEach(e => ValidateObjectType(context.Function, context.ObjectType, e.Name.LocalName));
             ValidatePluralRootElement(context.ObjectType, document);
         }
 
@@ -84,7 +85,7 @@ namespace PDS.Witsml.Server.Configuration
         /// <exception cref="WitsmlException">Thrown if the User-Agent header is missing.</exception>
         public static void ValidateUserAgent(WebOperationContext context)
         {
-            if (context != null && context.IncomingRequest != null && string.IsNullOrWhiteSpace(context.IncomingRequest.UserAgent))
+            if (context?.IncomingRequest != null && string.IsNullOrWhiteSpace(context.IncomingRequest.UserAgent))
             {
                 throw new WitsmlException(ErrorCodes.MissingClientUserAgent);
             }
@@ -349,19 +350,20 @@ namespace PDS.Witsml.Server.Configuration
                 throw new WitsmlException(ErrorCodes.MissingWMLtypeIn);
             }
 
-            // Not sure why these are only checked for AddToStore?
-            if (function == Functions.AddToStore)
+            // Different error codes return between AddToStore and other functions
+            if (!objectType.Equals(xmlType))
             {
-                if (!objectType.Equals(xmlType))
-                {
+                if (function == Functions.AddToStore)
                     throw new WitsmlException(ErrorCodes.DataObjectTypesDontMatch);
-                }
-
-                if (!IsSupported(function, objectType))
-                {
-                    throw new WitsmlException(ErrorCodes.DataObjectTypeNotSupported);
-                }
+                throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
             }
+
+            if (IsSupported(function, objectType))
+                return;
+
+            if (function == Functions.AddToStore)
+                throw new WitsmlException(ErrorCodes.DataObjectTypeNotSupported);
+            throw new WitsmlException(ErrorCodes.DataObjectNotSupported);
         }
 
         /// <summary>
