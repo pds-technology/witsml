@@ -1,0 +1,15 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="PDS.Witsml.DataLoader.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="BaseDataDirectory" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">C:\WITSML\Data</Value>
+    </Setting>
+    <Setting Name="DataSchemaVersion" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">1.4.1.1</Value>
+    </Setting>
+    <Setting Name="WitsmlStoreUrl" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">http://localhost/witsml.web/api/soap</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
