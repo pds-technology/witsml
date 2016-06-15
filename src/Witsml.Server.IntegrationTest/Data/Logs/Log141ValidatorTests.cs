@@ -63,6 +63,15 @@ namespace PDS.Witsml.Server.Data.Logs
             };
         }
 
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            WitsmlSettings.DepthRangeSize = DevKitAspect.DefaultDepthChunkRange;
+            WitsmlSettings.TimeRangeSize = DevKitAspect.DefaultTimeChunkRange;
+            WitsmlSettings.MaxDataPoints = DevKitAspect.DefaultMaxDataPoints;
+            WitsmlSettings.MaxDataNodes = DevKitAspect.DefaultMaxDataNodes;
+        }
+
         [TestMethod]
         public void Test_error_code_463_nodes_with_same_index()
         {
@@ -184,7 +193,8 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Test_error_code_456_max_data_exceeded_for_nodes()
         {
             var response = DevKit.Add<WellList, Well>(Well);
-            var maxDataNodes = WitsmlSettings.MaxDataNodes;
+            var maxDataNodes = 5;
+            WitsmlSettings.MaxDataNodes = maxDataNodes;
 
             Wellbore.UidWell = response.SuppMsgOut;
             response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
@@ -211,7 +221,8 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Test_error_code_456_max_data_exceeded_for_points()
         {
             var response = DevKit.Add<WellList, Well>(Well);
-            var maxDataPoints = WitsmlSettings.MaxDataPoints;
+            var maxDataPoints = 20;
+            WitsmlSettings.MaxDataPoints = maxDataPoints;
 
             Wellbore.UidWell = response.SuppMsgOut;
             response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
