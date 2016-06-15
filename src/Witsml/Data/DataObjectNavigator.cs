@@ -62,8 +62,9 @@ namespace PDS.Witsml.Data
         /// Determines whether the specified element name is ignored.
         /// </summary>
         /// <param name="elementName">Name of the element.</param>
+        /// <param name="parentPath">Parent path of the element.</param>
         /// <returns></returns>
-        protected virtual bool IsIgnored(string elementName)
+        protected virtual bool IsIgnored(string elementName, string parentPath = null)
         {
             return Context.Ignored != null && Context.Ignored.Contains(elementName);
         }
@@ -116,9 +117,9 @@ namespace PDS.Witsml.Data
 
             foreach (var group in groupings)
             {
-                if (IsIgnored(group.Key)) continue;
-
                 var propertyInfo = GetPropertyInfoForAnElement(properties, group.Key);
+                if (IsIgnored(group.Key, GetPropertyPath(parentPath, group.Key))) continue;
+                
                 if (propertyInfo != null)
                 {
                     NavigateElementGroup(propertyInfo, group, parentPath);
