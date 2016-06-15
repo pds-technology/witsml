@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Energistics.DataAccess;
@@ -54,18 +55,28 @@ namespace PDS.Witsml.Server.Data.Logs
             // Test data directory
             DataDir = new DirectoryInfo(@".\TestData").FullName;
 
-            Well = new Well { Name = DevKit.Name("Well 01"), TimeZone = DevKit.TimeZone };
+            Well = new Well()
+            {
+                Uid = DevKit.Uid(),
+                Name = DevKit.Name("Well 01"),
+                TimeZone = DevKit.TimeZone
+            };
 
             Wellbore = new Wellbore()
             {
+                UidWell = Well.Uid,
                 NameWell = Well.Name,
-                Name = DevKit.Name("Wellbore 01")
+                Uid = DevKit.Uid(),
+                Name = DevKit.Name("Wellbore 01"),
             };
 
             Log = new Log()
             {
+                UidWell = Well.Uid,
                 NameWell = Well.Name,
+                UidWellbore = Wellbore.Uid,
                 NameWellbore = Wellbore.Name,
+                Uid = DevKit.Uid(),
                 Name = DevKit.Name("Log 01")
             };
         }
@@ -771,6 +782,50 @@ namespace PDS.Witsml.Server.Data.Logs
             log.Uid = response.SuppMsgOut;
 
             var updateResponse = DevKit.Update<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+        }
+
+        [Ignore]
+        [TestMethod]
+        public void Log141DataAdapter_UpdateInStore_Can_Update_Nested_Recurring_Elements()
+        {
+            // Add Well and Wellbore
+            DevKit.Add<WellList, Well>(Well);
+            DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+
+            // Create nested array elements
+            var curve = Log.LogCurveInfo.Last();
+
+            curve.AxisDefinition = new List<AxisDefinition>
+            {
+                new AxisDefinition()
+                {
+                    Uid = "1",
+                    Order = 1,
+                    Count = 3,
+                    DoubleValues = "1 2 3",
+                    ExtensionNameValue = new List<ExtensionNameValue>
+                    {
+                        DevKit.ExtensionNameValue("Ext-1", "1.0", "m"),
+                        DevKit.ExtensionNameValue("Ext-2", "2.0", "ft")
+                    }
+                }
+            };
+
+            curve.ExtensionNameValue = new List<ExtensionNameValue>
+            {
+                DevKit.ExtensionNameValue("Ext-3", "3.0", "mm"),
+                DevKit.ExtensionNameValue("Ext-4", "4.0", "cm")
+            };
+
+            // Add Log
+            var addResponse = DevKit.Add<LogList, Log>(Log);
+            Assert.AreEqual((short)ErrorCodes.Success, addResponse.Result);
+
+            // Update Log
+            var updateResponse = DevKit.Update<LogList, Log>(Log);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
         }
     }

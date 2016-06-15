@@ -219,6 +219,21 @@ namespace PDS.Witsml.Server
             };
         }
 
+        public ExtensionNameValue ExtensionNameValue(string uid, string value, string uom, PrimitiveType dataType = PrimitiveType.@double, string name = null)
+        {
+            return new ExtensionNameValue()
+            {
+                Uid = uid,
+                Name = new ExtensionName(name ?? uid),
+                Value = new Extensionvalue()
+                {
+                    Value = value,
+                    Uom = uom
+                },
+                DataType = dataType
+            };
+        }
+
         public Log CreateLog(string uid, string name, string uidWell, string nameWell, string uidWellbore, string nameWellbore)
         {
             return new Log()
