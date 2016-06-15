@@ -380,27 +380,23 @@ namespace PDS.Witsml.Server.Data.Logs
                 ? new Range<double?>(null, null)
                 : GetLogDataSubsetRange(logHeader, parser);
 
-            if (mnemonics.Count > 0)
-            {
-                var units = GetUnitList(logHeader, mnemonics.Keys.ToArray());
-                var nullValues = GetNullValueList(logHeader, mnemonics.Keys.ToArray());
-                var records = GetChannelData(logHeader.GetUri(), mnemonics[0], range, IsIncreasing(logHeader),
-                    requestLatestValues);
+            if (mnemonics.Count <= 0)
+                return;
 
-                // Get a reader for the log's channel data
-                var reader = records.GetReader();
+            var units = GetUnitList(logHeader, mnemonics.Keys.ToArray());
+            var nullValues = GetNullValueList(logHeader, mnemonics.Keys.ToArray());
+            var records = GetChannelData(logHeader.GetUri(), mnemonics[0], range, IsIncreasing(logHeader),
+                requestLatestValues);
 
-                // Slice the reader for the requested mnemonics
-                reader.Slice(mnemonics, units, nullValues);
-                var logData = FormatLogData(log, reader, context, mnemonics, units, nullValues);
-                if (logData.Count > 0)
-                {
-                    SetLogDataValues(log, logData, mnemonics.Values, units.Values);
-                }
+            // Get a reader for the log's channel data
+            var reader = records.GetReader();
 
-                // Update the response context growing object totals
-                context.UpdateGrowingObjectTotals(logData.Count, mnemonics.Keys.Count);
-            }
+            // Slice the reader for the requested mnemonics
+            reader.Slice(mnemonics, units, nullValues);
+            var count = FormatLogData(log, logHeader, reader, context, mnemonics, units, nullValues);           
+
+            // Update the response context growing object totals
+            context.UpdateGrowingObjectTotals(count, mnemonics.Keys.Count);
         }
 
         private Range<double?> GetLogDataSubsetRange(T log, WitsmlQueryParser parser)
@@ -413,8 +409,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 isTimeLog);
         }
 
-        private List<string> FormatLogData(
-            T log, ChannelDataReader reader, ResponseContext context,
+        private int FormatLogData(
+            T log, T logHeader, ChannelDataReader reader, ResponseContext context,
             IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units, IDictionary<int, string> nullValues)
         {
             Dictionary<string, Range<double?>> ranges;
@@ -422,12 +418,14 @@ namespace PDS.Witsml.Server.Data.Logs
             var logData = reader.GetData(context, mnemonicSlices, units, nullValues, out ranges);
             if (logData.Count > 0)
             {
-                SetLogIndexRange(log, ranges);
+                var data = logData
+                    .Select(row => string.Join(",", row.SelectMany(x => x)))
+                    .ToList();
+                SetLogDataValues(log, data, mnemonicSlices.Values, units.Values);
+                SetLogIndexRange(log, logHeader, ranges, reader.Indices.FirstOrDefault()?.Mnemonic);
             }
 
-            return logData
-                .Select(row => string.Join(",", row.SelectMany(x => x)))
-                .ToList();
+            return logData.Count;
         }
 
         private void FormatLogHeader(T log, string[] mnemonics)
@@ -764,8 +762,10 @@ namespace PDS.Witsml.Server.Data.Logs
         /// Sets the log index range.
         /// </summary>
         /// <param name="log">The log.</param>
+        /// <param name="logHeader">The log that has the header information.</param>
         /// <param name="ranges">The ranges.</param>
-        protected abstract void SetLogIndexRange(T log, Dictionary<string, Range<double?>> ranges);
+        /// <param name="indexCurve">The index curve.</param>
+        protected abstract void SetLogIndexRange(T log, T logHeader, Dictionary<string, Range<double?>> ranges, string indexCurve);
 
         /// <summary>
         /// Sets the log data values.

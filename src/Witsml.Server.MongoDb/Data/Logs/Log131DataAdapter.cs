@@ -234,53 +234,45 @@ namespace PDS.Witsml.Server.Data.Logs
         /// Sets the log index range.
         /// </summary>
         /// <param name="log">The log.</param>
+        /// <param name="logHeader">The log that has the header information.</param>
         /// <param name="ranges">The ranges.</param>
-        protected override void SetLogIndexRange(Log log, Dictionary<string, Range<double?>> ranges)
+        /// <param name="indexCurve">The index curve.</param>
+        protected override void SetLogIndexRange(Log log, Log logHeader, Dictionary<string, Range<double?>> ranges, string indexCurve)
         {
-            if (log.LogCurveInfo == null)
-                return;
+            var isTimeLog = IsTimeLog(logHeader);
 
-            var isTimeLog = IsTimeLog(log);
-            var increasing = IsIncreasing(log);
-
-            foreach (var logCurve in log.LogCurveInfo)
+            if (log.LogCurveInfo != null)
             {
-                var mnemonic = logCurve.Mnemonic;
-                Range<double?> range;
-
-                if (!ranges.TryGetValue(mnemonic, out range))
-                    continue;
-
-                // Sort range in min/max order
-                range = range.Sort();
-
-                if (isTimeLog)
+                foreach (var logCurve in log.LogCurveInfo)
                 {
-                    if (range.Start.HasValue && !double.IsNaN(range.Start.Value))
-                        logCurve.MinDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.Start.Value).DateTime;
-                    if (range.End.HasValue && !double.IsNaN(range.End.Value))
-                        logCurve.MaxDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.End.Value).DateTime;
+                    var mnemonic = logCurve.Mnemonic;
+                    Range<double?> range;
 
-                    if (logCurve.ColumnIndex == log.IndexCurve.ColumnIndex)
+                    if (!ranges.TryGetValue(mnemonic, out range))
+                        continue;
+
+                    // Sort range in min/max order
+                    range = range.Sort();
+
+                    if (isTimeLog)
                     {
-                        log.StartDateTimeIndex = increasing ? logCurve.MinDateTimeIndex : logCurve.MaxDateTimeIndex;
-                        log.EndDateTimeIndex = increasing ? logCurve.MaxDateTimeIndex : logCurve.MinDateTimeIndex;
+                        if (range.Start.HasValue && !double.IsNaN(range.Start.Value))
+                            logCurve.MinDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.Start.Value).DateTime;
+                        if (range.End.HasValue && !double.IsNaN(range.End.Value))
+                            logCurve.MaxDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.End.Value).DateTime;
                     }
-                }
-                else
-                {
-                    if (range.Start.HasValue)
-                        logCurve.MinIndex.Value = range.Start.Value;
-                    if (range.End.HasValue)
-                        logCurve.MaxIndex.Value = range.End.Value;
-
-                    if (logCurve.ColumnIndex == log.IndexCurve.ColumnIndex)
+                    else
                     {
-                        log.StartIndex.Value = increasing ? logCurve.MinIndex.Value : logCurve.MaxIndex.Value;
-                        log.EndIndex.Value = increasing ? logCurve.MaxIndex.Value : logCurve.MinIndex.Value;
+                        if (range.Start.HasValue)
+                            logCurve.MinIndex.Value = range.Start.Value;
+                        if (range.End.HasValue)
+                            logCurve.MaxIndex.Value = range.End.Value;
                     }
                 }
             }
+
+            // Set index curve range separately, since logCurveInfo may not exist
+            SetIndexCurveRange(log, ranges, indexCurve, isTimeLog);
         }
 
         /// <summary>
@@ -422,6 +414,52 @@ namespace PDS.Witsml.Server.Data.Logs
                 {
                     curve.MinIndex = null;
                     curve.MaxIndex = null;
+                }
+            }
+        }
+
+        private void SetIndexCurveRange(Log log, Dictionary<string, Range<double?>> ranges, string indexCurve, bool isTimeLog)
+        {
+            if (!ranges.ContainsKey(indexCurve))
+                return;
+
+            var range = ranges[indexCurve];
+            if (isTimeLog)
+            {
+                if (log.StartDateTimeIndex != null)
+                {
+                    if (range.Start.HasValue && !double.IsNaN(range.Start.Value))
+                        log.StartDateTimeIndex =
+                            DateTimeExtensions.FromUnixTimeMicroseconds((long)range.Start.Value).DateTime;
+                    else
+                        log.StartDateTimeIndex = null;
+                }
+
+                if (log.EndDateTimeIndex != null)
+                {
+                    if (range.End.HasValue && !double.IsNaN(range.End.Value))
+                        log.EndDateTimeIndex =
+                            DateTimeExtensions.FromUnixTimeMicroseconds((long)range.End.Value).DateTime;
+                    else
+                        log.EndDateTimeIndex = null;
+                }
+            }
+            else
+            {
+                if (log.StartIndex != null)
+                {
+                    if (range.Start.HasValue)
+                        log.StartIndex.Value = range.Start.Value;
+                    else
+                        log.StartIndex = null;
+                }
+
+                if (log.EndIndex != null)
+                {
+                    if (range.End.HasValue)
+                        log.EndIndex.Value = range.End.Value;
+                    else
+                        log.EndIndex = null;
                 }
             }
         }

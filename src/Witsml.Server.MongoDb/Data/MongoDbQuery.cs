@@ -224,6 +224,21 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Determines whether the specified element name is ignored.
+        /// </summary>
+        /// <param name="elementName">Name of the element.</param>
+        /// <param name="path">Path of the element.</param>
+        /// <returns></returns>
+        protected override bool IsIgnored(string elementName, string path = null)
+        {
+            var ignored = base.IsIgnored(elementName);
+            if (ignored && (OptionsIn.ReturnElements.Requested.Equals(_parser.ReturnElements()) || OptionsIn.ReturnElements.DataOnly.Equals(_parser.ReturnElements())))
+                Context.Fields.Add(path);
+
+            return ignored;
+        }
+
+        /// <summary>
         /// Builds the query filter.
         /// </summary>
         /// <returns>The filter object that for the selection criteria for the queried entity.</returns>
