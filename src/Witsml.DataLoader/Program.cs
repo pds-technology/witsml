@@ -27,6 +27,7 @@ using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.Datatypes;
+using Newtonsoft.Json;
 using PDS.Framework;
 using PDS.Witsml.DataLoader.Properties;
 
@@ -36,16 +37,12 @@ namespace PDS.Witsml.DataLoader
     {
         private const string DateFormat = "yyyy-MM-dd HH:mm:ss.ffff";
         private static readonly List<EtpUri> _inserted = new List<EtpUri>();
-        private static readonly Dictionary<string, string> _dataTypes = new Dictionary<string, string>
-        {
-            { "well", "_wellInfo" },
-            { "wellbore", "_wellboreInfo" },
-            { "log", "log" }
-        };
 
         private static string _baseDataDirectory = Settings.Default.BaseDataDirectory;
         private static string _dataSchemaVersion = Settings.Default.DataSchemaVersion;
+        private static string _dataTypeSettings = Settings.Default.DataTypeSettings;
         private static string _witsmlStoreUrl = Settings.Default.WitsmlStoreUrl;
+        private static List<DataTypeInfo> _dataTypes;
         private static IWitsmlClient _client;
 
         public static void Main(string[] args)
@@ -56,6 +53,7 @@ namespace PDS.Witsml.DataLoader
             // Process command line arguments
             _baseDataDirectory = GetArgValue(args, "-d") ?? _baseDataDirectory;
             _dataSchemaVersion = GetArgValue(args, "-v") ?? _dataSchemaVersion;
+            _dataTypeSettings = GetArgValue(args, "-s") ?? _dataTypeSettings;
             _witsmlStoreUrl = GetArgValue(args, "-u") ?? _witsmlStoreUrl;
 
             var timer = new Stopwatch();
@@ -66,30 +64,32 @@ namespace PDS.Witsml.DataLoader
 
             _client = proxy.CreateClientProxy() as IWitsmlClient;
 
-            foreach (var info in _dataTypes)
-                LoadDataFiles(info.Key, info.Value);
+            var json = File.ReadAllText(_dataTypeSettings);
+            _dataTypes = JsonConvert.DeserializeObject<List<DataTypeInfo>>(json);
+
+            foreach (var dataTypeInfo in _dataTypes.Where(x => x.Enabled))
+                LoadDataFiles(dataTypeInfo);
 
             timer.Stop();
 
             Console.WriteLine("Data Load Completed in {0}", timer.Elapsed);
-            Console.WriteLine("Press any key to continue...");
             Console.ReadKey();
         }
 
-        private static void LoadDataFiles(string objectType, string folderName)
+        private static void LoadDataFiles(DataTypeInfo dataTypeInfo)
         {
-            Console.WriteLine("Loading {0} data...", objectType);
+            Console.WriteLine("Loading {0} data...", dataTypeInfo.ObjectType);
             var count = 0;
 
-            foreach (var folder in Directory.EnumerateDirectories(_baseDataDirectory, folderName, SearchOption.AllDirectories))
+            foreach (var folder in Directory.EnumerateDirectories(_baseDataDirectory, dataTypeInfo.FolderNamePattern, SearchOption.AllDirectories))
             {
-                foreach (var file in Directory.EnumerateFiles(folder, "*.xml", SearchOption.AllDirectories))
+                foreach (var file in Directory.EnumerateFiles(folder, dataTypeInfo.FileNamePattern, SearchOption.AllDirectories))
                 {
                     var timer = new Stopwatch();
                     timer.Start();
 
                     var xml = File.ReadAllText(file);
-                    var type = ObjectTypes.GetObjectGroupType(objectType, _dataSchemaVersion);
+                    var type = ObjectTypes.GetObjectGroupType(dataTypeInfo.ObjectType, _dataSchemaVersion);
                     var dataObject = WitsmlParser.Parse(type, xml);
                     var collection = dataObject as IEnergisticsCollection;
 
@@ -103,29 +103,30 @@ namespace PDS.Witsml.DataLoader
 
                     try
                     {
+                        var parseSeconds = timer.Elapsed.TotalSeconds;
+                        string action;
                         string suppMsgOut;
+                        short returnCode;
+                        timer.Restart();
 
-                        if (_inserted.Contains(uri) || Exists(objectType, xml))
+                        if (_inserted.Contains(uri) || Exists(dataTypeInfo.ObjectType, xml))
                         {
-                            var returnCode = _client.WMLS_UpdateInStore(objectType, xml, string.Empty, string.Empty, out suppMsgOut);
-                            timer.Stop();
-
-                            Console.WriteLine("{0}) Updated {1}; Return Code: {2}; {3} sec", ++count, uri, returnCode, timer.Elapsed.TotalSeconds);
+                            returnCode = _client.WMLS_UpdateInStore(dataTypeInfo.ObjectType, xml, string.Empty, string.Empty, out suppMsgOut);
+                            action = "Updated";
                         }
                         else
                         {
-                            var returnCode = _client.WMLS_AddToStore(objectType, xml, string.Empty, string.Empty, out suppMsgOut);
-                            timer.Stop();
-
-                            Console.WriteLine("{0}) Added {1}; Return Code: {2}; {3} sec", ++count, uri, returnCode, timer.Elapsed.TotalSeconds);
+                            returnCode = _client.WMLS_AddToStore(dataTypeInfo.ObjectType, xml, string.Empty, string.Empty, out suppMsgOut);
+                            action = "Added";
                         }
 
+                        timer.Stop();
                         _inserted.Add(uri);
                         var fileInfo = new FileInfo(file);
 
+                        Console.WriteLine("{0}) {1} {2}; Return Code: {3}; Parsed: {4} sec; Processed: {5} sec", ++count, action, uri, returnCode, parseSeconds, timer.Elapsed.TotalSeconds);
                         Console.WriteLine("      Path: {0}", fileInfo.DirectoryName);
-                        Console.WriteLine("      Name: {0}", fileInfo.Name);
-                        Console.WriteLine("      Size: {0:N2} KB", fileInfo.Length / 1000.0);
+                        Console.WriteLine("      Name: {0}; Size: {1:N2} KB", fileInfo.Name, fileInfo.Length / 1000.0);
 
                         var log13 = dataObject as Witsml131.Log;
                         if (log13 != null)
@@ -151,7 +152,7 @@ namespace PDS.Witsml.DataLoader
                 }
             }
 
-            Console.WriteLine("Loaded {0} {1} files.", count, objectType);
+            Console.WriteLine("Loaded {0} {1} files.", count, dataTypeInfo.ObjectType);
             Console.WriteLine();
         }
 

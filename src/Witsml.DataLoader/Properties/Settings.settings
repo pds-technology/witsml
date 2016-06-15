@@ -2,14 +2,17 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="PDS.Witsml.DataLoader.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="BaseDataDirectory" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">C:\WITSML\Data</Value>
-    </Setting>
     <Setting Name="DataSchemaVersion" Type="System.String" Scope="Application">
       <Value Profile="(Default)">1.4.1.1</Value>
     </Setting>
     <Setting Name="WitsmlStoreUrl" Type="System.String" Scope="Application">
       <Value Profile="(Default)">http://localhost/witsml.web/api/soap</Value>
+    </Setting>
+    <Setting Name="DataTypeSettings" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">DataTypeSettings.json</Value>
+    </Setting>
+    <Setting Name="BaseDataDirectory" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">C:\WITSML\Data</Value>
     </Setting>
   </Settings>
 </SettingsFile>

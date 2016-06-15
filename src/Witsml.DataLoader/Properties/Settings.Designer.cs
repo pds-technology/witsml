@@ -25,15 +25,6 @@ namespace PDS.Witsml.DataLoader.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("C:\\WITSML\\Data")]
-        public string BaseDataDirectory {
-            get {
-                return ((string)(this["BaseDataDirectory"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1.4.1.1")]
         public string DataSchemaVersion {
             get {
@@ -47,6 +38,24 @@ namespace PDS.Witsml.DataLoader.Properties {
         public string WitsmlStoreUrl {
             get {
                 return ((string)(this["WitsmlStoreUrl"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("DataTypeSettings.json")]
+        public string DataTypeSettings {
+            get {
+                return ((string)(this["DataTypeSettings"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\WITSML\\Data")]
+        public string BaseDataDirectory {
+            get {
+                return ((string)(this["BaseDataDirectory"]));
             }
         }
     }
