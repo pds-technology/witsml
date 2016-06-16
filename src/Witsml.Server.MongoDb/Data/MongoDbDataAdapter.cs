@@ -289,6 +289,11 @@ namespace PDS.Witsml.Server.Data
         {
             var list = uris.ToList();
 
+            Logger.DebugFormat("Querying {0} MongoDb collection by URIs: {1}{2}",
+                dbCollectionName,
+                Environment.NewLine,
+                Logger.IsDebugEnabled ? string.Join(Environment.NewLine, list) : null);
+
             if (!list.Any())
             {
                 return new List<TObject>(0);

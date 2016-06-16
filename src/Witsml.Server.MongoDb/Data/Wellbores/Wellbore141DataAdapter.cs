@@ -59,25 +59,13 @@ namespace PDS.Witsml.Server.Data.Wellbores
         }
 
         /// <summary>
-        /// Gets a list of the property names to project during a query.
-        /// </summary>
-        /// <param name="parser">The WITSML parser.</param>
-        /// <returns>A list of property names.</returns>
-        protected override List<string> GetProjectionPropertyNames(WitsmlQueryParser parser)
-        {
-            return OptionsIn.ReturnElements.IdOnly.Equals(parser.ReturnElements())
-                ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell" }
-                : null;
-        }
-
-        /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
         /// <returns>A collection of data objects.</returns>
         public override List<Wellbore> GetAll(EtpUri? parentUri = null)
         {
-            Logger.Debug("Fetching all Wellbores.");
+            Logger.DebugFormat("Fetching all Wellbores; Parent URI: {0}", parentUri);
 
             var query = GetQuery().AsQueryable();
 
@@ -90,6 +78,18 @@ namespace PDS.Witsml.Server.Data.Wellbores
             return query
                 .OrderBy(x => x.Name)
                 .ToList();
+        }
+
+        /// <summary>
+        /// Gets a list of the property names to project during a query.
+        /// </summary>
+        /// <param name="parser">The WITSML parser.</param>
+        /// <returns>A list of property names.</returns>
+        protected override List<string> GetProjectionPropertyNames(WitsmlQueryParser parser)
+        {
+            return OptionsIn.ReturnElements.IdOnly.Equals(parser.ReturnElements())
+                ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell" }
+                : null;
         }
 
         /// <summary>

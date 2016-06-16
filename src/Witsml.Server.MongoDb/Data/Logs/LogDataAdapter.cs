@@ -167,6 +167,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>A collection of data objects.</returns>
         public override List<T> GetAll(EtpUri? parentUri = null)
         {
+            Logger.DebugFormat("Fetching all Logs; Parent URI: {0}", parentUri);
+
             var query = GetQuery().AsQueryable();
 
             if (parentUri != null)
@@ -184,16 +186,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Gets a data object by the specified UUID.
-        /// </summary>
-        /// <param name="uri">The data object URI.</param>
-        /// <returns>The data object instance.</returns>
-        public override T Get(EtpUri uri)
-        {
-            return GetEntity(uri);
-        }
-
-        /// <summary>
         /// Deletes a data object by the specified identifier.
         /// </summary>
         /// <param name="uri">The data object URI.</param>
@@ -201,7 +193,7 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             using (var transaction = DatabaseProvider.BeginTransaction(uri))
             {
-                Logger.DebugFormat("Delete for Log with uri '{0}'.", uri.Uri);
+                Logger.DebugFormat("Deleting Log with uri '{0}'.", uri);
 
                 DeleteEntity(uri, transaction);
                 ChannelDataChunkAdapter.Delete(uri);
@@ -272,6 +264,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private string[] GetLogHeaderMnemonics(T log)
         {
+            Logger.Debug("Getting log header mnemonics.");
+
             var logCurves = GetLogCurves(log);
             return logCurves?.Select(GetMnemonic).ToArray();
         }

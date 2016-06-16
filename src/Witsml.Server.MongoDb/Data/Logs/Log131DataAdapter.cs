@@ -165,6 +165,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns></returns>
         protected override string GetMnemonic(LogCurveInfo curve)
         {
+            Logger.DebugFormat("Getting logCurveInfo mnemonic: {0}", curve?.Mnemonic);
             return curve?.Mnemonic;
         }
 
@@ -175,6 +176,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns></returns>
         protected override string GetIndexCurveMnemonic(Log log)
         {
+            Logger.DebugFormat("Getting log index curve mnemonic: {0}", log.IndexCurve.Value);
             return log.IndexCurve.Value;
         }
 
@@ -185,6 +187,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns></returns>
         protected override IDictionary<int, string> GetUnitsByColumnIndex(Log log)
         {
+            Logger.Debug("Getting logCurveInfo units by column index.");
+
             return log.LogCurveInfo
                 .Select(x => x.Unit)
                 .ToArray()
@@ -199,6 +203,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns></returns>
         protected override IDictionary<int, string> GetNullValuesByColumnIndex(Log log)
         {
+            Logger.Debug("Getting logCurveInfo null values by column index.");
+
             return log.LogCurveInfo
                 .Select(x => x.NullValue)
                 .ToArray()
@@ -243,6 +249,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
             if (log.LogCurveInfo != null)
             {
+                Logger.Debug("Setting logCurveInfo min/max index ranges.");
+
                 foreach (var logCurve in log.LogCurveInfo)
                 {
                     var mnemonic = logCurve.Mnemonic;
@@ -390,6 +398,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="dataObject">The data object.</param>
         private void ClearIndexValues(Log dataObject)
         {
+            Logger.Debug("Clearing log and logCurveInfo index ranges.");
+
             if (IsTimeLog(dataObject))
             {
                 dataObject.StartDateTimeIndex = null;
@@ -420,17 +430,17 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private void SetIndexCurveRange(Log log, Dictionary<string, Range<double?>> ranges, string indexCurve, bool isTimeLog)
         {
-            if (!ranges.ContainsKey(indexCurve))
-                return;
+            if (!ranges.ContainsKey(indexCurve)) return;
 
             var range = ranges[indexCurve];
+            Logger.DebugFormat("Setting log index curve ranges: {0}; {1}", indexCurve, range);
+
             if (isTimeLog)
             {
                 if (log.StartDateTimeIndex != null)
                 {
                     if (range.Start.HasValue && !double.IsNaN(range.Start.Value))
-                        log.StartDateTimeIndex =
-                            DateTimeExtensions.FromUnixTimeMicroseconds((long)range.Start.Value).DateTime;
+                        log.StartDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.Start.Value).DateTime;
                     else
                         log.StartDateTimeIndex = null;
                 }
@@ -438,8 +448,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 if (log.EndDateTimeIndex != null)
                 {
                     if (range.End.HasValue && !double.IsNaN(range.End.Value))
-                        log.EndDateTimeIndex =
-                            DateTimeExtensions.FromUnixTimeMicroseconds((long)range.End.Value).DateTime;
+                        log.EndDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.End.Value).DateTime;
                     else
                         log.EndDateTimeIndex = null;
                 }
