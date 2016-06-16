@@ -247,6 +247,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private IDictionary<int, string> GetMnemonicList(T log, WitsmlQueryParser parser)
         {
+            Logger.Debug("Getting mnemonic list for log.");
+
             var allMnemonics = GetLogHeaderMnemonics(log);
             if (allMnemonics == null)
             {
@@ -272,6 +274,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private IDictionary<int, string> ComputeMnemonicIndexes(string[] allMnemonics, string[] queryMnemonics, string returnElements)
         {
+            Logger.DebugFormat("Computing mnemonic indexes. Return Elements: {0}", returnElements);
+
             // Start with all mnemonics
             var mnemonicIndexes = allMnemonics
                 .Select((mn, index) => new { Mnemonic = mn, Index = index });
@@ -300,6 +304,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>The channel data records requested</returns>
         private IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, string indexChannel, Range<double?> range, bool increasing, int? requestLatestValues = null)
         {
+            Logger.DebugFormat("Getting channel data for log: {0}", uri);
+
             increasing = requestLatestValues.HasValue ? !increasing : increasing;
 
             var chunks = ChannelDataChunkAdapter.GetData(uri, indexChannel, range, increasing);
@@ -308,6 +314,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private IDictionary<int, string> GetUnitList(T log, int[] slices)
         {
+            Logger.Debug("Getting unit list for log.");
+
             // Get a list of all of the units
             var allUnits = GetUnitsByColumnIndex(log);
 
@@ -328,6 +336,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private IDictionary<int, string> GetNullValueList(T log, int[] slices)
         {
+            Logger.Debug("Getting null value list for log.");
+
             // Get a list of all of the null values
             var allNullValues = GetNullValuesByColumnIndex(log);
 
@@ -379,8 +389,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var units = GetUnitList(logHeader, mnemonics.Keys.ToArray());
             var nullValues = GetNullValueList(logHeader, mnemonics.Keys.ToArray());
-            var records = GetChannelData(logHeader.GetUri(), mnemonics[0], range, IsIncreasing(logHeader),
-                requestLatestValues);
+            var records = GetChannelData(logHeader.GetUri(), mnemonics[0], range, IsIncreasing(logHeader), requestLatestValues);
 
             // Get a reader for the log's channel data
             var reader = records.GetReader();
@@ -407,6 +416,7 @@ namespace PDS.Witsml.Server.Data.Logs
             T log, T logHeader, ChannelDataReader reader, ResponseContext context,
             IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units, IDictionary<int, string> nullValues)
         {
+            Logger.Debug("Formatting logData values.");
             Dictionary<string, Range<double?>> ranges;
 
             var logData = reader.GetData(context, mnemonicSlices, units, nullValues, out ranges);
@@ -429,6 +439,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private void RemoveLogCurveInfos(T log, string[] mnemonics)
         {
+            Logger.Debug("Removing logCurveInfos from response.");
+
             var logCurves = GetLogCurves(log);
             logCurves?.RemoveAll(x => !mnemonics.Contains(GetMnemonic(x)));
         }
@@ -503,6 +515,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns></returns>
         protected Dictionary<string, Range<double?>> GetCurrentIndexRange(T entity)
         {
+            Logger.Debug("Getting index ranges for all logCurveInfos.");
+
             var ranges = new Dictionary<string, Range<double?>>();
             var logCurves = GetLogCurves(entity);
             var isTimeLog = IsTimeLog(entity);
@@ -522,6 +536,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private void GetUpdatedIndexRange(ChannelDataReader reader, string[] mnemonics, Dictionary<string, Range<double?>> ranges, bool increasing = true)
         {
+            Logger.Debug("Getting updated index ranges for all logCurveInfos.");
+
             for (var i = 0; i < mnemonics.Length; i++)
             {
                 var mnemonic = mnemonics[i];

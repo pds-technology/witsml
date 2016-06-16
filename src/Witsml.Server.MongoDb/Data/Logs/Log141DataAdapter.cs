@@ -393,6 +393,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns></returns>
         private IEnumerable<ChannelDataReader> ExtractDataReaders(Log entity, Log existing = null)
         {
+            Logger.Debug("Extracing data readers from log.");
+
             if (existing == null)
             {
                 var readers = entity.GetReaders().ToList();

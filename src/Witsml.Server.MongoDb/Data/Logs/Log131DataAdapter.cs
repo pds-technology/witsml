@@ -381,6 +381,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns></returns>
         private ChannelDataReader ExtractDataReader(Log entity, Log existing = null)
         {
+            Logger.Debug("Extracing data reader from log.");
+
             if (existing == null)
             {
                 var reader = entity.GetReader();

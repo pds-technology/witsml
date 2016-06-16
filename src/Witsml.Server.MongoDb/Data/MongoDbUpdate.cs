@@ -55,6 +55,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="ignored">The ignored.</param>
         public MongoDbUpdate(IMongoCollection<T> collection, WitsmlQueryParser parser, string idPropertyName = "Uid", List<string> ignored = null) : base(new MongoDbUpdateContext<T>())
         {
+            Logger.Debug("Instance created.");
             Context.Ignored = ignored;
 
             _collection = collection;
@@ -70,6 +71,8 @@ namespace PDS.Witsml.Server.Data
         /// <param name="updates">The updates.</param>
         public void Update(T entity, EtpUri uri, Dictionary<string, object> updates)
         {
+            Logger.DebugFormat("Updating data object: {0}", uri);
+
              _entityFilter = MongoDbUtility.GetEntityFilter<T>(uri, _idPropertyName);
             _entity = entity;
 
@@ -289,6 +292,8 @@ namespace PDS.Witsml.Server.Data
 
         private void UpdateArrayElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
         {
+            Logger.DebugFormat("Validating array elements: {0} {1}", parentPath, propertyInfo?.Name);
+
             var updateBuilder = Builders<T>.Update;
             var filterBuilder = Builders<T>.Filter;
             var idField = MongoDbUtility.LookUpIdField(type);
@@ -373,7 +378,7 @@ namespace PDS.Witsml.Server.Data
 
         private void ValidateArrayElement(XElement element, IList<PropertyInfo> properties, bool isAdd = true)
         {
-            Logger.DebugFormat("Validating array elements for {0}", element.Name.LocalName);
+            Logger.DebugFormat("Validating array element: {0}", element.Name.LocalName);
 
             if (isAdd)
             {
