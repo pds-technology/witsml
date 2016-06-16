@@ -18,6 +18,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using log4net;
 using PDS.Framework;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
@@ -29,6 +30,8 @@ namespace PDS.Witsml.Server.Data.Logs
     /// </summary>
     public static class LogExtensions
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(LogExtensions));
+
         /// <summary>
         /// Ensures the index curve is in the first position.
         /// </summary>
@@ -36,6 +39,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="mnemonic">The index curve mnemonic.</param>
         public static void MoveToFirst(this List<Witsml131.ComponentSchemas.LogCurveInfo> list, string mnemonic)
         {
+            _log.DebugFormat("Moving index logCurveInfo to first position: {0}", mnemonic);
+
             if (list == null || !list.Any() || string.IsNullOrWhiteSpace(mnemonic)) return;
             if (list[0].Mnemonic.EqualsIgnoreCase(mnemonic)) return;
 
@@ -53,6 +58,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="mnemonic">The index curve mnemonic.</param>
         public static void MoveToFirst(this List<Witsml141.ComponentSchemas.LogCurveInfo> list, string mnemonic)
         {
+            _log.DebugFormat("Moving index logCurveInfo to first position: {0}", mnemonic);
+
             if (list == null || !list.Any() || string.IsNullOrWhiteSpace(mnemonic)) return;
             if (list[0].Mnemonic.Value.EqualsIgnoreCase(mnemonic)) return;
 
@@ -84,6 +91,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns></returns>
         public static IEnumerable<string> GetLogCurveInfoMnemonics(this WitsmlQueryParser parser)
         {
+            _log.Debug("Getting logCurveInfo mnemonics from parser.");
+
             var logCurveInfos = parser.Properties("logCurveInfo").ToArray();
             if (!logCurveInfos.Any()) return new string[0];
 
@@ -101,6 +110,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns></returns>
         public static IEnumerable<string> GetLogDataMnemonics(this WitsmlQueryParser parser)
         {
+            _log.Debug("Getting logData mnemonics from parser.");
+
             var logData = parser.Property("logData");
             if (logData == null) return null;
 

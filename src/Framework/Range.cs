@@ -43,18 +43,29 @@ namespace PDS.Framework
         /// Gets the start of the range.
         /// </summary>
         /// <value>The start value.</value>
-        public T Start { get; private set; }
+        public T Start { get; }
 
         /// <summary>
         /// Gets the end of the range.
         /// </summary>
         /// <value>The end value.</value>
-        public T End { get; private set; }
+        public T End { get; }
 
         /// <summary>
         /// Gets the offset.
         /// </summary>
         /// <value>The offset.</value>
-        public TimeSpan? Offset { get; private set; }
+        public TimeSpan? Offset { get; }
+
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            return $"Range: {{ Start: { Start }, End: { End }, Offset: { Offset } }}";
+        }
     }
 }

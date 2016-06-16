@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using log4net;
 using PDS.Framework;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
@@ -31,6 +32,8 @@ namespace PDS.Witsml.Data.Logs
     /// </summary>
     public static class LogExtensions
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof (LogExtensions));
+
         /// <summary>
         /// Determines whether the <see cref="Witsml131.Log"/> is increasing.
         /// </summary>
@@ -113,6 +116,7 @@ namespace PDS.Witsml.Data.Logs
         /// <returns>The <see cref="Witsml131.ComponentSchemas.LogCurveInfo"/> specified by the uid.</returns>
         public static Witsml131.ComponentSchemas.LogCurveInfo GetByUid(this IEnumerable<Witsml131.ComponentSchemas.LogCurveInfo> logCurveInfos, string uid)
         {
+            _log.DebugFormat("Getting logCurveInfo by UID: {0}", uid);
             return logCurveInfos?.FirstOrDefault(x => x.Uid.EqualsIgnoreCase(uid));
         }
 
@@ -124,6 +128,7 @@ namespace PDS.Witsml.Data.Logs
         /// <returns>The <see cref="Witsml141.ComponentSchemas.LogCurveInfo"/> specified by the uid.</returns>
         public static Witsml141.ComponentSchemas.LogCurveInfo GetByUid(this IEnumerable<Witsml141.ComponentSchemas.LogCurveInfo> logCurveInfos, string uid)
         {
+            _log.DebugFormat("Getting logCurveInfo by UID: {0}", uid);
             return logCurveInfos?.FirstOrDefault(x => x.Uid.EqualsIgnoreCase(uid));
         }
 
@@ -135,6 +140,7 @@ namespace PDS.Witsml.Data.Logs
         /// <returns>The <see cref="Witsml200.Channel"/> specified by the uuid.</returns>
         public static Witsml200.Channel GetByUuid(this IEnumerable<Witsml200.Channel> channels, string uuid)
         {
+            _log.DebugFormat("Getting Channel by UUID: {0}", uuid);
             return channels?.FirstOrDefault(x => x.Uuid.EqualsIgnoreCase(uuid));
         }
 
@@ -146,6 +152,7 @@ namespace PDS.Witsml.Data.Logs
         /// <returns>The <see cref="Witsml131.ComponentSchemas.LogCurveInfo"/> specified by the mnemonic.</returns>
         public static Witsml131.ComponentSchemas.LogCurveInfo GetByMnemonic(this IEnumerable<Witsml131.ComponentSchemas.LogCurveInfo> logCurveInfos, string mnemonic)
         {
+            _log.DebugFormat("Getting logCurveInfo by mnemonic: {0}", mnemonic);
             return logCurveInfos?.FirstOrDefault(x => x.Mnemonic.EqualsIgnoreCase(mnemonic));
         }
 
@@ -157,6 +164,7 @@ namespace PDS.Witsml.Data.Logs
         /// <returns>The <see cref="Witsml141.ComponentSchemas.LogCurveInfo"/> specified by the mnemonic.</returns>
         public static Witsml141.ComponentSchemas.LogCurveInfo GetByMnemonic(this IEnumerable<Witsml141.ComponentSchemas.LogCurveInfo> logCurveInfos, string mnemonic)
         {
+            _log.DebugFormat("Getting logCurveInfo by mnemonic: {0}", mnemonic);
             return logCurveInfos?.FirstOrDefault(x => x.Mnemonic.Value.EqualsIgnoreCase(mnemonic));
         }
 
@@ -168,6 +176,7 @@ namespace PDS.Witsml.Data.Logs
         /// <returns>The <see cref="Witsml200.Channel"/> specified by the mnemonic.</returns>
         public static Witsml200.Channel GetByMnemonic(this IEnumerable<Witsml200.Channel> channels, string mnemonic)
         {
+            _log.DebugFormat("Getting Channel by mnemonic: {0}", mnemonic);
             return channels?.FirstOrDefault(x => x.Mnemonic.EqualsIgnoreCase(mnemonic));
         }
 
@@ -180,6 +189,8 @@ namespace PDS.Witsml.Data.Logs
         /// <returns>The index range for the specified log curve.</returns>
         public static Range<double?> GetIndexRange(this Witsml131.ComponentSchemas.LogCurveInfo logCurveInfo, bool increasing = true, bool isTimeIndex = false)
         {
+            _log.DebugFormat("Getting logCurveInfo index range: {0}", logCurveInfo?.Mnemonic);
+
             double? start = null;
             double? end = null;
 
@@ -211,6 +222,8 @@ namespace PDS.Witsml.Data.Logs
         /// <returns>The index range for the specified log curve.</returns>
         public static Range<double?> GetIndexRange(this Witsml141.ComponentSchemas.LogCurveInfo logCurveInfo, bool increasing = true, bool isTimeIndex = false)
         {
+            _log.DebugFormat("Getting logCurveInfo index range: {0}", logCurveInfo?.Mnemonic?.Value);
+
             double? start = null;
             double? end = null;
 
@@ -271,6 +284,8 @@ namespace PDS.Witsml.Data.Logs
         /// <returns>A valid null indicator value.</returns>
         private static string GetNullValue(string logNullValue, string logCurveInfoNullValue)
         {
+            _log.DebugFormat("Getting null value from log: {0} or logCurveInfo: {1}", logNullValue, logCurveInfoNullValue);
+
             return !string.IsNullOrWhiteSpace(logCurveInfoNullValue)
                 ? logCurveInfoNullValue
                 : !string.IsNullOrWhiteSpace(logNullValue)
