@@ -220,7 +220,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             return OptionsIn.ReturnElements.IdOnly.Equals(returnElements)
                 ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell", "UidWellbore", "NameWellbore" }
-                : OptionsIn.ReturnElements.DataOnly.Equals(returnElements)
+                : parser.IncludeLogData()
                 ? new List<string> { IdPropertyName, "UidWell", "UidWellbore" }
                 : OptionsIn.ReturnElements.Requested.Equals(returnElements)
                 ? new List<string>()
