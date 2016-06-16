@@ -76,12 +76,7 @@ namespace PDS.Witsml.Server.Data
             Context.Update = Update(updates, uri.ObjectId);
             BuildUpdate(_parser.Element());
 
-            if (Logger.IsDebugEnabled)
-            {
-                var updateJson = Context.Update.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
-                Logger.DebugFormat("Detected update elements: {0}", updateJson);
-            }
-
+            LogUpdateFilter(_entityFilter, Context.Update);
             _collection.UpdateOne(_entityFilter, Context.Update);
         }
 
@@ -108,14 +103,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="update">The update.</param>
         public void UpdateFields(FilterDefinition<T> filter, UpdateDefinition<T> update)
         {
-            if (Logger.IsDebugEnabled)
-            {
-                var filterJson = filter.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
-                var updateJson = update.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
-                Logger.DebugFormat("Detected update parameters: {0}", updateJson);
-                Logger.DebugFormat("Detected update filters: {0}", filterJson);
-            }
-
+            LogUpdateFilter(filter, update);
             _collection.UpdateOne(filter, update);
         }
 
@@ -327,8 +315,11 @@ namespace PDS.Witsml.Server.Data
 
                     var item = WitsmlParser.Parse(type, element.ToString());
 
+                    var filter = filterBuilder.And(filters);
                     var update = updateBuilder.Push(parentPath, item);
-                    _collection.UpdateOne(filterBuilder.And(filters), update);
+
+                    LogUpdateFilter(filter, update);
+                    _collection.UpdateOne(filter, update);
                 }
                 else
                 {
@@ -336,8 +327,8 @@ namespace PDS.Witsml.Server.Data
 
                     var elementFilter = Builders<T>.Filter.EqIgnoreCase(filterPath, elementId);
                     filters.Add(elementFilter);
-                    var filter = filterBuilder.And(filters);
 
+                    var filter = filterBuilder.And(filters);
                     var update = updateBuilder.Set(GetPropertyPath(positionPath, idField), elementId);
 
                     var saveUpdate = Context.Update;
@@ -347,14 +338,7 @@ namespace PDS.Witsml.Server.Data
                     NavigateElement(element, type, positionPath);
                     PopPropertyInfo();
 
-                    if (Logger.IsDebugEnabled)
-                    {
-                        var filterJson = filter.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
-                        var updateJson = update.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
-                        Logger.DebugFormat("Detected update parameters: {0}", updateJson);
-                        Logger.DebugFormat("Detected update filters: {0}", filterJson);
-                    }
-
+                    LogUpdateFilter(filter, update);
                     _collection.UpdateOne(filter, Context.Update);
                     Context.Update = saveUpdate;                   
                 }
@@ -388,7 +372,9 @@ namespace PDS.Witsml.Server.Data
         }
 
         private void ValidateArrayElement(XElement element, IList<PropertyInfo> properties, bool isAdd = true)
-        {          
+        {
+            Logger.DebugFormat("Validating array elements for {0}", element.Name.LocalName);
+
             if (isAdd)
             {
                 WitsmlParser.RemoveEmptyElements(element);
@@ -423,6 +409,17 @@ namespace PDS.Witsml.Server.Data
                     if (prop.IsDefined(typeof(RequiredAttribute), false))
                         throw new WitsmlException(ErrorCodes.MissingRequiredData);
                 }
+            }
+        }
+
+        private void LogUpdateFilter(FilterDefinition<T> filter, UpdateDefinition<T> update)
+        {
+            if (Logger.IsDebugEnabled)
+            {
+                var filterJson = filter.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
+                var updateJson = update.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
+                Logger.DebugFormat("Detected update parameters: {0}", updateJson);
+                Logger.DebugFormat("Detected update filters: {0}", filterJson);
             }
         }
     }
