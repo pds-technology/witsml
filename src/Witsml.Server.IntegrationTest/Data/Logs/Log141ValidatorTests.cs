@@ -1052,6 +1052,63 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
+        public void Log141Validator_Test_Add_With_Blank_Unit_In_LogCurveInfo_And_UnitList()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10);
+
+            // Set the 3rd LogCurveInfo/unit to null and 3rd UnitList entry to an empty string
+            log.LogCurveInfo[2].Unit = null;
+            var logData = log.LogData.First();
+            logData.UnitList = "m,m/h,";
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+        }
+
+        [TestMethod]
+        public void Log141Validator_Test_Add_With_Unit_In_LogCurveInfo_And_Blank_In_UnitList()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10);
+
+            // Set the 3rd UnitList entry to an empty string
+            var logData = log.LogData.First();
+            logData.UnitList = "m,m/h,";
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.MissingUnitForMeasureData, response.Result);
+        }
+
+        [TestMethod]
         public void Test_error_code_453_units_not_specified_for_log_data_update()
         {
             var response = DevKit.Add<WellList, Well>(Well);
