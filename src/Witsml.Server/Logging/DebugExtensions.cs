@@ -206,6 +206,42 @@ namespace PDS.Witsml.Server.Logging
         }
 
         /// <summary>
+        /// Converts the response to a message suitable for logging.
+        /// </summary>
+        /// <param name="response">The response object.</param>
+        /// <param name="isEnabled">if set to <c>true</c> the message is created.</param>
+        /// <returns>The string representation of the response.</returns>
+        public static string ToLogMessage(this WMLS_UpdateInStoreResponse response, bool isEnabled = false)
+        {
+            if (!_log.IsDebugEnabled && !isEnabled)
+                return string.Empty;
+
+            return string.Format(
+                "{0}: Result: {1}; Message: {2}",
+                response.GetType().Name,
+                response.Result,
+                response.SuppMsgOut);
+        }
+
+        /// <summary>
+        /// Converts the response to a message suitable for logging.
+        /// </summary>
+        /// <param name="response">The response object.</param>
+        /// <param name="isEnabled">if set to <c>true</c> the message is created.</param>
+        /// <returns>The string representation of the response.</returns>
+        public static string ToLogMessage(this WMLS_DeleteFromStoreResponse response, bool isEnabled = false)
+        {
+            if (!_log.IsDebugEnabled && !isEnabled)
+                return string.Empty;
+
+            return string.Format(
+                "{0}: Result: {1}; Message: {2}",
+                response.GetType().Name,
+                response.Result,
+                response.SuppMsgOut);
+        }
+
+        /// <summary>
         /// Formats the specified XML.
         /// </summary>
         /// <param name="xml">The XML.</param>

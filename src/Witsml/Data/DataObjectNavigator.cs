@@ -59,17 +59,6 @@ namespace PDS.Witsml.Data
         protected ILog Logger { get; private set; }
 
         /// <summary>
-        /// Determines whether the specified element name is ignored.
-        /// </summary>
-        /// <param name="elementName">Name of the element.</param>
-        /// <param name="parentPath">Parent path of the element.</param>
-        /// <returns></returns>
-        protected virtual bool IsIgnored(string elementName, string parentPath = null)
-        {
-            return Context.Ignored != null && Context.Ignored.Contains(elementName);
-        }
-
-        /// <summary>
         /// Creates an <see cref="XName"/> for the xmlns namespace using the specified local name.
         /// </summary>
         /// <param name="attributeName">The attribute name.</param>
@@ -99,6 +88,7 @@ namespace PDS.Witsml.Data
         /// <param name="element">The XML element.</param>
         protected void Navigate(XElement element)
         {
+            Logger.DebugFormat("Navigating XML element: {0}", element?.Name.LocalName);
             NavigateElement(element, Context.DataObjectType);
         }
 
@@ -455,6 +445,17 @@ namespace PDS.Witsml.Data
         /// <param name="propertyPath">The property path.</param>
         protected virtual void HandleRecurringElements(string propertyPath)
         {
+        }
+
+        /// <summary>
+        /// Determines whether the specified element name is ignored.
+        /// </summary>
+        /// <param name="elementName">Name of the element.</param>
+        /// <param name="parentPath">Parent path of the element.</param>
+        /// <returns></returns>
+        protected virtual bool IsIgnored(string elementName, string parentPath = null)
+        {
+            return Context.Ignored != null && Context.Ignored.Contains(elementName);
         }
 
         /// <summary>

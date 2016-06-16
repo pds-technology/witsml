@@ -59,6 +59,8 @@ namespace PDS.Witsml.Server.Configuration
         /// <param name="document">The XML document.</param>
         public override void ValidateRequest(RequestContext context, XDocument document)
         {
+            Logger.DebugFormat("Validating WITSML request for {0}; Function: {1}", context.ObjectType, context.Function);
+
             base.ValidateRequest(context, document);
 
             var optionsIn = OptionsIn.Parse(context.Options);
@@ -102,6 +104,8 @@ namespace PDS.Witsml.Server.Configuration
         /// <param name="document">The document.</param>
         protected override void ValidateNamespace(XDocument document)
         {
+            Logger.Debug("Validating default namespace.");
+
             if (!Namespace141.Equals(GetNamespace(document)))
             {
                 throw new WitsmlException(ErrorCodes.MissingDefaultWitsmlNamespace);

@@ -234,17 +234,24 @@ namespace PDS.Witsml.Server
                 var dataWriter = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
                 var result = dataWriter.UpdateInStore(context);
 
-                return new WMLS_UpdateInStoreResponse((short)result.Code, result.Message);
+                var response = new WMLS_UpdateInStoreResponse((short)result.Code, result.Message);
+                _log.Debug(response.ToLogMessage());
+                return response;
             }
             catch (ContainerException)
             {
-                return new WMLS_UpdateInStoreResponse(
-                    (short)ErrorCodes.DataObjectNotSupported,
+                var response = new WMLS_UpdateInStoreResponse((short)ErrorCodes.DataObjectNotSupported,
                     "WITSML object type not supported: " + context.ObjectType + "; Version: " + version);
+
+                _log.Warn(response.ToLogMessage(_log.IsWarnEnabled));
+
+                return response;
             }
             catch (WitsmlException ex)
             {
-                return new WMLS_UpdateInStoreResponse((short)ex.ErrorCode, ex.Message);
+                var response = new WMLS_UpdateInStoreResponse((short)ex.ErrorCode, ex.Message);
+                _log.Warn(response.ToLogMessage(_log.IsWarnEnabled));
+                return response;
             }
         }
 
@@ -268,17 +275,24 @@ namespace PDS.Witsml.Server
                 var dataWriter = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
                 var result = dataWriter.DeleteFromStore(context);
 
-                return new WMLS_DeleteFromStoreResponse((short)result.Code, result.Message);
+                var response = new WMLS_DeleteFromStoreResponse((short)result.Code, result.Message);
+                _log.Debug(response.ToLogMessage());
+                return response;
             }
             catch (ContainerException)
             {
-                return new WMLS_DeleteFromStoreResponse(
-                    (short)ErrorCodes.DataObjectNotSupported,
+                var response = new WMLS_DeleteFromStoreResponse((short)ErrorCodes.DataObjectNotSupported,
                     "WITSML object type not supported: " + context.ObjectType + "; Version: " + version);
+
+                _log.Warn(response.ToLogMessage(_log.IsWarnEnabled));
+
+                return response;
             }
             catch (WitsmlException ex)
             {
-                return new WMLS_DeleteFromStoreResponse((short)ex.ErrorCode, ex.Message);
+                var response = new WMLS_DeleteFromStoreResponse((short)ex.ErrorCode, ex.Message);
+                _log.Warn(response.ToLogMessage(_log.IsWarnEnabled));
+                return response;
             }
         }
 

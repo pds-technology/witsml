@@ -18,6 +18,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using log4net;
 using PDS.Framework;
 
 namespace PDS.Witsml
@@ -28,6 +29,8 @@ namespace PDS.Witsml
     /// </summary>
     public class OptionsIn
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(OptionsIn));
+
         /// <summary>
         /// Defines the list of supported data schema versions.
         /// </summary>
@@ -376,6 +379,8 @@ namespace PDS.Witsml
         /// <returns>A collection of name-value pairs.</returns>
         public static Dictionary<string, string> Parse(string options)
         {
+            _log.DebugFormat("Parsing OptionsIn: {0}", options);
+
             if (string.IsNullOrWhiteSpace(options))
             {
                 return new Dictionary<string, string>(0);
@@ -394,6 +399,8 @@ namespace PDS.Witsml
         /// <returns>The option value, if specified; otherwise, the default value.</returns>
         public static string GetValue(Dictionary<string, string> options, OptionsIn defaultValue)
         {
+            _log.DebugFormat("Getting OptionsIn value: {0}", defaultValue?.Key);
+
             string value;
             if (!options.TryGetValue(defaultValue.Key, out value))
             {

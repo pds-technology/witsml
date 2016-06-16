@@ -69,6 +69,8 @@ namespace PDS.Witsml.Server.Data
         /// <exception cref="PDS.Witsml.WitsmlException">If any validation errors are detected.</exception>
         public void Validate(Functions function, WitsmlQueryParser parser, T dataObject)
         {
+            Logger.DebugFormat("Validating data object for {0}; Type: {1}", function, typeof(T).FullName);
+
             DataObject = dataObject;
             Function = function;
             Parser = parser;
@@ -177,8 +179,7 @@ namespace PDS.Witsml.Server.Data
 
         private static void ValidateResults(IList<ValidationResult> results)
         {
-            if (!results.Any())
-                return;
+            if (!results.Any()) return;
 
             ErrorCodes errorCode;
             var witsmlValidationResult = results.OfType<WitsmlValidationResult>().FirstOrDefault();

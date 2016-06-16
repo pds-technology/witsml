@@ -22,6 +22,7 @@ using System.Reflection;
 using System.Xml;
 using System.Xml.Linq;
 using Energistics.DataAccess;
+using log4net;
 using PDS.Framework;
 using PDS.Witsml.Data;
 
@@ -32,6 +33,8 @@ namespace PDS.Witsml
     /// </summary>
     public class WitsmlParser : DataObjectNavigator<WitsmlParserContext>
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(WitsmlParser));
+
         /// <summary>
         /// Initializes a new instance of the <see cref="WitsmlParser"/> class.
         /// </summary>
@@ -48,6 +51,8 @@ namespace PDS.Witsml
         /// <exception cref="WitsmlException"></exception>
         public static XDocument Parse(string xml)
         {
+            _log.Debug("Parsing XML string.");
+
             try
             {
                 return XDocument.Parse(xml);
@@ -67,6 +72,8 @@ namespace PDS.Witsml
         /// <exception cref="WitsmlException"></exception>
         public static T Parse<T>(string xml)
         {
+            _log.Debug("Parsing XML string.");
+
             try
             {
                 xml = RemoveNaNElements<T>(xml);
@@ -91,6 +98,8 @@ namespace PDS.Witsml
         /// <exception cref="WitsmlException"></exception>
         public static object Parse(Type type, string xml)
         {
+            _log.DebugFormat("Parsing XML string for type {0}.", type.FullName);
+
             var method = typeof(WitsmlParser).GetMethods(BindingFlags.Public | BindingFlags.Static)
                 .FirstOrDefault(x => x.Name == "Parse" && x.GetGenericArguments().Any());
 
@@ -114,6 +123,8 @@ namespace PDS.Witsml
         /// <returns>The serialized XML string.</returns>
         public static string ToXml(object obj)
         {
+            _log.Debug("Serializing object to XML.");
+
             if (obj == null) return string.Empty;
 
             var xml = EnergisticsConverter.ObjectToXml(obj);
@@ -136,6 +147,8 @@ namespace PDS.Witsml
         /// <param name="element">The element.</param>
         public static void RemoveEmptyElements(XElement element)
         {
+            _log.Debug("Removing empty elements.");
+
             Func<XElement, bool> predicate = e => e.Attributes(Xsi("nil")).Any() || 
                 (string.IsNullOrEmpty(e.Value) && !e.HasAttributes && !e.HasElements);
 
@@ -152,6 +165,8 @@ namespace PDS.Witsml
         /// <returns>The xml with NaN removed.</returns>
         public static string RemoveNaNElements<T>(string xml)
         {
+            _log.Debug("Removing NaN elements.");
+
             var context = new WitsmlParserContext<T>(Parse(xml));
             var parser = new WitsmlParser(context);
 

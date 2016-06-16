@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel.Web;
 using System.Xml.Linq;
+using log4net;
 using PDS.Framework;
 
 namespace PDS.Witsml.Server.Configuration
@@ -29,6 +30,8 @@ namespace PDS.Witsml.Server.Configuration
     /// </summary>
     public abstract class WitsmlValidator
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(WitsmlValidator));
+
         /// <summary>
         /// Validates the WITSML Store API request.
         /// </summary>
@@ -38,6 +41,8 @@ namespace PDS.Witsml.Server.Configuration
         /// <exception cref="WitsmlException"></exception>
         public static void ValidateRequest(IEnumerable<ICapServerProvider> providers, RequestContext context, out string version)
         {
+            _log.DebugFormat("Validating WITSML request for {0}", context.ObjectType);
+
             ValidateUserAgent(WebOperationContext.Current);
             var document = ValidateInputTemplate(context.Xml);
 
@@ -85,6 +90,8 @@ namespace PDS.Witsml.Server.Configuration
         /// <exception cref="WitsmlException">Thrown if the User-Agent header is missing.</exception>
         public static void ValidateUserAgent(WebOperationContext context)
         {
+            _log.DebugFormat("Validating user agent: {0}", context?.IncomingRequest?.UserAgent);
+
             if (context?.IncomingRequest != null && string.IsNullOrWhiteSpace(context.IncomingRequest.UserAgent))
             {
                 throw new WitsmlException(ErrorCodes.MissingClientUserAgent);
@@ -98,6 +105,8 @@ namespace PDS.Witsml.Server.Configuration
         /// <exception cref="WitsmlException"></exception>
         public static XDocument ValidateInputTemplate(string xml)
         {
+            _log.Debug("Validating WITSML input template.");
+
             if (string.IsNullOrWhiteSpace(xml))
             {
                 throw new WitsmlException(ErrorCodes.MissingInputTemplate);
@@ -120,6 +129,8 @@ namespace PDS.Witsml.Server.Configuration
         /// <exception cref="WitsmlException"></exception>
         public static void ValidateDataSchemaVersion(string version)
         {
+            _log.DebugFormat("Validating data schema version: {0}", version);
+
             if (string.IsNullOrWhiteSpace(version))
             {
                 throw new WitsmlException(ErrorCodes.MissingDataSchemaVersion);
@@ -134,6 +145,8 @@ namespace PDS.Witsml.Server.Configuration
         /// <exception cref="WitsmlException"></exception>
         public static void ValidatePluralRootElement(string objectType, XDocument document)
         {
+            _log.DebugFormat("Validating plural root element for {0}", objectType);
+
             var objectGroupType = ObjectTypes.GetObjectGroupType(document);
             var pluralObjectType = objectType + "s";
 
@@ -151,6 +164,8 @@ namespace PDS.Witsml.Server.Configuration
         /// <exception cref="WitsmlException"></exception>
         public static void ValidateEmptyRootElement(string objectType, XDocument document)
         {
+            _log.DebugFormat("Validating empty root element for {0}", objectType);
+
             if (!document.Root.Elements().Any())
             {
                 throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
@@ -165,6 +180,8 @@ namespace PDS.Witsml.Server.Configuration
         /// <exception cref="WitsmlException"></exception>
         public static void ValidateSingleChildElement(string objectType, XDocument document)
         {
+            _log.DebugFormat("Validating single child element for {0}", objectType);
+
             if (document.Root.Elements().Count() > 1)
             {
                 throw new WitsmlException(ErrorCodes.InputTemplateMultipleDataObjects);
@@ -179,6 +196,8 @@ namespace PDS.Witsml.Server.Configuration
         /// <exception cref="WitsmlException"></exception>
         public static void ValidateKeywords(Dictionary<string, string> options, params string[] keywords)
         {
+            _log.Debug("Validating keywords for OptionsIn");
+
             foreach (var option in options.Where(x => !keywords.Contains(x.Key)))
             {
                 throw new WitsmlException(ErrorCodes.KeywordNotSupportedByFunction, "Option not supported: " + option.Key);
@@ -193,6 +212,8 @@ namespace PDS.Witsml.Server.Configuration
         /// <exception cref="WitsmlException"></exception>
         public static void ValidateCompressionMethod(Dictionary<string, string> options, string compressionMethod)
         {
+            _log.DebugFormat("Validating compression method: {0}", compressionMethod);
+
             string optionValue;
             if (!options.TryGetValue(OptionsIn.CompressionMethod.Keyword, out optionValue))
             {
@@ -221,6 +242,8 @@ namespace PDS.Witsml.Server.Configuration
         /// <exception cref="WitsmlException"></exception>
         public void ValidateRequestMaxReturnNodes(Dictionary<string, string> options)
         {
+            _log.Debug("Validating max return nodes.");
+
             string optionValue;
             if (!options.TryGetValue(OptionsIn.MaxReturnNodes.Keyword, out optionValue))
             {
@@ -245,6 +268,8 @@ namespace PDS.Witsml.Server.Configuration
         /// </exception>
         public void ValidateRequestObjectSelectionCapability(Dictionary<string, string> options, string objectType, XDocument document)
         {
+            _log.DebugFormat("Validating request object selection capability for {0}", objectType);
+
             string optionValue;
             if (!options.TryGetValue(OptionsIn.RequestObjectSelectionCapability.Keyword, out optionValue))
             {
@@ -272,6 +297,8 @@ namespace PDS.Witsml.Server.Configuration
 
         private static void ValidateMinimumQueryTemplate(string objectType, XDocument document)
         {
+            _log.DebugFormat("Validating minimum query template for {0}", objectType);
+
             XElement root = document.Root;
 
             if ( !(root.Elements().Count() == 1 &&
@@ -290,6 +317,8 @@ namespace PDS.Witsml.Server.Configuration
         /// </exception>
         public void ValidateReturnElements(Dictionary<string, string> options, string objectType)
         {
+            _log.DebugFormat("Validating return elements for {0}", objectType);
+
             string optionValue;
             if (!options.TryGetValue(OptionsIn.ReturnElements.Keyword, out optionValue))
             {
@@ -328,6 +357,8 @@ namespace PDS.Witsml.Server.Configuration
         /// <param name="document">The queryIn XML document.</param>
         public static void ValidateSelectionCriteria(XDocument document)
         {
+            _log.Debug("Validating selection criteria.");
+
             var entities = document.Root.Elements();
 
             foreach (var entity in entities)
@@ -345,6 +376,8 @@ namespace PDS.Witsml.Server.Configuration
         /// <exception cref="WitsmlException"></exception>
         protected void ValidateObjectType(Functions function, string objectType, string xmlType)
         {
+            _log.DebugFormat("Validating object type for {0}", objectType);
+
             if (string.IsNullOrWhiteSpace(objectType))
             {
                 throw new WitsmlException(ErrorCodes.MissingWMLtypeIn);
@@ -355,6 +388,7 @@ namespace PDS.Witsml.Server.Configuration
             {
                 if (function == Functions.AddToStore)
                     throw new WitsmlException(ErrorCodes.DataObjectTypesDontMatch);
+
                 throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
             }
 
@@ -363,6 +397,7 @@ namespace PDS.Witsml.Server.Configuration
 
             if (function == Functions.AddToStore)
                 throw new WitsmlException(ErrorCodes.DataObjectTypeNotSupported);
+
             throw new WitsmlException(ErrorCodes.DataObjectNotSupported);
         }
 
@@ -390,12 +425,11 @@ namespace PDS.Witsml.Server.Configuration
         /// <param name="entity">The entity.</param>
         private static void ValidateSelectionCriteriaForAnEntity(XElement entity)
         {
-            if (entity == null)
-                return;
+            _log.DebugFormat("Validating selection criteria for {0}", entity.Name.LocalName);
+            if (entity == null) return;
 
             var elements = entity.Elements();
-            if (elements == null)
-                return;
+            if (elements == null) return;
 
             var groupings = elements.GroupBy(e => e.Name.LocalName);
 
@@ -427,6 +461,8 @@ namespace PDS.Witsml.Server.Configuration
 
         private static void IsSelectionMatch(XElement source, XElement target)
         {
+            _log.Debug("Validating matching selection criteria.");
+
             foreach (var attribute in source.Attributes())
             {
                 if (!target.Attributes().Any(a => a.Name.LocalName == attribute.Name.LocalName))
@@ -453,12 +489,15 @@ namespace PDS.Witsml.Server.Configuration
         }
 
         private static void IsRecurringElementValueEmpty(XElement element)
-        {    
-            if (string.IsNullOrEmpty(element.Value) && !element.HasAttributes 
-                || element.Elements().Any(e => string.IsNullOrEmpty(e.Value)) 
-                || element.Attributes().Any(a => string.IsNullOrEmpty(a.Value)))
-                throw new WitsmlException(ErrorCodes.RecurringItemsEmptySelection);
-        }
+        {
+            _log.Debug("Validating empty recurring elements.");
 
+            if (string.IsNullOrEmpty(element.Value) && !element.HasAttributes
+                || element.Elements().Any(e => string.IsNullOrEmpty(e.Value))
+                || element.Attributes().Any(a => string.IsNullOrEmpty(a.Value)))
+            {
+                throw new WitsmlException(ErrorCodes.RecurringItemsEmptySelection);
+            }
+        }
     }
 }

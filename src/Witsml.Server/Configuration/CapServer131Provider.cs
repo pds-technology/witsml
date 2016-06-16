@@ -59,6 +59,8 @@ namespace PDS.Witsml.Server.Configuration
         /// <exception cref="WitsmlException"></exception>
         protected override void ValidateNamespace(XDocument document)
         {
+            Logger.Debug("Validating default namespace.");
+
             if (!Namespace131.Equals(GetNamespace(document)))
             {
                 throw new WitsmlException(ErrorCodes.MissingDefaultWitsmlNamespace);
