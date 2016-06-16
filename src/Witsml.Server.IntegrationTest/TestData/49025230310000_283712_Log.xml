@@ -3,8 +3,8 @@
     <nameWell>61-2-X-15</nameWell>
     <nameWellbore>61-2-X-15</nameWellbore>
     <name>61-2-X-15 - Depth Log</name>
-    <serviceCompany>SCHLUMBERGER</serviceCompany>
-    <description>Created by Wellstorm LAS Import</description>
+    <serviceCompany>ABC Company</serviceCompany>
+    <description>Created by ABC Company Import</description>
     <indexType>measured depth</indexType>
     <startIndex uom='ft'>60.0</startIndex>
     <endIndex uom='ft'>5768.0</endIndex>

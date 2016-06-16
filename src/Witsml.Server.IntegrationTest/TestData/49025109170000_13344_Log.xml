@@ -3,7 +3,7 @@
     <nameWell>25-LX-11</nameWell>
     <nameWellbore>25-LX-11</nameWellbore>
     <name>25-LX-11 - Depth Log</name>
-    <serviceCompany>DRESSER ATLAS</serviceCompany>    
+    <serviceCompany>ABC Company</serviceCompany>    
     <indexType>measured depth</indexType>
     <startIndex uom='ft'>27.5</startIndex>
     <endIndex uom='ft'>5889.0</endIndex>

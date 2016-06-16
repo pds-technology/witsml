@@ -3,7 +3,7 @@
     <nameWell>62-TpX-11</nameWell>
     <nameWellbore>62-TpX-11</nameWellbore>
     <name>62-TpX-11 - Depth Log</name>
-    <serviceCompany>DRESSER ATLAS</serviceCompany>    
+    <serviceCompany>ABC Company</serviceCompany>    
     <indexType>measured depth</indexType>
     <startIndex uom='ft'>35.5</startIndex>
     <endIndex uom='ft'>6235.5</endIndex>
