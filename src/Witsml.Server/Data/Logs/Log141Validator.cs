@@ -318,8 +318,10 @@ namespace PDS.Witsml.Server.Data.Logs
                 if (logCurve == null)
                     continue;
 
-                if (!units[i].Trim().EqualsIgnoreCase(logCurve.Unit))
-                    return false;
+                if (string.IsNullOrEmpty(units[i].Trim()) && string.IsNullOrEmpty(logCurve.Unit) ||
+                    units[i].Trim().EqualsIgnoreCase(logCurve.Unit))
+                    continue;
+                return false;
             }
             return true;
         }
@@ -364,7 +366,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         {
                             return new ValidationResult(ErrorCodes.MissingUnitList.ToString(), new[] { "LogData", "UnitList" });
                         }
-                        else if (!UnitSpecified(logData))
+                        else if (!UnitSpecified(logCurves, logData))
                         {
                             return new ValidationResult(ErrorCodes.MissingUnitForMeasureData.ToString(), new[] { "LogData", "UnitList" });
                         }
@@ -391,20 +393,21 @@ namespace PDS.Witsml.Server.Data.Logs
             return null;
         }
 
-        private bool UnitSpecified(LogData logData)
+        private bool UnitSpecified(List<LogCurveInfo> logCurves, LogData logData)
         {
-            var data = logData.Data;
-            if (data == null || data.Count == 0)
-                return true;
-
-            var firstRow = data.First().Split(_seperator);
+            var mnemonics = logData.MnemonicList.Split(_seperator);
             var units = logData.UnitList.Split(_seperator);
-            for (var i = 0; i < firstRow.Length; i++)
+
+            for (var i = 0; i < mnemonics.Length; i++)
             {
-                if (units.Length <= i || string.IsNullOrWhiteSpace(units[i]))
+                var mnemonic = mnemonics[i];
+                var logCurve = logCurves.FirstOrDefault(l => l.Mnemonic.Value.EqualsIgnoreCase(mnemonic));
+
+                // If there are not enough units to cover all of the mnemonics OR 
+                //... the LogCurve has a unit and the unit is empty the the unit is not specified.
+                if (units.Length <= i || (!string.IsNullOrEmpty(logCurve?.Unit) && string.IsNullOrEmpty(units[i].Trim())))
                     return false;
             }
-
             return true;
         }
     }
