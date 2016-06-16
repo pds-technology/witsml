@@ -73,7 +73,7 @@ namespace PDS.Witsml.Server.Data
         {
             Logger.DebugFormat("Updating data object: {0}", uri);
 
-             _entityFilter = MongoDbUtility.GetEntityFilter<T>(uri, _idPropertyName);
+            _entityFilter = MongoDbUtility.GetEntityFilter<T>(uri, _idPropertyName);
             _entity = entity;
 
             Context.Update = Update(updates, uri.ObjectId);
@@ -135,7 +135,7 @@ namespace PDS.Witsml.Server.Data
             NavigateElementType(elementType, element, propertyPath);
 
             if (propertyInfo.DeclaringType?.GetProperty(propertyInfo.Name + "Specified") != null)
-                Context.Update = Context.Update.Set(propertyPath + "Specified", true);                
+                Context.Update = Context.Update.Set(propertyPath + "Specified", true);
         }
 
         /// <summary>
@@ -292,7 +292,7 @@ namespace PDS.Witsml.Server.Data
 
         private void UpdateArrayElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
         {
-            Logger.DebugFormat("Validating array elements: {0} {1}", parentPath, propertyInfo?.Name);
+            Logger.DebugFormat("Updating array elements: {0} {1}", parentPath, propertyInfo?.Name);
 
             var updateBuilder = Builders<T>.Update;
             var filterBuilder = Builders<T>.Filter;
@@ -300,54 +300,59 @@ namespace PDS.Witsml.Server.Data
             var filterPath = GetPropertyPath(parentPath, idField);
             var properties = GetPropertyInfo(type);
             var positionPath = parentPath + ".$";
-            
-            foreach (var element in elements)
-            {
-                var elementId = GetElementId(element, idField);
-                if (string.IsNullOrEmpty(elementId))
-                    continue;
 
-                var filters = new List<FilterDefinition<T>>() { _entityFilter };
-                var current = GetCurrentElementValue(idField, elementId, properties, propertyValue);
+            var itemsById = GetItemsById((IEnumerable)propertyValue, properties, idField);
 
-                if (current == null)
+            _collection.BulkWrite(elements
+                .Select(element =>
                 {
-                    ValidateArrayElement(element, properties);
+                    var elementId = GetElementId(element, idField);
+                    if (string.IsNullOrEmpty(elementId)) return null;
 
-                    // update element name to match XSD type
-                    var xmlType = type.GetCustomAttribute<XmlTypeAttribute>();
-                    element.Name = xmlType != null ? xmlType.TypeName : element.Name;
+                    var filters = new List<FilterDefinition<T>>() { _entityFilter };
 
-                    var item = WitsmlParser.Parse(type, element.ToString());
+                    object current;
+                    itemsById.TryGetValue(elementId, out current);
 
-                    var filter = filterBuilder.And(filters);
-                    var update = updateBuilder.Push(parentPath, item);
+                    if (current == null)
+                    {
+                        ValidateArrayElement(element, properties);
 
-                    LogUpdateFilter(filter, update);
-                    _collection.UpdateOne(filter, update);
-                }
-                else
-                {
-                    ValidateArrayElement(element, properties, false);
+                        // update element name to match XSD type
+                        var xmlType = type.GetCustomAttribute<XmlTypeAttribute>();
+                        element.Name = xmlType != null ? xmlType.TypeName : element.Name;
 
-                    var elementFilter = Builders<T>.Filter.EqIgnoreCase(filterPath, elementId);
-                    filters.Add(elementFilter);
+                        var item = WitsmlParser.Parse(type, element.ToString());
 
-                    var filter = filterBuilder.And(filters);
-                    var update = updateBuilder.Set(GetPropertyPath(positionPath, idField), elementId);
+                        var filter = filterBuilder.And(filters);
+                        var update = updateBuilder.Push(parentPath, item);
 
-                    var saveUpdate = Context.Update;
-                    Context.Update = update;
-                  
-                    PushPropertyInfo(propertyInfo, current);
-                    NavigateElement(element, type, positionPath);
-                    PopPropertyInfo();
+                        return new UpdateOneModel<T>(filter, update);
+                    }
+                    else
+                    {
+                        ValidateArrayElement(element, properties, false);
 
-                    LogUpdateFilter(filter, update);
-                    _collection.UpdateOne(filter, Context.Update);
-                    Context.Update = saveUpdate;                   
-                }
-            }
+                        var elementFilter = Builders<T>.Filter.EqIgnoreCase(filterPath, elementId);
+                        filters.Add(elementFilter);
+
+                        var filter = filterBuilder.And(filters);
+                        var update = updateBuilder.Set(GetPropertyPath(positionPath, idField), elementId);
+
+                        var saveUpdate = Context.Update;
+                        Context.Update = update;
+
+                        PushPropertyInfo(propertyInfo, current);
+                        NavigateElement(element, type, positionPath);
+                        PopPropertyInfo();                      
+
+                        var model = new UpdateOneModel<T>(filter, Context.Update);
+                        Context.Update = saveUpdate;
+                        return model;
+                    }
+                })
+                .Where(x => x != null)
+                .ToList());
         }
 
         private string GetElementId(XElement element, string idField)
@@ -363,17 +368,13 @@ namespace PDS.Witsml.Server.Data
             return string.Empty;
         }
 
-        private object GetCurrentElementValue(string idField, string elementId, IList<PropertyInfo> properties, object propertyValue)
+        private IDictionary<string, object> GetItemsById(IEnumerable items, IList<PropertyInfo> properties, string idField)
         {
-            var list = (IEnumerable)propertyValue;
-            foreach (var item in list)
-            {
-                var prop = GetPropertyInfoForAnElement(properties, idField);
-                var idValue = prop.GetValue(item).ToString();
-                if (elementId.EqualsIgnoreCase(idValue))
-                    return item;
-            }
-            return null;
+            var idProp = GetPropertyInfoForAnElement(properties, idField);
+
+            return items
+                .Cast<object>()
+                .ToDictionary(x => idProp.GetValue(x).ToString());
         }
 
         private void ValidateArrayElement(XElement element, IList<PropertyInfo> properties, bool isAdd = true)
