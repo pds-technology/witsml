@@ -47,21 +47,21 @@ namespace PDS.Witsml.Linq
         }
 
         [TestMethod]
-        public void Get_server_version()
+        public void Witsml131Context_Connection_Can_Get_server_version()
         {
             var response = _context.Connection.GetVersion();
             Console.WriteLine(response);
         }
 
         [TestMethod]
-        public void Get_server_capabilities()
+        public void Witsml131Context_Connection_Can_Get_server_capabilities()
         {
             var response = _context.Connection.GetCap<CapServers>();
             Console.WriteLine(EnergisticsConverter.ObjectToXml(response));
         }
 
         [TestMethod]
-        public void Query_for_all_wells()
+        public void Witsml131Context_Wells_Can_Query_for_all_wells()
         {
             foreach (var well in _context.Wells.With(OptionsIn.ReturnElements.IdOnly))
             {
@@ -70,14 +70,14 @@ namespace PDS.Witsml.Linq
         }
 
         [TestMethod]
-        public void Query_for_well_by_uid()
+        public void Witsml131Context_Wells_Can_Query_for_well_by_uid()
         {
             var well = _context.Wells.GetByUid(Guid.NewGuid().ToString());
             Console.WriteLine("Result: {0}", well);
         }
 
         [TestMethod]
-        public void Query_for_well_by_name()
+        public void Witsml131Context_Wells_Can_Query_for_well_by_name()
         {
             foreach (var well in _context.Wells.With(OptionsIn.ReturnElements.All).Where(w => w.Name == "Well 1"))
             {
@@ -86,7 +86,7 @@ namespace PDS.Witsml.Linq
         }
 
         [TestMethod]
-        public void Query_for_all_wellbores()
+        public void Witsml131Context_Wellbores_Can_Query_for_all_wellbores()
         {
             foreach (var well in _context.Wellbores.With(OptionsIn.ReturnElements.IdOnly))
             {
@@ -95,7 +95,7 @@ namespace PDS.Witsml.Linq
         }
 
         [TestMethod]
-        public void Query_for_wellbores_by_well_name()
+        public void Witsml131Context_Wellbores_Can_Query_for_wellbores_by_well_name()
         {
             foreach (var wellbore in _context.Wellbores.Where(w => w.NameWell == "Well 0"))
             {
@@ -105,7 +105,7 @@ namespace PDS.Witsml.Linq
 
         [TestMethod]
         [Ignore, Description("Invalid Test - Needs filter criteria to limit results")]
-        public void Query_for_well_hiererchy()
+        public void Witsml131Context_Wells_Can_Query_for_well_hiererchy()
         {
             foreach (var well in _context.Wells.With(OptionsIn.ReturnElements.IdOnly))
             {
@@ -125,7 +125,7 @@ namespace PDS.Witsml.Linq
 
         //[TestMethod]
         //[Ignore, Description("Invalid Test")]
-        //public void Query_for_log_header()
+        //public void Witsml131Context_Logs_Can_Query_for_log_header()
         //{
         //    var log = _context.Logs
         //        .Include(x => x.LogCurveInfo = _context.One<LogCurveInfo>())
@@ -137,7 +137,7 @@ namespace PDS.Witsml.Linq
         //}
 
         //[TestMethod]
-        //public void Query_for_log_data()
+        //public void Witsml131Context_Logs_Can_Query_for_log_data()
         //{
         //    var log = _context.Logs
         //        .Include(x => x.LogData = _context.One<LogData>())
