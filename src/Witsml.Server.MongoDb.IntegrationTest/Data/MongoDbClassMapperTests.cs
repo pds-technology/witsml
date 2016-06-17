@@ -35,7 +35,7 @@ namespace PDS.Witsml.Server.Data
         }
 
         [TestMethod]
-        public void Mapper_can_provide_id_mapping_details()
+        public void MongoDbClassMapper_Can_Provide_Id_Mapping_Details()
         {
             var classMap = BsonClassMap.LookupClassMap(typeof(ChannelIndex));
 

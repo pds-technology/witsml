@@ -45,7 +45,7 @@ namespace PDS.Witsml.Server.Data
         }
 
         [TestMethod]
-        public void Can_add_and_query_well()
+        public void DatabaseProvider_Can_Add_And_Query_Well()
         {
             var database = Provider.GetDatabase();
             var collection = database.GetCollection<Well>(ObjectNames.Well141);
