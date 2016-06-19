@@ -55,6 +55,7 @@
       <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -111,6 +112,7 @@
     <Compile Include="FrameworkExtensionsTests.cs" />
     <Compile Include="OptionsInTests.cs" />
     <Compile Include="EtpUrisTests.cs" />
+    <Compile Include="TextFieldParserTests.cs" />
     <Compile Include="WitsmlParserTests.cs" />
     <Compile Include="RangeTests.cs" />
     <Compile Include="Data\Channels\ChannelDataBlockTests.cs" />
@@ -126,6 +128,10 @@
     <ProjectReference Include="..\Framework\Framework.csproj">
       <Project>{fae228aa-4917-4b02-b239-0a24df883898}</Project>
       <Name>Framework</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Witsml.Server.IntegrationTest\Witsml.Server.IntegrationTest.csproj">
+      <Project>{C050AB68-0543-4A23-870C-2D07F872484B}</Project>
+      <Name>Witsml.Server.IntegrationTest</Name>
     </ProjectReference>
     <ProjectReference Include="..\Witsml.Server\Witsml.Server.csproj">
       <Project>{93faae2f-13aa-46df-a94b-36155b51ebfa}</Project>
