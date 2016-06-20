@@ -360,6 +360,12 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             Logger.DebugFormat("Query data values for log. Log Uid = {0}", log.Uid);
 
+            if (mnemonics.Count <= 0)
+            {
+                Logger.Warn("No mnemonics requested for log data query.");
+                return;
+            }
+
             if (context.MaxDataNodes <= 0 || context.MaxDataPoints <= 0)
             {
                 // Log why we are skipping.
@@ -381,14 +387,12 @@ namespace PDS.Witsml.Server.Data.Logs
             // TODO: If requesting latest values figure out a range that will contain the last values that we want.
             // if there is a request for latest values then the range should be ignored.
             var range = requestLatestValues.HasValue
-                ? new Range<double?>(null, null)
+                ? Range.Empty
                 : GetLogDataSubsetRange(logHeader, parser);
 
-            if (mnemonics.Count <= 0)
-                return;
-
-            var units = GetUnitList(logHeader, mnemonics.Keys.ToArray());
-            var nullValues = GetNullValueList(logHeader, mnemonics.Keys.ToArray());
+            var keys = mnemonics.Keys.ToArray();
+            var units = GetUnitList(logHeader, keys);
+            var nullValues = GetNullValueList(logHeader, keys);
             var records = GetChannelData(logHeader.GetUri(), mnemonics[0], range, IsIncreasing(logHeader), requestLatestValues);
 
             // Get a reader for the log's channel data
@@ -399,7 +403,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var count = FormatLogData(log, logHeader, reader, context, mnemonics, units, nullValues);           
 
             // Update the response context growing object totals
-            context.UpdateGrowingObjectTotals(count, mnemonics.Keys.Count);
+            context.UpdateGrowingObjectTotals(count, keys.Length);
         }
 
         private Range<double?> GetLogDataSubsetRange(T log, WitsmlQueryParser parser)

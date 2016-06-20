@@ -57,7 +57,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The list of queried data object.</returns>
         public List<T> Execute()
         {
-            Logger.DebugFormat("Executing query for entity: {0}", _parser.Context.ObjectType);
+            Logger.DebugFormat("Executing query for {0}", _parser.Context.ObjectType);
 
             var returnElements = _parser.ReturnElements();
             var entities = new List<T>();
@@ -96,6 +96,8 @@ namespace PDS.Witsml.Server.Data
 
                 entities.AddRange(results.ToList());
             }
+
+            Logger.DebugFormat("Executed query for {0}; Count: {1}", _parser.Context.ObjectType, entities.Count);
 
             return entities;
         }
@@ -227,13 +229,13 @@ namespace PDS.Witsml.Server.Data
         /// Determines whether the specified element name is ignored.
         /// </summary>
         /// <param name="elementName">Name of the element.</param>
-        /// <param name="path">Path of the element.</param>
+        /// <param name="parentPath">Parent path of the element.</param>
         /// <returns></returns>
-        protected override bool IsIgnored(string elementName, string path = null)
+        protected override bool IsIgnored(string elementName, string parentPath = null)
         {
-            var ignored = base.IsIgnored(elementName);
+            var ignored = base.IsIgnored(elementName, parentPath);
             if (ignored && (OptionsIn.ReturnElements.Requested.Equals(_parser.ReturnElements()) || OptionsIn.ReturnElements.DataOnly.Equals(_parser.ReturnElements())))
-                Context.Fields.Add(path);
+                Context.Fields.Add(parentPath);
 
             return ignored;
         }

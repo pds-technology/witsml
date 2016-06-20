@@ -237,6 +237,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="units">The units.</param>
         protected override void SetLogDataValues(Log log, List<string> logDataValues, IEnumerable<string> mnemonics, IEnumerable<string> units)
         {
+            Logger.Debug("Settings logData values.");
+
             if (log.LogData == null)
                 log.LogData = new List<LogData>();
 

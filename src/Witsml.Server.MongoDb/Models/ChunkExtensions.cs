@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
+using log4net;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 
@@ -27,6 +28,8 @@ namespace PDS.Witsml.Server.Models
     /// </summary>
     public static class ChunkExtensions
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(ChunkExtensions));
+
         /// <summary>
         /// Gets a <see cref="ChannelDataReader"/> that can be used to process the <see cref="ChannelDataChunk"/> data.
         /// </summary>
@@ -35,6 +38,8 @@ namespace PDS.Witsml.Server.Models
         /// <returns></returns>
         public static ChannelDataReader GetReader(this ChannelDataChunk channelDataChunk, bool reverse = false)
         {
+            _log.DebugFormat("Creating a ChannelDataReader for a ChannelDataChunk. Reverse: {0}", reverse);
+
             var mnemonics = ChannelDataReader.Split(channelDataChunk.MnemonicList);
             var units = ChannelDataReader.Split(channelDataChunk.UnitList);
             var nullValues = ChannelDataReader.Split(channelDataChunk.NullValueList);
@@ -53,8 +58,9 @@ namespace PDS.Witsml.Server.Models
         /// <returns></returns>
         public static IEnumerable<IChannelDataRecord> GetRecords(this IEnumerable<ChannelDataChunk> channelDataChunks, Range<double?>? range = null, bool ascending = true, bool reverse = false)
         {
-            if (channelDataChunks == null)
-                yield break;
+            if (channelDataChunks == null) yield break;
+
+            _log.DebugFormat("Getting IChannelDataRecords for all ChannelDataChunks; {0}", range);
 
             foreach (var chunk in channelDataChunks)
             {
@@ -62,7 +68,7 @@ namespace PDS.Witsml.Server.Models
 
                 foreach (var record in records)
                 {
-                    if (range.HasValue)
+                    if (range?.Start != null || range?.End != null)
                     {
                         var index = record.GetIndexValue();
 

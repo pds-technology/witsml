@@ -47,7 +47,6 @@ namespace PDS.Witsml.Server.Data.Channels
         /// </summary>
         public const string FileName = "FileName";
 
-
         /// <summary>
         /// The bucket name
         /// </summary>
@@ -58,8 +57,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// </summary>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public ChannelDataChunkAdapter(IDatabaseProvider databaseProvider)
-            : base(databaseProvider, ChannelDataChunk, ObjectTypes.Uid)
+        public ChannelDataChunkAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ChannelDataChunk, ObjectTypes.Uid)
         {
             Logger.Debug("Creating instance.");
         }
@@ -75,6 +73,8 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <exception cref="WitsmlException"></exception>
         public List<ChannelDataChunk> GetData(string uri, string indexChannel, Range<double?> range, bool ascending)
         {
+            Logger.DebugFormat("Getting channel data for {0}; Index Channel: {1}; {2}", uri, indexChannel, range);
+
             try
             {
                 var filter = BuildDataFilter(uri, indexChannel, range, ascending);
@@ -99,10 +99,9 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <exception cref="WitsmlException"></exception>
         public void Add(ChannelDataReader reader, MongoTransaction transaction = null)
         {
-            Logger.Debug("Adding ChannelDataChunk records with a ChannelDataReader.");
+            if (reader == null || reader.RecordsAffected <= 0) return;
 
-            if (reader == null || reader.RecordsAffected <= 0)
-                return;
+            Logger.Debug("Adding ChannelDataChunk records with a ChannelDataReader.");
 
             try
             {
@@ -136,8 +135,9 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <exception cref="WitsmlException"></exception>
         public void Merge(ChannelDataReader reader, MongoTransaction transaction = null)
         {
-            if (reader == null || reader.RecordsAffected <= 0)
-                return;
+            if (reader == null || reader.RecordsAffected <= 0) return;
+
+            Logger.Debug("Merging records in ChannelDataReader.");
 
             try
             {
@@ -194,6 +194,8 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="uri">The URI.</param>
         public override void Delete(EtpUri uri)
         {
+            Logger.DebugFormat("Deleting channel data for {0}", uri);
+
             try
             {
                 var filter = Builders<ChannelDataChunk>.Filter.EqIgnoreCase("Uri", uri.Uri);
@@ -216,11 +218,9 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="units">The units.</param>
         /// <param name="nullValues">The null values.</param>
         /// <param name="transaction">The transaction.</param>
-        private void BulkWriteChunks(IEnumerable<ChannelDataChunk> chunks, string uri, string mnemonics, string units,
-            string nullValues, MongoTransaction transaction = null)
+        private void BulkWriteChunks(IEnumerable<ChannelDataChunk> chunks, string uri, string mnemonics, string units, string nullValues, MongoTransaction transaction = null)
         {
-            Logger.DebugFormat("Bulk writing ChannelDataChunks for uri '{0}', mnemonics '{1}' and units '{2}'.", uri,
-                mnemonics, units);
+            Logger.DebugFormat("Bulk writing ChannelDataChunks for uri '{0}', mnemonics '{1}' and units '{2}'.", uri, mnemonics, units);
 
             var collection = GetCollection();
 
@@ -297,15 +297,12 @@ namespace PDS.Witsml.Server.Data.Channels
                 {
                     if (previousIndex.Value == index)
                     {
-                        Logger.ErrorFormat("Data node index repeated for uri: {0}; channel {1}; index: {2}", record.Uri,
-                            indexChannel.Mnemonic, index);
+                        Logger.ErrorFormat("Data node index repeated for uri: {0}; channel {1}; index: {2}", record.Uri, indexChannel.Mnemonic, index);
                         throw new WitsmlException(ErrorCodes.NodesWithSameIndex);
                     }
                     if (increasing && previousIndex.Value > index || !increasing && previousIndex.Value < index)
                     {
-                        var error =
-                            string.Format("Data node index not in sequence for uri: {0}: channel: {1}; index: {2}",
-                                record.Uri, indexChannel.Mnemonic, index);
+                        var error = $"Data node index not in sequence for uri: {record.Uri}: channel: {indexChannel.Mnemonic}; index: {index}";
                         Logger.Error(error);
                         throw new InvalidOperationException(error);
                     }
@@ -332,8 +329,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     var newIndex = indexChannel.Clone();
                     newIndex.Start = startIndex;
                     newIndex.End = endIndex;
-                    Logger.DebugFormat("ChannelDataChunk created with id '{0}', startIndex '{1}' and endIndex '{2}'.",
-                        id, startIndex, endIndex);
+                    Logger.DebugFormat("ChannelDataChunk created with id '{0}', startIndex '{1}' and endIndex '{2}'.", id, startIndex, endIndex);
 
                     yield return new ChannelDataChunk()
                     {
@@ -356,13 +352,12 @@ namespace PDS.Witsml.Server.Data.Channels
                 var newIndex = indexChannel.Clone();
                 newIndex.Start = startIndex;
                 newIndex.End = endIndex;
-                Logger.DebugFormat("ChannelDataChunk created with id '{0}', startIndex '{1}' and endIndex '{2}'.", id,
-                    startIndex, endIndex);
+                Logger.DebugFormat("ChannelDataChunk created with id '{0}', startIndex '{1}' and endIndex '{2}'.", id, startIndex, endIndex);
 
                 yield return new ChannelDataChunk()
                 {
                     Uid = id,
-                    Data = "[" + String.Join(",", data) + "]",
+                    Data = "[" + string.Join(",", data) + "]",
                     Indices = new List<ChannelIndexInfo> {newIndex},
                     RecordCount = data.Count
                 };
@@ -381,8 +376,7 @@ namespace PDS.Witsml.Server.Data.Channels
             IEnumerable<IChannelDataRecord> updatedChunks,
             Range<double?> updateRange)
         {
-            Logger.DebugFormat("Merging existing and update ChannelDataRecords for range - start: {0}, end: {1}",
-                updateRange.Start, updateRange.End);
+            Logger.DebugFormat("Merging existing and update ChannelDataRecords: {0}", updateRange);
 
             var id = string.Empty;
 
@@ -507,8 +501,8 @@ namespace PDS.Witsml.Server.Data.Channels
         {
             if (closeRange)
                 return increasing ? current <= end : current >= end;
-            else
-                return increasing ? current < end : current > end;
+
+            return increasing ? current < end : current > end;
         }
 
         /// <summary>
@@ -530,7 +524,7 @@ namespace PDS.Witsml.Server.Data.Channels
             if (Logger.IsDebugEnabled && filter != null)
             {
                 var filterJson = filter.Render(collection.DocumentSerializer, collection.Settings.SerializerRegistry);
-                Logger.DebugFormat("Data query filters: {0}", filterJson);
+                Logger.DebugFormat("Channel Data query filters: {0}", filterJson);
             }
 
             return collection
@@ -547,8 +541,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="range">The request range.</param>
         /// <param name="ascending">if set to <c>true</c> the data will be sorted in ascending order.</param>
         /// <returns>The query filter.</returns>
-        private FilterDefinition<ChannelDataChunk> BuildDataFilter(string uri, string indexChannel, Range<double?> range,
-            bool ascending)
+        private FilterDefinition<ChannelDataChunk> BuildDataFilter(string uri, string indexChannel, Range<double?> range, bool ascending)
         {
             var builder = Builders<ChannelDataChunk>.Filter;
             var filters = new List<FilterDefinition<ChannelDataChunk>>();
@@ -561,8 +554,8 @@ namespace PDS.Witsml.Server.Data.Channels
                 var endFilter = ascending
                     ? builder.Gte("Indices.End", range.Start.Value)
                     : builder.Lte("Indices.End", range.Start.Value);
-                Logger.DebugFormat("Building end filter with start range '{0}'.", range.Start.Value);
 
+                Logger.DebugFormat("Building end filter with start range '{0}'.", range.Start.Value);
                 rangeFilters.Add(endFilter);
             }
 
@@ -571,15 +564,15 @@ namespace PDS.Witsml.Server.Data.Channels
                 var startFilter = ascending
                     ? builder.Lte("Indices.Start", range.End)
                     : builder.Gte("Indices.Start", range.End);
-                Logger.DebugFormat("Building start filter with end range '{0}'.", range.End.Value);
 
+                Logger.DebugFormat("Building start filter with end range '{0}'.", range.End.Value);
                 rangeFilters.Add(startFilter);
             }
 
             if (rangeFilters.Count > 0)
             {
-                rangeFilters.Add(builder.EqIgnoreCase("Indices.Mnemonic", indexChannel));
                 Logger.DebugFormat("Building mnemonic filter with index channel '{0}'.", indexChannel);
+                rangeFilters.Add(builder.EqIgnoreCase("Indices.Mnemonic", indexChannel));
             }
 
             if (rangeFilters.Count > 0)
@@ -590,6 +583,8 @@ namespace PDS.Witsml.Server.Data.Channels
 
         private void UpdateMongoFile(ChannelDataChunk dc)
         {
+            Logger.DebugFormat("Updating MongoDb Channel Data files: {0}", dc.Uri);
+
             var bucket = GetMongoFileBucket();
 
             if (dc.Data.Length >= WitsmlSettings.MaxDataLength)
@@ -600,8 +595,8 @@ namespace PDS.Witsml.Server.Data.Channels
                 {
                     Metadata = new BsonDocument
                     {
-                        {FileName, dc.Uid},
-                        {"DataBytes", bytes.Length}
+                        { FileName, dc.Uid },
+                        { "DataBytes", bytes.Length }
                     }
                 };
 
@@ -620,11 +615,14 @@ namespace PDS.Witsml.Server.Data.Channels
 
         private void DeleteMongoFiles(FilterDefinition<ChannelDataChunk> filter)
         {
+            Logger.Debug("Deleting MongoDb Channel Data files.");
+
             var filters = new List<FilterDefinition<ChannelDataChunk>>
             {
                 filter,
                 Builders<ChannelDataChunk>.Filter.Eq(c => c.Data, null)
             };
+
             var chunkFilter = Builders<ChannelDataChunk>.Filter.And(filters);
             var chunks = GetData(chunkFilter, true);
 
@@ -638,6 +636,8 @@ namespace PDS.Witsml.Server.Data.Channels
 
         private void DeleteMongoFile(IGridFSBucket bucket, string fileId)
         {
+            Logger.DebugFormat("Deleting MongoDb Channel Data file: {0}", fileId);
+
             var filter = Builders<GridFSFileInfo>.Filter.Eq(fi => fi.Metadata[FileName], fileId);
             var mongoFile = bucket.Find(filter).FirstOrDefault();
 
@@ -649,6 +649,8 @@ namespace PDS.Witsml.Server.Data.Channels
 
         private void GetMongoFileData(IEnumerable<ChannelDataChunk> dcList)
         {
+            Logger.Debug("Getting MongoDb Channel Data files.");
+
             var bucket = GetMongoFileBucket();
 
             foreach (var dc in dcList.Where(c => string.IsNullOrEmpty(c.Data)))
