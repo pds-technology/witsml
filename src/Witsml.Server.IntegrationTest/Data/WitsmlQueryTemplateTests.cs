@@ -27,7 +27,7 @@ namespace PDS.Witsml.Server.Data
     public class WitsmlQueryTemplateTests
     {
         [TestMethod]
-        public void WitsmlQueryTemplate_creates_a_full_131_well_template()
+        public void WitsmlQueryTemplate_Can_Create_A_Full_131_Well_Template()
         {
             var template = new WitsmlQueryTemplate<Witsml131.Well>();
             var xml = template.AsXml<Witsml131.WellList>();
@@ -39,7 +39,7 @@ namespace PDS.Witsml.Server.Data
         }
 
         [TestMethod]
-        public void WitsmlQueryTemplate_creates_a_full_131_wellbore_template()
+        public void WitsmlQueryTemplate_Can_Create_A_Full_131_Wellbore_Template()
         {
             var template = new WitsmlQueryTemplate<Witsml131.Wellbore>();
             var xml = template.AsXml<Witsml131.WellboreList>();
@@ -51,7 +51,7 @@ namespace PDS.Witsml.Server.Data
         }
 
         [TestMethod]
-        public void WitsmlQueryTemplate_creates_a_full_131_log_template()
+        public void WitsmlQueryTemplate_Can_Create_A_Full_131_Log_Template()
         {
             var template = new WitsmlQueryTemplate<Witsml131.Log>();
             var xml = template.AsXml<Witsml131.LogList>();
@@ -63,7 +63,7 @@ namespace PDS.Witsml.Server.Data
         }
 
         [TestMethod]
-        public void WitsmlQueryTemplate_creates_a_full_141_well_template()
+        public void WitsmlQueryTemplate_Can_Create_A_Full_141_Well_Template()
         {
             var template = new WitsmlQueryTemplate<Witsml141.Well>();
             var xml = template.AsXml<Witsml141.WellList>();
@@ -75,7 +75,7 @@ namespace PDS.Witsml.Server.Data
         }
 
         [TestMethod]
-        public void WitsmlQueryTemplate_creates_a_full_141_wellbore_template()
+        public void WitsmlQueryTemplate_Can_Create_A_Full_141_Wellbore_Template()
         {
             var template = new WitsmlQueryTemplate<Witsml141.Wellbore>();
             var xml = template.AsXml<Witsml141.WellboreList>();
@@ -87,7 +87,7 @@ namespace PDS.Witsml.Server.Data
         }
 
         [TestMethod]
-        public void WitsmlQueryTemplate_creates_a_full_141_log_template()
+        public void WitsmlQueryTemplate_Can_Create_A_Full_141_Log_Template()
         {
             var template = new WitsmlQueryTemplate<Witsml141.Log>();
             var xml = template.AsXml<Witsml141.LogList>();
