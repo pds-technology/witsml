@@ -79,6 +79,8 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             var returnElements = parser.ReturnElements();
 
+            _log.DebugFormat("Checking if log data should be included. Return Elements: {0};", returnElements);
+
             return OptionsIn.ReturnElements.All.Equals(returnElements) ||
                    OptionsIn.ReturnElements.DataOnly.Equals(returnElements) ||
                    (OptionsIn.ReturnElements.Requested.Equals(returnElements) && parser.Contains("logData"));

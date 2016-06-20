@@ -134,6 +134,8 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dataObjects">The data object headers.</param>
         protected virtual void ValidateGrowingObjectDataRequest(WitsmlQueryParser parser, List<T> dataObjects)
         {
+            Logger.DebugFormat("Validating growing object data request. Count: {0}", dataObjects.Count);
+
             if (dataObjects.Count > parser.QueryCount)
             {
                 throw new WitsmlException(ErrorCodes.MissingSubsetOfGrowingDataObject);

@@ -18,6 +18,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using log4net;
 using PDS.Witsml.Data.Logs;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
@@ -31,6 +32,7 @@ namespace PDS.Witsml.Data.Channels
     /// </summary>
     public static class ChannelDataExtensions
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(ChannelDataExtensions));
 
         /// <summary>
         /// Gets a ChannelDataReader for an <see cref="IEnumerable{IChannelDataRecord}"/>.
@@ -94,7 +96,9 @@ namespace PDS.Witsml.Data.Channels
         /// <returns>A <see cref="ChannelDataReader"/>.</returns>
         public static ChannelDataReader GetReader(this Witsml131.Log log)
         {
-            if (log.LogData == null || !log.LogData.Any()) return null;
+            if (log?.LogData == null || !log.LogData.Any()) return null;
+
+            _log.DebugFormat("Creating ChannelDataReader for {0}", log.GetType().FullName);
 
             var isTimeIndex = log.IsTimeLog();
             var increasing = log.IsIncreasing();
@@ -117,14 +121,16 @@ namespace PDS.Witsml.Data.Channels
         /// <returns>An <see cref="IEnumerable{ChannelDataReader}"/>.</returns>
         public static IEnumerable<ChannelDataReader> GetReaders(this Witsml141.Log log)
         {
-            if (log.LogData == null) yield break;
+            if (log?.LogData == null) yield break;
+
+            _log.DebugFormat("Creating ChannelDataReaders for {0}", log.GetType().FullName);
 
             var isTimeIndex = log.IsTimeLog();
             var increasing = log.IsIncreasing();
 
             foreach (var logData in log.LogData)
             {
-                if (logData.Data == null || !logData.Data.Any())
+                if (logData?.Data == null || !logData.Data.Any())
                     continue;
 
                 var mnemonics = ChannelDataReader.Split(logData.MnemonicList);
@@ -155,7 +161,9 @@ namespace PDS.Witsml.Data.Channels
         /// <returns>An <see cref="IEnumerable{ChannelDataReader}"/>.</returns>
         public static IEnumerable<ChannelDataReader> GetReaders(this Witsml200.Log log)
         {
-            if (log.ChannelSet == null) yield break;
+            if (log?.ChannelSet == null) yield break;
+
+            _log.DebugFormat("Creating ChannelDataReaders for {0}", log.GetType().FullName);
 
             foreach (var channelSet in log.ChannelSet)
             {
@@ -174,6 +182,8 @@ namespace PDS.Witsml.Data.Channels
         {
             var data = Witsml200.Extensions.GetData(channelSet);
             if (string.IsNullOrWhiteSpace(data)) return null;
+
+            _log.DebugFormat("Creating ChannelDataReader for {0}", channelSet.GetType().FullName);
 
             // Not including index channels with value channels
             var mnemonics = channelSet.Channel.Select(x => x.Mnemonic).ToArray();
@@ -196,6 +206,8 @@ namespace PDS.Witsml.Data.Channels
         /// <returns>The <see cref="ChannelDataReader"/> instance being updated.</returns>
         public static ChannelDataReader WithIndex(this ChannelDataReader reader, string mnemonic, string unit, bool increasing, bool isTimeIndex)
         {
+            _log.DebugFormat("Adding channel index to ChannelDataReader for {0}", mnemonic);
+
             var index = new ChannelIndexInfo()
             {
                 Mnemonic = mnemonic,
@@ -220,6 +232,8 @@ namespace PDS.Witsml.Data.Channels
         /// <returns>The <see cref="ChannelDataReader"/> instance being updated.</returns>
         public static ChannelDataReader WithIndices(this ChannelDataReader reader, IEnumerable<ChannelIndexInfo> indices, bool calculate = false, bool reverse = false)
         {
+            _log.Debug("Adding channel indexes to ChannelDataReader");
+
             foreach (var index in indices)
             {
                 reader.Indices.Add(index);
@@ -258,6 +272,8 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="index">The index.</param>
         private static void CalculateIndexRange(ChannelDataReader reader, ChannelIndexInfo channelIndex, int index)
         {
+            _log.DebugFormat("Calculating channel index range for {0}", channelIndex.Mnemonic);
+
             var range = reader.GetIndexRange(index);
             channelIndex.Start = range.Start.GetValueOrDefault(double.NaN);
             channelIndex.End = range.End.GetValueOrDefault(double.NaN);

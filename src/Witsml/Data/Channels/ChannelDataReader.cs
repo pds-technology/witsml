@@ -97,7 +97,7 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="records">The collection of data records.</param>
         public ChannelDataReader(IEnumerable<IChannelDataRecord> records)
         {
-            _log.Debug("ChannelDataReader instance created");
+            _log.Debug("ChannelDataReader instance created for IChannelDataRecords");
 
             var items = records
                 .Cast<ChannelDataReader>()
@@ -212,7 +212,7 @@ namespace PDS.Witsml.Data.Channels
         /// Gets the indices.
         /// </summary>
         /// <value>A list of indices.</value>
-        public List<ChannelIndexInfo> Indices { get; private set; }
+        public List<ChannelIndexInfo> Indices { get; }
 
         /// <summary>
         /// Indexer property that gets the value with the specified mnemonic name for the current row referenced by the reader.
@@ -329,6 +329,22 @@ namespace PDS.Witsml.Data.Channels
             return channelIndex.IsTimeIndex
                 ? GetUnixTimeMicroseconds(index)
                 : GetDouble(index) * Math.Pow(10, scale);
+        }
+
+        /// <summary>
+        /// Gets the index value.
+        /// </summary>
+        /// <param name="rowValues">The row values.</param>
+        /// <param name="index">The index position.</param>
+        /// <param name="scale">The scale factor.</param>
+        /// <returns>The scaled index value at the index paramter position</returns>
+        public double GetIndexValue(IEnumerable<object> rowValues, int index = 0, int scale = 0)
+        {
+            var channelIndex = GetIndex(index);
+
+            return channelIndex.IsTimeIndex
+                ? GetDateTimeOffset(rowValues, index).ToUnixTimeMicroseconds()
+                : GetDouble(rowValues, index) * Math.Pow(10, scale);
         }
 
         /// <summary>
@@ -520,6 +536,18 @@ namespace PDS.Witsml.Data.Channels
         }
 
         /// <summary>
+        /// Gets the date time offset.
+        /// </summary>
+        /// <param name="rowValues">The row values.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
+        /// <returns></returns>
+        public DateTimeOffset GetDateTimeOffset(IEnumerable<object> rowValues, int i)
+        {
+            var rawValue = GetValue(rowValues, i);
+            return rawValue as DateTimeOffset? ?? DateTimeOffset.Parse(rawValue.ToString());
+        }
+
+        /// <summary>
         /// Gets the unix time seconds.
         /// </summary>
         /// <param name="i">The zero-based column ordinal.</param>
@@ -552,6 +580,20 @@ namespace PDS.Witsml.Data.Channels
         {
             double value;
             return double.TryParse(GetString(i), out value) ? value : double.NaN;
+        }
+
+        /// <summary>
+        /// Gets the double-precision floating point number of the specified field.
+        /// </summary>
+        /// <param name="rowValues">The row values.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
+        /// <returns>
+        /// The double-precision floating point number of the specified field.
+        /// </returns>
+        public double GetDouble(IEnumerable<object> rowValues, int i)
+        {
+            double value;
+            return double.TryParse(GetString(rowValues, i), out value) ? value : double.NaN;
         }
 
         /// <summary>
@@ -642,7 +684,10 @@ namespace PDS.Witsml.Data.Channels
         public string GetName(int i)
         {
             var name = GetAllMnemonics().Skip(i).FirstOrDefault();
-            var unit = GetAllUnits().Skip(i).FirstOrDefault();
+
+            var unit = IncludeUnitWithName
+                ? GetAllUnits().Skip(i).FirstOrDefault()
+                : string.Empty;
 
             return IncludeUnitWithName
                 ? FormatColumnName(name, unit)
@@ -695,7 +740,20 @@ namespace PDS.Witsml.Data.Channels
         /// </returns>
         public string GetString(int i)
         {
-            return string.Format("{0}", GetValue(i));
+            return $"{GetValue(i)}";
+        }
+
+        /// <summary>
+        /// Gets the string value of the specified field.
+        /// </summary>
+        /// <param name="rowValues">The row values.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
+        /// <returns>
+        /// The string value of the specified field.
+        /// </returns>
+        public string GetString(IEnumerable<object> rowValues, int i)
+        {
+            return $"{GetValue(rowValues, i)}";
         }
 
         /// <summary>
@@ -708,12 +766,31 @@ namespace PDS.Witsml.Data.Channels
         /// </returns>
         public object GetValue(int i)
         {
-            if (!SliceExists(i))
-            {
-                return null;
-            }
+            if (!SliceExists(i)) return null;
 
-            var value = GetRowValues(_current).Skip(i).FirstOrDefault();
+            _log.DebugFormat("Getting the value at row: {0}, col: {1}", _current, i);
+
+            var rowValues = GetRowValues(_current);
+            return GetValue(rowValues, i);
+        }
+
+        /// <summary>
+        /// Return the value of the specified field.
+        /// </summary>
+        /// <param name="rowValues">The row values.</param>
+        /// <param name="i">The zero-based column ordinal.</param>
+        /// <returns>
+        /// The <see cref="T:System.Object" /> which will contain the field value upon return.  
+        /// If the column ordinal is not included in slicing, null is returned.
+        /// </returns>
+        public object GetValue(IEnumerable<object> rowValues, int i)
+        {
+            if (!SliceExists(i)) return null;
+
+            // NOTE: logging here is too verbose!
+            //_log.DebugFormat("Getting the value at col: {0}", i);
+
+            var value = rowValues.Skip(i).FirstOrDefault();
             var array = value as JArray;
 
             if (array != null && array.Count == 1)
@@ -733,6 +810,8 @@ namespace PDS.Witsml.Data.Channels
         /// </returns>
         public int GetValues(object[] values)
         {
+            _log.DebugFormat("Getting the values for row: {0}", _current);
+
             // Slice the results of GetRowValues
             var rowValues = GetRowValues(_current)
                 .Where((r, i) => SliceExists(i))
@@ -754,7 +833,7 @@ namespace PDS.Witsml.Data.Channels
         /// </returns>
         public bool IsDBNull(int i)
         {
-            return IsChannelValueNull(i, GetString(i));
+            return IsNull(GetValue(i), i);
         }
 
         /// <summary>
@@ -798,13 +877,29 @@ namespace PDS.Witsml.Data.Channels
         }
 
         /// <summary>
-        /// Determines whether this instance has values.
+        /// Determines whether the current row has any non-null values.
         /// </summary>
         /// <returns>true if the current row has values, false otherwise.</returns>
         public bool HasValues()
         {
+            _log.DebugFormat("Checking if the current row has any values: {0}", _current);
+
             return GetChannelValuesWithIndex(_current)
-                .Any(x => !IsChannelValueNull(x.Key, x.Value?.ToString()));
+                .Any(x => !IsNull(x.Value, x.Key));
+        }
+
+        /// <summary>
+        /// Determines whether the specified row has any non-null values.
+        /// </summary>
+        /// <param name="rowValues">The row values.</param>
+        /// <returns>true if the current row has values, false otherwise.</returns>
+        public bool HasValues(IEnumerable<object> rowValues)
+        {
+            _log.DebugFormat("Checking if the row has any values.");
+
+            return rowValues
+                .Select((x, i) => new { Index = i + Depth, Value = x })
+                .Any(x => !IsNull(x.Value, x.Index));
         }
 
         /// <summary>
@@ -816,6 +911,8 @@ namespace PDS.Witsml.Data.Channels
         {
             if (IsClosed)
                 return null;
+
+            _log.Debug("Serializing the current row in json format.");
 
             return JsonConvert.SerializeObject(_records[_current]);
         }
@@ -839,6 +936,9 @@ namespace PDS.Witsml.Data.Channels
         public ChannelDataReader Sort(bool reverse = false)
         {
             if (!Indices.Any()) return this;
+
+            _log.DebugFormat("Sorting the records in the ChannelDataReader; Reverse: {0}", reverse);
+
             var indexChannel = Indices.First();
 
             var increasing = reverse
@@ -867,9 +967,11 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="nullValues">The null values.</param>
         public void Slice(IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units, IDictionary<int, string> nullValues)
         {
+            _log.Debug("Slicing the channels without any data.");
+
             // Remove the index mnemonic from the mnemonicSlices
-            var indices = Indices.Select(i => i.Mnemonic);
-            string[] slices = mnemonicSlices.Values.ToArray()
+            var indices = Indices.Select(i => i.Mnemonic).ToArray();
+            var slices = mnemonicSlices.Values.ToArray()
                 .Where(m => !indices.Contains(m))
                 .ToArray();
 
@@ -880,30 +982,37 @@ namespace PDS.Witsml.Data.Channels
             Units = null;
             NullValues = null;
 
-            // Slice by requestedMnemonics first
-            var sliceOrdinals = slices
-                .Select(GetOrdinal).ToArray(); // Get the ordinal position of each slice.
+            var allUnits = GetAllUnits();
+            var allNulls = GetAllNullValues();
+
+            // Cache all mnemonic ordinal positions
+            var allOrdinals = GetAllMnemonics()
+                .ToDictionary(x => x, GetOrdinal);
 
             // Call GetChannelRanges so we can see which ranges have data or not.  
             //... Ranges will only be calculated for the current slices.
             var ranges = GetChannelRanges();
 
-            // Apply slicing to mnemonics and units without and data (range)
+            // Apply slicing to mnemonics and units without any data (range)
             Mnemonics = Mnemonics.Where(m => ranges.Keys.Contains(m)).ToArray();
-            sliceOrdinals = Mnemonics.Select(GetOrdinal).ToArray();
+
+            // Get the ordinal position of each slice.
+            var sliceOrdinals = Mnemonics.Select(x => allOrdinals[x]).ToArray();
 
             // All Slice Ordinals including the ordinals for indexes
             _allSliceOrdinals = Enumerable.Range(0, Depth).ToArray()
                 .Concat(sliceOrdinals).ToArray();
 
-            Units = Mnemonics.Select(m => GetAllUnits()[GetOrdinal(m)]).ToArray();
-            NullValues = Mnemonics.Select(m => GetAllNullValues()[GetOrdinal(m)]).ToArray();
+            Units = Mnemonics.Select(m => allUnits[allOrdinals[m]]).ToArray();
+            NullValues = Mnemonics.Select(m => allNulls[allOrdinals[m]]).ToArray();
 
             // If there is data then update the mnemonics and units from the caller.
             if (RecordsAffected > 0)
             {
+                var allMnemonics = AllMnemonics;
+
                 // Get mnemonic ids for mnemonics that are not in the reader's mnemonics
-                var removeKeys = mnemonicSlices.Where(m => !AllMnemonics.Contains(m.Value)).Select(m => m.Key).ToArray();
+                var removeKeys = mnemonicSlices.Where(m => !allMnemonics.Contains(m.Value)).Select(m => m.Key).ToArray();
 
                 // Remove mnemonics and corresponding units that are not in the reader
                 removeKeys.ForEach(k =>
@@ -928,6 +1037,7 @@ namespace PDS.Witsml.Data.Channels
             IQueryContext context, IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units, IDictionary<int, string> nullValues,
             out Dictionary<string, Range<double?>> ranges)
         {
+            _log.Debug("Getting the sliced channel data.");
 
             int? requestLatestValues = context.RequestLatestValues;
             int maxDataNodes = context.MaxDataNodes;
@@ -958,9 +1068,10 @@ namespace PDS.Witsml.Data.Channels
             // Read through all of the data
             while (Read())
             {
+                var rowValues = GetRowValues(_current).ToArray();
+
                 // If there is no channel data in the current row then don't process it
-                if (!HasValues())
-                    continue;
+                if (!HasValues(rowValues)) continue;
 
                 // If processing the next row will exceed our maxDataNodes or maxDataPoints limits then stop
                 if ((dataNodeCount + 1) > maxDataNodes || (dataPointCount + channelCount) > maxDataPoints)
@@ -976,7 +1087,9 @@ namespace PDS.Witsml.Data.Channels
 
                 var indexValues = new List<object>();
                 var channelValues = new List<object>();
-                var primaryIndex = GetIndexValue();
+                var primaryIndex = GetIndexValue(rowValues);
+
+                _log.DebugFormat("Appending channel data values for row: {0}", _current);
 
                 // Add each index value to the values list and 
                 //... use timestamp format for time index values
@@ -987,10 +1100,9 @@ namespace PDS.Witsml.Data.Channels
                         .FirstOrDefault();
 
                     indexValues.Add(isTimeIndex
-                        ? GetDateTimeOffset(i).ToString("o")
-                        : (object)GetIndexValue(i));
+                        ? GetDateTimeOffset(rowValues, i).ToString("o")
+                        : (object)GetIndexValue(rowValues, i));
                 }
-
 
                 // Only add channel value to the list of values
                 //... if the are included in current slices
@@ -1000,8 +1112,8 @@ namespace PDS.Witsml.Data.Channels
                     if (SliceExists(i))
                     {
                         // Check if channelValue IsNull
-                        var channelValue = IsNull(GetString(i)) ? null : GetValue(i);
-                        channelValues.Add(channelValue);
+                        var channelValue = GetValue(rowValues, i);
+                        channelValues.Add(IsNull(channelValue, i) ? null : channelValue);
                     }
                 }
 
@@ -1039,12 +1151,15 @@ namespace PDS.Witsml.Data.Channels
             //... was retrieved from the bottom up.
             if (requestLatestValues.HasValue)
             {
+                _log.Debug("Reversing the order of channel data for request latest values.");
                 logData.Reverse();
             }
 
             // if any ranges are empty, then we must (re)slice
             if (ranges.Values.All(r => r.Start.HasValue) || Mnemonics.Length <= 0)
                 return logData;
+
+            _log.Debug("Re-slicing remaining channels with no data.");
 
             var reader = new ChannelDataReader(logData, Mnemonics, Units, NullValues)
                 .WithIndices(Indices);
@@ -1062,8 +1177,11 @@ namespace PDS.Witsml.Data.Channels
 
         private Dictionary<string, Range<double?>> InitializeSliceRanges()
         {
+            _log.Debug("Initializing index ranges.");
+
             var emptyRanges = new Dictionary<string, Range<double?>>();
             var allSlices = Indices.Select(i => i.Mnemonic).Concat(Mnemonics).ToArray();
+
             allSlices.ForEach(m =>
             {
                 emptyRanges.Add(m, new Range<double?>(null, null));
@@ -1074,14 +1192,14 @@ namespace PDS.Witsml.Data.Channels
 
         private void UpdateRanges(List<object> values, Dictionary<string, Range<double?>> ranges, double primaryIndex)
         {
-            var valueArray = values.ToArray();
+            _log.Debug("Updating index ranges.");
 
-            for (var i = 0; i < valueArray.Length; i++)
+            for (var i = 0; i < values.Count; i++)
             {
                 var ordinal = _allSliceOrdinals[i];
                 var mnemonic = GetName(ordinal);
 
-                if (valueArray[i] != null && !IsChannelValueNull(ordinal, valueArray[i].ToString()))
+                if (!IsNull(values[i], ordinal))
                 {
                     ranges[mnemonic] = ranges[mnemonic].Start.HasValue
                         ? new Range<double?>(ranges[mnemonic].Start, primaryIndex)
@@ -1092,6 +1210,8 @@ namespace PDS.Witsml.Data.Channels
 
         private bool IsRequestedValueNeeded(List<object> channelValues, Dictionary<int, int> requestedValueCount, int requestLatestValue)
         {
+            _log.Debug("Checking if request latest values requires additional values for any channels.");
+
             var valueAdded = false;
 
             for (var i = 0; i < channelValues.Count; i++)
@@ -1101,7 +1221,7 @@ namespace PDS.Witsml.Data.Channels
                 
                 // For the current channel, if the requested value count has not already been reached and then
                 // ... current channel value is not null or blank then a value is being added.
-                if (requestedValueCount[_allSliceOrdinals[i]] < requestLatestValue && !IsChannelValueNull(_allSliceOrdinals[i], channelValues[i].ToString()))
+                if (requestedValueCount[_allSliceOrdinals[i]] < requestLatestValue && !IsNull(channelValues[i], _allSliceOrdinals[i]))
                 {
                     valueAdded = true;
                 }
@@ -1116,6 +1236,8 @@ namespace PDS.Witsml.Data.Channels
 
         private void UpdateRequestedValueCount(Dictionary<int, int> requestedValueCount, List<object> values, Dictionary<string, Range<double?>> ranges, double primaryIndex)
         {
+            _log.Debug("Updating request latest values count for all channels.");
+
             var valueArray = values.ToArray();
 
             for (var i = 0; i < valueArray.Length; i++)
@@ -1123,7 +1245,7 @@ namespace PDS.Witsml.Data.Channels
                 var ordinal = _allSliceOrdinals[i];
                 var mnemonic = GetName(ordinal);
 
-                if (requestedValueCount.ContainsKey(ordinal) && valueArray[i] != null && !IsChannelValueNull(ordinal, valueArray[i].ToString()))
+                if (requestedValueCount.ContainsKey(ordinal) && !IsNull(valueArray[i], ordinal))
                 {
                     // If first time update for this channel value then start and end index are the same
                     if (requestedValueCount[ordinal] == 0)
@@ -1144,6 +1266,7 @@ namespace PDS.Witsml.Data.Channels
 
         private bool HasRequestedValuesForAllChannels(Dictionary<int, int> requestedValueCount, int requestLatestValues)
         {
+            _log.Debug("Checking if request latest values has been filled for all channels.");
             return requestedValueCount.Keys.All(r => requestedValueCount[r] >= requestLatestValues);
         }
 
@@ -1154,6 +1277,7 @@ namespace PDS.Witsml.Data.Channels
         {
             if (_allMnemonics == null)
             {
+                _log.Debug("Initializing _allMnemonics array.");
                 _allMnemonics = Indices.Select(i => i.Mnemonic).Concat(_originalMnemonics).ToArray();
             }
 
@@ -1167,6 +1291,7 @@ namespace PDS.Witsml.Data.Channels
         {
             if (_allUnits == null)
             {
+                _log.Debug("Initializing _allUnits array.");
                 _allUnits = Indices.Select(i => i.Unit).Concat(_originalUnits).ToArray();
             }
 
@@ -1181,6 +1306,7 @@ namespace PDS.Witsml.Data.Channels
         {
             if (_allNullValues == null)
             {
+                _log.Debug("Initializing _allNullValues array.");
                 _allNullValues = Indices.Select(i => i.NullValue).Concat(_originalNullValues).ToArray();
             }
 
@@ -1196,6 +1322,8 @@ namespace PDS.Witsml.Data.Channels
         {
             if (IsClosed)
                 return Enumerable.Empty<object>();
+
+            _log.DebugFormat("Getting all values for row: {0}", row);
 
             return _records
                 .Skip(row)
@@ -1213,6 +1341,8 @@ namespace PDS.Witsml.Data.Channels
             if (IsClosed)
                 return Enumerable.Empty<object>();
 
+            _log.DebugFormat("Getting index values for row: {0}", row);
+
             return _records
                 .Skip(row)
                 .Take(1)
@@ -1229,6 +1359,8 @@ namespace PDS.Witsml.Data.Channels
             if (IsClosed)
                 return new Dictionary<int, object>();
 
+            _log.DebugFormat("Getting channel values for row: {0}", row);
+
             // Slice row
             return _records
                 .Skip(row)
@@ -1236,7 +1368,7 @@ namespace PDS.Witsml.Data.Channels
                 .SelectMany(x => x.Last())
                 .Select((v, i) => new { Value = v, Index = i })
                 .Where((r, i) => SliceExists(i + Depth))  // We need to look at the i-th + Depth slice since we're only looking at channel values
-                .ToDictionary(x => x.Index+1, x => x.Value );
+                .ToDictionary(x => x.Index + Depth, x => x.Value );
         }
 
         /// <summary>
@@ -1245,6 +1377,8 @@ namespace PDS.Witsml.Data.Channels
         /// <returns>A collection of channel index ranges.</returns>
         private IList<Range<double?>> CalculateChannelIndexRanges()
         {
+            _log.DebugFormat("Calculating channel index ranges.");
+
             var ranges = new List<Range<double?>>();
             var channelIndex = GetIndex();
 
@@ -1266,18 +1400,19 @@ namespace PDS.Witsml.Data.Channels
         /// <returns>The channel index range.</returns>
         private Range<double?> CalculateChannelIndexRanges(int i, bool isTimeIndex)
         {
+            _log.DebugFormat("Calculating channel index range: {0}", i);
+
             var valueIndex = i - Depth;
             object start = null;
             object end = null;
-
 
             if (SliceExists(i))
             {
                 _records.ForEach(x =>
                 {
-                    var value = string.Format("{0}", x.Last().Skip(valueIndex).FirstOrDefault());
+                    var value = x.Last().Skip(valueIndex).FirstOrDefault();
 
-                    if (!IsChannelValueNull(i, value))
+                    if (!IsNull(value, i))
                     {
                         end = x[0][0];
 
@@ -1297,6 +1432,8 @@ namespace PDS.Witsml.Data.Channels
         /// <returns></returns>
         private static List<List<List<object>>> Deserialize(string data)
         {
+            _log.Debug("Deserializing channel data json.");
+
             if (string.IsNullOrWhiteSpace(data))
                 return new List<List<List<object>>>();
 
@@ -1310,6 +1447,8 @@ namespace PDS.Witsml.Data.Channels
         /// <returns>A JSON arrary of string values from the data list.</returns>
         private static string Combine(IList<string> data)
         {
+            _log.Debug("Combining log data elements into channel data json structure.");
+
             var json = new StringBuilder("[");
             var rows = new List<string>();
 
@@ -1364,25 +1503,40 @@ namespace PDS.Witsml.Data.Channels
                 NaN.EqualsIgnoreCase(value);
         }
 
-        private bool IsChannelValueNull(int channelIndex, string value)
+        /// <summary>
+        /// Determines whether the specified value is null.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="channelIndex">The channel index.</param>
+        /// <returns></returns>
+        private bool IsNull(object value, int channelIndex)
         {
-            if (IsNull(value))
-                return true;
+            if (value == null) return true;
+
+            var stringValue = $"{value}";
+            if (IsNull(stringValue)) return true;
 
             var nullValues = GetAllNullValues();
+            if (channelIndex >= nullValues.Length) return false;
 
-            if (channelIndex < nullValues.Length && !string.IsNullOrWhiteSpace(nullValues[channelIndex]))
-            {
-                var nullValue = nullValues[channelIndex];
+            var nullValue = nullValues[channelIndex];
+            if (string.IsNullOrWhiteSpace(nullValue)) return false;
 
-                double dNull, dValue;
-                if (!double.TryParse(nullValue, out dNull) || !double.TryParse(value, out dValue))
-                    return false;
+            // Using string compare to avoid parsing
+            return stringValue == nullValue;
 
-                return dNull == dValue;
-            }
+            //if (channelIndex < nullValues.Length && !string.IsNullOrWhiteSpace(nullValues[channelIndex]))
+            //{
+            //    var nullValue = nullValues[channelIndex];
 
-            return false;
+            //    double dNull, dValue;
+            //    if (!double.TryParse(nullValue, out dNull) || !double.TryParse(value, out dValue))
+            //        return false;
+
+            //    return dNull == dValue;
+            //}
+
+            //return false;
         }
 
         /// <summary>
