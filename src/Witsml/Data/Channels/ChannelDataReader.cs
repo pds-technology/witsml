@@ -885,7 +885,7 @@ namespace PDS.Witsml.Data.Channels
         {
             _log.DebugFormat("Checking if the current row has any values: {0}", _current);
 
-            return GetChannelValuesWithIndex(_current)
+            return GetChannelValuesByOrdinal(_current)
                 .Any(x => !IsNull(x.Value, x.Key));
         }
 
@@ -899,7 +899,8 @@ namespace PDS.Witsml.Data.Channels
             _log.DebugFormat("Checking if the row has any values.");
 
             return rowValues
-                .Select((x, i) => new { Index = i + Depth, Value = x })
+                .Select((x, i) => new { Index = i, Value = x })
+                .Skip(Depth)
                 .Any(x => !IsNull(x.Value, x.Index));
         }
 
@@ -1085,10 +1086,7 @@ namespace PDS.Witsml.Data.Channels
                     {
                         // Check if channelValue IsNull
                         var channelValue = GetValue(rowValues, i);
-                        channelValues.Add(IsNull(channelValue, i) ? null : channelValue);
-
-                        // Update the data point count
-                        dataPointCount++;
+                        channelValues.Add(IsNull($"{channelValue}") ? null : channelValue);
                     }
                 }
 
@@ -1112,6 +1110,9 @@ namespace PDS.Witsml.Data.Channels
                 }
 
                 var allValues = indexValues.Concat(channelValues).ToList();
+
+                // Update the data point count
+                dataPointCount += allValues.Count;
 
                 if (!requestLatestValues.HasValue || IsRequestedValueNeeded(allValues, requestedValueCount, requestLatestValues.Value))
                 {
@@ -1353,7 +1354,7 @@ namespace PDS.Witsml.Data.Channels
         /// </summary>
         /// <param name="row">The row.</param>
         /// <returns> A <see cref="IDictionary{TKey, TValue}"/></returns>
-        private IDictionary<int, object> GetChannelValuesWithIndex(int row)
+        private IDictionary<int, object> GetChannelValuesByOrdinal(int row)
         {
             if (IsClosed)
                 return new Dictionary<int, object>();
