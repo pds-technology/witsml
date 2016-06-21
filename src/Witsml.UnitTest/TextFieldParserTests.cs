@@ -58,7 +58,8 @@ namespace PDS.Witsml
                 }
             }
         }
-       
+
+        [Ignore]       
         [TestMethod]
         public void TextFieldParser_Performance_Compared_To_Split()
         {
