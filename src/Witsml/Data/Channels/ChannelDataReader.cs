@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using log4net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -1043,11 +1044,9 @@ namespace PDS.Witsml.Data.Channels
             int maxDataNodes = context.MaxDataNodes;
             int maxDataPoints = context.MaxDataPoints;
 
-            var dataNodeCount = 0;
             var dataPointCount = 0;
             var channelCount = AllMnemonics.Length;
-
-            var logData = new List<List<List<object>>>();
+            var channelData = new List<List<List<object>>>();
 
             // Ranges will only be returned for channels that are included in slicing
             //... and contain data.
@@ -1073,23 +1072,31 @@ namespace PDS.Witsml.Data.Channels
                 // If there is no channel data in the current row then don't process it
                 if (!HasValues(rowValues)) continue;
 
-                // If processing the next row will exceed our maxDataNodes or maxDataPoints limits then stop
-                if ((dataNodeCount + 1) > maxDataNodes || (dataPointCount + channelCount) > maxDataPoints)
+                _log.DebugFormat("Appending channel data values for row: {0}", _current);
+
+                var channelValues = new List<object>();
+
+                // Only add channel value to the list of values
+                //... if the are included in current slices
+                for (int i = Depth; i < FieldCount; i++)
                 {
-                    context.DataTruncated = true;
-                    _log.DebugFormat("GetData truncated with {0} data nodes and {1} data points.", dataNodeCount, dataPointCount);
-                    break;
+                    // Limit data to mnemonics slices                    
+                    if (SliceExists(i))
+                    {
+                        // Check if channelValue IsNull
+                        var channelValue = GetValue(rowValues, i);
+                        channelValues.Add(IsNull(channelValue, i) ? null : channelValue);
+
+                        // Update the data point count
+                        dataPointCount++;
+                    }
                 }
 
-                // Update our data node and data point counts
-                dataNodeCount++;
-                dataPointCount += channelCount;
+                // Skip rows with no channel values
+                if (channelValues.Count < 1) continue;
 
                 var indexValues = new List<object>();
-                var channelValues = new List<object>();
                 var primaryIndex = GetIndexValue(rowValues);
-
-                _log.DebugFormat("Appending channel data values for row: {0}", _current);
 
                 // Add each index value to the values list and 
                 //... use timestamp format for time index values
@@ -1104,64 +1111,56 @@ namespace PDS.Witsml.Data.Channels
                         : (object)GetIndexValue(rowValues, i));
                 }
 
-                // Only add channel value to the list of values
-                //... if the are included in current slices
-                for (int i = Depth; i < FieldCount; i++)
+                var allValues = indexValues.Concat(channelValues).ToList();
+
+                if (!requestLatestValues.HasValue || IsRequestedValueNeeded(allValues, requestedValueCount, requestLatestValues.Value))
                 {
-                    // Limit data to mnemonics slices                    
-                    if (SliceExists(i))
+                    channelData.Add(new List<List<object>>() { indexValues, allValues.GetRange(Depth, allValues.Count - 1) });
+
+                    // Update the latest value count for each channel.
+                    if (requestLatestValues.HasValue)
                     {
-                        // Check if channelValue IsNull
-                        var channelValue = GetValue(rowValues, i);
-                        channelValues.Add(IsNull(channelValue, i) ? null : channelValue);
+                        UpdateRequestedValueCount(requestedValueCount, allValues, ranges, primaryIndex);
+                    }
+                    // if it's not a lastest values request then update indexes
+                    else
+                    {
+                        // Update ranges for the current primaryIndex
+                        UpdateRanges(allValues, ranges, primaryIndex);
                     }
                 }
 
-                // Filter rows with no channel values
-                if (channelValues.Count > 0)
+                // if latest values requested and we have all of the requested values we need, break out;
+                if (requestLatestValues.HasValue && HasRequestedValuesForAllChannels(requestedValueCount, requestLatestValues.Value))
                 {
-                    var allValues = indexValues.Concat(channelValues).ToList();
+                    _log.Debug("Finished getting latest values for all channels.");
+                    break;
+                }
 
-                    if (!requestLatestValues.HasValue || IsRequestedValueNeeded(allValues, requestedValueCount, requestLatestValues.Value))
-                    {
-                        logData.Add(new List<List<object>>() { indexValues, allValues.GetRange(Depth, allValues.Count - 1) });
-
-                        // Update the latest value count for each channel.
-                        if (requestLatestValues.HasValue)
-                        {
-                            UpdateRequestedValueCount(requestedValueCount, allValues, ranges, primaryIndex);
-                        }
-                        // if it's not a lastest values request then update indexes
-                        else
-                        {
-                            // Update ranges for the current primaryIndex
-                            UpdateRanges(allValues, ranges, primaryIndex);
-                        }
-                    }
-
-                    // if latest values requested and we have all of the requested values we need, break out;
-                    if (requestLatestValues.HasValue && HasRequestedValuesForAllChannels(requestedValueCount, requestLatestValues.Value))
-                    {
-                        break;
-                    }
+                // If processing the next row will exceed our maxDataNodes or maxDataPoints limits then stop
+                if (channelData.Count >= maxDataNodes || (dataPointCount + channelCount) > maxDataPoints)
+                {
+                    _log.DebugFormat("Truncating channel data with {0} data nodes and {1} data points.", channelData.Count, dataPointCount);
+                    context.DataTruncated = true;
+                    break;
                 }
             }
 
-            // For requested values reverse the order before output because the logData
+            // For requested values reverse the order before output because the channel data
             //... was retrieved from the bottom up.
             if (requestLatestValues.HasValue)
             {
                 _log.Debug("Reversing the order of channel data for request latest values.");
-                logData.Reverse();
+                channelData.Reverse();
             }
 
             // if any ranges are empty, then we must (re)slice
             if (ranges.Values.All(r => r.Start.HasValue) || Mnemonics.Length <= 0)
-                return logData;
+                return channelData;
 
             _log.Debug("Re-slicing remaining channels with no data.");
 
-            var reader = new ChannelDataReader(logData, Mnemonics, Units, NullValues)
+            var reader = new ChannelDataReader(channelData, Mnemonics, Units, NullValues)
                 .WithIndices(Indices);
                     
             reader.Slice(mnemonicSlices, units, nullValues);
@@ -1170,9 +1169,9 @@ namespace PDS.Witsml.Data.Channels
             var resliceContext = context.Clone();
             resliceContext.RequestLatestValues = null;
 
-            logData = reader.GetData(resliceContext, mnemonicSlices, units, nullValues, out ranges);
+            channelData = reader.GetData(resliceContext, mnemonicSlices, units, nullValues, out ranges);
 
-            return logData;
+            return channelData;
         }
 
         private Dictionary<string, Range<double?>> InitializeSliceRanges()
@@ -1377,19 +1376,34 @@ namespace PDS.Witsml.Data.Channels
         /// <returns>A collection of channel index ranges.</returns>
         private IList<Range<double?>> CalculateChannelIndexRanges()
         {
-            _log.DebugFormat("Calculating channel index ranges.");
+            _log.DebugFormat("Calculating channel index ranges (in parallel).");
 
-            var ranges = new List<Range<double?>>();
             var channelIndex = GetIndex();
+            var ranges = new Dictionary<int, Range<double?>>();
 
-            for (var i = 0; i < FieldCount; i++)
-            {
-                ranges.Add(i < Depth
-                    ? GetIndexRange(i)
-                    : CalculateChannelIndexRanges(i, channelIndex.IsTimeIndex));
-            }
+            Parallel.For(0, FieldCount,
+                // Init
+                () => new Dictionary<int, Range<double?>>(), 
+                // Body
+                (i, s, x) =>
+                {
+                    x[i] = i < Depth
+                        ? GetIndexRange(i)
+                        : CalculateChannelIndexRanges(i, channelIndex.IsTimeIndex);
 
-            return ranges;
+                    return x;
+                },
+                // Finally
+                x =>
+                {
+                    foreach (var pair in x)
+                        ranges.Add(pair.Key, pair.Value);
+                });
+
+            return ranges
+                .OrderBy(r => r.Key)
+                .Select(r => r.Value)
+                .ToList();
         }
 
         /// <summary>
