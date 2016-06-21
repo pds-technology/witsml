@@ -67,76 +67,133 @@ namespace PDS.Witsml
 
             int textFieldParserLineCount = 0;
             long textFieldParserElapseTime;
-            int splitLineCount = 0;
-            long splitElapseTime;
+            
+            int numOfLoops = 1000;
 
             // Check performance of TextFieldParser
-            using (StreamReader reader = new StreamReader(logFiles[0]))
+            long maxElapseTime = long.MinValue;
+            int maxLoopNum = 0;
+            long minElapseTime = long.MaxValue;
+            int minLoopNum = 0;
+            long lastElapseTime = 0;
+            long intervalElapseTime = 0;
+
+            Stopwatch stopwatch1 = Stopwatch.StartNew();
+            stopwatch1.Stop();
+            
+            for (int i = 0; i < numOfLoops; i++)
             {
-                using (TextFieldParser parser = new TextFieldParser(reader))
+                using (StreamReader reader = new StreamReader(logFiles[0]))
                 {
-                    parser.Delimiters = new string[] {","};
+                    using (TextFieldParser parser = new TextFieldParser(reader))
+                    {
+                        parser.Delimiters = new string[] {","};
+                        bool startTimer = false;
+                        while (!startTimer)
+                        {
+                            string[] parts = parser.ReadFields();
+                            if (parts[0].Equals("<logData>"))
+                            {
+                                startTimer = true;
+                                stopwatch1.Start();
+                            }
+                        }
+                       
+                        while (true)
+                        {
+                            string[] parts = parser.ReadFields();
+                            if (parts == null)
+                            {
+                                break;
+                            }
+                            //Console.WriteLine(string.Join(" | ", parts));
+                            textFieldParserLineCount++;
+                        }
+                        stopwatch1.Stop();
+
+                        intervalElapseTime = stopwatch1.ElapsedMilliseconds - lastElapseTime;
+                        lastElapseTime = stopwatch1.ElapsedMilliseconds;
+                        if (intervalElapseTime > maxElapseTime)
+                        {
+                            maxElapseTime = intervalElapseTime;
+                            maxLoopNum = i;
+                        }
+                        else if (intervalElapseTime < minElapseTime)
+                        {
+                            minElapseTime = intervalElapseTime;
+                            minLoopNum = i;
+                        }
+                    }
+                }
+            }
+            textFieldParserElapseTime = stopwatch1.ElapsedMilliseconds;
+            Console.WriteLine("TextFieldParser elapse time = {0} milliseconds", textFieldParserElapseTime);
+            Console.WriteLine("Number of lines processed by TextFieldParse={0}", textFieldParserLineCount);
+            Console.WriteLine("Maximum elapse time = {0} ms at loop no. {1}", maxElapseTime, maxLoopNum);
+            Console.WriteLine("Minimum elapse time = {0} ms at loop no. {1}", minElapseTime, minLoopNum);
+
+            // Check Performance of Split
+            int splitLineCount = 0;
+            long splitElapseTime = 0;
+
+            long maxElapseTime2 = long.MinValue;
+            int maxLoopNum2 = 0;
+            long minElapseTime2 = long.MaxValue;
+            int minLoopNum2 = 0;
+            long lastElapseTime2 = 0;
+            long intervalElapseTime2 = 0;
+
+            Stopwatch stopwatch2 = Stopwatch.StartNew();
+            for (int i = 0; i < numOfLoops; i++)
+            {                
+                using (StreamReader reader = new StreamReader(logFiles[0]))
+                {
+                    char[] delimiters = new char[] {','};
                     bool startTimer = false;
                     while (!startTimer)
                     {
-                        string[] parts = parser.ReadFields();
-                        if (parts[0].Equals("<logData>"))
+                        string line = reader.ReadLine();
+                        if (line.Trim().StartsWith("<logData>"))
                         {
                             startTimer = true;
+                            stopwatch2.Start();
                         }
                     }
-
-                    Stopwatch stopwatch = Stopwatch.StartNew();
+                   
                     while (true)
                     {
-                        string[] parts = parser.ReadFields();
-                        if (parts == null)
+                        string line = reader.ReadLine();
+                        if (line == null)
                         {
                             break;
                         }
-                        //Console.WriteLine(string.Join(" | ", parts));
-                        textFieldParserLineCount++;
+
+                        string[] parts = line.Split(delimiters);
+
+                        // Console.WriteLine(string.Join(" | ", parts));
+                        splitLineCount++;
                     }
-                    stopwatch.Stop();
-                    textFieldParserElapseTime = stopwatch.ElapsedMilliseconds;                   
-                }
-            }
+                    stopwatch2.Stop();
 
-            Console.WriteLine("TextFieldParser elapse time = {0}", textFieldParserElapseTime);
-            Console.WriteLine("Number of lines processed by TextFieldParse={0}", textFieldParserLineCount);
-
-            // Check Performance of Split
-            using (StreamReader reader = new StreamReader(logFiles[0]))
-            {
-                char[] delimiters = new char[] { ',' };
-                bool startTimer = false;
-                while (!startTimer)
-                {
-                    string line = reader.ReadLine();
-                    if (line.Trim().StartsWith("<logData>"))
-                        startTimer = true;
-                }
-
-                Stopwatch stopwatch = Stopwatch.StartNew();
-                while (true)
-                {
-                    string line = reader.ReadLine();
-                    if (line == null)
+                    intervalElapseTime2 = stopwatch2.ElapsedMilliseconds - lastElapseTime2;
+                    lastElapseTime2 = stopwatch2.ElapsedMilliseconds;
+                    if (intervalElapseTime2 > maxElapseTime2)
                     {
-                        break;
+                        maxElapseTime2 = intervalElapseTime2;
+                        maxLoopNum2 = i;
                     }
-
-                    string[] parts = line.Split(delimiters);
-
-                    // Console.WriteLine(string.Join(" | ", parts));
-                    splitLineCount++;
+                    else if (intervalElapseTime2 < minElapseTime2)
+                    {
+                        minElapseTime2 = intervalElapseTime2;
+                        minLoopNum2 = i;
+                    }
                 }
-                stopwatch.Stop();
-                splitElapseTime = stopwatch.ElapsedMilliseconds;                
             }
-          
-            Console.WriteLine("Split elapse time = {0}", splitElapseTime);
+            splitElapseTime = stopwatch2.ElapsedMilliseconds;
+            Console.WriteLine("Split elapse time = {0} milliseconds", splitElapseTime);
             Console.WriteLine("Number of lines processed by Split ={0}", splitLineCount);
+            Console.WriteLine("Maximum elapse time = {0} ms at loop no. {1}", maxElapseTime2, maxLoopNum2);
+            Console.WriteLine("Minimum elapse time = {0} ms at loop no. {1}", minElapseTime2, minLoopNum2);
         }
     }
 }
