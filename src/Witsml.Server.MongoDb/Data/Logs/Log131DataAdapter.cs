@@ -264,16 +264,16 @@ namespace PDS.Witsml.Server.Data.Logs
 
                     if (isTimeLog)
                     {
-                        if (range.Start.HasValue && !double.IsNaN(range.Start.Value))
+                        if (range.Start.HasValue && !double.IsNaN(range.Start.Value) && logCurve.MinDateTimeIndex.HasValue)
                             logCurve.MinDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.Start.Value).DateTime;
-                        if (range.End.HasValue && !double.IsNaN(range.End.Value))
+                        if (range.End.HasValue && !double.IsNaN(range.End.Value) && logCurve.MaxDateTimeIndex.HasValue)
                             logCurve.MaxDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.End.Value).DateTime;
                     }
                     else
                     {
-                        if (range.Start.HasValue)
+                        if (range.Start.HasValue && logCurve.MinIndex != null)
                             logCurve.MinIndex.Value = range.Start.Value;
-                        if (range.End.HasValue)
+                        if (range.End.HasValue && logCurve.MaxIndex != null)
                             logCurve.MaxIndex.Value = range.End.Value;
                     }
                 }
