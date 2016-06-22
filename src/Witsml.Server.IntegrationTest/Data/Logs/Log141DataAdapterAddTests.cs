@@ -23,6 +23,7 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -2851,6 +2852,61 @@ namespace PDS.Witsml.Server.Data.Logs
             response = DevKit.Add<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_AddToStore_With_Custom_Data_Delimiter()
+        {
+            var delimiter = "|";
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = CreateLog(
+                null,
+                DevKit.Name("Log can be added with depth data"),
+                Wellbore.UidWell,
+                Well.Name,
+                response.SuppMsgOut,
+                Wellbore.Name);
+
+            // Set data delimiter to other charactrer than ","
+            log.DataDelimiter = delimiter;
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10, hasEmptyChannel:false);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var query = new Log
+            {
+                Uid = uidLog,
+                UidWell = log.UidWell,
+                UidWellbore = log.UidWellbore
+            };
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            var result = results.FirstOrDefault();
+            Assert.IsNotNull(result);
+
+            // Assert data delimiter
+            Assert.AreEqual(delimiter, result.DataDelimiter);
+
+            var data = result.LogData.FirstOrDefault()?.Data;
+            Assert.IsNotNull(data);
+
+            var channelCount = log.LogCurveInfo.Count;
+
+            // Assert data delimiter in log data
+            foreach (var row in data)
+            {
+                var points = ChannelDataReader.Split(row, delimiter);
+                Assert.AreEqual(channelCount, points.Length);
+            }
         }
 
         #region Helper Methods

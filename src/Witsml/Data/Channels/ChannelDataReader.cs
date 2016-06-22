@@ -19,10 +19,13 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using log4net;
+using Microsoft.VisualBasic.FileIO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PDS.Framework;
@@ -38,6 +41,11 @@ namespace PDS.Witsml.Data.Channels
     {
         private const string Null = "null";
         private const string NaN = "NaN";
+
+        /// <summary>
+        /// The default data delimiter
+        /// </summary>
+        public const string DefaultDataDelimiter = ",";
 
         private static readonly JsonSerializerSettings _jsonSettings = new JsonSerializerSettings()
         {
@@ -73,8 +81,9 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="nullValues">The null values.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="id">The identifier.</param>
-        public ChannelDataReader(IList<string> data, string[] mnemonics = null, string[] units = null, string[] nullValues = null, string uri = null, string id = null)
-            : this(Combine(data), mnemonics, units, nullValues, uri, id)
+        /// <param name="dataDelimiter">The log data delimiter.</param>
+        public ChannelDataReader(IList<string> data, string[] mnemonics = null, string[] units = null, string[] nullValues = null, string uri = null, string id = null, string dataDelimiter = null)
+            : this(Combine(data, dataDelimiter), mnemonics, units, nullValues, uri, id)
         {
         }
 
@@ -87,7 +96,8 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="nullValues">The null values.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="id">The identifier.</param>
-        public ChannelDataReader(string data, string[] mnemonics = null, string[] units = null, string[] nullValues = null, string uri = null, string id = null)
+        /// <param name="dataDelimiter">The log data delimiter.</param>
+        public ChannelDataReader(string data, string[] mnemonics = null, string[] units = null, string[] nullValues = null, string uri = null, string id = null, string dataDelimiter = null)
             : this(Deserialize(data), mnemonics, units, nullValues, uri, id)
         {
         }
@@ -1444,13 +1454,17 @@ namespace PDS.Witsml.Data.Channels
         /// Deserializes the specified data.
         /// </summary>
         /// <param name="data">The data.</param>
+        /// <param name="dataDelimiter">The data delimiter.</param>
         /// <returns></returns>
-        private static List<List<List<object>>> Deserialize(string data)
+        private static List<List<List<object>>> Deserialize(string data, string dataDelimiter = null)
         {
-            _log.Debug("Deserializing channel data json.");
+            _log.Debug("Deserializing channel data json.");       
 
             if (string.IsNullOrWhiteSpace(data))
                 return new List<List<List<object>>>();
+
+            if (!string.IsNullOrEmpty(dataDelimiter) && dataDelimiter != DefaultDataDelimiter)
+                data = data.Replace(dataDelimiter, DefaultDataDelimiter);
 
             return JsonConvert.DeserializeObject<List<List<List<object>>>>(data, _jsonSettings);
         }
@@ -1459,26 +1473,26 @@ namespace PDS.Witsml.Data.Channels
         /// Combines the specified data.
         /// </summary>
         /// <param name="data">The data.</param>
+        /// <param name="dataDelimiter">The log data delimiter.</param>
         /// <returns>A JSON arrary of string values from the data list.</returns>
-        private static string Combine(IList<string> data)
+        private static string Combine(IList<string> data, string dataDelimiter)
         {
             _log.Debug("Combining log data elements into channel data json structure.");
 
             var json = new StringBuilder("[");
             var rows = new List<string>();
 
+            var delimiter = dataDelimiter ?? DefaultDataDelimiter;
+
             if (data != null)
             {
                 foreach (var row in data)
                 {
-                    var values = row.Split(new[] { ',' })
+                    var values = Split(row, delimiter)
                         .Select(Format)
                         .ToArray();
 
-                    rows.Add(string.Format(
-                        "[[{0}],[{1}]]",
-                        values.First(),
-                        string.Join(",", values.Skip(1))));
+                    rows.Add($"[[{values.First()}],[{string.Join(",", values.Skip(1))}]]");
                 }
             }
 
@@ -1486,6 +1500,26 @@ namespace PDS.Witsml.Data.Channels
             json.Append("]");
 
             return json.ToString();
+        }
+
+        /// <summary>
+        /// Splits the specified data.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        /// <param name="delimiter">The delimiter.</param>
+        /// <returns></returns>
+        [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
+        public static string[] Split(string data, string delimiter)
+        {
+            data = data.Replace("\n", " ");
+            using (var sr = new StringReader(data))
+            {
+                using (var parser = new TextFieldParser(sr))
+                {
+                    parser.SetDelimiters(delimiter);
+                    return parser.ReadFields();
+                }               
+            }
         }
 
         /// <summary>

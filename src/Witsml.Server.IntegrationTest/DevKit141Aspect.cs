@@ -24,6 +24,7 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Data.Logs;
 
 namespace PDS.Witsml.Server
@@ -118,7 +119,8 @@ namespace PDS.Witsml.Server
 
             if (values != null && values.Any())
             {
-                log.LogData[0].Data.Add(String.Join(",", values.Select(x => x == null ? string.Empty : x)));
+                log.LogData[0].Data.Add(string.Join(log.DataDelimiter ?? ChannelDataReader.DefaultDataDelimiter,
+                    values.Select(x => x == null ? string.Empty : x)));
             }
         }
 
