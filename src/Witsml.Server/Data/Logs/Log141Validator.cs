@@ -41,6 +41,7 @@ namespace PDS.Witsml.Server.Data.Logs
         private readonly IWitsmlDataAdapter<Well> _wellDataAdapter;
 
         private static readonly char _seperator = ',';
+        private static readonly string _dataDelimiterErrorMessage = WitsmlSettings.DataDelimiterErrorMessage;
         private readonly string[] _illegalColumnIdentifiers = new string[] { "'", "\"", "<", ">", "/", "\\", "&", "," };
 
         /// <summary>
@@ -167,6 +168,12 @@ namespace PDS.Witsml.Server.Data.Logs
                 yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
             }
 
+            // Validate that the dataDelimiter does not contain any white space
+            else if (!DataObject.IsValidDataDelimiter())
+            {
+                yield return new ValidationResult(_dataDelimiterErrorMessage, new[] { "DataDelimiter" });
+            }
+
             // Validate that uid for LogParam exists
             else if (DataObject.LogParam != null && DataObject.LogParam.Any(lp => string.IsNullOrWhiteSpace(lp.Uid)))
             {
@@ -229,6 +236,12 @@ namespace PDS.Witsml.Server.Data.Logs
                 else if (logCurves != null && logCurves.Any(l => string.IsNullOrWhiteSpace(l.Uid)))
                 {
                     yield return new ValidationResult(ErrorCodes.MissingElementUid.ToString(), new[] { "LogCurveInfo", "Uid" });
+                }
+
+                // Validate that the dataDelimiter does not contain any white space
+                else if (!DataObject.IsValidDataDelimiter())
+                {
+                    yield return new ValidationResult(_dataDelimiterErrorMessage, new[] { "DataDelimiter" });
                 }
 
                 // Validate that uid for LogParam exists

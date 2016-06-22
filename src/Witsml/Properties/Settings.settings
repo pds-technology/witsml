@@ -5,5 +5,11 @@
     <Setting Name="ChannelDataBlockBatchSize" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">10</Value>
     </Setting>
+    <Setting Name="MaxDataDelimiterLength" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">2</Value>
+    </Setting>
+    <Setting Name="DataDelimiterExclusions" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">[\d\s\.\+\-]</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -31,5 +31,23 @@ namespace PDS.Witsml.Properties {
                 return ((int)(this["ChannelDataBlockBatchSize"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
+        public int MaxDataDelimiterLength {
+            get {
+                return ((int)(this["MaxDataDelimiterLength"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("[\\d\\s\\.\\+\\-]")]
+        public string DataDelimiterExclusions {
+            get {
+                return ((string)(this["DataDelimiterExclusions"]));
+            }
+        }
     }
 }

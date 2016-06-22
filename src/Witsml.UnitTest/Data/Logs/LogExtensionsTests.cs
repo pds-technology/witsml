@@ -93,5 +93,71 @@ namespace PDS.Witsml.Data.Logs
             Assert.AreEqual("-3333.33", nullValueList[3]);
             Assert.AreEqual("-1111.11", nullValueList[4]);
         }
+
+        [TestMethod]
+        public void LogExtensions_Data_Delimiter_Validation_Fail_Tests()
+        {
+            var log = new Log();
+
+            // Validate that all digits are invalid
+            for (int i = 0; i < 10; i++)
+            {
+                log.DataDelimiter = i.ToString();
+                Assert.IsFalse(log.IsValidDataDelimiter());
+            }
+
+            // A space in the delimiter is not allowed
+            log.DataDelimiter = "# ";
+            Assert.IsFalse(log.IsValidDataDelimiter());
+
+            // A decimal in the delimiter is not allowed
+            log.DataDelimiter = ".";
+            Assert.IsFalse(log.IsValidDataDelimiter());
+
+            // A "+" in the delimiter is not allowed
+            log.DataDelimiter = "+";
+            Assert.IsFalse(log.IsValidDataDelimiter());
+
+            // A "-" in the delimiter is not allowed
+            log.DataDelimiter = "-";
+            Assert.IsFalse(log.IsValidDataDelimiter());
+        }
+
+        [TestMethod]
+        public void LogExtensions_Data_Delimiter_Validation_Pass_Tests()
+        {
+            var log = new Log();
+
+            // Test symbols that should pass validation
+            log.DataDelimiter = "#";
+            Assert.IsTrue(log.IsValidDataDelimiter());
+
+            log.DataDelimiter = "*";
+            Assert.IsTrue(log.IsValidDataDelimiter());
+
+            log.DataDelimiter = "~";
+            Assert.IsTrue(log.IsValidDataDelimiter());
+
+            log.DataDelimiter = "^";
+            Assert.IsTrue(log.IsValidDataDelimiter());
+
+            log.DataDelimiter = "$";
+            Assert.IsTrue(log.IsValidDataDelimiter());
+
+            log.DataDelimiter = "(";
+            Assert.IsTrue(log.IsValidDataDelimiter());
+
+            log.DataDelimiter = ")";
+            Assert.IsTrue(log.IsValidDataDelimiter());
+
+            log.DataDelimiter = "@";
+            Assert.IsTrue(log.IsValidDataDelimiter());
+
+            log.DataDelimiter = "!";
+            Assert.IsTrue(log.IsValidDataDelimiter());
+
+            log.DataDelimiter = "|";
+            Assert.IsTrue(log.IsValidDataDelimiter());
+        }
     }
 }

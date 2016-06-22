@@ -94,6 +94,11 @@ namespace PDS.Witsml.Server.Configuration
         public static int ChunkSizeBytes = Properties.Settings.Default.ChunkSizeBytes;
 
         /// <summary>
+        /// The data delimiter error message
+        /// </summary>
+        public static string DataDelimiterErrorMessage = Properties.Settings.Default.DataDelimiterErrorMessage;
+
+        /// <summary>
         /// Gets the size of the range.
         /// </summary>
         /// <param name="isTimeIndex"><c>true</c> if is time index.</param>
