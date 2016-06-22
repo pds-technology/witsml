@@ -39,7 +39,7 @@ namespace PDS.Witsml.Server
     public class WitsmlStore : IWitsmlStore
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(WitsmlStore));
-        private static readonly string DefaultDataSchemaVersion = Settings.Default.DefaultDataSchemaVersion;
+        private static readonly string _defaultDataSchemaVersion = Settings.Default.DefaultDataSchemaVersion;
 
         private readonly IDictionary<string, ICapServerProvider> _capServerMap;
         private string _supportedVersions;
@@ -98,7 +98,7 @@ namespace PDS.Witsml.Server
                 _log.Debug(request.ToLogMessage());
 
                 var options = OptionsIn.Parse(request.OptionsIn);
-                var version = OptionsIn.GetValue(options, new OptionsIn.DataVersion(DefaultDataSchemaVersion));
+                var version = OptionsIn.GetValue(options, new OptionsIn.DataVersion(_defaultDataSchemaVersion));
 
                 // return error if WITSML 1.3.1 not supported AND dataVersion not specified (required in WITSML 1.4.1)
                 if (!_capServerMap.ContainsKey(OptionsIn.DataVersion.Version131.Value) && !options.ContainsKey(OptionsIn.DataVersion.Keyword))
@@ -118,7 +118,7 @@ namespace PDS.Witsml.Server
             catch (WitsmlException ex)
             {
                 var response = new WMLS_GetCapResponse((short)ex.ErrorCode, string.Empty, ex.Message);
-                _log.Warn(response.ToLogMessage(_log.IsWarnEnabled));
+                _log.Error(response.ToLogMessage(_log.IsWarnEnabled));
                 return response;
             }
         }
@@ -132,7 +132,7 @@ namespace PDS.Witsml.Server
         /// </returns>
         public WMLS_GetFromStoreResponse WMLS_GetFromStore(WMLS_GetFromStoreRequest request)
         {
-            var context = request.ToContext();
+            var context = WitsmlOperationContext.Current.Request = request.ToContext();
             var version = string.Empty;
 
             try
@@ -140,7 +140,7 @@ namespace PDS.Witsml.Server
                 _log.Debug(WebOperationContext.Current.ToLogMessage());
                 _log.Debug(context);
 
-                WitsmlValidator.ValidateRequest(CapServerProviders, context, out version);
+                WitsmlValidator.ValidateRequest(CapServerProviders, out version);
 
                 var dataProvider = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
                 var result = dataProvider.GetFromStore(context);
@@ -161,14 +161,14 @@ namespace PDS.Witsml.Server
                 var response = new WMLS_GetFromStoreResponse((short)ErrorCodes.DataObjectNotSupported, string.Empty,
                     "WITSML object type not supported: " + context.ObjectType + "; Version: " + version);
 
-                _log.Warn(response.ToLogMessage(_log.IsWarnEnabled));
+                _log.Error(response.ToLogMessage(_log.IsWarnEnabled));
 
                 return response;
             }
             catch (WitsmlException ex)
             {
                 var response = new WMLS_GetFromStoreResponse((short)ex.ErrorCode, string.Empty, ex.Message);
-                _log.Warn(response.ToLogMessage(_log.IsWarnEnabled));
+                _log.Error(response.ToLogMessage(_log.IsWarnEnabled));
                 return response;
             }
         }
@@ -180,7 +180,7 @@ namespace PDS.Witsml.Server
         /// <returns>A positive value indicates a success; a negative value indicates an error.</returns>
         public WMLS_AddToStoreResponse WMLS_AddToStore(WMLS_AddToStoreRequest request)
         {
-            var context = request.ToContext();
+            var context = WitsmlOperationContext.Current.Request = request.ToContext();
             var version = string.Empty;
 
             try
@@ -188,7 +188,7 @@ namespace PDS.Witsml.Server
                 _log.Debug(WebOperationContext.Current.ToLogMessage());
                 _log.Debug(context);
 
-                WitsmlValidator.ValidateRequest(CapServerProviders, context, out version);
+                WitsmlValidator.ValidateRequest(CapServerProviders, out version);
 
                 var dataWriter = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
                 var result = dataWriter.AddToStore(context);
@@ -202,14 +202,14 @@ namespace PDS.Witsml.Server
                 var response = new WMLS_AddToStoreResponse((short)ErrorCodes.DataObjectNotSupported,
                     "WITSML object type not supported: " + context.ObjectType + "; Version: " + version);
 
-                _log.Warn(response.ToLogMessage(_log.IsWarnEnabled));
+                _log.Error(response.ToLogMessage(_log.IsWarnEnabled));
 
                 return response;
             }
             catch (WitsmlException ex)
             {
                 var response = new WMLS_AddToStoreResponse((short)ex.ErrorCode, ex.Message);
-                _log.Warn(response.ToLogMessage(_log.IsWarnEnabled));
+                _log.Error(response.ToLogMessage(_log.IsWarnEnabled));
                 return response;
             }
         }
@@ -221,7 +221,7 @@ namespace PDS.Witsml.Server
         /// <returns>A positive value indicates a success; a negative value indicates an error.</returns>
         public WMLS_UpdateInStoreResponse WMLS_UpdateInStore(WMLS_UpdateInStoreRequest request)
         {
-            var context = request.ToContext();
+            var context = WitsmlOperationContext.Current.Request = request.ToContext();
             var version = string.Empty;
 
             try
@@ -229,7 +229,7 @@ namespace PDS.Witsml.Server
                 _log.Debug(WebOperationContext.Current.ToLogMessage());
                 _log.Debug(context);
 
-                WitsmlValidator.ValidateRequest(CapServerProviders, context, out version);
+                WitsmlValidator.ValidateRequest(CapServerProviders, out version);
 
                 var dataWriter = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
                 var result = dataWriter.UpdateInStore(context);
@@ -243,14 +243,14 @@ namespace PDS.Witsml.Server
                 var response = new WMLS_UpdateInStoreResponse((short)ErrorCodes.DataObjectNotSupported,
                     "WITSML object type not supported: " + context.ObjectType + "; Version: " + version);
 
-                _log.Warn(response.ToLogMessage(_log.IsWarnEnabled));
+                _log.Error(response.ToLogMessage(_log.IsWarnEnabled));
 
                 return response;
             }
             catch (WitsmlException ex)
             {
                 var response = new WMLS_UpdateInStoreResponse((short)ex.ErrorCode, ex.Message);
-                _log.Warn(response.ToLogMessage(_log.IsWarnEnabled));
+                _log.Error(response.ToLogMessage(_log.IsWarnEnabled));
                 return response;
             }
         }
@@ -262,7 +262,7 @@ namespace PDS.Witsml.Server
         /// <returns>A positive value indicates a success; a negative value indicates an error.</returns>
         public WMLS_DeleteFromStoreResponse WMLS_DeleteFromStore(WMLS_DeleteFromStoreRequest request)
         {
-            var context = request.ToContext();
+            var context = WitsmlOperationContext.Current.Request = request.ToContext();
             var version = string.Empty;
 
             try
@@ -270,7 +270,7 @@ namespace PDS.Witsml.Server
                 _log.Debug(WebOperationContext.Current.ToLogMessage());
                 _log.Debug(context);
 
-                WitsmlValidator.ValidateRequest(CapServerProviders, context, out version);
+                WitsmlValidator.ValidateRequest(CapServerProviders, out version);
 
                 var dataWriter = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
                 var result = dataWriter.DeleteFromStore(context);
@@ -284,14 +284,14 @@ namespace PDS.Witsml.Server
                 var response = new WMLS_DeleteFromStoreResponse((short)ErrorCodes.DataObjectNotSupported,
                     "WITSML object type not supported: " + context.ObjectType + "; Version: " + version);
 
-                _log.Warn(response.ToLogMessage(_log.IsWarnEnabled));
+                _log.Error(response.ToLogMessage(_log.IsWarnEnabled));
 
                 return response;
             }
             catch (WitsmlException ex)
             {
                 var response = new WMLS_DeleteFromStoreResponse((short)ex.ErrorCode, ex.Message);
-                _log.Warn(response.ToLogMessage(_log.IsWarnEnabled));
+                _log.Error(response.ToLogMessage(_log.IsWarnEnabled));
                 return response;
             }
         }

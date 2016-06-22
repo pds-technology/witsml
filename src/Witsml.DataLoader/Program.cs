@@ -90,7 +90,9 @@ namespace PDS.Witsml.DataLoader
 
                     var xml = File.ReadAllText(file);
                     var type = ObjectTypes.GetObjectGroupType(dataTypeInfo.ObjectType, _dataSchemaVersion);
-                    var dataObject = WitsmlParser.Parse(type, xml);
+
+                    var document = WitsmlParser.Parse(xml);
+                    var dataObject = WitsmlParser.Parse(type, document.Root);
                     var collection = dataObject as IEnergisticsCollection;
 
                     // Unwrap from plural element

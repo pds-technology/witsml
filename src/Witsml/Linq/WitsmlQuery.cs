@@ -83,25 +83,25 @@ namespace PDS.Witsml.Linq
             Visit(expression);
 
             var optionsIn = string.Join(";", Options.Select(x => $"{x.Key}={x.Value}"));
+            var objectType = ObjectTypes.GetObjectType<T>();
             var xmlIn = WitsmlParser.ToXml(Query);
 
-            Context.LogQuery(Functions.GetFromStore, xmlIn, optionsIn);
+            Context.LogQuery(Functions.GetFromStore, objectType, xmlIn, optionsIn);
 
             using (var client = Context.Connection.CreateClientProxy())
             {
                 var wmls = (IWitsmlClient)client;
                 string suppMsgOut, xmlOut;
 
-                var objectType = ObjectTypes.GetObjectType<T>();
-                var result = Enumerable.Empty<T>();
-
                 var returnCode = wmls.WMLS_GetFromStore(objectType, xmlIn, optionsIn, null, out xmlOut, out suppMsgOut);
+                var result = Enumerable.Empty<T>();
 
                 try
                 {
                     if (returnCode > 0)
                     {
-                        var response = WitsmlParser.Parse<TList>(xmlOut);
+                        var document = WitsmlParser.Parse(xmlOut);
+                        var response = WitsmlParser.Parse<TList>(document.Root);
                         result = (IEnumerable<T>)response.Items;
                     }
                 }
@@ -112,7 +112,7 @@ namespace PDS.Witsml.Linq
                     suppMsgOut = ex.Message + " " + ex.GetBaseException().Message;
                 }
 
-                Context.LogResponse(Functions.GetFromStore, xmlIn, optionsIn, xmlOut, returnCode, suppMsgOut);
+                Context.LogResponse(Functions.GetFromStore, objectType, xmlIn, optionsIn, xmlOut, returnCode, suppMsgOut);
                 return result;
             }
         }

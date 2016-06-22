@@ -67,16 +67,16 @@ namespace PDS.Witsml
         /// Parses the specified XML document using the Standards DevKit.
         /// </summary>
         /// <typeparam name="T">The data object type.</typeparam>
-        /// <param name="xml">The XML string.</param>
+        /// <param name="element">The XML element.</param>
         /// <returns>The data object instance.</returns>
         /// <exception cref="WitsmlException"></exception>
-        public static T Parse<T>(string xml)
+        public static T Parse<T>(XElement element)
         {
-            _log.Debug("Parsing XML string.");
+            _log.DebugFormat("Deserializing XML element for type: {0}", typeof(T).FullName);
 
             try
             {
-                xml = RemoveNaNElements<T>(xml);
+                var xml = RemoveNaNElements<T>(element);
                 return EnergisticsConverter.XmlToObject<T>(xml);
             }
             catch (WitsmlException)
@@ -93,20 +93,18 @@ namespace PDS.Witsml
         /// Parses the specified XML document.
         /// </summary>
         /// <param name="type">The data object type.</param>
-        /// <param name="xml">The XML string.</param>
+        /// <param name="element">The XML element.</param>
         /// <returns>The data object instance.</returns>
         /// <exception cref="WitsmlException"></exception>
-        public static object Parse(Type type, string xml)
+        public static object Parse(Type type, XElement element)
         {
-            _log.DebugFormat("Parsing XML string for type {0}.", type.FullName);
-
             var method = typeof(WitsmlParser).GetMethods(BindingFlags.Public | BindingFlags.Static)
                 .FirstOrDefault(x => x.Name == "Parse" && x.GetGenericArguments().Any());
 
             try
             {
                 return method?.MakeGenericMethod(type)
-                    .Invoke(null, new object[] { xml });
+                    .Invoke(null, new object[] { element });
             }
             catch (Exception ex)
             {
@@ -161,19 +159,19 @@ namespace PDS.Witsml
         /// <summary>
         /// Removes elements that are numeric type and have NaN value.
         /// </summary>
-        /// <param name="xml">The XML.</param>
+        /// <param name="element">The XML element.</param>
         /// <returns>The xml with NaN removed.</returns>
-        public static string RemoveNaNElements<T>(string xml)
+        public static string RemoveNaNElements<T>(XElement element)
         {
             _log.Debug("Removing NaN elements.");
 
-            var context = new WitsmlParserContext<T>(Parse(xml));
+            var context = new WitsmlParserContext<T>(element);
             var parser = new WitsmlParser(context);
 
             context.RemoveNaNElements = true;
-            parser.Navigate(context.Document.Root);
+            parser.Navigate(context.Element);
 
-            return context.Document.ToString();
+            return context.Element.ToString();
         }
 
         /// <summary>

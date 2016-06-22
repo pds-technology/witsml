@@ -23,7 +23,6 @@ using System.Xml.Linq;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
 using Witsml200 = Energistics.DataAccess.WITSML200;
-using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -32,56 +31,39 @@ namespace PDS.Witsml.Server.Data
     /// </summary>
     public class WitsmlQueryParser
     {
-        private XNamespace _namespace;
-        private XDocument _document;
-        private IEnumerable<XElement> _elements;
-
-        private WitsmlQueryParser(WitsmlQueryParser parser, XElement element, string objectType)
-        {
-            Context = new RequestContext(
-                function: parser.Context.Function, 
-                objectType: objectType,
-                xml: element.ToString(),
-                options: parser.Context.Options,
-                capabilities: parser.Context.Capabilities);
-
-            Options = parser.Options;
-            _document = parser._document;
-            _namespace = parser._namespace;
-            _elements = new[] { element };
-            QueryCount = 1;
-        }
+        private readonly string _options;
+        private readonly XNamespace _namespace;
+        private readonly IEnumerable<XElement> _elements;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="WitsmlQueryParser"/> class.
+        /// Initializes a new instance of the <see cref="WitsmlQueryParser" /> class.
         /// </summary>
-        /// <param name="context">The context.</param>
-        public WitsmlQueryParser(RequestContext context)
+        /// <param name="element">The element.</param>
+        /// <param name="objectType">The object type.</param>
+        /// <param name="options">The options.</param>
+        public WitsmlQueryParser(XElement element, string objectType, string options)
         {
-            Context = context;
-            Options = OptionsIn.Parse(context.Options);
-            _document = WitsmlParser.Parse(context.Xml);
-            _namespace = _document.Root.GetDefaultNamespace();
+            Root = element;
+            ObjectType = objectType;
+            Options = OptionsIn.Parse(options);
 
-            if (_document.Root.Attributes("version").Any())
-            {
-                _elements = _document.Root.Elements(_namespace + Context.ObjectType);
-            }
-            else
-            {
-                _elements = _document.Elements();
-            }
+            _options = options;
+            _namespace = element.GetDefaultNamespace();
+
+            _elements = element.Attributes("version").Any()
+                ? element.Elements(_namespace + objectType)
+                : new[] { element };
 
             QueryCount = _elements.Count();
         }
 
         /// <summary>
-        /// Gets the context.
+        /// Gets the object type.
         /// </summary>
         /// <value>
-        /// The context.
+        /// The object type.
         /// </value>
-        public RequestContext Context { get; private set; }
+        public string ObjectType { get; private set; }
 
         /// <summary>
         /// Gets the options.
@@ -90,6 +72,14 @@ namespace PDS.Witsml.Server.Data
         /// The options.
         /// </value>
         public Dictionary<string, string> Options { get; private set; }
+
+        /// <summary>
+        /// Gets the root element.
+        /// </summary>
+        /// <value>
+        /// The root element.
+        /// </value>
+        public XElement Root { get; }
 
         /// <summary>
         /// Gets the query count.
@@ -349,7 +339,7 @@ namespace PDS.Witsml.Server.Data
             }
             return Element()
                 .Elements(_namespace + name)
-                .Select(e => (String)e.Attribute(attribute))
+                .Select(e => (string)e.Attribute(attribute))
                 .FirstOrDefault();
         }
 
@@ -361,7 +351,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The Witsml query parser.</returns>
         public WitsmlQueryParser Fork(XElement element, string objectType)
         {
-            return new WitsmlQueryParser(this, element, objectType);
+            return new WitsmlQueryParser(element, objectType, _options);
         }
 
         /// <summary>
@@ -393,7 +383,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The list of Witsml query parsers.</returns>
         public IEnumerable<WitsmlQueryParser> ForkElements()
         {
-            return Fork(Elements(), Context.ObjectType);
+            return Fork(Elements(), ObjectType);
         }
     }
 }

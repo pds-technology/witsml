@@ -77,8 +77,8 @@ namespace PDS.Witsml.Linq
         /// </summary>
         private WitsmlContext()
         {
-            LogQuery = (f, q, o) => { };
-            LogResponse = (f, q, o, r, c, s) => { };
+            LogQuery = (f, t, q, o) => { };
+            LogResponse = (f, t, q, o, r, c, s) => { };
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace PDS.Witsml.Linq
         /// <value>
         /// The log query action.
         /// </value>
-        public Action<Functions, string, string> LogQuery { get; set; }
+        public Action<Functions, string, string, string> LogQuery { get; set; }
 
         /// <summary>
         /// Gets or sets the log response action.
@@ -111,7 +111,7 @@ namespace PDS.Witsml.Linq
         /// <value>
         /// The log response action.
         /// </value>
-        public Action<Functions, string, string, string, short, string> LogResponse { get; set; }
+        public Action<Functions, string, string, string, string, short, string> LogResponse { get; set; }
 
         /// <summary>
         /// Creates one instance of the specified type.

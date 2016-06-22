@@ -26,7 +26,6 @@ using Energistics.DataAccess.WITSML200.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Framework;
 using PDS.Witsml.Data.Logs;
-using PDS.Witsml.Server.Data;
 
 namespace PDS.Witsml.Server
 {
@@ -42,11 +41,6 @@ namespace PDS.Witsml.Server
         public override string DataSchemaVersion
         {
             get { return OptionsIn.DataVersion.Version200.Value; }
-        }
-
-        public WitsmlQueryParser Parser<T>(T entity, Functions function = Functions.PutObject)
-        {
-            return Parser(function, entity);
         }
 
         public Citation Citation(string name)
@@ -88,7 +82,7 @@ namespace PDS.Witsml.Server
             log.CurveClass = "unknown";
             log.LoggingMethod = loggingMethod;
 
-            var index = List(channelIndex); ;
+            var index = List(channelIndex);
             if (channelIndex.IndexType == ChannelIndexType.measureddepth)
             {
                 log.TimeDepth = "depth";

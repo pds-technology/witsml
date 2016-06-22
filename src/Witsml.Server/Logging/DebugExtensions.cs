@@ -38,7 +38,7 @@ namespace PDS.Witsml.Server.Logging
         /// <returns>The string representation of the request.</returns>
         public static string ToLogMessage(this WebOperationContext context, bool isEnabled = false)
         {
-            if (context == null || context.IncomingRequest == null)
+            if (context?.IncomingRequest == null)
                 return string.Empty;
 
             if (!_log.IsDebugEnabled && !isEnabled)

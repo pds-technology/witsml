@@ -29,13 +29,8 @@ namespace PDS.Witsml
     [TestClass]
     public class WitsmlParserTests
     {
-        //[TestMethod]
-        //public void WitsmlParser_MethodName_ExpectedBehavior()
-        //{
-        //}
-
         [TestMethod]
-        public void WitsmlParser_Can_Remove_NaN_Elements_Of_Different_Property_Name()
+        public void WitsmlParser_RemoveNaNElements_Removes_NaN_Elements()
         {
             string wellXml = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
            "<well>" + Environment.NewLine +
@@ -44,15 +39,16 @@ namespace PDS.Witsml
            "</well>" + Environment.NewLine +
            "</wells>";
 
-           var result = WitsmlParser.RemoveNaNElements<WellList>(wellXml);
-           WellList welllist = EnergisticsConverter.XmlToObject<WellList>(result);
+            var document = WitsmlParser.Parse(wellXml);
+            var result = WitsmlParser.RemoveNaNElements<WellList>(document.Root);
+            var welllist = EnergisticsConverter.XmlToObject<WellList>(result);
 
             Assert.IsNull(welllist.Well[0].PercentInterest);
         }
 
 
         [TestMethod]
-        public void WitsmlParser_Can_Remove_NaN_Elements_Of_Not_Primitive_Property_Type()
+        public void WitsmlParser_RemoveNaNElements_Removes_Nested_NaN_Elements()
         {
             string wellXml = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
            "<well>" + Environment.NewLine +
@@ -65,8 +61,9 @@ namespace PDS.Witsml
            "</well>" + Environment.NewLine +
            "</wells>";
 
-            var result = WitsmlParser.RemoveNaNElements<WellList>(wellXml);
-            WellList welllist = EnergisticsConverter.XmlToObject<WellList>(result);
+            var document = WitsmlParser.Parse(wellXml);
+            var result = WitsmlParser.RemoveNaNElements<WellList>(document.Root);
+            var welllist = EnergisticsConverter.XmlToObject<WellList>(result);
 
             Assert.IsNull(welllist.Well[0].WellDatum[0].Elevation);
         }

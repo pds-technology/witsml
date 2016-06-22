@@ -25,7 +25,6 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
@@ -89,8 +88,8 @@ namespace PDS.Witsml.Server.Data.Wells
             query = new Well { Uid = uid };
             var queryIn = EnergisticsConverter.ObjectToXml(new WellList { Well = new List<Well> { query } });
             var xmlOut = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, optionsIn: OptionsIn.ReturnElements.IdOnly).XMLout;
-            var context = new RequestContext(Functions.GetFromStore, ObjectTypes.Well, xmlOut, null, null);
-            var parser = new WitsmlQueryParser(context);
+            var document = WitsmlParser.Parse(xmlOut);
+            var parser = new WitsmlQueryParser(document.Root, ObjectTypes.Well, null);
             Assert.IsFalse(parser.HasElements("wellDatum"));
 
             var wellList = EnergisticsConverter.XmlToObject<WellList>(xmlOut);
@@ -123,8 +122,8 @@ namespace PDS.Witsml.Server.Data.Wells
             query = new Well { Uid = uid, Country = string.Empty, CommonData = new CommonData() };
             var queryIn = EnergisticsConverter.ObjectToXml(new WellList { Well = new List<Well> { query } });
             var xmlOut = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, optionsIn: OptionsIn.ReturnElements.IdOnly).XMLout;
-            var context = new RequestContext(Functions.GetFromStore, ObjectTypes.Well, xmlOut, null, null);
-            var parser = new WitsmlQueryParser(context);
+            var document = WitsmlParser.Parse(xmlOut);
+            var parser = new WitsmlQueryParser(document.Root, ObjectTypes.Well, null);
 
             Assert.IsTrue(parser.HasElements("country"));
             Assert.IsTrue(parser.HasElements("commonData"));
@@ -163,8 +162,8 @@ namespace PDS.Witsml.Server.Data.Wells
             query = new Well { Uid = uid, WellDatum = new List<WellDatum> { new WellDatum() } };
             var queryIn = EnergisticsConverter.ObjectToXml(new WellList { Well = new List<Well> { query } });
             var xmlOut = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, null).XMLout;
-            var context = new RequestContext(Functions.GetFromStore, ObjectTypes.Well, xmlOut, null, null);
-            var parser = new WitsmlQueryParser(context);
+            var document = WitsmlParser.Parse(xmlOut);
+            var parser = new WitsmlQueryParser(document.Root, ObjectTypes.Well, null);
             Assert.IsFalse(parser.HasElements("name"));
 
             var wellList = EnergisticsConverter.XmlToObject<WellList>(xmlOut);
@@ -204,8 +203,8 @@ namespace PDS.Witsml.Server.Data.Wells
             query = new Well { Uid = uid, CommonData = new CommonData { Comments = string.Empty } };
             var queryIn = EnergisticsConverter.ObjectToXml(new WellList { Well = new List<Well> { query } });
             var xmlOut = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, optionsIn: OptionsIn.ReturnElements.Requested).XMLout;
-            var context = new RequestContext(Functions.GetFromStore, ObjectTypes.Well, xmlOut, null, null);
-            var parser = new WitsmlQueryParser(context);
+            var document = WitsmlParser.Parse(xmlOut);
+            var parser = new WitsmlQueryParser(document.Root, ObjectTypes.Well, null);
 
             Assert.IsFalse(parser.HasElements("name"));
             Assert.IsFalse(parser.HasElements("wellDatum"));

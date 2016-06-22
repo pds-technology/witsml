@@ -34,7 +34,7 @@ namespace PDS.Witsml.Linq
         /// <value>
         /// The log query action.
         /// </value>
-        Action<Functions, string, string> LogQuery { get; set; }
+        Action<Functions, string, string, string> LogQuery { get; set; }
 
         /// <summary>
         /// Gets or sets the log response action.
@@ -42,7 +42,7 @@ namespace PDS.Witsml.Linq
         /// <value>
         /// The log response action.
         /// </value>
-        Action<Functions, string, string, string, short, string> LogResponse { get; set; }
+        Action<Functions, string, string, string, string, short, string> LogResponse { get; set; }
 
         /// <summary>
         /// Gets all wells.

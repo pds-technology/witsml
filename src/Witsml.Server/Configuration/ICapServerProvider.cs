@@ -16,8 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Xml.Linq;
-
 namespace PDS.Witsml.Server.Configuration
 {
     /// <summary>
@@ -48,8 +46,6 @@ namespace PDS.Witsml.Server.Configuration
         /// <summary>
         /// Performs validation for the specified function and supplied parameters.
         /// </summary>
-        /// <param name="context">The request context.</param>
-        /// <param name="document">The XML document.</param>
-        void ValidateRequest(RequestContext context, XDocument document);
+        void ValidateRequest();
     }
 }

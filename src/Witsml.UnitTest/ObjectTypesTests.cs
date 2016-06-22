@@ -62,7 +62,8 @@ namespace PDS.Witsml
         [TestMethod]
         public void GetObjectTypeFromGroup_returns_type_for_valid_xml()
         {
-            var typeFound = ObjectTypes.GetObjectTypeFromGroup(_wellsXml);
+            var document = WitsmlParser.Parse(_wellsXml);
+            var typeFound = ObjectTypes.GetObjectTypeFromGroup(document.Root);
 
             Assert.AreEqual(ObjectTypes.Well, typeFound);
         }
@@ -70,7 +71,7 @@ namespace PDS.Witsml
         [TestMethod]
         public void GetObjectTypeFromGroup_returns_unknown_for_invalid_xml()
         {
-            var typeFound = ObjectTypes.GetObjectTypeFromGroup(string.Empty);
+            var typeFound = ObjectTypes.GetObjectTypeFromGroup(null);
 
             Assert.AreEqual(ObjectTypes.Unknown, typeFound);
         }

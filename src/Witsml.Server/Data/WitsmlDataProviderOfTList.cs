@@ -18,6 +18,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
 using PDS.Framework;
@@ -51,9 +52,10 @@ namespace PDS.Witsml.Server.Data
         /// <returns>Queried objects.</returns>
         public virtual WitsmlResult<IEnergisticsCollection> GetFromStore(RequestContext context)
         {
-            var parser = new WitsmlQueryParser(context);
             Logger.DebugFormat("Getting {0}", typeof(TObject).Name);
 
+            var root = WitsmlOperationContext.Current.Document.Root;
+            var parser = new WitsmlQueryParser(root, context.ObjectType, context.Options);
             var childParsers = parser.ForkElements().ToArray();
 
             // Validate each query template separately
@@ -87,7 +89,9 @@ namespace PDS.Witsml.Server.Data
         {
             Logger.DebugFormat("Adding {0}", typeof(TObject).Name);
 
-            var parser = new WitsmlQueryParser(context);
+            var root = WitsmlOperationContext.Current.Document.Root;
+            var parser = new WitsmlQueryParser(root, context.ObjectType, context.Options);
+
             return Add(parser);
         }
 
@@ -102,7 +106,9 @@ namespace PDS.Witsml.Server.Data
         {
             Logger.DebugFormat("Updating {0}", typeof(TObject).Name);
 
-            var parser = new WitsmlQueryParser(context);
+            var root = WitsmlOperationContext.Current.Document.Root;
+            var parser = new WitsmlQueryParser(root, context.ObjectType, context.Options);
+
             return Update(parser);
         }
 
@@ -117,7 +123,9 @@ namespace PDS.Witsml.Server.Data
         {
             Logger.DebugFormat("Deleting {0}", typeof(TObject).Name);
 
-            var parser = new WitsmlQueryParser(context);
+            var root = WitsmlOperationContext.Current.Document.Root;
+            var parser = new WitsmlQueryParser(root, context.ObjectType, context.Options);
+
             return Delete(parser);
         }
 
@@ -134,11 +142,11 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Parses the specified XML string.
         /// </summary>
-        /// <param name="xml">The XML string.</param>
+        /// <param name="element">The XML element.</param>
         /// <returns>The data object instance.</returns>
-        protected override TObject Parse(string xml)
+        protected override TObject Parse(XElement element)
         {
-            var list = WitsmlParser.Parse<TList>(xml);
+            var list = WitsmlParser.Parse<TList>(element);
             return list.Items.Cast<TObject>().FirstOrDefault();
         }
 

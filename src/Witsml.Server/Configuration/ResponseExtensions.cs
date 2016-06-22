@@ -32,7 +32,7 @@ namespace PDS.Witsml.Server.Configuration
         /// <param name="parser">The parser.</param>
         public static ResponseContext ToContext(this WitsmlQueryParser parser)
         {
-            var context = new ResponseContext() { ObjectType = parser.Context.ObjectType };
+            var context = new ResponseContext() { ObjectType = parser.ObjectType };
 
             if (IsGrowingDataObject(context))
             {

@@ -36,27 +36,27 @@ namespace PDS.Witsml.Server.Configuration
         /// Validates the WITSML Store API request.
         /// </summary>
         /// <param name="providers">The capServer providers.</param>
-        /// <param name="context">The request context.</param>
         /// <param name="version">The data schema version.</param>
         /// <exception cref="WitsmlException"></exception>
-        public static void ValidateRequest(IEnumerable<ICapServerProvider> providers, RequestContext context, out string version)
+        public static void ValidateRequest(IEnumerable<ICapServerProvider> providers, out string version)
         {
-            _log.DebugFormat("Validating WITSML request for {0}", context.ObjectType);
+            var context = WitsmlOperationContext.Current;
+            _log.DebugFormat("Validating WITSML request for {0}", context.Request.ObjectType);
 
             ValidateUserAgent(WebOperationContext.Current);
-            var document = ValidateInputTemplate(context.Xml);
+            context.Document = ValidateInputTemplate(context.Request.Xml);
 
-            var dataSchemaVersion = ObjectTypes.GetVersion(document);
+            var dataSchemaVersion = ObjectTypes.GetVersion(context.Document.Root);
             ValidateDataSchemaVersion(dataSchemaVersion);
 
             var capServerProvider = providers.FirstOrDefault(x => x.DataSchemaVersion == dataSchemaVersion);
             if (capServerProvider == null)
             {
                 throw new WitsmlException(ErrorCodes.DataObjectNotSupported,
-                    "WITSML object type not supported: " + context.ObjectType + "; Version: " + dataSchemaVersion);
+                    "WITSML object type not supported: " + context.Request.ObjectType + "; Version: " + dataSchemaVersion);
             }
 
-            capServerProvider.ValidateRequest(context, document);
+            capServerProvider.ValidateRequest();
             version = dataSchemaVersion;
         }
 
@@ -73,14 +73,15 @@ namespace PDS.Witsml.Server.Configuration
         /// <summary>
         /// Performs validation for the specified function and supplied parameters.
         /// </summary>
-        /// <param name="context">The request context.</param>
-        /// <param name="document">The XML document.</param>
-        public virtual void ValidateRequest(RequestContext context, XDocument document)
+        public virtual void ValidateRequest()
         {
-            ValidateNamespace(document);
-            document?.Root?.Elements()
-                .ForEach(e => ValidateObjectType(context.Function, context.ObjectType, e.Name.LocalName));
-            ValidatePluralRootElement(context.ObjectType, document);
+            var context = WitsmlOperationContext.Current;
+            ValidateNamespace(context.Document);
+
+            context.Document.Root?.Elements()
+                .ForEach(e => ValidateObjectType(context.Request.Function, context.Request.ObjectType, e.Name.LocalName));
+
+            ValidatePluralRootElement(context.Request.ObjectType, context.Document);
         }
 
         /// <summary>
@@ -147,7 +148,7 @@ namespace PDS.Witsml.Server.Configuration
         {
             _log.DebugFormat("Validating plural root element for {0}", objectType);
 
-            var objectGroupType = ObjectTypes.GetObjectGroupType(document);
+            var objectGroupType = ObjectTypes.GetObjectGroupType(document.Root);
             var pluralObjectType = objectType + "s";
 
             if (objectGroupType != pluralObjectType)

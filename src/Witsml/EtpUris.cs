@@ -80,8 +80,10 @@ namespace PDS.Witsml
         /// <returns>The <see cref="EtpUri"/> type</returns>
         public static EtpUri GetUri(this IDataObject entity)
         {
-            return entity.GetUriFamily()
-                .Append(ObjectTypes.GetObjectType(entity), entity.Uid);
+            return (entity as IWellboreObject)?.GetUri()
+                ?? (entity as IWellObject)?.GetUri()
+                ?? entity.GetUriFamily()
+                    .Append(ObjectTypes.GetObjectType(entity), entity.Uid);
         }
 
         /// <summary>
@@ -91,9 +93,10 @@ namespace PDS.Witsml
         /// <returns>The <see cref="EtpUri"/> instance</returns>
         public static EtpUri GetUri(this IWellObject entity)
         {
-            return entity.GetUriFamily()
-                .Append(ObjectTypes.Well, entity.UidWell)
-                .Append(ObjectTypes.GetObjectType(entity), entity.Uid);
+            return (entity as IWellboreObject)?.GetUri()
+                ?? entity.GetUriFamily()
+                    .Append(ObjectTypes.Well, entity.UidWell)
+                    .Append(ObjectTypes.GetObjectType(entity), entity.Uid);
         }
 
         /// <summary>

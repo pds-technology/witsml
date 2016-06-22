@@ -19,11 +19,11 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Energistics.Common;
-using Energistics.DataAccess;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using Energistics.Protocol.Store;
 using PDS.Framework;
+using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data;
 
 namespace PDS.Witsml.Server.Providers.Store
@@ -94,6 +94,8 @@ namespace PDS.Witsml.Server.Providers.Store
             try
             {
                 var uri = new EtpUri(args.Message.Uri);
+                WitsmlOperationContext.Current.Request = new RequestContext(Functions.GetObject, uri.ObjectType, null, null, null);
+
                 var provider = Container.Resolve<IStoreStoreProvider>(new ObjectName(uri.Version));
                 provider.GetObject(args);
             }
@@ -117,6 +119,8 @@ namespace PDS.Witsml.Server.Providers.Store
 
             try
             {
+                WitsmlOperationContext.Current.Request = new RequestContext(Functions.PutObject, uri.ObjectType, putObject.Data.GetXml(), null, null);
+
                 var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
                 dataAdapter.Put(putObject.Data);
             }
@@ -147,6 +151,8 @@ namespace PDS.Witsml.Server.Providers.Store
         {
             try
             {
+                WitsmlOperationContext.Current.Request = new RequestContext(Functions.DeleteObject, uri.ObjectType, null, null, null);
+
                 var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
                 dataAdapter.Delete(uri);
             }

@@ -55,46 +55,48 @@ namespace PDS.Witsml.Server.Configuration
         /// <summary>
         /// Performs validation for the specified function and supplied parameters.
         /// </summary>
-        /// <param name="context">The request context.</param>
-        /// <param name="document">The XML document.</param>
-        public override void ValidateRequest(RequestContext context, XDocument document)
+        public override void ValidateRequest()
         {
-            Logger.DebugFormat("Validating WITSML request for {0}; Function: {1}", context.ObjectType, context.Function);
+            var context = WitsmlOperationContext.Current;
+            var request = context.Request;
+            var document = context.Document;
 
-            base.ValidateRequest(context, document);
+            Logger.DebugFormat("Validating WITSML request for {0}; Function: {1}", request.ObjectType, request.Function);
 
-            var optionsIn = OptionsIn.Parse(context.Options);
+            base.ValidateRequest();
 
-            if (context.Function == Functions.GetFromStore)
+            var optionsIn = OptionsIn.Parse(request.Options);
+
+            if (request.Function == Functions.GetFromStore)
             {
                 ValidateKeywords(optionsIn, OptionsIn.ReturnElements.Keyword, OptionsIn.RequestObjectSelectionCapability.Keyword, OptionsIn.RequestPrivateGroupOnly.Keyword, 
-                                OptionsIn.CompressionMethod.Keyword, OptionsIn.MaxReturnNodes.Keyword, OptionsIn.RequestLatestValues.Keyword);
+                                 OptionsIn.CompressionMethod.Keyword, OptionsIn.MaxReturnNodes.Keyword, OptionsIn.RequestLatestValues.Keyword);
                 ValidateRequestMaxReturnNodes(optionsIn);
-                ValidateRequestObjectSelectionCapability(optionsIn, context.ObjectType, document);
-                ValidateEmptyRootElement(context.ObjectType, document);
-                ValidateReturnElements(optionsIn, context.ObjectType);
+                ValidateRequestObjectSelectionCapability(optionsIn, request.ObjectType, document);
+                ValidateEmptyRootElement(request.ObjectType, document);
+                ValidateReturnElements(optionsIn, request.ObjectType);
                 ValidateSelectionCriteria(document);
             }
-            else if (context.Function == Functions.AddToStore)
+            else if (request.Function == Functions.AddToStore)
             {
                 ValidateKeywords(optionsIn, OptionsIn.CompressionMethod.Keyword);
                 ValidateCompressionMethod(optionsIn, GetCapServer().CapServer.CompressionMethod);
-                ValidateEmptyRootElement(context.ObjectType, document);
-                ValidateSingleChildElement(context.ObjectType, document);
+                ValidateEmptyRootElement(request.ObjectType, document);
+                ValidateSingleChildElement(request.ObjectType, document);
             }
-            else if (context.Function == Functions.UpdateInStore)
+            else if (request.Function == Functions.UpdateInStore)
             {
                 ValidateKeywords(optionsIn, OptionsIn.CompressionMethod.Keyword);
                 ValidateCompressionMethod(optionsIn, GetCapServer().CapServer.CompressionMethod);
-                ValidateEmptyRootElement(context.ObjectType, document);
-                ValidateSingleChildElement(context.ObjectType, document);
+                ValidateEmptyRootElement(request.ObjectType, document);
+                ValidateSingleChildElement(request.ObjectType, document);
             }
-            else if (context.Function == Functions.DeleteFromStore)
+            else if (request.Function == Functions.DeleteFromStore)
             {
                 //ValidateKeywords(optionsIn, OptionsIn.CascadedDelete.Keyword);
                 //ValidateCascadedDelete(optionsIn, GetCapServer().CapServer.CascadedDelete.GetValueOrDefault());
-                ValidateEmptyRootElement(context.ObjectType, document);
-                ValidateSingleChildElement(context.ObjectType, document);
+                ValidateEmptyRootElement(request.ObjectType, document);
+                ValidateSingleChildElement(request.ObjectType, document);
             }
         }
 

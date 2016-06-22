@@ -18,13 +18,12 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using Energistics.Common;
+using System.Xml.Linq;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using log4net;
 using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -140,10 +139,10 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dataObject">The data object.</param>
         public virtual void Put(DataObject dataObject)
         {
-            var context = new RequestContext(Functions.PutObject, ObjectTypes.GetObjectType<TObject>(),
-                dataObject.GetXml(), null, null);
+            var context = WitsmlOperationContext.Current;
+            context.Document = WitsmlParser.Parse(context.Request.Xml);
 
-            var parser = new WitsmlQueryParser(context);
+            var parser = new WitsmlQueryParser(context.Document.Root, context.Request.ObjectType, null);
 
             Put(parser);
         }
@@ -190,7 +189,7 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         protected virtual WitsmlResult Add(WitsmlQueryParser parser)
         {
-            var dataObject = Parse(parser.Context.Xml);
+            var dataObject = Parse(parser.Root);
 
             SetDefaultValues(dataObject);
             var uri = GetUri(dataObject);
@@ -212,7 +211,7 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         protected virtual WitsmlResult Update(WitsmlQueryParser parser)
         {
-            var dataObject = Parse(parser.Context.Xml);
+            var dataObject = Parse(parser.Root);
 
             var uri = GetUri(dataObject);
             Logger.DebugFormat("Updating {0} with URI '{1}'", typeof(TObject).Name, uri);
@@ -233,7 +232,7 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         protected virtual WitsmlResult Delete(WitsmlQueryParser parser)
         {
-            var dataObject = Parse(parser.Context.Xml);
+            var dataObject = Parse(parser.Root);
             Logger.DebugFormat("Deleting {0}", typeof(TObject).Name);
 
             Validate(Functions.DeleteFromStore, parser, dataObject);
@@ -246,11 +245,11 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Parses the specified XML string.
         /// </summary>
-        /// <param name="xml">The XML string.</param>
+        /// <param name="element">The XML element.</param>
         /// <returns>The data object instance.</returns>
-        protected virtual TObject Parse(string xml)
+        protected virtual TObject Parse(XElement element)
         {
-            return WitsmlParser.Parse<TObject>(xml);
+            return WitsmlParser.Parse<TObject>(element);
         }
 
         /// <summary>

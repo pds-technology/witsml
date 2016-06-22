@@ -23,7 +23,7 @@ using PDS.Witsml.Data;
 namespace PDS.Witsml
 {
     /// <summary>
-    /// Encapsulates common properties used for parsing WITSML documents.
+    /// Encapsulates common properties used for parsing WITSML elements.
     /// </summary>
     /// <seealso cref="PDS.Witsml.Data.DataObjectNavigationContext" />
     public abstract class WitsmlParserContext : DataObjectNavigationContext
@@ -31,17 +31,17 @@ namespace PDS.Witsml
         /// <summary>
         /// Initializes a new instance of the <see cref="WitsmlParserContext"/> class.
         /// </summary>
-        /// <param name="document">The document.</param>
-        protected WitsmlParserContext(XDocument document)
+        /// <param name="element">The XML element.</param>
+        protected WitsmlParserContext(XElement element)
         {
-            Document = document;
+            Element = element;
         }
 
         /// <summary>
-        /// Gets the XML document.
+        /// Gets the XML element.
         /// </summary>
-        /// <value>The XML document.</value>
-        public XDocument Document { get; }
+        /// <value>The XML element.</value>
+        public XElement Element { get; }
 
         /// <summary>
         /// Gets or sets a value indicating whether NaN elements should be removed.
@@ -53,7 +53,7 @@ namespace PDS.Witsml
     }
 
     /// <summary>
-    /// Encapsulates common properties used for parsing WITSML documents for a specific data object type.
+    /// Encapsulates common properties used for parsing WITSML elements for a specific data object type.
     /// </summary>
     /// <typeparam name="T">The type of the data object.</typeparam>
     /// <seealso cref="PDS.Witsml.Data.DataObjectNavigationContext" />
@@ -62,8 +62,8 @@ namespace PDS.Witsml
         /// <summary>
         /// Initializes a new instance of the <see cref="WitsmlParserContext{T}"/> class.
         /// </summary>
-        /// <param name="document">The XML document.</param>
-        public WitsmlParserContext(XDocument document) : base(document)
+        /// <param name="element">The XML element.</param>
+        public WitsmlParserContext(XElement element) : base(element)
         {
         }
 

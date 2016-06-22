@@ -96,12 +96,10 @@ namespace PDS.Witsml.Server
             return List(instance);
         }
 
-        public WitsmlQueryParser Parser<T>(Functions function, T entity, string options = null, string capabilities = null)
+        public WitsmlQueryParser Parser<T>(T entity, string options = null)
         {
-            var context = new RequestContext(function, ObjectTypes.GetObjectType<T>(),
-                EnergisticsConverter.ObjectToXml(entity), options, capabilities);
-
-            return new WitsmlQueryParser(context);
+            var document = WitsmlParser.Parse(EnergisticsConverter.ObjectToXml(entity));
+            return new WitsmlQueryParser(document.Root, ObjectTypes.GetObjectType<T>(), options);
         }
 
         public bool HasChildNodes(XmlElement element)

@@ -291,7 +291,6 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsNotNull(returnLog.IndexType);
             Assert.AreEqual(log.IndexType, returnLog.IndexType);
 
-
             var queryIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
                           "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
                           "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" +
@@ -301,11 +300,12 @@ namespace PDS.Witsml.Server.Data.Logs
                           "<nameWell />" + Environment.NewLine +
                           "</log>" + Environment.NewLine +
                           "</logs>";
+
             var result = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, null);
-            var xmlOut = result.XMLout;
             Assert.IsNotNull(result);
-            var context = new RequestContext(Functions.GetFromStore, ObjectTypes.Log, xmlOut, null, null);
-            var parser = new WitsmlQueryParser(context);
+
+            var document = WitsmlParser.Parse(result.XMLout);
+            var parser = new WitsmlQueryParser(document.Root, ObjectTypes.Log, null);
             Assert.IsFalse(parser.HasElements("indexType"));
         }
 
