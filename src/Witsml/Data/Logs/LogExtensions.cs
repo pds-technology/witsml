@@ -19,8 +19,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using log4net;
 using PDS.Framework;
+using PDS.Witsml.Properties;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
@@ -33,6 +35,8 @@ namespace PDS.Witsml.Data.Logs
     public static class LogExtensions
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (LogExtensions));
+        private static readonly int _maxDataDelimiterLength = Settings.Default.MaxDataDelimiterLength;
+        private static readonly string _dataDelimiterExclusions = Settings.Default.DataDelimiterExclusions;
 
         /// <summary>
         /// Determines whether the <see cref="Witsml131.Log"/> is increasing.
@@ -194,6 +198,10 @@ namespace PDS.Witsml.Data.Logs
             double? start = null;
             double? end = null;
 
+            if (logCurveInfo == null)
+                return new Range<double?>(null, null)
+                    .Sort(increasing);
+
             if (isTimeIndex)
             {
                 if (logCurveInfo.MinDateTimeIndex.HasValue)
@@ -226,6 +234,10 @@ namespace PDS.Witsml.Data.Logs
 
             double? start = null;
             double? end = null;
+
+            if (logCurveInfo == null)
+                return new Range<double?>(null, null)
+                    .Sort(increasing);
 
             if (isTimeIndex)
             {
@@ -274,6 +286,17 @@ namespace PDS.Witsml.Data.Logs
             return mnemonics
                 .Select(x => log.LogCurveInfo.GetByMnemonic(x))
                 .Select(n => GetNullValue(log.NullValue, n?.NullValue));
+        }
+
+        /// <summary>
+        /// Determines whether the specified log's data delimiter is valid.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns>true if the log's data delimiter is valid, false otherwise.</returns>
+        public static bool IsValidDataDelimiter(this Witsml141.Log log)
+        {
+            var regEx = new Regex(_dataDelimiterExclusions);
+            return log.DataDelimiter == null || (!regEx.IsMatch(log.DataDelimiter) && log.DataDelimiter.Length <= _maxDataDelimiterLength);
         }
 
         /// <summary>

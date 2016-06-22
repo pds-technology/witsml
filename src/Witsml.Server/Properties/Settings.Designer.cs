@@ -175,5 +175,15 @@ namespace PDS.Witsml.Server.Properties {
                 return ((int)(this["ChunkSizeBytes"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("The data delimiter must not contain any digits, space, \'+\', \'-\', or \'.\' and is tw" +
+            "o characters or less.")]
+        public string DataDelimiterErrorMessage {
+            get {
+                return ((string)(this["DataDelimiterErrorMessage"]));
+            }
+        }
     }
 }

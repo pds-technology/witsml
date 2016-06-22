@@ -1385,5 +1385,94 @@ namespace PDS.Witsml.Server.Data.Logs
 
             Assert.AreEqual((short)ErrorCodes.MissingMnemonicList, result.Result);
         }
+
+        [TestMethod]
+        public void Log141Validator_AddToStore_Success_DataDelimiter()
+        {
+            TestAddLogWithDelimiter("#", ErrorCodes.Success);
+        }
+
+        [TestMethod]
+        public void Log141Validator_AddToStore_Error_409_DataDelimiter_Max_Size_Exceeded()
+        {
+            TestAddLogWithDelimiter("123", ErrorCodes.InputTemplateNonConforming);
+        }
+
+        [TestMethod]
+        public void Log141Validator_AddToStore_Error_409_DataDelimiter_With_Bad_Characters()
+        {
+            TestAddLogWithDelimiter("0", ErrorCodes.InputTemplateNonConforming);
+            TestAddLogWithDelimiter("1", ErrorCodes.InputTemplateNonConforming);
+            TestAddLogWithDelimiter("5", ErrorCodes.InputTemplateNonConforming);
+            TestAddLogWithDelimiter("9", ErrorCodes.InputTemplateNonConforming);
+            TestAddLogWithDelimiter("+", ErrorCodes.InputTemplateNonConforming);
+            TestAddLogWithDelimiter("-", ErrorCodes.InputTemplateNonConforming);
+            TestAddLogWithDelimiter("# ", ErrorCodes.InputTemplateNonConforming);
+        }
+
+        [TestMethod]
+        public void Log141Validator_UpdateInStore_Error_409_DataDelimiter_Max_Size_Exceeded()
+        {
+            TestUpdateLogWithDelimiter("123", ErrorCodes.InputTemplateNonConforming);
+        }
+
+        [TestMethod]
+        public void Log141Validator_UpdateInStore_Error_409_DataDelimiter_With_Bad_Charaters()
+        {
+            var log = TestAddLogWithDelimiter(",", ErrorCodes.Success);
+            TestUpdateLogWithDelimiter("0", ErrorCodes.InputTemplateNonConforming, log);
+            TestUpdateLogWithDelimiter("2", ErrorCodes.InputTemplateNonConforming, log);
+            TestUpdateLogWithDelimiter("6", ErrorCodes.InputTemplateNonConforming, log);
+            TestUpdateLogWithDelimiter("8", ErrorCodes.InputTemplateNonConforming, log);
+            TestUpdateLogWithDelimiter("+", ErrorCodes.InputTemplateNonConforming, log);
+            TestUpdateLogWithDelimiter("-", ErrorCodes.InputTemplateNonConforming, log);
+            TestUpdateLogWithDelimiter("# ", ErrorCodes.InputTemplateNonConforming, log);
+        }
+
+        [TestMethod]
+        public void Log141Validator_UpdateInStore_Success_DataDelimiter()
+        {
+            TestUpdateLogWithDelimiter("#", ErrorCodes.Success);
+        }
+
+        #region Helper Methods
+
+        private Log TestAddLogWithDelimiter(string dataDelimiter, ErrorCodes expectedReturnCode)
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = response.SuppMsgOut,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01"),
+                DataDelimiter = dataDelimiter
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)expectedReturnCode, response.Result);
+            log.Uid = response.SuppMsgOut;
+
+            return log;
+        }
+
+        private void TestUpdateLogWithDelimiter(string dataDelimiter, ErrorCodes expectedReturnCode, Log log = null)
+        {
+            if (log == null)
+            {
+                log = TestAddLogWithDelimiter(",", ErrorCodes.Success);
+            }
+            log.DataDelimiter = dataDelimiter;
+            var update = DevKit.Update<LogList, Log>(log);
+            Assert.AreEqual((short)expectedReturnCode, update.Result);
+        }
+        #endregion Helper Methods
     }
 }
