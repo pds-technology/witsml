@@ -148,7 +148,7 @@ namespace PDS.Witsml.Data.Channels
                 mnemonics = mnemonics.Skip(1).ToArray();
                 units = units.Skip(1).ToArray();
 
-                yield return new ChannelDataReader(logData.Data, mnemonics, units, nullValues, log.GetUri())
+                yield return new ChannelDataReader(logData.Data, mnemonics, units, nullValues, log.GetUri(), dataDelimiter: log.DataDelimiter)
                     // Add index curve to separate collection
                     .WithIndex(indexCurve.Mnemonic.Value, indexCurve.Unit, increasing, isTimeIndex);
             }
