@@ -427,7 +427,7 @@ namespace PDS.Witsml.Server.Data.Logs
             if (logData.Count > 0)
             {
                 var data = logData
-                    .Select(row => string.Join(",", row.SelectMany(x => x)))
+                    .Select(row => string.Join(GetLogDataDelimiter(logHeader), row.SelectMany(x => x)))
                     .ToList();
                 SetLogDataValues(log, data, mnemonicSlices.Values, units.Values);
                 SetLogIndexRange(log, logHeader, ranges, reader.Indices.FirstOrDefault()?.Mnemonic);
@@ -824,5 +824,15 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="indexMetadata">The index metadata.</param>
         /// <returns></returns>
         protected abstract ChannelMetadataRecord ToChannelMetadataRecord(T entity, TChild curve, IndexMetadataRecord indexMetadata);
+
+        /// <summary>
+        /// Gets the log data delimiter.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <returns></returns>
+        protected virtual string GetLogDataDelimiter(T entity)
+        {
+            return ChannelDataReader.DefaultDataDelimiter;
+        }
     }
 }
