@@ -388,6 +388,16 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
+        /// Gets the log data delimiter.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <returns></returns>
+        protected override string GetLogDataDelimiter(Log entity)
+        {
+            return entity.DataDelimiter ?? base.GetLogDataDelimiter(entity);
+        }
+
+        /// <summary>
         /// Extracts the data readers.
         /// </summary>
         /// <param name="entity">The entity.</param>
