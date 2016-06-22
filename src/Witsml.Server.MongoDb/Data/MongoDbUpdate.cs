@@ -322,7 +322,7 @@ namespace PDS.Witsml.Server.Data
                         var xmlType = type.GetCustomAttribute<XmlTypeAttribute>();
                         element.Name = xmlType != null ? xmlType.TypeName : element.Name;
 
-                        var item = WitsmlParser.Parse(type, element.ToString());
+                        var item = WitsmlParser.Parse(type, element);
 
                         var filter = filterBuilder.And(filters);
                         var update = updateBuilder.Push(parentPath, item);

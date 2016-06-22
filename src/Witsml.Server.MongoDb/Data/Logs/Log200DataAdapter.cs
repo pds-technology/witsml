@@ -75,7 +75,7 @@ namespace PDS.Witsml.Server.Data.Logs
             // Add ChannelSets + data via the ChannelSet data adapter
             foreach (var childParser in parser.ForkProperties("ChannelSet", ObjectTypes.ChannelSet))
             {
-                var channelSet = WitsmlParser.Parse<ChannelSet>(childParser.Context.Xml);
+                var channelSet = WitsmlParser.Parse<ChannelSet>(childParser.Root);
                 _channelSetDataAdapter.Add(childParser, channelSet);
             }
 
@@ -98,7 +98,7 @@ namespace PDS.Witsml.Server.Data.Logs
             // Update ChannelSets + data via the ChannelSet data adapter
             foreach (var childParser in parser.ForkProperties("ChannelSet", ObjectTypes.ChannelSet))
             {
-                var channelSet = WitsmlParser.Parse<ChannelSet>(childParser.Context.Xml);
+                var channelSet = WitsmlParser.Parse<ChannelSet>(childParser.Root);
                 _channelSetDataAdapter.Update(childParser, channelSet);
             }
 

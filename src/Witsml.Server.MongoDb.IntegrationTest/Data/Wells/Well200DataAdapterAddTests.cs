@@ -93,8 +93,8 @@ namespace PDS.Witsml.Server.Data.Wells
                     </GeographicLocationWGS84>
                 </Well>";
 
-            var context = new RequestContext(Functions.AddToStore, ObjectTypes.Well, xml, null, null);
-            var parser = new WitsmlQueryParser(context);
+            var document = WitsmlParser.Parse(xml);
+            var parser = new WitsmlQueryParser(document.Root, ObjectTypes.Well, null);
 
             //WellAdapter.Validate(parser);
         }

@@ -57,7 +57,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The list of queried data object.</returns>
         public List<T> Execute()
         {
-            Logger.DebugFormat("Executing query for {0}", _parser.Context.ObjectType);
+            Logger.DebugFormat("Executing query for {0}", _parser.ObjectType);
 
             var returnElements = _parser.ReturnElements();
             var entities = new List<T>();
@@ -97,7 +97,7 @@ namespace PDS.Witsml.Server.Data
                 entities.AddRange(results.ToList());
             }
 
-            Logger.DebugFormat("Executed query for {0}; Count: {1}", _parser.Context.ObjectType, entities.Count);
+            Logger.DebugFormat("Executed query for {0}; Count: {1}", _parser.ObjectType, entities.Count);
 
             return entities;
         }
@@ -246,7 +246,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The filter object that for the selection criteria for the queried entity.</returns>
         private FilterDefinition<T> BuildFilter()
         {
-            Logger.DebugFormat("Building filter criteria for entity: {0}", _parser.Context.ObjectType);
+            Logger.DebugFormat("Building filter criteria for entity: {0}", _parser.ObjectType);
 
             var filters = Context.Filters;
 
@@ -274,7 +274,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The projection object that contains the fields to be selected.</returns>
         private ProjectionDefinition<T> BuildProjection()
         {
-            Logger.DebugFormat("Building projection fields for entity: {0}", _parser.Context.ObjectType);
+            Logger.DebugFormat("Building projection fields for entity: {0}", _parser.ObjectType);
 
             if (Context.Fields.Count == 0)
             {
