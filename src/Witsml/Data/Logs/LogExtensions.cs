@@ -36,7 +36,7 @@ namespace PDS.Witsml.Data.Logs
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof (LogExtensions));
         private static readonly int _maxDataDelimiterLength = Settings.Default.MaxDataDelimiterLength;
-        private static readonly string _dataDelimiterExclusions = Settings.Default.DataDelimiterExclusions;
+        private static readonly string _dataDelimiterExclusions = @"[\d\s\.\+\-]";
 
         /// <summary>
         /// Determines whether the <see cref="Witsml131.Log"/> is increasing.
@@ -295,7 +295,7 @@ namespace PDS.Witsml.Data.Logs
         /// <returns>true if the log's data delimiter is valid, false otherwise.</returns>
         public static bool IsValidDataDelimiter(this Witsml141.Log log)
         {
-            var regEx = new Regex(_dataDelimiterExclusions);
+            var regEx = new Regex(_dataDelimiterExclusions); 
             return log.DataDelimiter == null || (!regEx.IsMatch(log.DataDelimiter) && log.DataDelimiter.Length <= _maxDataDelimiterLength);
         }
 
