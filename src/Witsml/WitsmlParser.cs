@@ -47,11 +47,15 @@ namespace PDS.Witsml
         /// Parses the specified XML document using LINQ to XML.
         /// </summary>
         /// <param name="xml">The XML string.</param>
-        /// <returns>An <see cref="XDocument"/> instance.</returns>
+        /// <param name="debug">if set to <c>true</c> includes debug log output.</param>
+        /// <returns>An <see cref="XDocument" /> instance.</returns>
         /// <exception cref="WitsmlException"></exception>
-        public static XDocument Parse(string xml)
+        public static XDocument Parse(string xml, bool debug = true)
         {
-            _log.Debug("Parsing XML string.");
+            if (debug)
+            {
+                _log.Debug("Parsing XML string.");
+            }
 
             try
             {
@@ -76,7 +80,8 @@ namespace PDS.Witsml
 
             try
             {
-                var xml = RemoveNaNElements<T>(element);
+                // Create a copy of the element to prevent loss of NaN elements
+                var xml = RemoveNaNElements<T>(new XElement(element));
                 return EnergisticsConverter.XmlToObject<T>(xml);
             }
             catch (WitsmlException)

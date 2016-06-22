@@ -253,7 +253,7 @@ namespace PDS.Witsml.Server.Logging
 
             try
             {
-                return WitsmlParser.Parse(xml).ToString();
+                return WitsmlParser.Parse(xml, false).ToString();
             }
             catch
             {

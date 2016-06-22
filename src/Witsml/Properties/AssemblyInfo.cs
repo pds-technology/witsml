@@ -35,7 +35,6 @@ using System.Runtime.InteropServices;
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("0ef1d73f-e7a0-40b0-803b-7ce4b6b27112")]
 
-[assembly: InternalsVisibleTo("PDS.Witsml.Client.IntegrationTest")]
 [assembly: InternalsVisibleTo("PDS.Witsml.Server.IntegrationTest")]
 [assembly: InternalsVisibleTo("PDS.Witsml.Server.MongoDb.IntegrationTest")]
 [assembly: InternalsVisibleTo("PDS.Witsml.Studio.IntegrationTest")]
