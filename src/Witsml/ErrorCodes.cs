@@ -29,17 +29,17 @@ namespace PDS.Witsml
         Unset = 0,
 
         /// <summary>
-        /// 1 : Function completed successfully
+        /// 1 Function completed successfully.
         /// </summary>
         Success = 1,
 
         /// <summary>
-        /// 2 : Partial success: Function completed successfully but some growing data-object data-nodes were not returned.
+        /// 2 Partial success: Function completed successfully but some growing data-object data-nodes were not returned.
         /// </summary>
         ParialSuccess = 2,
 
         /// <summary>
-        /// -401 : The input template MUST contain a plural root element.
+        /// -401 The input template MUST contain a plural root element.
         /// </summary>
         MissingPluralRootElement = -401,
 
@@ -54,20 +54,17 @@ namespace PDS.Witsml
         MissingDefaultWitsmlNamespace = -403,
 
         /// <summary>
-        /// -404 In the value of the capClient schemaVersion, the oldest Data Schema Version must be listed first,
-        /// followed by the next oldest, etc.
+        /// -404 In the value of the capClient schemaVersion, the oldest Data Schema Version must be listed first, followed by the next oldest, etc.
         /// </summary>
         InvalidClientSchemaVersion = -404,
 
         /// <summary>
-        /// -405 For WMLS_AddToStore, a data-object with the same type and unique identifier(s) must NOT already
-        /// exist in the persistent store.
+        /// -405 For WMLS_AddToStore, a data-object with the same type and unique identifier(s) must NOT already exist in the persistent store.
         /// </summary>
         DataObjectUidAlreadyExists = -405,
 
         /// <summary>
-        /// -406 For WMLS_AddToStore, all parentage-pointers and lower level(child) uid values must be defined in the
-        /// XMLin file.
+        /// -406 For WMLS_AddToStore, all parentage-pointers and lower level (child) uid values must be defined in the XMLin.
         /// </summary>
         MissingParentUid = -406,
 
@@ -104,13 +101,12 @@ namespace PDS.Witsml
         InputDataObjectNotCompliant = -412,
 
         /// <summary>
-        /// -413 : The data-object must be supported by the server as defined in its capability data-object.
+        /// -413 The data-object must be supported by the server as defined in its capability data-object.
         /// </summary>
         DataObjectNotSupported = -413,
 
         /// <summary>
-        /// -414 In the server configuration for the site, the user must have rights to perform the requested operation on
-        /// the data-object.
+        /// -414 In the server configuration for the site, the user must have rights to perform the requested operation on the data-object.
         /// </summary>
         InsufficientOperationRights = -414,
 
@@ -170,7 +166,7 @@ namespace PDS.Witsml
         MissingDataVersion = -424,
 
         /// <summary>
-        /// -425 For WMLS_GetFromStore, the OptionsIn keyword ‘returnElements’ must not specify a value of “headeronly”
+        /// -425 For WMLS_GetFromStore, the OptionsIn keyword ‘returnElements’ must not specify a value of “header-only”
         /// or “data-only” for a non-growing data-object.
         /// </summary>
         InvalidOptionForGrowingObjectOnly = -425,
@@ -247,8 +243,7 @@ namespace PDS.Witsml
         RecurringItemsInconsistentSelection = -438,
 
         /// <summary>
-        /// -439 When multiple selection criteria is are included in a recurring pattern, an empty value must not be
-        /// specified.
+        /// -439 When multiple selection criteria is are included in a recurring pattern, an empty value must not be specified.
         /// </summary>
         RecurringItemsEmptySelection = -439,
 
@@ -293,20 +288,17 @@ namespace PDS.Witsml
         DuplicateColumnIdentifiers = -447,
 
         /// <summary>
-        /// -448 For WMLS_UpdateInStore, if an element with a unique identifier in the schema is specified then the
-        /// identifier value must also be specified
+        /// -448 For WMLS_UpdateInStore, if an element with a unique identifier in the schema is specified then the identifier value must also be specified.
         /// </summary>
         MissingElementUid = -448,
 
         /// <summary>
-        /// -449 When updating data in a systematically growing data-object the indexCurve must be specified in the
-        /// mnemonicList.
+        /// -449 When updating data in a systematically growing data-object the indexCurve must be specified in the mnemonicList.
         /// </summary>
         IndexCurveNotFound = -449,
 
         /// <summary>
-        /// -450 When updating data in a systematically growing data-object, each mnemonic must occur only once in the
-        /// mnemonicList.
+        /// -450 When updating data in a systematically growing data-object, each mnemonic must occur only once in the mnemonicList.
         /// </summary>
         MnemonicsNotUnique = -450,
 
@@ -316,8 +308,7 @@ namespace PDS.Witsml
         MissingUnitList = -451,
 
         /// <summary>
-        /// -452 When updating data in a systematically growing data-object, the unitList must be populated with units
-        /// that match the header.
+        /// -452 When updating data in a systematically growing data-object, the unitList must be populated with units that match the header.
         /// </summary>
         UnitListNotMatch = -452,
 
@@ -327,8 +318,7 @@ namespace PDS.Witsml
         MissingUnitForMeasureData = -453,
 
         /// <summary>
-        /// -454 For a particular WMLS_AddToStore call, a client must specify all growing data-object index data in the
-        /// same unit of measure.
+        /// -454 For a particular WMLS_AddToStore call, a client must specify all growing data-object index data in the same unit of measure.
         /// </summary>
         IndexDataUomNotSame = -454,
 
@@ -339,20 +329,17 @@ namespace PDS.Witsml
         WellDatumNotSame = -455,
 
         /// <summary>
-        /// -456 The client must not attempt to add or update more data than is allowed by the server’s maxDataNodes
-        /// and maxDataPoints values.
+        /// -456 The client must not attempt to add or update more data than is allowed by the server’s maxDataNodes and maxDataPoints values.
         /// </summary>
         MaxDataExceeded = -456,
 
         /// <summary>
-        /// -457 If a column-identifier representing the index column is specified then it must be specified first in the datacolumn-
-        /// list.
+        /// -457 If a column-identifier representing the index column is specified then it must be specified first in the data-column-list.
         /// </summary>
         IndexNotFirstInDataColumnList = -457,
 
         /// <summary>
-        /// -458 For growing data-objects, a combination of depth and date-time structural-range indices must not be
-        /// specified.
+        /// -458 For growing data-objects, a combination of depth and date-time structural-range indices must not be specified.
         /// </summary>
         MixedStructuralRangeIndices = -458,
 
@@ -364,13 +351,13 @@ namespace PDS.Witsml
         BadColumnIdentifier = -459,
 
         /// <summary>
-        /// -460 For getting systematically growing data-objects, if column-identifiers(mnemonics) are specified in both
+        /// -460 For getting systematically growing data-objects, if column-identifiers (mnemonics) are specified in both
         /// the header and data sections then the column-identifiers must be the same in the two sections.
         /// </summary>
         ColumnIdentifiersNotSame = -460,
 
         /// <summary>
-        /// -461 For getting systematically growing data-objects, if a column-definition(logCurveInfo) section is specified
+        /// -461 For getting systematically growing data-objects, if a column-definition (logCurveInfo) section is specified
         /// then a mnemonic element must be specified.
         /// </summary>
         MissingMnemonicElement = -461,
@@ -382,8 +369,7 @@ namespace PDS.Witsml
         MissingMnemonicList = -462,
 
         /// <summary>
-        /// -463 For updating systematically growing data, the update data must not contain multiple nodes with the same
-        /// index.
+        /// -463 For updating systematically growing data, the update data must not contain multiple nodes with the same index.
         /// </summary>
         NodesWithSameIndex = -463,
 
@@ -450,14 +436,12 @@ namespace PDS.Witsml
         MissingSubsetOfGrowingDataObject = -475,
 
         /// <summary>
-        /// -476 For WMLS_GetFromStore: OptionsIn keyword returnsElements=latest-change-only can only be used for
-        /// a changeLog object.
+        /// -476 For WMLS_GetFromStore: OptionsIn keyword returnsElements=latest-change-only can only be used for a changeLog object.
         /// </summary>
         InvalidOptionForChangeLogOnly = -476,
 
         /// <summary>
-        /// -477 For getting systematically growing data-objects, both column-description and data sections must be
-        /// specified.
+        /// -477 For getting systematically growing data-objects, both column-description and data sections must be specified.
         /// </summary>
         MissingColumnDescriptionOrDataSection = -477,
 
@@ -534,17 +518,17 @@ namespace PDS.Witsml
         ErrorDeletingFromDataStore = -1004,
 
         /// <summary>
-        /// -1005 Error transaction deadlock
+        /// -1005 Transaction deadlock error
         /// </summary>
         ErrorTransactionDeadlock = -1005,
 
         /// <summary>
-        /// -1006 Error Max Document Size Exceeded
+        /// -1006 Max document size exceeded
         /// </summary>
         ErrorMaxDocumentSizeExceeded = -1006,
 
         /// <summary>
-        /// -1050 Error number of values per row not matching number of column identifiers
+        /// -1051 Number of data values per row does not match number of column-identifiers (mnemonics).
         /// </summary>
         ErrorRowDataCount = -1051,
     }

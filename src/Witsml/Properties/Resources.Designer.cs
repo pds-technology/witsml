@@ -124,7 +124,7 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to For getting systematically growing data-objects, if column-identifiers(mnemonics) are specified in both the header and data sections then the column-identifiers must be the same in the two sections..
+        ///   Looks up a localized string similar to For getting systematically growing data-objects, if column-identifiers (mnemonics) are specified in both the header and data sections then the column-identifiers must be the same in the two sections..
         /// </summary>
         internal static string ColumnIdentifiersNotSame {
             get {
@@ -340,7 +340,7 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error number of values per row not matching number of column identifiers.
+        ///   Looks up a localized string similar to Number of data values per row does not match number of column-identifiers (mnemonics)..
         /// </summary>
         internal static string ErrorRowDataCount {
             get {
@@ -349,7 +349,7 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error transaction deadlock.
+        ///   Looks up a localized string similar to Transaction deadlock error.
         /// </summary>
         internal static string ErrorTransactionDeadlock {
             get {
@@ -493,7 +493,7 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The OptionsIn keyword ‘returnElements’ must not specify a value of “headeronly” or “data-only” for a non-growing data-object..
+        ///   Looks up a localized string similar to The OptionsIn keyword ‘returnElements’ must not specify a value of “header-only” or “data-only” for a non-growing data-object..
         /// </summary>
         internal static string InvalidOptionForGrowingObjectOnly {
             get {
@@ -637,7 +637,7 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to For getting systematically growing data-objects, if a column-definition(logCurveInfo) section is specified then a mnemonic element must be specified..
+        ///   Looks up a localized string similar to For getting systematically growing data-objects, if a column-definition (logCurveInfo) section is specified then a mnemonic element must be specified..
         /// </summary>
         internal static string MissingMnemonicElement {
             get {
@@ -664,7 +664,7 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to For WMLS_AddToStore, all parentage-pointers and lower level(child) uid values must be defined in the XMLin file..
+        ///   Looks up a localized string similar to For WMLS_AddToStore, all parentage-pointers and lower level (child) uid values must be defined in the XMLin..
         /// </summary>
         internal static string MissingParentUid {
             get {

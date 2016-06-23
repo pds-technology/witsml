@@ -238,7 +238,7 @@
     <comment>-403</comment>
   </data>
   <data name="MissingParentUid" xml:space="preserve">
-    <value>For WMLS_AddToStore, all parentage-pointers and lower level(child) uid values must be defined in the XMLin file.</value>
+    <value>For WMLS_AddToStore, all parentage-pointers and lower level (child) uid values must be defined in the XMLin.</value>
     <comment>-406</comment>
   </data>
   <data name="MissingRequiredData" xml:space="preserve">
@@ -282,7 +282,7 @@
     <comment>-476</comment>
   </data>
   <data name="InvalidOptionForGrowingObjectOnly" xml:space="preserve">
-    <value>The OptionsIn keyword ‘returnElements’ must not specify a value of “headeronly” or “data-only” for a non-growing data-object.</value>
+    <value>The OptionsIn keyword ‘returnElements’ must not specify a value of “header-only” or “data-only” for a non-growing data-object.</value>
     <comment>-425</comment>
   </data>
   <data name="InvalidOptionsInCombination" xml:space="preserve">
@@ -378,7 +378,7 @@
     <comment>-429</comment>
   </data>
   <data name="ColumnIdentifiersNotSame" xml:space="preserve">
-    <value>For getting systematically growing data-objects, if column-identifiers(mnemonics) are specified in both the header and data sections then the column-identifiers must be the same in the two sections.</value>
+    <value>For getting systematically growing data-objects, if column-identifiers (mnemonics) are specified in both the header and data sections then the column-identifiers must be the same in the two sections.</value>
     <comment>-460</comment>
   </data>
   <data name="MissingColumnDescriptionOrDataSection" xml:space="preserve">
@@ -386,7 +386,7 @@
     <comment>-477</comment>
   </data>
   <data name="MissingMnemonicElement" xml:space="preserve">
-    <value>For getting systematically growing data-objects, if a column-definition(logCurveInfo) section is specified then a mnemonic element must be specified.</value>
+    <value>For getting systematically growing data-objects, if a column-definition (logCurveInfo) section is specified then a mnemonic element must be specified.</value>
     <comment>-461</comment>
   </data>
   <data name="MissingMnemonicList" xml:space="preserve">
@@ -398,7 +398,7 @@
     <comment>-475</comment>
   </data>
   <data name="ErrorTransactionDeadlock" xml:space="preserve">
-    <value>Error transaction deadlock</value>
+    <value>Transaction deadlock error</value>
     <comment>-1005</comment>
   </data>
   <data name="MissingMeasureDataForUnit" xml:space="preserve">
@@ -494,7 +494,7 @@
     <comment>-413</comment>
   </data>
   <data name="ErrorRowDataCount" xml:space="preserve">
-    <value>Error number of values per row not matching number of column identifiers</value>
+    <value>Number of data values per row does not match number of column-identifiers (mnemonics).</value>
     <comment>-1051</comment>
   </data>
 </root>
