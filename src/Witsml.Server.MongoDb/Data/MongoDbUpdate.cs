@@ -298,10 +298,10 @@ namespace PDS.Witsml.Server.Data
             var filterBuilder = Builders<T>.Filter;
             var idField = MongoDbUtility.LookUpIdField(type);
             var filterPath = GetPropertyPath(parentPath, idField);
-            var properties = GetPropertyInfo(type);
-            var positionPath = parentPath + ".$";
+            var properties = GetPropertyInfo(type);           
 
-            var itemsById = GetItemsById((IEnumerable)propertyValue, properties, idField);
+            var ids = new List<string>();
+            var itemsById = GetItemsById((IEnumerable)propertyValue, properties, idField, ids);
 
             _collection.BulkWrite(elements
                 .Select(element =>
@@ -331,6 +331,8 @@ namespace PDS.Witsml.Server.Data
                     }
                     else
                     {
+                        var position = ids.IndexOf(elementId);
+                        var positionPath = parentPath + "." + position;
                         ValidateArrayElement(element, properties, false);
 
                         var elementFilter = Builders<T>.Filter.EqIgnoreCase(filterPath, elementId);
@@ -368,13 +370,18 @@ namespace PDS.Witsml.Server.Data
             return string.Empty;
         }
 
-        private IDictionary<string, object> GetItemsById(IEnumerable items, IList<PropertyInfo> properties, string idField)
+        private IDictionary<string, object> GetItemsById(IEnumerable items, IList<PropertyInfo> properties, string idField, List<string> idList)
         {
-            var idProp = GetPropertyInfoForAnElement(properties, idField);
+            var idProp = GetPropertyInfoForAnElement(properties, idField);            
 
             return items
                 .Cast<object>()
-                .ToDictionary(x => idProp.GetValue(x).ToString());
+                .ToDictionary(x =>
+                {
+                    var id = idProp.GetValue(x).ToString();
+                    idList.Add(id);
+                    return id;
+                });
         }
 
         private void ValidateArrayElement(XElement element, IList<PropertyInfo> properties, bool isAdd = true)
