@@ -787,7 +787,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
         }
 
-        [Ignore]
+        //[Ignore]
         [TestMethod]
         public void Log141DataAdapter_UpdateInStore_Can_Update_Nested_Recurring_Elements()
         {

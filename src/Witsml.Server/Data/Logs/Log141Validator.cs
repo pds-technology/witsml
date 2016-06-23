@@ -226,8 +226,9 @@ namespace PDS.Witsml.Server.Data.Logs
                 var logCurves = DataObject.LogCurveInfo;
                 var logParams = DataObject.LogParam;
                 var logData = DataObject.LogData;
+
                 var current = ((WitsmlDataAdapter<Log>)_logDataAdapter).Get(uri);
-                var delimiter = current.DataDelimiter ?? ChannelDataReader.DefaultDataDelimiter;
+                var delimiter = current?.DataDelimiter ?? ChannelDataReader.DefaultDataDelimiter;
 
                 // Validate Log does not exist
                 if (current == null)
