@@ -22,6 +22,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using log4net;
 using PDS.Framework;
+using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Properties;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
@@ -84,7 +85,7 @@ namespace PDS.Witsml.Data.Logs
             var data = log.LogData.FirstOrDefault();
             DateTimeOffset value;
 
-            return DateTimeOffset.TryParse(data?.Split(',').FirstOrDefault(), out value);
+            return DateTimeOffset.TryParse(ChannelDataReader.Split(data).FirstOrDefault(), out value);
         }
 
         /// <summary>
@@ -109,7 +110,10 @@ namespace PDS.Witsml.Data.Logs
             var data = log.LogData.SelectMany(x => x.Data ?? new List<string>(0)).FirstOrDefault();
             DateTimeOffset value;
 
-            return DateTimeOffset.TryParse(data?.Split(',').FirstOrDefault(), out value);
+            return
+                DateTimeOffset.TryParse(
+                    ChannelDataReader.Split(data, log.DataDelimiter ?? ChannelDataReader.DefaultDataDelimiter)
+                        .FirstOrDefault(), out value);
         }
 
         /// <summary>

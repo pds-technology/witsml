@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Linq;
 using log4net;
 using PDS.Framework;
+using PDS.Witsml.Data.Channels;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 
@@ -122,7 +123,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             return string.IsNullOrWhiteSpace(mnemonicList.Value)
                 ? Enumerable.Empty<string>()
-                : mnemonicList.Value.Split(',');
+                : ChannelDataReader.Split(mnemonicList.Value);
         }
     }
 }

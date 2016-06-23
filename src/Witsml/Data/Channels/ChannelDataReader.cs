@@ -76,14 +76,15 @@ namespace PDS.Witsml.Data.Channels
         /// Initializes a new instance of the <see cref="ChannelDataReader" /> class.
         /// </summary>
         /// <param name="data">The channel data.</param>
+        /// <param name="count">The number of mnemonics in mnemonicList element.</param>
         /// <param name="mnemonics">The channel mnemonics.</param>
         /// <param name="units">The channel units.</param>
         /// <param name="nullValues">The null values.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="id">The identifier.</param>
         /// <param name="dataDelimiter">The log data delimiter.</param>
-        public ChannelDataReader(IList<string> data, string[] mnemonics = null, string[] units = null, string[] nullValues = null, string uri = null, string id = null, string dataDelimiter = null)
-            : this(Combine(data, dataDelimiter), mnemonics, units, nullValues, uri, id)
+        public ChannelDataReader(IList<string> data, int count, string[] mnemonics = null, string[] units = null, string[] nullValues = null, string uri = null, string id = null, string dataDelimiter = null)
+            : this(Combine(data, dataDelimiter, count), mnemonics, units, nullValues, uri, id)
         {
         }
 
@@ -291,6 +292,26 @@ namespace PDS.Witsml.Data.Channels
         public static string[] Split(string value)
         {
             return string.IsNullOrWhiteSpace(value) ? _empty : value.Split(',');
+        }
+
+        /// <summary>
+        /// Splits the specified data.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        /// <param name="delimiter">The delimiter.</param>
+        /// <returns></returns>
+        [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
+        public static string[] Split(string data, string delimiter)
+        {
+            data = data.Replace("\n", " ");
+            using (var sr = new StringReader(data))
+            {
+                using (var parser = new TextFieldParser(sr))
+                {
+                    parser.SetDelimiters(delimiter);
+                    return parser.ReadFields();
+                }
+            }
         }
 
         /// <summary>
@@ -1474,8 +1495,9 @@ namespace PDS.Witsml.Data.Channels
         /// </summary>
         /// <param name="data">The data.</param>
         /// <param name="dataDelimiter">The log data delimiter.</param>
+        /// <param name="count">The number of mnemonics in mnemonicList element.</param>
         /// <returns>A JSON arrary of string values from the data list.</returns>
-        private static string Combine(IList<string> data, string dataDelimiter)
+        private static string Combine(IList<string> data, string dataDelimiter, int count)
         {
             _log.Debug("Combining log data elements into channel data json structure.");
 
@@ -1488,7 +1510,14 @@ namespace PDS.Witsml.Data.Channels
             {
                 foreach (var row in data)
                 {
-                    var values = Split(row, delimiter)
+                    var values = Split(row, delimiter);
+                    if (values.Length != count)
+                    {
+                        _log.ErrorFormat("Data points {0} does not match number of channels {1}", values.Length, count);
+                        throw new WitsmlException(ErrorCodes.ErrorRowDataCount);
+                    }
+
+                    values = values
                         .Select(Format)
                         .ToArray();
 
@@ -1501,27 +1530,7 @@ namespace PDS.Witsml.Data.Channels
 
             return json.ToString();
         }
-
-        /// <summary>
-        /// Splits the specified data.
-        /// </summary>
-        /// <param name="data">The data.</param>
-        /// <param name="delimiter">The delimiter.</param>
-        /// <returns></returns>
-        [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
-        public static string[] Split(string data, string delimiter)
-        {
-            data = data.Replace("\n", " ");
-            using (var sr = new StringReader(data))
-            {
-                using (var parser = new TextFieldParser(sr))
-                {
-                    parser.SetDelimiters(delimiter);
-                    return parser.ReadFields();
-                }               
-            }
-        }
-
+       
         /// <summary>
         /// Formats the specified value.
         /// </summary>

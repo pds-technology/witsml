@@ -109,7 +109,7 @@ namespace PDS.Witsml.Data.Channels
             var units = log.LogCurveInfo.Where(x => x != indexCurve).Select(x => x.Unit).ToArray();
             var nullValues = log.GetNullValues(mnemonics).ToArray();
 
-            return new ChannelDataReader(log.LogData, mnemonics, units, nullValues, log.GetUri())
+            return new ChannelDataReader(log.LogData, mnemonics.Length + 1, mnemonics, units, nullValues, log.GetUri())
                 // Add index curve to separate collection
                 .WithIndex(indexCurve.Mnemonic, indexCurve.Unit, increasing, isTimeIndex);
         }
@@ -148,7 +148,7 @@ namespace PDS.Witsml.Data.Channels
                 mnemonics = mnemonics.Skip(1).ToArray();
                 units = units.Skip(1).ToArray();
 
-                yield return new ChannelDataReader(logData.Data, mnemonics, units, nullValues, log.GetUri(), dataDelimiter: log.DataDelimiter)
+                yield return new ChannelDataReader(logData.Data, mnemonics.Length + 1, mnemonics, units, nullValues, log.GetUri(), dataDelimiter: log.DataDelimiter)
                     // Add index curve to separate collection
                     .WithIndex(indexCurve.Mnemonic.Value, indexCurve.Unit, increasing, isTimeIndex);
             }

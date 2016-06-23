@@ -23,6 +23,7 @@ using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using PDS.Framework;
+using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Server.Configuration;
 
@@ -40,9 +41,8 @@ namespace PDS.Witsml.Server.Data.Logs
         private readonly IWitsmlDataAdapter<Wellbore> _wellboreDataAdapter;
         private readonly IWitsmlDataAdapter<Well> _wellDataAdapter;
 
-        private static readonly char _seperator = ',';
+        private readonly string[] _illegalColumnIdentifiers = { "'", "\"", "<", ">", "/", "\\", "&", "," };
         private static readonly string _dataDelimiterErrorMessage = WitsmlSettings.DataDelimiterErrorMessage;
-        private readonly string[] _illegalColumnIdentifiers = new string[] { "'", "\"", "<", ">", "/", "\\", "&", "," };
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Log141Validator" /> class.
@@ -201,7 +201,9 @@ namespace PDS.Witsml.Server.Data.Logs
             // Validate if MaxDataPoints has been exceeded
             else if (logDatas != null && logDatas.Count > 0 )
             {
-                yield return ValidateLogData(indexCurve, logCurves, logDatas);
+                yield return
+                    ValidateLogData(indexCurve, logCurves, logDatas,
+                        DataObject.DataDelimiter ?? ChannelDataReader.DefaultDataDelimiter);
             }
         }
 
@@ -225,6 +227,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 var logParams = DataObject.LogParam;
                 var logData = DataObject.LogData;
                 var current = ((WitsmlDataAdapter<Log>)_logDataAdapter).Get(uri);
+                var delimiter = current.DataDelimiter ?? ChannelDataReader.DefaultDataDelimiter;
 
                 // Validate Log does not exist
                 if (current == null)
@@ -287,7 +290,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     }
                     else if (logData != null && logData.Count > 0)
                     {
-                        yield return ValidateLogData(current.IndexCurve, logCurves, logData, false);
+                        yield return ValidateLogData(current.IndexCurve, logCurves, logData, delimiter, false);
                     }
                 }
 
@@ -296,7 +299,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 // Validate LogData
                 else if (logData != null && logData.Count > 0)
                 {
-                    yield return ValidateLogData(current.IndexCurve, null, logData, false);
+                    yield return ValidateLogData(current.IndexCurve, null, logData, delimiter, false);
                 }
             }
         }
@@ -321,8 +324,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private bool UnitsMatch(List<LogCurveInfo> logCurves, LogData logData)
         {
-            var mnemonics = logData.MnemonicList.Split(_seperator);
-            var units = logData.UnitList.Split(_seperator);
+            var mnemonics = ChannelDataReader.Split(logData.MnemonicList);
+            var units = ChannelDataReader.Split(logData.UnitList);
 
             for (var i = 0; i < mnemonics.Length; i++)
             {
@@ -339,7 +342,7 @@ namespace PDS.Witsml.Server.Data.Logs
             return true;
         }
 
-        private ValidationResult ValidateLogData(string indexCurve, List<LogCurveInfo> logCurves, List<LogData> logDatas, bool insert = true)
+        private ValidationResult ValidateLogData(string indexCurve, List<LogCurveInfo> logCurves, List<LogData> logDatas, string delimiter, bool insert = true)
         {
             var totalPoints = 0;
 
@@ -355,9 +358,9 @@ namespace PDS.Witsml.Server.Data.Logs
                         return new ValidationResult(ErrorCodes.MissingColumnIdentifiers.ToString(), new[] { "LogData", "MnemonicList" });
                     else
                     {
-                        var mnemonics = logData.MnemonicList.Split(_seperator);
+                        var mnemonics = ChannelDataReader.Split(logData.MnemonicList);
                         if (logData.Data != null && logData.Data.Count > 0)
-                            totalPoints += logData.Data.Count * logData.Data[0].Split(',').Count();
+                            totalPoints += logData.Data.Count * ChannelDataReader.Split(logData.Data[0], delimiter).Length;
 
                         if (totalPoints > WitsmlSettings.MaxDataPoints)
                         {
@@ -408,8 +411,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private bool UnitSpecified(List<LogCurveInfo> logCurves, LogData logData)
         {
-            var mnemonics = logData.MnemonicList.Split(_seperator);
-            var units = logData.UnitList.Split(_seperator);
+            var mnemonics = ChannelDataReader.Split(logData.MnemonicList);
+            var units = ChannelDataReader.Split(logData.UnitList);
 
             for (var i = 0; i < mnemonics.Length; i++)
             {
