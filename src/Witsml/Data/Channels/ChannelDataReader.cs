@@ -23,7 +23,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using log4net;
 using Microsoft.VisualBasic.FileIO;
 using Newtonsoft.Json;
@@ -96,8 +95,7 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="nullValues">The null values.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="id">The identifier.</param>
-        /// <param name="dataDelimiter">The log data delimiter.</param>
-        public ChannelDataReader(string data, string[] mnemonics = null, string[] units = null, string[] nullValues = null, string uri = null, string id = null, string dataDelimiter = null)
+        public ChannelDataReader(string data, string[] mnemonics = null, string[] units = null, string[] nullValues = null, string uri = null, string id = null)
             : this(Deserialize(data), mnemonics, units, nullValues, uri, id)
         {
         }
@@ -395,10 +393,14 @@ namespace PDS.Witsml.Data.Channels
 
                 allSlices.ForEach(m =>
                 {
-                    var range = _ranges[GetOrdinal(m)];
-                    if (range.Start.HasValue)
+                    var rangeIndex = GetOrdinal(m);
+                    if (rangeIndex >= 0)
                     {
-                        channelRanges.Add(m, range);
+                        var range = _ranges[rangeIndex];
+                        if (range.Start.HasValue)
+                        {
+                            channelRanges.Add(m, range);
+                        }
                     }
                 });
             }
@@ -1387,34 +1389,19 @@ namespace PDS.Witsml.Data.Channels
         /// <returns>A collection of channel index ranges.</returns>
         private IList<Range<double?>> CalculateChannelIndexRanges()
         {
-            _log.DebugFormat("Calculating channel index ranges (in parallel).");
+            _log.DebugFormat("Calculating channel index ranges.");
 
             var channelIndex = GetIndex();
-            var ranges = new Dictionary<int, Range<double?>>();
+            var ranges = new List<Range<double?>>();
 
-            Parallel.For(0, FieldCount,
-                // Init
-                () => new Dictionary<int, Range<double?>>(), 
-                // Body
-                (i, s, x) =>
-                {
-                    x[i] = i < Depth
-                        ? GetIndexRange(i)
-                        : CalculateChannelIndexRanges(i, channelIndex.IsTimeIndex);
+            for (var i = 0; i < FieldCount; i++)
+            {
+                ranges.Add(i < Depth
+                    ? GetIndexRange(i)
+                    : CalculateChannelIndexRanges(i, channelIndex.IsTimeIndex));
+            }
 
-                    return x;
-                },
-                // Finally
-                x =>
-                {
-                    foreach (var pair in x)
-                        ranges.Add(pair.Key, pair.Value);
-                });
-
-            return ranges
-                .OrderBy(r => r.Key)
-                .Select(r => r.Value)
-                .ToList();
+            return ranges;
         }
 
         /// <summary>
