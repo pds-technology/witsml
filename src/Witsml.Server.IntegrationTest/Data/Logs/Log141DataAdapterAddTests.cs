@@ -2909,6 +2909,33 @@ namespace PDS.Witsml.Server.Data.Logs
             }
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_AddToStore_Error_1051_Incorrect_Row_Value_Count()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = CreateLog(
+                null,
+                DevKit.Name("Log can be added with depth data"),
+                Wellbore.UidWell,
+                Well.Name,
+                response.SuppMsgOut,
+                Wellbore.Name);
+
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10, hasEmptyChannel: false);
+
+            var logData = log.LogData.FirstOrDefault();
+            logData?.Data?.Add("20,20.1,20.2,20.3,20.4");
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.ErrorRowDataCount, response.Result);
+        }
+
         #region Helper Methods
 
         private Log CreateLog(string uid, string name, Well well, Wellbore wellbore)

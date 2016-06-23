@@ -340,6 +340,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error number of values per row not matching number of column identifiers.
+        /// </summary>
+        internal static string ErrorRowDataCount {
+            get {
+                return ResourceManager.GetString("ErrorRowDataCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error transaction deadlock.
         /// </summary>
         internal static string ErrorTransactionDeadlock {

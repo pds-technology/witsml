@@ -901,5 +901,54 @@ namespace PDS.Witsml.Server.Data.Logs
                 Assert.AreEqual(channelCount, points.Length);
             }
         }
+
+        [TestMethod]
+        public void Log141DataAdapter_UpdateInStore_Error_1051_Incorrect_Row_Value_Count()
+        {
+            const int count = 10;
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = DevKit.CreateLog(
+                null,
+                DevKit.Name("Log can be added with depth data"),
+                Wellbore.UidWell,
+                Well.Name,
+                response.SuppMsgOut,
+                Wellbore.Name);
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), count, hasEmptyChannel: false);
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var update = new Log
+            {
+                Uid = uidLog,
+                UidWell = log.UidWell,
+                UidWellbore = log.UidWellbore,
+                StartIndex = new GenericMeasure
+                {
+                    Uom = "m",
+                    Value = count
+                }
+            };
+
+            DevKit.InitHeader(update, LogIndexType.measureddepth);
+            DevKit.InitDataMany(update, DevKit.Mnemonics(update), DevKit.Units(update), count, hasEmptyChannel: false);
+
+            var logData = update.LogData.FirstOrDefault();
+            logData?.Data?.Add("30,30.1,30.2,30.3,30.4");
+
+            update.StartIndex = null;
+
+            var updateResponse = DevKit.Update<LogList, Log>(update);
+            Assert.AreEqual((short)ErrorCodes.ErrorRowDataCount, updateResponse.Result);
+        }
     }
 }

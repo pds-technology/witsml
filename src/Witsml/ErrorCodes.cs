@@ -542,5 +542,10 @@ namespace PDS.Witsml
         /// -1006 Error Max Document Size Exceeded
         /// </summary>
         ErrorMaxDocumentSizeExceeded = -1006,
+
+        /// <summary>
+        /// -1050 Error number of values per row not matching number of column identifiers
+        /// </summary>
+        ErrorRowDataCount = -1051,
     }
 }
