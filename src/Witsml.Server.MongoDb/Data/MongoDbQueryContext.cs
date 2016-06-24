@@ -36,6 +36,7 @@ namespace PDS.Witsml.Server.Data
         public MongoDbQueryContext()
         {
             DataObjectType = typeof(T);
+            Function = Functions.GetFromStore;
             Filters = new List<FilterDefinition<T>>();
             ParentFilters = new Dictionary<string, List<FilterDefinition<T>>>();
         }

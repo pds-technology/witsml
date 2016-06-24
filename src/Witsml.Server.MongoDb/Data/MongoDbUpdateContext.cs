@@ -37,6 +37,7 @@ namespace PDS.Witsml.Server.Data
         public MongoDbUpdateContext()
         {
             DataObjectType = typeof(T);
+            Function = Functions.UpdateInStore;
             PropertyInfos = new List<PropertyInfo>();
             PropertyValues = new List<object>();
             Update = null;           

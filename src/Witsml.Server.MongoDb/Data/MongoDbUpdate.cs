@@ -81,6 +81,8 @@ namespace PDS.Witsml.Server.Data
 
             LogUpdateFilter(_entityFilter, Context.Update);
             _collection.UpdateOne(_entityFilter, Context.Update);
+
+            WitsmlOperationContext.Current.Warnings.AddRange(Context.Warnings);
         }
 
         /// <summary>

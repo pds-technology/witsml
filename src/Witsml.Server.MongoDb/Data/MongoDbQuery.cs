@@ -98,6 +98,7 @@ namespace PDS.Witsml.Server.Data
             }
 
             Logger.DebugFormat("Executed query for {0}; Count: {1}", _parser.ObjectType, entities.Count);
+            WitsmlOperationContext.Current.Warnings.AddRange(Context.Warnings);
 
             return entities;
         }
