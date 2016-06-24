@@ -112,8 +112,8 @@ namespace PDS.Witsml.Data.Logs
 
             return
                 DateTimeOffset.TryParse(
-                    ChannelDataReader.Split(data, log.DataDelimiter ?? ChannelDataReader.DefaultDataDelimiter)
-                        .FirstOrDefault(), out value);
+                    ChannelDataReader.Split(data, log.GetDataDelimiterOrDefault()).FirstOrDefault(),
+                    out value);
         }
 
         /// <summary>
@@ -293,17 +293,6 @@ namespace PDS.Witsml.Data.Logs
         }
 
         /// <summary>
-        /// Determines whether the specified log's data delimiter is valid.
-        /// </summary>
-        /// <param name="log">The log.</param>
-        /// <returns>true if the log's data delimiter is valid, false otherwise.</returns>
-        public static bool IsValidDataDelimiter(this Witsml141.Log log)
-        {
-            var regEx = new Regex(_dataDelimiterExclusions); 
-            return log.DataDelimiter == null || (!regEx.IsMatch(log.DataDelimiter) && log.DataDelimiter.Length <= _maxDataDelimiterLength);
-        }
-
-        /// <summary>
         /// Gets the valid null value indicator from the specified values.
         /// </summary>
         /// <param name="logNullValue">The log null value.</param>
@@ -318,6 +307,34 @@ namespace PDS.Witsml.Data.Logs
                 : !string.IsNullOrWhiteSpace(logNullValue)
                 ? logNullValue
                 : "null";
+        }
+
+        /// <summary>
+        /// Gets the data delimiter for the log or the default data delimiter.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns>The data delimiter.</returns>
+        public static string GetDataDelimiterOrDefault(this Witsml141.Log log)
+        {
+            return ChannelDataExtensions.GetDataDelimiterOrDefault(log?.DataDelimiter);
+        }
+
+        /// <summary>
+        /// Determines whether the specified log's data delimiter is valid.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns>true if the log's data delimiter is valid, false otherwise.</returns>
+        public static bool IsValidDataDelimiter(this Witsml141.Log log)
+        {
+            // null or empty string will use default data delimiter
+            if (string.IsNullOrWhiteSpace(log.DataDelimiter)) return true;
+
+            // check delimiter length
+            if (log.DataDelimiter.Length > _maxDataDelimiterLength) return false;
+
+            // check for invalid characters
+            var regEx = new Regex(_dataDelimiterExclusions);
+            return !regEx.IsMatch(log.DataDelimiter);
         }
     }
 }

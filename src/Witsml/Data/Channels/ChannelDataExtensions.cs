@@ -35,6 +35,18 @@ namespace PDS.Witsml.Data.Channels
         private static readonly ILog _log = LogManager.GetLogger(typeof(ChannelDataExtensions));
 
         /// <summary>
+        /// Gets the data delimiter for channel data or the default data delimiter.
+        /// </summary>
+        /// <param name="dataDelimiter">The data delimiter.</param>
+        /// <returns>The data delimiter.</returns>
+        public static string GetDataDelimiterOrDefault(string dataDelimiter)
+        {
+            return string.IsNullOrWhiteSpace(dataDelimiter)
+                ? ChannelDataReader.DefaultDataDelimiter
+                : dataDelimiter;
+        }
+
+        /// <summary>
         /// Gets a ChannelDataReader for an <see cref="IEnumerable{IChannelDataRecord}"/>.
         /// </summary>
         /// <param name="records">The records.</param>
@@ -148,7 +160,7 @@ namespace PDS.Witsml.Data.Channels
                 mnemonics = mnemonics.Skip(1).ToArray();
                 units = units.Skip(1).ToArray();
 
-                yield return new ChannelDataReader(logData.Data, mnemonics.Length + 1, mnemonics, units, nullValues, log.GetUri(), dataDelimiter: log.DataDelimiter)
+                yield return new ChannelDataReader(logData.Data, mnemonics.Length + 1, mnemonics, units, nullValues, log.GetUri(), dataDelimiter: log.GetDataDelimiterOrDefault())
                     // Add index curve to separate collection
                     .WithIndex(indexCurve.Mnemonic.Value, indexCurve.Unit, increasing, isTimeIndex);
             }

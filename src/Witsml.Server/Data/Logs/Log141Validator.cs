@@ -168,12 +168,6 @@ namespace PDS.Witsml.Server.Data.Logs
                 yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
             }
 
-            // Validate that the dataDelimiter does not contain any white space
-            else if (!DataObject.IsValidDataDelimiter())
-            {
-                yield return new ValidationResult(_dataDelimiterErrorMessage, new[] { "DataDelimiter" });
-            }
-
             // Validate that uid for LogParam exists
             else if (DataObject.LogParam != null && DataObject.LogParam.Any(lp => string.IsNullOrWhiteSpace(lp.Uid)))
             {
@@ -198,12 +192,16 @@ namespace PDS.Witsml.Server.Data.Logs
                 yield return new ValidationResult(ErrorCodes.MixedStructuralRangeIndices.ToString(), new[] { "StartIndex", "EndIndex", "StartDateTimeIndex", "EndDateTimeIndex" });
             }
 
+            // Validate that the dataDelimiter does not contain any white space
+            else if (!DataObject.IsValidDataDelimiter())
+            {
+                yield return new ValidationResult(_dataDelimiterErrorMessage, new[] { "DataDelimiter" });
+            }
+
             // Validate if MaxDataPoints has been exceeded
             else if (logDatas != null && logDatas.Count > 0 )
             {
-                yield return
-                    ValidateLogData(indexCurve, logCurves, logDatas,
-                        DataObject.DataDelimiter ?? ChannelDataReader.DefaultDataDelimiter);
+                yield return ValidateLogData(indexCurve, logCurves, logDatas, DataObject.GetDataDelimiterOrDefault());
             }
         }
 
@@ -227,8 +225,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 var logParams = DataObject.LogParam;
                 var logData = DataObject.LogData;
 
-                var current = ((WitsmlDataAdapter<Log>)_logDataAdapter).Get(uri);
-                var delimiter = current?.DataDelimiter ?? ChannelDataReader.DefaultDataDelimiter;
+                var current = _logDataAdapter.Get(uri);
+                var delimiter = current?.GetDataDelimiterOrDefault();
 
                 // Validate Log does not exist
                 if (current == null)
@@ -240,12 +238,6 @@ namespace PDS.Witsml.Server.Data.Logs
                 else if (logCurves != null && logCurves.Any(l => string.IsNullOrWhiteSpace(l.Uid)))
                 {
                     yield return new ValidationResult(ErrorCodes.MissingElementUid.ToString(), new[] { "LogCurveInfo", "Uid" });
-                }
-
-                // Validate that the dataDelimiter does not contain any white space
-                else if (!DataObject.IsValidDataDelimiter())
-                {
-                    yield return new ValidationResult(_dataDelimiterErrorMessage, new[] { "DataDelimiter" });
                 }
 
                 // Validate that uid for LogParam exists
@@ -269,6 +261,12 @@ namespace PDS.Witsml.Server.Data.Logs
                 else if (DuplicateColumnIdentifier())
                 {
                     yield return new ValidationResult(ErrorCodes.DuplicateColumnIdentifiers.ToString(), new[] { "LogCurveInfo", "Mnemonic" });
+                }
+
+                // Validate that the dataDelimiter does not contain any white space
+                else if (!DataObject.IsValidDataDelimiter())
+                {
+                    yield return new ValidationResult(_dataDelimiterErrorMessage, new[] { "DataDelimiter" });
                 }
 
                 // Validate LogCurveInfo

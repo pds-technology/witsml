@@ -119,22 +119,22 @@ namespace PDS.Witsml.Server
 
             if (values != null && values.Any())
             {
-                log.LogData[0].Data.Add(string.Join(log.DataDelimiter ?? ChannelDataReader.DefaultDataDelimiter,
-                    values.Select(x => x == null ? string.Empty : x)));
+                var delimiter = log.GetDataDelimiterOrDefault();
+                log.LogData[0].Data.Add(string.Join(delimiter, values.Select(x => x ?? string.Empty)));
             }
         }
 
         public void InitDataMany(Log log, string mnemonics, string units, int numRows, double factor = 1.0, bool isDepthLog = true, bool hasEmptyChannel = true, bool increasing = true)
         {
-            var depthStart = log.StartIndex != null ? log.StartIndex.Value : 0;
+            var depthStart = log.StartIndex?.Value ?? 0;
             var timeStart = DateTimeOffset.UtcNow.AddDays(-1);
             var interval = increasing ? 1 : -1;
 
             if (isDepthLog)
             {
-                log.StartIndex = log.StartIndex == null ? new GenericMeasure() : log.StartIndex;
+                log.StartIndex = log.StartIndex ?? new GenericMeasure();
                 log.StartIndex.Uom = "ft";
-                log.EndIndex = log.EndIndex == null ? new GenericMeasure() : log.EndIndex;
+                log.EndIndex = log.EndIndex ?? new GenericMeasure();
                 log.EndIndex.Uom = "ft";
             }
 

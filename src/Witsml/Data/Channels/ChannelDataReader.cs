@@ -301,10 +301,12 @@ namespace PDS.Witsml.Data.Channels
         [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         public static string[] Split(string data, string delimiter)
         {
-            if (delimiter.Length == 1)
+            if (delimiter.Length < 2)
                 return data.Split(delimiter[0]);
 
+            // TextFieldParser iterates when it detects new line characters
             data = data.Replace("\n", " ");
+
             using (var sr = new StringReader(data))
             {
                 using (var parser = new TextFieldParser(sr))
@@ -1491,10 +1493,9 @@ namespace PDS.Witsml.Data.Channels
         {
             _log.Debug("Combining log data elements into channel data json structure.");
 
+            var delimiter = ChannelDataExtensions.GetDataDelimiterOrDefault(dataDelimiter);
             var json = new StringBuilder("[");
             var rows = new List<string>();
-
-            var delimiter = dataDelimiter ?? DefaultDataDelimiter;
 
             if (data != null)
             {
