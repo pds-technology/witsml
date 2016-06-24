@@ -40,5 +40,14 @@ namespace PDS.Witsml.Properties {
                 return ((int)(this["MaxDataDelimiterLength"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Error")]
+        public string UnknownElementSetting {
+            get {
+                return ((string)(this["UnknownElementSetting"]));
+            }
+        }
     }
 }

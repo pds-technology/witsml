@@ -31,12 +31,6 @@ namespace PDS.Witsml.Server.Data
         T DataObject { get; }
 
         /// <summary>
-        /// Gets the WITSML API method being executed.
-        /// </summary>
-        /// <value>The method being executed.</value>
-        Functions Function { get; }
-
-        /// <summary>
         /// Gets the input template parser.
         /// </summary>
         /// <value>The input template parser.</value>

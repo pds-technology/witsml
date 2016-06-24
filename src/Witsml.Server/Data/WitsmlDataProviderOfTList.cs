@@ -54,8 +54,8 @@ namespace PDS.Witsml.Server.Data
         {
             Logger.DebugFormat("Getting {0}", typeof(TObject).Name);
 
-            var root = WitsmlOperationContext.Current.Document.Root;
-            var parser = new WitsmlQueryParser(root, context.ObjectType, context.Options);
+            var op = WitsmlOperationContext.Current;
+            var parser = new WitsmlQueryParser(op.Document.Root, context.ObjectType, context.Options);
             var childParsers = parser.ForkElements().ToArray();
 
             // Validate each query template separately
@@ -73,8 +73,9 @@ namespace PDS.Witsml.Server.Data
 
             return new WitsmlResult<IEnergisticsCollection>(
                 responseContext.DataTruncated 
-                    ? ErrorCodes.ParialSuccess 
-                    : ErrorCodes.Success,
+                    ? op.Warnings.Any() ? ErrorCodes.PartialSuccessWithWarnings : ErrorCodes.ParialSuccess 
+                    : op.Warnings.Any() ? ErrorCodes.SuccessWithWarnings : ErrorCodes.Success,
+                string.Join(" ", op.Warnings.Select(x => x.ErrorMessage)),
                 CreateCollection(queries));
         }
 

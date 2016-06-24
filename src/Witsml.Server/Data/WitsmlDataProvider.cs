@@ -18,6 +18,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
@@ -199,7 +200,7 @@ namespace PDS.Witsml.Server.Data
             Logger.DebugFormat("Validated {0} with URI '{1}' for Add", typeof(TObject).Name, uri);
 
             DataAdapter.Add(parser, dataObject);
-            return new WitsmlResult(ErrorCodes.Success, uri.ObjectId);
+            return Success(uri.ObjectId);
         }
 
         /// <summary>
@@ -220,7 +221,7 @@ namespace PDS.Witsml.Server.Data
             Logger.DebugFormat("Validated {0} with URI '{1}' for Update", typeof(TObject).Name, uri);
 
             DataAdapter.Update(parser, dataObject);
-            return new WitsmlResult(ErrorCodes.Success);
+            return Success();
         }
 
         /// <summary>
@@ -239,7 +240,25 @@ namespace PDS.Witsml.Server.Data
             Logger.DebugFormat("Validated {0} for Delete", typeof(TObject).Name);
 
             DataAdapter.Delete(parser);
-            return new WitsmlResult(ErrorCodes.Success);
+            return Success();
+        }
+
+        /// <summary>
+        /// Creates a successful <see cref="WitsmlResult"/> response.
+        /// </summary>
+        /// <param name="message">An optional message to include.</param>
+        /// <returns>A <see cref="WitsmlResult"/> response.</returns>
+        protected virtual WitsmlResult Success(string message = null)
+        {
+            var op = WitsmlOperationContext.Current;
+            var messages = op.Warnings.Select(x => x.ErrorMessage).ToList();
+
+            if (!string.IsNullOrWhiteSpace(message))
+                messages.Insert(0, message);
+
+            return new WitsmlResult(
+                op.Warnings.Any() ? ErrorCodes.SuccessWithWarnings : ErrorCodes.Success,
+                string.Join(" ", messages));
         }
 
         /// <summary>

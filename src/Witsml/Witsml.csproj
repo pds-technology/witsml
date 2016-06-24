@@ -87,6 +87,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Linq.Dynamic, Version=1.1.14.15853, Culture=neutral, PublicKeyToken=b72be0322d1b32a8, processorArchitecture=MSIL">
@@ -105,6 +106,7 @@
     <Compile Include="..\External\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Compatibility\UnknownElementSetting.cs" />
     <Compile Include="Data\DataObjectNavigationContext.cs" />
     <Compile Include="Data\DataObjectNavigator.cs" />
     <Compile Include="Data\Channels\ChannelDataBlock.cs" />

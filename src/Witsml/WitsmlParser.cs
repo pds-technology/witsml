@@ -173,6 +173,7 @@ namespace PDS.Witsml
             var context = new WitsmlParserContext<T>(element);
             var parser = new WitsmlParser(context);
 
+            context.IgnoreUnknownElements = true;
             context.RemoveNaNElements = true;
             parser.Navigate(context.Element);
 

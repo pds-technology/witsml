@@ -23,8 +23,10 @@ using System.Reflection;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using Energistics.DataAccess;
+using Energistics.DataAccess.Validation;
 using log4net;
 using PDS.Framework;
+using PDS.Witsml.Server.Compatibility;
 
 namespace PDS.Witsml.Data
 {
@@ -35,6 +37,15 @@ namespace PDS.Witsml.Data
     public abstract class DataObjectNavigator<TContext> where TContext : DataObjectNavigationContext
     {
         private static readonly XNamespace _xsi = XNamespace.Get("http://www.w3.org/2001/XMLSchema-instance");
+        private static readonly UnknownElementSetting _unknownElementSetting;
+
+        /// <summary>
+        /// Initializes the <see cref="DataObjectNavigator{TContext}"/> class.
+        /// </summary>
+        static DataObjectNavigator()
+        {
+            Enum.TryParse(Properties.Settings.Default.UnknownElementSetting, out _unknownElementSetting);
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DataObjectNavigator{TContext}"/> class.
@@ -56,7 +67,7 @@ namespace PDS.Witsml.Data
         /// Gets the logger.
         /// </summary>
         /// <value>The logger.</value>
-        protected ILog Logger { get; private set; }
+        protected ILog Logger { get; }
 
         /// <summary>
         /// Creates an <see cref="XName"/> for the xmlns namespace using the specified local name.
@@ -116,7 +127,7 @@ namespace PDS.Witsml.Data
                 } 
                 else
                 {
-                    Logger.DebugFormat("Invalid element '{0}' is ignored.", group.Key);                   
+                    HandleInvalidElementGroup(group.Key);
                 }
             }
 
@@ -133,7 +144,7 @@ namespace PDS.Witsml.Data
                 }
                 else
                 {
-                    Logger.DebugFormat("Invalid attribute '{0}' is ignored.", attribute.Name.LocalName);
+                    HandleInvalidAttribute(attribute, false);
                 }
             }
         }
@@ -448,6 +459,84 @@ namespace PDS.Witsml.Data
         }
 
         /// <summary>
+        /// Handles the invalid element group.
+        /// </summary>
+        /// <param name="element">The name of the element.</param>
+        protected virtual void HandleInvalidElementGroup(string element)
+        {
+            HandleInvalidElementOrAttribute(null, element, nameof(element), false);
+        }
+
+        /// <summary>
+        /// Handles the invalid element.
+        /// </summary>
+        /// <param name="element">The element.</param>
+        /// <param name="remove">if set to <c>true</c> the element will be removed.</param>
+        protected virtual void HandleInvalidElement(XElement element, bool remove = true)
+        {
+            HandleInvalidElementOrAttribute(element, element.Name.LocalName, nameof(element), remove);
+        }
+
+        /// <summary>
+        /// Handles the invalid attribute.
+        /// </summary>
+        /// <param name="attribute">The attribute.</param>
+        /// <param name="remove">if set to <c>true</c> the attribute will be removed.</param>
+        protected virtual void HandleInvalidAttribute(XAttribute attribute, bool remove = true)
+        {
+            HandleInvalidElementOrAttribute(attribute, attribute.Name.LocalName, nameof(attribute), remove);
+        }
+
+        /// <summary>
+        /// Handles and optionally removes the invalid element or attribute.
+        /// </summary>
+        /// <param name="element">The XML element or attribute.</param>
+        /// <param name="name">The XML element or attribute name.</param>
+        /// <param name="type">The XML object type.</param>
+        /// <param name="remove">if set to <c>true</c> the element or attribute will be removed.</param>
+        private void HandleInvalidElementOrAttribute(XObject element, string name, string type, bool remove = true)
+        {
+            var message = $"Invalid {type} found: {name}";
+
+            if (_unknownElementSetting == UnknownElementSetting.Ignore || Context.IgnoreUnknownElements)
+            {
+                Logger.Debug(message);
+            }
+            else if (_unknownElementSetting == UnknownElementSetting.Warn)
+            {
+                Logger.Warn(message);
+
+                Context.Warnings.Add(new WitsmlValidationResult(
+                    (short)ErrorCodes.SuccessWithWarnings,
+                    message,
+                    new[] { type }));
+            }
+            else
+            {
+                throw new WitsmlException(GetErrorCode(), message);
+            }
+
+            if (remove)
+            {
+                Remove(element);
+            }
+        }
+
+        /// <summary>
+        /// Gets the error code for the current WITSML API function.
+        /// </summary>
+        /// <returns>The <see cref="ErrorCodes"/> value.</returns>
+        protected virtual ErrorCodes GetErrorCode()
+        {
+            return Context.Function == Functions.GetFromStore ||
+                   Context.Function == Functions.DeleteFromStore
+                ? ErrorCodes.QueryTemplateNonConforming
+                : Context.Function == Functions.UpdateInStore
+                    ? ErrorCodes.UpdateTemplateNonConforming
+                    : ErrorCodes.InputTemplateNonConforming;
+        }
+
+        /// <summary>
         /// Determines whether the specified element name is ignored.
         /// </summary>
         /// <param name="elementName">Name of the element.</param>
@@ -653,20 +742,20 @@ namespace PDS.Witsml.Data
                     continue;
 
                 var propertyInfo = GetPropertyInfoForAnElement(properties, attribute.Name.LocalName);
+
                 if (propertyInfo == null)
                 {
-                    attribute.Remove();
-                    Logger.DebugFormat("Invalid attribute '{0}' is ignored.", attribute.Name.LocalName);
+                    HandleInvalidAttribute(attribute);
                 }
             }
 
             foreach (var child in element.Elements())
             {
                 var propertyInfo = GetPropertyInfoForAnElement(properties, child.Name.LocalName);
+
                 if (propertyInfo == null)
                 {
-                    child.Remove();
-                    Logger.DebugFormat("Invalid element '{0}' is ignored.", child.Name.LocalName);
+                    HandleInvalidElement(child);
                 }
             }
         }

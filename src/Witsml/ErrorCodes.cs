@@ -39,6 +39,16 @@ namespace PDS.Witsml
         ParialSuccess = 2,
 
         /// <summary>
+        /// 1001 Function completed successfully with warnings.
+        /// </summary>
+        SuccessWithWarnings = 1001,
+
+        /// <summary>
+        /// 1002 Partial success: Function completed successfully with warnings, but some growing data-object data-nodes were not returned.
+        /// </summary>
+        PartialSuccessWithWarnings = 1002,
+
+        /// <summary>
         /// -401 The input template MUST contain a plural root element.
         /// </summary>
         MissingPluralRootElement = -401,

@@ -808,6 +808,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Partial success: Function completed successfully with warnings, but some growing data-object data-nodes were not returned..
+        /// </summary>
+        internal static string PartialSuccessWithWarnings {
+            get {
+                return ResourceManager.GetString("PartialSuccessWithWarnings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The client is polling too fast..
         /// </summary>
         internal static string PollingTooFast {
@@ -876,6 +885,15 @@ namespace PDS.Witsml.Properties {
         internal static string Success {
             get {
                 return ResourceManager.GetString("Success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Function completed successfully with warnings..
+        /// </summary>
+        internal static string SuccessWithWarnings {
+            get {
+                return ResourceManager.GetString("SuccessWithWarnings", resourceCulture);
             }
         }
         

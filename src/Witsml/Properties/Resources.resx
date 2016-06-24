@@ -497,4 +497,12 @@
     <value>Number of data values per row does not match number of column-identifiers (mnemonics).</value>
     <comment>-1051</comment>
   </data>
+  <data name="PartialSuccessWithWarnings" xml:space="preserve">
+    <value>Partial success: Function completed successfully with warnings, but some growing data-object data-nodes were not returned.</value>
+    <comment>1002</comment>
+  </data>
+  <data name="SuccessWithWarnings" xml:space="preserve">
+    <value>Function completed successfully with warnings.</value>
+    <comment>1001</comment>
+  </data>
 </root>

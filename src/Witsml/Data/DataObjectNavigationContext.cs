@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using Energistics.DataAccess.Validation;
 
 namespace PDS.Witsml.Data
 {
@@ -26,6 +27,14 @@ namespace PDS.Witsml.Data
     /// </summary>
     public abstract class DataObjectNavigationContext
     {
+        private List<WitsmlValidationResult> _warnings;
+
+        /// <summary>
+        /// Gets the WITSML API function.
+        /// </summary>
+        /// <value>The WITSML API function.</value>
+        public Functions Function { get; set; }
+
         /// <summary>
         /// Gets the type of the data object.
         /// </summary>
@@ -37,5 +46,19 @@ namespace PDS.Witsml.Data
         /// </summary>
         /// <value>The list of ignored element names.</value>
         public List<string> Ignored { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether unknown elements should be ignored.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if unknown elements should be ignored; otherwise, <c>false</c>.
+        /// </value>
+        public bool IgnoreUnknownElements { get; set; }
+
+        /// <summary>
+        /// Gets the list of validation warnings encountered during navigation.
+        /// </summary>
+        /// <value>The list of validation warnings.</value>
+        public List<WitsmlValidationResult> Warnings => _warnings ?? (_warnings = new List<WitsmlValidationResult>());
     }
 }

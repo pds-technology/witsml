@@ -8,5 +8,8 @@
     <Setting Name="MaxDataDelimiterLength" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">2</Value>
     </Setting>
+    <Setting Name="UnknownElementSetting" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Error</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

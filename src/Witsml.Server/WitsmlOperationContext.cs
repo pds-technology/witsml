@@ -17,8 +17,10 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.ServiceModel;
 using System.Xml.Linq;
+using Energistics.DataAccess.Validation;
 using log4net;
 using PDS.Witsml.Server.Configuration;
 
@@ -41,6 +43,7 @@ namespace PDS.Witsml.Server
         private WitsmlOperationContext()
         {
             _log.Debug("Instance created.");
+            Warnings = new List<WitsmlValidationResult>();
         }
 
         /// <summary>
@@ -92,6 +95,12 @@ namespace PDS.Witsml.Server
         /// </summary>
         /// <value>The XML document.</value>
         public XDocument Document { get; set; }
+
+        /// <summary>
+        /// Gets the list of validation warnings encountered during the operation.
+        /// </summary>
+        /// <value>The list of validation warnings.</value>
+        public List<WitsmlValidationResult> Warnings { get; }
 
         /// <summary>
         /// Enables an extension object to find out when it has been aggregated. Called when the extension is

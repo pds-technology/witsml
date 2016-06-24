@@ -49,12 +49,6 @@ namespace PDS.Witsml.Server.Data
         public T DataObject { get; private set; }
 
         /// <summary>
-        /// Gets the WITSML API method being executed.
-        /// </summary>
-        /// <value>The function.</value>
-        public Functions Function { get; private set; }
-
-        /// <summary>
         /// Gets the input template parser.
         /// </summary>
         /// <value>The input template parser.</value>
@@ -71,8 +65,8 @@ namespace PDS.Witsml.Server.Data
         {
             Logger.DebugFormat("Validating data object for {0}; Type: {1}", function, typeof(T).FullName);
 
+            Context.Function = function;
             DataObject = dataObject;
-            Function = function;
             Parser = parser;
 
             if (function == Functions.AddToStore || function == Functions.UpdateInStore)
@@ -81,6 +75,8 @@ namespace PDS.Witsml.Server.Data
             IList<ValidationResult> results;
             DataObjectValidator.TryValidate(this, out results);
             ValidateResults(results);
+
+            WitsmlOperationContext.Current.Warnings.AddRange(Context.Warnings);
         }
 
         /// <summary>
@@ -90,7 +86,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>A collection that holds failed-validation information.</returns>
         IEnumerable<ValidationResult> IValidatableObject.Validate(ValidationContext validationContext)
         {
-            switch (Function)
+            switch (Context.Function)
             {
                 case Functions.GetFromStore:
                     foreach (var result in ValidateForGet())
