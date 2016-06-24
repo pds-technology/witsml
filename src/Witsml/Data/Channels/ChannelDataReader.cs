@@ -301,6 +301,9 @@ namespace PDS.Witsml.Data.Channels
         [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         public static string[] Split(string data, string delimiter)
         {
+            if (delimiter.Length == 1)
+                return data.Split(delimiter[0]);
+
             data = data.Replace("\n", " ");
             using (var sr = new StringReader(data))
             {
