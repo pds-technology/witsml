@@ -43,7 +43,7 @@ namespace PDS.Witsml.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Error")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Ignore")]
         public string UnknownElementSetting {
             get {
                 return ((string)(this["UnknownElementSetting"]));

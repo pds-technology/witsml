@@ -9,7 +9,7 @@
       <Value Profile="(Default)">2</Value>
     </Setting>
     <Setting Name="UnknownElementSetting" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">Error</Value>
+      <Value Profile="(Default)">Ignore</Value>
     </Setting>
   </Settings>
 </SettingsFile>
