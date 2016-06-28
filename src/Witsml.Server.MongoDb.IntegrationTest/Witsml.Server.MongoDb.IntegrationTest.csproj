@@ -40,11 +40,11 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Energistics.DataAccess, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bacb93980f36ff32, processorArchitecture=MSIL">
-      <HintPath>..\packages\Energistics.DataAccess.2.0.20160525.1\lib\net40\Energistics.DataAccess.dll</HintPath>
+      <HintPath>..\packages\Energistics.DataAccess.2.0.20160627.1\lib\net40\Energistics.DataAccess.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ETP.DevKit, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ETP.DevKit.1.0.20160517.7-BUILD55\lib\net46\ETP.DevKit.dll</HintPath>
+      <HintPath>..\packages\ETP.DevKit.1.0.20160627.1-BUILD55\lib\net46\ETP.DevKit.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ETP.Messages, Version=0.0.0.0, Culture=neutral, PublicKeyToken=10cba23b8f544b64, processorArchitecture=MSIL">
@@ -92,23 +92,23 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="PDS.Framework, Version=2016.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PDS.Framework.2016.1.20160627.1\lib\net46\PDS.Framework.dll</HintPath>
+      <HintPath>..\packages\PDS.Framework.2016.1.20160628.1\lib\net46\PDS.Framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="PDS.Framework.Web, Version=2016.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PDS.Framework.Web.2016.1.20160627.1\lib\net46\PDS.Framework.Web.dll</HintPath>
+      <HintPath>..\packages\PDS.Framework.Web.2016.1.20160628.1\lib\net46\PDS.Framework.Web.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="PDS.Witsml, Version=2016.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PDS.Witsml.2016.1.20160627.1-BUILD55\lib\net46\PDS.Witsml.dll</HintPath>
+      <HintPath>..\packages\PDS.Witsml.2016.1.20160628.1-BUILD55\lib\net46\PDS.Witsml.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="PDS.Witsml.Server, Version=2016.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PDS.Witsml.Server.2016.1.20160627.1-BUILD55\lib\net46\PDS.Witsml.Server.dll</HintPath>
+      <HintPath>..\packages\PDS.Witsml.Server.2016.1.20160628.1-BUILD55\lib\net46\PDS.Witsml.Server.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="PDS.Witsml.Server.IntegrationTest, Version=2016.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PDS.Witsml.Server.IntegrationTest.2016.1.20160627.1-BUILD55\lib\net46\PDS.Witsml.Server.IntegrationTest.dll</HintPath>
+      <HintPath>..\packages\PDS.Witsml.Server.IntegrationTest.2016.1.20160628.1-BUILD55\lib\net46\PDS.Witsml.Server.IntegrationTest.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="SuperSocket.Common, Version=1.6.0.4, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">
