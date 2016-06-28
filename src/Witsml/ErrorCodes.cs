@@ -34,7 +34,7 @@ namespace PDS.Witsml
         Success = 1,
 
         /// <summary>
-        /// 2 Partial success: Function completed successfully but some growing data-object data-nodes were not returned.
+        /// 2 Partial success: Function completed successfully, but some growing data-object data-nodes were not returned.
         /// </summary>
         ParialSuccess = 2,
 
@@ -508,32 +508,32 @@ namespace PDS.Witsml
         DataObjectTypeNotSupported = -487,
 
         /// <summary>
-        /// -1001 Error adding to data store
+        /// -1001 Error adding to data store.
         /// </summary>
         ErrorAddingToDataStore = -1001,
 
         /// <summary>
-        /// -1002 Error reading from data store
+        /// -1002 Error reading from data store.
         /// </summary>
         ErrorReadingFromDataStore = -1002,
 
         /// <summary>
-        /// -1003 Error updating in data store
+        /// -1003 Error updating in data store.
         /// </summary>
         ErrorUpdatingInDataStore = -1003,
 
         /// <summary>
-        /// -1004 Error deleting from data store
+        /// -1004 Error deleting from data store.
         /// </summary>
         ErrorDeletingFromDataStore = -1004,
 
         /// <summary>
-        /// -1005 Transaction deadlock error
+        /// -1005 Transaction deadlock error.
         /// </summary>
         ErrorTransactionDeadlock = -1005,
 
         /// <summary>
-        /// -1006 Max document size exceeded
+        /// -1006 Max document size exceeded.
         /// </summary>
         ErrorMaxDocumentSizeExceeded = -1006,
 
