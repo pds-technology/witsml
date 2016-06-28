@@ -398,33 +398,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Validates the log data update.
-        /// </summary>
-        /// <param name="log">The current log.</param>
-        /// <param name="updateMnemonics">The list of mnemonics for log data update.</param>
-        /// <exception cref="WitsmlException"></exception>
-        protected override void ValidateLogDataUpdate(Log log, List<string> updateMnemonics)
-        {
-            base.ValidateLogDataUpdate(log, updateMnemonics);
-
-            Logger.Debug("Validating mnemonic list channels for existance in LogCurveInfo.");
-
-            var logCurveInfoMnemonics = log.LogCurveInfo.Select(l => l.Mnemonic.Value);
-            updateMnemonics.ForEach(um =>
-            {
-                if (!logCurveInfoMnemonics.Contains(um))
-                {
-                    Logger.DebugFormat("Mnemonic '{0}' does not exist in LogCurveInfo.", um);
-
-                    throw new WitsmlException(ErrorCodes.MissingColumnIdentifiers,
-                        $"Mnemonic '{um}' does not exist in LogCurveInfo.");
-                }
-            });
-            Logger.Debug("Validation of mnemonic list channels successful.");
-        }
-
-
-        /// <summary>
         /// Extracts the data readers.
         /// </summary>
         /// <param name="entity">The entity.</param>
