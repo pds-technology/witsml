@@ -34,7 +34,7 @@ namespace PDS.Witsml
         Success = 1,
 
         /// <summary>
-        /// 2 Partial success: Function completed successfully but some growing data-object data-nodes were not returned.
+        /// 2 Partial success: Function completed successfully, but some growing data-object data-nodes were not returned.
         /// </summary>
         ParialSuccess = 2,
 
