@@ -844,7 +844,6 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.MissingColumnIdentifiers, updateResponse.Result);
         }
 
-        [Ignore] // Ignore until fixed
         [TestMethod, Description("Test Error 434 LogCurveInfo has fewer channels than the Mnemonic list")]
         public void Log141Validator_Error_434_Missing_Mnemonics_In_LogCurveInfo()
         {
@@ -904,7 +903,6 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.MissingColumnIdentifiers, updateResponse.Result);
         }
 
-        [Ignore] // Ignore until fixed
         [TestMethod, Description("Test Error 434 LogCurveInfo and Mnemonic list have the same count but one channel does not match")]
         public void Log141Validator_Error_434_Mnemonics_Do_Not_Match_LogCurveInfo()
         {
