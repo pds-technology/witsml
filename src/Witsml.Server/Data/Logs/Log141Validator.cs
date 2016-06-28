@@ -134,6 +134,9 @@ namespace PDS.Witsml.Server.Data.Logs
             var indexCurve = DataObject.IndexCurve;
 
             var logDatas = DataObject.LogData;
+            var logCurveInfoMnemonics = new List<string>();
+
+            logCurves?.ForEach(l => logCurveInfoMnemonics.Add(l.Mnemonic.Value));
 
             // Validate parent uid property
             if (string.IsNullOrWhiteSpace(DataObject.UidWell))
@@ -175,7 +178,7 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             // Validate for a bad column identifier in LogCurveInfo Mnemonics
-            else if (_illegalColumnIdentifiers.Any(s => logCurves.Any(m => m.Mnemonic.Value.Contains(s))))
+            else if (_illegalColumnIdentifiers.Any(s => { return logCurves != null && logCurves.Any(m => m.Mnemonic.Value.Contains(s)); }))
             {
                 yield return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogCurveInfo.Mnemonic" });
             }
@@ -201,7 +204,7 @@ namespace PDS.Witsml.Server.Data.Logs
             // Validate if MaxDataPoints has been exceeded
             else if (logDatas != null && logDatas.Count > 0 )
             {
-                yield return ValidateLogData(indexCurve, logCurves, logDatas, DataObject.GetDataDelimiterOrDefault());
+                yield return ValidateLogData(indexCurve, logCurves, logDatas, logCurveInfoMnemonics, DataObject.GetDataDelimiterOrDefault());
             }
         }
 
@@ -227,6 +230,18 @@ namespace PDS.Witsml.Server.Data.Logs
 
                 var current = _logDataAdapter.Get(uri);
                 var delimiter = current?.GetDataDelimiterOrDefault();
+
+                var mergedLogCurveMnemonics = new List<string>();
+
+                current?.LogCurveInfo.ForEach(l => mergedLogCurveMnemonics.Add(l.Mnemonic.Value));
+                logCurves?.ForEach(l =>
+                {
+                    if (l.Mnemonic != null && !mergedLogCurveMnemonics.Contains(l.Mnemonic.Value))
+                    {
+                        mergedLogCurveMnemonics.Add(l.Mnemonic.Value);
+                    }
+                });
+
 
                 // Validate Log does not exist
                 if (current == null)
@@ -289,7 +304,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     }
                     else if (logData != null && logData.Count > 0)
                     {
-                        yield return ValidateLogData(current.IndexCurve, logCurves, logData, delimiter, false);
+                        yield return ValidateLogData(current.IndexCurve, logCurves, logData, mergedLogCurveMnemonics, delimiter, false);
                     }
                 }
 
@@ -298,7 +313,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 // Validate LogData
                 else if (logData != null && logData.Count > 0)
                 {
-                    yield return ValidateLogData(current.IndexCurve, null, logData, delimiter, false);
+                    yield return ValidateLogData(current.IndexCurve, null, logData, mergedLogCurveMnemonics, delimiter, false);
                 }
             }
         }
@@ -341,7 +356,7 @@ namespace PDS.Witsml.Server.Data.Logs
             return true;
         }
 
-        private ValidationResult ValidateLogData(string indexCurve, List<LogCurveInfo> logCurves, List<LogData> logDatas, string delimiter, bool insert = true)
+        private ValidationResult ValidateLogData(string indexCurve, List<LogCurveInfo> logCurves, List<LogData> logDatas, List<string> mergedLogCurveInfoMnemonics, string delimiter, bool insert = true)
         {
             var totalPoints = 0;
 
@@ -373,6 +388,10 @@ namespace PDS.Witsml.Server.Data.Logs
                         {
                             return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogData", "MnemonicList" });
                         } 
+                        else if (!IsValidLogDataMnemonics(mergedLogCurveInfoMnemonics, mnemonics))
+                        {
+                            return new ValidationResult(ErrorCodes.MissingColumnIdentifiers.ToString(), new[] { "LogData", "MnemonicList" });
+                        }
                         else if (insert && logCurves != null && mnemonics.Count() > logCurves.Count)
                         {
                             return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogData", "MnemonicList" });
@@ -407,6 +426,20 @@ namespace PDS.Witsml.Server.Data.Logs
 
             return null;
         }
+
+        private bool IsValidLogDataMnemonics(List<string> logCurveInfoMnemonics, IEnumerable<string> logDataMnemonics)
+        {
+            Logger.Debug("Validating mnemonic list channels for existance in LogCurveInfo.");
+
+            var isValid = !logDataMnemonics.Any(um => !logCurveInfoMnemonics.Contains(um));
+
+            Logger.Debug(isValid
+                ? "Validation of mnemonic list channels successful."
+                : "Mnemonic from mnemonic list does not exist in LogCurveInfo.");
+
+            return isValid;
+        }
+
 
         private bool UnitSpecified(List<LogCurveInfo> logCurves, LogData logData)
         {
