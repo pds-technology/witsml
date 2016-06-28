@@ -491,6 +491,9 @@ namespace PDS.Witsml.Server.Data.Logs
                 updateMnemonics.AddRange(reader.Mnemonics
                     .Where(m => !updateMnemonics.Contains(m)));
 
+
+                ValidateLogDataUpdate(current, updateMnemonics);
+
                 if (isTimeLog && checkOffset)
                 {
                     offset = reader.GetChannelIndexRange(0).Offset;
@@ -510,6 +513,16 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 UpdateIndexRange(uri, current, ranges, updateMnemonics, IsTimeLog(current), indexUnit, offset);
             }
+        }
+
+        /// <summary>
+        /// Validates the log data update.
+        /// </summary>
+        /// <param name="log">The current log.</param>
+        /// <param name="updateMnemonics">The list of mnemonics for log data update.</param>
+        /// <exception cref="WitsmlException">Exception thrown if there is an error.</exception>
+        protected virtual void ValidateLogDataUpdate(T log, List<string> updateMnemonics)
+        {
         }
 
         /// <summary>
