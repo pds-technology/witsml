@@ -845,6 +845,55 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
+        public void Log141Validator_Error_434_Missing_Mnemonics_In_LogCurveInfo()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+            Wellbore.UidWell = response.SuppMsgOut;
+
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            var uidWellbore = response.SuppMsgOut;
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = uidWellbore,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            log.LogCurveInfo.RemoveAt(2);
+            log.LogCurveInfo.RemoveAt(1);
+            log.LogData.Clear();
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var update = new Log()
+            {
+                Uid = uidLog,
+                UidWell = Wellbore.UidWell,
+                UidWellbore = uidWellbore
+            };
+
+            DevKit.InitHeader(update, LogIndexType.measureddepth);
+            update.LogCurveInfo.Clear();
+
+            var logData = update.LogData.First();
+            logData.Data.Add("13,13.1");
+            logData.Data.Add("14,14.1");
+            logData.MnemonicList = "MD,ROP";
+            logData.UnitList = "m,m/h";
+
+            var updateResponse = DevKit.Update<LogList, Log>(update);
+            Assert.AreEqual((short)ErrorCodes.MissingColumnIdentifiers, updateResponse.Result);
+        }
+
+        [TestMethod]
         public void Test_error_code_436_index_range_should_not_be_specified_when_updating_data()
         {
             var response = DevKit.Add<WellList, Well>(Well);
