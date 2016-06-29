@@ -950,5 +950,124 @@ namespace PDS.Witsml.Server.Data.Logs
             var updateResponse = DevKit.Update<LogList, Log>(update);
             Assert.AreEqual((short)ErrorCodes.ErrorRowDataCount, updateResponse.Result);
         }
+
+        [TestMethod]
+        public void Log141DataAdapter_UpdateInStore_Can_Partial_Update()
+        {
+            var log = AddAnEmptyLogWithFourCurves();
+
+            var curves = log.LogCurveInfo;
+
+            var indexCurve = curves[0];
+            var channel1 = curves[1];
+            var channel2 = curves[2];
+            var channel3 = curves[3];
+            
+            var update = DevKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
+
+            // Update 2rd channel
+            update.LogData = new List<LogData>();
+
+            var logData = new LogData
+            {
+                MnemonicList = indexCurve.Mnemonic.Value + "," + channel2.Mnemonic.Value,
+                UnitList = indexCurve.Unit + "," + channel2.Unit
+            };           
+            var data = new List<string> {"1,1.2", "2,2.2"};
+            logData.Data = data;
+            update.LogData.Add(logData);
+
+            var updateResponse = DevKit.Update<LogList, Log>(update);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            // Update 1st channel with a different chunk
+            update = DevKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
+            update.LogData = new List<LogData>();
+
+            logData = new LogData
+            {
+                MnemonicList = indexCurve.Mnemonic.Value + "," + channel1.Mnemonic.Value,
+                UnitList = indexCurve.Unit + "," + channel1.Unit
+            };
+            data = new List<string> { "5002,5002.1", "5003,5003.1" };
+            logData.Data = data;
+            update.LogData.Add(logData);
+
+            updateResponse = DevKit.Update<LogList, Log>(update);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            // Update 3rd channel spanning the previous 2 chunks
+            update = DevKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
+            update.LogData = new List<LogData>();
+
+            logData = new LogData
+            {
+                MnemonicList = indexCurve.Mnemonic.Value + "," + channel3.Mnemonic.Value,
+                UnitList = indexCurve.Unit + "," + channel3.Unit
+            };
+            data = new List<string> { "1001,1001.3", "5001,5001.3", "5003,5003.3" };
+            logData.Data = data;
+            update.LogData.Add(logData);
+
+            updateResponse = DevKit.Update<LogList, Log>(update);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            var query = DevKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            var result = results.FirstOrDefault();
+            Assert.IsNotNull(result);
+
+            // Assert log data
+            logData = result.LogData.FirstOrDefault();
+            Assert.IsNotNull(logData);
+
+            data = logData.Data;
+            Assert.IsNotNull(data);
+            Assert.AreEqual(6, data.Count);
+            Assert.AreEqual("1,,1.2,", data[0]);
+            Assert.AreEqual("2,,2.2,", data[1]);
+            Assert.AreEqual("1001,,,1001.3", data[2]);
+            Assert.AreEqual("5001,,,5001.3", data[3]);
+            Assert.AreEqual("5002,5002.1,,", data[4]);
+            Assert.AreEqual("5003,5003.1,,5003.3", data[5]);
+        }
+
+        private Log AddAnEmptyLogWithFourCurves()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = DevKit.CreateLog(
+                DevKit.Uid(),
+                DevKit.Name("Log can be added with depth data"),
+                Wellbore.UidWell,
+                Well.Name,
+                response.SuppMsgOut,
+                Wellbore.Name);
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            var channelName = "channel3";
+            var curves = log.LogCurveInfo;
+            var channel3 = new LogCurveInfo
+            {
+                Uid = channelName,
+                Mnemonic = new ShortNameStruct
+                {
+                    Value = channelName
+                },
+                Unit = "ft",
+                TypeLogData = LogDataType.@double
+            };
+            curves.Add(channel3);
+            log.LogData = null;
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            return log;
+        }
     }
 }
