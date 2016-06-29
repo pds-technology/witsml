@@ -172,7 +172,7 @@ namespace PDS.Witsml.Data.Channels
             NullValues = _originalNullValues;
             Uri = uri;
             Id = id;
-            _queryMnemonics = GetAllMnemonics();
+            _queryMnemonics = mnemonics;
         }
 
         /// <summary>
