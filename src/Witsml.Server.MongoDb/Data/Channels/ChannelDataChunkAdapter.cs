@@ -457,13 +457,6 @@ namespace PDS.Witsml.Server.Data.Channels
                                 if (existingEnum.Current.HasValues())
                                     yield return existingEnum.Current;
 
-                                //var mergedRow = MergeRow(existingEnum.Current, updateEnum.Current);
-
-                                //if (mergedRow.HasValues())
-                                //{
-                                //    yield return mergedRow;
-                                //}
-
                                 endOfExisting = !existingEnum.MoveNext();
                                 endOfUpdate = !updateEnum.MoveNext();
                             }
@@ -475,13 +468,6 @@ namespace PDS.Witsml.Server.Data.Channels
                                 existingEnum.Current.MergeRecord(updateEnum.Current, rangeSize, IndexOrder.Before, increasing);
                                 if (existingEnum.Current.HasValues())
                                     yield return existingEnum.Current;
-
-                                //var mergedRow = MergeRow(existingEnum.Current, updateEnum.Current, clear: true);
-
-                                //if (mergedRow.HasValues())
-                                //{
-                                //    yield return mergedRow;
-                                //}
 
                                 endOfExisting = !existingEnum.MoveNext();
                             }
@@ -499,37 +485,6 @@ namespace PDS.Witsml.Server.Data.Channels
                     }
                 }
             }
-        }
-
-        private IChannelDataRecord MergeRow(IChannelDataRecord existingRecord, IChannelDataRecord updateRecord,
-            bool clear = false)
-        {
-            Logger.DebugFormat("Merging existing record with index '{0}' with update record with index '{1}'.",
-                existingRecord.GetIndexValue(), updateRecord.GetIndexValue());
-
-            var existingIndexValue = existingRecord.GetIndexValue();
-            var increasing = existingRecord.GetIndex().Increasing;
-
-            for (var i = updateRecord.Indices.Count; i < updateRecord.FieldCount; i++)
-            {
-                var mnemonicRange = updateRecord.GetChannelIndexRange(i);
-                if (mnemonicRange.Contains(existingIndexValue, increasing))
-                {
-                    existingRecord.SetValue(i,
-                        clear ? GetChannelNullValue(i, existingRecord.NullValues) : updateRecord.GetValue(i));
-                }
-            }
-
-            return existingRecord;
-        }
-
-        private object GetChannelNullValue(int i, string[] nullValues)
-        {
-            if (nullValues != null && i < nullValues.Length)
-            {
-                return nullValues[i];
-            }
-            return null;
         }
 
         /// <summary>
