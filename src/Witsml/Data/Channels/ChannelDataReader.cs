@@ -122,7 +122,7 @@ namespace PDS.Witsml.Data.Channels
 
             var items = records
                 .Cast<ChannelDataReader>()
-                .Select(x => new { Row = x._current, Record = x, x.Mnemonics })
+                .Select(x => new { Row = x._current, Record = x, x.Mnemonics, x.Units, x.NullValues })
                 .ToList();
 
             var record = items.Select(x => x.Record).FirstOrDefault();
@@ -384,10 +384,13 @@ namespace PDS.Witsml.Data.Channels
                             {
                                 var mnemonic = _originalMnemonics[i];
                                 var index = update.GetChannelIndex(mnemonic);
-                                var range = update.GetChannelIndexRange(index + Depth);
-                                if (range.Contains(GetIndexValue(), increasing))
+                                if (index > -1)
                                 {
-                                    row[i] = NullValues[i];
+                                    var range = update.GetChannelIndexRange(index + Depth);
+                                    if (range.Contains(GetIndexValue(), increasing))
+                                    {
+                                        row[i] = NullValues[i];
+                                    }
                                 }
                             }
                             else
@@ -443,10 +446,10 @@ namespace PDS.Witsml.Data.Channels
             for (var i = 0; i < Mnemonics.Length; i++)
             {
                 var mnemonic = Mnemonics[i];
-                if (!_indexMap.ContainsKey(mnemonic))
+                var index = Array.IndexOf(_originalMnemonics, mnemonic);
+                if (index < 0)
                     continue;
-
-                var index = _indexMap[mnemonic];
+                
                 values[i] = row[1][index];
             }
 
@@ -460,14 +463,7 @@ namespace PDS.Witsml.Data.Channels
         /// <returns></returns>
         public int GetChannelIndex(string mnemonic)
         {
-            if (_indexMap != null)
-            {
-                return _indexMap.ContainsKey(mnemonic) ? _indexMap[mnemonic] : -1;
-            }
-            else
-            {
-                return Array.IndexOf(_originalMnemonics, mnemonic);
-            }   
+            return Array.IndexOf(_originalMnemonics, mnemonic);
         }
 
         private void MergeSettings(IChannelDataRecord update, IndexOrder order, long rangeSize)
@@ -479,16 +475,25 @@ namespace PDS.Witsml.Data.Channels
             if (order == IndexOrder.After)
             {
                 var indexValue = update.GetIndexValue();
-                withinRange = WithinRange(indexValue, _chunkRange.End.GetValueOrDefault(), increasing, false);
+                var range = GetIndexRange();
+              
+                if (!_chunkRange.Start.HasValue || !_chunkRange.Contains(indexValue, increasing))
+                {
+                    _chunkRange = new Range<double?>(
+                        Range.ComputeRange(range.Start.GetValueOrDefault(), rangeSize, increasing).Start,
+                        Range.ComputeRange(range.End.GetValueOrDefault(), rangeSize, increasing).End
+                        );
+                    _settingMerged = false;
+                }
+                withinRange = _chunkRange.Contains(indexValue, increasing);
                 if (!withinRange)
                 {
-                    _indexMap = null;
                     update.UpdateChannelSettings(this, false, false);
                 }
                 else
                 {
                     UpdateChannelSettings(update, true);
-                    update.CopyChannelSettings(this);
+                    update.CopyChannelSettings(this, _chunkRange);
                 }   
             }
             else
@@ -502,9 +507,9 @@ namespace PDS.Witsml.Data.Channels
                     Range.ComputeRange(range.End.GetValueOrDefault(), rangeSize, increasing).End
                     );
 
-                withinRange = WithinRange(update.GetIndexValue(), _chunkRange.End.GetValueOrDefault(), increasing, false);
+                withinRange = _chunkRange.Contains(update.GetIndexValue(), increasing);
                 UpdateChannelSettings(update, withinRange);        
-                update.CopyChannelSettings(this);       
+                update.CopyChannelSettings(this, _chunkRange);       
             }
         }
 
@@ -524,6 +529,7 @@ namespace PDS.Witsml.Data.Channels
                 if (_settingMerged)
                     return;
 
+                record.ResetMergeSettings();
                 if (append)
                 {
                     for (var i = 0; i < record.Mnemonics.Length; i++)
@@ -566,23 +572,44 @@ namespace PDS.Witsml.Data.Channels
             }
             else
             {
-                Mnemonics = _originalMnemonics;
-                Units = _originalUnits;
-                NullValues = _originalNullValues;
+                var indexValue = GetIndexValue();
+                var indexChannel = GetIndex();
+                var increasing = indexChannel.Increasing;
+                if (_chunkRange.Contains(indexValue, increasing))
+                    return;
+
+                ResetMergeSettings();
                 UpdateIndexMap(false);
             }
+        }
+
+        /// <summary>
+        /// Resets the merge settings.
+        /// </summary>
+        public void ResetMergeSettings()
+        {
+            _indexMap = null;
+            Mnemonics = _originalMnemonics;
+            Units = _originalUnits;
+            NullValues = _originalNullValues;
         }
 
         /// <summary>
         /// Copies the channel settings.
         /// </summary>
         /// <param name="record">The record.</param>
-        public void CopyChannelSettings(IChannelDataRecord record)
-        {
-            UpdateIndexMap(false);
+        /// <param name="range">The planned chunk range.</param>
+        public void CopyChannelSettings(IChannelDataRecord record, Range<double?> range)
+        {          
             Mnemonics = record.Mnemonics;
             Units = record.Units;
             NullValues = record.NullValues;
+            _chunkRange = range;
+
+            var indexValue = GetIndexValue();
+            var indexChannel = GetIndex();
+            var increasing = indexChannel.Increasing;
+            UpdateIndexMap(_chunkRange.Contains(indexValue, increasing));
             _settingMerged = true;
         }
 
@@ -603,14 +630,6 @@ namespace PDS.Witsml.Data.Channels
                     _indexMap.Add(_originalMnemonics[i], i);
                 }
             }
-        }
-
-        private bool WithinRange(double current, double end, bool increasing, bool closeRange = true)
-        {
-            if (closeRange)
-                return increasing ? current <= end : current >= end;
-
-            return increasing ? current < end : current > end;
         }
 
         /// <summary>

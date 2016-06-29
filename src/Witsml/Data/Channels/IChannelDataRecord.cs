@@ -196,7 +196,8 @@ namespace PDS.Witsml.Data.Channels
         /// Copies the channel settings.
         /// </summary>
         /// <param name="record">The record.</param>
-        void CopyChannelSettings(IChannelDataRecord record);
+        /// <param name="range">The planned chunk range.</param>
+        void CopyChannelSettings(IChannelDataRecord record, Range<double?> range);
 
         /// <summary>
         /// Gets the index of the channel.
@@ -204,5 +205,10 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="mnemonic">The mnemonic.</param>
         /// <returns></returns>
         int GetChannelIndex(string mnemonic);
+
+        /// <summary>
+        /// Resets the merge settings.
+        /// </summary>
+        void ResetMergeSettings();
     }
 }
