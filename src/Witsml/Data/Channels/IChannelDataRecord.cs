@@ -23,6 +23,28 @@ using PDS.Framework;
 
 namespace PDS.Witsml.Data.Channels
 {
+
+    /// <summary>
+    /// Index value order
+    /// </summary>
+    public enum IndexOrder
+    {
+        /// <summary>
+        /// Before
+        /// </summary>
+        Before,
+
+        /// <summary>
+        /// Same index value
+        /// </summary>
+        Same,
+
+        /// <summary>
+        /// After
+        /// </summary>
+        After
+    };
+
     /// <summary>
     /// Defines the properties and methods that define a channel data record
     /// </summary>
@@ -146,5 +168,41 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="i">The channel position.</param>
         /// <param name="value">The value.</param>
         void SetValue(int i, object value);
+
+        /// <summary>
+        /// Merges the value.
+        /// </summary>
+        /// <param name="update">The update record.</param>
+        /// <param name="rangeSize">The chunk range.</param>
+        /// <param name="order">The order of index value</param>
+        /// <param name="increasing">if increasting set to <c>true</c> [append].</param>
+        void MergeRecord(IChannelDataRecord update, long rangeSize, IndexOrder order, bool increasing);
+
+        /// <summary>
+        /// Updates the values.
+        /// </summary>
+        /// <param name="mnemonicIndexMap">The channel mnemonics index map.</param>
+        void UpdateValues(Dictionary<string, int> mnemonicIndexMap);
+
+        /// <summary>
+        /// Updates the channel settings.
+        /// </summary>
+        /// <param name="record">The record.</param>
+        /// <param name="withinRange">if set to <c>true</c> [record within range].</param>
+        /// <param name="append">if set to <c>true</c> [append].</param>
+        void UpdateChannelSettings(IChannelDataRecord record, bool withinRange, bool append);
+
+        /// <summary>
+        /// Copies the channel settings.
+        /// </summary>
+        /// <param name="record">The record.</param>
+        void CopyChannelSettings(IChannelDataRecord record);
+
+        /// <summary>
+        /// Gets the index of the channel.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic.</param>
+        /// <returns></returns>
+        int GetChannelIndex(string mnemonic);
     }
 }

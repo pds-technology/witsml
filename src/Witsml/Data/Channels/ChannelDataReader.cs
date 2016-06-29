@@ -28,6 +28,7 @@ using Microsoft.VisualBasic.FileIO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PDS.Framework;
+using SuperSocket.ClientEngine;
 
 namespace PDS.Witsml.Data.Channels
 {
@@ -65,6 +66,13 @@ namespace PDS.Witsml.Data.Channels
         private readonly int _indexCount;
         private readonly int _count;
         private int _current = -1;
+        private bool _settingMerged = false;
+        private Dictionary<string, int> _indexMap;
+        private Range<double?> _chunkRange;
+        private string[] _queryMnemonics;
+        private List<string[]> _recordMnemonics;
+        private IDictionary<int, string> _queryUnits;
+        private IDictionary<int, string> _queryNullValues;
 
         /// <summary>
         /// Ordinal position of mnemonics that are included in slicing.  Null if reader is not sliced.
@@ -105,17 +113,22 @@ namespace PDS.Witsml.Data.Channels
         /// Initializes a new instance of the <see cref="ChannelDataReader"/> class.
         /// </summary>
         /// <param name="records">The collection of data records.</param>
-        public ChannelDataReader(IEnumerable<IChannelDataRecord> records)
+        /// <param name="queryMnemonics">The query mnemonics</param>
+        /// <param name="units">The channel units for the query.</param>
+        /// <param name="nullValues">The null values for the query.</param>
+        public ChannelDataReader(IEnumerable<IChannelDataRecord> records, string[] queryMnemonics, IDictionary<int, string> units, IDictionary<int, string> nullValues)
         {
             _log.Debug("ChannelDataReader instance created for IChannelDataRecords");
 
             var items = records
                 .Cast<ChannelDataReader>()
-                .Select(x => new { Row = x._current, Record = x })
+                .Select(x => new { Row = x._current, Record = x, x.Mnemonics })
                 .ToList();
 
             var record = items.Select(x => x.Record).FirstOrDefault();
             _records = items.Select(x => x.Record._records[x.Row]).ToList();
+
+            _recordMnemonics = items.Select(x => x.Mnemonics).ToList();
 
             _count = GetRowValues(0).Count();
             _indexCount = GetIndexValues(0).Count();
@@ -128,6 +141,9 @@ namespace PDS.Witsml.Data.Channels
             Units = _originalUnits;
             NullValues = _originalNullValues;
             Uri = record?.Uri;
+            _queryMnemonics = queryMnemonics;
+            _queryUnits = units;
+            _queryNullValues = nullValues;
         }
 
         /// <summary>
@@ -156,6 +172,7 @@ namespace PDS.Witsml.Data.Channels
             NullValues = _originalNullValues;
             Uri = uri;
             Id = id;
+            _queryMnemonics = GetAllMnemonics();
         }
 
         /// <summary>
@@ -342,6 +359,258 @@ namespace PDS.Witsml.Data.Channels
                 row[0][i] = value;
             else
                 row[1][i - Depth] = value;
+        }
+
+        /// <summary>
+        /// Merges the value.
+        /// </summary>
+        /// <param name="update">The update record.</param>
+        /// <param name="rangeSize">The chunk range.</param>
+        /// <param name="order">The order of index value</param>
+        /// <param name="increasing">if increasting set to <c>true</c> [append].</param>
+        /// <exception cref="System.NotImplementedException"></exception>
+        public void MergeRecord(IChannelDataRecord update, long rangeSize, IndexOrder order, bool increasing)
+        {
+            MergeSettings(update, order, rangeSize);
+
+            switch (order)
+            {
+                case IndexOrder.Before:
+                    {
+                        var row = _records[_current][1];
+                        for (var i = 0; i < Mnemonics.Length; i++)
+                        {
+                            if (i < _originalMnemonics.Length)
+                            {
+                                var mnemonic = _originalMnemonics[i];
+                                var index = update.GetChannelIndex(mnemonic);
+                                var range = update.GetChannelIndexRange(index + Depth);
+                                if (range.Contains(GetIndexValue(), increasing))
+                                {
+                                    row[i] = NullValues[i];
+                                }
+                            }
+                            else
+                            {
+                                row.Add(null);
+                            }
+                        }
+                    }
+                    break;
+                case IndexOrder.Same:
+                    {
+                        var row = _records[_current][1];
+                        for (var i = 0; i < update.Mnemonics.Length; i++)
+                        {
+                            var mnemonic = update.Mnemonics[i];
+                            var index = _indexMap[mnemonic];
+                            var updateIndex = update.GetChannelIndex(mnemonic);
+                            if (updateIndex <= -1)
+                                continue;
+
+                            var value = update.GetValue(updateIndex + Depth);
+                            if (index < row.Count)
+                            {
+                                if (!IsNull(value, index))
+                                    row[index] = value;
+                            }
+                            else
+                                row.Add(value);
+                        }
+                    }
+                    break;
+                case IndexOrder.After:
+                    update.UpdateValues(_indexMap);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Updates the values.
+        /// </summary>
+        /// <param name="mnemonicIndexMap">The channel mnemonics index map.</param>
+        public void UpdateValues(Dictionary<string, int> mnemonicIndexMap)
+        {
+            var row = _records[_current];
+
+            var values = new List<object>();
+            var indexMap = mnemonicIndexMap ?? _indexMap;
+            foreach (var pair in indexMap)
+            {
+                values.Add(null);
+            }
+
+            for (var i = 0; i < Mnemonics.Length; i++)
+            {
+                var mnemonic = Mnemonics[i];
+                if (!_indexMap.ContainsKey(mnemonic))
+                    continue;
+
+                var index = _indexMap[mnemonic];
+                values[i] = row[1][index];
+            }
+
+            row[1] = values;
+        }
+
+        /// <summary>
+        /// Gets the index of the channel.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic.</param>
+        /// <returns></returns>
+        public int GetChannelIndex(string mnemonic)
+        {
+            if (_indexMap != null)
+            {
+                return _indexMap.ContainsKey(mnemonic) ? _indexMap[mnemonic] : -1;
+            }
+            else
+            {
+                return Array.IndexOf(_originalMnemonics, mnemonic);
+            }   
+        }
+
+        private void MergeSettings(IChannelDataRecord update, IndexOrder order, long rangeSize)
+        {
+            bool withinRange;
+            var indexChannel = GetIndex();
+            var increasing = indexChannel.Increasing;
+
+            if (order == IndexOrder.After)
+            {
+                var indexValue = update.GetIndexValue();
+                withinRange = WithinRange(indexValue, _chunkRange.End.GetValueOrDefault(), increasing, false);
+                if (!withinRange)
+                {
+                    _indexMap = null;
+                    update.UpdateChannelSettings(this, false, false);
+                }
+                else
+                {
+                    UpdateChannelSettings(update, true);
+                    update.CopyChannelSettings(this);
+                }   
+            }
+            else
+            {
+                if (_settingMerged)
+                    return;
+                
+                var range = GetIndexRange();
+                _chunkRange = new Range<double?>(
+                    Range.ComputeRange(range.Start.GetValueOrDefault(), rangeSize, increasing).Start,
+                    Range.ComputeRange(range.End.GetValueOrDefault(), rangeSize, increasing).End
+                    );
+
+                withinRange = WithinRange(update.GetIndexValue(), _chunkRange.End.GetValueOrDefault(), increasing, false);
+                UpdateChannelSettings(update, withinRange);        
+                update.CopyChannelSettings(this);       
+            }
+        }
+
+        /// <summary>
+        /// Updates the channel settings.
+        /// </summary>
+        /// <param name="record">The record.</param>
+        /// <param name="withinRange">if set to <c>true</c> [record within range].</param>
+        /// <param name="append">if set to <c>true</c> [append].</param>
+        public void UpdateChannelSettings(IChannelDataRecord record, bool withinRange, bool append = true)
+        {
+            var mnemonics = new List<string>();
+            var units = new List<string>();
+            var nullValues = new List<string>();
+            if (withinRange)
+            {
+                if (_settingMerged)
+                    return;
+
+                if (append)
+                {
+                    for (var i = 0; i < record.Mnemonics.Length; i++)
+                    {
+                        var mnemonic = record.Mnemonics[i];
+                        if (Mnemonics.Contains(mnemonic))
+                            continue;
+                        mnemonics.Add(mnemonic);
+                        units.Add(record.Units[i]);
+                        nullValues.Add(record.NullValues[i]);
+                    }
+                    if (mnemonics.Count > 0)
+                    {
+                        Mnemonics = Mnemonics.Concat(mnemonics.ToArray()).ToArray();
+                        Units = Units.Concat(units.ToArray()).ToArray();
+                        NullValues = NullValues.Concat(nullValues.ToArray()).ToArray();
+                    }
+                    UpdateIndexMap();
+                }
+                else
+                {
+                    for (var i = 0; i < Mnemonics.Length; i++)
+                    {
+                        var mnemonic = Mnemonics[i];
+                        if (record.Mnemonics.Contains(mnemonic))
+                            continue;
+                        mnemonics.Add(mnemonic);
+                        units.Add(Units[i]);
+                        nullValues.Add(NullValues[i]);
+                    }
+                    if (mnemonics.Count > 0)
+                    {
+                        Mnemonics = record.Mnemonics.Concat(mnemonics.ToArray()).ToArray();
+                        Units = record.Units.Concat(units.ToArray()).ToArray();
+                        NullValues = record.NullValues.Concat(nullValues.ToArray()).ToArray();
+                    }
+                }
+                              
+                _settingMerged = true;
+            }
+            else
+            {
+                Mnemonics = _originalMnemonics;
+                Units = _originalUnits;
+                NullValues = _originalNullValues;
+                UpdateIndexMap(false);
+            }
+        }
+
+        /// <summary>
+        /// Copies the channel settings.
+        /// </summary>
+        /// <param name="record">The record.</param>
+        public void CopyChannelSettings(IChannelDataRecord record)
+        {
+            UpdateIndexMap(false);
+            Mnemonics = record.Mnemonics;
+            Units = record.Units;
+            NullValues = record.NullValues;
+            _settingMerged = true;
+        }
+
+        private void UpdateIndexMap(bool withinRange = true)
+        {
+            _indexMap = new Dictionary<string, int>();
+            if (withinRange)
+            {
+                for (var i = 0; i < Mnemonics.Length; i++)
+                {
+                    _indexMap.Add(Mnemonics[i], i);
+                }
+            }
+            else
+            {
+                for (var i = 0; i < _originalMnemonics.Length; i++)
+                {
+                    _indexMap.Add(_originalMnemonics[i], i);
+                }
+            }
+        }
+
+        private bool WithinRange(double current, double end, bool increasing, bool closeRange = true)
+        {
+            if (closeRange)
+                return increasing ? current <= end : current >= end;
+
+            return increasing ? current < end : current > end;
         }
 
         /// <summary>
@@ -1092,7 +1361,7 @@ namespace PDS.Witsml.Data.Channels
 
             // Ranges will only be returned for channels that are included in slicing
             //... and contain data.
-            ranges = InitializeSliceRanges();
+            ranges = InitializeSliceRanges(mnemonicSlices.Values.ToArray());
 
             // Create and initialize value count dictionary for channels
             Dictionary<int, int> requestedValueCount = null;
@@ -1103,6 +1372,10 @@ namespace PDS.Witsml.Data.Channels
                 // Use _allSliceOrdinals that includes the index ordinals
                 //... to initialize requestedValueCount.
                 requestedValueCount = new Dictionary<int, int>();
+                if (_allSliceOrdinals == null)
+                {
+                    _allSliceOrdinals = Enumerable.Range(0, Depth).ToArray().Concat(mnemonicSlices.Select((m, i) => i)).Skip(1).ToArray();
+                }
                 _allSliceOrdinals.ForEach(s => requestedValueCount.Add(s, 0));
             }
 
@@ -1110,32 +1383,20 @@ namespace PDS.Witsml.Data.Channels
             while (Read())
             {
                 var rowValues = GetRowValues(_current).ToArray();
+                var fullRowValues = GetFullRowValues(rowValues, mnemonicSlices.Values.ToArray());
 
                 // If there is no channel data in the current row then don't process it
-                if (!HasValues(rowValues)) continue;
+                if (!HasValues(fullRowValues)) continue;
 
                 _log.DebugFormat("Appending channel data values for row: {0}", _current);
 
-                var channelValues = new List<object>();
-
-                // Only add channel value to the list of values
-                //... if the are included in current slices
-                for (int i = Depth; i < FieldCount; i++)
-                {
-                    // Limit data to mnemonics slices                    
-                    if (SliceExists(i))
-                    {
-                        // Check if channelValue IsNull
-                        var channelValue = GetValue(rowValues, i);
-                        channelValues.Add(IsNull($"{channelValue}") ? null : channelValue);
-                    }
-                }
+                var channelValues = fullRowValues.Skip(Depth).ToList();
 
                 // Skip rows with no channel values
                 if (channelValues.Count < 1) continue;
 
                 var indexValues = new List<object>();
-                var primaryIndex = GetIndexValue(rowValues);
+                var primaryIndex = GetIndexValue(fullRowValues);
 
                 // Add each index value to the values list and 
                 //... use timestamp format for time index values
@@ -1168,7 +1429,7 @@ namespace PDS.Witsml.Data.Channels
                     else
                     {
                         // Update ranges for the current primaryIndex
-                        UpdateRanges(allValues, ranges, primaryIndex);
+                        UpdateRanges(allValues, mnemonicSlices.Values.ToArray(), ranges, primaryIndex);
                     }
                 }
 
@@ -1202,28 +1463,54 @@ namespace PDS.Witsml.Data.Channels
 
             _log.Debug("Re-slicing remaining channels with no data.");
 
-            var reader = new ChannelDataReader(channelData, Mnemonics, Units, NullValues)
+            var reader = new ChannelDataReader(channelData, _queryMnemonics.Skip(Depth).ToArray(), _queryUnits.Values.Skip(Depth).ToArray(), _queryNullValues.Values.Skip(Depth).ToArray())
                 .WithIndices(Indices);
                     
-            reader.Slice(mnemonicSlices, units, nullValues);
+            reader.Slice(mnemonicSlices, _queryUnits, _queryNullValues);
 
             // Clone the context without RequestLatestValues
             var resliceContext = context.Clone();
             resliceContext.RequestLatestValues = null;
 
-            channelData = reader.GetData(resliceContext, mnemonicSlices, units, nullValues, out ranges);
+            channelData = reader.GetData(resliceContext, mnemonicSlices, _queryUnits, _queryNullValues, out ranges);
 
             return channelData;
         }
 
-        private Dictionary<string, Range<double?>> InitializeSliceRanges()
+        private object[] GetFullRowValues(object[] rowValues, string[] slicedMnemonics)
+        {
+            var rowMnemonics = _recordMnemonics != null ? _recordMnemonics[_current] : slicedMnemonics;
+            var fullRow = new object[slicedMnemonics.Length];
+            fullRow[0] = rowValues[0];
+            for (var i = 1; i < fullRow.Length; i++)
+            {
+                if (_allSliceOrdinals == null)
+                {
+                    var channel = slicedMnemonics[i];
+                    var index = Array.IndexOf(rowMnemonics, channel);
+                    if (index <= -1)
+                        continue;
+
+                    if (_recordMnemonics != null)
+                        index++;
+                    fullRow[i] = rowValues[index];
+                }
+                else
+                {
+                    fullRow[i] = rowValues[_allSliceOrdinals[i]];
+                }
+            }
+
+            return fullRow;
+        }
+
+        private Dictionary<string, Range<double?>> InitializeSliceRanges(string[] mnemonics)
         {
             _log.Debug("Initializing index ranges.");
 
             var emptyRanges = new Dictionary<string, Range<double?>>();
-            var allSlices = Indices.Select(i => i.Mnemonic).Concat(Mnemonics).ToArray();
 
-            allSlices.ForEach(m =>
+            mnemonics.ForEach(m =>
             {
                 emptyRanges.Add(m, new Range<double?>(null, null));
             });
@@ -1231,16 +1518,16 @@ namespace PDS.Witsml.Data.Channels
             return emptyRanges;
         }
 
-        private void UpdateRanges(List<object> values, Dictionary<string, Range<double?>> ranges, double primaryIndex)
+        private void UpdateRanges(List<object> values, string[] mnemonics, Dictionary<string, Range<double?>> ranges, double primaryIndex)
         {
             _log.Debug("Updating index ranges.");
 
             for (var i = 0; i < values.Count; i++)
             {
-                var ordinal = _allSliceOrdinals[i];
-                var mnemonic = GetName(ordinal);
+                //var ordinal = _allSliceOrdinals[i];
+                var mnemonic = mnemonics[i];
 
-                if (!IsNull(values[i], ordinal))
+                if (!IsNull(values[i], i))
                 {
                     ranges[mnemonic] = ranges[mnemonic].Start.HasValue
                         ? new Range<double?>(ranges[mnemonic].Start, primaryIndex)
@@ -1284,7 +1571,7 @@ namespace PDS.Witsml.Data.Channels
             for (var i = 0; i < valueArray.Length; i++)
             {
                 var ordinal = _allSliceOrdinals[i];
-                var mnemonic = GetName(ordinal);
+                var mnemonic = _queryMnemonics[ordinal];
 
                 if (requestedValueCount.ContainsKey(ordinal) && !IsNull(valueArray[i], ordinal))
                 {
@@ -1664,6 +1951,7 @@ namespace PDS.Witsml.Data.Channels
             // NOTE: uncomment the following line if the finalizer is overridden above.
             // GC.SuppressFinalize(this);
         }
+        
         #endregion
     }
 }
