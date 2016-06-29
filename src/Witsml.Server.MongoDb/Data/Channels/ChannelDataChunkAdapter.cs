@@ -168,7 +168,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 {
                     BulkWriteChunks(
                         ToChunks(
-                            MergeSequence(results.GetRecords(), reader.AsEnumerable(), updateRange)),
+                            MergeSequence(results.GetRecords(), reader.AsEnumerable(), updateRange, rangeSize)),
                         reader.Uri,
                         string.Join(",", reader.Mnemonics),
                         string.Join(",", reader.Units),
@@ -257,9 +257,9 @@ namespace PDS.Witsml.Server.Data.Channels
                         filter.Eq(f => f.Uri, uri) & filter.Eq(f => f.Uid, dc.Uid),
                         update
                             .Set(u => u.Indices, dc.Indices)
-                            .Set(u => u.MnemonicList, mnemonics)
-                            .Set(u => u.UnitList, units)
-                            .Set(u => u.NullValueList, nullValues)
+                            .Set(u => u.MnemonicList, dc.MnemonicList)
+                            .Set(u => u.UnitList, dc.UnitList)
+                            .Set(u => u.NullValueList, dc.NullValueList)
                             .Set(u => u.Data, dc.Data)
                             .Set(u => u.RecordCount, dc.RecordCount));
                 })
@@ -285,6 +285,10 @@ namespace PDS.Witsml.Server.Data.Channels
             double startIndex = 0;
             double endIndex = 0;
             double? previousIndex = null;
+            string[] chunkMnemonics = null;
+            string[] chunkUnits = null;
+            string[] chunkNullValues = null;
+            var chunkSettingsSet = false;
 
             foreach (var record in records)
             {
@@ -323,6 +327,14 @@ namespace PDS.Witsml.Server.Data.Channels
                     id = string.IsNullOrEmpty(id) ? record.Id : id;
                     data.Add(record.GetJson());
                     endIndex = index;
+
+                    if (chunkSettingsSet)
+                        continue;
+
+                    chunkMnemonics = record.Mnemonics;
+                    chunkUnits = record.Units;
+                    chunkNullValues = record.NullValues;
+                    chunkSettingsSet = true;
                 }
                 else
                 {
@@ -336,7 +348,10 @@ namespace PDS.Witsml.Server.Data.Channels
                         Uid = id,
                         Data = "[" + String.Join(",", data) + "]",
                         Indices = new List<ChannelIndexInfo> {newIndex},
-                        RecordCount = data.Count
+                        RecordCount = data.Count,
+                        MnemonicList = string.Join(",", chunkMnemonics),
+                        UnitList = string.Join(",", chunkUnits),
+                        NullValueList = string.Join(",", chunkNullValues)
                     };
 
                     plannedRange = Range.ComputeRange(index, rangeSize, increasing);
@@ -344,6 +359,9 @@ namespace PDS.Witsml.Server.Data.Channels
                     startIndex = index;
                     endIndex = index;
                     id = record.Id;
+                    chunkMnemonics = record.Mnemonics;
+                    chunkUnits = record.Units;
+                    chunkNullValues = record.NullValues;
                 }
             }
 
@@ -354,13 +372,22 @@ namespace PDS.Witsml.Server.Data.Channels
                 newIndex.End = endIndex;
                 Logger.DebugFormat("ChannelDataChunk created with id '{0}', startIndex '{1}' and endIndex '{2}'.", id, startIndex, endIndex);
 
-                yield return new ChannelDataChunk()
+                var chunk = new ChannelDataChunk()
                 {
                     Uid = id,
                     Data = "[" + string.Join(",", data) + "]",
-                    Indices = new List<ChannelIndexInfo> {newIndex},
+                    Indices = new List<ChannelIndexInfo> { newIndex },
                     RecordCount = data.Count
                 };
+
+                if (chunkMnemonics != null)
+                {
+                    chunk.MnemonicList = string.Join(",", chunkMnemonics);
+                    chunk.UnitList = string.Join(",", chunkUnits);
+                    chunk.NullValueList = string.Join(",", chunkNullValues);
+                }
+
+                yield return chunk;
             }
         }
 
@@ -370,11 +397,13 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="existingChunks">The existing channel data chunks.</param>
         /// <param name="updatedChunks">The updated channel data chunks.</param>
         /// <param name="updateRange">The update range.</param>
+        /// <param name="rangeSize">The chunk range.</param>
         /// <returns>The merged sequence of channel data.</returns>
         private IEnumerable<IChannelDataRecord> MergeSequence(
             IEnumerable<IChannelDataRecord> existingChunks,
             IEnumerable<IChannelDataRecord> updatedChunks,
-            Range<double?> updateRange)
+            Range<double?> updateRange,
+            long rangeSize)
         {
             Logger.DebugFormat("Merging existing and update ChannelDataRecords: {0}", updateRange);
 
@@ -399,7 +428,8 @@ namespace PDS.Witsml.Server.Data.Channels
                          new Range<double?>(existingEnum.Current.GetIndexValue(), null)
                              .StartsAfter(updateEnum.Current.GetIndexValue(), increasing, inclusive: false)))
                     {
-                        updateEnum.Current.Id = id;
+                        updateEnum.Current.Id = endOfExisting ? string.Empty : id;
+                        existingEnum.Current?.MergeRecord(updateEnum.Current, rangeSize, IndexOrder.After, increasing);
                         yield return updateEnum.Current;
                         endOfUpdate = !updateEnum.MoveNext();
                     }
@@ -410,6 +440,8 @@ namespace PDS.Witsml.Server.Data.Channels
                               !(new Range<double?>(updateRange.Start.Value, updateRange.End.Value)
                                   .Contains(existingEnum.Current.GetIndexValue(), increasing))))
                     {
+                        if (updateEnum.Current != null)
+                            existingEnum.Current.MergeRecord(updateEnum.Current, rangeSize, IndexOrder.Before, increasing);
                         yield return existingEnum.Current;
                         endOfExisting = !existingEnum.MoveNext();
                         id = endOfExisting ? string.Empty : existingEnum.Current.Id;
@@ -421,12 +453,16 @@ namespace PDS.Witsml.Server.Data.Channels
                             if (existingEnum.Current.GetIndexValue() == updateEnum.Current.GetIndexValue())
                             {
                                 id = existingEnum.Current.Id;
-                                var mergedRow = MergeRow(existingEnum.Current, updateEnum.Current);
+                                existingEnum.Current.MergeRecord(updateEnum.Current, rangeSize, IndexOrder.Same, increasing);
+                                if (existingEnum.Current.HasValues())
+                                    yield return existingEnum.Current;
 
-                                if (mergedRow.HasValues())
-                                {
-                                    yield return mergedRow;
-                                }
+                                //var mergedRow = MergeRow(existingEnum.Current, updateEnum.Current);
+
+                                //if (mergedRow.HasValues())
+                                //{
+                                //    yield return mergedRow;
+                                //}
 
                                 endOfExisting = !existingEnum.MoveNext();
                                 endOfUpdate = !updateEnum.MoveNext();
@@ -436,12 +472,16 @@ namespace PDS.Witsml.Server.Data.Channels
                                 .StartsAfter(existingEnum.Current.GetIndexValue(), increasing, inclusive: false))
                             {
                                 id = existingEnum.Current.Id;
-                                var mergedRow = MergeRow(existingEnum.Current, updateEnum.Current, clear: true);
+                                existingEnum.Current.MergeRecord(updateEnum.Current, rangeSize, IndexOrder.Before, increasing);
+                                if (existingEnum.Current.HasValues())
+                                    yield return existingEnum.Current;
 
-                                if (mergedRow.HasValues())
-                                {
-                                    yield return mergedRow;
-                                }
+                                //var mergedRow = MergeRow(existingEnum.Current, updateEnum.Current, clear: true);
+
+                                //if (mergedRow.HasValues())
+                                //{
+                                //    yield return mergedRow;
+                                //}
 
                                 endOfExisting = !existingEnum.MoveNext();
                             }
@@ -449,7 +489,10 @@ namespace PDS.Witsml.Server.Data.Channels
                             else // Update Starts Before existing
                             {
                                 updateEnum.Current.Id = id;
-                                yield return updateEnum.Current;
+                                existingEnum.Current?.MergeRecord(updateEnum.Current, rangeSize, IndexOrder.After, increasing);
+                                if (updateEnum.Current.HasValues())
+                                    yield return updateEnum.Current;
+
                                 endOfUpdate = !updateEnum.MoveNext();
                             }
                         }

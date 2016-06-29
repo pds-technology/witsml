@@ -396,10 +396,10 @@ namespace PDS.Witsml.Server.Data.Logs
             var records = GetChannelData(logHeader.GetUri(), mnemonics[0], range, IsIncreasing(logHeader), requestLatestValues);
 
             // Get a reader for the log's channel data
-            var reader = records.GetReader();
+            var reader = records.GetReader(mnemonics.Values.ToArray(), units, nullValues);
 
             // Slice the reader for the requested mnemonics
-            reader.Slice(mnemonics, units, nullValues);
+            //reader.Slice(mnemonics, units, nullValues);
             var count = FormatLogData(log, logHeader, reader, context, mnemonics, units, nullValues);           
 
             // Update the response context growing object totals
