@@ -28,7 +28,6 @@ using Microsoft.VisualBasic.FileIO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PDS.Framework;
-using SuperSocket.ClientEngine;
 
 namespace PDS.Witsml.Data.Channels
 {
@@ -66,13 +65,13 @@ namespace PDS.Witsml.Data.Channels
         private readonly int _indexCount;
         private readonly int _count;
         private int _current = -1;
-        private bool _settingMerged = false;
+        private bool _settingMerged;
         private Dictionary<string, int> _indexMap;
         private Range<double?> _chunkRange;
-        private string[] _queryMnemonics;
-        private List<string[]> _recordMnemonics;
-        private IDictionary<int, string> _queryUnits;
-        private IDictionary<int, string> _queryNullValues;
+        private readonly string[] _queryMnemonics;
+        private readonly List<string[]> _recordMnemonics;
+        private readonly IDictionary<int, string> _queryUnits;
+        private readonly IDictionary<int, string> _queryNullValues;
 
         /// <summary>
         /// Ordinal position of mnemonics that are included in slicing.  Null if reader is not sliced.
