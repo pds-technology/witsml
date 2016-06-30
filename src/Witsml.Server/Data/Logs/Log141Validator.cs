@@ -287,13 +287,14 @@ namespace PDS.Witsml.Server.Data.Logs
                 // Validate LogCurveInfo
                 else if (logCurves != null)
                 {
+                    var indexCurve = current.IndexCurve;
                     var isTimeLog = current.IsTimeLog(true);
                     var exist = current.LogCurveInfo ?? new List<LogCurveInfo>();
                     var uids = exist.Select(e => e.Uid.ToUpper()).ToList();
                     var newCurves = logCurves.Where(l => !uids.Contains(l.Uid.ToUpper())).ToList();
-                    var updateCurves = logCurves.Where(l => uids.Contains(l.Uid.ToUpper())).ToList();
+                    var updateCurves = logCurves.Where(l => !l.Mnemonic.Value.EqualsIgnoreCase(indexCurve) && uids.Contains(l.Uid.ToUpper())).ToList();
 
-                    if (newCurves.Count > 0 && updateCurves.Count > 1)
+                    if (newCurves.Count > 0 && updateCurves.Count > 0)
                     {
                         yield return new ValidationResult(ErrorCodes.AddingUpdatingLogCurveAtTheSameTime.ToString(), new[] { "LogCurveInfo", "Uid" });
                     }
@@ -304,7 +305,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     }
                     else if (logData != null && logData.Count > 0)
                     {
-                        yield return ValidateLogData(current.IndexCurve, logCurves, logData, mergedLogCurveMnemonics, delimiter, false);
+                        yield return ValidateLogData(indexCurve, logCurves, logData, mergedLogCurveMnemonics, delimiter, false);
                     }
                 }
 
