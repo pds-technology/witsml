@@ -787,7 +787,6 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
         }
 
-        //[Ignore]
         [TestMethod]
         public void Log141DataAdapter_UpdateInStore_Can_Update_Nested_Recurring_Elements()
         {
@@ -800,6 +799,9 @@ namespace PDS.Witsml.Server.Data.Logs
             // Create nested array elements
             var curve = Log.LogCurveInfo.Last();
 
+            var extensionName1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            var extensionName4 = DevKit.ExtensionNameValue("Ext-4", "4.0", "cm");
+
             curve.AxisDefinition = new List<AxisDefinition>
             {
                 new AxisDefinition()
@@ -810,7 +812,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     DoubleValues = "1 2 3",
                     ExtensionNameValue = new List<ExtensionNameValue>
                     {
-                        DevKit.ExtensionNameValue("Ext-1", "1.0", "m"),
+                        extensionName1,
                         DevKit.ExtensionNameValue("Ext-2", "2.0", "ft")
                     }
                 }
@@ -819,16 +821,64 @@ namespace PDS.Witsml.Server.Data.Logs
             curve.ExtensionNameValue = new List<ExtensionNameValue>
             {
                 DevKit.ExtensionNameValue("Ext-3", "3.0", "mm"),
-                DevKit.ExtensionNameValue("Ext-4", "4.0", "cm")
+                extensionName4
             };
 
             // Add Log
             var addResponse = DevKit.Add<LogList, Log>(Log);
             Assert.AreEqual((short)ErrorCodes.Success, addResponse.Result);
 
+            var query = new Log
+            {
+                Uid = Log.Uid,
+                UidWell = Log.UidWell,
+                UidWellbore = Log.UidWellbore
+            };
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            AssertNestedElements(results, curve, extensionName1, extensionName4);
+
             // Update Log
-            var updateResponse = DevKit.Update<LogList, Log>(Log);
+            extensionName1 = DevKit.ExtensionNameValue("Ext-1", "1.1", "m");
+            extensionName4 = DevKit.ExtensionNameValue("Ext-4", "4.4", "cm");
+
+            var update = new Log
+            {
+                Uid = Log.Uid,
+                UidWell = Log.UidWell,
+                UidWellbore = Log.UidWellbore
+            };
+
+            curve.ExtensionNameValue = new List<ExtensionNameValue>
+            {
+                extensionName4
+            };
+
+            curve.AxisDefinition = new List<AxisDefinition>
+            {
+                new AxisDefinition()
+                {
+                    Uid = "1",
+                    Order = 1,
+                    Count = 3,
+                    DoubleValues = "1 2 3",
+                    ExtensionNameValue = new List<ExtensionNameValue>
+                    {
+                        extensionName1
+                    }
+                }
+            };
+
+            update.LogCurveInfo = new List<LogCurveInfo>
+            {
+                curve
+            };
+
+            var updateResponse = DevKit.Update<LogList, Log>(update);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            AssertNestedElements(results, curve, extensionName1, extensionName4);
         }
 
         [TestMethod]
@@ -1031,45 +1081,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual("5002,5002.1,,", data[4]);
             Assert.AreEqual("5003,5003.1,,5003.3", data[5]);
         }
-
-        private Log AddAnEmptyLogWithFourCurves()
-        {
-            var response = DevKit.Add<WellList, Well>(Well);
-
-            Wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
-
-            var log = DevKit.CreateLog(
-                DevKit.Uid(),
-                DevKit.Name("Log can be added with depth data"),
-                Wellbore.UidWell,
-                Well.Name,
-                response.SuppMsgOut,
-                Wellbore.Name);
-
-            DevKit.InitHeader(log, LogIndexType.measureddepth);
-
-            var channelName = "channel3";
-            var curves = log.LogCurveInfo;
-            var channel3 = new LogCurveInfo
-            {
-                Uid = channelName,
-                Mnemonic = new ShortNameStruct
-                {
-                    Value = channelName
-                },
-                Unit = "ft",
-                TypeLogData = LogDataType.@double
-            };
-            curves.Add(channel3);
-            log.LogData = null;
-
-            response = DevKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            return log;
-        }
-
+        
         [TestMethod]
         public void Log141DataAdapter_UpdateInStore_Can_Partial_Update_2()
         {
@@ -1210,8 +1222,6 @@ namespace PDS.Witsml.Server.Data.Logs
             updateResponse = DevKit.Update<LogList, Log>(update);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
 
-
-
             var query = DevKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
             var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             var result = results.FirstOrDefault();
@@ -1241,7 +1251,6 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var indexCurve = curves[0];
             var channel1 = curves[1];
-            var channel2 = curves[2];
             var channel3 = curves[3];
 
             // Update 3rd channel spanning the previous 2 chunks
@@ -1311,5 +1320,73 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual("5002,5002.1,,", data[4]);
             Assert.AreEqual("5003,5003.1,,5003.3", data[5]);
         }
+
+        #region Helper Functions
+
+        private Log AddAnEmptyLogWithFourCurves()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+
+            Wellbore.UidWell = response.SuppMsgOut;
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+
+            var log = DevKit.CreateLog(
+                DevKit.Uid(),
+                DevKit.Name("Log can be added with depth data"),
+                Wellbore.UidWell,
+                Well.Name,
+                response.SuppMsgOut,
+                Wellbore.Name);
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+
+            var channelName = "channel3";
+            var curves = log.LogCurveInfo;
+            var channel3 = new LogCurveInfo
+            {
+                Uid = channelName,
+                Mnemonic = new ShortNameStruct
+                {
+                    Value = channelName
+                },
+                Unit = "ft",
+                TypeLogData = LogDataType.@double
+            };
+            curves.Add(channel3);
+            log.LogData = null;
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            return log;
+        }
+
+        private void AssertNestedElements(List<Log> results, LogCurveInfo curve, ExtensionNameValue extensionName1, ExtensionNameValue extensionName4)
+        {
+            var result = results.FirstOrDefault();
+            Assert.IsNotNull(result);
+
+            var lastCurve = result.LogCurveInfo.Last();
+            Assert.IsNotNull(lastCurve);
+
+            var extensionNames = lastCurve.ExtensionNameValue;
+
+            var resultExtensionName = extensionNames.Last();
+            Assert.IsNotNull(resultExtensionName);
+            Assert.AreEqual(extensionName4.Value.Value, resultExtensionName.Value.Value);
+
+            var axisDefinition = curve.AxisDefinition.FirstOrDefault();
+            Assert.IsNotNull(axisDefinition);
+
+            var resultAxisDefinition = lastCurve.AxisDefinition.FirstOrDefault();
+            Assert.IsNotNull(resultAxisDefinition);
+
+            resultExtensionName = resultAxisDefinition.ExtensionNameValue.First();
+            Assert.IsNotNull(resultExtensionName);
+
+            Assert.AreEqual(extensionName1.Value.Value, resultExtensionName.Value.Value);
+        }
+
+        #endregion
     }
 }
