@@ -485,8 +485,10 @@ namespace PDS.Witsml.Server.Data.Logs
                 if (string.IsNullOrEmpty(indexUnit))
                 {
                     indexUnit = indexCurve.Unit;
-                    updateMnemonics.Add(indexCurve.Mnemonic);
                 }
+
+                updateMnemonics.Clear();
+                updateMnemonics.Add(indexCurve.Mnemonic);
 
                 updateMnemonics.AddRange(reader.Mnemonics
                     .Where(m => !updateMnemonics.Contains(m)));
