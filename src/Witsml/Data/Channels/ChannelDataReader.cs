@@ -465,53 +465,6 @@ namespace PDS.Witsml.Data.Channels
             return Array.IndexOf(_originalMnemonics, mnemonic);
         }
 
-        private void MergeSettings(IChannelDataRecord update, IndexOrder order, long rangeSize)
-        {
-            bool withinRange;
-            var indexChannel = GetIndex();
-            var increasing = indexChannel.Increasing;
-
-            if (order == IndexOrder.After)
-            {
-                var indexValue = update.GetIndexValue();
-                var range = GetIndexRange();
-              
-                if (!_chunkRange.Start.HasValue || !_chunkRange.Contains(indexValue, increasing))
-                {
-                    _chunkRange = new Range<double?>(
-                        Range.ComputeRange(range.Start.GetValueOrDefault(), rangeSize, increasing).Start,
-                        Range.ComputeRange(range.End.GetValueOrDefault(), rangeSize, increasing).End
-                        );
-                    _settingMerged = false;
-                }
-                withinRange = _chunkRange.Contains(indexValue, increasing);
-                if (!withinRange)
-                {
-                    update.UpdateChannelSettings(this, false, false);
-                }
-                else
-                {
-                    UpdateChannelSettings(update, true);
-                    update.CopyChannelSettings(this, _chunkRange);
-                }   
-            }
-            else
-            {
-                if (_settingMerged)
-                    return;
-                
-                var range = GetIndexRange();
-                _chunkRange = new Range<double?>(
-                    Range.ComputeRange(range.Start.GetValueOrDefault(), rangeSize, increasing).Start,
-                    Range.ComputeRange(range.End.GetValueOrDefault(), rangeSize, increasing).End
-                    );
-
-                withinRange = _chunkRange.Contains(update.GetIndexValue(), increasing);
-                UpdateChannelSettings(update, withinRange);        
-                update.CopyChannelSettings(this, _chunkRange);       
-            }
-        }
-
         /// <summary>
         /// Updates the channel settings.
         /// </summary>
@@ -610,25 +563,6 @@ namespace PDS.Witsml.Data.Channels
             var increasing = indexChannel.Increasing;
             UpdateIndexMap(_chunkRange.Contains(indexValue, increasing));
             _settingMerged = true;
-        }
-
-        private void UpdateIndexMap(bool withinRange = true)
-        {
-            _indexMap = new Dictionary<string, int>();
-            if (withinRange)
-            {
-                for (var i = 0; i < Mnemonics.Length; i++)
-                {
-                    _indexMap.Add(Mnemonics[i], i);
-                }
-            }
-            else
-            {
-                for (var i = 0; i < _originalMnemonics.Length; i++)
-                {
-                    _indexMap.Add(_originalMnemonics[i], i);
-                }
-            }
         }
 
         /// <summary>
@@ -1927,6 +1861,82 @@ namespace PDS.Witsml.Data.Channels
             return string.IsNullOrWhiteSpace(units)
                 ? mnemonic
                 : $"{ mnemonic } [{ units }]";
+        }
+
+        /// <summary>
+        /// Merges the settings between existing chunk and update chunk.
+        /// </summary>
+        /// <param name="update">The update.</param>
+        /// <param name="order">The order.</param>
+        /// <param name="rangeSize">Size of the range.</param>
+        private void MergeSettings(IChannelDataRecord update, IndexOrder order, long rangeSize)
+        {
+            bool withinRange;
+            var indexChannel = GetIndex();
+            var increasing = indexChannel.Increasing;
+
+            if (order == IndexOrder.After)
+            {
+                var indexValue = update.GetIndexValue();
+                var range = GetIndexRange();
+
+                if (!_chunkRange.Start.HasValue || !_chunkRange.Contains(indexValue, increasing))
+                {
+                    _chunkRange = new Range<double?>(
+                        Range.ComputeRange(range.Start.GetValueOrDefault(), rangeSize, increasing).Start,
+                        Range.ComputeRange(range.End.GetValueOrDefault(), rangeSize, increasing).End
+                        );
+                    _settingMerged = false;
+                }
+                withinRange = _chunkRange.Contains(indexValue, increasing);
+                if (!withinRange)
+                {
+                    update.UpdateChannelSettings(this, false, false);
+                }
+                else
+                {
+                    UpdateChannelSettings(update, true);
+                    update.CopyChannelSettings(this, _chunkRange);
+                }
+            }
+            else
+            {
+                if (_settingMerged)
+                    return;
+
+                var range = GetIndexRange();
+                _chunkRange = new Range<double?>(
+                    Range.ComputeRange(range.Start.GetValueOrDefault(), rangeSize, increasing).Start,
+                    Range.ComputeRange(range.End.GetValueOrDefault(), rangeSize, increasing).End
+                    );
+
+                withinRange = _chunkRange.Contains(update.GetIndexValue(), increasing);
+                UpdateChannelSettings(update, withinRange);
+                update.CopyChannelSettings(this, _chunkRange);
+            }
+        }
+
+        /// <summary>
+        /// Updates the index map for the chunk.
+        /// </summary>
+        /// <param name="withinRange">if set to <c>true</c> [within range].</param>
+        private void UpdateIndexMap(bool withinRange = true)
+        {
+            _indexMap = new Dictionary<string, int>();
+            if (withinRange)
+            {
+                for (var i = 0; i < Mnemonics.Length; i++)
+                {
+                    _indexMap.Add(Mnemonics[i], i);
+                }
+            }
+            else
+            {
+                for (var i = 0; i < _originalMnemonics.Length; i++)
+                {
+                    _indexMap.Add(_originalMnemonics[i], i);
+                }
+            }
         }
 
         #region IDisposable Support

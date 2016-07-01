@@ -288,11 +288,12 @@ namespace PDS.Witsml.Server.Data.Logs
                 else if (logCurves != null)
                 {
                     var indexCurve = current.IndexCurve;
+                    var indexCurveUid = current.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == indexCurve)?.Uid;
                     var isTimeLog = current.IsTimeLog(true);
                     var exist = current.LogCurveInfo ?? new List<LogCurveInfo>();
                     var uids = exist.Select(e => e.Uid.ToUpper()).ToList();
                     var newCurves = logCurves.Where(l => !uids.Contains(l.Uid.ToUpper())).ToList();
-                    var updateCurves = logCurves.Where(l => !l.Mnemonic.Value.EqualsIgnoreCase(indexCurve) && uids.Contains(l.Uid.ToUpper())).ToList();
+                    var updateCurves = logCurves.Where(l => !l.Uid.EqualsIgnoreCase(indexCurveUid) && uids.Contains(l.Uid.ToUpper())).ToList();
 
                     if (newCurves.Count > 0 && updateCurves.Count > 0)
                     {
