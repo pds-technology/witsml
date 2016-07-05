@@ -1321,6 +1321,91 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual("5003,5003.1,,5003.3", data[5]);
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_UpdateInStore_Can_Update_With_Sparse_Data()
+        {
+            var response = DevKit.Add<WellList, Well>(Well);
+            Wellbore.UidWell = response.SuppMsgOut;
+
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            var uidWellbore = response.SuppMsgOut;
+
+            var log = new Log()
+            {
+                UidWell = Wellbore.UidWell,
+                NameWell = Well.Name,
+                UidWellbore = uidWellbore,
+                NameWellbore = Wellbore.Name,
+                Name = DevKit.Name("Log 01")
+            };
+
+            DevKit.InitHeader(log, LogIndexType.measureddepth);
+            var logData = log.LogData.First();
+            logData.Data.Add("1,1.1,1.2");
+            logData.Data.Add("2,2.1,2.2");
+            logData.Data.Add("3,3.1,3.2");
+            logData.Data.Add("4,4.1,4.2");
+
+            response = DevKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var update = new Log()
+            {
+                Uid = uidLog,
+                UidWell = Wellbore.UidWell,
+                UidWellbore = uidWellbore,
+                Description = "Should not be updated"
+            };
+
+            var indexCurve = log.LogCurveInfo.FirstOrDefault();
+            var channel1 = log.LogCurveInfo[1];
+            var channel2 = log.LogCurveInfo[2];
+
+            var logData1 = new LogData
+            {
+                MnemonicList = $"{indexCurve?.Mnemonic.Value},{channel1.Mnemonic.Value}",
+                UnitList = $"{indexCurve?.Unit},{channel1.Unit}",
+                Data = new List<string> { "2,2.11"}
+            };
+
+            var logData2 = new LogData
+            {
+                MnemonicList = $"{indexCurve?.Mnemonic.Value},{channel2.Mnemonic.Value}",
+                UnitList = $"{indexCurve?.Unit},{channel2.Unit}",
+                Data = new List<string> { "3,3.21" }
+            };
+
+            update.LogData = new List<LogData> {logData1, logData2};
+
+            var updateResponse = DevKit.Update<LogList, Log>(update);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            var query = new Log
+            {
+                Uid = uidLog,
+                UidWell = log.UidWell,
+                UidWellbore = log.UidWellbore
+            };
+
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+
+            var result = results.First();
+            Assert.IsNotNull(result);
+
+            logData = result.LogData.FirstOrDefault();
+            Assert.IsNotNull(logData);
+
+            var data = logData.Data;
+            Assert.AreEqual(4, logData.Data.Count);
+            Assert.AreEqual("1,1.1,1.2", data[0]);
+            Assert.AreEqual("2,2.11,2.2", data[1]);
+            Assert.AreEqual("3,3.1,3.21", data[2]);
+            Assert.AreEqual("4,4.1,4.2", data[3]);
+        }
+
         #region Helper Functions
 
         private Log AddAnEmptyLogWithFourCurves()

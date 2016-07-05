@@ -437,7 +437,8 @@ namespace PDS.Witsml.Data.Channels
 
             var values = new List<object>();
             var indexMap = mnemonicIndexMap ?? _indexMap;
-            foreach (var pair in indexMap)
+
+            for (var i = 0; i < indexMap.Keys.Count; i++)
             {
                 values.Add(null);
             }
@@ -493,12 +494,14 @@ namespace PDS.Witsml.Data.Channels
                         units.Add(record.Units[i]);
                         nullValues.Add(record.NullValues[i]);
                     }
+
                     if (mnemonics.Count > 0)
                     {
                         Mnemonics = Mnemonics.Concat(mnemonics.ToArray()).ToArray();
                         Units = Units.Concat(units.ToArray()).ToArray();
                         NullValues = NullValues.Concat(nullValues.ToArray()).ToArray();
                     }
+
                     UpdateIndexMap();
                 }
                 else
@@ -512,6 +515,7 @@ namespace PDS.Witsml.Data.Channels
                         units.Add(Units[i]);
                         nullValues.Add(NullValues[i]);
                     }
+
                     if (mnemonics.Count > 0)
                     {
                         Mnemonics = record.Mnemonics.Concat(mnemonics.ToArray()).ToArray();
@@ -1888,7 +1892,9 @@ namespace PDS.Witsml.Data.Channels
                         );
                     _settingMerged = false;
                 }
+
                 withinRange = _chunkRange.Contains(indexValue, increasing);
+
                 if (!withinRange)
                 {
                     update.UpdateChannelSettings(this, false, false);
