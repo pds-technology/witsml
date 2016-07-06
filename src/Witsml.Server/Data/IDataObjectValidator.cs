@@ -16,6 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Xml.Linq;
+
 namespace PDS.Witsml.Server.Data
 {
     /// <summary>
@@ -43,5 +45,13 @@ namespace PDS.Witsml.Server.Data
         /// <param name="parser">The input template parser.</param>
         /// <param name="dataObject">The data object.</param>
         void Validate(Functions function, WitsmlQueryParser parser, T dataObject);
+
+        /// <summary>
+        /// Parses the specified function.
+        /// </summary>
+        /// <param name="function">The function.</param>
+        /// <param name="parser">The input template parser.</param>
+        /// <returns>A copy of the parsed element.</returns>
+        XElement Parse(Functions function, WitsmlQueryParser parser);
     }
 }

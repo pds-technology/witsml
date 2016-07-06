@@ -190,13 +190,15 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         protected virtual WitsmlResult Add(WitsmlQueryParser parser)
         {
-            var dataObject = Parse(parser.Root);
+            var validator = Container.Resolve<IDataObjectValidator<TObject>>();
+            var element = validator.Parse(Functions.UpdateInStore, parser);
+            var dataObject = Parse(element);
 
             SetDefaultValues(dataObject);
             var uri = GetUri(dataObject);
             Logger.DebugFormat("Adding {0} with URI '{1}'", typeof(TObject).Name, uri);
 
-            Validate(Functions.AddToStore, parser, dataObject);
+            validator.Validate(Functions.AddToStore, parser, dataObject);
             Logger.DebugFormat("Validated {0} with URI '{1}' for Add", typeof(TObject).Name, uri);
 
             DataAdapter.Add(parser, dataObject);
@@ -212,12 +214,14 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         protected virtual WitsmlResult Update(WitsmlQueryParser parser)
         {
-            var dataObject = Parse(parser.Root);
+            var validator = Container.Resolve<IDataObjectValidator<TObject>>();
+            var element = validator.Parse(Functions.UpdateInStore, parser);
+            var dataObject = Parse(element);
 
             var uri = GetUri(dataObject);
             Logger.DebugFormat("Updating {0} with URI '{1}'", typeof(TObject).Name, uri);
 
-            Validate(Functions.UpdateInStore, parser, dataObject);
+            validator.Validate(Functions.UpdateInStore, parser, dataObject);
             Logger.DebugFormat("Validated {0} with URI '{1}' for Update", typeof(TObject).Name, uri);
 
             DataAdapter.Update(parser, dataObject);
@@ -233,10 +237,13 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         protected virtual WitsmlResult Delete(WitsmlQueryParser parser)
         {
-            var dataObject = Parse(parser.Root);
+            var validator = Container.Resolve<IDataObjectValidator<TObject>>();
+            var element = validator.Parse(Functions.UpdateInStore, parser);
+            var dataObject = Parse(element);
+
             Logger.DebugFormat("Deleting {0}", typeof(TObject).Name);
 
-            Validate(Functions.DeleteFromStore, parser, dataObject);
+            validator.Validate(Functions.DeleteFromStore, parser, dataObject);
             Logger.DebugFormat("Validated {0} for Delete", typeof(TObject).Name);
 
             DataAdapter.Delete(parser);

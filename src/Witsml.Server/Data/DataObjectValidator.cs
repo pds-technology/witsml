@@ -20,8 +20,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Xml.Linq;
 using Energistics.DataAccess.Validation;
-using PDS.Framework;
 using PDS.Witsml.Data;
 
 namespace PDS.Witsml.Server.Data
@@ -69,14 +69,27 @@ namespace PDS.Witsml.Server.Data
             DataObject = dataObject;
             Parser = parser;
 
-            if (function == Functions.AddToStore || function == Functions.UpdateInStore)
-                parser.Elements().ForEach(Navigate);
-
             IList<ValidationResult> results;
             DataObjectValidator.TryValidate(this, out results);
             ValidateResults(results);
 
             WitsmlOperationContext.Current.Warnings.AddRange(Context.Warnings);
+        }
+
+        /// <summary>
+        /// Parses the specified function.
+        /// </summary>
+        /// <param name="function">The function.</param>
+        /// <param name="parser">The input template parser.</param>
+        /// <returns>A copy of the parsed element.</returns>
+        public XElement Parse(Functions function, WitsmlQueryParser parser)
+        {
+            var root = new XElement(parser.Root);
+            Context.RemoveNaNElements = true;
+            if (function == Functions.AddToStore || function == Functions.UpdateInStore)
+                Navigate(root.Elements().FirstOrDefault());
+
+            return root;
         }
 
         /// <summary>
@@ -114,6 +127,19 @@ namespace PDS.Witsml.Server.Data
                         yield return result;
                     break;
             }
+        }
+
+        /// <summary>
+        /// Handles the NaN value during parse navigation by removing NaN values.
+        /// </summary>
+        /// <param name="xmlObject">The XML object.</param>
+        /// <param name="propertyType">Type of the property.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <param name="propertyValue">The property value.</param>
+        protected override void HandleNaNValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
+        {
+            if (Context.RemoveNaNElements)
+                Remove(xmlObject);
         }
 
         /// <summary>

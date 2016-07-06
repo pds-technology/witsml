@@ -32,5 +32,13 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <value>The type of the data object.</value>
         public override Type DataObjectType => typeof(T);
+
+        /// <summary>
+        /// Gets or sets a value indicating whether NaN elements should be removed.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if NaN elements should be removed; otherwise, <c>false</c>.
+        /// </value>
+        public bool RemoveNaNElements { get; set; }
     }
 }
