@@ -17,9 +17,11 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -222,6 +224,35 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual(_well.Name, result[0].Name);
             Assert.IsNull(result[0].Operator);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_UpdateInStore_Error_409_Missing_Required_Fields_For_Optional_Property()
+        {
+            // Add well
+            var response = DevKit.Add<WellList, Well>(_well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uid = response.SuppMsgOut;
+
+            var wellDatum = new WellDatum
+            {
+                Uid = "DF",
+                Code = ElevCodeEnum.DF
+            };
+
+            var update = new Well
+            {
+                Uid = uid,
+                WellDatum = new List<WellDatum> {wellDatum}
+            };
+
+            var updateResponse = DevKit.Update<WellList, Well>(update);
+
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, updateResponse.Result);
         }
     }
 }
