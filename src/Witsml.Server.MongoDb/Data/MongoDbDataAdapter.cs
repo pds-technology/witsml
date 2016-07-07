@@ -18,7 +18,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using Energistics.DataAccess.Validation;
 using Energistics.Datatypes;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -122,6 +124,7 @@ namespace PDS.Witsml.Server.Data
             using (var transaction = DatabaseProvider.BeginTransaction(uri))
             {
                 UpdateEntity(parser, uri, transaction);
+                ValidateUpdatedEntity(uri);
                 transaction.Commit();
             }
         }
@@ -488,6 +491,36 @@ namespace PDS.Witsml.Server.Data
             return OptionsIn.ReturnElements.IdOnly.Equals(parser.ReturnElements())
                 ? new List<string> { IdPropertyName, NamePropertyName }
                 : null;
+        }
+
+        private void ValidateUpdatedEntity(EtpUri uri)
+        {
+            IList<ValidationResult> results;
+
+            var entity = GetEntity(uri);
+            DataObjectValidator.TryValidate(entity, out results);
+            ValidateResults(results);
+        }
+
+        private static void ValidateResults(IList<ValidationResult> results)
+        {
+            if (!results.Any()) return;
+
+            ErrorCodes errorCode;
+            var witsmlValidationResult = results.OfType<WitsmlValidationResult>().FirstOrDefault();
+
+            if (witsmlValidationResult != null)
+            {
+                throw new WitsmlException((ErrorCodes)witsmlValidationResult.ErrorCode);
+            }
+
+            if (Enum.TryParse(results.First().ErrorMessage, out errorCode))
+            {
+                throw new WitsmlException(errorCode);
+            }
+
+            throw new WitsmlException(ErrorCodes.InputTemplateNonConforming,
+                string.Join("; ", results.Select(x => x.ErrorMessage)));
         }
     }
 }
