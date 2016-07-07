@@ -105,7 +105,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var uid = response.SuppMsgOut;
 
             string xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-                           "   <well> uid=\"" + uid + "\"" + Environment.NewLine +                          
+                           "   <well uid=\"" + uid + "\">" + Environment.NewLine +                          
                            "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
                            "     <wellheadElevation uom=\"ft\"></wellheadElevation>" + Environment.NewLine +
                            "   </well>" + Environment.NewLine +
@@ -130,7 +130,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var uid = response.SuppMsgOut;
 
             string xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-                           "   <well> uid=\"" + uid + "\"" + Environment.NewLine +
+                           "   <well uid=\"" + uid + "\">" + Environment.NewLine +
                            "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
                            "     <wellheadElevation uom=\"ft\">NaN</wellheadElevation>" + Environment.NewLine +
                            "   </well>" + Environment.NewLine +
