@@ -216,10 +216,7 @@ namespace PDS.Witsml
         /// <returns></returns>
         public static ErrorCodes GetNonConformingErrorCode(this Functions function)
         {
-            return function == Functions.GetFromStore ||
-                   function == Functions.DeleteFromStore
-                ? ErrorCodes.QueryTemplateNonConforming
-                : function == Functions.UpdateInStore
+            return function == Functions.UpdateInStore
                     ? ErrorCodes.UpdateTemplateNonConforming
                     : ErrorCodes.InputTemplateNonConforming;
         }

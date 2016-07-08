@@ -1289,6 +1289,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.MissingElementUid, response.Result);
         }
 
+        [Ignore, Description("No longer a valid test as we are now validating recurring elements for uid")]
         [TestMethod]
         public void Test_log_curve_uid_default_to_mnemonic()
         {
@@ -1526,22 +1527,22 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141Validator_UpdateInStore_Error_409_DataDelimiter_Max_Size_Exceeded()
+        public void Log141Validator_UpdateInStore_Error_483_DataDelimiter_Max_Size_Exceeded()
         {
-            TestUpdateLogWithDelimiter("123", ErrorCodes.InputTemplateNonConforming);
+            TestUpdateLogWithDelimiter("123", ErrorCodes.UpdateTemplateNonConforming);
         }
 
         [TestMethod]
-        public void Log141Validator_UpdateInStore_Error_409_DataDelimiter_With_Bad_Charaters()
+        public void Log141Validator_UpdateInStore_Error_483_DataDelimiter_With_Bad_Charaters()
         {
             var log = TestAddLogWithDelimiter(",", ErrorCodes.Success);
-            TestUpdateLogWithDelimiter("0", ErrorCodes.InputTemplateNonConforming, log);
-            TestUpdateLogWithDelimiter("2", ErrorCodes.InputTemplateNonConforming, log);
-            TestUpdateLogWithDelimiter("6", ErrorCodes.InputTemplateNonConforming, log);
-            TestUpdateLogWithDelimiter("8", ErrorCodes.InputTemplateNonConforming, log);
-            TestUpdateLogWithDelimiter("+", ErrorCodes.InputTemplateNonConforming, log);
-            TestUpdateLogWithDelimiter("-", ErrorCodes.InputTemplateNonConforming, log);
-            TestUpdateLogWithDelimiter("# ", ErrorCodes.InputTemplateNonConforming, log);
+            TestUpdateLogWithDelimiter("0", ErrorCodes.UpdateTemplateNonConforming, log);
+            TestUpdateLogWithDelimiter("2", ErrorCodes.UpdateTemplateNonConforming, log);
+            TestUpdateLogWithDelimiter("6", ErrorCodes.UpdateTemplateNonConforming, log);
+            TestUpdateLogWithDelimiter("8", ErrorCodes.UpdateTemplateNonConforming, log);
+            TestUpdateLogWithDelimiter("+", ErrorCodes.UpdateTemplateNonConforming, log);
+            TestUpdateLogWithDelimiter("-", ErrorCodes.UpdateTemplateNonConforming, log);
+            TestUpdateLogWithDelimiter("# ", ErrorCodes.UpdateTemplateNonConforming, log);
         }
 
         [TestMethod]

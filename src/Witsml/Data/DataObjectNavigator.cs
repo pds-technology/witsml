@@ -26,7 +26,6 @@ using Energistics.DataAccess;
 using Energistics.DataAccess.Validation;
 using log4net;
 using PDS.Framework;
-using PDS.Witsml;
 using PDS.Witsml.Server.Compatibility;
 
 namespace PDS.Witsml.Data
