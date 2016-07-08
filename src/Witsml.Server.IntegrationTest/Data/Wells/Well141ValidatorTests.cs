@@ -317,6 +317,24 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.MissingElementUid, updateResponse.Result);
         }
 
+        [TestMethod]
+        public void Well141Validator_UpdateInStore_484_Missing_Required_Data()
+        {
+            // Add a well to the store
+            var response = AddTestWell(_well, "WellTest484");
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Clear the well name (required) and update
+            _well.Uid = response.SuppMsgOut;
+            _well.Name = string.Empty;
+
+
+            // Update and Assert MissingRequiredData
+            var updateResponse = DevKit.Update<WellList, Well>(_well, ObjectTypes.Well, null, null);
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.MissingRequiredData, updateResponse.Result);
+        }
+
         private WMLS_AddToStoreResponse AddTestWell(Well well, string wellName = null)
         {
             well.Name = wellName ?? well.Name;
