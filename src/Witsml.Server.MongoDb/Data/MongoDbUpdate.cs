@@ -309,10 +309,8 @@ namespace PDS.Witsml.Server.Data
                 .Select(element =>
                 {
                     var elementId = GetElementId(element, idField);
-                    if (string.IsNullOrEmpty(elementId))
-                    {
-                        throw new WitsmlException(ErrorCodes.MissingElementUid);
-                    }
+                    if (string.IsNullOrEmpty(elementId)) return null;
+                    
 
                     var filters = new List<FilterDefinition<T>>() { _entityFilter };
 
