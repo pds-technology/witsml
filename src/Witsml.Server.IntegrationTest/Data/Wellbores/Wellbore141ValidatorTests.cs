@@ -280,6 +280,13 @@ namespace PDS.Witsml.Server.Data.Wellbores
         }
 
         [TestMethod]
+        public void Wellbore141Validator_UpdateInStore_Error_483_None_Non_Conforming_Query_Template()
+        {
+            var response = DevKit.UpdateInStore(ObjectTypes.Wellbore, _badQueryEmptyWellboreList, null, null);
+            Assert.AreEqual((short)ErrorCodes.UpdateTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
         public void Wellbore141Validator_GetFromStore_Error_425_ReturnElement_HeaderOnly_Not_Growing_Object()
         {
             var response = DevKit.Get<WellboreList, Wellbore>(_query, ObjectTypes.Wellbore, optionsIn: OptionsIn.ReturnElements.HeaderOnly);

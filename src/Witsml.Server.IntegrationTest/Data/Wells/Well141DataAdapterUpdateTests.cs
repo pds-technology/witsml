@@ -17,9 +17,11 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -222,6 +224,129 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual(_well.Name, result[0].Name);
             Assert.IsNull(result[0].Operator);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_UpdateInStore_443_Invalid_Uom()
+        {
+            ValidateUpdateUom("WellTest443", "abc123", ErrorCodes.InvalidUnitOfMeasure);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_UpdateInStore_453_Missing_Uom_For_MeasureData()
+        {
+            ValidateUpdateUom("WellTest453", string.Empty, ErrorCodes.MissingUnitForMeasureData);
+        }
+
+        private WMLS_UpdateInStoreResponse ValidateUpdateUom(string wellName, string uom, ErrorCodes expectedUpdateResult)
+        {
+            // Add well and get its uid
+            _well.Name = DevKit.Name(wellName);
+            var response = DevKit.Add<WellList, Well>(_well);
+            var uid = response.SuppMsgOut;
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Create an update well with an invalid wellheadElevation
+            string xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                           "   <well uid=\"" + uid + "\">" + Environment.NewLine +
+                           "     <wellheadElevation uom=\"" + uom + "\">1000</wellheadElevation>" + Environment.NewLine +
+                           "   </well>" + Environment.NewLine +
+                           "</wells>";
+
+            var updateResponse = DevKit.UpdateInStore(ObjectTypes.Well, xmlIn, null, null);
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)expectedUpdateResult, updateResponse.Result);
+
+            return updateResponse;
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_UpdateInStore_444_Input_Template_Multiple_DataObjects()
+        {
+            // Add a well to the store
+            var response = AddTestWell(_well, "WellTest444");
+            var uid = response.SuppMsgOut;
+
+            Assert.AreEqual((short) ErrorCodes.Success, response.Result);
+
+            // Create a well list with two valid wells and update
+            _well.Uid = uid;
+            var wells = new WellList { Well = DevKit.List(_well, _well) };
+            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
+            var updateResponse = DevKit.UpdateInStore(ObjectTypes.Well, xmlIn, null, null);
+
+            // Assert that we have multiple wells
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateMultipleDataObjects, updateResponse.Result);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_UpdateInStore_445_Input_Template_Multiple_DataObjects()
+        {
+            // Add a well to the store
+            var response = AddTestWell(_well, "WellTest445");
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add empty element
+            _well.Uid = response.SuppMsgOut;
+            _well.ReferencePoint = new List<ReferencePoint> {new ReferencePoint() {Uid = "Test empty reference point"}};
+
+            // Update and Assert that there are empt elements
+            var updateResponse = DevKit.Update<WellList, Well>(_well, ObjectTypes.Well, null, null);
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.EmptyNewElementsOrAttributes, updateResponse.Result);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_UpdateInStore_464_Child_Uid_Not_Unique()
+        {
+            // Add a well to the store and Assert Success
+            var response = AddTestWell(_well, "WellTest464");
+            var uid = response.SuppMsgOut;
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Create a well with two WellDatum with the same uid and update
+            var datumKb = DevKit.WellDatum("Kelly Bushing", ElevCodeEnum.KB, "This is WellDatum");
+            var datumSl = DevKit.WellDatum("Sea Level", ElevCodeEnum.SL, "This is WellDatum");
+            _well.Uid = uid;
+            _well.WellDatum = new List<WellDatum>() { datumKb, datumSl };
+            var updateResponse = DevKit.Update<WellList, Well>(_well);
+
+            // Assert that non-unique uids were found
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.ChildUidNotUnique, updateResponse.Result);
+        }
+
+        [TestMethod]
+        public void Test_error_code_468_missing_version_attribute()
+        {
+            // Add a well and Assert Success
+            var response = AddTestWell(_well, "Well-to-add-missing-version-attribute");
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // update Version property to an unsupported data schema version
+            _well.Uid = response.SuppMsgOut;
+            var wells = new WellList
+            {
+                Well = DevKit.List(_well),
+                Version = null
+            };
+            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
+
+            // Update and Assert that the version was missing for update.
+            var updateResponse = DevKit.UpdateInStore(ObjectTypes.Well, xmlIn, null, null);
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, updateResponse.Result);
+        }
+
+        private WMLS_AddToStoreResponse AddTestWell(Well well, string wellName)
+        {
+            _well.Name = DevKit.Name(wellName);
+            var response = DevKit.Add<WellList, Well>(well);
+            return response;
         }
     }
 }

@@ -26,6 +26,7 @@ using Energistics.DataAccess;
 using Energistics.DataAccess.Validation;
 using log4net;
 using PDS.Framework;
+using PDS.Witsml;
 using PDS.Witsml.Server.Compatibility;
 
 namespace PDS.Witsml.Data
@@ -345,7 +346,7 @@ namespace PDS.Witsml.Data
                 DateTime value;
 
                 if (!DateTime.TryParse(propertyValue, out value))
-                    throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
+                    throw new WitsmlException(Context.Function.GetNonConformingErrorCode());
 
                 HandleDateTimeValue(xmlObject, propertyType, propertyPath, propertyValue, value);
             }
@@ -354,7 +355,7 @@ namespace PDS.Witsml.Data
                 DateTimeOffset value;
 
                 if (!DateTimeOffset.TryParse(propertyValue, out value))
-                    throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
+                    throw new WitsmlException(Context.Function.GetNonConformingErrorCode());
 
                 HandleTimestampValue(xmlObject, propertyType, propertyPath, propertyValue, new Timestamp(value));
             }
@@ -513,27 +514,13 @@ namespace PDS.Witsml.Data
             }
             else
             {
-                throw new WitsmlException(GetErrorCode(), message);
+                throw new WitsmlException(Context.Function.GetNonConformingErrorCode(), message);
             }
 
             if (remove)
             {
                 Remove(element);
             }
-        }
-
-        /// <summary>
-        /// Gets the error code for the current WITSML API function.
-        /// </summary>
-        /// <returns>The <see cref="ErrorCodes"/> value.</returns>
-        protected virtual ErrorCodes GetErrorCode()
-        {
-            return Context.Function == Functions.GetFromStore ||
-                   Context.Function == Functions.DeleteFromStore
-                ? ErrorCodes.QueryTemplateNonConforming
-                : Context.Function == Functions.UpdateInStore
-                    ? ErrorCodes.UpdateTemplateNonConforming
-                    : ErrorCodes.InputTemplateNonConforming;
         }
 
         /// <summary>
