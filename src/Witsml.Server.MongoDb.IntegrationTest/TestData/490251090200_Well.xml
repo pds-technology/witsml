@@ -9,7 +9,7 @@
     <timeZone>-08:00</timeZone>
     <statusWell>plugged and abandoned</statusWell>
     <dTimSpud>1982-11-18T00:00:00.0000000+00:00</dTimSpud>
-    <wellDatum>
+    <wellDatum uid="KB">
       <name>Kelly Bushing</name>
       <code>KB</code>
       <elevation uom="ft">5218</elevation>
