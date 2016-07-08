@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Xml.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using PDS.Framework;
@@ -459,6 +460,16 @@ namespace PDS.Witsml.Server.Data.Logs
                     return false;
             }
             return true;
+        }
+
+        /// <summary>
+        /// Determines whether the specified element should be ignored
+        /// </summary>
+        /// <param name="element">The element to tested to be ignored.</param>
+        /// <returns>true if the element should be ignored, false otherwise.</returns>
+        protected override bool IsRecurringElementIgnored(XElement element)
+        {
+            return element.Name.LocalName == "logData" ? true : false;
         }
     }
 }

@@ -169,7 +169,7 @@ namespace PDS.Witsml.Server.Configuration
 
             if (!document.Root.Elements().Any())
             {
-                throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
+                throw new WitsmlException(WitsmlOperationContext.Current.Request.Function.GetNonConformingErrorCode());
             }
         }
 
@@ -390,7 +390,7 @@ namespace PDS.Witsml.Server.Configuration
                 if (function == Functions.AddToStore)
                     throw new WitsmlException(ErrorCodes.DataObjectTypesDontMatch);
 
-                throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
+                throw new WitsmlException(function.GetNonConformingErrorCode());
             }
 
             if (IsSupported(function, objectType))

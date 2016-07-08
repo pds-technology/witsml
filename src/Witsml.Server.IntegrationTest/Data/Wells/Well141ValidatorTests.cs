@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Server.Data.Wells
@@ -32,6 +33,7 @@ namespace PDS.Witsml.Server.Data.Wells
         private string _badQueryNoWell;
         private string _queryEmptyWell;
         private List<Well> _queryEmptyWellList;
+        private Well _well;
 
         public TestContext TestContext { get; set; }
 
@@ -52,6 +54,8 @@ namespace PDS.Witsml.Server.Data.Wells
                             "    <well/>" + Environment.NewLine +
                             "</wells>";
             _queryEmptyWellList = DevKit.List(new Well());
+
+            _well = new Well { Name = DevKit.Name("Well141Validator"), TimeZone = DevKit.TimeZone };
         }
 
         [TestCleanup]
@@ -243,6 +247,13 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
+        public void WitsmlValidator_UpdateInStore_Error_483_Bad_Query_No_Well()
+        {
+            var response = DevKit.UpdateInStore(ObjectTypes.Well, _badQueryNoWell, null, optionsIn: null);
+            Assert.AreEqual((short)ErrorCodes.UpdateTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
         public void WitsmlValidator_GetFromStore_Error_407_Missing_Witsml_Object_Type()
         {
             var well = new Well { Name = "Well-to-query-missing-witsml-type", TimeZone = DevKit.TimeZone };
@@ -258,6 +269,62 @@ namespace PDS.Witsml.Server.Data.Wells
             var response = DevKit.GetFromStore(ObjectTypes.Well, null, null, null);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.MissingInputTemplate, response.Result);
+        }
+
+        [TestMethod]
+        public void Well141Validator_UpdateInStore_415_Uid_Missing()
+        {
+            var response = AddTestWell(_well);
+
+            // Update Well has no Uid
+            var updateWell = new Well() { Country = "test" };
+            var updateResponse = DevKit.Update<WellList, Well>(updateWell);
+
+            // Assert that uid is missing
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.DataObjectUidMissing, updateResponse.Result);
+        }
+
+        [TestMethod]
+        public void Well141Validator_UpdateInStore_433_DataObject_Does_Not_Exist()
+        {
+            var response = AddTestWell(_well);
+
+            // Update Well has modified uid that does not exist
+            var updateWell = new Well() { Country = "test", Uid = response.SuppMsgOut + "x"};
+            var updateResponse = DevKit.Update<WellList, Well>(updateWell);
+
+            // Assert that the update well does not exist
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.DataObjectNotExist, updateResponse.Result);
+        }
+
+        [TestMethod]
+        public void Well141Validator_UpdateInStore_448_Missing_Element_Uid()
+        {
+            // Add a well to the store
+            var response = AddTestWell(_well, "WellTest448");
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add a reference point without a uid
+            _well.Uid = response.SuppMsgOut;
+            _well.ReferencePoint = new List<ReferencePoint> {new ReferencePoint() {Name = "rpName"} };
+            _well.ReferencePoint[0].Location = new List<Location> {new Location()};
+
+            // Update and Assert MissingElementUid
+            var updateResponse = DevKit.Update<WellList, Well>(_well, ObjectTypes.Well, null, null);
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.MissingElementUid, updateResponse.Result);
+        }
+
+        private WMLS_AddToStoreResponse AddTestWell(Well well, string wellName = null)
+        {
+            well.Name = wellName ?? well.Name;
+            var response = DevKit.Add<WellList, Well>(well);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            return response;
         }
     }
 }

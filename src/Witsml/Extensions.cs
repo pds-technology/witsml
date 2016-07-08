@@ -208,5 +208,17 @@ namespace PDS.Witsml
         {
             return timestamp?.ToUnixTimeMicroseconds();
         }
+
+        /// <summary>
+        /// Gets the error code.
+        /// </summary>
+        /// <param name="function">The function.</param>
+        /// <returns></returns>
+        public static ErrorCodes GetNonConformingErrorCode(this Functions function)
+        {
+            return function == Functions.UpdateInStore
+                    ? ErrorCodes.UpdateTemplateNonConforming
+                    : ErrorCodes.InputTemplateNonConforming;
+        }
     }
 }

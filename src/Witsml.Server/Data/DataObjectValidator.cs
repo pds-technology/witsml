@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Reflection;
 using System.Xml.Linq;
 using Energistics.DataAccess.Validation;
 using PDS.Witsml.Data;
@@ -199,7 +200,80 @@ namespace PDS.Witsml.Server.Data
             yield break;
         }
 
-        private static void ValidateResults(IList<ValidationResult> results)
+
+        /// <summary>
+        /// Navigates the recurring elements with validation for Uids (MissingElementUid).
+        /// </summary>
+        /// <param name="elements">The elements.</param>
+        /// <param name="childType">Type of the child.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <param name="propertyInfo">The property information.</param>
+        protected override void NavigateRecurringElements(List<XElement> elements, Type childType, string propertyPath, PropertyInfo propertyInfo)
+        {
+            var elementIds = new List<string>();
+
+            foreach (var element in elements)
+            {
+                if (IsRecurringElementIgnored(element))
+                {
+                    return;
+                }
+                elementIds.Add(GetAndValidateArrayElementUid(element));
+                NavigateElementType(childType, element, propertyPath);
+            }
+
+            // Look for duplicate uids
+            var duplicateKeys = elementIds.GroupBy(x => x)
+                        .Where(group => group.Count() > 1)
+                        .Select(group => group.Key);
+
+            if (duplicateKeys.Any())
+            {
+                throw new WitsmlException(ErrorCodes.ChildUidNotUnique);
+            }
+        }
+
+        /// <summary>
+        /// Navigates the array element with validation for Uid (MissingElementUid).  
+        /// </summary>
+        /// <param name="elements">The elements.</param>
+        /// <param name="childType">Type of the child.</param>
+        /// <param name="element">The element.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <param name="propertyInfo">The property information.</param>
+        protected override void NavigateArrayElementType(List<XElement> elements, Type childType, XElement element, string propertyPath,
+            PropertyInfo propertyInfo)
+        {
+            if (IsRecurringElementIgnored(element))
+                return;
+
+            GetAndValidateArrayElementUid(element);
+            base.NavigateArrayElementType(elements, childType, element, propertyPath, propertyInfo);
+        }
+
+        /// <summary>
+        /// Determines whether the specified element should be ignored
+        /// </summary>
+        /// <param name="element">The element to tested to be ignored.</param>
+        /// <returns>true if the element should be ignored, false otherwise.</returns>
+        protected virtual bool IsRecurringElementIgnored(XElement element)
+        {
+            return false;
+        }
+
+        private static string GetAndValidateArrayElementUid(XElement element)
+        {
+            var uidAttribute = element.Attributes().FirstOrDefault(a => a.Name == "uid");
+
+            if (string.IsNullOrEmpty(uidAttribute?.Value))
+            {
+                throw new WitsmlException(ErrorCodes.MissingElementUid);
+            }
+
+            return uidAttribute.Value;
+        }
+
+        private void ValidateResults(IList<ValidationResult> results)
         {
             if (!results.Any()) return;
 
@@ -216,7 +290,7 @@ namespace PDS.Witsml.Server.Data
                 throw new WitsmlException(errorCode);
             }
 
-            throw new WitsmlException(ErrorCodes.InputTemplateNonConforming,
+            throw new WitsmlException(Context.Function.GetNonConformingErrorCode(),
                 string.Join("; ", results.Select(x => x.ErrorMessage)));
         }
     }
