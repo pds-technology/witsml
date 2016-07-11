@@ -128,7 +128,9 @@ namespace PDS.Witsml.Server.Data
             {
                 var elementList = elements.ToList();
 
-                if (elementList.Count == 1)
+                if (elementList.Count == 1 && 
+                    !propertyInfo.PropertyType.FullName.StartsWith("System.") && 
+                    propertyInfo.PropertyType != typeof(Timestamp))
                 {
                     var propertyPath = GetPropertyPath(parentPath, propertyInfo.Name);
                     var childValue = ParseNestedElement(propertyInfo.PropertyType, elementList.First());
@@ -328,6 +330,13 @@ namespace PDS.Witsml.Server.Data
             return WitsmlParser.Parse(type, element);
         }
 
+        private IList CreateList(Type listType, object item)
+        {
+            var list = Activator.CreateInstance(listType) as IList;
+            list?.Add(item);
+            return list;
+        }
+
         private void UpdateArrayElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
         {
             Logger.DebugFormat("Updating array elements: {0} {1}", parentPath, propertyInfo?.Name);
@@ -345,9 +354,8 @@ namespace PDS.Witsml.Server.Data
                 .Select(element =>
                 {
                     var elementId = GetElementId(element, idField);
-                    if (string.IsNullOrEmpty(elementId)) return null;
+                    if (string.IsNullOrEmpty(elementId) || propertyInfo == null) return null;
                     
-
                     var filters = new List<FilterDefinition<T>>() { _entityFilter };
 
                     object current;
@@ -359,7 +367,10 @@ namespace PDS.Witsml.Server.Data
 
                         var item = ParseNestedElement(type, element);
                         var filter = filterBuilder.And(filters);
-                        var update = updateBuilder.Push(parentPath, item);
+
+                        var update = propertyValue == null
+                            ? updateBuilder.Set(parentPath, CreateList(propertyInfo.PropertyType, item))
+                            : updateBuilder.Push(parentPath, item);
 
                         return new UpdateOneModel<T>(filter, update);
                     }
@@ -408,7 +419,7 @@ namespace PDS.Witsml.Server.Data
         {
             var idProp = GetPropertyInfoForAnElement(properties, idField);            
 
-            return items
+            return (items ?? Enumerable.Empty<object>())
                 .Cast<object>()
                 .ToDictionary(x =>
                 {
