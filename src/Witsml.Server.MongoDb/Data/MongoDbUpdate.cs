@@ -121,7 +121,30 @@ namespace PDS.Witsml.Server.Data
         protected override void NavigateElementGroup(PropertyInfo propertyInfo, IGrouping<string, XElement> elements, string parentPath)
         {
             PushPropertyInfo(propertyInfo);
-            base.NavigateElementGroup(propertyInfo, elements, parentPath);
+
+            var parentValue = Context.PropertyValues.LastOrDefault();
+
+            if (parentValue == null)
+            {
+                var elementList = elements.ToList();
+
+                if (elementList.Count == 1)
+                {
+                    var propertyPath = GetPropertyPath(parentPath, propertyInfo.Name);
+                    var childValue = ParseNestedElement(propertyInfo.PropertyType, elementList.First());
+
+                    HandleObjectValue(null, null, propertyPath, null, childValue);
+                }
+                else
+                {
+                    base.NavigateElementGroup(propertyInfo, elements, parentPath);
+                }
+            }
+            else
+            {
+                base.NavigateElementGroup(propertyInfo, elements, parentPath);
+            }
+
             PopPropertyInfo();
         }
 
@@ -265,9 +288,13 @@ namespace PDS.Witsml.Server.Data
 
         private void PushPropertyInfo(PropertyInfo propertyInfo)
         {
+            var parentValue = Context.PropertyValues.LastOrDefault();
+
             var propertyValue = Context.PropertyValues.Count == 0
                 ? propertyInfo.GetValue(_entity)
-                : propertyInfo.GetValue(Context.PropertyValues.Last());
+                : parentValue != null
+                ? propertyInfo.GetValue(parentValue)
+                : null;
 
             PushPropertyInfo(propertyInfo, propertyValue);
         }
@@ -290,6 +317,15 @@ namespace PDS.Witsml.Server.Data
                 throw new WitsmlException(ErrorCodes.MissingRequiredData);
 
             Context.Update = Context.Update.Unset(propertyPath);
+        }
+
+        private object ParseNestedElement(Type type, XElement element)
+        {
+            // update element name to match XSD type
+            var xmlType = type.GetCustomAttribute<XmlTypeAttribute>();
+            element.Name = xmlType != null ? xmlType.TypeName : element.Name;
+
+            return WitsmlParser.Parse(type, element);
         }
 
         private void UpdateArrayElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
@@ -321,12 +357,7 @@ namespace PDS.Witsml.Server.Data
                     {
                         ValidateArrayElement(element, properties);
 
-                        // update element name to match XSD type
-                        var xmlType = type.GetCustomAttribute<XmlTypeAttribute>();
-                        element.Name = xmlType != null ? xmlType.TypeName : element.Name;
-
-                        var item = WitsmlParser.Parse(type, element);
-
+                        var item = ParseNestedElement(type, element);
                         var filter = filterBuilder.And(filters);
                         var update = updateBuilder.Push(parentPath, item);
 
