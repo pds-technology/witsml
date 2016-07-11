@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
@@ -591,6 +592,7 @@ namespace PDS.Witsml.Data
         protected string ValidateMeasureUom(XElement element, PropertyInfo uomProperty, string measureValue)
         {
             var xmlAttribute = uomProperty.GetCustomAttribute<XmlAttributeAttribute>();
+            var isRequired = uomProperty.GetCustomAttribute<RequiredAttribute>() != null;
 
             // validation not needed if uom attribute is not defined
             if (xmlAttribute == null)
@@ -602,7 +604,7 @@ namespace PDS.Witsml.Data
                 .FirstOrDefault();
 
             // uom is required when a measure value is specified
-            if (!string.IsNullOrWhiteSpace(measureValue) && string.IsNullOrWhiteSpace(uomValue))
+            if (isRequired && !string.IsNullOrWhiteSpace(measureValue) && string.IsNullOrWhiteSpace(uomValue))
             {
                 throw new WitsmlException(ErrorCodes.MissingUnitForMeasureData);
             }
