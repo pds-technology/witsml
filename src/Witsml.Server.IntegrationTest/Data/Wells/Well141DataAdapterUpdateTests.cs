@@ -377,5 +377,72 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.IsNotNull(updateResponse);
             Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, updateResponse.Result);
         }
+
+        [TestMethod, Description("Tests adding a recurring element for the first time on an UpdateInStore")]
+        public void WellDataAdapter_UpdateInStore_Add_Recurring_Element_Success()
+        {
+            _well.Name = DevKit.Name("WellAddRecurringOnUpdate");
+            var response = DevKit.Add<WellList, Well>(_well);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Create an update well that adds a recurring element for the first time on update
+            var updateWell = new Well()
+            {
+                Uid = response.SuppMsgOut,
+                WellDatum = new List<WellDatum>
+                {
+                    DevKit.WellDatum("Kelly Bushing", ElevCodeEnum.KB, "KB"),
+                    DevKit.WellDatum("Casing Flange", ElevCodeEnum.CF, "CF")
+                }
+            };
+            var updateResponse = DevKit.Update<WellList, Well>(updateWell);
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+        }
+
+        [TestMethod, Description("Tests adding an nested, non-recurring, element for the first time on an UpdateInStore")]
+        public void WellDataAdapter_UpdateInStore_Add_Nested_Element_Success()
+        {
+            // Add a minimal test well and Assert its Success
+            _well.Name = DevKit.Name("WellAddNestedOnUpdate");
+            var response = DevKit.Add<WellList, Well>(_well);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Create an update well that adds a nested (non-recurring) element for the first time on update
+            var updateWell = new Well()
+            {
+                Uid = response.SuppMsgOut,
+                WellPublicLandSurveySystemLocation =
+                    new PublicLandSurveySystem() {PrincipalMeridian = PrincipalMeridian.ChoctawMeridian, Range = 1}
+            };
+            var updateResponse = DevKit.Update<WellList, Well>(updateWell);
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+        }
+
+        [TestMethod, Description("Tests adding an element with attributes for the first time on an UpdateInStore")]
+        public void WellDataAdapter_UpdateInStore_Add_Element_With_Attribute_Success()
+        {
+            // Add a wellDatum to the test _well
+            _well.Name = DevKit.Name("WellAddWithAttributesOnUpdate");
+            _well.WellDatum = new List<WellDatum> {DevKit.WellDatum("Kelly Bushing", ElevCodeEnum.KB, "KB")};
+
+            // Add a well with a datum that we can reference in the update
+            var response = DevKit.Add<WellList, Well>(_well);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Create an update well with a new element that has attributes and Assert Success
+            var updateWell = new Well()
+            {
+                Uid = response.SuppMsgOut,
+                WellheadElevation = new WellElevationCoord() { Uom = WellVerticalCoordinateUom.m, Datum = "KB" }
+            };
+            var updateResponse = DevKit.Update<WellList, Well>(updateWell);
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+        }
     }
 }
