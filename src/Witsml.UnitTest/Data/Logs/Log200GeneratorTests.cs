@@ -27,118 +27,115 @@ namespace PDS.Witsml.Data.Logs
     [TestClass]
     public class Log200GeneratorTests
     {
-        private Log200Generator LogGenerator;
-        private Log DepthLog;
-        private Log TimeLog;
-        private DataObjectReference WellboreReference;
-        private ChannelIndex MeasuredDepthIndex;
-        private ChannelIndex DateTimeIndex;
-        private ChannelIndex ElapseTimeIndex;
-        private PointMetadata BooleanPointMetadata;
-        private PointMetadata FloatPointMetadata;
-        private ChannelSet DepthLogChannelSet;
-        private ChannelSet TimeLogChannelSet;
+        private Log200Generator _logGenerator;
+        private Log _depthLog;
+        private Log _timeLog;
+        private DataObjectReference _wellboreReference;
+        private ChannelIndex _measuredDepthIndex;
+        private ChannelIndex _dateTimeIndex;
+        private ChannelIndex _elapseTimeIndex;
+        private PointMetadata _booleanPointMetadata;
+        private PointMetadata _floatPointMetadata;
+        private ChannelSet _depthLogChannelSet;
+        private ChannelSet _timeLogChannelSet;
 
         [TestInitialize]
         public void TestSetUp()
         {
-            LogGenerator = new Log200Generator();
-            WellboreReference = new DataObjectReference
+            _logGenerator = new Log200Generator();
+            _wellboreReference = new DataObjectReference
             {
                 ContentType = EtpContentTypes.Witsml200.For(ObjectTypes.Wellbore),
-                Title = LogGenerator.Name("Wellbore"),
-                Uuid = LogGenerator.Uid()
+                Title = _logGenerator.Name("Wellbore"),
+                Uuid = _logGenerator.Uid()
             };
 
-            TimeLog = new Log() { TimeDepth = "Time", Citation = LogGenerator.CreateCitation(LogGenerator.Name("Citation")), Wellbore = WellboreReference, Uuid = LogGenerator.Uid() };
-            DepthLog = new Log() { TimeDepth = "Depth", Citation = LogGenerator.CreateCitation(LogGenerator.Name("Citation")), Wellbore = WellboreReference, Uuid = LogGenerator.Uid() };
+            _timeLog = new Log() { TimeDepth = "Time", Citation = _logGenerator.CreateCitation(_logGenerator.Name("Citation")), Wellbore = _wellboreReference, Uuid = _logGenerator.Uid() };
+            _depthLog = new Log() { TimeDepth = "Depth", Citation = _logGenerator.CreateCitation(_logGenerator.Name("Citation")), Wellbore = _wellboreReference, Uuid = _logGenerator.Uid() };
 
-            MeasuredDepthIndex = LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
-            DateTimeIndex = LogGenerator.CreateDateTimeIndex();
-            ElapseTimeIndex = LogGenerator.CreateElapsedTimeIndex(IndexDirection.increasing);
+            _measuredDepthIndex = _logGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
+            _dateTimeIndex = _logGenerator.CreateDateTimeIndex();
+            _elapseTimeIndex = _logGenerator.CreateElapsedTimeIndex(IndexDirection.increasing);
 
-            BooleanPointMetadata = LogGenerator.CreatePointMetadata("confidence", "confidence", EtpDataType.boolean);
-            FloatPointMetadata = LogGenerator.CreatePointMetadata("Confidence", "Confidence", EtpDataType.@float);
+            _booleanPointMetadata = _logGenerator.CreatePointMetadata("confidence", "confidence", EtpDataType.boolean);
+            _floatPointMetadata = _logGenerator.CreatePointMetadata("Confidence", "Confidence", EtpDataType.@float);
 
-            DepthLogChannelSet = LogGenerator.CreateChannelSet(DepthLog);
-            DepthLogChannelSet.Index.Add(MeasuredDepthIndex);
-            DepthLogChannelSet.Index.Add(DateTimeIndex);
-            DepthLogChannelSet.Channel.Add(LogGenerator.CreateChannel(DepthLog, DepthLogChannelSet.Index, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: LogGenerator.List(BooleanPointMetadata)));
-            DepthLogChannelSet.Channel.Add(LogGenerator.CreateChannel(DepthLog, DepthLogChannelSet.Index, "Hookload", "HKLD", "klbf", "Force", EtpDataType.@double, null));
+            _depthLogChannelSet = _logGenerator.CreateChannelSet(_depthLog);
+            _depthLogChannelSet.Index.Add(_measuredDepthIndex);
+            _depthLogChannelSet.Index.Add(_dateTimeIndex);
+            _depthLogChannelSet.Channel.Add(_logGenerator.CreateChannel(_depthLog, _depthLogChannelSet.Index, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: _logGenerator.List(_booleanPointMetadata)));
+            _depthLogChannelSet.Channel.Add(_logGenerator.CreateChannel(_depthLog, _depthLogChannelSet.Index, "Hookload", "HKLD", "klbf", "Force", EtpDataType.@double, null));
 
-            TimeLogChannelSet = LogGenerator.CreateChannelSet(TimeLog);
-            TimeLogChannelSet.Index.Add(ElapseTimeIndex);
-            TimeLogChannelSet.Channel.Add(LogGenerator.CreateChannel(TimeLog, TimeLogChannelSet.Index, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: LogGenerator.List(FloatPointMetadata)));
+            _timeLogChannelSet = _logGenerator.CreateChannelSet(_timeLog);
+            _timeLogChannelSet.Index.Add(_elapseTimeIndex);
+            _timeLogChannelSet.Channel.Add(_logGenerator.CreateChannel(_timeLog, _timeLogChannelSet.Index, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: _logGenerator.List(_floatPointMetadata)));
         }
 
         [TestMethod]
-        public void Can_Generate_Depth_Log()
+        public void Log200Generator_Can_Generate_Depth_Log_Data_Increasing()
         {
-            List<ChannelSet> channelSetList = new List<ChannelSet>();
-            channelSetList.Add(DepthLogChannelSet);
+            var channelSetList = new List<ChannelSet> {_depthLogChannelSet};
 
-            LogGenerator.GenerateChannelData(channelSetList, numDataValue: 5);
+            _logGenerator.GenerateChannelData(channelSetList);
             Assert.AreEqual(1, channelSetList.Count);
             Assert.AreEqual(2, channelSetList[0].Channel.Count);
 
-            List<List<List<object>>> dataValues = LogGenerator.DeserializeChannelSetData(channelSetList[0].GetData());
+            var dataValues = _logGenerator.DeserializeChannelSetData(channelSetList[0].GetData());
             Assert.AreEqual(5, dataValues.Count);
             Assert.AreEqual(2, dataValues[0].Count);
             Assert.AreEqual(2, dataValues[0][0].Count);
             Assert.AreEqual(2, dataValues[0][1].Count);
 
-            for (int i = 0; i < 5; i++)
+            for (var i = 0; i < 5; i++)
             {
                 var channel = dataValues[i][1][0];
                 if (channel != null)
                 {
-                    var channelValues = LogGenerator.DeserializeChannelValues(channel.ToString());
+                    var channelValues = _logGenerator.DeserializeChannelValues(channel.ToString());
                     Assert.IsNotNull(channelValues[0]);
                 }
             }
         }
 
         [TestMethod]
-        public void Can_Generate_Depth_Log_Decreasing()
+        public void Log200Generator_Can_Generate_Depth_Log_Data_Decreasing()
         {
-            DepthLogChannelSet.Index[0].Direction = IndexDirection.decreasing;
+            _depthLogChannelSet.Index[0].Direction = IndexDirection.decreasing;
 
-            List<ChannelSet> channelSetList = new List<ChannelSet>();
-            channelSetList.Add(DepthLogChannelSet);
+            var channelSetList = new List<ChannelSet>();
+            channelSetList.Add(_depthLogChannelSet);
 
-            LogGenerator.GenerateChannelData(channelSetList, numDataValue: 5);
+            _logGenerator.GenerateChannelData(channelSetList);
             Assert.AreEqual(1, channelSetList.Count);
             Assert.AreEqual(2, channelSetList[0].Channel.Count);
 
-            List<List<List<object>>> dataValues = LogGenerator.DeserializeChannelSetData(channelSetList[0].GetData());
+            var dataValues = _logGenerator.DeserializeChannelSetData(channelSetList[0].GetData());
             Assert.AreEqual(5, dataValues.Count);
             Assert.AreEqual(2, dataValues[0].Count);
         }
 
         [TestMethod]
-        public void Can_Generate_Depth_Log_MultiChannelSet()
+        public void Log200Generator_Can_Generate_Depth_Log_Data_MultiChannelSet()
         {
-            ChannelSet channelSet2 = LogGenerator.CreateChannelSet(DepthLog);
-            channelSet2.Index.Add(MeasuredDepthIndex);
-            channelSet2.Index.Add(DateTimeIndex);
-            channelSet2.Channel.Add(LogGenerator.CreateChannel(DepthLog, channelSet2.Index, "GR", "GR", "api", "gamma_ray", EtpDataType.@double, pointMetadataList: LogGenerator.List(FloatPointMetadata)));
+            var channelSet2 = _logGenerator.CreateChannelSet(_depthLog);
+            channelSet2.Index.Add(_measuredDepthIndex);
+            channelSet2.Index.Add(_dateTimeIndex);
+            channelSet2.Channel.Add(_logGenerator.CreateChannel(_depthLog, channelSet2.Index, "GR", "GR", "api", "gamma_ray", EtpDataType.@double, pointMetadataList: _logGenerator.List(_floatPointMetadata)));
 
-            List<ChannelSet> channelSetList = new List<ChannelSet>();
-            channelSetList.Add(DepthLogChannelSet);
-            channelSetList.Add(channelSet2);
+            var channelSetList = new List<ChannelSet> {_depthLogChannelSet, channelSet2};
 
-            LogGenerator.GenerateChannelData(channelSetList, numDataValue: 5);
+            _logGenerator.GenerateChannelData(channelSetList);
             Assert.AreEqual(2, channelSetList.Count);
             Assert.AreEqual(2, channelSetList[0].Channel.Count);
             Assert.AreEqual(1, channelSetList[1].Channel.Count);
 
-            List<List<List<object>>> dataValues = LogGenerator.DeserializeChannelSetData(channelSetList[0].GetData());
+            var dataValues = _logGenerator.DeserializeChannelSetData(channelSetList[0].GetData());
             Assert.AreEqual(5, dataValues.Count);
             Assert.AreEqual(2, dataValues[0].Count);
             Assert.AreEqual(2, dataValues[0][0].Count);
             Assert.AreEqual(2, dataValues[0][1].Count);
 
-            dataValues = LogGenerator.DeserializeChannelSetData(channelSetList[1].GetData());
+            dataValues = _logGenerator.DeserializeChannelSetData(channelSetList[1].GetData());
             Assert.AreEqual(5, dataValues.Count);
             Assert.AreEqual(2, dataValues[0].Count);
             Assert.AreEqual(2, dataValues[0][0].Count);
@@ -146,27 +143,26 @@ namespace PDS.Witsml.Data.Logs
         }
 
         [TestMethod]
-        public void Log_can_be_generated_with_time_data_for_channel_set()
+        public void Log200Generator_Can_Generate_Time_Log_Data()
         {
-            List<ChannelSet> channelSetList = new List<ChannelSet>();
-            channelSetList.Add(TimeLogChannelSet); ;
+            var channelSetList = new List<ChannelSet> {_timeLogChannelSet};       
 
-            LogGenerator.GenerateChannelData(channelSetList, numDataValue: 5);
+            _logGenerator.GenerateChannelData(channelSetList);
             Assert.AreEqual(1, channelSetList.Count);
             Assert.AreEqual(1, channelSetList[0].Channel.Count);
 
-            List<List<List<object>>> dataValues = LogGenerator.DeserializeChannelSetData(channelSetList[0].GetData());
+            var dataValues = _logGenerator.DeserializeChannelSetData(channelSetList[0].GetData());
             Assert.AreEqual(5, dataValues.Count);
             Assert.AreEqual(2, dataValues[0].Count);
             Assert.AreEqual(1, dataValues[0][0].Count);
             Assert.AreEqual(1, dataValues[0][1].Count);
 
-            for (int i = 0; i < 5; i++)
+            for (var i = 0; i < 5; i++)
             {
                 var channel = dataValues[i][1][0];
                 if (channel != null)
                 {
-                    var channelValues = LogGenerator.DeserializeChannelValues(channel.ToString());
+                    var channelValues = _logGenerator.DeserializeChannelValues(channel.ToString());
                     Assert.IsNotNull(channelValues[0]);
                 }
             }

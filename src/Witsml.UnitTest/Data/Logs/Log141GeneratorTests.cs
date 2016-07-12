@@ -27,127 +27,129 @@ namespace PDS.Witsml.Data.Logs
     [TestClass]
     public class Log141GeneratorTests
     {
-        private Log141Generator LogGenerator;
-        private Log DepthLogIncreasing;
-        private Log DepthLogDecreasing;
-        private Log TimeLog;
+        private Log141Generator _logGenerator;
+        private Log _depthLogIncreasing;
+        private Log _depthLogDecreasing;
+        private Log _timeLog;
 
         [TestInitialize]
         public void TestSetUp()
         {
-            LogGenerator = new Log141Generator();
-            DepthLogIncreasing = Create(LogIndexType.measureddepth, LogIndexDirection.increasing);
-            DepthLogDecreasing = Create(LogIndexType.measureddepth, LogIndexDirection.decreasing);
-            TimeLog = Create(LogIndexType.datetime, LogIndexDirection.increasing);
+            _logGenerator = new Log141Generator();
+            _depthLogIncreasing = CreateLog(LogIndexType.measureddepth, LogIndexDirection.increasing);
+            _depthLogDecreasing = CreateLog(LogIndexType.measureddepth, LogIndexDirection.decreasing);
+            _timeLog = CreateLog(LogIndexType.datetime, LogIndexDirection.increasing);
         }
 
         [TestMethod]
-        public void Can_generate_decreasing_depth_log()
+        public void Log141Generator_Can_Generate_Depth_Log_Data_Decreasing()
         {
-            LogGenerator.GenerateLogData(DepthLogDecreasing);
+            _logGenerator.GenerateLogData(_depthLogDecreasing);
 
-            Assert.IsNotNull(DepthLogDecreasing);
-            Assert.IsNotNull(DepthLogDecreasing.LogData);
-            Assert.IsNotNull(DepthLogDecreasing.LogData[0].Data);
-            Assert.AreEqual(5, DepthLogDecreasing.LogData[0].Data.Count);
+            Assert.IsNotNull(_depthLogDecreasing);
+            Assert.IsNotNull(_depthLogDecreasing.LogData);
+            Assert.IsNotNull(_depthLogDecreasing.LogData[0].Data);
+            Assert.AreEqual(5, _depthLogDecreasing.LogData[0].Data.Count);
         }
 
         [TestMethod]
-        public void Can_generate_increasing_depth_log()
+        public void Log141Generator_Can_Generate_Depth_Log_Data_Increasing()
         {
-            LogGenerator.GenerateLogData(DepthLogIncreasing, 50);
+            _logGenerator.GenerateLogData(_depthLogIncreasing, 50);
 
-            Assert.IsNotNull(DepthLogIncreasing);
-            Assert.IsNotNull(DepthLogIncreasing.LogData);
-            Assert.IsNotNull(DepthLogIncreasing.LogData[0].Data);
-            Assert.AreEqual(50, DepthLogIncreasing.LogData[0].Data.Count);
+            Assert.IsNotNull(_depthLogIncreasing);
+            Assert.IsNotNull(_depthLogIncreasing.LogData);
+            Assert.IsNotNull(_depthLogIncreasing.LogData[0].Data);
+            Assert.AreEqual(50, _depthLogIncreasing.LogData[0].Data.Count);
         }
 
         [TestMethod]
-        public void Can_generate_increasing_depth_log_in_loop()
+        public void Log141Generator_Can_Generate_Depth_Log_Data_Increasing_Repeatedly()
         {
             var startIndex = 0.0;
-            var numOfRows = 3;
-            var interval = 1.0;
-            for (int i = 0; i < 10; i++)
+            const int numOfRows = 3;
+            const double interval = 1.0;
+
+            for (var i = 0; i < 10; i++)
             {
-                var nextStartIndex = LogGenerator.GenerateLogData(DepthLogIncreasing, numOfRows, startIndex);
+                var nextStartIndex = _logGenerator.GenerateLogData(_depthLogIncreasing, numOfRows, startIndex);
                 Assert.AreEqual(startIndex + numOfRows * interval, nextStartIndex);
                 startIndex = nextStartIndex;
             }
 
-            Assert.IsNotNull(DepthLogIncreasing);
-            Assert.IsNotNull(DepthLogIncreasing.LogData);
-            Assert.IsNotNull(DepthLogIncreasing.LogData[0].Data);
-            Assert.AreEqual(30, DepthLogIncreasing.LogData[0].Data.Count);
+            Assert.IsNotNull(_depthLogIncreasing);
+            Assert.IsNotNull(_depthLogIncreasing.LogData);
+            Assert.IsNotNull(_depthLogIncreasing.LogData[0].Data);
+            Assert.AreEqual(30, _depthLogIncreasing.LogData[0].Data.Count);
 
             double index = 0;
-            foreach (string row in DepthLogIncreasing.LogData[0].Data)
+            foreach (var row in _depthLogIncreasing.LogData[0].Data)
             {
-                string[] columns = row.Split(',');
+                var columns = row.Split(',');
                 Assert.AreEqual(index, double.Parse(columns[0]));
                 index += interval;
             }
         }
         [TestMethod]
-        public void Can_generate_decreasing_depth_log_in_loop()
+        public void Log141Generator_Can_Generate_Depth_Log_Data_Decreasing_Repeatedly()
         {
             var startIndex = 0.0;
             var numOfRows = 3;
             var interval = -1.0;
-            for (int i = 0; i < 10; i++)
+            for (var i = 0; i < 10; i++)
             {
-                var nextStartIndex = LogGenerator.GenerateLogData(DepthLogDecreasing, numOfRows, startIndex);
+                var nextStartIndex = _logGenerator.GenerateLogData(_depthLogDecreasing, numOfRows, startIndex);
                 Assert.AreEqual(startIndex + numOfRows*interval, nextStartIndex);
                 startIndex = nextStartIndex;
             }
 
-            Assert.IsNotNull(DepthLogDecreasing);
-            Assert.IsNotNull(DepthLogDecreasing.LogData);
-            Assert.IsNotNull(DepthLogDecreasing.LogData[0].Data);
-            Assert.AreEqual(30, DepthLogDecreasing.LogData[0].Data.Count);
+            Assert.IsNotNull(_depthLogDecreasing);
+            Assert.IsNotNull(_depthLogDecreasing.LogData);
+            Assert.IsNotNull(_depthLogDecreasing.LogData[0].Data);
+            Assert.AreEqual(30, _depthLogDecreasing.LogData[0].Data.Count);
 
             double index = 0;
-            foreach (string row in DepthLogDecreasing.LogData[0].Data)
+            foreach (var row in _depthLogDecreasing.LogData[0].Data)
             {
-                string[] columns = row.Split(',');
+                var columns = row.Split(',');
                 Assert.AreEqual(index, double.Parse(columns[0]));
                 index += interval;
             }
         }
 
         [TestMethod]
-        public void Can_generate_time_log()
+        public void Log141Generator_Can_Generate_Time_Log_Data()
         {
-            LogGenerator.GenerateLogData(TimeLog, 10);
+            _logGenerator.GenerateLogData(_timeLog, 10);
 
-            Assert.IsNotNull(TimeLog);
-            Assert.IsNotNull(TimeLog.LogData);
-            Assert.IsNotNull(TimeLog.LogData[0].Data);
-            Assert.AreEqual(10, TimeLog.LogData[0].Data.Count);
+            Assert.IsNotNull(_timeLog);
+            Assert.IsNotNull(_timeLog.LogData);
+            Assert.IsNotNull(_timeLog.LogData[0].Data);
+            Assert.AreEqual(10, _timeLog.LogData[0].Data.Count);
         }
 
-        private Log Create(LogIndexType indexType, LogIndexDirection direction)
+        private Log CreateLog(LogIndexType indexType, LogIndexDirection direction)
         {
-            var log = new Log();
-
-            log.IndexType = indexType;
-            log.Direction = direction;
-            log.LogCurveInfo = new List<LogCurveInfo>();
+            var log = new Log
+            {
+                IndexType = indexType,
+                Direction = direction,
+                LogCurveInfo = new List<LogCurveInfo>()
+            };
 
             if (indexType == LogIndexType.datetime)
             {
                 log.IndexCurve = "TIME";
-                log.LogCurveInfo.Add(LogGenerator.CreateDateTimeLogCurveInfo(log.IndexCurve, "s"));
+                log.LogCurveInfo.Add(_logGenerator.CreateDateTimeLogCurveInfo(log.IndexCurve, "s"));
             }
             else
             {
                 log.IndexCurve = "MD";
-                log.LogCurveInfo.Add(LogGenerator.CreateDoubleLogCurveInfo(log.IndexCurve, "m"));
+                log.LogCurveInfo.Add(_logGenerator.CreateDoubleLogCurveInfo(log.IndexCurve, "m"));
             }
 
-            log.LogCurveInfo.Add(LogGenerator.CreateDoubleLogCurveInfo("ROP", "m/h"));
-            log.LogCurveInfo.Add(LogGenerator.CreateDoubleLogCurveInfo("GR", "gAPI"));
+            log.LogCurveInfo.Add(_logGenerator.CreateDoubleLogCurveInfo("ROP", "m/h"));
+            log.LogCurveInfo.Add(_logGenerator.CreateDoubleLogCurveInfo("GR", "gAPI"));
 
             return log;
         }
