@@ -18,7 +18,6 @@
 
 using System.IO;
 using System.Linq;
-using Energistics.DataAccess.WITSML141;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Server
@@ -26,28 +25,29 @@ namespace PDS.Witsml.Server
     [TestClass]
     public class SampleDataTests
     {
-        private DevKit141Aspect DevKit;
-        private string DataDir;
+        private DevKit141Aspect _devKit;
+        private string _dataDir;
 
         public TestContext TestContext { get; set; }
 
         [TestInitialize]
         public void TestSetUp()
         {
-            DevKit = new DevKit141Aspect(TestContext);
+            _devKit = new DevKit141Aspect(TestContext);
 
-            DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
+            _devKit.Store.CapServerProviders = _devKit.Store.CapServerProviders
                 .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
                 .ToArray();
 
-            DataDir =  new DirectoryInfo(@".\TestData").FullName;
+            _dataDir =  new DirectoryInfo(@".\TestData").FullName;
         }
 
+
         /// <summary>
-        /// Add a <see cref="Well"/>, <see cref="Wellbore"/> and <see cref="Log"/> to the store
+        /// Tests logs can be added from XML file
         /// </summary>
         [TestMethod]
-        public void Add_data()
+        public void WitsmlDataProvider_AddToStore_Can_Add_Wells_Wellbores_Logs_From_File()
         {
             Add_parents();
             Add_logs();
@@ -57,21 +57,21 @@ namespace PDS.Witsml.Server
 
         private void Add_parents()
         {
-            string[] wellFiles = Directory.GetFiles(DataDir, "*_Well.xml");
+            var wellFiles = Directory.GetFiles(_dataDir, "*_Well.xml");
 
-            foreach (string xmlfile in wellFiles)
+            foreach (var xmlfile in wellFiles)
             {
-                var response = DevKit.Add_Well_from_file(xmlfile);
+                var response = _devKit.Add_Well_from_file(xmlfile);
                 if (response != null)
                 {
                     Assert.AreEqual((short)ErrorCodes.Success, response.Result);
                 }
             }
 
-            string[] wellboreFiles = Directory.GetFiles(DataDir, "*_Wellbore.xml");
-            foreach (string xmlfile in wellboreFiles)
+            var wellboreFiles = Directory.GetFiles(_dataDir, "*_Wellbore.xml");
+            foreach (var xmlfile in wellboreFiles)
             {
-                var response = DevKit.Add_Wellbore_from_file(xmlfile);
+                var response = _devKit.Add_Wellbore_from_file(xmlfile);
                 if (response != null)
                 {
                     Assert.AreEqual((short)ErrorCodes.Success, response.Result);
@@ -81,17 +81,18 @@ namespace PDS.Witsml.Server
 
         private void Add_logs()
         {
-            string[] logFiles = Directory.GetFiles(DataDir, "*_Log.xml");
+            var logFiles = Directory.GetFiles(_dataDir, "*_Log.xml");
 
-            foreach (string xmlfile in logFiles)
+            foreach (var xmlfile in logFiles)
             {
-                var response = DevKit.Add_Log_from_file(xmlfile);
+                var response = _devKit.Add_Log_from_file(xmlfile);
                 if (response != null)
                 {
                     Assert.AreEqual((short)ErrorCodes.Success, response.Result);
                 }
             }
         }
+
         #endregion Helper Methods
     }
 }
