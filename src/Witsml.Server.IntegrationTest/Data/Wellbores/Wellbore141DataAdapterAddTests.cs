@@ -16,6 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Linq;
+using Energistics.DataAccess.WITSML141;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Server.Data.Wellbores
@@ -26,9 +28,44 @@ namespace PDS.Witsml.Server.Data.Wellbores
     [TestClass]
     public class Wellbore141DataAdapterAddTests
     {
-        //[TestMethod]
-        //public void Wellbore141DataAdapter_MethodName_ExpectedBehavior()
-        //{
-        //}
+        private DevKit141Aspect _devKit;
+        private Well _well;
+        private Wellbore _wellbore;
+
+        public TestContext TestContext { get; set; }
+
+        [TestInitialize]
+        public void TestSetUp()
+        {
+            _devKit = new DevKit141Aspect(TestContext);
+
+            _devKit.Store.CapServerProviders = _devKit.Store.CapServerProviders
+                .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
+                .ToArray();
+
+            _well = new Well {
+                Uid = _devKit.Uid(),
+                Name = _devKit.Name("Well 01"),
+                TimeZone = _devKit.TimeZone
+            };
+
+            _wellbore = new Wellbore()
+            {
+                Uid = _devKit.Uid(),
+                UidWell = _well.Uid,
+                NameWell = _well.Name,
+                Name = _devKit.Name("Wellbore 01")
+            };
+        }
+
+        [TestMethod]
+        public void Can_add_wellbore_without_validation()
+        {
+            var response = _devKit.Add<WellList, Well>(_well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+        }
     }
 }
