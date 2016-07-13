@@ -200,6 +200,7 @@
     <Compile Include="..\External\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Data\Channels\ChannelDataChunkAdapterValidationTests.cs" />
     <Compile Include="TestAssemblyInitializer.cs" />
     <Compile Include="Data\Channels\ChannelDataChunkAdapterAddTests.cs" />
     <Compile Include="Data\Channels\ChannelSet200DataAdapterAddTests.cs" />
