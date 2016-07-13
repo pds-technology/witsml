@@ -25,7 +25,7 @@ namespace PDS.Witsml
     public class ExtensionsTests
     {
         [TestMethod]
-        public void GetDescription_returns_correct_description_for_error_code()
+        public void Extensions_GetDescription_returns_correct_description_for_error_code()
         {
             const string expected = "Function completed successfully";
 
@@ -35,7 +35,7 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
-        public void GetDescription_returns_null_for_unset_error_code()
+        public void Extensions_GetDescription_returns_null_for_unset_error_code()
         {
             const string expected = "Unset";
 
@@ -45,7 +45,7 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
-        public void Functions_GetDescription_returns_DescriptionAttribute_value()
+        public void Extensions_GetDescription_returns_DescriptionAttribute_value()
         {
             var expected = "Get From Store";
             var actual = Functions.GetFromStore.GetDescription();
