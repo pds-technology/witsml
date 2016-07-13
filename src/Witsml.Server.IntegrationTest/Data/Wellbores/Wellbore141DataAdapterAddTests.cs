@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -58,13 +59,57 @@ namespace PDS.Witsml.Server.Data.Wellbores
             };
         }
 
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            _devKit = null;
+        }
+
         [TestMethod]
-        public void Can_add_wellbore_without_validation()
+        public void Wellbore141DataAdapter_AddToStore_Can_Add_Wellbore()
         {
             var response = _devKit.Add<WellList, Well>(_well);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+        }
+
+        /// <summary>
+        /// Test adding a <see cref="Wellbore"/> successfully with dTimKickoff specified
+        /// </summary>
+        [TestMethod]
+        public void Wellbore141DataAdapter_AddToStore_Can_Add_Wellbore_with_dTimKickoff()
+        {
+            var response = _devKit.Add<WellList, Well>(_well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            _wellbore.DateTimeKickoff = DateTimeOffset.Now;            
+            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+        }
+
+        [TestMethod]
+        public void Wellbore141DataAdapter_AddToStore_Can_Add_Wellbore_With_Same_Uid_Under_Different_Well()
+        {
+            var response = _devKit.Add<WellList, Well>(_well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var well2 = new Well { Uid = _devKit.Uid(), Name = _devKit.Name("Well-to-add-02"), TimeZone = _devKit.TimeZone };
+            response = _devKit.Add<WellList, Well>(well2);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var wellbore2 = new Wellbore()
+            {
+                Uid = well2.Uid,
+                UidWell = response.SuppMsgOut,
+                NameWell = well2.Name,
+                Name = _devKit.Name("Wellbore 02-01")
+            };
+            response = _devKit.Add<WellboreList, Wellbore>(wellbore2);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
         }
     }
