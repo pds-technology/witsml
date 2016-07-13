@@ -107,7 +107,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod]
         public void Wellbore141Validator_AddToStore_Error_478_Parent_Uid_Case_Not_Matching()
         {
-            var uid = "arent-well-01-for-error-code-478" + _devKit.Uid();
+            var uid = "arent-well-478" + _devKit.Uid();
             _well.Uid = "P" + uid;
             var response = _devKit.Add<WellList, Well>(_well);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
