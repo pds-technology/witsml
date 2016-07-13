@@ -40,6 +40,7 @@ namespace PDS.Witsml.Server.Data
         private static readonly IList<Type> ExcludeTypes = new List<Type>();
         private static readonly DateTime DefaultDateTime = new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         private static readonly DateTimeOffset DefaultDateTimeOffset = DateTimeOffset.MinValue.AddYears(1899);
+        private const string UidPattern = "[^ ]*";
         private T _instance;
 
         static WitsmlQueryTemplate()
@@ -69,9 +70,9 @@ namespace PDS.Witsml.Server.Data
             _instance = instance;
         }
 
-        private static void Exclude<V>()
+        private static void Exclude<TExclude>()
         {
-            ExcludeTypes.Add(typeof(V));
+            ExcludeTypes.Add(typeof(TExclude));
         }
 
         /// <summary>
@@ -167,15 +168,14 @@ namespace PDS.Witsml.Server.Data
                 {
                     var childType = objectType.GetGenericArguments()[0];
                     var list = Activator.CreateInstance(objectType) as IList;
-                    list.Add(CreateTemplate(childType));
+                    list?.Add(CreateTemplate(childType));
                     return list;
                 }
             }
             if (objectType.IsAbstract)
             {
                 var concreteType = objectType.Assembly.GetTypes()
-                    .Where(x => !x.IsAbstract && objectType.IsAssignableFrom(x))
-                    .FirstOrDefault();
+                    .FirstOrDefault(x => !x.IsAbstract && objectType.IsAssignableFrom(x));
 
                 return CreateTemplate(concreteType);
             }
@@ -188,7 +188,9 @@ namespace PDS.Witsml.Server.Data
                 {
                     if (property.CanWrite && !IsIgnored(property))
                     {
-                        if (property.PropertyType == typeof(string) && property.IsDefined(typeof(RegularExpressionAttribute)))
+                        var regex = property.GetCustomAttribute<RegularExpressionAttribute>();
+
+                        if (property.PropertyType == typeof(string) && regex != null && !UidPattern.Equals(regex.Pattern))
                         {
                             var attribute = property.GetCustomAttribute<RegularExpressionAttribute>();
                             var xeger = new Fare.Xeger(attribute.Pattern);
@@ -201,7 +203,7 @@ namespace PDS.Witsml.Server.Data
                 }
                 catch
                 {
-                    Console.WriteLine("Error setting property value. Type: {0}; Property: {1}", objectType.FullName, property.Name);
+                    _log.WarnFormat("Error setting property value. Type: {0}; Property: {1}", objectType.FullName, property.Name);
                 }
             }
 
