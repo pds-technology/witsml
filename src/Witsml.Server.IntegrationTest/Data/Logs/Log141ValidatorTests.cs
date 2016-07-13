@@ -1466,8 +1466,10 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private Log TestAddLogWithDelimiter(string dataDelimiter, ErrorCodes expectedReturnCode)
         {
+            _well.Uid = null;
             var response = _devKit.Add<WellList, Well>(_well);
 
+            _wellbore.Uid = null;
             _wellbore.UidWell = response.SuppMsgOut;
             response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
 
