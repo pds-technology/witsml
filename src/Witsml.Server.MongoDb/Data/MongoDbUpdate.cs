@@ -323,6 +323,9 @@ namespace PDS.Witsml.Server.Data
 
         private object ParseNestedElement(Type type, XElement element)
         {
+            if (element.DescendantsAndSelf().Any(e => !e.HasAttributes && string.IsNullOrWhiteSpace(e.Value) || e.Attributes().Any(a => string.IsNullOrWhiteSpace(a.Value))))
+                throw new WitsmlException(ErrorCodes.EmptyNewElementsOrAttributes);
+
             // update element name to match XSD type
             var xmlType = type.GetCustomAttribute<XmlTypeAttribute>();
             element.Name = xmlType != null ? xmlType.TypeName : element.Name;
