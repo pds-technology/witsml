@@ -184,402 +184,174 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Test_error_code_459_bad_column_identifier_in_LogCurveInfo()
+        public void Log141Validator_AddToStore_Error_459_Bad_Column_Identifier_In_LogCurveInfo()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
+            AddParents();
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-            _devKit.InitDataMany(log, _devKit.Mnemonics(log), _devKit.Units(log), 10);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), 10);
 
             // Test all Illegal characters => { "'", "\"", "<", ">", "/", "\\", "&", "," }
 
             // Test &
-            log.LogCurveInfo[1].Mnemonic.Value = log.LogCurveInfo[1].Mnemonic.Value + "&";
-            response = _devKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+            AddLogBadColumnIdentifier(_log, "&");
 
             // Test "
-            log.LogCurveInfo[1].Mnemonic.Value = log.LogCurveInfo[1].Mnemonic.Value + "\"";
-            response = _devKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+            AddLogBadColumnIdentifier(_log, "\"");
 
             // Test '
-            log.LogCurveInfo[1].Mnemonic.Value = log.LogCurveInfo[1].Mnemonic.Value + "'";
-            response = _devKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+            AddLogBadColumnIdentifier(_log, "'");
 
             // Test >
-            log.LogCurveInfo[1].Mnemonic.Value = log.LogCurveInfo[1].Mnemonic.Value + ">";
-            response = _devKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+            AddLogBadColumnIdentifier(_log, ">");
 
             // Test <
-            log.LogCurveInfo[1].Mnemonic.Value = log.LogCurveInfo[1].Mnemonic.Value + "<";
-            response = _devKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+            AddLogBadColumnIdentifier(_log, "<");
 
             // Test \
-            log.LogCurveInfo[1].Mnemonic.Value = log.LogCurveInfo[1].Mnemonic.Value + "\\";
-            response = _devKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+            AddLogBadColumnIdentifier(_log, "\\");
 
             // Test /
-            log.LogCurveInfo[1].Mnemonic.Value = log.LogCurveInfo[1].Mnemonic.Value + "/";
-            response = _devKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+            AddLogBadColumnIdentifier(_log, "/");
 
             // Test ,
-            log.LogCurveInfo[1].Mnemonic.Value = log.LogCurveInfo[1].Mnemonic.Value + ",";
-            response = _devKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+            AddLogBadColumnIdentifier(_log, ",");
         }
 
         [TestMethod]
         public void Log141Validator_AddToStore_Error_459_Bad_Char_In_Mnemonics()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
+            AddParents();
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-            _devKit.InitDataMany(log, _devKit.Mnemonics(log), _devKit.Units(log), 10);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), 10);
 
             // Test all Illegal characters => { "'", "\"", "<", ">", "/", "\\", "&", "," }
-            var mnemonics = log.LogData.FirstOrDefault().MnemonicList.Split(',');
+            var mnemonics = _log.LogData.FirstOrDefault().MnemonicList.Split(',');
 
             // Test &
-            mnemonics[1] = "&";
-            log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics);
-            response = _devKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+            AddLogBadCharInMnemonics(_log, mnemonics, "&");
 
             // Test "
-            mnemonics[1] = "\"";
-            log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics);
-            response = _devKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+            AddLogBadCharInMnemonics(_log, mnemonics, "\"");
 
             // Test '
-            mnemonics[1] = "'";
-            log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics);
-            response = _devKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+            AddLogBadCharInMnemonics(_log, mnemonics, "'");
 
             // Test >
-            mnemonics[1] = ">";
-            log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics);
-            response = _devKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+            AddLogBadCharInMnemonics(_log, mnemonics, ">");
 
             // Test <
-            mnemonics[1] = "<";
-            log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics);
-            response = _devKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+            AddLogBadCharInMnemonics(_log, mnemonics, "<");
 
             // Test \
-            mnemonics[1] = "\\";
-            log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics);
-            response = _devKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+            AddLogBadCharInMnemonics(_log, mnemonics, "\\");
 
             // Test /
-            mnemonics[1] = "/";
-            log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics);
-            response = _devKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+            AddLogBadCharInMnemonics(_log, mnemonics, "/");
         }
 
         [TestMethod]
-        public void Test_error_code_442_optionsIn_keyword_not_supported()
+        public void WitsmlValidator_AddToStore_Error_442_OptionsIn_Keyword_Not_Supported()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
+            AddParents();
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), 10);
 
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-            _devKit.InitDataMany(log, _devKit.Mnemonics(log), _devKit.Units(log), 10);
-
-            response = _devKit.Add<LogList, Log>(log, optionsIn: "compressionMethod=gzip");
+            var response = _devKit.Add<LogList, Log>(_log, optionsIn: "compressionMethod=gzip");
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.KeywordNotSupportedByServer, response.Result);
         }
 
         [TestMethod]
-        public void Test_error_code_464_child_uids_not_unique()
+        public void Log141Validator_AddToStore_Error_464_Child_Uids_Not_Unique()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
+            AddParents();
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
             // Make all child uids the same for LogCurveInfos
-            log.LogCurveInfo.ForEach(lci => lci.Uid = "lci1");
+            _log.LogCurveInfo.ForEach(lci => lci.Uid = "lci1");
 
-            _devKit.InitDataMany(log, _devKit.Mnemonics(log), _devKit.Units(log), 10);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), 10);
 
-            response = _devKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.ChildUidNotUnique, response.Result);
         }
 
         [TestMethod]
-        public void Test_error_code_486_data_object_types_dont_match()
+        public void WitsmlValidator_AddToStore_Error_486_Data_Object_Types_Dont_Match()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
+            AddParents();
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), 10);
 
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-            _devKit.InitDataMany(log, _devKit.Mnemonics(log), _devKit.Units(log), 10);
-
-            var logs = new LogList { Log = _devKit.List(log) };
+            var logs = new LogList { Log = _devKit.List(_log) };
             var xmlIn = EnergisticsConverter.ObjectToXml(logs);
-            response = _devKit.AddToStore(ObjectTypes.Wellbore, xmlIn, null, null);
+            var response = _devKit.AddToStore(ObjectTypes.Wellbore, xmlIn, null, null);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
 
         [TestMethod]
-        public void Test_error_code_433_object_not_exist()
+        public void Log141Validator_UpdateInStore_Error_433_Object_Not_Exist()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
-            _wellbore.UidWell = response.SuppMsgOut;
+            AddParents();
 
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            var uidWellbore = response.SuppMsgOut;
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
-            var log = new Log()
-            {
-                Uid = _devKit.Uid(),
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-
-            var update = _devKit.Update<LogList, Log>(log);
+            var update = _devKit.Update<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.DataObjectNotExist, update.Result);
         }
 
         [TestMethod]
-        public void Test_error_code_415_missing_uid()
+        public void Log141Validator_UpdateInStore_Error_415_Missing_Uid()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
-            _wellbore.UidWell = response.SuppMsgOut;
+            AddParents();
 
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            var uidWellbore = response.SuppMsgOut;
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-
-            var update = _devKit.Update<LogList, Log>(log);
+            var update = _devKit.Update<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.DataObjectUidMissing, update.Result);
         }
 
         [TestMethod]
-        public void MongoDbUpdate_UpdateInStore_Error_484_Empty_Value_For_Mandatory_Field()
+        public void Log141Validator_AddToStore_Error_464_Curve_Uid_Not_Unique()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
-            _wellbore.UidWell = response.SuppMsgOut;
+            AddParents();
 
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            var uidWellbore = response.SuppMsgOut;
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _log.LogCurveInfo.ForEach(l => l.Uid = "uid01");
 
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-
-            response = _devKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidLog = response.SuppMsgOut;
-
-            var xmlIn = "<logs version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" +
-                "<log uidWell=\"" + log.UidWell + "\" uidWellbore=\"" + log.UidWellbore + "\" uid=\"" + uidLog + "\">" +
-                    "<nameWell />" +
-                "</log>" +
-                "</logs>";
-
-            var updateResponse = _devKit.UpdateInStore(ObjectTypes.Log, xmlIn, null, null);
-            Assert.AreEqual((short)ErrorCodes.MissingRequiredData, updateResponse.Result);
-        }
-
-        [TestMethod]
-        public void Test_error_code_445_empty_new_element()
-        {
-            var response = _devKit.Add<WellList, Well>(_well);
-            _wellbore.UidWell = response.SuppMsgOut;
-
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            var uidWellbore = response.SuppMsgOut;
-
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-
-            response = _devKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidLog = response.SuppMsgOut;
-
-            var update = new Log()
-            {
-                Uid = uidLog,
-                UidWell = _wellbore.UidWell,
-                UidWellbore = uidWellbore
-            };
-
-            update.LogCurveInfo = new List<LogCurveInfo>
-            {
-                new LogCurveInfo { Uid = "ExtraCurve" }
-            };
-
-            var updateResponse = _devKit.Update<LogList, Log>(update);
-            Assert.AreEqual((short)ErrorCodes.EmptyNewElementsOrAttributes, updateResponse.Result);
-        }
-
-        [TestMethod]
-        public void Test_error_code_464_unique_curve_uid_add()
-        {
-            var response = _devKit.Add<WellList, Well>(_well);
-            _wellbore.UidWell = response.SuppMsgOut;
-
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            var uidWellbore = response.SuppMsgOut;
-
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-            log.LogCurveInfo.ForEach(l => l.Uid = "uid01");
-
-            response = _devKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.ChildUidNotUnique, response.Result);
         }
 
         [TestMethod]
-        public void Test_error_code_464_unique_curve_uid_update()
+        public void Log141Validator_UpdateInStore_Error_464_Curve_Uid_Not_Unique()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
-            _wellbore.UidWell = response.SuppMsgOut;
+            AddParents();
 
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            var uidWellbore = response.SuppMsgOut;
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-
-            response = _devKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            var uidLog = response.SuppMsgOut;
-
-            var update = new Log()
+            var update = new Log
             {
-                Uid = uidLog,
-                UidWell = _wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                NameWell = string.Empty
+                Uid = _log.Uid,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore,
+                NameWell = string.Empty,
+                LogCurveInfo = _log.LogCurveInfo
             };
 
-            update.LogCurveInfo = log.LogCurveInfo;
             update.LogCurveInfo.ForEach(l => l.Uid = "abc");
 
             var updateResponse = _devKit.Update<LogList, Log>(update);
@@ -587,125 +359,48 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Test_error_code_448_missing_curve_uid()
+        public void Log141Validator_UpdateInStore_Error_448_Missing_Curve_Uid()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
-            _wellbore.UidWell = response.SuppMsgOut;
+            AddParents();
 
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            var uidWellbore = response.SuppMsgOut;
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-
-            response = _devKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            var uidLog = response.SuppMsgOut;
-
-            var update = new Log()
+            var update = new Log
             {
-                Uid = uidLog,
-                UidWell = _wellbore.UidWell,
-                UidWellbore = uidWellbore,
-                NameWell = string.Empty
+                Uid = _log.Uid,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore,
+                NameWell = string.Empty,
+                LogCurveInfo = _log.LogCurveInfo
             };
 
-            update.LogCurveInfo = log.LogCurveInfo;
             update.LogCurveInfo.Last().Uid = string.Empty;
 
             var updateResponse = _devKit.Update<LogList, Log>(update);
             Assert.AreEqual((short)ErrorCodes.MissingElementUid, updateResponse.Result);
         }
-
+       
         [TestMethod]
-        public void Test_error_code_463_duplicate_index_value()
+        public void Log141Validator_UpdateInStore_Error_480_Adding_Updating_Curves_Simultaneously()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
-            _wellbore.UidWell = response.SuppMsgOut;
+            AddParents();
 
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            var uidWellbore = response.SuppMsgOut;
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-
-            response = _devKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            var uidLog = response.SuppMsgOut;
-
-            var update = new Log()
+            var update = new Log
             {
-                Uid = uidLog,
-                UidWell = _wellbore.UidWell,
-                UidWellbore = uidWellbore
+                Uid = _log.Uid,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore,
+                LogCurveInfo = _log.LogCurveInfo
             };
 
-            _devKit.InitHeader(update, LogIndexType.measureddepth);
-            var logData = update.LogData.First();
-            logData.Data.Add("13,13.1,");
-            logData.Data.Add("14,14.1,");
-            logData.Data.Add("15,15.1,");
-            logData.Data.Add("15,16.1,");
-            logData.Data.Add("17,17.1,");
-            logData.Data.Add("21,,21.2");
-            logData.Data.Add("22,,22.2");
-            logData.Data.Add("23,,23.2");
-
-            var updateResponse = _devKit.Update<LogList, Log>(update);
-            Assert.AreEqual((short)ErrorCodes.NodesWithSameIndex, updateResponse.Result);
-        }
-
-        [TestMethod]
-        public void Test_error_code_480_adding_updating_curves_simultaneously()
-        {
-            var response = _devKit.Add<WellList, Well>(_well);
-            _wellbore.UidWell = response.SuppMsgOut;
-
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            var uidWellbore = response.SuppMsgOut;
-
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-
-            response = _devKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidLog = response.SuppMsgOut;
-
-            var update = new Log()
-            {
-                Uid = uidLog,
-                UidWell = _wellbore.UidWell,
-                UidWellbore = uidWellbore
-            };
-
-            update.LogCurveInfo = log.LogCurveInfo;
             update.LogCurveInfo.Last().Uid = "NewCurve";
 
             var updateResponse = _devKit.Update<LogList, Log>(update);
@@ -713,35 +408,20 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Test_error_code_434_missing_mnemonics_when_updating_log_data()
+        public void Log141Validator_UpdateInStore_Error_434_Missing_Mnemonics_When_Updating_Log_Data()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
-            _wellbore.UidWell = response.SuppMsgOut;
+            AddParents();
 
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            var uidWellbore = response.SuppMsgOut;
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-
-            response = _devKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidLog = response.SuppMsgOut;
 
             var update = new Log()
             {
-                Uid = uidLog,
-                UidWell = _wellbore.UidWell,
-                UidWellbore = uidWellbore
+                Uid = _log.Uid,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore
             };
 
             _devKit.InitHeader(update, LogIndexType.measureddepth);
@@ -756,47 +436,32 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod, Description("Test Error 434 LogCurveInfo has fewer channels than the Mnemonic list")]
-        public void Log141Validator_Error_434_Missing_Mnemonics_In_LogCurveInfo()
+        public void Log141Validator_UpdateInStore_Error_434_Missing_Mnemonics_In_LogCurveInfo()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
-            _wellbore.UidWell = response.SuppMsgOut;
-
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            var uidWellbore = response.SuppMsgOut;
+            AddParents();
 
             ///////////////////////////////////////////////////////////////
             // Add a Log with only the index channel in the LogCurveInfo //
             ///////////////////////////////////////////////////////////////
 
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
             // Remove all LogCurveInfo except for the index channel
-            log.LogCurveInfo.RemoveAt(2);
-            log.LogCurveInfo.RemoveAt(1);
-            log.LogData.Clear();
+            _log.LogCurveInfo.RemoveAt(2);
+            _log.LogCurveInfo.RemoveAt(1);
+            _log.LogData.Clear();
 
-            response = _devKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidLog = response.SuppMsgOut;
 
             ////////////////////////////////////////////////////////////////////
             // Update the Log with data for two channels in the mnemonic list //
             ////////////////////////////////////////////////////////////////////
             var update = new Log()
             {
-                Uid = uidLog,
-                UidWell = _wellbore.UidWell,
-                UidWellbore = uidWellbore
+                Uid = _log.Uid,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore
             };
 
             _devKit.InitHeader(update, LogIndexType.measureddepth);
@@ -815,46 +480,31 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod, Description("Test Error 434 LogCurveInfo and Mnemonic list have the same count but one channel does not match")]
-        public void Log141Validator_Error_434_Mnemonics_Do_Not_Match_LogCurveInfo()
+        public void Log141Validator_UpdateInStore_Error_434_Mnemonics_Do_Not_Match_LogCurveInfo()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
-            _wellbore.UidWell = response.SuppMsgOut;
-
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            var uidWellbore = response.SuppMsgOut;
+            AddParents();
 
             /////////////////////////////////////////////////////
             // Add a Log with two channels in the LogCurveInfo //
             /////////////////////////////////////////////////////
 
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
             // Remove the last channel from LogCurveInfo, that should leave MD and ROP
-            log.LogCurveInfo.RemoveAt(2);
-            log.LogData.Clear();
+            _log.LogCurveInfo.RemoveAt(2);
+            _log.LogData.Clear();
 
-            response = _devKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidLog = response.SuppMsgOut;
 
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // Update the Log with data for two channels in the mnemonic list, but one channel does not match LogCurveInfo //
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             var update = new Log()
             {
-                Uid = uidLog,
-                UidWell = _wellbore.UidWell,
-                UidWellbore = uidWellbore
+                Uid = _log.Uid,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore
             };
 
             _devKit.InitHeader(update, LogIndexType.measureddepth);
@@ -870,36 +520,21 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.MissingColumnIdentifiers, updateResponse.Result);
         }
 
-        [TestMethod]
-        public void Test_error_code_436_index_range_should_not_be_specified_when_updating_data()
+        [TestMethod, Description("Index range should not be specified when updating log data")]
+        public void Log141Validator_UpdateInStore_Error_436_Index_Range_Specified()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
-            _wellbore.UidWell = response.SuppMsgOut;
+            AddParents();
 
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            var uidWellbore = response.SuppMsgOut;
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-
-            response = _devKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidLog = response.SuppMsgOut;
 
             var update = new Log()
             {
-                Uid = uidLog,
-                UidWell = _wellbore.UidWell,
-                UidWellbore = uidWellbore
+                Uid = _log.Uid,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore
             };
 
             _devKit.InitHeader(update, LogIndexType.measureddepth);
@@ -918,36 +553,21 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.IndexRangeSpecified, updateResponse.Result);
         }
 
-        [TestMethod]
-        public void Test_error_code_451_missing_units_when_updating_log_data()
+        [TestMethod, Description("Unit list is missing in log data when updating log data")]
+        public void Log141Validator_UpdateInStore_Error_451_Missing_Units()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
-            _wellbore.UidWell = response.SuppMsgOut;
+            AddParents();
 
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            var uidWellbore = response.SuppMsgOut;
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-
-            response = _devKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidLog = response.SuppMsgOut;
 
             var update = new Log()
             {
-                Uid = uidLog,
-                UidWell = _wellbore.UidWell,
-                UidWellbore = uidWellbore
+                Uid = _log.Uid,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore
             };
 
             _devKit.InitHeader(update, LogIndexType.measureddepth);
@@ -962,35 +582,20 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Test_error_code_452_units_not_match_when_updating_log_data()
+        public void Log141Validator_UpdateInStore_Error_452_Units_Not_Match()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
-            _wellbore.UidWell = response.SuppMsgOut;
+            AddParents();
 
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            var uidWellbore = response.SuppMsgOut;
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-
-            response = _devKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidLog = response.SuppMsgOut;
 
             var update = new Log()
             {
-                Uid = uidLog,
-                UidWell = _wellbore.UidWell,
-                UidWellbore = uidWellbore
+                Uid = _log.Uid,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore
             };
 
             _devKit.InitHeader(update, LogIndexType.measureddepth);
@@ -1005,36 +610,21 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.UnitListNotMatch, updateResponse.Result);
         }
 
-        [TestMethod]
-        public void Test_error_code_449_missing_index_curve_when_updating_log_data()
+        [TestMethod, Description("Index curve is missing when updating log data")]
+        public void Log141Validator_UpdateInStore_Error_449_Index_Curve_Missing()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
-            _wellbore.UidWell = response.SuppMsgOut;
+            AddParents();
 
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            var uidWellbore = response.SuppMsgOut;
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-
-            response = _devKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidLog = response.SuppMsgOut;
 
             var update = new Log()
             {
-                Uid = uidLog,
-                UidWell = _wellbore.UidWell,
-                UidWellbore = uidWellbore
+                Uid = _log.Uid,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore
             };
 
             _devKit.InitHeader(update, LogIndexType.measureddepth);
@@ -1043,207 +633,81 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Add("13,13.1,13.2");
             logData.Data.Add("14,14.1,");
             var mnemonics = logData.MnemonicList.Split(',');
-            logData.MnemonicList = string.Join(",", mnemonics.Where(m => m != log.IndexCurve));
+            logData.MnemonicList = string.Join(",", mnemonics.Where(m => m != _log.IndexCurve));
 
             var updateResponse = _devKit.Update<LogList, Log>(update);
             Assert.AreEqual((short)ErrorCodes.IndexCurveNotFound, updateResponse.Result);
         }
 
-        [TestMethod]
-        public void Test_error_code_453_units_not_specified_for_log_data_add()
+        [TestMethod, Description("Unit list in logData is not specified when add log date")]
+        public void Log141Validator_AddToStore_Error_453_Units_Not_Specified()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
+            AddParents();
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-            _devKit.InitDataMany(log, _devKit.Mnemonics(log), _devKit.Units(log), 10);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), 10);
 
             // Set the 3rd mnemonic to the 2nd in LogCurveInfo
-            var logData = log.LogData.First();
+            var logData = _log.LogData.First();
             logData.UnitList = "m,";
 
-            response = _devKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.MissingUnitForMeasureData, response.Result);
         }
 
-        [TestMethod]
-        public void Log141Validator_Test_Add_With_Blank_Unit_In_LogCurveInfo_And_UnitList()
+        [TestMethod, Description("Mismatch in units between log curve and log data when adding log data")]
+        public void Log141Validator_AddToStore_Error_453_Mismatched_UnitList()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
+            AddParents();
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-            _devKit.InitDataMany(log, _devKit.Mnemonics(log), _devKit.Units(log), 10);
-
-            // Set the 3rd LogCurveInfo/unit to null and 3rd UnitList entry to an empty string
-            log.LogCurveInfo[2].Unit = null;
-            var logData = log.LogData.First();
-            logData.UnitList = "m,m/h,";
-
-            response = _devKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-        }
-
-        [TestMethod]
-        public void Log141Validator_Test_Add_With_Unit_In_LogCurveInfo_And_Blank_In_UnitList()
-        {
-            var response = _devKit.Add<WellList, Well>(_well);
-
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-            _devKit.InitDataMany(log, _devKit.Mnemonics(log), _devKit.Units(log), 10);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), 10);
 
             // Set the 3rd UnitList entry to an empty string
-            var logData = log.LogData.First();
+            var logData = _log.LogData.First();
             logData.UnitList = "m,m/h,";
 
-            response = _devKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.MissingUnitForMeasureData, response.Result);
         }
 
-        [TestMethod]
-        public void Test_error_code_453_units_not_specified_for_log_data_update()
+        [TestMethod, Description("Mismatch in units between log curve and log data when updating log data")]
+        public void Log141Validator_UpdateInStore_Error_453_Mismatched_UnitList()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
+            AddParents();
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-
-            response = _devKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            var uidLog = response.SuppMsgOut;
-
-            log.Uid = uidLog;
-            _devKit.InitDataMany(log, _devKit.Mnemonics(log), _devKit.Units(log), 10);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), 10);
 
             // Set the 3rd mnemonic to the 2nd in LogCurveInfo
-            var logData = log.LogData.First();
+            var logData = _log.LogData.First();
             logData.UnitList = "m,";
 
-            var update = _devKit.Update<LogList, Log>(log);
+            var update = _devKit.Update<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.MissingUnitForMeasureData, update.Result);
         }
 
         [TestMethod]
-        public void Test_error_code_448_missing_log_param_uid_add()
+        public void Log141Validator_AddToStore_Error_448_Missing_Log_Param_Uid_Add()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
-            _wellbore.UidWell = response.SuppMsgOut;
+            AddParents();
 
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            var uidWellbore = response.SuppMsgOut;
-
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
             var logParam = new IndexedObject
             {
                 Description = "Md Index"
             };
 
-            log.LogParam = new List<IndexedObject> { logParam };
+            _log.LogParam = new List<IndexedObject> { logParam };
 
-            response = _devKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.MissingElementUid, response.Result);
         }
-
-        [Ignore, Description("No longer a valid test as we are now validating recurring elements for uid")]
-        [TestMethod]
-        public void Test_log_curve_uid_default_to_mnemonic()
-        {
-            var response = _devKit.Add<WellList, Well>(_well);
-            _wellbore.UidWell = response.SuppMsgOut;
-
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            var uidWellbore = response.SuppMsgOut;
-
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-
-            var indexCurve = log.LogCurveInfo.First();
-            indexCurve.Uid = string.Empty;
-
-            response = _devKit.Add<LogList, Log>(log);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidLog = response.SuppMsgOut;
-
-            var query = new Log
-            {
-                Uid = uidLog,
-                UidWell = log.UidWell,
-                UidWellbore = log.UidWellbore
-            };
-
-            var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All.ToString());
-            Assert.AreEqual(1, results.Count);
-
-            var logAdded = results.First();
-            indexCurve = logAdded.LogCurveInfo.First();
-            Assert.AreEqual(indexCurve.Mnemonic.Value, indexCurve.Uid);
-        }
-
 
         [TestMethod]
         public void Log141Validator_GetFromStore_Error_429_Has_Recurring_Data_Section()
@@ -1279,33 +743,18 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141Validator_UpdateInStore_Error_450_mnemonics_not_unique()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
-            _wellbore.UidWell = response.SuppMsgOut;
+            AddParents();
 
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            var uidWellbore = response.SuppMsgOut;
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-
-            response = _devKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidLog = response.SuppMsgOut;
 
             var update = new Log
             {
-                Uid = uidLog,
-                UidWell = _wellbore.UidWell,
-                UidWellbore = uidWellbore,
+                Uid = _log.Uid,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore,
             };
 
             update.LogData = new List<LogData> { new LogData
@@ -1322,51 +771,25 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141Validator_AddToStore_Error_481_Well_Missing()
         {
-            var log = new Log
-            {
-                UidWell = _devKit.Uid(),
-                UidWellbore = _devKit.Uid(),
-                NameWell = "Well 01",
-                NameWellbore = "Wellbore 01",
-                Name = "Log missing well parent"
-            };
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-
-            var response = _devKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.MissingParentDataObject, response.Result);
         }
 
         [TestMethod]
         public void Log141Validator_AddToStore_Error_405_Log_Already_Exists()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
-            _wellbore.UidWell = response.SuppMsgOut;
+            AddParents();
 
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            var uidWellbore = response.SuppMsgOut;
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = uidWellbore,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-
-            response = _devKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            var uidLog = response.SuppMsgOut;
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
-            log.Uid = uidLog;
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-
-            response = _devKit.Add<LogList, Log>(log);
+            response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.DataObjectUidAlreadyExists, response.Result);
         }
 
@@ -1456,12 +879,6 @@ namespace PDS.Witsml.Server.Data.Logs
             TestUpdateLogWithDelimiter("# ", ErrorCodes.UpdateTemplateNonConforming, log);
         }
 
-        [TestMethod]
-        public void Log141Validator_UpdateInStore_Success_DataDelimiter()
-        {
-            TestUpdateLogWithDelimiter("#", ErrorCodes.Success);
-        }
-
         #region Helper Methods
 
         private Log TestAddLogWithDelimiter(string dataDelimiter, ErrorCodes expectedReturnCode)
@@ -1510,6 +927,21 @@ namespace PDS.Witsml.Server.Data.Logs
 
             response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+        }
+
+        private void AddLogBadColumnIdentifier(Log log, string badChar)
+        {
+            log.LogCurveInfo[1].Mnemonic.Value = log.LogCurveInfo[1].Mnemonic.Value + badChar;
+            var response = _devKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
+        }
+
+        private void AddLogBadCharInMnemonics(Log log, string[] mnemonics, string badChar)
+        {
+            mnemonics[1] = badChar;
+            log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics);
+            var response = _devKit.Add<LogList, Log>(log);
+            Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
         }
 
         #endregion Helper Methods
