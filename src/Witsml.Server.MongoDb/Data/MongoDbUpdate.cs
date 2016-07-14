@@ -295,13 +295,20 @@ namespace PDS.Witsml.Server.Data
         {
             var parentValue = Context.PropertyValues.LastOrDefault();
 
-            var propertyValue = Context.PropertyValues.Count == 0
-                ? _entity != null
-                ? propertyInfo.GetValue(_entity)
-                : parentValue != null
-                ? propertyInfo.GetValue(parentValue)
-                : null
-                : null;
+            object propertyValue;
+
+            if (_entity == null)
+            {
+                propertyValue = null;
+            }
+            else
+            {
+                propertyValue = Context.PropertyValues.Count == 0
+                    ? propertyInfo.GetValue(_entity)
+                    : parentValue != null
+                    ? propertyInfo.GetValue(parentValue)
+                    : null;
+            }
 
             PushPropertyInfo(propertyInfo, propertyValue);
         }
