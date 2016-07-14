@@ -838,12 +838,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141Validator_AddToStore_Success_DataDelimiter()
-        {
-            TestAddLogWithDelimiter("#", ErrorCodes.Success);
-        }
-
-        [TestMethod]
         public void Log141Validator_AddToStore_Error_409_DataDelimiter_Max_Size_Exceeded()
         {
             TestAddLogWithDelimiter("123", ErrorCodes.InputTemplateNonConforming);
