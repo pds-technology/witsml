@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
@@ -87,6 +88,44 @@ namespace PDS.Witsml.Server.Data.Wells
 
             var response = _devKit.Update<WellList, Well>(update);
             Assert.AreEqual((short)ErrorCodes.EmptyNewElementsOrAttributes, response.Result);
+        }
+
+        [TestMethod, Description("When adding a new element has nested uom and value, uom should not be specified if there is no value")]
+        public void MongoDbUpdate_UpdateInStore_Error_446_Uom_Exist_Without_Value_Nested_Element()
+        {
+            AddWell();
+
+            var updateXml = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                "<well uid=\"" + _well.Uid + "\">" + Environment.NewLine +
+                "<wellheadElevation uom=\"m\" datum=\"KB\"></wellheadElevation>" + Environment.NewLine +
+                "</well>" + Environment.NewLine +
+                "</wells>";
+
+            var response = _devKit.UpdateInStore(ObjectTypes.Well, updateXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.MissingMeasureDataForUnit, response.Result);
+        }
+
+        [TestMethod, Description("When adding a new recurring element has nested uom and value, uom should not be specified if there is no value")]
+        public void MongoDbUpdate_UpdateInStore_Error_446_Uom_Exist_Without_Value_Array_Element()
+        {
+            AddWell();
+
+            var updateXml = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                "<well uid=\"" + _well.Uid + "\">" + Environment.NewLine +
+                    "<wellDatum uid=\"KB\" >" + Environment.NewLine +
+                        "<name>Kelly Bushing</name>" + Environment.NewLine +
+                        "<code>KB</code>" + Environment.NewLine +
+                        "<elevation uom=\"ft\"/>" + Environment.NewLine +
+                    "</wellDatum>" + Environment.NewLine +
+                    "<wellDatum uid=\"DF\" >" + Environment.NewLine +
+                        "<name>Derrick Floor</name>" + Environment.NewLine +
+                        "<code>DF</code>" + Environment.NewLine +
+                    "</wellDatum>" + Environment.NewLine +
+                "</well>" + Environment.NewLine +
+                "</wells>";
+
+            var response = _devKit.UpdateInStore(ObjectTypes.Well, updateXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.MissingMeasureDataForUnit, response.Result);
         }
 
         private void AddWell()

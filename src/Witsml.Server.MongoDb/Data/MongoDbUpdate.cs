@@ -135,6 +135,9 @@ namespace PDS.Witsml.Server.Data
                     var propertyPath = GetPropertyPath(parentPath, propertyInfo.Name);
                     var childValue = ParseNestedElement(propertyInfo.PropertyType, elementList.First());
 
+                    var childValidator = new MongoDbUpdate<T>(_collection, _parser, _idPropertyName, Context.Ignored);
+                    childValidator.NavigateElementType(propertyInfo.PropertyType, elementList[0], propertyPath);
+
                     HandleObjectValue(null, null, propertyPath, null, childValue);
                 }
                 else
@@ -293,9 +296,11 @@ namespace PDS.Witsml.Server.Data
             var parentValue = Context.PropertyValues.LastOrDefault();
 
             var propertyValue = Context.PropertyValues.Count == 0
+                ? _entity != null
                 ? propertyInfo.GetValue(_entity)
                 : parentValue != null
                 ? propertyInfo.GetValue(parentValue)
+                : null
                 : null;
 
             PushPropertyInfo(propertyInfo, propertyValue);
@@ -370,6 +375,9 @@ namespace PDS.Witsml.Server.Data
 
                         var item = ParseNestedElement(type, element);
                         var filter = filterBuilder.And(filters);
+
+                        var childValidator = new MongoDbUpdate<T>(_collection, _parser, _idPropertyName, Context.Ignored);
+                        childValidator.NavigateElementType(type, element, parentPath);
 
                         var update = propertyValue == null
                             ? updateBuilder.Set(parentPath, CreateList(propertyInfo.PropertyType, item))
