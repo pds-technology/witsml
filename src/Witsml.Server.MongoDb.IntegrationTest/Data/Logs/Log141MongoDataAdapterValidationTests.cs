@@ -16,17 +16,17 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-
+using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace PDS.Witsml.Server.Data.Channels
+namespace PDS.Witsml.Server.Data.Logs
 {
     [TestClass]
-    public class ChannelDataChunkAdapterValidationTests
+    public class Log141MongoDataAdapterValidationTests
     {
         private DevKit141Aspect _devKit;
         private Well _well;
@@ -72,29 +72,29 @@ namespace PDS.Witsml.Server.Data.Channels
         }
 
         [TestMethod]
-        public void ChannelDataChunkAdapter_AddToStore_Error_463_Nodes_With_Same_Index()
+        public void MongoDbUpdate_UpdateInStore_Error_484_Empty_Value_For_Mandatory_Field()
         {
             AddParents();
 
-            var logData = _devKit.List<string>();
-            _log.LogData = _devKit.List(new LogData() {Data = logData});
-
-            logData.Add("13,13.1,");
-            logData.Add("14,14.1,");
-            logData.Add("15,15.1,");
-            logData.Add("15,16.1,");
-            logData.Add("17,17.1,");
-            logData.Add("21,,21.2");
-            logData.Add("22,,22.2");
-            logData.Add("23,,23.2");
             _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
             var response = _devKit.Add<LogList, Log>(_log);
-            Assert.AreEqual((short)ErrorCodes.NodesWithSameIndex, response.Result);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var xmlIn = "<logs version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" +
+                "<log uidWell=\"" + _log.UidWell + "\" uidWellbore=\"" + _log.UidWellbore + "\" uid=\"" + uidLog + "\">" +
+                    "<nameWell />" +
+                "</log>" +
+                "</logs>";
+
+            var updateResponse = _devKit.UpdateInStore(ObjectTypes.Log, xmlIn, null, null);
+            Assert.AreEqual((short)ErrorCodes.MissingRequiredData, updateResponse.Result);
         }
 
         [TestMethod]
-        public void ChannelDataChunkAdapter_UpdateInStore_Error_463_Nodes_With_Same_Index()
+        public void MongoDbUpdate_UpdateInStore_Error_445_Empty_New_Element()
         {
             AddParents();
 
@@ -110,19 +110,13 @@ namespace PDS.Witsml.Server.Data.Channels
                 UidWellbore = _log.UidWellbore
             };
 
-            _devKit.InitHeader(update, LogIndexType.measureddepth);
-            var logData = update.LogData.First();
-            logData.Data.Add("13,13.1,");
-            logData.Data.Add("14,14.1,");
-            logData.Data.Add("15,15.1,");
-            logData.Data.Add("15,16.1,");
-            logData.Data.Add("17,17.1,");
-            logData.Data.Add("21,,21.2");
-            logData.Data.Add("22,,22.2");
-            logData.Data.Add("23,,23.2");
+            update.LogCurveInfo = new List<LogCurveInfo>
+            {
+                new LogCurveInfo { Uid = "ExtraCurve" }
+            };
 
             var updateResponse = _devKit.Update<LogList, Log>(update);
-            Assert.AreEqual((short)ErrorCodes.NodesWithSameIndex, updateResponse.Result);
+            Assert.AreEqual((short)ErrorCodes.EmptyNewElementsOrAttributes, updateResponse.Result);
         }
 
         private void AddParents()

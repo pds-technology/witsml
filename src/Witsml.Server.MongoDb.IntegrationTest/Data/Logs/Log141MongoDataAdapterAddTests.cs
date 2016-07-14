@@ -63,6 +63,12 @@ namespace PDS.Witsml.Server.Data.Logs
             };
         }
 
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            _devKit = null;
+        }
+
         [TestMethod]
         public void Log141Adapter_AddToStore_Can_Add_Data_Chunk_Exceeds_MongoDb_Document_Size()
         {
