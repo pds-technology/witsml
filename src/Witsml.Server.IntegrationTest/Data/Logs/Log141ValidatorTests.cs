@@ -317,6 +317,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
+            _log.Uid = null;
             var update = _devKit.Update<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.DataObjectUidMissing, update.Result);
         }

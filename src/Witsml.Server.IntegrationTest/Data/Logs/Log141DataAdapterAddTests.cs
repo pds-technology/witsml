@@ -1712,7 +1712,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Test_error_code_478_parent_uid_case_not_matching()
         {
             // Base uid
-            var uid = "arent-well-01-for-error-code-478" + _devKit.Uid();
+            var uid = "well-01-error-478" + _devKit.Uid();
 
             // Well Uid with uppercase "P"
             _well.Uid = "P" + uid;

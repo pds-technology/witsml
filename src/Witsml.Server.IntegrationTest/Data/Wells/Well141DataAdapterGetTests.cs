@@ -443,7 +443,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Test_Well_Selection_Uid_Caseless_Compare()
         {
-            var testUid = "Test_Well_Selection_Uid_Caseless_Compare_" + _devKit.Uid();
+            var testUid = "Uid_Caseless_" + _devKit.Uid();
             var query = new Well { Uid = testUid };
             var result = _devKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.IdOnly);
 
