@@ -775,7 +775,7 @@ namespace PDS.Witsml.Server.Data.Logs
             for (var i = log.LogCurveInfo.Count; i < 50; i++)
             {
                 var mnemonic = $"Log-Curve-{i}";
-                log.LogCurveInfo.Add(DevKit.LogGenerator.CreateLogCurveInfo(mnemonic, "m", LogDataType.@double));
+                log.LogCurveInfo.Add(_devKit.LogGenerator.CreateLogCurveInfo(mnemonic, "m", LogDataType.@double));
             }
 
             response = _devKit.Add<LogList, Log>(log);
