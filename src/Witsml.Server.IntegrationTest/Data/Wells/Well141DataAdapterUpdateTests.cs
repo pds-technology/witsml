@@ -444,5 +444,27 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.IsNotNull(updateResponse);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
         }
+
+        [TestMethod, Description("Tests adding a nested array element, e.g. referencePoint.location with elements having uom attributes, e.g. latitude during update")]
+        public void WellDataAdapter_UpdateInStore_Add_Nested_Array_Element_With_Uom_Success()
+        {
+            var well = DevKit.CreateFullWell();
+            var referencePoint = well.ReferencePoint;
+            well.ReferencePoint = null;
+            var response = DevKit.Add<WellList, Well>(well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Create an update well with a new element that has attributes and Assert Success
+            var updateWell = new Well()
+            {
+                Uid = response.SuppMsgOut,
+                ReferencePoint = referencePoint
+            };
+            var updateResponse = DevKit.Update<WellList, Well>(updateWell);
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+        }
     }
 }
