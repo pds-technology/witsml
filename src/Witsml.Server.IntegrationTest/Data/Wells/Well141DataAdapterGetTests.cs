@@ -34,6 +34,22 @@ namespace PDS.Witsml.Server.Data.Wells
     {
         private DevKit141Aspect _devKit;
         private Well _well;
+        private static readonly string _inputXmlTemplate =
+            "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+            "<well uid=\"" + "{0}" + "\">" + Environment.NewLine +
+            "<name>{1}</name>" + Environment.NewLine +
+            "<dTimLicense>" + "{2}" + "</dTimLicense>" + Environment.NewLine +
+            "<timeZone>-06:00</timeZone>" + Environment.NewLine +
+            "</well>" + Environment.NewLine +
+            "</wells>";
+        private static readonly string _xmlInMeasureData =
+            "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+            "   <well> uid=\"" + "{0}" + "\"" + Environment.NewLine +
+            "     <name>" + "{1}" + "</name>" + Environment.NewLine +
+            "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
+            "     <wellheadElevation uom=\"ft\">{2}</wellheadElevation>" + Environment.NewLine +
+            "   </well>" + Environment.NewLine +
+            "</wells>";
 
         public TestContext TestContext { get; set; }
 
@@ -46,7 +62,12 @@ namespace PDS.Witsml.Server.Data.Wells
                 .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
                 .ToArray();
 
-            _well = new Well { Name = _devKit.Name("Well 01"), TimeZone = _devKit.TimeZone };
+            _well = new Well
+                {
+                    Uid = _devKit.Uid(),
+                    Name = _devKit.Name("Well 01"),
+                    TimeZone = _devKit.TimeZone
+                };
         }
 
         [TestMethod]
@@ -72,15 +93,16 @@ namespace PDS.Witsml.Server.Data.Wells
             // Prevent large debug log output
             WitsmlSettings.TruncateXmlOutDebugSize = 100;
 
-            var well = new Well { Name = _devKit.Name("Well-to-add-01"), TimeZone = _devKit.TimeZone };
-            var response = _devKit.Add<WellList, Well>(well);
+            _well.Name = _devKit.Name("Well-add-01");
+            var response = _devKit.Add<WellList, Well>(_well);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            CommonData commonData = new CommonData();
-            commonData.PrivateGroupOnly = true;
-            well = new Well { Name = _devKit.Name("Well-to-add-01"), TimeZone = _devKit.TimeZone, CommonData = commonData };
-            response = _devKit.Add<WellList, Well>(well);
+            CommonData commonData = new CommonData {PrivateGroupOnly = true};
+            _well.Uid = _devKit.Uid();
+            _well.Name = _devKit.Name("Well-add-02");  
+            _well.CommonData = commonData;
+            response = _devKit.Add<WellList, Well>(_well);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
@@ -88,7 +110,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var valid = !string.IsNullOrEmpty(uid);
             Assert.IsTrue(valid);
 
-            well = new Well();
+            var well = new Well();
             var result = _devKit.Query<WellList, Well>(well, optionsIn: OptionsIn.ReturnElements.All + ";" + OptionsIn.RequestPrivateGroupOnly.True);
             Assert.IsNotNull(result);
 
@@ -104,7 +126,7 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
-        public void Test_return_element_all()
+        public void Well141DataAdapter_GetFromStore_Return_Element_All()
         {
             var well = _devKit.CreateTestWell();
             var response = _devKit.Add<WellList, Well>(well);
@@ -123,7 +145,7 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
-        public void Test_return_element_id_only()
+        public void Well141DataAdapter_GetFromStore_Return_Element_Id_Only()
         {
             var well = _devKit.CreateTestWell();
             var response = _devKit.Add<WellList, Well>(well);
@@ -151,13 +173,14 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual(1, wellList.Well.Count);
             returnWell = wellList.Well.FirstOrDefault();
 
+            Assert.IsNotNull(returnWell);
             Assert.AreEqual(well.Name, returnWell.Name);
             Assert.IsNull(returnWell.DateTimeSpud);
             Assert.IsNull(returnWell.GroundElevation);
         }
 
         [TestMethod]
-        public void Test_return_element_id_only_with_additional_elements()
+        public void Well141DataAdapter_GetFromStore_Return_Element_Id_Only_With_Additional_Elements()
         {
             var well = _devKit.CreateTestWell();
             var response = _devKit.Add<WellList, Well>(well);
@@ -188,6 +211,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual(1, wellList.Well.Count);
             returnWell = wellList.Well.FirstOrDefault();
 
+            Assert.IsNotNull(returnWell);
             Assert.AreEqual(well.Name, returnWell.Name);
             Assert.AreEqual(well.Country, returnWell.Country);
             Assert.AreEqual(well.CommonData.ItemState.ToString(), returnWell.CommonData.ItemState.ToString());
@@ -197,7 +221,7 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
-        public void Test_return_element_default()
+        public void Well141DataAdapter_GetFromStore_Return_Element_Default()
         {
             var well = _devKit.CreateTestWell();
             var response = _devKit.Add<WellList, Well>(well);
@@ -225,6 +249,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual(1, wellList.Well.Count);
             returnWell = wellList.Well.FirstOrDefault();
 
+            Assert.IsNotNull(returnWell);
             Assert.IsNull(returnWell.DateTimeSpud);
             Assert.IsNull(returnWell.GroundElevation);
             Assert.IsNull(returnWell.CommonData);
@@ -238,7 +263,7 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
-        public void Test_return_element_requested()
+        public void Well141DataAdapter_GetFromStore_ReturnElements_Requested1()
         {
             var well = _devKit.CreateTestWell();
             var response = _devKit.Add<WellList, Well>(well);
@@ -268,6 +293,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual(1, wellList.Well.Count);
             returnWell = wellList.Well.FirstOrDefault();
 
+            Assert.IsNotNull(returnWell);
             Assert.IsNull(returnWell.DateTimeSpud);
             Assert.IsNull(returnWell.GroundElevation);
 
@@ -279,7 +305,7 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
-        public void Query_OptionsIn_ReturnElements_IdOnly()
+        public void Well141DataAdapter_GetFromStore__ReturnElements_IdOnly()
         {
             var wellName = _devKit.Name("Well-to-add-01");
 
@@ -297,11 +323,14 @@ namespace PDS.Witsml.Server.Data.Wells
             doc.LoadXml(xmlout);
             var wells = doc.DocumentElement;
 
+            Assert.IsNotNull(wells);
+
             var uidExists = false;
             foreach (XmlNode node in wells.ChildNodes)
             {
                 uidExists = true;
-                Assert.IsTrue(node.Attributes.Count == 1);
+                Assert.IsNotNull(node);
+                Assert.IsTrue(node.Attributes?.Count == 1);
                 Assert.IsTrue(node.HasChildNodes);
                 Assert.AreEqual(1, node.ChildNodes.Count);
                 Assert.AreEqual("name", node.ChildNodes[0].Name);
@@ -310,7 +339,7 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
-        public void Query_OptionsIn_ReturnElements_Requested()
+        public void Well141DataAdapter_GetFromStore_ReturnElements_Requested2()
         {
             var wellName = _devKit.Name("Well-to-add-01");
 
@@ -328,17 +357,19 @@ namespace PDS.Witsml.Server.Data.Wells
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(xmlout);
             XmlElement wells = doc.DocumentElement;
+            Assert.IsNotNull(wells);
 
             bool uidExists = false;
             foreach (XmlNode node in wells.ChildNodes)
             {
-                Assert.AreEqual(1, node.Attributes.Count);
+                Assert.IsNotNull(node);
+                Assert.AreEqual(1, node.Attributes?.Count);
                 Assert.IsTrue(node.HasChildNodes);
                 Assert.IsTrue(node.ChildNodes.Count <= 3);
                 Assert.AreEqual("name", node.ChildNodes[0].Name);
                 Assert.AreEqual(wellName, node.ChildNodes[0].InnerText);
 
-                if (uid.Equals(node.Attributes[0].InnerText))
+                if (uid.Equals(node.Attributes?[0].InnerText))
                 {
                     uidExists = true;
                     Assert.AreEqual("nameLegal", node.ChildNodes[1].Name);
@@ -366,7 +397,8 @@ namespace PDS.Witsml.Server.Data.Wells
 
             Assert.AreEqual(1, result.Count);
             var returnWell = result.FirstOrDefault();
-           
+           Assert.IsNotNull(returnWell);
+
             well.Uid = uid;
             well.CommonData.DateTimeCreation = returnWell.CommonData.DateTimeCreation;
             well.CommonData.DateTimeLastChange = returnWell.CommonData.DateTimeLastChange;                        
@@ -377,18 +409,14 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
-        public void Test_Well_Selection_Uid_ReturnElement_All_dTimLicense_With_Offset()
+        public void Well141DataAdapter_GetFromStore_Selection_Uid_ReturnElement_All_dTimLicense_With_Offset()
         {
-            string inputXml = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-                "<well>" + Environment.NewLine +
-                "<name>PDS Full Test Well</name>" + Environment.NewLine +
-                "<dTimLicense>2001-05-15T13:20:00-05:00</dTimLicense>" + Environment.NewLine +
-                "<timeZone>-06:00</timeZone>" + Environment.NewLine +
-                "</well>" + Environment.NewLine +
-                "</wells>";
+            string inputXml = string.Format(_inputXmlTemplate,
+                string.Empty, "Full Test Well With Offset", "2001-05-15T13:20:00-05:00");
 
             WellList wells = EnergisticsConverter.XmlToObject<WellList>(inputXml);
             var well = wells.Items[0] as Well;
+            Assert.IsNotNull(well);
             var response = _devKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
@@ -400,6 +428,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             Assert.AreEqual(1, result.Count);
             var returnWell = result.FirstOrDefault();
+            Assert.IsNotNull(returnWell);
 
             well.Uid = uid;
             well.CommonData = returnWell.CommonData;
@@ -410,18 +439,12 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
-        public void Test_Well_query_by_dTimLicense_with_custom_timestamp()
+        public void Well141DataAdapter_GetFromStore_By_dTimLicense_With_Custom_Timestamp()
         {
             var uid = _devKit.Uid();
             var timeStr = "2001-05-15T13:20:00.0000000+00:00";
 
-            string inputXml = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-                "<well uid=\"" + uid + "\">" + Environment.NewLine +
-                "<name>PDS Full Test Well</name>" + Environment.NewLine +
-                "<dTimLicense>" + timeStr + "</dTimLicense>" + Environment.NewLine +
-                "<timeZone>-06:00</timeZone>" + Environment.NewLine +
-                "</well>" + Environment.NewLine +
-                "</wells>";
+            string inputXml = string.Format(_inputXmlTemplate, uid, "Full Test Well Custom Timestamp", timeStr);
 
             WellList wells = EnergisticsConverter.XmlToObject<WellList>(inputXml);
             var well = wells.Items[0] as Well;
@@ -437,14 +460,15 @@ namespace PDS.Witsml.Server.Data.Wells
             var returnWell = results.FirstOrDefault();
 
             Assert.IsNotNull(returnWell);
+            Assert.IsNotNull(returnWell.DateTimeLicense);
             Assert.AreEqual(timeStr, returnWell.DateTimeLicense.Value.ToString());
         }
 
         [TestMethod]
-        public void Test_Well_Selection_Uid_Caseless_Compare()
+        public void Well141DataAdapter_GetFromStore_Selection_Uid_Caseless_Compare()
         {
-            var testUid = "Test_Well_Selection_Uid_Caseless_Compare_" + _devKit.Uid();
-            var query = new Well { Uid = testUid };
+            var testUid = "Well_Caseless_Compare_" + _devKit.Uid();
+            var query = new Well { Uid = _devKit.Uid() };
             var result = _devKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.IdOnly);
 
             if (result.Count == 0)
@@ -464,7 +488,7 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
-        public void Test_Well_Selection_Different_Case()
+        public void Well141DataAdapter_GetFromStore_Selection_Different_Case()
         {
             var well = _devKit.CreateFullWell();
             var response = _devKit.Add<WellList, Well>(well);
@@ -480,11 +504,11 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
-        public void Test_Well_Selection_Criteria_Not_Satisfied()
+        public void Well141DataAdapter_GetFromStore_Selection_Criteria_Not_Satisfied()
         {
             var dummy = "Dummy";
-            var datumKB = _devKit.WellDatum(dummy);
-            var query = new Well { Uid = dummy, Name = dummy, NameLegal = dummy, Country=dummy, County=dummy, WellDatum = _devKit.List(datumKB) };
+            var datumKb = _devKit.WellDatum(dummy);
+            var query = new Well { Uid = dummy, Name = dummy, NameLegal = dummy, Country=dummy, County=dummy, WellDatum = _devKit.List(datumKb) };
             var result = _devKit.Get<WellList, Well>(_devKit.List(query), ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
             Assert.IsNotNull(result);
 
@@ -499,7 +523,7 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
-        public void Test_Well_Selection_MultiQueries_Same_Object_Returned()
+        public void Well141DataAdapter_GetFromStore_Selection_MultiQueries_Same_Object_Returned()
         {
             var well = _devKit.CreateFullWell();
             var response = _devKit.Add<WellList, Well>(well);
@@ -509,8 +533,8 @@ namespace PDS.Witsml.Server.Data.Wells
 
             var uid = response.SuppMsgOut;
 
-            var datumKB = _devKit.WellDatum("Kelly Bushing");       
-            var query1 = new Well { Uid = "", WellDatum = _devKit.List(datumKB) };
+            var datumKb = _devKit.WellDatum("Kelly Bushing");       
+            var query1 = new Well { Uid = "", WellDatum = _devKit.List(datumKb) };
             var query2 = new Well { Uid = uid };
             var result = _devKit.Get<WellList, Well>(_devKit.List(query1, query2), ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
 
@@ -525,7 +549,7 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
-        public void Test_Well_Selection_MultiQueries_One_Query_Fails()
+        public void Well141DataAdapter_GetFromStore_Selection_MultiQueries_One_Query_Fails()
         {
             var well = _devKit.CreateFullWell();
             var response = _devKit.Add<WellList, Well>(well);
@@ -535,10 +559,10 @@ namespace PDS.Witsml.Server.Data.Wells
 
             var uid = response.SuppMsgOut;
 
-            var datumKB = _devKit.WellDatum("Kelly Bushing", ElevCodeEnum.KB);
-            var datumSL = _devKit.WellDatum(null, ElevCodeEnum.SL);
+            var datumKb = _devKit.WellDatum("Kelly Bushing", ElevCodeEnum.KB);
+            var datumSl = _devKit.WellDatum(null, ElevCodeEnum.SL);
 
-            var badWellQuery = new Well { Uid = "", WellDatum = _devKit.List(datumKB, datumSL) };
+            var badWellQuery = new Well { Uid = "", WellDatum = _devKit.List(datumKb, datumSl) };
             var goodWellQuery = new Well { Uid = uid };
 
             var result = _devKit.Get<WellList, Well>(_devKit.List(goodWellQuery, badWellQuery), ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
@@ -548,70 +572,70 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
-        public void Test_Well_Selection_Not_Equal_Comparison_dTimCreation()
+        public void Well141DataAdapter_GetFromStore_Selection_Not_Equal_Comparison_dTimCreation()
         {
-            var well_01 = _devKit.CreateFullWell();
-            var response = _devKit.Add<WellList, Well>(well_01);
+            var well01 = _devKit.CreateFullWell();
+            var response = _devKit.Add<WellList, Well>(well01);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            var uid_01 = response.SuppMsgOut;
+            var uid01 = response.SuppMsgOut;
             var now = DateTimeOffset.UtcNow;
 
-            var well_02 = _devKit.CreateFullWell();
-            response = _devKit.Add<WellList, Well>(well_02);
+            var well02 = _devKit.CreateFullWell();
+            response = _devKit.Add<WellList, Well>(well02);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            var uid_02 = response.SuppMsgOut;
+            var uid02 = response.SuppMsgOut;
 
             var query = new Well { CommonData = new CommonData() };
             query.CommonData.DateTimeCreation = now;
             var result = _devKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
 
             // Section 6.6.4
-            Assert.IsTrue(result.Where(x => x.Uid == uid_02).Any());
-            Assert.IsFalse(result.Where(x => x.Uid == uid_01).Any());
+            Assert.IsTrue(result.Any(x => x.Uid == uid02));
+            Assert.IsFalse(result.Any(x => x.Uid == uid01));
         }
 
         [TestMethod]
-        public void Test_Well_Selection_Not_Equal_Comparison_dTimLastChange()
+        public void Well141DataAdapter_GetFromStore_Selection_Not_Equal_Comparison_dTimLastChange()
         {
-            var well_01 = _devKit.CreateFullWell();
-            var response = _devKit.Add<WellList, Well>(well_01);
+            var well01 = _devKit.CreateFullWell();
+            var response = _devKit.Add<WellList, Well>(well01);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-            var uid_01 = response.SuppMsgOut;
+            var uid01 = response.SuppMsgOut;
 
-            var query = new Well { Uid = uid_01 };
+            var query = new Well { Uid = uid01 };
             var result = _devKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
             Assert.AreEqual(1, result.Count);
-            Assert.AreEqual(uid_01, result[0].Uid);
+            Assert.AreEqual(uid01, result[0].Uid);
 
             var wellLastChangeTime = result[0].CommonData.DateTimeLastChange;
 
-            var well_02 = _devKit.CreateFullWell();
-            well_02.CommonData.DateTimeCreation = DateTimeOffset.UtcNow;
-            response = _devKit.Add<WellList, Well>(well_02);
+            var well02 = _devKit.CreateFullWell();
+            well02.CommonData.DateTimeCreation = DateTimeOffset.UtcNow;
+            response = _devKit.Add<WellList, Well>(well02);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-            var uid_02 = response.SuppMsgOut;
+            var uid02 = response.SuppMsgOut;
 
             query = new Well { CommonData = new CommonData() };
             query.CommonData.DateTimeLastChange = wellLastChangeTime;
             result = _devKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
-            
+
             // Section 6.6.4
-            Assert.IsTrue(result.Where(x => x.Uid == uid_02).Any());
-            Assert.IsFalse(result.Where(x => x.Uid == uid_01).Any());
+            Assert.IsTrue(result.Any(x => x.Uid == uid02));
+            Assert.IsFalse(result.Any(x => x.Uid == uid01));
         }
 
         [TestMethod]
-        public void Test_Well_Selection_Do_Not_Return_Empty_Values()
+        public void Well141DataAdapter_GetFromStore_Selection_Do_Not_Return_Empty_Values()
         {
             var well = _devKit.CreateTestWell();
             Assert.IsNull(well.WaterDepth);
@@ -631,7 +655,7 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
-        public void Test_Well_Selection_Recurring_Items()
+        public void Well141DataAdapter_GetFromStore_Selection_Recurring_Items()
         {
             var well = _devKit.CreateFullWell();
             var response = _devKit.Add<WellList, Well>(well);
@@ -641,41 +665,41 @@ namespace PDS.Witsml.Server.Data.Wells
 
             var uid = response.SuppMsgOut;
 
-            var datumKB = _devKit.WellDatum("Kelly Bushing", ElevCodeEnum.KB);
-            var datumSL = _devKit.WellDatum("Sea Level", ElevCodeEnum.SL);
-            var query = new Well { Uid = "", WellDatum = _devKit.List(datumKB,  datumSL) };
+            var datumKb = _devKit.WellDatum("Kelly Bushing", ElevCodeEnum.KB);
+            var datumSl = _devKit.WellDatum("Sea Level", ElevCodeEnum.SL);
+            var query = new Well { Uid = "", WellDatum = _devKit.List(datumKb,  datumSl) };
             var result = _devKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
 
-            Assert.IsTrue(result.Where(x => x.Uid == uid).Any());
+            Assert.IsTrue(result.Any(x => x.Uid == uid));
         }
 
         [TestMethod]
-        public void Test_Well_Selection_Recurring_Items_Criteria_OR()
+        public void Well141DataAdapter_GetFromStrore_Selection_Recurring_Items_Criteria_OR()
         {
-            var well_01 = _devKit.CreateFullWell();
-            well_01.WellDatum.RemoveAt(0);            
-            var response = _devKit.Add<WellList, Well>(well_01);
+            var well01 = _devKit.CreateFullWell();
+            well01.WellDatum.RemoveAt(0);            
+            var response = _devKit.Add<WellList, Well>(well01);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-            var uid_01 = response.SuppMsgOut;
+            var uid01 = response.SuppMsgOut;
 
-            var well_02 = _devKit.CreateFullWell();
-            well_02.WellDatum.RemoveAt(1);
-            response = _devKit.Add<WellList, Well>(well_02);
+            var well02 = _devKit.CreateFullWell();
+            well02.WellDatum.RemoveAt(1);
+            response = _devKit.Add<WellList, Well>(well02);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-            var uid_02 = response.SuppMsgOut;
+            var uid02 = response.SuppMsgOut;
 
-            var datumKB = _devKit.WellDatum("Kelly Bushing", ElevCodeEnum.KB);
-            var datumSL = _devKit.WellDatum("Sea Level", ElevCodeEnum.SL);
-            var query = new Well { WellDatum = _devKit.List(datumKB, datumSL) };
+            var datumKb = _devKit.WellDatum("Kelly Bushing", ElevCodeEnum.KB);
+            var datumSl = _devKit.WellDatum("Sea Level", ElevCodeEnum.SL);
+            var query = new Well { WellDatum = _devKit.List(datumKb, datumSl) };
             var result = _devKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
 
             // Section 4.1.5
-            Assert.IsTrue(result.Where(x => x.Uid == uid_01).Any());
-            Assert.IsTrue(result.Where(x => x.Uid == uid_02).Any());
+            Assert.IsTrue(result.Any(x => x.Uid == uid01));
+            Assert.IsTrue(result.Any(x => x.Uid == uid02));
         }
 
         [TestMethod]
@@ -743,31 +767,13 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well141DataAdapter_GetFromStore_Can_Get_Measure_Data_With_Uom_And_Null()
         {
-            // Add well
-            var well = _devKit.CreateFullWell();
-            var response = _devKit.Add<WellList, Well>(well);
+            Get_Measure_Data_With_Value(string.Empty);
+        }
 
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uid = response.SuppMsgOut;
-
-            string xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-                           "   <well> uid=\"" + uid + "\"" + Environment.NewLine +
-                           "     <name>" + well.Name + "</name>" + Environment.NewLine +
-                           "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
-                           "     <wellheadElevation uom=\"ft\"></wellheadElevation>" + Environment.NewLine +
-                           "   </well>" + Environment.NewLine +
-                           "</wells>";
-
-            var getResponse = _devKit.GetFromStore(ObjectTypes.Well, xmlIn, null, null);
-
-            Assert.IsNotNull(getResponse);
-            Assert.AreEqual((short)ErrorCodes.Success, getResponse.Result);
-
-            var wellList = EnergisticsConverter.XmlToObject<WellList>(getResponse.XMLout);
-            Assert.AreEqual(1, wellList.Well.Count);
-            Assert.AreEqual(500, wellList.Well[0].WellheadElevation.Value);
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Can_Get_Measure_Data_With_Uom_And_NaN()
+        {
+            Get_Measure_Data_With_Value("NaN");
         }
 
         [TestMethod]
@@ -811,35 +817,6 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual(well.PercentInterest.Value, queriedWell.PercentInterest.Value);
             Assert.AreEqual(well.WellDatum[0].Elevation.Uom, queriedWell.WellDatum[0].Elevation.Uom);
             Assert.AreEqual(well.WellDatum[0].Elevation.Value, queriedWell.WellDatum[0].Elevation.Value);
-        }
-
-        [TestMethod]
-        public void Well141DataAdapter_GetFromStore_Can_Get_Measure_Data_With_Uom_And_NaN()
-        {
-            // Add well
-            var well = _devKit.CreateFullWell();
-            var response = _devKit.Add<WellList, Well>(well);
-
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uid = response.SuppMsgOut;
-
-            string xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-                           "   <well> uid=\"" + uid + "\"" + Environment.NewLine +
-                            "     <name>" + well.Name + "</name>" + Environment.NewLine +
-                           "     <wellheadElevation uom=\"ft\">NaN</wellheadElevation>" + Environment.NewLine +
-                           "   </well>" + Environment.NewLine +
-                           "</wells>";
-
-            var getResponse = _devKit.GetFromStore(ObjectTypes.Well, xmlIn, null, null);
-
-            Assert.IsNotNull(getResponse);
-            Assert.AreEqual((short)ErrorCodes.Success, getResponse.Result);
-
-            var wellList = EnergisticsConverter.XmlToObject<WellList>(getResponse.XMLout);
-            Assert.AreEqual(1, wellList.Well.Count);
-            Assert.AreEqual(500, wellList.Well[0].WellheadElevation.Value);
         }
 
         [TestMethod]
@@ -936,6 +913,27 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.IsNotNull(actual.CommonData.DateTimeLastChange);
             Assert.AreEqual(expected.CommonData.ItemState, actual.CommonData.ItemState);
             Assert.AreEqual(expected.CommonData.Comments, actual.CommonData.Comments);
+        }
+
+        private void Get_Measure_Data_With_Value(string measureDataValue)
+        {
+            // Add well
+            var well = _devKit.CreateFullWell();
+            var response = _devKit.Add<WellList, Well>(well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uid = response.SuppMsgOut;
+            string xmlIn = string.Format(_xmlInMeasureData, uid, well.Name, measureDataValue);
+            var getResponse = _devKit.GetFromStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(getResponse);
+            Assert.AreEqual((short)ErrorCodes.Success, getResponse.Result);
+
+            var wellList = EnergisticsConverter.XmlToObject<WellList>(getResponse.XMLout);
+            Assert.AreEqual(1, wellList.Well.Count);
+            Assert.AreEqual(500, wellList.Well[0].WellheadElevation.Value);
         }
     }
 }
