@@ -73,7 +73,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log_can_be_retrieved_with_all_data()
+        public void Log141DataAdapter_GetFromStore_Can_Be_Retrieved_With_All_Data()
         {
             var response = DevKit.Add<WellList, Well>(_well);
 
@@ -130,7 +130,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log_column_with_one_value_returned()
+        public void Log141DataAdapter_GetFromStore_Column_With_One_Value_Returned()
         {
             var response = DevKit.Add<WellList, Well>(_well);
 
@@ -181,7 +181,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log_can_be_retrieved_with_increasing_log_data()
+        public void Log141DataAdapter_GetFromStore_Can_Be_Retrieved_With_Increasing_Log_Data()
         {
             var response = DevKit.Add<WellList, Well>(_well);
 
@@ -219,7 +219,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log_can_be_retrieved_with_decreasing_log_data()
+        public void Log141DataAdapter_GetFromStore_Can_Be_Retrieved_With_Decreasing_Log_Data()
         {
             var response = DevKit.Add<WellList, Well>(_well);
 
@@ -258,7 +258,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log_empty_elements_are_removed()
+        public void Log141DataAdapter_GetFromStore_Empty_Elements_Are_Removed()
         {
             var response = DevKit.Add<WellList, Well>(_well);
 
@@ -311,7 +311,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log_header_index_value_sorted_for_decreasing_log()
+        public void Log141DataAdapter_GetFromStore_Header_Index_Value_Sorted_For_Decreasing_Log()
         {
             var response = DevKit.Add<WellList, Well>(_well);
 
