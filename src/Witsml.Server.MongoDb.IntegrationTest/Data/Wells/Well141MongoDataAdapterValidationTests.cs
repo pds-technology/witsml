@@ -128,6 +128,37 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.MissingMeasureDataForUnit, response.Result);
         }
 
+        [TestMethod, Description("When adding a new recurring element has nested recurring element with uom and value, uom should not be specified if there is no value")]
+        public void MongoDbUpdate_UpdateInStore_Error_446_Uom_Exist_Without_Value_Nested_Array_Element()
+        {
+            _well = _devKit.CreateFullWell();
+            _well.Uid = _devKit.Uid();
+            _well.ReferencePoint = null;
+            AddWell();
+
+            var updateXml = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                "<well uid=\"" + _well.Uid + "\">" + Environment.NewLine +
+                    "<referencePoint uid=\"abc\" >" + Environment.NewLine +
+                    "<name>abc</name>" + Environment.NewLine +
+                    "<type>abc</type>" + Environment.NewLine +
+                    "<elevation uom=\"m\" datum=\"KB\">1</elevation>" + Environment.NewLine +
+                    "<measuredDepth uom=\"m\" datum=\"KB\">1</measuredDepth>" + Environment.NewLine +
+                    "<location uid=\"abc\">" + Environment.NewLine +
+                        "<wellCRS uidRef=\"epsg\">abc</wellCRS>" + Environment.NewLine +
+                        "<latitude uom=\"rad\">1</latitude>" + Environment.NewLine +
+                        "<longitude uom=\"rad\" />" + Environment.NewLine +
+                        "<original>false</original>" + Environment.NewLine +
+                        "<description>abc</description>" + Environment.NewLine +
+                    "</location>" + Environment.NewLine +
+                    "<description>abc</description>" + Environment.NewLine +
+                    "</referencePoint>" + Environment.NewLine +
+                    "</well>" + Environment.NewLine +
+                "</wells>";
+
+            var response = _devKit.UpdateInStore(ObjectTypes.Well, updateXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.MissingMeasureDataForUnit, response.Result);
+        }
+
         private void AddWell()
         {
             var response = _devKit.Add<WellList, Well>(_well);

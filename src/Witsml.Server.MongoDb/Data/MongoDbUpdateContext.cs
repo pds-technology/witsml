@@ -66,5 +66,13 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <value>The update definition.</value>
         public UpdateDefinition<T> Update { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether [validation only].
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if [validation only]; otherwise, <c>false</c>.
+        /// </value>
+        public bool ValidationOnly { get; set; }
     }
 }

@@ -136,6 +136,7 @@ namespace PDS.Witsml.Server.Data
                     var childValue = ParseNestedElement(propertyInfo.PropertyType, elementList.First());
 
                     var childValidator = new MongoDbUpdate<T>(_collection, _parser, _idPropertyName, Context.Ignored);
+                    childValidator.Context.ValidationOnly = true;
                     childValidator.NavigateElementType(propertyInfo.PropertyType, elementList[0], propertyPath);
 
                     HandleObjectValue(null, null, propertyPath, null, childValue);
@@ -335,7 +336,7 @@ namespace PDS.Witsml.Server.Data
 
         private object ParseNestedElement(Type type, XElement element)
         {
-            if (element.DescendantsAndSelf().Any(e => !e.HasAttributes && string.IsNullOrWhiteSpace(e.Value) || e.Attributes().Any(a => string.IsNullOrWhiteSpace(a.Value))))
+            if (element.DescendantsAndSelf().Any(e => (!e.HasAttributes && string.IsNullOrWhiteSpace(e.Value)) || e.Attributes().Any(a => string.IsNullOrWhiteSpace(a.Value))))
                 throw new WitsmlException(ErrorCodes.EmptyNewElementsOrAttributes);
 
             // update element name to match XSD type
@@ -365,13 +366,13 @@ namespace PDS.Witsml.Server.Data
             var ids = new List<string>();
             var itemsById = GetItemsById((IEnumerable)propertyValue, properties, idField, ids);
 
-            _collection.BulkWrite(elements
+            var updateList = elements
                 .Select(element =>
                 {
                     var elementId = GetElementId(element, idField);
                     if (string.IsNullOrEmpty(elementId) || propertyInfo == null) return null;
-                    
-                    var filters = new List<FilterDefinition<T>>() { _entityFilter };
+
+                    var filters = new List<FilterDefinition<T>>() {_entityFilter};
 
                     object current;
                     itemsById.TryGetValue(elementId, out current);
@@ -384,7 +385,11 @@ namespace PDS.Witsml.Server.Data
                         var filter = filterBuilder.And(filters);
 
                         var childValidator = new MongoDbUpdate<T>(_collection, _parser, _idPropertyName, Context.Ignored);
+                        childValidator.Context.ValidationOnly = true;
                         childValidator.NavigateElementType(type, element, parentPath);
+
+                        if (Context.ValidationOnly)
+                            return null;
 
                         var update = propertyValue == null
                             ? updateBuilder.Set(parentPath, CreateList(propertyInfo.PropertyType, item))
@@ -409,7 +414,7 @@ namespace PDS.Witsml.Server.Data
 
                         PushPropertyInfo(propertyInfo, current);
                         NavigateElement(element, type, positionPath);
-                        PopPropertyInfo();                      
+                        PopPropertyInfo();
 
                         var model = new UpdateOneModel<T>(filter, Context.Update);
                         Context.Update = saveUpdate;
@@ -417,7 +422,10 @@ namespace PDS.Witsml.Server.Data
                     }
                 })
                 .Where(x => x != null)
-                .ToList());
+                .ToList();
+
+            if (updateList.Count > 0)
+                _collection.BulkWrite(updateList);
         }
 
         private string GetElementId(XElement element, string idField)
