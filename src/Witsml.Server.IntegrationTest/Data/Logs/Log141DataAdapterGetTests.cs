@@ -32,7 +32,7 @@ namespace PDS.Witsml.Server.Data.Logs
     [TestClass]
     public class Log141DataAdapterGetTests
     {
-        private DevKit141Aspect DevKit;
+        private DevKit141Aspect _devKit;
         private Well _well;
         private Wellbore _wellbore;
         private Log _log;
@@ -42,24 +42,35 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestInitialize]
         public void TestSetUp()
         {
-            DevKit = new DevKit141Aspect(TestContext);
+            _devKit = new DevKit141Aspect(TestContext);
 
-            DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
+            _devKit.Store.CapServerProviders = _devKit.Store.CapServerProviders
                 .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
                 .ToArray();
 
-            _well = new Well {Name = DevKit.Name("Well 01"), TimeZone = DevKit.TimeZone};
+            _well = new Well
+            {
+                Uid = _devKit.Uid(),
+                Name = _devKit.Name("Well 01"),
+                TimeZone = _devKit.TimeZone
+            };
+
             _wellbore = new Wellbore()
             {
+                UidWell = _well.Uid,
                 NameWell = _well.Name,
-                Name = DevKit.Name("Wellbore 01")
+                Uid = _devKit.Uid(),
+                Name = _devKit.Name("Wellbore 01")
             };
 
             _log = new Log()
             {
+                UidWell = _well.Uid,
                 NameWell = _well.Name,
+                UidWellbore = _wellbore.Uid,
                 NameWellbore = _wellbore.Name,
-                Name = DevKit.Name("Log 01")
+                Uid = _devKit.Uid(),
+                Name = _devKit.Name("Log 01")
             };
         }
 
@@ -75,38 +86,27 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_GetFromStore_Can_Be_Retrieved_With_All_Data()
         {
-            var response = DevKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellboreList, Wellbore>(_wellbore);
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = _wellbore.Name,
-                Name = DevKit.Name("Log 01")
-            };
-
+            // Initialize the _log
             var row = 10;
-            DevKit.InitHeader(log, LogIndexType.measureddepth);
-            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), row);
-            var columnCountBeforeSave = log.LogData.First().Data.First().Split(',').Length;
-            response = DevKit.Add<LogList, Log>(log);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), row);
+            var columnCountBeforeSave = _log.LogData.First().Data.First().Split(',').Length;
+            var response = _devKit.Add<LogList, Log>(_log);
 
             // Test that a Log was Added successfully
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
-            var uidLog = response.SuppMsgOut;
-
+            // Create a query log
             var query = new Log
             {
-                Uid = uidLog,
-                UidWell = log.UidWell,
-                UidWellbore = log.UidWellbore,
+                Uid = _log.Uid,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore,
             };
-            var result = DevKit.Query<LogList, Log>(query, ObjectTypes.Log, null, OptionsIn.ReturnElements.DataOnly);
+            var result = _devKit.Query<LogList, Log>(query, ObjectTypes.Log, null, OptionsIn.ReturnElements.DataOnly);
             var queriedLog = result.FirstOrDefault();
 
             // Test that Log was returned
@@ -132,39 +132,28 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_GetFromStore_Column_With_One_Value_Returned()
         {
-            var response = DevKit.Add<WellList, Well>(_well);
-
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = _wellbore.Name,
-                Name = DevKit.Name("Log 01")
-            };
+            _devKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellboreList, Wellbore>(_wellbore);
 
             var row = 10;
-            DevKit.InitHeader(log, LogIndexType.measureddepth);
-            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), row);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), row);
 
             // Replace the third data row with a value where there is none
-            log.LogData.First().Data[2] = log.LogData.First().Data[2].Replace(",,", ",0,");
-            var columnCountBeforeSave = log.LogData.First().Data.First().Split(',').Length;
+            _log.LogData.First().Data[2] = _log.LogData.First().Data[2].Replace(",,", ",0,");
+            var columnCountBeforeSave = _log.LogData.First().Data.First().Split(',').Length;
 
             // Save the Log
-            response = DevKit.Add<LogList, Log>(log);
+            _devKit.Add<LogList, Log>(_log);
 
-            var uidLog = response.SuppMsgOut;
+            // Create a query log
             var query = new Log
             {
-                Uid = uidLog,
-                UidWell = log.UidWell,
-                UidWellbore = log.UidWellbore,
+                Uid = _log.Uid,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore,
             };
-            var result = DevKit.Query<LogList, Log>(query, ObjectTypes.Log, null, OptionsIn.ReturnElements.DataOnly);
+            var result = _devKit.Query<LogList, Log>(query, ObjectTypes.Log, null, OptionsIn.ReturnElements.DataOnly);
             var queriedLog = result.FirstOrDefault();
 
             // Test that Log was returned
@@ -183,126 +172,92 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_GetFromStore_Can_Be_Retrieved_With_Increasing_Log_Data()
         {
-            var response = DevKit.Add<WellList, Well>(_well);
-
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = _wellbore.Name,
-                Name = DevKit.Name("Log 01")
-            };
+            _devKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellboreList, Wellbore>(_wellbore);
 
             var row = 10;
-            DevKit.InitHeader(log, LogIndexType.measureddepth);
-            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), row);
-            response = DevKit.Add<LogList, Log>(log);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), row);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
-            var uidLog = response.SuppMsgOut;
-            var logData = new LogData {MnemonicList = DevKit.Mnemonics(log)};
+            var logData = new LogData {MnemonicList = _devKit.Mnemonics(_log)};
             var query = new Log
             {
-                Uid = uidLog,
-                UidWell = log.UidWell,
-                UidWellbore = log.UidWellbore,
+                Uid = _log.Uid,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore,
                 StartIndex = new GenericMeasure(2.0, "m"),
                 EndIndex = new GenericMeasure(6.0, "m"),
                 LogData = new List<LogData> {logData}
             };
-            var result = DevKit.Query<LogList, Log>(query, ObjectTypes.Log, null, OptionsIn.ReturnElements.DataOnly);
+            var result = _devKit.Query<LogList, Log>(query, ObjectTypes.Log, null, OptionsIn.ReturnElements.DataOnly);
             Assert.IsNotNull(result);
         }
 
         [TestMethod]
         public void Log141DataAdapter_GetFromStore_Can_Be_Retrieved_With_Decreasing_Log_Data()
         {
-            var response = DevKit.Add<WellList, Well>(_well);
-
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = _wellbore.Name,
-                Name = DevKit.Name("Log 01")
-            };
+            _devKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellboreList, Wellbore>(_wellbore);
 
             var row = 10;
-            DevKit.InitHeader(log, LogIndexType.measureddepth, false);
-            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), row, 1, true, true, false);
-            response = DevKit.Add<LogList, Log>(log);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth, false);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), row, 1, true, true, false);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
-            var uidLog = response.SuppMsgOut;
-            var logData = new LogData {MnemonicList = DevKit.Mnemonics(log)};
+            //var uidLog = response.SuppMsgOut;
+            var logData = new LogData {MnemonicList = _devKit.Mnemonics(_log)};
             var query = new Log
             {
-                Uid = uidLog,
-                UidWell = log.UidWell,
-                UidWellbore = log.UidWellbore,
+                Uid = _log.Uid,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore,
                 Direction = LogIndexDirection.decreasing,
                 StartIndex = new GenericMeasure(-3.0, "m"),
                 EndIndex = new GenericMeasure(-6.0, "m"),
                 LogData = new List<LogData> {logData}
             };
-            var result = DevKit.Query<LogList, Log>(query, ObjectTypes.Log, null, OptionsIn.ReturnElements.DataOnly);
+            var result = _devKit.Query<LogList, Log>(query, ObjectTypes.Log, null, OptionsIn.ReturnElements.DataOnly);
             Assert.IsNotNull(result);
         }
 
         [TestMethod]
         public void Log141DataAdapter_GetFromStore_Empty_Elements_Are_Removed()
         {
-            var response = DevKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellboreList, Wellbore>(_wellbore);
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = _wellbore.Name,
-                Name = DevKit.Name("Log 01")
-            };
-
-            DevKit.InitHeader(log, LogIndexType.measureddepth, false);
-            response = DevKit.Add<LogList, Log>(log);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth, false);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
-            var uidLog = response.SuppMsgOut;
-
+            // Query all of the log and Assert
             var query = new Log()
             {
-                UidWell = log.UidWell,
-                UidWellbore = log.UidWellbore,
-                Uid = uidLog
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore,
+                Uid = _log.Uid
             };
             var returnLog =
-                DevKit.Query<LogList, Log>(query, ObjectTypes.Log, null, OptionsIn.ReturnElements.All).FirstOrDefault();
+                _devKit.Query<LogList, Log>(query, ObjectTypes.Log, null, OptionsIn.ReturnElements.All).FirstOrDefault();
             Assert.IsNotNull(returnLog);
             Assert.IsNotNull(returnLog.IndexType);
-            Assert.AreEqual(log.IndexType, returnLog.IndexType);
+            Assert.AreEqual(_log.IndexType, returnLog.IndexType);
 
             var queryIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
                           "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
                           "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" +
                           Environment.NewLine +
-                          "<log uid=\"" + uidLog + "\" uidWell=\"" + log.UidWell + "\" uidWellbore=\"" + log.UidWellbore +
+                          "<log uid=\"" + _log.Uid + "\" uidWell=\"" + _log.UidWell + "\" uidWellbore=\"" + _log.UidWellbore +
                           "\">" + Environment.NewLine +
                           "<nameWell />" + Environment.NewLine +
                           "</log>" + Environment.NewLine +
                           "</logs>";
 
-            var result = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, null);
+            // Query log, requested by default.
+            var result = _devKit.GetFromStore(ObjectTypes.Log, queryIn, null, null);
             Assert.IsNotNull(result);
 
             var document = WitsmlParser.Parse(result.XMLout);
@@ -313,27 +268,18 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_GetFromStore_Header_Index_Value_Sorted_For_Decreasing_Log()
         {
-            var response = DevKit.Add<WellList, Well>(_well);
-
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            var log = new Log()
-            {
-                UidWell = _wellbore.UidWell,
-                NameWell = _well.Name,
-                UidWellbore = response.SuppMsgOut,
-                NameWellbore = _wellbore.Name,
-                Name = DevKit.Name("Log 01")
-            };
+            _devKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellboreList, Wellbore>(_wellbore);
 
             var row = 10;
-            DevKit.InitHeader(log, LogIndexType.measureddepth, false);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth, false);
 
             var startIndex = new GenericMeasure {Uom = "m", Value = 100};
-            log.StartIndex = startIndex;
-            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), row, 1, true, false, false);
-            var logData = log.LogData.First();
+            _log.StartIndex = startIndex;
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), row, 1, true, false, false);
+
+            // Clear and add log data
+            var logData = _log.LogData.First();
             logData.Data.Clear();
             logData.Data.Add("100,1,");
             logData.Data.Add("99,2,");
@@ -345,31 +291,33 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Add("93,,8");
             logData.Data.Add("92,,9");
             logData.Data.Add("91,,10");
-            response = DevKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
-            var uidLog = response.SuppMsgOut;
-            logData = new LogData {MnemonicList = DevKit.Mnemonics(log)};
+            //var uidLog = response.SuppMsgOut;
             var query = new Log
             {
-                Uid = uidLog,
-                UidWell = log.UidWell,
-                UidWellbore = log.UidWellbore,
+                Uid = _log.Uid,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore,
                 Direction = LogIndexDirection.decreasing,
                 StartIndex = new GenericMeasure(98.0, "m"),
                 EndIndex = new GenericMeasure(94.0, "m")
             };
-            var result = DevKit.Query<LogList, Log>(query, ObjectTypes.Log, null, OptionsIn.ReturnElements.All);
+            var result = _devKit.Query<LogList, Log>(query, ObjectTypes.Log, null, OptionsIn.ReturnElements.All);
             Assert.IsNotNull(result);
+
             var logAdded = result.First();
             var indexCurve = logAdded.LogCurveInfo.First();
             Assert.AreEqual(query.EndIndex.Value, indexCurve.MinIndex.Value);
             Assert.AreEqual(query.StartIndex.Value, indexCurve.MaxIndex.Value);
             Assert.AreEqual(query.StartIndex.Value, logAdded.StartIndex.Value);
             Assert.AreEqual(query.EndIndex.Value, logAdded.EndIndex.Value);
+
             var firstChannel = logAdded.LogCurveInfo[1];
             Assert.AreEqual(96, firstChannel.MinIndex.Value);
             Assert.AreEqual(query.StartIndex.Value, firstChannel.MaxIndex.Value);
+
             var secondChannel = logAdded.LogCurveInfo[2];
             Assert.AreEqual(query.EndIndex.Value, secondChannel.MinIndex.Value);
             Assert.AreEqual(95, secondChannel.MaxIndex.Value);
@@ -378,20 +326,18 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_GetFromStore_Decreasing_RequestLatestValue_OptionsIn()
         {
-            var response = DevKit.Add<WellList, Well>(_well);
-
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            _log.UidWell = _wellbore.UidWell;
-            _log.UidWellbore = response.SuppMsgOut;
+            //var response = 
+            _devKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellboreList, Wellbore>(_wellbore);
 
             var row = 10;
-            DevKit.InitHeader(_log, LogIndexType.measureddepth, false);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth, false);
 
             var startIndex = new GenericMeasure {Uom = "m", Value = 100};
             _log.StartIndex = startIndex;
-            DevKit.InitDataMany(_log, DevKit.Mnemonics(_log), DevKit.Units(_log), row, 1, true, false, false);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), row, 1, true, false, false);
+
+
             var logData = _log.LogData.First();
             logData.Data.Clear();
             logData.Data.Add("100,1,");
@@ -408,14 +354,13 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Add("91,,10"); // The latest 1 value for the last channel
 
             // Add a decreasing log with several values
-            response = DevKit.Add<LogList, Log>(_log);
+            var response = _devKit.Add<LogList, Log>(_log);
 
             // Assert that the log was added successfully
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
 
             var uidLog = response.SuppMsgOut;
-            logData = new LogData {MnemonicList = DevKit.Mnemonics(_log)};
             var query = new Log
             {
                 Uid = uidLog,
@@ -423,7 +368,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 UidWellbore = _log.UidWellbore,
             };
 
-            var result = DevKit.Query<LogList, Log>(
+            var result = _devKit.Query<LogList, Log>(
                 query,
                 ObjectTypes.Log, null, OptionsIn.ReturnElements.All + ';' +
                                        OptionsIn.RequestLatestValues.Eq(1));
@@ -453,23 +398,18 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_GetFromStore_Increasing_RequestLatestValue_OptionsIn()
         {
-            var response = DevKit.Add<WellList, Well>(_well);
-
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            _log.UidWell = _wellbore.UidWell;
-            _log.UidWellbore = response.SuppMsgOut;
+            _devKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellboreList, Wellbore>(_wellbore);
 
             var row = 10;
-            DevKit.InitHeader(_log, LogIndexType.measureddepth, increasing: true);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
             // Add a 4th Log Curve
-            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("GR2", "gAPI"));
+            _log.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("GR2", "gAPI"));
 
             var startIndex = new GenericMeasure {Uom = "m", Value = 100};
             _log.StartIndex = startIndex;
-            DevKit.InitDataMany(_log, DevKit.Mnemonics(_log), DevKit.Units(_log), row, 1, true, false, increasing: true);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), row, 1, true, false);
 
             // Reset for custom LogData
             var logData = _log.LogData.First();
@@ -494,14 +434,13 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Add("15,,,5"); // returned
 
             // Add a decreasing log with several values
-            response = DevKit.Add<LogList, Log>(_log);
+            var response = _devKit.Add<LogList, Log>(_log);
 
             // Assert that the log was added successfully
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
 
             var uidLog = response.SuppMsgOut;
-            logData = new LogData {MnemonicList = DevKit.Mnemonics(_log)};
             var query = new Log
             {
                 Uid = uidLog,
@@ -509,7 +448,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 UidWellbore = _log.UidWellbore,
             };
 
-            var result = DevKit.Query<LogList, Log>(
+            var result = _devKit.Query<LogList, Log>(
                 query,
                 ObjectTypes.Log, null, OptionsIn.ReturnElements.All + ';' +
                                        OptionsIn.RequestLatestValues.Eq(2));
@@ -539,18 +478,12 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_GetFromStore_Increasing_Time_RequestLatestValue_OptionsIn()
         {
-            var response = DevKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellboreList, Wellbore>(_wellbore);
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            _log.UidWell = _wellbore.UidWell;
-            _log.UidWellbore = response.SuppMsgOut;
-
-            //var row = 10;
-            DevKit.InitHeader(_log, LogIndexType.datetime, increasing: true);
-            DevKit.InitDataMany(_log, DevKit.Mnemonics(_log), DevKit.Units(_log), numRows: 1, factor: 1,
-                isDepthLog: false, hasEmptyChannel: false, increasing: true);
+            _devKit.InitHeader(_log, LogIndexType.datetime);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), numRows: 1, factor: 1,
+                isDepthLog: false, hasEmptyChannel: false);
 
             // Reset for custom LogData
             var logData = _log.LogData.First();
@@ -562,7 +495,7 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Add("2012-07-26T15:17:50.0000000+00:00,,3");
 
             // Add a decreasing log with several values
-            response = DevKit.Add<LogList, Log>(_log);
+            var response = _devKit.Add<LogList, Log>(_log);
 
             // Assert that the log was added successfully
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
@@ -576,7 +509,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 UidWellbore = _log.UidWellbore,
             };
 
-            var result = DevKit.Query<LogList, Log>(
+            var result = _devKit.Query<LogList, Log>(
                 query,
                 ObjectTypes.Log, null, OptionsIn.ReturnElements.All + ';' +
                                        OptionsIn.RequestLatestValues.Eq(1));
@@ -608,29 +541,44 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual("2012-07-26T15:17:50.0000000+00:00", queryData[1].Split(',')[0],
                 "The last data row should be for index value 2012-07-26T15:17:50.0000000+00:00");
 
+            Assert.IsNotNull(logInfos);
+
             // Validate the Min and Max of each LogCurveInfo #1
-            Assert.AreEqual(logInfos[0].MinDateTimeIndex.Value,
-                new Energistics.DataAccess.Timestamp(DateTimeOffset.Parse(queryData[0].Split(',')[0])));
-            Assert.AreEqual(logInfos[0].MaxDateTimeIndex.Value,
-                new Energistics.DataAccess.Timestamp(DateTimeOffset.Parse(queryData[1].Split(',')[0])));
+            var minDateTimeIndex0 = logInfos[0].MinDateTimeIndex;
+            var maxDateTimeIndex0 = logInfos[0].MaxDateTimeIndex;
+            var minDateTimeIndex1 = logInfos[1].MinDateTimeIndex;
+            var maxDateTimeIndex1 = logInfos[1].MaxDateTimeIndex;
+            var minDateTimeIndex2 = logInfos[2].MinDateTimeIndex;
+            var maxDateTimeIndex2 = logInfos[2].MaxDateTimeIndex;
+
+            Assert.IsNotNull(minDateTimeIndex0);
+            Assert.IsNotNull(maxDateTimeIndex0);
+            Assert.AreEqual(minDateTimeIndex0.Value,
+                new Timestamp(DateTimeOffset.Parse(queryData[0].Split(',')[0])));
+            Assert.AreEqual(maxDateTimeIndex0.Value,
+                new Timestamp(DateTimeOffset.Parse(queryData[1].Split(',')[0])));
 
             // Validate the Min and Max of each LogCurveInfo #2
-            Assert.AreEqual(logInfos[1].MinDateTimeIndex.Value,
-                new Energistics.DataAccess.Timestamp(DateTimeOffset.Parse(queryData[0].Split(',')[0])));
-            Assert.AreEqual(logInfos[1].MaxDateTimeIndex.Value,
-                new Energistics.DataAccess.Timestamp(DateTimeOffset.Parse(queryData[0].Split(',')[0])));
+            Assert.IsNotNull(minDateTimeIndex1);
+            Assert.IsNotNull(maxDateTimeIndex1);
+            Assert.AreEqual(minDateTimeIndex1.Value,
+                new Timestamp(DateTimeOffset.Parse(queryData[0].Split(',')[0])));
+            Assert.AreEqual(maxDateTimeIndex1.Value,
+                new Timestamp(DateTimeOffset.Parse(queryData[0].Split(',')[0])));
 
             // Validate the Min and Max of each LogCurveInfo #3
-            Assert.AreEqual(logInfos[2].MinDateTimeIndex.Value,
-                new Energistics.DataAccess.Timestamp(DateTimeOffset.Parse(queryData[1].Split(',')[0])));
-            Assert.AreEqual(logInfos[2].MaxDateTimeIndex.Value,
-                new Energistics.DataAccess.Timestamp(DateTimeOffset.Parse(queryData[1].Split(',')[0])));
+            Assert.IsNotNull(minDateTimeIndex2);
+            Assert.IsNotNull(maxDateTimeIndex2);
+            Assert.AreEqual(minDateTimeIndex2.Value,
+                new Timestamp(DateTimeOffset.Parse(queryData[1].Split(',')[0])));
+            Assert.AreEqual(maxDateTimeIndex2.Value,
+                new Timestamp(DateTimeOffset.Parse(queryData[1].Split(',')[0])));
         }
 
         [TestMethod]
         public void Log141DataAdapter_GetFromStore_Error_402_MaxReturnNodes_Not_Greater_Than_Zero()
         {
-            var result = DevKit.Get<LogList, Log>(DevKit.List(_log), ObjectTypes.Log, optionsIn: "maxReturnNodes=0");
+            var result = _devKit.Get<LogList, Log>(_devKit.List(_log), ObjectTypes.Log, optionsIn: "maxReturnNodes=0");
 
             Assert.AreEqual((short) ErrorCodes.InvalidMaxReturnNodes, result.Result);
         }
@@ -642,9 +590,9 @@ namespace PDS.Witsml.Server.Data.Logs
             _log.LogCurveInfo.Add(new LogCurveInfo() {Uid = "MD", DataSource = "abc"});
             _log.LogCurveInfo.Add(new LogCurveInfo() {Uid = "GR", CurveDescription = "efg"});
 
-            var list = DevKit.New<LogList>(x => x.Log = DevKit.List(_log));
+            var list = _devKit.New<LogList>(x => x.Log = _devKit.List(_log));
             var queryIn = WitsmlParser.ToXml(list);
-            var result = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
+            var result = _devKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
 
             Assert.AreEqual((short) ErrorCodes.RecurringItemsInconsistentSelection, result.Result);
         }
@@ -656,7 +604,7 @@ namespace PDS.Witsml.Server.Data.Logs
             _log.LogCurveInfo.Add(new LogCurveInfo() {Uid = "MD", Mnemonic = new ShortNameStruct("MD")});
             _log.LogCurveInfo.Add(new LogCurveInfo() {Uid = string.Empty, Mnemonic = new ShortNameStruct("ROP")});
 
-            var result = DevKit.Get<LogList, Log>(DevKit.List(_log), ObjectTypes.Log, null,
+            var result = _devKit.Get<LogList, Log>(_devKit.List(_log), ObjectTypes.Log, null,
                 optionsIn: OptionsIn.ReturnElements.Requested);
 
             Assert.AreEqual((short) ErrorCodes.RecurringItemsEmptySelection, result.Result);
@@ -665,32 +613,29 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_GetFromStore_Error_475_No_Subset_When_Getting_Growing_Object()
         {
-            var response = DevKit.Add<WellList, Well>(_well);
+            var response = _devKit.Add<WellList, Well>(_well);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
             // Add first log
-            _log.UidWell = _wellbore.UidWell;
-            _log.UidWellbore = response.SuppMsgOut;
-            DevKit.InitHeader(_log, LogIndexType.measureddepth);
-            response = DevKit.Add<LogList, Log>(_log);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
             // Add second log
-            var log2 = DevKit.CreateLog(null, DevKit.Name("Log 02"), _log.UidWell, _log.NameWell, _log.UidWellbore,
+            var log2 = _devKit.CreateLog(null, _devKit.Name("Log 02"), _log.UidWell, _log.NameWell, _log.UidWellbore,
                 _log.NameWellbore);
-            DevKit.InitHeader(log2, LogIndexType.measureddepth);
+            _devKit.InitHeader(log2, LogIndexType.measureddepth);
 
-            response = DevKit.Add<LogList, Log>(log2);
+            response = _devKit.Add<LogList, Log>(log2);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
             // Query
-            var query = DevKit.CreateLog(null, null, log2.UidWell, null, log2.UidWellbore, null);
+            var query = _devKit.CreateLog(null, null, log2.UidWell, null, log2.UidWellbore, null);
 
-            var result = DevKit.Get<LogList, Log>(DevKit.List(query), ObjectTypes.Log, null,
+            var result = _devKit.Get<LogList, Log>(_devKit.List(query), ObjectTypes.Log, null,
                 OptionsIn.ReturnElements.DataOnly);
             Assert.AreEqual((short) ErrorCodes.MissingSubsetOfGrowingDataObject, result.Result);
         }
@@ -698,33 +643,30 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_GetFromStore_ReturnElements_DataOnly_Supports_Multiple_Queries()
         {
-            var response = DevKit.Add<WellList, Well>(_well);
+            var response = _devKit.Add<WellList, Well>(_well);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
             // Add first log
-            _log.UidWell = _wellbore.UidWell;
-            _log.UidWellbore = response.SuppMsgOut;
-            DevKit.InitHeader(_log, LogIndexType.measureddepth);
-            DevKit.InitDataMany(_log, DevKit.Mnemonics(_log), DevKit.Units(_log), 3, hasEmptyChannel: false);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), 3, hasEmptyChannel: false);
 
-            response = DevKit.Add<LogList, Log>(_log);
+            response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
             var uidLog1 = response.SuppMsgOut;
 
             // Add second log
-            var log2 = DevKit.CreateLog(null, DevKit.Name("Log 02"), _log.UidWell, _log.NameWell, _log.UidWellbore,
+            var log2 = _devKit.CreateLog(null, _devKit.Name("Log 02"), _log.UidWell, _log.NameWell, _log.UidWellbore,
                 _log.NameWellbore);
-            DevKit.InitHeader(log2, LogIndexType.datetime);
+            _devKit.InitHeader(log2, LogIndexType.datetime);
             log2.LogCurveInfo.Clear();
-            log2.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("TIME", "s"));
-            log2.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("AAA", "m/h"));
-            log2.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("BBB", "gAPI"));
-            log2.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("CCC", "gAPI"));
+            log2.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("TIME", "s"));
+            log2.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("AAA", "m/h"));
+            log2.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("BBB", "gAPI"));
+            log2.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("CCC", "gAPI"));
 
             var logData = log2.LogData.First();
             logData.Data.Clear();
@@ -735,16 +677,16 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Add("2012-07-26T15:17:40.0000000+00:00,3,2,3");
             logData.Data.Add("2012-07-26T15:17:50.0000000+00:00,4,3,4");
 
-            response = DevKit.Add<LogList, Log>(log2);
+            response = _devKit.Add<LogList, Log>(log2);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
             var uidLog2 = response.SuppMsgOut;
 
             // Query
-            var query1 = DevKit.CreateLog(uidLog1, null, log2.UidWell, null, log2.UidWellbore, null);
-            var query2 = DevKit.CreateLog(uidLog2, null, log2.UidWell, null, log2.UidWellbore, null);
+            var query1 = _devKit.CreateLog(uidLog1, null, log2.UidWell, null, log2.UidWellbore, null);
+            var query2 = _devKit.CreateLog(uidLog2, null, log2.UidWell, null, log2.UidWellbore, null);
 
-            var result = DevKit.Get<LogList, Log>(DevKit.List(query1, query2), ObjectTypes.Log, null,
+            var result = _devKit.Get<LogList, Log>(_devKit.List(query1, query2), ObjectTypes.Log, null,
                 OptionsIn.ReturnElements.DataOnly);
             Assert.AreEqual((short) ErrorCodes.Success, result.Result);
 
@@ -767,33 +709,30 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_GetFromStore_ReturnElements_Requested_Supports_Multiple_Queries()
         {
-            var response = DevKit.Add<WellList, Well>(_well);
+            var response = _devKit.Add<WellList, Well>(_well);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
             // Add first log
-            _log.UidWell = _wellbore.UidWell;
-            _log.UidWellbore = response.SuppMsgOut;
-            DevKit.InitHeader(_log, LogIndexType.measureddepth);
-            DevKit.InitDataMany(_log, DevKit.Mnemonics(_log), DevKit.Units(_log), 3, hasEmptyChannel: false);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), 3, hasEmptyChannel: false);
 
-            response = DevKit.Add<LogList, Log>(_log);
+            response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
             var uidLog1 = response.SuppMsgOut;
 
             // Add second log
-            var log2 = DevKit.CreateLog(null, DevKit.Name("Log 02"), _log.UidWell, _log.NameWell, _log.UidWellbore,
+            var log2 = _devKit.CreateLog(null, _devKit.Name("Log 02"), _log.UidWell, _log.NameWell, _log.UidWellbore,
                 _log.NameWellbore);
-            DevKit.InitHeader(log2, LogIndexType.datetime);
+            _devKit.InitHeader(log2, LogIndexType.datetime);
             log2.LogCurveInfo.Clear();
-            log2.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("TIME", "s"));
-            log2.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("AAA", "m/h"));
-            log2.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("BBB", "gAPI"));
-            log2.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("CCC", "gAPI"));
+            log2.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("TIME", "s"));
+            log2.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("AAA", "m/h"));
+            log2.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("BBB", "gAPI"));
+            log2.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("CCC", "gAPI"));
 
             var logData = log2.LogData.First();
             logData.Data.Clear();
@@ -804,13 +743,13 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Add("2012-07-26T15:17:40.0000000+00:00,3,2,3");
             logData.Data.Add("2012-07-26T15:17:50.0000000+00:00,4,3,4");
 
-            response = DevKit.Add<LogList, Log>(log2);
+            response = _devKit.Add<LogList, Log>(log2);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
             var uidLog2 = response.SuppMsgOut;
 
             // Query
-            var query1 = DevKit.CreateLog(uidLog1, null, log2.UidWell, null, log2.UidWellbore, null);
+            var query1 = _devKit.CreateLog(uidLog1, null, log2.UidWell, null, log2.UidWellbore, null);
             query1.LogCurveInfo = new List<LogCurveInfo>();
             query1.LogCurveInfo.Add(new LogCurveInfo() {Uid = "MD", Mnemonic = new ShortNameStruct("MD")});
             query1.LogCurveInfo.Add(new LogCurveInfo() {Uid = "ROP", Mnemonic = new ShortNameStruct("ROP")});
@@ -818,7 +757,7 @@ namespace PDS.Witsml.Server.Data.Logs
             query1.LogData = new List<LogData>() {new LogData()};
             query1.LogData.First().MnemonicList = "MD,ROP,GR";
 
-            var query2 = DevKit.CreateLog(uidLog2, null, log2.UidWell, null, log2.UidWellbore, null);
+            var query2 = _devKit.CreateLog(uidLog2, null, log2.UidWell, null, log2.UidWellbore, null);
             query2.LogCurveInfo = new List<LogCurveInfo>();
             query2.LogCurveInfo.Add(new LogCurveInfo() {Uid = "TIME", Mnemonic = new ShortNameStruct("TIME")});
             query2.LogCurveInfo.Add(new LogCurveInfo() {Uid = "AAA", Mnemonic = new ShortNameStruct("AAA")});
@@ -827,9 +766,9 @@ namespace PDS.Witsml.Server.Data.Logs
             query2.LogData = new List<LogData>() {new LogData()};
             query2.LogData.First().MnemonicList = "TIME,AAA,BBB,CCC";
 
-            var list = DevKit.New<LogList>(x => x.Log = DevKit.List(query1, query2));
+            var list = _devKit.New<LogList>(x => x.Log = _devKit.List(query1, query2));
             var queryIn = WitsmlParser.ToXml(list);
-            var result = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
+            var result = _devKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
             Assert.AreEqual((short) ErrorCodes.Success, result.Result);
 
             var logList = EnergisticsConverter.XmlToObject<LogList>(result.XMLout);
@@ -852,36 +791,29 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141DataAdapter_GetFromStore_Supports_NaN_In_Numeric_Fields()
         {
             // Add well
-            var response = DevKit.Add<WellList, Well>(_well);
+            var response = _devKit.Add<WellList, Well>(_well);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
             // Add wellbore
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
-            var uidWellbore = response.SuppMsgOut;
-
             // Add log
-            _log.UidWell = _wellbore.UidWell;
-            _log.UidWellbore = uidWellbore;
-            DevKit.InitHeader(_log, LogIndexType.measureddepth);
-            DevKit.InitDataMany(_log, DevKit.Mnemonics(_log), DevKit.Units(_log), 3);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), 3);
             _log.BhaRunNumber = 123;
             _log.LogCurveInfo[0].ClassIndex = 1;
             _log.LogCurveInfo[1].ClassIndex = 2;
 
-            response = DevKit.Add<LogList, Log>(_log);
+            response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
-
-            var uidLog = response.SuppMsgOut;
 
             // Query log
             var queryIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
                           "<logs version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" +
                           Environment.NewLine +
-                          "<log uid=\"" + uidLog + "\" uidWell=\"" + _wellbore.UidWell + "\" uidWellbore=\"" +
-                          uidWellbore + "\">" + Environment.NewLine +
+                          "<log uid=\"" + _log.Uid + "\" uidWell=\"" + _log.UidWell + "\" uidWellbore=\"" +
+                          _log.UidWellbore + "\">" + Environment.NewLine +
                           "<bhaRunNumber>NaN</bhaRunNumber>" + Environment.NewLine +
                           "<logCurveInfo uid=\"MD\">" + Environment.NewLine +
                           "  <mnemonic>MD</mnemonic>" + Environment.NewLine +
@@ -894,7 +826,7 @@ namespace PDS.Witsml.Server.Data.Logs
                           "</log>" + Environment.NewLine +
                           "</logs>";
 
-            var results = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
+            var results = _devKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
             Assert.AreEqual((short) ErrorCodes.Success, results.Result);
 
             var logList = EnergisticsConverter.XmlToObject<LogList>(results.XMLout);
@@ -913,16 +845,10 @@ namespace PDS.Witsml.Server.Data.Logs
             // Set the depth range chunk size.
             WitsmlSettings.DepthRangeSize = 1000;
 
-            var response = DevKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellboreList, Wellbore>(_wellbore);
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            _log.UidWell = _wellbore.UidWell;
-            _log.UidWellbore = response.SuppMsgOut;
-
-            _log.LogData = DevKit.List(new LogData() {Data = DevKit.List<string>()});
-
+            _log.LogData = _devKit.List(new LogData() {Data = _devKit.List<string>()});
             var logData = _log.LogData.First();
             logData.Data.Add("1700.0,17.1,17.2");
             logData.Data.Add("1800.0,18.1,18.2");
@@ -931,19 +857,19 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Add("2800.0,28.1,28.2");
             logData.Data.Add("2900.0,29.1,29.2");
 
-            DevKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
-            response = DevKit.Add<LogList, Log>(_log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
             var uidLog = response.SuppMsgOut;
 
             // Query
-            var query = DevKit.CreateLog(uidLog, null, _log.UidWell, null, _log.UidWellbore, null);
+            var query = _devKit.CreateLog(uidLog, null, _log.UidWell, null, _log.UidWellbore, null);
             query.StartIndex = new GenericMeasure(1800, "ft");
             query.EndIndex = new GenericMeasure(2700, "ft");
 
-            var result = DevKit.Get<LogList, Log>(DevKit.List(query), ObjectTypes.Log, null,
+            var result = _devKit.Get<LogList, Log>(_devKit.List(query), ObjectTypes.Log, null,
                 OptionsIn.ReturnElements.DataOnly);
             Assert.AreEqual((short) ErrorCodes.Success, result.Result);
 
@@ -962,16 +888,10 @@ namespace PDS.Witsml.Server.Data.Logs
             // Set the depth range chunk size.
             WitsmlSettings.DepthRangeSize = 1000;
 
-            var response = DevKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellboreList, Wellbore>(_wellbore);
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            _log.UidWell = _wellbore.UidWell;
-            _log.UidWellbore = response.SuppMsgOut;
-
-            _log.LogData = DevKit.List(new LogData() {Data = DevKit.List<string>()});
-
+            _log.LogData = _devKit.List(new LogData() {Data = _devKit.List<string>()});
             var logData = _log.LogData.First();
             logData.Data.Add("2300.0,23.1,23.2");
             logData.Data.Add("2200.0,22.1,22.2");
@@ -980,19 +900,19 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Add("1900.0,19.1,19.2");
             logData.Data.Add("1800.0,18.1,18.2");
 
-            DevKit.InitHeader(_log, LogIndexType.measureddepth, false);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth, false);
 
-            response = DevKit.Add<LogList, Log>(_log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
             var uidLog = response.SuppMsgOut;
 
             // Query
-            var query = DevKit.CreateLog(uidLog, null, _log.UidWell, null, _log.UidWellbore, null);
+            var query = _devKit.CreateLog(uidLog, null, _log.UidWell, null, _log.UidWellbore, null);
             query.StartIndex = new GenericMeasure(2200, "ft");
             query.EndIndex = new GenericMeasure(1800, "ft");
 
-            var result = DevKit.Get<LogList, Log>(DevKit.List(query), ObjectTypes.Log, null,
+            var result = _devKit.Get<LogList, Log>(_devKit.List(query), ObjectTypes.Log, null,
                 OptionsIn.ReturnElements.DataOnly);
             Assert.AreEqual((short) ErrorCodes.Success, result.Result);
 
@@ -1010,24 +930,19 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_GetFromStore_With_Start_And_End_Index_On_Channel_With_Null_Values()
         {
-            var response = DevKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellboreList, Wellbore>(_wellbore);
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            _log.UidWell = _wellbore.UidWell;
-            _log.UidWellbore = response.SuppMsgOut;
-
-            DevKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
             _log.LogCurveInfo.Clear();
-            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("MD", "ft"));
-            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("AAA", "m/h"));
-            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("BBB", "gAPI"));
-            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("CCC", "gAPI"));
-            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("DDD", "s"));
+            _log.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("MD", "ft"));
+            _log.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("AAA", "m/h"));
+            _log.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("BBB", "gAPI"));
+            _log.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("CCC", "gAPI"));
+            _log.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("DDD", "s"));
 
-            _log.LogData = DevKit.List(new LogData() {Data = DevKit.List<string>()});
+            _log.LogData = _devKit.List(new LogData() {Data = _devKit.List<string>()});
             var logData = _log.LogData.First();
             logData.Data.Clear();
             logData.MnemonicList = "MD,AAA,BBB,CCC,DDD";
@@ -1040,17 +955,17 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Add("2200.0, 22.1, 22.2, null, 22.4");
             logData.Data.Add("2300.0, 23.1, 23.2, 23.3, 23.4");
 
-            response = DevKit.Add<LogList, Log>(_log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
             var uidLog = response.SuppMsgOut;
 
             // Query
-            var query = DevKit.CreateLog(uidLog, null, _log.UidWell, null, _log.UidWellbore, null);
+            var query = _devKit.CreateLog(uidLog, null, _log.UidWell, null, _log.UidWellbore, null);
             query.StartIndex = new GenericMeasure(1800, "ft");
             query.EndIndex = new GenericMeasure(2200, "ft");
 
-            var result = DevKit.Get<LogList, Log>(DevKit.List(query), ObjectTypes.Log, null,
+            var result = _devKit.Get<LogList, Log>(_devKit.List(query), ObjectTypes.Log, null,
                 OptionsIn.ReturnElements.All);
             Assert.AreEqual((short) ErrorCodes.Success, result.Result);
 
@@ -1076,9 +991,9 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(5, data.Count);
 
             double value = 18;
-            for (int i = 0; i < data.Count; i++)
+            foreach (string r in data)
             {
-                var row = data[i].Split(',');
+                var row = r.Split(',');
                 Assert.AreEqual(4, row.Count());
                 Assert.AreEqual(value*100, Convert.ToDouble(row[0]));
                 Assert.AreEqual(value + 0.1, Convert.ToDouble(row[1]));
@@ -1094,26 +1009,21 @@ namespace PDS.Witsml.Server.Data.Logs
             // Set the depth range chunk size.
             WitsmlSettings.DepthRangeSize = 1000;
 
-            var response = DevKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellboreList, Wellbore>(_wellbore);
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            _log.UidWell = _wellbore.UidWell;
-            _log.UidWellbore = response.SuppMsgOut;
-
-            DevKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
             _log.NullValue = "-999.25";
 
             _log.LogCurveInfo.Clear();
-            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("MD", "ft"));
-            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("AAA", "m/h"));
-            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("BBB", "gAPI"));
-            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("CCC", "gAPI"));
-            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("DDD", "s"));
+            _log.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("MD", "ft"));
+            _log.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("AAA", "m/h"));
+            _log.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("BBB", "gAPI"));
+            _log.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("CCC", "gAPI"));
+            _log.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("DDD", "s"));
 
-            _log.LogData = DevKit.List(new LogData() {Data = DevKit.List<string>()});
+            _log.LogData = _devKit.List(new LogData() {Data = _devKit.List<string>()});
             var logData = _log.LogData.First();
             logData.Data.Clear();
             logData.MnemonicList = "MD,AAA,BBB,CCC,DDD";
@@ -1126,17 +1036,17 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Add("2200.0, 22.1, 22.2, -999.25, 22.4");
             logData.Data.Add("2300.0, 23.1, 23.2,    23.3, 23.4");
 
-            response = DevKit.Add<LogList, Log>(_log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
             var uidLog = response.SuppMsgOut;
 
             // Query
-            var query = DevKit.CreateLog(uidLog, null, _log.UidWell, null, _log.UidWellbore, null);
+            var query = _devKit.CreateLog(uidLog, null, _log.UidWell, null, _log.UidWellbore, null);
             query.StartIndex = new GenericMeasure(1800, "ft");
             query.EndIndex = new GenericMeasure(2200, "ft");
 
-            var result = DevKit.Get<LogList, Log>(DevKit.List(query), ObjectTypes.Log, null,
+            var result = _devKit.Get<LogList, Log>(_devKit.List(query), ObjectTypes.Log, null,
                 OptionsIn.ReturnElements.All);
             Assert.AreEqual((short) ErrorCodes.Success, result.Result);
 
@@ -1162,9 +1072,9 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(5, data.Count);
 
             double value = 18;
-            for (int i = 0; i < data.Count; i++)
+            foreach (string s in data)
             {
-                var row = data[i].Split(',');
+                var row = s.Split(',');
                 Assert.AreEqual(4, row.Count());
                 Assert.AreEqual(value*100, Convert.ToDouble(row[0]));
                 Assert.AreEqual(value + 0.1, Convert.ToDouble(row[1]));
@@ -1180,31 +1090,26 @@ namespace PDS.Witsml.Server.Data.Logs
             // Set the depth range chunk size.
             WitsmlSettings.DepthRangeSize = 1000;
 
-            var response = DevKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellboreList, Wellbore>(_wellbore);
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            _log.UidWell = _wellbore.UidWell;
-            _log.UidWellbore = response.SuppMsgOut;
-
-            DevKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
             _log.NullValue = "-999.25";
 
             _log.LogCurveInfo.Clear();
-            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("MD", "ft"));
-            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("AAA", "m/h"));
-            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("BBB", "gAPI"));
-            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("CCC", "gAPI"));
-            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("DDD", "s"));
+            _log.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("MD", "ft"));
+            _log.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("AAA", "m/h"));
+            _log.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("BBB", "gAPI"));
+            _log.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("CCC", "gAPI"));
+            _log.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("DDD", "s"));
 
             // Set channels null value except channel "CCC"
             _log.LogCurveInfo[1].NullValue = "-1111.1";
             _log.LogCurveInfo[2].NullValue = "-2222.2";
             _log.LogCurveInfo[4].NullValue = "-4444.4";
 
-            _log.LogData = DevKit.List(new LogData() {Data = DevKit.List<string>()});
+            _log.LogData = _devKit.List(new LogData() {Data = _devKit.List<string>()});
             var logData = _log.LogData.First();
             logData.Data.Clear();
             logData.MnemonicList = "MD,AAA,BBB,CCC,DDD";
@@ -1217,17 +1122,17 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Add("2200.0,    22.1,    22.2, -999.25, -4444.4");
             logData.Data.Add("2300.0,    23.1, -2222.2,    23.3, -4444.4");
 
-            response = DevKit.Add<LogList, Log>(_log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
             var uidLog = response.SuppMsgOut;
 
             // Query
-            var query = DevKit.CreateLog(uidLog, null, _log.UidWell, null, _log.UidWellbore, null);
+            var query = _devKit.CreateLog(uidLog, null, _log.UidWell, null, _log.UidWellbore, null);
             query.StartIndex = new GenericMeasure(1.0, "ft");
             query.EndIndex = new GenericMeasure(2.0, "ft");
 
-            var result = DevKit.Get<LogList, Log>(DevKit.List(query), ObjectTypes.Log, null,
+            var result = _devKit.Get<LogList, Log>(_devKit.List(query), ObjectTypes.Log, null,
                 OptionsIn.ReturnElements.All);
             Assert.AreEqual((short) ErrorCodes.Success, result.Result);
 
@@ -1253,25 +1158,18 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_GetFromStore_With_Null_Indicator_Empty_Row_Should_Not_Be_Returned()
         {
-            var response = DevKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellboreList, Wellbore>(_wellbore);
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            _log.UidWell = _wellbore.UidWell;
-            _log.UidWellbore = response.SuppMsgOut;
-
-            DevKit.InitHeader(_log, LogIndexType.measureddepth);
-
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
             _log.NullValue = "-999.25";
-
             _log.LogCurveInfo.Clear();
-            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("MD", "ft"));
-            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("AAA", "m/h"));
-            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("BBB", "gAPI"));
-            _log.LogCurveInfo.Add(DevKit.CreateDoubleLogCurveInfo("CCC", "gAPI"));
+            _log.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("MD", "ft"));
+            _log.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("AAA", "m/h"));
+            _log.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("BBB", "gAPI"));
+            _log.LogCurveInfo.Add(_devKit.CreateDoubleLogCurveInfo("CCC", "gAPI"));
 
-            _log.LogData = DevKit.List(new LogData() {Data = DevKit.List<string>()});
+            _log.LogData = _devKit.List(new LogData() {Data = _devKit.List<string>()});
             var logData = _log.LogData.First();
             logData.Data.Clear();
             logData.MnemonicList = "MD,AAA,BBB,CCC";
@@ -1281,15 +1179,15 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Add("1900.0, -999.25, -999.25, -999.25");
             logData.Data.Add("2000.0, 20.1, 20.2, -999.25");
 
-            response = DevKit.Add<LogList, Log>(_log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short) ErrorCodes.Success, response.Result);
 
             var uidLog = response.SuppMsgOut;
 
             // Query
-            var query = DevKit.CreateLog(uidLog, null, _log.UidWell, null, _log.UidWellbore, null);
+            var query = _devKit.CreateLog(uidLog, null, _log.UidWell, null, _log.UidWellbore, null);
 
-            var result = DevKit.Get<LogList, Log>(DevKit.List(query), ObjectTypes.Log, null,
+            var result = _devKit.Get<LogList, Log>(_devKit.List(query), ObjectTypes.Log, null,
                 OptionsIn.ReturnElements.All);
             Assert.AreEqual((short) ErrorCodes.Success, result.Result);
 
@@ -1332,17 +1230,15 @@ namespace PDS.Witsml.Server.Data.Logs
             // Assert that the log was added successfully
             Assert.AreEqual((short) ErrorCodes.Success, logResponse.Result);
 
-            var uidLog = logResponse.SuppMsgOut;
-            var logData = new LogData {MnemonicList = DevKit.Mnemonics(_log)};
             var query = new Log
             {
-                Uid = uidLog,
+                Uid = _log.Uid,
                 UidWell = _log.UidWell,
                 UidWellbore = _log.UidWellbore,
             };
 
             short errorCode;
-            var result = DevKit.QueryWithErrorCode<LogList, Log>(
+            var result = _devKit.QueryWithErrorCode<LogList, Log>(
                 query, out errorCode,
                 ObjectTypes.Log, null, OptionsIn.ReturnElements.All + ';' +
                                        OptionsIn.MaxReturnNodes.Eq(maxReturnNodes));
@@ -1380,17 +1276,15 @@ namespace PDS.Witsml.Server.Data.Logs
             // Assert that the log was added successfully
             Assert.AreEqual((short) ErrorCodes.Success, logResponse.Result);
 
-            var uidLog = logResponse.SuppMsgOut;
-            var logData = new LogData {MnemonicList = DevKit.Mnemonics(_log)};
             var query = new Log
             {
-                Uid = uidLog,
+                Uid = _log.Uid,
                 UidWell = _log.UidWell,
                 UidWellbore = _log.UidWellbore,
             };
 
             short errorCode;
-            var result = DevKit.QueryWithErrorCode<LogList, Log>(
+            var result = _devKit.QueryWithErrorCode<LogList, Log>(
                 query, out errorCode,
                 ObjectTypes.Log, null, OptionsIn.ReturnElements.All + ';' +
                                        OptionsIn.MaxReturnNodes.Eq(maxReturnNodes));
@@ -1430,20 +1324,20 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short) ErrorCodes.Success, log1Response.Result);
 
             // Add a second Log to the same wellbore as Setup log (_log)
-            var log2 = DevKit.CreateLog(null, DevKit.Name("Log 02"), _log.UidWell, _well.Name, _log.UidWellbore,
+            var log2 = _devKit.CreateLog(null, _devKit.Name("Log 02"), _log.UidWell, _well.Name, _log.UidWellbore,
                 _wellbore.Name);
-            DevKit.InitHeader(log2, LogIndexType.measureddepth);
-            DevKit.InitDataMany(log2, DevKit.Mnemonics(log2), DevKit.Units(log2), numRows, hasEmptyChannel: false);
+            _devKit.InitHeader(log2, LogIndexType.measureddepth);
+            _devKit.InitDataMany(log2, _devKit.Mnemonics(log2), _devKit.Units(log2), numRows, hasEmptyChannel: false);
 
             // Add the 2nd log
-            var log2Response = DevKit.Add<LogList, Log>(log2);
+            var log2Response = _devKit.Add<LogList, Log>(log2);
 
-            var query1 = DevKit.CreateLog(log1Response.SuppMsgOut, null, _log.UidWell, null, _log.UidWellbore, null);
-            var query2 = DevKit.CreateLog(log2Response.SuppMsgOut, null, log2.UidWell, null, log2.UidWellbore, null);
+            var query1 = _devKit.CreateLog(log1Response.SuppMsgOut, null, _log.UidWell, null, _log.UidWellbore, null);
+            var query2 = _devKit.CreateLog(log2Response.SuppMsgOut, null, log2.UidWell, null, log2.UidWellbore, null);
 
             // Perform a GetFromStore with multiple log queries
-            var result = DevKit.Get<LogList, Log>(
-                DevKit.List(query1, query2),
+            var result = _devKit.Get<LogList, Log>(
+                _devKit.List(query1, query2),
                 ObjectTypes.Log,
                 null,
                 OptionsIn.ReturnElements.All + ';' + OptionsIn.MaxReturnNodes.Eq(maxReturnNodes));
@@ -1456,6 +1350,7 @@ namespace PDS.Witsml.Server.Data.Logs
             foreach (var l in logList.Items)
             {
                 var log = l as Log;
+                Assert.IsNotNull(log);
                 Assert.AreEqual(maxReturnNodes, log.LogData[0].Data.Count);
             }
         }
@@ -1473,16 +1368,16 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short) ErrorCodes.Success, log1Response.Result);
 
             // Add a second Log to the same wellbore as Setup log (_log)
-            var log2 = DevKit.CreateLog(null, DevKit.Name("Log 02"), _log.UidWell, _well.Name, _log.UidWellbore,
+            var log2 = _devKit.CreateLog(null, _devKit.Name("Log 02"), _log.UidWell, _well.Name, _log.UidWellbore,
                 _wellbore.Name);
-            DevKit.InitHeader(log2, LogIndexType.measureddepth);
-            DevKit.InitDataMany(log2, DevKit.Mnemonics(log2), DevKit.Units(log2), numRows, hasEmptyChannel: false);
+            _devKit.InitHeader(log2, LogIndexType.measureddepth);
+            _devKit.InitDataMany(log2, _devKit.Mnemonics(log2), _devKit.Units(log2), numRows, hasEmptyChannel: false);
 
             // Add the 2nd log
-            var log2Response = DevKit.Add<LogList, Log>(log2);
+            var log2Response = _devKit.Add<LogList, Log>(log2);
 
-            var query1 = DevKit.CreateLog(log1Response.SuppMsgOut, null, _log.UidWell, null, _log.UidWellbore, null);
-            var query2 = DevKit.CreateLog(log2Response.SuppMsgOut, null, log2.UidWell, null, log2.UidWellbore, null);
+            var query1 = _devKit.CreateLog(log1Response.SuppMsgOut, null, _log.UidWell, null, _log.UidWellbore, null);
+            var query2 = _devKit.CreateLog(log2Response.SuppMsgOut, null, log2.UidWell, null, log2.UidWellbore, null);
 
             // This will cap the total response nodes to 8 instead of 10 if this was not specified.
             var previousMaxDataNodes = WitsmlSettings.MaxDataNodes;
@@ -1491,22 +1386,28 @@ namespace PDS.Witsml.Server.Data.Logs
             try
             {
                 // Perform a GetFromStore with multiple log queries
-                var result = DevKit.Get<LogList, Log>(
-                    DevKit.List(query1, query2),
+                var result = _devKit.Get<LogList, Log>(
+                    _devKit.List(query1, query2),
                     ObjectTypes.Log,
                     null,
                     OptionsIn.ReturnElements.All + ';' + OptionsIn.MaxReturnNodes.Eq(maxReturnNodes));
                 Assert.AreEqual((short) ErrorCodes.ParialSuccess, result.Result);
 
                 var logList = EnergisticsConverter.XmlToObject<LogList>(result.XMLout);
+                Assert.IsNotNull(logList);
+                Assert.IsNotNull(logList.Items);
                 Assert.AreEqual(2, logList.Items.Count, "Two logs should be returned");
 
                 // The first log should have maxReturnNodes log data rows
-                Assert.AreEqual(maxReturnNodes, (logList.Items[0] as Log).LogData[0].Data.Count);
+                var log0 = (logList.Items[0] as Log);
+                Assert.IsNotNull(log0);
+                Assert.AreEqual(maxReturnNodes, log0.LogData[0].Data.Count);
 
                 // Since there is a total cap of 8 rows the last log should have only 3 rows.
+                var log1 = (logList.Items[1] as Log);
+                Assert.IsNotNull(log1);
                 Assert.AreEqual(WitsmlSettings.MaxDataNodes - maxReturnNodes,
-                    (logList.Items[1] as Log).LogData[0].Data.Count);
+                    log1.LogData[0].Data.Count);
 
                 WitsmlSettings.MaxDataNodes = previousMaxDataNodes;
             }
@@ -1527,11 +1428,11 @@ namespace PDS.Witsml.Server.Data.Logs
                 increasing: true);
             Assert.AreEqual((short) ErrorCodes.Success, logResponse.Result);
 
-            var query = DevKit.CreateLog(_log.Uid, null, _log.UidWell, null, _log.UidWellbore, null);
+            var query = _devKit.CreateLog(_log.Uid, null, _log.UidWell, null, _log.UidWellbore, null);
 
             // Query the log and it returns the whole log data
             short errorCode;
-            var result = DevKit.QueryWithErrorCode<LogList, Log>(query, out errorCode, ObjectTypes.Log, null,
+            var result = _devKit.QueryWithErrorCode<LogList, Log>(query, out errorCode, ObjectTypes.Log, null,
                 OptionsIn.ReturnElements.All);
 
             Assert.AreEqual((short) ErrorCodes.Success, errorCode);
@@ -1547,7 +1448,7 @@ namespace PDS.Witsml.Server.Data.Logs
             // Change the MaxDataPoints in Settings to a small number and query the log again
             WitsmlSettings.MaxDataPoints = maxDataPoints;
 
-            result = DevKit.QueryWithErrorCode<LogList, Log>(query, out errorCode, ObjectTypes.Log, null,
+            result = _devKit.QueryWithErrorCode<LogList, Log>(query, out errorCode, ObjectTypes.Log, null,
                 OptionsIn.ReturnElements.All);
 
             Assert.AreEqual((short) ErrorCodes.ParialSuccess, errorCode, "Returning partial data.");
@@ -1565,38 +1466,31 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Empty_MneMonicList_And_ReturnElement_DataOnly()
         {
             // Add well
-            var response = DevKit.Add<WellList, Well>(_well);
+            var response = _devKit.Add<WellList, Well>(_well);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             // Add wellbore
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidWellbore = response.SuppMsgOut;
 
             // Add log
-            _log.UidWell = _wellbore.UidWell;
-            _log.UidWellbore = uidWellbore;
-            DevKit.InitHeader(_log, LogIndexType.measureddepth);
-            DevKit.InitDataMany(_log, DevKit.Mnemonics(_log), DevKit.Units(_log), 3);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), 3);
 
-            response = DevKit.Add<LogList, Log>(_log);
+            response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidLog = response.SuppMsgOut;
 
             // Query log
             var queryIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
                 "<logs version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
-                    "<log uid=\"" + uidLog + "\" uidWell=\"" + _wellbore.UidWell + "\" uidWellbore=\"" + uidWellbore + "\">" + Environment.NewLine +
+                    "<log uid=\"" + _log.Uid + "\" uidWell=\"" + _log.UidWell + "\" uidWellbore=\"" + _log.UidWellbore + "\">" + Environment.NewLine +
                         "<logData>" + Environment.NewLine +
                         "  <mnemonicList/>" + Environment.NewLine +
                         "</logData>" + Environment.NewLine +
                     "</log>" + Environment.NewLine +
                "</logs>";
 
-            var results = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=data-only");
+            var results = _devKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=data-only");
             Assert.AreEqual((short)ErrorCodes.Success, results.Result);
 
             var logList = EnergisticsConverter.XmlToObject<LogList>(results.XMLout);
@@ -1605,43 +1499,35 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(3, logList.Log[0].LogData[0].Data.Count);           
         }
 
-
         [TestMethod]
         public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Empty_MneMonicList_And_ReturnElement_Requested()
         {
             // Add well
-            var response = DevKit.Add<WellList, Well>(_well);
+            var response = _devKit.Add<WellList, Well>(_well);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             // Add wellbore
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
+            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidWellbore = response.SuppMsgOut;
 
             // Add log
-            _log.UidWell = _wellbore.UidWell;
-            _log.UidWellbore = uidWellbore;
-            DevKit.InitHeader(_log, LogIndexType.measureddepth);
-            DevKit.InitDataMany(_log, DevKit.Mnemonics(_log), DevKit.Units(_log), 3);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), 3);
 
-            response = DevKit.Add<LogList, Log>(_log);
+            response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidLog = response.SuppMsgOut;
 
             // Query log
             var queryIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
                 "<logs version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
-                    "<log uid=\"" + uidLog + "\" uidWell=\"" + _wellbore.UidWell + "\" uidWellbore=\"" + uidWellbore + "\">" + Environment.NewLine +
+                    "<log uid=\"" + _log.Uid + "\" uidWell=\"" + _log.UidWell + "\" uidWellbore=\"" + _log.UidWellbore + "\">" + Environment.NewLine +
                         "<logData>" + Environment.NewLine +
                         "  <mnemonicList/>" + Environment.NewLine +
                         "</logData>" + Environment.NewLine +
                     "</log>" + Environment.NewLine +
                "</logs>";
 
-            var results = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
+            var results = _devKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
             Assert.AreEqual((short)ErrorCodes.Success, results.Result);
 
             var logList = EnergisticsConverter.XmlToObject<LogList>(results.XMLout);
@@ -1660,11 +1546,11 @@ namespace PDS.Witsml.Server.Data.Logs
                 increasing: true);
             Assert.AreEqual((short)ErrorCodes.Success, logResponse.Result);
 
-            var queryHeaderOnly = DevKit.CreateLog(logResponse.SuppMsgOut, null, _log.UidWell, null, _log.UidWellbore, null);
+            var queryHeaderOnly = _devKit.CreateLog(logResponse.SuppMsgOut, null, _log.UidWell, null, _log.UidWellbore, null);
 
             // Perform a GetFromStore with multiple log queries
-            var result = DevKit.Get<LogList, Log>(
-                DevKit.List(queryHeaderOnly),
+            var result = _devKit.Get<LogList, Log>(
+                _devKit.List(queryHeaderOnly),
                 ObjectTypes.Log,
                 null,
                 OptionsIn.ReturnElements.HeaderOnly);
@@ -1680,15 +1566,10 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void LogDataAdapter_GetFromStore_Return_Latest_N_Values()
         {
-            var response = DevKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellboreList, Wellbore>(_wellbore);
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            _log.UidWell = _wellbore.UidWell;
-            _log.UidWellbore = response.SuppMsgOut;
-
-            DevKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
             var channel3 = _log.LogCurveInfo[1];
             var channel4 = _log.LogCurveInfo[2];
@@ -1715,25 +1596,25 @@ namespace PDS.Witsml.Server.Data.Logs
                 }
             });
 
-            var logData = new LogData();
-            logData.MnemonicList = DevKit.Mnemonics(_log);
-            logData.UnitList = DevKit.Units(_log);
-            logData.Data = new List<string> {"0,,0.2,0.3,", "1,,1.2,,1.4", "2,,2.2,,2.4", "3,,3.2,,", "4,,4.2,,"};
+            var logData = new LogData
+            {
+                MnemonicList = _devKit.Mnemonics(_log),
+                UnitList = _devKit.Units(_log),
+                Data = new List<string> {"0,,0.2,0.3,", "1,,1.2,,1.4", "2,,2.2,,2.4", "3,,3.2,,", "4,,4.2,,"}
+            };
             _log.LogData = new List<LogData> {logData};
 
-            response = DevKit.Add<LogList, Log>(_log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidLog = response.SuppMsgOut;
 
             var query = new Log
             {
-                Uid = uidLog,
+                Uid = _log.Uid,
                 UidWell = _log.UidWell,
                 UidWellbore = _log.UidWellbore
             };
 
-            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All + ';' + OptionsIn.RequestLatestValues.Eq(1));
+            var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All + ';' + OptionsIn.RequestLatestValues.Eq(1));
             Assert.IsNotNull(results);
 
             var result = results.First();
@@ -1767,39 +1648,35 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141DataAdapter_GetFromStore_With_Custom_Data_Delimiter()
         {
             var delimiter = "|";
-            var response = DevKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellboreList, Wellbore>(_wellbore);
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            var log = DevKit.CreateLog(
-                null,
-                DevKit.Name("Log can be added with depth data"),
-                _wellbore.UidWell,
-                _well.Name,
-                response.SuppMsgOut,
-                _wellbore.Name);
+            //var log = _devKit.CreateLog(
+            //    null,
+            //    _devKit.Name("Log can be added with depth data"),
+            //    _wellbore.UidWell,
+            //    _well.Name,
+            //    _wellbore.Uid,
+            //    _wellbore.Name);
 
             // Set data delimiter to other charactrer than ","
-            log.DataDelimiter = delimiter;
+            _log.DataDelimiter = delimiter;
 
-            DevKit.InitHeader(log, LogIndexType.measureddepth);
-            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), 10, hasEmptyChannel: false);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), 10, hasEmptyChannel: false);
 
-            response = DevKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidLog = response.SuppMsgOut;
 
             var query = new Log
             {
-                Uid = uidLog,
-                UidWell = log.UidWell,
-                UidWellbore = log.UidWellbore,
+                Uid = _log.Uid,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore,
                 DataDelimiter = delimiter
             };
 
-            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             var result = results.FirstOrDefault();
             Assert.IsNotNull(result);
 
@@ -1809,7 +1686,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var data = result.LogData.FirstOrDefault()?.Data;
             Assert.IsNotNull(data);
 
-            var channelCount = log.LogCurveInfo.Count;
+            var channelCount = _log.LogCurveInfo.Count;
 
             // Assert data delimiter in log data
             foreach (var row in data)
@@ -1823,23 +1700,17 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private WMLS_AddToStoreResponse AddSetupWellWellboreLog(int numRows, bool isDepthLog, bool hasEmptyChannel, bool increasing)
         {
-            var response = DevKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellboreList, Wellbore>(_wellbore);
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            _log.UidWell = _wellbore.UidWell;
-            _log.UidWellbore = response.SuppMsgOut;
-
-            DevKit.InitHeader(_log, LogIndexType.measureddepth, increasing);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth, increasing);
 
             var startIndex = new GenericMeasure { Uom = "m", Value = 100 };
             _log.StartIndex = startIndex;
-            DevKit.InitDataMany(_log, DevKit.Mnemonics(_log), DevKit.Units(_log), numRows, 1, isDepthLog, hasEmptyChannel, increasing);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), numRows, 1, isDepthLog, hasEmptyChannel, increasing);
 
             // Add a log
-            response = DevKit.Add<LogList, Log>(_log);
-            return response;
+            return _devKit.Add<LogList, Log>(_log); ;
         }
         #endregion Helper Methods
     }
