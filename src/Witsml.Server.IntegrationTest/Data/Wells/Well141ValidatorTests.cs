@@ -19,8 +19,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Server.Data.Wells
@@ -55,13 +57,239 @@ namespace PDS.Witsml.Server.Data.Wells
                             "</wells>";
             _queryEmptyWellList = _devKit.List(new Well());
 
-            _well = new Well { Name = _devKit.Name("Well141Validator"), TimeZone = _devKit.TimeZone };
+            _well = new Well { Uid = _devKit.Uid(), Name = _devKit.Name("Well141Validator"), TimeZone = _devKit.TimeZone };
         }
 
         [TestCleanup]
         public void TestCleanup()
         {
             _devKit = null;
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_AddToStore_Error_401_No_Plural_Root_Element()
+        {
+            var xmlIn = "<well xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                           "   <well>" + Environment.NewLine +
+                           "   <name>Test Add Well Plural Root Element</name>" + Environment.NewLine +
+                           "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
+                           "   </well>" + Environment.NewLine +
+                           "</well>";
+
+            var response = _devKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingPluralRootElement, response.Result);
+        }
+
+        [TestMethod]
+        public void Well141Validator_AddToStore_Error_405_Uid_Exist()
+        {
+            var response = AddTestWell(_well);
+
+            var uid = response.SuppMsgOut;
+            Assert.AreEqual(_well.Uid, uid);
+
+            response = _devKit.Add<WellList, Well>(_well);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.DataObjectUidAlreadyExists, response.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_AddToStore_Error_407_Missing_Witsml_Object_Type()
+        {
+            var response = _devKit.Add<WellList, Well>(_well, string.Empty);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingWMLtypeIn, response.Result);
+        }
+
+
+        [TestMethod]
+        public void WitsmlValidator_AddToStore_Error_408_Missing_Input_Template()
+        {
+            var response = _devKit.AddToStore(ObjectTypes.Well, null, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingInputTemplate, response.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_AddToStore_Error_409_Non_Conforming_Input_Template()
+        {
+            _well.TimeZone = null; // <-- Missing required TimeZone
+            var response = _devKit.Add<WellList, Well>(_well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [Ignore, Description("Not Implemented")]
+        [TestMethod]
+        public void WitsmlValidator_AddToStore_Error_411_OptionsIn_Invalid_Format()
+        {
+            var response = _devKit.Add<WellList, Well>(_well, optionsIn: "compressionMethod:gzip");
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.ParametersNotEncodedByRules, response.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_AddToStore_Error_413_Unsupported_Data_Object()
+        {
+            // Use an unsupported data schema version
+            var wells = new WellList
+            {
+                Well = _devKit.List(_well),
+                Version = "1.4.x.y"
+            };
+
+            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
+            var response = _devKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.DataObjectNotSupported, response.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_AddToStore_Error_440_OptionsIn_Keyword_Not_Recognized()
+        {
+            var response = _devKit.Add<WellList, Well>(_well, optionsIn: "returnElements=all");
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.KeywordNotSupportedByFunction, response.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_AddToStore_Error_441_optionsIn_value_not_recognized()
+        {
+            var response = _devKit.Add<WellList, Well>(_well, optionsIn: "compressionMethod=7zip");
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.InvalidKeywordValue, response.Result);
+        }
+
+
+        [TestMethod]
+        public void WitsmlValidator_AddToStore_Error_442_OptionsIn_Keyword_Not_Supported()
+        {
+            var response = _devKit.Add<WellList, Well>(_well, optionsIn: "compressionMethod=gzip");
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.KeywordNotSupportedByServer, response.Result);
+        }
+
+        [TestMethod]
+        public void DataObjectValidator_AddToStore_Error_443_Invalid_Unit_Of_Measure_Value()
+        {
+            var xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                           "   <well>" + Environment.NewLine +
+                           "     <name>Well-to-add-missing-unit</name>" + Environment.NewLine +
+                           "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
+                           "     <wellheadElevation uom=\"abc123\">1000</wellheadElevation>" + Environment.NewLine +
+                           "   </well>" + Environment.NewLine +
+                           "</wells>";
+
+            var response = _devKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.InvalidUnitOfMeasure, response.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_AddToStore_Error_444_Mulitple_Data_Objects_Error()
+        {
+            var well1 = new Well { Name = _devKit.Name("Well-to-01"), TimeZone = _devKit.TimeZone, Uid = _devKit.Uid() };
+            var well2 = new Well { Name = _devKit.Name("Well-to-02"), TimeZone = _devKit.TimeZone, Uid = _devKit.Uid() };
+            var wells = new WellList { Well = _devKit.List(well1, well2) };
+
+            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
+            var response = _devKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateMultipleDataObjects, response.Result);
+        }
+
+        [TestMethod]
+        public void DataObjectValidator_AddToStore_Error_453_Missing_Unit_For_Measure_Data()
+        {
+            var xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                           "   <well>" + Environment.NewLine +
+                           "     <name>Well-to-add-missing-unit</name>" + Environment.NewLine +
+                           "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
+                           "     <wellheadElevation>1000</wellheadElevation>" + Environment.NewLine +
+                           "   </well>" + Environment.NewLine +
+                           "</wells>";
+
+            var response = _devKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingUnitForMeasureData, response.Result);
+        }
+
+        [TestMethod]
+        public void DataObjectValidator_AddToStore_Error_464_Child_Uid_Not_Unique()
+        {
+            var well = _devKit.CreateFullWell();
+            var datumKb = _devKit.WellDatum("Kelly Bushing", ElevCodeEnum.KB, "This is WellDatum");
+            var datumSl = _devKit.WellDatum("Sea Level", ElevCodeEnum.SL, "This is WellDatum");
+            well.WellDatum = new List<WellDatum>() { datumKb, datumSl };
+            var response = _devKit.Add<WellList, Well>(well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.ChildUidNotUnique, response.Result);
+        }
+
+        [Ignore, Description("Not Implemented")]
+        [TestMethod]
+        public void WitsmlValidator_AddToStore_Error_466_Non_Conforming_Capabilities_In()
+        {
+            var response = _devKit.Add<WellList, Well>(_well, ObjectTypes.Well, "<capClients />");
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.CapabilitiesInNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_AddToStore_Error_468_Missing_Version_Attribute()
+        {
+            // Use an unsupported data schema version
+            var wells = new WellList
+            {
+                Well = _devKit.List(_well),
+                Version = null
+            };
+
+            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
+            var response = _devKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_AddToStore_Error_486_Data_Object_Types_Dont_Match()
+        {
+            var wells = new WellList { Well = _devKit.List(_well) };
+
+            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
+            var response = _devKit.AddToStore(ObjectTypes.Wellbore, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_AddToStore_Error_487_Data_Object_Not_Supported()
+        {
+            var entity = new Target { Name = "Entity-to-test-unsupported-error" };
+            var list = new TargetList { Target = _devKit.List(entity) };
+
+            var xmlIn = EnergisticsConverter.ObjectToXml(list);
+            var response = _devKit.AddToStore("target", xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.DataObjectTypeNotSupported, response.Result);
         }
 
         [TestMethod]
