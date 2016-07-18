@@ -322,7 +322,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 foreach (var channelId in channelRangeInfo.ChannelId)
                 {
                     var channel = channels.FirstOrDefault(c => c.ChannelId == channelId);
-                    var value = FormatValue(record.GetValue(record.GetOrdinal(channel.Mnemonic)));
+                    var value = FormatValue(record.GetValue(record.GetOrdinal(channel.ChannelName)));
 
                     yield return new DataItem()
                     {
@@ -385,7 +385,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 .FirstOrDefault();
 
             var primaryIndexChannelId = channels
-                .Where(x => x.Mnemonic.EqualsIgnoreCase(x.Indexes[0].Mnemonic))
+                .Where(x => x.ChannelName.EqualsIgnoreCase(x.Indexes[0].Mnemonic))
                 .Select(x => x.ChannelId)
                 .FirstOrDefault();
             var indexMnemonics = channels
@@ -422,10 +422,10 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 {
                     var channel = channels.FirstOrDefault(c => c.ChannelId == channelId);
 
-                    if (indexMnemonics.Any(x => x.EqualsIgnoreCase(channel.Mnemonic)))
+                    if (indexMnemonics.Any(x => x.EqualsIgnoreCase(channel.ChannelName)))
                         continue;
 
-                    var value = FormatValue(record.GetValue(record.GetOrdinal(channel.Mnemonic)));
+                    var value = FormatValue(record.GetValue(record.GetOrdinal(channel.ChannelName)));
                     var valueDataItem = new DataItem()
                     {
                         ChannelId = channelId,
@@ -589,7 +589,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 // update ChannelStreamingInfo index value
                 info.StartIndex.Item = primaryIndexValue;
 
-                var value = FormatValue(record.GetValue(record.GetOrdinal(channel.Mnemonic)));
+                var value = FormatValue(record.GetValue(record.GetOrdinal(channel.ChannelName)));
 
                 yield return new DataItem()
                 {
@@ -646,7 +646,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             // Get the value and ChannelId of the primary index
             var primaryIndexValue = record.GetIndexValue();
             var primaryIndexChannelId = channels
-                .Where(x => x.Mnemonic.EqualsIgnoreCase(x.Indexes[0].Mnemonic))
+                .Where(x => x.ChannelName.EqualsIgnoreCase(x.Indexes[0].Mnemonic))
                 .Select(x => x.ChannelId)
                 .FirstOrDefault();
             var indexMnemonics = channels
@@ -673,7 +673,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
                 // Handle decreasing data
                 if ((start.StartsAfter(primaryIndexValue, increasing, inclusive: true))
-                    || indexMnemonics.Any(x => x.EqualsIgnoreCase(channel.Mnemonic)))
+                    || indexMnemonics.Any(x => x.EqualsIgnoreCase(channel.ChannelName)))
                 {
                     continue;
                 }
@@ -681,7 +681,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 // update ChannelStreamingInfo index value
                 info.StartIndex.Item = primaryIndexValue;
 
-                var value = FormatValue(record.GetValue(record.GetOrdinal(channel.Mnemonic)));
+                var value = FormatValue(record.GetValue(record.GetOrdinal(channel.ChannelName)));
 
                 var valueDataItem = new DataItem()
                 {

@@ -115,14 +115,14 @@ namespace PDS.Witsml.Server.Providers.Store
         {
             base.HandlePutObject(header, putObject);
 
-            var uri = new EtpUri(putObject.Data.Resource.Uri);
+            var uri = new EtpUri(putObject.DataObject.Resource.Uri);
 
             try
             {
-                WitsmlOperationContext.Current.Request = new RequestContext(Functions.PutObject, uri.ObjectType, putObject.Data.GetXml(), null, null);
+                WitsmlOperationContext.Current.Request = new RequestContext(Functions.PutObject, uri.ObjectType, putObject.DataObject.GetXml(), null, null);
 
                 var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
-                dataAdapter.Put(putObject.Data);
+                dataAdapter.Put(putObject.DataObject);
             }
             catch (ContainerException ex)
             {

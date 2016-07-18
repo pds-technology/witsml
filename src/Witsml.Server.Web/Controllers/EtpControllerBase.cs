@@ -16,7 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
@@ -106,9 +105,8 @@ namespace PDS.Witsml.Server.Controllers
                 ApplicationName = handler.ApplicationName,
                 ApplicationVersion = handler.ApplicationVersion,
                 SupportedProtocols = handler.GetSupportedProtocols(),
-                SessionId = Guid.NewGuid().ToString(),
                 SupportedObjects = supportedObjects,
-                ContactInfomration = new Contact()
+                ContactInformation = new Contact()
                 {
                     OrganizationName = WitsmlSettings.DefaultVendorName,
                     ContactName = WitsmlSettings.DefaultContactName,

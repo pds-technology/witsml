@@ -24,7 +24,6 @@ using Energistics.Common;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
 using Energistics.Protocol.ChannelStreaming;
-using Energistics.Protocol.Core;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Data.Channels;
@@ -161,7 +160,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                         index.IndexType == ChannelIndexTypes.Time);
                 }
 
-                dataBlock.AddChannel(channel.ChannelId, channel.Mnemonic, channel.Uom);
+                dataBlock.AddChannel(channel.ChannelId, channel.ChannelName, channel.Uom);
             }
         }
 
