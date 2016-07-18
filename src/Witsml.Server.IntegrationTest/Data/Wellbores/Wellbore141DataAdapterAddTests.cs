@@ -50,7 +50,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 TimeZone = _devKit.TimeZone
             };
 
-            _wellbore = new Wellbore()
+            _wellbore = new Wellbore
             {
                 Uid = _devKit.Uid(),
                 UidWell = _well.Uid,
@@ -68,11 +68,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod]
         public void Wellbore141DataAdapter_AddToStore_Can_Add_Wellbore()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+            AddWellbore(_wellbore);
         }
 
         /// <summary>
@@ -81,25 +77,17 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod]
         public void Wellbore141DataAdapter_AddToStore_Can_Add_Wellbore_with_dTimKickoff()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            _wellbore.DateTimeKickoff = DateTimeOffset.Now;            
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+            _wellbore.DateTimeKickoff = DateTimeOffset.Now;
+            AddWellbore(_wellbore);
         }
 
         [TestMethod]
         public void Wellbore141DataAdapter_AddToStore_Can_Add_Wellbore_With_Same_Uid_Under_Different_Well()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+            AddWellbore(_wellbore);
 
             var well2 = new Well { Uid = _devKit.Uid(), Name = _devKit.Name("Well-to-add-02"), TimeZone = _devKit.TimeZone };
-            response = _devKit.Add<WellList, Well>(well2);
+            var response = _devKit.Add<WellList, Well>(well2);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             var wellbore2 = new Wellbore()
@@ -111,6 +99,15 @@ namespace PDS.Witsml.Server.Data.Wellbores
             };
             response = _devKit.Add<WellboreList, Wellbore>(wellbore2);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+        }
+
+        private void AddWellbore(Wellbore wellbore, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            var response = _devKit.Add<WellList, Well>(_well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            response = _devKit.Add<WellboreList, Wellbore>(wellbore);
+            Assert.AreEqual((short)errorCode, response.Result);
         }
     }
 }
