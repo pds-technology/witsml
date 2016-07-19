@@ -32,7 +32,7 @@ namespace PDS.Witsml.Server.Data.Logs
     [TestClass]
     public class Log131DataAdapterGetTests
     {
-        private DevKit131Aspect DevKit;
+        private DevKit131Aspect _devKit;
         private Well _well;
         private Wellbore _wellbore;
         private Log _log;
@@ -42,24 +42,35 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestInitialize]
         public void TestSetUp()
         {
-            DevKit = new DevKit131Aspect(TestContext);
+            _devKit = new DevKit131Aspect(TestContext);
 
-            DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders
+            _devKit.Store.CapServerProviders = _devKit.Store.CapServerProviders
                 .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version131.Value)
                 .ToArray();
 
-            _well = new Well { Name = DevKit.Name("Well 01"), TimeZone = DevKit.TimeZone };
+            _well = new Well
+            {
+                Uid = _devKit.Uid(),
+                Name = _devKit.Name("Well 01"),
+                TimeZone = _devKit.TimeZone
+            };
+
             _wellbore = new Wellbore()
             {
+                Uid = _devKit.Uid(),
+                UidWell = _well.Uid,
                 NameWell = _well.Name,
-                Name = DevKit.Name("Wellbore 01")
+                Name = _devKit.Name("Wellbore 01")
             };
 
             _log = new Log()
             {
+                Uid = _devKit.Uid(),
+                UidWell = _well.Uid,
+                UidWellbore = _wellbore.Uid,
                 NameWell = _well.Name,
                 NameWellbore = _wellbore.Name,
-                Name = DevKit.Name("Log 01")
+                Name = _devKit.Name("Log 01")
             };
 
             // Sets the depth and time chunk size
@@ -86,11 +97,11 @@ namespace PDS.Witsml.Server.Data.Logs
                 increasing: true);
             Assert.AreEqual((short)ErrorCodes.Success, logResponse.Result);
 
-            var queryHeaderOnly = DevKit.CreateLog(logResponse.SuppMsgOut, null, _log.UidWell, null, _log.UidWellbore, null);
+            var queryHeaderOnly = _devKit.CreateLog(logResponse.SuppMsgOut, null, _log.UidWell, null, _log.UidWellbore, null);
 
             // Perform a GetFromStore with multiple log queries
-            var result = DevKit.Get<LogList, Log>(
-                DevKit.List(queryHeaderOnly),
+            var result = _devKit.Get<LogList, Log>(
+                _devKit.List(queryHeaderOnly),
                 ObjectTypes.Log,
                 null,
                 OptionsIn.ReturnElements.HeaderOnly);
@@ -107,23 +118,16 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private WMLS_AddToStoreResponse AddSetupWellWellboreLog(int numRows, bool isDepthLog, bool hasEmptyChannel, bool increasing)
         {
-            var response = DevKit.Add<WellList, Well>(_well);
-
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = DevKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            _log.UidWell = _wellbore.UidWell;
-            _log.UidWellbore = response.SuppMsgOut;
-
-            DevKit.InitHeader(_log, LogIndexType.measureddepth, increasing);
+            _devKit.Add<WellList, Well>(_well);
+            _devKit.Add<WellboreList, Wellbore>(_wellbore);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth, increasing);
 
             var startIndex = new GenericMeasure { Uom = "m", Value = 100 };
             _log.StartIndex = startIndex;
-            DevKit.InitDataMany(_log, DevKit.Mnemonics(_log), DevKit.Units(_log), numRows, 1, isDepthLog, hasEmptyChannel, increasing);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), numRows, 1, isDepthLog, hasEmptyChannel, increasing);
 
             // Add a log
-            response = DevKit.Add<LogList, Log>(_log);
-            return response;
+            return _devKit.Add<LogList, Log>(_log);
         }
         #endregion Helper Methods
     }
