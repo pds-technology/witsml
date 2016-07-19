@@ -210,15 +210,27 @@ namespace PDS.Witsml
         }
 
         /// <summary>
-        /// Gets the error code.
+        /// Gets the non conforming error code.
         /// </summary>
         /// <param name="function">The function.</param>
-        /// <returns></returns>
+        /// <returns>The proper error code based on the specified function.</returns>
         public static ErrorCodes GetNonConformingErrorCode(this Functions function)
         {
             return function == Functions.UpdateInStore
                     ? ErrorCodes.UpdateTemplateNonConforming
                     : ErrorCodes.InputTemplateNonConforming;
+        }
+
+        /// <summary>
+        /// Gets the missing element uid error code.
+        /// </summary>
+        /// <param name="function">The function.</param>
+        /// <returns>The proper error code based on the specified function.</returns>
+        public static ErrorCodes GetMissingElementUidErrorCode(this Functions function)
+        {
+            return function == Functions.AddToStore
+                ? ErrorCodes.MissingElementUidForAdd
+                : ErrorCodes.MissingElementUidForUpdate;
         }
     }
 }

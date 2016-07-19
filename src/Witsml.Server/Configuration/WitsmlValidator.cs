@@ -381,7 +381,7 @@ namespace PDS.Witsml.Server.Configuration
 
             if (string.IsNullOrWhiteSpace(objectType))
             {
-                throw new WitsmlException(ErrorCodes.MissingWMLtypeIn);
+                throw new WitsmlException(ErrorCodes.MissingWmlTypeIn);
             }
 
             // Different error codes return between AddToStore and other functions

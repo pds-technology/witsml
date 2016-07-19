@@ -191,7 +191,7 @@ namespace PDS.Witsml.Server.Data
         protected virtual WitsmlResult Add(WitsmlQueryParser parser)
         {
             var validator = Container.Resolve<IDataObjectValidator<TObject>>();
-            var element = validator.Parse(Functions.UpdateInStore, parser);
+            var element = validator.Parse(Functions.AddToStore, parser);
             var dataObject = Parse(element);
 
             SetDefaultValues(dataObject);
@@ -238,7 +238,7 @@ namespace PDS.Witsml.Server.Data
         protected virtual WitsmlResult Delete(WitsmlQueryParser parser)
         {
             var validator = Container.Resolve<IDataObjectValidator<TObject>>();
-            var element = validator.Parse(Functions.UpdateInStore, parser);
+            var element = validator.Parse(Functions.DeleteFromStore, parser);
             var dataObject = Parse(element);
 
             Logger.DebugFormat("Deleting {0}", typeof(TObject).Name);

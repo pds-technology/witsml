@@ -76,12 +76,12 @@ namespace PDS.Witsml
         /// <summary>
         /// -406 For WMLS_AddToStore, all parentage-pointers and lower level (child) uid values must be defined in the XMLin.
         /// </summary>
-        MissingParentUid = -406,
+        MissingElementUidForAdd = -406,
 
         /// <summary>
         /// -407 A non-empty value must be defined for WMLtypeIn.
         /// </summary>
-        MissingWMLtypeIn = -407,
+        MissingWmlTypeIn = -407,
 
         /// <summary>
         /// -408 A non-empty value must be defined for the input template.
@@ -300,7 +300,7 @@ namespace PDS.Witsml
         /// <summary>
         /// -448 For WMLS_UpdateInStore, if an element with a unique identifier in the schema is specified then the identifier value must also be specified.
         /// </summary>
-        MissingElementUid = -448,
+        MissingElementUidForUpdate = -448,
 
         /// <summary>
         /// -449 When updating data in a systematically growing data-object the indexCurve must be specified in the mnemonicList.

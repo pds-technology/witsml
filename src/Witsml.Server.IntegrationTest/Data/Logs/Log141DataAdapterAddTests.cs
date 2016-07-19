@@ -1705,7 +1705,7 @@ namespace PDS.Witsml.Server.Data.Logs
             response = _devKit.Add<LogList, Log>(log);
 
             Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.MissingParentUid, response.Result);
+            Assert.AreEqual((short)ErrorCodes.MissingElementUidForAdd, response.Result);
         }
 
         [TestMethod]

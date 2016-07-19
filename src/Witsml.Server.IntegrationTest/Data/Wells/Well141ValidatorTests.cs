@@ -101,7 +101,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var response = _devKit.Add<WellList, Well>(_well, string.Empty);
 
             Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.MissingWMLtypeIn, response.Result);
+            Assert.AreEqual((short)ErrorCodes.MissingWmlTypeIn, response.Result);
         }
 
 
@@ -458,7 +458,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var response = _devKit.Get<WellList, Well>(_devKit.List(well), string.Empty);
 
             Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.MissingWMLtypeIn, response.Result);
+            Assert.AreEqual((short)ErrorCodes.MissingWmlTypeIn, response.Result);
         }
 
         [TestMethod]
@@ -512,7 +512,7 @@ namespace PDS.Witsml.Server.Data.Wells
             // Update and Assert MissingElementUid
             var updateResponse = _devKit.Update<WellList, Well>(_well, ObjectTypes.Well);
             Assert.IsNotNull(updateResponse);
-            Assert.AreEqual((short)ErrorCodes.MissingElementUid, updateResponse.Result);
+            Assert.AreEqual((short)ErrorCodes.MissingElementUidForUpdate, updateResponse.Result);
         }
 
         [TestMethod]

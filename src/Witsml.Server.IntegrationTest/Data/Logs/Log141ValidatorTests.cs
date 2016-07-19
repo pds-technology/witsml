@@ -381,7 +381,7 @@ namespace PDS.Witsml.Server.Data.Logs
             update.LogCurveInfo.Last().Uid = string.Empty;
 
             var updateResponse = _devKit.Update<LogList, Log>(update);
-            Assert.AreEqual((short)ErrorCodes.MissingElementUid, updateResponse.Result);
+            Assert.AreEqual((short)ErrorCodes.MissingElementUidForUpdate, updateResponse.Result);
         }
        
         [TestMethod]
@@ -707,7 +707,7 @@ namespace PDS.Witsml.Server.Data.Logs
             _log.LogParam = new List<IndexedObject> { logParam };
 
             var response = _devKit.Add<LogList, Log>(_log);
-            Assert.AreEqual((short)ErrorCodes.MissingElementUid, response.Result);
+            Assert.AreEqual((short)ErrorCodes.MissingElementUidForAdd, response.Result);
         }
 
         [TestMethod]

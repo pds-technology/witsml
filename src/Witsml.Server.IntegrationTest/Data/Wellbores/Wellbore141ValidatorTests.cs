@@ -101,7 +101,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             var response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
 
             Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.MissingParentUid, response.Result);         
+            Assert.AreEqual((short)ErrorCodes.MissingElementUidForAdd, response.Result);         
         }
 
         [TestMethod]
@@ -164,7 +164,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         {
             _query[0].Name = _devKit.Name("Wellbore-to-add-missing-witsml-type");
             var response = _devKit.Get<WellboreList, Wellbore>(_query, string.Empty, null, optionsIn: OptionsIn.ReturnElements.All);
-            Assert.AreEqual((short)ErrorCodes.MissingWMLtypeIn, response.Result);
+            Assert.AreEqual((short)ErrorCodes.MissingWmlTypeIn, response.Result);
         }
 
         [TestMethod]
@@ -174,7 +174,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             var response = _devKit.Get<WellboreList, Wellbore>(_devKit.List(wellbore), string.Empty);
 
             Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.MissingWMLtypeIn, response.Result);
+            Assert.AreEqual((short)ErrorCodes.MissingWmlTypeIn, response.Result);
         }
 
         [TestMethod]

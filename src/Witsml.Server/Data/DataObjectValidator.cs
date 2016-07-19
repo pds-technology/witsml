@@ -215,18 +215,19 @@ namespace PDS.Witsml.Server.Data
 
             foreach (var element in elements)
             {
-                if (IsRecurringElementIgnored(element))
+                if (HasUidProperty(childType))
                 {
-                    return;
+                    elementIds.Add(GetAndValidateArrayElementUid(element));
                 }
-                elementIds.Add(GetAndValidateArrayElementUid(element));
+
                 NavigateElementType(childType, element, propertyPath);
             }
 
             // Look for duplicate uids
-            var duplicateKeys = elementIds.GroupBy(x => x)
-                        .Where(group => group.Count() > 1)
-                        .Select(group => group.Key);
+            var duplicateKeys = elementIds
+                .GroupBy(x => x)
+                .Where(group => group.Count() > 1)
+                .Select(group => group.Key);
 
             if (duplicateKeys.Any())
             {
@@ -242,33 +243,33 @@ namespace PDS.Witsml.Server.Data
         /// <param name="element">The element.</param>
         /// <param name="propertyPath">The property path.</param>
         /// <param name="propertyInfo">The property information.</param>
-        protected override void NavigateArrayElementType(List<XElement> elements, Type childType, XElement element, string propertyPath,
-            PropertyInfo propertyInfo)
+        protected override void NavigateArrayElementType(List<XElement> elements, Type childType, XElement element, string propertyPath, PropertyInfo propertyInfo)
         {
-            if (IsRecurringElementIgnored(element))
-                return;
+            if (HasUidProperty(childType))
+            {
+                GetAndValidateArrayElementUid(element);
+            }
 
-            GetAndValidateArrayElementUid(element);
             base.NavigateArrayElementType(elements, childType, element, propertyPath, propertyInfo);
         }
 
         /// <summary>
-        /// Determines whether the specified element should be ignored
+        /// Determines whether the specified type has a uid property.
         /// </summary>
-        /// <param name="element">The element to tested to be ignored.</param>
-        /// <returns>true if the element should be ignored, false otherwise.</returns>
-        protected virtual bool IsRecurringElementIgnored(XElement element)
+        /// <param name="type">The type.</param>
+        /// <returns><c>true</c> if the type defines a uid property; otherwise, <c>false</c>.</returns>
+        protected virtual bool HasUidProperty(Type type)
         {
-            return false;
+            return type.GetProperty("Uid") != null;
         }
 
-        private static string GetAndValidateArrayElementUid(XElement element)
+        private string GetAndValidateArrayElementUid(XElement element)
         {
             var uidAttribute = element.Attributes().FirstOrDefault(a => a.Name == "uid");
 
             if (string.IsNullOrEmpty(uidAttribute?.Value))
             {
-                throw new WitsmlException(ErrorCodes.MissingElementUid);
+                throw new WitsmlException(Context.Function.GetMissingElementUidErrorCode());
             }
 
             return uidAttribute.Value;

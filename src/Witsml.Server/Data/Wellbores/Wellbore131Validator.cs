@@ -59,7 +59,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             // Validate parent uid property
             if (string.IsNullOrWhiteSpace(DataObject.UidWell))
             {
-                yield return new ValidationResult(ErrorCodes.MissingParentUid.ToString(), new[] { "UidWell" });
+                yield return new ValidationResult(ErrorCodes.MissingElementUidForAdd.ToString(), new[] { "UidWell" });
             }
 
             // Validate parent exists

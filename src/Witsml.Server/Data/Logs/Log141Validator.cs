@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Xml.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using PDS.Framework;
@@ -142,12 +141,12 @@ namespace PDS.Witsml.Server.Data.Logs
             // Validate parent uid property
             if (string.IsNullOrWhiteSpace(DataObject.UidWell))
             {
-                yield return new ValidationResult(ErrorCodes.MissingParentUid.ToString(), new[] { "UidWell" });
+                yield return new ValidationResult(ErrorCodes.MissingElementUidForAdd.ToString(), new[] { "UidWell" });
             }
             // Validate parent uid property
             else if (string.IsNullOrWhiteSpace(DataObject.UidWellbore))
             {
-                yield return new ValidationResult(ErrorCodes.MissingParentUid.ToString(), new[] { "UidWellbore" });
+                yield return new ValidationResult(ErrorCodes.MissingElementUidForAdd.ToString(), new[] { "UidWellbore" });
             }
 
             // Validate parent exists
@@ -175,7 +174,7 @@ namespace PDS.Witsml.Server.Data.Logs
             // Validate that uid for LogParam exists
             else if (DataObject.LogParam != null && DataObject.LogParam.Any(lp => string.IsNullOrWhiteSpace(lp.Uid)))
             {
-                yield return new ValidationResult(ErrorCodes.MissingElementUid.ToString(), new[] { "LogParam", "Uid" });
+                yield return new ValidationResult(ErrorCodes.MissingElementUidForAdd.ToString(), new[] { "LogParam", "Uid" });
             }
 
             // Validate for a bad column identifier in LogCurveInfo Mnemonics
@@ -253,13 +252,13 @@ namespace PDS.Witsml.Server.Data.Logs
                 // Validate that uid for LogCurveInfo exists
                 else if (logCurves != null && logCurves.Any(l => string.IsNullOrWhiteSpace(l.Uid)))
                 {
-                    yield return new ValidationResult(ErrorCodes.MissingElementUid.ToString(), new[] { "LogCurveInfo", "Uid" });
+                    yield return new ValidationResult(ErrorCodes.MissingElementUidForUpdate.ToString(), new[] { "LogCurveInfo", "Uid" });
                 }
 
                 // Validate that uid for LogParam exists
                 else if (logParams != null && logParams.Any(lp => string.IsNullOrWhiteSpace(lp.Uid)))
                 {
-                    yield return new ValidationResult(ErrorCodes.MissingElementUid.ToString(), new[] { "LogParam", "Uid" });
+                    yield return new ValidationResult(ErrorCodes.MissingElementUidForUpdate.ToString(), new[] { "LogParam", "Uid" });
                 }
 
                 // Validate that uids in LogCurveInfo are unique
@@ -459,17 +458,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 if (units.Length <= i || (!string.IsNullOrEmpty(logCurve?.Unit) && string.IsNullOrEmpty(units[i].Trim())))
                     return false;
             }
-            return true;
-        }
 
-        /// <summary>
-        /// Determines whether the specified element should be ignored
-        /// </summary>
-        /// <param name="element">The element to tested to be ignored.</param>
-        /// <returns>true if the element should be ignored, false otherwise.</returns>
-        protected override bool IsRecurringElementIgnored(XElement element)
-        {
-            return element.Name.LocalName == "logData" ? true : false;
+            return true;
         }
     }
 }

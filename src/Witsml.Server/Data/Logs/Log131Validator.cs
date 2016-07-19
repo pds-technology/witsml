@@ -17,7 +17,6 @@
 //-----------------------------------------------------------------------
 
 using System.ComponentModel.Composition;
-using System.Xml.Linq;
 using Energistics.DataAccess.WITSML131;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -39,16 +38,6 @@ namespace PDS.Witsml.Server.Data.Logs
         [ImportingConstructor]
         public Log131Validator(IWitsmlDataAdapter<Log> logDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter)
         {        
-        }
-
-        /// <summary>
-        /// Determines whether the specified element should be ignored
-        /// </summary>
-        /// <param name="element">The element to tested to be ignored.</param>
-        /// <returns>true if the element should be ignored, false otherwise.</returns>
-        protected override bool IsRecurringElementIgnored(XElement element)
-        {
-            return element.Name.LocalName == "logData" ? true : false;
         }
     }
 }
