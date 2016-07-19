@@ -1651,14 +1651,6 @@ namespace PDS.Witsml.Server.Data.Logs
             _devKit.Add<WellList, Well>(_well);
             _devKit.Add<WellboreList, Wellbore>(_wellbore);
 
-            //var log = _devKit.CreateLog(
-            //    null,
-            //    _devKit.Name("Log can be added with depth data"),
-            //    _wellbore.UidWell,
-            //    _well.Name,
-            //    _wellbore.Uid,
-            //    _wellbore.Name);
-
             // Set data delimiter to other charactrer than ","
             _log.DataDelimiter = delimiter;
 
@@ -1710,7 +1702,7 @@ namespace PDS.Witsml.Server.Data.Logs
             _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), numRows, 1, isDepthLog, hasEmptyChannel, increasing);
 
             // Add a log
-            return _devKit.Add<LogList, Log>(_log); ;
+            return _devKit.Add<LogList, Log>(_log);
         }
         #endregion Helper Methods
     }
