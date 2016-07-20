@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
@@ -84,7 +85,7 @@ namespace PDS.Witsml.Server
 
                 for (var i = 1; i < versions.Length; i++)
                 {
-                    if (string.Compare(version, versions[i]) >= 0)
+                    if (String.CompareOrdinal(version, versions[i]) >= 0)
                     {
                         ordered = false;
                         break;
