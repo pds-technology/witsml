@@ -159,6 +159,48 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.MissingMeasureDataForUnit, response.Result);
         }
 
+        [TestMethod]
+        public void MongoUpdate_UpdateInStore_Error_446_Uom_With_Null_Measure_Data()
+        {
+            // Add well
+            _well = _devKit.CreateFullWell();
+            _well.Uid = _devKit.Uid();
+            AddWell();
+
+            var xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                           "   <well uid=\"" + _well.Uid + "\">" + Environment.NewLine +
+                           "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
+                           "     <wellheadElevation uom=\"ft\"></wellheadElevation>" + Environment.NewLine +
+                           "   </well>" + Environment.NewLine +
+                           "</wells>";
+
+            var updateResponse = _devKit.UpdateInStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.MissingMeasureDataForUnit, updateResponse.Result);
+        }
+
+        [TestMethod]
+        public void MongoUpdate_UpdateInStore_Error_446_Uom_With_NaN_Measure_Data()
+        {
+            // Add well
+            _well = _devKit.CreateFullWell();
+            _well.Uid = _devKit.Uid();
+            AddWell();
+
+            var xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                           "   <well uid=\"" + _well.Uid + "\">" + Environment.NewLine +
+                           "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
+                           "     <wellheadElevation uom=\"ft\">NaN</wellheadElevation>" + Environment.NewLine +
+                           "   </well>" + Environment.NewLine +
+                           "</wells>";
+
+            var updateResponse = _devKit.UpdateInStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.MissingMeasureDataForUnit, updateResponse.Result);
+        }
+
         private void AddWell()
         {
             var response = _devKit.Add<WellList, Well>(_well);
