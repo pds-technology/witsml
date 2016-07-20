@@ -49,8 +49,8 @@ namespace PDS.Witsml.Web.Controllers
             return UpgradeRequest();
         }
 
-        // GET: api/etp/ServerCapabilities
-        [Route("api/etp/ServerCapabilities")]
+        // GET: .well-known/etp-server-capabilities
+        [Route(".well-known/etp-server-capabilities")]
         [ResponseType(typeof(ServerCapabilities))]
         public IHttpActionResult GetServerCapabilities()
         {
