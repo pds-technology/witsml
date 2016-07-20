@@ -227,7 +227,9 @@ namespace PDS.Witsml.Server.Data.Logs
             _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), 10);
 
             // Test all Illegal characters => { "'", "\"", "<", ">", "/", "\\", "&", "," }
-            var mnemonics = _log.LogData.FirstOrDefault().MnemonicList.Split(',');
+            var logData = _log.LogData.FirstOrDefault();
+            Assert.IsNotNull(logData);
+            var mnemonics = logData.MnemonicList.Split(',');
 
             // Test &
             AddLogBadCharInMnemonics(_log, mnemonics, "&");
@@ -1181,7 +1183,9 @@ namespace PDS.Witsml.Server.Data.Logs
         private void AddLogBadCharInMnemonics(Log log, string[] mnemonics, string badChar)
         {
             mnemonics[1] = badChar;
-            log.LogData.FirstOrDefault().MnemonicList = string.Join(",", mnemonics);
+            var logData = log.LogData.FirstOrDefault();
+            Assert.IsNotNull(logData);
+            logData.MnemonicList = string.Join(",", mnemonics);
             var response = _devKit.Add<LogList, Log>(log);
             Assert.AreEqual((short)ErrorCodes.BadColumnIdentifier, response.Result);
         }
@@ -1191,8 +1195,8 @@ namespace PDS.Witsml.Server.Data.Logs
             string xmlIn =
                 "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" +
                 "    <log uidWell=\"" + uidWell + "\" uidWellbore=\"" + uidWellbore + "\">" +
-                "        <nameWell>" + _well.Name + "</nameWell>" +
-                "        <nameWellbore>" + _wellbore.Name + "</nameWellbore>" +
+                "        <nameWell>" + nameWell + "</nameWell>" +
+                "        <nameWellbore>" + nameWellbore + "</nameWellbore>" +
                 "        <name>" + logName + "</name>" +
                 "        <serviceCompany>Service Company Name</serviceCompany>" +
                 "        <indexType>measured depth</indexType>" +

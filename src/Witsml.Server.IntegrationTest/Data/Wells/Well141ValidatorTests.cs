@@ -552,7 +552,7 @@ namespace PDS.Witsml.Server.Data.Wells
             _well.ReferencePoint = new List<ReferencePoint> { new ReferencePoint() { Uid = "Test empty reference point" } };
 
             // Update and Assert that there are empt elements
-            var updateResponse = _devKit.Update<WellList, Well>(_well, ObjectTypes.Well, null, null);
+            var updateResponse = _devKit.Update<WellList, Well>(_well, ObjectTypes.Well);
             Assert.IsNotNull(updateResponse);
             Assert.AreEqual((short)ErrorCodes.EmptyNewElementsOrAttributes, updateResponse.Result);
         }
