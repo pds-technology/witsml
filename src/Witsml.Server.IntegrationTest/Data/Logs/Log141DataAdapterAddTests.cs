@@ -48,7 +48,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _well = new Well { Uid = _devKit.Uid(), Name = _devKit.Name("Well 01"), TimeZone = _devKit.TimeZone };
 
-            _wellbore = new Wellbore()
+            _wellbore = new Wellbore
             {
                 Uid = _devKit.Uid(),
                 UidWell = _well.Uid,
@@ -56,7 +56,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 Name = _devKit.Name("Wellbore 01")
             };
 
-            _log = CreateLog(_devKit.Uid(), _devKit.Name("Log 01"), _well.Uid, _well.Name, _wellbore.Uid, _wellbore.Name);
+            _log = _devKit.CreateLog(_devKit.Uid(), _devKit.Name("Log 01"), _well.Uid, _well.Name, _wellbore.Uid, _wellbore.Name);
         }
 
         [TestCleanup]
@@ -329,6 +329,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(_log.RunNumber, logAdded.RunNumber);
 
             var logData = logAdded.LogData.FirstOrDefault();
+            Assert.IsNotNull(logData);
             var firstIndex = int.Parse(logData.Data[0].Split(',')[0]);
             var secondIndex = int.Parse(logData.Data[1].Split(',')[0]);
             Assert.IsTrue(firstIndex > secondIndex);
@@ -337,43 +338,21 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_AddToStore_Move_Index_Curve_To_First()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
+            AddParents();
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
-            var log = CreateLog(
-                null,
-                _devKit.Name("Log can be added with depth data"),
-                _wellbore.UidWell,
-                _well.Name,
-                response.SuppMsgOut,
-                _wellbore.Name);
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-
-            var logCurves = log.LogCurveInfo;
+            var logCurves = _log.LogCurveInfo;
             var indexCurve = logCurves.First();
             logCurves.Remove(indexCurve);
             logCurves.Add(indexCurve);
-            var firstCurve = log.LogCurveInfo.First();
+            var firstCurve = _log.LogCurveInfo.First();
             Assert.AreNotEqual(indexCurve.Mnemonic.Value, firstCurve.Mnemonic.Value);
 
-            response = _devKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidLog = response.SuppMsgOut;
-
-            var query = new Log
-            {
-                Uid = uidLog,
-                UidWell = log.UidWell,
-                UidWellbore = log.UidWellbore
-            };
-
-            var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
-            var logAdded = results.FirstOrDefault();
-            Assert.IsNotNull(logAdded);
+         
+            var logAdded = GetLog(_log);
             firstCurve = logAdded.LogCurveInfo.First();
             Assert.AreEqual(indexCurve.Mnemonic.Value, firstCurve.Mnemonic.Value);
         }
@@ -381,22 +360,13 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_AddToStore_Supports_NaN_In_Numeric_Fields()
         {
-            // Add well
-            var response = _devKit.Add<WellList, Well>(_well);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            // Add wellbore
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidWellbore = response.SuppMsgOut;
+            AddParents();
 
             // Add log
             var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
                 "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
                 "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
-                    "<log uid=\"" + "\" uidWell=\"" + _wellbore.UidWell + "\" uidWellbore=\"" + uidWellbore + "\">" + Environment.NewLine +
+                    "<log uid=\"" + _log.Uid + "\" uidWell=\"" + _log.UidWell + "\" uidWellbore=\"" + _log.UidWellbore + "\">" + Environment.NewLine +
                         "<nameWell>" + _well.Name + "</nameWell>" + Environment.NewLine +
                         "<nameWellbore>" + _wellbore.Name + "</nameWellbore>" + Environment.NewLine +
                         "<name>" + _devKit.Name("Log 01") + "</name>" + Environment.NewLine +
@@ -419,89 +389,35 @@ namespace PDS.Witsml.Server.Data.Logs
                     "</log>" + Environment.NewLine +
                "</logs>";
 
-            var result = _devKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
-            Assert.AreEqual((short)ErrorCodes.Success, result.Result);
-            
-            var uidLog = result.SuppMsgOut;
+            var response = _devKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            // Query log
-            var query = CreateLog(uidLog, null, _wellbore.UidWell, null, uidWellbore, null);
-
-            var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.HeaderOnly);
-            Assert.IsTrue(results.Any());
-
-            Assert.IsNull(results.First().BhaRunNumber);
-            Assert.AreEqual(2, results.First().LogCurveInfo.Count);
-            Assert.IsNull(results.First().LogCurveInfo[0].ClassIndex);
-            Assert.IsNull(results.First().LogCurveInfo[1].ClassIndex);
+            var result = GetLog(_log);
+            Assert.IsNull(result.BhaRunNumber);
+            Assert.AreEqual(2, result.LogCurveInfo.Count);
+            Assert.IsNull(result.LogCurveInfo[0].ClassIndex);
+            Assert.IsNull(result.LogCurveInfo[1].ClassIndex);
         }
 
         [TestMethod, Description("To test adding a log with special characters")]
         public void Log141DataAdapter_AddToStore_Add_Log_With_Special_Characters()
         {
-            // Add well
-            var response = _devKit.Add<WellList, Well>(_well);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            // Add wellbore
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidWellbore = response.SuppMsgOut;
+            AddParents();
 
             // Add log
-            var description         = @"~ ! @ # $ % ^ &amp; * ( ) _ + { } | &lt; > ? ; : ' "" , . / \ [ ] and \b \f \n \r \t \"" \\ ";
+            var description = @"~ ! @ # $ % ^ &amp; * ( ) _ + { } | &lt; > ? ; : ' "" , . / \ [ ] and \b \f \n \r \t \"" \\ ";
             var expectedDescription = @"~ ! @ # $ % ^ & * ( ) _ + { } | < > ? ; : ' "" , . / \ [ ] and \b \f \n \r \t \"" \\";
 
             var row = @"~ ! @ # $ % ^ &amp; * ( ) _ + { } | &lt; > ? ; : ' "" . / \ [ ] and \b \f \n \r \t \"" \\ ";   // Comma omitted
             var expectedRow = @"~ ! @ # $ % ^ & * ( ) _ + { } | < > ? ; : ' "" . / \ [ ] and \b \f \n \r \t \"" \\";
 
-            var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
-                "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
-                "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
-                    "<log uid=\"" + "\" uidWell=\"" + _wellbore.UidWell + "\" uidWellbore=\"" + uidWellbore + "\">" + Environment.NewLine +
-                        "<nameWell>" + _well.Name + "</nameWell>" + Environment.NewLine +
-                        "<nameWellbore>" + _wellbore.Name + "</nameWellbore>" + Environment.NewLine +
-                        "<name>" + _devKit.Name("Test special characters") + "</name>" + Environment.NewLine +
-                        "<indexType>measured depth</indexType>" + Environment.NewLine +
-                        "<direction>increasing</direction>" + Environment.NewLine +
-                        "<description>" + description + "</description>" + Environment.NewLine +
-                        "<indexCurve>MD</indexCurve>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"MD\">" + Environment.NewLine +
-                        "  <mnemonic>MD</mnemonic>" + Environment.NewLine +
-                        "  <unit>m</unit>" + Environment.NewLine +
-                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"AAA\">" + Environment.NewLine +
-                        "  <mnemonic>AAA</mnemonic>" + Environment.NewLine +
-                        "  <unit>unitless</unit>" + Environment.NewLine +
-                        "  <typeLogData>string</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"BBB\">" + Environment.NewLine +
-                        "  <mnemonic>BBB</mnemonic>" + Environment.NewLine +
-                        "  <unit>s</unit>" + Environment.NewLine +
-                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logData>" + Environment.NewLine +
-                        "   <mnemonicList>MD,AAA,BBB</mnemonicList>" + Environment.NewLine +
-                        "   <unitList>m,unitless,s</unitList>" + Environment.NewLine +
-                        "   <data>5000.0," + row + ", 5.1 </data>" + Environment.NewLine +
-                        "</logData>" + Environment.NewLine +
-                    "</log>" + Environment.NewLine +
-               "</logs>";
+            var xmlIn = FormatXmlIn(_log, $"<description>{description}</description>", $"<data>5000.1, {row}, 5.1</data>");
 
             var result = _devKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, result.Result);
-            var uidLog = result.SuppMsgOut;
 
             // Query log
-            var query = CreateLog(uidLog, null, _wellbore.UidWell, null, uidWellbore, null);
-
-            var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
-            Assert.IsTrue(results.Any());
-
-            var returnLog = results.First();
+            var returnLog = GetLog(_log);
             Assert.IsNotNull(returnLog.Description);
             Assert.AreEqual(expectedDescription, returnLog.Description.Trim());
             Assert.AreEqual(1, returnLog.LogData.Count);
@@ -515,67 +431,19 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod, Description("To test adding a log with special character: &amp; (encoded ampersand)")]
         public void Log141DataAdapter_AddToStore_Add_Log_With_Special_Characters_Encoded_Ampersand()
         {
-            // Add well
-            var response = _devKit.Add<WellList, Well>(_well);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            // Add wellbore
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidWellbore = response.SuppMsgOut;
+            AddParents();
 
             // Add log          
             var description = "<description>Header &amp; </description>";
             var row = "<data>5000.1, Data &amp; , 5.1</data>";
 
-            var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
-                "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
-                "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
-                    "<log uid=\"" + "\" uidWell=\"" + _wellbore.UidWell + "\" uidWellbore=\"" + uidWellbore + "\">" + Environment.NewLine +
-                        "<nameWell>" + _well.Name + "</nameWell>" + Environment.NewLine +
-                        "<nameWellbore>" + _wellbore.Name + "</nameWellbore>" + Environment.NewLine +
-                        "<name>" + _devKit.Name("Test special characters") + "</name>" + Environment.NewLine +
-                        "<indexType>measured depth</indexType>" + Environment.NewLine +
-                        "<direction>increasing</direction>" + Environment.NewLine +
-                        description + Environment.NewLine +
-                        "<indexCurve>MD</indexCurve>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"MD\">" + Environment.NewLine +
-                        "  <mnemonic>MD</mnemonic>" + Environment.NewLine +
-                        "  <unit>m</unit>" + Environment.NewLine +
-                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"AAA\">" + Environment.NewLine +
-                        "  <mnemonic>AAA</mnemonic>" + Environment.NewLine +
-                        "  <unit>unitless</unit>" + Environment.NewLine +
-                        "  <typeLogData>string</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"BBB\">" + Environment.NewLine +
-                        "  <mnemonic>BBB</mnemonic>" + Environment.NewLine +
-                        "  <unit>s</unit>" + Environment.NewLine +
-                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logData>" + Environment.NewLine +
-                        "   <mnemonicList>MD,AAA,BBB</mnemonicList>" + Environment.NewLine +
-                        "   <unitList>m,unitless,s</unitList>" + Environment.NewLine +
-                        row + Environment.NewLine +
-                        "</logData>" + Environment.NewLine +
-                    "</log>" + Environment.NewLine +
-               "</logs>";
+            var xmlIn = FormatXmlIn(_log, description, row);
 
             var result = _devKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, result.Result);
 
-            var uidLog = result.SuppMsgOut;
-
             // Query log
-            var query = CreateLog(uidLog, null, _wellbore.UidWell, null, uidWellbore, null);
-
-            var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
-            Assert.IsTrue(results.Any());
-
-            var returnLog = results.First();
+            var returnLog = GetLog(_log);
             Assert.IsNotNull(returnLog.Description.Trim());
             Assert.AreEqual("Header &", returnLog.Description.Trim());
             Assert.AreEqual(1, returnLog.LogData.Count);
@@ -589,67 +457,19 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod, Description("To test adding a log with special characters &lt; (encoded less than)")]
         public void Log141DataAdapter_AddToStore_Add_Log_With_Special_Characters_Encoded_Less_Than()
         {
-            // Add well
-            var response = _devKit.Add<WellList, Well>(_well);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            // Add wellbore
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidWellbore = response.SuppMsgOut;
+            AddParents();
 
             // Add log          
             var description = "<description>Header &lt; </description>";
             var row = "<data>5000.1, Data &lt; , 5.1</data>";
 
-            var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
-                "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
-                "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
-                    "<log uid=\"" + "\" uidWell=\"" + _wellbore.UidWell + "\" uidWellbore=\"" + uidWellbore + "\">" + Environment.NewLine +
-                        "<nameWell>" + _well.Name + "</nameWell>" + Environment.NewLine +
-                        "<nameWellbore>" + _wellbore.Name + "</nameWellbore>" + Environment.NewLine +
-                        "<name>" + _devKit.Name("Test special characters") + "</name>" + Environment.NewLine +
-                        "<indexType>measured depth</indexType>" + Environment.NewLine +
-                        "<direction>increasing</direction>" + Environment.NewLine +
-                        description + Environment.NewLine +
-                        "<indexCurve>MD</indexCurve>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"MD\">" + Environment.NewLine +
-                        "  <mnemonic>MD</mnemonic>" + Environment.NewLine +
-                        "  <unit>m</unit>" + Environment.NewLine +
-                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"AAA\">" + Environment.NewLine +
-                        "  <mnemonic>AAA</mnemonic>" + Environment.NewLine +
-                        "  <unit>unitless</unit>" + Environment.NewLine +
-                        "  <typeLogData>string</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"BBB\">" + Environment.NewLine +
-                        "  <mnemonic>BBB</mnemonic>" + Environment.NewLine +
-                        "  <unit>s</unit>" + Environment.NewLine +
-                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logData>" + Environment.NewLine +
-                        "   <mnemonicList>MD,AAA,BBB</mnemonicList>" + Environment.NewLine +
-                        "   <unitList>m,unitless,s</unitList>" + Environment.NewLine +
-                        row + Environment.NewLine +
-                        "</logData>" + Environment.NewLine +
-                    "</log>" + Environment.NewLine +
-               "</logs>";
+            var xmlIn = FormatXmlIn(_log, description, row);
 
             var result = _devKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, result.Result);
 
-            var uidLog = result.SuppMsgOut;
-
             // Query log
-            var query = CreateLog(uidLog, null, _wellbore.UidWell, null, uidWellbore, null);
-
-            var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
-            Assert.IsTrue(results.Any());
-
-            var returnLog = results.First();
+            var returnLog = GetLog(_log);
             Assert.IsNotNull(returnLog.Description);
             Assert.AreEqual("Header <", returnLog.Description.Trim());
             Assert.AreEqual(1, returnLog.LogData.Count);
@@ -664,67 +484,19 @@ namespace PDS.Witsml.Server.Data.Logs
     
         public void Log141DataAdapter_AddToStore_Add_Log_With_Special_Character_Backslash()
         {
-            // Add well
-            var response = _devKit.Add<WellList, Well>(_well);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            // Add wellbore
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidWellbore = response.SuppMsgOut;
+            AddParents();
 
             // Add log          
             var description = @"<description>Header \ </description>";
             var row = @"<data>5000.0, Data \ , 5.0</data>";
 
-            var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
-                "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
-                "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
-                    "<log uid=\"" + "\" uidWell=\"" + _wellbore.UidWell + "\" uidWellbore=\"" + uidWellbore + "\">" + Environment.NewLine +
-                        "<nameWell>" + _well.Name + "</nameWell>" + Environment.NewLine +
-                        "<nameWellbore>" + _wellbore.Name + "</nameWellbore>" + Environment.NewLine +
-                        "<name>" + _devKit.Name("Test special characters") + "</name>" + Environment.NewLine +
-                        "<indexType>measured depth</indexType>" + Environment.NewLine +
-                        "<direction>increasing</direction>" + Environment.NewLine +
-                        description + Environment.NewLine +
-                        "<indexCurve>MD</indexCurve>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"MD\">" + Environment.NewLine +
-                        "  <mnemonic>MD</mnemonic>" + Environment.NewLine +
-                        "  <unit>m</unit>" + Environment.NewLine +
-                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"AAA\">" + Environment.NewLine +
-                        "  <mnemonic>AAA</mnemonic>" + Environment.NewLine +
-                        "  <unit>unitless</unit>" + Environment.NewLine +
-                        "  <typeLogData>string</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"BBB\">" + Environment.NewLine +
-                        "  <mnemonic>BBB</mnemonic>" + Environment.NewLine +
-                        "  <unit>s</unit>" + Environment.NewLine +
-                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logData>" + Environment.NewLine +
-                        "   <mnemonicList>MD,AAA,BBB</mnemonicList>" + Environment.NewLine +
-                        "   <unitList>m,unitless,s</unitList>" + Environment.NewLine +
-                        row + Environment.NewLine +
-                        "</logData>" + Environment.NewLine +
-                    "</log>" + Environment.NewLine +
-               "</logs>";
+            var xmlIn = FormatXmlIn(_log, description, row);
 
             var result = _devKit.AddToStore(ObjectTypes.Log, xmlIn, null, null); 
             Assert.AreEqual((short)ErrorCodes.Success, result.Result);
 
-            var uidLog = result.SuppMsgOut;
-
             // Query log
-            var query = CreateLog(uidLog, null, _wellbore.UidWell, null, uidWellbore, null);
-
-            var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
-            Assert.IsTrue(results.Any());
-
-            var returnLog = results.First();
+            var returnLog = GetLog(_log);
             Assert.IsNotNull(returnLog.Description);
             Assert.AreEqual(@"Header \", returnLog.Description.Trim());
             Assert.AreEqual(1, returnLog.LogData.Count);
@@ -739,67 +511,19 @@ namespace PDS.Witsml.Server.Data.Logs
         [Ignore]
         public void Log141DataAdapter_AddToStore_Add_Log_With_Special_Character_Comma()
         {
-            // Add well
-            var response = _devKit.Add<WellList, Well>(_well);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            // Add wellbore
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidWellbore = response.SuppMsgOut;
+            AddParents();
 
             // Add log          
             var description = "<description>Test special character , (comma) </description>";
             var row = "<data>5000.0, comma ,, 5.0</data>";
 
-            var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
-                "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
-                "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
-                    "<log uid=\"" + "\" uidWell=\"" + _wellbore.UidWell + "\" uidWellbore=\"" + uidWellbore + "\">" + Environment.NewLine +
-                        "<nameWell>" + _well.Name + "</nameWell>" + Environment.NewLine +
-                        "<nameWellbore>" + _wellbore.Name + "</nameWellbore>" + Environment.NewLine +
-                        "<name>" + _devKit.Name("Test special characters") + "</name>" + Environment.NewLine +
-                        "<indexType>measured depth</indexType>" + Environment.NewLine +
-                        "<direction>increasing</direction>" + Environment.NewLine +
-                        description + Environment.NewLine +
-                        "<indexCurve>MD</indexCurve>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"MD\">" + Environment.NewLine +
-                        "  <mnemonic>MD</mnemonic>" + Environment.NewLine +
-                        "  <unit>m</unit>" + Environment.NewLine +
-                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"AAA\">" + Environment.NewLine +
-                        "  <mnemonic>AAA</mnemonic>" + Environment.NewLine +
-                        "  <unit>unitless</unit>" + Environment.NewLine +
-                        "  <typeLogData>string</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"BBB\">" + Environment.NewLine +
-                        "  <mnemonic>BBB</mnemonic>" + Environment.NewLine +
-                        "  <unit>s</unit>" + Environment.NewLine +
-                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logData>" + Environment.NewLine +
-                        "   <mnemonicList>MD,AAA,BBB</mnemonicList>" + Environment.NewLine +
-                        "   <unitList>m,unitless,s</unitList>" + Environment.NewLine +
-                        row + Environment.NewLine +
-                        "</logData>" + Environment.NewLine +
-                    "</log>" + Environment.NewLine +
-               "</logs>";
+            var xmlIn = FormatXmlIn(_log, description, row);
 
             var result = _devKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, result.Result);
 
-            var uidLog = result.SuppMsgOut;
-
             // Query log
-            var query = CreateLog(uidLog, null, _wellbore.UidWell, null, uidWellbore, null);
-
-            var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
-            Assert.IsTrue(results.Any());
-
-            var returnLog = results.First();
+            var returnLog = GetLog(_log);
             Assert.IsNotNull(returnLog.Description);
             Assert.AreEqual(1, returnLog.LogData.Count);
             Assert.AreEqual(1, returnLog.LogData[0].Data.Count);
@@ -809,67 +533,19 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod, Description("To test adding log data string channel with JSON special character \f (form feed).")]
         public void Log141DataAdapter_AddToStore_Add_Log_With_Special_Character_FormFeed()
         {
-            // Add well
-            var response = _devKit.Add<WellList, Well>(_well);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            // Add wellbore
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidWellbore = response.SuppMsgOut;
+            AddParents();
 
             // Add log          
             var description = @"<description>Header \f </description>";
             var row = @"<data>5000.0, Data \f , 5.0</data>";
 
-            var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
-                "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
-                "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
-                    "<log uid=\"" + "\" uidWell=\"" + _wellbore.UidWell + "\" uidWellbore=\"" + uidWellbore + "\">" + Environment.NewLine +
-                        "<nameWell>" + _well.Name + "</nameWell>" + Environment.NewLine +
-                        "<nameWellbore>" + _wellbore.Name + "</nameWellbore>" + Environment.NewLine +
-                        "<name>" + _devKit.Name("Test special characters") + "</name>" + Environment.NewLine +
-                        "<indexType>measured depth</indexType>" + Environment.NewLine +
-                        "<direction>increasing</direction>" + Environment.NewLine +
-                        description + Environment.NewLine +
-                        "<indexCurve>MD</indexCurve>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"MD\">" + Environment.NewLine +
-                        "  <mnemonic>MD</mnemonic>" + Environment.NewLine +
-                        "  <unit>m</unit>" + Environment.NewLine +
-                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"AAA\">" + Environment.NewLine +
-                        "  <mnemonic>AAA</mnemonic>" + Environment.NewLine +
-                        "  <unit>unitless</unit>" + Environment.NewLine +
-                        "  <typeLogData>string</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"BBB\">" + Environment.NewLine +
-                        "  <mnemonic>BBB</mnemonic>" + Environment.NewLine +
-                        "  <unit>s</unit>" + Environment.NewLine +
-                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logData>" + Environment.NewLine +
-                        "   <mnemonicList>MD,AAA,BBB</mnemonicList>" + Environment.NewLine +
-                        "   <unitList>m,unitless,s</unitList>" + Environment.NewLine +
-                        row + Environment.NewLine +
-                        "</logData>" + Environment.NewLine +
-                    "</log>" + Environment.NewLine +
-               "</logs>";
+            var xmlIn = FormatXmlIn(_log, description, row);
 
             var result = _devKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, result.Result);
 
-            var uidLog = result.SuppMsgOut;
-
             // Query log
-            var query = CreateLog(uidLog, null, _wellbore.UidWell, null, uidWellbore, null);
-
-            var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All); 
-            Assert.IsTrue(results.Any());
-
-            var returnLog = results.First();
+            var returnLog = GetLog(_log);
             Assert.IsNotNull(returnLog.Description);
             Assert.AreEqual(@"Header \f", returnLog.Description.Trim());
             Assert.AreEqual(1, returnLog.LogData.Count);
@@ -883,67 +559,19 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod, Description("To test adding log data string channel with JSON special character \" (backslash double-quote).")]
         public void Log141DataAdapter_AddToStore_Add_Log_With_Special_Character_Backslash_Double_Quote()
         {
-            // Add well
-            var response = _devKit.Add<WellList, Well>(_well);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            // Add wellbore
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidWellbore = response.SuppMsgOut;
+            AddParents();
 
             // Add log          
             var description = @"<description>Header \""  </description>";
             var row = @"<data>5000.0, Data \"" , 5.0</data>";
 
-            var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
-                "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
-                "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
-                    "<log uid=\"" + "\" uidWell=\"" + _wellbore.UidWell + "\" uidWellbore=\"" + uidWellbore + "\">" + Environment.NewLine +
-                        "<nameWell>" + _well.Name + "</nameWell>" + Environment.NewLine +
-                        "<nameWellbore>" + _wellbore.Name + "</nameWellbore>" + Environment.NewLine +
-                        "<name>" + _devKit.Name("Test special characters") + "</name>" + Environment.NewLine +
-                        "<indexType>measured depth</indexType>" + Environment.NewLine +
-                        "<direction>increasing</direction>" + Environment.NewLine +
-                        description + Environment.NewLine +
-                        "<indexCurve>MD</indexCurve>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"MD\">" + Environment.NewLine +
-                        "  <mnemonic>MD</mnemonic>" + Environment.NewLine +
-                        "  <unit>m</unit>" + Environment.NewLine +
-                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"AAA\">" + Environment.NewLine +
-                        "  <mnemonic>AAA</mnemonic>" + Environment.NewLine +
-                        "  <unit>unitless</unit>" + Environment.NewLine +
-                        "  <typeLogData>string</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"BBB\">" + Environment.NewLine +
-                        "  <mnemonic>BBB</mnemonic>" + Environment.NewLine +
-                        "  <unit>s</unit>" + Environment.NewLine +
-                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logData>" + Environment.NewLine +
-                        "   <mnemonicList>MD,AAA,BBB</mnemonicList>" + Environment.NewLine +
-                        "   <unitList>m,unitless,s</unitList>" + Environment.NewLine +
-                        row + Environment.NewLine +
-                        "</logData>" + Environment.NewLine +
-                    "</log>" + Environment.NewLine +
-               "</logs>";
+            var xmlIn = FormatXmlIn(_log, description, row);
 
             var result = _devKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);              
             Assert.AreEqual((short)ErrorCodes.Success, result.Result);
 
-            var uidLog = result.SuppMsgOut;
-
             // Query log
-            var query = CreateLog(uidLog, null, _wellbore.UidWell, null, uidWellbore, null);
-
-            var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
-            Assert.IsTrue(results.Any());
-
-            var returnLog = results.First();
+            var returnLog = GetLog(_log);
             Assert.IsNotNull(returnLog.Description);
             Assert.AreEqual(@"Header \""", returnLog.Description.Trim());
             Assert.AreEqual(1, returnLog.LogData.Count);
@@ -957,71 +585,19 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod, Description("To test adding log data string channel with JSON special character \b (backspace).")]
         public void Log141DataAdapter_AddToStore_Add_Log_With_Special_Character_Backspace()
         {
-            // Add well
-            var response = _devKit.Add<WellList, Well>(_well);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            // Add wellbore
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidWellbore = response.SuppMsgOut;
-
-            _log.UidWell = _wellbore.UidWell;
-            _log.UidWellbore = uidWellbore;
-            _log.Name = _devKit.Name("Test special characters");
-            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            AddParents();
 
             // Add log          
             var description = @"<description>Header \b  </description>";
             var row = @"<data>5000.0, Data \b , 5.0</data>";
 
-            var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
-                "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
-                "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
-                    "<log uid=\"" + "\" uidWell=\"" + _wellbore.UidWell + "\" uidWellbore=\"" + uidWellbore + "\">" + Environment.NewLine +
-                        "<nameWell>" + _well.Name + "</nameWell>" + Environment.NewLine +
-                        "<nameWellbore>" + _wellbore.Name + "</nameWellbore>" + Environment.NewLine +
-                        "<name>" + _devKit.Name("Test special characters") + "</name>" + Environment.NewLine +
-                        "<indexType>measured depth</indexType>" + Environment.NewLine +
-                        "<direction>increasing</direction>" + Environment.NewLine +
-                        description + Environment.NewLine +
-                        "<indexCurve>MD</indexCurve>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"MD\">" + Environment.NewLine +
-                        "  <mnemonic>MD</mnemonic>" + Environment.NewLine +
-                        "  <unit>m</unit>" + Environment.NewLine +
-                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"AAA\">" + Environment.NewLine +
-                        "  <mnemonic>AAA</mnemonic>" + Environment.NewLine +
-                        "  <unit>unitless</unit>" + Environment.NewLine +
-                        "  <typeLogData>string</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"BBB\">" + Environment.NewLine +
-                        "  <mnemonic>BBB</mnemonic>" + Environment.NewLine +
-                        "  <unit>s</unit>" + Environment.NewLine +
-                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logData>" + Environment.NewLine +
-                        "   <mnemonicList>MD,AAA,BBB</mnemonicList>" + Environment.NewLine +
-                        "   <unitList>m,unitless,s</unitList>" + Environment.NewLine +
-                        row + Environment.NewLine +
-                        "</logData>" + Environment.NewLine +
-                    "</log>" + Environment.NewLine +
-               "</logs>";
+            var xmlIn = FormatXmlIn(_log, description, row);
 
             var result = _devKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);    
             Assert.AreEqual((short)ErrorCodes.Success, result.Result);
-            var uidLog = result.SuppMsgOut;
 
             // Query log
-            var query = CreateLog(uidLog, null, _wellbore.UidWell, null, uidWellbore, null);
-
-            var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All); 
-            Assert.IsTrue(results.Any());
-
-            var returnLog = results.First();
+            var returnLog = GetLog(_log);
             Assert.IsNotNull(returnLog.Description);
             Assert.AreEqual(@"Header \b", returnLog.Description.Trim());
             Assert.AreEqual(1, returnLog.LogData.Count);
@@ -1035,66 +611,19 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod, Description("To test adding log data string channel with JSON special character \\ (double backslash).")]
         public void Log141DataAdapter_AddToStore_Add_Log_With_Special_Character_Double_Backslash()
         {
-            // Add well
-            var response = _devKit.Add<WellList, Well>(_well);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            // Add wellbore
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            var uidWellbore = response.SuppMsgOut;
+            AddParents();
 
             // Add log          
             var description = @"<description>Header \\ </description>";
-            var row = @"Data \\";
+            var row = @"<data>5000.0, Data \\ , 5.0</data>";
 
-            var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
-                "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
-                "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
-                    "<log uid=\"" + "\" uidWell=\"" + _wellbore.UidWell + "\" uidWellbore=\"" + uidWellbore + "\">" + Environment.NewLine +
-                        "<nameWell>" + _well.Name + "</nameWell>" + Environment.NewLine +
-                        "<nameWellbore>" + _wellbore.Name + "</nameWellbore>" + Environment.NewLine +
-                        "<name>" + _devKit.Name("Test special characters") + "</name>" + Environment.NewLine +
-                        "<indexType>measured depth</indexType>" + Environment.NewLine +
-                        "<direction>increasing</direction>" + Environment.NewLine +
-                        description + Environment.NewLine +
-                        "<indexCurve>MD</indexCurve>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"MD\">" + Environment.NewLine +
-                        "  <mnemonic>MD</mnemonic>" + Environment.NewLine +
-                        "  <unit>m</unit>" + Environment.NewLine +
-                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"AAA\">" + Environment.NewLine +
-                        "  <mnemonic>AAA</mnemonic>" + Environment.NewLine +
-                        "  <unit>unitless</unit>" + Environment.NewLine +
-                        "  <typeLogData>string</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"BBB\">" + Environment.NewLine +
-                        "  <mnemonic>BBB</mnemonic>" + Environment.NewLine +
-                        "  <unit>s</unit>" + Environment.NewLine +
-                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
-                        "</logCurveInfo>" + Environment.NewLine +
-                        "<logData>" + Environment.NewLine +
-                        "   <mnemonicList>MD,AAA,BBB</mnemonicList>" + Environment.NewLine +
-                        "   <unitList>m,unitless,s</unitList>" + Environment.NewLine +
-                        "<data>5000.0," + row + ", 5.0</data>" + Environment.NewLine +
-                        "</logData>" + Environment.NewLine +
-                    "</log>" + Environment.NewLine +
-               "</logs>";
+            var xmlIn = FormatXmlIn(_log, description, row);
 
             var result = _devKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, result.Result);
-            var uidLog = result.SuppMsgOut;
 
             // Query log
-            var query = CreateLog(uidLog, null, _wellbore.UidWell, null, uidWellbore, null);
-
-            var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
-            Assert.IsTrue(results.Any());
-
-            var returnLog = results.First();
+            var returnLog = GetLog(_log);
             Assert.IsNotNull(returnLog.Description);
             Assert.AreEqual(@"Header \\", returnLog.Description.Trim());
             Assert.AreEqual(1, returnLog.LogData.Count);
@@ -1157,7 +686,7 @@ namespace PDS.Witsml.Server.Data.Logs
             _wellbore.UidWell = response.SuppMsgOut;
             response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
 
-            var log = CreateLog(null, _devKit.Name("Log 01"), _wellbore.UidWell, _well.Name, response.SuppMsgOut, _wellbore.Name);
+            var log = _devKit.CreateLog(null, _devKit.Name("Log 01"), _wellbore.UidWell, _well.Name, response.SuppMsgOut, _wellbore.Name);
             log.StartIndex = new GenericMeasure(13, "ft");
             log.EndIndex = new GenericMeasure(17, "ft");
             log.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
@@ -1180,7 +709,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var uidLog = response.SuppMsgOut;
 
             // Query
-            var query = CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+            var query = _devKit.CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
 
             var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             Assert.AreEqual(1, results.Count);
@@ -1213,7 +742,7 @@ namespace PDS.Witsml.Server.Data.Logs
             _wellbore.UidWell = response.SuppMsgOut;
             response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
 
-            var log = CreateLog(null, _devKit.Name("Log 01"), _wellbore.UidWell, _well.Name, response.SuppMsgOut, _wellbore.Name);
+            var log = _devKit.CreateLog(null, _devKit.Name("Log 01"), _wellbore.UidWell, _well.Name, response.SuppMsgOut, _wellbore.Name);
             log.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
 
             log.NullValue = "-999.25";
@@ -1234,7 +763,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var uidLog = response.SuppMsgOut;
 
             // Query
-            var query = CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
+            var query = _devKit.CreateLog(uidLog, null, log.UidWell, null, log.UidWellbore, null);
 
             var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             Assert.AreEqual(1, results.Count);
@@ -1255,50 +784,28 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_AddToStore_Structural_Ranges_Ignored()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
+            AddParents();
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
-            var log = CreateLog(
-                null,
-                _devKit.Name("Log can be added with depth data"),
-                _wellbore.UidWell,
-                _well.Name,
-                response.SuppMsgOut,
-                _wellbore.Name);
+            _log.StartIndex = new GenericMeasure {Uom = "m", Value = 1.0};
+            _log.EndIndex = new GenericMeasure { Uom = "m", Value = 10.0 };
 
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-
-            log.StartIndex = new GenericMeasure {Uom = "m", Value = 1.0};
-            log.EndIndex = new GenericMeasure { Uom = "m", Value = 10.0 };
-
-            foreach (var curve in log.LogCurveInfo)
+            foreach (var curve in _log.LogCurveInfo)
             {
-                curve.MinIndex = log.StartIndex;
-                curve.MaxIndex = log.EndIndex;
+                curve.MinIndex = _log.StartIndex;
+                curve.MaxIndex = _log.EndIndex;
             }
 
-            response = _devKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            var query = new Log
-            {
-                Uid = response.SuppMsgOut,
-                UidWell = log.UidWell,
-                UidWellbore = log.UidWellbore
-            };
-
-            var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.HeaderOnly);
-            Assert.AreEqual(1, results.Count);
-
-            var result = results.First();
-            Assert.IsNotNull(result);
+            var result = GetLog(_log);
 
             Assert.IsNull(result.StartIndex);
             Assert.IsNull(result.EndIndex);
 
-            Assert.AreEqual(log.LogCurveInfo.Count, result.LogCurveInfo.Count);
+            Assert.AreEqual(_log.LogCurveInfo.Count, result.LogCurveInfo.Count);
             foreach (var curve in result.LogCurveInfo)
             {
                 Assert.IsNull(curve.MinIndex);
@@ -1309,66 +816,33 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_AddToStore_With_No_LogCurveInfos()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
+            AddParents();
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _log.LogCurveInfo.Clear();
+            _log.LogData.Clear();
 
-            var log = CreateLog(
-                null,
-                _devKit.Name("Log can be added with depth data"),
-                _wellbore.UidWell,
-                _well.Name,
-                response.SuppMsgOut,
-                _wellbore.Name);
-
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-            log.LogCurveInfo.Clear();
-            log.LogData.Clear();
-
-            response = _devKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
         }
 
         [TestMethod]
         public void Log141DataAdapter_AddToStore_With_Custom_Data_Delimiter()
         {
             var delimiter = "|";
-            var response = _devKit.Add<WellList, Well>(_well);
 
-            _wellbore.UidWell = response.SuppMsgOut;
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-
-            var log = CreateLog(
-                null,
-                _devKit.Name("Log can be added with depth data"),
-                _wellbore.UidWell,
-                _well.Name,
-                response.SuppMsgOut,
-                _wellbore.Name);
+            AddParents();
 
             // Set data delimiter to other charactrer than ","
-            log.DataDelimiter = delimiter;
+            _log.DataDelimiter = delimiter;
 
-            _devKit.InitHeader(log, LogIndexType.measureddepth);
-            _devKit.InitDataMany(log, _devKit.Mnemonics(log), _devKit.Units(log), 10, hasEmptyChannel:false);
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), 10, hasEmptyChannel:false);
 
-            response = _devKit.Add<LogList, Log>(log);
+            var response = _devKit.Add<LogList, Log>(_log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            var uidLog = response.SuppMsgOut;
-
-            var query = new Log
-            {
-                Uid = uidLog,
-                UidWell = log.UidWell,
-                UidWellbore = log.UidWellbore
-            };
-
-            var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
-            var result = results.FirstOrDefault();
-            Assert.IsNotNull(result);
+            var result = GetLog(_log);
 
             // Assert data delimiter
             Assert.AreEqual(delimiter, result.DataDelimiter);
@@ -1376,7 +850,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var data = result.LogData.FirstOrDefault()?.Data;
             Assert.IsNotNull(data);
 
-            var channelCount = log.LogCurveInfo.Count;
+            var channelCount = _log.LogCurveInfo.Count;
 
             // Assert data delimiter in log data
             foreach (var row in data)
@@ -1405,19 +879,6 @@ namespace PDS.Witsml.Server.Data.Logs
 
         #region Helper Methods
 
-        private Log CreateLog(string uid, string name, string uidWell, string nameWell, string uidWellbore, string nameWellbore)
-        {
-            return new Log()
-            {
-                Uid = uid,
-                Name = name,
-                UidWell = uidWell,
-                NameWell = nameWell,
-                UidWellbore = uidWellbore,
-                NameWellbore = nameWellbore,
-            };
-        }
-
         private void AddParents()
         {
             var response = _devKit.Add<WellList, Well>(_well);
@@ -1429,7 +890,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private Log GetLog(Log log)
         {
-            var query = CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
+            var query = _devKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
             var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             Assert.AreEqual(1, results.Count);
 
@@ -1437,6 +898,45 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsNotNull(result);
 
             return result;
+        }
+
+        private string FormatXmlIn(Log log, string description, string row)
+        {
+            var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
+                "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
+                "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
+                    "<log uid=\"" + log.Uid + "\" uidWell=\"" + log.UidWell + "\" uidWellbore=\"" + log.UidWellbore + "\">" + Environment.NewLine +
+                        "<nameWell>" + log.NameWell + "</nameWell>" + Environment.NewLine +
+                        "<nameWellbore>" + log.NameWellbore + "</nameWellbore>" + Environment.NewLine +
+                        "<name>" + _devKit.Name("Test special characters") + "</name>" + Environment.NewLine +
+                        "<indexType>measured depth</indexType>" + Environment.NewLine +
+                        "<direction>increasing</direction>" + Environment.NewLine +
+                        description + Environment.NewLine +
+                        "<indexCurve>MD</indexCurve>" + Environment.NewLine +
+                        "<logCurveInfo uid=\"MD\">" + Environment.NewLine +
+                        "  <mnemonic>MD</mnemonic>" + Environment.NewLine +
+                        "  <unit>m</unit>" + Environment.NewLine +
+                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
+                        "</logCurveInfo>" + Environment.NewLine +
+                        "<logCurveInfo uid=\"AAA\">" + Environment.NewLine +
+                        "  <mnemonic>AAA</mnemonic>" + Environment.NewLine +
+                        "  <unit>unitless</unit>" + Environment.NewLine +
+                        "  <typeLogData>string</typeLogData>" + Environment.NewLine +
+                        "</logCurveInfo>" + Environment.NewLine +
+                        "<logCurveInfo uid=\"BBB\">" + Environment.NewLine +
+                        "  <mnemonic>BBB</mnemonic>" + Environment.NewLine +
+                        "  <unit>s</unit>" + Environment.NewLine +
+                        "  <typeLogData>double</typeLogData>" + Environment.NewLine +
+                        "</logCurveInfo>" + Environment.NewLine +
+                        "<logData>" + Environment.NewLine +
+                        "   <mnemonicList>MD,AAA,BBB</mnemonicList>" + Environment.NewLine +
+                        "   <unitList>m,unitless,s</unitList>" + Environment.NewLine +
+                        row + Environment.NewLine +
+                        "</logData>" + Environment.NewLine +
+                    "</log>" + Environment.NewLine +
+               "</logs>";
+
+            return xmlIn;
         }
 
         #endregion
