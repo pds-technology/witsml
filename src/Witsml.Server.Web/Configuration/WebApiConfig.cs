@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Net.Http.Formatting;
 using System.Web.Http;
 using Energistics.Common;
@@ -28,6 +29,8 @@ namespace PDS.Witsml.Server.Configuration
     /// </summary>
     public static class WebApiConfig
     {
+        private const string ContentType = "application/json";
+
         /// <summary>
         /// Registers configuration settings for the application.
         /// </summary>
@@ -47,7 +50,8 @@ namespace PDS.Witsml.Server.Configuration
 
             config.Filters.Add(new UnhandledExceptionHandler());
 
-            config.Formatters.JsonFormatter.MediaTypeMappings.Add(new QueryStringMapping("json", "true", "application/json"));
+            config.Formatters.JsonFormatter.MediaTypeMappings.Add(new RequestHeaderMapping("Accept", "text/html", StringComparison.InvariantCultureIgnoreCase, true, ContentType));
+            config.Formatters.JsonFormatter.MediaTypeMappings.Add(new QueryStringMapping("json", "true", ContentType));
 
             config.Formatters.JsonFormatter.SerializerSettings.ContractResolver = new EtpContractResolver();
 #if DEBUG
