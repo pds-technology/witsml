@@ -1084,6 +1084,42 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.ErrorRowDataCount, response.Result);
         }
 
+        [TestMethod]
+        public void ChannelDataReader_UpdateInStore_Error_1051_Incorrect_Row_Value_Count()
+        {
+            const int count = 10;
+            AddParents();
+
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), count, hasEmptyChannel: false);
+
+            var response = _devKit.Add<LogList, Log>(_log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+            
+            var update = new Log
+            {
+                Uid = _log.Uid,
+                UidWell = _log.UidWell,
+                UidWellbore = _log.UidWellbore,
+                StartIndex = new GenericMeasure
+                {
+                    Uom = "m",
+                    Value = count
+                }
+            };
+
+            _devKit.InitHeader(update, LogIndexType.measureddepth);
+            _devKit.InitDataMany(update, _devKit.Mnemonics(update), _devKit.Units(update), count, hasEmptyChannel: false);
+
+            var logData = update.LogData.FirstOrDefault();
+            logData?.Data?.Add("30,30.1,30.2,30.3,30.4");
+
+            update.StartIndex = null;
+
+            var updateResponse = _devKit.Update<LogList, Log>(update);
+            Assert.AreEqual((short)ErrorCodes.ErrorRowDataCount, updateResponse.Result);
+        }
+
 
         #region Helper Methods
 
