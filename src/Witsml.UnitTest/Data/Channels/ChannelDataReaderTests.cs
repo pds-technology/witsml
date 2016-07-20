@@ -101,7 +101,7 @@ namespace PDS.Witsml.Data.Channels
         ]";
 
         [TestMethod]
-        public void ChannelDataReader_can_parse_null_data()
+        public void ChannelDataReader_Can_Parse_Null_Data()
         {
             var reader = new ChannelDataReader(string.Empty);
 
@@ -111,7 +111,7 @@ namespace PDS.Witsml.Data.Channels
         }
 
         [TestMethod]
-        public void ChannelDataReader_can_set_data_value()
+        public void ChannelDataReader_Can_Set_Data_Value()
         {
             var reader = new ChannelDataReader(UpdateLogData1, new[] { "MD", "ROP", "GR", "HKLD" })
                 .WithIndex("MD", "m", true, false);
@@ -128,7 +128,7 @@ namespace PDS.Witsml.Data.Channels
         }
 
         [TestMethod]
-        public void ChannelDataReader_can_read_time_log_data()
+        public void ChannelDataReader_Can_Read_Time_Log_Data()
         {
             var reader = new ChannelDataReader(TimeLogData);
             int count = 0;
@@ -148,7 +148,7 @@ namespace PDS.Witsml.Data.Channels
         }
 
         [TestMethod]
-        public void ChannelDataReader_can_read_depth_log_data()
+        public void ChannelDataReader_Can_Read_Depth_Log_Data()
         {
             var reader = new ChannelDataReader(DepthLogData1, new[] { "MD", "ROP", "GR", "HKLD" });
             int count = 0;
@@ -168,7 +168,7 @@ namespace PDS.Witsml.Data.Channels
         }
 
         [TestMethod]
-        public void ChannelDataReader_can_calculate_channel_min_max_indices_with_single_value()
+        public void ChannelDataReader_Can_calculate_Channel_Min_Max_Indices_With_Single_Value()
         {
             var reader = new ChannelDataReader(UpdateLogData2, new[] { "ROP", "GR", "HKLD" })
                 .WithIndex("MD", "m", true, false);
@@ -184,7 +184,7 @@ namespace PDS.Witsml.Data.Channels
         }
 
         [TestMethod]
-        public void ChannelDataReader_can_calculate_channel_min_max_indices_with_multiple_values()
+        public void ChannelDataReader_Can_Calculate_Channel_Min_Max_Indices_With_Multiple_Values()
         {
             var reader = new ChannelDataReader(UpdateLogData3, new[] { "ROP", "GR", "HKLD" })
                 .WithIndex("MD", "m", true, false);
@@ -200,7 +200,7 @@ namespace PDS.Witsml.Data.Channels
         }
 
         [TestMethod]
-        public void ChannelDataReader_can_read_ChannelSet_data()
+        public void ChannelDataReader_can_Read_ChannelSet_Data()
         {
             var reader = new ChannelDataReader(ChannelSetData);
             var json = new StringBuilder("[");
@@ -235,7 +235,7 @@ namespace PDS.Witsml.Data.Channels
         }
 
         [TestMethod]
-        public void ChannelDataReader_can_slice()
+        public void ChannelDataReader_Can_Slice()
         {
             var data = 
                 "[" +

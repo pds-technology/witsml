@@ -85,7 +85,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well141Validator_AddToStore_Error_405_Uid_Exist()
         {
-            var response = AddTestWell(_well);
+            var response = AddWell(_well);
 
             var uid = response.SuppMsgOut;
             Assert.AreEqual(_well.Uid, uid);
@@ -472,7 +472,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well141Validator_UpdateInStore_Error_415_Uid_Missing()
         {
-            AddTestWell(_well);
+            AddWell(_well);
 
             // Update Well has no Uid
             var updateWell = new Well() { Country = "test" };
@@ -486,10 +486,10 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well141Validator_UpdateInStore_Error_433_DataObject_Does_Not_Exist()
         {
-            var response = AddTestWell(_well);
+            AddWell(_well);
 
             // Update Well has modified uid that does not exist
-            var updateWell = new Well() { Country = "test", Uid = response.SuppMsgOut + "x"};
+            var updateWell = new Well() { Country = "test", Uid = _well.Uid + "x"};
             var updateResponse = _devKit.Update<WellList, Well>(updateWell);
 
             // Assert that the update well does not exist
@@ -501,11 +501,9 @@ namespace PDS.Witsml.Server.Data.Wells
         public void Well141Validator_UpdateInStore_Error_448_Missing_Element_Uid()
         {
             // Add a well to the store
-            var response = AddTestWell(_well, "WellTest448");
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+            AddWell(_well, "WellTest448");
 
             // Add a reference point without a uid
-            _well.Uid = response.SuppMsgOut;
             _well.ReferencePoint = new List<ReferencePoint> {new ReferencePoint() {Name = "rpName"} };
             _well.ReferencePoint[0].Location = new List<Location> {new Location()};
 
@@ -519,11 +517,9 @@ namespace PDS.Witsml.Server.Data.Wells
         public void Well141Validator_UpdateInStore_Error_484_Missing_Required_Data()
         {
             // Add a well to the store
-            var response = AddTestWell(_well, "WellTest484");
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+            AddWell(_well, "WellTest484");
 
             // Clear the well name (required) and update
-            _well.Uid = response.SuppMsgOut;
             _well.Name = string.Empty;
 
             // Update and Assert MissingRequiredData
@@ -532,7 +528,102 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, updateResponse.Result);
         }
 
-        private WMLS_AddToStoreResponse AddTestWell(Well well, string wellName = null)
+        [TestMethod]
+        public void WitsmlValidator_UpdateInStore_444_Input_Template_Multiple_DataObjects()
+        {
+            // Add a well to the store
+            AddWell(_well, "WellTest444");
+
+            var wells = new WellList { Well = _devKit.List(_well, _well) };
+            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
+            var updateResponse = _devKit.UpdateInStore(ObjectTypes.Well, xmlIn, null, null);
+
+            // Assert that we have multiple wells
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateMultipleDataObjects, updateResponse.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_UpdateInStore_445_Empty_New_Elements_Or_Attributes()
+        {
+            // Add a well to the store
+            AddWell(_well, "WellTest445");
+
+            _well.ReferencePoint = new List<ReferencePoint> { new ReferencePoint() { Uid = "Test empty reference point" } };
+
+            // Update and Assert that there are empt elements
+            var updateResponse = _devKit.Update<WellList, Well>(_well, ObjectTypes.Well);
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.EmptyNewElementsOrAttributes, updateResponse.Result);
+        }
+
+        [TestMethod]
+        public void DataObjectValidator_UpdateInStore_464_Child_Uid_Not_Unique()
+        {
+            // Add a well to the store and Assert Success
+            AddWell(_well, "WellTest464");
+
+            // Create a well with two WellDatum with the same uid and update
+            var datumKb = _devKit.WellDatum("Kelly Bushing", ElevCodeEnum.KB, "This is WellDatum");
+            var datumSl = _devKit.WellDatum("Sea Level", ElevCodeEnum.SL, "This is WellDatum");
+            _well.WellDatum = new List<WellDatum>() { datumKb, datumSl };
+            var updateResponse = _devKit.Update<WellList, Well>(_well);
+
+            // Assert that non-unique uids were found
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.ChildUidNotUnique, updateResponse.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_UpdateInStore_Error_468_Missing_Version_Attribute()
+        {
+            // Add a well and Assert Success
+            AddWell(_well, "Well-to-add-missing-version-attribute");
+
+            var wells = new WellList
+            {
+                Well = _devKit.List(_well),
+                Version = null
+            };
+            var xmlIn = EnergisticsConverter.ObjectToXml(wells);
+
+            // Update and Assert that the version was missing for update.
+            var updateResponse = _devKit.UpdateInStore(ObjectTypes.Well, xmlIn, null, null);
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, updateResponse.Result);
+        }
+
+        [TestMethod]
+        public void DataObjectValidator_UpdateInStore_Error_443_Invalid_Uom()
+        {
+            ValidateUpdateUom("WellTest443", "abc123", ErrorCodes.InvalidUnitOfMeasure);
+        }
+
+        [TestMethod]
+        public void DataObjectValidator_UpdateInStore_Error_453_Missing_Uom_For_MeasureData()
+        {
+            ValidateUpdateUom("WellTest453", string.Empty, ErrorCodes.MissingUnitForMeasureData);
+        }
+
+        private void ValidateUpdateUom(string wellName, string uom, ErrorCodes expectedUpdateResult)
+        {
+            // Add well and get its uid
+            _well.Name = _devKit.Name(wellName);
+            AddWell(_well);
+
+            // Create an update well with an invalid wellheadElevation
+            string xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                           "   <well uid=\"" + _well.Uid + "\">" + Environment.NewLine +
+                           "     <wellheadElevation uom=\"" + uom + "\">1000</wellheadElevation>" + Environment.NewLine +
+                           "   </well>" + Environment.NewLine +
+                           "</wells>";
+
+            var updateResponse = _devKit.UpdateInStore(ObjectTypes.Well, xmlIn, null, null);
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)expectedUpdateResult, updateResponse.Result);
+        }
+
+        private WMLS_AddToStoreResponse AddWell(Well well, string wellName = null)
         {
             well.Name = wellName ?? well.Name;
             var response = _devKit.Add<WellList, Well>(well);
