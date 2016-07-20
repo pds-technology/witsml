@@ -16,10 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
@@ -67,9 +65,9 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual(ElevCodeEnum.SL, welldatum.Code);
 
             // Update well
-            var datumSL = _devKit.WellDatum("Sea Level", ElevCodeEnum.LAT, "SL");
+            var datumSl = _devKit.WellDatum("Sea Level", ElevCodeEnum.LAT, "SL");
 
-            var update = new Well() { Uid = well.Uid, WellDatum = _devKit.List(datumSL) };
+            var update = new Well() { Uid = well.Uid, WellDatum = _devKit.List(datumSl) };
             UpdateWell(update);
 
             // Query updated well
