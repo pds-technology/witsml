@@ -72,6 +72,32 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Error_475_No_Subset_When_Getting_Growing_Object()
+        {
+            AddParents();
+
+            // Add first log
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            var response = _devKit.Add<LogList, Log>(_log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add second log
+            var log2 = _devKit.CreateLog(null, _devKit.Name("Log 02"), _log.UidWell, _log.NameWell, _log.UidWellbore,
+                _log.NameWellbore);
+            _devKit.InitHeader(log2, LogIndexType.measureddepth);
+
+            response = _devKit.Add<LogList, Log>(log2);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Query
+            var query = _devKit.CreateLog(null, null, log2.UidWell, null, log2.UidWellbore, null);
+
+            var result = _devKit.Get<LogList, Log>(_devKit.List(query), ObjectTypes.Log, null,
+                OptionsIn.ReturnElements.DataOnly);
+            Assert.AreEqual((short)ErrorCodes.MissingSubsetOfGrowingDataObject, result.Result);
+        }
+
+        [TestMethod]
         public void MongoDbUpdate_UpdateInStore_Error_484_Empty_Value_For_Mandatory_Field()
         {
             AddParents();
