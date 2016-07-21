@@ -198,7 +198,7 @@ namespace PDS.Witsml.Server.Data
             var dataObject = instance as IDataObject;
             if (dataObject != null) return dataObject.GetUri();
 
-            var abstractObject = instance as Energistics.DataAccess.WITSML200.ComponentSchemas.AbstractObject;
+            var abstractObject = instance as Energistics.DataAccess.WITSML200.AbstractObject;
             if (abstractObject != null) return abstractObject.GetUri();
 
             throw new InvalidOperationException();

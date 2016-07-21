@@ -50,7 +50,7 @@ namespace PDS.Witsml
         /// <typeparam name="T">The type of data object.</typeparam>
         /// <param name="dataObject">The data object.</param>
         /// <returns>The supplied UUID if not null; otherwise, a generated UID.</returns>
-        public static string NewUuid<T>(this T dataObject) where T : Witsml200.ComponentSchemas.AbstractObject
+        public static string NewUuid<T>(this T dataObject) where T : Witsml200.AbstractObject
         {
             return string.IsNullOrEmpty(dataObject.Uuid)
                 ? Guid.NewGuid().ToString()

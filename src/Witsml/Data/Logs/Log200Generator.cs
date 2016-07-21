@@ -181,7 +181,7 @@ namespace PDS.Witsml.Data.Logs
             {
                 Citation = CreateCitation(citationName),
                 Mnemonic = mnemonic,
-                UoM = uom,
+                Uom = uom,
                 CurveClass = curveClass,
                 LoggingMethod = log.LoggingMethod,
                 LoggingCompanyName = log.LoggingCompanyName,

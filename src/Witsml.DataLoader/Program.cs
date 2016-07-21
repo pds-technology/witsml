@@ -25,7 +25,7 @@ using System.Xml.Linq;
 using Energistics.DataAccess;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
-using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Witsml200 = Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
 using Newtonsoft.Json;
 using PDS.Framework;
@@ -101,7 +101,7 @@ namespace PDS.Witsml.DataLoader
                     var uri = (dataObject as IWellboreObject)?.GetUri()
                         ?? (dataObject as IWellObject)?.GetUri()
                         ?? (dataObject as IDataObject)?.GetUri()
-                        ?? (dataObject as AbstractObject).GetUri();
+                        ?? (dataObject as Witsml200.AbstractObject).GetUri();
 
                     try
                     {

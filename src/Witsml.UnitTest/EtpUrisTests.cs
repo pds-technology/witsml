@@ -45,8 +45,7 @@ namespace PDS.Witsml
             var well = new Witsml141.Well { Uid = _data.Uid() };
             var uri = well.GetUri();
 
-            //Assert.IsTrue($"eml://witsml14/obj_well({ well.Uid })".EqualsIgnoreCase(uri.ToString()));
-            Assert.IsTrue($"eml://witsml14/well({ well.Uid })".EqualsIgnoreCase(uri.ToString()));
+            Assert.IsTrue($"eml://witsml14/obj_well({ well.Uid })".EqualsIgnoreCase(uri.ToString()));
             Assert.AreEqual("obj_well", uri.SchemaType);
             Assert.AreEqual("well", uri.ObjectType);
             Assert.AreEqual(well.Uid, uri.ObjectId);
@@ -59,8 +58,7 @@ namespace PDS.Witsml
             var uri = well.GetUri();
 
             Assert.IsTrue($"eml://witsml20/Well({ well.Uuid })".EqualsIgnoreCase(uri.ToString()));
-            //Assert.AreEqual("Well", uri.SchemaType);
-            Assert.AreEqual("obj_Well", uri.SchemaType);
+            Assert.AreEqual("Well", uri.SchemaType);
             Assert.AreEqual("well", uri.ObjectType);
             Assert.AreEqual(well.Uuid, uri.ObjectId);
         }
@@ -71,8 +69,7 @@ namespace PDS.Witsml
             var wellbore = new Witsml141.Wellbore { Uid = _data.Uid(), UidWell = _data.Uid() };
             var uri = wellbore.GetUri();
 
-            //Assert.IsTrue($"eml://witsml14/obj_well({ wellbore.UidWell })/obj_wellbore({ wellbore.Uid })".EqualsIgnoreCase(uri.ToString()));
-            Assert.IsTrue($"eml://witsml14/well({ wellbore.UidWell })/wellbore({ wellbore.Uid })".EqualsIgnoreCase(uri.ToString()));
+            Assert.IsTrue($"eml://witsml14/obj_well({ wellbore.UidWell })/obj_wellbore({ wellbore.Uid })".EqualsIgnoreCase(uri.ToString()));
             Assert.AreEqual("obj_wellbore", uri.SchemaType);
             Assert.AreEqual("wellbore", uri.ObjectType);
             Assert.AreEqual(wellbore.Uid, uri.ObjectId);
@@ -86,8 +83,7 @@ namespace PDS.Witsml
             var uri = wellbore.GetUri();
 
             Assert.IsTrue($"eml://witsml20/Wellbore({ wellbore.Uuid })".EqualsIgnoreCase(uri.ToString()));
-            //Assert.AreEqual("Wellbore", uri.SchemaType);
-            Assert.AreEqual("obj_Wellbore", uri.SchemaType);
+            Assert.AreEqual("Wellbore", uri.SchemaType);
             Assert.AreEqual("wellbore", uri.ObjectType);
             Assert.AreEqual(wellbore.Uuid, uri.ObjectId);
         }
@@ -98,8 +94,7 @@ namespace PDS.Witsml
             var log = new Witsml141.Log { Uid = _data.Uid(), UidWell = _data.Uid(), UidWellbore = _data.Uid() };
             var uri = log.GetUri();
 
-            //Assert.IsTrue($"eml://witsml14/obj_well({ log.UidWell })/obj_wellbore({ log.UidWellbore })/obj_log({ log.Uid })".EqualsIgnoreCase(uri.ToString()));
-            Assert.IsTrue($"eml://witsml14/well({ log.UidWell })/wellbore({ log.UidWellbore })/log({ log.Uid })".EqualsIgnoreCase(uri.ToString()));
+            Assert.IsTrue($"eml://witsml14/obj_well({ log.UidWell })/obj_wellbore({ log.UidWellbore })/obj_log({ log.Uid })".EqualsIgnoreCase(uri.ToString()));
             Assert.AreEqual("obj_log", uri.SchemaType);
             Assert.AreEqual("log", uri.ObjectType);
             Assert.AreEqual(log.Uid, uri.ObjectId);
@@ -114,8 +109,7 @@ namespace PDS.Witsml
             var uri = log.GetUri();
 
             Assert.IsTrue($"eml://witsml20/Log({ log.Uuid })".EqualsIgnoreCase(uri.ToString()));
-            //Assert.AreEqual("Log", uri.SchemaType);
-            Assert.AreEqual("obj_Log", uri.SchemaType);
+            Assert.AreEqual("Log", uri.SchemaType);
             Assert.AreEqual("log", uri.ObjectType);
             Assert.AreEqual(log.Uuid, uri.ObjectId);
         }

@@ -16,7 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Witsml200 = Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
 using PDS.Framework;
 
@@ -28,7 +28,7 @@ namespace PDS.Witsml.Server.Data
     /// <typeparam name="TObject">The type of the object.</typeparam>
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{TObject}" />
     public abstract class EtpDataProvider<TObject> : WitsmlDataProvider<TObject>
-        where TObject : AbstractObject
+        where TObject : Witsml200.AbstractObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EtpDataProvider{TObject}"/> class.

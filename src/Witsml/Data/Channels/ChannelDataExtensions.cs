@@ -202,7 +202,7 @@ namespace PDS.Witsml.Data.Channels
 
             // Not including index channels with value channels
             var mnemonics = channelSet.Channel.Select(x => x.Mnemonic).ToArray();
-            var units = channelSet.Channel.Select(x => x.UoM).ToArray();
+            var units = channelSet.Channel.Select(x => x.Uom).ToArray();
             var nullValues = new string[units.Length];
 
             return new ChannelDataReader(data, mnemonics, units, nullValues, channelSet.GetUri())

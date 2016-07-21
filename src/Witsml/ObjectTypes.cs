@@ -21,7 +21,7 @@ using System.Linq;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using Energistics.DataAccess;
-using AbstractObject = Energistics.DataAccess.WITSML200.ComponentSchemas.AbstractObject;
+using Witsml200 = Energistics.DataAccess.WITSML200;
 using PDS.Framework;
 
 namespace PDS.Witsml
@@ -149,7 +149,7 @@ namespace PDS.Witsml
         /// </summary>
         /// <param name="dataObject">The data object.</param>
         /// <returns>The WITSML data object type, as a string.</returns>
-        public static string GetObjectType(AbstractObject dataObject)
+        public static string GetObjectType(Witsml200.AbstractObject dataObject)
         {
             return GetObjectType(dataObject.GetType());
         }
@@ -174,7 +174,7 @@ namespace PDS.Witsml
         {
             if (!typeof(IEnergisticsCollection).IsAssignableFrom(type) && 
                 !typeof(IDataObject).IsAssignableFrom(type) &&
-                !typeof(AbstractObject).IsAssignableFrom(type))
+                !typeof(Witsml200.AbstractObject).IsAssignableFrom(type))
             {
                 throw new ArgumentException("Invalid WITSML object type, does not implement IEnergisticsCollection, IDataObject or AbstractObject", nameof(type));
             }
@@ -191,9 +191,13 @@ namespace PDS.Witsml
                 .OfType<XmlRootAttribute>()
                 .Select(x =>
                 {
+                    var elementName = string.IsNullOrWhiteSpace(x.ElementName)
+                        ? type.Name
+                        : x.ElementName;
+
                     return typeof(IEnergisticsCollection).IsAssignableFrom(type)
-                        ? PluralToSingle(x.ElementName)
-                        : x.ElementName.ToCamelCase();
+                        ? PluralToSingle(elementName)
+                        : elementName.ToCamelCase();
                 })
                 .FirstOrDefault();
         }

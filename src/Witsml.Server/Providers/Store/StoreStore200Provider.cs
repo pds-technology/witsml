@@ -18,12 +18,12 @@
 
 using System.ComponentModel.Composition;
 using Energistics.Common;
-using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using Energistics.Protocol.Store;
 using PDS.Framework;
 using PDS.Witsml.Server.Data;
+using Witsml200 = Energistics.DataAccess.WITSML200;
 
 namespace PDS.Witsml.Server.Providers.Store
 {
@@ -69,12 +69,12 @@ namespace PDS.Witsml.Server.Providers.Store
         {
             var uri = new EtpUri(args.Message.Uri);
             var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
-            var entity = dataAdapter.Get(uri) as AbstractObject;
+            var entity = dataAdapter.Get(uri) as Witsml200.AbstractObject;
 
             StoreStoreProvider.SetDataObject(args.Context, entity, uri, GetName(entity));
         }
 
-        private string GetName(AbstractObject entity)
+        private string GetName(Witsml200.AbstractObject entity)
         {
             return entity == null ? string.Empty : entity.Citation.Title;
         }

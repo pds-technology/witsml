@@ -22,7 +22,6 @@ using Energistics.Datatypes;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
-using AbstractObject = Energistics.DataAccess.WITSML200.ComponentSchemas.AbstractObject;
 
 namespace PDS.Witsml
 {
@@ -113,11 +112,11 @@ namespace PDS.Witsml
         }
 
         /// <summary>
-        /// Gets the <see cref="EtpUri"/> for a given <see cref="AbstractObject"/>.
+        /// Gets the <see cref="EtpUri"/> for a given <see cref="Witsml200.AbstractObject"/>.
         /// </summary>
-        /// <param name="entity">The <see cref="AbstractObject"/> entity.</param>
+        /// <param name="entity">The <see cref="Witsml200.AbstractObject"/> entity.</param>
         /// <returns>The <see cref="EtpUri"/> type</returns>
-        public static EtpUri GetUri(this AbstractObject entity)
+        public static EtpUri GetUri(this Witsml200.AbstractObject entity)
         {
             return Witsml200
                 .Append(ObjectTypes.GetObjectType(entity), entity.Uuid);

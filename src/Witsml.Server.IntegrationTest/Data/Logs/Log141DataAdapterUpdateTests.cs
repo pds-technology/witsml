@@ -368,12 +368,12 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_UpdateInStore_Lock_Transaction()
         {
-            _well.Uid = "Parent Well - Testing Lock";
+            _well.Uid = "Parent_Well_Testing_Lock";
             _wellbore.UidWell = _well.Uid;
-            _wellbore.Uid = "Parent Wellbore - Testing Lock";
+            _wellbore.Uid = "Parent_Wellbore_Testing_Lock";
             _log.UidWell = _well.Uid;
             _log.UidWellbore = _wellbore.Uid;
-            _log.Uid = "Log - Testing Lock";
+            _log.Uid = "Log_Testing_Lock";
             _devKit.InitHeader(_log, LogIndexType.measureddepth);
 
             var queryWell = new Well { Uid = _well.Uid };

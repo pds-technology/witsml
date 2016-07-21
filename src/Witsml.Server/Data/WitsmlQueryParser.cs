@@ -164,7 +164,7 @@ namespace PDS.Witsml.Server.Data
             var objectType = ObjectTypes.GetObjectType(type);
             var baseUri = EtpUris.GetUriFamily(type);
 
-            if (typeof(Witsml200.ComponentSchemas.AbstractObject).IsAssignableFrom(type))
+            if (typeof(Witsml200.AbstractObject).IsAssignableFrom(type))
                 return baseUri.Append(objectType, Attribute("uuid"));
 
             if (typeof(IWellObject).IsAssignableFrom(type))
