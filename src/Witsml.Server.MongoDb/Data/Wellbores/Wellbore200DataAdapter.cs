@@ -56,7 +56,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             if (parentUri != null)
             {
                 var uidWell = parentUri.Value.ObjectId;
-                query = query.Where(x => x.ReferenceWell.Uuid == uidWell);
+                query = query.Where(x => x.Well.Uuid == uidWell);
             }
 
             return query

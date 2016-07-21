@@ -72,7 +72,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 Uuid = Well1.Uuid
             };
 
-            Wellbore1 = new Wellbore() { Citation = DevKit.Citation("Wellbore 01"), ReferenceWell = WellReference, Uuid = DevKit.Uid() };
+            Wellbore1 = new Wellbore() { Citation = DevKit.Citation("Wellbore 01"), Well = WellReference, Uuid = DevKit.Uid() };
 
             WellboreReference = new DataObjectReference
             {

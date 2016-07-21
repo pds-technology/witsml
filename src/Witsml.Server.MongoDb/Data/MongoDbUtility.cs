@@ -77,7 +77,7 @@ namespace PDS.Witsml.Server.Data
                 };
             }
 
-            if (typeof(Witsml200.ComponentSchemas.AbstractObject).IsAssignableFrom(typeof(T)))
+            if (typeof(Witsml200.AbstractObject).IsAssignableFrom(typeof(T)))
             {
                 return new Dictionary<string, object> {
                     { "Citation.LastUpdate", DateTime.UtcNow.ToString("o") }

@@ -92,11 +92,11 @@ namespace PDS.Witsml.Server.Data
             }
         }
 
-        private void Register2<T>() where T : Witsml200.ComponentSchemas.AbstractObject
+        private void Register2<T>() where T : Witsml200.AbstractObject
         {
             if (!BsonClassMap.IsClassMapRegistered(typeof(T).BaseType))
             {
-                BsonClassMap.RegisterClassMap<Witsml200.ComponentSchemas.AbstractObject>(cm =>
+                BsonClassMap.RegisterClassMap<Witsml200.AbstractObject>(cm =>
                 {
                     cm.AutoMap();
                     cm.MapIdMember(x => x.Uuid).SetIdGenerator(UidGenerator.Instance);

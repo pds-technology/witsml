@@ -64,8 +64,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 Uuid = Well1.Uuid
             };
 
-            Wellbore1 = new Wellbore() { Citation = DevKit.Citation("Wellbore 01"), ReferenceWell = WellReference, Uuid = DevKit.Uid() };
-            Wellbore2 = new Wellbore() { Citation = DevKit.Citation("Wellbore 02"), ReferenceWell = WellReference };
+            Wellbore1 = new Wellbore() { Citation = DevKit.Citation("Wellbore 01"), Well = WellReference, Uuid = DevKit.Uid() };
+            Wellbore2 = new Wellbore() { Citation = DevKit.Citation("Wellbore 02"), Well = WellReference };
         }
 
         [TestMethod]
