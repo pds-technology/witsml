@@ -1072,6 +1072,43 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
+        public void WitsmlValidator_GetFromStore_Error_402_MaxReturnNodes_Not_Greater_Than_Zero()
+        {
+            var result = _devKit.Get<LogList, Log>(_devKit.List(_log), ObjectTypes.Log, optionsIn: "maxReturnNodes=0");
+
+            Assert.AreEqual((short)ErrorCodes.InvalidMaxReturnNodes, result.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_GetFromStore_Error_438_Recurring_Elements_Have_Inconsistent_Selection()
+        {
+            _log.LogCurveInfo = new List<LogCurveInfo>
+            {
+                new LogCurveInfo() {Uid = "MD", DataSource = "abc"},
+                new LogCurveInfo() {Uid = "GR", CurveDescription = "efg"}
+            };
+
+            var list = _devKit.New<LogList>(x => x.Log = _devKit.List(_log));
+            var queryIn = WitsmlParser.ToXml(list);
+            var result = _devKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
+
+            Assert.AreEqual((short)ErrorCodes.RecurringItemsInconsistentSelection, result.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_GetFromStore_Error_439_Recurring_Elements_Has_Empty_Selection_Value()
+        {
+            _log.LogCurveInfo = new List<LogCurveInfo>();
+            _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = "MD", Mnemonic = new ShortNameStruct("MD") });
+            _log.LogCurveInfo.Add(new LogCurveInfo() { Uid = string.Empty, Mnemonic = new ShortNameStruct("ROP") });
+
+            var result = _devKit.Get<LogList, Log>(_devKit.List(_log), ObjectTypes.Log, null,
+                optionsIn: OptionsIn.ReturnElements.Requested);
+
+            Assert.AreEqual((short)ErrorCodes.RecurringItemsEmptySelection, result.Result);
+        }
+
+        [TestMethod]
         public void ChannelDataReader_AddToStore_Error_1051_Incorrect_Row_Value_Count()
         {
             AddParents();

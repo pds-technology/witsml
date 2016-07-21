@@ -534,72 +534,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(maxDateTimeIndex2.Value,
                 new Timestamp(DateTimeOffset.Parse(queryData[1].Split(',')[0])));
         }
-
-        [TestMethod]
-        public void Log141DataAdapter_GetFromStore_Error_402_MaxReturnNodes_Not_Greater_Than_Zero()
-        {
-            var result = _devKit.Get<LogList, Log>(_devKit.List(_log), ObjectTypes.Log, optionsIn: "maxReturnNodes=0");
-
-            Assert.AreEqual((short) ErrorCodes.InvalidMaxReturnNodes, result.Result);
-        }
-
-        [TestMethod]
-        public void Log141DataAdapter_GetFromStore_Error_438_Recurring_Elements_Have_Inconsistent_Selection()
-        {
-            _log.LogCurveInfo = new List<LogCurveInfo>();
-            _log.LogCurveInfo.Add(new LogCurveInfo() {Uid = "MD", DataSource = "abc"});
-            _log.LogCurveInfo.Add(new LogCurveInfo() {Uid = "GR", CurveDescription = "efg"});
-
-            var list = _devKit.New<LogList>(x => x.Log = _devKit.List(_log));
-            var queryIn = WitsmlParser.ToXml(list);
-            var result = _devKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
-
-            Assert.AreEqual((short) ErrorCodes.RecurringItemsInconsistentSelection, result.Result);
-        }
-
-        [TestMethod]
-        public void Log141DataAdapter_GetFromStore_Error_439_Recurring_Elements_Has_Empty_Selection_Value()
-        {
-            _log.LogCurveInfo = new List<LogCurveInfo>();
-            _log.LogCurveInfo.Add(new LogCurveInfo() {Uid = "MD", Mnemonic = new ShortNameStruct("MD")});
-            _log.LogCurveInfo.Add(new LogCurveInfo() {Uid = string.Empty, Mnemonic = new ShortNameStruct("ROP")});
-
-            var result = _devKit.Get<LogList, Log>(_devKit.List(_log), ObjectTypes.Log, null,
-                optionsIn: OptionsIn.ReturnElements.Requested);
-
-            Assert.AreEqual((short) ErrorCodes.RecurringItemsEmptySelection, result.Result);
-        }
-
-        [TestMethod]
-        public void Log141DataAdapter_GetFromStore_Error_475_No_Subset_When_Getting_Growing_Object()
-        {
-            var response = _devKit.Add<WellList, Well>(_well);
-            Assert.AreEqual((short) ErrorCodes.Success, response.Result);
-
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            Assert.AreEqual((short) ErrorCodes.Success, response.Result);
-
-            // Add first log
-            _devKit.InitHeader(_log, LogIndexType.measureddepth);
-            response = _devKit.Add<LogList, Log>(_log);
-            Assert.AreEqual((short) ErrorCodes.Success, response.Result);
-
-            // Add second log
-            var log2 = _devKit.CreateLog(null, _devKit.Name("Log 02"), _log.UidWell, _log.NameWell, _log.UidWellbore,
-                _log.NameWellbore);
-            _devKit.InitHeader(log2, LogIndexType.measureddepth);
-
-            response = _devKit.Add<LogList, Log>(log2);
-            Assert.AreEqual((short) ErrorCodes.Success, response.Result);
-
-            // Query
-            var query = _devKit.CreateLog(null, null, log2.UidWell, null, log2.UidWellbore, null);
-
-            var result = _devKit.Get<LogList, Log>(_devKit.List(query), ObjectTypes.Log, null,
-                OptionsIn.ReturnElements.DataOnly);
-            Assert.AreEqual((short) ErrorCodes.MissingSubsetOfGrowingDataObject, result.Result);
-        }
-
+        
         [TestMethod]
         public void Log141DataAdapter_GetFromStore_ReturnElements_DataOnly_Supports_Multiple_Queries()
         {
