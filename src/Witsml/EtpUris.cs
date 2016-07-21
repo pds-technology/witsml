@@ -34,17 +34,17 @@ namespace PDS.Witsml
         /// <summary>
         /// The <see cref="EtpUri"/> for witsml131
         /// </summary>
-        public static readonly EtpUri Witsml131 = new EtpUri("eml:///witsml13");
+        public static readonly EtpUri Witsml131 = new EtpUri("eml://witsml13");
 
         /// <summary>
         /// The <see cref="EtpUri"/> for witsml141
         /// </summary>
-        public static readonly EtpUri Witsml141 = new EtpUri("eml:///witsml14");
+        public static readonly EtpUri Witsml141 = new EtpUri("eml://witsml14");
 
         /// <summary>
         /// The <see cref="EtpUri"/> for witsml200
         /// </summary>
-        public static readonly EtpUri Witsml200 = new EtpUri("eml:///witsml20");
+        public static readonly EtpUri Witsml200 = new EtpUri("eml://witsml20");
 
         /// <summary>
         /// Gets the <see cref="EtpUri"/> for a given type namespace.
