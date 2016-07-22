@@ -10,7 +10,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <dependencies>
       <group targetFramework="net40">
-        <dependency id="Energistics.DataAccess" version="2.0.20160721.1" />
+        <dependency id="Energistics.DataAccess" version="2.0.20160722.1" />
       </group>
       <group targetFramework="net46">
         <dependency id="ETP.DevKit" version="1.0.20160721.2" />
