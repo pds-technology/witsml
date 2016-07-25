@@ -59,6 +59,9 @@ namespace PDS.Witsml
 
             try
             {
+                // remove invalid character along with leading/trailing white space
+                xml = xml?.Trim().Replace("\x00", string.Empty) ?? string.Empty;
+
                 return XDocument.Parse(xml);
             }
             catch (XmlException ex)
