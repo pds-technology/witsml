@@ -60,7 +60,8 @@ namespace PDS.Witsml.Server
             {
                 Crs = new GeodeticEpsgCrs() { EpsgCode = 26914 },
                 Latitude = 28.5597,
-                Longitude = -90.6671
+                Longitude = -90.6671,
+                Uid = "loc-01"
             };
         }
 
