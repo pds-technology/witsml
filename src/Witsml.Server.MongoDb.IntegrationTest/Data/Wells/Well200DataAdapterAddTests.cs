@@ -22,53 +22,51 @@ using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML200;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Driver;
-using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
     [TestClass]
     public class Well200DataAdapterAddTests
     {
-        private DevKit200Aspect DevKit;
-        private IDatabaseProvider Provider;
-        private IWitsmlDataAdapter<Well> WellAdapter;
+        private DevKit200Aspect _devKit;
+        private IDatabaseProvider _provider;
+        private IWitsmlDataAdapter<Well> _wellAdapter;
 
-        private Well Well1;
-        private Well Well2;
+        private Well _well1;
+        private Well _well2;
 
         public TestContext TestContext { get; set; }
 
         [TestInitialize]
         public void TestSetUp()
         {
-            DevKit = new DevKit200Aspect(TestContext);
-            Provider = DevKit.Container.Resolve<IDatabaseProvider>();
+            _devKit = new DevKit200Aspect(TestContext);
+            _provider = _devKit.Container.Resolve<IDatabaseProvider>();
 
-            WellAdapter = new Well200DataAdapter(Provider);
+            _wellAdapter = new Well200DataAdapter(_provider);
 
-            Well1 = new Well()
+            _well1 = new Well()
             {
-                Citation = DevKit.Citation("Well 01"),
-                GeographicLocationWGS84 = DevKit.Location(),
+                Citation = _devKit.Citation("Well 01"),
+                GeographicLocationWGS84 = _devKit.Location(),
                 SchemaVersion = "2.0",
-                TimeZone = DevKit.TimeZone,
-                Uuid = DevKit.Uid(),
+                TimeZone = _devKit.TimeZone,
+                Uuid = _devKit.Uid(),
             };
 
-            Well2 = new Well()
+            _well2 = new Well()
             {
-                Citation = DevKit.Citation("Well 02"),
-                GeographicLocationWGS84 = DevKit.Location(),
+                Citation = _devKit.Citation("Well 02"),
+                GeographicLocationWGS84 = _devKit.Location(),
                 SchemaVersion = "2.0",
-                TimeZone = DevKit.TimeZone,
+                TimeZone = _devKit.TimeZone,
             };
         }
 
         [TestMethod]
         public void Well_can_be_serialized_to_xml()
         {
-            var xml = EnergisticsConverter.ObjectToXml(Well1);
+            var xml = EnergisticsConverter.ObjectToXml(_well1);
             Console.WriteLine(xml);
             Assert.IsNotNull(xml);
         }
@@ -104,22 +102,22 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void CanAddAndGetSingleWellWithUuid()
         {
-            WellAdapter.Add(DevKit.Parser(Well1), Well1);
+            _wellAdapter.Add(_devKit.Parser(_well1), _well1);
 
-            var well1 = WellAdapter.Get(Well1.GetUri());
+            var well1 = _wellAdapter.Get(_well1.GetUri());
 
-            Assert.AreEqual(Well1.Citation.Title, well1.Citation.Title);
+            Assert.AreEqual(_well1.Citation.Title, well1.Citation.Title);
         }
 
         [TestMethod]
         public void CanAddAndGetSingleWellWithoutUuid()
         {
-            WellAdapter.Add(DevKit.Parser(Well2), Well2);
+            _wellAdapter.Add(_devKit.Parser(_well2), _well2);
 
-            var well2 = Provider.GetDatabase().GetCollection<Well>(ObjectNames.Well200).AsQueryable()
-                .First(x => x.Citation.Title == Well2.Citation.Title);
+            var well2 = _provider.GetDatabase().GetCollection<Well>(ObjectNames.Well200).AsQueryable()
+                .First(x => x.Citation.Title == _well2.Citation.Title);
 
-            Assert.AreEqual(Well2.Citation.Title, well2.Citation.Title);
+            Assert.AreEqual(_well2.Citation.Title, well2.Citation.Title);
         }
     }
 }
