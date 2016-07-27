@@ -170,6 +170,7 @@
     <Compile Include="Providers\Discovery\DiscoveryStoreProvider.cs" />
     <Compile Include="Providers\Discovery\IDiscoveryStoreProvider.cs" />
     <Compile Include="Data\WitsmlExtensions.cs" />
+    <Compile Include="Providers\EtpExtensions.cs" />
     <Compile Include="Providers\Store\IStoreStoreProvider.cs" />
     <Compile Include="Providers\Store\StoreStore131Provider.cs" />
     <Compile Include="Providers\Store\StoreStore200Provider.cs" />

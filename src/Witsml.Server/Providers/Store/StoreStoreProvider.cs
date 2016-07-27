@@ -18,6 +18,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using Energistics;
 using Energistics.Common;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
@@ -94,7 +95,9 @@ namespace PDS.Witsml.Server.Providers.Store
         {
             try
             {
-                var uri = new EtpUri(args.Message.Uri);
+                var uri = this.CreateAndValidateUri(args.Message.Uri, args.Header.MessageId);
+                if (!uri.IsValid) return;
+
                 WitsmlOperationContext.Current.Request = new RequestContext(Functions.GetObject, uri.ObjectType, null, null, null);
 
                 var provider = Container.Resolve<IStoreStoreProvider>(new ObjectName(uri.Version));
@@ -102,8 +105,7 @@ namespace PDS.Witsml.Server.Providers.Store
             }
             catch (ContainerException ex)
             {
-                Logger.Error(ex);
-                ProtocolException(1000, "Data object not supported. URI: " + args.Message.Uri, args.Header.MessageId);
+                this.UnsupportedObject(ex, args.Message.Uri, args.Header.MessageId);
             }
         }
 
@@ -116,7 +118,8 @@ namespace PDS.Witsml.Server.Providers.Store
         {
             base.HandlePutObject(header, putObject);
 
-            var uri = new EtpUri(putObject.DataObject.Resource.Uri);
+            var uri = this.CreateAndValidateUri(putObject.DataObject.Resource.Uri, header.MessageId);
+            if (!uri.IsValid) return;
 
             try
             {
@@ -127,8 +130,11 @@ namespace PDS.Witsml.Server.Providers.Store
             }
             catch (ContainerException ex)
             {
-                Logger.Error(ex);
-                ProtocolException(1000, "Data object not supported. URI: " + uri, header.MessageId);
+                this.UnsupportedObject(ex, putObject.DataObject.Resource.Uri, header.MessageId);
+            }
+            catch (WitsmlException ex)
+            {
+                ProtocolException((int)EtpErrorCodes.InvalidObject, $"Invalid object: {ex.Message}; Error code: {(int)ex.ErrorCode}", header.MessageId);
             }
         }
 
@@ -140,7 +146,7 @@ namespace PDS.Witsml.Server.Providers.Store
         protected override void HandleDeleteObject(MessageHeader header, DeleteObject deleteObject)
         {
             base.HandleDeleteObject(header, deleteObject);
-            deleteObject.Uri.ForEach(x => DeleteObject(header, new EtpUri(x)));
+            deleteObject.Uri.ForEach(x => DeleteObject(header, x));
         }
 
         /// <summary>
@@ -148,19 +154,21 @@ namespace PDS.Witsml.Server.Providers.Store
         /// </summary>
         /// <param name="header">The message header.</param>
         /// <param name="uri">The URI.</param>
-        private void DeleteObject(MessageHeader header, EtpUri uri)
+        private void DeleteObject(MessageHeader header, string uri)
         {
             try
             {
-                WitsmlOperationContext.Current.Request = new RequestContext(Functions.DeleteObject, uri.ObjectType, null, null, null);
+                var etpUri = this.CreateAndValidateUri(uri, header.MessageId);
+                if (!etpUri.IsValid) return;
 
-                var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
-                dataAdapter.Delete(uri);
+                WitsmlOperationContext.Current.Request = new RequestContext(Functions.DeleteObject, etpUri.ObjectType, null, null, null);
+
+                var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(etpUri.ObjectType, etpUri.Version));
+                dataAdapter.Delete(etpUri);
             }
             catch (ContainerException ex)
             {
-                Logger.Error(ex);
-                ProtocolException(1000, "Data object not supported. URI: " + uri, header.MessageId);
+                this.UnsupportedObject(ex, uri, header.MessageId);
             }
         }
     }
