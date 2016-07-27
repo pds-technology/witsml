@@ -25,10 +25,12 @@ using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
+using Energistics.Datatypes.Object;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Models;
+using PDS.Witsml.Server.Providers.Store;
 
 namespace PDS.Witsml.Server.Data.Channels
 {
@@ -227,8 +229,11 @@ namespace PDS.Witsml.Server.Data.Channels
         {
             var uri = channel.GetUri(entity);
             var primaryIndex = indexMetadata.FirstOrDefault();
-            var isTimeLog = primaryIndex != null ? primaryIndex.IndexType == ChannelIndexTypes.Time : false;
+            var isTimeLog = primaryIndex != null && primaryIndex.IndexType == ChannelIndexTypes.Time;
             var curveIndexes = GetCurrentIndexRange(entity);
+            var dataObject = new DataObject();
+
+            StoreStoreProvider.SetDataObject(dataObject, channel, uri, channel.Mnemonic, 0);
 
             return new ChannelMetadataRecord()
             {
@@ -241,10 +246,12 @@ namespace PDS.Witsml.Server.Data.Channels
                 MeasureClass = channel.CurveClass ?? ObjectTypes.Unknown,
                 Source = channel.Source ?? ObjectTypes.Unknown,
                 Uuid = channel.Mnemonic,
+                DomainObject = dataObject,
                 Status = ChannelStatuses.Active,
                 StartIndex = primaryIndex == null ? null : curveIndexes[channel.Mnemonic].Start.IndexToScale(primaryIndex.Scale, isTimeLog),
                 EndIndex = primaryIndex == null ? null : curveIndexes[channel.Mnemonic].End.IndexToScale(primaryIndex.Scale, isTimeLog),
-                Indexes = indexMetadata
+                Indexes = indexMetadata,
+                CustomData = new Dictionary<string, DataValue>()
             };
         }
 
