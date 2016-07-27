@@ -60,7 +60,8 @@ namespace PDS.Witsml.Server.Providers.Store
         /// <param name="entity">The entity.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="name">The name.</param>
-        public static void SetDataObject<T>(DataObject dataObject, T entity, EtpUri uri, string name)
+        /// <param name="childCount">The child count.</param>
+        public static void SetDataObject<T>(DataObject dataObject, T entity, EtpUri uri, string name, int childCount = -1)
         {
             if (entity == null)
             {
@@ -77,7 +78,7 @@ namespace PDS.Witsml.Server.Providers.Store
                 Uri = uri,
                 Uuid = uri.ObjectId,
                 Name = name,
-                HasChildren = -1,
+                HasChildren = childCount,
                 ContentType = uri.ContentType,
                 ResourceType = ResourceTypes.DataObject.ToString(),
                 CustomData = new Dictionary<string, string>(),

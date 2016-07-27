@@ -181,10 +181,8 @@ namespace PDS.Witsml
 
             if (typeof(IDataObject).IsAssignableFrom(type))
             {
-                return type.GetCustomAttributes(typeof(XmlTypeAttribute), true)
-                    .OfType<XmlTypeAttribute>()
-                    .Select(x => x.TypeName.Substring(4).ToCamelCase())
-                    .FirstOrDefault();
+                var xsdType = GetSchemaType(type);
+                return xsdType.Substring(xsdType.IndexOf('_') + 1);
             }
 
             return type.GetCustomAttributes(typeof(XmlRootAttribute), true)
@@ -307,6 +305,29 @@ namespace PDS.Witsml
             {
                 return Unknown;
             }
+        }
+
+        /// <summary>
+        /// Gets the XSD type for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <returns>The XSD type.</returns>
+        public static string GetSchemaType(object dataObject)
+        {
+            return GetSchemaType(dataObject?.GetType());
+        }
+
+        /// <summary>
+        /// Gets the XSD type for the specified data object type.
+        /// </summary>
+        /// <param name="type">The data object type.</param>
+        /// <returns>The XSD type.</returns>
+        public static string GetSchemaType(Type type)
+        {
+            return type?.GetCustomAttributes(typeof(XmlTypeAttribute), true)
+                .OfType<XmlTypeAttribute>()
+                .Select(x => string.IsNullOrWhiteSpace(x.TypeName) ? type.Name : x.TypeName)
+                .FirstOrDefault();
         }
 
         /// <summary>
