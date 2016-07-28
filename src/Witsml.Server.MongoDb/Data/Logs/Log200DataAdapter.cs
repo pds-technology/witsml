@@ -16,11 +16,16 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
+using Energistics.Datatypes.ChannelData;
+using PDS.Framework;
+using PDS.Witsml.Data.Channels;
+using PDS.Witsml.Server.Data.Channels;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -28,9 +33,11 @@ namespace PDS.Witsml.Server.Data.Logs
     /// Data adapter that encapsulates CRUD functionality for <see cref="Log" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Log}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.Channels.IChannelDataProvider" />
     [Export(typeof(IWitsmlDataAdapter<Log>))]
+    [Export200(ObjectTypes.Log, typeof(IChannelDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Log200DataAdapter : MongoDbDataAdapter<Log>
+    public class Log200DataAdapter : MongoDbDataAdapter<Log>, IChannelDataProvider
     {
         private readonly IWitsmlDataAdapter<ChannelSet> _channelSetDataAdapter;
 
@@ -43,6 +50,44 @@ namespace PDS.Witsml.Server.Data.Logs
         public Log200DataAdapter(IDatabaseProvider databaseProvider, IWitsmlDataAdapter<ChannelSet> channelSetDataAdapter) : base(databaseProvider, ObjectNames.Log200, ObjectTypes.Uuid)
         {
             _channelSetDataAdapter = channelSetDataAdapter;
+        }
+
+        /// <summary>
+        /// Gets the channel metadata for the specified data object URI.
+        /// </summary>
+        /// <param name="uri">The parent data object URI.</param>
+        /// <returns>A collection of channel metadata.</returns>
+        public IList<ChannelMetadataRecord> GetChannelMetadata(EtpUri uri)
+        {
+            var adapter = _channelSetDataAdapter as IChannelDataProvider;
+
+            if (adapter == null)
+                throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, "IChannelDataProvider not configured.");
+
+            var entity = GetEntity(uri);
+
+            return entity.ChannelSet
+                .SelectMany(x => adapter.GetChannelMetadata(x.GetUri()))
+                .ToList();
+        }
+
+        /// <summary>
+        /// Gets the channel data records for the specified data object URI and range.
+        /// </summary>
+        /// <param name="uri">The parent data object URI.</param>
+        /// <param name="range">The data range to retrieve.</param>
+        /// <returns>A collection of channel data.</returns>
+        public IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, Range<double?> range)
+        {
+            var adapter = _channelSetDataAdapter as IChannelDataProvider;
+
+            if (adapter == null)
+                throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, "IChannelDataProvider not configured.");
+
+            var entity = GetEntity(uri);
+
+            return entity.ChannelSet
+                .SelectMany(x => adapter.GetChannelData(x.GetUri(), range));
         }
 
         /// <summary>
@@ -104,6 +149,16 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var uri = GetUri(dataObject);
             UpdateEntity(parser, uri);
+        }
+
+        /// <summary>
+        /// Updates the channel data for the specified data object URI.
+        /// </summary>
+        /// <param name="uri">The parent data object URI.</param>
+        /// <param name="reader">The update reader.</param>
+        public void UpdateChannelData(EtpUri uri, ChannelDataReader reader)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
