@@ -167,11 +167,11 @@ namespace PDS.Witsml.Server.Controllers
         {
             var combined = new Dictionary<string, string>();
 
-            foreach (var key in headers.AllKeys)
-                combined[key] = headers[key];
-
             foreach (var key in queryString.AllKeys)
                 combined[key] = queryString[key];
+
+            foreach (var key in headers.AllKeys)
+                combined[key] = headers[key];
 
             return combined;
         }

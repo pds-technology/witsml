@@ -96,7 +96,12 @@ namespace PDS.Witsml.Server.Providers.Store
             try
             {
                 var uri = this.CreateAndValidateUri(args.Message.Uri, args.Header.MessageId);
-                if (!uri.IsValid) return;
+
+                if (!uri.IsValid)
+                {
+                    args.Cancel = true;
+                    return;
+                }
 
                 WitsmlOperationContext.Current.Request = new RequestContext(Functions.GetObject, uri.ObjectType, null, null, null);
 
@@ -106,6 +111,7 @@ namespace PDS.Witsml.Server.Providers.Store
             catch (ContainerException ex)
             {
                 this.UnsupportedObject(ex, args.Message.Uri, args.Header.MessageId);
+                args.Cancel = true;
             }
         }
 

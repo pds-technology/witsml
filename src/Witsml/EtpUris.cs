@@ -82,7 +82,7 @@ namespace PDS.Witsml
             return (entity as IWellboreObject)?.GetUri()
                 ?? (entity as IWellObject)?.GetUri()
                 ?? entity.GetUriFamily()
-                    .Append(ObjectTypes.GetSchemaType(entity), entity.Uid);
+                    .Append(ObjectTypes.GetObjectType(entity), entity.Uid);
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace PDS.Witsml
             return (entity as IWellboreObject)?.GetUri()
                 ?? entity.GetUriFamily()
                     .Append(ObjectTypes.Well, entity.UidWell)
-                    .Append(ObjectTypes.GetSchemaType(entity), entity.Uid);
+                    .Append(ObjectTypes.GetObjectType(entity), entity.Uid);
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace PDS.Witsml
             return entity.GetUriFamily()
                 .Append(ObjectTypes.Well, entity.UidWell)
                 .Append(ObjectTypes.Wellbore, entity.UidWellbore)
-                .Append(ObjectTypes.GetSchemaType(entity), entity.Uid);
+                .Append(ObjectTypes.GetObjectType(entity), entity.Uid);
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace PDS.Witsml
         public static EtpUri GetUri(this Witsml200.AbstractObject entity)
         {
             return Witsml200
-                .Append(ObjectTypes.GetSchemaType(entity), entity.Uuid);
+                .Append(ObjectTypes.GetObjectType(entity), entity.Uuid);
         }
 
         /// <summary>
@@ -131,7 +131,7 @@ namespace PDS.Witsml
         public static EtpUri GetUri(this Witsml131.ComponentSchemas.LogCurveInfo entity, Witsml131.Log log)
         {
             return log.GetUri()
-                .Append(ObjectTypes.GetSchemaType(entity), entity.Mnemonic);
+                .Append(ObjectTypes.LogCurveInfo, entity.Mnemonic);
         }
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace PDS.Witsml
         public static EtpUri GetUri(this Witsml141.ComponentSchemas.LogCurveInfo entity, Witsml141.Log log)
         {
             return log.GetUri()
-                .Append(ObjectTypes.GetSchemaType(entity), entity.Mnemonic.Value);
+                .Append(ObjectTypes.LogCurveInfo, entity.Mnemonic.Value);
         }
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace PDS.Witsml
         public static EtpUri GetUri(this Witsml200.ChannelSet entity, Witsml200.Log log)
         {
             return log.GetUri()
-                .Append(ObjectTypes.GetSchemaType(entity), entity.Uuid);
+                .Append(ObjectTypes.ChannelSet, entity.Uuid);
         }
 
         /// <summary>
@@ -167,7 +167,7 @@ namespace PDS.Witsml
         public static EtpUri GetUri(this Witsml200.Channel entity, Witsml200.ChannelSet channelSet)
         {
             return channelSet.GetUri()
-                .Append(ObjectTypes.GetSchemaType(entity), entity.Mnemonic);
+                .Append(ObjectTypes.Channel, entity.Mnemonic);
         }
 
         /// <summary>
@@ -180,7 +180,7 @@ namespace PDS.Witsml
         public static EtpUri GetUri(this Witsml200.Channel entity, Witsml200.Log log, Witsml200.ChannelSet channelSet)
         {
             return channelSet.GetUri(log)
-                .Append(ObjectTypes.GetSchemaType(entity), entity.Mnemonic);
+                .Append(ObjectTypes.Channel, entity.Mnemonic);
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace PDS.Witsml
         public static EtpUri GetUri(this Witsml200.ComponentSchemas.ChannelIndex entity, Witsml200.ChannelSet channelSet)
         {
             return channelSet.GetUri()
-                .Append(ObjectTypes.GetSchemaType(entity), entity.Mnemonic);
+                .Append(ObjectTypes.ChannelIndex, entity.Mnemonic);
         }
 
         /// <summary>
@@ -205,7 +205,7 @@ namespace PDS.Witsml
         public static EtpUri GetUri(this Witsml200.ComponentSchemas.ChannelIndex entity, Witsml200.Log log, Witsml200.ChannelSet channelSet)
         {
             return channelSet.GetUri(log)
-                .Append(ObjectTypes.GetSchemaType(entity), entity.Mnemonic);
+                .Append(ObjectTypes.ChannelIndex, entity.Mnemonic);
         }
     }
 }

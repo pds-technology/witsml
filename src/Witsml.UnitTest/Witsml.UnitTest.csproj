@@ -43,8 +43,8 @@
       <HintPath>..\packages\Energistics.DataAccess.2.0.20160722.1\lib\net40\Energistics.DataAccess.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="ETP.DevKit, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ETP.DevKit.1.0.20160725.2\lib\net46\ETP.DevKit.dll</HintPath>
+    <Reference Include="ETP.DevKit, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ETP.DevKit.1.1.20160801.1\lib\net46\ETP.DevKit.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ETP.Messages, Version=1.4.1.0, Culture=neutral, PublicKeyToken=c2b7028481fb2795, processorArchitecture=MSIL">
