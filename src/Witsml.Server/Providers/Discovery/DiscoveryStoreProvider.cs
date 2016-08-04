@@ -49,16 +49,18 @@ namespace PDS.Witsml.Server.Providers.Discovery
         /// <param name="args">The ProtocolEventArgs{GetResources, IList{Resource}} instance containing the event data.</param>
         protected override void HandleGetResources(ProtocolEventArgs<GetResources, IList<Resource>> args)
         {
+            if (!EtpUri.IsRoot(args.Message.Uri))
+            {
+                var uri = new EtpUri(args.Message.Uri);
+                if (!uri.IsValid)
+                {
+                    ProtocolException((int)EtpErrorCodes.InvalidArgument, "Invalid Argument: " + uri, args.Header.MessageId);
+                    return;
+                }
+            }
+
             foreach (var provider in Providers.OrderBy(x => x.DataSchemaVersion))
             {
-                if (!EtpUri.IsRoot(args.Message.Uri))
-                {
-                    var uri = new EtpUri(args.Message.Uri);
-                    if (!uri.IsValid)
-                    {
-                        ProtocolException((int)EtpErrorCodes.InvalidArgument, "Invalid Argument: " + uri, args.Header.MessageId);
-                    }
-                }
                 provider.GetResources(args);
             }
         }
