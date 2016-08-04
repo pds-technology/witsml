@@ -133,6 +133,8 @@ namespace PDS.Witsml.Server.Providers.Store
 
                 var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
                 dataAdapter.Put(putObject.DataObject);
+
+                Acknowledge(header.MessageId);
             }
             catch (ContainerException ex)
             {
@@ -171,6 +173,8 @@ namespace PDS.Witsml.Server.Providers.Store
 
                 var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(etpUri.ObjectType, etpUri.Version));
                 dataAdapter.Delete(etpUri);
+
+                Acknowledge(header.MessageId);
             }
             catch (ContainerException ex)
             {
