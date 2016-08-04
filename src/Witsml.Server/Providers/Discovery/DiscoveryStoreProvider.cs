@@ -51,10 +51,13 @@ namespace PDS.Witsml.Server.Providers.Discovery
         {
             foreach (var provider in Providers.OrderBy(x => x.DataSchemaVersion))
             {
-                var uri = new EtpUri(args.Message.Uri);
-                if (!uri.IsValid)
+                if (!EtpUri.IsRoot(args.Message.Uri))
                 {
-                    ProtocolException((int)EtpErrorCodes.InvalidArgument, "Invalid Argument: " + uri, args.Header.MessageId);
+                    var uri = new EtpUri(args.Message.Uri);
+                    if (!uri.IsValid)
+                    {
+                        ProtocolException((int)EtpErrorCodes.InvalidArgument, "Invalid Argument: " + uri, args.Header.MessageId);
+                    }
                 }
                 provider.GetResources(args);
             }
