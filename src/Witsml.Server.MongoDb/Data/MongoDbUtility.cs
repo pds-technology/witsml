@@ -172,6 +172,14 @@ namespace PDS.Witsml.Server.Data
                 ((IWellboreObject)copy).UidWellbore = ((IWellboreObject)entity).UidWellbore;
             }
 
+            var obj = entity as Witsml200.AbstractObject;
+            if (obj != null)
+            {
+                var copyObj = copy as Witsml200.AbstractObject;
+                if (copyObj != null)
+                    copyObj.Uuid = obj.Uuid;
+            }
+
             return copy.ToBsonDocument();
         }
     }
