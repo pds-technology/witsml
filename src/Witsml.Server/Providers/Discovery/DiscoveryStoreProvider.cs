@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using Energistics;
 using Energistics.Common;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
@@ -50,6 +51,11 @@ namespace PDS.Witsml.Server.Providers.Discovery
         {
             foreach (var provider in Providers.OrderBy(x => x.DataSchemaVersion))
             {
+                var uri = new EtpUri(args.Message.Uri);
+                if (!uri.IsValid)
+                {
+                    ProtocolException((int)EtpErrorCodes.InvalidArgument, "Invalid Argument: " + uri, args.Header.MessageId);
+                }
                 provider.GetResources(args);
             }
         }
