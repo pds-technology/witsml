@@ -28,6 +28,7 @@ using System.Web;
 using System.Web.Http;
 using System.Web.WebSockets;
 using Energistics;
+using Energistics.Common;
 using Energistics.Datatypes;
 using Energistics.Protocol.Core;
 using PDS.Framework;
@@ -80,7 +81,7 @@ namespace PDS.Witsml.Server.Controllers
             {
                 context.AcceptWebSocketRequest(AcceptWebSocketRequest, new AspNetWebSocketOptions()
                 {
-                    SubProtocol = Energistics.Properties.Settings.Default.EtpSubProtocolName
+                    SubProtocol = EtpSettings.EtpSubProtocolName
                 });
 
                 return Request.CreateResponse(HttpStatusCode.SwitchingProtocols);
