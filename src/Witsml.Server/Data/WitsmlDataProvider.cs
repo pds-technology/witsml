@@ -161,8 +161,10 @@ namespace PDS.Witsml.Server.Data
             {
                 Update(parser);
             }
-
-            Add(parser);
+            else
+            {
+                Add(parser);
+            }
         }
 
         /// <summary>
