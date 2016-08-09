@@ -51,10 +51,11 @@ namespace PDS.Witsml.Server.Providers.Discovery
         {
             if (!EtpUri.IsRoot(args.Message.Uri))
             {
-                var uri = new EtpUri(args.Message.Uri);
+                var uri = this.CreateAndValidateUri(args.Message.Uri, args.Header.MessageId);
+
                 if (!uri.IsValid)
                 {
-                    ProtocolException((int)EtpErrorCodes.InvalidArgument, "Invalid Argument: " + uri, args.Header.MessageId);
+                    args.Cancel = true;
                     return;
                 }
             }

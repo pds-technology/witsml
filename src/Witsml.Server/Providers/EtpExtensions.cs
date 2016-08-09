@@ -35,14 +35,14 @@ namespace PDS.Witsml.Server.Providers
         /// <param name="handler">The protocol handler.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="messageId">The message identifier.</param>
-        /// <returns>An <see cref="EtpUri" /> instance.</returns>
+        /// <returns>A new <see cref="EtpUri" /> instance.</returns>
         public static EtpUri CreateAndValidateUri(this EtpProtocolHandler handler, string uri, long messageId = 0)
         {
             var etpUri = new EtpUri(uri);
 
             if (!etpUri.IsValid)
             {
-                handler.ProtocolException((int)EtpErrorCodes.InvalidUri, "Invalid URI: " + uri, messageId);
+                handler.ProtocolException((int)EtpErrorCodes.InvalidArgument, "Invalid Argument: " + uri, messageId);
             }
 
             return etpUri;
