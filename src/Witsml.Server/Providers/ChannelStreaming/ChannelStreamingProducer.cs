@@ -91,17 +91,25 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         {
             Channels.Clear();
 
+            var parentTypes = new[] { ObjectTypes.Log, ObjectTypes.ChannelSet };
+            var channelTypes = new[] { ObjectTypes.LogCurveInfo, ObjectTypes.Channel };
+            var supportedTypes = parentTypes.Concat(channelTypes).ToArray();
+
             foreach (var uri in args.Message.Uris.Select(x => new EtpUri(x)))
             {
-                if (!ObjectTypes.Log.EqualsIgnoreCase(uri.ObjectType) && 
-                    !ObjectTypes.ChannelSet.EqualsIgnoreCase(uri.ObjectType))
+                if (!supportedTypes.ContainsIgnoreCase(uri.ObjectType))
                     continue;
 
                 Uris.Add(uri);
                 Channels[uri] = new List<ChannelMetadataRecord>();
 
-                var dataProvider = GetDataProvider(uri);
-                var metadata = dataProvider.GetChannelMetadata(uri);
+                var isChannel = channelTypes.ContainsIgnoreCase(uri.ObjectType);
+                var parentUri = isChannel ? uri.Parent : uri;
+
+                var dataProvider = GetDataProvider(parentUri);
+                var metadata = dataProvider.GetChannelMetadata(parentUri)
+                    .Where(x => !isChannel || x.ChannelUri == uri)
+                    .ToList();
 
                 metadata.ForEach(args.Context.Add);
                 Channels[uri].AddRange(metadata);
