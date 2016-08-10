@@ -43,7 +43,10 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class ChannelStreamingProducer : ChannelStreamingProducerHandler
     {
-        private static readonly IList<DataItem> EmptyChannelData = new List<DataItem>(0);
+        private static readonly string[] ParentTypes = new[] { ObjectTypes.Log, ObjectTypes.ChannelSet };
+        private static readonly string[] ChannelTypes = new[] { ObjectTypes.LogCurveInfo, ObjectTypes.Channel };
+        private static readonly string[] SupportedTypes = ParentTypes.Concat(ChannelTypes).ToArray();
+
         private readonly IContainer _container;
         private CancellationTokenSource _tokenSource;
 
@@ -91,19 +94,15 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         {
             Channels.Clear();
 
-            var parentTypes = new[] { ObjectTypes.Log, ObjectTypes.ChannelSet };
-            var channelTypes = new[] { ObjectTypes.LogCurveInfo, ObjectTypes.Channel };
-            var supportedTypes = parentTypes.Concat(channelTypes).ToArray();
-
             foreach (var uri in args.Message.Uris.Select(x => new EtpUri(x)))
             {
-                if (!supportedTypes.ContainsIgnoreCase(uri.ObjectType))
+                if (!SupportedTypes.ContainsIgnoreCase(uri.ObjectType))
                     continue;
 
                 Uris.Add(uri);
                 Channels[uri] = new List<ChannelMetadataRecord>();
 
-                var isChannel = channelTypes.ContainsIgnoreCase(uri.ObjectType);
+                var isChannel = ChannelTypes.ContainsIgnoreCase(uri.ObjectType);
                 var parentUri = isChannel ? uri.Parent : uri;
 
                 var dataProvider = GetDataProvider(parentUri);
@@ -243,8 +242,11 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 .Select(x => x.Indexes[0].Direction)
                 .FirstOrDefault() == IndexDirections.Decreasing);
 
-            var dataProvider = GetDataProvider(uri);
-            var channelData = dataProvider.GetChannelData(uri, new Range<double?>(minStart, increasing ? minStart + rangeSize : minStart - rangeSize));
+            var isChannel = ChannelTypes.ContainsIgnoreCase(uri.ObjectType);
+            var parentUri = isChannel ? uri.Parent : uri;
+
+            var dataProvider = GetDataProvider(parentUri);
+            var channelData = dataProvider.GetChannelData(parentUri, new Range<double?>(minStart, increasing ? minStart + rangeSize : minStart - rangeSize));
 
             // Stream Channel Data with IndexedDataItems if StreamIndexValuePairs setting is true
             if (WitsmlSettings.StreamIndexValuePairs)
@@ -514,9 +516,11 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             channelIds = channelInfos.Select(x => x.ChannelId).ToArray();
             channels = channels.Where(x => channelIds.Contains(x.ChannelId)).ToList();
 
+            var isChannel = ChannelTypes.ContainsIgnoreCase(uri.ObjectType);
+            var parentUri = isChannel ? uri.Parent : uri;
 
-            var dataProvider = GetDataProvider(uri);
-            var channelData = dataProvider.GetChannelData(uri, new Range<double?>(minStart, increasing ? minStart + rangeSize : minStart - rangeSize));
+            var dataProvider = GetDataProvider(parentUri);
+            var channelData = dataProvider.GetChannelData(parentUri, new Range<double?>(minStart, increasing ? minStart + rangeSize : minStart - rangeSize));
 
             // Stream Channel Data with IndexedDataItems if StreamIndexValuePairs setting is true
             if (WitsmlSettings.StreamIndexValuePairs)
