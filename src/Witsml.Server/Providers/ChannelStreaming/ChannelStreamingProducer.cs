@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 using Energistics.Common;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
+using Energistics.Protocol;
 using Energistics.Protocol.ChannelStreaming;
 using Newtonsoft.Json.Linq;
 using PDS.Framework;
@@ -195,19 +196,33 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             token);
         }
 
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposing">
+        ///     <c>true</c> to release both managed and unmanaged resources;
+        ///     <c>false</c> to release only unmanaged resources.
+        /// </param>
+        protected override void Dispose(bool disposing)
+        {
+            _tokenSource?.Cancel();
+            base.Dispose(disposing);
+        }
+
         private async Task StartChannelRangeRequest(IList<ChannelRangeInfo> channelRangeInfos, CancellationToken token)
         {
-            while (!channelRangeInfos.All(x => x.EndIndex <= x.StartIndex))
+            // TODO: convert while condition into range validation with error
+            //while (!channelRangeInfos.All(x => x.EndIndex <= x.StartIndex))
             {
-                if (token.IsCancellationRequested)
-                    break;
+                //if (token.IsCancellationRequested)
+                //    break;
 
-                foreach (var uri in Channels.Keys)
+                foreach (var channelRangeInfo in channelRangeInfos)
                 {
                     if (token.IsCancellationRequested)
                         break;
 
-                    foreach (var channelRangeInfo in channelRangeInfos)
+                    foreach (var uri in Channels.Keys)
                     {
                         if (token.IsCancellationRequested)
                             break;
@@ -216,17 +231,25 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     }
                 }
             }
-            await Task.Delay(1000);
+
+            await Task.Delay(1000, token);
         }
 
         private async Task<bool> StreamChannelDataRange(ChannelRangeInfo channelRangeInfo, EtpUri uri, CancellationToken token)
         {
             // Select the channels using the channel ids from channelRangeInfo
-            var channels = Channels[uri].Where(x => channelRangeInfo.ChannelId.Contains(x.ChannelId));
+            var channels = Channels[uri]
+                .Where(x => channelRangeInfo.ChannelId.Contains(x.ChannelId))
+                .ToList();
+
             var primaryIndex = channels
                 .Take(1)
                 .Select(x => x.Indexes[0])
                 .FirstOrDefault();
+
+            // Verify channels exist for the URI
+            if (!channels.Any() || primaryIndex == null)
+                return false;
 
             // Get the start index before we convert to scale
             var minStart = channelRangeInfo.StartIndex;
@@ -237,10 +260,10 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             channelRangeInfo.StartIndex = ((double)channelRangeInfo.StartIndex).IndexToScale(primaryIndex.Scale, isTimeIndex);
             channelRangeInfo.EndIndex = ((double)channelRangeInfo.EndIndex).IndexToScale(primaryIndex.Scale, isTimeIndex);
 
-            var increasing = !(channels
+            var increasing = channels
                 .Take(1)
                 .Select(x => x.Indexes[0].Direction)
-                .FirstOrDefault() == IndexDirections.Decreasing);
+                .FirstOrDefault() != IndexDirections.Decreasing;
 
             var isChannel = ChannelTypes.ContainsIgnoreCase(uri.ObjectType);
             var parentUri = isChannel ? uri.Parent : uri;
@@ -261,7 +284,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             return true;
         }
 
-        private async Task StreamChannelDataRange(ChannelRangeInfo channelRangeInfo, IEnumerable<ChannelMetadataRecord> channels, IEnumerable<IChannelDataRecord> channelData, bool increasing, CancellationToken token)
+        private async Task StreamChannelDataRange(ChannelRangeInfo channelRangeInfo, IList<ChannelMetadataRecord> channels, IEnumerable<IChannelDataRecord> channelData, bool increasing, CancellationToken token)
         {
             var dataItemList = new List<DataItem>();
 
@@ -300,7 +323,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             }
         }
 
-        private IEnumerable<DataItem> CreateDataItems(IEnumerable<ChannelMetadataRecord> channels, ChannelRangeInfo channelRangeInfo, IChannelDataRecord record, bool increasing)
+        private IEnumerable<DataItem> CreateDataItems(IList<ChannelMetadataRecord> channels, ChannelRangeInfo channelRangeInfo, IChannelDataRecord record, bool increasing)
         {
             // Get the value and ChannelId of the primary index
             var primaryIndexValue = record.GetIndexValue();
@@ -309,14 +332,15 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 .Select(x => x.Indexes[0])
                 .FirstOrDefault();
 
-            var indexValues = new List<long>();
+            var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
             var indexes = channels.Take(1).SelectMany(x => x.Indexes);
+            var indexValues = new List<long>();
             var i = 0;
+
             indexes.ForEach(x =>
             {
                 indexValues.Add((long)record.GetIndexValue(i++, x.Scale));
             });
-            var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
 
             // Convert range info index from scale to compare to record index values
             var startEndRange = new Range<double?>(
@@ -333,6 +357,9 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 {
                     var channel = channels.FirstOrDefault(c => c.ChannelId == channelId);
                     var value = FormatValue(record.GetValue(record.GetOrdinal(channel.ChannelName)));
+
+                    if (value == null || string.IsNullOrWhiteSpace($"{value}"))
+                        continue;
 
                     yield return new DataItem()
                     {
@@ -710,9 +737,9 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             }
         }
 
-        private async Task SendChannelData(List<DataItem> dataItemList)
+        private async Task SendChannelData(List<DataItem> dataItemList, MessageFlags messageFlag = MessageFlags.MultiPart)
         {
-            ChannelData(Request, dataItemList);
+            ChannelData(Request, dataItemList, messageFlag);
             await Task.Delay(MaxMessageRate);
         }
 
