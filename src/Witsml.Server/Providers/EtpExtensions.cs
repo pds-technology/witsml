@@ -42,10 +42,22 @@ namespace PDS.Witsml.Server.Providers
 
             if (!etpUri.IsValid)
             {
-                handler.ProtocolException((int)EtpErrorCodes.InvalidArgument, "Invalid Argument: " + uri, messageId);
+                InvalidArgument(handler, uri, messageId);
             }
 
             return etpUri;
+        }
+
+        /// <summary>
+        /// Sends a <see cref="ProtocolException"/> message for an invalid argument.
+        /// </summary>
+        /// <param name="handler">The protocol handler.</param>
+        /// <param name="value">The argument value.</param>
+        /// <param name="messageId">The message identifier.</param>
+        /// <returns>The <see cref="ProtocolException"/> message identifier.</returns>
+        public static long InvalidArgument(this EtpProtocolHandler handler, object value, long messageId = 0)
+        {
+            return handler.ProtocolException((int)EtpErrorCodes.InvalidArgument, "Invalid Argument: " + value, messageId);
         }
 
         /// <summary>
@@ -55,14 +67,15 @@ namespace PDS.Witsml.Server.Providers
         /// <param name="ex">The exception.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="messageId">The message identifier.</param>
-        public static void UnsupportedObject(this EtpProtocolHandler handler, Exception ex, string uri, long messageId = 0)
+        /// <returns>The <see cref="ProtocolException"/> message identifier.</returns>
+        public static long UnsupportedObject(this EtpProtocolHandler handler, Exception ex, string uri, long messageId = 0)
         {
             if (ex != null)
             {
                 handler.Logger.Error(ex);
             }
 
-            handler.ProtocolException((int)EtpErrorCodes.UnsupportedObject, "Data object not supported. URI: " + uri, messageId);
+            return handler.ProtocolException((int)EtpErrorCodes.UnsupportedObject, "Data object not supported. URI: " + uri, messageId);
         }
     }
 }

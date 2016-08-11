@@ -211,24 +211,17 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
         private async Task StartChannelRangeRequest(IList<ChannelRangeInfo> channelRangeInfos, CancellationToken token)
         {
-            // TODO: convert while condition into range validation with error
-            //while (!channelRangeInfos.All(x => x.EndIndex <= x.StartIndex))
+            foreach (var channelRangeInfo in channelRangeInfos)
             {
-                //if (token.IsCancellationRequested)
-                //    break;
+                if (token.IsCancellationRequested)
+                    break;
 
-                foreach (var channelRangeInfo in channelRangeInfos)
+                foreach (var uri in Channels.Keys)
                 {
                     if (token.IsCancellationRequested)
                         break;
 
-                    foreach (var uri in Channels.Keys)
-                    {
-                        if (token.IsCancellationRequested)
-                            break;
-
-                        await StreamChannelDataRange(channelRangeInfo, uri, token);
-                    }
+                    await StreamChannelDataRange(channelRangeInfo, uri, token);
                 }
             }
 
@@ -265,6 +258,10 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 .Select(x => x.Indexes[0].Direction)
                 .FirstOrDefault() != IndexDirections.Decreasing;
 
+            // Validate startIndex and endIndex are in the expected order based on Direction
+            if (!ValidateChannelRangeInfo(channelRangeInfo, increasing))
+                return false;
+
             var isChannel = ChannelTypes.ContainsIgnoreCase(uri.ObjectType);
             var parentUri = isChannel ? uri.Parent : uri;
 
@@ -279,6 +276,28 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             else
             {
                 await StreamChannelDataRange(channelRangeInfo, channels, channelData, increasing, token);
+            }
+
+            return true;
+        }
+
+        private bool ValidateChannelRangeInfo(ChannelRangeInfo channelRangeInfo, bool increasing)
+        {
+            if (increasing)
+            {
+                if (channelRangeInfo.StartIndex > channelRangeInfo.EndIndex)
+                {
+                    this.InvalidArgument("startIndex > endIndex", Request.MessageId);
+                    return false;
+                }
+            }
+            else
+            {
+                if (channelRangeInfo.StartIndex < channelRangeInfo.EndIndex)
+                {
+                    this.InvalidArgument("startIndex < endIndex", Request.MessageId);
+                    return false;
+                }
             }
 
             return true;
@@ -358,6 +377,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     var channel = channels.FirstOrDefault(c => c.ChannelId == channelId);
                     var value = FormatValue(record.GetValue(record.GetOrdinal(channel.ChannelName)));
 
+                    // Filter null or empty data values
                     if (value == null || string.IsNullOrWhiteSpace($"{value}"))
                         continue;
 
@@ -450,7 +470,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
             // Only output if we are within the range
             if (startEndRange.Contains(primaryIndexValue))
-                
             {
                 // Move the range info start index
                 channelRangeInfo.StartIndex = primaryIndexValue.IndexToScale(primaryIndex.Scale, isTimeIndex);
