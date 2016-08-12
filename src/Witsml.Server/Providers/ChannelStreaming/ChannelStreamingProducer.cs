@@ -375,6 +375,9 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 foreach (var channelId in channelRangeInfo.ChannelId)
                 {
                     var channel = channels.FirstOrDefault(c => c.ChannelId == channelId);
+                    // Verify channel is included in the channelRangeInfo
+                    if (channel == null) continue;
+
                     var value = FormatValue(record.GetValue(record.GetOrdinal(channel.ChannelName)));
 
                     // Filter null or empty data values
@@ -395,7 +398,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             }
         }
 
-        private async Task StreamIndexedChannelDataRange(ChannelRangeInfo channelRangeInfo, IEnumerable<ChannelMetadataRecord> channels, IEnumerable<IChannelDataRecord> channelData, bool increasing, CancellationToken token)
+        private async Task StreamIndexedChannelDataRange(ChannelRangeInfo channelRangeInfo, IList<ChannelMetadataRecord> channels, IEnumerable<IChannelDataRecord> channelData, bool increasing, CancellationToken token)
         {
             var dataItemList = new List<DataItem>();
 
@@ -432,7 +435,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             }
         }
 
-        private IEnumerable<IndexedDataItem> CreateIndexedDataItems(IEnumerable<ChannelMetadataRecord> channels, ChannelRangeInfo channelRangeInfo, IChannelDataRecord record, bool increasing)
+        private IEnumerable<IndexedDataItem> CreateIndexedDataItems(IList<ChannelMetadataRecord> channels, ChannelRangeInfo channelRangeInfo, IChannelDataRecord record, bool increasing)
         {
             // Get the value and ChannelId of the primary index
             var primaryIndexValue = record.GetIndexValue();
@@ -477,11 +480,18 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 foreach (var channelId in channelRangeInfo.ChannelId)
                 {
                     var channel = channels.FirstOrDefault(c => c.ChannelId == channelId);
+                    // Verify channel is included in the channelRangeInfo
+                    if (channel == null) continue;
 
                     if (indexMnemonics.Any(x => x.EqualsIgnoreCase(channel.ChannelName)))
                         continue;
 
                     var value = FormatValue(record.GetValue(record.GetOrdinal(channel.ChannelName)));
+
+                    // Filter null or empty data values
+                    if (value == null || string.IsNullOrWhiteSpace($"{value}"))
+                        continue;
+
                     var valueDataItem = new DataItem()
                     {
                         ChannelId = channelId,
@@ -628,6 +638,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             var indexValues = new List<long>();
             var indexes = channels.Take(1).SelectMany(x => x.Indexes);
             var i = 0;
+
             indexes.ForEach(x =>
             {
                 indexValues.Add((long)record.GetIndexValue(i++, x.Scale));
@@ -636,18 +647,23 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             foreach (var info in infos)
             {
                 var channel = channels.FirstOrDefault(c => c.ChannelId == info.ChannelId);
+                // Verify channel is included in the channelRangeInfo
+                if (channel == null) continue;
+
                 var start = new Range<double?>(Convert.ToDouble(info.StartIndex.Item), null);
 
                 // Handle decreasing data
                 if (start.StartsAfter(primaryIndexValue, increasing, inclusive: true))
-                {
                     continue;
-                }
 
                 // update ChannelStreamingInfo index value
                 info.StartIndex.Item = primaryIndexValue;
 
                 var value = FormatValue(record.GetValue(record.GetOrdinal(channel.ChannelName)));
+
+                // Filter null or empty data values
+                if (value == null || string.IsNullOrWhiteSpace($"{value}"))
+                    continue;
 
                 yield return new DataItem()
                 {
@@ -727,6 +743,9 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             foreach (var info in infos)
             {
                 var channel = channels.FirstOrDefault(c => c.ChannelId == info.ChannelId);
+                // Verify channel is included in the channelRangeInfo
+                if (channel == null) continue;
+
                 var start = new Range<double?>(Convert.ToDouble(info.StartIndex.Item), null);
 
                 // Handle decreasing data
@@ -740,6 +759,10 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 info.StartIndex.Item = primaryIndexValue;
 
                 var value = FormatValue(record.GetValue(record.GetOrdinal(channel.ChannelName)));
+
+                // Filter null or empty data values
+                if (value == null || string.IsNullOrWhiteSpace($"{value}"))
+                    continue;
 
                 var valueDataItem = new DataItem()
                 {
