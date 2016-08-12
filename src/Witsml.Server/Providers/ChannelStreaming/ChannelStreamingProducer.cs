@@ -560,9 +560,12 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             //else
             //    // Stream Latest Value Data
 
-            var minStart = channelInfos.Min(x => Convert.ToDouble(x.StartIndex.Item));
+            var minStart = channelInfos.Min(x => Convert.ToInt64(x.StartIndex.Item));
             var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
             var rangeSize = WitsmlSettings.GetRangeSize(isTimeIndex);
+
+            // Convert indexes to scale
+            var minStartIndex = minStart.IndexFromScale(primaryIndex.Scale, isTimeIndex);
 
             var increasing = !(channels
                 .Take(1)
@@ -576,7 +579,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             var parentUri = isChannel ? uri.Parent : uri;
 
             var dataProvider = GetDataProvider(parentUri);
-            var channelData = dataProvider.GetChannelData(parentUri, new Range<double?>(minStart, increasing ? minStart + rangeSize : minStart - rangeSize));
+            var channelData = dataProvider.GetChannelData(parentUri, new Range<double?>(minStartIndex, increasing ? minStartIndex + rangeSize : minStartIndex - rangeSize));
 
             // Stream Channel Data with IndexedDataItems if StreamIndexValuePairs setting is true
             if (WitsmlSettings.StreamIndexValuePairs)
