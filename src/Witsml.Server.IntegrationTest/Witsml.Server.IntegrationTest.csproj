@@ -46,7 +46,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="ETP.DevKit, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ETP.DevKit.1.1.20160810.1\lib\net46\ETP.DevKit.dll</HintPath>
+      <HintPath>..\packages\ETP.DevKit.1.1.20160812.2\lib\net46\ETP.DevKit.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ETP.Messages, Version=1.4.1.0, Culture=neutral, PublicKeyToken=c2b7028481fb2795, processorArchitecture=MSIL">

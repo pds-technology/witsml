@@ -159,9 +159,11 @@ namespace PDS.Witsml.Server.Controllers
         private async Task AcceptWebSocketRequest(AspNetWebSocketContext context)
         {
             var headers = GetWebSocketHeaders(context.Headers, context.QueryString);
-            var handler = CreateEtpServerHandler(context.WebSocket, headers);
-            handler.SupportedObjects = GetSupportedObjects();
-            await handler.Accept(context);
+            using (var handler = CreateEtpServerHandler(context.WebSocket, headers))
+            {
+                handler.SupportedObjects = GetSupportedObjects();
+                await handler.Accept(context);
+            }
         }
 
         private IDictionary<string, string> GetWebSocketHeaders(NameValueCollection headers, NameValueCollection queryString)

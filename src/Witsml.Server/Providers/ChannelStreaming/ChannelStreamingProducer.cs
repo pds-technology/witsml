@@ -66,26 +66,18 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         /// <summary>
         /// Gets the request.
         /// </summary>
-        /// <value>
-        /// The request.
-        /// </value>
+        /// <value>The request message header.</value>
         public MessageHeader Request { get; private set; }
 
         /// <summary>
         /// Gets the uris.
         /// </summary>
-        /// <value>
-        /// The uris.
-        /// </value>
-        public List<EtpUri> Uris { get; private set; }
+        public List<EtpUri> Uris { get; }
 
         /// <summary>
         /// Gets the channels.
         /// </summary>
-        /// <value>
-        /// The channels.
-        /// </value>
-        public Dictionary<EtpUri, List<ChannelMetadataRecord>> Channels { get; private set; }
+        public Dictionary<EtpUri, List<ChannelMetadataRecord>> Channels { get; }
 
         /// <summary>
         /// Handles the channel describe.
@@ -164,13 +156,11 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         protected override void HandleChannelStreamingStop(MessageHeader header, ChannelStreamingStop channelStreamingStop)
         {
             // no action needed if streaming not in progress
-            if (_tokenSource == null)
-                return;
+            if (_tokenSource == null) return;
 
             base.HandleChannelStreamingStop(header, channelStreamingStop);
 
-            if (_tokenSource != null)
-                _tokenSource.Cancel();
+            _tokenSource?.Cancel();
         }
 
         /// <summary>
@@ -222,7 +212,13 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         /// </param>
         protected override void Dispose(bool disposing)
         {
-            _tokenSource?.Cancel();
+            if (disposing && _tokenSource != null)
+            {
+                _tokenSource.Cancel();
+                _tokenSource.Dispose();
+                _tokenSource = null;
+            }
+
             base.Dispose(disposing);
         }
 
@@ -261,16 +257,12 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             if (!channels.Any() || primaryIndex == null)
                 return false;
 
+            var increasing = primaryIndex.Direction == IndexDirections.Increasing;
             var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
             var rangeSize = WitsmlSettings.GetRangeSize(isTimeIndex);
 
             // Convert indexes from scaled values
             var minStart = channelRangeInfo.StartIndex.IndexFromScale(primaryIndex.Scale, isTimeIndex);
-
-            var increasing = channels
-                .Take(1)
-                .Select(x => x.Indexes[0].Direction)
-                .FirstOrDefault() != IndexDirections.Decreasing;
 
             // Validate startIndex and endIndex are in the expected order based on Direction
             if (!ValidateChannelRangeInfo(channelRangeInfo, increasing))
@@ -358,14 +350,16 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
         private IEnumerable<DataItem> CreateDataItems(IList<ChannelMetadataRecord> channels, ChannelRangeInfo channelRangeInfo, IChannelDataRecord record, bool increasing)
         {
-            // Get the value and ChannelId of the primary index
-            var primaryIndexValue = record.GetIndexValue();
-            var primaryIndex = channels
-                .Take(1)
-                .Select(x => x.Indexes[0])
-                .FirstOrDefault();
-
+            // Get primary index info and scaled value for the current record
+            var primaryIndex = channels.Take(1).Select(x => x.Indexes[0]).First();
             var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
+            var primaryIndexValue = record.GetIndexValue().IndexToScale(primaryIndex.Scale, isTimeIndex);
+            var requestedRange = new Range<double?>(channelRangeInfo.StartIndex, channelRangeInfo.EndIndex);
+
+            // Only output if we are within the range
+            if (!requestedRange.Contains(primaryIndexValue))
+                yield break;
+
             var indexes = channels.Take(1).SelectMany(x => x.Indexes);
             var indexValues = new List<long>();
             var i = 0;
@@ -375,40 +369,31 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 indexValues.Add((long)record.GetIndexValue(i++, x.Scale));
             });
 
-            // Convert range info index from scale to compare to record index values
-            var startEndRange = new Range<double?>(
-                channelRangeInfo.StartIndex.IndexFromScale(primaryIndex.Scale, isTimeIndex),
-                channelRangeInfo.EndIndex.IndexFromScale(primaryIndex.Scale, isTimeIndex));
+            // Move the range info start index
+            channelRangeInfo.StartIndex = primaryIndexValue;
 
-            // Only output if we are within the range
-            if (startEndRange.Contains(primaryIndexValue))
+            foreach (var channelId in channelRangeInfo.ChannelId)
             {
-                // Move the range info start index
-                channelRangeInfo.StartIndex = primaryIndexValue.IndexToScale(primaryIndex.Scale, isTimeIndex);
+                var channel = channels.FirstOrDefault(c => c.ChannelId == channelId);
+                // Verify channel is included in the channelRangeInfo
+                if (channel == null) continue;
 
-                foreach (var channelId in channelRangeInfo.ChannelId)
+                var value = FormatValue(record.GetValue(record.GetOrdinal(channel.ChannelName)));
+
+                // Filter null or empty data values
+                if (value == null || string.IsNullOrWhiteSpace($"{value}"))
+                    continue;
+
+                yield return new DataItem()
                 {
-                    var channel = channels.FirstOrDefault(c => c.ChannelId == channelId);
-                    // Verify channel is included in the channelRangeInfo
-                    if (channel == null) continue;
-
-                    var value = FormatValue(record.GetValue(record.GetOrdinal(channel.ChannelName)));
-
-                    // Filter null or empty data values
-                    if (value == null || string.IsNullOrWhiteSpace($"{value}"))
-                        continue;
-
-                    yield return new DataItem()
+                    ChannelId = channelId,
+                    Indexes = indexValues.ToArray(),
+                    ValueAttributes = new DataAttribute[0],
+                    Value = new DataValue()
                     {
-                        ChannelId = channelId,
-                        Indexes = indexValues.ToArray(),
-                        ValueAttributes = new DataAttribute[0],
-                        Value = new DataValue()
-                        {
-                            Item = value
-                        }
-                    };
-                }
+                        Item = value
+                    }
+                };
             }
         }
 
@@ -552,18 +537,18 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             //else
             //    // Stream Latest Value Data
 
+            // Verify channels exist for the URI
+            if (!channels.Any() || primaryIndex == null)
+                return false;
+
             var minStart = channelInfos.Min(x => Convert.ToInt64(x.StartIndex.Item));
+            var increasing = primaryIndex.Direction == IndexDirections.Increasing;
             var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
             var rangeSize = WitsmlSettings.GetRangeSize(isTimeIndex);
 
             // Convert indexes from scaled values
             var minStartIndex = minStart.IndexFromScale(primaryIndex.Scale, isTimeIndex);
 
-            var increasing = !(channels
-                .Take(1)
-                .Select(x => x.Indexes[0].Direction)
-                .FirstOrDefault() == IndexDirections.Decreasing);
-            
             channelIds = channelInfos.Select(x => x.ChannelId).ToArray();
             channels = channels.Where(x => channelIds.Contains(x.ChannelId)).ToList();
 
@@ -627,8 +612,10 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
         private IEnumerable<DataItem> CreateDataItems(IList<ChannelMetadataRecord> channels, IList<ChannelStreamingInfo> infos, IChannelDataRecord record, bool increasing)
         {
-            // Get the value and ChannelId of the primary index
-            var primaryIndexValue = record.GetIndexValue();
+            // Get primary index info and scaled value for the current record
+            var primaryIndex = channels.Take(1).Select(x => x.Indexes[0]).First();
+            var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
+            var primaryIndexValue = record.GetIndexValue().IndexToScale(primaryIndex.Scale, isTimeIndex);
 
             var indexValues = new List<long>();
             var indexes = channels.Take(1).SelectMany(x => x.Indexes);
@@ -651,7 +638,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 if (start.StartsAfter(primaryIndexValue, increasing, inclusive: true))
                     continue;
 
-                // update ChannelStreamingInfo index value
+                // Update ChannelStreamingInfo index value
                 info.StartIndex.Item = primaryIndexValue;
 
                 var value = FormatValue(record.GetValue(record.GetOrdinal(channel.ChannelName)));
