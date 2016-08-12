@@ -157,6 +157,23 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         }
 
         /// <summary>
+        /// Handles the channel streaming stop.
+        /// </summary>
+        /// <param name="header">The header.</param>
+        /// <param name="channelStreamingStop">The channel streaming stop.</param>
+        protected override void HandleChannelStreamingStop(MessageHeader header, ChannelStreamingStop channelStreamingStop)
+        {
+            // no action needed if streaming not in progress
+            if (_tokenSource == null)
+                return;
+
+            base.HandleChannelStreamingStop(header, channelStreamingStop);
+
+            if (_tokenSource != null)
+                _tokenSource.Cancel();
+        }
+
+        /// <summary>
         /// Handles the channel range request.
         /// </summary>
         /// <param name="header">The header.</param>
@@ -244,14 +261,11 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             if (!channels.Any() || primaryIndex == null)
                 return false;
 
-            // Get the start index before we convert to scale
-            var minStart = channelRangeInfo.StartIndex;
             var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
             var rangeSize = WitsmlSettings.GetRangeSize(isTimeIndex);
 
-            // Because we can store only longs, convert indexes to scale
-            channelRangeInfo.StartIndex = ((double)channelRangeInfo.StartIndex).IndexToScale(primaryIndex.Scale, isTimeIndex);
-            channelRangeInfo.EndIndex = ((double)channelRangeInfo.EndIndex).IndexToScale(primaryIndex.Scale, isTimeIndex);
+            // Convert indexes from scaled values
+            var minStart = channelRangeInfo.StartIndex.IndexFromScale(primaryIndex.Scale, isTimeIndex);
 
             var increasing = channels
                 .Take(1)
@@ -508,23 +522,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             }
         }
 
-        /// <summary>
-        /// Handles the channel streaming stop.
-        /// </summary>
-        /// <param name="header">The header.</param>
-        /// <param name="channelStreamingStop">The channel streaming stop.</param>
-        protected override void HandleChannelStreamingStop(MessageHeader header, ChannelStreamingStop channelStreamingStop)
-        {
-            // no action needed if streaming not in progress
-            if (_tokenSource == null)
-                return;
-
-            base.HandleChannelStreamingStop(header, channelStreamingStop);
-
-            if (_tokenSource != null)
-                _tokenSource.Cancel();
-        }
-
         private async Task StartChannelStreaming(IList<ChannelStreamingInfo> infos, CancellationToken token)
         {
             while (true)
@@ -535,11 +532,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 foreach (var uri in Channels.Keys)
                     await StreamChannelData(infos, uri, token);
             }
-        }
-
-        private IChannelDataProvider GetDataProvider(EtpUri uri)
-        {
-            return _container.Resolve<IChannelDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
         }
 
         private async Task<bool> StreamChannelData(IList<ChannelStreamingInfo> infos, EtpUri uri, CancellationToken token)
@@ -564,7 +556,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
             var rangeSize = WitsmlSettings.GetRangeSize(isTimeIndex);
 
-            // Convert indexes to scale
+            // Convert indexes from scaled values
             var minStartIndex = minStart.IndexFromScale(primaryIndex.Scale, isTimeIndex);
 
             var increasing = !(channels
@@ -786,6 +778,11 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         {
             ChannelData(Request, dataItemList, messageFlag);
             await Task.Delay(MaxMessageRate);
+        }
+
+        private IChannelDataProvider GetDataProvider(EtpUri uri)
+        {
+            return _container.Resolve<IChannelDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
         }
 
         private object FormatValue(object value)
