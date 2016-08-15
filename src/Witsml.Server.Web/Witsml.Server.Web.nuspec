@@ -9,7 +9,7 @@
     <licenseUrl>https://witsml.pds.nl/license</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <dependencies>
-      <group targetFramework="net46">
+      <group targetFramework="net45">
         <dependency id="Microsoft.AspNet.Cors" version="5.2.3" />
         <dependency id="Microsoft.AspNet.WebApi.Owin" version="5.2.3" />
         <dependency id="Microsoft.Owin" version="3.0.1" />
@@ -26,8 +26,8 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="bin/$configuration$/PDS.Witsml.Server.Web.dll" target="lib/net46" />
-    <file src="bin/$configuration$/PDS.Witsml.Server.Web.pdb" target="lib/net46" />
-    <file src="bin/$configuration$/PDS.Witsml.Server.Web.xml" target="lib/net46" />
+    <file src="bin/$configuration$/PDS.Witsml.Server.Web.dll" target="lib/net45" />
+    <file src="bin/$configuration$/PDS.Witsml.Server.Web.pdb" target="lib/net45" />
+    <file src="bin/$configuration$/PDS.Witsml.Server.Web.xml" target="lib/net45" />
   </files>
 </package>

@@ -244,7 +244,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 Assert.AreEqual(index, outIndex.Minute);
                 if (previousDateTime.HasValue)
                 {
-                    Assert.IsTrue((outIndex.ToUnixTimeSeconds() - previousDateTime.Value.ToUnixTimeSeconds()) == 60);
+                    //Assert.IsTrue((outIndex.ToUnixTimeSeconds() - previousDateTime.Value.ToUnixTimeSeconds()) == 60);
+                    Assert.IsTrue((outIndex - previousDateTime.Value).Seconds == -60);
                 }
                 previousDateTime = outIndex;
 
@@ -293,7 +294,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 Assert.AreEqual(index, outIndex.Minute);
                 if (previousDateTime.HasValue)
                 {
-                    Assert.IsTrue((outIndex.ToUnixTimeSeconds() - previousDateTime.Value.ToUnixTimeSeconds()) == -60);
+                    //Assert.IsTrue((outIndex.ToUnixTimeSeconds() - previousDateTime.Value.ToUnixTimeSeconds()) == -60);
+                    Assert.IsTrue((outIndex - previousDateTime.Value).Seconds == -60);
                 }
                 previousDateTime = outIndex;
 

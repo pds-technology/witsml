@@ -9,15 +9,15 @@
     <licenseUrl>https://witsml.pds.nl/license</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <dependencies>
-      <group targetFramework="net46">
+      <group targetFramework="net45">
         <dependency id="PDS.Witsml.Server" version="$version$" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="bin/$configuration$/PDS.Witsml.Server.IntegrationTest.dll" target="lib/net46" />
-    <file src="bin/$configuration$/PDS.Witsml.Server.IntegrationTest.dll.config" target="lib/net46" />
-    <file src="bin/$configuration$/PDS.Witsml.Server.IntegrationTest.pdb" target="lib/net46" />
+    <file src="bin/$configuration$/PDS.Witsml.Server.IntegrationTest.dll" target="lib/net45" />
+    <file src="bin/$configuration$/PDS.Witsml.Server.IntegrationTest.dll.config" target="lib/net45" />
+    <file src="bin/$configuration$/PDS.Witsml.Server.IntegrationTest.pdb" target="lib/net45" />
     <file src="TestData/**/*" target="content" />
   </files>
 </package>

@@ -9,15 +9,15 @@
     <licenseUrl>https://witsml.pds.nl/license</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <dependencies>
-      <group targetFramework="net46">
+      <group targetFramework="net45">
         <dependency id="Fare" version="1.0.2" />
         <dependency id="PDS.Witsml" version="$version$" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="bin/$configuration$/PDS.Witsml.Server.dll" target="lib/net46" />
-    <file src="bin/$configuration$/PDS.Witsml.Server.pdb" target="lib/net46" />
-    <file src="bin/$configuration$/PDS.Witsml.Server.xml" target="lib/net46" />
+    <file src="bin/$configuration$/PDS.Witsml.Server.dll" target="lib/net45" />
+    <file src="bin/$configuration$/PDS.Witsml.Server.pdb" target="lib/net45" />
+    <file src="bin/$configuration$/PDS.Witsml.Server.xml" target="lib/net45" />
   </files>
 </package>
