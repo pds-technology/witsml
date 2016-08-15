@@ -22,6 +22,7 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Configuration;
 
@@ -29,7 +30,8 @@ namespace PDS.Witsml.Server.Data.Logs
 {
     [TestClass]
     public class Log141DataAdapterAddTests
-    {        
+    {
+        private const int MicrosecondsPerSecond = 1000000;
         private DevKit141Aspect _devKit;
         private Well _well;
         private Wellbore _wellbore;
@@ -244,8 +246,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 Assert.AreEqual(index, outIndex.Minute);
                 if (previousDateTime.HasValue)
                 {
-                    //Assert.IsTrue((outIndex.ToUnixTimeSeconds() - previousDateTime.Value.ToUnixTimeSeconds()) == 60);
-                    Assert.IsTrue((outIndex - previousDateTime.Value).Seconds == -60);
+                    Assert.IsTrue((outIndex.ToUnixTimeMicroseconds() - previousDateTime.Value.ToUnixTimeMicroseconds()) == 60 * MicrosecondsPerSecond);
                 }
                 previousDateTime = outIndex;
 
@@ -294,8 +295,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 Assert.AreEqual(index, outIndex.Minute);
                 if (previousDateTime.HasValue)
                 {
-                    //Assert.IsTrue((outIndex.ToUnixTimeSeconds() - previousDateTime.Value.ToUnixTimeSeconds()) == -60);
-                    Assert.IsTrue((outIndex - previousDateTime.Value).Seconds == -60);
+                    Assert.IsTrue((outIndex.ToUnixTimeMicroseconds() - previousDateTime.Value.ToUnixTimeMicroseconds()) == -60 * MicrosecondsPerSecond);
                 }
                 previousDateTime = outIndex;
 
