@@ -145,6 +145,20 @@ namespace PDS.Witsml.Server
             return Store.WMLS_AddToStore(request);
         }
 
+        public WMLS_DeleteFromStoreResponse Delete<TList, TObject>(TObject entity, string wmlTypeIn = null, string capClient = null, string optionsIn = null) where TList : IEnergisticsCollection
+        {
+            string typeIn, xmlIn;
+            SetupParameters<TList, TObject>(List(entity), wmlTypeIn, out typeIn, out xmlIn);
+
+            return DeleteFromStore(typeIn, xmlIn, capClient, optionsIn);
+        }
+
+        public WMLS_DeleteFromStoreResponse DeleteFromStore(string wmlTypeIn, string xmlIn, string capClient, string optionsIn)
+        {
+            var request = new WMLS_DeleteFromStoreRequest() { WMLtypeIn = wmlTypeIn, QueryIn = xmlIn, CapabilitiesIn = capClient, OptionsIn = optionsIn };
+            return Store.WMLS_DeleteFromStore(request);
+        }
+
         public WMLS_GetFromStoreResponse GetFromStore(string wmlTypeIn, string queryIn, string capClient, string optionsIn)
         {
             var request = new WMLS_GetFromStoreRequest { WMLtypeIn = wmlTypeIn, QueryIn = queryIn, CapabilitiesIn = capClient, OptionsIn = optionsIn };
