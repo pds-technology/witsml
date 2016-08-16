@@ -187,7 +187,7 @@ namespace PDS.Witsml.Data.Logs
                 LoggingCompanyName = log.LoggingCompanyName,
                 Source = log.LoggingMethod.ToString(),
                 DataType = etpDataType,
-                Status = ChannelStatus.active,
+                GrowingStatus = ChannelStatus.active,
                 Index = indexList,
                 StartIndex = (log.TimeDepth.EqualsIgnoreCase(ObjectFolders.Depth) ?
                                (AbstractIndexValue)new DepthIndexValue() : (new TimeIndexValue())),
