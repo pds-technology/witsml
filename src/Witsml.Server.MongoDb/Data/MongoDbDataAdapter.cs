@@ -482,6 +482,53 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Partials the delete entity.
+        /// </summary>
+        /// <param name="parser">The parser.</param>
+        /// <param name="uri">The URI.</param>
+        /// <param name="transaction">The transaction.</param>
+        protected void PartialDeleteEntity(WitsmlQueryParser parser, EtpUri uri, MongoTransaction transaction = null)
+        {
+            PartialDeleteEntity<T>(DbCollectionName, parser, uri, transaction);
+        }
+
+        /// <summary>
+        /// Partials the delete entity.
+        /// </summary>
+        /// <typeparam name="TObject">The type of the object.</typeparam>
+        /// <param name="dbCollectionName">Name of the database collection.</param>
+        /// <param name="parser">The parser.</param>
+        /// <param name="uri">The URI.</param>
+        /// <param name="transaction">The transaction.</param>
+        /// <exception cref="WitsmlException"></exception>
+        protected void PartialDeleteEntity<TObject>(string dbCollectionName, WitsmlQueryParser parser, EtpUri uri, MongoTransaction transaction = null)
+        {
+            try
+            {
+                Logger.DebugFormat("Partial Deleting {0} MongoDb collection", dbCollectionName);
+
+                var collection = GetCollection<TObject>(dbCollectionName);
+                var current = GetEntity<TObject>(uri, dbCollectionName);
+                var updates = MongoDbUtility.CreateUpdateFields<TObject>();
+                var ignores = MongoDbUtility.CreateIgnoreFields<TObject>(GetIgnoredElementNamesForUpdate(parser));
+
+                var partialDelete = new MongoDbDelete<TObject>(collection, parser, IdPropertyName, ignores);
+                partialDelete.PartialDelete(current, uri, updates);
+
+                if (transaction != null)
+                {
+                    transaction.Attach(MongoDbAction.Update, dbCollectionName, current.ToBsonDocument(), uri);
+                    transaction.Save();
+                }
+            }
+            catch (MongoException ex)
+            {
+                Logger.ErrorFormat("Error partial deleting {0} MongoDb collection: {1}", dbCollectionName, ex);
+                throw new WitsmlException(ErrorCodes.ErrorUpdatingInDataStore, ex);
+            }
+        }
+
+        /// <summary>
         /// Gets a list of the property names to project during a query.
         /// </summary>
         /// <param name="parser">The WITSML parser.</param>
@@ -491,6 +538,18 @@ namespace PDS.Witsml.Server.Data
             return OptionsIn.ReturnElements.IdOnly.Equals(parser.ReturnElements())
                 ? new List<string> { IdPropertyName, NamePropertyName }
                 : null;
+        }
+
+        /// <summary>
+        /// Determines whether [is partial delete] [the specified parser].
+        /// </summary>
+        /// <param name="parser">The WITSML parser.</param>
+        /// <returns>
+        ///   <c>true</c> if [is partial delete] [the specified parser]; otherwise, <c>false</c>.
+        /// </returns>
+        protected bool IsPartialDelete(WitsmlQueryParser parser)
+        {
+            return parser.Element().Elements().Any();
         }
 
         private void ValidateUpdatedEntity(EtpUri uri)

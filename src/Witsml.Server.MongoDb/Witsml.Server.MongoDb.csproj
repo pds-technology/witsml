@@ -196,6 +196,8 @@
     <Compile Include="Data\Logs\LogDataAdapter.cs" />
     <Compile Include="Data\MongoDbClassMapper.cs" />
     <Compile Include="Data\MongoDbDataAdapter.cs" />
+    <Compile Include="Data\MongoDbDelete.cs" />
+    <Compile Include="Data\MongoDbDeleteContext.cs" />
     <Compile Include="Data\MongoDbExtensions.cs" />
     <Compile Include="Data\MongoDbQueryContext.cs" />
     <Compile Include="Data\MongoDbUtility.cs" />

@@ -71,5 +71,27 @@ namespace PDS.Witsml.Server.Data.Wells
                 .OrderBy(x => x.Name)
                 .ToList();
         }
+
+        /// <summary>
+        /// Deletes or partially updates the specified object by uid.
+        /// </summary>
+        /// <param name="parser">The query parser that specifies the object.</param>
+        public override void Delete(WitsmlQueryParser parser)
+        {
+            var uri = parser.GetUri<Well>();
+
+            if (IsPartialDelete(parser))
+            {
+                using (var transaction = DatabaseProvider.BeginTransaction(uri))
+                {
+                    PartialDeleteEntity(parser, uri, transaction);
+                    transaction.Commit();
+                }
+            }
+            else
+            {
+                Delete(uri);
+            }
+        }
     }
 }
