@@ -339,11 +339,14 @@ namespace PDS.Witsml.Server.Data
             if (element.DescendantsAndSelf().Any(e => (!e.HasAttributes && string.IsNullOrWhiteSpace(e.Value)) || e.Attributes().Any(a => string.IsNullOrWhiteSpace(a.Value))))
                 throw new WitsmlException(ErrorCodes.EmptyNewElementsOrAttributes);
 
-            // update element name to match XSD type
+            // update element name to match XSD type name
             var xmlType = type.GetCustomAttribute<XmlTypeAttribute>();
-            element.Name = xmlType != null ? xmlType.TypeName : element.Name;
+            var clone = new XElement(element)
+            {
+                Name = xmlType == null ? type.Name : xmlType.TypeName
+            };
 
-            return WitsmlParser.Parse(type, element);
+            return WitsmlParser.Parse(type, clone);
         }
 
         private IList CreateList(Type listType, object item)
