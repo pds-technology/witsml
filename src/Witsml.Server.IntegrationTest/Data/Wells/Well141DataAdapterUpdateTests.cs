@@ -257,6 +257,45 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
         }
 
+        [TestMethod, Description("Tests adding an extensionNameValue field to commonData on an UpdateInStore")]
+        public void Well141DataAdapter_UpdateInStore_Add_Extension_Name_Value_Success()
+        {
+            // Add a minimal test well and Assert its Success
+            AddWell(_well);
+
+            var extensionName1 = _devKit.ExtensionNameValue("Ext-1", "1.0", "m");
+
+            // Create an update well that adds a nested (non-recurring) element for the first time on update
+            var updateWell = new Well()
+            {
+                Uid = _well.Uid,
+                CommonData = new CommonData
+                {
+                    ExtensionNameValue = new List<ExtensionNameValue>
+                    {
+                       extensionName1
+                    }
+                }
+            };
+
+            var updateResponse = _devKit.Update<WellList, Well>(updateWell);
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            var result = GetWell(_well);
+            var commonData = result.CommonData;
+            Assert.IsNotNull(commonData);
+            var extensionNameValues = commonData.ExtensionNameValue;
+            Assert.IsNotNull(extensionNameValues);
+            Assert.AreEqual(1, extensionNameValues.Count);
+            var extensionName = extensionNameValues.FirstOrDefault();
+            Assert.IsNotNull(extensionName);
+            Assert.AreEqual(extensionName1.Uid, extensionName.Uid);
+            Assert.AreEqual(extensionName1.Name.Name, extensionName.Name.Name);
+            Assert.AreEqual(extensionName1.Value.Uom, extensionName.Value.Uom);
+            Assert.AreEqual(extensionName1.Value.Value, extensionName.Value.Value);
+        }
+
         private void AddWell(Well well)
         {
             var response = _devKit.Add<WellList, Well>(well);
