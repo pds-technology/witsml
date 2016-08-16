@@ -79,5 +79,25 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
             }
         }
+
+        /// <summary>
+        /// Validates the data object while executing UpdateInStore.
+        /// </summary>
+        /// <returns>A collection of validation results.</returns>
+        protected override IEnumerable<ValidationResult> ValidateForUpdate()
+        {
+            var uri = DataObject.GetUri();
+
+            // Validate that a Uid was provided
+            if (string.IsNullOrWhiteSpace(DataObject.Uid))
+            {
+                yield return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] { "Uid" });
+            }
+            // Validate that a well for the Uid exists
+            else if (!_wellboreDataAdapter.Exists(uri))
+            {
+                yield return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] { "Uid" });
+            }
+        }
     }
 }
