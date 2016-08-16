@@ -43,7 +43,7 @@ namespace PDS.Witsml.Server.Data
 
         private FilterDefinition<T> _entityFilter;
         private T _entity;
-        private List<UpdateOneModel<T>> _pullList;
+        private Dictionary<int, List<UpdateOneModel<T>>> _pullUpdates;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDbDelete{T}"/> class.
@@ -60,7 +60,7 @@ namespace PDS.Witsml.Server.Data
             _collection = collection;
             _parser = parser;
             _idPropertyName = idPropertyName;
-            _pullList = new List<UpdateOneModel<T>>();
+            _pullUpdates = new Dictionary<int, List<UpdateOneModel<T>>>();
         }
 
         /// <summary>
@@ -82,8 +82,8 @@ namespace PDS.Witsml.Server.Data
             LogUpdateFilter(_entityFilter, Context.Update);
             _collection.UpdateOne(_entityFilter, Context.Update);
 
-            if (_pullList.Count > 0)
-                _collection.BulkWrite(_pullList);
+            // Remove recurring elements after all update because of the position being used in field path
+            RemoveArrayElementsByDepth();
 
             WitsmlOperationContext.Current.Warnings.AddRange(Context.Warnings);
         }
@@ -271,7 +271,8 @@ namespace PDS.Witsml.Server.Data
                     else
                     {
                         var update = updateBuilder.Pull(parentPath, current);
-                        _pullList.Add(new UpdateOneModel<T>(filter, update));
+                        //_pullList.Add(new UpdateOneModel<T>(filter, update));
+                        AddToPullCollection(parentPath, new UpdateOneModel<T>(filter, update));
                         return null;
                     }
                 })
@@ -318,6 +319,44 @@ namespace PDS.Witsml.Server.Data
             var updateJson = update.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
             Logger.DebugFormat($"Detected partial delete parameters: {updateJson}");
             Logger.DebugFormat($"Detected partial delete filters: {filterJson}");
+        }
+
+        /// <summary>
+        /// Add a pull update to pull collection based on the depth of its field path.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <param name="pullUpdate">The pull update.</param>
+        private void AddToPullCollection(string path, UpdateOneModel<T> pullUpdate)
+        {
+            var depth = path.Split('.').Length;
+
+            List<UpdateOneModel<T>> updates;
+
+            if (_pullUpdates.ContainsKey(depth))
+                updates = _pullUpdates[depth];
+            else
+            {
+                updates = new List<UpdateOneModel<T>>();
+                _pullUpdates.Add(depth, updates);
+            }
+
+            updates.Add(pullUpdate);
+        }
+
+        /// <summary>
+        /// Removes the array elements by depth, i.e remove the most nested array elements
+        /// so that it won't cause positional error.
+        /// </summary>
+        private void RemoveArrayElementsByDepth()
+        {
+            var depths = _pullUpdates.Keys.ToList();
+            depths.Sort();
+
+            for (var i = depths.Count - 1; i > -1; i--)
+            {
+                var updates = _pullUpdates[depths[i]];
+                _collection.BulkWrite(updates);
+            }
         }
     }
 }
