@@ -23,8 +23,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
-using System.Xml.Serialization;
-using Energistics.DataAccess;
 using Energistics.Datatypes;
 using MongoDB.Driver;
 using PDS.Framework;
@@ -33,7 +31,7 @@ using PDS.Witsml.Data;
 namespace PDS.Witsml.Server.Data
 {
     /// <summary>
-    /// 
+    /// Encloses MongoDb partial delete method and its helper methods
     /// </summary>
     /// <typeparam name="T">The data object type.</typeparam>
     /// <seealso cref="PDS.Witsml.Data.DataObjectNavigator{MongoDbDeleteContext}" />
@@ -66,14 +64,14 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Partials the delete.
+        /// Executes partial delete.
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="updates">The updates.</param>
         public void PartialDelete(T entity, EtpUri uri, Dictionary<string, object> updates)
         {
-            Logger.DebugFormat("Partial deleting data object: {0}", uri);
+            Logger.DebugFormat($"Partial deleting data object: {uri}");
 
             _entityFilter = MongoDbUtility.GetEntityFilter<T>(uri, _idPropertyName);
             _entity = entity;
@@ -237,7 +235,8 @@ namespace PDS.Witsml.Server.Data
                 .Select(element =>
                 {
                     var elementId = GetElementId(element, idField);
-                    if (string.IsNullOrEmpty(elementId) || propertyInfo == null) return null;
+                    if (string.IsNullOrEmpty(elementId) || propertyInfo == null)
+                        return null;
 
                     var filters = new List<FilterDefinition<T>>() { _entityFilter };
 
@@ -255,7 +254,6 @@ namespace PDS.Witsml.Server.Data
                     {
                         var position = ids.IndexOf(elementId);
                         var positionPath = parentPath + "." + position;
-                        ValidateArrayElement(element, properties);
                            
                         var update = updateBuilder.Set(GetPropertyPath(positionPath, idField), elementId);
 
@@ -272,7 +270,7 @@ namespace PDS.Witsml.Server.Data
                     }
                     else
                     {
-                        var update = updateBuilder.Pull(GetPropertyPath(parentPath, idField), elementId);
+                        var update = updateBuilder.Pull(parentPath, current);
                         _pullList.Add(new UpdateOneModel<T>(filter, update));
                         return null;
                     }
@@ -309,37 +307,6 @@ namespace PDS.Witsml.Server.Data
                     idList.Add(id);
                     return id;
                 });
-        }
-
-        private void ValidateArrayElement(XElement element, IList<PropertyInfo> properties)
-        {
-            Logger.DebugFormat("Validating array element: {0}", element.Name.LocalName);
-
-            var emptyElements = element.Elements()
-                    .Where(e => e.IsEmpty || string.IsNullOrWhiteSpace(e.Value))
-                    .ToList();
-
-            foreach (var child in emptyElements)
-            {
-                var prop = GetPropertyInfoForAnElement(properties, child.Name.LocalName);
-                if (prop == null) continue;
-
-                if (prop.IsDefined(typeof(RequiredAttribute), false))
-                    throw new WitsmlException(ErrorCodes.EmptyNewElementsOrAttributes);
-            }
-
-            var emptyAttributes = element.Attributes()
-                .Where(a => string.IsNullOrWhiteSpace(a.Value))
-                .ToList();
-
-            foreach (var child in emptyAttributes)
-            {
-                var prop = GetPropertyInfoForAnElement(properties, child.Name.LocalName);
-                if (prop == null) continue;
-
-                if (prop.IsDefined(typeof(RequiredAttribute), false))
-                    throw new WitsmlException(ErrorCodes.MissingRequiredData);
-            }
         }
 
         private void LogUpdateFilter(FilterDefinition<T> filter, UpdateDefinition<T> update)
