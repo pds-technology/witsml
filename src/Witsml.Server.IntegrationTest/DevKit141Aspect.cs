@@ -44,7 +44,13 @@ namespace PDS.Witsml.Server
                           "{2}" +
                           "   </well>" + Environment.NewLine +
                           "</wells>";
-       
+
+        public static readonly string BasicDeleteWellXmlTemplate = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                          "   <well uid=\"{0}\">" + Environment.NewLine +
+                          "{1}" +
+                          "   </well>" + Environment.NewLine +
+                          "</wells>";
+
         public DevKit141Aspect(TestContext context, string url = null) : base(url, WMLSVersion.WITSML141, context)
         {
             LogGenerator = new Log141Generator();
