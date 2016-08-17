@@ -89,24 +89,24 @@
       <HintPath>..\packages\MongoDB.Driver.GridFS.2.2.4\lib\net45\MongoDB.Driver.GridFS.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="PDS.Framework, Version=2016.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PDS.Framework.2016.1.20160816.1\lib\net45\PDS.Framework.dll</HintPath>
+      <HintPath>..\packages\PDS.Framework.2016.1.20160817.1\lib\net45\PDS.Framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="PDS.Framework.Web, Version=2016.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PDS.Framework.Web.2016.1.20160816.1\lib\net45\PDS.Framework.Web.dll</HintPath>
+      <HintPath>..\packages\PDS.Framework.Web.2016.1.20160817.1\lib\net45\PDS.Framework.Web.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="PDS.Witsml, Version=2016.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PDS.Witsml.2016.1.20160816.1\lib\net45\PDS.Witsml.dll</HintPath>
+      <HintPath>..\packages\PDS.Witsml.2016.1.20160817.1\lib\net45\PDS.Witsml.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="PDS.Witsml.Server, Version=2016.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PDS.Witsml.Server.2016.1.20160816.1\lib\net45\PDS.Witsml.Server.dll</HintPath>
+      <HintPath>..\packages\PDS.Witsml.Server.2016.1.20160817.1\lib\net45\PDS.Witsml.Server.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="SuperSocket.Common, Version=1.6.0.4, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">
