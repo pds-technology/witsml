@@ -446,6 +446,17 @@ namespace PDS.Witsml.Data
         /// <param name="propertyValue">The property value.</param>
         protected virtual void HandleNullValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
+            if (!propertyType.IsValueType && !propertyType.IsEnum)
+                return;
+
+            var element = xmlObject as XElement;
+            if (element == null) return;
+
+            var nil = Xsi("nil");
+            var attribute = element.Attribute(nil);
+            if (attribute != null) return;
+
+            element.Add(new XAttribute(nil, "true"));
         }
 
         /// <summary>

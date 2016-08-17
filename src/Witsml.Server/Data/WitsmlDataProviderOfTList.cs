@@ -147,7 +147,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The data object instance.</returns>
         protected override TObject Parse(XElement element)
         {
-            var list = EnergisticsConverter.XmlToObject<TList>(element.ToString());
+            var list = WitsmlParser.Parse<TList>(element, false);
             return list.Items.Cast<TObject>().FirstOrDefault();
         }
 

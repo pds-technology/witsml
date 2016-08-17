@@ -75,16 +75,20 @@ namespace PDS.Witsml
         /// </summary>
         /// <typeparam name="T">The data object type.</typeparam>
         /// <param name="element">The XML element.</param>
+        /// <param name="removeNaN">if set to <c>true</c> remove NaN elements.</param>
         /// <returns>The data object instance.</returns>
         /// <exception cref="WitsmlException"></exception>
-        public static T Parse<T>(XElement element)
+        public static T Parse<T>(XElement element, bool removeNaN = true)
         {
             _log.DebugFormat("Deserializing XML element for type: {0}", typeof(T).FullName);
 
             try
             {
                 // Create a copy of the element to prevent loss of NaN elements
-                var xml = RemoveNaNElements<T>(new XElement(element));
+                var xml = removeNaN
+                    ? RemoveNaNElements<T>(new XElement(element))
+                    : element.ToString();
+
                 return EnergisticsConverter.XmlToObject<T>(xml);
             }
             catch (WitsmlException)

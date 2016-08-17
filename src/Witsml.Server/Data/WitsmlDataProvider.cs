@@ -16,7 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -219,19 +218,7 @@ namespace PDS.Witsml.Server.Data
         {
             var validator = Container.Resolve<IDataObjectValidator<TObject>>();
             var element = validator.Parse(Functions.UpdateInStore, parser);
-            TObject dataObject;
-
-            // Parse element for the data object to update, 
-            //... throw UpdateTemplateNonConforming error if parse fails.
-            try
-            {
-                dataObject = Parse(element);
-            }
-            catch (Exception ex)
-            {
-                var baseEx = ex.GetBaseException();
-                throw new WitsmlException(ErrorCodes.UpdateTemplateNonConforming, baseEx.Message);
-            }
+            var dataObject = Parse(element);
 
             var uri = GetUri(dataObject);
             Logger.DebugFormat("Updating {0} with URI '{1}'", typeof(TObject).Name, uri);
