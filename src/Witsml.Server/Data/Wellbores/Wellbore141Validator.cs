@@ -93,10 +93,10 @@ namespace PDS.Witsml.Server.Data.Wellbores
             {
                 yield return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] { "Uid" });
             }
-            // Validate that a well for the Uid exists
+            // Validate that a wellbore for the Uid exists
             else if (!_wellboreDataAdapter.Exists(uri))
             {
-                yield return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] { "Uid" });
+                yield return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] { "UidWell", "Uid" });
             }
         }
     }
