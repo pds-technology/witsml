@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -90,6 +91,27 @@ namespace PDS.Witsml.Server.Data.Wells
 
             var results = _devKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
             Assert.AreEqual(0, results.Count);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_DeleteFromStore_Can_Partial_Delete_Elements()
+        {
+            _well.Country = "USA";
+            _well.DateTimeSpud = DateTimeOffset.UtcNow;
+
+            // Add well
+            AddWell(_well);
+
+            // Partial delete well
+            const string delete = "<country /><dTimSpud />";
+            var queryIn = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid, delete);
+            var response = _devKit.DeleteFromStore(ObjectTypes.Well, queryIn, null, null);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Assert the well elements has been deleted
+            var result = GetWell(_well);
+            Assert.IsNull(result.Country);
+            Assert.IsNull(result.DateTimeSpud);
         }
 
         private void AddWell(Well well)
