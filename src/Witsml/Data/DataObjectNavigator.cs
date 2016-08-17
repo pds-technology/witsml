@@ -270,11 +270,9 @@ namespace PDS.Witsml.Data
                     NavigateUomAttribute(element.Attribute("uom"), uomProperty.PropertyType, uomPath, element.Value,
                         uomValue);
                 }
-                else
-                {
-                    if (element.HasAttributes)
-                        NavigateElement(element, elementType, propertyPath);
-                }
+
+                if (element.HasAttributes)
+                    NavigateElement(element, elementType, propertyPath);
 
                 NavigateProperty(element, propertyType, propertyName, element.Value);
             }
