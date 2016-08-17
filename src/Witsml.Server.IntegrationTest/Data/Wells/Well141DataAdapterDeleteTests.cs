@@ -49,6 +49,12 @@ namespace PDS.Witsml.Server.Data.Wells
             _well = new Well { Uid = _devKit.Uid(), Name = _devKit.Name("Well 01"), TimeZone = _devKit.TimeZone };
         }
 
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            _devKit = null;
+        }
+
         [TestMethod]
         public void Well141DataAdapter_DeleteFromStore_Can_Delete_Full_Well()
         {
