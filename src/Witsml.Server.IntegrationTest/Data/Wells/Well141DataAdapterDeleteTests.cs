@@ -17,8 +17,11 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Server.Data.Wells
@@ -102,6 +105,11 @@ namespace PDS.Witsml.Server.Data.Wells
             // Add well
             AddWell(_well);
 
+            // Assert all testing elements are added
+            var result = GetWell(_well);
+            Assert.AreEqual(_well.Country, result.Country);
+            Assert.AreEqual(_well.DateTimeSpud, result.DateTimeSpud);
+
             // Partial delete well
             const string delete = "<country /><dTimSpud />";
             var queryIn = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid, delete);
@@ -109,9 +117,188 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             // Assert the well elements has been deleted
-            var result = GetWell(_well);
+            result = GetWell(_well);
             Assert.IsNull(result.Country);
             Assert.IsNull(result.DateTimeSpud);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_DeleteFromStore_Can_Partial_Delete_Attributes()
+        {
+            var datumKb = _devKit.WellDatum("KB", ElevCodeEnum.KB, "KB");
+            datumKb.DatumName = new WellKnownNameStruct {Code = "5106", NamingSystem = "EPSG", Value = "KB"};
+
+            _well.WellDatum = new List<WellDatum> {datumKb};
+
+            // Add well
+            AddWell(_well);
+
+            // Assert all testing elements are added
+            var result = GetWell(_well);
+            var data = result.WellDatum;
+            Assert.IsNotNull(data);
+            Assert.AreEqual(1, data.Count);
+
+            // Partial delete well
+            var delete = "<wellDatum uid=\"KB\">" + Environment.NewLine +
+                    "<datumName code=\"\" />" + Environment.NewLine +
+                "</wellDatum>";
+            var queryIn = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid, delete);
+            var response = _devKit.DeleteFromStore(ObjectTypes.Well, queryIn, null, null);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Assert the attributes has been deleted
+            result = GetWell(_well);
+            data = result.WellDatum;
+            Assert.IsNotNull(data);
+            Assert.AreEqual(1, data.Count);
+            var datum = data.FirstOrDefault();
+            Assert.IsNotNull(datum);
+            Assert.IsNotNull(datum.DatumName);
+            Assert.IsNull(datum.DatumName.Code);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_DeleteFromStore_Can_Partial_Delete_Nested_Elements()
+        {
+            var testCommonData = new CommonData
+            {
+                Comments = "Testing partial delete nested elements",
+                ItemState = ItemState.plan
+            };
+
+            _well.CommonData = testCommonData;
+
+            // Add well
+            AddWell(_well);
+
+            // Assert all testing elements are added
+            var result = GetWell(_well);
+            var commonData = result.CommonData;
+            Assert.IsNotNull(commonData);
+            Assert.AreEqual(testCommonData.Comments, commonData.Comments);
+            Assert.AreEqual(testCommonData.ItemState, commonData.ItemState);
+
+            // Partial delete well
+            const string delete = "<commonData><comments /><itemState /></commonData>";
+            var queryIn = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid, delete);
+            var response = _devKit.DeleteFromStore(ObjectTypes.Well, queryIn, null, null);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Assert the well elements has been deleted
+            result = GetWell(_well);
+            commonData = result.CommonData;
+            Assert.IsNotNull(commonData);
+            Assert.IsNull(commonData.Comments);
+            Assert.IsNull(commonData.ItemState);
+        }
+
+        [TestMethod]
+        [Description("Tests the removal of the 1st wellDatum element and unset the code element of the 2nd wellDatum element")]
+        public void Well141DataAdapter_DeleteFromStore_Can_Partial_Delete_Recurring_Elements()
+        {
+            var datumKb = _devKit.WellDatum("KB", ElevCodeEnum.KB, "KB");
+            var datumSl = _devKit.WellDatum("SL", ElevCodeEnum.SL, "SL");
+            _well.WellDatum = new List<WellDatum> {datumKb, datumSl};
+
+            // Add well
+            AddWell(_well);
+
+            // Assert all testing elements are added
+            var result = GetWell(_well);
+            var data = result.WellDatum;
+            Assert.AreEqual(2, data.Count);
+            var datum1 = data.FirstOrDefault(d => d.Uid == datumKb.Uid);
+            Assert.IsNotNull(datum1);
+            var datum2 = data.FirstOrDefault(d => d.Uid == datumSl.Uid);
+            Assert.IsNotNull(datum2);
+
+            // Partial delete well
+            var delete = "<wellDatum uid=\"KB\" />" + Environment.NewLine +
+                "<wellDatum uid=\"SL\">" + Environment.NewLine +
+                    "<code />" + Environment.NewLine +
+                "</wellDatum>";
+            var queryIn = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid, delete);
+            var response = _devKit.DeleteFromStore(ObjectTypes.Well, queryIn, null, null);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Assert the partial delete of the recurring elements
+            result = GetWell(_well);
+            data = result.WellDatum;
+            Assert.AreEqual(1, data.Count);
+            datum1 = data.FirstOrDefault(d => d.Uid == datumKb.Uid);
+            Assert.IsNull(datum1);
+            datum2 = data.FirstOrDefault(d => d.Uid == datumSl.Uid);
+            Assert.IsNotNull(datum2);
+            Assert.IsNull(datum2.Code);
+        }
+
+        [TestMethod]
+        [Description("Tests the removal of the 1st wellDatum element and unset the code element of the 2nd wellDatum element")]
+        public void Well141DataAdapter_DeleteFromStore_Can_Partial_Delete_Nested_Recurring_Elements()
+        {
+            var datumKb = _devKit.WellDatum("KB", ElevCodeEnum.KB, "KB");
+            var datumSl = _devKit.WellDatum("SL", ElevCodeEnum.SL, "SL");
+
+            var ext1 = _devKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            var ext2 = _devKit.ExtensionNameValue("Ext-2", "2.0", "ft");
+            var ext3 = _devKit.ExtensionNameValue("Ext-3", "3.0", "s");
+            ext3.Description = "Testing partial delete of nested recurring elements";
+
+            datumKb.ExtensionNameValue = new List<ExtensionNameValue> {ext1};
+            datumSl.ExtensionNameValue = new List<ExtensionNameValue> {ext2, ext3};
+            _well.WellDatum = new List<WellDatum> { datumKb, datumSl };
+
+            // Add well
+            AddWell(_well);
+
+            // Assert all testing elements are added
+            var result = GetWell(_well);
+            var data = result.WellDatum;
+            Assert.AreEqual(2, data.Count);
+            var datum1 = data.FirstOrDefault(d => d.Uid == datumKb.Uid);
+            Assert.IsNotNull(datum1);
+            var extDatum1 = datum1.ExtensionNameValue;
+            Assert.IsNotNull(extDatum1);
+            Assert.AreEqual(1, extDatum1.Count);
+            var datum2 = data.FirstOrDefault(d => d.Uid == datumSl.Uid);
+            Assert.IsNotNull(datum2);
+            var extDatum2 = datum2.ExtensionNameValue;
+            Assert.IsNotNull(extDatum2);
+            Assert.AreEqual(2, extDatum2.Count);
+
+            // Partial delete well
+            var delete = "<wellDatum uid=\"KB\" />" + Environment.NewLine +
+                "<wellDatum uid=\"SL\">" + Environment.NewLine +
+                    "<code />" + Environment.NewLine +
+                    "<extensionNameValue uid=\"Ext-2\" />" + Environment.NewLine +
+                    "<extensionNameValue uid=\"Ext-3\">" + Environment.NewLine + 
+                        "<description />" + Environment.NewLine +
+                    "</extensionNameValue>" + Environment.NewLine +
+                "</wellDatum>";
+            var queryIn = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid, delete);
+            var response = _devKit.DeleteFromStore(ObjectTypes.Well, queryIn, null, null);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Assert wellDatum
+            result = GetWell(_well);
+            data = result.WellDatum;
+            Assert.AreEqual(1, data.Count);
+            datum1 = data.FirstOrDefault(d => d.Uid == datumKb.Uid);
+            Assert.IsNull(datum1);
+            datum2 = data.FirstOrDefault(d => d.Uid == datumSl.Uid);
+            Assert.IsNotNull(datum2);
+            Assert.IsNull(datum2.Code);
+
+            // Assert extensionNameValues
+            extDatum2 = datum2.ExtensionNameValue;
+            Assert.IsNotNull(extDatum2);
+            Assert.AreEqual(1, extDatum2.Count);
+            var resultExt2 = extDatum2.FirstOrDefault(e => e.Uid == ext2.Uid);
+            Assert.IsNull(resultExt2);
+            var resultExt3 = extDatum2.FirstOrDefault(e => e.Uid == ext3.Uid);
+            Assert.IsNotNull(resultExt3);
+            Assert.IsNull(resultExt3.Description);
         }
 
         private void AddWell(Well well)
