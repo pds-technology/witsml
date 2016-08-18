@@ -16,8 +16,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -77,6 +80,222 @@ namespace PDS.Witsml.Server.Data.Logs
             var query = _devKit.CreateLog(_log.Uid, null, _log.UidWell, null, _log.UidWellbore, null);
             var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             Assert.AreEqual(0, results.Count);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_DeleteFromStore_Can_Delete_Log_With_Case_Insensitive_Uid()
+        {
+            AddParents();
+
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+
+            var uid = _devKit.Uid();
+            _log.Uid = "l" + uid;
+            AddLog(_log);
+
+            // Query log
+            GetLog(_log);
+
+            // Delete log
+            var delete = _devKit.CreateLog("L" + uid, null, _well.Uid, null, _wellbore.Uid, null);
+            DeleteLog(delete, string.Empty);
+
+            // Assert log is deleted
+            var query = _devKit.CreateLog(_log.Uid, null, _log.UidWell, null, _log.UidWellbore, null);
+            var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(0, results.Count);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_DeleteFromStore_Can_Partial_Delete_Elements()
+        {
+            AddParents();
+
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+
+            _log.ServiceCompany = "company 1";
+            _log.StepIncrement = new RatioGenericMeasure {Uom = "m", Value = 1.0};
+
+            // Add log
+            AddLog(_log);
+
+            // Assert all testing elements are added
+            var result = GetLog(_log);
+            Assert.AreEqual(_log.ServiceCompany, result.ServiceCompany);
+            Assert.AreEqual(_log.Direction, result.Direction);
+
+            // Partial delete well
+            const string delete = "<serviceCompany /><stepIncrement />";
+            DeleteLog(_log, delete);
+
+            // Assert the well elements has been deleted
+            result = GetLog(_log);
+            Assert.IsNull(result.ServiceCompany);
+            Assert.IsNull(result.StepIncrement);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_DeleteFromStore_Can_Partial_Delete_Nested_Elements()
+        {
+            AddParents();
+
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+
+            var testCommonData = new CommonData
+            {
+                Comments = "Testing partial delete nested elements",
+                ItemState = ItemState.plan
+            };
+
+            _log.CommonData = testCommonData;
+
+            // Add log
+            AddLog(_log);
+
+            // Assert all testing elements are added
+            var result = GetLog(_log);
+            var commonData = result.CommonData;
+            Assert.IsNotNull(commonData);
+            Assert.AreEqual(testCommonData.Comments, commonData.Comments);
+            Assert.AreEqual(testCommonData.ItemState, commonData.ItemState);
+
+            // Partial delete well
+            const string delete = "<commonData><comments /><itemState /></commonData>";
+            DeleteLog(_log, delete);
+
+            // Assert the well elements has been deleted
+            result = GetLog(_log);
+            commonData = result.CommonData;
+            Assert.IsNotNull(commonData);
+            Assert.IsNull(commonData.Comments);
+            Assert.IsNull(commonData.ItemState);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_DeleteFromStore_Can_Partial_Delete_Recurring_Elements()
+        {
+            AddParents();
+
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+
+            var curve1 = _log.LogCurveInfo[1];
+            Assert.IsNotNull(curve1);
+            var curve2 = _log.LogCurveInfo[2];
+            Assert.IsNotNull(curve2);
+            curve2.CurveDescription = "Testing partial delete recurring elements";
+
+            // Add log
+            AddLog(_log);
+
+            // Assert all testing elements are added
+            var result = GetLog(_log);
+            var curves = result.LogCurveInfo;
+            var resultCurve1 = curves.FirstOrDefault(c => c.Uid == curve1.Uid);
+            Assert.IsNotNull(resultCurve1);
+            var resultCurve2 = curves.FirstOrDefault(c => c.Uid == curve2.Uid);
+            Assert.IsNotNull(resultCurve2);
+            Assert.AreEqual(curve2.CurveDescription, resultCurve2.CurveDescription);
+
+            // Partial delete well
+            var delete = "<logCurveInfo uid=\"" + curve1.Uid + "\" />" + Environment.NewLine +
+                "<logCurveInfo uid=\"" + curve2.Uid + "\">" + Environment.NewLine +
+                    "<curveDescription />" + Environment.NewLine +
+                "</logCurveInfo>";
+            DeleteLog(_log, delete);
+
+            // Assert the well elements has been deleted
+            result = GetLog(_log);
+            curves = result.LogCurveInfo;
+            resultCurve1 = curves.FirstOrDefault(c => c.Uid == curve1.Uid);
+            Assert.IsNull(resultCurve1);
+            resultCurve2 = curves.FirstOrDefault(c => c.Uid == curve2.Uid);
+            Assert.IsNotNull(resultCurve2);
+            Assert.IsNull(resultCurve2.CurveDescription);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_DeleteFromStore_Can_Partial_Delete_Nested_Recurring_Elements()
+        {
+            AddParents();
+
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+
+            var curve1 = _log.LogCurveInfo[1];
+            Assert.IsNotNull(curve1);
+            var curve2 = _log.LogCurveInfo[2];
+            Assert.IsNotNull(curve2);
+            curve2.CurveDescription = "Testing partial delete recurring elements";
+
+            var axis1 = new AxisDefinition
+            {
+                Uid = "1",
+                Order = 1,
+                Count = 3,
+                DoubleValues = "1 2 3"
+            };
+
+            var axis2 = new AxisDefinition
+            {
+                Uid = "2",
+                Order = 2,
+                Count = 3,
+                DoubleValues = "2 3 4",
+                Name = "Axis 2"
+            };
+
+            curve2.AxisDefinition = new List<AxisDefinition> {axis1, axis2};
+
+            // Add log
+            AddLog(_log);
+
+            // Assert all testing elements are added
+            var result = GetLog(_log);
+
+            // Assert log curves
+            var curves = result.LogCurveInfo;
+            var resultCurve1 = curves.FirstOrDefault(c => c.Uid == curve1.Uid);
+            Assert.IsNotNull(resultCurve1);
+            var resultCurve2 = curves.FirstOrDefault(c => c.Uid == curve2.Uid);
+            Assert.IsNotNull(resultCurve2);
+            Assert.AreEqual(curve2.CurveDescription, resultCurve2.CurveDescription);
+
+            // Assert axid definition of 2nd curve
+            var resultAxis = resultCurve2.AxisDefinition;
+            var resultAxis1 = resultAxis.FirstOrDefault(a => a.Uid == axis1.Uid);
+            Assert.IsNotNull(resultAxis1);
+            var resultAxis2 = resultAxis.FirstOrDefault(a => a.Uid == axis2.Uid);
+            Assert.IsNotNull(resultAxis2);
+            Assert.AreEqual(axis2.Name, resultAxis2.Name);
+
+            // Partial delete well
+            var delete = "<logCurveInfo uid=\"" + curve1.Uid + "\" />" + Environment.NewLine +
+                "<logCurveInfo uid=\"" + curve2.Uid + "\">" + Environment.NewLine +
+                    "<curveDescription />" + Environment.NewLine +
+                    "<axisDefinition uid=\"" + axis1.Uid + "\" />" + Environment.NewLine +
+                    "<axisDefinition uid=\"" + axis2.Uid + "\">" + Environment.NewLine +
+                        "<name />" + Environment.NewLine +
+                    "</axisDefinition>" + Environment.NewLine +
+                "</logCurveInfo>";
+            DeleteLog(_log, delete);
+
+            // Assert the well elements has been deleted
+            result = GetLog(_log);
+
+            // Assert log curves
+            curves = result.LogCurveInfo;
+            resultCurve1 = curves.FirstOrDefault(c => c.Uid == curve1.Uid);
+            Assert.IsNull(resultCurve1);
+            resultCurve2 = curves.FirstOrDefault(c => c.Uid == curve2.Uid);
+            Assert.IsNotNull(resultCurve2);
+            Assert.IsNull(resultCurve2.CurveDescription);
+
+            // Assert axid definition of 2nd curve
+            resultAxis = resultCurve2.AxisDefinition;
+            resultAxis1 = resultAxis.FirstOrDefault(a => a.Uid == axis1.Uid);
+            Assert.IsNull(resultAxis1);
+            resultAxis2 = resultAxis.FirstOrDefault(a => a.Uid == axis2.Uid);
+            Assert.IsNotNull(resultAxis2);
+            Assert.IsNull(resultAxis2.Name);
         }
 
         private void AddParents()
