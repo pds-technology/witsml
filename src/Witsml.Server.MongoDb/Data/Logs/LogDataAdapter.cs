@@ -186,6 +186,31 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
+        /// Deletes or partially updates the specified object by uid.
+        /// </summary>
+        /// <param name="parser">The query parser that specifies the object.</param>
+        public override void Delete(WitsmlQueryParser parser)
+        {
+            var uri = parser.GetUri<T>();
+
+            if (IsPartialDelete(parser))
+            {
+                using (var transaction = DatabaseProvider.BeginTransaction(uri))
+                {
+                    PartialDeleteEntity(parser, uri, transaction);
+
+                    // TODO: Implement partial delete of log data
+
+                    transaction.Commit();
+                }
+            }
+            else
+            {
+                Delete(uri);
+            }
+        }
+
+        /// <summary>
         /// Deletes a data object by the specified identifier.
         /// </summary>
         /// <param name="uri">The data object URI.</param>
