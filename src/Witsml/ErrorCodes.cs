@@ -139,7 +139,7 @@ namespace PDS.Witsml
         /// -418 For WMLS_DeleteFromStore, if an element with a uid attribute in the schema is specified then it must
         /// also be specified with a value for its uid attribute.
         /// </summary>
-        MissingUidAttributeValue = -418,
+        MissingElementUidForDelete = -418,
 
         /// <summary>
         /// -419 For WMLS_DeleteFromStore, an empty non-recurring container-element with no unique identifier in the

@@ -229,7 +229,9 @@ namespace PDS.Witsml
         public static ErrorCodes GetMissingElementUidErrorCode(this Functions function)
         {
             return function == Functions.AddToStore
-                ? ErrorCodes.MissingElementUidForAdd
+                ? ErrorCodes.MissingElementUidForAdd 
+                : function == Functions.DeleteFromStore 
+                ? ErrorCodes.MissingElementUidForDelete 
                 : ErrorCodes.MissingElementUidForUpdate;
         }
     }

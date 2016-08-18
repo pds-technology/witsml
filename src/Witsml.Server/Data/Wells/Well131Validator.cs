@@ -64,17 +64,31 @@ namespace PDS.Witsml.Server.Data.Wells
         /// <returns>A collection of validation results.</returns>
         protected override IEnumerable<ValidationResult> ValidateForUpdate()
         {
+            return ValidateObjectExistence();
+        }
+
+        /// <summary>
+        /// Validates the data object while executing UpdateInStore.
+        /// </summary>
+        /// <returns>A collection of validation results.</returns>
+        protected override IEnumerable<ValidationResult> ValidateForDelete()
+        {
+            return ValidateObjectExistence();
+        }
+
+        private IEnumerable<ValidationResult> ValidateObjectExistence()
+        {
             var uri = DataObject.GetUri();
 
             // Validate that a Uid was provided
             if (string.IsNullOrWhiteSpace(DataObject.Uid))
             {
-                yield return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] { "Uid" });
+                yield return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] {"Uid"});
             }
             // Validate that a well for the Uid exists
             else if (!_wellDataAdapter.Exists(uri))
             {
-                yield return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] { "Uid" });
+                yield return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] {"Uid"});
             }
         }
     }

@@ -239,14 +239,15 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         protected virtual WitsmlResult Delete(WitsmlQueryParser parser)
         {
-            //var validator = Container.Resolve<IDataObjectValidator<TObject>>();
-            //var element = validator.Parse(Functions.DeleteFromStore, parser);
-            //var dataObject = Parse(element);
+            var validator = Container.Resolve<IDataObjectValidator<TObject>>();
+            var element = validator.Parse(Functions.DeleteFromStore, parser);
+            var dataObject = Parse(element);
 
-            Logger.DebugFormat("Deleting {0}", typeof(TObject).Name);
+            var uri = GetUri(dataObject);
+            Logger.DebugFormat("Deleting {0} with URI '{1}'", typeof(TObject).Name, uri);
 
-            //validator.Validate(Functions.DeleteFromStore, parser, dataObject);
-            //Logger.DebugFormat("Validated {0} for Delete", typeof(TObject).Name);
+            validator.Validate(Functions.DeleteFromStore, parser, dataObject);
+            Logger.DebugFormat("Validated {0} with URI '{1}' for Delete", typeof(TObject).Name, uri);
 
             DataAdapter.Delete(parser);
             return Success();

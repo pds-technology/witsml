@@ -88,7 +88,8 @@ namespace PDS.Witsml.Server.Data
             var root = new XElement(parser.Root);
             Context.RemoveNaNElements = true;
             Context.Function = function;
-            if (function == Functions.AddToStore || function == Functions.UpdateInStore)
+
+            if (function == Functions.AddToStore || function == Functions.UpdateInStore || function == Functions.DeleteFromStore)
                 Navigate(root.Elements().FirstOrDefault());
 
             return root;
