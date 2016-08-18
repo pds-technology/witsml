@@ -202,6 +202,7 @@
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Data\Channels\ChannelDataChunkAdapterValidationTests.cs" />
+    <Compile Include="Data\Logs\Log141MongoDataAdapterDeleteTests.cs" />
     <Compile Include="Data\Logs\Log141MongoDataAdapterValidationTests.cs" />
     <Compile Include="Data\Wells\Well141MongoDataAdapterValidationTests.cs" />
     <Compile Include="TestAssemblyInitializer.cs" />
