@@ -198,6 +198,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
                     }
                 }
             };
+
             var results = _devKit.Update<WellboreList, Wellbore>(update);
             Assert.IsNotNull(results);
             Assert.AreEqual((short)ErrorCodes.Success, results.Result);
@@ -219,6 +220,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 Uid = _wellbore.Uid,
                 Tvd = new WellVerticalDepthCoord { Uom = WellVerticalCoordinateUom.ft, Value = 1 }
             };
+
             var updateResponse = _devKit.Update<WellboreList, Wellbore>(update);
             Assert.IsNotNull(updateResponse);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
@@ -277,6 +279,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
                            "       <name>No Plural Wellbore</name>" + Environment.NewLine +
                            "   </wellbore>" + Environment.NewLine +
                            "</wellbore>";
+
             var xmlIn = string.Format(nonPluralWellbore, _well.Uid, _wellbore.Uid);
             var response = _devKit.UpdateInStore(ObjectTypes.Wellbore, xmlIn, null, null);
 
@@ -304,6 +307,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             // Update wellbore
             var updateXml = string.Format(DevKit141Aspect.BasicUpdateWellboreXmlTemplate, _well.Uid, _wellbore.Uid,
                 "<commonData><extensionNameValue uid=\"Ext - 1\"><name>Ext-1</name><dataType>double</dataType></extensionNameValue></commonData>");
+
             var results = _devKit.UpdateInStore(ObjectTypes.Wellbore, updateXml, null, null);
 
             Assert.IsNotNull(results);
@@ -360,6 +364,61 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.AreEqual((short)ErrorCodes.InvalidUnitOfMeasure, results.Result);
         }
 
+        [TestMethod, Description("Tests you cannot do UpdateInStore more than one object")]
+        public void Wellbore141DataAdapter_UpdateInStore_Error_444_Updating_With_More_Than_One_Data_Object()
+        {
+            // Add well 
+            _devKit.AddWellSuccess(_well);
+
+            // Add second well
+            var well2 = new Well()
+            {
+                Uid = _devKit.Uid(),
+                Name = _devKit.Name("Well 02"),
+                TimeZone = _devKit.TimeZone
+            };
+            _devKit.AddWellSuccess(well2);
+
+            // Add wellbore
+            _devKit.AddWellboreSuccess(_wellbore);
+
+            // Add second wellbore
+            var wellbore2 = new Wellbore()
+            {
+                UidWell = well2.Uid,
+                NameWell = well2.Name,
+                Uid = _devKit.Uid(),
+                Name = _devKit.Name("Wellbore 02"),
+                MD = new MeasuredDepthCoord(0, MeasuredDepthUom.ft)
+            };
+
+            _devKit.AddWellboreSuccess(wellbore2);
+
+            var multiObjectXml =  "<wellbores xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                          "   <wellbore uidWell=\"{0}\" uid=\"{1}\">" + Environment.NewLine +
+                          "{2}" +
+                          "   </wellbore>" + Environment.NewLine +
+                          "   <wellbore uidWell=\"{3}\" uid=\"{4}\">" + Environment.NewLine +
+                          "{5}" +
+                          "   </wellbore>" + Environment.NewLine +
+                          "</wellbores>";
+
+            // Update wellbore
+            var updateXml = string.Format(
+                multiObjectXml, 
+                _well.Uid, 
+                _wellbore.Uid,
+                "<md uom=\"ft\">1</md>",
+                well2.Uid,
+                wellbore2.Uid,
+                "<md uom=\"ft\">2</md>"
+                );
+
+            var results = _devKit.UpdateInStore(ObjectTypes.Wellbore, updateXml, null, null);
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateMultipleDataObjects, results.Result);
+        }
+
         [TestMethod, Description("Tests you cannot do UpdateInStore a empty complex element")]
         public void Wellbore141DataAdapter_UpdateInStore_Error_445_Updating_With_An_Empty_Element()
         {
@@ -395,6 +454,24 @@ namespace PDS.Witsml.Server.Data.Wellbores
             var results = _devKit.UpdateInStore(ObjectTypes.Wellbore, updateXml, null, null);
             Assert.IsNotNull(results);
             Assert.AreEqual((short)ErrorCodes.MissingMeasureDataForUnit, results.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do UpdateInStore on an element missing its attribute")]
+        public void Wellbore141DataAdapter_UpdateInStore_Error_448_Updating_An_Element_Missing_An_Attribute()
+        {
+            // Add well 
+            _devKit.AddWellSuccess(_well);
+
+            // Add wellbore
+            _devKit.AddWellboreSuccess(_wellbore);
+
+            // Update wellbore with invalid element
+            var updateXml = string.Format(DevKit141Aspect.BasicUpdateWellboreXmlTemplate, _well.Uid, _wellbore.Uid,
+                          "<commonData><extensionNameValue><name>Ext-1</name><value uom=\"m\">1.0</value><dataType>double</dataType></extensionNameValue></commonData>");
+
+            var results = _devKit.UpdateInStore(ObjectTypes.Wellbore, updateXml, null, null);
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.MissingElementUidForUpdate, results.Result);
         }
 
         [TestMethod, Description("Tests you cannot do UpdateInStore an element with a value with a blank attribute")]
@@ -440,6 +517,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
                     }
                 }
             };
+
             var results = _devKit.Update<WellboreList, Wellbore>(update);
             Assert.IsNotNull(results);
             Assert.AreEqual((short)ErrorCodes.ChildUidNotUnique, results.Result);
@@ -461,6 +539,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
                            "       <name>No Plural Wellbore</name>" + Environment.NewLine +
                            "   </wellbore>" + Environment.NewLine +
                            "</wellbores>";
+
             var xmlIn = string.Format(missingVersionXml, _well.Uid, _wellbore.Uid);
             var response = _devKit.UpdateInStore(ObjectTypes.Wellbore, xmlIn, null, null);
 
@@ -479,6 +558,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
             // Try to update without declaring schema version
             var nonConformingTempalteXml = "<wellbores xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine + "</wellbores>";
+
             var xmlIn = string.Format(nonConformingTempalteXml, _well.Uid, _wellbore.Uid);
             var response = _devKit.UpdateInStore(ObjectTypes.Wellbore, xmlIn, null, null);
 
@@ -501,6 +581,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
                            "       <name></name>" + Environment.NewLine +
                            "   </wellbore>" + Environment.NewLine +
                            "</wellbores>";
+
             var xmlIn = string.Format(nullingNameXml, _well.Uid, _wellbore.Uid);
             var response = _devKit.UpdateInStore(ObjectTypes.Wellbore, xmlIn, null, null);
 
