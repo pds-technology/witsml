@@ -57,6 +57,12 @@ namespace PDS.Witsml.Server
                           "   </wellbore>" + Environment.NewLine +
                           "</wellbores>";
 
+        public static readonly string BasicDeleteLogXmlTemplate = "<logs xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                          "   <log uid=\"{0}\" uidWell=\"{1}\" uidWellbore=\"{2}\">" + Environment.NewLine +
+                          "{3}" +
+                          "   </log>" + Environment.NewLine +
+                          "</logs>";
+
         public DevKit141Aspect(TestContext context, string url = null) : base(url, WMLSVersion.WITSML141, context)
         {
             LogGenerator = new Log141Generator();
