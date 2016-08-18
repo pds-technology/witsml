@@ -65,7 +65,8 @@ namespace PDS.Witsml.Server.Data
             // Check if to project fields
             Context.IsProjection = OptionsIn.ReturnElements.IdOnly.Equals(returnElements) ||
                 OptionsIn.ReturnElements.Requested.Equals(returnElements) ||
-                OptionsIn.ReturnElements.DataOnly.Equals(returnElements);
+                OptionsIn.ReturnElements.DataOnly.Equals(returnElements) ||
+                OptionsIn.ReturnElements.StationLocationOnly.Equals(returnElements);
 
             if (Context.Fields == null)
                 Context.Fields = new List<string>();

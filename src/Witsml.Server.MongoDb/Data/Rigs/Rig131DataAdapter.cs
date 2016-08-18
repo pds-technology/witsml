@@ -1,0 +1,98 @@
+﻿//----------------------------------------------------------------------- 
+// PDS.Witsml.Server, 2016.1
+//
+// Copyright 2016 Petrotechnical Data Systems
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//   
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------
+
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.Linq;
+using Energistics.DataAccess.WITSML131;
+using Energistics.Datatypes;
+using PDS.Witsml.Server.Configuration;
+
+namespace PDS.Witsml.Server.Data.Rigs
+{
+    /// <summary>
+    /// Data adapter that encapsulates CRUD functionality for <see cref="Rig" />
+    /// </summary>
+    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Rig}" />
+    [Export(typeof(IWitsmlDataAdapter<Rig>))]
+    [Export(typeof(IWitsml131Configuration))]
+    [PartCreationPolicy(CreationPolicy.Shared)]
+    public class Rig131DataAdapter : MongoDbDataAdapter<Rig>, IWitsml131Configuration
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Rig131DataAdapter"/> class.
+        /// </summary>
+        /// <param name="databaseProvider">The database provider.</param>
+        [ImportingConstructor]
+        public Rig131DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Rig131)
+        {
+            Logger.Debug("Instance created.");
+        }
+
+        /// <summary>
+        /// Gets the supported capabilities for the <see cref="Rig"/> object.
+        /// </summary>
+        /// <param name="capServer">The capServer instance.</param>
+        public void GetCapabilities(CapServer capServer)
+        {
+            Logger.DebugFormat("Getting the supported capabilities for Rig data version {0}.", capServer.Version);
+
+            capServer.Add(Functions.GetFromStore, ObjectTypes.Rig);
+            capServer.Add(Functions.AddToStore, ObjectTypes.Rig);
+            capServer.Add(Functions.UpdateInStore, ObjectTypes.Rig);
+            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Rig);
+        }
+
+        /// <summary>
+        /// Gets a collection of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        public override List<Rig> GetAll(EtpUri? parentUri = null)
+        {
+            Logger.DebugFormat("Fetching all Rigs; Parent URI: {0}", parentUri);
+
+            var query = GetQuery().AsQueryable();
+
+            if (parentUri != null)
+            {
+                var ids = parentUri.Value.GetObjectIds().ToDictionary(x => x.ObjectType, y => y.ObjectId);
+                var uidWellbore = ids[ObjectTypes.Wellbore];
+                var uidWell = ids[ObjectTypes.Well];
+
+                query = query.Where(x => x.UidWell == uidWell && x.UidWellbore == uidWellbore);
+            }
+
+            return query
+                .OrderBy(x => x.Name)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Gets a list of the property names to project during a query.
+        /// </summary>
+        /// <param name="parser">The WITSML parser.</param>
+        /// <returns>A list of property names.</returns>
+        protected override List<string> GetProjectionPropertyNames(WitsmlQueryParser parser)
+        {
+            return OptionsIn.ReturnElements.IdOnly.Equals(parser.ReturnElements())
+                ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell", "UidWellbore", "NameWellbore" }
+                : null;
+        }
+    }
+}
