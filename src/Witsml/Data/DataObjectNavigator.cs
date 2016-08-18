@@ -262,19 +262,29 @@ namespace PDS.Witsml.Data
                 var propertyName = GetPropertyPath(propertyPath, textProperty.Name);
                 var propertyType = textProperty.PropertyType;
 
-                if (uomProperty != null)
+                if (uomProperty != null && Context.Function != Functions.DeleteFromStore)
                 {
                     var uomPath = GetPropertyPath(propertyPath, uomProperty.Name);
                     var uomValue = ValidateMeasureUom(element, uomProperty, element.Value);
 
-                    NavigateUomAttribute(element.Attribute("uom"), uomProperty.PropertyType, uomPath, element.Value,
-                        uomValue);
+                    NavigateUomAttribute(element.Attribute("uom"), uomProperty.PropertyType, uomPath, element.Value, uomValue);
+
+                    if (uomValue != null)
+                        NavigateProperty(element, propertyType, propertyName, element.Value);
+                }
+                else
+                {
+                    if (Context.Function != Functions.DeleteFromStore)
+                        NavigateProperty(element, propertyType, propertyName, element.Value);
                 }
 
                 if (element.HasAttributes)
                     NavigateElement(element, elementType, propertyPath);
-
-                NavigateProperty(element, propertyType, propertyName, element.Value);
+                else
+                {
+                    if (Context.Function == Functions.DeleteFromStore)
+                        NavigateProperty(element, elementType, propertyPath, element.Value);
+                }                
             }
             else
             {

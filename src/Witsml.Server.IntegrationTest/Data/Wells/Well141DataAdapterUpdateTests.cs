@@ -54,9 +54,9 @@ namespace PDS.Witsml.Server.Data.Wells
             // Add well
             var well = _devKit.CreateFullWell();
             well.Uid = _devKit.Uid();
-            _devKit.AddWellSuccess(well);
+            _devKit.AddAndAssert(well);
             // Query well 
-            var returnWell = _devKit.GetSingleWellSuccess(well);
+            var returnWell = _devKit.GetSingleWellAndAssert(well);
             
             var welldatum = returnWell.WellDatum.FirstOrDefault(x => x.Uid.Equals("SL"));
             Assert.IsNotNull(welldatum);
@@ -67,10 +67,10 @@ namespace PDS.Witsml.Server.Data.Wells
             var datumSl = _devKit.WellDatum("Sea Level", ElevCodeEnum.LAT, "SL");
 
             var update = new Well() { Uid = well.Uid, WellDatum = _devKit.List(datumSl) };
-            _devKit.UpdateWellSuccess(update);
+            _devKit.UpdateAndAssert(update);
 
             // Query updated well
-            returnWell = _devKit.GetSingleWellSuccess(well);
+            returnWell = _devKit.GetSingleWellAndAssert(well);
 
             welldatum = returnWell.WellDatum.FirstOrDefault(x => x.Uid.Equals("SL"));
             Assert.IsNotNull(welldatum);
@@ -83,7 +83,7 @@ namespace PDS.Witsml.Server.Data.Wells
         {
             _well.Operator = "AAA Company";
 
-            _devKit.AddWellSuccess(_well);
+            _devKit.AddAndAssert(_well);
 
             // Update well with invalid element
             var updateXml = string.Format(DevKit141Aspect.BasicWellXmlTemplate, _well.Uid,
@@ -94,7 +94,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.Success, results.Result);
 
             // Query the updated well 
-            var result = _devKit.GetSingleWellSuccess(_well);
+            var result = _devKit.GetSingleWellAndAssert(_well);
             Assert.AreEqual("BBB Company", result.Operator);
         }
 
@@ -103,7 +103,7 @@ namespace PDS.Witsml.Server.Data.Wells
         {
             _well.Operator = "AAA Company";
 
-            _devKit.AddWellSuccess(_well);
+            _devKit.AddAndAssert(_well);
 
             // Update well with invalid element
             var updateXml = string.Format(DevKit141Aspect.BasicWellXmlTemplate, _well.Uid,
@@ -114,7 +114,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.Success, results.Result);
 
             // Query the updated well 
-            var result = _devKit.GetSingleWellSuccess(_well);
+            var result = _devKit.GetSingleWellAndAssert(_well);
             Assert.AreEqual("BBB Company", result.Operator);
             Assert.AreEqual("Big Field", result.Field);
         }
@@ -123,7 +123,7 @@ namespace PDS.Witsml.Server.Data.Wells
         public void Well141DataAdapter_UpdateInStore_Update_With_Invalid_Child_Element()
         {
             _well.Operator = "AAA Company";
-            _devKit.AddWellSuccess(_well);
+            _devKit.AddAndAssert(_well);
 
             // Update well with invalid element
             var updateXml = string.Format(DevKit141Aspect.BasicWellXmlTemplate, _well.Uid,
@@ -133,7 +133,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.Success, results.Result);
 
             // Query the updated well 
-            var result = _devKit.GetSingleWellSuccess(_well);
+            var result = _devKit.GetSingleWellAndAssert(_well);
             Assert.AreEqual(_well.Name, result.Name);
             Assert.IsNull(result.Operator);
         }
@@ -260,7 +260,7 @@ namespace PDS.Witsml.Server.Data.Wells
         public void Well141DataAdapter_UpdateInStore_Add_Extension_Name_Value_Success()
         {
             // Add a minimal test well and Assert its Success
-            _devKit.AddWellSuccess(_well);
+            _devKit.AddAndAssert(_well);
 
             var extensionName1 = _devKit.ExtensionNameValue("Ext-1", "1.0", "m");
 
@@ -281,7 +281,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.IsNotNull(updateResponse);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
 
-            var result = _devKit.GetSingleWellSuccess(_well);
+            var result = _devKit.GetSingleWellAndAssert(_well);
             var commonData = result.CommonData;
             Assert.IsNotNull(commonData);
             var extensionNameValues = commonData.ExtensionNameValue;
