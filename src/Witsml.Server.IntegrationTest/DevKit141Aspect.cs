@@ -45,6 +45,12 @@ namespace PDS.Witsml.Server
                           "   </well>" + Environment.NewLine +
                           "</wells>";
 
+        public static readonly string BasicUpdateWellboreXmlTemplate = "<wellbores xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                          "   <wellbore uidWell=\"{0}\" uid=\"{1}\">" + Environment.NewLine +
+                          "{2}" +
+                          "   </wellbore>" + Environment.NewLine +
+                          "</wellbores>";
+
         public static readonly string BasicDeleteWellXmlTemplate = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
                           "   <well uid=\"{0}\">" + Environment.NewLine +
                           "{1}" +
@@ -399,6 +405,85 @@ namespace PDS.Witsml.Server
 
             WellList wells = EnergisticsConverter.XmlToObject<WellList>(wellXml);
             return wells.Items[0] as Well;
+        }
+
+        /// <summary>
+        /// Adds well object and test for succcess
+        /// </summary>
+        /// <param name="well"></param>
+        /// <param name="errorCode"></param>
+        public void AddWellSuccess(Well well, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            var response = Add<WellList, Well>(well);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+        }
+
+        /// <summary>
+        /// Adds wellbore object and test for success
+        /// </summary>
+        /// <param name="wellbore"></param>
+        /// <param name="errorCode"></param>
+        public void AddWellboreSuccess(Wellbore wellbore, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            var response = Add<WellboreList, Wellbore>(wellbore);
+            Assert.AreEqual((short)errorCode, response.Result);
+        }
+
+        /// <summary>
+        /// Does get query for single well object and test for result count equal to 1 and is not null
+        /// </summary>
+        /// <param name="well"></param>
+        /// <returns></returns>
+        public Well GetSingleWellSuccess(Well well)
+        {
+            var query = new Well { Uid = well.Uid };
+
+            var results = Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+            var result = results.FirstOrDefault();
+            Assert.IsNotNull(result);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Does get query for single wellbore object and test for result count equal to 1 and is not null
+        /// </summary>
+        /// <param name="well"></param>
+        /// <param name="wellbore"></param>
+        /// <returns></returns>
+        public Wellbore GetSingleWellboreSuccess(Well well, Wellbore wellbore)
+        {
+            var query = new Wellbore { UidWell = well.Uid, Uid = wellbore.Uid };
+
+            var results = Query<WellboreList, Wellbore>(query, ObjectTypes.Wellbore, null, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+            var result = results.FirstOrDefault();
+            Assert.IsNotNull(result);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Does UpdateInStore on well object and test if it was successful
+        /// </summary>
+        /// <param name="well"></param>
+        public void UpdateWellSuccess(Well well)
+        {
+            var updateResponse = Update<WellList, Well>(well);
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+        }
+
+        /// <summary>
+        /// Does UpdateInStore on wellbore object and test if it was successful
+        /// </summary>
+        /// <param name="wellbore"></param>
+        public void UpdateWellboreSuccess(Wellbore wellbore)
+        {
+            var updateResponse = Update<WellboreList, Wellbore>(wellbore);
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
         }
 
         public WMLS_AddToStoreResponse Add_Log_from_file(string xmlfile)
