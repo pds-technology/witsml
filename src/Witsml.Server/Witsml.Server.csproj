@@ -122,9 +122,27 @@
     <Compile Include="Data\DataObjectValidationContext.cs" />
     <Compile Include="Data\DataObjectValidator.cs" />
     <Compile Include="Configuration\ICapServerProvider.cs" />
+    <Compile Include="Data\DataObjectValidatorOfT.cs" />
     <Compile Include="Data\IEtpDataProviderOfT.cs" />
     <Compile Include="Data\Logs\Log200DataProvider.cs" />
     <Compile Include="Data\Logs\LogExtensions.cs" />
+    <Compile Include="Data\Messages\Message131DataProvider.cs" />
+    <Compile Include="Data\Messages\Message131Validator.cs" />
+    <Compile Include="Data\Messages\Message141DataProvider.cs" />
+    <Compile Include="Data\Messages\Message141Validator.cs" />
+    <Compile Include="Data\Rigs\Rig131DataProvider.cs" />
+    <Compile Include="Data\Rigs\Rig131Validator.cs" />
+    <Compile Include="Data\Rigs\Rig141DataProvider.cs" />
+    <Compile Include="Data\Rigs\Rig141Validator.cs" />
+    <Compile Include="Data\Rigs\Rig200DataProvider.cs" />
+    <Compile Include="Data\Rigs\Rig200Validator.cs" />
+    <Compile Include="Data\Trajectories\Trajectory200Validator.cs" />
+    <Compile Include="Data\Trajectories\Trajectory141Validator.cs" />
+    <Compile Include="Data\Trajectories\Trajectory131Validator.cs" />
+    <Compile Include="Data\Trajectories\Trajectory200DataProvider.cs" />
+    <Compile Include="Data\Trajectories\Trajectory131DataProvider.cs" />
+    <Compile Include="Data\Trajectories\Trajectory141DataProvider.cs" />
+    <Compile Include="Data\Trajectories\TrajectoryExtensions.cs" />
     <Compile Include="Data\Wellbores\Wellbore200DataProvider.cs" />
     <Compile Include="Data\WitsmlDataProvider.cs" />
     <Compile Include="Data\EtpDataProvider.cs" />
@@ -193,8 +211,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\ChangeLogs\" />
-    <Folder Include="Data\Rigs\" />
-    <Folder Include="Data\Trajectories\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config">

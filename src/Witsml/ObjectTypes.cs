@@ -51,7 +51,6 @@ namespace PDS.Witsml
         /// </summary>
         public const string NameProperty = "Name";
 
-
         /// <summary>
         /// The ObjectType identifier for Unknown.
         /// </summary>
@@ -91,6 +90,11 @@ namespace PDS.Witsml
         /// The ObjectType identifier for a Rig.
         /// </summary>
         public const string Rig = "rig";
+
+        /// <summary>
+        /// The ObjectType identifier for a Message.
+        /// </summary>
+        public const string Message = "message";
 
         /// <summary>
         /// The ObjectType identifier for a Trajectory.

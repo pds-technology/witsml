@@ -81,5 +81,45 @@ namespace PDS.Witsml
         /// The ObjectName for 2.0 version channels.
         /// </summary>
         public static readonly ObjectName Channel200 = new ObjectName(ObjectTypes.Channel, Version200);
+
+        /// <summary>
+        /// The ObjectName for 131 version trajectory.
+        /// </summary>
+        public static readonly ObjectName Trajectory131 = new ObjectName(ObjectTypes.Trajectory, Version131);
+
+        /// <summary>
+        /// The ObjectName for 141 version trajectory.
+        /// </summary>
+        public static readonly ObjectName Trajectory141 = new ObjectName(ObjectTypes.Trajectory, Version141);
+
+        /// <summary>
+        /// The ObjectName for 2.0 version trajectory.
+        /// </summary>
+        public static readonly ObjectName Trajectory200 = new ObjectName(ObjectTypes.Trajectory, Version200);
+
+        /// <summary>
+        /// The ObjectName for 131 version rigs.
+        /// </summary>
+        public static readonly ObjectName Rig131 = new ObjectName(ObjectTypes.Rig, Version131);
+
+        /// <summary>
+        /// The ObjectName for 141 version rigs.
+        /// </summary>
+        public static readonly ObjectName Rig141 = new ObjectName(ObjectTypes.Rig, Version141);
+
+        /// <summary>
+        /// The ObjectName for 2.0 version rigs.
+        /// </summary>
+        public static readonly ObjectName Rig200 = new ObjectName(ObjectTypes.Rig, Version200);
+
+        /// <summary>
+        /// The ObjectName for 131 version messages.
+        /// </summary>
+        public static readonly ObjectName Message131 = new ObjectName(ObjectTypes.Message, Version131);
+
+        /// <summary>
+        /// The ObjectName for 141 version messages.
+        /// </summary>
+        public static readonly ObjectName Message141 = new ObjectName(ObjectTypes.Message, Version141);
     }
 }

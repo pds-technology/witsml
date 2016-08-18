@@ -18,7 +18,6 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
 using Energistics.DataAccess.WITSML131;
 using PDS.Framework;
 
