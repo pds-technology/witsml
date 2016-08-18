@@ -106,9 +106,10 @@ namespace PDS.Witsml
         /// </summary>
         /// <param name="type">The data object type.</param>
         /// <param name="element">The XML element.</param>
+        /// <param name="removeNaN">if set to <c>true</c> remove NaN elements.</param>
         /// <returns>The data object instance.</returns>
         /// <exception cref="WitsmlException"></exception>
-        public static object Parse(Type type, XElement element)
+        public static object Parse(Type type, XElement element, bool removeNaN = true)
         {
             var method = typeof(WitsmlParser).GetMethods(BindingFlags.Public | BindingFlags.Static)
                 .FirstOrDefault(x => x.Name == "Parse" && x.GetGenericArguments().Any());
@@ -116,7 +117,7 @@ namespace PDS.Witsml
             try
             {
                 return method?.MakeGenericMethod(type)
-                    .Invoke(null, new object[] { element });
+                    .Invoke(null, new object[] { element, removeNaN });
             }
             catch (Exception ex)
             {
