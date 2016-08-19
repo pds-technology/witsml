@@ -119,9 +119,10 @@ namespace PDS.Witsml.Data
 
             foreach (var group in groupings)
             {
-                var propertyInfo = GetPropertyInfoForAnElement(properties, group.Key);
                 if (IsIgnored(group.Key, GetPropertyPath(parentPath, group.Key))) continue;
-                
+
+                var propertyInfo = GetPropertyInfoForAnElement(properties, group.Key);
+
                 if (propertyInfo != null)
                 {
                     NavigateElementGroup(propertyInfo, group, parentPath);
@@ -160,84 +161,84 @@ namespace PDS.Witsml.Data
                     if (genericType == typeof(Nullable<>))
                     {
                         var underlyingType = Nullable.GetUnderlyingType(propertyType);
-                        NavigateNullableElementType(underlyingType, element, propertyPath, propertyInfo);
+                        NavigateNullableElementType(propertyInfo, underlyingType, element, propertyPath);
                     }
                     else if (genericType == typeof(List<>))
                     {
                         var childType = propertyType.GetGenericArguments()[0];
-                        NavigateArrayElementType(elementList, childType, element, propertyPath, propertyInfo);
+                        NavigateArrayElementType(propertyInfo, elementList, childType, element, propertyPath);
                     }
                 }
                 else if (propertyType.IsAbstract)
                 {
                     var concreteType = GetConcreteType(element, propertyType);
-                    NavigateElementType(concreteType, element, propertyPath);
+                    NavigateElementType(propertyInfo, concreteType, element, propertyPath);
                 }
                 else
                 {
-                    NavigateElementType(propertyType, element, propertyPath);
+                    NavigateElementType(propertyInfo, propertyType, element, propertyPath);
                 }
             }
             else
             {
-                InitializeRecurringElementHandler(propertyPath);
+                InitializeRecurringElementHandler(propertyInfo, propertyPath);
 
                 var childType = propertyType.GetGenericArguments()[0];
            
-                NavigateRecurringElements(elementList, childType, propertyPath, propertyInfo);
+                NavigateRecurringElements(propertyInfo, elementList, childType, propertyPath);
 
-                HandleRecurringElements(propertyPath);
+                HandleRecurringElements(propertyInfo, propertyPath);
             }
         }
 
         /// <summary>
         /// Navigates the recurring elements.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="elements">The elements.</param>
         /// <param name="childType">Type of the child.</param>
         /// <param name="propertyPath">The property path.</param>
-        /// <param name="propertyInfo">The property information.</param>
-        protected virtual void NavigateRecurringElements(List<XElement> elements, Type childType, string propertyPath, PropertyInfo propertyInfo)
+        protected virtual void NavigateRecurringElements(PropertyInfo propertyInfo, List<XElement> elements, Type childType, string propertyPath)
         {
             foreach (var value in elements)
             {
-                NavigateElementType(childType, value, propertyPath);
+                NavigateElementType(propertyInfo, childType, value, propertyPath);
             }
         }
 
         /// <summary>
         /// Navigates the array element.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="elements">The elements.</param>
         /// <param name="childType">Type of the child.</param>
         /// <param name="element">The element.</param>
         /// <param name="propertyPath">The property path.</param>
-        /// <param name="propertyInfo">The property information.</param>
-        protected virtual void NavigateArrayElementType(List<XElement> elements, Type childType, XElement element, string propertyPath, PropertyInfo propertyInfo)
+        protected virtual void NavigateArrayElementType(PropertyInfo propertyInfo, List<XElement> elements, Type childType, XElement element, string propertyPath)
         {
-            NavigateElementType(childType, element, propertyPath, propertyInfo);
+            NavigateElementType(propertyInfo, childType, element, propertyPath);
         }
 
         /// <summary>
         /// Navigates the nullable element.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="elementType">Type of the element.</param>
         /// <param name="element">The element.</param>
         /// <param name="propertyPath">The property path.</param>
-        /// <param name="propertyInfo">The property information.</param>
-        protected virtual void NavigateNullableElementType(Type elementType, XElement element, string propertyPath, PropertyInfo propertyInfo)
+        protected virtual void NavigateNullableElementType(PropertyInfo propertyInfo, Type elementType, XElement element, string propertyPath)
         {
-            NavigateElementType(elementType, element, propertyPath);
+            NavigateElementType(propertyInfo, elementType, element, propertyPath);
         }
 
         /// <summary>
         /// Navigates the element.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="elementType">Type of the element.</param>
         /// <param name="element">The element.</param>
         /// <param name="propertyPath">The property path.</param>
-        /// <param name="parentPropertyInfo">The parent property information.</param>
-        protected virtual void NavigateElementType(Type elementType, XElement element, string propertyPath, PropertyInfo parentPropertyInfo = null)
+        protected virtual void NavigateElementType(PropertyInfo propertyInfo, Type elementType, XElement element, string propertyPath)
         {
             var textProperty = elementType.GetProperties().FirstOrDefault(x => x.IsDefined(typeof(XmlTextAttribute), false));
 
@@ -252,7 +253,7 @@ namespace PDS.Witsml.Data
                     var uomPath = GetPropertyPath(propertyPath, uomProperty.Name);
                     var uomValue = ValidateMeasureUom(element, uomProperty, element.Value);
 
-                    NavigateUomAttribute(element.Attribute("uom"), uomProperty.PropertyType, uomPath, element.Value, uomValue);
+                    NavigateUomAttribute(uomProperty, element.Attribute("uom"), uomProperty.PropertyType, uomPath, element.Value, uomValue);
                 }
 
                 if (element.HasAttributes)
@@ -261,24 +262,24 @@ namespace PDS.Witsml.Data
                     NavigateAttributes(element, propertyPath, properties, true);
                 }
 
-                NavigateProperty(element, propertyType, propertyName, element.Value);
+                NavigateProperty(propertyInfo, element, propertyType, propertyName, element.Value);
             }
             else
             {
-                NavigateElementTypeWithoutXmlText(elementType, element, propertyPath, parentPropertyInfo);
+                NavigateElementTypeWithoutXmlText(propertyInfo, elementType, element, propertyPath);
             }
         }
 
         /// <summary>
         /// Navigates the element without processing <see cref="XmlTextAttribute"/>.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="elementType">Type of the element.</param>
         /// <param name="element">The element.</param>
         /// <param name="propertyPath">The property path.</param>
-        /// <param name="parentPropertyInfo">The parent property information.</param>
-        protected virtual void NavigateElementTypeWithoutXmlText(Type elementType, XElement element, string propertyPath, PropertyInfo parentPropertyInfo = null)
+        protected virtual void NavigateElementTypeWithoutXmlText(PropertyInfo propertyInfo, Type elementType, XElement element, string propertyPath)
         {
-            RemoveInvalidChildElementsAndAttributes(elementType, element, parentPropertyInfo);
+            RemoveInvalidChildElementsAndAttributes(propertyInfo, elementType, element);
 
             if (element.HasElements || element.HasAttributes)
             {
@@ -286,23 +287,24 @@ namespace PDS.Witsml.Data
             }
             else
             {
-                NavigateProperty(element, elementType, propertyPath, element.Value);
+                NavigateProperty(propertyInfo, element, elementType, propertyPath, element.Value);
             }
         }
 
         /// <summary>
         /// Navigates the uom attribute.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="xmlObject">The XML object.</param>
         /// <param name="propertyType">Type of the property.</param>
         /// <param name="propertyPath">The property path.</param>
         /// <param name="measureValue">The measure value.</param>
         /// <param name="uomValue">The uom value.</param>
-        protected virtual void NavigateUomAttribute(XObject xmlObject, Type propertyType, string propertyPath, string measureValue, string uomValue)
+        protected virtual void NavigateUomAttribute(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string measureValue, string uomValue)
         {
             if (measureValue.EqualsIgnoreCase("NaN")) return;
 
-            NavigateProperty(xmlObject, propertyType, propertyPath, uomValue);
+            NavigateProperty(propertyInfo, xmlObject, propertyType, propertyPath, uomValue);
         }
 
         /// <summary>
@@ -344,32 +346,32 @@ namespace PDS.Witsml.Data
             var propertyPath = GetPropertyPath(parentPath, propertyInfo.Name);
             var propertyType = propertyInfo.PropertyType;
 
-            NavigateProperty(attribute, propertyType, propertyPath, attribute.Value);
+            NavigateProperty(propertyInfo, attribute, propertyType, propertyPath, attribute.Value);
         }
 
         /// <summary>
         /// Navigates the property.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="xmlObject">The XML object.</param>
         /// <param name="propertyType">Type of the property.</param>
         /// <param name="propertyPath">The property path.</param>
         /// <param name="propertyValue">The property value.</param>
-        /// <exception cref="WitsmlException">
-        /// </exception>
-        protected void NavigateProperty(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
+        /// <exception cref="WitsmlException"></exception>
+        protected void NavigateProperty(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
             if (string.IsNullOrWhiteSpace(propertyValue))
             {
-                HandleNullValue(xmlObject, propertyType, propertyPath, propertyValue);
+                HandleNullValue(propertyInfo, xmlObject, propertyType, propertyPath, propertyValue);
             }
             else if (propertyType == typeof(string))
             {
-                HandleStringValue(xmlObject, propertyType, propertyPath, propertyValue);
+                HandleStringValue(propertyInfo, xmlObject, propertyType, propertyPath, propertyValue);
             }
             else if (propertyType.IsEnum)
             {
                 var value = ParseEnum(propertyType, propertyValue);
-                HandleObjectValue(xmlObject, propertyType, propertyPath, propertyValue, value);
+                HandleObjectValue(propertyInfo, xmlObject, propertyType, propertyPath, propertyValue, value);
             }
             else if (propertyType == typeof(DateTime))
             {
@@ -378,7 +380,7 @@ namespace PDS.Witsml.Data
                 if (!DateTime.TryParse(propertyValue, out value))
                     throw new WitsmlException(Context.Function.GetNonConformingErrorCode());
 
-                HandleDateTimeValue(xmlObject, propertyType, propertyPath, propertyValue, value);
+                HandleDateTimeValue(propertyInfo, xmlObject, propertyType, propertyPath, propertyValue, value);
             }
             else if (propertyType == typeof(Timestamp))
             {
@@ -387,89 +389,95 @@ namespace PDS.Witsml.Data
                 if (!DateTimeOffset.TryParse(propertyValue, out value))
                     throw new WitsmlException(Context.Function.GetNonConformingErrorCode());
 
-                HandleTimestampValue(xmlObject, propertyType, propertyPath, propertyValue, new Timestamp(value));
+                HandleTimestampValue(propertyInfo, xmlObject, propertyType, propertyPath, propertyValue, new Timestamp(value));
             }
             else if (propertyValue.EqualsIgnoreCase("NaN") && IsNumeric(propertyType))
             {
-                HandleNaNValue(xmlObject, propertyType, propertyPath, propertyValue);
+                HandleNaNValue(propertyInfo, xmlObject, propertyType, propertyPath, propertyValue);
             }
             else if (typeof(IConvertible).IsAssignableFrom(propertyType))
             {
                 var value = Convert.ChangeType(propertyValue, propertyType);
-                HandleObjectValue(xmlObject, propertyType, propertyPath, propertyValue, value);
+                HandleObjectValue(propertyInfo, xmlObject, propertyType, propertyPath, propertyValue, value);
             }
             else
             {
-                HandleStringValue(xmlObject, propertyType, propertyPath, propertyValue);
+                HandleStringValue(propertyInfo, xmlObject, propertyType, propertyPath, propertyValue);
             }
         }
 
         /// <summary>
-        /// Handles the <see cref="string"/> value.
+        /// Handles the <see cref="string" /> value.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="xmlObject">The XML object.</param>
         /// <param name="propertyType">Type of the property.</param>
         /// <param name="propertyPath">The property path.</param>
         /// <param name="propertyValue">The property value.</param>
-        protected virtual void HandleStringValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
+        protected virtual void HandleStringValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
         }
 
         /// <summary>
-        /// Handles the <see cref="DateTime"/> value.
+        /// Handles the <see cref="DateTime" /> value.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="xmlObject">The XML object.</param>
         /// <param name="propertyType">Type of the property.</param>
         /// <param name="propertyPath">The property path.</param>
         /// <param name="propertyValue">The property value.</param>
         /// <param name="dateTimeValue">The date time value.</param>
-        protected virtual void HandleDateTimeValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, DateTime dateTimeValue)
+        protected virtual void HandleDateTimeValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, DateTime dateTimeValue)
         {
         }
 
         /// <summary>
-        /// Handles the <see cref="Timestamp"/> value.
+        /// Handles the <see cref="Timestamp" /> value.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="xmlObject">The XML object.</param>
         /// <param name="propertyType">Type of the property.</param>
         /// <param name="propertyPath">The property path.</param>
         /// <param name="propertyValue">The property value.</param>
         /// <param name="timestampValue">The timestamp value.</param>
-        protected virtual void HandleTimestampValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, Timestamp timestampValue)
+        protected virtual void HandleTimestampValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, Timestamp timestampValue)
         {
         }
 
         /// <summary>
         /// Handles the object value.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="xmlObject">The XML object.</param>
         /// <param name="propertyType">Type of the property.</param>
         /// <param name="propertyPath">The property path.</param>
         /// <param name="propertyValue">The property value.</param>
         /// <param name="objectValue">The object value.</param>
-        protected virtual void HandleObjectValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, object objectValue)
+        protected virtual void HandleObjectValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, object objectValue)
         {
         }
 
         /// <summary>
         /// Handles the NaN value.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="xmlObject">The XML object.</param>
         /// <param name="propertyType">Type of the property.</param>
         /// <param name="propertyPath">The property path.</param>
         /// <param name="propertyValue">The property value.</param>
-        protected virtual void HandleNaNValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
+        protected virtual void HandleNaNValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
         }
 
         /// <summary>
         /// Handles the null value.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="xmlObject">The XML object.</param>
         /// <param name="propertyType">Type of the property.</param>
         /// <param name="propertyPath">The property path.</param>
         /// <param name="propertyValue">The property value.</param>
-        protected virtual void HandleNullValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
+        protected virtual void HandleNullValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
             if (!propertyType.IsValueType && !propertyType.IsEnum)
                 return;
@@ -487,16 +495,18 @@ namespace PDS.Witsml.Data
         /// <summary>
         /// Initializes the recurring element handler.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="propertyPath">The property path.</param>
-        protected virtual void InitializeRecurringElementHandler(string propertyPath)
+        protected virtual void InitializeRecurringElementHandler(PropertyInfo propertyInfo, string propertyPath)
         {
         }
 
         /// <summary>
         /// Handles the recurring elements.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="propertyPath">The property path.</param>
-        protected virtual void HandleRecurringElements(string propertyPath)
+        protected virtual void HandleRecurringElements(PropertyInfo propertyInfo, string propertyPath)
         {
         }
 
@@ -758,10 +768,10 @@ namespace PDS.Witsml.Data
             return type.IsNumeric();
         }
 
-        private void RemoveInvalidChildElementsAndAttributes(Type elementType, XElement element, PropertyInfo parentPropertyInfo)
+        private void RemoveInvalidChildElementsAndAttributes(PropertyInfo propertyInfo, Type elementType, XElement element)
         {
             // Ignore list properties that declare child elements using XmlArrayItem
-            if (parentPropertyInfo?.GetCustomAttribute<XmlArrayItemAttribute>() != null) return;
+            if (propertyInfo.GetCustomAttribute<XmlArrayItemAttribute>() != null) return;
 
             var properties = GetPropertyInfo(elementType);
 
@@ -770,9 +780,9 @@ namespace PDS.Witsml.Data
                 if (attribute.IsNamespaceDeclaration || attribute.Name == Xsi("nil") || attribute.Name == Xsi("type"))
                     continue;
 
-                var propertyInfo = GetPropertyInfoForAnElement(properties, attribute.Name.LocalName);
+                var attributeInfo = GetPropertyInfoForAnElement(properties, attribute.Name.LocalName);
 
-                if (propertyInfo == null)
+                if (attributeInfo == null)
                 {
                     HandleInvalidAttribute(attribute);
                 }
@@ -780,9 +790,9 @@ namespace PDS.Witsml.Data
 
             foreach (var child in element.Elements())
             {
-                var propertyInfo = GetPropertyInfoForAnElement(properties, child.Name.LocalName);
+                var childInfo = GetPropertyInfoForAnElement(properties, child.Name.LocalName);
 
-                if (propertyInfo == null)
+                if (childInfo == null)
                 {
                     HandleInvalidElement(child);
                 }

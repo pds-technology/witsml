@@ -135,11 +135,12 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Handles the NaN value during parse navigation by removing NaN values.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="xmlObject">The XML object.</param>
         /// <param name="propertyType">Type of the property.</param>
         /// <param name="propertyPath">The property path.</param>
         /// <param name="propertyValue">The property value.</param>
-        protected override void HandleNaNValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
+        protected override void HandleNaNValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
             if (Context.RemoveNaNElements)
                 Remove(xmlObject);
@@ -206,11 +207,11 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Navigates the recurring elements with validation for Uids (MissingElementUid).
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="elements">The elements.</param>
         /// <param name="childType">Type of the child.</param>
         /// <param name="propertyPath">The property path.</param>
-        /// <param name="propertyInfo">The property information.</param>
-        protected override void NavigateRecurringElements(List<XElement> elements, Type childType, string propertyPath, PropertyInfo propertyInfo)
+        protected override void NavigateRecurringElements(PropertyInfo propertyInfo, List<XElement> elements, Type childType, string propertyPath)
         {
             var elementIds = new List<string>();
 
@@ -221,7 +222,7 @@ namespace PDS.Witsml.Server.Data
                     elementIds.Add(GetAndValidateArrayElementUid(element));
                 }
 
-                NavigateElementType(childType, element, propertyPath);
+                NavigateElementType(propertyInfo, childType, element, propertyPath);
             }
 
             // Look for duplicate uids
@@ -239,19 +240,19 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Navigates the array element with validation for Uid (MissingElementUid).  
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="elements">The elements.</param>
         /// <param name="childType">Type of the child.</param>
         /// <param name="element">The element.</param>
         /// <param name="propertyPath">The property path.</param>
-        /// <param name="propertyInfo">The property information.</param>
-        protected override void NavigateArrayElementType(List<XElement> elements, Type childType, XElement element, string propertyPath, PropertyInfo propertyInfo)
+        protected override void NavigateArrayElementType(PropertyInfo propertyInfo, List<XElement> elements, Type childType, XElement element, string propertyPath)
         {
             if (HasUidProperty(childType))
             {
                 GetAndValidateArrayElementUid(element);
             }
 
-            base.NavigateArrayElementType(elements, childType, element, propertyPath, propertyInfo);
+            base.NavigateArrayElementType(propertyInfo, elements, childType, element, propertyPath);
         }
 
         /// <summary>
