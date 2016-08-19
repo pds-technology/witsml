@@ -245,15 +245,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
         private void AddWellbore(Well well, Wellbore wellbore)
         {
-            var response = _devKit.Add<WellList, Well>(well);
-
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            response = _devKit.Add<WellboreList, Wellbore>(wellbore);
-
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+            _devKit.AddAndAssert(well);
+            _devKit.AddAndAssert(wellbore);
         }
 
         private void DeleteWellbore(Wellbore wellbore)

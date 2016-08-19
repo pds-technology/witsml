@@ -62,7 +62,7 @@ namespace PDS.Witsml.Server.Data.Wells
             _well.Uid = _devKit.Uid();
 
             // Add well
-            AddWell(_well);
+            _devKit.AddAndAssert(_well);
 
             // Assert well is added
             GetWell(_well);
@@ -86,7 +86,7 @@ namespace PDS.Witsml.Server.Data.Wells
             _well.Uid = "w" + uid;
 
             // Add well
-            AddWell(_well);
+            _devKit.AddAndAssert(_well);
 
             // Assert well is added
             GetWell(_well);
@@ -109,7 +109,7 @@ namespace PDS.Witsml.Server.Data.Wells
             _well.DateTimeSpud = DateTimeOffset.UtcNow;
 
             // Add well
-            AddWell(_well);
+            _devKit.AddAndAssert(_well);
 
             // Assert all testing elements are added
             var result = GetWell(_well);
@@ -137,7 +137,7 @@ namespace PDS.Witsml.Server.Data.Wells
             _well.WellDatum = new List<WellDatum> {datumKb};
 
             // Add well
-            AddWell(_well);
+            _devKit.AddAndAssert(_well);
 
             // Assert all testing elements are added
             var result = GetWell(_well);
@@ -176,7 +176,7 @@ namespace PDS.Witsml.Server.Data.Wells
             _well.CommonData = testCommonData;
 
             // Add well
-            AddWell(_well);
+            _devKit.AddAndAssert(_well);
 
             // Assert all testing elements are added
             var result = GetWell(_well);
@@ -208,7 +208,7 @@ namespace PDS.Witsml.Server.Data.Wells
             _well.WellDatum = new List<WellDatum> {datumKb, datumSl};
 
             // Add well
-            AddWell(_well);
+            _devKit.AddAndAssert(_well);
 
             // Assert all testing elements are added
             var result = GetWell(_well);
@@ -256,7 +256,7 @@ namespace PDS.Witsml.Server.Data.Wells
             _well.WellDatum = new List<WellDatum> { datumKb, datumSl };
 
             // Add well
-            AddWell(_well);
+            _devKit.AddAndAssert(_well);
 
             // Assert all testing elements are added
             var result = GetWell(_well);
@@ -305,14 +305,6 @@ namespace PDS.Witsml.Server.Data.Wells
             var resultExt3 = extDatum2.FirstOrDefault(e => e.Uid == ext3.Uid);
             Assert.IsNotNull(resultExt3);
             Assert.IsNull(resultExt3.Description);
-        }
-
-        private void AddWell(Well well)
-        {
-            var response = _devKit.Add<WellList, Well>(well);
-
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
         }
 
         private void DeleteWell(Well well)
