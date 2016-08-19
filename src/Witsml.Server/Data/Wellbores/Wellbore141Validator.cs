@@ -86,6 +86,20 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// <returns>A collection of validation results.</returns>
         protected override IEnumerable<ValidationResult> ValidateForUpdate()
         {
+            return ValidateObjectExistence();
+        }
+
+        /// <summary>
+        /// Validates the data object while executing DeleteFromStore.
+        /// </summary>
+        /// <returns>A collection of validation results.</returns>
+        protected override IEnumerable<ValidationResult> ValidateForDelete()
+        {
+            return ValidateObjectExistence();
+        }
+
+        private IEnumerable<ValidationResult> ValidateObjectExistence()
+        {
             var uri = DataObject.GetUri();
 
             // Validate that a Uid was provided

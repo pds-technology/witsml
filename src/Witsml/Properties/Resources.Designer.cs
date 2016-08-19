@@ -610,11 +610,29 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to For WMLS_AddToStore, all parentage-pointers and lower level (child) uid values must be defined in the XMLin..
+        /// </summary>
+        internal static string MissingElementUidForAdd {
+            get {
+                return ResourceManager.GetString("MissingElementUidForAdd", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to For WMLS_DeleteFromStore, if an element with a uid attribute in the schema is specified then it must also be specified with a value for its uid attribute..
+        /// </summary>
+        internal static string MissingElementUidForDelete {
+            get {
+                return ResourceManager.GetString("MissingElementUidForDelete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to For WMLS_UpdateInStore, if an element with a unique identifier in the schema is specified then the  identifier value must also be specified.
         /// </summary>
-        internal static string MissingElementUid {
+        internal static string MissingElementUidForUpdate {
             get {
-                return ResourceManager.GetString("MissingElementUid", resourceCulture);
+                return ResourceManager.GetString("MissingElementUidForUpdate", resourceCulture);
             }
         }
         
@@ -664,15 +682,6 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to For WMLS_AddToStore, all parentage-pointers and lower level (child) uid values must be defined in the XMLin..
-        /// </summary>
-        internal static string MissingParentUid {
-            get {
-                return ResourceManager.GetString("MissingParentUid", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The input template MUST contain a plural root element..
         /// </summary>
         internal static string MissingPluralRootElement {
@@ -696,15 +705,6 @@ namespace PDS.Witsml.Properties {
         internal static string MissingSubsetOfGrowingDataObject {
             get {
                 return ResourceManager.GetString("MissingSubsetOfGrowingDataObject", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to For WMLS_DeleteFromStore, if an element with a uid attribute in the schema is specified then it must also be specified with a value for its uid attribute..
-        /// </summary>
-        internal static string MissingUidAttributeValue {
-            get {
-                return ResourceManager.GetString("MissingUidAttributeValue", resourceCulture);
             }
         }
         
