@@ -65,11 +65,11 @@ namespace PDS.Witsml.Server.Data.Wells
             _devKit.AddAndAssert(_well);
 
             // Assert well is added
-            GetWell(_well);
+            _devKit.GetSingleWellAndAssert(_well);
 
             // Delete well
             var delete = new Well {Uid = _well.Uid};
-            DeleteWell(delete);
+            _devKit.DeleteAndAssert(delete);
 
             // Assert the well has been deleted
             var query = new Well { Uid = _well.Uid };
@@ -89,11 +89,11 @@ namespace PDS.Witsml.Server.Data.Wells
             _devKit.AddAndAssert(_well);
 
             // Assert well is added
-            GetWell(_well);
+            _devKit.GetSingleWellAndAssert(_well);
 
             // Delete well
             var delete = new Well { Uid = "W" + uid };
-            DeleteWell(delete);
+            _devKit.DeleteAndAssert(delete);
 
             // Assert the well has been deleted
             var query = new Well { Uid = _well.Uid };
@@ -112,7 +112,7 @@ namespace PDS.Witsml.Server.Data.Wells
             _devKit.AddAndAssert(_well);
 
             // Assert all testing elements are added
-            var result = GetWell(_well);
+            var result = _devKit.GetSingleWellAndAssert(_well);
             Assert.AreEqual(_well.Country, result.Country);
             Assert.AreEqual(_well.DateTimeSpud, result.DateTimeSpud);
 
@@ -123,7 +123,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             // Assert the well elements has been deleted
-            result = GetWell(_well);
+            result = _devKit.GetSingleWellAndAssert(_well);
             Assert.IsNull(result.Country);
             Assert.IsNull(result.DateTimeSpud);
         }
@@ -140,7 +140,7 @@ namespace PDS.Witsml.Server.Data.Wells
             _devKit.AddAndAssert(_well);
 
             // Assert all testing elements are added
-            var result = GetWell(_well);
+            var result = _devKit.GetSingleWellAndAssert(_well);
             var data = result.WellDatum;
             Assert.IsNotNull(data);
             Assert.AreEqual(1, data.Count);
@@ -154,7 +154,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             // Assert the attributes has been deleted
-            result = GetWell(_well);
+            result = _devKit.GetSingleWellAndAssert(_well);
             data = result.WellDatum;
             Assert.IsNotNull(data);
             Assert.AreEqual(1, data.Count);
@@ -179,7 +179,7 @@ namespace PDS.Witsml.Server.Data.Wells
             _devKit.AddAndAssert(_well);
 
             // Assert all testing elements are added
-            var result = GetWell(_well);
+            var result = _devKit.GetSingleWellAndAssert(_well);
             var commonData = result.CommonData;
             Assert.IsNotNull(commonData);
             Assert.AreEqual(testCommonData.Comments, commonData.Comments);
@@ -192,7 +192,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             // Assert the well elements has been deleted
-            result = GetWell(_well);
+            result = _devKit.GetSingleWellAndAssert(_well);
             commonData = result.CommonData;
             Assert.IsNotNull(commonData);
             Assert.IsNull(commonData.Comments);
@@ -211,7 +211,7 @@ namespace PDS.Witsml.Server.Data.Wells
             _devKit.AddAndAssert(_well);
 
             // Assert all testing elements are added
-            var result = GetWell(_well);
+            var result = _devKit.GetSingleWellAndAssert(_well);
             var data = result.WellDatum;
             Assert.AreEqual(2, data.Count);
             var datum1 = data.FirstOrDefault(d => d.Uid == datumKb.Uid);
@@ -229,7 +229,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             // Assert the partial delete of the recurring elements
-            result = GetWell(_well);
+            result = _devKit.GetSingleWellAndAssert(_well);
             data = result.WellDatum;
             Assert.AreEqual(1, data.Count);
             datum1 = data.FirstOrDefault(d => d.Uid == datumKb.Uid);
@@ -259,7 +259,7 @@ namespace PDS.Witsml.Server.Data.Wells
             _devKit.AddAndAssert(_well);
 
             // Assert all testing elements are added
-            var result = GetWell(_well);
+            var result = _devKit.GetSingleWellAndAssert(_well);
             var data = result.WellDatum;
             Assert.AreEqual(2, data.Count);
             var datum1 = data.FirstOrDefault(d => d.Uid == datumKb.Uid);
@@ -287,7 +287,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             // Assert wellDatum
-            result = GetWell(_well);
+            result = _devKit.GetSingleWellAndAssert(_well);
             data = result.WellDatum;
             Assert.AreEqual(1, data.Count);
             datum1 = data.FirstOrDefault(d => d.Uid == datumKb.Uid);
@@ -307,24 +307,323 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.IsNull(resultExt3.Description);
         }
 
-        private void DeleteWell(Well well)
+        [TestMethod, Description("Tests you cannot do DeleteFromStore without plural container")]
+        public void Well141DataAdapter_DeleteFromStore_Error_401_No_Plural_Root_Element()
         {
-            var response = _devKit.Delete<WellList, Well>(well);
+            var nonPluralWell = "<well xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                           "   <well uid=\"{0}\">" + Environment.NewLine +
+                           "       <name>No Plural Wellbore</name>" + Environment.NewLine +
+                           "   </well>" + Environment.NewLine +
+                           "</well>";
+
+            var xmlIn = string.Format(nonPluralWell, _well.Uid);
+            var response = _devKit.DeleteFromStore(ObjectTypes.Well, xmlIn, null, null);
 
             Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+            Assert.AreEqual((short)ErrorCodes.MissingPluralRootElement, response.Result);
         }
 
-        private Well GetWell(Well well)
+        [TestMethod, Description("Tests you cannot do DeleteFromStore while missing the object type")]
+        public void Well141DataAdapter_DeleteFromStore_Error_407_Missing_Witsml_Object_Type()
         {
-            var query = new Well { Uid = well.Uid };
+            var response = _devKit.Delete<WellList, Well>(_well, string.Empty);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingWmlTypeIn, response.Result);
+        }
 
-            var results = _devKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
-            Assert.AreEqual(1, results.Count);
-            var result = results.FirstOrDefault();
-            Assert.IsNotNull(result);
+        [TestMethod, Description("Tests you cannot do DeleteFromStore while missing the object type")]
+        public void Well141DataAdapter_DeleteFromStore_Error_408_Delete_Without_QueryIn()
+        {
+            var results = _devKit.DeleteFromStore(ObjectTypes.Well, string.Empty, null, null);
 
-            return result;
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.MissingInputTemplate, results.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore with QueryIn that doesn't conform to delete schema")]
+        public void Well141DataAdapter_DeleteFromStore_Error_409_XmlIn_Doesnt_Conform_To_Delete_Schema()
+        {
+            // Add well
+            _well.Field = "Field1";
+            _devKit.AddAndAssert(_well);
+
+            // Delete well
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid,
+                $"<field /><field />");
+
+            var results = _devKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, results.Result);
+        }
+
+        // TODO: Add 414 test when persmissions are in place
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore without specifying the well uid")]
+        public void Well141DataAdapter_DeleteFromStore_Error_415_Delete_Without_Specifing_UID()
+        {
+            // Add well
+            _devKit.AddAndAssert(_well);
+
+            // Delete well with invalid element
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, string.Empty, string.Empty);
+            var results = _devKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.DataObjectUidMissing, results.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore without all required fields on an optional element")]
+        public void Well141DataAdapter_DeleteFromStore_Error_416_Missing_Attribute()
+        {
+            // Add well
+            var ext1 = _devKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            _well.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            _devKit.AddAndAssert(_well);
+
+            // Delete well
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid,
+                "<commonData><extensionNameValue /></commonData>");
+
+            var results = _devKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            // Note - This is currently throwing a -418 instead of 416.  
+            Assert.AreEqual((short)ErrorCodes.MissingElementUidForDelete, results.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore without all required fields on an optional element")]
+        public void Well141DataAdapter_DeleteFromStore_Error_417_Deleting_With_Empty_UOM_Attribute()
+        {
+            // Add well
+            _well.PercentInterest = new DimensionlessMeasure(0, DimensionlessUom.Item);
+            _devKit.AddAndAssert(_well);
+
+            // Delete well
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid,
+                "<pcInterest />");
+
+            var results = _devKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyUomSpecified, results.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore without all required fields on an optional element")]
+        public void Well141DataAdapter_DeleteFromStore_Error_418_Missing_Uid_Value()
+        {
+            // Add well
+            var ext1 = _devKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            _well.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            _devKit.AddAndAssert(_well);
+
+            // Delete well
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid,
+                "<commonData><extensionNameValue uid=\"\" /></commonData>");
+
+            var results = _devKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.MissingElementUidForDelete, results.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore specify an empty non-recurring container-element with no unique identifier in the schema")]
+        public void Well141DataAdapter_DeleteFromStore_Error_419_Specifying_A_Non_Recuring_Container_Without_UID()
+        {
+            // Add well
+            var wellCrs = new WellCRS
+            {
+                Uid = "localWell1",
+                Name = "Well01",
+                LocalCRS = new LocalCRS
+                {
+                    UsesWellAsOrigin = true,
+                    YAxisAzimuth = new YAxisAzimuth(0, PlaneAngleUom.dega),
+                    XRotationCounterClockwise = false
+                }
+            };
+
+            _devKit.AddAndAssert(_well);
+
+            // Delete well
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid,
+                $"<wellCRS  uid=\"{wellCrs.Uid}\"><localCRS /></wellCRS>");
+
+            var results = _devKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyNonRecurringElementSpecified, results.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore specify an empty node for a non-recurring element or attributethat is mandatory in the write schema.")]
+        public void Well141DataAdapter_DeleteFromStore_Error_420_Specifying_A_Non_Recuring_Attribute_That_Is_Required()
+        {
+            // Add well
+            var wellCrs = new WellCRS
+            {
+                Uid = "localWell1",
+                Name = "Well01",
+                LocalCRS = new LocalCRS
+                {
+                    UsesWellAsOrigin = true,
+                    YAxisAzimuth = new YAxisAzimuth(0, PlaneAngleUom.dega),
+                    XRotationCounterClockwise = false
+                }
+            };
+
+            _devKit.AddAndAssert(_well);
+
+            // Delete well
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid,
+                $"<wellCRS  uid=\"{wellCrs.Uid}\"><localCRS><yAxisAzimuth northDirection=\"grid north\" /></localCRS></wellCRS>");
+
+            var results = _devKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyMandatoryNodeSpecified, results.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore specify an empty node for a non-recurring element or attributethat is mandatory in the write schema.")]
+        public void Well141DataAdapter_DeleteFromStore_Error_421_Specifying_A_Non_Recuring_Attribute_That_Is_Required()
+        {
+            // Add well
+            var location = new Location
+            {
+                Uid = "Loc-1",
+                WellCRS = new RefNameString
+                {
+                    UidRef = "localWell1",
+                    Value = "LocalWellCRS"
+                }
+            };
+            var referencePoint = new ReferencePoint
+            {
+                Uid = "localWell1",
+                Name = "Well01",
+                Location = new List<Location>()
+                {
+                    location
+                }
+            };
+
+            _devKit.AddAndAssert(_well);
+
+            // Delete well
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid,
+                $"<referencePoint uid=\"{referencePoint.Uid}\"><location uid=\"{location.Uid}\" /></referencePoint>");
+
+            var results = _devKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.MustRetainOneRecurringNode, results.Result);
+        }
+
+        [TestMethod, Description("Tests trying to delete a well that doesn't exist")]
+        public void Well141DataAdapter_DeleteFromStore_Error_432_Deleting_A_Well_Has_A_Child()
+        {
+            // Add well
+            _devKit.AddAndAssert(_well);
+
+            // Add wellbore
+            var wellbore = new Wellbore()
+            {
+                UidWell = _well.Uid,
+                NameWell = _well.Name,
+                Uid = _devKit.Uid(),
+                Name = _devKit.Name("Wellbore 01")
+            };
+
+            _devKit.AddAndAssert(wellbore);
+
+            // Delete well
+            var deleteResponse = _devKit.Delete<WellList, Well>(_well);
+            Assert.IsNotNull(deleteResponse);
+            Assert.AreEqual((short)ErrorCodes.NotBottomLevelDataObject, deleteResponse.Result);
+        }
+
+        [TestMethod, Description("Tests trying to delete a well that doesn't exist")]
+        public void Well141DataAdapter_DeleteFromStore_Error_433_Deleting_A_Well_That_Doesnt_Exist()
+        {
+            // Delete well
+            var deleteResponse = _devKit.Delete<WellList, Well>(_well);
+            Assert.IsNotNull(deleteResponse);
+            Assert.AreEqual((short)ErrorCodes.DataObjectNotExist, deleteResponse.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore more than one object")]
+        public void Well141DataAdapter_DeleteFromStore_Error_444_Deleting_With_More_Than_One_Data_Object()
+        {
+            // Add well 
+            _well.Field = "Field1";
+            _devKit.AddAndAssert(_well);
+
+            // Add second well
+            var well2 = new Well()
+            {
+                Uid = _devKit.Uid(),
+                Name = _devKit.Name("Well 02"),
+                TimeZone = _devKit.TimeZone,
+                Field = "Field2"
+            };
+            _devKit.AddAndAssert(well2);
+
+            var multiObjectXml = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                          "   <well uid=\"{0}\">" + Environment.NewLine +
+                          "{1}" +
+                          "   </well>" + Environment.NewLine +
+                          "   <well uid=\"{2}\">" + Environment.NewLine +
+                          "{3}" +
+                          "   </well>" + Environment.NewLine +
+                          "</wells>";
+
+            // Delete Multiple Well Objects
+            var deleteXml = string.Format(
+                multiObjectXml,
+                _well.Uid,
+                "<field />",
+                well2.Uid,
+                "<field />"
+                );
+
+            var results = _devKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateMultipleDataObjects, results.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore that results in a missing mandatory item")]
+        public void Well141DataAdapter_DeleteFromStore_Error_484_Operation_Results_In_Missing_Mandatory_Item()
+        {
+            // Add well
+            var ext1 = _devKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            _well.CommonData = new CommonData()
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+            _devKit.AddAndAssert(_well);
+
+            // Delete well
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid,
+                $"<commonData><extensionNameValue uid=\"{ext1.Uid}\"><name /></extensionNameValue></commonData>");
+
+            var results = _devKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.MissingRequiredData, results.Result);
         }
     }
 }

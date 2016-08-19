@@ -492,6 +492,30 @@ namespace PDS.Witsml.Server
             Assert.AreEqual((short)errorCode, updateResponse.Result);
         }
 
+        /// <summary>
+        /// Deletes the well and test the return code
+        /// </summary>
+        /// <param name="well">The well.</param>
+        public void DeleteAndAssert(Well well, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            var response = Delete<WellList, Well>(well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)errorCode, response.Result);
+        }
+
+        /// <summary>
+        /// Deletes the wellbore and test the return code
+        /// </summary>
+        /// <param name="wellbore">The wellbore.</param>
+        public void DeleteAndAssert(Wellbore wellbore, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            var response = Delete<WellboreList, Wellbore>(wellbore);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)errorCode, response.Result);
+        }
+
         public WMLS_AddToStoreResponse Add_Log_from_file(string xmlfile)
         {
             var xmlin = File.ReadAllText(xmlfile);
