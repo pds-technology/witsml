@@ -132,22 +132,7 @@ namespace PDS.Witsml.Data
                 }
             }
 
-            foreach (var attribute in element.Attributes())
-            {
-                if (attribute.IsNamespaceDeclaration || attribute.Name == Xsi("nil") || attribute.Name == Xsi("type"))
-                    continue;
-
-                var attributeProp = GetPropertyInfoForAnElement(properties, attribute.Name.LocalName);
-
-                if (attributeProp != null)
-                {
-                    NavigateAttribute(attributeProp, attribute, parentPath);
-                }
-                else
-                {
-                    HandleInvalidAttribute(attribute, false);
-                }
-            }
+            NavigateAttributes(element, parentPath, properties);
         }
 
         /// <summary>
@@ -252,7 +237,7 @@ namespace PDS.Witsml.Data
         /// <param name="element">The element.</param>
         /// <param name="propertyPath">The property path.</param>
         /// <param name="parentPropertyInfo">The parent property information.</param>
-        protected void NavigateElementType(Type elementType, XElement element, string propertyPath, PropertyInfo parentPropertyInfo = null)
+        protected virtual void NavigateElementType(Type elementType, XElement element, string propertyPath, PropertyInfo parentPropertyInfo = null)
         {
             var textProperty = elementType.GetProperties().FirstOrDefault(x => x.IsDefined(typeof(XmlTextAttribute), false));
 
@@ -262,42 +247,46 @@ namespace PDS.Witsml.Data
                 var propertyName = GetPropertyPath(propertyPath, textProperty.Name);
                 var propertyType = textProperty.PropertyType;
 
-                if (uomProperty != null && Context.Function != Functions.DeleteFromStore)
+                if (uomProperty != null)
                 {
                     var uomPath = GetPropertyPath(propertyPath, uomProperty.Name);
                     var uomValue = ValidateMeasureUom(element, uomProperty, element.Value);
 
                     NavigateUomAttribute(element.Attribute("uom"), uomProperty.PropertyType, uomPath, element.Value, uomValue);
-
-                    if (uomValue != null)
-                        NavigateProperty(element, propertyType, propertyName, element.Value);
-                }
-                else
-                {
-                    if (Context.Function != Functions.DeleteFromStore)
-                        NavigateProperty(element, propertyType, propertyName, element.Value);
                 }
 
                 if (element.HasAttributes)
-                    NavigateElement(element, elementType, propertyPath);
-                else
                 {
-                    if (Context.Function == Functions.DeleteFromStore)
-                        NavigateProperty(element, elementType, propertyPath, element.Value);
-                }                
+                    var properties = GetPropertyInfo(elementType);
+                    NavigateAttributes(element, propertyPath, properties, true);
+                }
+
+                NavigateProperty(element, propertyType, propertyName, element.Value);
             }
             else
             {
-                RemoveInvalidChildElementsAndAttributes(elementType, element, parentPropertyInfo);
+                NavigateElementTypeWithoutXmlText(elementType, element, propertyPath, parentPropertyInfo);
+            }
+        }
 
-                if (element.HasElements || element.HasAttributes)
-                {
-                    NavigateElement(element, elementType, propertyPath);
-                }
-                else
-                {
-                    NavigateProperty(element, elementType, propertyPath, element.Value);
-                }
+        /// <summary>
+        /// Navigates the element without processing <see cref="XmlTextAttribute"/>.
+        /// </summary>
+        /// <param name="elementType">Type of the element.</param>
+        /// <param name="element">The element.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <param name="parentPropertyInfo">The parent property information.</param>
+        protected virtual void NavigateElementTypeWithoutXmlText(Type elementType, XElement element, string propertyPath, PropertyInfo parentPropertyInfo = null)
+        {
+            RemoveInvalidChildElementsAndAttributes(elementType, element, parentPropertyInfo);
+
+            if (element.HasElements || element.HasAttributes)
+            {
+                NavigateElement(element, elementType, propertyPath);
+            }
+            else
+            {
+                NavigateProperty(element, elementType, propertyPath, element.Value);
             }
         }
 
@@ -314,6 +303,34 @@ namespace PDS.Witsml.Data
             if (measureValue.EqualsIgnoreCase("NaN")) return;
 
             NavigateProperty(xmlObject, propertyType, propertyPath, uomValue);
+        }
+
+        /// <summary>
+        /// Navigates the attributes.
+        /// </summary>
+        /// <param name="element">The element.</param>
+        /// <param name="parentPath">The parent path.</param>
+        /// <param name="properties">The properties.</param>
+        /// <param name="skipUom">if set to <c>true</c> skip uom.</param>
+        protected virtual void NavigateAttributes(XElement element, string parentPath, IList<PropertyInfo> properties, bool skipUom = false)
+        {
+            foreach (var attribute in element.Attributes())
+            {
+                if (attribute.IsNamespaceDeclaration || attribute.Name == Xsi("nil") || attribute.Name == Xsi("type") ||
+                    (skipUom && attribute.Name.LocalName == "uom"))
+                    continue;
+
+                var attributeProp = GetPropertyInfoForAnElement(properties, attribute.Name.LocalName);
+
+                if (attributeProp != null)
+                {
+                    NavigateAttribute(attributeProp, attribute, parentPath);
+                }
+                else
+                {
+                    HandleInvalidAttribute(attribute, false);
+                }
+            }
         }
 
         /// <summary>
