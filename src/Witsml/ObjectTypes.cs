@@ -365,20 +365,25 @@ namespace PDS.Witsml
         /// Convert a singular string to plural.
         /// </summary>
         /// <param name="singleString">The single string.</param>
-        /// <returns>The singular string.</returns>
-        internal static string SingleToPlural(string singleString)
+        /// <param name="isWitsmlPlural">if set to <c>true</c> use WITSML plural rules.</param>
+        /// <returns>The plural string.</returns>
+        public static string SingleToPlural(string singleString, bool isWitsmlPlural = true)
         {
-            return singleString + "s";
+            return isWitsmlPlural || !singleString.EndsWith("y")
+                ? singleString + "s"
+                : singleString.Substring(0, singleString.Length - 1) + "ies";
         }
 
         /// <summary>
         /// Converts a plural string to singlular.
         /// </summary>
         /// <param name="pluralString">The plural string.</param>
-        /// <returns>The plural string.</returns>
-        internal static string PluralToSingle(string pluralString)
+        /// <returns>The singular string.</returns>
+        public static string PluralToSingle(string pluralString)
         {
-            return pluralString.EndsWith("s")
+            return pluralString.EndsWith("ies")
+                ? pluralString.Substring(0, pluralString.Length - 3) + "y"
+                : pluralString.EndsWith("s")
                 ? pluralString.Substring(0, pluralString.Length - 1)
                 : pluralString;
         }

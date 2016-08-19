@@ -37,6 +37,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class DiscoveryStore200Provider : IDiscoveryStoreProvider
     {
+        private readonly IContainer _container;
         private readonly IEtpDataProvider<Well> _wellDataProvider;
         private readonly IEtpDataProvider<Wellbore> _wellboreDataProvider;
         private readonly IEtpDataProvider<Log> _logDataProvider;
@@ -45,17 +46,20 @@ namespace PDS.Witsml.Server.Providers.Discovery
         /// <summary>
         /// Initializes a new instance of the <see cref="DiscoveryStore200Provider" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="wellDataProvider">The well data Provider.</param>
         /// <param name="wellboreDataProvider">The wellbore data Provider.</param>
         /// <param name="logDataProvider">The log data Provider.</param>
         /// <param name="channelSetDataProvider">The channel set data Provider.</param>
         [ImportingConstructor]
         public DiscoveryStore200Provider(
+            IContainer container,
             IEtpDataProvider<Well> wellDataProvider,
             IEtpDataProvider<Wellbore> wellboreDataProvider,
             IEtpDataProvider<Log> logDataProvider,
             IEtpDataProvider<ChannelSet> channelSetDataProvider)
         {
+            _container = container;
             _wellDataProvider = wellDataProvider;
             _wellboreDataProvider = wellboreDataProvider;
             _logDataProvider = logDataProvider;
@@ -110,6 +114,16 @@ namespace PDS.Witsml.Server.Providers.Discovery
 
                     _logDataProvider.GetAll(wellboreUri)
                         .Where(x => x.TimeDepth.EqualsIgnoreCase(uri.ObjectType))
+                        .ForEach(x => args.Context.Add(ToResource(x)));
+                }
+                else
+                {
+                    var objectType = ObjectTypes.PluralToSingle(uri.ObjectType);
+                    var dataProvider = _container.Resolve<IEtpDataProvider>(new ObjectName(objectType, uri.Version));
+
+                    dataProvider
+                        .GetAll(uri.Parent)
+                        .Cast<AbstractObject>()
                         .ForEach(x => args.Context.Add(ToResource(x)));
                 }
             }
@@ -191,6 +205,15 @@ namespace PDS.Witsml.Server.Providers.Discovery
                 uri: entity.GetUri(channelSet),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Mnemonic);
+        }
+
+        private Resource ToResource(AbstractObject entity)
+        {
+            return DiscoveryStoreProvider.New(
+                uuid: entity.Uuid,
+                uri: entity.GetUri(),
+                resourceType: ResourceTypes.DataObject,
+                name: entity.Citation.Title);
         }
     }
 }

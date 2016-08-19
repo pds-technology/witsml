@@ -44,6 +44,11 @@ namespace PDS.Witsml
         public const string Other = "Other";
 
         /// <summary>
+        /// An ObjectFolders identifier for Messages.
+        /// </summary>
+        public const string Messages = "Messages";
+
+        /// <summary>
         /// An ObjectFolders identifier for MudLogs.
         /// </summary>
         public const string MudLogs = "MudLogs";

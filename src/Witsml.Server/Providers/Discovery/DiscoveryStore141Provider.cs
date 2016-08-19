@@ -18,12 +18,15 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
 using Energistics.Common;
+using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using Energistics.Protocol.Discovery;
+using PDS.Framework;
 using PDS.Witsml.Server.Data;
 
 namespace PDS.Witsml.Server.Providers.Discovery
@@ -36,6 +39,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class DiscoveryStore141Provider : IDiscoveryStoreProvider
     {
+        private readonly IContainer _container;
         private readonly IEtpDataProvider<Well> _wellDataProvider;
         private readonly IEtpDataProvider<Wellbore> _wellboreDataProvider;
         private readonly IEtpDataProvider<Log> _logDataProvider;
@@ -43,15 +47,18 @@ namespace PDS.Witsml.Server.Providers.Discovery
         /// <summary>
         /// Initializes a new instance of the <see cref="DiscoveryStore141Provider" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="wellDataProvider">The well data provider.</param>
         /// <param name="wellboreDataProvider">The wellbore data provider.</param>
         /// <param name="logDataProvider">The log data provider.</param>
         [ImportingConstructor]
         public DiscoveryStore141Provider(
+            IContainer container,
             IEtpDataProvider<Well> wellDataProvider,
             IEtpDataProvider<Wellbore> wellboreDataProvider,
             IEtpDataProvider<Log> logDataProvider)
         {
+            _container = container;
             _wellDataProvider = wellDataProvider;
             _wellboreDataProvider = wellboreDataProvider;
             _logDataProvider = logDataProvider;
@@ -89,6 +96,16 @@ namespace PDS.Witsml.Server.Providers.Discovery
                 _wellDataProvider.GetAll()
                     .ForEach(x => args.Context.Add(ToResource(x)));
             }
+            else if (string.IsNullOrWhiteSpace(uri.ObjectId))
+            {
+                var objectType = ObjectTypes.PluralToSingle(uri.ObjectType);
+                var dataProvider = _container.Resolve<IEtpDataProvider>(new ObjectName(objectType, uri.Version));
+
+                dataProvider
+                    .GetAll(uri.Parent)
+                    .Cast<IWellboreObject>()
+                    .ForEach(x => args.Context.Add(ToResource(x)));
+            }
             else if (uri.ObjectType == ObjectTypes.Well)
             {
                 _wellboreDataProvider.GetAll(uri)
@@ -96,8 +113,11 @@ namespace PDS.Witsml.Server.Providers.Discovery
             }
             else if (uri.ObjectType == ObjectTypes.Wellbore)
             {
-                _logDataProvider.GetAll(uri)
-                    .ForEach(x => args.Context.Add(ToResource(x)));
+                args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Logs));
+                args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Message, ObjectFolders.Messages));
+                args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.MudLog, ObjectFolders.MudLogs));
+                args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Rig, ObjectFolders.Rigs));
+                args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Trajectory, ObjectFolders.Trajectories));
             }
             else if (uri.ObjectType == ObjectTypes.Log)
             {
@@ -126,14 +146,14 @@ namespace PDS.Witsml.Server.Providers.Discovery
                 count: -1);
         }
 
-        private Resource ToResource(Log entity)
+        private Resource ToResource(IWellboreObject entity)
         {
             return DiscoveryStoreProvider.New(
                 uuid: entity.Uid,
                 uri: entity.GetUri(),
                 resourceType: ResourceTypes.DataObject,
                 name: entity.Name,
-                count: -1);
+                count: entity is Log ? -1 : 0);
         }
 
         private Resource ToResource(Log log, LogCurveInfo curve)

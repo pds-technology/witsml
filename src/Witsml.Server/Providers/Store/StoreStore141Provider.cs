@@ -51,7 +51,7 @@ namespace PDS.Witsml.Server.Providers.Store
         /// Gets the composition container.
         /// </summary>
         /// <value>The container.</value>
-        public IContainer Container { get; private set; }
+        public IContainer Container { get; }
 
         /// <summary>
         /// Gets the data schema version supported by the provider.
