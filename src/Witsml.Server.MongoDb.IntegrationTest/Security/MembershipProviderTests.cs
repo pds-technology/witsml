@@ -145,7 +145,7 @@ namespace PDS.Witsml.Server.Security
             Assert.AreEqual(true, result);
         }
 
-        //[Ignore]
+        [Ignore]
         [TestMethod]
         public void MongoDbMembershipProvider_DeleteUser_removes_successfully()
         {

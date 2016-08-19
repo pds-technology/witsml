@@ -120,6 +120,18 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Navigates the element.
+        /// </summary>
+        /// <param name="elementType">Type of the element.</param>
+        /// <param name="element">The element.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <param name="parentPropertyInfo">The parent property information.</param>
+        protected override void NavigateElementType(Type elementType, XElement element, string propertyPath, PropertyInfo parentPropertyInfo = null)
+        {
+            NavigateElementTypeWithoutXmlText(elementType, element, propertyPath, parentPropertyInfo);
+        }
+
+        /// <summary>
         /// Navigates the nullable element type.
         /// </summary>
         /// <param name="elementType">Type of the element.</param>
