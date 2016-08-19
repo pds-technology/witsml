@@ -312,7 +312,7 @@ namespace PDS.Witsml.Server.Data.Wells
         {
             var nonPluralWell = "<well xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
                            "   <well uid=\"{0}\">" + Environment.NewLine +
-                           "       <name>No Plural Wellbore</name>" + Environment.NewLine +
+                           "       <name>No Plural well</name>" + Environment.NewLine +
                            "   </well>" + Environment.NewLine +
                            "</well>";
 
@@ -340,24 +340,23 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.MissingInputTemplate, results.Result);
         }
 
-        [TestMethod, Description("Tests you cannot do DeleteFromStore with QueryIn that doesn't conform to delete schema")]
-        public void Well141DataAdapter_DeleteFromStore_Error_409_XmlIn_Doesnt_Conform_To_Delete_Schema()
-        {
-            // Add well
-            _well.Field = "Field1";
-            _devKit.AddAndAssert(_well);
+        // Implement after fix task 6882
+        //[TestMethod, Description("Tests you cannot do DeleteFromStore with QueryIn that doesn't conform to delete schema")]
+        //public void Well141DataAdapter_DeleteFromStore_Error_409_XmlIn_Doesnt_Conform_To_Delete_Schema()
+        //{
+        //    // Add well
+        //    _well.Field = "Field1";
+        //    _devKit.AddAndAssert(_well);
 
-            // Delete well
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid,
-                $"<field /><field />");
+        //    // Delete well
+        //    var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid,
+        //        $"<field /><field />");
 
-            var results = _devKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
+        //    var results = _devKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
 
-            Assert.IsNotNull(results);
-            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, results.Result);
-        }
-
-        // TODO: Add 414 test when persmissions are in place
+        //    Assert.IsNotNull(results);
+        //    Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, results.Result);
+        //}
 
         [TestMethod, Description("Tests you cannot do DeleteFromStore without specifying the well uid")]
         public void Well141DataAdapter_DeleteFromStore_Error_415_Delete_Without_Specifing_UID()
