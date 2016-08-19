@@ -551,6 +551,42 @@ namespace PDS.Witsml.Data.Channels
         }
 
         /// <summary>
+        /// Partials the delete record.
+        /// </summary>
+        /// <param name="deletedChannels">The deleted channels.</param>
+        /// <param name="ranges">The ranges.</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <exception cref="NotImplementedException"></exception>
+        public void PartialDeleteRecord(List<string> deletedChannels, Dictionary<string, Range<double?>> ranges, bool increasing)
+        {
+            var row = _records[_current][1];
+            var newRow = new List<object>();
+            var index = GetIndexValue();
+
+            for (var i = 0; i < _originalMnemonics.Length; i++)
+            {
+                var mnemonic = _originalMnemonics[i];
+                if (deletedChannels.Contains(mnemonic))
+                    continue;
+
+                if (ranges.ContainsKey(mnemonic))
+                {
+                    var range = ranges[mnemonic];
+                    if (WithinDeleteRange(index, range, increasing))
+                        newRow.Add(null);
+                    else
+                        newRow.Add(row[i]);
+                }
+                else
+                {
+                    newRow.Add(row[i]);
+                }
+            }
+
+            _records[_current][1] = newRow;
+        }
+
+        /// <summary>
         /// Copies the channel settings.
         /// </summary>
         /// <param name="record">The record.</param>
@@ -1943,6 +1979,11 @@ namespace PDS.Witsml.Data.Channels
                     _indexMap.Add(_originalMnemonics[i], i);
                 }
             }
+        }
+
+        private bool WithinDeleteRange(double index, Range<double?> range, bool increasing)
+        {
+            return !range.StartsAfter(index, increasing) && !range.EndsBefore(index, increasing);
         }
 
         #region IDisposable Support

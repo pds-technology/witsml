@@ -210,5 +210,13 @@ namespace PDS.Witsml.Data.Channels
         /// Resets the merge settings.
         /// </summary>
         void ResetMergeSettings();
+
+        /// <summary>
+        /// Partials the delete record.
+        /// </summary>
+        /// <param name="deletedChannels">The deleted channels.</param>
+        /// <param name="ranges">The ranges.</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        void PartialDeleteRecord(List<string> deletedChannels, Dictionary<string, Range<double?>> ranges, bool increasing);
     }
 }
