@@ -137,9 +137,9 @@ namespace PDS.Witsml.Server.Data
 
                     var childValidator = new MongoDbUpdate<T>(_collection, _parser, _idPropertyName, Context.Ignored);
                     childValidator.Context.ValidationOnly = true;
-                    childValidator.NavigateElementType(propertyInfo.PropertyType, elementList[0], propertyPath);
+                    childValidator.NavigateElementType(propertyInfo, propertyInfo.PropertyType, elementList[0], propertyPath);
 
-                    HandleObjectValue(null, null, propertyPath, null, childValue);
+                    HandleObjectValue(propertyInfo, null, null, propertyPath, null, childValue);
                 }
                 else
                 {
@@ -155,41 +155,26 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Navigates the nullable element type.
-        /// </summary>
-        /// <param name="elementType">Type of the element.</param>
-        /// <param name="element">The element.</param>
-        /// <param name="propertyPath">The property path.</param>
-        /// <param name="propertyInfo">The property information.</param>
-        protected override void NavigateNullableElementType(Type elementType, XElement element, string propertyPath, PropertyInfo propertyInfo)
-        {
-            NavigateElementType(elementType, element, propertyPath);
-
-            if (propertyInfo.DeclaringType?.GetProperty(propertyInfo.Name + "Specified") != null)
-                Context.Update = Context.Update.Set(propertyPath + "Specified", true);
-        }
-
-        /// <summary>
         /// Navigates the recurring elements.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="elements">The elements.</param>
         /// <param name="childType">Type of the child.</param>
         /// <param name="propertyPath">The property path.</param>
-        /// <param name="propertyInfo">The property information.</param>
-        protected override void NavigateRecurringElements(List<XElement> elements, Type childType, string propertyPath, PropertyInfo propertyInfo)
+        protected override void NavigateRecurringElements(PropertyInfo propertyInfo, List<XElement> elements, Type childType, string propertyPath)
         {
-            NavigateArrayElementType(elements, childType, null, propertyPath, propertyInfo);
+            NavigateArrayElementType(propertyInfo, elements, childType, null, propertyPath);
         }
 
         /// <summary>
         /// Navigates the array element type.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="elements">The elements.</param>
         /// <param name="childType">Type of the child.</param>
         /// <param name="element">The element.</param>
         /// <param name="propertyPath">The property path.</param>
-        /// <param name="propertyInfo">The property information.</param>
-        protected override void NavigateArrayElementType(List<XElement> elements, Type childType, XElement element, string propertyPath, PropertyInfo propertyInfo)
+        protected override void NavigateArrayElementType(PropertyInfo propertyInfo, List<XElement> elements, Type childType, XElement element, string propertyPath)
         {
             UpdateArrayElements(elements, propertyInfo, Context.PropertyValues.Last(), childType, propertyPath);
         }
@@ -197,94 +182,101 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Navigates the uom attribute.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="xmlObject">The XML object.</param>
         /// <param name="propertyType">Type of the property.</param>
         /// <param name="propertyPath">The property path.</param>
         /// <param name="measureValue">The measure value.</param>
         /// <param name="uomValue">The uom value.</param>
         /// <exception cref="WitsmlException"></exception>
-        protected override void NavigateUomAttribute(XObject xmlObject, Type propertyType, string propertyPath, string measureValue, string uomValue)
+        protected override void NavigateUomAttribute(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string measureValue, string uomValue)
         {
             // Throw error -446 if uomValue is specified but measureValue is missing or NaN
             if (!string.IsNullOrWhiteSpace(uomValue) && (string.IsNullOrWhiteSpace(measureValue) || measureValue.EqualsIgnoreCase("NaN")))
                 throw new WitsmlException(ErrorCodes.MissingMeasureDataForUnit);
 
-            NavigateProperty(xmlObject, propertyType, propertyPath, uomValue);
+            NavigateProperty(propertyInfo, xmlObject, propertyType, propertyPath, uomValue);
         }
 
         /// <summary>
         /// Handles the string value.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="xmlObject">The XML object.</param>
         /// <param name="propertyType">Type of the property.</param>
         /// <param name="propertyPath">The property path.</param>
         /// <param name="propertyValue">The property value.</param>
-        protected override void HandleStringValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
+        protected override void HandleStringValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
-            Context.Update = Context.Update.Set(propertyPath, propertyValue);
+            SetProperty(propertyInfo, propertyPath, propertyValue);
         }
 
         /// <summary>
         /// Handles the date time value.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="xmlObject">The XML object.</param>
         /// <param name="propertyType">Type of the property.</param>
         /// <param name="propertyPath">The property path.</param>
         /// <param name="propertyValue">The property value.</param>
         /// <param name="dateTimeValue">The date time value.</param>
-        protected override void HandleDateTimeValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, DateTime dateTimeValue)
+        protected override void HandleDateTimeValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, DateTime dateTimeValue)
         {
-            Context.Update = Context.Update.Set(propertyPath, dateTimeValue);
+            SetProperty(propertyInfo, propertyPath, dateTimeValue);
         }
 
         /// <summary>
         /// Handles the timestamp value.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="xmlObject">The XML object.</param>
         /// <param name="propertyType">Type of the property.</param>
         /// <param name="propertyPath">The property path.</param>
         /// <param name="propertyValue">The property value.</param>
         /// <param name="timestampValue">The timestamp value.</param>
-        protected override void HandleTimestampValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, Timestamp timestampValue)
+        protected override void HandleTimestampValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, Timestamp timestampValue)
         {
-            Context.Update = Context.Update.Set(propertyPath, timestampValue);
+            SetProperty(propertyInfo, propertyPath, timestampValue);
         }
 
         /// <summary>
         /// Handles the object value.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="xmlObject">The XML object.</param>
         /// <param name="propertyType">Type of the property.</param>
         /// <param name="propertyPath">The property path.</param>
         /// <param name="propertyValue">The property value.</param>
         /// <param name="objectValue">The object value.</param>
-        protected override void HandleObjectValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, object objectValue)
+        protected override void HandleObjectValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, object objectValue)
         {
-            Context.Update = Context.Update.Set(propertyPath, objectValue);
+            SetProperty(propertyInfo, propertyPath, objectValue);
         }
 
         /// <summary>
         /// Handles the null value.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="xmlObject">The XML object.</param>
         /// <param name="propertyType">Type of the property.</param>
         /// <param name="propertyPath">The property path.</param>
         /// <param name="propertyValue">The property value.</param>
-        protected override void HandleNullValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
+        protected override void HandleNullValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
-            UnsetProperty(propertyPath);
+            UnsetProperty(propertyInfo, propertyPath);
         }
 
         /// <summary>
         /// Handles the na n value.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="xmlObject">The XML object.</param>
         /// <param name="propertyType">Type of the property.</param>
         /// <param name="propertyPath">The property path.</param>
         /// <param name="propertyValue">The property value.</param>
-        protected override void HandleNaNValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
+        protected override void HandleNaNValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
-            UnsetProperty(propertyPath);
+            UnsetProperty(propertyInfo, propertyPath);
         }
 
         private void BuildUpdate(XElement element)
@@ -326,12 +318,27 @@ namespace PDS.Witsml.Server.Data
             Context.PropertyValues.Remove(Context.PropertyValues.Last());
         }
 
-        private void UnsetProperty(string propertyPath)
+        private void SetProperty<TValue>(PropertyInfo propertyInfo, string propertyPath, TValue propertyValue)
         {
-            if (Context.PropertyInfos.Last().IsDefined(typeof(RequiredAttribute), false))
+            Context.Update = Context.Update.Set(propertyPath, propertyValue);
+            SetSpecifiedProperty(propertyInfo, propertyPath, true);
+        }
+
+        private void UnsetProperty(PropertyInfo propertyInfo, string propertyPath)
+        {
+            if (propertyInfo.IsDefined(typeof(RequiredAttribute), false))
                 throw new WitsmlException(ErrorCodes.MissingRequiredData);
 
             Context.Update = Context.Update.Unset(propertyPath);
+            SetSpecifiedProperty(propertyInfo, propertyPath, false);
+        }
+
+        private void SetSpecifiedProperty(PropertyInfo propertyInfo, string propertyPath, bool specified)
+        {
+            if (propertyInfo.DeclaringType?.GetProperty(propertyInfo.Name + "Specified") != null)
+            {
+                Context.Update = Context.Update.Set(propertyPath + "Specified", specified);
+            }
         }
 
         private object ParseNestedElement(Type type, XElement element)
@@ -389,7 +396,7 @@ namespace PDS.Witsml.Server.Data
 
                         var childValidator = new MongoDbUpdate<T>(_collection, _parser, _idPropertyName, Context.Ignored);
                         childValidator.Context.ValidationOnly = true;
-                        childValidator.NavigateElementType(type, element, parentPath);
+                        childValidator.NavigateElementType(propertyInfo, type, element, parentPath);
 
                         if (Context.ValidationOnly)
                             return null;

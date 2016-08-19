@@ -122,51 +122,36 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Navigates the element.
         /// </summary>
-        /// <param name="elementType">Type of the element.</param>
-        /// <param name="element">The element.</param>
-        /// <param name="propertyPath">The property path.</param>
-        /// <param name="parentPropertyInfo">The parent property information.</param>
-        protected override void NavigateElementType(Type elementType, XElement element, string propertyPath, PropertyInfo parentPropertyInfo = null)
-        {
-            NavigateElementTypeWithoutXmlText(elementType, element, propertyPath, parentPropertyInfo);
-        }
-
-        /// <summary>
-        /// Navigates the nullable element type.
-        /// </summary>
-        /// <param name="elementType">Type of the element.</param>
-        /// <param name="element">The element.</param>
-        /// <param name="propertyPath">The property path.</param>
         /// <param name="propertyInfo">The property information.</param>
-        protected override void NavigateNullableElementType(Type elementType, XElement element, string propertyPath, PropertyInfo propertyInfo)
+        /// <param name="elementType">Type of the element.</param>
+        /// <param name="element">The element.</param>
+        /// <param name="propertyPath">The property path.</param>
+        protected override void NavigateElementType(PropertyInfo propertyInfo, Type elementType, XElement element, string propertyPath)
         {
-            NavigateElementType(elementType, element, propertyPath);
-
-            if (propertyInfo.DeclaringType?.GetProperty(propertyInfo.Name + "Specified") != null)
-                Context.Update = Context.Update.Set(propertyPath + "Specified", false);
+            NavigateElementTypeWithoutXmlText(propertyInfo, elementType, element, propertyPath);
         }
 
         /// <summary>
         /// Navigates the recurring elements.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="elements">The elements.</param>
         /// <param name="childType">Type of the child.</param>
         /// <param name="propertyPath">The property path.</param>
-        /// <param name="propertyInfo">The property information.</param>
-        protected override void NavigateRecurringElements(List<XElement> elements, Type childType, string propertyPath, PropertyInfo propertyInfo)
+        protected override void NavigateRecurringElements(PropertyInfo propertyInfo, List<XElement> elements, Type childType, string propertyPath)
         {
-            NavigateArrayElementType(elements, childType, null, propertyPath, propertyInfo);
+            NavigateArrayElementType(propertyInfo, elements, childType, null, propertyPath);
         }
 
         /// <summary>
         /// Navigates the array element type.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="elements">The elements.</param>
         /// <param name="childType">Type of the child.</param>
         /// <param name="element">The element.</param>
         /// <param name="propertyPath">The property path.</param>
-        /// <param name="propertyInfo">The property information.</param>
-        protected override void NavigateArrayElementType(List<XElement> elements, Type childType, XElement element, string propertyPath, PropertyInfo propertyInfo)
+        protected override void NavigateArrayElementType(PropertyInfo propertyInfo, List<XElement> elements, Type childType, XElement element, string propertyPath)
         {
             PartialDeleteArrayElements(elements, propertyInfo, Context.PropertyValues.Last(), childType, propertyPath);
         }
@@ -174,13 +159,14 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Handles the null value.
         /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
         /// <param name="xmlObject">The XML object.</param>
         /// <param name="propertyType">Type of the property.</param>
         /// <param name="propertyPath">The property path.</param>
         /// <param name="propertyValue">The property value.</param>
-        protected override void HandleNullValue(XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
+        protected override void HandleNullValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
-            UnsetProperty(propertyPath);
+            UnsetProperty(propertyInfo, propertyPath);
         }
 
         private void BuildPartialDelete(XElement element)
@@ -222,12 +208,27 @@ namespace PDS.Witsml.Server.Data
             Context.PropertyValues.Remove(Context.PropertyValues.Last());
         }
 
-        private void UnsetProperty(string propertyPath)
+        private void SetProperty<TValue>(PropertyInfo propertyInfo, string propertyPath, TValue propertyValue)
         {
-            if (Context.PropertyInfos.Last().IsDefined(typeof(RequiredAttribute), false))
+            Context.Update = Context.Update.Set(propertyPath, propertyValue);
+            SetSpecifiedProperty(propertyInfo, propertyPath, true);
+        }
+
+        private void UnsetProperty(PropertyInfo propertyInfo, string propertyPath)
+        {
+            if (propertyInfo.IsDefined(typeof(RequiredAttribute), false))
                 throw new WitsmlException(ErrorCodes.MissingRequiredData);
 
             Context.Update = Context.Update.Unset(propertyPath);
+            SetSpecifiedProperty(propertyInfo, propertyPath, false);
+        }
+
+        private void SetSpecifiedProperty(PropertyInfo propertyInfo, string propertyPath, bool specified)
+        {
+            if (propertyInfo.DeclaringType?.GetProperty(propertyInfo.Name + "Specified") != null)
+            {
+                Context.Update = Context.Update.Set(propertyPath + "Specified", specified);
+            }
         }
 
         private void PartialDeleteArrayElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
