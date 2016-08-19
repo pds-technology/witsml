@@ -331,7 +331,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.MissingWmlTypeIn, response.Result);
         }
 
-        [TestMethod, Description("Tests you cannot do DeleteFromStore while missing the object type")]
+        [TestMethod, Description("Tests you cannot do DeleteFromStore while missing queryIn")]
         public void Well141DataAdapter_DeleteFromStore_Error_408_Delete_Without_QueryIn()
         {
             var results = _devKit.DeleteFromStore(ObjectTypes.Well, string.Empty, null, null);
@@ -396,7 +396,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.MissingElementUidForDelete, results.Result);
         }
 
-        [TestMethod, Description("Tests you cannot do DeleteFromStore without all required fields on an optional element")]
+        [TestMethod, Description("Tests you cannot do DeleteFromStore with a missing uom")]
         public void Well141DataAdapter_DeleteFromStore_Error_417_Deleting_With_Empty_UOM_Attribute()
         {
             // Add well
@@ -405,7 +405,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             // Delete well
             var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid,
-                "<pcInterest />");
+                "<pcInterest uom=\"\" />");
 
             var results = _devKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
 
@@ -494,8 +494,8 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.EmptyMandatoryNodeSpecified, results.Result);
         }
 
-        [TestMethod, Description("Tests you cannot do DeleteFromStore specify an empty node for a non-recurring element or attributethat is mandatory in the write schema.")]
-        public void Well141DataAdapter_DeleteFromStore_Error_421_Specifying_A_Non_Recuring_Attribute_That_Is_Required()
+        [TestMethod, Description("Tests you cannot do DeleteFromStore if it results in a mandatory node being deleted")]
+        public void Well141DataAdapter_DeleteFromStore_Error_421_Deleting_A_Mandatory_Node()
         {
             // Add well
             var location = new Location
@@ -529,7 +529,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.MustRetainOneRecurringNode, results.Result);
         }
 
-        [TestMethod, Description("Tests trying to delete a well that doesn't exist")]
+        [TestMethod, Description("Tests trying to delete a well that has children")]
         public void Well141DataAdapter_DeleteFromStore_Error_432_Deleting_A_Well_Has_A_Child()
         {
             // Add well
