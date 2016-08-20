@@ -32,6 +32,7 @@ using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
+using PDS.Witsml.Server.Data.Transactions;
 using PDS.Witsml.Server.Providers.Store;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -377,6 +378,18 @@ namespace PDS.Witsml.Server.Data.Logs
                 },
                 CustomData = new Dictionary<string, DataValue>()
             };
+        }
+
+        /// <summary>
+        /// Partials the delete log data.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="parser">The parser.</param>
+        /// <param name="transaction">The transaction.</param>
+        /// <exception cref="NotImplementedException"></exception>
+        protected override void PartialDeleteLogData(EtpUri uri, WitsmlQueryParser parser, MongoTransaction transaction)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>

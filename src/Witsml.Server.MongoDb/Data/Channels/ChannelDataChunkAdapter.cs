@@ -210,6 +210,43 @@ namespace PDS.Witsml.Server.Data.Channels
         }
 
         /// <summary>
+        /// Partials the delete log data.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="indexCurve">The index curve.</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <param name="isTimeLog">if set to <c>true</c> [is time log].</param>
+        /// <param name="deletedChannels">The deleted channels.</param>
+        /// <param name="ranges">The ranges.</param>
+        /// <param name="transaction">The transaction.</param>
+        public void PartialDeleteLogData(EtpUri uri, string indexCurve, bool increasing, bool isTimeLog, List<string> deletedChannels, Dictionary<string, Range<double?>> ranges, MongoTransaction transaction)
+        {
+            try
+            {
+                var rangeSize = WitsmlSettings.GetRangeSize(isTimeLog);
+                var indexRange = ranges[indexCurve];
+
+                // Based on the range of the updates, compute the range of the data chunk(s) 
+                //... so we can merge updates with existing data.
+                var existingRange = new Range<double?>(
+                    Range.ComputeRange(indexRange.Start.GetValueOrDefault(), rangeSize, increasing).Start,
+                    Range.ComputeRange(indexRange.End.GetValueOrDefault(), rangeSize, increasing).End
+                    );
+
+                // Get DataChannelChunk list from database for the computed range and URI
+                var filter = BuildDataFilter(uri, indexCurve, existingRange, increasing);
+                var results = GetData(filter, increasing);
+
+                BulkWriteChunks(PartialDeleteChunks(results, deletedChannels, ranges, increasing), uri, null, null, null, transaction);
+            }
+            catch (MongoException ex)
+            {
+                Logger.ErrorFormat("Error when deleting data: {0}", ex);
+                throw new WitsmlException(ErrorCodes.ErrorUpdatingInDataStore, ex);
+            }
+        }
+
+        /// <summary>
         /// Bulks writes <see cref="ChannelDataChunk" /> records for insert and update
         /// </summary>
         /// <param name="chunks">The chunks.</param>
@@ -246,22 +283,35 @@ namespace PDS.Witsml.Server.Data.Channels
                         return (WriteModel<ChannelDataChunk>) new InsertOneModel<ChannelDataChunk>(dc);
                     }
 
-                    transaction?.Attach(MongoDbAction.Update, DbCollectionName, dc.ToBsonDocument());
+                    if (dc.Indices != null)
+                    {
+                        transaction?.Attach(MongoDbAction.Update, DbCollectionName, dc.ToBsonDocument());
 
-                    var filter = Builders<ChannelDataChunk>.Filter;
-                    var update = Builders<ChannelDataChunk>.Update;
+                        var filter = Builders<ChannelDataChunk>.Filter;
+                        var update = Builders<ChannelDataChunk>.Update;
 
-                    UpdateMongoFile(dc);
+                        UpdateMongoFile(dc);
 
-                    return new UpdateOneModel<ChannelDataChunk>(
-                        filter.Eq(f => f.Uri, uri) & filter.Eq(f => f.Uid, dc.Uid),
-                        update
-                            .Set(u => u.Indices, dc.Indices)
-                            .Set(u => u.MnemonicList, dc.MnemonicList)
-                            .Set(u => u.UnitList, dc.UnitList)
-                            .Set(u => u.NullValueList, dc.NullValueList)
-                            .Set(u => u.Data, dc.Data)
-                            .Set(u => u.RecordCount, dc.RecordCount));
+                        return new UpdateOneModel<ChannelDataChunk>(
+                            filter.Eq(f => f.Uri, uri) & filter.Eq(f => f.Uid, dc.Uid),
+                            update
+                                .Set(u => u.Indices, dc.Indices)
+                                .Set(u => u.MnemonicList, dc.MnemonicList)
+                                .Set(u => u.UnitList, dc.UnitList)
+                                .Set(u => u.NullValueList, dc.NullValueList)
+                                .Set(u => u.Data, dc.Data)
+                                .Set(u => u.RecordCount, dc.RecordCount));
+                    }
+
+                    // Delete data chunk
+                    transaction?.Attach(MongoDbAction.Delete, DbCollectionName, dc.Uid.ToBsonDocument(), new EtpUri(dc.Uri));
+
+                    var chunkFilter = Builders<ChannelDataChunk>.Filter;
+                    var mongoFileFilter = Builders<ChannelDataChunk>.Filter.EqIgnoreCase("Uri", dc.Uri);
+
+                    DeleteMongoFiles(mongoFileFilter);
+
+                    return new DeleteOneModel<ChannelDataChunk>(chunkFilter.Eq(f => f.Uri, uri) & chunkFilter.Eq(f => f.Uid, dc.Uid));
                 })
                 .ToList());
 
@@ -389,6 +439,100 @@ namespace PDS.Witsml.Server.Data.Channels
 
                 yield return chunk;
             }
+        }
+
+        private IEnumerable<ChannelDataChunk> PartialDeleteChunks(List<ChannelDataChunk> chunks, List<string> deletedChannels, Dictionary<string, Range<double?>> ranges, bool increasing)
+        {
+            foreach (var chunk in chunks)
+            {
+                yield return PartialDeleteDataChunk(chunk, deletedChannels, ranges, increasing);
+            }
+        }
+
+        private ChannelDataChunk PartialDeleteDataChunk(ChannelDataChunk chunk, List<string> deletedChannels, Dictionary<string, Range<double?>> ranges, bool increasing)
+        {
+            var data = new List<string>();
+            var records = chunk.GetReader().AsEnumerable();
+
+            double? start = null;
+            double? end = null;
+            ChannelIndexInfo indexChannel = null;
+
+            using (var existingEum = records.GetEnumerator())
+            {
+                var endOfExisting = !existingEum.MoveNext();
+
+                while (!endOfExisting)
+                {
+                    existingEum.Current.PartialDeleteRecord(deletedChannels, ranges, increasing);
+                    if (existingEum.Current.HasValues())
+                    {
+                        if (indexChannel == null)
+                            indexChannel = existingEum.Current.GetIndex();
+                        var index = existingEum.Current.GetIndexValue();
+                        if (!start.HasValue)
+                            start = index;
+                        end = index;
+
+                        data.Add(existingEum.Current.GetJson());
+                    }
+
+                    endOfExisting = !existingEum.MoveNext();
+                }
+            }           
+
+            if (data.Count == 0)
+            {
+                chunk.Indices = null;
+                return chunk;
+            }
+
+            var newChunk = new ChannelDataChunk
+            {
+                Uid = chunk.Uid,
+                MnemonicList = chunk.MnemonicList,
+                UnitList = chunk.UnitList,
+                NullValueList = chunk.NullValueList,
+                Uri = chunk.Uri
+            };
+
+            var newIndex = indexChannel.Clone();
+            newIndex.Start = start.GetValueOrDefault();
+            newIndex.End = end.GetValueOrDefault();
+            newChunk.Indices = new List<ChannelIndexInfo> { indexChannel };
+                
+            DeleteChunkChannels(newChunk, deletedChannels);
+            newChunk.RecordCount = data.Count;
+            newChunk.Data = "[" + string.Join(",", data) + "]";
+
+            return newChunk;
+        }
+
+        private void DeleteChunkChannels(ChannelDataChunk chunk, List<string> deletedChannels)
+        {
+            var separator = ',';
+            var mnemonics = chunk.MnemonicList.Split(separator);
+            var units = chunk.UnitList.Split(separator);
+            var nullValues = chunk.NullValueList.Split(separator);
+
+            var newMnemonics = new List<string>();
+            var newUnits = new List<string>();
+            var newNullValues = new List<string>();
+
+            for (var i = 0; i < mnemonics.Length; i++)
+            {
+                var mnemonic = mnemonics[i];
+                if (deletedChannels.Contains(mnemonic))
+                    continue;
+
+                newMnemonics.Add(mnemonic);
+                newUnits.Add(units[i]);
+                newNullValues.Add(nullValues[i]);
+            }
+
+            chunk.MnemonicList = string.Join(separator.ToString(), newMnemonics);
+            chunk.UnitList = string.Join(separator.ToString(), newUnits);
+            chunk.NullValueList = string.Join(separator.ToString(), newNullValues);
         }
 
         /// <summary>
