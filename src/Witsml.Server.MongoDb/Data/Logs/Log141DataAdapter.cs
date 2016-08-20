@@ -32,6 +32,7 @@ using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
+using PDS.Witsml.Server.Data.Transactions;
 using PDS.Witsml.Server.Providers.Store;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -401,6 +402,159 @@ namespace PDS.Witsml.Server.Data.Logs
         protected override string GetLogDataDelimiter(Log entity)
         {
             return entity.DataDelimiter ?? base.GetLogDataDelimiter(entity);
+        }
+
+        /// <summary>
+        /// Partials the delete log data.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="parser">The parser.</param>
+        /// <param name="transaction">The transaction.</param>
+        protected override void PartialDeleteLogData(EtpUri uri, WitsmlQueryParser parser, MongoTransaction transaction)
+        {
+            var element = parser.Element();
+            var delete = WitsmlParser.Parse<Log>(element);
+            var current = GetEntity(uri);
+            delete.IndexType = current.IndexType;
+            delete.Direction = current.Direction;
+
+            if (!ToDeleteLogData(delete))
+                return;
+
+            if (DeleteAllLogData(current, delete))
+            {
+                ChannelDataChunkAdapter.Delete(uri);
+                return;
+            }
+
+            var deletedChannels = GetDeletedChannels(current, delete);
+            var defaultDeleteRange = GetDefaultDeletRange(current, delete);
+            var currentRanges = GetCurrentIndexRange(current);
+            var updateRanges = GetCurrentIndexRange(delete);
+            var ranges = GetPartialDeleteRanges(deletedChannels, defaultDeleteRange, currentRanges, updateRanges, current.IndexCurve, current.IsIncreasing());
+
+            ChannelDataChunkAdapter.PartialDeleteLogData(uri, current.IndexCurve, current.IsIncreasing(), current.IsTimeLog(), deletedChannels, ranges, transaction);
+
+            // TODO: Update index range
+            // Simplest way is to do a full log data query to get the updated range for each channel
+            // and then update the index
+        }
+
+        private List<string> GetDeletedChannels(Log current, Log entity)
+        {
+            var channels = new List<string>();
+
+            if (entity.LogCurveInfo == null || entity.LogCurveInfo.All(l => l.Mnemonic.Value == current.IndexCurve))
+                return channels;
+
+            var existing = current.LogCurveInfo.Select(l => l.Mnemonic.Value).ToList();
+            channels = entity.LogCurveInfo.Where(l => !existing.Contains(l.Mnemonic.Value)).Select(l=>l.Mnemonic.Value).ToList();
+
+            return channels;
+        }
+
+        private bool ToDeleteLogData(Log entity)
+        {
+            var isTimeLog = entity.IsTimeLog();
+            var curves = entity.LogCurveInfo;
+
+            if (isTimeLog)
+            {
+                if (entity.StartDateTimeIndex.HasValue || entity.EndDateTimeIndex.HasValue
+                    || (curves != null && curves.Any(c => c.MinDateTimeIndex.HasValue || c.MaxDateTimeIndex.HasValue)))
+                    return true;
+            }
+            else
+            {
+                if (entity.StartIndex != null || entity.EndIndex != null
+                    || (curves != null && curves.Any(c => c.MinIndex != null || c.MaxIndex != null)))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private bool DeleteAllLogData(Log current, Log entity)
+        {
+            if (current.LogCurveInfo == null || current.LogCurveInfo.Count == 0)
+                return true;
+            
+            if (current.LogCurveInfo.Count == 1 && current.LogCurveInfo.Any(l => l.Mnemonic.Value == current.IndexCurve))
+                return true;
+
+            var increasing = current.IsIncreasing();
+            var isTimeLog = current.IsTimeLog();
+
+            if (isTimeLog)
+            {
+                if (entity.StartDateTimeIndex.HasValue)
+                {
+                    if (!StartsBefore(entity.StartDateTimeIndex.Value.ToUnixTimeMicroseconds(),
+                        current.StartDateTimeIndex.Value.ToUnixTimeMicroseconds(), increasing))
+                        return false;
+
+                    if (!entity.EndDateTimeIndex.HasValue ||
+                        StartsBefore(current.EndDateTimeIndex.Value.ToUnixTimeMicroseconds(),
+                            entity.EndDateTimeIndex.Value.ToUnixTimeMicroseconds(), increasing))
+                        return true;
+                }
+                else
+                {
+                    if (entity.EndDateTimeIndex.HasValue &&
+                        StartsBefore(current.EndDateTimeIndex.Value.ToUnixTimeMicroseconds(),
+                            entity.EndDateTimeIndex.Value.ToUnixTimeMicroseconds(), increasing))
+                        return true;
+                }
+            }
+            else
+            {
+                if (entity.StartIndex != null)
+                {
+                    if (!StartsBefore(entity.StartIndex.Value, current.StartIndex.Value, increasing))
+                        return false;
+
+                    if (entity.EndIndex == null ||
+                        StartsBefore(current.EndIndex.Value, entity.EndIndex.Value, increasing))
+                        return true;
+                }
+                else
+                {
+                    if (entity.EndIndex != null &&
+                        StartsBefore(current.EndIndex.Value, entity.EndIndex.Value, increasing))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        private Range<double?> GetDefaultDeletRange(Log current, Log entity)
+        {
+            var isTimeLog = current.IsTimeLog();
+
+            double? start;
+            double? end;
+
+            if (isTimeLog)
+            {
+                if (!entity.StartDateTimeIndex.HasValue && !entity.EndDateTimeIndex.HasValue)
+                    return new Range<double?>(null, null);
+
+                start = entity.StartDateTimeIndex?.ToUnixTimeMicroseconds() ?? current.StartDateTimeIndex.Value.ToUnixTimeMicroseconds();
+
+                end = entity.EndDateTimeIndex?.ToUnixTimeMicroseconds() ?? current.EndDateTimeIndex.Value.ToUnixTimeMicroseconds();
+            }
+            else
+            {
+                if (entity.StartIndex == null && entity.EndIndex == null)
+                    return new Range<double?>(null, null);
+
+                start = entity.StartIndex?.Value ?? current.StartIndex.Value;
+
+                end = entity.EndIndex?.Value ?? current.EndIndex.Value;
+            }
+
+            return new Range<double?>(start, end);
         }
 
         /// <summary>

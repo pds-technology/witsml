@@ -200,6 +200,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     PartialDeleteEntity(parser, uri, transaction);
 
                     // TODO: Implement partial delete of log data
+                    PartialDeleteLogData(uri, parser, transaction);
 
                     transaction.Commit();
                 }
@@ -565,6 +566,83 @@ namespace PDS.Witsml.Server.Data.Logs
             return ranges;
         }
 
+        /// <summary>
+        /// Gets the partial delete ranges.
+        /// </summary>
+        /// <param name="deletedChannels">The deleted channels.</param>
+        /// <param name="defaultRange">The default delete range.</param>
+        /// <param name="current">The current.</param>
+        /// <param name="delete">The delete.</param>
+        /// <param name="indexCurve">The index curve.</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <returns></returns>
+        protected Dictionary<string, Range<double?>> GetPartialDeleteRanges(List<string> deletedChannels, Range<double?> defaultRange, Dictionary<string, Range<double?>> current, Dictionary<string, Range<double?>> delete, string indexCurve, bool increasing)
+        {
+            var ranges = new Dictionary<string, Range<double?>>();
+            var indexRange = current[indexCurve];
+
+            double? begin = null;
+            double? finish = null;
+            double? start = null;
+            double? end = null;
+
+            foreach (var range in delete)
+            {
+                if (deletedChannels.Contains(range.Key))
+                    continue;
+
+                if (!range.Value.Start.HasValue && !range.Value.End.HasValue)
+                {
+                    if (defaultRange.Start.HasValue)
+                    {
+                        start = defaultRange.Start;
+                        end = defaultRange.End;
+                        ranges.Add(range.Key, new Range<double?>(start, end, range.Value.Offset));
+                    }
+                }
+                else
+                {
+                    start = range.Value.Start ?? indexRange.Start.GetValueOrDefault();
+                    end = range.Value.End ?? indexRange.End.GetValueOrDefault();
+                    ranges.Add(range.Key, new Range<double?>(start, end, range.Value.Offset));
+                }
+
+                if (!start.HasValue || !end.HasValue)
+                    continue;
+
+                if (begin.HasValue)
+                {
+                    if (StartsBefore(start.Value, begin.Value, increasing))
+                        begin = start;
+                    if (StartsBefore(end.Value, finish.Value, increasing))
+                        finish = end;
+                }
+                else
+                {
+                    begin = start;
+                    finish = end;
+                }
+            }
+
+            ranges.Add(indexCurve, new Range<double?>(begin, finish, indexRange.Offset));
+
+            return ranges;
+        }
+
+        /// <summary>
+        /// Startses the before.
+        /// </summary>
+        /// <param name="a">a.</param>
+        /// <param name="b">The b.</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <returns></returns>
+        protected bool StartsBefore(double a, double b, bool increasing)
+        {
+            return increasing
+                ? a <= b
+                : a >= b;
+        }
+
         private void GetUpdatedIndexRange(ChannelDataReader reader, string[] mnemonics, Dictionary<string, Range<double?>> ranges, bool increasing = true)
         {
             Logger.Debug("Getting updated index ranges for all logCurveInfos.");
@@ -851,6 +929,14 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="indexMetadata">The index metadata.</param>
         /// <returns></returns>
         protected abstract ChannelMetadataRecord ToChannelMetadataRecord(T entity, TChild curve, IndexMetadataRecord indexMetadata);
+
+        /// <summary>
+        /// Partials the delete log data.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="parser">The parser.</param>
+        /// <param name="transaction">The transaction.</param>
+        protected abstract void PartialDeleteLogData(EtpUri uri, WitsmlQueryParser parser, MongoTransaction transaction);
 
         /// <summary>
         /// Gets the log data delimiter.
