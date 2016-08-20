@@ -183,7 +183,8 @@ namespace PDS.Witsml.Data
             {
                 InitializeRecurringElementHandler(propertyInfo, propertyPath);
 
-                var childType = propertyType.GetGenericArguments()[0];
+                var args = propertyType.GetGenericArguments();
+                var childType = args.FirstOrDefault() ?? propertyType.GetElementType();
            
                 NavigateRecurringElements(propertyInfo, elementList, childType, propertyPath);
 

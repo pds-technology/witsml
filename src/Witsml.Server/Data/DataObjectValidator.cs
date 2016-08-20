@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -203,6 +204,26 @@ namespace PDS.Witsml.Server.Data
             yield break;
         }
 
+        /// <summary>
+        /// Initializes the recurring element handler.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="propertyPath">The property path.</param>
+        protected override void InitializeRecurringElementHandler(PropertyInfo propertyInfo, string propertyPath)
+        {
+            if (Context.Function != Functions.GetFromStore)
+            {
+                var propertyType = propertyInfo.PropertyType;
+                var args = propertyType.GetGenericArguments();
+
+                if (!args.Any() && !propertyType.IsArray && !typeof(IList).IsAssignableFrom(propertyType))
+                {
+                    throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
+                }
+            }
+
+            base.InitializeRecurringElementHandler(propertyInfo, propertyPath);
+        }
 
         /// <summary>
         /// Navigates the recurring elements with validation for Uids (MissingElementUid).
