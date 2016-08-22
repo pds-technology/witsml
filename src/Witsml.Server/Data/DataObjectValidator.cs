@@ -167,14 +167,12 @@ namespace PDS.Witsml.Server.Data
                 throw new WitsmlException(ErrorCodes.EmptyMandatoryNodeSpecified);
             }
 
-            if (!propertyType.IsValueType && !propertyType.IsEnum)
+            if (IsComplexType(propertyType) && !HasSimpleContent(propertyType))
             {
                 // DeleteFromStore validation [-419]
                 // Check Delete of non-recurring container element
                 if (Context.Function == Functions.DeleteFromStore)
                 {
-                    var element = xmlObject as XElement;
-
                     if (!HasUidProperty(propertyType))
                         throw new WitsmlException(ErrorCodes.EmptyNonRecurringElementSpecified);
                 }
@@ -333,22 +331,15 @@ namespace PDS.Witsml.Server.Data
             base.NavigateUomAttribute(propertyInfo, xmlObject, propertyType, propertyPath, measureValue, uomValue);
         }
 
-        /// <summary>
-        /// Determines whether the specified type has a uid property.
-        /// </summary>
-        /// <param name="type">The type.</param>
-        /// <returns><c>true</c> if the type defines a uid property; otherwise, <c>false</c>.</returns>
-        protected virtual bool HasUidProperty(Type type)
-        {
-            return type.GetProperty("Uid") != null;
-        }
-
         private string GetAndValidateArrayElementUid(XElement element)
         {
             var uidAttribute = element.Attributes().FirstOrDefault(a => a.Name == "uid");
 
             if (string.IsNullOrEmpty(uidAttribute?.Value))
             {
+                if (uidAttribute != null && Context.Function == Functions.DeleteFromStore)
+                    throw new WitsmlException(ErrorCodes.EmptyUidSpecified);
+
                 throw new WitsmlException(Context.Function.GetMissingElementUidErrorCode());
             }
 
