@@ -440,24 +440,52 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod, Description("Tests you cannot do DeleteFromStore specify an empty non-recurring container-element with no unique identifier in the schema")]
         public void Well141DataAdapter_DeleteFromStore_Error_419_Specifying_A_Non_Recuring_Container_Without_UID()
         {
-            // Add well
-            var wellCrs = new WellCRS
-            {
-                Uid = "localWell1",
-                Name = "Well01",
-                LocalCRS = new LocalCRS
-                {
-                    UsesWellAsOrigin = true,
-                    YAxisAzimuth = new YAxisAzimuth(0, PlaneAngleUom.dega),
-                    XRotationCounterClockwise = false
-                }
-            };
-
+            // Add a minimal test well and Assert its Success
             _devKit.AddAndAssert(_well);
 
-            // Delete well
+            // Add wellbore
+            var wellbore = new Wellbore()
+            {
+                UidWell = _well.Uid,
+                Uid = _devKit.Uid(),
+                Name = _devKit.Name("Wellbore 01"),
+                NameWell = _well.Name
+            };
+            _devKit.AddAndAssert(wellbore);
+
+            // Add rig
+            var rig = new Rig()
+            {
+                UidWell = _well.Uid,
+                UidWellbore = wellbore.Uid,
+                Uid = _devKit.Uid(),
+                Name = _devKit.Name("Rig 01"),
+                NameWellbore = wellbore.Name,
+                NameWell = _well.Name
+            };
+            _devKit.AddAndAssert(rig);
+            var wellDatum = new WellDatum()
+            {
+                Uid = "RIG",
+                Name = "Rig",
+                Rig = new RefWellWellboreRig()
+                {
+                    RigReference = new RefNameString()
+                    {
+                        UidRef = rig.Uid,
+                        Value = rig.Name
+                    }
+                }
+            };
+            var returnWell = _devKit.GetSingleWellAndAssert(_well);
+            returnWell.WellDatum = new List<WellDatum>()
+            {
+                wellDatum
+            };
+
+            // Delete 
             var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid,
-                $"<wellCRS  uid=\"{wellCrs.Uid}\"><localCRS /></wellCRS>");
+                $"<wellDatum uid=\"{wellDatum.Uid}\"><rig /></wellDatum>");
 
             var results = _devKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
 
@@ -465,8 +493,8 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.EmptyNonRecurringElementSpecified, results.Result);
         }
 
-        [TestMethod, Description("Tests you cannot do DeleteFromStore specify an empty node for a non-recurring element or attributethat is mandatory in the write schema.")]
-        public void Well141DataAdapter_DeleteFromStore_Error_420_Specifying_A_Non_Recuring_Attribute_That_Is_Required()
+        [TestMethod, Description("Tests you cannot do DeleteFromStore specify an empty node for a non-recurring element or attribute that is mandatory in the write schema.")]
+        public void Well141DataAdapter_DeleteFromStore_Error_420_Specifying_A_Non_Recuring_Element_That_Is_Required()
         {
             // Add well
             _devKit.AddAndAssert(_well);
@@ -478,6 +506,41 @@ namespace PDS.Witsml.Server.Data.Wells
 
             Assert.IsNotNull(results);
             Assert.AreEqual((short)ErrorCodes.EmptyMandatoryNodeSpecified, results.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore specify an empty node for a non-recurring element or attribute that is mandatory in the write schema.")]
+        public void Well141DataAdapter_DeleteFromStore_Error_420_Specifying_A_Non_Recuring_Attribute_That_Is_Required()
+        {
+            // Add a minimal test well and Assert its Success
+            var wellDatum = new WellDatum()
+            {
+                Code = ElevCodeEnum.KB,
+                Uid = "KB",
+                Name = "Kelly Bushing",
+                DatumName = new WellKnownNameStruct()
+                {
+                    Code = "XX",
+                    NamingSystem = "TestName",
+                    Value = "Test"
+                }
+            };
+
+            _well.WellDatum = new List<WellDatum>
+            {
+              wellDatum 
+            };
+
+            _devKit.AddAndAssert(_well);
+
+            // Delete 
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid,
+                $"<wellDatum uid=\"{wellDatum.Uid}\"><datumName namingSystem=\"\" /></wellDatum>");
+
+            var results = _devKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyMandatoryNodeSpecified, results.Result);
+
         }
 
         [TestMethod, Description("Tests you cannot do DeleteFromStore if it results in a mandatory node being deleted")]
