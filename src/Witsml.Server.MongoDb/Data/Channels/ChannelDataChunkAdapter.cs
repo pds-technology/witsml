@@ -312,7 +312,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     }
 
                     // Delete data chunk
-                    transaction?.Attach(MongoDbAction.Delete, DbCollectionName, dc.Uid.ToBsonDocument(), new EtpUri(dc.Uri));
+                    transaction?.Attach(MongoDbAction.Delete, DbCollectionName, dc.ToBsonDocument(), new EtpUri(dc.Uri));
 
                     var chunkFilter = Builders<ChannelDataChunk>.Filter;
                     var mongoFileFilter = Builders<ChannelDataChunk>.Filter.EqIgnoreCase("Uri", dc.Uri);

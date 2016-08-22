@@ -405,7 +405,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Partials the delete log data.
+        /// Partially delete the log data.
         /// </summary>
         /// <param name="uri">The URI.</param>
         /// <param name="parser">The parser.</param>
@@ -442,9 +442,10 @@ namespace PDS.Witsml.Server.Data.Logs
                 var updateRanges = GetCurrentIndexRange(delete);
                 offset = currentRanges[indexCurve].Offset;
 
+                var isTimeLog = current.IsTimeLog();
                 var ranges = GetPartialDeleteRanges(deletedChannels, defaultDeleteRange, currentRanges, updateRanges, indexCurve, current.IsIncreasing());
 
-                ChannelDataChunkAdapter.PartialDeleteLogData(uri, indexCurve, current.IsIncreasing(), current.IsTimeLog(), deletedChannels, ranges, updatedRanges, transaction);
+                ChannelDataChunkAdapter.PartialDeleteLogData(uri, indexCurve, current.IsIncreasing(), isTimeLog, deletedChannels, ranges, updatedRanges, transaction);
             }
 
             UpdateIndexRange(uri, current, updatedRanges, updatedRanges.Keys.ToList(), current.IsTimeLog(), indexChannel.Unit, offset, true);

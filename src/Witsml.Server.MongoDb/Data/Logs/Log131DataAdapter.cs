@@ -381,7 +381,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Partials the delete log data.
+        /// Partially delete the log data.
         /// </summary>
         /// <param name="uri">The URI.</param>
         /// <param name="parser">The parser.</param>

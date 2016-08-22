@@ -570,12 +570,12 @@ namespace PDS.Witsml.Server.Data.Logs
         /// Gets the partial delete ranges.
         /// </summary>
         /// <param name="deletedChannels">The deleted channels.</param>
-        /// <param name="defaultRange">The default delete range.</param>
-        /// <param name="current">The current.</param>
-        /// <param name="delete">The delete.</param>
+        /// <param name="defaultRange">The default delete range, i.e from startIndex/startDateTimeIndex, endIndex/endDateTimeIndex of the log header.</param>
+        /// <param name="current">The current index ranges.</param>
+        /// <param name="delete">The index range from the XmlIn.</param>
         /// <param name="indexCurve">The index curve.</param>
         /// <param name="increasing">if set to <c>true</c> [increasing].</param>
-        /// <returns></returns>
+        /// <returns>The channel index ranges for the partial delete.</returns>
         protected Dictionary<string, Range<double?>> GetPartialDeleteRanges(List<string> deletedChannels, Range<double?> defaultRange, Dictionary<string, Range<double?>> current, Dictionary<string, Range<double?>> delete, string indexCurve, bool increasing)
         {
             var ranges = new Dictionary<string, Range<double?>>();
@@ -585,6 +585,20 @@ namespace PDS.Witsml.Server.Data.Logs
             double? finish = null;
             double? start = null;
             double? end = null;
+
+            if (!delete.Keys.Any())
+            {
+                if (defaultRange.Start.HasValue || defaultRange.End.HasValue)
+                {
+                    foreach (var channel in current.Keys)
+                    {
+                        ranges.Add(channel,
+                            new Range<double?>(defaultRange.Start, defaultRange.End, defaultRange.Offset));
+                    }
+                }
+
+                return ranges;
+            }
 
             foreach (var range in delete)
             {
@@ -630,12 +644,12 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Startses the before.
+        /// Check if value a starts the before value b.
         /// </summary>
-        /// <param name="a">a.</param>
-        /// <param name="b">The b.</param>
+        /// <param name="a">The value a.</param>
+        /// <param name="b">The value b.</param>
         /// <param name="increasing">if set to <c>true</c> [increasing].</param>
-        /// <returns></returns>
+        /// <returns>True is a starts before b.</returns>
         protected bool StartsBefore(double a, double b, bool increasing)
         {
             return increasing
@@ -937,7 +951,7 @@ namespace PDS.Witsml.Server.Data.Logs
         protected abstract ChannelMetadataRecord ToChannelMetadataRecord(T entity, TChild curve, IndexMetadataRecord indexMetadata);
 
         /// <summary>
-        /// Partials the delete log data.
+        /// Partially delete the log data.
         /// </summary>
         /// <param name="uri">The URI.</param>
         /// <param name="parser">The parser.</param>
