@@ -370,7 +370,7 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod, Description("Tests you cannot do DeleteFromStore with missing uid attribute.")]
-        public void Well141DataAdapter_DeleteFromStore_Error_416_Missing_Attribute()
+        public void Well141DataAdapter_DeleteFromStore_Error_416_Empty_UID_Attribute()
         {
             // Add well
             var ext1 = _devKit.ExtensionNameValue("Ext-1", "1.0", "m");
@@ -412,7 +412,7 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod, Description("Tests you cannot do DeleteFromStore without all required fields on an optional element")]
-        public void Well141DataAdapter_DeleteFromStore_Error_418_Missing_Uid_Value()
+        public void Well141DataAdapter_DeleteFromStore_Error_418_Missing_Uid()
         {
             // Add well
             var ext1 = _devKit.ExtensionNameValue("Ext-1", "1.0", "m");
