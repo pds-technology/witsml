@@ -672,7 +672,18 @@ namespace PDS.Witsml.Server.Data.Logs
             }
         }
 
-        private void UpdateIndexRange(EtpUri uri, T entity, Dictionary<string, Range<double?>> ranges, IEnumerable<string> mnemonics, bool isTimeLog, string indexUnit, TimeSpan? offset)
+        /// <summary>
+        /// Updates the index range.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="entity">The entity.</param>
+        /// <param name="ranges">The ranges.</param>
+        /// <param name="mnemonics">The mnemonics.</param>
+        /// <param name="isTimeLog">if set to <c>true</c> [is time log].</param>
+        /// <param name="indexUnit">The index unit.</param>
+        /// <param name="offset">The offset.</param>
+        /// <param name="isDelete">True if for delete log data.</param>
+        protected void UpdateIndexRange(EtpUri uri, T entity, Dictionary<string, Range<double?>> ranges, IEnumerable<string> mnemonics, bool isTimeLog, string indexUnit, TimeSpan? offset, bool isDelete = false)
         {
             Logger.DebugFormat("Updating index range with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
 
@@ -693,7 +704,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 var isIndexCurve = mnemonic == GetIndexCurveMnemonic(entity);
 
                 var currentRange = GetIndexRange(curve, increasing, isTimeLog);
-                var updateRange = GetUpdateRange(currentRange, range, increasing);
+                var updateRange = isDelete? range: GetUpdateRange(currentRange, range, increasing);
 
                 logHeaderUpdate = isTimeLog
                     ? UpdateDateTimeIndexRange(mongoUpdate, curveFilter, logHeaderUpdate, updateRange, increasing, isIndexCurve, offset)
@@ -710,7 +721,6 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private UpdateDefinition<T> UpdateIndexRange(MongoDbUpdate<T> mongoUpdate, FilterDefinition<T> curveFilter, UpdateDefinition<T> logHeaderUpdate, Range<double?> range, bool increasing, bool isIndexCurve, string indexUnit)
         {
-            UpdateDefinition<T> updates = null;
             object minIndex = null;
             object maxIndex = null;
 
@@ -718,18 +728,14 @@ namespace PDS.Witsml.Server.Data.Logs
             range = range.Sort();
 
             if (range.Start.HasValue)
-            {
                 minIndex = CreateGenericMeasure(range.Start.Value, indexUnit);
-                updates = MongoDbUtility.BuildUpdate<T>(null, "LogCurveInfo.$.MinIndex", minIndex);
-                Logger.DebugFormat("Building MongoDb Update for MinIndex '{0}'", minIndex);
-            }
+            var updates = MongoDbUtility.BuildUpdate<T>(null, "LogCurveInfo.$.MinIndex", minIndex);
+            Logger.DebugFormat("Building MongoDb Update for MinIndex '{0}'", minIndex);
 
             if (range.End.HasValue)
-            {
                 maxIndex = CreateGenericMeasure(range.End.Value, indexUnit);
-                updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MaxIndex", maxIndex);
-                Logger.DebugFormat("Building MongoDb Update for MaxIndex '{0}'", maxIndex);
-            }
+            updates = MongoDbUtility.BuildUpdate(updates, "LogCurveInfo.$.MaxIndex", maxIndex);
+            Logger.DebugFormat("Building MongoDb Update for MaxIndex '{0}'", maxIndex);
 
             if (isIndexCurve)
             {

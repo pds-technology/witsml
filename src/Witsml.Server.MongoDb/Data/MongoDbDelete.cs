@@ -284,7 +284,6 @@ namespace PDS.Witsml.Server.Data
                     else
                     {
                         var update = updateBuilder.Pull(parentPath, current);
-                        //_pullList.Add(new UpdateOneModel<T>(filter, update));
                         AddToPullCollection(parentPath, new UpdateOneModel<T>(filter, update));
                         return null;
                     }
