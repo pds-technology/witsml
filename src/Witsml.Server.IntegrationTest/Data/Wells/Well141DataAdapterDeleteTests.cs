@@ -649,29 +649,5 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.IsNotNull(results);
             Assert.AreEqual((short)ErrorCodes.InputTemplateMultipleDataObjects, results.Result);
         }
-
-        [TestMethod, Description("Tests you cannot do DeleteFromStore that results in a missing mandatory item")]
-        public void Well141DataAdapter_DeleteFromStore_Error_484_Operation_Results_In_Missing_Mandatory_Item()
-        {
-            // Add well
-            var ext1 = _devKit.ExtensionNameValue("Ext-1", "1.0", "m");
-            _well.CommonData = new CommonData()
-            {
-                ExtensionNameValue = new List<ExtensionNameValue>
-                {
-                    ext1
-                }
-            };
-            _devKit.AddAndAssert(_well);
-
-            // Delete well
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid,
-                $"<commonData><extensionNameValue uid=\"{ext1.Uid}\"><name /></extensionNameValue></commonData>");
-
-            var results = _devKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
-
-            Assert.IsNotNull(results);
-            Assert.AreEqual((short)ErrorCodes.MissingRequiredData, results.Result);
-        }
     }
 }
