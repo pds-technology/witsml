@@ -96,7 +96,6 @@ namespace PDS.Witsml.Server.Data.Wells
             {
                 yield return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] {"Uid"});
             }
-            // TODO: Check if cascadedDelete is supported in CapServer.
             // Validate that there are no child data-objects if cascading deletes are not invoked.
             else if ((cascadeDeleteOff.Equals(parserCascadedDelete)) && _wellboreDataAdapter.GetAll(uri).Any())
             {

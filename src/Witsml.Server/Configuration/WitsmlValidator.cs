@@ -240,10 +240,30 @@ namespace PDS.Witsml.Server.Configuration
         /// Validates the cascaded delete.
         /// </summary>
         /// <param name="options">The options.</param>
-        /// <param name="compressionMethod">The compression method.</param>
-        public static void ValidateCascadedDelete(Dictionary<string, string> options, bool compressionMethod)
+        /// <param name="cascadedDelete">if set to <c>true</c> cascade delete is supported.</param>
+        public static void ValidateCascadedDelete(Dictionary<string, string> options, bool? cascadedDelete)
         {
-            
+            _log.DebugFormat("Validating compression method: {0}", cascadedDelete);
+
+            string optionValue;
+            if (!options.TryGetValue(OptionsIn.CascadedDelete.Keyword, out optionValue))
+            {
+                return;
+            }
+
+            // Validate CascadedDelete value
+            if (!OptionsIn.CascadedDelete.True.Equals(optionValue) &&
+                !OptionsIn.CascadedDelete.False.Equals(optionValue))
+            {
+                throw new WitsmlException(ErrorCodes.InvalidKeywordValue);
+            }
+
+            // Validate CascadedDelete is supported
+            if (!OptionsIn.CascadedDelete.False.Equals(optionValue) &&
+                !optionValue.EqualsIgnoreCase(cascadedDelete?.ToString().ToLower()))
+            {
+                throw new WitsmlException(ErrorCodes.KeywordNotSupportedByServer);
+            }
         }
 
         /// <summary>
