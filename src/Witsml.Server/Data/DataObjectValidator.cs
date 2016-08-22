@@ -148,6 +148,45 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Handles the null value.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="xmlObject">The XML object.</param>
+        /// <param name="propertyType">Type of the property.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <param name="propertyValue">The property value.</param>
+        protected override void HandleNullValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath,
+            string propertyValue)
+        {
+            var isRequired = propertyInfo?.GetCustomAttribute<RequiredAttribute>() != null;
+
+            if (!propertyType.IsValueType && !propertyType.IsEnum)
+            {
+                // DeleteFromStore validation [-419] and [-420]
+                // Check Delete of non-recurring container element
+                if (Context.Function == Functions.DeleteFromStore)
+                {
+                    if (isRequired)
+                        throw new WitsmlException(ErrorCodes.EmptyMandatoryNodeSpecified);
+                    else
+                        throw new WitsmlException(ErrorCodes.EmptyNonRecurringElementSpecified);
+                }
+
+                return;
+            }
+
+            // DeleteFromStore validation [-420]
+            // Check Delete of non-recurring, required element or attribute
+            if (Context.Function == Functions.DeleteFromStore && isRequired)
+            {
+                throw new WitsmlException(ErrorCodes.EmptyMandatoryNodeSpecified);
+            }
+
+
+            base.HandleNullValue(propertyInfo, xmlObject, propertyType, propertyPath, propertyValue);
+        }
+
+        /// <summary>
         /// Validates the data object properties using .NET validation attributes.
         /// </summary>
         /// <returns>A collection of validation results.</returns>
@@ -274,6 +313,27 @@ namespace PDS.Witsml.Server.Data
             }
 
             base.NavigateArrayElementType(propertyInfo, elements, childType, element, propertyPath);
+        }
+
+        /// <summary>
+        /// Navigates the uom attribute.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="xmlObject">The XML object.</param>
+        /// <param name="propertyType">Type of the property.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <param name="measureValue">The measure value.</param>
+        /// <param name="uomValue">The uom value.</param>
+        protected override void NavigateUomAttribute(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath,
+            string measureValue, string uomValue)
+        {
+            // client MUST NOT [else error -417] specify an empty unit of measure (uom) attribute during a DeleteFromStore.
+            if (Context.Function == Functions.DeleteFromStore && xmlObject != null && string.IsNullOrWhiteSpace(uomValue))
+            {
+                throw new WitsmlException(ErrorCodes.EmptyUomSpecified);
+            }
+
+            base.NavigateUomAttribute(propertyInfo, xmlObject, propertyType, propertyPath, measureValue, uomValue);
         }
 
         /// <summary>

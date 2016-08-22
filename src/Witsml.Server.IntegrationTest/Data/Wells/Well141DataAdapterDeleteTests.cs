@@ -469,23 +469,10 @@ namespace PDS.Witsml.Server.Data.Wells
         public void Well141DataAdapter_DeleteFromStore_Error_420_Specifying_A_Non_Recuring_Attribute_That_Is_Required()
         {
             // Add well
-            var wellCrs = new WellCRS
-            {
-                Uid = "localWell1",
-                Name = "Well01",
-                LocalCRS = new LocalCRS
-                {
-                    UsesWellAsOrigin = true,
-                    YAxisAzimuth = new YAxisAzimuth(0, PlaneAngleUom.dega),
-                    XRotationCounterClockwise = false
-                }
-            };
-
             _devKit.AddAndAssert(_well);
 
-            // Delete well
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid,
-                $"<wellCRS  uid=\"{wellCrs.Uid}\"><localCRS><yAxisAzimuth northDirection=\"grid north\" /></localCRS></wellCRS>");
+            // Delete sub-node (element) "timeZone" which is required.
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid, "<timeZone />" );
 
             var results = _devKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
 
