@@ -447,12 +447,25 @@ namespace PDS.Witsml.Server
         }
 
         /// <summary>
+        /// Adds rig object and test the return code
+        /// </summary>
+        /// <param name="rig">the rig</param>
+        /// <param name="errorCode">the errorCode</param>
+        public void AddAndAssert(Rig rig, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            var response = Add<RigList, Rig>(rig);
+            Assert.AreEqual((short)errorCode, response.Result);
+        }
+
+        /// <summary>
         /// Does get query for single well object and test for result count equal to 1 and is not null
         /// </summary>
         /// <param name="well">the well</param>
         /// <returns>The first well from the response</returns>
         public Well GetSingleWellAndAssert(Well well)
         {
+            Assert.IsNotNull(well.Uid);
+
             var query = new Well { Uid = well.Uid };
 
             var results = Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
@@ -466,12 +479,14 @@ namespace PDS.Witsml.Server
         /// <summary>
         /// Does get query for single wellbore object and test for result count equal to 1 and is not null
         /// </summary>
-        /// <param name="well">the well</param>
         /// <param name="wellbore">the wellbore</param>
         /// <returns>The first wellbore from the response</returns>
-        public Wellbore GetSingleWellboreAndAssert(Well well, Wellbore wellbore)
+        public Wellbore GetSingleWellboreAndAssert(Wellbore wellbore)
         {
-            var query = new Wellbore { UidWell = well.Uid, Uid = wellbore.Uid };
+            Assert.IsNotNull(wellbore.UidWell);
+            Assert.IsNotNull(wellbore.Uid);
+
+            var query = new Wellbore { UidWell = wellbore.UidWell, Uid = wellbore.Uid };
 
             var results = Query<WellboreList, Wellbore>(query, ObjectTypes.Wellbore, null, optionsIn: OptionsIn.ReturnElements.All);
             Assert.AreEqual(1, results.Count);
@@ -488,6 +503,10 @@ namespace PDS.Witsml.Server
         /// <returns>The first log from the response</returns>
         public Log GetSingleLogAndAssert(Log log)
         {
+            Assert.IsNotNull(log.UidWell);
+            Assert.IsNotNull(log.UidWellbore);
+            Assert.IsNotNull(log.Uid);
+
             var query = CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
             var results = Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             Assert.AreEqual(1, results.Count);
