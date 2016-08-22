@@ -342,11 +342,11 @@ namespace PDS.Witsml.Server.Data.Wells
             var welldatum = result.WellDatum.FirstOrDefault(x => x.Uid.Equals("KB"));
             Assert.IsNotNull(welldatum);
             Assert.AreEqual("Kelly Bushing", welldatum.Name);
-            Assert.AreEqual("KB", welldatum.Code);
+            Assert.AreEqual(ElevCodeEnum.KB, welldatum.Code);
             var datumName = welldatum.DatumName;
             Assert.IsNotNull(datumName);
             Assert.AreEqual("TestName", datumName.NamingSystem);
-            Assert.AreEqual("XX", datumName.NamingSystem);
+            Assert.AreEqual("XX", datumName.Code);
             Assert.AreEqual("Test", datumName.Value);
         }
     }
