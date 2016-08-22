@@ -218,26 +218,31 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="isTimeLog">if set to <c>true</c> [is time log].</param>
         /// <param name="deletedChannels">The deleted channels.</param>
         /// <param name="ranges">The ranges.</param>
+        /// <param name="updatedRanges">The updated ranges.</param>
         /// <param name="transaction">The transaction.</param>
-        public void PartialDeleteLogData(EtpUri uri, string indexCurve, bool increasing, bool isTimeLog, List<string> deletedChannels, Dictionary<string, Range<double?>> ranges, MongoTransaction transaction)
+        public void PartialDeleteLogData(EtpUri uri, string indexCurve, bool increasing, bool isTimeLog, List<string> deletedChannels, Dictionary<string, Range<double?>> ranges, Dictionary<string, Range<double?>> updatedRanges, MongoTransaction transaction)
         {
             try
             {
-                var rangeSize = WitsmlSettings.GetRangeSize(isTimeLog);
-                var indexRange = ranges[indexCurve];
-
-                // Based on the range of the updates, compute the range of the data chunk(s) 
-                //... so we can merge updates with existing data.
-                var existingRange = new Range<double?>(
-                    Range.ComputeRange(indexRange.Start.GetValueOrDefault(), rangeSize, increasing).Start,
-                    Range.ComputeRange(indexRange.End.GetValueOrDefault(), rangeSize, increasing).End
-                    );
-
-                // Get DataChannelChunk list from database for the computed range and URI
-                var filter = BuildDataFilter(uri, indexCurve, existingRange, increasing);
+                // Get DataChannelChunk list from database for the log
+                var filter = BuildDataFilter(uri, indexCurve, new Range<double?>(null, null), increasing);
                 var results = GetData(filter, increasing);
 
-                BulkWriteChunks(PartialDeleteChunks(results, deletedChannels, ranges, increasing), uri, null, null, null, transaction);
+                var channelRanges = new Dictionary<string, List<double?>>();
+                foreach (var range in ranges)
+                {
+                    channelRanges.Add(range.Key, new List<double?> {null, null});
+                }
+                if (!channelRanges.ContainsKey(indexCurve))
+                    channelRanges.Add(indexCurve, new List<double?> {null, null});
+
+                BulkWriteChunks(PartialDeleteChunks(results, deletedChannels, ranges, channelRanges, increasing), uri, null, null, null, transaction);
+
+                foreach (var chanelRange in channelRanges)
+                {
+                    var rangeValues = chanelRange.Value;
+                    updatedRanges.Add(chanelRange.Key, new Range<double?>(rangeValues[0], rangeValues[1]));
+                }
             }
             catch (MongoException ex)
             {
@@ -264,6 +269,9 @@ namespace PDS.Witsml.Server.Data.Channels
             collection.BulkWrite(chunks
                 .Select(dc =>
                 {
+                    if (dc == null)
+                        return null;
+
                     if (string.IsNullOrWhiteSpace(dc.Uid))
                     {
                         dc.Uid = Guid.NewGuid().ToString();
@@ -313,6 +321,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
                     return new DeleteOneModel<ChannelDataChunk>(chunkFilter.Eq(f => f.Uri, uri) & chunkFilter.Eq(f => f.Uid, dc.Uid));
                 })
+                .Where(wm => wm != null)
                 .ToList());
 
             transaction?.Save();
@@ -441,22 +450,46 @@ namespace PDS.Witsml.Server.Data.Channels
             }
         }
 
-        private IEnumerable<ChannelDataChunk> PartialDeleteChunks(List<ChannelDataChunk> chunks, List<string> deletedChannels, Dictionary<string, Range<double?>> ranges, bool increasing)
+        private IEnumerable<ChannelDataChunk> PartialDeleteChunks(List<ChannelDataChunk> chunks, List<string> deletedChannels, Dictionary<string, Range<double?>> ranges, Dictionary<string, List<double?>> updatedRanges, bool increasing)
         {
             foreach (var chunk in chunks)
             {
-                yield return PartialDeleteDataChunk(chunk, deletedChannels, ranges, increasing);
+                yield return PartialDeleteDataChunk(chunk, deletedChannels, ranges, updatedRanges, increasing);
             }
         }
 
-        private ChannelDataChunk PartialDeleteDataChunk(ChannelDataChunk chunk, List<string> deletedChannels, Dictionary<string, Range<double?>> ranges, bool increasing)
+        private ChannelDataChunk PartialDeleteDataChunk(ChannelDataChunk chunk, List<string> deletedChannels, Dictionary<string, Range<double?>> ranges, Dictionary<string, List<double?>> updatedRanges, bool increasing)
         {
+            var indexChannel = chunk.Indices.FirstOrDefault();
+            var indexRange = updatedRanges[indexChannel.Mnemonic];
+            var reader = chunk.GetReader();
+
+            var channelRanges = reader.GetChannelRanges();
+            if (!ToPartialDeleteChunk(reader, deletedChannels, channelRanges, ranges, updatedRanges, increasing))
+            {
+                foreach (var updatedRange in updatedRanges)
+                {
+                    if (!channelRanges.ContainsKey(updatedRange.Key))
+                        continue;
+
+                    var update = updatedRange.Value;
+                    if (!update[0].HasValue)
+                        update[0] = channelRanges[updatedRange.Key].Start;
+                    update[1] = channelRanges[updatedRange.Key].End;
+                }
+
+                if (!indexRange[0].HasValue)
+                    indexRange[0] = indexChannel.Start;
+                indexRange[1] = indexChannel.End;
+
+                return null;
+            }
+
             var data = new List<string>();
-            var records = chunk.GetReader().AsEnumerable();
+            var records = reader.AsEnumerable();
 
             double? start = null;
-            double? end = null;
-            ChannelIndexInfo indexChannel = null;
+            double? end = null;          
 
             using (var existingEum = records.GetEnumerator())
             {
@@ -464,11 +497,10 @@ namespace PDS.Witsml.Server.Data.Channels
 
                 while (!endOfExisting)
                 {
-                    existingEum.Current.PartialDeleteRecord(deletedChannels, ranges, increasing);
+                    existingEum.Current.PartialDeleteRecord(deletedChannels, ranges, updatedRanges, increasing);
                     if (existingEum.Current.HasValues())
                     {
-                        if (indexChannel == null)
-                            indexChannel = existingEum.Current.GetIndex();
+                        indexChannel = existingEum.Current.GetIndex();
                         var index = existingEum.Current.GetIndexValue();
                         if (!start.HasValue)
                             start = index;
@@ -505,7 +537,49 @@ namespace PDS.Witsml.Server.Data.Channels
             newChunk.RecordCount = data.Count;
             newChunk.Data = "[" + string.Join(",", data) + "]";
 
+            if (!indexRange[0].HasValue)
+                indexRange[0] = newIndex.Start;
+            indexRange[1] = newIndex.End;
+
             return newChunk;
+        }
+
+        private bool ToPartialDeleteChunk(ChannelDataReader reader, List<string> deletedChannels, Dictionary<string, Range<double?>> channelRanges, Dictionary<string, Range<double?>> ranges, Dictionary<string, List<double?>> updatedRanges, bool increasing)
+        {
+            var updatedChannels = ranges.Keys.ToList();
+
+            if (!reader.Mnemonics.Any(m => deletedChannels.Contains(m) || updatedChannels.Contains(m)))
+                return false;
+
+            var toPartialDelete = false;
+
+            foreach (var channelRange in channelRanges)
+            {
+                if (!ranges.ContainsKey(channelRange.Key))
+                    continue;
+
+                var range = ranges[channelRange.Key];
+                if (!RangesOverlap(channelRange.Value, range, increasing))
+
+                    continue;
+                toPartialDelete = true;
+                break;
+            }
+
+            return toPartialDelete;
+        }
+
+        private bool RangesOverlap(Range<double?> current, Range<double?> update, bool increasing)
+        {
+            return !StartsBefore(current.End.GetValueOrDefault(), update.Start.GetValueOrDefault(), increasing) 
+                && !StartsBefore(update.End.GetValueOrDefault(), current.Start.GetValueOrDefault(), increasing);
+        }
+
+        private bool StartsBefore(double a, double b, bool increasing)
+        {
+            return increasing
+                ? a <= b
+                : a >= b;
         }
 
         private void DeleteChunkChannels(ChannelDataChunk chunk, List<string> deletedChannels)
