@@ -93,8 +93,8 @@ namespace PDS.Witsml.Server.Configuration
             }
             else if (request.Function == Functions.DeleteFromStore)
             {
-                //ValidateKeywords(optionsIn, OptionsIn.CascadedDelete.Keyword);
-                //ValidateCascadedDelete(optionsIn, GetCapServer().CapServer.CascadedDelete.GetValueOrDefault());
+                ValidateKeywords(optionsIn, OptionsIn.CascadedDelete.Keyword);
+                ValidateCascadedDelete(optionsIn, GetCapServer().CapServer.CascadedDelete.GetValueOrDefault());
                 ValidateEmptyRootElement(request.ObjectType, document);
                 ValidateSingleChildElement(request.ObjectType, document);
             }

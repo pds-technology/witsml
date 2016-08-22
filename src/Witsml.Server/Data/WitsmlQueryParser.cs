@@ -123,6 +123,21 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Requests the CascadedDelete OptionIn.
+        /// </summary>
+        /// <returns>The CascadedDelete value</returns>
+        public bool CascadedDelete()
+        {
+            string value = OptionsIn.GetValue(Options, OptionsIn.CascadedDelete.False);
+            bool result;
+
+            if (!bool.TryParse(value, out result))
+                result = false;
+
+            return result;
+        }
+
+        /// <summary>
         /// The maximum number of nodes that can be returned to the client.
         /// </summary>
         /// <returns>The number of maximum nodes to returned if it exists in the Options In, null otherwise.</returns>

@@ -237,6 +237,16 @@ namespace PDS.Witsml.Server.Configuration
         }
 
         /// <summary>
+        /// Validates the cascaded delete.
+        /// </summary>
+        /// <param name="options">The options.</param>
+        /// <param name="compressionMethod">The compression method.</param>
+        public static void ValidateCascadedDelete(Dictionary<string, string> options, bool compressionMethod)
+        {
+            
+        }
+
+        /// <summary>
         /// Validates the request maximum return nodes.
         /// </summary>
         /// <param name="options">The options.</param>

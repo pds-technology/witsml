@@ -480,7 +480,7 @@ namespace PDS.Witsml.Data
         /// <param name="propertyValue">The property value.</param>
         protected virtual void HandleNullValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
-            if (!propertyType.IsValueType && !propertyType.IsEnum)
+            if (IsComplexType(propertyType))
                 return;
 
             var element = xmlObject as XElement;
@@ -747,6 +747,36 @@ namespace PDS.Witsml.Data
         {
             var prefix = string.IsNullOrEmpty(parentPath) ? string.Empty : string.Format("{0}.", parentPath);
             return string.Format("{0}{1}", prefix, propertyName.ToPascalCase());
+        }
+
+        /// <summary>
+        /// Determines whether the specified type has a uid property.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns><c>true</c> if the type defines a uid property; otherwise, <c>false</c>.</returns>
+        protected virtual bool HasUidProperty(Type type)
+        {
+            return type.GetProperty("Uid") != null;
+        }
+
+        /// <summary>
+        /// Determines whether the specified type is a complex type.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns><c>true</c> if the type defines a complex type; otherwise, <c>false</c>.</returns>
+        protected virtual bool IsComplexType(Type type)
+        {
+            return !(type == typeof(string)) && !type.IsValueType && !type.IsEnum;
+        }
+
+        /// <summary>
+        /// Determines whether the specified type has simple content.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns><c>true</c> if the type defines a type with simple content; otherwise, <c>false</c>.</returns>
+        protected virtual bool HasSimpleContent(Type type)
+        {
+            return type.GetProperties().Any(x => x.IsDefined(typeof(XmlTextAttribute), false));
         }
 
         private bool IsNumeric(Type propertyType)

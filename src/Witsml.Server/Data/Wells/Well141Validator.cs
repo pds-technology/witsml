@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Energistics.DataAccess.WITSML141;
 using System.ComponentModel.Composition;
+using System.Linq;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
@@ -32,15 +33,18 @@ namespace PDS.Witsml.Server.Data.Wells
     public class Well141Validator : DataObjectValidator<Well>
     {
         private readonly IWitsmlDataAdapter<Well> _wellDataAdapter;
+        private readonly IWitsmlDataAdapter<Wellbore> _wellboreDataAdapter;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Well141Validator"/> class.
+        /// Initializes a new instance of the <see cref="Well141Validator" /> class.
         /// </summary>
         /// <param name="wellDataAdapter">The well data adapter.</param>
+        /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
         [ImportingConstructor]
-        public Well141Validator(IWitsmlDataAdapter<Well> wellDataAdapter)
+        public Well141Validator(IWitsmlDataAdapter<Well> wellDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter)
         {
             _wellDataAdapter = wellDataAdapter;
+            _wellboreDataAdapter = wellboreDataAdapter;
         }
 
         /// <summary>
@@ -79,6 +83,8 @@ namespace PDS.Witsml.Server.Data.Wells
         private IEnumerable<ValidationResult> ValidateObjectExistence()
         {
             var uri = DataObject.GetUri();
+            var cascadeDeleteOff = OptionsIn.CascadedDelete.False.Value.ToLower();
+            var parserCascadedDelete = Parser.CascadedDelete().ToString().ToLower();
 
             // Validate that a Uid was provided
             if (string.IsNullOrWhiteSpace(DataObject.Uid))
@@ -89,6 +95,12 @@ namespace PDS.Witsml.Server.Data.Wells
             else if (!_wellDataAdapter.Exists(uri))
             {
                 yield return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] {"Uid"});
+            }
+            // TODO: Check if cascadedDelete is supported in CapServer.
+            // Validate that there are no child data-objects if cascading deletes are not invoked.
+            else if ((cascadeDeleteOff.Equals(parserCascadedDelete)) && _wellboreDataAdapter.GetAll(uri).Any())
+            {
+                yield return new ValidationResult(ErrorCodes.NotBottomLevelDataObject.ToString());
             }
         }
     }

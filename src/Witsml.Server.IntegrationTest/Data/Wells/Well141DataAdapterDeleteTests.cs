@@ -503,6 +503,8 @@ namespace PDS.Witsml.Server.Data.Wells
                 }
             };
 
+            _well.ReferencePoint = new List<ReferencePoint>();
+            _well.ReferencePoint.Add(referencePoint);
             _devKit.AddAndAssert(_well);
 
             // Delete well
