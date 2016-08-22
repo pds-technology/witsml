@@ -555,9 +555,10 @@ namespace PDS.Witsml.Data.Channels
         /// </summary>
         /// <param name="deletedChannels">The deleted channels.</param>
         /// <param name="ranges">The ranges.</param>
+        /// <param name="updatedRanges">The updated ranges.</param>
         /// <param name="increasing">if set to <c>true</c> [increasing].</param>
         /// <exception cref="NotImplementedException"></exception>
-        public void PartialDeleteRecord(List<string> deletedChannels, Dictionary<string, Range<double?>> ranges, bool increasing)
+        public void PartialDeleteRecord(List<string> deletedChannels, Dictionary<string, Range<double?>> ranges, Dictionary<string, List<double?>> updatedRanges, bool increasing)
         {
             var row = _records[_current][1];
             var newRow = new List<object>();
@@ -572,10 +573,20 @@ namespace PDS.Witsml.Data.Channels
                 if (ranges.ContainsKey(mnemonic))
                 {
                     var range = ranges[mnemonic];
+                    var updatedRange = updatedRanges[mnemonic];
+
                     if (WithinDeleteRange(index, range, increasing))
+                    {
                         newRow.Add(null);
+                    }
                     else
+                    {
                         newRow.Add(row[i]);
+                        if (!updatedRange[0].HasValue)
+                            updatedRange[0] = index;
+                        updatedRange[1] = index;
+                    }
+                        
                 }
                 else
                 {
