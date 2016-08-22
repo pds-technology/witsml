@@ -294,5 +294,60 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual(extensionName1.Value.Uom, extensionName.Value.Uom);
             Assert.AreEqual(extensionName1.Value.Value, extensionName.Value.Value);
         }
+
+        [TestMethod, Description("Tests adding an extensionNameValue field to commonData on an UpdateInStore")]
+        public void Well141DataAdapter_UpdateInStore_Add_Complex_Element_To_Existing_Recurring_Element()
+        {
+            // Add a minimal test well and Assert its Success
+            _well.WellDatum = new List<WellDatum>
+            {
+                new WellDatum()
+                {
+                    Code = ElevCodeEnum.KB,
+                    Uid = "KB",
+                    Name = "Kelly Bushing"
+                }
+            };
+            _devKit.AddAndAssert(_well);
+
+
+            // Create an update well that will update the existing KB datum with a datumName
+            var datamWithDatumName = new WellDatum()
+            {
+                Uid = "KB",
+                DatumName = new WellKnownNameStruct()
+                {
+                    Code = "XX",
+                    NamingSystem = "TestName",
+                    Value = "Test"
+                }
+            };
+
+            var updateWell = new Well()
+            {
+                Uid = _well.Uid,
+                WellDatum = new List<WellDatum>()
+                {
+                    datamWithDatumName
+                }
+            };
+
+            // Update well
+            var updateResponse = _devKit.Update<WellList, Well>(updateWell);
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
+
+            // Query well to make sure datumName was added
+            var result = _devKit.GetSingleWellAndAssert(_well);
+            var welldatum = result.WellDatum.FirstOrDefault(x => x.Uid.Equals("KB"));
+            Assert.IsNotNull(welldatum);
+            Assert.AreEqual("Kelly Bushing", welldatum.Name);
+            Assert.AreEqual("KB", welldatum.Code);
+            var datumName = welldatum.DatumName;
+            Assert.IsNotNull(datumName);
+            Assert.AreEqual("TestName", datumName.NamingSystem);
+            Assert.AreEqual("XX", datumName.NamingSystem);
+            Assert.AreEqual("Test", datumName.Value);
+        }
     }
 }
