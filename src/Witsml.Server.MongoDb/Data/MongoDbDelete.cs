@@ -283,6 +283,10 @@ namespace PDS.Witsml.Server.Data
                     }
                     else
                     {
+                        if (IsRequired(propertyInfo) && itemsById.Count == 1)
+                        {
+                            throw new WitsmlException(ErrorCodes.MustRetainOneRecurringNode);
+                        }
                         var update = updateBuilder.Pull(parentPath, current);
                         AddToPullCollection(parentPath, new UpdateOneModel<T>(filter, update));
                         return null;
