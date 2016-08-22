@@ -175,7 +175,7 @@ namespace PDS.Witsml.Server.Data
                 {
                     var element = xmlObject as XElement;
 
-                    if (element != null && element.HasElements && !HasUidProperty(propertyType))
+                    if (!HasUidProperty(propertyType))
                         throw new WitsmlException(ErrorCodes.EmptyNonRecurringElementSpecified);
                 }
             }
