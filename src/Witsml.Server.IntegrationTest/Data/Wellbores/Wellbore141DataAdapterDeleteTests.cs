@@ -244,6 +244,192 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.IsNull(resultExt2.Description);
         }
 
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore without plural container")]
+        public void Wellbore141DataAdapter_DeleteFromStore_Error_401_No_Plural_Root_Element()
+        {
+            var nonPluralWell = "<wellbore xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                           "   <wellbore uidWell=\"{0}\" uid=\"{0}\">" + Environment.NewLine +
+                           "       <name>plural wellbore</name>" + Environment.NewLine +
+                           "   </wellbore>" + Environment.NewLine +
+                           "</wellbore>";
+
+            var xmlIn = string.Format(nonPluralWell, _well.Uid, _wellbore.Uid);
+            var response = _devKit.DeleteFromStore(ObjectTypes.Wellbore, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingPluralRootElement, response.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore while missing the object type")]
+        public void Wellbore141DataAdapter_DeleteFromStore_Error_407_Missing_Witsml_Object_Type()
+        {
+            var response = _devKit.Delete<WellboreList, Wellbore>(_wellbore, string.Empty);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingWmlTypeIn, response.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore without plural container")]
+        public void Wellbore141DataAdapter_DeleteFromStore_Error_408_Empty_QueryIn()
+        {
+            var response = _devKit.DeleteFromStore(ObjectTypes.Wellbore, string.Empty, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingInputTemplate, response.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore without specifying the wellbore uid")]
+        public void Wellbore141DataAdapter_DeleteFromStore_Error_415_Delete_Without_Specifing_UID()
+        {
+            // Add well
+            _devKit.AddAndAssert(_well);
+
+            // Add wellbore
+            _devKit.AddAndAssert(_wellbore);
+
+            // Delete well with invalid element
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, string.Empty, _well.Uid, string.Empty);
+            var results = _devKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.DataObjectUidMissing, results.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore without all required fields on an optional element")]
+        public void Wellbore141DataAdapter_DeleteFromStore_Error_416_Empty_UID()
+        {
+            // Add well
+            _devKit.AddAndAssert(_well);
+
+            // Add wellbore
+
+            var ext1 = _devKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            _wellbore.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            _devKit.AddAndAssert(_wellbore);
+
+            // Delete well
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, _wellbore.Uid, _well.Uid,
+                "<commonData><extensionNameValue uid=\"\" /></commonData>");
+
+            var results = _devKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore with a missing uom")]
+        public void Wellbore141DataAdapter_DeleteFromStore_Error_417_Deleting_With_Empty_UOM_Attribute()
+        {
+            // Add well
+            _devKit.AddAndAssert(_well);
+
+            // Add wellbore
+            _wellbore.MD = new MeasuredDepthCoord()
+            {
+                Uom = MeasuredDepthUom.ft,
+                Value = 1.0
+            };
+            _devKit.AddAndAssert(_wellbore);
+
+            // Delete wellbore's MD
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, _wellbore.Uid, _well.Uid,
+                "<md uom=\"\" />");
+
+            var results = _devKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyUomSpecified, results.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore without all required fields on an optional element")]
+        public void Wellbore141DataAdapter_DeleteFromStore_Error_418_Missing_Uid()
+        {
+            // Add well
+            _devKit.AddAndAssert(_well);
+
+            // Add wellbore
+            var ext1 = _devKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            _wellbore.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+            _devKit.AddAndAssert(_wellbore);
+
+            // Delete well
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, _wellbore.Uid, _well.Uid,
+                "<commonData><extensionNameValue /></commonData>");
+
+            var results = _devKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.MissingElementUidForDelete, results.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore more than one object")]
+        public void Wellbore141DataAdapter_DeleteFromStore_Error_444_Updating_With_More_Than_One_Data_Object()
+        {
+            // Add well 
+            _devKit.AddAndAssert(_well);
+
+            // Add second well
+            var well2 = new Well()
+            {
+                Uid = _devKit.Uid(),
+                Name = _devKit.Name("Well 02"),
+                TimeZone = _devKit.TimeZone
+            };
+
+            _devKit.AddAndAssert(well2);
+
+            // Add wellbore
+            _devKit.AddAndAssert(_wellbore);
+
+            // Add second wellbore
+            var wellbore2 = new Wellbore()
+            {
+                UidWell = well2.Uid,
+                NameWell = well2.Name,
+                Uid = _devKit.Uid(),
+                Name = _devKit.Name("Wellbore 02"),
+                MD = new MeasuredDepthCoord(0, MeasuredDepthUom.ft)
+            };
+
+            _devKit.AddAndAssert(wellbore2);
+
+            var multiObjectXml = "<wellbores xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                          "   <wellbore uidWell=\"{0}\" uid=\"{1}\">" + Environment.NewLine +
+                          "{2}" +
+                          "   </wellbore>" + Environment.NewLine +
+                          "   <wellbore uidWell=\"{3}\" uid=\"{4}\">" + Environment.NewLine +
+                          "{5}" +
+                          "   </wellbore>" + Environment.NewLine +
+                          "</wellbores>";
+
+            // Delete wellbores
+            var deleteXml = string.Format(
+                multiObjectXml,
+                _well.Uid,
+                _wellbore.Uid,
+                "<md uom=\"ft\">1</md>",
+                well2.Uid,
+                wellbore2.Uid,
+                "<md uom=\"ft\">2</md>"
+                );
+
+            var results = _devKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateMultipleDataObjects, results.Result);
+        }
+
+
         #region Helper Methods
 
         private void AddWellbore(Well well, Wellbore wellbore)
