@@ -436,6 +436,17 @@ namespace PDS.Witsml.Server
         }
 
         /// <summary>
+        /// Adds log object and test the return code
+        /// </summary>
+        /// <param name="log">the wellbore</param>
+        /// <param name="errorCode">the errorCode</param>
+        public void AddAndAssert(Log log, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            var response = Add<LogList, Log>(log);
+            Assert.AreEqual((short)errorCode, response.Result);
+        }
+
+        /// <summary>
         /// Does get query for single well object and test for result count equal to 1 and is not null
         /// </summary>
         /// <param name="well">the well</param>
@@ -471,9 +482,27 @@ namespace PDS.Witsml.Server
         }
 
         /// <summary>
+        /// Does get query for single log object and test for result count equal to 1 and is not null
+        /// </summary>
+        /// <param name="log">the log with UIDs for well and wellbore</param>
+        /// <returns>The first log from the response</returns>
+        public Log GetSingleLogAndAssert(Log log)
+        {
+            var query = CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
+            var results = Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+
+            var result = results.FirstOrDefault();
+            Assert.IsNotNull(result);
+
+            return result;
+        }
+
+        /// <summary>
         /// Does UpdateInStore on well object and test the return code
         /// </summary>
         /// <param name="well">the well</param>
+        /// <param name="errorCode">The error code.</param>
         public void UpdateAndAssert(Well well, ErrorCodes errorCode = ErrorCodes.Success)
         {
             var updateResponse = Update<WellList, Well>(well);
@@ -485,6 +514,7 @@ namespace PDS.Witsml.Server
         /// Does UpdateInStore on wellbore object and test the return code
         /// </summary>
         /// <param name="wellbore">the wellbore</param>
+        /// <param name="errorCode">The error code.</param>
         public void UpdateAndAssert(Wellbore wellbore, ErrorCodes errorCode = ErrorCodes.Success)
         {
             var updateResponse = Update<WellboreList, Wellbore>(wellbore);
@@ -493,9 +523,21 @@ namespace PDS.Witsml.Server
         }
 
         /// <summary>
+        /// Does UpdateInStore on log object and test the return code
+        /// </summary>
+        /// <param name="log">the log</param>
+        /// <param name="errorCode">The error code.</param>
+        public void UpdateAndAssert(Log log, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            var updateResponse = Update<LogList, Log>(log);
+            Assert.AreEqual((short)errorCode, updateResponse.Result);
+        }
+
+        /// <summary>
         /// Deletes the well and test the return code
         /// </summary>
         /// <param name="well">The well.</param>
+        /// <param name="errorCode">The error code.</param>
         public void DeleteAndAssert(Well well, ErrorCodes errorCode = ErrorCodes.Success)
         {
             var response = Delete<WellList, Well>(well);
@@ -508,9 +550,23 @@ namespace PDS.Witsml.Server
         /// Deletes the wellbore and test the return code
         /// </summary>
         /// <param name="wellbore">The wellbore.</param>
+        /// <param name="errorCode">The error code.</param>
         public void DeleteAndAssert(Wellbore wellbore, ErrorCodes errorCode = ErrorCodes.Success)
         {
             var response = Delete<WellboreList, Wellbore>(wellbore);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)errorCode, response.Result);
+        }
+
+        /// <summary>
+        /// Deletes the log and test the return code
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="errorCode">The error code.</param>
+        public void DeleteAndAssert(Log log, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            var response = Delete<LogList, Log>(log);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)errorCode, response.Result);
