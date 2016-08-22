@@ -644,7 +644,7 @@ namespace PDS.Witsml.Data
         protected string ValidateMeasureUom(XElement element, PropertyInfo uomProperty, string measureValue)
         {
             var xmlAttribute = uomProperty.GetCustomAttribute<XmlAttributeAttribute>();
-            var isRequired = uomProperty.GetCustomAttribute<RequiredAttribute>() != null;
+            var isRequired = IsRequired(uomProperty);
 
             // validation not needed if uom attribute is not defined
             if (xmlAttribute == null)
@@ -767,6 +767,16 @@ namespace PDS.Witsml.Data
         protected virtual bool IsComplexType(Type type)
         {
             return !(type == typeof(string)) && !type.IsValueType && !type.IsEnum;
+        }
+
+        /// <summary>
+        /// Determines whether the specified property information is required.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <returns><c>true</c> if the propertyInfo has the custom attribute RequiredAttribute; /// otherwise, <c>false</c>.</returns>
+        protected virtual bool IsRequired(PropertyInfo propertyInfo)
+        {
+            return propertyInfo?.GetCustomAttribute<RequiredAttribute>() != null;
         }
 
         /// <summary>

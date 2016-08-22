@@ -158,7 +158,7 @@ namespace PDS.Witsml.Server.Data
         protected override void HandleNullValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath,
             string propertyValue)
         {
-            var isRequired = propertyInfo?.GetCustomAttribute<RequiredAttribute>() != null;
+            var isRequired = IsRequired(propertyInfo);
 
             // DeleteFromStore validation [-420]
             // Check Delete of non-recurring, required element or attribute
