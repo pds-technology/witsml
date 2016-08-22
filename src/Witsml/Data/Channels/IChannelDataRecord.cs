@@ -216,7 +216,8 @@ namespace PDS.Witsml.Data.Channels
         /// </summary>
         /// <param name="deletedChannels">The deleted channels.</param>
         /// <param name="ranges">The ranges.</param>
+        /// <param name="updatedRanges">The updated ranges.</param>
         /// <param name="increasing">if set to <c>true</c> [increasing].</param>
-        void PartialDeleteRecord(List<string> deletedChannels, Dictionary<string, Range<double?>> ranges, bool increasing);
+        void PartialDeleteRecord(List<string> deletedChannels, Dictionary<string, Range<double?>> ranges, Dictionary<string, List<double?>> updatedRanges, bool increasing);
     }
 }
