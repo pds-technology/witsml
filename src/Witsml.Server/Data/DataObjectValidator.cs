@@ -160,21 +160,6 @@ namespace PDS.Witsml.Server.Data
         {
             var isRequired = propertyInfo?.GetCustomAttribute<RequiredAttribute>() != null;
 
-            if (!propertyType.IsValueType && !propertyType.IsEnum)
-            {
-                // DeleteFromStore validation [-419] and [-420]
-                // Check Delete of non-recurring container element
-                if (Context.Function == Functions.DeleteFromStore)
-                {
-                    if (isRequired)
-                        throw new WitsmlException(ErrorCodes.EmptyMandatoryNodeSpecified);
-                    else
-                        throw new WitsmlException(ErrorCodes.EmptyNonRecurringElementSpecified);
-                }
-
-                return;
-            }
-
             // DeleteFromStore validation [-420]
             // Check Delete of non-recurring, required element or attribute
             if (Context.Function == Functions.DeleteFromStore && isRequired)
@@ -182,6 +167,18 @@ namespace PDS.Witsml.Server.Data
                 throw new WitsmlException(ErrorCodes.EmptyMandatoryNodeSpecified);
             }
 
+            if (!propertyType.IsValueType && !propertyType.IsEnum)
+            {
+                // DeleteFromStore validation [-419]
+                // Check Delete of non-recurring container element
+                if (Context.Function == Functions.DeleteFromStore)
+                {
+                    var element = xmlObject as XElement;
+
+                    if (!HasUidProperty(propertyType))
+                        throw new WitsmlException(ErrorCodes.EmptyNonRecurringElementSpecified);
+                }
+            }
 
             base.HandleNullValue(propertyInfo, xmlObject, propertyType, propertyPath, propertyValue);
         }
