@@ -369,7 +369,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.DataObjectUidMissing, results.Result);
         }
 
-        [TestMethod, Description("Tests you cannot do DeleteFromStore without all required fields on an optional element")]
+        [TestMethod, Description("Tests you cannot do DeleteFromStore with missing uid attribute.")]
         public void Well141DataAdapter_DeleteFromStore_Error_416_Missing_Attribute()
         {
             // Add well
@@ -386,13 +386,12 @@ namespace PDS.Witsml.Server.Data.Wells
 
             // Delete well
             var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid,
-                "<commonData><extensionNameValue /></commonData>");
+                "<commonData><extensionNameValue uid=\"\" /></commonData>");
 
             var results = _devKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
 
             Assert.IsNotNull(results);
-            // Note - This is currently throwing a -418 instead of 416.  
-            Assert.AreEqual((short)ErrorCodes.MissingElementUidForDelete, results.Result);
+            Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
         }
 
         [TestMethod, Description("Tests you cannot do DeleteFromStore with a missing uom")]
@@ -429,7 +428,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             // Delete well
             var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid,
-                "<commonData><extensionNameValue uid=\"\" /></commonData>");
+                "<commonData><extensionNameValue /></commonData>");
 
             var results = _devKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
 
@@ -556,6 +555,7 @@ namespace PDS.Witsml.Server.Data.Wells
                     Value = "LocalWellCRS"
                 }
             };
+
             var referencePoint = new ReferencePoint
             {
                 Uid = "localWell1",
@@ -564,6 +564,11 @@ namespace PDS.Witsml.Server.Data.Wells
                 {
                     location
                 }
+            };
+
+            _well.ReferencePoint = new List<ReferencePoint>()
+            {
+                referencePoint
             };
 
             _devKit.AddAndAssert(_well);
