@@ -197,10 +197,12 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 using (var transaction = DatabaseProvider.BeginTransaction(uri))
                 {
+                    var current = Get(uri);
+                    var channels = GetLogCurves(current);
+
                     PartialDeleteEntity(parser, uri, transaction);
 
-                    // TODO: Implement partial delete of log data
-                    PartialDeleteLogData(uri, parser, transaction);
+                    PartialDeleteLogData(uri, parser, channels, transaction);
 
                     transaction.Commit();
                 }
@@ -567,7 +569,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Gets the partial delete ranges.
+        /// Merge the partial delete ranges from QueryIn with the current index range and the default index range.
         /// </summary>
         /// <param name="deletedChannels">The deleted channels.</param>
         /// <param name="defaultRange">The default delete range, i.e from startIndex/startDateTimeIndex, endIndex/endDateTimeIndex of the log header.</param>
@@ -576,7 +578,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="indexCurve">The index curve.</param>
         /// <param name="increasing">if set to <c>true</c> [increasing].</param>
         /// <returns>The channel index ranges for the partial delete.</returns>
-        protected Dictionary<string, Range<double?>> GetPartialDeleteRanges(List<string> deletedChannels, Range<double?> defaultRange, Dictionary<string, Range<double?>> current, Dictionary<string, Range<double?>> delete, string indexCurve, bool increasing)
+        protected Dictionary<string, Range<double?>> MergePartialDeleteRanges(List<string> deletedChannels, Range<double?> defaultRange, Dictionary<string, Range<double?>> current, Dictionary<string, Range<double?>> delete, string indexCurve, bool increasing)
         {
             var ranges = new Dictionary<string, Range<double?>>();
             var indexRange = current[indexCurve];
@@ -955,8 +957,9 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="uri">The URI.</param>
         /// <param name="parser">The parser.</param>
+        /// <param name="channels">The current logCurve information.</param>
         /// <param name="transaction">The transaction.</param>
-        protected abstract void PartialDeleteLogData(EtpUri uri, WitsmlQueryParser parser, MongoTransaction transaction);
+        protected abstract void PartialDeleteLogData(EtpUri uri, WitsmlQueryParser parser, List<TChild> channels, MongoTransaction transaction);
 
         /// <summary>
         /// Gets the log data delimiter.

@@ -385,9 +385,10 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="uri">The URI.</param>
         /// <param name="parser">The parser.</param>
+        /// <param name="channels">The current logCurve information.</param>
         /// <param name="transaction">The transaction.</param>
         /// <exception cref="NotImplementedException"></exception>
-        protected override void PartialDeleteLogData(EtpUri uri, WitsmlQueryParser parser, MongoTransaction transaction)
+        protected override void PartialDeleteLogData(EtpUri uri, WitsmlQueryParser parser, List<LogCurveInfo> channels, MongoTransaction transaction)
         {
             throw new NotImplementedException();
         }
