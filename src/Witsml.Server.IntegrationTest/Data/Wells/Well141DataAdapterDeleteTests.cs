@@ -476,12 +476,14 @@ namespace PDS.Witsml.Server.Data.Wells
                     }
                 }
             };
+
             var returnWell = _devKit.GetSingleWellAndAssert(_well);
             returnWell.WellDatum = new List<WellDatum>()
             {
                 wellDatum
             };
-
+            _devKit.UpdateAndAssert(returnWell);
+            
             // Delete 
             var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, _well.Uid,
                 $"<wellDatum uid=\"{wellDatum.Uid}\"><rig /></wellDatum>");
