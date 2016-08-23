@@ -415,6 +415,8 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             var uidToMnemonics = channels.ToDictionary(c => c.Uid, c => c.Mnemonic.Value);
             var updatedRanges = new Dictionary<string, Range<double?>>();
+
+            WitsmlParser.RemoveEmptyElements(parser.Root);
             var delete = WitsmlParser.Parse<LogList>(parser.Root, false).Log.FirstOrDefault();
             var current = GetEntity(uri);
             
