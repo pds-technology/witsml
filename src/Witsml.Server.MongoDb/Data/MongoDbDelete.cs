@@ -283,7 +283,12 @@ namespace PDS.Witsml.Server.Data
                     }
                     else
                     {
-                        /* 
+                        if (IsRequired(propertyInfo) && itemsById.Count == 1)
+                        {
+                            throw new WitsmlException(ErrorCodes.MustRetainOneRecurringNode);
+                        }
+
+                        /*
                         // FieldDefinition<T>
                         var parentField = new StringFieldDefinition<T>(parentPath);
 
@@ -317,10 +322,6 @@ namespace PDS.Witsml.Server.Data
                         var update = pullFilterMethod.Invoke(updateBuilder, new[] { parentField, childFilter }) as UpdateDefinition<T>;
                         */
 
-                        if (IsRequired(propertyInfo) && itemsById.Count == 1)
-                        {
-                            throw new WitsmlException(ErrorCodes.MustRetainOneRecurringNode);
-                        }
                         var update = updateBuilder.Pull(parentPath, current);
                         AddToPullCollection(parentPath, new UpdateOneModel<T>(filter, update));
                         return null;
