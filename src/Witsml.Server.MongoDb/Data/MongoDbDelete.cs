@@ -208,11 +208,11 @@ namespace PDS.Witsml.Server.Data
             Context.PropertyValues.Remove(Context.PropertyValues.Last());
         }
 
-        private void SetProperty<TValue>(PropertyInfo propertyInfo, string propertyPath, TValue propertyValue)
-        {
-            Context.Update = Context.Update.Set(propertyPath, propertyValue);
-            SetSpecifiedProperty(propertyInfo, propertyPath, true);
-        }
+        //private void SetProperty<TValue>(PropertyInfo propertyInfo, string propertyPath, TValue propertyValue)
+        //{
+        //    Context.Update = Context.Update.Set(propertyPath, propertyValue);
+        //    SetSpecifiedProperty(propertyInfo, propertyPath, true);
+        //}
 
         private void UnsetProperty(PropertyInfo propertyInfo, string propertyPath)
         {
@@ -288,45 +288,14 @@ namespace PDS.Witsml.Server.Data
                             throw new WitsmlException(ErrorCodes.MustRetainOneRecurringNode);
                         }
 
-                        /*
-                        // FieldDefinition<T>
-                        var parentFieldType = typeof (FieldDefinition<T>);
-                        var parentField = new StringFieldDefinition<T>(parentPath);
-
-                        // TField
-                        var childPropertyType = typeof(string);
-                        var childPropertyPath = idField; 
-                        var childPropertyValue = elementId;
-
-                        // Create: StringFieldDefinition<TChild, TField>
-                        var childFieldDefinition = typeof(StringFieldDefinition<,>);
-                        var childFieldType = childFieldDefinition.MakeGenericType(type, childPropertyType);
-                        var childField = Activator.CreateInstance(childFieldType, childPropertyPath, null);
-
-                        // Define: FieldDefinition<TChild, TField>
-                        childFieldDefinition = typeof(FieldDefinition<,>);
-                        childFieldType = childFieldDefinition.MakeGenericType(type, childPropertyType);
-
-                        // Create: FilterDefinitionBuilder<TChild>
-                        var childFilterBuilderDefinition = typeof(FilterDefinitionBuilder<>);
-                        var childFilterBuilderType = childFilterBuilderDefinition.MakeGenericType(type);
-                        var childFilterBuilder = Activator.CreateInstance(childFilterBuilderType);
-
-                        // GetMethod: FilterDefinitionBuilder<TChild>.Eq
-                        var eqMethod = childFilterBuilderType.GetMethod("Eq", new[] { childFieldType, childPropertyType });
-
-                        // Invoke: FilterDefinitionBuilder<TChild>.Eq<TField>(FieldDefinition<TChild, TField>, TField) => FilterDefinition<TChild>
-                        var childFilter = eqMethod.Invoke(childFilterBuilder, new[] { childField, childPropertyValue });
-
-                        // GetMethod: UpdateDefinition<T>.PullFilter
-                        var pullFilterMethod = updateBuilder.GetType().GetMethod("PullFilter", new[] { parentFieldType, childFilter.GetType() });
-
-                        // Invoke: UpdateDefinitionBuilder<T>.PullFilter(FieldDefinition<T>, FilterDefinition<TChild>)
-                        var update = pullFilterMethod.Invoke(updateBuilder, new[] { parentField, childFilter }) as UpdateDefinition<T>;
-                        */
-
-                        var update = updateBuilder.Pull(parentPath, current);
-                        AddToPullCollection(parentPath, new UpdateOneModel<T>(filter, update));
+                        var childFilter = MongoDbExtensions.EqualsIgnoreCase(type, idField, elementId);
+                        var update = MongoDbExtensions.PullFilter(typeof (T), type, parentPath, childFilter) as UpdateDefinition<T>;
+                        
+                        if (childFilter != null && update != null)
+                        {
+                            //var update = updateBuilder.Pull(parentPath, current);
+                            AddToPullCollection(parentPath, new UpdateOneModel<T>(filter, update));
+                        }
 
                         return null;
                     }
