@@ -409,9 +409,11 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="uri">The URI.</param>
         /// <param name="parser">The parser.</param>
+        /// <param name="channels">The current logCurve information.</param>
         /// <param name="transaction">The transaction.</param>
-        protected override void PartialDeleteLogData(EtpUri uri, WitsmlQueryParser parser, MongoTransaction transaction)
+        protected override void PartialDeleteLogData(EtpUri uri, WitsmlQueryParser parser, List<LogCurveInfo> channels, MongoTransaction transaction)
         {
+            var uidToMnemonics = channels.ToDictionary(c => c.Uid, c => c.Mnemonic.Value);
             var updatedRanges = new Dictionary<string, Range<double?>>();
             var delete = WitsmlParser.Parse<LogList>(parser.Root, false).Log.FirstOrDefault();
             var current = GetEntity(uri);
@@ -436,14 +438,15 @@ namespace PDS.Witsml.Server.Data.Logs
             }
             else
             {               
-                var deletedChannels = GetDeletedChannels(current, delete);
+                var deletedChannels = GetDeletedChannels(current, uidToMnemonics);
                 var defaultDeleteRange = GetDefaultDeletRange(current, delete);
                 var currentRanges = GetCurrentIndexRange(current);
-                var updateRanges = GetCurrentIndexRange(delete);
-                offset = currentRanges[indexCurve].Offset;
 
                 var isTimeLog = current.IsTimeLog();
-                var ranges = GetPartialDeleteRanges(deletedChannels, defaultDeleteRange, currentRanges, updateRanges, indexCurve, current.IsIncreasing());
+                var updateRanges = GetDeleteQueryIndexRange(delete, uidToMnemonics, current.IsIncreasing(), isTimeLog);
+                offset = currentRanges[indexCurve].Offset;
+                
+                var ranges = MergePartialDeleteRanges(deletedChannels, defaultDeleteRange, currentRanges, updateRanges, indexCurve, current.IsIncreasing());
 
                 ChannelDataChunkAdapter.PartialDeleteLogData(uri, indexCurve, current.IsIncreasing(), isTimeLog, deletedChannels, ranges, updatedRanges, transaction);
             }
@@ -451,17 +454,27 @@ namespace PDS.Witsml.Server.Data.Logs
             UpdateIndexRange(uri, current, updatedRanges, updatedRanges.Keys.ToList(), current.IsTimeLog(), indexChannel.Unit, offset, true);
         }
 
-        private List<string> GetDeletedChannels(Log current, Log entity)
+        private List<string> GetDeletedChannels(Log current, Dictionary<string, string> uidToMnemonics)
         {
-            var channels = new List<string>();
+            var uids = current.LogCurveInfo.Select(l => l.Uid).ToList();
+            return uidToMnemonics.Where(u => !uids.Contains(u.Key)).Select(u => u.Value).ToList();
+        }
 
-            if (entity.LogCurveInfo == null || entity.LogCurveInfo.All(l => l.Mnemonic.Value == current.IndexCurve))
-                return channels;
+        private Dictionary<string, Range<double?>> GetDeleteQueryIndexRange(Log entity, Dictionary<string, string> uidToMnemonics, bool increasing, bool isTimeLog)
+        {
+            var ranges = new Dictionary<string, Range<double?>>();
 
-            var existing = current.LogCurveInfo.Select(l => l.Mnemonic.Value).ToList();
-            channels = entity.LogCurveInfo.Where(l => !existing.Contains(l.Mnemonic.Value)).Select(l=>l.Mnemonic.Value).ToList();
+            foreach (var curve in entity.LogCurveInfo)
+            {
+                if (uidToMnemonics.ContainsKey(curve.Uid))
+                {
+                    var mnemonic = uidToMnemonics[curve.Uid];
+                    var range = GetIndexRange(curve, increasing, isTimeLog);
+                    ranges.Add(mnemonic, range);
+                }
+            }
 
-            return channels;
+            return ranges;
         }
 
         private bool ToDeleteLogData(Log entity, WitsmlQueryParser parser)

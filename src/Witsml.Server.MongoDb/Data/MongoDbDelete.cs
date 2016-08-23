@@ -283,6 +283,40 @@ namespace PDS.Witsml.Server.Data
                     }
                     else
                     {
+                        /* 
+                        // FieldDefinition<T>
+                        var parentField = new StringFieldDefinition<T>(parentPath);
+
+                        // TField
+                        var childPropertyType = typeof(string);
+                        var childPropertyPath = idField; 
+                        var childPropertyValue = elementId; 
+
+                        // Create: FieldDefinition<TChild, TField>
+                        var childFieldDefinition = typeof(FieldDefinition<,>);
+                        var childFieldType = childFieldDefinition.MakeGenericType(type, childPropertyType);
+
+                        // The following statement generates exception (constructor not find)
+                        var childField = Activator.CreateInstance(childFieldType, childPropertyPath);
+
+                        // Create: FilterDefinitionBuilder<TChild>
+                        var childFilterBuilderDefinition = typeof(FilterDefinitionBuilder<>);
+                        var childFilterBuilderType = childFilterBuilderDefinition.MakeGenericType(type);
+                        var childFilterBuilder = Activator.CreateInstance(childFilterBuilderType);
+
+                        // GetMethod: FilterDefinitionBuilder<TChild>.Eq
+                        var eqMethod = childFilterBuilderType.GetMethod("Eq", new[] { childFieldType, childPropertyType });
+
+                        // Invoke: FilterDefinitionBuilder<TChild>.Eq<TField>(FieldDefinition<TChild, TField>, TField) => FilterDefinition<TChild>
+                        var childFilter = eqMethod.Invoke(childFilterBuilder, new[] { childField, childPropertyValue });
+
+                        // GetMethod: UpdateDefinition<T>.PullFilter
+                        var pullFilterMethod = updateBuilder.GetType().GetMethod("PullFilter", new[] { typeof(FieldDefinition<T>), childFilter.GetType() });
+
+                        // Invoke: UpdateDefinitionBuilder<T>.PullFilter(FieldDefinition<T>, FilterDefinition<TChild>)
+                        var update = pullFilterMethod.Invoke(updateBuilder, new[] { parentField, childFilter }) as UpdateDefinition<T>;
+                        */
+
                         if (IsRequired(propertyInfo) && itemsById.Count == 1)
                         {
                             throw new WitsmlException(ErrorCodes.MustRetainOneRecurringNode);
