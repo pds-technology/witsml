@@ -290,19 +290,22 @@ namespace PDS.Witsml.Server.Data
 
                         /*
                         // FieldDefinition<T>
+                        var parentFieldType = typeof (FieldDefinition<T>);
                         var parentField = new StringFieldDefinition<T>(parentPath);
 
                         // TField
                         var childPropertyType = typeof(string);
                         var childPropertyPath = idField; 
-                        var childPropertyValue = elementId; 
+                        var childPropertyValue = elementId;
 
-                        // Create: FieldDefinition<TChild, TField>
-                        var childFieldDefinition = typeof(FieldDefinition<,>);
+                        // Create: StringFieldDefinition<TChild, TField>
+                        var childFieldDefinition = typeof(StringFieldDefinition<,>);
                         var childFieldType = childFieldDefinition.MakeGenericType(type, childPropertyType);
+                        var childField = Activator.CreateInstance(childFieldType, childPropertyPath, null);
 
-                        // The following statement generates exception (constructor not find)
-                        var childField = Activator.CreateInstance(childFieldType, childPropertyPath);
+                        // Define: FieldDefinition<TChild, TField>
+                        childFieldDefinition = typeof(FieldDefinition<,>);
+                        childFieldType = childFieldDefinition.MakeGenericType(type, childPropertyType);
 
                         // Create: FilterDefinitionBuilder<TChild>
                         var childFilterBuilderDefinition = typeof(FilterDefinitionBuilder<>);
@@ -316,7 +319,7 @@ namespace PDS.Witsml.Server.Data
                         var childFilter = eqMethod.Invoke(childFilterBuilder, new[] { childField, childPropertyValue });
 
                         // GetMethod: UpdateDefinition<T>.PullFilter
-                        var pullFilterMethod = updateBuilder.GetType().GetMethod("PullFilter", new[] { typeof(FieldDefinition<T>), childFilter.GetType() });
+                        var pullFilterMethod = updateBuilder.GetType().GetMethod("PullFilter", new[] { parentFieldType, childFilter.GetType() });
 
                         // Invoke: UpdateDefinitionBuilder<T>.PullFilter(FieldDefinition<T>, FilterDefinition<TChild>)
                         var update = pullFilterMethod.Invoke(updateBuilder, new[] { parentField, childFilter }) as UpdateDefinition<T>;
@@ -324,6 +327,7 @@ namespace PDS.Witsml.Server.Data
 
                         var update = updateBuilder.Pull(parentPath, current);
                         AddToPullCollection(parentPath, new UpdateOneModel<T>(filter, update));
+
                         return null;
                     }
                 })
