@@ -328,7 +328,10 @@ namespace PDS.Witsml.Server.Data
                 throw new WitsmlException(ErrorCodes.EmptyUomSpecified);
             }
 
-            base.NavigateUomAttribute(propertyInfo, xmlObject, propertyType, propertyPath, measureValue, uomValue);
+            if (Context.Function != Functions.DeleteFromStore)
+            {
+                base.NavigateUomAttribute(propertyInfo, xmlObject, propertyType, propertyPath, measureValue, uomValue);
+            }
         }
 
         private string GetAndValidateArrayElementUid(XElement element)
