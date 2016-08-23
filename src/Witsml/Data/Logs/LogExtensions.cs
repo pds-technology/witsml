@@ -221,8 +221,9 @@ namespace PDS.Witsml.Data.Logs
                     end = logCurveInfo.MaxIndex.Value;
             }
 
-            return new Range<double?>(start, end)
-                .Sort(increasing);
+            return increasing
+                ? new Range<double?>(start, end)
+                : new Range<double?>(end, start);
         }
 
         /// <summary>
@@ -258,8 +259,9 @@ namespace PDS.Witsml.Data.Logs
                     end = logCurveInfo.MaxIndex.Value;
             }
 
-            return new Range<double?>(start, end)
-                .Sort(increasing);
+            return increasing
+                ? new Range<double?>(start, end)
+                : new Range<double?>(end, start);
         }
 
         /// <summary>
