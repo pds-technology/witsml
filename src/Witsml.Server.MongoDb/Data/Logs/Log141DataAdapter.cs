@@ -410,8 +410,9 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="uri">The URI.</param>
         /// <param name="parser">The parser.</param>
         /// <param name="channels">The current logCurve information.</param>
+        /// <param name="currentRanges">The current channel index ranges.</param>
         /// <param name="transaction">The transaction.</param>
-        protected override void PartialDeleteLogData(EtpUri uri, WitsmlQueryParser parser, List<LogCurveInfo> channels, MongoTransaction transaction)
+        protected override void PartialDeleteLogData(EtpUri uri, WitsmlQueryParser parser, List<LogCurveInfo> channels, Dictionary<string, Range<double?>> currentRanges, MongoTransaction transaction)
         {
             var uidToMnemonics = channels.ToDictionary(c => c.Uid, c => c.Mnemonic.Value);
             var updatedRanges = new Dictionary<string, Range<double?>>();
@@ -423,7 +424,6 @@ namespace PDS.Witsml.Server.Data.Logs
             delete.IndexType = current.IndexType;
             delete.Direction = current.Direction;
 
-            var currentRanges = GetCurrentIndexRange(current);
             var indexRange = currentRanges[current.IndexCurve];
             if (!indexRange.Start.HasValue || !ToDeleteLogData(delete, parser))
                 return;
@@ -432,7 +432,6 @@ namespace PDS.Witsml.Server.Data.Logs
             var indexCurve = current.IndexCurve;
             var indexChannel = current.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == indexCurve);
             
-
             if (DeleteAllLogData(current, delete, updatedRanges))
             {
                 ChannelDataChunkAdapter.Delete(uri);
@@ -455,7 +454,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 ChannelDataChunkAdapter.PartialDeleteLogData(uri, indexCurve, current.IsIncreasing(), isTimeLog, deletedChannels, ranges, updatedRanges, transaction);
             }
 
-            UpdateIndexRange(uri, current, updatedRanges, updatedRanges.Keys.ToList(), current.IsTimeLog(), indexChannel.Unit, offset, true);
+            UpdateIndexRange(uri, current, updatedRanges, updatedRanges.Keys.ToList(), current.IsTimeLog(), indexChannel?.Unit, offset, true);
         }
 
         private List<string> GetDeletedChannels(Log current, Dictionary<string, string> uidToMnemonics)

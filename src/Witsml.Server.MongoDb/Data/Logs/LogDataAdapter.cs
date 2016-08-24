@@ -188,10 +188,11 @@ namespace PDS.Witsml.Server.Data.Logs
                 {
                     var current = Get(uri);
                     var channels = GetLogCurves(current);
+                    var currentRanges = GetCurrentIndexRange(current);
 
                     PartialDeleteEntity(parser, uri, transaction);
 
-                    PartialDeleteLogData(uri, parser, channels, transaction);
+                    PartialDeleteLogData(uri, parser, channels, currentRanges, transaction);
 
                     transaction.Commit();
                 }
@@ -655,7 +656,8 @@ namespace PDS.Witsml.Server.Data.Logs
                 }
             }
 
-            ranges.Add(indexCurve, new Range<double?>(begin, finish, indexRange.Offset));
+            if (!ranges.ContainsKey(indexCurve))
+                ranges.Add(indexCurve, new Range<double?>(begin, finish, indexRange.Offset));
 
             return ranges;
         }
@@ -973,8 +975,9 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="uri">The URI.</param>
         /// <param name="parser">The parser.</param>
         /// <param name="channels">The current logCurve information.</param>
+        /// <param name="currentRanges">The current channel index ranges.</param>
         /// <param name="transaction">The transaction.</param>
-        protected abstract void PartialDeleteLogData(EtpUri uri, WitsmlQueryParser parser, List<TChild> channels, MongoTransaction transaction);
+        protected abstract void PartialDeleteLogData(EtpUri uri, WitsmlQueryParser parser, List<TChild> channels, Dictionary<string, Range<double?>> currentRanges, MongoTransaction transaction);
 
         /// <summary>
         /// Gets the log data delimiter.
