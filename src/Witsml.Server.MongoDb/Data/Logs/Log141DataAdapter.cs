@@ -464,16 +464,19 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private Dictionary<string, Range<double?>> GetDeleteQueryIndexRange(Log entity, Dictionary<string, string> uidToMnemonics, bool increasing, bool isTimeLog)
         {
-            var ranges = new Dictionary<string, Range<double?>>();
+            var ranges = new Dictionary<string, Range<double?>>();          
 
             foreach (var curve in entity.LogCurveInfo)
             {
-                if (uidToMnemonics.ContainsKey(curve.Uid))
-                {
-                    var mnemonic = uidToMnemonics[curve.Uid];
-                    var range = GetIndexRange(curve, increasing, isTimeLog);
-                    ranges.Add(mnemonic, range);
-                }
+                var mnemonic = curve.Mnemonic?.Value;
+                if (string.IsNullOrEmpty(mnemonic))
+                    mnemonic = uidToMnemonics[curve.Uid];
+
+                if (!uidToMnemonics.ContainsValue(mnemonic))
+                    continue;
+
+                var range = GetIndexRange(curve, increasing, isTimeLog);
+                ranges.Add(mnemonic, range);
             }
 
             return ranges;
@@ -497,7 +500,38 @@ namespace PDS.Witsml.Server.Data.Logs
                     return true;
             }
 
-            return parser.Properties(parser.Element(), "logCuveInfo").Any(e => !e.HasElements);
+            return ToDeleteChannelDataByMnemonic(parser, isTimeLog);
+        }
+
+        private bool ToDeleteChannelDataByMnemonic(WitsmlQueryParser parser, bool isTimeLog)
+        {
+            var fields = new List<string> {"mnemonic"};
+            if (isTimeLog)
+            {
+                fields.Add("minDateTimeIndex");
+                fields.Add("maxDateTimeIndex");
+            }
+            else
+            {
+                fields.Add("minIndex");
+                fields.Add("maxDIndex");
+            }
+            var elements = parser.Properties(parser.Element(), "logCuveInfo");
+            foreach (var element in elements)
+            {
+                if (!element.HasElements)
+                    return true;
+
+                var curveElements = element.Elements();
+                var uidAttribute = element.Attribute("uid");
+                if (uidAttribute != null)
+                    continue;
+
+                if (curveElements.All(e => fields.Contains(e.Name.LocalName)))
+                    return true;
+            }
+
+            return false;
         }
 
         private bool DeleteAllLogData(Log current, Log entity, Dictionary<string, Range<double?>> updatedRanges)
