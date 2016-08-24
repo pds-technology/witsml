@@ -17,7 +17,9 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
 using log4net;
@@ -30,7 +32,7 @@ namespace PDS.Witsml.Server.Data
     /// </summary>
     /// <typeparam name="T">Type of the object.</typeparam>
     /// <seealso cref="PDS.Witsml.Server.Data.IWitsmlDataAdapter{T}" />
-    public abstract class WitsmlDataAdapter<T> : IWitsmlDataAdapter<T>
+    public abstract class WitsmlDataAdapter<T> : IWitsmlDataAdapter<T>, IWitsmlDataAdapter
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="WitsmlDataAdapter{T}"/> class.
@@ -45,6 +47,11 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <value>The logger.</value>
         protected ILog Logger { get; }
+
+        /// <summary>
+        /// Gets the data object type.
+        /// </summary>
+        public Type DataObjectType => typeof (T);
 
         /// <summary>
         /// Retrieves data objects from the data store using the specified parser.
@@ -99,6 +106,16 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Gets the count of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>The count of related data objects.</returns>
+        public virtual int CountAll(EtpUri? parentUri = null)
+        {
+            return GetAllQuery(parentUri).Count();
+        }
+
+        /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
@@ -106,6 +123,26 @@ namespace PDS.Witsml.Server.Data
         public virtual List<T> GetAll(EtpUri? parentUri = null)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets a collection of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        IList IWitsmlDataAdapter.GetAll(EtpUri? parentUri)
+        {
+            return GetAll(parentUri);
+        }
+
+        /// <summary>
+        /// Gets a data object by the specified URI.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        /// <returns>The data object instance.</returns>
+        object IWitsmlDataAdapter.Get(EtpUri uri)
+        {
+            return Get(uri);
         }
 
         /// <summary>
@@ -123,6 +160,16 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="uri">The data object URI.</param>
         public virtual void Delete(EtpUri uri)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets an <see cref="IQueryable{T}"/> instance to by used by the GetAll method.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>An executable query.</returns>
+        protected virtual IQueryable<T> GetAllQuery(EtpUri? parentUri)
         {
             throw new NotImplementedException();
         }

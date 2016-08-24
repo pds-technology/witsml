@@ -112,9 +112,9 @@ namespace PDS.Witsml
         }
 
         /// <summary>
-        /// Gets the <see cref="EtpUri"/> for a given <see cref="Witsml200.AbstractObject"/>.
+        /// Gets the <see cref="EtpUri"/> for a given <see cref="Energistics.DataAccess.WITSML200.AbstractObject"/>.
         /// </summary>
-        /// <param name="entity">The <see cref="Witsml200.AbstractObject"/> entity.</param>
+        /// <param name="entity">The <see cref="Energistics.DataAccess.WITSML200.AbstractObject"/> entity.</param>
         /// <returns>The <see cref="EtpUri"/> type</returns>
         public static EtpUri GetUri(this Witsml200.AbstractObject entity)
         {
@@ -123,9 +123,9 @@ namespace PDS.Witsml
         }
 
         /// <summary>
-        /// Gets the <see cref="EtpUri"/> for a given <see cref="Witsml131.ComponentSchemas.LogCurveInfo"/>.
+        /// Gets the <see cref="EtpUri"/> for a given <see cref="Energistics.DataAccess.WITSML131.ComponentSchemas.LogCurveInfo"/>.
         /// </summary>
-        /// <param name="entity">The <see cref="Witsml131.ComponentSchemas.LogCurveInfo"/> entity.</param>
+        /// <param name="entity">The <see cref="Energistics.DataAccess.WITSML131.ComponentSchemas.LogCurveInfo"/> entity.</param>
         /// <param name="log">The log.</param>
         /// <returns>A <see cref="EtpUri"/> instance.</returns>
         public static EtpUri GetUri(this Witsml131.ComponentSchemas.LogCurveInfo entity, Witsml131.Log log)
@@ -135,7 +135,7 @@ namespace PDS.Witsml
         }
 
         /// <summary>
-        /// Gets the <see cref="EtpUri"/> for a given <see cref="Witsml141.ComponentSchemas.LogCurveInfo"/>
+        /// Gets the <see cref="EtpUri"/> for a given <see cref="Energistics.DataAccess.WITSML131.ComponentSchemas.LogCurveInfo"/>
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="log">The log.</param>
@@ -147,7 +147,7 @@ namespace PDS.Witsml
         }
 
         /// <summary>
-        /// Gets the <see cref="EtpUri"/> for a given <see cref="Witsml200.ChannelSet"/>
+        /// Gets the <see cref="EtpUri"/> for a given <see cref="Energistics.DataAccess.WITSML200.ChannelSet"/>
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="log">The log.</param>
@@ -159,7 +159,7 @@ namespace PDS.Witsml
         }
 
         /// <summary>
-        /// Gets the <see cref="EtpUri"/> for a given <see cref="Witsml200.Channel"/>
+        /// Gets the <see cref="EtpUri"/> for a given <see cref="Energistics.DataAccess.WITSML200.Channel"/>
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="channelSet">The channel set.</param>
@@ -171,7 +171,7 @@ namespace PDS.Witsml
         }
 
         /// <summary>
-        /// Gets the <see cref="EtpUri"/> for a given <see cref="Witsml200.Channel"/>
+        /// Gets the <see cref="EtpUri"/> for a given <see cref="Energistics.DataAccess.WITSML200.Channel"/>
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="log">The log.</param>
@@ -184,7 +184,7 @@ namespace PDS.Witsml
         }
 
         /// <summary>
-        /// Gets the <see cref="EtpUri"/> for a given <see cref="Witsml200.ComponentSchemas.ChannelIndex"/>
+        /// Gets the <see cref="EtpUri"/> for a given <see cref="Energistics.DataAccess.WITSML200.ComponentSchemas.ChannelIndex"/>
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="channelSet">The channel set.</param>
@@ -196,7 +196,7 @@ namespace PDS.Witsml
         }
 
         /// <summary>
-        /// Gets the <see cref="EtpUri"/> for a given <see cref="Witsml200.ComponentSchemas.ChannelIndex"/>
+        /// Gets the <see cref="EtpUri"/> for a given <see cref="Energistics.DataAccess.WITSML200.ComponentSchemas.ChannelIndex"/>
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="log">The log.</param>

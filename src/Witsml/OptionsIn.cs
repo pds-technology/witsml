@@ -38,7 +38,7 @@ namespace PDS.Witsml
         public class DataVersion : OptionsIn
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="DataVersion"/> class.
+            /// Initializes a new instance of the <see cref="PDS.Witsml.OptionsIn.DataVersion"/> class.
             /// </summary>
             /// <param name="value">The value.</param>
             public DataVersion(string value) : base(Keyword, value) { }
@@ -71,7 +71,7 @@ namespace PDS.Witsml
         public class ReturnElements : OptionsIn
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="ReturnElements"/> class.
+            /// Initializes a new instance of the <see cref="PDS.Witsml.OptionsIn.ReturnElements"/> class.
             /// </summary>
             /// <param name="value">The value.</param>
             public ReturnElements(string value) : base(Keyword, value) { }
@@ -139,7 +139,7 @@ namespace PDS.Witsml
         public class MaxReturnNodes : OptionsIn
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="MaxReturnNodes"/> class.
+            /// Initializes a new instance of the <see cref="PDS.Witsml.OptionsIn.MaxReturnNodes"/> class.
             /// </summary>
             /// <param name="value">The value.</param>
             public MaxReturnNodes(int value) : base(Keyword, value.ToString()) { }
@@ -167,7 +167,7 @@ namespace PDS.Witsml
         public class CompressionMethod : OptionsIn
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="CompressionMethod"/> class.
+            /// Initializes a new instance of the <see cref="PDS.Witsml.OptionsIn.CompressionMethod"/> class.
             /// </summary>
             /// <param name="value">The value.</param>
             public CompressionMethod(string value) : base(Keyword, value) { }
@@ -195,7 +195,7 @@ namespace PDS.Witsml
         public class RequestObjectSelectionCapability : OptionsIn
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="RequestObjectSelectionCapability"/> class.
+            /// Initializes a new instance of the <see cref="PDS.Witsml.OptionsIn.RequestObjectSelectionCapability"/> class.
             /// </summary>
             /// <param name="value">The value.</param>
             public RequestObjectSelectionCapability(string value) : base(Keyword, value) { }
@@ -233,7 +233,7 @@ namespace PDS.Witsml
         public class RequestPrivateGroupOnly : OptionsIn
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="RequestPrivateGroupOnly"/> class.
+            /// Initializes a new instance of the <see cref="PDS.Witsml.OptionsIn.RequestPrivateGroupOnly"/> class.
             /// </summary>
             /// <param name="value">The value.</param>
             public RequestPrivateGroupOnly(string value) : base(Keyword, value) { }
@@ -271,7 +271,7 @@ namespace PDS.Witsml
         public class RequestLatestValues : OptionsIn
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="RequestLatestValues"/> class.
+            /// Initializes a new instance of the <see cref="PDS.Witsml.OptionsIn.RequestLatestValues"/> class.
             /// </summary>
             /// <param name="value">The value.</param>
             public RequestLatestValues(int value) : base(Keyword, value.ToString()) { }
@@ -299,7 +299,7 @@ namespace PDS.Witsml
         public class CascadedDelete : OptionsIn
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="CascadedDelete"/> class.
+            /// Initializes a new instance of the <see cref="PDS.Witsml.OptionsIn.CascadedDelete"/> class.
             /// </summary>
             /// <param name="value">The value.</param>
             public CascadedDelete(string value) : base(Keyword, value) { }
@@ -401,11 +401,12 @@ namespace PDS.Witsml
         {
             _log.DebugFormat("Getting OptionsIn value: {0}", defaultValue?.Key);
 
+            if (defaultValue == null) return null;
             string value;
+
             if (!options.TryGetValue(defaultValue.Key, out value))
-            {
                 value = defaultValue.Value;
-            }
+
             return value;
         }
 
