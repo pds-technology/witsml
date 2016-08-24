@@ -150,6 +150,9 @@ namespace PDS.Witsml.Data
             var propertyType = propertyInfo.PropertyType;
             var elementList = elements.ToList();
 
+            if (HandleSpecialCase(propertyInfo, elementList, parentPath, elements.Key))
+                return;
+
             if (elementList.Count == 1)
             {
                 var element = elementList.FirstOrDefault();
@@ -509,6 +512,38 @@ namespace PDS.Witsml.Data
         /// <param name="propertyPath">The property path.</param>
         protected virtual void HandleRecurringElements(PropertyInfo propertyInfo, string propertyPath)
         {
+        }
+
+        /// <summary>
+        /// Handles the special case.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="elementList">The element list.</param>
+        /// <param name="parentPath">The parent path.</param>
+        /// <param name="elementName">Name of the element.</param>
+        /// <returns>true if the special case was handled, false otherwise</returns>
+        protected virtual bool HandleSpecialCase(PropertyInfo propertyInfo, List<XElement> elementList, string parentPath, string elementName)
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the specified property is a special case.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <returns>true if the property is a special case, false otherwise.</returns>
+        protected virtual bool IsSpecialCase(PropertyInfo propertyInfo)
+        {
+            var propertyType = propertyInfo.PropertyType;
+            var args = propertyType.GetGenericArguments();
+            var childType = args.FirstOrDefault() ?? propertyType.GetElementType();
+
+            if (childType != null && !HasUidProperty(childType))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
