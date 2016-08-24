@@ -729,6 +729,125 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(15, curve2.MaxIndex.Value);
         }
 
+        [TestMethod, Description("Tests you cannot do DeleteFromStore without plural container")]
+        public void Log141DataAdapter_DeleteFromStore_Error_401_No_Plural_Root_Element()
+        {
+            var nonPluralLog = "<log xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                           "<log uid=\"{0}\" uidWell=\"{1}\" uidWellbore=\"{2}\" />" + Environment.NewLine +
+                           "</log>";
+
+            var queryIn = string.Format(nonPluralLog, _log.Uid, _log.UidWell, _log.UidWellbore);
+            var response = _devKit.DeleteFromStore(ObjectTypes.Log, queryIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingPluralRootElement, response.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore while missing the object type")]
+        public void Log141DataAdapter_DeleteFromStore_Error_407_Missing_Witsml_Object_Type()
+        {
+            var response = _devKit.Delete<LogList, Log>(_log, string.Empty);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingWmlTypeIn, response.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore with empty queryIn")]
+        public void Log141DataAdapter_DeleteFromStore_Error_408_Empty_QueryIn()
+        {
+            var response = _devKit.DeleteFromStore(ObjectTypes.Log, string.Empty, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingInputTemplate, response.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore with invalid xml")]
+        public void Log141DataAdapter_DeleteFromStore_Error_409_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+
+            // Delete well with invalid element
+            const string delete = "<dataDelimiter /><dataDelimiter />";
+            DeleteLog(_log, delete, ErrorCodes.InputTemplateNonConforming);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore without specifying the log uid")]
+        public void Log141DataAdapter_DeleteFromStore_Error_415_Delete_Without_Specifing_UID()
+        {
+            AddParents();
+
+            _log.Uid = string.Empty;
+            DeleteLog(_log, string.Empty, ErrorCodes.DataObjectUidMissing);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore on a recurring element without specifying uid")]
+        public void Log141DataAdapter_DeleteFromStore_Error_416_Empty_UID()
+        {
+            AddParents();
+
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            var ext1 = _devKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            _log.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            _devKit.AddAndAssert(_log);
+
+            // Delete Log
+            const string delete = "<commonData><extensionNameValue uid=\"\" /></commonData>";
+            DeleteLog(_log, delete, ErrorCodes.EmptyUidSpecified);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore with a missing uom")]
+        public void Log141DataAdapter_DeleteFromStore_Error_417_Deleting_With_Empty_UOM_Attribute()
+        {
+            AddParents();
+
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _log.StepIncrement = new RatioGenericMeasure {Uom = "m", Value = 1.0};
+
+            _devKit.AddAndAssert(_log);
+
+            // Delete wellbore's MD
+            const string delete = "<stepIncrement uom=\"\" />";
+            DeleteLog(_log, delete, ErrorCodes.EmptyUomSpecified);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore on a recurring element without uid attribute")]
+        public void Log141DataAdapter_DeleteFromStore_Error_418_Missing_Uid()
+        {
+            AddParents();
+
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            var ext1 = _devKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            _log.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            _devKit.AddAndAssert(_log);
+
+            // Delete Log
+            const string delete = "<commonData><extensionNameValue /></commonData>";
+            DeleteLog(_log, delete, ErrorCodes.MissingElementUidForDelete);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore on a non recurring empty container element")]
+        public void Log141DataAdapter_DeleteFromStore_Error_419_Deleting_Empty_NonRecurring_Container_Element()
+        {
+            AddParents();
+
+            // Delete wellbore's MD
+            const string delete = "<commonData />";
+            DeleteLog(_log, delete, ErrorCodes.EmptyNonRecurringElementSpecified);
+        }
+
         private void AddParents()
         {
             _devKit.AddAndAssert(_well);
@@ -753,11 +872,11 @@ namespace PDS.Witsml.Server.Data.Logs
             return result;
         }
 
-        private void DeleteLog(Log log, string delete)
+        private void DeleteLog(Log log, string delete, ErrorCodes error = ErrorCodes.Success)
         {
             var queryIn = string.Format(DevKit141Aspect.BasicDeleteLogXmlTemplate, log.Uid, log.UidWell, log.UidWellbore, delete);
             var response = _devKit.DeleteFromStore(ObjectTypes.Log, queryIn, null, null);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+            Assert.AreEqual((short)error, response.Result);
         }
     }
 }
