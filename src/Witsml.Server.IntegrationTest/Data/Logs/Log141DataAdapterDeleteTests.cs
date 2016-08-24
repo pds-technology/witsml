@@ -299,6 +299,78 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
+        public void Log141DataAdapter_DeleteFromStore_Can_Delete_All_Log_Channels_And_Data()
+        {
+            AddParents();
+
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            var logData = _log.LogData.First();
+            logData.Data.Add("13,13.1,13.2");
+            logData.Data.Add("14,14.1,14.2");
+            logData.Data.Add("15,15.1,15.2");
+
+            _devKit.AddAndAssert(_log);
+
+            var indexCurve = _log.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == _log.IndexCurve);
+            Assert.IsNotNull(indexCurve);
+
+            var result = _devKit.GetSingleLogAndAssert(_log);
+            var resultLogData = result.LogData.First();
+            Assert.IsNotNull(resultLogData);
+            Assert.AreEqual(_log.LogCurveInfo.Count, result.LogCurveInfo.Count);
+
+            var delete = string.Empty;
+            foreach (var curve in _log.LogCurveInfo)
+            {
+                delete += "<logCurveInfo uid=\"" + curve.Uid + "\" />";
+            }
+            DeleteLog(_log, delete);
+
+            result = _devKit.GetSingleLogAndAssert(_log);
+            Assert.AreEqual(0, result.LogCurveInfo.Count);
+            Assert.AreEqual(0, result.LogData.Count);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_DeleteFromStore_Can_Delete_All_Log_Data_By_Mnemonics_Only()
+        {
+            AddParents();
+
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            var logData = _log.LogData.First();
+            logData.Data.Add("13,13.1,13.2");
+            logData.Data.Add("14,14.1,14.2");
+            logData.Data.Add("15,15.1,15.2");
+
+            _devKit.AddAndAssert(_log);
+
+            var indexCurve = _log.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == _log.IndexCurve);
+            Assert.IsNotNull(indexCurve);
+
+            var result = _devKit.GetSingleLogAndAssert(_log);
+            var resultLogData = result.LogData.First();
+            Assert.IsNotNull(resultLogData);
+            Assert.AreEqual(_log.LogCurveInfo.Count, result.LogCurveInfo.Count);
+
+            var delete = string.Empty;
+            foreach (var curve in _log.LogCurveInfo)
+            {
+                delete += "<logCurveInfo><mnemonic>" + curve.Mnemonic.Value + "</mnemonic></logCurveInfo>";
+            }
+            DeleteLog(_log, delete);
+
+            result = _devKit.GetSingleLogAndAssert(_log);          
+            Assert.AreEqual(0, result.LogData.Count);
+
+            Assert.AreEqual(_log.LogCurveInfo.Count, result.LogCurveInfo.Count);
+            foreach (var curve in result.LogCurveInfo)
+            {
+                Assert.IsNull(curve.MinIndex);
+                Assert.IsNull(curve.MaxIndex);
+            }
+        }
+
+        [TestMethod]
         public void Log141DataAdapter_DeleteFromStore_Can_Delete_Full_Increasing_Log_Data_By_Index()
         {
             AddParents();
@@ -597,6 +669,64 @@ namespace PDS.Witsml.Server.Data.Logs
 
             Assert.AreEqual(18, result.StartIndex.Value);
             Assert.AreEqual(13, result.EndIndex.Value);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_DeleteFromStore_Can_Delete_Increasing_Channels_Data_With_Default_And_Specific_Index_Range()
+        {
+            AddParents();
+
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            var logData = _log.LogData.First();
+            logData.Data.Add("13,13.1,13.2");
+            logData.Data.Add("14,14.1,14.2");
+            logData.Data.Add("15,15.1,15.2");
+            logData.Data.Add("16,16.1,16.2");
+            logData.Data.Add("17,17.1,17.2");
+            logData.Data.Add("18,18.1,18.2");
+
+            _devKit.AddAndAssert(_log);
+
+            var indexCurve = _log.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == _log.IndexCurve);
+            Assert.IsNotNull(indexCurve);
+            var curve1 = _log.LogCurveInfo[1];
+            Assert.IsNotNull(curve1);
+            var curve2 = _log.LogCurveInfo[2];
+            Assert.IsNotNull(curve2);
+
+            var result = _devKit.GetSingleLogAndAssert(_log);
+            var resultLogData = result.LogData.First();
+            Assert.IsNotNull(resultLogData);
+            foreach (var curve in result.LogCurveInfo)
+            {
+                Assert.AreEqual(13, curve.MinIndex.Value);
+                Assert.AreEqual(18, curve.MaxIndex.Value);
+            }
+
+            var delete = "<startIndex uom=\"" + indexCurve.Unit + "\">15</startIndex>" + Environment.NewLine +
+                "<logCurveInfo><mnemonic>" + curve1.Mnemonic.Value + "</mnemonic></logCurveInfo>" + Environment.NewLine +
+                "<logCurveInfo uid=\"" + curve2.Uid + "\">" + Environment.NewLine +
+                "<minIndex uom=\"" + indexCurve.Unit + "\">16</minIndex>" + Environment.NewLine +
+                "</logCurveInfo>";
+            DeleteLog(_log, delete);
+
+            result = _devKit.GetSingleLogAndAssert(_log);
+
+            // Assert log data
+            resultLogData = result.LogData.First();
+            Assert.IsNotNull(resultLogData);
+            var data = resultLogData.Data;
+            Assert.AreEqual("13,13.1,13.2", data[0]);
+            Assert.AreEqual("14,14.1,14.2", data[1]);
+            Assert.AreEqual("15,,15.2", data[2]);
+
+            // Assert Index
+            curve1 = result.LogCurveInfo[1];
+            Assert.IsNotNull(curve1);
+            Assert.AreEqual(14, curve1.MaxIndex.Value);
+            curve2 = result.LogCurveInfo[2];
+            Assert.IsNotNull(curve2);
+            Assert.AreEqual(15, curve2.MaxIndex.Value);
         }
 
         private void AddParents()
