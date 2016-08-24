@@ -410,8 +410,9 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="uri">The URI.</param>
         /// <param name="parser">The parser.</param>
         /// <param name="channels">The current logCurve information.</param>
+        /// <param name="currentRanges">The current channel index ranges.</param>
         /// <param name="transaction">The transaction.</param>
-        protected override void PartialDeleteLogData(EtpUri uri, WitsmlQueryParser parser, List<LogCurveInfo> channels, MongoTransaction transaction)
+        protected override void PartialDeleteLogData(EtpUri uri, WitsmlQueryParser parser, List<LogCurveInfo> channels, Dictionary<string, Range<double?>> currentRanges, MongoTransaction transaction)
         {
             var uidToMnemonics = channels.ToDictionary(c => c.Uid, c => c.Mnemonic.Value);
             var updatedRanges = new Dictionary<string, Range<double?>>();
@@ -423,13 +424,14 @@ namespace PDS.Witsml.Server.Data.Logs
             delete.IndexType = current.IndexType;
             delete.Direction = current.Direction;
 
-            if (!ToDeleteLogData(delete, parser))
+            var indexRange = currentRanges[current.IndexCurve];
+            if (!indexRange.Start.HasValue || !ToDeleteLogData(delete, parser))
                 return;
 
             TimeSpan? offset = null;
             var indexCurve = current.IndexCurve;
             var indexChannel = current.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == indexCurve);
-
+            
             if (DeleteAllLogData(current, delete, updatedRanges))
             {
                 ChannelDataChunkAdapter.Delete(uri);
@@ -442,7 +444,6 @@ namespace PDS.Witsml.Server.Data.Logs
             {               
                 var deletedChannels = GetDeletedChannels(current, uidToMnemonics);
                 var defaultDeleteRange = GetDefaultDeletRange(current, delete);
-                var currentRanges = GetCurrentIndexRange(current);
 
                 var isTimeLog = current.IsTimeLog();
                 var updateRanges = GetDeleteQueryIndexRange(delete, uidToMnemonics, current.IsIncreasing(), isTimeLog);
@@ -453,7 +454,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 ChannelDataChunkAdapter.PartialDeleteLogData(uri, indexCurve, current.IsIncreasing(), isTimeLog, deletedChannels, ranges, updatedRanges, transaction);
             }
 
-            UpdateIndexRange(uri, current, updatedRanges, updatedRanges.Keys.ToList(), current.IsTimeLog(), indexChannel.Unit, offset, true);
+            UpdateIndexRange(uri, current, updatedRanges, updatedRanges.Keys.ToList(), current.IsTimeLog(), indexChannel?.Unit, offset, true);
         }
 
         private List<string> GetDeletedChannels(Log current, Dictionary<string, string> uidToMnemonics)
@@ -464,16 +465,19 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private Dictionary<string, Range<double?>> GetDeleteQueryIndexRange(Log entity, Dictionary<string, string> uidToMnemonics, bool increasing, bool isTimeLog)
         {
-            var ranges = new Dictionary<string, Range<double?>>();
+            var ranges = new Dictionary<string, Range<double?>>();          
 
             foreach (var curve in entity.LogCurveInfo)
             {
-                if (uidToMnemonics.ContainsKey(curve.Uid))
-                {
-                    var mnemonic = uidToMnemonics[curve.Uid];
-                    var range = GetIndexRange(curve, increasing, isTimeLog);
-                    ranges.Add(mnemonic, range);
-                }
+                var mnemonic = curve.Mnemonic?.Value;
+                if (string.IsNullOrEmpty(mnemonic))
+                    mnemonic = uidToMnemonics[curve.Uid];
+
+                if (!uidToMnemonics.ContainsValue(mnemonic))
+                    continue;
+
+                var range = GetIndexRange(curve, increasing, isTimeLog);
+                ranges.Add(mnemonic, range);
             }
 
             return ranges;
@@ -497,7 +501,38 @@ namespace PDS.Witsml.Server.Data.Logs
                     return true;
             }
 
-            return parser.Properties(parser.Element(), "logCuveInfo").Any(e => !e.HasElements);
+            return ToDeleteChannelDataByMnemonic(parser, isTimeLog);
+        }
+
+        private bool ToDeleteChannelDataByMnemonic(WitsmlQueryParser parser, bool isTimeLog)
+        {
+            var fields = new List<string> {"mnemonic"};
+            if (isTimeLog)
+            {
+                fields.Add("minDateTimeIndex");
+                fields.Add("maxDateTimeIndex");
+            }
+            else
+            {
+                fields.Add("minIndex");
+                fields.Add("maxDIndex");
+            }
+            var elements = parser.Properties(parser.Element(), "logCurveInfo");
+            foreach (var element in elements)
+            {
+                if (!element.HasElements)
+                    return true;
+
+                var curveElements = element.Elements();
+                var uidAttribute = element.Attribute("uid");
+                if (uidAttribute != null)
+                    continue;
+
+                if (curveElements.All(e => fields.Contains(e.Name.LocalName)))
+                    return true;
+            }
+
+            return false;
         }
 
         private bool DeleteAllLogData(Log current, Log entity, Dictionary<string, Range<double?>> updatedRanges)
