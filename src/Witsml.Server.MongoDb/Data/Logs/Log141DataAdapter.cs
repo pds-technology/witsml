@@ -423,12 +423,15 @@ namespace PDS.Witsml.Server.Data.Logs
             delete.IndexType = current.IndexType;
             delete.Direction = current.Direction;
 
-            if (!ToDeleteLogData(delete, parser))
+            var currentRanges = GetCurrentIndexRange(current);
+            var indexRange = currentRanges[current.IndexCurve];
+            if (!indexRange.Start.HasValue || !ToDeleteLogData(delete, parser))
                 return;
 
             TimeSpan? offset = null;
             var indexCurve = current.IndexCurve;
             var indexChannel = current.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == indexCurve);
+            
 
             if (DeleteAllLogData(current, delete, updatedRanges))
             {
@@ -442,7 +445,6 @@ namespace PDS.Witsml.Server.Data.Logs
             {               
                 var deletedChannels = GetDeletedChannels(current, uidToMnemonics);
                 var defaultDeleteRange = GetDefaultDeletRange(current, delete);
-                var currentRanges = GetCurrentIndexRange(current);
 
                 var isTimeLog = current.IsTimeLog();
                 var updateRanges = GetDeleteQueryIndexRange(delete, uidToMnemonics, current.IsIncreasing(), isTimeLog);
@@ -516,7 +518,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 fields.Add("minIndex");
                 fields.Add("maxDIndex");
             }
-            var elements = parser.Properties(parser.Element(), "logCuveInfo");
+            var elements = parser.Properties(parser.Element(), "logCurveInfo");
             foreach (var element in elements)
             {
                 if (!element.HasElements)

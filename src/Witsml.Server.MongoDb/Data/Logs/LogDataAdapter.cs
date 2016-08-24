@@ -622,9 +622,14 @@ namespace PDS.Witsml.Server.Data.Logs
                     if (defaultRange.Start.HasValue)
                     {
                         start = defaultRange.Start;
-                        end = defaultRange.End;
-                        ranges.Add(range.Key, new Range<double?>(start, end, range.Value.Offset));
+                        end = defaultRange.End;                      
                     }
+                    else
+                    {
+                        start = indexRange.Start;
+                        end = indexRange.End;
+                    }
+                    ranges.Add(range.Key, new Range<double?>(start, end, range.Value.Offset));
                 }
                 else
                 {
