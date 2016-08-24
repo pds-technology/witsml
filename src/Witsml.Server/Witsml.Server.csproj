@@ -124,7 +124,7 @@
     <Compile Include="Configuration\ICapServerProvider.cs" />
     <Compile Include="Data\DataObjectValidatorOfT.cs" />
     <Compile Include="Data\IEtpDataProviderOfT.cs" />
-    <Compile Include="Data\IWitsmlDataAdapter2.cs" />
+    <Compile Include="Data\IWitsmlDataAdapter.cs" />
     <Compile Include="Data\Logs\Log200DataProvider.cs" />
     <Compile Include="Data\Logs\LogExtensions.cs" />
     <Compile Include="Data\Messages\Message131DataProvider.cs" />
