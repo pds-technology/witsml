@@ -390,6 +390,24 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.AreEqual((short)ErrorCodes.MissingElementUidForDelete, results.Result);
         }
 
+        [TestMethod, Description("Tests you cannot do DeleteFromStore with a missing uom")]
+        public void Wellbore141DataAdapter_DeleteFromStore_Error_419_Deleting_Empty_NonRecurring_Element_With_No_Uid()
+        {
+            // Add well
+            _devKit.AddAndAssert(_well);
+
+            // Add wellbore
+            _devKit.AddAndAssert(_wellbore);
+
+            // Delete wellbore's MD
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, _wellbore.Uid, _well.Uid,
+                "<commonData />");
+
+            var results = _devKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyNonRecurringElementSpecified, results.Result);
+        }
 
         [TestMethod, Description("Tests you cannot do DeleteFromStore with an empty node for a non-recurring element or attribute that is mandatory in the write schema.")]
         public void Wellbore141DataAdapter_DeleteFromStore_Error_420_Delete_Required_Element()
