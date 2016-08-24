@@ -602,8 +602,12 @@ namespace PDS.Witsml.Server.Data.Wells
 
             _devKit.AddAndAssert(wellbore);
 
+            var delete = new Well()
+            {
+                Uid = _well.Uid
+            };
             // Delete well
-            var deleteResponse = _devKit.Delete<WellList, Well>(_well);
+            var deleteResponse = _devKit.Delete<WellList, Well>(delete);
             Assert.IsNotNull(deleteResponse);
             Assert.AreEqual((short)ErrorCodes.NotBottomLevelDataObject, deleteResponse.Result);
         }
