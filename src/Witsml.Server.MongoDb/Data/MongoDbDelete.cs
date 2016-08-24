@@ -169,6 +169,31 @@ namespace PDS.Witsml.Server.Data
             UnsetProperty(propertyInfo, propertyPath);
         }
 
+        /// <summary>
+        /// Handles the special case.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="elementList">The element list.</param>
+        /// <param name="parentPath">The parent path.</param>
+        /// <param name="elementName">Name of the element.</param>
+        /// <returns>true if the special case was handled, false otherwise</returns>
+        protected override bool HandleSpecialCase(PropertyInfo propertyInfo, List<XElement> elementList, string parentPath, string elementName)
+        {
+            if (IsSpecialCase(propertyInfo))
+            {
+                var items = Context.PropertyValues.Last() as IEnumerable;
+                var propertyPath = GetPropertyPath(parentPath, propertyInfo.Name);
+
+                if (items != null)
+                {
+                    UnsetProperty(propertyInfo, propertyPath);
+                    return true;
+                }
+            }
+
+            return base.HandleSpecialCase(propertyInfo, elementList, parentPath, elementName);
+        }
+
         private void BuildPartialDelete(XElement element)
         {
             NavigateElement(element, Context.DataObjectType);
@@ -225,7 +250,9 @@ namespace PDS.Witsml.Server.Data
 
         private void SetSpecifiedProperty(PropertyInfo propertyInfo, string propertyPath, bool specified)
         {
-            if (propertyInfo.DeclaringType?.GetProperty(propertyInfo.Name + "Specified") != null)
+            var property = propertyInfo.DeclaringType?.GetProperty(propertyInfo.Name + "Specified");
+
+            if (property != null && property.CanWrite)
             {
                 Context.Update = Context.Update.Set(propertyPath + "Specified", specified);
             }

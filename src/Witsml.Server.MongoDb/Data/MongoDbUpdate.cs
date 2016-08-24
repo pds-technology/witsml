@@ -279,6 +279,36 @@ namespace PDS.Witsml.Server.Data
             UnsetProperty(propertyInfo, propertyPath);
         }
 
+        /// <summary>
+        /// Handles the special case.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="elementList">The element list.</param>
+        /// <param name="parentPath">The parent path.</param>
+        /// <param name="elementName">Name of the element.</param>
+        /// <returns>true if the special case was handled, false otherwise</returns>
+        protected override bool HandleSpecialCase(PropertyInfo propertyInfo, List<XElement> elementList, string parentPath, string elementName)
+        {
+            if (IsSpecialCase(propertyInfo))
+            {
+                var items = Context.PropertyValues.Last() as IEnumerable;
+                var propertyPath = GetPropertyPath(parentPath, propertyInfo.Name);
+                var propertyType = propertyInfo.PropertyType;
+
+                if (typeof(IEnumerable).IsAssignableFrom(propertyType))
+                {
+                    var args = propertyType.GetGenericArguments();
+                    var childType = args.FirstOrDefault() ?? propertyType.GetElementType();
+
+                    UpdateRecurringElementsWithoutUid(elementList, propertyInfo, items, childType, propertyPath);
+
+                    return true;
+                }
+            }
+
+            return base.HandleSpecialCase(propertyInfo, elementList, parentPath, elementName);
+        }
+
         private void BuildUpdate(XElement element)
         {
             NavigateElement(element, Context.DataObjectType);
@@ -335,7 +365,9 @@ namespace PDS.Witsml.Server.Data
 
         private void SetSpecifiedProperty(PropertyInfo propertyInfo, string propertyPath, bool specified)
         {
-            if (propertyInfo.DeclaringType?.GetProperty(propertyInfo.Name + "Specified") != null)
+            var property = propertyInfo.DeclaringType?.GetProperty(propertyInfo.Name + "Specified");
+
+            if (property != null && property.CanWrite)
             {
                 Context.Update = Context.Update.Set(propertyPath + "Specified", specified);
             }
@@ -430,6 +462,48 @@ namespace PDS.Witsml.Server.Data
                         Context.Update = saveUpdate;
                         return model;
                     }
+                })
+                .Where(x => x != null)
+                .ToList();
+
+            if (updateList.Count > 0)
+                _collection.BulkWrite(updateList);
+        }
+
+        private void UpdateRecurringElementsWithoutUid(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
+        {
+            Logger.DebugFormat("Updating recurring elements without a uid: {0} {1}", parentPath, propertyInfo?.Name);
+
+            var updateBuilder = Builders<T>.Update;
+            var filterBuilder = Builders<T>.Filter;
+
+            var updateList = elements
+                .Select(element =>
+                {
+                    var filters = new List<FilterDefinition<T>>() { _entityFilter };
+
+                    WitsmlParser.RemoveEmptyElements(element);
+
+                    // TODO: Modify to handle other item types as needed.
+                    var item = element.Value; //ParseNestedElement(type, element);
+
+                    if (string.IsNullOrWhiteSpace(item))
+                        return null;
+
+                    var filter = filterBuilder.And(filters);
+
+                    //var childValidator = new MongoDbUpdate<T>(_collection, _parser, _idPropertyName, Context.Ignored);
+                    //childValidator.Context.ValidationOnly = true;
+                    //childValidator.NavigateElementType(propertyInfo, type, element, parentPath);
+
+                    if (Context.ValidationOnly)
+                        return null;
+
+                    var update = propertyValue == null
+                        ? updateBuilder.Set(parentPath, CreateList(propertyInfo.PropertyType, item))
+                        : updateBuilder.Push(parentPath, item);
+
+                    return new UpdateOneModel<T>(filter, update);
                 })
                 .Where(x => x != null)
                 .ToList();
