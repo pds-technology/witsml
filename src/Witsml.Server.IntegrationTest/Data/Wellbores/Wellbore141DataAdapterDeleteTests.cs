@@ -373,6 +373,35 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.AreEqual((short)ErrorCodes.MissingElementUidForDelete, results.Result);
         }
 
+        [TestMethod, Description("Tests you cannot do DeleteFromStore without all required fields on an optional element")]
+        public void Wellbore141DataAdapter_DeleteFromStore_Error_432_Wellbore_Has_Child_Data_Objects()
+        {
+            // Add well
+            _devKit.AddAndAssert(_well);
+
+            // Add wellbore
+            _devKit.AddAndAssert(_wellbore);
+
+            // Add rig
+            var rig = new Rig()
+            {
+                UidWell = _well.Uid,
+                UidWellbore = _wellbore.Uid,
+                Uid = _devKit.Uid(),
+                NameWell = _well.Name,
+                NameWellbore = _wellbore.Name,
+                Name = "Big Rig"
+            };
+            _devKit.AddAndAssert(rig);
+
+            // Delete wellbore
+            var delete = new Wellbore { Uid = _wellbore.Uid, UidWell = _well.Uid };
+
+            var results = _devKit.Delete<WellboreList, Wellbore>(delete, ObjectTypes.Wellbore);
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.NotBottomLevelDataObject, results.Result);
+        }
+
         [TestMethod, Description("Tests you cannot do DeleteFromStore more than one object")]
         public void Wellbore141DataAdapter_DeleteFromStore_Error_444_Updating_With_More_Than_One_Data_Object()
         {

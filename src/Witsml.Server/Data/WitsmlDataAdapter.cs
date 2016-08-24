@@ -110,9 +110,19 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
         /// <returns>The count of related data objects.</returns>
-        public virtual int CountAll(EtpUri? parentUri = null)
+        public virtual int Count(EtpUri? parentUri = null)
         {
             return GetAllQuery(parentUri).Count();
+        }
+
+        /// <summary>
+        /// Determines if the specified URI has child data objects.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>If there are any related data objects.</returns>
+        public virtual bool Any(EtpUri? parentUri = null)
+        {
+            return GetAllQuery(parentUri).Any();
         }
 
         /// <summary>
