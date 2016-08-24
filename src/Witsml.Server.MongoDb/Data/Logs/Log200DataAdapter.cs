@@ -97,15 +97,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>A collection of data objects.</returns>
         public override List<Log> GetAll(EtpUri? parentUri = null)
         {
-            var query = GetQuery().AsQueryable();
-
-            if (parentUri != null)
-            {
-                var uidWellbore = parentUri.Value.ObjectId;
-                query = query.Where(x => x.Wellbore.Uuid == uidWellbore);
-            }
-
-            return query
+            return GetAllQuery(parentUri)
                 .OrderBy(x => x.Citation.Title)
                 .ToList();
         }
@@ -159,6 +151,24 @@ namespace PDS.Witsml.Server.Data.Logs
         public void UpdateChannelData(EtpUri uri, ChannelDataReader reader)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets an <see cref="IQueryable{Log}" /> instance to by used by the GetAll method.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>An executable query.</returns>
+        protected override IQueryable<Log> GetAllQuery(EtpUri? parentUri)
+        {
+            var query = GetQuery().AsQueryable();
+
+            if (parentUri != null)
+            {
+                var uidWellbore = parentUri.Value.ObjectId;
+                query = query.Where(x => x.Wellbore.Uuid == uidWellbore);
+            }
+
+            return query;
         }
 
         /// <summary>

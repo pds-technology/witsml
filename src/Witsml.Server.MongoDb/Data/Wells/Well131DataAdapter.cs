@@ -67,9 +67,19 @@ namespace PDS.Witsml.Server.Data.Wells
         {
             Logger.Debug("Fetching all Wells.");
 
-            return GetQuery()
+            return GetAllQuery(parentUri)
                 .OrderBy(x => x.Name)
                 .ToList();
+        }
+
+        /// <summary>
+        /// Gets an <see cref="IQueryable{Well}" /> instance to by used by the GetAll method.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>An executable query.</returns>
+        protected override IQueryable<Well> GetAllQuery(EtpUri? parentUri)
+        {
+            return GetQuery();
         }
     }
 }

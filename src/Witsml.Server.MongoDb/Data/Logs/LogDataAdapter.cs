@@ -169,18 +169,7 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             Logger.DebugFormat("Fetching all Logs; Parent URI: {0}", parentUri);
 
-            var query = GetQuery().AsQueryable();
-
-            if (parentUri != null)
-            {
-                var ids = parentUri.Value.GetObjectIds().ToDictionary(x => x.ObjectType, y => y.ObjectId);
-                var uidWellbore = ids[ObjectTypes.Wellbore];
-                var uidWell = ids[ObjectTypes.Well];
-
-                query = query.Where(x => x.UidWell == uidWell && x.UidWellbore == uidWellbore);
-            }
-
-            return query
+            return GetAllQuery(parentUri)
                 .OrderBy(x => x.Name)
                 .ToList();
         }
@@ -227,6 +216,27 @@ namespace PDS.Witsml.Server.Data.Logs
                 ChannelDataChunkAdapter.Delete(uri);
                 transaction.Commit();
             }
+        }
+
+        /// <summary>
+        /// Gets an <see cref="IQueryable{T}" /> instance to by used by the GetAll method.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>An executable query.</returns>
+        protected override IQueryable<T> GetAllQuery(EtpUri? parentUri)
+        {
+            var query = GetQuery().AsQueryable();
+
+            if (parentUri != null)
+            {
+                var ids = parentUri.Value.GetObjectIds().ToDictionary(x => x.ObjectType, y => y.ObjectId);
+                var uidWellbore = ids[ObjectTypes.Wellbore];
+                var uidWell = ids[ObjectTypes.Well];
+
+                query = query.Where(x => x.UidWell == uidWell && x.UidWellbore == uidWellbore);
+            }
+
+            return query;
         }
 
         /// <summary>

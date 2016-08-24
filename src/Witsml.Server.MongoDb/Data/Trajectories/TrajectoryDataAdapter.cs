@@ -86,6 +86,18 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             Logger.DebugFormat("Fetching all Trajectorys; Parent URI: {0}", parentUri);
 
+            return GetAllQuery(parentUri)
+                .OrderBy(x => x.Name)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Gets an <see cref="IQueryable{T}" /> instance to by used by the GetAll method.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>An executable query.</returns>
+        protected override IQueryable<T> GetAllQuery(EtpUri? parentUri)
+        {
             var query = GetQuery().AsQueryable();
 
             if (parentUri != null)
@@ -97,9 +109,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 query = query.Where(x => x.UidWell == uidWell && x.UidWellbore == uidWellbore);
             }
 
-            return query
-                .OrderBy(x => x.Name)
-                .ToList();
+            return query;
         }
 
         /// <summary>

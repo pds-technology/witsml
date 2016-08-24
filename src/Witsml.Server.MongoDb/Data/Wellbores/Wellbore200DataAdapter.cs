@@ -51,6 +51,18 @@ namespace PDS.Witsml.Server.Data.Wellbores
         {
             Logger.Debug("Fetching all Wellbores.");
 
+            return GetAllQuery(parentUri)
+                .OrderBy(x => x.Citation.Title)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Gets an <see cref="IQueryable{Wellbore}" /> instance to by used by the GetAll method.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>An executable query.</returns>
+        protected override IQueryable<Wellbore> GetAllQuery(EtpUri? parentUri)
+        {
             var query = GetQuery().AsQueryable();
 
             if (parentUri != null)
@@ -59,9 +71,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 query = query.Where(x => x.Well.Uuid == uidWell);
             }
 
-            return query
-                .OrderBy(x => x.Citation.Title)
-                .ToList();
+            return query;
         }
     }
 }

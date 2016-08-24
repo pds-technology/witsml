@@ -67,6 +67,18 @@ namespace PDS.Witsml.Server.Data.Messages
         {
             Logger.DebugFormat("Fetching all Messages; Parent URI: {0}", parentUri);
 
+            return GetAllQuery(parentUri)
+                .OrderBy(x => x.Name)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Gets an <see cref="IQueryable{Message}" /> instance to by used by the GetAll method.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>An executable query.</returns>
+        protected override IQueryable<Message> GetAllQuery(EtpUri? parentUri)
+        {
             var query = GetQuery().AsQueryable();
 
             if (parentUri != null)
@@ -78,9 +90,7 @@ namespace PDS.Witsml.Server.Data.Messages
                 query = query.Where(x => x.UidWell == uidWell && x.UidWellbore == uidWellbore);
             }
 
-            return query
-                .OrderBy(x => x.Name)
-                .ToList();
+            return query;
         }
 
         /// <summary>
