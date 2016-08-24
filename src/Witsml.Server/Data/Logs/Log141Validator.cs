@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Xml.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using PDS.Framework;
@@ -318,6 +319,44 @@ namespace PDS.Witsml.Server.Data.Logs
                     yield return ValidateLogData(current.IndexCurve, null, logData, mergedLogCurveMnemonics, delimiter, false);
                 }
             }
+        }
+
+        /// <summary>
+        /// Validate the uid attribute value of the element.
+        /// </summary>
+        /// <param name="element">The element.</param>
+        /// <returns>The value of the uid attribute.</returns>
+        /// <exception cref="WitsmlException">
+        /// </exception>
+        protected override string GetAndValidateArrayElementUid(XElement element)
+        {
+            var uidAttribute = element.Attributes().FirstOrDefault(a => a.Name == "uid");
+            if (uidAttribute != null)
+            {
+                if (string.IsNullOrEmpty(uidAttribute.Value))
+                {
+                    throw new WitsmlException(Context.Function.GetMissingElementUidErrorCode());
+                }
+            }
+            else
+            {
+                if (Context.Function == Functions.DeleteFromStore)
+                {
+                    if (element.Name.LocalName != "logCurveInfo" || !DeleteChannelData(element))
+                        throw new WitsmlException(ErrorCodes.EmptyUidSpecified);
+                }
+            }
+
+            return uidAttribute?.Value;
+        }
+
+        private bool DeleteChannelData(XElement element)
+        {
+            var fields = new List<string> { "mnemonic", "minDateTimeIndex", "maxDateTimeIndex", "minIndex", "maxIndex" };
+            if (!element.HasElements)
+                return false;
+
+            return element.Elements().All(e => fields.Contains(e.Name.LocalName));
         }
 
         private bool DuplicateUid(IEnumerable<string> uids)

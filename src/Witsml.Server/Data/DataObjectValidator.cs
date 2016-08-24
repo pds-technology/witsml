@@ -274,10 +274,15 @@ namespace PDS.Witsml.Server.Data
             {
                 if (HasUidProperty(childType))
                 {
-                    elementIds.Add(GetAndValidateArrayElementUid(element));
-                }
+                    var uidValue = GetAndValidateArrayElementUid(element);
+                    if (string.IsNullOrWhiteSpace(uidValue))
+                        continue;
 
-                NavigateElementType(propertyInfo, childType, element, propertyPath);
+                    elementIds.Add(uidValue);
+                    NavigateElementType(propertyInfo, childType, element, propertyPath);
+                }
+                else
+                    NavigateElementType(propertyInfo, childType, element, propertyPath);
             }
 
             // Look for duplicate uids
@@ -302,12 +307,8 @@ namespace PDS.Witsml.Server.Data
         /// <param name="propertyPath">The property path.</param>
         protected override void NavigateArrayElementType(PropertyInfo propertyInfo, List<XElement> elements, Type childType, XElement element, string propertyPath)
         {
-            if (HasUidProperty(childType))
-            {
-                GetAndValidateArrayElementUid(element);
-            }
-
-            base.NavigateArrayElementType(propertyInfo, elements, childType, element, propertyPath);
+            if (!HasUidProperty(childType) || !string.IsNullOrWhiteSpace(GetAndValidateArrayElementUid(element)))
+                base.NavigateArrayElementType(propertyInfo, elements, childType, element, propertyPath);
         }
 
         /// <summary>
@@ -334,7 +335,14 @@ namespace PDS.Witsml.Server.Data
             }
         }
 
-        private string GetAndValidateArrayElementUid(XElement element)
+        /// <summary>
+        /// Validate the uid attribute value of the element.
+        /// </summary>
+        /// <param name="element">The element.</param>
+        /// <returns>The value of the uid attribute.</returns>
+        /// <exception cref="WitsmlException">
+        /// </exception>
+        protected virtual string GetAndValidateArrayElementUid(XElement element)
         {
             var uidAttribute = element.Attributes().FirstOrDefault(a => a.Name == "uid");
 
