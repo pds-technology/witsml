@@ -485,10 +485,19 @@ namespace PDS.Witsml.Server.Data
                     WitsmlParser.RemoveEmptyElements(element);
 
                     // TODO: Modify to handle other item types as needed.
-                    var item = element.Value; //ParseNestedElement(type, element);
+                    object item;
 
-                    if (string.IsNullOrWhiteSpace(item))
-                        return null;
+                    if (IsComplexType(type))
+                    {
+                        item = ParseNestedElement(type, element);
+                    }
+                    else
+                    {
+                        if (string.IsNullOrWhiteSpace(element.Value))
+                            return null;
+
+                        item = element.Value;
+                    }
 
                     var filter = filterBuilder.And(filters);
 
