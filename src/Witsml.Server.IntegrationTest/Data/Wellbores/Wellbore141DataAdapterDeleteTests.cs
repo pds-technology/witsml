@@ -390,7 +390,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.AreEqual((short)ErrorCodes.MissingElementUidForDelete, results.Result);
         }
 
-        [TestMethod, Description("Tests you cannot do DeleteFromStore with a missing uom")]
+        [TestMethod, Description("Tests you cannot do DeleteFromStore non recurring element with no uid")]
         public void Wellbore141DataAdapter_DeleteFromStore_Error_419_Deleting_Empty_NonRecurring_Element_With_No_Uid()
         {
             // Add well
