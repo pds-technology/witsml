@@ -44,7 +44,14 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
         /// <returns>The count of related data objects.</returns>
-        int CountAll(EtpUri? parentUri);
+        int Count(EtpUri? parentUri);
+
+        /// <summary>
+        /// Determines if the specified URI has child data objects.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>If there are any related data objects.</returns>
+        bool Any(EtpUri? parentUri);
 
         /// <summary>
         /// Gets a collection of data objects related to the specified URI.

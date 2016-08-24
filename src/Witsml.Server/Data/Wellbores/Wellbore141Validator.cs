@@ -20,6 +20,10 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Energistics.DataAccess.WITSML141;
 using System.ComponentModel.Composition;
+using System.Linq;
+using Energistics.Datatypes;
+using PDS.Framework;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
@@ -35,15 +39,30 @@ namespace PDS.Witsml.Server.Data.Wellbores
         private readonly IWitsmlDataAdapter<Well> _wellDataAdapter;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Wellbore141Validator"/> class.
+        /// Gets or sets the collection of <see cref="IWitsml141Configuration"/> providers.
         /// </summary>
+        /// <value>The collection of providers.</value>
+        [ImportMany]
+        public IEnumerable<IWitsml141Configuration> Providers { get; set; }
+
+        /// <summary>
+        /// Gets the composition container.
+        /// </summary>
+        /// <value>The composition container.</value>
+        protected IContainer Container { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Wellbore141Validator" /> class.
+        /// </summary>
+        /// <param name="container">The container.</param>
         /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
         /// <param name="wellDataAdapter">The well data adapter.</param>
         [ImportingConstructor]
-        public Wellbore141Validator(IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter)
+        public Wellbore141Validator(IContainer container, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter)
         {
             _wellboreDataAdapter = wellboreDataAdapter;
             _wellDataAdapter = wellDataAdapter;
+            Container = container;
         }
 
         /// <summary>
@@ -86,7 +105,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// <returns>A collection of validation results.</returns>
         protected override IEnumerable<ValidationResult> ValidateForUpdate()
         {
-            return ValidateObjectExistence();
+            var uri = DataObject.GetUri();
+            yield return ValidateObjectExistence(uri);
         }
 
         /// <summary>
@@ -95,23 +115,53 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// <returns>A collection of validation results.</returns>
         protected override IEnumerable<ValidationResult> ValidateForDelete()
         {
-            return ValidateObjectExistence();
+            var uri = DataObject.GetUri();
+            var cascadeDeleteOff = OptionsIn.CascadedDelete.False.Value.ToLower();
+            var parserCascadedDelete = Parser.CascadedDelete().ToString().ToLower();
+
+            
+            if ((cascadeDeleteOff.Equals(parserCascadedDelete)))
+            {
+                yield return ValidateObjectExistence(uri);
+
+                // Validate that there are no child data-objects if cascading deletes are not invoked.
+                foreach (var dataAdapter in Providers.Cast<IWitsmlDataAdapter>())
+                {
+                    if (dataAdapter.DataObjectType == typeof(Well) || dataAdapter.DataObjectType == typeof(Wellbore))
+                        continue;
+
+                    if (dataAdapter.Any(uri))
+                        yield return new ValidationResult(ErrorCodes.NotBottomLevelDataObject.ToString());
+                }
+            }
+            else
+                yield return ValidateObjectExistence(uri);
         }
 
-        private IEnumerable<ValidationResult> ValidateObjectExistence()
+        private ValidationResult ValidateObjectExistence(EtpUri uri)
         {
-            var uri = DataObject.GetUri();
+            // Validate that a Uid was provided
+            if (string.IsNullOrWhiteSpace(DataObject.UidWell))
+            {
+                return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] { "Uid" });
+            }
+            // Validate that a well for the Uid exists
+            else if (!_wellDataAdapter.Exists(uri.Parent))
+            {
+                return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] { "Uid" });
+            }
 
             // Validate that a Uid was provided
             if (string.IsNullOrWhiteSpace(DataObject.Uid))
             {
-                yield return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] { "Uid" });
+                return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] { "Uid" });
             }
             // Validate that a wellbore for the Uid exists
             else if (!_wellboreDataAdapter.Exists(uri))
             {
-                yield return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] { "UidWell", "Uid" });
+                return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] { "UidWell", "Uid" });
             }
+            return null;
         }
     }
 }

@@ -279,6 +279,23 @@ namespace PDS.Witsml.Server.Data.Wellbores
         }
 
         [TestMethod, Description("Tests you cannot do DeleteFromStore without specifying the wellbore uid")]
+        public void Wellbore141DataAdapter_DeleteFromStore_Error_409_QueryIn_Must_Conform_To_Schema()
+        {
+            // Add well
+            _devKit.AddAndAssert(_well);
+
+            // Add wellbore
+            _wellbore.NumGovt = "101";
+            _devKit.AddAndAssert(_wellbore);
+
+            // Delete well with invalid element
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, string.Empty, _well.Uid,
+                "<numGovt /><numGovt />");
+            var results = _devKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, results.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore without specifying the wellbore uid")]
         public void Wellbore141DataAdapter_DeleteFromStore_Error_415_Delete_Without_Specifing_UID()
         {
             // Add well
@@ -371,6 +388,87 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
             Assert.IsNotNull(results);
             Assert.AreEqual((short)ErrorCodes.MissingElementUidForDelete, results.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore non recurring element with no uid")]
+        public void Wellbore141DataAdapter_DeleteFromStore_Error_419_Deleting_Empty_NonRecurring_Element_With_No_Uid()
+        {
+            // Add well
+            _devKit.AddAndAssert(_well);
+
+            // Add wellbore
+            _devKit.AddAndAssert(_wellbore);
+
+            // Delete wellbore's MD
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, _wellbore.Uid, _well.Uid,
+                "<commonData />");
+
+            var results = _devKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyNonRecurringElementSpecified, results.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore with an empty node for a non-recurring element or attribute that is mandatory in the write schema.")]
+        public void Wellbore141DataAdapter_DeleteFromStore_Error_420_Delete_Required_Element()
+        {
+            // Add well
+            _devKit.AddAndAssert(_well);
+
+            // Add wellbore
+            _devKit.AddAndAssert(_wellbore);
+
+            // Delete nameWell
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, _wellbore.Uid, _well.Uid,
+                "<nameWell />");
+
+            var results = _devKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyMandatoryNodeSpecified, results.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore without all required fields on an optional element")]
+        public void Wellbore141DataAdapter_DeleteFromStore_Error_432_Wellbore_Has_Child_Data_Objects()
+        {
+            // Add well
+            _devKit.AddAndAssert(_well);
+
+            // Add wellbore
+            _devKit.AddAndAssert(_wellbore);
+
+            // Add rig
+            var rig = new Rig()
+            {
+                UidWell = _well.Uid,
+                UidWellbore = _wellbore.Uid,
+                Uid = _devKit.Uid(),
+                NameWell = _well.Name,
+                NameWellbore = _wellbore.Name,
+                Name = "Big Rig"
+            };
+            _devKit.AddAndAssert(rig);
+
+            // Delete wellbore
+            var delete = new Wellbore { Uid = _wellbore.Uid, UidWell = _well.Uid };
+
+            var results = _devKit.Delete<WellboreList, Wellbore>(delete, ObjectTypes.Wellbore);
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.NotBottomLevelDataObject, results.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore without all required fields on an optional element")]
+        public void Wellbore141DataAdapter_DeleteFromStore_Error_433_Wellbore_Does_Not_Exist()
+        {
+            // Add well
+            _devKit.AddAndAssert(_well);
+
+            // Delete wellbore
+            var delete = new Wellbore { Uid = _wellbore.Uid, UidWell = _well.Uid };
+
+            var results = _devKit.Delete<WellboreList, Wellbore>(delete, ObjectTypes.Wellbore);
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.DataObjectNotExist, results.Result);
         }
 
         [TestMethod, Description("Tests you cannot do DeleteFromStore more than one object")]
