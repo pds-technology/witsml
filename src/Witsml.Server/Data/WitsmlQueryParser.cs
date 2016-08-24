@@ -404,10 +404,12 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Determines if the witsml query is partial updating or deleting elements
         /// </summary>
-        /// <returns>The list of Witsml query parsers.</returns>
+        /// <returns>
+        ///   <c>true</c> if [is partial delete] [the specified parser]; otherwise, <c>false</c>.
+        /// </returns>
         public bool IsPartial()
         {
-            return Elements().Elements().Any();
+            return Element().Elements().Any();
         }
     }
 }
