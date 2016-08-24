@@ -400,5 +400,14 @@ namespace PDS.Witsml.Server.Data
         {
             return Fork(Elements(), ObjectType);
         }
+
+        /// <summary>
+        /// Determines if the witsml query is partial updating or deleting elements
+        /// </summary>
+        /// <returns>The list of Witsml query parsers.</returns>
+        public bool IsPartial()
+        {
+            return Elements().Elements().Any();
+        }
     }
 }
