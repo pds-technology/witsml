@@ -269,7 +269,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.AreEqual((short)ErrorCodes.MissingWmlTypeIn, response.Result);
         }
 
-        [TestMethod, Description("Tests you cannot do DeleteFromStore without plural container")]
+        [TestMethod, Description("Tests you cannot do DeleteFromStore with empty queryIn")]
         public void Wellbore141DataAdapter_DeleteFromStore_Error_408_Empty_QueryIn()
         {
             var response = _devKit.DeleteFromStore(ObjectTypes.Wellbore, string.Empty, null, null);
@@ -278,7 +278,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.AreEqual((short)ErrorCodes.MissingInputTemplate, response.Result);
         }
 
-        [TestMethod, Description("Tests you cannot do DeleteFromStore without specifying the wellbore uid")]
+        [TestMethod, Description("Tests you cannot do DeleteFromStore with non conforming QueryIn")]
         public void Wellbore141DataAdapter_DeleteFromStore_Error_409_QueryIn_Must_Conform_To_Schema()
         {
             // Add well
@@ -310,7 +310,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.AreEqual((short)ErrorCodes.DataObjectUidMissing, results.Result);
         }
 
-        [TestMethod, Description("Tests you cannot do DeleteFromStore without all required fields on an optional element")]
+        [TestMethod, Description("Tests you cannot do DeleteFromStore with an empty UID")]
         public void Wellbore141DataAdapter_DeleteFromStore_Error_416_Empty_UID()
         {
             // Add well
@@ -339,7 +339,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
         }
 
-        [TestMethod, Description("Tests you cannot do DeleteFromStore with a missing uom")]
+        [TestMethod, Description("Tests you cannot do DeleteFromStore with an empty uom")]
         public void Wellbore141DataAdapter_DeleteFromStore_Error_417_Deleting_With_Empty_UOM_Attribute()
         {
             // Add well
@@ -363,7 +363,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.AreEqual((short)ErrorCodes.EmptyUomSpecified, results.Result);
         }
 
-        [TestMethod, Description("Tests you cannot do DeleteFromStore without all required fields on an optional element")]
+        [TestMethod, Description("Tests you cannot do DeleteFromStore with the UID missing")]
         public void Wellbore141DataAdapter_DeleteFromStore_Error_418_Missing_Uid()
         {
             // Add well
@@ -428,7 +428,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.AreEqual((short)ErrorCodes.EmptyMandatoryNodeSpecified, results.Result);
         }
 
-        [TestMethod, Description("Tests you cannot do DeleteFromStore without all required fields on an optional element")]
+        [TestMethod, Description("Tests you cannot do DeleteFromStore if wellbore has any child data objects")]
         public void Wellbore141DataAdapter_DeleteFromStore_Error_432_Wellbore_Has_Child_Data_Objects()
         {
             // Add well
@@ -457,7 +457,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.AreEqual((short)ErrorCodes.NotBottomLevelDataObject, results.Result);
         }
 
-        [TestMethod, Description("Tests you cannot do DeleteFromStore without all required fields on an optional element")]
+        [TestMethod, Description("Tests you cannot do DeleteFromStore on a wellbore that does not exist")]
         public void Wellbore141DataAdapter_DeleteFromStore_Error_433_Wellbore_Does_Not_Exist()
         {
             // Add well
