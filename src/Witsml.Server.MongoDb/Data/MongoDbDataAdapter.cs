@@ -137,7 +137,7 @@ namespace PDS.Witsml.Server.Data
         {
             var uri = parser.GetUri<T>();
 
-            if (IsPartialDelete(parser))
+            if (parser.IsPartial())
             {
                 using (var transaction = DatabaseProvider.BeginTransaction(uri))
                 {
@@ -550,18 +550,6 @@ namespace PDS.Witsml.Server.Data
             return OptionsIn.ReturnElements.IdOnly.Equals(parser.ReturnElements())
                 ? new List<string> { IdPropertyName, NamePropertyName }
                 : null;
-        }
-
-        /// <summary>
-        /// Determines whether [is partial delete] [the specified parser].
-        /// </summary>
-        /// <param name="parser">The WITSML parser.</param>
-        /// <returns>
-        ///   <c>true</c> if [is partial delete] [the specified parser]; otherwise, <c>false</c>.
-        /// </returns>
-        protected bool IsPartialDelete(WitsmlQueryParser parser)
-        {
-            return parser.Element().Elements().Any();
         }
 
         private void ValidateUpdatedEntity(EtpUri uri)
