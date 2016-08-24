@@ -120,7 +120,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             var parserCascadedDelete = Parser.CascadedDelete().ToString().ToLower();
 
             
-            if ((cascadeDeleteOff.Equals(parserCascadedDelete)))
+            if (!Parser.Element().Elements().Any() && (cascadeDeleteOff.Equals(parserCascadedDelete)))
             {
                 yield return ValidateObjectExistence(uri);
 
