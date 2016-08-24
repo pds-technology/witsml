@@ -23,6 +23,7 @@ using System.Linq;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.Datatypes;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Data.Logs;
@@ -322,6 +323,18 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
+        /// Validates the data object while executing DeleteFromStore.
+        /// </summary>
+        /// <returns>
+        /// A collection of validation results.
+        /// </returns>
+        protected override IEnumerable<ValidationResult> ValidateForDelete()
+        {
+            var uri = DataObject.GetUri();
+            yield return ValidateObjectExistence(uri);
+        }
+
+        /// <summary>
         /// Validate the uid attribute value of the element.
         /// </summary>
         /// <param name="element">The element.</param>
@@ -333,21 +346,19 @@ namespace PDS.Witsml.Server.Data.Logs
             var uidAttribute = element.Attributes().FirstOrDefault(a => a.Name == "uid");
             if (uidAttribute != null)
             {
-                if (string.IsNullOrEmpty(uidAttribute.Value))
-                {
-                    throw new WitsmlException(Context.Function.GetMissingElementUidErrorCode());
-                }
-            }
-            else
-            {
-                if (Context.Function == Functions.DeleteFromStore)
-                {
-                    if (element.Name.LocalName != "logCurveInfo" || !DeleteChannelData(element))
-                        throw new WitsmlException(ErrorCodes.EmptyUidSpecified);
-                }
-            }
+                if (!string.IsNullOrEmpty(uidAttribute.Value))
+                    return uidAttribute.Value;
 
-            return uidAttribute?.Value;
+                if (Context.Function != Functions.DeleteFromStore)
+                    throw new WitsmlException(Context.Function.GetMissingElementUidErrorCode());
+                throw new WitsmlException(ErrorCodes.EmptyUidSpecified);
+            }
+            if (Context.Function != Functions.DeleteFromStore)
+                return null;
+            if (element.Name.LocalName != "logCurveInfo" || !DeleteChannelData(element))
+                throw new WitsmlException(ErrorCodes.MissingElementUidForDelete);
+
+            return null;
         }
 
         private bool DeleteChannelData(XElement element)
@@ -499,6 +510,44 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             return true;
+        }
+
+        private ValidationResult ValidateObjectExistence(EtpUri uri)
+        {
+            // Validate that a UidWell was provided
+            if (string.IsNullOrWhiteSpace(DataObject.UidWell))
+            {
+                return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] {"UidWell"});
+            }
+            // Validate that a well for the Uid exists
+            if (!_wellDataAdapter.Exists(uri.Parent.Parent))
+            {
+                return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] {"UidWell"});
+            }
+
+            // Validate that a UidWellbore was provided
+            if (string.IsNullOrWhiteSpace(DataObject.UidWellbore))
+            {
+                return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] {"UidWellbore"});
+            }
+            // Validate that a wellbore for the Uid exists
+            if (!_wellboreDataAdapter.Exists(uri.Parent))
+            {
+                return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] {"UidWell", "UidWellbore"});
+            }
+
+            // Validate that a Uid was provided
+            if (string.IsNullOrWhiteSpace(DataObject.Uid))
+            {
+                return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] {"Uid"});
+            }
+            // Validate that a log for the Uid exists
+            else if (!_wellboreDataAdapter.Exists(uri))
+            {
+                return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(),
+                    new[] {"UidWell", "UidWellbore", "Uid"});
+            }
+            return null;
         }
     }
 }
