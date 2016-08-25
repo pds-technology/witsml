@@ -23,6 +23,7 @@ using System.Linq;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
 using log4net;
+using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data
@@ -35,11 +36,13 @@ namespace PDS.Witsml.Server.Data
     public abstract class WitsmlDataAdapter<T> : IWitsmlDataAdapter<T>, IWitsmlDataAdapter
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="WitsmlDataAdapter{T}"/> class.
+        /// Initializes a new instance of the <see cref="WitsmlDataAdapter{T}" /> class.
         /// </summary>
-        protected WitsmlDataAdapter()
+        /// <param name="container">The composition container.</param>
+        protected WitsmlDataAdapter(IContainer container)
         {
             Logger = LogManager.GetLogger(GetType());
+            Container = container;
         }
 
         /// <summary>
@@ -47,6 +50,12 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <value>The logger.</value>
         protected ILog Logger { get; }
+
+        /// <summary>
+        /// Gets the composition container.
+        /// </summary>
+        /// <value>The composition container.</value>
+        protected IContainer Container { get; }
 
         /// <summary>
         /// Gets the data object type.
