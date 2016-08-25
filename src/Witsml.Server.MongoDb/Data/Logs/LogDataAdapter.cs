@@ -297,7 +297,9 @@ namespace PDS.Witsml.Server.Data.Logs
             var queryMnemonics = parser.GetLogDataMnemonics()?.ToArray() ?? new string[0];
             if (!queryMnemonics.Any())
             {
-                queryMnemonics = parser.GetLogCurveInfoMnemonics().ToArray();
+                queryMnemonics = parser.GetLogCurveInfoMnemonics()
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .ToArray();
             }
 
             return ComputeMnemonicIndexes(allMnemonics, queryMnemonics, parser.ReturnElements());
