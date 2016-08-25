@@ -584,6 +584,13 @@ namespace PDS.Witsml.Server.Data.Logs
                 }
             }
 
+            if (deleteAll)
+            {
+                var indexCurve = current.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == current.IndexCurve);
+                if (entity.LogCurveInfo.Any(l => l.Uid != indexCurve?.Uid || l.Mnemonic.Value != current.IndexCurve))
+                    deleteAll = false;
+            }
+
             return deleteAll;
         }
 
