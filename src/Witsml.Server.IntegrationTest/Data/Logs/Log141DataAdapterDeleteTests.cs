@@ -935,8 +935,22 @@ namespace PDS.Witsml.Server.Data.Logs
             _devKit.AddAndAssert(_log);
 
             // Delete log
-            var indexCurveUid = _log.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == _log.IndexCurve);
+            var indexCurveUid = _log.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == _log.IndexCurve)?.Uid;
             var delete = "<logCurveInfo uid=\"" + indexCurveUid + "\" />";
+            DeleteLog(_log, delete, ErrorCodes.ErrorDeletingIndexCurve);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore of index curve unless all curve are being deleted")]
+        public void Log141DataAdapter_DeleteFromStore_Error_1052_Deleting_Index_Curve_Data()
+        {
+            AddParents();
+
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), 10);
+            _devKit.AddAndAssert(_log);
+
+            // Delete log
+            var delete = "<logCurveInfo><mnemonic>" + _log.IndexCurve + "</mnemonic></logCurveInfo>";
             DeleteLog(_log, delete, ErrorCodes.ErrorDeletingIndexCurve);
         }
 
