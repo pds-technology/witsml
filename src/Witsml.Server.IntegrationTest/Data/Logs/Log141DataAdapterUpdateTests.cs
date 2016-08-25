@@ -120,7 +120,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
 
             // Query log
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
 
             Assert.IsNull(result.BhaRunNumber);
             Assert.AreEqual(3, result.LogCurveInfo.Count);
@@ -148,7 +148,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.AddAndAssert(_log);
 
-            var logAdded = _devKit.GetSingleLogAndAssert(_log);
+            var logAdded = _devKit.GetOneAndAssert(_log);
             Assert.IsNull(logAdded.Description);
 
             var logDataAdded = logAdded.LogData.First();
@@ -174,7 +174,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var updateResponse = _devKit.Update<LogList, Log>(update);
             Assert.AreEqual((short)ErrorCodes.NodesWithSameIndex, updateResponse.Result);
 
-            var logUpdated = _devKit.GetSingleLogAndAssert(_log);
+            var logUpdated = _devKit.GetOneAndAssert(_log);
 
             var logDataUpdated = logUpdated.LogData.First();
             for (var i = 0; i < logDataAdded.Data.Count; i++)
@@ -287,7 +287,7 @@ namespace PDS.Witsml.Server.Data.Logs
             query.StartIndex = new GenericMeasure(1700, "ft");
             query.EndIndex = new GenericMeasure(2200, "ft");
 
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(6, result.LogData[0].Data.Count);
             Assert.AreEqual(3, result.LogData[0].MnemonicList.Split(',').Length);
@@ -410,7 +410,7 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             AddLogHeader(_log, LogIndexType.measureddepth);
             
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
             Assert.IsNull(result.StartIndex);
             Assert.IsNull(result.EndIndex);
 
@@ -435,7 +435,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.UpdateAndAssert(update);
 
-            result = _devKit.GetSingleLogAndAssert(_log);
+            result = _devKit.GetOneAndAssert(_log);
             Assert.IsNotNull(result);
             Assert.IsNull(result.StartIndex);
             Assert.IsNull(result.EndIndex);
@@ -471,7 +471,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var update = CreateLogDataUpdate(_log, LogIndexType.measureddepth, new GenericMeasure {Uom = "m", Value = 11}, count, hasEmptyChannel: false);
             _devKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
             var start = _log.StartIndex.Value;
             var end = update.StartIndex.Value + count - 1;
             Assert.AreEqual(start, result.StartIndex.Value);
@@ -507,7 +507,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.AddAndAssert(log);
 
-            var result = _devKit.GetSingleLogAndAssert(log);
+            var result = _devKit.GetOneAndAssert(log);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(5000, result.LogData[0].Data.Count);
 
@@ -526,7 +526,7 @@ namespace PDS.Witsml.Server.Data.Logs
             _devKit.UpdateAndAssert(log);
 
             // Query log after appending data
-            result = _devKit.GetSingleLogAndAssert(log);
+            result = _devKit.GetOneAndAssert(log);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(15000, result.LogData[0].Data.Count);
         }
@@ -595,7 +595,7 @@ namespace PDS.Witsml.Server.Data.Logs
             // Add Log
             _devKit.AddAndAssert(_log);
 
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
             AssertNestedElements(result, curve, extensionName1, extensionName4);
 
             // Update Log
@@ -636,7 +636,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.UpdateAndAssert(update);
 
-            result = _devKit.GetSingleLogAndAssert(_log);
+            result = _devKit.GetOneAndAssert(_log);
             AssertNestedElements(result, curve, extensionName1, extensionName4);
         }
 
@@ -646,7 +646,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var delimiter = "|~";
             AddLogWithData(_log, LogIndexType.measureddepth, 10, false);
 
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
             Assert.IsNotNull(result);
 
             // Assert null data delimiter
@@ -663,7 +663,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.UpdateAndAssert(update);
 
-            result = _devKit.GetSingleLogAndAssert(_log);
+            result = _devKit.GetOneAndAssert(_log);
 
             // Assert data delimiter is updated
             Assert.AreEqual(delimiter, result.DataDelimiter);
@@ -745,7 +745,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
 
             // Assert log data
             logData = result.LogData.FirstOrDefault();
@@ -825,7 +825,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
 
             // Assert log data
             logData = result.LogData.FirstOrDefault();
@@ -905,7 +905,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
 
             // Assert log data
             logData = result.LogData.FirstOrDefault();
@@ -984,7 +984,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
 
             // Assert log data
             logData = result.LogData.FirstOrDefault();
@@ -1045,7 +1045,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
 
             logData = result.LogData.FirstOrDefault();
             Assert.IsNotNull(logData);
@@ -1079,7 +1079,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
             Assert.AreEqual(dataDelimiter, result.DataDelimiter);
         }
 
@@ -1092,7 +1092,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var update = CreateLogDataUpdate(_log, LogIndexType.measureddepth, new GenericMeasure(17, "m"), 6);
             _devKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
             var logData = result.LogData.FirstOrDefault();
 
             Assert.IsNotNull(logData);
@@ -1108,7 +1108,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var update = CreateLogDataUpdate(_log, LogIndexType.measureddepth, new GenericMeasure(5, "m"), 6);
             _devKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
             var logData = result.LogData.FirstOrDefault();
 
             Assert.IsNotNull(logData);
@@ -1124,7 +1124,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var update = CreateLogDataUpdate(_log, LogIndexType.measureddepth, new GenericMeasure(4.1, "m"), 3, 0.9);
             _devKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
             var logData = result.LogData.FirstOrDefault();
 
             Assert.IsNotNull(logData);
@@ -1142,7 +1142,7 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Add("21.5, 1, 21.7");
             _devKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
             logData = result.LogData.FirstOrDefault();
 
             Assert.IsNotNull(logData);
@@ -1171,7 +1171,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
             logData = result.LogData.FirstOrDefault();
 
             Assert.IsNotNull(logData);
@@ -1194,7 +1194,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.AddAndAssert(_log);
 
-            var logAdded = _devKit.GetSingleLogAndAssert(_log);
+            var logAdded = _devKit.GetOneAndAssert(_log);
             Assert.IsNotNull(logAdded);
             Assert.AreEqual(_log.Description, logAdded.Description);
             Assert.AreEqual(_log.RunNumber, logAdded.RunNumber);
@@ -1208,7 +1208,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.UpdateAndAssert(update);
 
-            var logUpdated = _devKit.GetSingleLogAndAssert(_log);
+            var logUpdated = _devKit.GetOneAndAssert(_log);
             Assert.IsNotNull(logUpdated);
             Assert.AreEqual(logAdded.Description, logUpdated.Description);
             Assert.AreEqual(update.RunNumber, logUpdated.RunNumber);
@@ -1231,7 +1231,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.AddAndAssert(_log);
 
-            var logAdded = _devKit.GetSingleLogAndAssert(_log);
+            var logAdded = _devKit.GetOneAndAssert(_log);
             Assert.IsNotNull(logAdded);
             Assert.AreEqual(_log.Description, logAdded.Description);
             Assert.AreEqual(_log.RunNumber, logAdded.RunNumber);
@@ -1256,7 +1256,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.UpdateAndAssert(update);
 
-            var logUpdated = _devKit.GetSingleLogAndAssert(_log);
+            var logUpdated = _devKit.GetOneAndAssert(_log);
 
             Assert.IsNotNull(logUpdated);
             Assert.AreEqual(logAdded.Description, logUpdated.Description);
@@ -1280,7 +1280,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.AddAndAssert(_log);
 
-            var logAdded = _devKit.GetSingleLogAndAssert(_log);
+            var logAdded = _devKit.GetOneAndAssert(_log);
             Assert.AreEqual(1, logAdded.LogCurveInfo.Count);
             Assert.AreEqual(_log.LogCurveInfo.Count, logAdded.LogCurveInfo.Count);
 
@@ -1292,7 +1292,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.UpdateAndAssert(update);
 
-            var logUpdated = _devKit.GetSingleLogAndAssert(_log);
+            var logUpdated = _devKit.GetOneAndAssert(_log);
             Assert.AreEqual(2, logUpdated.LogCurveInfo.Count);
         }
 
@@ -1312,7 +1312,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.AddAndAssert(_log);
 
-            var logAdded = _devKit.GetSingleLogAndAssert(_log);
+            var logAdded = _devKit.GetOneAndAssert(_log);
             Assert.AreEqual(LogIndexDirection.increasing, logAdded.Direction);
             Assert.AreEqual(_log.RunNumber, logAdded.RunNumber);
 
@@ -1322,7 +1322,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.UpdateAndAssert(update);
 
-            var logUpdated = _devKit.GetSingleLogAndAssert(_log);
+            var logUpdated = _devKit.GetOneAndAssert(_log);
             Assert.AreEqual(LogIndexDirection.increasing, logAdded.Direction);
             Assert.AreEqual(update.RunNumber, logUpdated.RunNumber);
         }
@@ -1337,7 +1337,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var lciUids = _log.LogCurveInfo.Select(l => l.Uid).ToArray();
             Assert.AreEqual(3, lciUids.Length);
 
-            var logAdded = _devKit.GetSingleLogAndAssert(_log);
+            var logAdded = _devKit.GetOneAndAssert(_log);
             Assert.AreEqual(15, logAdded.StartIndex.Value);
             Assert.AreEqual(22, logAdded.EndIndex.Value);
 
@@ -1373,7 +1373,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.UpdateAndAssert(update);
 
-            var logUpdated = _devKit.GetSingleLogAndAssert(_log);
+            var logUpdated = _devKit.GetOneAndAssert(_log);
             logData = logUpdated.LogData.FirstOrDefault();
 
             Assert.IsNotNull(logData);
@@ -1434,7 +1434,7 @@ namespace PDS.Witsml.Server.Data.Logs
             _devKit.UpdateAndAssert(updateLog);
 
             // Query
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(9, result.LogData[0].Data.Count);
 
@@ -1491,7 +1491,7 @@ namespace PDS.Witsml.Server.Data.Logs
             _devKit.UpdateAndAssert(updateLog);
 
             // Query
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(8, result.LogData[0].Data.Count);
 
@@ -1548,7 +1548,7 @@ namespace PDS.Witsml.Server.Data.Logs
             _devKit.UpdateAndAssert(updateLog);
 
             // Query
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(7, result.LogData[0].Data.Count);
 
@@ -1607,7 +1607,7 @@ namespace PDS.Witsml.Server.Data.Logs
             _devKit.UpdateAndAssert(updateLog);
 
             // Query
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(9, result.LogData[0].Data.Count);
 
@@ -1664,7 +1664,7 @@ namespace PDS.Witsml.Server.Data.Logs
             _devKit.UpdateAndAssert(updateLog);
 
             // Query
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(7, result.LogData[0].Data.Count);
 
@@ -1726,7 +1726,7 @@ namespace PDS.Witsml.Server.Data.Logs
             _devKit.UpdateAndAssert(updateLog);
 
             // Query
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(7, result.LogData[0].Data.Count);
 
@@ -1788,7 +1788,7 @@ namespace PDS.Witsml.Server.Data.Logs
             _devKit.UpdateAndAssert(updateLog);
 
             // Query
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(7, result.LogData[0].Data.Count);
 
@@ -1849,7 +1849,7 @@ namespace PDS.Witsml.Server.Data.Logs
             _devKit.UpdateAndAssert(updateLog);
 
             // Query
-            var result = _devKit.GetSingleLogAndAssert(_log);
+            var result = _devKit.GetOneAndAssert(_log);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(7, result.LogData[0].Data.Count);
 
@@ -1889,7 +1889,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.AddAndAssert(_log);
 
-            var logAdded = _devKit.GetSingleLogAndAssert(_log);
+            var logAdded = _devKit.GetOneAndAssert(_log);
             Assert.IsNull(logAdded.StepIncrement);
 
             var logDataAdded = logAdded.LogData.First();
@@ -1914,7 +1914,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             _devKit.UpdateAndAssert(update);
 
-            var logUpdated = _devKit.GetSingleLogAndAssert(_log);
+            var logUpdated = _devKit.GetOneAndAssert(_log);
 
             var logDataUpdated = logUpdated.LogData.First();
             for (var i = 0; i < logDataAdded.Data.Count; i++)

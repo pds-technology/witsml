@@ -358,9 +358,59 @@ namespace PDS.Witsml.Server.Data.Logs
                 }
                 else
                 {
+                    var element = Parser.Element();
+
+                    // Validate deleting index curve
+                    if (logCurves.Count > 0 && current.LogCurveInfo.Count > 0)
+                    {
+                        var indexCurve = current.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == current.IndexCurve);
+                        var curveElements = Parser.Properties(element, "logCurveInfo").ToList();
+                        var indexCurveElement = GetCurveElement(indexCurve, curveElements);
+
+                        var emptyCurveUids = curveElements.Where(e => !e.HasElements)
+                                    .Select(c => c.Attribute("uid")?.Value)
+                                    .Where(v => !string.IsNullOrWhiteSpace(v))
+                                    .ToList();
+
+                        if (indexCurveElement != null)
+                        {
+                            if (!indexCurveElement.HasElements)
+                            {
+                                
+                                if (current.LogCurveInfo.Select(l => l.Uid).Any(v => !emptyCurveUids.Contains(v)))
+                                    yield return new ValidationResult(ErrorCodes.ErrorDeletingIndexCurve.ToString(), new[] { "LogCurveInfo" });
+                            }
+                            else
+                            {
+                                var isTimeLog = current.IsTimeLog();
+                                var hasDefaultRange = isTimeLog
+                                    ? DataObject.StartDateTimeIndex.HasValue || DataObject.EndDateTimeIndex.HasValue
+                                    : DataObject.StartIndex != null || DataObject.EndIndex != null;
+
+                                if (indexCurveElement.Elements().All(e => e.Name.LocalName == "mnemonic"))
+                                {
+                                    foreach (var curve in
+                                            current.LogCurveInfo.Where(l => l.Mnemonic.Value != current.IndexCurve
+                                                                            && !emptyCurveUids.Contains(l.Uid) && HasData(l, isTimeLog)))
+                                    {
+                                        var curveElement = GetCurveElement(curve, curveElements);
+                                        if (curveElement == null)
+                                            yield return new ValidationResult(ErrorCodes.ErrorDeletingIndexCurve.ToString(), new[] { "LogCurveInfo" });
+                                        else
+                                        {
+                                            var curveInfo = GetCurveInfo(curve, logCurves);
+                                            if (!ToDeleteCurveData(curveInfo, curveElement, isTimeLog, hasDefaultRange))
+                                                yield return new ValidationResult(ErrorCodes.ErrorDeletingIndexCurve.ToString(), new[] { "LogCurveInfo" });
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     if (logData != null && logData.Count > 0)
                     {
-                        var element = Parser.Element();
+                        
                         var logDataElements = Parser.Properties(element, "logData");
                         if (logData.Count == 1)
                         {
@@ -572,6 +622,47 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             return true;
+        }
+
+        private bool HasData(LogCurveInfo curve, bool isTimeLog)
+        {
+            if (isTimeLog)
+                return curve.MinDateTimeIndex.HasValue && curve.MaxDateTimeIndex.HasValue;
+
+            return curve.MinIndex != null && curve.MaxIndex != null;
+        }
+
+        private bool ToDeleteCurveData(LogCurveInfo curve, XElement element, bool isTimeLog, bool hasDefaultRange)
+        {
+            var hasRange = isTimeLog
+                ? curve.MinDateTimeIndex.HasValue || curve.MaxDateTimeIndex.HasValue
+                : curve.MinIndex != null || curve.MaxIndex != null;
+
+            if (hasRange)
+                return true;
+
+            if (string.IsNullOrWhiteSpace(element.Attribute("uid")?.Value))
+            {
+                if (element.Elements().All(e => e.Name.LocalName == "mnemonic"))
+                    return true;
+            }
+            else
+            {
+                return hasDefaultRange;
+            }
+
+            return false;
+        }
+
+        private XElement GetCurveElement(LogCurveInfo curve, List<XElement> elements)
+        {
+            return elements.FirstOrDefault(e => e.Attribute("uid")?.Value == curve.Uid
+                                                || e.Elements().Any(c => c.Name.LocalName == "mnemonic" && c.Value == curve.Mnemonic.Value));
+        }
+
+        private LogCurveInfo GetCurveInfo(LogCurveInfo curve, List<LogCurveInfo> curves)
+        {
+            return curves.FirstOrDefault(l => l.Uid == curve.Uid || l.Mnemonic.Value == curve.Mnemonic.Value);
         }
     }
 }

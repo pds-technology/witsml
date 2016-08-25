@@ -65,7 +65,7 @@ namespace PDS.Witsml.Server.Data.Wells
             _devKit.AddAndAssert(_well);
 
             // Assert well is added
-            _devKit.GetSingleWellAndAssert(_well);
+            _devKit.GetOneAndAssert(_well);
 
             // Delete well
             var delete = new Well {Uid = _well.Uid};
@@ -89,7 +89,7 @@ namespace PDS.Witsml.Server.Data.Wells
             _devKit.AddAndAssert(_well);
 
             // Assert well is added
-            _devKit.GetSingleWellAndAssert(_well);
+            _devKit.GetOneAndAssert(_well);
 
             // Delete well
             var delete = new Well { Uid = "W" + uid };
@@ -112,7 +112,7 @@ namespace PDS.Witsml.Server.Data.Wells
             _devKit.AddAndAssert(_well);
 
             // Assert all testing elements are added
-            var result = _devKit.GetSingleWellAndAssert(_well);
+            var result = _devKit.GetOneAndAssert(_well);
             Assert.AreEqual(_well.Country, result.Country);
             Assert.AreEqual(_well.DateTimeSpud, result.DateTimeSpud);
 
@@ -123,7 +123,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             // Assert the well elements has been deleted
-            result = _devKit.GetSingleWellAndAssert(_well);
+            result = _devKit.GetOneAndAssert(_well);
             Assert.IsNull(result.Country);
             Assert.IsNull(result.DateTimeSpud);
         }
@@ -140,7 +140,7 @@ namespace PDS.Witsml.Server.Data.Wells
             _devKit.AddAndAssert(_well);
 
             // Assert all testing elements are added
-            var result = _devKit.GetSingleWellAndAssert(_well);
+            var result = _devKit.GetOneAndAssert(_well);
             var data = result.WellDatum;
             Assert.IsNotNull(data);
             Assert.AreEqual(1, data.Count);
@@ -154,7 +154,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             // Assert the attributes has been deleted
-            result = _devKit.GetSingleWellAndAssert(_well);
+            result = _devKit.GetOneAndAssert(_well);
             data = result.WellDatum;
             Assert.IsNotNull(data);
             Assert.AreEqual(1, data.Count);
@@ -179,7 +179,7 @@ namespace PDS.Witsml.Server.Data.Wells
             _devKit.AddAndAssert(_well);
 
             // Assert all testing elements are added
-            var result = _devKit.GetSingleWellAndAssert(_well);
+            var result = _devKit.GetOneAndAssert(_well);
             var commonData = result.CommonData;
             Assert.IsNotNull(commonData);
             Assert.AreEqual(testCommonData.Comments, commonData.Comments);
@@ -192,7 +192,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             // Assert the well elements has been deleted
-            result = _devKit.GetSingleWellAndAssert(_well);
+            result = _devKit.GetOneAndAssert(_well);
             commonData = result.CommonData;
             Assert.IsNotNull(commonData);
             Assert.IsNull(commonData.Comments);
@@ -211,7 +211,7 @@ namespace PDS.Witsml.Server.Data.Wells
             _devKit.AddAndAssert(_well);
 
             // Assert all testing elements are added
-            var result = _devKit.GetSingleWellAndAssert(_well);
+            var result = _devKit.GetOneAndAssert(_well);
             var data = result.WellDatum;
             Assert.AreEqual(2, data.Count);
             var datum1 = data.FirstOrDefault(d => d.Uid == datumKb.Uid);
@@ -229,7 +229,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             // Assert the partial delete of the recurring elements
-            result = _devKit.GetSingleWellAndAssert(_well);
+            result = _devKit.GetOneAndAssert(_well);
             data = result.WellDatum;
             Assert.AreEqual(1, data.Count);
             datum1 = data.FirstOrDefault(d => d.Uid == datumKb.Uid);
@@ -259,7 +259,7 @@ namespace PDS.Witsml.Server.Data.Wells
             _devKit.AddAndAssert(_well);
 
             // Assert all testing elements are added
-            var result = _devKit.GetSingleWellAndAssert(_well);
+            var result = _devKit.GetOneAndAssert(_well);
             var data = result.WellDatum;
             Assert.AreEqual(2, data.Count);
             var datum1 = data.FirstOrDefault(d => d.Uid == datumKb.Uid);
@@ -287,7 +287,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             // Assert wellDatum
-            result = _devKit.GetSingleWellAndAssert(_well);
+            result = _devKit.GetOneAndAssert(_well);
             data = result.WellDatum;
             Assert.AreEqual(1, data.Count);
             datum1 = data.FirstOrDefault(d => d.Uid == datumKb.Uid);
@@ -477,7 +477,7 @@ namespace PDS.Witsml.Server.Data.Wells
                 }
             };
 
-            var returnWell = _devKit.GetSingleWellAndAssert(_well);
+            var returnWell = _devKit.GetOneAndAssert(_well);
             returnWell.WellDatum = new List<WellDatum>()
             {
                 wellDatum

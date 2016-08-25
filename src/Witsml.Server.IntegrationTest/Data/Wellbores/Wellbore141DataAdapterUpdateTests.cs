@@ -75,7 +75,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             _devKit.AddAndAssert(_wellbore);
 
             // Query wellbore
-            var returnWellbore = _devKit.GetSingleWellboreAndAssert(_wellbore);
+            var returnWellbore = _devKit.GetOneAndAssert(_wellbore);
 
             var mdElement = returnWellbore.MD;
             Assert.IsNotNull(mdElement);
@@ -92,7 +92,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             _devKit.UpdateAndAssert(update);
 
             // Query updated wellbore
-            returnWellbore = _devKit.GetSingleWellboreAndAssert(_wellbore);
+            returnWellbore = _devKit.GetOneAndAssert(_wellbore);
 
             mdElement = returnWellbore.MD;
             Assert.IsNotNull(mdElement);
@@ -120,7 +120,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.AreEqual((short)ErrorCodes.Success, results.Result);
 
             // Query the updated wellbore 
-            var returnWellbore = _devKit.GetSingleWellboreAndAssert(_wellbore);
+            var returnWellbore = _devKit.GetOneAndAssert(_wellbore);
             Assert.AreEqual("1", returnWellbore.SuffixAPI);
         }
 
@@ -144,7 +144,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.AreEqual((short)ErrorCodes.Success, results.Result);
 
             // Query the updated wellbore 
-            var returnWellbore = _devKit.GetSingleWellboreAndAssert(_wellbore);
+            var returnWellbore = _devKit.GetOneAndAssert(_wellbore);
             Assert.AreEqual("1", returnWellbore.SuffixAPI);
             Assert.AreEqual("101", returnWellbore.NumGovt);
         }
@@ -168,7 +168,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.AreEqual((short)ErrorCodes.Success, results.Result);
 
             // Query the updated wellbore 
-            var returnWellbore = _devKit.GetSingleWellboreAndAssert(_wellbore);
+            var returnWellbore = _devKit.GetOneAndAssert(_wellbore);
             Assert.AreEqual(_wellbore.Name, returnWellbore.Name);
             Assert.IsNull(returnWellbore.SuffixAPI);
         }
@@ -256,7 +256,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.AreEqual((short)ErrorCodes.Success, results.Result);
 
             // Get updated wellbore
-            var returnedWellbore = _devKit.GetSingleWellboreAndAssert(_wellbore);
+            var returnedWellbore = _devKit.GetOneAndAssert(_wellbore);
             var commonData = returnedWellbore.CommonData;
             Assert.IsNotNull(commonData);
             var extensionNameValues = commonData.ExtensionNameValue;
@@ -348,7 +348,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             _devKit.AddAndAssert(_wellbore);
 
             // Query wellbore
-            var returnWellbore = _devKit.GetSingleWellboreAndAssert(_wellbore);
+            var returnWellbore = _devKit.GetOneAndAssert(_wellbore);
 
             var mdElement = returnWellbore.MD;
             Assert.IsNotNull(mdElement);
