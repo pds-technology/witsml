@@ -776,7 +776,7 @@ namespace PDS.Witsml.Data
         /// </returns>
         protected bool HasAttributesWithValues(XElement element)
         {
-            return element.Attributes().Any(a => !string.IsNullOrWhiteSpace(a.Value));
+            return element.Attributes().Any(a => !a.IsNamespaceDeclaration && !string.IsNullOrWhiteSpace(a.Value));
         }
 
         /// <summary>

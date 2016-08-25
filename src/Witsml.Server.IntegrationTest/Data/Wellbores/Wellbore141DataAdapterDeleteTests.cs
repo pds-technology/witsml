@@ -527,6 +527,25 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.AreEqual((short)ErrorCodes.InputTemplateMultipleDataObjects, results.Result);
         }
 
+        [TestMethod, Description("Tests you cannot do DeleteFromStore on a non-container element with non-empty attribute value")]
+        public void Wellbore141DataAdapter_DeleteFromStore_Error_1021_Delete_Simple_Content_With_Non_Empty_Attribute()
+        {
+            // Add well
+            _devKit.AddAndAssert(_well);
+
+            // Add wellbore
+            _wellbore.MD = new MeasuredDepthCoord {Uom = MeasuredDepthUom.m, Datum = "abc", Value = 12.0};
+            _devKit.AddAndAssert(_wellbore);
+
+            // Delete nameWell
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, _wellbore.Uid, _well.Uid,
+                "<md uom=\"m\" datum=\"abc\" />");
+
+            var results = _devKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.ErrorDeletingSimpleContent, results.Result);
+        }
 
         #region Helper Methods
 
