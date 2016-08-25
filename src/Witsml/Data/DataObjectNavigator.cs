@@ -72,14 +72,6 @@ namespace PDS.Witsml.Data
         /// <value>The logger.</value>
         protected ILog Logger { get; }
 
-
-        /// <summary>
-        /// Gets or sets the composition container used for dependency injection.
-        /// </summary>
-        /// <value>The composition container.</value>
-        [Import]
-        public IContainer Container { get; set; }
-
         /// <summary>
         /// Creates an <see cref="XName"/> for the xmlns namespace using the specified local name.
         /// </summary>
