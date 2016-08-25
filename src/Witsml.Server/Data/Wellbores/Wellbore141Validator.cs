@@ -119,15 +119,14 @@ namespace PDS.Witsml.Server.Data.Wellbores
             var cascadeDeleteOff = OptionsIn.CascadedDelete.False.Value.ToLower();
             var parserCascadedDelete = Parser.CascadedDelete().ToString().ToLower();
 
-            
-            if (!Parser.IsPartial() && (cascadeDeleteOff.Equals(parserCascadedDelete)))
+            if (!Parser.HasElements() && cascadeDeleteOff.Equals(parserCascadedDelete))
             {
                 yield return ValidateObjectExistence(uri);
 
                 // Validate that there are no child data-objects if cascading deletes are not invoked.
                 foreach (var dataAdapter in Providers.Cast<IWitsmlDataAdapter>())
                 {
-                    if (dataAdapter.DataObjectType == typeof(Well) || dataAdapter.DataObjectType == typeof(Wellbore))
+                    if (dataAdapter.DataObjectType == typeof (Well) || dataAdapter.DataObjectType == typeof (Wellbore))
                         continue;
 
                     if (dataAdapter.Any(uri))
@@ -135,7 +134,9 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 }
             }
             else
+            {
                 yield return ValidateObjectExistence(uri);
+            }
         }
 
         private ValidationResult ValidateObjectExistence(EtpUri uri)
@@ -143,12 +144,12 @@ namespace PDS.Witsml.Server.Data.Wellbores
             // Validate that a Uid was provided
             if (string.IsNullOrWhiteSpace(DataObject.UidWell))
             {
-                return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] { "Uid" });
+                return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] { "UidWell" });
             }
             // Validate that a well for the Uid exists
             else if (!_wellDataAdapter.Exists(uri.Parent))
             {
-                return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] { "Uid" });
+                return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] { "UidWell" });
             }
 
             // Validate that a Uid was provided

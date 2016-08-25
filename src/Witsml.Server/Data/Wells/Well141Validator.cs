@@ -84,12 +84,14 @@ namespace PDS.Witsml.Server.Data.Wells
             var parserCascadedDelete = Parser.CascadedDelete().ToString().ToLower();
 
             // Validate that there are no child data-objects if cascading deletes are not invoked.
-            if (!Parser.IsPartial() && (cascadeDeleteOff.Equals(parserCascadedDelete)) && _wellboreDataAdapter.GetAll(uri).Any())
+            if (!Parser.HasElements() && cascadeDeleteOff.Equals(parserCascadedDelete) && _wellboreDataAdapter.Any(uri))
             {
                 yield return new ValidationResult(ErrorCodes.NotBottomLevelDataObject.ToString());
             }
             else
+            {
                 yield return ValidateObjectExistence(uri);
+            }
         }
 
         private ValidationResult ValidateObjectExistence(EtpUri uri)

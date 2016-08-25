@@ -287,6 +287,25 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Determines whether the root element has any child elements.
+        /// </summary>
+        /// <returns><c>true</c> if the root element has any child elements; otherwise, <c>false</c>.</returns>
+        public bool HasElements()
+        {
+            return HasElements(Element());
+        }
+
+        /// <summary>
+        /// Determines whether the specified element has any child elements.
+        /// </summary>
+        /// <param name="element">The element.</param>
+        /// <returns><c>true</c> if the element has any child elements; otherwise, <c>false</c>.</returns>
+        public bool HasElements(XElement element)
+        {
+            return element.Elements().Any();
+        }
+
+        /// <summary>
         /// Determines whether the specified name has elements.
         /// </summary>
         /// <param name="name">The name.</param>
@@ -338,6 +357,27 @@ namespace PDS.Witsml.Server.Data
                 .Elements(_namespace + name)
                 .Select(e => e.Value)
                 .FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Determines whether the element has a value.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <returns><c>true</c> if the element has a value; otherwise, <c>false</c>.</returns>
+        public bool HasPropertyValue(string name)
+        {
+            return HasPropertyValue(Element(), name);
+        }
+
+        /// <summary>
+        /// Determines whether the element has a value.
+        /// </summary>
+        /// <param name="element">The element.</param>
+        /// <param name="name">The name.</param>
+        /// <returns><c>true</c> if the element has a value; otherwise, <c>false</c>.</returns>
+        public bool HasPropertyValue(XElement element, string name)
+        {
+            return !string.IsNullOrWhiteSpace(PropertyValue(element, name));
         }
 
         /// <summary>
@@ -399,17 +439,6 @@ namespace PDS.Witsml.Server.Data
         public IEnumerable<WitsmlQueryParser> ForkElements()
         {
             return Fork(Elements(), ObjectType);
-        }
-
-        /// <summary>
-        /// Determines if the witsml query is partial updating or deleting elements
-        /// </summary>
-        /// <returns>
-        ///   <c>true</c> if [is partial delete] [the specified parser]; otherwise, <c>false</c>.
-        /// </returns>
-        public bool IsPartial()
-        {
-            return Element().Elements().Any();
         }
     }
 }

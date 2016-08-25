@@ -75,9 +75,13 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>A collection of validation results.</returns>
         protected override IEnumerable<ValidationResult> ValidateForGet()
         {
-            if ( (Parser.HasElements("startIndex") || Parser.HasElements("endIndex")) && (Parser.HasElements("startDateTimeIndex") || Parser.HasElements("endDateTimeIndex") ))
+            // Only raise error -458 if requesting logData
+            if (Parser.IncludeLogData() &&
+                (Parser.HasPropertyValue("startIndex") || Parser.HasPropertyValue("endIndex")) &&
+                (Parser.HasPropertyValue("startDateTimeIndex") || Parser.HasPropertyValue("endDateTimeIndex")))
             {
-                yield return new ValidationResult(ErrorCodes.MixedStructuralRangeIndices.ToString(), new[] { "StartIndex", "EndIndex", "StartDateTimeIndex", "EndDateTimeIndex" });
+                yield return new ValidationResult(ErrorCodes.MixedStructuralRangeIndices.ToString(), 
+                    new[] { "StartIndex", "EndIndex", "StartDateTimeIndex", "EndDateTimeIndex" });
             }
 
             var logDatas = Parser.Properties("logData").ToArray();
