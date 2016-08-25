@@ -19,7 +19,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
@@ -788,6 +787,18 @@ namespace PDS.Witsml.Data
         {
             var prefix = string.IsNullOrEmpty(parentPath) ? string.Empty : string.Format("{0}.", parentPath);
             return string.Format("{0}{1}", prefix, propertyName.ToPascalCase());
+        }
+
+        /// <summary>
+        /// Determines whether the element has any attribute with non-empty value.
+        /// </summary>
+        /// <param name="element">The element.</param>
+        /// <returns>
+        ///   <c>true</c> if the element has any attribute with non-empty value; otherwise, <c>false</c>.
+        /// </returns>
+        protected bool HasAttributesWithValues(XElement element)
+        {
+            return element.Attributes().Any(a => !a.IsNamespaceDeclaration && !string.IsNullOrWhiteSpace(a.Value));
         }
 
         /// <summary>

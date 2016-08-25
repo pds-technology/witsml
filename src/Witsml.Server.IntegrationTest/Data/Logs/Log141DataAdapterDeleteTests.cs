@@ -729,6 +729,78 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(15, curve2.MaxIndex.Value);
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_DeleteFromStore_Can_Delete_Multiple_Curves_With_StartIndex_And_EndIndex()
+        {
+            AddParents();
+
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+
+            // Add another curve
+            var newCurve = _devKit.LogGenerator.CreateDoubleLogCurveInfo("RPM", "c/s");
+            _log.LogCurveInfo.Add(newCurve);
+
+            var logData = _log.LogData.First();
+            logData.MnemonicList += $",{newCurve.Mnemonic}";
+            logData.UnitList += $",{newCurve.Unit}";
+            logData.Data.Add("13,13.1,13.2,13.3");
+            logData.Data.Add("14,14.1,14.2,14.3");
+            logData.Data.Add("15,15.1,15.2,15.3");
+            logData.Data.Add("16,16.1,16.2,16.3");
+            logData.Data.Add("17,17.1,17.2,17.3");
+            logData.Data.Add("18,18.1,18.2,18.3");
+
+            _devKit.AddAndAssert(_log);
+
+            var indexCurve = _log.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == _log.IndexCurve);
+            Assert.IsNotNull(indexCurve);
+            var curve1 = _log.LogCurveInfo[1];
+            Assert.IsNotNull(curve1);
+            var curve2 = _log.LogCurveInfo[2];
+            Assert.IsNotNull(curve2);
+            var curve3 = _log.LogCurveInfo[3];
+            Assert.IsNotNull(curve3);
+
+            var result = _devKit.GetOneAndAssert(_log);
+            var resultLogData = result.LogData.First();
+            Assert.IsNotNull(resultLogData);
+            foreach (var curve in result.LogCurveInfo)
+            {
+                Assert.AreEqual(13, curve.MinIndex.Value);
+                Assert.AreEqual(18, curve.MaxIndex.Value);
+            }
+
+            var delete = "<startIndex uom=\"" + indexCurve.Unit + "\">0</startIndex>" + Environment.NewLine +
+                         "<endIndex uom=\"" + indexCurve.Unit + "\">20</endIndex>" + Environment.NewLine +
+                         "<logCurveInfo><mnemonic>" + curve1.Mnemonic.Value + "</mnemonic></logCurveInfo>" + Environment.NewLine +
+                         "<logCurveInfo><mnemonic>" + curve2.Mnemonic.Value + "</mnemonic></logCurveInfo>";
+            DeleteLog(_log, delete);
+
+            result = _devKit.GetOneAndAssert(_log);
+
+            // Assert log data
+            Assert.IsNotNull(result.LogData);
+            resultLogData = result.LogData.First();
+            Assert.IsNotNull(resultLogData);
+            var data = resultLogData.Data;
+            Assert.AreEqual("13,13.3", data[0]);
+            Assert.AreEqual("14,14.3", data[1]);
+            Assert.AreEqual("15,15.3", data[2]);
+            Assert.AreEqual("16,16.3", data[3]);
+            Assert.AreEqual("17,17.3", data[4]);
+            Assert.AreEqual("18,18.3", data[5]);
+
+            // Assert Index
+            curve1 = result.LogCurveInfo[0];
+            Assert.IsNotNull(curve1);
+            Assert.AreEqual(13, curve1.MinIndex.Value);
+            Assert.AreEqual(18, curve1.MaxIndex.Value);
+            curve2 = result.LogCurveInfo[1];
+            Assert.IsNotNull(curve2);
+            Assert.AreEqual(13, curve2.MinIndex.Value);
+            Assert.AreEqual(18, curve2.MaxIndex.Value);
+        }
+
         [TestMethod, Description("Tests you cannot do DeleteFromStore without plural container")]
         public void Log141DataAdapter_DeleteFromStore_Error_401_No_Plural_Root_Element()
         {

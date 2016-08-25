@@ -59,7 +59,8 @@ namespace PDS.Witsml.Server.Data.Logs
             _wellboreDataAdapter = wellboreDataAdapter;
             _wellDataAdapter = wellDataAdapter;
 
-            Context.Ignored = new List<string> {"logData"};
+            Context.Ignored = new List<string> {"logData", "startIndex", "endIndex", "startDateTimeIndex", "endDateTimeIndex",
+                "minIndex", "maxIndex", "minDateTimeIndex", "maxDateTimeIndex", };
         }
 
         /// <summary>

@@ -538,6 +538,11 @@ namespace PDS.Witsml
         ErrorMaxDocumentSizeExceeded = -1006,
 
         /// <summary>
+        /// -1021 When deleting simple content that has attribute, the attribute value should not specified.
+        /// </summary>
+        ErrorDeletingSimpleContent = -1021,
+
+        /// <summary>
         /// -1051 Number of data values per row does not match number of column-identifiers (mnemonics).
         /// </summary>
         ErrorRowDataCount = -1051,
