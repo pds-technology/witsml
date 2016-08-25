@@ -413,6 +413,29 @@ namespace PDS.Witsml.Data
         }
 
         /// <summary>
+        /// Parses the nested element to the specified type.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="element">The element.</param>
+        /// <returns>The parsed object.</returns>
+        /// <exception cref="WitsmlException"></exception>
+        protected object ParseNestedElement(Type type, XElement element)
+        {
+            if (element.DescendantsAndSelf().Any(e => (!e.HasAttributes && string.IsNullOrWhiteSpace(e.Value)) || e.Attributes().Any(a => string.IsNullOrWhiteSpace(a.Value))))
+                throw new WitsmlException(ErrorCodes.EmptyNewElementsOrAttributes);
+
+            // update element name to match XSD type name
+            var xmlType = type.GetCustomAttribute<XmlTypeAttribute>();
+            var clone = new XElement(element)
+            {
+                Name = xmlType == null ? type.Name : xmlType.TypeName
+            };
+
+            return WitsmlParser.Parse(type, clone);
+        }
+
+
+        /// <summary>
         /// Handles the <see cref="string" /> value.
         /// </summary>
         /// <param name="propertyInfo">The property information.</param>
