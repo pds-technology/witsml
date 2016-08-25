@@ -23,7 +23,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
-using System.Xml.Serialization;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
 using MongoDB.Driver;
@@ -304,9 +303,12 @@ namespace PDS.Witsml.Server.Data
             var args = propertyType.GetGenericArguments();
             var childType = args.FirstOrDefault() ?? propertyType.GetElementType();
 
-            var version = ObjectTypes.GetVersion(childType);
-            var validator = _container.Resolve<IRecurringElementValidator>(new ObjectName(childType.Name, version));
-            validator?.Validate(Context.Function, childType, items, elementList);
+            if (childType != typeof (string))
+            {
+                var version = ObjectTypes.GetVersion(childType);
+                var validator = _container.Resolve<IRecurringElementValidator>(new ObjectName(childType.Name, version));
+                validator?.Validate(Context.Function, childType, items, elementList);
+            }
 
             UpdateArrayElementsWithoutUid(elementList, propertyInfo, items, childType, propertyPath);
 
