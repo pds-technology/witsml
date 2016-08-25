@@ -385,21 +385,6 @@ namespace PDS.Witsml.Server.Data
             }
         }
 
-        private object ParseNestedElement(Type type, XElement element)
-        {
-            if (element.DescendantsAndSelf().Any(e => (!e.HasAttributes && string.IsNullOrWhiteSpace(e.Value)) || e.Attributes().Any(a => string.IsNullOrWhiteSpace(a.Value))))
-                throw new WitsmlException(ErrorCodes.EmptyNewElementsOrAttributes);
-
-            // update element name to match XSD type name
-            var xmlType = type.GetCustomAttribute<XmlTypeAttribute>();
-            var clone = new XElement(element)
-            {
-                Name = xmlType == null ? type.Name : xmlType.TypeName
-            };
-
-            return WitsmlParser.Parse(type, clone);
-        }
-
         private IList CreateList(Type listType, object item)
         {
             var list = Activator.CreateInstance(listType) as IList;
