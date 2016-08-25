@@ -776,6 +776,18 @@ namespace PDS.Witsml.Data
         }
 
         /// <summary>
+        /// Determines whether the element has any attribute with non-empty value.
+        /// </summary>
+        /// <param name="element">The element.</param>
+        /// <returns>
+        ///   <c>true</c> if the element has any attribute with non-empty value; otherwise, <c>false</c>.
+        /// </returns>
+        protected bool HasAttributesWithValues(XElement element)
+        {
+            return element.Attributes().Any(a => !string.IsNullOrWhiteSpace(a.Value));
+        }
+
+        /// <summary>
         /// Determines whether the specified type has a uid property.
         /// </summary>
         /// <param name="type">The type.</param>

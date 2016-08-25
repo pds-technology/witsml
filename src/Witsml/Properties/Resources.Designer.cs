@@ -331,6 +331,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to When deleting simple content that has attribute, the attribute value should not specified..
+        /// </summary>
+        internal static string ErrorDeletingSimpleContent {
+            get {
+                return ResourceManager.GetString("ErrorDeletingSimpleContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Maximum document size exceeded.
         /// </summary>
         internal static string ErrorMaxDocumentSizeExceeded {

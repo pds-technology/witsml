@@ -134,6 +134,23 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Navigates the element.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="elementType">Type of the element.</param>
+        /// <param name="element">The element.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <exception cref="WitsmlException"></exception>
+        protected override void NavigateElementType(PropertyInfo propertyInfo, Type elementType, XElement element, string propertyPath)
+        {
+            if (Context.Function == Functions.DeleteFromStore && HasSimpleContent(elementType) && element.IsEmpty && HasAttributesWithValues(element))
+                throw new WitsmlException(ErrorCodes.ErrorDeletingSimpleContent);
+
+            base.NavigateElementType(propertyInfo, elementType, element, propertyPath);
+        }
+
+
+        /// <summary>
         /// Handles the NaN value during parse navigation by removing NaN values.
         /// </summary>
         /// <param name="propertyInfo">The property information.</param>
