@@ -20,7 +20,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
 using System.Xml.Linq;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
 
 namespace PDS.Witsml.Server.Data.Common
 {
@@ -30,7 +32,7 @@ namespace PDS.Witsml.Server.Data.Common
     /// <seealso cref="PDS.Witsml.Server.Data.Common.IRecurringElementValidator" />
     [Export141("TimestampedTimeZone", typeof(IRecurringElementValidator))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public class TimestampedTimeZone141Validator : IRecurringElementValidator
+    public class TimestampedTimeZone141Validator : DataObjectValidator<TimestampedTimeZone>, IRecurringElementValidator
     {
         /// <summary>
         /// Validates the elementList of a specified childType for the specified function.
@@ -43,10 +45,25 @@ namespace PDS.Witsml.Server.Data.Common
         /// <exception cref="System.NotImplementedException"></exception>
         public void Validate(Functions function, Type childType, IEnumerable currentItems, List<XElement> elementList)
         {
-            //if (function == Functions.UpdateInStore)
-            //{                
-            //    throw new WitsmlException(ErrorCodes.ErrorUpdatingInDataStore);
-            //}
+            if (function != Functions.UpdateInStore)
+                return;
+
+            var itemCount = (currentItems as IEnumerable<TimestampedTimeZone>)?.Count();
+            var hasItems = (itemCount != null && itemCount > 0);
+
+            for (var i = 0; i < elementList.Count; i++)
+            {
+                // We don't need to check the first one if there are no current items
+                if (i == 0 && !hasItems)
+                    continue;
+
+                var newTimestampTimeZone = ParseNestedElement(childType, elementList[i]) as TimestampedTimeZone;
+
+                if (!newTimestampTimeZone.DateTimeSpecified)
+                    throw new WitsmlException(function.GetNonConformingErrorCode(), 
+                        "The dTim attribute must be populated in the second and subsequent occurrences if the local time zone changes during acquisition.");
+
+            }
         }
     }
 }
