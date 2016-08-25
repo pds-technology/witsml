@@ -50,10 +50,11 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelSet200DataAdapter" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
         /// <param name="channelDataChunkAdapter">The channel data chunk adapter.</param>
         [ImportingConstructor]
-        public ChannelSet200DataAdapter(IDatabaseProvider databaseProvider, ChannelDataChunkAdapter channelDataChunkAdapter) : base(databaseProvider, ObjectNames.ChannelSet200, ObjectTypes.Uuid)
+        public ChannelSet200DataAdapter(IContainer container, IDatabaseProvider databaseProvider, ChannelDataChunkAdapter channelDataChunkAdapter) : base(container, databaseProvider, ObjectNames.ChannelSet200, ObjectTypes.Uuid)
         {
             _channelDataChunkAdapter = channelDataChunkAdapter;
         }
@@ -405,7 +406,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
         private void UpdateIndexRange(EtpUri uri, ChannelSet entity, Dictionary<string, Range<double?>> ranges, IEnumerable<string> mnemonics)
         {
-            var mongoUpdate = new MongoDbUpdate<ChannelSet>(GetCollection(), null);
+            var mongoUpdate = new MongoDbUpdate<ChannelSet>(Container, GetCollection(), null);
 
             var idField = MongoDbUtility.LookUpIdField(typeof(ChannelSet), "Uuid");
 

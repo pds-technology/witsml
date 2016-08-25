@@ -45,11 +45,12 @@ namespace PDS.Witsml.Server.Data.Logs
         private readonly bool _streamIndexValuePairs = WitsmlSettings.StreamIndexValuePairs;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="LogDataAdapter{T, TChild}"/> class.
+        /// Initializes a new instance of the <see cref="LogDataAdapter{T, TChild}" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
         /// <param name="dbCollectionName">Name of the database collection.</param>
-        protected LogDataAdapter(IDatabaseProvider databaseProvider, string dbCollectionName) : base(databaseProvider, dbCollectionName)
+        protected LogDataAdapter(IContainer container, IDatabaseProvider databaseProvider, string dbCollectionName) : base(container, databaseProvider, dbCollectionName)
         {
         }
 
@@ -722,7 +723,7 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             Logger.DebugFormat("Updating index range with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
 
-            var mongoUpdate = new MongoDbUpdate<T>(GetCollection(), null);
+            var mongoUpdate = new MongoDbUpdate<T>(Container, GetCollection(), null);
             var filter = MongoDbUtility.GetEntityFilter<T>(uri);
             var increasing = IsIncreasing(entity);
             UpdateDefinition<T> logHeaderUpdate = null;

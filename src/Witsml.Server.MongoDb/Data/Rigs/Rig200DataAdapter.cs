@@ -21,6 +21,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Rigs
 {
@@ -33,11 +34,12 @@ namespace PDS.Witsml.Server.Data.Rigs
     public class Rig200DataAdapter : MongoDbDataAdapter<Rig>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Rig200DataAdapter"/> class.
+        /// Initializes a new instance of the <see cref="Rig200DataAdapter" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public Rig200DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Rig200, ObjectTypes.Uuid)
+        public Rig200DataAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, ObjectNames.Rig200, ObjectTypes.Uuid)
         {
             Logger.Debug("Instance created.");
         }

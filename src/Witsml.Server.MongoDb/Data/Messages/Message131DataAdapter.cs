@@ -21,6 +21,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.Datatypes;
+using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Messages
@@ -35,11 +36,12 @@ namespace PDS.Witsml.Server.Data.Messages
     public class Message131DataAdapter : MongoDbDataAdapter<Message>, IWitsml131Configuration
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Message131DataAdapter"/> class.
+        /// Initializes a new instance of the <see cref="Message131DataAdapter" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public Message131DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Message131)
+        public Message131DataAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, ObjectNames.Message131)
         {
             Logger.Debug("Instance created.");
         }

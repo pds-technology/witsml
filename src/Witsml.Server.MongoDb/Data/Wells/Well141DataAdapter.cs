@@ -38,10 +38,10 @@ namespace PDS.Witsml.Server.Data.Wells
         /// <summary>
         /// Initializes a new instance of the <see cref="Well141DataAdapter" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
-        /// <param name="container">The container.</param>
         [ImportingConstructor]
-        public Well141DataAdapter(IDatabaseProvider databaseProvider, IContainer container) : base(databaseProvider, ObjectNames.Well141, container: container)
+        public Well141DataAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, ObjectNames.Well141)
         {
             Logger.Debug("Instance created.");
         }

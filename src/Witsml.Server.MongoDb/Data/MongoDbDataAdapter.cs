@@ -41,27 +41,19 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDbDataAdapter{T}" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
         /// <param name="dbCollectionName">The database collection name.</param>
         /// <param name="idPropertyName">The name of the identifier property.</param>
         /// <param name="namePropertyName">The name of the object name property</param>
-        /// <param name="container">The container.</param>
-        protected MongoDbDataAdapter(IDatabaseProvider databaseProvider, string dbCollectionName, string idPropertyName = ObjectTypes.Uid, string namePropertyName = ObjectTypes.NameProperty, IContainer container = null)
+        protected MongoDbDataAdapter(IContainer container, IDatabaseProvider databaseProvider, string dbCollectionName, string idPropertyName = ObjectTypes.Uid, string namePropertyName = ObjectTypes.NameProperty)
+            : base(container)
         {
             DatabaseProvider = databaseProvider;
             DbCollectionName = dbCollectionName;
             IdPropertyName = idPropertyName;
             NamePropertyName = namePropertyName;
-            Container = container;
         }
-
-        /// <summary>
-        /// Gets or sets the container.
-        /// </summary>
-        /// <value>
-        /// The container.
-        /// </value>
-        public IContainer Container { get; set; }
 
         /// <summary>
         /// Gets the database provider used for accessing MongoDb.
@@ -439,7 +431,7 @@ namespace PDS.Witsml.Server.Data
                 var updates = MongoDbUtility.CreateUpdateFields<TObject>();
                 var ignores = MongoDbUtility.CreateIgnoreFields<TObject>(GetIgnoredElementNamesForUpdate(parser));
 
-                var update = new MongoDbUpdate<TObject>(collection, parser, IdPropertyName, ignores, Container);
+                var update = new MongoDbUpdate<TObject>(Container, collection, parser, IdPropertyName, ignores);
                 update.Update(current, uri, updates);
 
                 if (transaction != null)

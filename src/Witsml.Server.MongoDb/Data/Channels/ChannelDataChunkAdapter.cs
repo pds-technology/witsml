@@ -53,11 +53,12 @@ namespace PDS.Witsml.Server.Data.Channels
         public const string BucketName = "channelData";
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ChannelDataChunkAdapter"/> class.
+        /// Initializes a new instance of the <see cref="ChannelDataChunkAdapter" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public ChannelDataChunkAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ChannelDataChunk, ObjectTypes.Uid)
+        public ChannelDataChunkAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, ChannelDataChunk, ObjectTypes.Uid)
         {
             Logger.Debug("Creating instance.");
         }

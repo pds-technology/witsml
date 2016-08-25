@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
+using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Trajectories
@@ -33,11 +34,12 @@ namespace PDS.Witsml.Server.Data.Trajectories
     public abstract class TrajectoryDataAdapter<T, TChild> : MongoDbDataAdapter<T> where T : IWellboreObject where TChild : IUniqueId
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TrajectoryDataAdapter{T, TChild}"/> class.
+        /// Initializes a new instance of the <see cref="TrajectoryDataAdapter{T, TChild}" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
         /// <param name="dbCollectionName">Name of the database collection.</param>
-        protected TrajectoryDataAdapter(IDatabaseProvider databaseProvider, string dbCollectionName) : base(databaseProvider, dbCollectionName)
+        protected TrajectoryDataAdapter(IContainer container, IDatabaseProvider databaseProvider, string dbCollectionName) : base(container, databaseProvider, dbCollectionName)
         {
             Logger.Debug("Instance created.");
         }

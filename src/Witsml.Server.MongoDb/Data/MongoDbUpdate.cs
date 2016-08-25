@@ -19,7 +19,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
@@ -41,6 +40,7 @@ namespace PDS.Witsml.Server.Data
     /// <seealso cref="PDS.Witsml.Data.DataObjectNavigator{MongoDbUpdateContext}" />
     public class MongoDbUpdate<T> : DataObjectNavigator<MongoDbUpdateContext<T>>
     {
+        private readonly IContainer _container;
         private readonly IMongoCollection<T> _collection;
         private readonly WitsmlQueryParser _parser;
         private readonly string _idPropertyName;
@@ -51,28 +51,21 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDbUpdate{T}" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="collection">The collection.</param>
         /// <param name="parser">The parser.</param>
         /// <param name="idPropertyName">Name of the identifier property.</param>
         /// <param name="ignored">The ignored.</param>
-        /// <param name="container">The container.</param>
-        public MongoDbUpdate(IMongoCollection<T> collection, WitsmlQueryParser parser, string idPropertyName = "Uid", List<string> ignored = null, IContainer container = null) : base(new MongoDbUpdateContext<T>())
+        public MongoDbUpdate(IContainer container, IMongoCollection<T> collection, WitsmlQueryParser parser, string idPropertyName = "Uid", List<string> ignored = null) : base(new MongoDbUpdateContext<T>())
         {
             Logger.Debug("Instance created.");
             Context.Ignored = ignored;
 
+            _container = container;
             _collection = collection;
             _parser = parser;
             _idPropertyName = idPropertyName;
-            Container = container;
         }
-
-        /// <summary>
-        /// Gets or sets the composition container used for dependency injection.
-        /// </summary>
-        /// <value>The composition container.</value>
-        //[Import]
-        public IContainer Container { get; set; }
 
         /// <summary>
         /// Updates the specified entity.
@@ -144,12 +137,11 @@ namespace PDS.Witsml.Server.Data
                     propertyInfo.PropertyType != typeof(Timestamp))
                 {
                     var propertyPath = GetPropertyPath(parentPath, propertyInfo.Name);
-                    var childValue = ParseNestedElement(propertyInfo.PropertyType, elementList.First());
+                    var element = elementList.First();
 
-                    var childValidator = new MongoDbUpdate<T>(_collection, _parser, _idPropertyName, Context.Ignored);
-                    childValidator.Context.ValidationOnly = true;
-                    childValidator.NavigateElementType(propertyInfo, propertyInfo.PropertyType, elementList[0], propertyPath);
+                    ValidateArrayElement(propertyInfo, propertyInfo.PropertyType, element, propertyPath);
 
+                    var childValue = ParseNestedElement(propertyInfo.PropertyType, element);
                     HandleObjectValue(propertyInfo, null, null, propertyPath, null, childValue);
                 }
                 else
@@ -313,10 +305,10 @@ namespace PDS.Witsml.Server.Data
             var childType = args.FirstOrDefault() ?? propertyType.GetElementType();
 
             var version = ObjectTypes.GetVersion(childType);
-            var validator = Container?.Resolve<IRecurringElementValidator>(new ObjectName(childType.Name, version));
+            var validator = _container.Resolve<IRecurringElementValidator>(new ObjectName(childType.Name, version));
             validator?.Validate(Context.Function, childType, items, elementList);
 
-            UpdateRecurringElementsWithoutUid(elementList, propertyInfo, items, childType, propertyPath);
+            UpdateArrayElementsWithoutUid(elementList, propertyInfo, items, childType, propertyPath);
 
             return true;
         }
@@ -434,16 +426,13 @@ namespace PDS.Witsml.Server.Data
                     if (current == null)
                     {
                         ValidateArrayElement(element, properties);
-
-                        var item = ParseNestedElement(type, element);
-                        var filter = filterBuilder.And(filters);
-
-                        var childValidator = new MongoDbUpdate<T>(_collection, _parser, _idPropertyName, Context.Ignored);
-                        childValidator.Context.ValidationOnly = true;
-                        childValidator.NavigateElementType(propertyInfo, type, element, parentPath);
+                        ValidateArrayElement(propertyInfo, type, element, parentPath);
 
                         if (Context.ValidationOnly)
                             return null;
+
+                        var item = ParseNestedElement(type, element);
+                        var filter = filterBuilder.And(filters);
 
                         var update = propertyValue == null
                             ? updateBuilder.Set(parentPath, CreateList(propertyInfo.PropertyType, item))
@@ -482,7 +471,7 @@ namespace PDS.Witsml.Server.Data
                 _collection.BulkWrite(updateList);
         }
 
-        private void UpdateRecurringElementsWithoutUid(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
+        private void UpdateArrayElementsWithoutUid(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
         {
             Logger.DebugFormat("Updating recurring elements without a uid: {0} {1}", parentPath, propertyInfo?.Name);
 
@@ -558,6 +547,13 @@ namespace PDS.Witsml.Server.Data
                     idList.Add(id);
                     return id;
                 });
+        }
+
+        private void ValidateArrayElement(PropertyInfo propertyInfo, Type type, XElement element, string propertyPath)
+        {
+            var validator = new MongoDbUpdate<T>(_container, _collection, _parser, _idPropertyName, Context.Ignored);
+            validator.Context.ValidationOnly = true;
+            validator.NavigateElementType(propertyInfo, type, element, propertyPath);
         }
 
         private void ValidateArrayElement(XElement element, IList<PropertyInfo> properties, bool isAdd = true)

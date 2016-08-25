@@ -21,6 +21,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
@@ -33,11 +34,12 @@ namespace PDS.Witsml.Server.Data.Trajectories
     public class Trajectory200DataAdapter : MongoDbDataAdapter<Trajectory>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Trajectory200DataAdapter"/> class.
+        /// Initializes a new instance of the <see cref="Trajectory200DataAdapter" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public Trajectory200DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Trajectory200, ObjectTypes.Uuid)
+        public Trajectory200DataAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, ObjectNames.Trajectory200, ObjectTypes.Uuid)
         {
             Logger.Debug("Instance created.");
         }
