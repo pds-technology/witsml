@@ -58,6 +58,8 @@ namespace PDS.Witsml.Server.Data.Logs
             _logDataAdapter = logDataAdapter;
             _wellboreDataAdapter = wellboreDataAdapter;
             _wellDataAdapter = wellDataAdapter;
+
+            Context.Ignored = new List<string> {"logData"};
         }
 
         /// <summary>
@@ -334,8 +336,64 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </returns>
         protected override IEnumerable<ValidationResult> ValidateForDelete()
         {
-            var uri = DataObject.GetUri();
-            yield return ValidateObjectExistence(uri);
+            // Validate Log uid property
+            if (string.IsNullOrWhiteSpace(DataObject.UidWell) || string.IsNullOrWhiteSpace(DataObject.UidWellbore) || string.IsNullOrWhiteSpace(DataObject.Uid))
+            {
+                yield return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] { "Uid", "UidWell", "UidWellbore" });
+            }
+            else
+            {
+                var uri = DataObject.GetUri();
+                var logCurves = DataObject.LogCurveInfo;
+                var logData = DataObject.LogData;
+
+                var current = _logDataAdapter.Get(uri);
+
+                // Validate Log does not exist
+                if (current == null)
+                {
+                    yield return
+                        new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(),
+                            new[] {"Uid", "UidWell", "UidWellbore"});
+                }
+                else
+                {
+                    if (logData != null && logData.Count > 0)
+                    {
+                        var element = Parser.Element();
+                        var logDataElements = Parser.Properties(element, "logData");
+                        if (logData.Count == 1)
+                        {
+                            var logDataElement = logDataElements.FirstOrDefault();
+                            if (logDataElement != null)
+                            {
+                                if (logDataElement.HasElements)
+                                {
+                                    if (logDataElement.Elements().Any(e => e.Name.LocalName == "mnemonicList"))
+                                        yield return
+                                            new ValidationResult(ErrorCodes.ColumnIdentifierSpecified.ToString(),
+                                                new[] { "LogData", "MnemonicList" });
+                                    else
+                                        yield return
+                                            new ValidationResult(ErrorCodes.InputTemplateNonConforming.ToString(),
+                                                new[] { "LogData" });
+                                }
+                                else
+                                {
+                                    yield return
+                                            new ValidationResult(ErrorCodes.EmptyNonRecurringElementSpecified.ToString(),
+                                                new[] { "LogData", "MnemonicList" });
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            yield return new ValidationResult(ErrorCodes.InputTemplateNonConforming.ToString(), new[] {"LogData"});
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -514,44 +572,6 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             return true;
-        }
-
-        private ValidationResult ValidateObjectExistence(EtpUri uri)
-        {
-            // Validate that a UidWell was provided
-            if (string.IsNullOrWhiteSpace(DataObject.UidWell))
-            {
-                return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] {"UidWell"});
-            }
-            // Validate that a well for the Uid exists
-            if (!_wellDataAdapter.Exists(uri.Parent.Parent))
-            {
-                return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] {"UidWell"});
-            }
-
-            // Validate that a UidWellbore was provided
-            if (string.IsNullOrWhiteSpace(DataObject.UidWellbore))
-            {
-                return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] {"UidWellbore"});
-            }
-            // Validate that a wellbore for the Uid exists
-            if (!_wellboreDataAdapter.Exists(uri.Parent))
-            {
-                return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] {"UidWell", "UidWellbore"});
-            }
-
-            // Validate that a Uid was provided
-            if (string.IsNullOrWhiteSpace(DataObject.Uid))
-            {
-                return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] {"Uid"});
-            }
-            // Validate that a log for the Uid exists
-            else if (!_wellboreDataAdapter.Exists(uri))
-            {
-                return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(),
-                    new[] {"UidWell", "UidWellbore", "Uid"});
-            }
-            return null;
         }
     }
 }
