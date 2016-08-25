@@ -565,8 +565,8 @@ namespace PDS.Witsml.Server.Data.Channels
 
                 var range = ranges[channelRange.Key];
                 if (!RangesOverlap(channelRange.Value, range, increasing))
-
                     continue;
+
                 toPartialDelete = true;
                 break;
             }
@@ -583,8 +583,8 @@ namespace PDS.Witsml.Server.Data.Channels
         private bool StartsBefore(double a, double b, bool increasing)
         {
             return increasing
-                ? a <= b
-                : a >= b;
+                ? a < b
+                : a > b;
         }
 
         private void DeleteChunkChannels(ChannelDataChunk chunk, List<string> deletedChannels)
