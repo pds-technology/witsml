@@ -939,7 +939,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var response = _devKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
 
             Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.MissingUnitForMeasureData, response.Result);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
         }
 
         [TestMethod]
