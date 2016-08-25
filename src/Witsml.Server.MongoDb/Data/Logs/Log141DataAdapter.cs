@@ -443,7 +443,7 @@ namespace PDS.Witsml.Server.Data.Logs
             else
             {               
                 var deletedChannels = GetDeletedChannels(current, uidToMnemonics);
-                var defaultDeleteRange = GetDefaultDeletRange(current, delete);
+                var defaultDeleteRange = GetDefaultDeleteRange(current, delete);
 
                 var isTimeLog = current.IsTimeLog();
                 var updateRanges = GetDeleteQueryIndexRange(delete, uidToMnemonics, current.IsIncreasing(), isTimeLog);
@@ -520,7 +520,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var elements = parser.Properties(parser.Element(), "logCurveInfo");
             foreach (var element in elements)
             {
-                if (!element.HasElements)
+                if (!element.HasElements || element.Elements().All(e => e.Name.LocalName == "mnemonic"))
                     return true;
 
                 var curveElements = element.Elements();
@@ -587,7 +587,7 @@ namespace PDS.Witsml.Server.Data.Logs
             return deleteAll;
         }
 
-        private Range<double?> GetDefaultDeletRange(Log current, Log entity)
+        private Range<double?> GetDefaultDeleteRange(Log current, Log entity)
         {
             var isTimeLog = current.IsTimeLog();
 
