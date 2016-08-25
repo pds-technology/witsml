@@ -462,7 +462,7 @@ namespace PDS.Witsml.Server
         /// </summary>
         /// <param name="well">the well</param>
         /// <returns>The first well from the response</returns>
-        public Well GetSingleWellAndAssert(Well well)
+        public Well GetOneAndAssert(Well well)
         {
             Assert.IsNotNull(well.Uid);
 
@@ -481,7 +481,7 @@ namespace PDS.Witsml.Server
         /// </summary>
         /// <param name="wellbore">the wellbore</param>
         /// <returns>The first wellbore from the response</returns>
-        public Wellbore GetSingleWellboreAndAssert(Wellbore wellbore)
+        public Wellbore GetOneAndAssert(Wellbore wellbore)
         {
             Assert.IsNotNull(wellbore.UidWell);
             Assert.IsNotNull(wellbore.Uid);
@@ -501,7 +501,7 @@ namespace PDS.Witsml.Server
         /// </summary>
         /// <param name="log">the log with UIDs for well and wellbore</param>
         /// <returns>The first log from the response</returns>
-        public Log GetSingleLogAndAssert(Log log)
+        public Log GetOneAndAssert(Log log)
         {
             Assert.IsNotNull(log.UidWell);
             Assert.IsNotNull(log.UidWellbore);
