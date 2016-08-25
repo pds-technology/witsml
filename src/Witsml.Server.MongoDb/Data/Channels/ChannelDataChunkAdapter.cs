@@ -266,7 +266,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
             var collection = GetCollection();
 
-            collection.BulkWrite(chunks
+            var writeModels = chunks
                 .Select(dc =>
                 {
                     if (dc == null)
@@ -319,10 +319,15 @@ namespace PDS.Witsml.Server.Data.Channels
 
                     DeleteMongoFiles(mongoFileFilter);
 
-                    return new DeleteOneModel<ChannelDataChunk>(chunkFilter.Eq(f => f.Uri, uri) & chunkFilter.Eq(f => f.Uid, dc.Uid));
+                    return
+                        new DeleteOneModel<ChannelDataChunk>(chunkFilter.Eq(f => f.Uri, uri) &
+                                                             chunkFilter.Eq(f => f.Uid, dc.Uid));
                 })
                 .Where(wm => wm != null)
-                .ToList());
+                .ToList();
+
+            if (writeModels.Count > 0)
+                collection.BulkWrite(writeModels);
 
             transaction?.Save();
         }
