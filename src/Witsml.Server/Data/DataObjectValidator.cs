@@ -19,12 +19,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 using Energistics.DataAccess.Validation;
+using PDS.Framework;
 using PDS.Witsml.Data;
+using PDS.Witsml.Server.Data.Common;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -43,6 +46,15 @@ namespace PDS.Witsml.Server.Data
         protected DataObjectValidator() : base(new DataObjectValidationContext<T>())
         {
         }
+
+        /// <summary>
+        /// Gets or sets the container.
+        /// </summary>
+        /// <value>
+        /// The container.
+        /// </value>
+        [Import]
+        public IContainer Container { get; set; }
 
         /// <summary>
         /// Gets the data object being validated.
@@ -196,6 +208,37 @@ namespace PDS.Witsml.Server.Data
             }
 
             base.HandleNullValue(propertyInfo, xmlObject, propertyType, propertyPath, propertyValue);
+        }
+
+        /// <summary>
+        /// Handles the special case.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="elementList">The element list.</param>
+        /// <param name="parentPath">The parent path.</param>
+        /// <param name="elementName">Name of the element.</param>
+        /// <returns>true if the special case was handled, false otherwise.</returns>
+        protected override bool HandleSpecialCase(PropertyInfo propertyInfo, List<XElement> elementList, string parentPath, string elementName)
+        {
+            if (Context.Function != Functions.AddToStore || !IsSpecialCase(propertyInfo))
+            {
+                return base.HandleSpecialCase(propertyInfo, elementList, parentPath, elementName);
+            }
+
+            // If AddToStore && IsSpecialCase
+            var propertyType = propertyInfo.PropertyType;
+
+            var args = propertyType.GetGenericArguments();
+            var childType = args.FirstOrDefault() ?? propertyType.GetElementType();
+
+            if (childType != typeof (string))
+            {
+                var version = ObjectTypes.GetVersion(childType);
+                var validator = Container.Resolve<IRecurringElementValidator>(new ObjectName(childType.Name, version));
+                validator?.Validate(Context.Function, childType, null, elementList);
+            }
+
+            return true;
         }
 
         /// <summary>

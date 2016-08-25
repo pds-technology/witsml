@@ -45,7 +45,7 @@ namespace PDS.Witsml.Server.Data.Common
         /// <exception cref="System.NotImplementedException"></exception>
         public void Validate(Functions function, Type childType, IEnumerable currentItems, List<XElement> elementList)
         {
-            if (function != Functions.UpdateInStore)
+            if (function != Functions.UpdateInStore && function != Functions.AddToStore)
                 return;
 
             var itemCount = (currentItems as IEnumerable<TimestampedTimeZone>)?.Count();
