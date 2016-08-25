@@ -322,6 +322,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to When deleting log curves, index curve/data cannot be deleted without all other log curve/data are being deleted..
+        /// </summary>
+        internal static string ErrorDeletingIndexCurve {
+            get {
+                return ResourceManager.GetString("ErrorDeletingIndexCurve", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Maximum document size exceeded.
         /// </summary>
         internal static string ErrorMaxDocumentSizeExceeded {
