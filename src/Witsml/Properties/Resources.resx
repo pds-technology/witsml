@@ -509,4 +509,8 @@
     <value>When deleting log curves, index curve/data cannot be deleted without all other log curve/data are being deleted.</value>
     <comment>-1052</comment>
   </data>
+  <data name="ErrorDeletingSimpleContent" xml:space="preserve">
+    <value>When deleting simple content that has attribute, the attribute value should not specified.</value>
+    <comment>1021</comment>
+  </data>
 </root>
