@@ -358,9 +358,39 @@ namespace PDS.Witsml.Server.Data.Logs
                 }
                 else
                 {
+                    var element = Parser.Element();
+
+                    // Validate deleting index curve
+                    if (logCurves.Count > 0 && current.LogCurveInfo.Count > 0)
+                    {
+                        var indexCurveUid = current.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == current.IndexCurve)?.Uid;
+                        var curveElements = Parser.Properties(element, "logCurveInfo").ToList();
+
+                        var indexCurveElement =
+                            curveElements.FirstOrDefault(e => e.Attribute("uid")?.Value == indexCurveUid
+                                                              || e.Element("mnemonic")?.Value == current.IndexCurve);
+
+                        if (indexCurveElement != null)
+                        {
+                            if (!indexCurveElement.HasElements)
+                            {
+                                var emptyCurveUids = curveElements.Where(e => !e.HasElements)
+                                    .Select(c => c.Attribute("uid")?.Value)
+                                    .Where(v => !string.IsNullOrWhiteSpace(v))
+                                    .ToList();
+                                if (current.LogCurveInfo.Select(l => l.Uid).Any(v => !emptyCurveUids.Contains(v)))
+                                    yield return new ValidationResult(ErrorCodes.ErrorDeletingIndexCurve.ToString(), new[] { "LogCurveInfo" });
+                            }
+                            else
+                            {
+                                
+                            }
+                        }
+                    }
+
                     if (logData != null && logData.Count > 0)
                     {
-                        var element = Parser.Element();
+                        
                         var logDataElements = Parser.Properties(element, "logData");
                         if (logData.Count == 1)
                         {
@@ -572,6 +602,20 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             return true;
+        }
+
+        private ValidationResult ValidateDeleteIndexData(List<LogCurveInfo> logCurves, List<XElement> curveElements, List<string> emptyCurveUids, bool isTimeLog)
+        {
+            var curves = logCurves.Where(l => !emptyCurveUids.Contains(l.Uid) && HasData(l, isTimeLog)).ToList();
+            return null;
+        }
+
+        private bool HasData(LogCurveInfo curve, bool isTimeLog)
+        {
+            if (isTimeLog)
+                return curve.MinDateTimeIndex.HasValue && curve.MaxDateTimeIndex.HasValue;
+
+            return curve.MinIndex != null && curve.MaxIndex != null;
         }
     }
 }
