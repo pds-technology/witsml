@@ -520,7 +520,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var elements = parser.Properties(parser.Element(), "logCurveInfo");
             foreach (var element in elements)
             {
-                if (!element.HasElements)
+                if (!element.HasElements || element.Elements().All(e => e.Name.LocalName == "mnemonic"))
                     return true;
 
                 var curveElements = element.Elements();
