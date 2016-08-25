@@ -43,8 +43,8 @@ namespace PDS.Witsml.Server.Data.Channels
             DevKit = new DevKit200Aspect(TestContext);
             Provider = DevKit.Container.Resolve<IDatabaseProvider>();
             
-            ChunkAdapter = new ChannelDataChunkAdapter(Provider);
-            ChannelSetAdapter = new ChannelSet200DataAdapter(Provider, ChunkAdapter);
+            ChunkAdapter = new ChannelDataChunkAdapter(DevKit.Container, Provider);
+            ChannelSetAdapter = new ChannelSet200DataAdapter(DevKit.Container, Provider, ChunkAdapter);
 
             var log = new Log();
             var mdChannelIndex = DevKit.LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);

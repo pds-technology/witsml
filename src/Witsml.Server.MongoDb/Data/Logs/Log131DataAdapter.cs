@@ -48,11 +48,12 @@ namespace PDS.Witsml.Server.Data.Logs
     public class Log131DataAdapter : LogDataAdapter<Log, LogCurveInfo>, IWitsml131Configuration
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Log131DataAdapter"/> class.
+        /// Initializes a new instance of the <see cref="Log131DataAdapter" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public Log131DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Log131)
+        public Log131DataAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, ObjectNames.Log131)
         {
         }
 

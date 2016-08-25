@@ -43,7 +43,7 @@ namespace PDS.Witsml.Server.Data.Wells
             _devKit = new DevKit200Aspect(TestContext);
             _provider = _devKit.Container.Resolve<IDatabaseProvider>();
 
-            _wellAdapter = new Well200DataAdapter(_provider);
+            _wellAdapter = new Well200DataAdapter(_devKit.Container, _provider);
 
             _well1 = new Well()
             {

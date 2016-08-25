@@ -57,10 +57,10 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit = new DevKit200Aspect(TestContext);
             Provider = DevKit.Container.Resolve<IDatabaseProvider>();
 
-            WellAdapter = new Well200DataAdapter(Provider);
-            WellboreAdapter = new Wellbore200DataAdapter(Provider);
-            ChannelSetAdapter = new ChannelSet200DataAdapter(Provider, new ChannelDataChunkAdapter(Provider));
-            LogAdapter = new Log200DataAdapter(Provider, ChannelSetAdapter);
+            WellAdapter = new Well200DataAdapter(DevKit.Container, Provider);
+            WellboreAdapter = new Wellbore200DataAdapter(DevKit.Container, Provider);
+            ChannelSetAdapter = new ChannelSet200DataAdapter(DevKit.Container, Provider, new ChannelDataChunkAdapter(DevKit.Container, Provider));
+            LogAdapter = new Log200DataAdapter(DevKit.Container, Provider, ChannelSetAdapter);
 
             Well1 = new Well() { Citation = DevKit.Citation("Well 01"), TimeZone = DevKit.TimeZone, Uuid = DevKit.Uid() };
             Well1.GeographicLocationWGS84 = DevKit.Location();
@@ -158,7 +158,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             LogAdapter.Add(DevKit.Parser(Log1), Log1);
 
-            var cda = new ChannelDataChunkAdapter(Provider);
+            var cda = new ChannelDataChunkAdapter(DevKit.Container, Provider);
 
             // Retrieve the data
             var indexCurve = channelSet.Channel.Select(c => c.Mnemonic).FirstOrDefault();
@@ -193,7 +193,7 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.LogGenerator.GenerateChannelData(LogDecreasing.ChannelSet, numDataValue);
             LogAdapter.Add(DevKit.Parser(LogDecreasing), LogDecreasing);
 
-            var cda = new ChannelDataChunkAdapter(Provider);
+            var cda = new ChannelDataChunkAdapter(DevKit.Container, Provider);
 
             // Retrieve the data
             var indexCurve = channelSet.Channel.Select(c => c.Mnemonic).FirstOrDefault();

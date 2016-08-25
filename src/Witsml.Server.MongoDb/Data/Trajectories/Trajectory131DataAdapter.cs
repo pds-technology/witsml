@@ -19,6 +19,7 @@
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
+using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Trajectories
@@ -33,11 +34,12 @@ namespace PDS.Witsml.Server.Data.Trajectories
     public class Trajectory131DataAdapter : TrajectoryDataAdapter<Trajectory, TrajectoryStation>, IWitsml131Configuration
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Trajectory131DataAdapter"/> class.
+        /// Initializes a new instance of the <see cref="Trajectory131DataAdapter" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public Trajectory131DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Trajectory131)
+        public Trajectory131DataAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, ObjectNames.Trajectory131)
         {
         }
 

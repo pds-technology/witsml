@@ -44,10 +44,11 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <summary>
         /// Initializes a new instance of the <see cref="Log200DataAdapter" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
         /// <param name="channelSetDataAdapter">The channel set data adapter.</param>
         [ImportingConstructor]
-        public Log200DataAdapter(IDatabaseProvider databaseProvider, IWitsmlDataAdapter<ChannelSet> channelSetDataAdapter) : base(databaseProvider, ObjectNames.Log200, ObjectTypes.Uuid)
+        public Log200DataAdapter(IContainer container, IDatabaseProvider databaseProvider, IWitsmlDataAdapter<ChannelSet> channelSetDataAdapter) : base(container, databaseProvider, ObjectNames.Log200, ObjectTypes.Uuid)
         {
             _channelSetDataAdapter = channelSetDataAdapter;
         }

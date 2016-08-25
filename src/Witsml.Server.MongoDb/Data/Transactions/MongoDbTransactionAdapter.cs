@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Energistics.Datatypes;
 using MongoDB.Driver;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Transactions
 {
@@ -35,11 +36,12 @@ namespace PDS.Witsml.Server.Data.Transactions
         private const string TransactionIdField = "TransactionId";
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MongoDbTransactionAdapter"/> class.
+        /// Initializes a new instance of the <see cref="MongoDbTransactionAdapter" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public MongoDbTransactionAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, MongoDbTransaction, ObjectTypes.Uid)
+        public MongoDbTransactionAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, MongoDbTransaction, ObjectTypes.Uid)
         {
             Logger.Debug("Creating instance.");
         }

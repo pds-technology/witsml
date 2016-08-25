@@ -48,11 +48,12 @@ namespace PDS.Witsml.Server.Data.Logs
     public class Log141DataAdapter : LogDataAdapter<Log, LogCurveInfo>, IWitsml141Configuration
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Log141DataAdapter"/> class.
+        /// Initializes a new instance of the <see cref="Log141DataAdapter" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public Log141DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Log141)
+        public Log141DataAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, ObjectNames.Log141)
         {
         }
 
@@ -582,6 +583,13 @@ namespace PDS.Witsml.Server.Data.Logs
                         StartsBefore(current.EndIndex.Value, entity.EndIndex.Value, increasing))
                         deleteAll = true;
                 }
+            }
+
+            if (deleteAll)
+            {
+                var indexCurve = current.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == current.IndexCurve);
+                if (entity.LogCurveInfo.Any(l => l.Uid != indexCurve?.Uid || l.Mnemonic.Value != current.IndexCurve))
+                    deleteAll = false;
             }
 
             return deleteAll;

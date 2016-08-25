@@ -48,8 +48,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit = new DevKit200Aspect(TestContext);
             Provider = DevKit.Container.Resolve<IDatabaseProvider>();
 
-            WellAdapter = new Well200DataAdapter(Provider);
-            WellboreAdapter = new Wellbore200DataAdapter(Provider);
+            WellAdapter = new Well200DataAdapter(DevKit.Container, Provider);
+            WellboreAdapter = new Wellbore200DataAdapter(DevKit.Container, Provider);
 
             Well1 = new Well() { Citation = DevKit.Citation("Well 01"), TimeZone = DevKit.TimeZone, Uuid = DevKit.Uid() };
             Well2 = new Well() { Citation = DevKit.Citation("Well 02"), TimeZone = DevKit.TimeZone, Uuid = DevKit.Uid() };

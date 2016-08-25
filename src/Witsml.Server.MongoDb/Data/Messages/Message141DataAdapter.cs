@@ -21,6 +21,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.Datatypes;
+using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Messages
@@ -37,9 +38,10 @@ namespace PDS.Witsml.Server.Data.Messages
         /// <summary>
         /// Initializes a new instance of the <see cref="Message141DataAdapter" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public Message141DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Message141)
+        public Message141DataAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, ObjectNames.Message141)
         {
             Logger.Debug("Instance created.");
         }

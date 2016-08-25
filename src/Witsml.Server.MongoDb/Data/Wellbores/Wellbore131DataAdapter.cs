@@ -21,6 +21,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.Datatypes;
+using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wellbores
@@ -35,11 +36,12 @@ namespace PDS.Witsml.Server.Data.Wellbores
     public class Wellbore131DataAdapter : MongoDbDataAdapter<Wellbore>, IWitsml131Configuration
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Wellbore131DataAdapter"/> class.
+        /// Initializes a new instance of the <see cref="Wellbore131DataAdapter" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public Wellbore131DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Wellbore131)
+        public Wellbore131DataAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, ObjectNames.Wellbore131)
         {
             Logger.Debug("Instance created.");
         }
