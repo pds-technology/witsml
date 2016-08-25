@@ -25,6 +25,7 @@ using Energistics.Datatypes;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
+using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Transactions;
 
@@ -44,13 +45,23 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dbCollectionName">The database collection name.</param>
         /// <param name="idPropertyName">The name of the identifier property.</param>
         /// <param name="namePropertyName">The name of the object name property</param>
-        protected MongoDbDataAdapter(IDatabaseProvider databaseProvider, string dbCollectionName, string idPropertyName = ObjectTypes.Uid, string namePropertyName = ObjectTypes.NameProperty)
+        /// <param name="container">The container.</param>
+        protected MongoDbDataAdapter(IDatabaseProvider databaseProvider, string dbCollectionName, string idPropertyName = ObjectTypes.Uid, string namePropertyName = ObjectTypes.NameProperty, IContainer container = null)
         {
             DatabaseProvider = databaseProvider;
             DbCollectionName = dbCollectionName;
             IdPropertyName = idPropertyName;
             NamePropertyName = namePropertyName;
+            Container = container;
         }
+
+        /// <summary>
+        /// Gets or sets the container.
+        /// </summary>
+        /// <value>
+        /// The container.
+        /// </value>
+        public IContainer Container { get; set; }
 
         /// <summary>
         /// Gets the database provider used for accessing MongoDb.
@@ -428,7 +439,7 @@ namespace PDS.Witsml.Server.Data
                 var updates = MongoDbUtility.CreateUpdateFields<TObject>();
                 var ignores = MongoDbUtility.CreateIgnoreFields<TObject>(GetIgnoredElementNamesForUpdate(parser));
 
-                var update = new MongoDbUpdate<TObject>(collection, parser, IdPropertyName, ignores);
+                var update = new MongoDbUpdate<TObject>(collection, parser, IdPropertyName, ignores, Container);
                 update.Update(current, uri, updates);
 
                 if (transaction != null)

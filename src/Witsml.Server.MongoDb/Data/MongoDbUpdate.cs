@@ -19,6 +19,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
@@ -29,6 +30,7 @@ using Energistics.Datatypes;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data;
+using PDS.Witsml.Server.Data.Common;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -47,13 +49,14 @@ namespace PDS.Witsml.Server.Data
         private T _entity;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MongoDbUpdate{T}"/> class.
+        /// Initializes a new instance of the <see cref="MongoDbUpdate{T}" /> class.
         /// </summary>
         /// <param name="collection">The collection.</param>
         /// <param name="parser">The parser.</param>
         /// <param name="idPropertyName">Name of the identifier property.</param>
         /// <param name="ignored">The ignored.</param>
-        public MongoDbUpdate(IMongoCollection<T> collection, WitsmlQueryParser parser, string idPropertyName = "Uid", List<string> ignored = null) : base(new MongoDbUpdateContext<T>())
+        /// <param name="container">The container.</param>
+        public MongoDbUpdate(IMongoCollection<T> collection, WitsmlQueryParser parser, string idPropertyName = "Uid", List<string> ignored = null, IContainer container = null) : base(new MongoDbUpdateContext<T>())
         {
             Logger.Debug("Instance created.");
             Context.Ignored = ignored;
@@ -61,7 +64,15 @@ namespace PDS.Witsml.Server.Data
             _collection = collection;
             _parser = parser;
             _idPropertyName = idPropertyName;
+            Container = container;
         }
+
+        /// <summary>
+        /// Gets or sets the composition container used for dependency injection.
+        /// </summary>
+        /// <value>The composition container.</value>
+        //[Import]
+        public IContainer Container { get; set; }
 
         /// <summary>
         /// Updates the specified entity.
@@ -289,24 +300,25 @@ namespace PDS.Witsml.Server.Data
         /// <returns>true if the special case was handled, false otherwise</returns>
         protected override bool HandleSpecialCase(PropertyInfo propertyInfo, List<XElement> elementList, string parentPath, string elementName)
         {
-            if (IsSpecialCase(propertyInfo))
+            if (!IsSpecialCase(propertyInfo))
             {
-                var items = Context.PropertyValues.Last() as IEnumerable;
-                var propertyPath = GetPropertyPath(parentPath, propertyInfo.Name);
-                var propertyType = propertyInfo.PropertyType;
-
-                if (typeof(IEnumerable).IsAssignableFrom(propertyType))
-                {
-                    var args = propertyType.GetGenericArguments();
-                    var childType = args.FirstOrDefault() ?? propertyType.GetElementType();
-
-                    UpdateRecurringElementsWithoutUid(elementList, propertyInfo, items, childType, propertyPath);
-
-                    return true;
-                }
+                return base.HandleSpecialCase(propertyInfo, elementList, parentPath, elementName);
             }
 
-            return base.HandleSpecialCase(propertyInfo, elementList, parentPath, elementName);
+            var items = Context.PropertyValues.Last() as IEnumerable;
+            var propertyPath = GetPropertyPath(parentPath, propertyInfo.Name);
+            var propertyType = propertyInfo.PropertyType;
+
+            var args = propertyType.GetGenericArguments();
+            var childType = args.FirstOrDefault() ?? propertyType.GetElementType();
+
+            var version = ObjectTypes.GetVersion(childType);
+            var validator = Container?.Resolve<IRecurringElementValidator>(new ObjectName(childType.Name, version));
+            validator?.Validate(Context.Function, childType, items, elementList);
+
+            UpdateRecurringElementsWithoutUid(elementList, propertyInfo, items, childType, propertyPath);
+
+            return true;
         }
 
         private void BuildUpdate(XElement element)

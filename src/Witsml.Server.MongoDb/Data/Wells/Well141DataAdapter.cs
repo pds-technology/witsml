@@ -21,6 +21,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.Datatypes;
+using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
@@ -35,11 +36,12 @@ namespace PDS.Witsml.Server.Data.Wells
     public class Well141DataAdapter : MongoDbDataAdapter<Well>, IWitsml141Configuration
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Well141DataAdapter"/> class.
+        /// Initializes a new instance of the <see cref="Well141DataAdapter" /> class.
         /// </summary>
         /// <param name="databaseProvider">The database provider.</param>
+        /// <param name="container">The container.</param>
         [ImportingConstructor]
-        public Well141DataAdapter(IDatabaseProvider databaseProvider) : base(databaseProvider, ObjectNames.Well141)
+        public Well141DataAdapter(IDatabaseProvider databaseProvider, IContainer container) : base(databaseProvider, ObjectNames.Well141, container: container)
         {
             Logger.Debug("Instance created.");
         }
