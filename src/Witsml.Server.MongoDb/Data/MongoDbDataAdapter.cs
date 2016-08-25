@@ -137,7 +137,7 @@ namespace PDS.Witsml.Server.Data
         {
             var uri = parser.GetUri<T>();
 
-            if (parser.IsPartial())
+            if (parser.HasElements())
             {
                 using (var transaction = DatabaseProvider.BeginTransaction(uri))
                 {

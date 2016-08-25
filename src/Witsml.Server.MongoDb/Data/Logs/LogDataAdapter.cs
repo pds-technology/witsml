@@ -182,7 +182,7 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             var uri = parser.GetUri<T>();
 
-            if (parser.IsPartial())
+            if (parser.HasElements())
             {
                 using (var transaction = DatabaseProvider.BeginTransaction(uri))
                 {
