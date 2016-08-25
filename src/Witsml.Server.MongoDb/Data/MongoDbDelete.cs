@@ -184,11 +184,12 @@ namespace PDS.Witsml.Server.Data
                 var items = Context.PropertyValues.Last() as IEnumerable;
                 var propertyPath = GetPropertyPath(parentPath, propertyInfo.Name);
 
-                if (items != null)
+                if (items != null && elementList.Any(e => string.IsNullOrWhiteSpace(e.Value)))
                 {
                     UnsetProperty(propertyInfo, propertyPath);
-                    return true;
                 }
+
+                return true;
             }
 
             return base.HandleSpecialCase(propertyInfo, elementList, parentPath, elementName);
