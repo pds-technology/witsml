@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
@@ -69,6 +70,14 @@ namespace PDS.Witsml.Data
         /// </summary>
         /// <value>The logger.</value>
         protected ILog Logger { get; }
+
+
+        /// <summary>
+        /// Gets or sets the composition container used for dependency injection.
+        /// </summary>
+        /// <value>The composition container.</value>
+        [Import]
+        public IContainer Container { get; set; }
 
         /// <summary>
         /// Creates an <see cref="XName"/> for the xmlns namespace using the specified local name.
