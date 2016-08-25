@@ -352,6 +352,23 @@ namespace PDS.Witsml
         }
 
         /// <summary>
+        /// Gets the data schema version for the specified data object type.
+        /// </summary>
+        /// <param name="type">The data object type.</param>
+        /// <returns>The data schema version.</returns>
+        public static string GetVersion(Type type)
+        {
+            if (string.IsNullOrWhiteSpace(type.Namespace)) return null;
+            var ns = type.Namespace;
+
+            return ns.StartsWith("Energistics.DataAccess.WITSML131.")
+                ? OptionsIn.DataVersion.Version131.Value
+                : ns.StartsWith("Energistics.DataAccess.WITSML200.")
+                ? OptionsIn.DataVersion.Version200.Value
+                : OptionsIn.DataVersion.Version141.Value;
+        }
+
+        /// <summary>
         /// Determines whether the object type is a growing data object type.
         /// </summary>
         /// <param name="objectType">Type of the object.</param>

@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.DataAnnotations;
@@ -537,25 +538,6 @@ namespace PDS.Witsml.Data
         }
 
         /// <summary>
-        /// Determines whether the specified property is a special case.
-        /// </summary>
-        /// <param name="propertyInfo">The property information.</param>
-        /// <returns>true if the property is a special case, false otherwise.</returns>
-        protected virtual bool IsSpecialCase(PropertyInfo propertyInfo)
-        {
-            var propertyType = propertyInfo.PropertyType;
-            var args = propertyType.GetGenericArguments();
-            var childType = args.FirstOrDefault() ?? propertyType.GetElementType();
-
-            if (childType != null && !HasUidProperty(childType))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
         /// Handles the invalid element group.
         /// </summary>
         /// <param name="element">The name of the element.</param>
@@ -821,6 +803,25 @@ namespace PDS.Witsml.Data
         protected virtual bool IsRequired(PropertyInfo propertyInfo)
         {
             return propertyInfo?.GetCustomAttribute<RequiredAttribute>() != null;
+        }
+
+        /// <summary>
+        /// Determines whether the specified property is a special case.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <returns>true if the property is a special case, false otherwise.</returns>
+        protected virtual bool IsSpecialCase(PropertyInfo propertyInfo)
+        {
+            var propertyType = propertyInfo.PropertyType;
+            var args = propertyType.GetGenericArguments();
+            var childType = args.FirstOrDefault() ?? propertyType.GetElementType();
+
+            if (typeof(IEnumerable).IsAssignableFrom(propertyType) && childType != null && !HasUidProperty(childType))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
