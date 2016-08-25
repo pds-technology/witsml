@@ -733,10 +733,28 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141Validator_GetFromStore_Error_458_Has_Mixed_Structural_Range_Indices()
+        public void Log141Validator_GetFromStore_Error_458_Mixed_Structural_Range_Indices_Allowed_When_Not_Requesting_Log_Data()
+        {
+            _log.StartIndex = new GenericMeasure();
+            _log.EndDateTimeIndex = new Timestamp();
+
+            var result = _devKit.Get<LogList, Log>(_devKit.List(_log), ObjectTypes.Log, null, optionsIn: OptionsIn.ReturnElements.Requested);
+
+            Assert.AreEqual((short)ErrorCodes.Success, result.Result);
+        }
+
+        [TestMethod]
+        public void Log141Validator_GetFromStore_Error_458_Mixed_Structural_Range_Indices_Not_Allowed_When_Requesting_Log_Data()
         {
             _log.StartIndex = new GenericMeasure(1000.0, "ft");
             _log.EndDateTimeIndex = new Timestamp();
+            _log.LogData = new List<LogData>
+            {
+                new LogData
+                {
+                    Data = new List<string>()
+                }
+            };
 
             var result = _devKit.Get<LogList, Log>(_devKit.List(_log), ObjectTypes.Log, null, optionsIn: OptionsIn.ReturnElements.Requested);
 
