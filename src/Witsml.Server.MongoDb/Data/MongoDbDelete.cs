@@ -40,19 +40,20 @@ namespace PDS.Witsml.Server.Data
         private readonly IMongoCollection<T> _collection;
         private readonly WitsmlQueryParser _parser;
         private readonly string _idPropertyName;
+        private readonly Dictionary<int, List<UpdateOneModel<T>>> _pullUpdates;
 
         private FilterDefinition<T> _entityFilter;
         private T _entity;
-        private Dictionary<int, List<UpdateOneModel<T>>> _pullUpdates;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MongoDbDelete{T}"/> class.
+        /// Initializes a new instance of the <see cref="MongoDbDelete{T}" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="collection">The collection.</param>
         /// <param name="parser">The parser.</param>
         /// <param name="idPropertyName">Name of the identifier property.</param>
         /// <param name="ignored">The ignored.</param>
-        public MongoDbDelete(IMongoCollection<T> collection, WitsmlQueryParser parser, string idPropertyName = "Uid", List<string> ignored = null) : base(new MongoDbDeleteContext<T>())
+        public MongoDbDelete(IContainer container, IMongoCollection<T> collection, WitsmlQueryParser parser, string idPropertyName = "Uid", List<string> ignored = null) : base(container, new MongoDbDeleteContext<T>())
         {
             Logger.Debug("Instance created.");
             Context.Ignored = ignored;

@@ -23,6 +23,7 @@ using System.Reflection;
 using System.Xml.Linq;
 using Energistics.DataAccess;
 using MongoDB.Driver;
+using PDS.Framework;
 using PDS.Witsml.Data;
 
 namespace PDS.Witsml.Server.Data
@@ -39,11 +40,12 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDbQuery{T}" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="collection">The Mongo database collection.</param>
         /// <param name="parser">The parser.</param>
         /// <param name="fields">The fields of the data object to be selected.</param>
         /// <param name="ignored">The fields of the data object to be ignored.</param>
-        public MongoDbQuery(IMongoCollection<T> collection, WitsmlQueryParser parser, List<string> fields, List<string> ignored = null) : base(new MongoDbQueryContext<T>())
+        public MongoDbQuery(IContainer container, IMongoCollection<T> collection, WitsmlQueryParser parser, List<string> fields, List<string> ignored = null) : base(container, new MongoDbQueryContext<T>())
         {
             Context.Fields = fields;
             Context.Ignored = ignored;

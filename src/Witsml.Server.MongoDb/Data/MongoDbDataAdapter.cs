@@ -348,7 +348,7 @@ namespace PDS.Witsml.Server.Data
                 var ignored = GetIgnoredElementNamesForQuery(parser);
 
                 Logger.DebugFormat("Querying {0} MongoDb collection.", DbCollectionName);
-                var query = new MongoDbQuery<T>(GetCollection(), parser, fields, ignored);
+                var query = new MongoDbQuery<T>(Container, GetCollection(), parser, fields, ignored);
                 return query.Execute();
             }
             catch (MongoException ex)
@@ -527,7 +527,7 @@ namespace PDS.Witsml.Server.Data
                 var updates = MongoDbUtility.CreateUpdateFields<TObject>();
                 var ignores = MongoDbUtility.CreateIgnoreFields<TObject>(GetIgnoredElementNamesForUpdate(parser));
 
-                var partialDelete = new MongoDbDelete<TObject>(collection, parser, IdPropertyName, ignores);
+                var partialDelete = new MongoDbDelete<TObject>(Container, collection, parser, IdPropertyName, ignores);
                 partialDelete.PartialDelete(current, uri, updates);
 
                 if (transaction != null)
