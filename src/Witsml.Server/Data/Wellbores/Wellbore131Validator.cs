@@ -19,8 +19,11 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using Energistics.DataAccess.WITSML131;
+using Energistics.Datatypes;
 using PDS.Framework;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
@@ -34,6 +37,13 @@ namespace PDS.Witsml.Server.Data.Wellbores
     {
         private readonly IWitsmlDataAdapter<Wellbore> _wellboreDataAdapter;
         private readonly IWitsmlDataAdapter<Well> _wellDataAdapter;
+
+        /// <summary>
+        /// Gets or sets the collection of <see cref="IWitsml131Configuration"/> providers.
+        /// </summary>
+        /// <value>The collection of providers.</value>
+        [ImportMany]
+        public IEnumerable<IWitsml131Configuration> Providers { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Wellbore131Validator" /> class.
@@ -88,7 +98,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// <returns>A collection of validation results.</returns>
         protected override IEnumerable<ValidationResult> ValidateForUpdate()
         {
-            return ValidateObjectExistence();
+            var uri = DataObject.GetUri();
+            yield return ValidateObjectExistence(uri);
         }
 
         /// <summary>
@@ -97,23 +108,54 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// <returns>A collection of validation results.</returns>
         protected override IEnumerable<ValidationResult> ValidateForDelete()
         {
-            return ValidateObjectExistence();
+            var uri = DataObject.GetUri();
+            var cascadeDeleteOff = OptionsIn.CascadedDelete.False.Value.ToLower();
+            var parserCascadedDelete = Parser.CascadedDelete().ToString().ToLower();
+
+            if (!Parser.HasElements() && cascadeDeleteOff.Equals(parserCascadedDelete))
+            {
+                yield return ValidateObjectExistence(uri);
+
+                // Validate that there are no child data-objects if cascading deletes are not invoked.
+                foreach (var dataAdapter in Providers.Cast<IWitsmlDataAdapter>())
+                {
+                    if (dataAdapter.DataObjectType == typeof(Well) || dataAdapter.DataObjectType == typeof(Wellbore))
+                        continue;
+
+                    if (dataAdapter.Any(uri))
+                        yield return new ValidationResult(ErrorCodes.NotBottomLevelDataObject.ToString());
+                }
+            }
+            else
+            {
+                yield return ValidateObjectExistence(uri);
+            }
         }
 
-        private IEnumerable<ValidationResult> ValidateObjectExistence()
+        private ValidationResult ValidateObjectExistence(EtpUri uri)
         {
-            var uri = DataObject.GetUri();
+            // Validate that a Uid was provided
+            if (string.IsNullOrWhiteSpace(DataObject.UidWell))
+            {
+                return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] { "UidWell" });
+            }
+            // Validate that a well for the Uid exists
+            else if (!_wellDataAdapter.Exists(uri.Parent))
+            {
+                return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] { "UidWell" });
+            }
 
             // Validate that a Uid was provided
             if (string.IsNullOrWhiteSpace(DataObject.Uid))
             {
-                yield return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] {"Uid"});
+                return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] {"Uid"});
             }
             // Validate that a wellbore for the Uid exists
             else if (!_wellboreDataAdapter.Exists(uri))
             {
-                yield return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] {"UidWell", "Uid"});
+                return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] {"UidWell", "Uid"});
             }
+            return null;
         }
     }
 }

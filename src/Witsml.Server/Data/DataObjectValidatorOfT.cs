@@ -116,6 +116,22 @@ namespace PDS.Witsml.Server.Data
         /// <returns>A collection of validation results.</returns>
         protected override IEnumerable<ValidationResult> ValidateForUpdate()
         {
+            return ValidateObjectExistance();
+        }
+
+        /// <summary>
+        /// Validates the data object while executing DeleteFromStore.
+        /// </summary>
+        /// <returns>
+        /// A collection of validation results.
+        /// </returns>
+        protected override IEnumerable<ValidationResult> ValidateForDelete()
+        {
+            return ValidateObjectExistance();
+        }
+
+        private IEnumerable<ValidationResult> ValidateObjectExistance()
+        {
             var uri = DataObject.GetUri();
 
             // Validate uid properties
@@ -123,12 +139,13 @@ namespace PDS.Witsml.Server.Data
                 string.IsNullOrWhiteSpace(DataObject.UidWellbore) ||
                 string.IsNullOrWhiteSpace(DataObject.Uid))
             {
-                yield return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] { "Uid", "UidWell", "UidWellbore" });
+                yield return
+                    new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] {"Uid", "UidWell", "UidWellbore"});
             }
             // Validate UID exists
             else if (!DataAdapter.Exists(uri))
             {
-                yield return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] { "UidWell", "Uid" });
+                yield return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] {"UidWell", "Uid"});
             }
         }
     }
