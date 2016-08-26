@@ -485,12 +485,6 @@ namespace PDS.Witsml.Server.Data
                         item = element.Value;
                     }
 
-                    var filter = filterBuilder.And(filters);
-
-                    //var childValidator = new MongoDbUpdate<T>(_collection, _parser, _idPropertyName, Context.Ignored);
-                    //childValidator.Context.ValidationOnly = true;
-                    //childValidator.NavigateElementType(propertyInfo, type, element, parentPath);
-
                     if (Context.ValidationOnly)
                         return null;
 
@@ -498,6 +492,7 @@ namespace PDS.Witsml.Server.Data
                         ? updateBuilder.Set(parentPath, CreateList(propertyInfo.PropertyType, item))
                         : updateBuilder.Push(parentPath, item);
 
+                    var filter = filterBuilder.And(filters);
                     return new UpdateOneModel<T>(filter, update);
                 })
                 .Where(x => x != null)
