@@ -371,6 +371,45 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
+        public void Log141DataAdapter_DeleteFromStore_Can_Delete_All_Log_Data_By_Index_Curve_With_Range()
+        {
+            AddParents();
+
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            var logData = _log.LogData.First();
+            logData.Data.Add("13,13.1,13.2");
+            logData.Data.Add("14,14.1,14.2");
+            logData.Data.Add("15,15.1,15.2");
+
+            _devKit.AddAndAssert(_log);
+
+            var indexCurve = _log.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == _log.IndexCurve);
+            Assert.IsNotNull(indexCurve);
+
+            var result = _devKit.GetOneAndAssert(_log);
+            var resultLogData = result.LogData.First();
+            Assert.IsNotNull(resultLogData);
+            Assert.AreEqual(_log.LogCurveInfo.Count, result.LogCurveInfo.Count);
+
+            var delete = "<logCurveInfo>" + Environment.NewLine +
+                "<mnemonic>" + indexCurve.Mnemonic.Value + "</mnemonic>" + Environment.NewLine +
+                "<minIndex uom=\"" + indexCurve.Unit + "\">10</minIndex>" + Environment.NewLine +
+                "</logCurveInfo>";
+            
+            DeleteLog(_log, delete);
+
+            result = _devKit.GetOneAndAssert(_log);
+            Assert.AreEqual(0, result.LogData.Count);
+
+            Assert.AreEqual(_log.LogCurveInfo.Count, result.LogCurveInfo.Count);
+            foreach (var curve in result.LogCurveInfo)
+            {
+                Assert.IsNull(curve.MinIndex);
+                Assert.IsNull(curve.MaxIndex);
+            }
+        }
+
+        [TestMethod]
         public void Log141DataAdapter_DeleteFromStore_Can_Delete_Full_Increasing_Log_Data_By_Index()
         {
             AddParents();
