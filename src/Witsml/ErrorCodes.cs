@@ -538,7 +538,7 @@ namespace PDS.Witsml
         ErrorMaxDocumentSizeExceeded = -1006,
 
         /// <summary>
-        /// -1021 When deleting simple content that has attribute, the attribute value should not specified.
+        /// -1021 When deleting simple content that has attribute(s), the attribute(s) should not be specified.
         /// </summary>
         ErrorDeletingSimpleContent = -1021,
 

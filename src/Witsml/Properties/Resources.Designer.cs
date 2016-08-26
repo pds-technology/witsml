@@ -331,7 +331,7 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to When deleting simple content that has attribute, the attribute value should not specified..
+        ///   Looks up a localized string similar to When deleting simple content that has attribute(s), the attribute(s) should not be specified..
         /// </summary>
         internal static string ErrorDeletingSimpleContent {
             get {
