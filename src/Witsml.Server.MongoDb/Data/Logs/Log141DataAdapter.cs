@@ -515,37 +515,6 @@ namespace PDS.Witsml.Server.Data.Logs
             return ToDeleteChannelDataByMnemonic(parser, isTimeLog);
         }
 
-        private bool ToDeleteChannelDataByMnemonic(WitsmlQueryParser parser, bool isTimeLog)
-        {
-            var fields = new List<string> {"mnemonic"};
-            if (isTimeLog)
-            {
-                fields.Add("minDateTimeIndex");
-                fields.Add("maxDateTimeIndex");
-            }
-            else
-            {
-                fields.Add("minIndex");
-                fields.Add("maxDIndex");
-            }
-            var elements = parser.Properties(parser.Element(), "logCurveInfo");
-            foreach (var element in elements)
-            {
-                if (!element.HasElements || element.Elements().All(e => e.Name.LocalName == "mnemonic"))
-                    return true;
-
-                var curveElements = element.Elements();
-                var uidAttribute = element.Attribute("uid");
-                if (uidAttribute != null)
-                    continue;
-
-                if (curveElements.All(e => fields.Contains(e.Name.LocalName)))
-                    return true;
-            }
-
-            return false;
-        }
-
         private bool DeleteAllLogData(Log current, Log entity, Dictionary<string, Range<double?>> updatedRanges)
         {
             if (current.LogCurveInfo == null || current.LogCurveInfo.Count == 0)

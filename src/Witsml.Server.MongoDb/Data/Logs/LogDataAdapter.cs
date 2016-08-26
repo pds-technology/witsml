@@ -666,6 +666,43 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
+        /// Check if to delete channel data by mnemonic.
+        /// </summary>
+        /// <param name="parser">The parser.</param>
+        /// <param name="isTimeLog">if set to <c>true</c> [is time log].</param>
+        /// <returns>True if to delete channel data by mnemonic; false otherwise.</returns>
+        protected bool ToDeleteChannelDataByMnemonic(WitsmlQueryParser parser, bool isTimeLog)
+        {
+            var fields = new List<string> { "mnemonic" };
+            if (isTimeLog)
+            {
+                fields.Add("minDateTimeIndex");
+                fields.Add("maxDateTimeIndex");
+            }
+            else
+            {
+                fields.Add("minIndex");
+                fields.Add("maxDIndex");
+            }
+            var elements = parser.Properties(parser.Element(), "logCurveInfo");
+            foreach (var element in elements)
+            {
+                if (!element.HasElements || element.Elements().All(e => e.Name.LocalName == "mnemonic"))
+                    return true;
+
+                var curveElements = element.Elements();
+                var uidAttribute = element.Attribute("uid");
+                if (uidAttribute != null)
+                    continue;
+
+                if (curveElements.All(e => fields.Contains(e.Name.LocalName)))
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Check if value a starts the before value b.
         /// </summary>
         /// <param name="a">The value a.</param>

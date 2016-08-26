@@ -401,12 +401,12 @@ namespace PDS.Witsml.Server.Data.Logs
             delete.IndexType = current.IndexType;
             delete.Direction = current.Direction;
 
-            var indexRange = currentRanges[current.IndexCurve.Value];
+            var indexCurve = current.IndexCurve.Value;
+            var indexRange = currentRanges[indexCurve];
             if (!indexRange.Start.HasValue || !ToDeleteLogData(delete, parser))
                 return;
 
-            TimeSpan? offset = null;
-            var indexCurve = current.IndexCurve.Value;
+            TimeSpan? offset = null;            
             var indexChannel = current.LogCurveInfo.FirstOrDefault(l => l.Mnemonic == indexCurve);
 
             if (DeleteAllLogData(current, delete, updatedRanges))
@@ -423,7 +423,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 var defaultDeleteRange = GetDefaultDeleteRange(current, delete);
 
                 var isTimeLog = current.IsTimeLog();
-                var updateRanges = GetDeleteQueryIndexRange(delete, uidToMnemonics, current.IsIncreasing(), isTimeLog);
+                var updateRanges = GetDeleteQueryIndexRange(delete, channels, uidToMnemonics, indexCurve, current.IsIncreasing(), isTimeLog);
                 offset = currentRanges[indexCurve].Offset;
 
                 var ranges = MergePartialDeleteRanges(deletedChannels, defaultDeleteRange, currentRanges, updateRanges, indexCurve, current.IsIncreasing());
@@ -440,7 +440,7 @@ namespace PDS.Witsml.Server.Data.Logs
             return uidToMnemonics.Where(u => !uids.Contains(u.Key)).Select(u => u.Value).ToList();
         }
 
-        private Dictionary<string, Range<double?>> GetDeleteQueryIndexRange(Log entity, Dictionary<string, string> uidToMnemonics, bool increasing, bool isTimeLog)
+        private Dictionary<string, Range<double?>> GetDeleteQueryIndexRange(Log entity, List<LogCurveInfo> channels, Dictionary<string, string> uidToMnemonics, string indexCurve, bool increasing, bool isTimeLog)
         {
             var ranges = new Dictionary<string, Range<double?>>();
 
@@ -455,6 +455,16 @@ namespace PDS.Witsml.Server.Data.Logs
 
                 var range = GetIndexRange(curve, increasing, isTimeLog);
                 ranges.Add(mnemonic, range);
+            }
+
+            if (ranges.Keys.Count == 1 && ranges.Keys.FirstOrDefault() == indexCurve)
+            {
+                var indexRange = ranges.Values.FirstOrDefault();
+                foreach (var channel in channels.Where(c => c.Mnemonic != indexCurve))
+                {
+                    var channelRange = new Range<double?>(indexRange.Start, indexRange.End, indexRange.Offset);
+                    ranges.Add(channel.Mnemonic, channelRange);
+                }
             }
 
             return ranges;
@@ -479,37 +489,6 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             return ToDeleteChannelDataByMnemonic(parser, isTimeLog);
-        }
-
-        private bool ToDeleteChannelDataByMnemonic(WitsmlQueryParser parser, bool isTimeLog)
-        {
-            var fields = new List<string> { "mnemonic" };
-            if (isTimeLog)
-            {
-                fields.Add("minDateTimeIndex");
-                fields.Add("maxDateTimeIndex");
-            }
-            else
-            {
-                fields.Add("minIndex");
-                fields.Add("maxDIndex");
-            }
-            var elements = parser.Properties(parser.Element(), "logCurveInfo");
-            foreach (var element in elements)
-            {
-                if (!element.HasElements || element.Elements().All(e => e.Name.LocalName == "mnemonic"))
-                    return true;
-
-                var curveElements = element.Elements();
-                var uidAttribute = element.Attribute("uid");
-                if (uidAttribute != null)
-                    continue;
-
-                if (curveElements.All(e => fields.Contains(e.Name.LocalName)))
-                    return true;
-            }
-
-            return false;
         }
 
         private bool DeleteAllLogData(Log current, Log entity, Dictionary<string, Range<double?>> updatedRanges)
