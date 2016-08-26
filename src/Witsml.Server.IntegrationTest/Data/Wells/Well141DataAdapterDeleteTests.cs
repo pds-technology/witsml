@@ -660,5 +660,32 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.IsNotNull(results);
             Assert.AreEqual((short)ErrorCodes.InputTemplateMultipleDataObjects, results.Result);
         }
+
+        [TestMethod]
+        public void Well141DataAdapter_DeleteFromStore_Acquisition_Success()
+        {
+            // Add well with three acquisitions
+            var response = _devKit.AddValidAcquisition(_well);
+
+            var deleteWellAcqusition = new Well()
+            {
+                Uid = response.SuppMsgOut,
+                CommonData = new CommonData
+                {
+                    AcquisitionTimeZone = new List<TimestampedTimeZone>()
+                    {
+                        new TimestampedTimeZone() {DateTimeSpecified = false},
+                    }
+                }
+            };
+
+            // Delete well acqusitions and Assert success
+            _devKit.DeleteAndAssert(deleteWellAcqusition);
+
+            var queryWell = _devKit.GetOneAndAssert(new Well() { Uid = response.SuppMsgOut });
+            Assert.IsNotNull(queryWell.CommonData);
+            Assert.IsNotNull(queryWell.CommonData.AcquisitionTimeZone);
+            Assert.AreEqual(0, queryWell.CommonData.AcquisitionTimeZone.Count);
+        }
     }
 }

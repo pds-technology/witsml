@@ -16,6 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -53,13 +55,13 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well141DataAdapter_AddToStore_Can_Add_Well()
         {
-            AddTestWell(_well);
+            _devKit.AddAndAssert(_well);
         }
 
         [TestMethod]
         public void Well141DataAdapter_AddToStore_Uid_Returned()
         {
-            var response = AddTestWell(_well);
+            var response = _devKit.AddAndAssert(_well);
 
             var uid = response.SuppMsgOut;
             Assert.AreEqual(_well.Uid, uid);
@@ -79,7 +81,7 @@ namespace PDS.Witsml.Server.Data.Wells
         {
             var nameLegal = "Well Legal Name";
             _well.NameLegal = nameLegal;
-            AddTestWell(_well);
+            _devKit.AddAndAssert(_well);
 
             var query = new Well { Uid = _well.Uid, NameLegal = string.Empty };
             var result = _devKit.Query<WellList, Well>(query);
@@ -217,14 +219,26 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.IsNull(result[0].Field);
         }
 
-        private WMLS_AddToStoreResponse AddTestWell(Well well)
+        [TestMethod]
+        public void Well141DataAdapter_AddToStore_Acquisition_Success()
         {
-            var response = _devKit.Add<WellList, Well>(well);
+            _devKit.AddValidAcquisition(_well);
+        }
 
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+        [TestMethod]
+        public void Well141DataAdapter_AddToStore_Acquisition_Error_409()
+        {
+            _well.CommonData = new CommonData
+            {
+                AcquisitionTimeZone = new List<TimestampedTimeZone>()
+                {
+                    new TimestampedTimeZone() {DateTimeSpecified = false, Value = "+01:00"},
+                    new TimestampedTimeZone() {DateTimeSpecified = true, DateTime = DateTime.UtcNow, Value = "+02:00"},
+                    new TimestampedTimeZone() {DateTimeSpecified = false, Value = "+03:00"} // This is not allowed
+                }
+            };
 
-            return response;
+            _devKit.AddAndAssert(_well, ErrorCodes.InputTemplateNonConforming);
         }
     }
 }

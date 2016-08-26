@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
@@ -348,6 +349,58 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual("TestName", datumName.NamingSystem);
             Assert.AreEqual("XX", datumName.Code);
             Assert.AreEqual("Test", datumName.Value);
+        }
+
+
+        [TestMethod]
+        public void Well141DataAdapter_UpdateInStore_Acquisition_Success()
+        {
+            // Add a valid well with three AcquisitionTimeZones
+            var response = _devKit.AddValidAcquisition(_well);
+
+            var updateWell = new Well()
+            {
+                Uid = response.SuppMsgOut,
+                CommonData = new CommonData
+                {
+                    AcquisitionTimeZone = new List<TimestampedTimeZone>()
+                    {
+                        new TimestampedTimeZone() {DateTimeSpecified = true, DateTime = DateTime.UtcNow, Value = "+03:00"}
+                    }
+                }
+            };
+
+            // Update and Assert for success
+            _devKit.UpdateAndAssert(updateWell);
+
+            // Retrieve the updated well and check that there are four acquisitions
+            var queryWell = _devKit.GetOneAndAssert(new Well() {Uid = response.SuppMsgOut});
+            Assert.IsNotNull(queryWell.CommonData);
+            Assert.IsNotNull(queryWell.CommonData.AcquisitionTimeZone);
+            Assert.AreEqual(4, queryWell.CommonData.AcquisitionTimeZone.Count);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_UpdateTinStore_Acquisition_Error_483()
+        {
+            // Add a valid well with three AcquisitionTimeZones
+            var response = _devKit.AddValidAcquisition(_well);
+
+            var updateWell = new Well()
+            {
+                Uid = response.SuppMsgOut,
+                CommonData = new CommonData
+                {
+                    AcquisitionTimeZone = new List<TimestampedTimeZone>()
+                    {
+                        // Appending a subsequent TimestampedTimeZone without a DateTime specified is an error
+                        new TimestampedTimeZone() {DateTimeSpecified = false, Value = "+03:00"}
+                    }
+                }
+            };
+
+            // Update and Assert for error
+            _devKit.UpdateAndAssert(updateWell, ErrorCodes.UpdateTemplateNonConforming);
         }
     }
 }

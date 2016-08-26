@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Energistics.DataAccess;
@@ -418,10 +419,13 @@ namespace PDS.Witsml.Server
         /// </summary>
         /// <param name="well">the well</param>
         /// <param name="errorCode">the errorCode</param>
-        public void AddAndAssert(Well well, ErrorCodes errorCode = ErrorCodes.Success)
+        public WMLS_AddToStoreResponse AddAndAssert(Well well, ErrorCodes errorCode = ErrorCodes.Success)
         {
             var response = Add<WellList, Well>(well);
+            Assert.IsNotNull(response);
             Assert.AreEqual((short)errorCode, response.Result);
+
+            return response;
         }
 
         /// <summary>
@@ -657,6 +661,21 @@ namespace PDS.Witsml.Server
             var response = AddToStore(ObjectTypes.Wellbore, xmlin, null, null);
             Assert.IsNotNull(response);
             return response;
+        }
+
+        public WMLS_AddToStoreResponse AddValidAcquisition(Well well)
+        {
+            well.CommonData = new CommonData
+            {
+                AcquisitionTimeZone = new List<TimestampedTimeZone>()
+                {
+                    new TimestampedTimeZone() {DateTimeSpecified = false, Value = "+01:00"},
+                    new TimestampedTimeZone() {DateTimeSpecified = true, DateTime = DateTime.UtcNow, Value = "+02:00"},
+                    new TimestampedTimeZone() {DateTimeSpecified = true, DateTime = DateTime.UtcNow, Value = "+03:00"}
+                }
+            };
+
+            return AddAndAssert(well);
         }
     }
 }
