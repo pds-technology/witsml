@@ -551,5 +551,10 @@ namespace PDS.Witsml
         /// -1052 When deleting log curves, index curve/data cannot be deleted without all other log curve/data are being deleted.
         /// </summary>
         ErrorDeletingIndexCurve = -1052,
+
+        /// <summary>
+        /// -1053 The maximum columnIndex value was greater than the logData array length.
+        /// </summary>
+        InvalidLogCurveInfoColumnIndex = -1053
     }
 }
