@@ -663,31 +663,21 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             Logger.Debug("Clearing log and logCurveInfo index ranges.");
 
-            if (IsTimeLog(dataObject))
-            {
-                dataObject.StartDateTimeIndex = null;
-                dataObject.StartDateTimeIndexSpecified = false;
-                dataObject.EndDateTimeIndex = null;
-                dataObject.EndDateTimeIndexSpecified = false;
+            dataObject.StartDateTimeIndex = null;
+            dataObject.StartDateTimeIndexSpecified = false;
+            dataObject.EndDateTimeIndex = null;
+            dataObject.EndDateTimeIndexSpecified = false;
+            dataObject.StartIndex = null;
+            dataObject.EndIndex = null;
 
-                foreach (var curve in dataObject.LogCurveInfo)
-                {
-                    curve.MinDateTimeIndex = null;
-                    curve.MinDateTimeIndexSpecified = false;
-                    curve.MaxDateTimeIndex = null;
-                    curve.MaxDateTimeIndexSpecified = false;
-                }
-            }
-            else
+            foreach (var curve in dataObject.LogCurveInfo)
             {
-                dataObject.StartIndex = null;
-                dataObject.EndIndex = null;
-
-                foreach (var curve in dataObject.LogCurveInfo)
-                {
-                    curve.MinIndex = null;
-                    curve.MaxIndex = null;
-                }
+                curve.MinDateTimeIndex = null;
+                curve.MinDateTimeIndexSpecified = false;
+                curve.MaxDateTimeIndex = null;
+                curve.MaxDateTimeIndexSpecified = false;
+                curve.MinIndex = null;
+                curve.MaxIndex = null;
             }
         }
 
