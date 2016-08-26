@@ -175,13 +175,10 @@ namespace PDS.Witsml.Server
         /// </summary>
         /// <param name="well">the well</param>
         /// <param name="errorCode">the errorCode</param>
-        public WMLS_AddToStoreResponse AddAndAssert(Well well, ErrorCodes errorCode = ErrorCodes.Success)
+        public void AddAndAssert(Well well, ErrorCodes errorCode = ErrorCodes.Success)
         {
             var response = Add<WellList, Well>(well);
-            Assert.IsNotNull(response);
             Assert.AreEqual((short)errorCode, response.Result);
-
-            return response;
         }
 
         /// <summary>

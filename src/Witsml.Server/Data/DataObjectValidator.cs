@@ -146,7 +146,7 @@ namespace PDS.Witsml.Server.Data
         /// <exception cref="WitsmlException"></exception>
         protected override void NavigateElementType(PropertyInfo propertyInfo, Type elementType, XElement element, string propertyPath)
         {
-            if (Context.Function == Functions.DeleteFromStore && HasSimpleContent(elementType) && !element.HasElements && HasAttributesWithValues(element))
+            if (Context.Function == Functions.DeleteFromStore && !HasUidProperty(elementType) && HasSimpleContent(elementType) && !element.HasElements && HasAttributesWithValues(element))
                 throw new WitsmlException(ErrorCodes.ErrorDeletingSimpleContent);
 
             base.NavigateElementType(propertyInfo, elementType, element, propertyPath);

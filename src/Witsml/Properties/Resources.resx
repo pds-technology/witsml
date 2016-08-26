@@ -513,4 +513,8 @@
     <value>When deleting simple content that has attribute(s), the attribute(s) should not be specified.</value>
     <comment>1021</comment>
   </data>
+  <data name="InvalidLogCurveInfoColumnIndex" xml:space="preserve">
+    <value>The maximum columnIndex value was greater than the logData array length.</value>
+    <comment>-1053</comment>
+  </data>
 </root>

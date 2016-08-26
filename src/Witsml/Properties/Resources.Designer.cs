@@ -484,6 +484,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The maximum columnIndex value was greater than the logData array length..
+        /// </summary>
+        internal static string InvalidLogCurveInfoColumnIndex {
+            get {
+                return ResourceManager.GetString("InvalidLogCurveInfoColumnIndex", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The value of the OptionsIn keyword of ‘maxReturnNodes’ MUST be greater than zero..
         /// </summary>
         internal static string InvalidMaxReturnNodes {
