@@ -214,6 +214,32 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
+        public void Log141DataAdapter_DeleteFromStore_Can_Partial_Delete_Recurring_Simple_Contents()
+        {
+            AddParents();
+
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+
+            var param = new IndexedObject {Uid = "1", Uom = "m", Value = "10"};
+            _log.LogParam = new List<IndexedObject> {param};
+
+            // Add log
+            _devKit.AddAndAssert(_log);
+
+            // Assert all testing elements are added
+            var result = _devKit.GetOneAndAssert(_log);
+            Assert.AreEqual(1, result.LogParam.Count);
+
+            // Partial delete well
+            var delete = "<logParam uid=\"" + param.Uid + "\" />";
+            DeleteLog(_log, delete);
+
+            // Assert the well elements has been deleted
+            result = _devKit.GetOneAndAssert(_log);
+            Assert.AreEqual(0, result.LogParam.Count);
+        }
+
+        [TestMethod]
         public void Log141DataAdapter_DeleteFromStore_Can_Partial_Delete_Nested_Recurring_Elements()
         {
             AddParents();
