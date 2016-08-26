@@ -447,7 +447,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 var defaultDeleteRange = GetDefaultDeleteRange(current, delete);
 
                 var isTimeLog = current.IsTimeLog();
-                var updateRanges = GetDeleteQueryIndexRange(delete, uidToMnemonics, current.IsIncreasing(), isTimeLog);
+                var updateRanges = GetDeleteQueryIndexRange(delete, channels, uidToMnemonics, indexCurve, current.IsIncreasing(), isTimeLog);
                 offset = currentRanges[indexCurve].Offset;
                 
                 var ranges = MergePartialDeleteRanges(deletedChannels, defaultDeleteRange, currentRanges, updateRanges, indexCurve, current.IsIncreasing());
@@ -464,7 +464,7 @@ namespace PDS.Witsml.Server.Data.Logs
             return uidToMnemonics.Where(u => !uids.Contains(u.Key)).Select(u => u.Value).ToList();
         }
 
-        private Dictionary<string, Range<double?>> GetDeleteQueryIndexRange(Log entity, Dictionary<string, string> uidToMnemonics, bool increasing, bool isTimeLog)
+        private Dictionary<string, Range<double?>> GetDeleteQueryIndexRange(Log entity, List<LogCurveInfo> channels, Dictionary<string, string> uidToMnemonics, string indexCurve, bool increasing, bool isTimeLog)
         {
             var ranges = new Dictionary<string, Range<double?>>();          
 
@@ -479,6 +479,16 @@ namespace PDS.Witsml.Server.Data.Logs
 
                 var range = GetIndexRange(curve, increasing, isTimeLog);
                 ranges.Add(mnemonic, range);
+            }
+
+            if (ranges.Keys.Count == 1 && ranges.Keys.FirstOrDefault() == indexCurve)
+            {
+                var indexRange = ranges.Values.FirstOrDefault();
+                foreach (var channel in channels.Where(c => c.Mnemonic.Value != indexCurve))
+                {
+                    var channelRange = new Range<double?>(indexRange.Start, indexRange.End, indexRange.Offset);
+                    ranges.Add(channel.Mnemonic.Value, channelRange);
+                }
             }
 
             return ranges;
@@ -653,31 +663,21 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             Logger.Debug("Clearing log and logCurveInfo index ranges.");
 
-            if (IsTimeLog(dataObject))
-            {
-                dataObject.StartDateTimeIndex = null;
-                dataObject.StartDateTimeIndexSpecified = false;
-                dataObject.EndDateTimeIndex = null;
-                dataObject.EndDateTimeIndexSpecified = false;
+            dataObject.StartDateTimeIndex = null;
+            dataObject.StartDateTimeIndexSpecified = false;
+            dataObject.EndDateTimeIndex = null;
+            dataObject.EndDateTimeIndexSpecified = false;
+            dataObject.StartIndex = null;
+            dataObject.EndIndex = null;
 
-                foreach (var curve in dataObject.LogCurveInfo)
-                {
-                    curve.MinDateTimeIndex = null;
-                    curve.MinDateTimeIndexSpecified = false;
-                    curve.MaxDateTimeIndex = null;
-                    curve.MaxDateTimeIndexSpecified = false;
-                }
-            }
-            else
+            foreach (var curve in dataObject.LogCurveInfo)
             {
-                dataObject.StartIndex = null;
-                dataObject.EndIndex = null;
-
-                foreach (var curve in dataObject.LogCurveInfo)
-                {
-                    curve.MinIndex = null;
-                    curve.MaxIndex = null;
-                }
+                curve.MinDateTimeIndex = null;
+                curve.MinDateTimeIndexSpecified = false;
+                curve.MaxDateTimeIndex = null;
+                curve.MaxDateTimeIndexSpecified = false;
+                curve.MinIndex = null;
+                curve.MaxIndex = null;
             }
         }
 
