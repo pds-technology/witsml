@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Energistics.DataAccess.WITSML200;
 using System.ComponentModel.Composition;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
@@ -35,12 +36,13 @@ namespace PDS.Witsml.Server.Data.Wellbores
         private readonly IWitsmlDataAdapter<Well> _wellDataAdapter;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Wellbore200Validator"/> class.
+        /// Initializes a new instance of the <see cref="Wellbore200Validator" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
         /// <param name="wellDataAdapter">The well data adapter.</param>
         [ImportingConstructor]
-        public Wellbore200Validator(IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter)
+        public Wellbore200Validator(IContainer container, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter) : base(container)
         {
             _wellboreDataAdapter = wellboreDataAdapter;
             _wellDataAdapter = wellDataAdapter;

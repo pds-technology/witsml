@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Energistics.DataAccess.WITSML200;
 using System.ComponentModel.Composition;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Channels
 {
@@ -36,9 +37,10 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelSet200Validator" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="channelSetDataAdapter">The channel set data adapter.</param>
         [ImportingConstructor]
-        public ChannelSet200Validator(IWitsmlDataAdapter<ChannelSet> channelSetDataAdapter)
+        public ChannelSet200Validator(IContainer container, IWitsmlDataAdapter<ChannelSet> channelSetDataAdapter) : base(container)
         {
             _channelSetDataAdapter = channelSetDataAdapter;
         }

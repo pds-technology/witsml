@@ -49,10 +49,11 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// <summary>
         /// Initializes a new instance of the <see cref="Wellbore141Validator" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
         /// <param name="wellDataAdapter">The well data adapter.</param>
         [ImportingConstructor]
-        public Wellbore141Validator(IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter)
+        public Wellbore141Validator(IContainer container, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter) : base(container)
         {
             _wellboreDataAdapter = wellboreDataAdapter;
             _wellDataAdapter = wellDataAdapter;

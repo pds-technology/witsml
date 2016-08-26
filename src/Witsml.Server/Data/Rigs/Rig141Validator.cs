@@ -18,6 +18,7 @@
 
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML141;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Rigs
 {
@@ -30,14 +31,15 @@ namespace PDS.Witsml.Server.Data.Rigs
     public class Rig141Validator : DataObjectValidator<Rig, Wellbore, Well>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Rig141Validator"/> class.
+        /// Initializes a new instance of the <see cref="Rig141Validator" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="rigDataAdapter">The rig data adapter.</param>
         /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
         /// <param name="wellDataAdapter">The well data adapter.</param>
         [ImportingConstructor]
-        public Rig141Validator(IWitsmlDataAdapter<Rig> rigDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter)
-            : base(rigDataAdapter, wellboreDataAdapter, wellDataAdapter)
+        public Rig141Validator(IContainer container, IWitsmlDataAdapter<Rig> rigDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter)
+            : base(container, rigDataAdapter, wellboreDataAdapter, wellDataAdapter)
         {
         }
     }

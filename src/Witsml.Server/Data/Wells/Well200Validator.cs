@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Energistics.DataAccess.WITSML200;
 using System.ComponentModel.Composition;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
@@ -34,11 +35,12 @@ namespace PDS.Witsml.Server.Data.Wells
         private readonly IWitsmlDataAdapter<Well> _wellDataAdapter;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Well200Validator"/> class.
+        /// Initializes a new instance of the <see cref="Well200Validator" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="wellDataAdapter">The well data adapter.</param>
         [ImportingConstructor]
-        public Well200Validator(IWitsmlDataAdapter<Well> wellDataAdapter)
+        public Well200Validator(IContainer container, IWitsmlDataAdapter<Well> wellDataAdapter) : base(container)
         {
             _wellDataAdapter = wellDataAdapter;
         }

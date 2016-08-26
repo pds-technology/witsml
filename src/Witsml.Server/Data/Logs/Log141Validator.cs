@@ -49,11 +49,12 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <summary>
         /// Initializes a new instance of the <see cref="Log141Validator" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="logDataAdapter">The log data adapter.</param>
         /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
         /// <param name="wellDataAdapter">The well data adapter.</param>
         [ImportingConstructor]
-        public Log141Validator(IWitsmlDataAdapter<Log> logDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter)
+        public Log141Validator(IContainer container, IWitsmlDataAdapter<Log> logDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter) : base(container)
         {
             _logDataAdapter = logDataAdapter;
             _wellboreDataAdapter = wellboreDataAdapter;

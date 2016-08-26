@@ -17,9 +17,10 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.ComponentModel.DataAnnotations;
 using Energistics.DataAccess.WITSML200;
-using System.ComponentModel.Composition;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Rigs
 {
@@ -37,10 +38,11 @@ namespace PDS.Witsml.Server.Data.Rigs
         /// <summary>
         /// Initializes a new instance of the <see cref="Rig200Validator" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="rigDataAdapter">The rig data adapter.</param>
         /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
         [ImportingConstructor]
-        public Rig200Validator(IWitsmlDataAdapter<Rig> rigDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter)
+        public Rig200Validator(IContainer container, IWitsmlDataAdapter<Rig> rigDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter) : base(container)
         {
             _rigDataAdapter = rigDataAdapter;
             _wellboreDataAdapter = wellboreDataAdapter;

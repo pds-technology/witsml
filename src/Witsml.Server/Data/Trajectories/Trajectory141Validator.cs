@@ -18,6 +18,7 @@
 
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML141;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
@@ -30,14 +31,15 @@ namespace PDS.Witsml.Server.Data.Trajectories
     public class Trajectory141Validator : DataObjectValidator<Trajectory, Wellbore, Well>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Trajectory141Validator"/> class.
+        /// Initializes a new instance of the <see cref="Trajectory141Validator" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="trajectoryDataAdapter">The trajectory data adapter.</param>
         /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
         /// <param name="wellDataAdapter">The well data adapter.</param>
         [ImportingConstructor]
-        public Trajectory141Validator(IWitsmlDataAdapter<Trajectory> trajectoryDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter)
-            : base(trajectoryDataAdapter, wellboreDataAdapter, wellDataAdapter)
+        public Trajectory141Validator(IContainer container, IWitsmlDataAdapter<Trajectory> trajectoryDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter)
+            : base(container, trajectoryDataAdapter, wellboreDataAdapter, wellDataAdapter)
         {
         }
     }

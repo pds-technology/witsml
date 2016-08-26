@@ -35,6 +35,6 @@ namespace PDS.Witsml.Server.Data.Common
         /// <param name="childType">Type of the child elements.</param>
         /// <param name="currentItems">The current items.</param>
         /// <param name="elementList">The list of all child elements being validated.</param>
-        void Validate(Functions function, Type childType, IEnumerable currentItems, List<XElement> elementList);
+        void Validate(Functions function, Type childType, IEnumerable currentItems, IList<XElement> elementList);
     }
 }

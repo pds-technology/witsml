@@ -42,7 +42,7 @@ namespace PDS.Witsml.Data
         private static readonly UnknownElementSetting _unknownElementSetting;
 
         /// <summary>
-        /// Initializes the <see cref="DataObjectNavigator{TContext}"/> class.
+        /// Initializes the <see cref="DataObjectNavigator{TContext}" /> class.
         /// </summary>
         static DataObjectNavigator()
         {
@@ -53,11 +53,18 @@ namespace PDS.Witsml.Data
         /// Initializes a new instance of the <see cref="DataObjectNavigator{TContext}"/> class.
         /// </summary>
         /// <param name="context">The context.</param>
-        protected DataObjectNavigator(TContext context)
+        /// <param name="container">The composition container.</param>
+        protected DataObjectNavigator(IContainer container, TContext context)
         {
             Logger = LogManager.GetLogger(GetType());
+            Container = container;
             Context = context;
         }
+
+        /// <summary>
+        /// Gets or sets the composition container used for dependency injection.
+        /// </summary>
+        protected IContainer Container { get; }
 
         /// <summary>
         /// Gets the context.
@@ -818,7 +825,7 @@ namespace PDS.Witsml.Data
         /// <returns><c>true</c> if the type defines a complex type; otherwise, <c>false</c>.</returns>
         protected virtual bool IsComplexType(Type type)
         {
-            return !(type == typeof(string)) && !type.IsValueType && !type.IsEnum;
+            return type != typeof(string) && !type.IsValueType && !type.IsEnum;
         }
 
         /// <summary>

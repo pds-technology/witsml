@@ -19,6 +19,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Energistics.DataAccess;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -35,12 +36,13 @@ namespace PDS.Witsml.Server.Data
         where TWell : IDataObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DataObjectValidator{TObject, TWellbore, TWell}"/> class.
+        /// Initializes a new instance of the <see cref="DataObjectValidator{TObject, TWellbore, TWell}" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="dataAdapter">The data adapter.</param>
         /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
         /// <param name="wellDataAdapter">The well data adapter.</param>
-        protected DataObjectValidator(IWitsmlDataAdapter<TObject> dataAdapter, IWitsmlDataAdapter<TWellbore> wellboreDataAdapter, IWitsmlDataAdapter<TWell> wellDataAdapter)
+        protected DataObjectValidator(IContainer container, IWitsmlDataAdapter<TObject> dataAdapter, IWitsmlDataAdapter<TWellbore> wellboreDataAdapter, IWitsmlDataAdapter<TWell> wellDataAdapter) : base(container)
         {
             DataAdapter = dataAdapter;
             WellboreDataAdapter = wellboreDataAdapter;

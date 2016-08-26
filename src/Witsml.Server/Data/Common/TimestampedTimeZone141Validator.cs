@@ -23,11 +23,12 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Common
 {
     /// <summary>
-    /// Performs validtion on recurring elements of type TimestampedTimeZone from the WITSML141 schema.
+    /// Performs validtion on recurring elements of type TimestampedTimeZone from the WITSML 1.4.1.1 schema.
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.Common.IRecurringElementValidator" />
     [Export141("TimestampedTimeZone", typeof(IRecurringElementValidator))]
@@ -35,21 +36,27 @@ namespace PDS.Witsml.Server.Data.Common
     public class TimestampedTimeZone141Validator : DataObjectValidator<TimestampedTimeZone>, IRecurringElementValidator
     {
         /// <summary>
-        /// Validates the elementList of a specified childType for the specified function.
+        /// Initializes a new instance of the <see cref="TimestampedTimeZone141Validator"/> class.
+        /// </summary>
+        /// <param name="container">The composition container.</param>
+        [ImportingConstructor]
+        public TimestampedTimeZone141Validator(IContainer container) : base(container)
+        {
+        }
+
+        /// <summary>
+        /// Validates the elementList of a specified child type for the specified function.
         /// </summary>
         /// <param name="function">The function.</param>
         /// <param name="childType">Type of the child elements.</param>
         /// <param name="currentItems">The current items.</param>
         /// <param name="elementList">The list of all child elements being validated.</param>
-        /// <exception cref="WitsmlException"></exception>
-        /// <exception cref="System.NotImplementedException"></exception>
-        public void Validate(Functions function, Type childType, IEnumerable currentItems, List<XElement> elementList)
+        public void Validate(Functions function, Type childType, IEnumerable currentItems, IList<XElement> elementList)
         {
-            if (function != Functions.UpdateInStore && function != Functions.AddToStore)
+            if (function != Functions.AddToStore && function != Functions.UpdateInStore)
                 return;
 
-            var itemCount = (currentItems as IEnumerable<TimestampedTimeZone>)?.Count();
-            var hasItems = (itemCount != null && itemCount > 0);
+            var hasItems = (currentItems as IEnumerable<TimestampedTimeZone>)?.Any() ?? false;
 
             for (var i = 0; i < elementList.Count; i++)
             {
@@ -59,10 +66,9 @@ namespace PDS.Witsml.Server.Data.Common
 
                 var newTimestampTimeZone = ParseNestedElement(childType, elementList[i]) as TimestampedTimeZone;
 
-                if (!newTimestampTimeZone.DateTimeSpecified)
+                if (newTimestampTimeZone != null && !newTimestampTimeZone.DateTimeSpecified)
                     throw new WitsmlException(function.GetNonConformingErrorCode(), 
                         "The dTim attribute must be populated in the second and subsequent occurrences if the local time zone changes during acquisition.");
-
             }
         }
     }

@@ -18,6 +18,7 @@
 
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML141;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Messages
 {
@@ -30,14 +31,15 @@ namespace PDS.Witsml.Server.Data.Messages
     public class Message141Validator : DataObjectValidator<Message, Wellbore, Well>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Message141Validator"/> class.
+        /// Initializes a new instance of the <see cref="Message141Validator" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="messageDataAdapter">The message data adapter.</param>
         /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
         /// <param name="wellDataAdapter">The well data adapter.</param>
         [ImportingConstructor]
-        public Message141Validator(IWitsmlDataAdapter<Message> messageDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter)
-            : base(messageDataAdapter, wellboreDataAdapter, wellDataAdapter)
+        public Message141Validator(IContainer container, IWitsmlDataAdapter<Message> messageDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter)
+            : base(container, messageDataAdapter, wellboreDataAdapter, wellDataAdapter)
         {
         }
     }

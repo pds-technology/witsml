@@ -19,7 +19,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
@@ -41,20 +40,12 @@ namespace PDS.Witsml.Server.Data
     public abstract class DataObjectValidator<T> : DataObjectNavigator<DataObjectValidationContext<T>>,  IDataObjectValidator<T>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DataObjectValidator{T}"/> class.
+        /// Initializes a new instance of the <see cref="DataObjectValidator{T}" /> class.
         /// </summary>
-        protected DataObjectValidator() : base(new DataObjectValidationContext<T>())
+        /// <param name="container">The composition container.</param>
+        protected DataObjectValidator(IContainer container) : base(container, new DataObjectValidationContext<T>())
         {
         }
-
-        /// <summary>
-        /// Gets or sets the container.
-        /// </summary>
-        /// <value>
-        /// The container.
-        /// </value>
-        [Import]
-        public IContainer Container { get; set; }
 
         /// <summary>
         /// Gets the data object being validated.
@@ -184,8 +175,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="propertyType">Type of the property.</param>
         /// <param name="propertyPath">The property path.</param>
         /// <param name="propertyValue">The property value.</param>
-        protected override void HandleNullValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath,
-            string propertyValue)
+        protected override void HandleNullValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
             var isRequired = IsRequired(propertyInfo);
 
@@ -231,11 +221,18 @@ namespace PDS.Witsml.Server.Data
             var args = propertyType.GetGenericArguments();
             var childType = args.FirstOrDefault() ?? propertyType.GetElementType();
 
-            if (childType != typeof (string))
+            if (IsComplexType(childType))
             {
-                var version = ObjectTypes.GetVersion(childType);
-                var validator = Container.Resolve<IRecurringElementValidator>(new ObjectName(childType.Name, version));
-                validator?.Validate(Context.Function, childType, null, elementList);
+                try
+                {
+                    var version = ObjectTypes.GetVersion(childType);
+                    var validator = Container.Resolve<IRecurringElementValidator>(new ObjectName(childType.Name, version));
+                    validator?.Validate(Context.Function, childType, null, elementList);
+                }
+                catch (ContainerException)
+                {
+                    Logger.DebugFormat("{0} not configured for type: {1}", typeof(IRecurringElementValidator).Name, childType);
+                }
             }
 
             return true;

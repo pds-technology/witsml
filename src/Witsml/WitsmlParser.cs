@@ -39,7 +39,7 @@ namespace PDS.Witsml
         /// Initializes a new instance of the <see cref="WitsmlParser"/> class.
         /// </summary>
         /// <param name="context">The context.</param>
-        private WitsmlParser(WitsmlParserContext context) : base(context)
+        private WitsmlParser(WitsmlParserContext context) : base(null, context)
         {
         }
 

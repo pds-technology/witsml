@@ -18,6 +18,7 @@
 
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML131;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -30,13 +31,14 @@ namespace PDS.Witsml.Server.Data.Logs
     public class Log131Validator : DataObjectValidator<Log>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Log131Validator"/> class.
+        /// Initializes a new instance of the <see cref="Log131Validator" /> class.
         /// </summary>
+        /// <param name="container">The composition container.</param>
         /// <param name="logDataAdapter">The log data adapter.</param>
         /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
         /// <param name="wellDataAdapter">The well data adapter.</param>
         [ImportingConstructor]
-        public Log131Validator(IWitsmlDataAdapter<Log> logDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter)
+        public Log131Validator(IContainer container, IWitsmlDataAdapter<Log> logDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter) : base(container)
         {        
         }
     }
