@@ -29,6 +29,12 @@ namespace PDS.Witsml.Server
 {
     public class DevKit131Aspect : DevKitAspect
     {
+        public static readonly string BasicDeleteLogXmlTemplate = "<logs xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\">" + Environment.NewLine +
+                          "   <log uid=\"{0}\" uidWell=\"{1}\" uidWellbore=\"{2}\">" + Environment.NewLine +
+                          "{3}" +
+                          "   </log>" + Environment.NewLine +
+                          "</logs>";
+
         public DevKit131Aspect(TestContext context, string url = null) : base(url, WMLSVersion.WITSML131, context)
         {
             LogGenerator = new Log131Generator();
@@ -162,6 +168,113 @@ namespace PDS.Witsml.Server
                 UidWellbore = uidWellbore,
                 NameWellbore = nameWellbore,
             };
+        }
+
+        /// <summary>
+        /// Adds well object and test the return code
+        /// </summary>
+        /// <param name="well">the well</param>
+        /// <param name="errorCode">the errorCode</param>
+        public WMLS_AddToStoreResponse AddAndAssert(Well well, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            var response = Add<WellList, Well>(well);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)errorCode, response.Result);
+
+            return response;
+        }
+
+        /// <summary>
+        /// Adds wellbore object and test the return code
+        /// </summary>
+        /// <param name="wellbore">the wellbore</param>
+        /// <param name="errorCode">the errorCode</param>
+        public void AddAndAssert(Wellbore wellbore, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            var response = Add<WellboreList, Wellbore>(wellbore);
+            Assert.AreEqual((short)errorCode, response.Result);
+        }
+
+        /// <summary>
+        /// Adds log object and test the return code
+        /// </summary>
+        /// <param name="log">the wellbore</param>
+        /// <param name="errorCode">the errorCode</param>
+        public void AddAndAssert(Log log, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            var response = Add<LogList, Log>(log);
+            Assert.AreEqual((short)errorCode, response.Result);
+        }
+
+        /// <summary>
+        /// Adds rig object and test the return code
+        /// </summary>
+        /// <param name="rig">the rig</param>
+        /// <param name="errorCode">the errorCode</param>
+        public void AddAndAssert(Rig rig, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            var response = Add<RigList, Rig>(rig);
+            Assert.AreEqual((short)errorCode, response.Result);
+        }
+
+        /// <summary>
+        /// Does get query for single well object and test for result count equal to 1 and is not null
+        /// </summary>
+        /// <param name="well">the well</param>
+        /// <returns>The first well from the response</returns>
+        public Well GetOneAndAssert(Well well)
+        {
+            Assert.IsNotNull(well.Uid);
+
+            var query = new Well { Uid = well.Uid };
+
+            var results = Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+            var result = results.FirstOrDefault();
+            Assert.IsNotNull(result);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Does get query for single wellbore object and test for result count equal to 1 and is not null
+        /// </summary>
+        /// <param name="wellbore">the wellbore</param>
+        /// <returns>The first wellbore from the response</returns>
+        public Wellbore GetOneAndAssert(Wellbore wellbore)
+        {
+            Assert.IsNotNull(wellbore.UidWell);
+            Assert.IsNotNull(wellbore.Uid);
+
+            var query = new Wellbore { UidWell = wellbore.UidWell, Uid = wellbore.Uid };
+
+            var results = Query<WellboreList, Wellbore>(query, ObjectTypes.Wellbore, null, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+            var result = results.FirstOrDefault();
+            Assert.IsNotNull(result);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Does get query for single log object and test for result count equal to 1 and is not null
+        /// </summary>
+        /// <param name="log">the log with UIDs for well and wellbore</param>
+        /// <returns>The first log from the response</returns>
+        public Log GetOneAndAssert(Log log)
+        {
+            Assert.IsNotNull(log.UidWell);
+            Assert.IsNotNull(log.UidWellbore);
+            Assert.IsNotNull(log.Uid);
+
+            var query = CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
+            var results = Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+
+            var result = results.FirstOrDefault();
+            Assert.IsNotNull(result);
+
+            return result;
         }
     }
 }
