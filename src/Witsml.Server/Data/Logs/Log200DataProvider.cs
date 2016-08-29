@@ -16,30 +16,14 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML200;
-using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
     /// <summary>
     /// Data provider that implements support for ETP API functions for <see cref="Log"/>.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{Log}" />
-    [Export(typeof(IEtpDataProvider))]
-    [Export(typeof(IEtpDataProvider<Log>))]
-    [Export200(ObjectTypes.Log, typeof(IEtpDataProvider))]
-    [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Log200DataProvider : EtpDataProvider<Log>
+    public partial class Log200DataProvider
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Log200DataProvider"/> class.
-        /// </summary>
-        /// <param name="container">The composition container.</param>
-        /// <param name="dataAdapter">The data adapter.</param>
-        [ImportingConstructor]
-        public Log200DataProvider(IContainer container, IWitsmlDataAdapter<Log> dataAdapter) : base(container, dataAdapter)
-        {
-        }
     }
 }

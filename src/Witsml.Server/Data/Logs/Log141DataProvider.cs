@@ -16,8 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ReferenceData;
@@ -28,33 +26,14 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Log"/>.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{LogList, Log}" />
-    [Export(typeof(IEtpDataProvider))]
-    [Export(typeof(IEtpDataProvider<Log>))]
-    [Export141(ObjectTypes.Log, typeof(IEtpDataProvider))]
-    [Export141(ObjectTypes.Log, typeof(IWitsmlDataProvider))]
-    [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Log141DataProvider : WitsmlDataProvider<LogList, Log>
+    public partial class Log141DataProvider
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Log141DataProvider"/> class.
-        /// </summary>
-        /// <param name="container">The composition container.</param>
-        /// <param name="dataAdapter">The data adapter.</param>
-        [ImportingConstructor]
-        public Log141DataProvider(IContainer container, IWitsmlDataAdapter<Log> dataAdapter) : base(container, dataAdapter)
-        {
-        }
-
-        /// <summary>
-        /// Sets the default values for the specified data object.
+        /// Sets additional default values for the specified data object.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-        protected override void SetDefaultValues(Log dataObject)
+        partial void SetAdditionalDefaultValues(Log dataObject)
         {
-            dataObject.Uid = dataObject.NewUid();
-            dataObject.CommonData = dataObject.CommonData.Create();
-
             // Ensure ObjectGrowing is false during AddToStore
             dataObject.ObjectGrowing = false;
 
@@ -72,16 +51,6 @@ namespace PDS.Witsml.Server.Data.Logs
                 // Ensure index curve is first
                 dataObject.LogCurveInfo.MoveToFirst(dataObject.IndexCurve);
             }
-        }
-
-        /// <summary>
-        /// Creates an <see cref="LogList" /> instance containing the specified data objects.
-        /// </summary>
-        /// <param name="dataObjects">The data objects.</param>
-        /// <returns>The <see cref="LogList" /> instance.</returns>
-        protected override LogList CreateCollection(List<Log> dataObjects)
-        {
-            return new LogList { Log = dataObjects };
         }
     }
 }

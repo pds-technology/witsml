@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS.Witsml.Server, 2016.1
 //
 // Copyright 2016 Petrotechnical Data Systems
@@ -16,23 +16,32 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Energistics.DataAccess.WITSML131;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using Energistics.DataAccess.WITSML200;
+using PDS.Framework;
+
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Trajectory"/>.
     /// </summary>
-    public partial class Trajectory131DataProvider
+    /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{Trajectory}" />
+    [Export(typeof(IEtpDataProvider))]
+    [Export(typeof(IEtpDataProvider<Trajectory>))]
+    [Export200(ObjectTypes.Trajectory, typeof(IEtpDataProvider))]
+    [PartCreationPolicy(CreationPolicy.Shared)]
+    public partial class Trajectory200DataProvider : EtpDataProvider<Trajectory>
     {
         /// <summary>
-        /// Sets additional default values for the specified data object.
+        /// Initializes a new instance of the <see cref="Trajectory200DataProvider"/> class.
         /// </summary>
-        /// <param name="dataObject">The data object.</param>
-        partial void SetAdditionalDefaultValues(Trajectory dataObject)
+        /// <param name="container">The composition container.</param>
+        /// <param name="dataAdapter">The data adapter.</param>
+        [ImportingConstructor]
+        public Trajectory200DataProvider(IContainer container, IWitsmlDataAdapter<Trajectory> dataAdapter) : base(container, dataAdapter)
         {
-            // Ensure ObjectGrowing is false during AddToStore
-            dataObject.ObjectGrowing = false;
         }
     }
 }

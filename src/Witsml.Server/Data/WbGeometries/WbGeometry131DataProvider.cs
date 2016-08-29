@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS.Witsml.Server, 2016.1
 //
 // Copyright 2016 Petrotechnical Data Systems
@@ -16,14 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Energistics.DataAccess.WITSML200;
-
-namespace PDS.Witsml.Server.Data.Rigs
+namespace PDS.Witsml.Server.Data.WbGeometries
 {
     /// <summary>
-    /// Data provider that implements support for ETP API functions for <see cref="Rig"/>.
+    /// WbGeometry131DataProvider
     /// </summary>
-    public partial class Rig200DataProvider
+    public partial class WbGeometry131DataProvider
     {
     }
 }

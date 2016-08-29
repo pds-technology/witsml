@@ -16,52 +16,14 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML131;
-using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Rigs
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Rig"/>.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{RigList, Rig}" />
-    [Export(typeof(IEtpDataProvider))]
-    [Export(typeof(IEtpDataProvider<Rig>))]
-    [Export131(ObjectTypes.Rig, typeof(IEtpDataProvider))]
-    [Export131(ObjectTypes.Rig, typeof(IWitsmlDataProvider))]
-    [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Rig131DataProvider : WitsmlDataProvider<RigList, Rig>
+    public partial class Rig131DataProvider
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Rig131DataProvider"/> class.
-        /// </summary>
-        /// <param name="container">The composition container.</param>
-        /// <param name="dataAdapter">The data adapter.</param>
-        [ImportingConstructor]
-        public Rig131DataProvider(IContainer container, IWitsmlDataAdapter<Rig> dataAdapter) : base(container, dataAdapter)
-        {
-        }
-
-        /// <summary>
-        /// Sets the default values for the specified data object.
-        /// </summary>
-        /// <param name="dataObject">The data object.</param>
-        protected override void SetDefaultValues(Rig dataObject)
-        {
-            dataObject.Uid = dataObject.NewUid();
-            dataObject.CommonData = dataObject.CommonData.Create();
-        }
-
-        /// <summary>
-        /// Creates an <see cref="RigList" /> instance containing the specified data objects.
-        /// </summary>
-        /// <param name="dataObjects">The data objects.</param>
-        /// <returns>The <see cref="RigList" /> instance.</returns>
-        protected override RigList CreateCollection(List<Rig> dataObjects)
-        {
-            return new RigList { Rig = dataObjects };
-        }
     }
 }

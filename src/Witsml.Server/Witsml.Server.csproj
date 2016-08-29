@@ -116,6 +116,14 @@
     <Compile Include="Configuration\ResponseExtensions.cs" />
     <Compile Include="Configuration\WitsmlSettings.cs" />
     <Compile Include="Configuration\WitsmlValidator.cs" />
+    <Compile Include="Data\Attachments\Attachment141DataProvider.cs" />
+    <Compile Include="Data\Attachments\Attachment141DataProvider.generated.cs">
+      <DependentUpon>Attachment141DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Attachments\Attachment200DataProvider.cs" />
+    <Compile Include="Data\Attachments\Attachment200DataProvider.generated.cs">
+      <DependentUpon>Attachment200DataProvider.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Channels\ChannelSet200Validator.cs" />
     <Compile Include="Data\Channels\IChannelDataProvider.cs" />
     <Compile Include="Data\Channels\ChannelSet200DataProvider.cs" />
@@ -127,18 +135,51 @@
     <Compile Include="Data\DataObjectValidatorOfT.cs" />
     <Compile Include="Data\IEtpDataProviderOfT.cs" />
     <Compile Include="Data\IWitsmlDataAdapter.cs" />
+    <Compile Include="Data\Logs\Log131DataProvider.generated.cs">
+      <DependentUpon>Log131DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Logs\Log141DataProvider.generated.cs">
+      <DependentUpon>Log141DataProvider.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Logs\Log200DataProvider.cs" />
+    <Compile Include="Data\Logs\Log200DataProvider.generated.cs">
+      <DependentUpon>Log200DataProvider.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Logs\LogExtensions.cs" />
     <Compile Include="Data\Messages\Message131DataProvider.cs" />
+    <Compile Include="Data\Messages\Message131DataProvider.generated.cs">
+      <DependentUpon>Message131DataProvider.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Messages\Message131Validator.cs" />
     <Compile Include="Data\Messages\Message141DataProvider.cs" />
+    <Compile Include="Data\Messages\Message141DataProvider.generated.cs">
+      <DependentUpon>Message141DataProvider.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Messages\Message141Validator.cs" />
     <Compile Include="Data\Rigs\Rig131DataProvider.cs" />
+    <Compile Include="Data\Rigs\Rig131DataProvider.generated.cs">
+      <DependentUpon>Rig131DataProvider.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Rigs\Rig131Validator.cs" />
     <Compile Include="Data\Rigs\Rig141DataProvider.cs" />
+    <Compile Include="Data\Rigs\Rig141DataProvider.generated.cs">
+      <DependentUpon>Rig141DataProvider.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Rigs\Rig141Validator.cs" />
     <Compile Include="Data\Rigs\Rig200DataProvider.cs" />
+    <Compile Include="Data\Rigs\Rig200DataProvider.generated.cs">
+      <DependentUpon>Rig200DataProvider.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Rigs\Rig200Validator.cs" />
+    <Compile Include="Data\Trajectories\Trajectory131DataProvider.generated.cs">
+      <DependentUpon>Trajectory131DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Trajectories\Trajectory141DataProvider.generated.cs">
+      <DependentUpon>Trajectory141DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Trajectories\Trajectory200DataProvider.generated.cs">
+      <DependentUpon>Trajectory200DataProvider.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Trajectories\Trajectory200Validator.cs" />
     <Compile Include="Data\Trajectories\Trajectory141Validator.cs" />
     <Compile Include="Data\Trajectories\Trajectory131Validator.cs" />
@@ -146,7 +187,33 @@
     <Compile Include="Data\Trajectories\Trajectory131DataProvider.cs" />
     <Compile Include="Data\Trajectories\Trajectory141DataProvider.cs" />
     <Compile Include="Data\Trajectories\TrajectoryExtensions.cs" />
+    <Compile Include="Data\WbGeometries\WbGeometry131DataProvider.cs" />
+    <Compile Include="Data\WbGeometries\WbGeometry131DataProvider.generated.cs">
+      <DependentUpon>WbGeometry131DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\WbGeometries\WbGeometry141DataProvider.cs" />
+    <Compile Include="Data\WbGeometries\WbGeometry141DataProvider.generated.cs">
+      <DependentUpon>WbGeometry141DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wellbores\Wellbore131DataProvider.generated.cs">
+      <DependentUpon>Wellbore131DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wellbores\Wellbore141DataProvider.generated.cs">
+      <DependentUpon>Wellbore141DataProvider.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Wellbores\Wellbore200DataProvider.cs" />
+    <Compile Include="Data\Wellbores\Wellbore200DataProvider.generated.cs">
+      <DependentUpon>Wellbore200DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wells\Well131DataProvider.generated.cs">
+      <DependentUpon>Well131DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wells\Well141DataProvider.generated.cs">
+      <DependentUpon>Well141DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wells\Well200DataProvider.generated.cs">
+      <DependentUpon>Well200DataProvider.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\WitsmlDataProvider.cs" />
     <Compile Include="Data\EtpDataProvider.cs" />
     <Compile Include="Data\IDataObjectValidator.cs" />

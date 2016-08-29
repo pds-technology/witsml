@@ -16,52 +16,14 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML131;
-using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Messages
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Message"/>.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{MessageList, Message}" />
-    [Export(typeof(IEtpDataProvider))]
-    [Export(typeof(IEtpDataProvider<Message>))]
-    [Export131(ObjectTypes.Message, typeof(IEtpDataProvider))]
-    [Export131(ObjectTypes.Message, typeof(IWitsmlDataProvider))]
-    [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Message131DataProvider : WitsmlDataProvider<MessageList, Message>
+    public partial class Message131DataProvider
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Message131DataProvider"/> class.
-        /// </summary>
-        /// <param name="container">The composition container.</param>
-        /// <param name="dataAdapter">The data adapter.</param>
-        [ImportingConstructor]
-        public Message131DataProvider(IContainer container, IWitsmlDataAdapter<Message> dataAdapter) : base(container, dataAdapter)
-        {
-        }
-
-        /// <summary>
-        /// Sets the default values for the specified data object.
-        /// </summary>
-        /// <param name="dataObject">The data object.</param>
-        protected override void SetDefaultValues(Message dataObject)
-        {
-            dataObject.Uid = dataObject.NewUid();
-            dataObject.CommonData = dataObject.CommonData.Create();
-        }
-
-        /// <summary>
-        /// Creates an <see cref="MessageList" /> instance containing the specified data objects.
-        /// </summary>
-        /// <param name="dataObjects">The data objects.</param>
-        /// <returns>The <see cref="MessageList" /> instance.</returns>
-        protected override MessageList CreateCollection(List<Message> dataObjects)
-        {
-            return new MessageList { Message = dataObjects };
-        }
     }
 }

@@ -16,30 +16,14 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML200;
-using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
     /// <summary>
     /// Data provider that implements support for ETP API functions for <see cref="Trajectory"/>.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{Trajectory}" />
-    [Export(typeof(IEtpDataProvider))]
-    [Export(typeof(IEtpDataProvider<Trajectory>))]
-    [Export200(ObjectTypes.Trajectory, typeof(IEtpDataProvider))]
-    [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Trajectory200DataProvider : EtpDataProvider<Trajectory>
+    public partial class Trajectory200DataProvider
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Trajectory200DataProvider"/> class.
-        /// </summary>
-        /// <param name="container">The composition container.</param>
-        /// <param name="dataAdapter">The data adapter.</param>
-        [ImportingConstructor]
-        public Trajectory200DataProvider(IContainer container, IWitsmlDataAdapter<Trajectory> dataAdapter) : base(container, dataAdapter)
-        {
-        }
     }
 }

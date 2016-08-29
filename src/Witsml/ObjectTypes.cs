@@ -18,6 +18,7 @@
 
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using Energistics.DataAccess;
@@ -89,7 +90,27 @@ namespace PDS.Witsml
         /// <summary>
         /// The ObjectType identifier for a ChannelIndex.
         /// </summary>
-        public const string ChannelIndex = "channelIndex";      
+        public const string ChannelIndex = "channelIndex";
+
+        /// <summary>
+        /// The ObjectType identifier for a MudLog.
+        /// </summary>
+        public const string MudLog = "mudLog";
+
+        /// <summary>
+        /// The ObjectType identifier for a Channel.
+        /// </summary>
+        public const string Channel = "channel";
+
+        /// <summary>
+        /// The ObjectType identifier for a ChannelSet.
+        /// </summary>
+        public const string ChannelSet = "channelSet";
+
+        /// <summary>
+        /// The ObjectType identifier for a WellboreGeometry.
+        /// </summary>
+        public const string WellboreGeometry = "wellboreGeometry";
 
         private static readonly string[] GrowingObjects = { Log, MudLog, Trajectory };
 
@@ -221,6 +242,23 @@ namespace PDS.Witsml
                 objectType = $"StandAlone{WellboreGeometry.ToPascalCase()}";
 
             return typeof(IDataObject).Assembly.GetType(ns + objectType.ToPascalCase());
+        }
+
+        /// <summary>
+        /// Gets the property name for the recurring element within the container.
+        /// </summary>
+        /// <param name="objectType">The data object type.</param>
+        /// <param name="version">The version.</param>
+        /// <returns>The recurring element property name.</returns>
+        public static string GetObjectTypeListProperty(string objectType, string version)
+        {
+            var objectGroupType = GetObjectGroupType(objectType, version);
+
+            return objectGroupType?.GetProperties()
+                .Select(x => new { x.Name, Attribute = x.GetCustomAttribute<XmlElementAttribute>() })
+                .Where(x => x.Attribute != null && x.Attribute.ElementName.EqualsIgnoreCase(objectType))
+                .Select(x => x.Name)
+                .FirstOrDefault();
         }
 
         /// <summary>
