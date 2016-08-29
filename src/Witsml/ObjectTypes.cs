@@ -29,7 +29,7 @@ namespace PDS.Witsml
     /// <summary>
     /// Defines properties and methods for specifying or determining a WITSML data object's type.
     /// </summary>
-    public static class ObjectTypes
+    public static partial class ObjectTypes
     {
         /// <summary>
         /// The ObjectType identifier for an Id.
@@ -67,39 +67,9 @@ namespace PDS.Witsml
         public const string CapServer = "capServer";
 
         /// <summary>
-        /// The ObjectType identifier for a Well.
-        /// </summary>
-        public const string Well = "well";
-
-        /// <summary>
-        /// The ObjectType identifier for a Wellbore.
-        /// </summary>
-        public const string Wellbore = "wellbore";
-
-        /// <summary>
-        /// The ObjectType identifier for a Log.
-        /// </summary>
-        public const string Log = "log";
-
-        /// <summary>
         /// The ObjectType identifier for a LogCurveInfo.
         /// </summary>
         public const string LogCurveInfo = "logCurveInfo";
-
-        /// <summary>
-        /// The ObjectType identifier for a Rig.
-        /// </summary>
-        public const string Rig = "rig";
-
-        /// <summary>
-        /// The ObjectType identifier for a Message.
-        /// </summary>
-        public const string Message = "message";
-
-        /// <summary>
-        /// The ObjectType identifier for a Trajectory.
-        /// </summary>
-        public const string Trajectory = "trajectory";
 
         /// <summary>
         /// The ObjectType identifier for a TrajectoryStation.
@@ -107,39 +77,14 @@ namespace PDS.Witsml
         public const string TrajectoryStation = "trajectoryStation";
 
         /// <summary>
-        /// The ObjectType identifier for a MudLog.
-        /// </summary>
-        public const string MudLog = "mudLog";
-
-        /// <summary>
         /// The ObjectType identifier for a GeologyInterval.
         /// </summary>
         public const string GeologyInterval = "geologyInterval";
 
         /// <summary>
-        /// The ObjectType identifier for a WbGeometry.
-        /// </summary>
-        public const string WbGeometry = "wbGeometry";
-
-        /// <summary>
-        /// The ObjectType identifier for a WellboreGeometry.
-        /// </summary>
-        public const string WellboreGeometry = "wellboreGeometry";
-
-        /// <summary>
         /// The ObjectType identifier for a ChangeLog.
         /// </summary>
         public const string ChangeLog = "changeLog";
-
-        /// <summary>
-        /// The ObjectType identifier for a ChannelSet.
-        /// </summary>
-        public const string ChannelSet = "channelSet";
-
-        /// <summary>
-        /// The ObjectType identifier for a Channel.
-        /// </summary>
-        public const string Channel = "channel";
 
         /// <summary>
         /// The ObjectType identifier for a ChannelIndex.
