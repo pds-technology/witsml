@@ -30,8 +30,8 @@ namespace PDS.Witsml.Server.Data.Rigs
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{RigList, Rig}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Rig>))]
-    [Export141(ObjectTypes.Rig, typeof(IEtpDataProvider))]
-    [Export141(ObjectTypes.Rig, typeof(IWitsmlDataProvider))]
+    [Export131(ObjectTypes.Rig, typeof(IEtpDataProvider))]
+    [Export131(ObjectTypes.Rig, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Rig131DataProvider : WitsmlDataProvider<RigList, Rig>
     {

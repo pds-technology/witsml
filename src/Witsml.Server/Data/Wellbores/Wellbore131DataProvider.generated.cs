@@ -30,8 +30,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{WellboreList, Wellbore}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Wellbore>))]
-    [Export141(ObjectTypes.Wellbore, typeof(IEtpDataProvider))]
-    [Export141(ObjectTypes.Wellbore, typeof(IWitsmlDataProvider))]
+    [Export131(ObjectTypes.Wellbore, typeof(IEtpDataProvider))]
+    [Export131(ObjectTypes.Wellbore, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Wellbore131DataProvider : WitsmlDataProvider<WellboreList, Wellbore>
     {

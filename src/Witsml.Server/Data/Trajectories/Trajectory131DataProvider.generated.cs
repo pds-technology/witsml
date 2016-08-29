@@ -30,8 +30,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{TrajectoryList, Trajectory}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Trajectory>))]
-    [Export141(ObjectTypes.Trajectory, typeof(IEtpDataProvider))]
-    [Export141(ObjectTypes.Trajectory, typeof(IWitsmlDataProvider))]
+    [Export131(ObjectTypes.Trajectory, typeof(IEtpDataProvider))]
+    [Export131(ObjectTypes.Trajectory, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Trajectory131DataProvider : WitsmlDataProvider<TrajectoryList, Trajectory>
     {

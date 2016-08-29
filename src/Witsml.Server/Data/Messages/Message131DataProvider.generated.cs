@@ -30,8 +30,8 @@ namespace PDS.Witsml.Server.Data.Messages
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{MessageList, Message}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Message>))]
-    [Export141(ObjectTypes.Message, typeof(IEtpDataProvider))]
-    [Export141(ObjectTypes.Message, typeof(IWitsmlDataProvider))]
+    [Export131(ObjectTypes.Message, typeof(IEtpDataProvider))]
+    [Export131(ObjectTypes.Message, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Message131DataProvider : WitsmlDataProvider<MessageList, Message>
     {

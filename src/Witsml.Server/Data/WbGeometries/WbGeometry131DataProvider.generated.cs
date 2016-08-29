@@ -32,8 +32,8 @@ namespace PDS.Witsml.Server.Data.WbGeometries
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{WbGeometryList, WbGeometry}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<WbGeometry>))]
-    [Export141(ObjectTypes.WbGeometry, typeof(IEtpDataProvider))]
-    [Export141(ObjectTypes.WbGeometry, typeof(IWitsmlDataProvider))]
+    [Export131(ObjectTypes.WbGeometry, typeof(IEtpDataProvider))]
+    [Export131(ObjectTypes.WbGeometry, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class WbGeometry131DataProvider : WitsmlDataProvider<WbGeometryList, WbGeometry>
     {
