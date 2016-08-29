@@ -506,6 +506,145 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(18, curve2.MaxIndex.Value);
         }
 
+        [TestMethod, Description("Tests you cannot do DeleteFromStore without plural container")]
+        public void Log131DataAdapter_DeleteFromStore_Error_401_No_Plural_Root_Element()
+        {
+            var nonPluralLog = "<log xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\">" + Environment.NewLine +
+                           "<log uid=\"{0}\" uidWell=\"{1}\" uidWellbore=\"{2}\" />" + Environment.NewLine +
+                           "</log>";
+
+            var queryIn = string.Format(nonPluralLog, _log.Uid, _log.UidWell, _log.UidWellbore);
+            var response = _devKit.DeleteFromStore(ObjectTypes.Log, queryIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingPluralRootElement, response.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore while missing the object type")]
+        public void Log131DataAdapter_DeleteFromStore_Error_407_Missing_Witsml_Object_Type()
+        {
+            var response = _devKit.Delete<LogList, Log>(_log, string.Empty);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingWmlTypeIn, response.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore with empty queryIn")]
+        public void Log131DataAdapter_DeleteFromStore_Error_408_Empty_QueryIn()
+        {
+            var response = _devKit.DeleteFromStore(ObjectTypes.Log, string.Empty, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingInputTemplate, response.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore with invalid xml")]
+        public void Log131DataAdapter_DeleteFromStore_Error_409_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+
+            // Delete log with invalid element
+            const string delete = "<serviceCompany /><serviceCompany />";
+            DeleteLog(_log, delete, ErrorCodes.InputTemplateNonConforming);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore without specifying the log uid")]
+        public void Log131DataAdapter_DeleteFromStore_Error_415_Delete_Without_Specifing_UID()
+        {
+            AddParents();
+
+            _log.Uid = string.Empty;
+            DeleteLog(_log, string.Empty, ErrorCodes.DataObjectUidMissing);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore with a missing uom")]
+        public void Log131DataAdapter_DeleteFromStore_Error_417_Deleting_With_Empty_UOM_Attribute()
+        {
+            AddParents();
+
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _log.StepIncrement = new RatioGenericMeasure { Uom = "m", Value = 1.0 };
+
+            _devKit.AddAndAssert(_log);
+
+            // Delete log
+            const string delete = "<stepIncrement uom=\"\" />";
+            DeleteLog(_log, delete, ErrorCodes.EmptyUomSpecified);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore with empty logData element")]
+        public void Log131DataAdapter_DeleteFromStore_Error_419_Deleting_With_Empty_LogData_Element()
+        {
+            AddParents();
+
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), 10);
+            _devKit.AddAndAssert(_log);
+
+            // Delete log
+            const string delete = "<logData />";
+            DeleteLog(_log, delete, ErrorCodes.EmptyNonRecurringElementSpecified);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore with an empty node for a non-recurring element or attribute that is mandatory in the write schema.")]
+        public void Log131DataAdapter_DeleteFromStore_Error_420_Delete_Required_Element()
+        {
+            AddParents();
+
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.AddAndAssert(_log);
+
+            // Delete log
+            const string delete = "<name />";
+            DeleteLog(_log, delete, ErrorCodes.EmptyMandatoryNodeSpecified);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore on a log that does not exist")]
+        public void Log131DataAdapter_DeleteFromStore_Error_433_Log_Does_Not_Exist()
+        {
+            AddParents();
+
+            // Delete log
+            DeleteLog(_log, string.Empty, ErrorCodes.DataObjectNotExist);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore more than one object")]
+        public void Log131DataAdapter_DeleteFromStore_Error_444_Deleting_More_Than_One_Data_Object()
+        {
+            AddParents();
+
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.AddAndAssert(_log);
+
+            var log2 = _devKit.CreateLog(_devKit.Uid(), "log 2", _well.Uid, _well.Name, _wellbore.Uid, _wellbore.Name);
+            _devKit.InitHeader(log2, LogIndexType.measureddepth);
+            _devKit.AddAndAssert(log2);
+
+            var delete = "<logs xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\">" + Environment.NewLine +
+                          "   <log uid=\"{0}\" uidWell=\"{1}\" uidWellbore=\"{2}\" />" + Environment.NewLine +
+                          "   <log uid=\"{3}\" uidWell=\"{4}\" uidWellbore=\"{5}\" />" + Environment.NewLine +
+                          "</logs>";
+            var queryIn = string.Format(delete, _log.Uid, _log.UidWell, _log.UidWellbore, log2.Uid, log2.UidWell,
+                log2.UidWellbore);
+
+            var results = _devKit.DeleteFromStore(ObjectTypes.Log, queryIn, null, null);
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateMultipleDataObjects, results.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore of index curve unless all curve are being deleted")]
+        public void Log131DataAdapter_DeleteFromStore_Error_1052_Deleting_Index_Curve()
+        {
+            AddParents();
+
+            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), 10);
+            _devKit.AddAndAssert(_log);
+
+            // Delete log
+            var delete = $"<logCurveInfo><mnemonic>{_log.IndexCurve.Value}</mnemonic></logCurveInfo>";
+            DeleteLog(_log, delete, ErrorCodes.ErrorDeletingIndexCurve);
+        }
+
         #region Helper Methods
 
         private void AddParents()
