@@ -21,56 +21,11 @@ namespace PDS.Witsml
     /// <summary>
     /// Defines the supported list of version-qualified data object names.
     /// </summary>
-    public static class ObjectNames
+    public static partial class ObjectNames
     {
         private static readonly string Version131 = OptionsIn.DataVersion.Version131.Value;
         private static readonly string Version141 = OptionsIn.DataVersion.Version141.Value;
         private static readonly string Version200 = OptionsIn.DataVersion.Version200.Value;
-
-        /// <summary>
-        /// The ObjectName for 131 version wells.
-        /// </summary>
-        public static readonly ObjectName Well131 = new ObjectName(ObjectTypes.Well, Version131);
-
-        /// <summary>
-        /// The ObjectName for 141 version wells.
-        /// </summary>
-        public static readonly ObjectName Well141 = new ObjectName(ObjectTypes.Well, Version141);
-
-        /// <summary>
-        /// The ObjectName for 2.0 version wells.
-        /// </summary>
-        public static readonly ObjectName Well200 = new ObjectName(ObjectTypes.Well, Version200);
-
-        /// <summary>
-        /// The ObjectName for 131 version wellbores.
-        /// </summary>
-        public static readonly ObjectName Wellbore131 = new ObjectName(ObjectTypes.Wellbore, Version131);
-
-        /// <summary>
-        /// The ObjectName for 141 version wellbores.
-        /// </summary>
-        public static readonly ObjectName Wellbore141 = new ObjectName(ObjectTypes.Wellbore, Version141);
-
-        /// <summary>
-        /// The ObjectName for 2.0 version wellbores.
-        /// </summary>
-        public static readonly ObjectName Wellbore200 = new ObjectName(ObjectTypes.Wellbore, Version200);
-
-        /// <summary>
-        /// The ObjectName for 131 version logs.
-        /// </summary>
-        public static readonly ObjectName Log131 = new ObjectName(ObjectTypes.Log, Version131);
-
-        /// <summary>
-        /// The ObjectName for 141 version logs.
-        /// </summary>
-        public static readonly ObjectName Log141 = new ObjectName(ObjectTypes.Log, Version141);
-
-        /// <summary>
-        /// The ObjectName for 2.0 version logs.
-        /// </summary>
-        public static readonly ObjectName Log200 = new ObjectName(ObjectTypes.Log, Version200);
 
         /// <summary>
         /// The ObjectName for 2.0 version channel sets.
@@ -81,45 +36,5 @@ namespace PDS.Witsml
         /// The ObjectName for 2.0 version channels.
         /// </summary>
         public static readonly ObjectName Channel200 = new ObjectName(ObjectTypes.Channel, Version200);
-
-        /// <summary>
-        /// The ObjectName for 131 version trajectory.
-        /// </summary>
-        public static readonly ObjectName Trajectory131 = new ObjectName(ObjectTypes.Trajectory, Version131);
-
-        /// <summary>
-        /// The ObjectName for 141 version trajectory.
-        /// </summary>
-        public static readonly ObjectName Trajectory141 = new ObjectName(ObjectTypes.Trajectory, Version141);
-
-        /// <summary>
-        /// The ObjectName for 2.0 version trajectory.
-        /// </summary>
-        public static readonly ObjectName Trajectory200 = new ObjectName(ObjectTypes.Trajectory, Version200);
-
-        /// <summary>
-        /// The ObjectName for 131 version rigs.
-        /// </summary>
-        public static readonly ObjectName Rig131 = new ObjectName(ObjectTypes.Rig, Version131);
-
-        /// <summary>
-        /// The ObjectName for 141 version rigs.
-        /// </summary>
-        public static readonly ObjectName Rig141 = new ObjectName(ObjectTypes.Rig, Version141);
-
-        /// <summary>
-        /// The ObjectName for 2.0 version rigs.
-        /// </summary>
-        public static readonly ObjectName Rig200 = new ObjectName(ObjectTypes.Rig, Version200);
-
-        /// <summary>
-        /// The ObjectName for 131 version messages.
-        /// </summary>
-        public static readonly ObjectName Message131 = new ObjectName(ObjectTypes.Message, Version131);
-
-        /// <summary>
-        /// The ObjectName for 141 version messages.
-        /// </summary>
-        public static readonly ObjectName Message141 = new ObjectName(ObjectTypes.Message, Version141);
     }
 }

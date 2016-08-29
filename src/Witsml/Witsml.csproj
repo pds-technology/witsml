@@ -140,6 +140,9 @@
     <Compile Include="ObjectName.cs" />
     <Compile Include="Export141Attribute.cs" />
     <Compile Include="ObjectNames.cs" />
+    <Compile Include="ObjectNames.generated.cs">
+      <DependentUpon>ObjectNames.cs</DependentUpon>
+    </Compile>
     <Compile Include="ObjectTypes.cs" />
     <Compile Include="ObjectTypes.generated.cs">
       <DependentUpon>ObjectTypes.cs</DependentUpon>
