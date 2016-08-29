@@ -53,6 +53,46 @@ namespace PDS.Witsml.Server.Configuration
         public IEnumerable<IWitsml131Configuration> Providers { get; set; }
 
         /// <summary>
+        /// Performs validation for the specified function and supplied parameters.
+        /// </summary>
+        public override void ValidateRequest()
+        {
+            var context = WitsmlOperationContext.Current;
+            var request = context.Request;
+            var document = context.Document;
+
+            Logger.DebugFormat("Validating WITSML request for {0}; Function: {1}", request.ObjectType, request.Function);
+
+            base.ValidateRequest();
+
+            var optionsIn = OptionsIn.Parse(request.Options);
+
+            if (request.Function == Functions.GetFromStore)
+            {
+                ValidateKeywords(optionsIn, OptionsIn.ReturnElements.Keyword);
+                ValidateRequestObjectSelectionCapability(optionsIn, request.ObjectType, document);
+                ValidateEmptyRootElement(request.ObjectType, document);
+                ValidateReturnElements(optionsIn, request.ObjectType);
+                ValidateSelectionCriteria(document);
+            }
+            else if (request.Function == Functions.AddToStore)
+            {
+                ValidateEmptyRootElement(request.ObjectType, document);
+                ValidateSingleChildElement(request.ObjectType, document);
+            }
+            else if (request.Function == Functions.UpdateInStore)
+            {
+                ValidateEmptyRootElement(request.ObjectType, document);
+                ValidateSingleChildElement(request.ObjectType, document);
+            }
+            else if (request.Function == Functions.DeleteFromStore)
+            {
+                ValidateEmptyRootElement(request.ObjectType, document);
+                ValidateSingleChildElement(request.ObjectType, document);
+            }
+        }
+
+        /// <summary>
         /// Validates the namespace for a specific WITSML data schema version.
         /// </summary>
         /// <param name="document">The document.</param>
