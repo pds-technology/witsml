@@ -99,6 +99,11 @@ namespace PDS.Witsml.Server.Configuration
         public static string DataDelimiterErrorMessage = Properties.Settings.Default.DataDelimiterErrorMessage;
 
         /// <summary>
+        /// The maximum station count
+        /// </summary>
+        public static int MaxStationCount = Properties.Settings.Default.MaxStationCount;
+
+        /// <summary>
         /// Gets the size of the range.
         /// </summary>
         /// <param name="isTimeIndex"><c>true</c> if is time index.</param>

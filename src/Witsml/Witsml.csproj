@@ -120,6 +120,7 @@
     <Compile Include="Data\Logs\Log131Generator.cs" />
     <Compile Include="Data\Logs\Log141Generator.cs" />
     <Compile Include="Data\Logs\LogExtensions.cs" />
+    <Compile Include="Data\Trajectories\Trajectory141Generator.cs" />
     <Compile Include="EtpContentTypes.cs" />
     <Compile Include="ErrorCodes.cs" />
     <Compile Include="Export131Attribute.cs" />
