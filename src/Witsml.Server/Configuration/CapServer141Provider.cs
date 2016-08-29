@@ -133,6 +133,9 @@ namespace PDS.Witsml.Server.Configuration
                 config.GetCapabilities(capServer);
             }
 
+            // Sort each function by data object name
+            capServer.Function.ForEach(f => f.DataObject = f.DataObject?.OrderBy(x => x.Value).ToList());
+
             capServer.ApiVers = "1.4.1";
             capServer.SchemaVersion = DataSchemaVersion;
             capServer.SupportUomConversion = false; // TODO: update after UoM conversion implemented

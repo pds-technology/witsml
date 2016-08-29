@@ -126,6 +126,9 @@ namespace PDS.Witsml.Server.Configuration
                 config.GetCapabilities(capServer);
             }
 
+            // Sort each function by data object name
+            capServer.Function.ForEach(f => f.DataObject = f.DataObject?.OrderBy(x => x).ToList());
+
             capServer.ApiVers = "1.3.1";
             capServer.SchemaVersion = DataSchemaVersion;
 
