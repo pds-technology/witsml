@@ -124,7 +124,11 @@ namespace PDS.Witsml.Server.Data.Trajectories
             Logger.Debug("Set trajectory MD ranges.");
 
             if (dataObject.TrajectoryStation.Count <= 0)
+            {
+                dataObject.MDMin = null;
+                dataObject.MDMax = null;
                 return;
+            }
 
             var mds = dataObject.TrajectoryStation.Select(t => t.MD).OrderBy(m => m.Value).ToList();
 

@@ -18,6 +18,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using PDS.Framework;
@@ -56,6 +57,22 @@ namespace PDS.Witsml.Server.Data.Trajectories
             capServer.Add(Functions.AddToStore, ObjectTypes.Trajectory);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Trajectory);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.Trajectory);
+        }
+
+        /// <summary>
+        /// Adds a <see cref="Trajectory"/> object to the data store.
+        /// </summary>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The <see cref="Log" /> to be added.</param>
+        public override void Add(WitsmlQueryParser parser, Trajectory dataObject)
+        {
+            using (var transaction = DatabaseProvider.BeginTransaction())
+            {
+                SetMdValues(dataObject);
+                UpdateMongoFile(dataObject, dataObject.TrajectoryStation, false);
+                InsertEntity(dataObject, transaction);
+                transaction.Commit();
+            }
         }
 
         /// <summary>
@@ -99,6 +116,23 @@ namespace PDS.Witsml.Server.Data.Trajectories
         protected override bool QueryStationFile(Trajectory entity, Trajectory header)
         {
             return header.MDMin != null && entity.TrajectoryStation == null;
+        }
+
+        private void SetMdValues(Trajectory dataObject)
+        {
+            Logger.Debug("Set trajectory MD ranges.");
+
+            if (dataObject.TrajectoryStation.Count <= 0)
+            {
+                dataObject.MDMin = null;
+                dataObject.MDMax = null;
+                return;
+            }
+
+            var mds = dataObject.TrajectoryStation.Select(t => t.MD).OrderBy(m => m.Value).ToList();
+
+            dataObject.MDMin = mds.FirstOrDefault();
+            dataObject.MDMax = mds.LastOrDefault();
         }
     }
 }
