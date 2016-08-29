@@ -37,6 +37,7 @@ namespace PDS.Witsml.Server
         public static readonly long DefaultTimeChunkRange = WitsmlSettings.TimeRangeSize;
         public static readonly int DefaultMaxDataPoints = WitsmlSettings.MaxDataPoints;
         public static readonly int DefaultMaxDataNodes = WitsmlSettings.MaxDataNodes;
+        public static readonly int DefaultMaxStationCount = WitsmlSettings.MaxStationCount;
 
         public readonly string TimeZone = "-06:00";
 

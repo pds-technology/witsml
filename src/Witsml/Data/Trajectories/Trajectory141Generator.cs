@@ -21,6 +21,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.DataAccess.WITSML141.ReferenceData;
 
 namespace PDS.Witsml.Data.Trajectories
 {
@@ -30,5 +32,41 @@ namespace PDS.Witsml.Data.Trajectories
     /// <seealso cref="PDS.Witsml.Data.DataGenerator" />
     public class Trajectory141Generator : DataGenerator
     {
+        private const string StationUidPrefix = "sta-";
+        private const MeasuredDepthUom MdUom = MeasuredDepthUom.m;
+        private const WellVerticalCoordinateUom TvdUom = WellVerticalCoordinateUom.m;
+        private const PlaneAngleUom AngleUom = PlaneAngleUom.dega;
+
+        /// <summary>
+        /// Generations trajectory station data.
+        /// </summary>
+        /// <param name="numOfStations">The number of stations.</param>
+        /// <param name="startMd">The start md.</param>
+        /// <param name="mdUom">The MD index uom.</param>
+        /// <param name="tvdUom">The Tvd uom.</param>
+        /// <param name="angleUom">The angle uom.</param>
+        /// <returns>The trajectoryStation collection.</returns>
+        public List<TrajectoryStation> GenerationStations(int numOfStations, double startMd, MeasuredDepthUom mdUom = MdUom, WellVerticalCoordinateUom tvdUom = TvdUom, PlaneAngleUom angleUom = AngleUom)
+        {
+            var stations = new List<TrajectoryStation>();
+            var random = new Random(numOfStations*2);
+
+            for (var i = 0; i < numOfStations; i++)
+            {
+                var station = new TrajectoryStation
+                {
+                    Uid = StationUidPrefix + (i + 1),
+                    TypeTrajStation = TrajStationType.tieinpoint,
+                    MD = new MeasuredDepthCoord {Uom = mdUom, Value = startMd},
+                    Tvd = new WellVerticalDepthCoord() {Uom = tvdUom, Value = startMd + 0.5},
+                    Azi = new PlaneAngleMeasure {Uom = angleUom, Value = random.NextDouble()},
+                    Incl = new PlaneAngleMeasure {Uom = angleUom, Value = random.NextDouble()}
+                };
+                stations.Add(station);
+                startMd++;
+            }
+
+            return stations;
+        }
     }
 }
