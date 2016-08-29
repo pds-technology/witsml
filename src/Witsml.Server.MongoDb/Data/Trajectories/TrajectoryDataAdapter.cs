@@ -16,10 +16,16 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Driver;
+using MongoDB.Driver.GridFS;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 
@@ -33,6 +39,16 @@ namespace PDS.Witsml.Server.Data.Trajectories
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{T}" />
     public abstract class TrajectoryDataAdapter<T, TChild> : MongoDbDataAdapter<T> where T : IWellboreObject where TChild : IUniqueId
     {
+        /// <summary>
+        /// The field to query Mongo File
+        /// </summary>
+        protected readonly string FileQueryField = "Uri";
+
+        /// <summary>
+        /// The file name
+        /// </summary>
+        protected const string FileName = "FileName";
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TrajectoryDataAdapter{T, TChild}" /> class.
         /// </summary>
@@ -65,10 +81,10 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 entities.ForEach(x =>
                 {
                     // TODO: Implement trajectory station range query, if requested
-                    //var header = headers[x.GetUri()];
+                    var header = headers[x.GetUri()];
 
-                    // Query the trajectory stations
-                    //QueryTrajectoryStations(x, header, parser, context);
+                    //Query the trajectory stations
+                    QueryTrajectoryStations(x, header, parser, context);
                 });
             }
             else if (!OptionsIn.RequestObjectSelectionCapability.True.Equals(parser.RequestObjectSelectionCapability()))
@@ -165,9 +181,124 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         /// <summary>
+        /// Saves trajectory stations data in mongo file if trajectory stations count exceeds maximun count; removes if not.
+        /// </summary>
+        /// <param name="entity">The data object.</param>
+        /// <param name="stations">The trajectory stations.</param>
+        /// <param name="deleteFile">if set to <c>true</c> [delete file].</param>
+        protected void UpdateMongoFile(T entity, List<TChild> stations, bool deleteFile = true)
+        {
+            var uri = entity.GetUri();
+            Logger.DebugFormat($"Updating MongoDb Trajectory Stations files: {uri}");
+
+            var bucket = GetMongoFileBucket();
+
+            if (stations.Count >= WitsmlSettings.MaxStationCount)
+            {
+                var bytes = Encoding.UTF8.GetBytes(stations.ToJson());
+
+                var loadOptions = new GridFSUploadOptions
+                {
+                    Metadata = new BsonDocument
+                    {
+                        { FileName, new Guid().ToString() },
+                        { FileQueryField, uri.ToString() },
+                        { "DataBytes", bytes.Length }
+                    }
+                };
+
+                if (deleteFile)
+                    DeleteMongoFile(bucket, uri);
+
+                bucket.UploadFromBytes(uri, bytes, loadOptions);
+                ClearTrajectoryStations(entity);
+            }
+            else
+            {
+                if (deleteFile)
+                    DeleteMongoFile(bucket, uri);
+            }
+        }
+
+        private IGridFSBucket GetMongoFileBucket()
+        {
+            var db = DatabaseProvider.GetDatabase();
+            return new GridFSBucket(db, new GridFSBucketOptions
+            {
+                BucketName = DbCollectionName,
+                ChunkSizeBytes = WitsmlSettings.ChunkSizeBytes
+            });
+        }
+
+        private void DeleteMongoFile(IGridFSBucket bucket, string fileId)
+        {
+            Logger.DebugFormat($"Deleting MongoDb Channel Data file: {fileId}");
+
+            var filter = Builders<GridFSFileInfo>.Filter.Eq(fi => fi.Metadata[FileQueryField], fileId);
+            var mongoFile = bucket.Find(filter).FirstOrDefault();
+
+            if (mongoFile == null)
+                return;
+
+            bucket.Delete(mongoFile.Id);
+        }
+
+        private void QueryTrajectoryStations(T entity, T header, WitsmlQueryParser parser, ResponseContext context)
+        {
+            if (!QueryStationFile(entity, header))
+                return;
+
+            var uri = entity.GetUri();
+            var stations = GetMongoFileStationData(uri);
+            FormatStationData(entity, stations, parser);
+        }
+
+        private List<TChild> GetMongoFileStationData(string uri)
+        {
+            Logger.Debug("Getting MongoDb Trajectory Station files.");
+
+            var bucket = GetMongoFileBucket();
+
+            var filter = Builders<GridFSFileInfo>.Filter.Eq(fi => fi.Metadata[FileQueryField], uri);
+            var mongoFile = bucket.Find(filter).FirstOrDefault();
+
+            if (mongoFile == null)
+                return null;
+
+            var bytes = bucket.DownloadAsBytes(mongoFile.Id);
+            var json = Encoding.UTF8.GetString(bytes);
+            return BsonSerializer.Deserialize<List<TChild>>(json);
+        }
+
+        /// <summary>
         /// Clears the trajectory stations.
         /// </summary>
         /// <param name="entity">The entity.</param>
         protected abstract void ClearTrajectoryStations(T entity);
+
+        /// <summary>
+        /// Formats the station data based on query parameters.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="stations">The trajectory stations.</param>
+        /// <param name="parser">The parser.</param>
+        protected abstract void FormatStationData(T entity, List<TChild> stations, WitsmlQueryParser parser);
+
+        /// <summary>
+        /// Determines whether the current trajectory has station data.
+        /// </summary>
+        /// <param name="header">The trajectory.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified trajectory has data; otherwise, <c>false</c>.
+        /// </returns>
+        protected abstract bool HasData(T header);
+
+        /// <summary>
+        /// Check if need to query mongo file for station data.
+        /// </summary>
+        /// <param name="entity">The result data object.</param>
+        /// <param name="header">The full header object.</param>
+        /// <returns><c>true</c> if needs to query mongo file; otherwise, <c>false</c>.</returns>
+        protected abstract bool QueryStationFile(T entity, T header);
     }
 }

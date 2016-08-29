@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
@@ -64,6 +65,40 @@ namespace PDS.Witsml.Server.Data.Trajectories
         protected override void ClearTrajectoryStations(Trajectory entity)
         {
             entity.TrajectoryStation = null;
+        }
+
+        /// <summary>
+        /// Formats the station data based on query parameters.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="stations">The trajectory stations.</param>
+        /// <param name="parser">The parser.</param>
+        protected override void FormatStationData(Trajectory entity, List<TrajectoryStation> stations, WitsmlQueryParser parser)
+        {
+            entity.TrajectoryStation = stations;
+        }
+
+        /// <summary>
+        /// Determines whether the current trajectory has station data.
+        /// </summary>
+        /// <param name="header">The trajectory.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified trajectory has data; otherwise, <c>false</c>.
+        /// </returns>
+        protected override bool HasData(Trajectory header)
+        {
+            return header.MDMax != null;
+        }
+
+        /// <summary>
+        /// Check if need to query mongo file for station data.
+        /// </summary>
+        /// <param name="entity">The result data object.</param>
+        /// <param name="header">The full header object.</param>
+        /// <returns><c>true</c> if needs to query mongo file; otherwise, <c>false</c>.</returns>
+        protected override bool QueryStationFile(Trajectory entity, Trajectory header)
+        {
+            return header.MDMin != null && entity.TrajectoryStation == null;
         }
     }
 }
