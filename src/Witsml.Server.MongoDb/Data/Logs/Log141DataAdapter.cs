@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
@@ -30,8 +29,6 @@ using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Data.Logs;
-using PDS.Witsml.Server.Configuration;
-using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Server.Data.Transactions;
 using PDS.Witsml.Server.Providers.Store;
 
@@ -40,42 +37,10 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for a 141 <see cref="Log" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.Logs.LogDataAdapter{Log, LogCurveInfo}" />
-    [Export(typeof(IWitsmlDataAdapter<Log>))]
-    [Export(typeof(IWitsml141Configuration))]
-    [Export141(ObjectTypes.Log, typeof(IChannelDataProvider))]
-    [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Log141DataAdapter : LogDataAdapter<Log, LogCurveInfo>, IWitsml141Configuration
+    public partial class Log141DataAdapter
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Log141DataAdapter" /> class.
-        /// </summary>
-        /// <param name="container">The composition container.</param>
-        /// <param name="databaseProvider">The database provider.</param>
-        [ImportingConstructor]
-        public Log141DataAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, ObjectNames.Log141)
-        {
-        }
-
-        /// <summary>
-        /// Gets the supported capabilities for the <see cref="Log"/> object.
-        /// </summary>
-        /// <param name="capServer">The capServer instance.</param>
-        public void GetCapabilities(CapServer capServer)
-        {
-            Logger.DebugFormat("Getting the supported capabilities for Log data version {0}.", capServer.Version);
-
-            var dataObject = new ObjectWithConstraint(ObjectTypes.Log)
-            {
-                MaxDataNodes = WitsmlSettings.MaxDataNodes,
-                MaxDataPoints = WitsmlSettings.MaxDataPoints
-            };
-
-            capServer.Add(Functions.GetFromStore, dataObject);
-            capServer.Add(Functions.AddToStore, dataObject);
-            capServer.Add(Functions.UpdateInStore, dataObject);
-            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Log);
-        }
+        //MaxDataNodes = WitsmlSettings.MaxDataNodes,
+        //MaxDataPoints = WitsmlSettings.MaxDataPoints
 
         /// <summary>
         /// Adds a <see cref="Log" /> entity to the data store.

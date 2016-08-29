@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS.Witsml.Server, 2016.1
 //
 // Copyright 2016 Petrotechnical Data Systems
@@ -16,22 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Energistics.DataAccess.WITSML141;
-
-namespace PDS.Witsml.Server.Data.Trajectories
+namespace PDS.Witsml.Server.Data.WbGeometrys
 {
     /// <summary>
-    /// Data adapter that encapsulates CRUD functionality for <see cref="Trajectory" />
+    /// WbGeometry141DataAdapter
     /// </summary>
-    public partial class Trajectory141DataAdapter
+    public partial class WbGeometry141DataAdapter
     {
-        /// <summary>
-        /// Clears the trajectory stations.
-        /// </summary>
-        /// <param name="entity">The entity.</param>
-        protected override void ClearTrajectoryStations(Trajectory entity)
-        {
-            entity.TrajectoryStation = null;
-        }
     }
 }

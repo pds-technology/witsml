@@ -16,47 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML131;
-using Energistics.DataAccess.WITSML131.ComponentSchemas;
-using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Trajectory" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Trajectory}" />
-    [Export(typeof(IWitsmlDataAdapter<Trajectory>))]
-    [Export(typeof(IWitsml131Configuration))]
-    [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Trajectory131DataAdapter : TrajectoryDataAdapter<Trajectory, TrajectoryStation>, IWitsml131Configuration
+    public partial class Trajectory131DataAdapter
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Trajectory131DataAdapter" /> class.
-        /// </summary>
-        /// <param name="container">The composition container.</param>
-        /// <param name="databaseProvider">The database provider.</param>
-        [ImportingConstructor]
-        public Trajectory131DataAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, ObjectNames.Trajectory131)
-        {
-        }
-
-        /// <summary>
-        /// Gets the supported capabilities for the <see cref="Trajectory"/> object.
-        /// </summary>
-        /// <param name="capServer">The capServer instance.</param>
-        public void GetCapabilities(CapServer capServer)
-        {
-            Logger.DebugFormat("Getting the supported capabilities for Trajectory data version {0}.", capServer.Version);
-
-            capServer.Add(Functions.GetFromStore, ObjectTypes.Trajectory);
-            capServer.Add(Functions.AddToStore, ObjectTypes.Trajectory);
-            capServer.Add(Functions.UpdateInStore, ObjectTypes.Trajectory);
-            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Trajectory);
-        }
-
         /// <summary>
         /// Clears the trajectory stations.
         /// </summary>

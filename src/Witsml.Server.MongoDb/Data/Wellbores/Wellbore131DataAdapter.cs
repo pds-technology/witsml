@@ -17,49 +17,17 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.Datatypes;
-using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Wellbore" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Wellbore}" />
-    [Export(typeof(IWitsmlDataAdapter<Wellbore>))]
-    [Export(typeof(IWitsml131Configuration))]
-    [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Wellbore131DataAdapter : MongoDbDataAdapter<Wellbore>, IWitsml131Configuration
+    public partial class Wellbore131DataAdapter
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Wellbore131DataAdapter" /> class.
-        /// </summary>
-        /// <param name="container">The composition container.</param>
-        /// <param name="databaseProvider">The database provider.</param>
-        [ImportingConstructor]
-        public Wellbore131DataAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, ObjectNames.Wellbore131)
-        {
-            Logger.Debug("Instance created.");
-        }
-
-        /// <summary>
-        /// Gets the supported capabilities for the <see cref="Wellbore"/> object.
-        /// </summary>
-        /// <param name="capServer">The capServer instance.</param>
-        public void GetCapabilities(CapServer capServer)
-        {
-            Logger.DebugFormat("Getting the supported capabilities for Wellbore data version {0}.", capServer.Version);
-
-            capServer.Add(Functions.GetFromStore, ObjectTypes.Wellbore);
-            capServer.Add(Functions.AddToStore, ObjectTypes.Wellbore);
-            capServer.Add(Functions.UpdateInStore, ObjectTypes.Wellbore);
-            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Wellbore);
-        }
-
         /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>

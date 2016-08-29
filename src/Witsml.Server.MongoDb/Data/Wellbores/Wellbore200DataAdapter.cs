@@ -17,33 +17,17 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
-using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Wellbore" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Wellbore}" />
-    [Export(typeof(IWitsmlDataAdapter<Wellbore>))]
-    [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Wellbore200DataAdapter : MongoDbDataAdapter<Wellbore>
+    public partial class Wellbore200DataAdapter
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Wellbore200DataAdapter" /> class.
-        /// </summary>
-        /// <param name="container">The composition container.</param>
-        /// <param name="databaseProvider">The database provider.</param>
-        [ImportingConstructor]
-        public Wellbore200DataAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, ObjectNames.Wellbore200, ObjectTypes.Uuid)
-        {
-            Logger.Debug("Instance created.");
-        }
-
         /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>

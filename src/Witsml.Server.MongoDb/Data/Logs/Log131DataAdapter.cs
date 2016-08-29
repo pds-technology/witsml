@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
@@ -30,8 +29,6 @@ using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Data.Logs;
-using PDS.Witsml.Server.Configuration;
-using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Server.Data.Transactions;
 using PDS.Witsml.Server.Providers.Store;
 
@@ -40,37 +37,8 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for a 131 <see cref="Log" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.Logs.LogDataAdapter{Log, LogCurveInfo}" />
-    [Export(typeof(IWitsmlDataAdapter<Log>))]
-    [Export(typeof(IWitsml131Configuration))]
-    [Export131(ObjectTypes.Log, typeof(IChannelDataProvider))]
-    [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Log131DataAdapter : LogDataAdapter<Log, LogCurveInfo>, IWitsml131Configuration
+    public partial class Log131DataAdapter
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Log131DataAdapter" /> class.
-        /// </summary>
-        /// <param name="container">The composition container.</param>
-        /// <param name="databaseProvider">The database provider.</param>
-        [ImportingConstructor]
-        public Log131DataAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, ObjectNames.Log131)
-        {
-        }
-
-        /// <summary>
-        /// Gets the supported capabilities for the <see cref="Log"/> object.
-        /// </summary>
-        /// <param name="capServer">The capServer instance.</param>
-        public void GetCapabilities(CapServer capServer)
-        {
-            Logger.DebugFormat("Getting the supported capabilities for Log data version {0}.", capServer.Version);
-
-            capServer.Add(Functions.GetFromStore, ObjectTypes.Log);
-            capServer.Add(Functions.AddToStore, ObjectTypes.Log);
-            capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);
-            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Log);
-        }
-
         /// <summary>
         /// Adds a <see cref="Log" /> entity to the data store.
         /// </summary>

@@ -17,49 +17,17 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.Datatypes;
-using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Rigs
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Rig" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Rig}" />
-    [Export(typeof(IWitsmlDataAdapter<Rig>))]
-    [Export(typeof(IWitsml131Configuration))]
-    [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Rig131DataAdapter : MongoDbDataAdapter<Rig>, IWitsml131Configuration
+    public partial class Rig131DataAdapter
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Rig131DataAdapter" /> class.
-        /// </summary>
-        /// <param name="container">The composition container.</param>
-        /// <param name="databaseProvider">The database provider.</param>
-        [ImportingConstructor]
-        public Rig131DataAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, ObjectNames.Rig131)
-        {
-            Logger.Debug("Instance created.");
-        }
-
-        /// <summary>
-        /// Gets the supported capabilities for the <see cref="Rig"/> object.
-        /// </summary>
-        /// <param name="capServer">The capServer instance.</param>
-        public void GetCapabilities(CapServer capServer)
-        {
-            Logger.DebugFormat("Getting the supported capabilities for Rig data version {0}.", capServer.Version);
-
-            capServer.Add(Functions.GetFromStore, ObjectTypes.Rig);
-            capServer.Add(Functions.AddToStore, ObjectTypes.Rig);
-            capServer.Add(Functions.UpdateInStore, ObjectTypes.Rig);
-            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Rig);
-        }
-
         /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>

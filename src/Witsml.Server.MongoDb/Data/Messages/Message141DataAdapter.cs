@@ -17,49 +17,17 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.Datatypes;
-using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Messages
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Message" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Message}" />
-    [Export(typeof(IWitsmlDataAdapter<Message>))]
-    [Export(typeof(IWitsml141Configuration))]
-    [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Message141DataAdapter : MongoDbDataAdapter<Message>, IWitsml141Configuration
+    public partial class Message141DataAdapter
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Message141DataAdapter" /> class.
-        /// </summary>
-        /// <param name="container">The composition container.</param>
-        /// <param name="databaseProvider">The database provider.</param>
-        [ImportingConstructor]
-        public Message141DataAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, ObjectNames.Message141)
-        {
-            Logger.Debug("Instance created.");
-        }
-
-        /// <summary>
-        /// Gets the supported capabilities for the <see cref="Message"/> object.
-        /// </summary>
-        /// <param name="capServer">The capServer object.</param>
-        public void GetCapabilities(CapServer capServer)
-        {
-            Logger.DebugFormat("Getting the supported capabilities for Message data version {0}.", capServer.Version);
-
-            capServer.Add(Functions.GetFromStore, ObjectTypes.Message);
-            capServer.Add(Functions.AddToStore, ObjectTypes.Message);
-            capServer.Add(Functions.UpdateInStore, ObjectTypes.Message);
-            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Message);
-        }
-
         /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>

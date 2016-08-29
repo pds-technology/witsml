@@ -32,12 +32,7 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Log" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Log}" />
-    /// <seealso cref="PDS.Witsml.Server.Data.Channels.IChannelDataProvider" />
-    [Export(typeof(IWitsmlDataAdapter<Log>))]
-    [Export200(ObjectTypes.Log, typeof(IChannelDataProvider))]
-    [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Log200DataAdapter : MongoDbDataAdapter<Log>, IChannelDataProvider
+    public partial class Log200DataAdapter : IChannelDataProvider
     {
         private readonly IWitsmlDataAdapter<ChannelSet> _channelSetDataAdapter;
 

@@ -17,12 +17,9 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.Datatypes;
-using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
@@ -30,36 +27,8 @@ namespace PDS.Witsml.Server.Data.Wells
     /// Data adapter that encapsulates CRUD functionality for <see cref="Well" />
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Well}" />
-    [Export(typeof(IWitsmlDataAdapter<Well>))]
-    [Export(typeof(IWitsml141Configuration))]
-    [PartCreationPolicy(CreationPolicy.Shared)]
-    public class Well141DataAdapter : MongoDbDataAdapter<Well>, IWitsml141Configuration
+    public partial class Well141DataAdapter
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Well141DataAdapter" /> class.
-        /// </summary>
-        /// <param name="container">The composition container.</param>
-        /// <param name="databaseProvider">The database provider.</param>
-        [ImportingConstructor]
-        public Well141DataAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, ObjectNames.Well141)
-        {
-            Logger.Debug("Instance created.");
-        }
-
-        /// <summary>
-        /// Gets the supported capabilities for the <see cref="Well"/> object.
-        /// </summary>
-        /// <param name="capServer">The capServer instance.</param>
-        public void GetCapabilities(CapServer capServer)
-        {
-            Logger.DebugFormat("Getting the supported capabilities for Well data version {0}.", capServer.Version);
-
-            capServer.Add(Functions.GetFromStore, ObjectTypes.Well);
-            capServer.Add(Functions.AddToStore, ObjectTypes.Well);
-            capServer.Add(Functions.UpdateInStore, ObjectTypes.Well);
-            capServer.Add(Functions.DeleteFromStore, ObjectTypes.Well);
-        }
-
         /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>
