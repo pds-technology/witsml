@@ -60,6 +60,36 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
+        public void ObjectTypes_GetObjectType_returns_correct_WbGeometry_type_for_131()
+        {
+            var objectType = ObjectTypes.GetObjectType(ObjectTypes.WbGeometry, OptionsIn.DataVersion.Version131.Value);
+            Assert.AreEqual(typeof(Energistics.DataAccess.WITSML131.StandAloneWellboreGeometry), objectType);
+
+            objectType = ObjectTypes.GetObjectType(ObjectTypes.WellboreGeometry, OptionsIn.DataVersion.Version131.Value);
+            Assert.IsNull(objectType);
+        }
+
+        [TestMethod]
+        public void ObjectTypes_GetObjectType_returns_correct_WbGeometry_type_for_141()
+        {
+            var objectType = ObjectTypes.GetObjectType(ObjectTypes.WbGeometry, OptionsIn.DataVersion.Version141.Value);
+            Assert.AreEqual(typeof(StandAloneWellboreGeometry), objectType);
+
+            objectType = ObjectTypes.GetObjectType(ObjectTypes.WellboreGeometry, OptionsIn.DataVersion.Version141.Value);
+            Assert.IsNull(objectType);
+        }
+
+        [TestMethod]
+        public void ObjectTypes_GetObjectType_returns_correct_WbGeometry_type_for_200()
+        {
+            var objectType = ObjectTypes.GetObjectType(ObjectTypes.WbGeometry, OptionsIn.DataVersion.Version200.Value);
+            Assert.IsNull(objectType);
+
+            objectType = ObjectTypes.GetObjectType(ObjectTypes.WellboreGeometry, OptionsIn.DataVersion.Version200.Value);
+            Assert.AreEqual(typeof(Energistics.DataAccess.WITSML200.WellboreGeometry), objectType);
+        }
+
+        [TestMethod]
         public void ObjectTypes_GetObjectTypeFromGroup_returns_type_for_valid_xml()
         {
             var document = WitsmlParser.Parse(_wellsXml);

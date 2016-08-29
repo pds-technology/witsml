@@ -102,9 +102,29 @@ namespace PDS.Witsml
         public const string Trajectory = "trajectory";
 
         /// <summary>
+        /// The ObjectType identifier for a TrajectoryStation.
+        /// </summary>
+        public const string TrajectoryStation = "trajectoryStation";
+
+        /// <summary>
         /// The ObjectType identifier for a MudLog.
         /// </summary>
         public const string MudLog = "mudLog";
+
+        /// <summary>
+        /// The ObjectType identifier for a GeologyInterval.
+        /// </summary>
+        public const string GeologyInterval = "geologyInterval";
+
+        /// <summary>
+        /// The ObjectType identifier for a WbGeometry.
+        /// </summary>
+        public const string WbGeometry = "wbGeometry";
+
+        /// <summary>
+        /// The ObjectType identifier for a WellboreGeometry.
+        /// </summary>
+        public const string WellboreGeometry = "wellboreGeometry";
 
         /// <summary>
         /// The ObjectType identifier for a ChangeLog.
@@ -126,7 +146,9 @@ namespace PDS.Witsml
         /// </summary>
         public const string ChannelIndex = "channelIndex";      
 
-        private static readonly string[] GrowingObjects = new [] { Log, MudLog, Trajectory };
+        private static readonly string[] GrowingObjects = { Log, MudLog, Trajectory };
+
+        private static readonly string[] GrowingPartTypes = { LogCurveInfo, GeologyInterval, TrajectoryStation };
 
         /// <summary>
         /// Gets the type of the object.
@@ -250,6 +272,9 @@ namespace PDS.Witsml
                 ? "Energistics.DataAccess.WITSML200."
                 : "Energistics.DataAccess.WITSML141.";
 
+            if (WbGeometry.EqualsIgnoreCase(objectType) && !OptionsIn.DataVersion.Version200.Equals(version))
+                objectType = $"StandAlone{WellboreGeometry.ToPascalCase()}";
+
             return typeof(IDataObject).Assembly.GetType(ns + objectType.ToPascalCase());
         }
 
@@ -261,6 +286,9 @@ namespace PDS.Witsml
         /// <returns>The .NET type for the data object collection.</returns>
         public static Type GetObjectGroupType(string objectType, WMLSVersion version)
         {
+            if (WbGeometry.EqualsIgnoreCase(objectType))
+                objectType = WellboreGeometry;
+
             return GetObjectType(objectType + "List", version);
         }
 
@@ -272,6 +300,9 @@ namespace PDS.Witsml
         /// <returns>The .NET type for the data object collection.</returns>
         public static Type GetObjectGroupType(string objectType, string version)
         {
+            if (WbGeometry.EqualsIgnoreCase(objectType))
+                objectType = WellboreGeometry;
+
             return GetObjectType(objectType + "List", version);
         }
 
@@ -376,6 +407,19 @@ namespace PDS.Witsml
         public static bool IsGrowingDataObject(string objectType)
         {
             return GrowingObjects.Contains(objectType);
+        }
+
+        /// <summary>
+        /// Gets the object type for the growing part of a growing object.
+        /// </summary>
+        /// <param name="objectType">The growing object type.</param>
+        /// <returns>The growing part type.</returns>
+        public static string GetGrowingObjectType(string objectType)
+        {
+            if (!IsGrowingDataObject(objectType)) return null;
+
+            var index = Array.IndexOf(GrowingObjects, objectType);
+            return GrowingPartTypes.Skip(index).FirstOrDefault();
         }
 
         /// <summary>
