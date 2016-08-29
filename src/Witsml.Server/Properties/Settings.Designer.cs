@@ -185,5 +185,14 @@ namespace PDS.Witsml.Server.Properties {
                 return ((string)(this["DataDelimiterErrorMessage"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("300")]
+        public int MaxStationCount {
+            get {
+                return ((int)(this["MaxStationCount"]));
+            }
+        }
     }
 }
