@@ -16,31 +16,14 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML131;
-using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Messages
 {
     /// <summary>
     /// Provides validation for <see cref="Message" /> data objects.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Message}" />
-    [Export(typeof(IDataObjectValidator<Message>))]
-    [PartCreationPolicy(CreationPolicy.NonShared)]
-    public class Message131Validator : DataObjectValidator<Message, Wellbore, Well>
+    public partial class Message131Validator
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Message131Validator" /> class.
-        /// </summary>
-        /// <param name="container">The composition container.</param>
-        /// <param name="messageDataAdapter">The message data adapter.</param>
-        /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
-        /// <param name="wellDataAdapter">The well data adapter.</param>
-        [ImportingConstructor]
-        public Message131Validator(IContainer container, IWitsmlDataAdapter<Message> messageDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter)
-            : base(container, messageDataAdapter, wellboreDataAdapter, wellDataAdapter)
-        {
-        }
     }
 }

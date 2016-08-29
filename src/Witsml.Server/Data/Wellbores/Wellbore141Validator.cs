@@ -22,7 +22,6 @@ using Energistics.DataAccess.WITSML141;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.Datatypes;
-using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wellbores
@@ -30,34 +29,14 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// <summary>
     /// Provides validation for <see cref="Wellbore" /> data objects.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Wellbore}" />
-    [Export(typeof(IDataObjectValidator<Wellbore>))]
-    [PartCreationPolicy(CreationPolicy.NonShared)]
-    public class Wellbore141Validator : DataObjectValidator<Wellbore>
+    public partial class Wellbore141Validator
     {
-        private readonly IWitsmlDataAdapter<Wellbore> _wellboreDataAdapter;
-        private readonly IWitsmlDataAdapter<Well> _wellDataAdapter;
-
         /// <summary>
         /// Gets or sets the collection of <see cref="IWitsml141Configuration"/> providers.
         /// </summary>
         /// <value>The collection of providers.</value>
         [ImportMany]
         public IEnumerable<IWitsml141Configuration> Providers { get; set; }
-
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Wellbore141Validator" /> class.
-        /// </summary>
-        /// <param name="container">The composition container.</param>
-        /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
-        /// <param name="wellDataAdapter">The well data adapter.</param>
-        [ImportingConstructor]
-        public Wellbore141Validator(IContainer container, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter) : base(container)
-        {
-            _wellboreDataAdapter = wellboreDataAdapter;
-            _wellDataAdapter = wellDataAdapter;
-        }
 
         /// <summary>
         /// Validates the data object while executing AddToStore.

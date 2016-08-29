@@ -19,37 +19,15 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Energistics.DataAccess.WITSML141;
-using System.ComponentModel.Composition;
-using System.Linq;
 using Energistics.Datatypes;
-using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
     /// <summary>
     /// Provides validation for <see cref="Well" /> data objects.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Well}" />
-    [Export(typeof(IDataObjectValidator<Well>))]
-    [PartCreationPolicy(CreationPolicy.NonShared)]
-    public class Well141Validator : DataObjectValidator<Well>
+    public partial class Well141Validator
     {
-        private readonly IWitsmlDataAdapter<Well> _wellDataAdapter;
-        private readonly IWitsmlDataAdapter<Wellbore> _wellboreDataAdapter;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Well141Validator" /> class.
-        /// </summary>
-        /// <param name="container">The composition container.</param>
-        /// <param name="wellDataAdapter">The well data adapter.</param>
-        /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
-        [ImportingConstructor]
-        public Well141Validator(IContainer container, IWitsmlDataAdapter<Well> wellDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter) : base(container)
-        {
-            _wellDataAdapter = wellDataAdapter;
-            _wellboreDataAdapter = wellboreDataAdapter;
-        }
-
         /// <summary>
         /// Validates the data object while executing AddToStore.
         /// </summary>

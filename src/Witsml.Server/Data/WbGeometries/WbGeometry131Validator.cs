@@ -1,7 +1,7 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS.Witsml.Server, 2016.1
 //
-// Copymessageht 2016 Petrotechnical Data Systems
+// Copyright 2016 Petrotechnical Data Systems
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,14 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Energistics.DataAccess.WITSML141;
-
-namespace PDS.Witsml.Server.Data.Messages
+namespace PDS.Witsml.Server.Data.WbGeometries
 {
     /// <summary>
-    /// Provides validation for <see cref="Message" /> data objects.
+    /// WbGeometry131Validator
     /// </summary>
-    public partial class Message141Validator
+    public partial class WbGeometry131Validator
     {
     }
 }

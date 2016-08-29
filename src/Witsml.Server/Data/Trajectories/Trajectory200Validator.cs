@@ -19,35 +19,14 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Energistics.DataAccess.WITSML200;
-using System.ComponentModel.Composition;
-using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
     /// <summary>
     /// Provides validation for <see cref="Trajectory" /> data objects.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Trajectory}" />
-    [Export(typeof(IDataObjectValidator<Trajectory>))]
-    [PartCreationPolicy(CreationPolicy.NonShared)]
-    public class Trajectory200Validator : DataObjectValidator<Trajectory>
+    public partial class Trajectory200Validator
     {
-        private readonly IWitsmlDataAdapter<Trajectory> _trajectoryDataAdapter;
-        private readonly IWitsmlDataAdapter<Wellbore> _wellboreDataAdapter;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Trajectory200Validator" /> class.
-        /// </summary>
-        /// <param name="container">The composition container.</param>
-        /// <param name="trajectoryDataAdapter">The trajectory data adapter.</param>
-        /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
-        [ImportingConstructor]
-        public Trajectory200Validator(IContainer container, IWitsmlDataAdapter<Trajectory> trajectoryDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter) : base(container)
-        {
-            _trajectoryDataAdapter = trajectoryDataAdapter;
-            _wellboreDataAdapter = wellboreDataAdapter;
-        }
-
         /// <summary>
         /// Validates the data object while executing AddToStore.
         /// </summary>

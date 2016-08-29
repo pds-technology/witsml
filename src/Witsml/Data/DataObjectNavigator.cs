@@ -59,6 +59,7 @@ namespace PDS.Witsml.Data
             Logger = LogManager.GetLogger(GetType());
             Container = container;
             Context = context;
+            ConfigureContext();
         }
 
         /// <summary>
@@ -100,6 +101,13 @@ namespace PDS.Witsml.Data
         protected static XName Xsi(string attributeName)
         {
             return _xsi.GetName(attributeName);
+        }
+
+        /// <summary>
+        /// Configures the context.
+        /// </summary>
+        protected virtual void ConfigureContext()
+        {
         }
 
         /// <summary>

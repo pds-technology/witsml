@@ -19,35 +19,14 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Energistics.DataAccess.WITSML200;
-using System.ComponentModel.Composition;
-using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
     /// <summary>
     /// Provides validation for <see cref="Log" /> data objects.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Log}" />
-    [Export(typeof(IDataObjectValidator<Log>))]
-    [PartCreationPolicy(CreationPolicy.NonShared)]
-    public class Log200Validator : DataObjectValidator<Log>
+    public partial class Log200Validator
     {
-        private readonly IWitsmlDataAdapter<Log> _logDataAdapter;
-        private readonly IWitsmlDataAdapter<Wellbore> _wellboreDataAdapter;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Log200Validator" /> class.
-        /// </summary>
-        /// <param name="container">The composition container.</param>
-        /// <param name="logDataAdapter">The log data adapter.</param>
-        /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
-        [ImportingConstructor]
-        public Log200Validator(IContainer container, IWitsmlDataAdapter<Log> logDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter) : base(container)
-        {
-            _logDataAdapter = logDataAdapter;
-            _wellboreDataAdapter = wellboreDataAdapter;
-        }
-
         /// <summary>
         /// Validates the data object while executing AddToStore.
         /// </summary>

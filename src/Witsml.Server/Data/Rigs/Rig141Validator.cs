@@ -16,31 +16,14 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML141;
-using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Rigs
 {
     /// <summary>
     /// Provides validation for <see cref="Rig" /> data objects.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Rig}" />
-    [Export(typeof(IDataObjectValidator<Rig>))]
-    [PartCreationPolicy(CreationPolicy.NonShared)]
-    public class Rig141Validator : DataObjectValidator<Rig, Wellbore, Well>
+    public partial class Rig141Validator
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Rig141Validator" /> class.
-        /// </summary>
-        /// <param name="container">The composition container.</param>
-        /// <param name="rigDataAdapter">The rig data adapter.</param>
-        /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
-        /// <param name="wellDataAdapter">The well data adapter.</param>
-        [ImportingConstructor]
-        public Rig141Validator(IContainer container, IWitsmlDataAdapter<Rig> rigDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter)
-            : base(container, rigDataAdapter, wellboreDataAdapter, wellDataAdapter)
-        {
-        }
     }
 }

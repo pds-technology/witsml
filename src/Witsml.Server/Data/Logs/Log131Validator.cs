@@ -32,43 +32,27 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Provides validation for <see cref="Log" /> data objects.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Log}" />
-    [Export(typeof(IDataObjectValidator<Log>))]
-    [PartCreationPolicy(CreationPolicy.NonShared)]
-    public class Log131Validator : DataObjectValidator<Log>
+    public partial class Log131Validator
     {
-        private readonly IWitsmlDataAdapter<Log> _logDataAdapter;
-        private readonly IWitsmlDataAdapter<Wellbore> _wellboreDataAdapter;
-        private readonly IWitsmlDataAdapter<Well> _wellDataAdapter;
-
         private readonly string[] _illegalColumnIdentifiers = { "'", "\"", "<", ">", "/", "\\", "&", "," };
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Log131Validator" /> class.
-        /// </summary>
-        /// <param name="container">The composition container.</param>
-        /// <param name="logDataAdapter">The log data adapter.</param>
-        /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
-        /// <param name="wellDataAdapter">The well data adapter.</param>
-        [ImportingConstructor]
-        public Log131Validator(IContainer container, IWitsmlDataAdapter<Log> logDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter) : base(container)
-        {
-            _logDataAdapter = logDataAdapter;
-            _wellboreDataAdapter = wellboreDataAdapter;
-            _wellDataAdapter = wellDataAdapter;
-
-            Context.Ignored = new List<string> {"logData", "startIndex", "endIndex", "startDateTimeIndex", "endDateTimeIndex",
-                "minIndex", "maxIndex", "minDateTimeIndex", "maxDateTimeIndex", };
-        }
 
         /// <summary>
         /// Gets or sets the Witsml configuration providers.
         /// </summary>
-        /// <value>
-        /// The providers.
-        /// </value>
         [ImportMany]
         public IEnumerable<IWitsml131Configuration> Providers { get; set; }
+
+        /// <summary>
+        /// Configures the context.
+        /// </summary>
+        protected override void ConfigureContext()
+        {
+            Context.Ignored = new List<string>
+            {
+                "logData", "startIndex", "endIndex", "startDateTimeIndex", "endDateTimeIndex",
+                "minIndex", "maxIndex", "minDateTimeIndex", "maxDateTimeIndex"
+            };
+        }
 
         /// <summary>
         /// Validates the data object while executing GetFromStore
@@ -123,7 +107,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var uri = DataObject.GetUri();
             var uriWellbore = uri.Parent;
             var uriWell = uriWellbore.Parent;
-            var wellbore = _wellboreDataAdapter.Get(uriWellbore);
+            var wellbore = WellboreDataAdapter.Get(uriWellbore);
             var indexCurve = DataObject.IndexCurve;
 
             var logDatas = DataObject.LogData;
@@ -143,7 +127,7 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             // Validate parent exists
-            else if (!_wellDataAdapter.Exists(uriWell))
+            else if (!WellDataAdapter.Exists(uriWell))
             {
                 yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWell" });
             }
@@ -159,7 +143,7 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             // Validate UID does not exist
-            else if (_logDataAdapter.Exists(uri))
+            else if (DataAdapter.Exists(uri))
             {
                 yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
             }
@@ -215,7 +199,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 var logParams = DataObject.LogParam;
                 var logData = DataObject.LogData;
 
-                var current = _logDataAdapter.Get(uri);
+                var current = DataAdapter.Get(uri);
                 var delimiter = ",";
 
                 var mergedLogCurveMnemonics = new List<string>();
@@ -322,7 +306,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 var uri = DataObject.GetUri();
                 var logCurves = DataObject.LogCurveInfo;
                 var logData = DataObject.LogData;
-                var current = _logDataAdapter.Get(uri);
+                var current = DataAdapter.Get(uri);
 
                 // Validate Log does not exist
                 if (current == null)

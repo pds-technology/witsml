@@ -16,31 +16,14 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML141;
-using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
     /// <summary>
     /// Provides validation for <see cref="Trajectory" /> data objects.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.DataObjectValidator{Trajectory}" />
-    [Export(typeof (IDataObjectValidator<Trajectory>))]
-    [PartCreationPolicy(CreationPolicy.NonShared)]
-    public class Trajectory141Validator : DataObjectValidator<Trajectory, Wellbore, Well>
+    public partial class Trajectory141Validator
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Trajectory141Validator" /> class.
-        /// </summary>
-        /// <param name="container">The composition container.</param>
-        /// <param name="trajectoryDataAdapter">The trajectory data adapter.</param>
-        /// <param name="wellboreDataAdapter">The wellbore data adapter.</param>
-        /// <param name="wellDataAdapter">The well data adapter.</param>
-        [ImportingConstructor]
-        public Trajectory141Validator(IContainer container, IWitsmlDataAdapter<Trajectory> trajectoryDataAdapter, IWitsmlDataAdapter<Wellbore> wellboreDataAdapter, IWitsmlDataAdapter<Well> wellDataAdapter)
-            : base(container, trajectoryDataAdapter, wellboreDataAdapter, wellDataAdapter)
-        {
-        }
     }
 }
