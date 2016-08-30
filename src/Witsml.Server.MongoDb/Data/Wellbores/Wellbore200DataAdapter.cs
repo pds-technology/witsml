@@ -16,10 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Linq;
 using Energistics.DataAccess.WITSML200;
-using Energistics.Datatypes;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
@@ -28,36 +25,5 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// </summary>
     public partial class Wellbore200DataAdapter
     {
-        /// <summary>
-        /// Gets a collection of data objects related to the specified URI.
-        /// </summary>
-        /// <param name="parentUri">The parent URI.</param>
-        /// <returns>A collection of data objects.</returns>
-        public override List<Wellbore> GetAll(EtpUri? parentUri = null)
-        {
-            Logger.Debug("Fetching all Wellbores.");
-
-            return GetAllQuery(parentUri)
-                .OrderBy(x => x.Citation.Title)
-                .ToList();
-        }
-
-        /// <summary>
-        /// Gets an <see cref="IQueryable{Wellbore}" /> instance to by used by the GetAll method.
-        /// </summary>
-        /// <param name="parentUri">The parent URI.</param>
-        /// <returns>An executable query.</returns>
-        protected override IQueryable<Wellbore> GetAllQuery(EtpUri? parentUri)
-        {
-            var query = GetQuery().AsQueryable();
-
-            if (parentUri != null)
-            {
-                var uidWell = parentUri.Value.ObjectId;
-                query = query.Where(x => x.Well.Uuid == uidWell);
-            }
-
-            return query;
-        }
     }
 }

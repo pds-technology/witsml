@@ -16,10 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Linq;
 using Energistics.DataAccess.WITSML131;
-using Energistics.Datatypes;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
@@ -28,28 +25,5 @@ namespace PDS.Witsml.Server.Data.Wells
     /// </summary>
     public partial class Well131DataAdapter
     {
-        /// <summary>
-        /// Gets a collection of data objects related to the specified URI.
-        /// </summary>
-        /// <param name="parentUri">The parent URI.</param>
-        /// <returns>A collection of data objects.</returns>
-        public override List<Well> GetAll(EtpUri? parentUri = null)
-        {
-            Logger.Debug("Fetching all Wells.");
-
-            return GetAllQuery(parentUri)
-                .OrderBy(x => x.Name)
-                .ToList();
-        }
-
-        /// <summary>
-        /// Gets an <see cref="IQueryable{Well}" /> instance to by used by the GetAll method.
-        /// </summary>
-        /// <param name="parentUri">The parent URI.</param>
-        /// <returns>An executable query.</returns>
-        protected override IQueryable<Well> GetAllQuery(EtpUri? parentUri)
-        {
-            return GetQuery();
-        }
     }
 }

@@ -47,5 +47,37 @@ namespace PDS.Witsml.Server.Data.Attachments
         {
             Logger.Debug("Instance created.");
         }
+
+        /// <summary>
+        /// Gets a collection of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        public override List<Attachment> GetAll(EtpUri? parentUri)
+        {
+            Logger.DebugFormat("Fetching all Attachments; Parent URI: {0}", parentUri);
+
+            return GetAllQuery(parentUri)
+                .OrderBy(x => x.Citation.Title)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Gets an <see cref="IQueryable{Attachment}" /> instance to by used by the GetAll method.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>An executable query.</returns>
+        protected override IQueryable<Attachment> GetAllQuery(EtpUri? parentUri)
+        {
+            var query = GetQuery().AsQueryable();
+
+            if (parentUri != null)
+            {
+                var uidWellbore = parentUri.Value.ObjectId;
+                query = query.Where(x => x.Wellbore.Uuid == uidWellbore);
+            }
+
+            return query;
+        }
     }
 }

@@ -80,41 +80,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         /// <summary>
-        /// Gets a collection of data objects related to the specified URI.
-        /// </summary>
-        /// <param name="parentUri">The parent URI.</param>
-        /// <returns>A collection of data objects.</returns>
-        public override List<T> GetAll(EtpUri? parentUri = null)
-        {
-            Logger.DebugFormat("Fetching all Trajectorys; Parent URI: {0}", parentUri);
-
-            return GetAllQuery(parentUri)
-                .OrderBy(x => x.Name)
-                .ToList();
-        }
-
-        /// <summary>
-        /// Gets an <see cref="IQueryable{T}" /> instance to by used by the GetAll method.
-        /// </summary>
-        /// <param name="parentUri">The parent URI.</param>
-        /// <returns>An executable query.</returns>
-        protected override IQueryable<T> GetAllQuery(EtpUri? parentUri)
-        {
-            var query = GetQuery().AsQueryable();
-
-            if (parentUri != null)
-            {
-                var ids = parentUri.Value.GetObjectIds().ToDictionary(x => x.ObjectType, y => y.ObjectId);
-                var uidWellbore = ids[ObjectTypes.Wellbore];
-                var uidWell = ids[ObjectTypes.Well];
-
-                query = query.Where(x => x.UidWell == uidWell && x.UidWellbore == uidWellbore);
-            }
-
-            return query;
-        }
-
-        /// <summary>
         /// Gets a list of the property names to project during a query.
         /// </summary>
         /// <param name="parser">The WITSML parser.</param>

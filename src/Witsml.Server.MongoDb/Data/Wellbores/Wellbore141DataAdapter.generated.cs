@@ -62,5 +62,37 @@ namespace PDS.Witsml.Server.Data.Wellbores
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Wellbore);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.Wellbore);
         }
+
+        /// <summary>
+        /// Gets a collection of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        public override List<Wellbore> GetAll(EtpUri? parentUri)
+        {
+            Logger.DebugFormat("Fetching all Wellbores; Parent URI: {0}", parentUri);
+
+            return GetAllQuery(parentUri)
+                .OrderBy(x => x.Name)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Gets an <see cref="IQueryable{Wellbore}" /> instance to by used by the GetAll method.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>An executable query.</returns>
+        protected override IQueryable<Wellbore> GetAllQuery(EtpUri? parentUri)
+        {
+            var query = GetQuery().AsQueryable();
+
+            if (parentUri != null)
+            {
+                var uidWell = parentUri.Value.ObjectId;
+                query = query.Where(x => x.UidWell == uidWell);
+            }
+
+            return query;
+        }
     }
 }

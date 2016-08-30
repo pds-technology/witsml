@@ -62,5 +62,40 @@ namespace PDS.Witsml.Server.Data.Trajectories
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Trajectory);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.Trajectory);
         }
+
+        /// <summary>
+        /// Gets a collection of data objects related to the specified URI.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>A collection of data objects.</returns>
+        public override List<Trajectory> GetAll(EtpUri? parentUri)
+        {
+            Logger.DebugFormat("Fetching all Trajectories; Parent URI: {0}", parentUri);
+
+            return GetAllQuery(parentUri)
+                .OrderBy(x => x.Name)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Gets an <see cref="IQueryable{Trajectory}" /> instance to by used by the GetAll method.
+        /// </summary>
+        /// <param name="parentUri">The parent URI.</param>
+        /// <returns>An executable query.</returns>
+        protected override IQueryable<Trajectory> GetAllQuery(EtpUri? parentUri)
+        {
+            var query = GetQuery().AsQueryable();
+
+            if (parentUri != null)
+            {
+                var ids = parentUri.Value.GetObjectIds().ToDictionary(x => x.ObjectType, y => y.ObjectId);
+                var uidWellbore = ids[ObjectTypes.Wellbore];
+                var uidWell = ids[ObjectTypes.Well];
+
+                query = query.Where(x => x.UidWell == uidWell && x.UidWellbore == uidWellbore);
+            }
+
+            return query;
+        }
     }
 }

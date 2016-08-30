@@ -17,9 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.Linq;
 using Energistics.DataAccess.WITSML141;
-using Energistics.Datatypes;
 
 namespace PDS.Witsml.Server.Data.Rigs
 {
@@ -28,41 +26,6 @@ namespace PDS.Witsml.Server.Data.Rigs
     /// </summary>
     public partial class Rig141DataAdapter
     {
-        /// <summary>
-        /// Gets a collection of data objects related to the specified URI.
-        /// </summary>
-        /// <param name="parentUri">The parent URI.</param>
-        /// <returns>A collection of data objects.</returns>
-        public override List<Rig> GetAll(EtpUri? parentUri = null)
-        {
-            Logger.DebugFormat("Fetching all Rigs; Parent URI: {0}", parentUri);
-
-            return GetAllQuery(parentUri)
-                .OrderBy(x => x.Name)
-                .ToList();
-        }
-
-        /// <summary>
-        /// Gets an <see cref="IQueryable{Rig}" /> instance to by used by the GetAll method.
-        /// </summary>
-        /// <param name="parentUri">The parent URI.</param>
-        /// <returns>An executable query.</returns>
-        protected override IQueryable<Rig> GetAllQuery(EtpUri? parentUri)
-        {
-            var query = GetQuery().AsQueryable();
-
-            if (parentUri != null)
-            {
-                var ids = parentUri.Value.GetObjectIds().ToDictionary(x => x.ObjectType, y => y.ObjectId);
-                var uidWellbore = ids[ObjectTypes.Wellbore];
-                var uidWell = ids[ObjectTypes.Well];
-
-                query = query.Where(x => x.UidWell == uidWell && x.UidWellbore == uidWellbore);
-            }
-
-            return query;
-        }
-
         /// <summary>
         /// Gets a list of the property names to project during a query.
         /// </summary>
