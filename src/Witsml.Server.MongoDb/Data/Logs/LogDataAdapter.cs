@@ -445,15 +445,23 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private void FormatLogHeader(T log, string[] mnemonics)
         {
-            RemoveLogCurveInfos(log, mnemonics);
+            var logCurves = GetLogCurves(log);
+            RemoveLogCurveInfos(logCurves, mnemonics);
+            FormatLogCurveInfos(logCurves);
         }
 
-        private void RemoveLogCurveInfos(T log, string[] mnemonics)
+        private void RemoveLogCurveInfos(List<TChild> logCurves, string[] mnemonics)
         {
             Logger.Debug("Removing logCurveInfos from response.");
-
-            var logCurves = GetLogCurves(log);
             logCurves?.RemoveAll(x => !mnemonics.Contains(GetMnemonic(x)));
+        }
+
+        /// <summary>
+        /// Formats the log curve infos.
+        /// </summary>
+        /// <param name="logCurves">The log curves.</param>
+        protected virtual void FormatLogCurveInfos(List<TChild> logCurves)
+        {
         }
 
         /// <summary>

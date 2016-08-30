@@ -199,6 +199,15 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
+        /// Formats the log curve infos.
+        /// </summary>
+        /// <param name="logCurves">The log curves.</param>
+        protected override void FormatLogCurveInfos(List<LogCurveInfo> logCurves)
+        {
+            logCurves?.ForEach((c, i) => c.ColumnIndex = Convert.ToInt16(i + 1));
+        }
+
+        /// <summary>
         /// Sets the log data values.
         /// </summary>
         /// <param name="log">The log.</param>
