@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using Energistics.DataAccess;
 using Energistics.DataAccess.Validation;
 using Energistics.Datatypes;
 using MongoDB.Bson;
@@ -550,9 +551,18 @@ namespace PDS.Witsml.Server.Data
         /// <returns>A list of property names.</returns>
         protected override List<string> GetProjectionPropertyNames(WitsmlQueryParser parser)
         {
-            return OptionsIn.ReturnElements.IdOnly.Equals(parser.ReturnElements())
-                ? new List<string> { IdPropertyName, NamePropertyName }
-                : null;
+            if (OptionsIn.ReturnElements.IdOnly.Equals(parser.ReturnElements()))
+            {
+                if (typeof(IWellboreObject).IsAssignableFrom(typeof(T)))
+                    return new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell", "UidWellbore", "NameWellbore" };
+
+                if (typeof(IWellObject).IsAssignableFrom(typeof(T)))
+                    return new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell" };
+
+                return new List<string> { IdPropertyName, NamePropertyName };
+            }
+
+            return null;
         }
 
         private void ValidateUpdatedEntity(EtpUri uri)

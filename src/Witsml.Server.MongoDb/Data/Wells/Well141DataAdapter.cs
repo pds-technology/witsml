@@ -21,7 +21,7 @@ using Energistics.DataAccess.WITSML141;
 namespace PDS.Witsml.Server.Data.Wells
 {
     /// <summary>
-    /// Data adapter that encapsulates CRUD functionality for <see cref="Well" />
+    /// Data adapter that encapsulates CRUD functionality for <see cref="Well" />.
     /// </summary>
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Well}" />
     public partial class Well141DataAdapter

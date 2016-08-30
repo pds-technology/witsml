@@ -16,10 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace PDS.Witsml.Server.Data.WbGeometrys
+using WbGeometry = Energistics.DataAccess.WITSML141.StandAloneWellboreGeometry;
+
+namespace PDS.Witsml.Server.Data.WbGeometries
 {
     /// <summary>
-    /// WbGeometry141DataAdapter
+    /// Data adapter that encapsulates CRUD functionality for <see cref="WbGeometry" />.
     /// </summary>
     public partial class WbGeometry141DataAdapter
     {

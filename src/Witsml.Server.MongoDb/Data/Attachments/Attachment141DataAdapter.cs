@@ -16,10 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Energistics.DataAccess.WITSML141;
+
 namespace PDS.Witsml.Server.Data.Attachments
 {
     /// <summary>
-    /// Attachment141DataAdapter
+    /// Data adapter that encapsulates CRUD functionality for <see cref="Attachment" />.
     /// </summary>
     public partial class Attachment141DataAdapter
     {

@@ -21,7 +21,7 @@ using Energistics.DataAccess.WITSML131;
 namespace PDS.Witsml.Server.Data.Wells
 {
     /// <summary>
-    /// Data adapter that encapsulates CRUD functionality for <see cref="Well" />
+    /// Data adapter that encapsulates CRUD functionality for <see cref="Well" />.
     /// </summary>
     public partial class Well131DataAdapter
     {

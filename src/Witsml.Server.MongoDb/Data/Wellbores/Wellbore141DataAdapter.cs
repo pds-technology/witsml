@@ -22,22 +22,10 @@ using Energistics.DataAccess.WITSML141;
 namespace PDS.Witsml.Server.Data.Wellbores
 {
     /// <summary>
-    /// Data adapter that encapsulates CRUD functionality for <see cref="Wellbore" />
+    /// Data adapter that encapsulates CRUD functionality for <see cref="Wellbore" />.
     /// </summary>
     public partial class Wellbore141DataAdapter
     {
-        /// <summary>
-        /// Gets a list of the property names to project during a query.
-        /// </summary>
-        /// <param name="parser">The WITSML parser.</param>
-        /// <returns>A list of property names.</returns>
-        protected override List<string> GetProjectionPropertyNames(WitsmlQueryParser parser)
-        {
-            return OptionsIn.ReturnElements.IdOnly.Equals(parser.ReturnElements())
-                ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell" }
-                : null;
-        }
-
         /// <summary>
         /// Gets a list of the element names to ignore during an update.
         /// </summary>

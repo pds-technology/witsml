@@ -16,26 +16,14 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
 using Energistics.DataAccess.WITSML131;
 
 namespace PDS.Witsml.Server.Data.Messages
 {
     /// <summary>
-    /// Data adapter that encapsulates CRUD functionality for <see cref="Message" />
+    /// Data adapter that encapsulates CRUD functionality for <see cref="Message" />.
     /// </summary>
     public partial class Message131DataAdapter
     {
-        /// <summary>
-        /// Gets a list of the property names to project during a query.
-        /// </summary>
-        /// <param name="parser">The WITSML parser.</param>
-        /// <returns>A list of property names.</returns>
-        protected override List<string> GetProjectionPropertyNames(WitsmlQueryParser parser)
-        {
-            return OptionsIn.ReturnElements.IdOnly.Equals(parser.ReturnElements())
-                ? new List<string> { IdPropertyName, NamePropertyName, "UidWell", "NameWell", "UidWellbore", "NameWellbore" }
-                : null;
-        }
     }
 }
