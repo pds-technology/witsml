@@ -1432,6 +1432,54 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Header_Only_Query_As_Requested()
+        {
+            int numRows = 10;
+
+            // Add the Setup Well, Wellbore and Log to the store.
+            var logResponse = AddSetupWellWellboreLog(numRows, isDepthLog: true, hasEmptyChannel: false,
+                increasing: true);
+            Assert.AreEqual((short)ErrorCodes.Success, logResponse.Result);
+            var queryIn = "<logs version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
+                            $"  <log uidWell=\"{_log.UidWell}\" uidWellbore=\"{_log.UidWellbore}\" uid=\"{logResponse.SuppMsgOut}\">" + Environment.NewLine +
+                            "    <nameWell />" + Environment.NewLine +
+                            "    <nameWellbore />" + Environment.NewLine +
+                            "    <name />" + Environment.NewLine +
+                            "    <objectGrowing />" + Environment.NewLine +
+                            "    <serviceCompany />" + Environment.NewLine +
+                            "    <runNumber />" + Environment.NewLine +
+                            "    <creationDate />" + Environment.NewLine +
+                            "    <indexType />" + Environment.NewLine +
+                            "    <startIndex uom=\"\" />" + Environment.NewLine +
+                            "    <endIndex uom=\"\" />" + Environment.NewLine +
+                            "    <startDateTimeIndex />" + Environment.NewLine +
+                            "    <endDateTimeIndex />" + Environment.NewLine +
+                            "    <direction />" + Environment.NewLine +
+                            "    <indexCurve />" + Environment.NewLine +
+                            "    <logCurveInfo uid=\"\">" + Environment.NewLine +
+                            "      <mnemonic />" + Environment.NewLine +
+                            "      <unit />" + Environment.NewLine +
+                            "      <minIndex uom=\"\" />" + Environment.NewLine +
+                            "      <maxIndex uom=\"\" />" + Environment.NewLine +
+                            "      <minDateTimeIndex />" + Environment.NewLine +
+                            "      <maxDateTimeIndex />" + Environment.NewLine +
+                            "      <curveDescription />" + Environment.NewLine +
+                            "      <typeLogData />" + Environment.NewLine +
+                            "    </logCurveInfo>" + Environment.NewLine +
+                            "  </log>" + Environment.NewLine +
+                            "</logs>";
+            var result = _devKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
+            Assert.AreEqual((short)ErrorCodes.Success, result.Result);
+            Assert.IsNotNull(result);
+            var logs = EnergisticsConverter.XmlToObject<LogList>(result.XMLout);
+            Assert.IsNotNull(logs);
+            var log = logs.Log.FirstOrDefault();
+            Assert.IsNotNull(log);
+            Assert.AreEqual(log.LogCurveInfo.Count, 3);
+            Assert.AreEqual(log.LogData.Count, 0);
+        }
+
+        [TestMethod]
         public void LogDataAdapter_GetFromStore_Return_Latest_N_Values()
         {
             _devKit.Add<WellList, Well>(_well);
