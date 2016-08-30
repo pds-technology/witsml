@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
@@ -34,20 +33,6 @@ namespace PDS.Witsml.Server.Data.Logs
     /// </summary>
     public partial class Log200DataAdapter : IChannelDataProvider
     {
-        private readonly IWitsmlDataAdapter<ChannelSet> _channelSetDataAdapter;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Log200DataAdapter" /> class.
-        /// </summary>
-        /// <param name="container">The composition container.</param>
-        /// <param name="databaseProvider">The database provider.</param>
-        /// <param name="channelSetDataAdapter">The channel set data adapter.</param>
-        [ImportingConstructor]
-        public Log200DataAdapter(IContainer container, IDatabaseProvider databaseProvider, IWitsmlDataAdapter<ChannelSet> channelSetDataAdapter) : base(container, databaseProvider, ObjectNames.Log200, ObjectTypes.Uuid)
-        {
-            _channelSetDataAdapter = channelSetDataAdapter;
-        }
-
         /// <summary>
         /// Gets the channel metadata for the specified data object URI.
         /// </summary>
@@ -55,7 +40,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>A collection of channel metadata.</returns>
         public IList<ChannelMetadataRecord> GetChannelMetadata(EtpUri uri)
         {
-            var adapter = _channelSetDataAdapter as IChannelDataProvider;
+            var adapter = ChannelSetDataAdapter as IChannelDataProvider;
 
             if (adapter == null)
                 throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, "IChannelDataProvider not configured.");
@@ -75,7 +60,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>A collection of channel data.</returns>
         public IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, Range<double?> range)
         {
-            var adapter = _channelSetDataAdapter as IChannelDataProvider;
+            var adapter = ChannelSetDataAdapter as IChannelDataProvider;
 
             if (adapter == null)
                 throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, "IChannelDataProvider not configured.");
@@ -97,7 +82,7 @@ namespace PDS.Witsml.Server.Data.Logs
             foreach (var childParser in parser.ForkProperties("ChannelSet", ObjectTypes.ChannelSet))
             {
                 var channelSet = WitsmlParser.Parse<ChannelSet>(childParser.Root);
-                _channelSetDataAdapter.Add(childParser, channelSet);
+                ChannelSetDataAdapter.Add(childParser, channelSet);
             }
 
             // Clear ChannelSet data properties
@@ -120,7 +105,7 @@ namespace PDS.Witsml.Server.Data.Logs
             foreach (var childParser in parser.ForkProperties("ChannelSet", ObjectTypes.ChannelSet))
             {
                 var channelSet = WitsmlParser.Parse<ChannelSet>(childParser.Root);
-                _channelSetDataAdapter.Update(childParser, channelSet);
+                ChannelSetDataAdapter.Update(childParser, channelSet);
             }
 
             var uri = GetUri(dataObject);
