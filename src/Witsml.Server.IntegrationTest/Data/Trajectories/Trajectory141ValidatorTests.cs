@@ -150,6 +150,28 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
+        public void Trajectory141Validator_AddToStore_Error_440_OptionsIn_Keyword_Not_Recognized()
+        {
+            AddParents();
+
+            var response = _devKit.Add<TrajectoryList, Trajectory>(_trajectory, optionsIn: "returnElements=all");
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.KeywordNotSupportedByFunction, response.Result);
+        }
+
+        [TestMethod]
+        public void Trajectory141Validator_AddToStore_Error_441_optionsIn_value_not_recognized()
+        {
+            AddParents();
+
+            var response = _devKit.Add<TrajectoryList, Trajectory>(_trajectory, optionsIn: "compressionMethod=7zip");
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.InvalidKeywordValue, response.Result);
+        }
+
+        [TestMethod]
         public void Trajectory141Validator_AddToStore_Error_442_OptionsIn_Keyword_Not_Supported()
         {
             AddParents();
@@ -158,6 +180,32 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.KeywordNotSupportedByServer, response.Result);
+        }
+
+        [TestMethod]
+        public void Trajectory141Validator_AddToStore_Error_443_Uom_Not_Valid()
+        {
+            AddParents();
+
+            var xmlIn = "<trajectorys xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                "<trajectory uid=\"" + _trajectory.Uid + "\" uidWell=\"" + _trajectory.UidWell + "\" uidWellbore=\"" + _trajectory.UidWellbore + "\">" + Environment.NewLine +
+                    "<nameWell>" + _trajectory.NameWell + "</nameWell>" + Environment.NewLine +
+                    "<nameWellbore>" + _trajectory.NameWellbore + "</nameWellbore>" + Environment.NewLine +
+                    "<name>" + _trajectory.Name + "</name>" + Environment.NewLine +
+                    "<trajectoryStation uid=\"ts01\">" + Environment.NewLine +
+                        "<typeTrajStation>unknown</typeTrajStation>" + Environment.NewLine +
+                        "<md uom=\"dega\">5673.5</md>" + Environment.NewLine +
+                        "<tvd uom=\"ft\">5432.8</tvd>" + Environment.NewLine +
+                        "<incl uom=\"dega\">12.4</incl>" + Environment.NewLine +
+                        "<azi uom=\"dega\">47.3</azi>" + Environment.NewLine +
+                    "</trajectoryStation>" + Environment.NewLine +
+                "</trajectory>" + Environment.NewLine +
+                "</trajectorys>";
+
+            var response = _devKit.AddToStore(ObjectTypes.Trajectory, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.InvalidUnitOfMeasure, response.Result);
         }
 
         [TestMethod]
