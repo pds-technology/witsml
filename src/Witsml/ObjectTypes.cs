@@ -98,16 +98,6 @@ namespace PDS.Witsml
         public const string MudLog = "mudLog";
 
         /// <summary>
-        /// The ObjectType identifier for a Channel.
-        /// </summary>
-        public const string Channel = "channel";
-
-        /// <summary>
-        /// The ObjectType identifier for a ChannelSet.
-        /// </summary>
-        public const string ChannelSet = "channelSet";
-
-        /// <summary>
         /// The ObjectType identifier for a WellboreGeometry.
         /// </summary>
         public const string WellboreGeometry = "wellboreGeometry";

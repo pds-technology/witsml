@@ -132,9 +132,23 @@
     <Compile Include="Data\Attachments\Attachment200Validator.generated.cs">
       <DependentUpon>Attachment200Validator.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\Channels\ChannelSet200Validator.cs" />
+    <Compile Include="Data\ChannelSets\ChannelSet200DataProvider.cs" />
+    <Compile Include="Data\ChannelSets\ChannelSet200DataProvider.generated.cs">
+      <DependentUpon>ChannelSet200DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ChannelSets\ChannelSet200Validator.cs" />
+    <Compile Include="Data\ChannelSets\ChannelSet200Validator.generated.cs">
+      <DependentUpon>ChannelSet200Validator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Channels\Channel200DataProvider.cs" />
+    <Compile Include="Data\Channels\Channel200DataProvider.generated.cs">
+      <DependentUpon>Channel200DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Channels\Channel200Validator.cs" />
+    <Compile Include="Data\Channels\Channel200Validator.generated.cs">
+      <DependentUpon>Channel200Validator.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Channels\IChannelDataProvider.cs" />
-    <Compile Include="Data\Channels\ChannelSet200DataProvider.cs" />
     <Compile Include="Data\Common\IRecurringElementValidator.cs" />
     <Compile Include="Data\Common\TimestampedTimeZone141Validator.cs" />
     <Compile Include="Data\DataObjectValidationContext.cs" />

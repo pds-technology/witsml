@@ -34,6 +34,16 @@ namespace PDS.Witsml
         public static readonly ObjectName Attachment200 = new ObjectName(ObjectTypes.Attachment, Version200);
 
         /// <summary>
+        /// The data object name for a 2.0 Channel.
+        /// </summary>
+        public static readonly ObjectName Channel200 = new ObjectName(ObjectTypes.Channel, Version200);
+
+        /// <summary>
+        /// The data object name for a 2.0 ChannelSet.
+        /// </summary>
+        public static readonly ObjectName ChannelSet200 = new ObjectName(ObjectTypes.ChannelSet, Version200);
+
+        /// <summary>
         /// The data object name for a 1.3.1.1 Log.
         /// </summary>
         public static readonly ObjectName Log131 = new ObjectName(ObjectTypes.Log, Version131);

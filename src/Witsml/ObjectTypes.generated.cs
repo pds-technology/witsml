@@ -29,6 +29,16 @@ namespace PDS.Witsml
         public const string Attachment = "attachment";
 
         /// <summary>
+        /// The data object type for a Channel.
+        /// </summary>
+        public const string Channel = "channel";
+
+        /// <summary>
+        /// The data object type for a ChannelSet.
+        /// </summary>
+        public const string ChannelSet = "channelSet";
+
+        /// <summary>
         /// The data object type for a Log.
         /// </summary>
         public const string Log = "log";

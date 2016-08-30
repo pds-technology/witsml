@@ -26,15 +26,5 @@ namespace PDS.Witsml
         private static readonly string Version131 = OptionsIn.DataVersion.Version131.Value;
         private static readonly string Version141 = OptionsIn.DataVersion.Version141.Value;
         private static readonly string Version200 = OptionsIn.DataVersion.Version200.Value;
-
-        /// <summary>
-        /// The ObjectName for 2.0 version channel sets.
-        /// </summary>
-        public static readonly ObjectName ChannelSet200 = new ObjectName(ObjectTypes.ChannelSet, Version200);
-
-        /// <summary>
-        /// The ObjectName for 2.0 version channels.
-        /// </summary>
-        public static readonly ObjectName Channel200 = new ObjectName(ObjectTypes.Channel, Version200);
     }
 }

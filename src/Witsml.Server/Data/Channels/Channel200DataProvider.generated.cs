@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------- 
+//----------------------------------------------------------------------- 
 // PDS.Witsml.Server, 2016.1
 //
 // Copyright 2016 Petrotechnical Data Systems
@@ -16,40 +16,32 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML200;
 using PDS.Framework;
 
+
 namespace PDS.Witsml.Server.Data.Channels
 {
     /// <summary>
-    /// Data provider that implements support for WITSML API functions for <see cref="ChannelSet"/>.
+    /// Data provider that implements support for WITSML API functions for <see cref="Channel"/>.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{ChannelSet}" />
+    /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{Channel}" />
     [Export(typeof(IEtpDataProvider))]
-    [Export(typeof(IEtpDataProvider<ChannelSet>))]
-    [Export200(ObjectTypes.ChannelSet, typeof(IEtpDataProvider))]
+    [Export(typeof(IEtpDataProvider<Channel>))]
+    [Export200(ObjectTypes.Channel, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class ChannelSet200DataProvider : EtpDataProvider<ChannelSet>
+    public partial class Channel200DataProvider : EtpDataProvider<Channel>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ChannelSet200DataProvider"/> class.
+        /// Initializes a new instance of the <see cref="Channel200DataProvider"/> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="dataAdapter">The data adapter.</param>
         [ImportingConstructor]
-        public ChannelSet200DataProvider(IContainer container, IWitsmlDataAdapter<ChannelSet> dataAdapter) : base(container, dataAdapter)
+        public Channel200DataProvider(IContainer container, IWitsmlDataAdapter<Channel> dataAdapter) : base(container, dataAdapter)
         {
-        }
-
-        /// <summary>
-        /// Sets the default values for the specified data object.
-        /// </summary>
-        /// <param name="dataObject">The data object.</param>
-        protected override void SetDefaultValues(ChannelSet dataObject)
-        {
-            base.SetDefaultValues(dataObject);
-            dataObject.Channel.ForEach(c => c.Uuid = c.NewUuid());
         }
     }
 }
