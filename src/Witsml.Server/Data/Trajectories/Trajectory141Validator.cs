@@ -96,7 +96,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
                     yield return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] {"TrajectoryStation"});
                 }
             }
-
         }
     }
 }
