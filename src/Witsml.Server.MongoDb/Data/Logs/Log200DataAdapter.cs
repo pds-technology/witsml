@@ -31,6 +31,7 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Log" />
     /// </summary>
+    [Export200(ObjectTypes.Log, typeof(IChannelDataProvider))]
     public partial class Log200DataAdapter : IChannelDataProvider
     {
         /// <summary>

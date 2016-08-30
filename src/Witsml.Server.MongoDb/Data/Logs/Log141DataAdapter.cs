@@ -29,6 +29,7 @@ using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Data.Logs;
+using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Server.Data.Transactions;
 using PDS.Witsml.Server.Providers.Store;
 
@@ -37,6 +38,7 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for a 141 <see cref="Log" />
     /// </summary>
+    [Export141(ObjectTypes.Log, typeof(IChannelDataProvider))]
     public partial class Log141DataAdapter
     {
         /// <summary>
