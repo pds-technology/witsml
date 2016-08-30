@@ -76,6 +76,23 @@ namespace PDS.Witsml.Server.Data
         /// <param name="capServer">The capServer instance.</param>
         /// <param name="function">The WITSML Store API function.</param>
         /// <param name="dataObject">The data object.</param>
+        /// <param name="maxDataNodes">The maximum data nodes.</param>
+        /// <param name="maxDataPoints">The maximum data points.</param>
+        public static void Add(this Witsml141.CapServer capServer, Functions function, string dataObject, int maxDataNodes, int maxDataPoints)
+        {
+            Add(capServer, function, new Witsml141Schemas.ObjectWithConstraint(dataObject)
+            {
+                MaxDataNodes = maxDataNodes,
+                MaxDataPoints = maxDataPoints
+            });
+        }
+
+        /// <summary>
+        /// Adds support for the specified function and data object to the capServer instance.
+        /// </summary>
+        /// <param name="capServer">The capServer instance.</param>
+        /// <param name="function">The WITSML Store API function.</param>
+        /// <param name="dataObject">The data object.</param>
         public static void Add(this Witsml141.CapServer capServer, Functions function, Witsml141Schemas.ObjectWithConstraint dataObject)
         {
             if (capServer.Function == null)
