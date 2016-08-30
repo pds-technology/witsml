@@ -60,22 +60,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         /// <summary>
-        /// Adds a <see cref="Trajectory"/> object to the data store.
-        /// </summary>
-        /// <param name="parser">The input template parser.</param>
-        /// <param name="dataObject">The <see cref="Log" /> to be added.</param>
-        public override void Add(WitsmlQueryParser parser, Trajectory dataObject)
-        {
-            using (var transaction = DatabaseProvider.BeginTransaction())
-            {
-                SetMdValues(dataObject);
-                UpdateMongoFile(dataObject, dataObject.TrajectoryStation, false);
-                InsertEntity(dataObject, transaction);
-                transaction.Commit();
-            }
-        }
-
-        /// <summary>
         /// Clears the trajectory stations.
         /// </summary>
         /// <param name="entity">The entity.</param>
@@ -119,7 +103,11 @@ namespace PDS.Witsml.Server.Data.Trajectories
             return header.MDMin != null && entity.TrajectoryStation == null;
         }
 
-        private void SetMdValues(Trajectory dataObject)
+        /// <summary>
+        /// Sets the MD index ranges.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        protected override void SetIndexRange(Trajectory dataObject)
         {
             Logger.Debug("Set trajectory MD ranges.");
 
@@ -134,6 +122,16 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             dataObject.MDMin = mds.FirstOrDefault();
             dataObject.MDMax = mds.LastOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the trajectory station.
+        /// </summary>
+        /// <param name="dataObject">The trajectory data object.</param>
+        /// <returns>The trajectory station collection.</returns>
+        protected override List<TrajectoryStation> GetTrajectoryStation(Trajectory dataObject)
+        {
+            return dataObject.TrajectoryStation;
         }
     }
 }

@@ -42,12 +42,12 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <summary>
         /// The field to query Mongo File
         /// </summary>
-        protected readonly string FileQueryField = "Uri";
+        private const string FileQueryField = "Uri";
 
         /// <summary>
         /// The file name
         /// </summary>
-        protected const string FileName = "FileName";
+        private const string FileName = "FileName";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TrajectoryDataAdapter{T, TChild}" /> class.
@@ -59,6 +59,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             Logger.Debug("Instance created.");
         }
+
         /// <summary>
         /// Retrieves data objects from the data store using the specified parser.
         /// </summary>
@@ -93,6 +94,22 @@ namespace PDS.Witsml.Server.Data.Trajectories
             }
 
             return entities;
+        }
+
+        /// <summary>
+        /// Adds a data object to the data store.
+        /// </summary>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The data object to be added.</param>
+        public override void Add(WitsmlQueryParser parser, T dataObject)
+        {
+            using (var transaction = DatabaseProvider.BeginTransaction())
+            {
+                SetIndexRange(dataObject);
+                UpdateMongoFile(dataObject, false);
+                InsertEntity(dataObject, transaction);
+                transaction.Commit();
+            }
         }
 
         /// <summary>
@@ -184,14 +201,14 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// Saves trajectory stations data in mongo file if trajectory stations count exceeds maximun count; removes if not.
         /// </summary>
         /// <param name="entity">The data object.</param>
-        /// <param name="stations">The trajectory stations.</param>
         /// <param name="deleteFile">if set to <c>true</c> [delete file].</param>
-        protected void UpdateMongoFile(T entity, List<TChild> stations, bool deleteFile = true)
+        protected void UpdateMongoFile(T entity, bool deleteFile = true)
         {
             var uri = entity.GetUri();
             Logger.DebugFormat($"Updating MongoDb Trajectory Stations files: {uri}");
 
             var bucket = GetMongoFileBucket();
+            var stations = GetTrajectoryStation(entity);
 
             if (stations.Count >= WitsmlSettings.MaxStationCount)
             {
@@ -300,5 +317,18 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <param name="header">The full header object.</param>
         /// <returns><c>true</c> if needs to query mongo file; otherwise, <c>false</c>.</returns>
         protected abstract bool QueryStationFile(T entity, T header);
+
+        /// <summary>
+        /// Sets the MD index ranges.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        protected abstract void SetIndexRange(T dataObject);
+
+        /// <summary>
+        /// Gets the trajectory station.
+        /// </summary>
+        /// <param name="dataObject">The trajectory data object.</param>
+        /// <returns>The trajectory station collection.</returns>
+        protected abstract List<TChild> GetTrajectoryStation(T dataObject);
     }
 }
