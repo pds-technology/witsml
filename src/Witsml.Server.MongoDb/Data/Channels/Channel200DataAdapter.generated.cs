@@ -25,43 +25,36 @@ using Energistics.Datatypes;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 
-namespace PDS.Witsml.Server.Data.Logs
+namespace PDS.Witsml.Server.Data.Channels
 {
     /// <summary>
-    /// Data adapter that encapsulates CRUD functionality for <see cref="Log" />
+    /// Data adapter that encapsulates CRUD functionality for <see cref="Channel" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Log}" />
-    [Export(typeof(IWitsmlDataAdapter<Log>))]
+    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Channel}" />
+    [Export(typeof(IWitsmlDataAdapter<Channel>))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public partial class Log200DataAdapter : MongoDbDataAdapter<Log>
+    public partial class Channel200DataAdapter : MongoDbDataAdapter<Channel>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Log200DataAdapter" /> class.
+        /// Initializes a new instance of the <see cref="Channel200DataAdapter" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
-        /// <param name="channelSetDataAdapter">The channel set data adapter.</param>
         [ImportingConstructor]
-        public Log200DataAdapter(IContainer container, IDatabaseProvider databaseProvider, IWitsmlDataAdapter<ChannelSet> channelSetDataAdapter)
-            : base(container, databaseProvider, ObjectNames.Log200, ObjectTypes.Uuid)
+        public Channel200DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
+            : base(container, databaseProvider, ObjectNames.Channel200, ObjectTypes.Uuid)
         {
             Logger.Debug("Instance created.");
-            ChannelSetDataAdapter = channelSetDataAdapter;
         }
-
-        /// <summary>
-        /// Gets the channel set data adapter.
-        /// </summary>
-        public IWitsmlDataAdapter<ChannelSet> ChannelSetDataAdapter { get; }
 
         /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
         /// <returns>A collection of data objects.</returns>
-        public override List<Log> GetAll(EtpUri? parentUri)
+        public override List<Channel> GetAll(EtpUri? parentUri)
         {
-            Logger.DebugFormat("Fetching all Logs; Parent URI: {0}", parentUri);
+            Logger.DebugFormat("Fetching all Channels; Parent URI: {0}", parentUri);
 
             return GetAllQuery(parentUri)
                 .OrderBy(x => x.Citation.Title)
@@ -69,11 +62,11 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Gets an <see cref="IQueryable{Log}" /> instance to by used by the GetAll method.
+        /// Gets an <see cref="IQueryable{Channel}" /> instance to by used by the GetAll method.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
         /// <returns>An executable query.</returns>
-        protected override IQueryable<Log> GetAllQuery(EtpUri? parentUri)
+        protected override IQueryable<Channel> GetAllQuery(EtpUri? parentUri)
         {
             var query = GetQuery().AsQueryable();
 

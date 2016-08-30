@@ -26,6 +26,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Server.Data.Channels;
+using PDS.Witsml.Server.Data.ChannelSets;
 using PDS.Witsml.Server.Data.Wellbores;
 using PDS.Witsml.Server.Data.Wells;
 

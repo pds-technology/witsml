@@ -24,44 +24,45 @@ using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.Datatypes;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
+using PDS.Witsml.Server.Data.Channels;
 
-namespace PDS.Witsml.Server.Data.Logs
+namespace PDS.Witsml.Server.Data.ChannelSets
 {
     /// <summary>
-    /// Data adapter that encapsulates CRUD functionality for <see cref="Log" />
+    /// Data adapter that encapsulates CRUD functionality for <see cref="ChannelSet" />
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Log}" />
-    [Export(typeof(IWitsmlDataAdapter<Log>))]
+    /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{ChannelSet}" />
+    [Export(typeof(IWitsmlDataAdapter<ChannelSet>))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public partial class Log200DataAdapter : MongoDbDataAdapter<Log>
+    public partial class ChannelSet200DataAdapter : MongoDbDataAdapter<ChannelSet>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Log200DataAdapter" /> class.
+        /// Initializes a new instance of the <see cref="ChannelSet200DataAdapter" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
-        /// <param name="channelSetDataAdapter">The channel set data adapter.</param>
+        /// <param name="channelDataChunkAdapter">The channel data chunk adapter.</param>
         [ImportingConstructor]
-        public Log200DataAdapter(IContainer container, IDatabaseProvider databaseProvider, IWitsmlDataAdapter<ChannelSet> channelSetDataAdapter)
-            : base(container, databaseProvider, ObjectNames.Log200, ObjectTypes.Uuid)
+        public ChannelSet200DataAdapter(IContainer container, IDatabaseProvider databaseProvider, ChannelDataChunkAdapter channelDataChunkAdapter)
+            : base(container, databaseProvider, ObjectNames.ChannelSet200, ObjectTypes.Uuid)
         {
             Logger.Debug("Instance created.");
-            ChannelSetDataAdapter = channelSetDataAdapter;
+            ChannelDataChunkAdapter = channelDataChunkAdapter;
         }
 
         /// <summary>
-        /// Gets the channel set data adapter.
+        /// Gets the channel data chunk adapter.
         /// </summary>
-        public IWitsmlDataAdapter<ChannelSet> ChannelSetDataAdapter { get; }
+        public ChannelDataChunkAdapter ChannelDataChunkAdapter { get; }
 
         /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
         /// <returns>A collection of data objects.</returns>
-        public override List<Log> GetAll(EtpUri? parentUri)
+        public override List<ChannelSet> GetAll(EtpUri? parentUri)
         {
-            Logger.DebugFormat("Fetching all Logs; Parent URI: {0}", parentUri);
+            Logger.DebugFormat("Fetching all ChannelSets; Parent URI: {0}", parentUri);
 
             return GetAllQuery(parentUri)
                 .OrderBy(x => x.Citation.Title)
@@ -69,18 +70,18 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Gets an <see cref="IQueryable{Log}" /> instance to by used by the GetAll method.
+        /// Gets an <see cref="IQueryable{ChannelSet}" /> instance to by used by the GetAll method.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
         /// <returns>An executable query.</returns>
-        protected override IQueryable<Log> GetAllQuery(EtpUri? parentUri)
+        protected override IQueryable<ChannelSet> GetAllQuery(EtpUri? parentUri)
         {
             var query = GetQuery().AsQueryable();
 
             if (parentUri != null)
             {
-                var uidWellbore = parentUri.Value.ObjectId;
-                query = query.Where(x => x.Wellbore.Uuid == uidWellbore);
+                //var uidWellbore = parentUri.Value.ObjectId;
+                //query = query.Where(x => x.Wellbore.Uuid == uidWellbore);
             }
 
             return query;

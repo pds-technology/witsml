@@ -21,8 +21,7 @@ using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Framework;
-using PDS.Witsml.Data.Logs;
+using PDS.Witsml.Server.Data.ChannelSets;
 
 namespace PDS.Witsml.Server.Data.Channels
 {
