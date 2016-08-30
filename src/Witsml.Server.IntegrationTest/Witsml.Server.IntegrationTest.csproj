@@ -137,6 +137,7 @@
     <Compile Include="Data\Logs\Log200DataAdapterDeleteTests.cs" />
     <Compile Include="Data\Logs\Log200DataAdapterUpdateTests.cs" />
     <Compile Include="Data\Logs\Log200ValidatorTests.cs" />
+    <Compile Include="Data\Trajectories\Trajectory131DataAdapterAddTests.cs" />
     <Compile Include="Data\Trajectories\Trajectory141DataAdapterAddTests.cs" />
     <Compile Include="Data\Wellbores\Wellbore141DataAdapterGetTests.cs" />
     <Compile Include="Data\Wellbores\Wellbore141DataAdapterDeleteTests.cs" />

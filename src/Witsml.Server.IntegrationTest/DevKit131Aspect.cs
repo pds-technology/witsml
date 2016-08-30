@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
@@ -24,6 +25,7 @@ using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Witsml.Data.Logs;
+using PDS.Witsml.Data.Trajectories;
 
 namespace PDS.Witsml.Server
 {
@@ -35,12 +37,19 @@ namespace PDS.Witsml.Server
                           "   </log>" + Environment.NewLine +
                           "</logs>";
 
+        private const MeasuredDepthUom MdUom = MeasuredDepthUom.m;
+        private const WellVerticalCoordinateUom TvdUom = WellVerticalCoordinateUom.m;
+        private const PlaneAngleUom AngleUom = PlaneAngleUom.dega;
+
         public DevKit131Aspect(TestContext context, string url = null) : base(url, WMLSVersion.WITSML131, context)
         {
             LogGenerator = new Log131Generator();
+            TrajectoryGenerator = new Trajectory131Generator();
         }
 
         public Log131Generator LogGenerator { get; }
+
+        public Trajectory131Generator TrajectoryGenerator { get; }
 
         public override string DataSchemaVersion
         {
@@ -170,6 +179,19 @@ namespace PDS.Witsml.Server
             };
         }
 
+        public Trajectory CreateTrajectory(string uid, string name, string uidWell, string nameWell, string uidWellbore, string nameWellbore)
+        {
+            return new Trajectory()
+            {
+                Uid = uid,
+                Name = name,
+                UidWell = uidWell,
+                NameWell = nameWell,
+                UidWellbore = uidWellbore,
+                NameWellbore = nameWellbore,
+            };
+        }
+
         /// <summary>
         /// Adds well object and test the return code
         /// </summary>
@@ -200,6 +222,17 @@ namespace PDS.Witsml.Server
         public void AddAndAssert(Log log, ErrorCodes errorCode = ErrorCodes.Success)
         {
             var response = Add<LogList, Log>(log);
+            Assert.AreEqual((short)errorCode, response.Result);
+        }
+
+        /// <summary>
+        /// Adds trajectory object and test the return code
+        /// </summary>
+        /// <param name="trajectory">the trajectory.</param>
+        /// <param name="errorCode">the errorCode.</param>
+        public void AddAndAssert(Trajectory trajectory, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            var response = Add<TrajectoryList, Trajectory>(trajectory);
             Assert.AreEqual((short)errorCode, response.Result);
         }
 
@@ -272,6 +305,41 @@ namespace PDS.Witsml.Server
             Assert.IsNotNull(result);
 
             return result;
+        }
+
+        /// <summary>
+        /// Does get query for single trajectory object and test for result count equal to 1 and is not null
+        /// </summary>
+        /// <param name="trajectory">the log with UIDs for well and wellbore</param>
+        /// <returns>The first trajectory from the response</returns>
+        public Trajectory GetOneAndAssert(Trajectory trajectory)
+        {
+            Assert.IsNotNull(trajectory.UidWell);
+            Assert.IsNotNull(trajectory.UidWellbore);
+            Assert.IsNotNull(trajectory.Uid);
+
+            var query = CreateTrajectory(trajectory.Uid, null, trajectory.UidWell, null, trajectory.UidWellbore, null);
+            var results = Query<TrajectoryList, Trajectory>(query, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(1, results.Count);
+
+            var result = results.FirstOrDefault();
+            Assert.IsNotNull(result);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Generations trajectory station data.
+        /// </summary>
+        /// <param name="numOfStations">The number of stations.</param>
+        /// <param name="startMd">The start md.</param>
+        /// <param name="mdUom">The MD index uom.</param>
+        /// <param name="tvdUom">The Tvd uom.</param>
+        /// <param name="angleUom">The angle uom.</param>
+        /// <returns>The trajectoryStation collection.</returns>
+        public List<TrajectoryStation> TrajectoryStations(int numOfStations, double startMd, MeasuredDepthUom mdUom = MdUom, WellVerticalCoordinateUom tvdUom = TvdUom, PlaneAngleUom angleUom = AngleUom)
+        {
+            return TrajectoryGenerator.GenerationStations(numOfStations, startMd, mdUom, tvdUom, angleUom);
         }
     }
 }
