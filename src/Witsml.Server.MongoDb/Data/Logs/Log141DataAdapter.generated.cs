@@ -25,7 +25,6 @@ using Energistics.Datatypes;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 
-
 namespace PDS.Witsml.Server.Data.Logs
 {
     /// <summary>
@@ -57,7 +56,7 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             Logger.DebugFormat("Getting the supported capabilities for Log data version {0}.", capServer.Version);
 
-            capServer.Add(Functions.GetFromStore, ObjectTypes.Log);
+            capServer.Add(Functions.GetFromStore, ObjectTypes.Log, WitsmlSettings.MaxDataNodes, WitsmlSettings.MaxDataPoints);
             capServer.Add(Functions.AddToStore, ObjectTypes.Log);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.Log);

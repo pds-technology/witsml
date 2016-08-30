@@ -39,9 +39,6 @@ namespace PDS.Witsml.Server.Data.Logs
     /// </summary>
     public partial class Log141DataAdapter
     {
-        //MaxDataNodes = WitsmlSettings.MaxDataNodes,
-        //MaxDataPoints = WitsmlSettings.MaxDataPoints
-
         /// <summary>
         /// Adds a <see cref="Log" /> entity to the data store.
         /// </summary>

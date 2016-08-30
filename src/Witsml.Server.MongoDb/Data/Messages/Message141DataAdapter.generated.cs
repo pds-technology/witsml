@@ -25,7 +25,6 @@ using Energistics.Datatypes;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 
-
 namespace PDS.Witsml.Server.Data.Messages
 {
     /// <summary>
