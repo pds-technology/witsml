@@ -1,8 +1,3 @@
-
-
-
-
-
 //----------------------------------------------------------------------- 
 // PDS.Witsml.Server, 2016.1
 //
@@ -30,29 +25,22 @@ using Energistics.Datatypes;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 
-
 namespace PDS.Witsml.Server.Data.Logs
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Log" />
     /// </summary>
-
     /// <seealso cref="PDS.Witsml.Server.Data.MongoDbDataAdapter{Log}" />
-
     [Export(typeof(IWitsmlDataAdapter<Log>))]
-
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Log200DataAdapter : MongoDbDataAdapter<Log>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Log200DataAdapter" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
-
         /// <param name="channelSetDataAdapter">The channel set data adapter.</param>
-
         [ImportingConstructor]
         public Log200DataAdapter(IContainer container, IDatabaseProvider databaseProvider, IWitsmlDataAdapter<ChannelSet> channelSetDataAdapter)
             : base(container, databaseProvider, ObjectNames.Log200, ObjectTypes.Uuid)
@@ -60,16 +48,12 @@ namespace PDS.Witsml.Server.Data.Logs
             Logger.Debug("Instance created.");
 
             ChannelSetDataAdapter = channelSetDataAdapter;
-
         }
 
-
         /// <summary>
-        /// Gets the Channel Set data adapter.
+        /// Gets the channel set data adapter.
         /// </summary>
         public IWitsmlDataAdapter<ChannelSet> ChannelSetDataAdapter { get; }
-
-
 
         /// <summary>
         /// Gets a collection of data objects related to the specified URI.
@@ -80,11 +64,9 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             Logger.DebugFormat("Fetching all Logs; Parent URI: {0}", parentUri);
 
-
             return GetAllQuery(parentUri)
                 .OrderBy(x => x.Citation.Title)
                 .ToList();
-
         }
 
         /// <summary>
@@ -98,10 +80,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
             if (parentUri != null)
             {
-
                 var uidWellbore = parentUri.Value.ObjectId;
                 query = query.Where(x => x.Wellbore.Uuid == uidWellbore);
-
             }
 
             return query;

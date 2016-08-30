@@ -87,7 +87,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             if (parentUri != null)
             {
-				return query;
+                return query;
             }
 
             return query;
