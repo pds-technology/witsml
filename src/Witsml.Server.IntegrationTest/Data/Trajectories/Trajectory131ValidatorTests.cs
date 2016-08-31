@@ -102,17 +102,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory131Validator_AddToStore_Error_440_OptionsIn_Keyword_Not_Recognized()
-        {
-            AddParents();
-
-            var response = DevKit.Add<TrajectoryList, Trajectory>(Trajectory, optionsIn: "returnElements=all");
-
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.KeywordNotSupportedByFunction, response.Result);
-        }
-
-        [TestMethod]
         public void Trajectory131Validator_AddToStore_Error_443_Uom_Not_Valid()
         {
             AddParents();
