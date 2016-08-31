@@ -95,7 +95,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
 		#region Error -401
 
 		public static readonly string QueryInvalidPluralRoot =
-			"<wbGeometry xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+			"<wbGeometry xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\">" + Environment.NewLine +
 			"  <wbGeometry>" + Environment.NewLine +
 			"    <name>Test Plural Root Element</name>" + Environment.NewLine +
 			"  </wbGeometry>" + Environment.NewLine +

@@ -92,7 +92,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 		#region Error -401
 
 		public static readonly string QueryInvalidPluralRoot =
-			"<trajectory xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+			"<trajectory xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\">" + Environment.NewLine +
 			"  <trajectory>" + Environment.NewLine +
 			"    <name>Test Plural Root Element</name>" + Environment.NewLine +
 			"  </trajectory>" + Environment.NewLine +

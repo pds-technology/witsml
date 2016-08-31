@@ -92,7 +92,7 @@ namespace PDS.Witsml.Server.Data.Logs
 		#region Error -401
 
 		public static readonly string QueryInvalidPluralRoot =
-			"<log xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+			"<log xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\">" + Environment.NewLine +
 			"  <log>" + Environment.NewLine +
 			"    <name>Test Plural Root Element</name>" + Environment.NewLine +
 			"  </log>" + Environment.NewLine +
