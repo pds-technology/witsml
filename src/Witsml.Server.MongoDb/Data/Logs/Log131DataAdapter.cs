@@ -204,7 +204,11 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="logCurves">The log curves.</param>
         protected override void FormatLogCurveInfos(List<LogCurveInfo> logCurves)
         {
-            logCurves?.ForEach((c, i) => c.ColumnIndex = Convert.ToInt16(i + 1));
+            // Renumber columnIndex elements, if returned, to match logData position
+            if (logCurves != null && logCurves.Any(c => c.ColumnIndex.HasValue))
+            {
+                logCurves.ForEach((c, i) => c.ColumnIndex = Convert.ToInt16(i + 1));
+            }
         }
 
         /// <summary>
