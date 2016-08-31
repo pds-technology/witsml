@@ -1,5 +1,5 @@
-﻿//----------------------------------------------------------------------- 
-// PDS.Witsml, 2016.1
+//----------------------------------------------------------------------- 
+// PDS.Witsml.Server, 2016.1
 //
 // Copyright 2016 Petrotechnical Data Systems
 // 
@@ -19,13 +19,9 @@
 namespace PDS.Witsml.Server.Data.Wellbores
 {
     /// <summary>
-    /// Wellbore200Validator tests.
+    /// Wellbore131ValidatorTests
     /// </summary>
-    public partial class Wellbore200ValidatorTests
+    public partial class Wellbore131ValidatorTests
     {
-        //[TestMethod]
-        //public void Wellbore200Validator_MethodName_ExpectedBehavior()
-        //{
-        //}
     }
 }

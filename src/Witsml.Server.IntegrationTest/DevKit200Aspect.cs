@@ -65,16 +65,21 @@ namespace PDS.Witsml.Server
             };
         }
 
+        public DataObjectReference DataObjectReference(AbstractObject dataObject)
+        {
+            var objectType = ObjectTypes.GetObjectType(dataObject);
+            return DataObjectReference(objectType, dataObject.Citation?.Title, dataObject.Uuid);
+        }
+
         public DataObjectReference DataObjectReference(string objectType, string title = null, string uuid = null)
         {
             return new DataObjectReference
             {
                 ContentType = EtpContentTypes.Witsml200.For(objectType),
-                Title = (title == null) ? objectType : title,
-                Uuid = uuid == null ? objectType : uuid,
+                Title = title ?? objectType,
+                Uuid = uuid ?? objectType,
             };
         }
-
 
         public void InitHeader(Log log, LoggingMethod loggingMethod, ChannelIndex channelIndex, IndexDirection direction = IndexDirection.increasing)
         {

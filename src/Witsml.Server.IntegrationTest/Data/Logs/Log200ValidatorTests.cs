@@ -23,8 +23,7 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Log200Validator tests.
     /// </summary>
-    [TestClass]
-    public class Log200ValidatorTests
+    public partial class Log200ValidatorTests
     {
         //[TestMethod]
         //public void Log200Validator_MethodName_ExpectedBehavior()

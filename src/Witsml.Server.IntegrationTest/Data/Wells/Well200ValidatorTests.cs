@@ -16,15 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 namespace PDS.Witsml.Server.Data.Wells
 {
     /// <summary>
     /// Well200Validator tests.
     /// </summary>
-    [TestClass]
-    public class Well200ValidatorTests
+    public partial class Well200ValidatorTests
     {
         //[TestMethod]
         //public void Well200Validator_MethodName_ExpectedBehavior()

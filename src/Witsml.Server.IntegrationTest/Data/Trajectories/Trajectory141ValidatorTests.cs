@@ -25,74 +25,26 @@ using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
-    [TestClass]
-    public class Trajectory141ValidatorTests
+    public partial class Trajectory141ValidatorTests
     {
-        private DevKit141Aspect _devKit;
-        private Well _well;
-        private Wellbore _wellbore;
-        private Trajectory _trajectory;
-
-        public TestContext TestContext { get; set; }
-
-        [TestInitialize]
-        public void TestSetUp()
+        partial void OnTestSetUp()
         {
-            _devKit = new DevKit141Aspect(TestContext);
-
-            _devKit.Store.CapServerProviders = _devKit.Store.CapServerProviders
-                .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
-                .ToArray();
-
-            _well = new Well { Uid = _devKit.Uid(), Name = _devKit.Name("Well 01"), TimeZone = _devKit.TimeZone };
-
-            _wellbore = new Wellbore
-            {
-                Uid = _devKit.Uid(),
-                UidWell = _well.Uid,
-                NameWell = _well.Name,
-                Name = _devKit.Name("Wellbore 01")
-            };
-
-            _trajectory = _devKit.CreateTrajectory(_devKit.Uid(), _devKit.Name("Log 01"), _well.Uid, _well.Name, _wellbore.Uid, _wellbore.Name);
+            Trajectory = DevKit.CreateTrajectory(DevKit.Uid(), DevKit.Name("Log 01"), Well.Uid, Well.Name, Wellbore.Uid, Wellbore.Name);
         }
 
-        [TestCleanup]
-        public void TestCleanup()
+        partial void OnTestCleanUp()
         {
             WitsmlSettings.MaxStationCount = DevKitAspect.DefaultMaxStationCount;
         }
 
         [TestMethod]
-        public void Trajectory141Validator_AddToStore_Error_401_No_Plural_Root_Element()
+        public void Trajectory141Validator_AddToStore_Error_405Trajectory_Already_Exists()
         {
             AddParents();
 
-            var template = "<trajectory xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-                           "   <trajectory uid=\"{0}\" uidWell=\"{1}\" uidWellbore=\"{2}\">" + Environment.NewLine +
-                           "   <nameWell>{3}</nameWell>" + Environment.NewLine +
-                           "   <nameWellbore>{4}</nameWellbore>" + Environment.NewLine +
-                           "   <name>{5}</name>" + Environment.NewLine +
-                           "   </trajectory>" + Environment.NewLine +
-                           "</trajectory>";
+            DevKit.AddAndAssert(Trajectory);
 
-            var xmlIn = string.Format(template, _trajectory.Uid, _trajectory.UidWell, _trajectory.UidWellbore,
-                _trajectory.NameWell, _trajectory.NameWellbore, _trajectory.Name);
-
-            var response = _devKit.AddToStore(ObjectTypes.Trajectory, xmlIn, null, null);
-
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.MissingPluralRootElement, response.Result);
-        }
-
-        [TestMethod]
-        public void Trajectory141Validator_AddToStore_Error_405_Trajectory_Already_Exists()
-        {
-            AddParents();
-
-            _devKit.AddAndAssert(_trajectory);
-
-            _devKit.AddAndAssert(_trajectory, ErrorCodes.DataObjectUidAlreadyExists);
+            DevKit.AddAndAssert(Trajectory, ErrorCodes.DataObjectUidAlreadyExists);
         }
 
         [TestMethod]
@@ -100,8 +52,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             AddParents();
 
-            _trajectory.UidWellbore = null;
-            _devKit.AddAndAssert(_trajectory, ErrorCodes.MissingElementUidForAdd);
+            Trajectory.UidWellbore = null;
+            DevKit.AddAndAssert(Trajectory, ErrorCodes.MissingElementUidForAdd);
         }
 
         [TestMethod]
@@ -110,12 +62,12 @@ namespace PDS.Witsml.Server.Data.Trajectories
             AddParents();
 
             // Add trajectory without stations         
-            _trajectory.TrajectoryStation = _devKit.TrajectoryStations(1, 0);
-            var station = _trajectory.TrajectoryStation.FirstOrDefault();
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(1, 0);
+            var station = Trajectory.TrajectoryStation.FirstOrDefault();
             Assert.IsNotNull(station);
             station.Uid = null;
 
-            _devKit.AddAndAssert(_trajectory, ErrorCodes.MissingElementUidForAdd);
+            DevKit.AddAndAssert(Trajectory, ErrorCodes.MissingElementUidForAdd);
         }
 
         [TestMethod]
@@ -123,7 +75,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             AddParents();
 
-            var response = _devKit.Add<TrajectoryList, Trajectory>(_trajectory, string.Empty);
+            var response = DevKit.Add<TrajectoryList, Trajectory>(Trajectory, string.Empty);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.MissingWmlTypeIn, response.Result);
@@ -134,7 +86,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             AddParents();
 
-            var response = _devKit.AddToStore(ObjectTypes.Trajectory, null, null, null);
+            var response = DevKit.AddToStore(ObjectTypes.Trajectory, null, null, null);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.MissingInputTemplate, response.Result);
@@ -145,8 +97,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             AddParents();
 
-            _trajectory.Name = null;
-            _devKit.AddAndAssert(_trajectory, ErrorCodes.InputTemplateNonConforming);
+            Trajectory.Name = null;
+            DevKit.AddAndAssert(Trajectory, ErrorCodes.InputTemplateNonConforming);
         }
 
         [TestMethod]
@@ -154,7 +106,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             AddParents();
 
-            var response = _devKit.Add<TrajectoryList, Trajectory>(_trajectory, optionsIn: "returnElements=all");
+            var response = DevKit.Add<TrajectoryList, Trajectory>(Trajectory, optionsIn: "returnElements=all");
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.KeywordNotSupportedByFunction, response.Result);
@@ -165,7 +117,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             AddParents();
 
-            var response = _devKit.Add<TrajectoryList, Trajectory>(_trajectory, optionsIn: "compressionMethod=7zip");
+            var response = DevKit.Add<TrajectoryList, Trajectory>(Trajectory, optionsIn: "compressionMethod=7zip");
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.InvalidKeywordValue, response.Result);
@@ -176,7 +128,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             AddParents();
 
-            var response = _devKit.Add<TrajectoryList, Trajectory>(_trajectory, optionsIn: "compressionMethod=gzip");
+            var response = DevKit.Add<TrajectoryList, Trajectory>(Trajectory, optionsIn: "compressionMethod=gzip");
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.KeywordNotSupportedByServer, response.Result);
@@ -188,10 +140,10 @@ namespace PDS.Witsml.Server.Data.Trajectories
             AddParents();
 
             var xmlIn = "<trajectorys xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-                "<trajectory uid=\"" + _trajectory.Uid + "\" uidWell=\"" + _trajectory.UidWell + "\" uidWellbore=\"" + _trajectory.UidWellbore + "\">" + Environment.NewLine +
-                    "<nameWell>" + _trajectory.NameWell + "</nameWell>" + Environment.NewLine +
-                    "<nameWellbore>" + _trajectory.NameWellbore + "</nameWellbore>" + Environment.NewLine +
-                    "<name>" + _trajectory.Name + "</name>" + Environment.NewLine +
+                "<trajectory uid=\"" + Trajectory.Uid + "\" uidWell=\"" + Trajectory.UidWell + "\" uidWellbore=\"" + Trajectory.UidWellbore + "\">" + Environment.NewLine +
+                    "<nameWell>" + Trajectory.NameWell + "</nameWell>" + Environment.NewLine +
+                    "<nameWellbore>" + Trajectory.NameWellbore + "</nameWellbore>" + Environment.NewLine +
+                    "<name>" + Trajectory.Name + "</name>" + Environment.NewLine +
                     "<trajectoryStation uid=\"ts01\">" + Environment.NewLine +
                         "<typeTrajStation>unknown</typeTrajStation>" + Environment.NewLine +
                         "<md uom=\"dega\">5673.5</md>" + Environment.NewLine +
@@ -202,7 +154,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 "</trajectory>" + Environment.NewLine +
                 "</trajectorys>";
 
-            var response = _devKit.AddToStore(ObjectTypes.Trajectory, xmlIn, null, null);
+            var response = DevKit.AddToStore(ObjectTypes.Trajectory, xmlIn, null, null);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.InvalidUnitOfMeasure, response.Result);
@@ -214,10 +166,10 @@ namespace PDS.Witsml.Server.Data.Trajectories
             AddParents();
 
             var xmlIn = "<trajectorys xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-                "<trajectory uid=\"" + _trajectory.Uid + "\" uidWell=\"" + _trajectory.UidWell + "\" uidWellbore=\"" + _trajectory.UidWellbore + "\">" + Environment.NewLine +
-                    "<nameWell>" + _trajectory.NameWell + "</nameWell>" + Environment.NewLine +
-                    "<nameWellbore>" + _trajectory.NameWellbore + "</nameWellbore>" + Environment.NewLine +
-                    "<name>" + _trajectory.Name + "</name>" + Environment.NewLine +
+                "<trajectory uid=\"" + Trajectory.Uid + "\" uidWell=\"" + Trajectory.UidWell + "\" uidWellbore=\"" + Trajectory.UidWellbore + "\">" + Environment.NewLine +
+                    "<nameWell>" + Trajectory.NameWell + "</nameWell>" + Environment.NewLine +
+                    "<nameWellbore>" + Trajectory.NameWellbore + "</nameWellbore>" + Environment.NewLine +
+                    "<name>" + Trajectory.Name + "</name>" + Environment.NewLine +
                     "<trajectoryStation uid=\"ts01\">" + Environment.NewLine +
                         "<typeTrajStation>unknown</typeTrajStation>" + Environment.NewLine +
                         "<md uom=\"\">5673.5</md>" + Environment.NewLine +
@@ -228,7 +180,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 "</trajectory>" + Environment.NewLine +
                 "</trajectorys>";
 
-            var response = _devKit.AddToStore(ObjectTypes.Trajectory, xmlIn, null, null);
+            var response = DevKit.AddToStore(ObjectTypes.Trajectory, xmlIn, null, null);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.MissingUnitForMeasureData, response.Result);
@@ -243,8 +195,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             AddParents();
 
             // Add trajectory without stations         
-            _trajectory.TrajectoryStation = _devKit.TrajectoryStations(6, 0);
-            _devKit.AddAndAssert(_trajectory, ErrorCodes.MaxDataExceeded);
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(6, 0);
+            DevKit.AddAndAssert(Trajectory, ErrorCodes.MaxDataExceeded);
         }
 
         [TestMethod]
@@ -252,29 +204,29 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             AddParents();
 
-            _trajectory.TrajectoryStation = _devKit.TrajectoryStations(2, 0);
-            foreach (var station in _trajectory.TrajectoryStation)
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(2, 0);
+            foreach (var station in Trajectory.TrajectoryStation)
             {
                 station.Uid = "ts00";
             }
 
-            _devKit.AddAndAssert(_trajectory, ErrorCodes.ChildUidNotUnique);
+            DevKit.AddAndAssert(Trajectory, ErrorCodes.ChildUidNotUnique);
         }
 
         [TestMethod]
         public void Trajectory141Validator_AddToStore_Error_478_Parent_Uid_Case_Not_Matching()
         {
             // Base uid
-            var uid = _well.Uid;
+            var uid = Well.Uid;
 
             // Well Uid with uppercase "P"
-            _well.Uid = "P" + uid;
-            _wellbore.UidWell = _well.Uid;
+            Well.Uid = "P" + uid;
+            Wellbore.UidWell = Well.Uid;
 
             AddParents();
 
-            _trajectory.UidWell = "p" + uid;
-            _devKit.AddAndAssert(_trajectory, ErrorCodes.IncorrectCaseParentUid);
+            Trajectory.UidWell = "p" + uid;
+            DevKit.AddAndAssert(Trajectory, ErrorCodes.IncorrectCaseParentUid);
         }
 
         [TestMethod]
@@ -282,9 +234,9 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             AddParents();
 
-            var trajectories = new TrajectoryList { Trajectory = _devKit.List(_trajectory) };
+            var trajectories = new TrajectoryList { Trajectory = DevKit.List(Trajectory) };
             var xmlIn = EnergisticsConverter.ObjectToXml(trajectories);
-            var response = _devKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
+            var response = DevKit.AddToStore(ObjectTypes.Log, xmlIn, null, null);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
@@ -292,10 +244,10 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
         private void AddParents()
         {
-            var response = _devKit.Add<WellList, Well>(_well);
+            var response = DevKit.Add<WellList, Well>(Well);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
-            response = _devKit.Add<WellboreList, Wellbore>(_wellbore);
+            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
         }
     }

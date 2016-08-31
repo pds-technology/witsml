@@ -16,15 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 namespace PDS.Witsml.Server.Data.Logs
 {
     /// <summary>
     /// Log131Validator tests.
     /// </summary>
-    [TestClass]
-    public class Log131ValidatorTests
+    public partial class Log131ValidatorTests
     {
         //[TestMethod]
         //public void Log131Validator_MethodName_ExpectedBehavior()

@@ -25,7 +25,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Framework;
 using PDS.Witsml.Data.Logs;
 
-namespace PDS.Witsml.Server.Data.Channels
+namespace PDS.Witsml.Server.Data.ChannelSets
 {
     [TestClass]
     public class ChannelSet200DataAdapterAddTests
