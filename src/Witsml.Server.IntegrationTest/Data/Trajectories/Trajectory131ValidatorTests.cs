@@ -38,29 +38,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory141Validator_AddToStore_Error_401_No_Plural_Root_Element()
-        {
-            AddParents();
-
-            var template = "<trajectory xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\">" + Environment.NewLine +
-                           "   <trajectory uid=\"{0}\" uidWell=\"{1}\" uidWellbore=\"{2}\">" + Environment.NewLine +
-                           "   <nameWell>{3}</nameWell>" + Environment.NewLine +
-                           "   <nameWellbore>{4}</nameWellbore>" + Environment.NewLine +
-                           "   <name>{5}</name>" + Environment.NewLine +
-                           "   </trajectory>" + Environment.NewLine +
-                           "</trajectory>";
-
-            var xmlIn = string.Format(template, Trajectory.Uid, Trajectory.UidWell, Trajectory.UidWellbore,
-                Trajectory.NameWell, Trajectory.NameWellbore, Trajectory.Name);
-
-            var response = DevKit.AddToStore(ObjectTypes.Trajectory, xmlIn, null, null);
-
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.MissingPluralRootElement, response.Result);
-        }
-
-        [TestMethod]
-        public void Trajectory141Validator_AddToStore_Error_405Trajectory_Already_Exists()
+        public void Trajectory131Validator_AddToStore_Error_405_Trajectory_Already_Exists()
         {
             AddParents();
 
@@ -70,7 +48,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory141Validator_AddToStore_Error_406_Missing_Parent_Uid()
+        public void Trajectory131Validator_AddToStore_Error_406_Missing_Parent_Uid()
         {
             AddParents();
 
@@ -79,7 +57,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory141Validator_AddToStore_Error_406_Missing_Station_Uid()
+        public void Trajectory131Validator_AddToStore_Error_406_Missing_Station_Uid()
         {
             AddParents();
 
@@ -93,7 +71,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory141Validator_AddToStore_Error_407_Missing_Witsml_Object_Type()
+        public void Trajectory131Validator_AddToStore_Error_407_Missing_Witsml_Object_Type()
         {
             AddParents();
 
@@ -104,7 +82,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory141Validator_AddToStore_Error_408_Missing_Input_Template()
+        public void Trajectory131Validator_AddToStore_Error_408_Missing_Input_Template()
         {
             AddParents();
 
@@ -115,7 +93,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory141Validator_AddToStore_Error_409_Non_Conforming_Input_Template()
+        public void Trajectory131Validator_AddToStore_Error_409_Non_Conforming_Input_Template()
         {
             AddParents();
 
@@ -124,7 +102,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory141Validator_AddToStore_Error_440_OptionsIn_Keyword_Not_Recognized()
+        public void Trajectory131Validator_AddToStore_Error_440_OptionsIn_Keyword_Not_Recognized()
         {
             AddParents();
 
@@ -135,7 +113,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory141Validator_AddToStore_Error_443_Uom_Not_Valid()
+        public void Trajectory131Validator_AddToStore_Error_443_Uom_Not_Valid()
         {
             AddParents();
 
@@ -161,7 +139,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory141Validator_AddToStore_Error_453_Uom_Not_Specified()
+        public void Trajectory131Validator_AddToStore_Error_453_Uom_Not_Specified()
         {
             AddParents();
 
@@ -187,7 +165,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory141Validator_AddToStore_Error_456_Max_Data_Exceeded_For_Nodes()
+        public void Trajectory131Validator_AddToStore_Error_456_Max_Data_Exceeded_For_Nodes()
         {
             var maxDataNodes = 5;
             WitsmlSettings.MaxDataNodes = maxDataNodes;
@@ -200,7 +178,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory141Validator_AddToStore_Error_464_Child_Uids_Not_Unique()
+        public void Trajectory131Validator_AddToStore_Error_464_Child_Uids_Not_Unique()
         {
             AddParents();
 
@@ -214,7 +192,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory141Validator_AddToStore_Error_478_Parent_Uid_Case_Not_Matching()
+        public void Trajectory131Validator_AddToStore_Error_478_Parent_Uid_Case_Not_Matching()
         {
             // Base uid
             var uid = Well.Uid;
@@ -230,7 +208,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory141Validator_AddToStore_Error_486_Data_Object_Types_Dont_Match()
+        public void Trajectory131Validator_AddToStore_Error_486_Data_Object_Types_Dont_Match()
         {
             AddParents();
 
