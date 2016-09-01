@@ -1,3 +1,8 @@
+
+
+
+
+
 //----------------------------------------------------------------------- 
 // PDS.Witsml.Server, 2016.1
 //
@@ -23,25 +28,41 @@
 // </auto-generated>
 // ----------------------------------------------------------------------
 
+using Energistics.DataAccess;
+using Energistics.DataAccess.WITSML131;
+using Energistics.DataAccess.WITSML131.ComponentSchemas;
+using Energistics.DataAccess.WITSML131.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 
 namespace PDS.Witsml.Server.Data.Messages
 {
     [TestClass]
     public partial class Message131DataAdapterUpdateTests : Message131TestBase
     {
-		partial void BeforeEachTest();
+        partial void BeforeEachTest();
 
-		partial void AfterEachTest();
+        partial void AfterEachTest();
 
-		protected override void OnTestSetUp()
-		{
-			BeforeEachTest();
-		}
+        protected override void OnTestSetUp()
+        {
+            BeforeEachTest();
+        }
 
-		protected override void OnTestCleanUp()
-		{
-			AfterEachTest();
-		}
-	}
+        protected override void OnTestCleanUp()
+        {
+            AfterEachTest();
+        }
+
+        [TestMethod]
+        public void Message131DataAdapter_UpdateInStore_Can_Update_Message()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<MessageList, Message>(Message);
+            DevKit.UpdateAndAssert<MessageList, Message>(Message);
+            DevKit.GetAndAssert<MessageList, Message>(Message);
+
+        }
+    }
 }

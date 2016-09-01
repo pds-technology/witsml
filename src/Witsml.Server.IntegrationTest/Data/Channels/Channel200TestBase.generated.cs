@@ -35,8 +35,8 @@ namespace PDS.Witsml.Server.Data.Channels
 {
     public abstract partial class Channel200TestBase
     {
-		public Well Well { get; set; }
-		public Wellbore Wellbore { get; set; }
+        public Well Well { get; set; }
+        public Wellbore Wellbore { get; set; }
         public Channel Channel { get; set; }
         public DevKit200Aspect DevKit { get; set; }
         public TestContext TestContext { get; set; }
@@ -48,49 +48,51 @@ namespace PDS.Witsml.Server.Data.Channels
             DevKit = new DevKit200Aspect(TestContext);
 
             Well = new Well
-			{
-				Uuid = DevKit.Uid(),
-				Citation = DevKit.Citation("Well"),
-				GeographicLocationWGS84 = DevKit.Location(),
-				TimeZone = DevKit.TimeZone
-			};
+            {
+                Uuid = DevKit.Uid(),
+                Citation = DevKit.Citation("Well"),
+                GeographicLocationWGS84 = DevKit.Location(),
+                TimeZone = DevKit.TimeZone
+            };
             Wellbore = new Wellbore
-			{
-				Uuid = DevKit.Uid(),
-				Citation = DevKit.Citation("Wellbore"),
-				Well = DevKit.DataObjectReference(Well)
-			};
-			Channel = new Channel
-			{
-				Uuid = DevKit.Uid(),
-				Citation = DevKit.Citation("Channel"),
-				Wellbore = DevKit.DataObjectReference(Wellbore)
-			};
+            {
+                Uuid = DevKit.Uid(),
+                Citation = DevKit.Citation("Wellbore"),
+                Well = DevKit.DataObjectReference(Well)
+            };
+            Channel = new Channel
+            {
+                Uuid = DevKit.Uid(),
+                Citation = DevKit.Citation("Channel"),
+                Wellbore = DevKit.DataObjectReference(Wellbore)
+            };
 
             QueryEmptyList = DevKit.List(new Channel());
 
-			OnTestSetUp();
-			BeforeEachTest();
+            OnTestSetUp();
+            BeforeEachTest();
         }
 
         [TestCleanup]
         public void TestCleanUp()
         {
-			AfterEachTest();
-			OnTestCleanUp();
+            AfterEachTest();
+            OnTestCleanUp();
             DevKit = null;
         }
 
-		partial void BeforeEachTest();
+        partial void BeforeEachTest();
 
-		partial void AfterEachTest();
+        partial void AfterEachTest();
 
-		protected virtual void OnTestSetUp() { }
+        protected virtual void OnTestSetUp() { }
 
-		protected virtual void OnTestCleanUp() { }
+        protected virtual void OnTestCleanUp() { }
 
-		protected virtual void AddParents()
-		{
-		}
-	}
+        protected virtual void AddParents()
+        {
+            DevKit.AddAndAssert(Well);
+            DevKit.AddAndAssert(Wellbore);
+        }
+    }
 }

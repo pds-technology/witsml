@@ -1,3 +1,8 @@
+
+
+
+
+
 //----------------------------------------------------------------------- 
 // PDS.Witsml.Server, 2016.1
 //
@@ -23,25 +28,39 @@
 // </auto-generated>
 // ----------------------------------------------------------------------
 
+using Energistics.DataAccess;
+using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 
 namespace PDS.Witsml.Server.Data.Logs
 {
     [TestClass]
     public partial class Log141DataAdapterAddTests : Log141TestBase
     {
-		partial void BeforeEachTest();
+        partial void BeforeEachTest();
 
-		partial void AfterEachTest();
+        partial void AfterEachTest();
 
-		protected override void OnTestSetUp()
-		{
-			BeforeEachTest();
-		}
+        protected override void OnTestSetUp()
+        {
+            BeforeEachTest();
+        }
 
-		protected override void OnTestCleanUp()
-		{
-			AfterEachTest();
-		}
-	}
+        protected override void OnTestCleanUp()
+        {
+            AfterEachTest();
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_AddToStore_Can_Add_Log()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<LogList, Log>(Log);
+
+        }
+    }
 }

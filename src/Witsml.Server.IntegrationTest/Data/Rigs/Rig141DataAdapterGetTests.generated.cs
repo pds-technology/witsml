@@ -1,3 +1,8 @@
+
+
+
+
+
 //----------------------------------------------------------------------- 
 // PDS.Witsml.Server, 2016.1
 //
@@ -23,25 +28,40 @@
 // </auto-generated>
 // ----------------------------------------------------------------------
 
+using Energistics.DataAccess;
+using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 
 namespace PDS.Witsml.Server.Data.Rigs
 {
     [TestClass]
     public partial class Rig141DataAdapterGetTests : Rig141TestBase
     {
-		partial void BeforeEachTest();
+        partial void BeforeEachTest();
 
-		partial void AfterEachTest();
+        partial void AfterEachTest();
 
-		protected override void OnTestSetUp()
-		{
-			BeforeEachTest();
-		}
+        protected override void OnTestSetUp()
+        {
+            BeforeEachTest();
+        }
 
-		protected override void OnTestCleanUp()
-		{
-			AfterEachTest();
-		}
-	}
+        protected override void OnTestCleanUp()
+        {
+            AfterEachTest();
+        }
+
+        [TestMethod]
+        public void Rig141DataAdapter_GetFromStore_Can_Get_Rig()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<RigList, Rig>(Rig);
+            DevKit.GetAndAssert<RigList, Rig>(Rig);
+
+       }
+    }
 }

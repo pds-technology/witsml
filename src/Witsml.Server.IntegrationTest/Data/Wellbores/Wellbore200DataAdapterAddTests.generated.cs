@@ -1,3 +1,8 @@
+
+
+
+
+
 //----------------------------------------------------------------------- 
 // PDS.Witsml.Server, 2016.1
 //
@@ -23,25 +28,39 @@
 // </auto-generated>
 // ----------------------------------------------------------------------
 
+using Energistics.DataAccess;
+using Energistics.DataAccess.WITSML200;
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Energistics.DataAccess.WITSML200.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
     [TestClass]
     public partial class Wellbore200DataAdapterAddTests : Wellbore200TestBase
     {
-		partial void BeforeEachTest();
+        partial void BeforeEachTest();
 
-		partial void AfterEachTest();
+        partial void AfterEachTest();
 
-		protected override void OnTestSetUp()
-		{
-			BeforeEachTest();
-		}
+        protected override void OnTestSetUp()
+        {
+            BeforeEachTest();
+        }
 
-		protected override void OnTestCleanUp()
-		{
-			AfterEachTest();
-		}
-	}
+        protected override void OnTestCleanUp()
+        {
+            AfterEachTest();
+        }
+
+        [TestMethod]
+        public void Wellbore200DataAdapter_AddToStore_Can_Add_Wellbore()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert(Wellbore);
+
+        }
+    }
 }

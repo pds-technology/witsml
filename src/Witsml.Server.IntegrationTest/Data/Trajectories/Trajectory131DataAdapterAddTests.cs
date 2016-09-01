@@ -32,7 +32,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.AddAndAssert(Trajectory);
 
             // Get trajectory
-            DevKit.GetOneAndAssert(Trajectory);
+            DevKit.GetAndAssert(Trajectory);
         }
 
         [TestMethod]
@@ -46,7 +46,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.AddAndAssert(Trajectory);
 
             // Get trajectory
-            var result = DevKit.GetOneAndAssert(Trajectory);
+            var result = DevKit.GetAndAssert(Trajectory);
             Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
         }
     }

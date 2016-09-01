@@ -36,5 +36,5 @@ namespace PDS.Witsml.Server.Data.Attachments
     [TestClass]
     public partial class Attachment200ValidatorTests : Attachment200TestBase
     {
-	}
+    }
 }

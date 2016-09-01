@@ -39,7 +39,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AddAndAssert(Wellbore);
 
             // Assert wellbore is added
-             DevKit.GetOneAndAssert(Wellbore);
+             DevKit.GetAndAssert(Wellbore);
 
             // Delete wellbore
             var delete = new Wellbore {Uid = Wellbore.Uid, UidWell = Wellbore.UidWell};
@@ -61,7 +61,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AddAndAssert(Wellbore);
 
             // Assert wellbore is added
-            DevKit.GetOneAndAssert(Wellbore);
+            DevKit.GetAndAssert(Wellbore);
 
             // Delete wellbore
             var delete = new Wellbore {Uid = "Wb" + uid, UidWell = Wellbore.UidWell};
@@ -83,7 +83,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AddAndAssert(Wellbore);
 
             // Assert all testing elements are added
-            var result =  DevKit.GetOneAndAssert(Wellbore);
+            var result =  DevKit.GetAndAssert(Wellbore);
             Assert.AreEqual(Wellbore.PurposeWellbore, result.PurposeWellbore);
             Assert.AreEqual(Wellbore.DateTimeKickoff, result.DateTimeKickoff);
 
@@ -94,7 +94,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             // Assert the wellbore elements has been deleted
-            result =  DevKit.GetOneAndAssert(Wellbore);
+            result =  DevKit.GetAndAssert(Wellbore);
             Assert.IsNull(result.PurposeWellbore);
             Assert.IsNull(result.DateTimeKickoff);
         }
@@ -110,7 +110,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AddAndAssert(Wellbore);
 
             // Assert all testing elements are added
-            var result =  DevKit.GetOneAndAssert(Wellbore);
+            var result =  DevKit.GetAndAssert(Wellbore);
             var resultMd = result.MD;
             Assert.IsNotNull(resultMd);
             Assert.IsNotNull(resultMd.Datum);
@@ -122,7 +122,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             // Assert the attributes has been deleted
-            result =  DevKit.GetOneAndAssert(Wellbore);
+            result =  DevKit.GetAndAssert(Wellbore);
             resultMd = result.MD;
             Assert.IsNotNull(resultMd);
             Assert.IsNull(resultMd.Datum);
@@ -144,7 +144,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AddAndAssert(Wellbore);
 
             // Assert all testing elements are added
-            var result =  DevKit.GetOneAndAssert(Wellbore);
+            var result =  DevKit.GetAndAssert(Wellbore);
             var commonData = result.CommonData;
             Assert.IsNotNull(commonData);
             Assert.AreEqual(testCommonData.Comments, commonData.Comments);
@@ -157,7 +157,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             // Assert the wellbore elements has been deleted
-            result =  DevKit.GetOneAndAssert(Wellbore);
+            result =  DevKit.GetAndAssert(Wellbore);
             commonData = result.CommonData;
             Assert.IsNotNull(commonData);
             Assert.IsNull(commonData.Comments);
@@ -182,7 +182,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AddAndAssert(Wellbore);
 
             // Assert all testing elements are added
-            var result =  DevKit.GetOneAndAssert(Wellbore);
+            var result =  DevKit.GetAndAssert(Wellbore);
             var commonData = result.CommonData;
             Assert.IsNotNull(commonData);
             Assert.AreEqual(2, commonData.ExtensionNameValue.Count);
@@ -200,7 +200,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
             // Assert the partial delete of the recurring elements
            
-            result =  DevKit.GetOneAndAssert(Wellbore);
+            result =  DevKit.GetAndAssert(Wellbore);
             commonData = result.CommonData;
             Assert.IsNotNull(commonData);
             var exts = commonData.ExtensionNameValue;

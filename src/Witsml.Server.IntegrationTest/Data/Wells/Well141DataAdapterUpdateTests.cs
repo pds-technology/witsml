@@ -39,7 +39,7 @@ namespace PDS.Witsml.Server.Data.Wells
             well.Uid = DevKit.Uid();
             DevKit.AddAndAssert(well);
             // Query well 
-            var returnWell = DevKit.GetOneAndAssert(well);
+            var returnWell = DevKit.GetAndAssert(well);
             
             var welldatum = returnWell.WellDatum.FirstOrDefault(x => x.Uid.Equals("SL"));
             Assert.IsNotNull(welldatum);
@@ -53,7 +53,7 @@ namespace PDS.Witsml.Server.Data.Wells
             DevKit.UpdateAndAssert(update);
 
             // Query updated well
-            returnWell = DevKit.GetOneAndAssert(well);
+            returnWell = DevKit.GetAndAssert(well);
 
             welldatum = returnWell.WellDatum.FirstOrDefault(x => x.Uid.Equals("SL"));
             Assert.IsNotNull(welldatum);
@@ -77,7 +77,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.Success, results.Result);
 
             // Query the updated well 
-            var result = DevKit.GetOneAndAssert(Well);
+            var result = DevKit.GetAndAssert(Well);
             Assert.AreEqual("BBB Company", result.Operator);
         }
 
@@ -97,7 +97,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.Success, results.Result);
 
             // Query the updated well 
-            var result = DevKit.GetOneAndAssert(Well);
+            var result = DevKit.GetAndAssert(Well);
             Assert.AreEqual("BBB Company", result.Operator);
             Assert.AreEqual("Big Field", result.Field);
         }
@@ -116,7 +116,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.Success, results.Result);
 
             // Query the updated well 
-            var result = DevKit.GetOneAndAssert(Well);
+            var result = DevKit.GetAndAssert(Well);
             Assert.AreEqual(Well.Name, result.Name);
             Assert.IsNull(result.Operator);
         }
@@ -264,7 +264,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.IsNotNull(updateResponse);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
 
-            var result = DevKit.GetOneAndAssert(Well);
+            var result = DevKit.GetAndAssert(Well);
             var commonData = result.CommonData;
             Assert.IsNotNull(commonData);
             var extensionNameValues = commonData.ExtensionNameValue;
@@ -321,7 +321,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
 
             // Query well to make sure datumName was added
-            var result = DevKit.GetOneAndAssert(Well);
+            var result = DevKit.GetAndAssert(Well);
             var welldatum = result.WellDatum.FirstOrDefault(x => x.Uid.Equals("KB"));
             Assert.IsNotNull(welldatum);
             Assert.AreEqual("Kelly Bushing", welldatum.Name);
@@ -356,7 +356,7 @@ namespace PDS.Witsml.Server.Data.Wells
             DevKit.UpdateAndAssert(updateWell);
 
             // Retrieve the updated well and check that there are four acquisitions
-            var queryWell = DevKit.GetOneAndAssert(new Well() {Uid = response.SuppMsgOut});
+            var queryWell = DevKit.GetAndAssert(new Well() {Uid = response.SuppMsgOut});
             Assert.IsNotNull(queryWell.CommonData);
             Assert.IsNotNull(queryWell.CommonData.AcquisitionTimeZone);
             Assert.AreEqual(4, queryWell.CommonData.AcquisitionTimeZone.Count);

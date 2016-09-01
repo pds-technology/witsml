@@ -36,14 +36,14 @@ namespace PDS.Witsml.Server.Data.Wellbores
     [TestClass]
     public partial class Wellbore141ValidatorTests : Wellbore141TestBase
     {
-		#region Error -401
+        #region Error -401
 
-		public static readonly string QueryInvalidPluralRoot =
-			"<wellbore xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-			"  <wellbore>" + Environment.NewLine +
-			"    <name>Test Plural Root Element</name>" + Environment.NewLine +
-			"  </wellbore>" + Environment.NewLine +
-			"</wellbore>";
+        public static readonly string QueryInvalidPluralRoot =
+            "<wellbore xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+            "  <wellbore>" + Environment.NewLine +
+            "    <name>Test Plural Root Element</name>" + Environment.NewLine +
+            "  </wellbore>" + Environment.NewLine +
+            "</wellbore>";
 
         [TestMethod]
         public void Wellbore141Validator_GetFromStore_Error_401_No_Plural_Root_Element()
@@ -73,9 +73,9 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.AreEqual((short)ErrorCodes.MissingPluralRootElement, response?.Result);
         }
 
-		#endregion Error -401
+        #endregion Error -401
 
-		#region Error -403
+        #region Error -403
 
         [TestMethod]
         public void Wellbore141Validator_GetFromStore_Error_403_RequestObjectSelectionCapability_True_MissingNamespace()
@@ -98,6 +98,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.AreEqual((short)ErrorCodes.MissingDefaultWitsmlNamespace, response.Result);
         }
 
-		#endregion Error -403
-	}
+        #endregion Error -403
+    }
 }

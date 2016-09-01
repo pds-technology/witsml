@@ -122,6 +122,13 @@ namespace PDS.Witsml.Server
             return QueryWithErrorCode<TList, TObject>(entity, out result, wmlTypeIn, capClient, optionsIn);
         }
 
+        public List<TObject> Query<TList, TObject>(string wmlTypeIn, string queryIn, string capClient = null, string optionsIn = null) where TList : IEnergisticsCollection
+        {
+            var response = GetFromStore(wmlTypeIn, queryIn, capClient, optionsIn);
+            var results = EnergisticsConverter.XmlToObject<TList>(response.XMLout);
+            return (List<TObject>)results.Items;
+        }
+
         public List<TObject> QueryWithErrorCode<TList, TObject>(TObject entity, out short result, string wmlTypeIn = null, string capClient = null, string optionsIn = null) where TList : IEnergisticsCollection
         {
             var response = Get<TList, TObject>(List(entity), wmlTypeIn, capClient, optionsIn);
