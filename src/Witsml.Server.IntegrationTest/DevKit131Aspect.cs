@@ -37,6 +37,12 @@ namespace PDS.Witsml.Server
                           "   </log>" + Environment.NewLine +
                           "</logs>";
 
+        public static readonly string BasicTrajectoryXmlTemplate = "<trajectorys xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\">" + Environment.NewLine +
+                          "   <trajectory uid=\"{0}\" uidWell=\"{1}\" uidWellbore=\"{2}\">" + Environment.NewLine +
+                          "{3}" +
+                          "   </trajectory>" + Environment.NewLine +
+                          "</trajectorys>";
+
         private const MeasuredDepthUom MdUom = MeasuredDepthUom.m;
         private const WellVerticalCoordinateUom TvdUom = WellVerticalCoordinateUom.m;
         private const PlaneAngleUom AngleUom = PlaneAngleUom.dega;
@@ -169,6 +175,19 @@ namespace PDS.Witsml.Server
         public Log CreateLog(string uid, string name, string uidWell, string nameWell, string uidWellbore, string nameWellbore)
         {
             return new Log()
+            {
+                Uid = uid,
+                Name = name,
+                UidWell = uidWell,
+                NameWell = nameWell,
+                UidWellbore = uidWellbore,
+                NameWellbore = nameWellbore,
+            };
+        }
+
+        public Trajectory CreateTrajectory(string uid, string name, string uidWell, string nameWell, string uidWellbore, string nameWellbore)
+        {
+            return new Trajectory()
             {
                 Uid = uid,
                 Name = name,
@@ -335,10 +354,11 @@ namespace PDS.Witsml.Server
         /// <typeparam name="TObject">The type of the data object.</typeparam>
         /// <param name="query">The query.</param>
         /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <param name="optionsIn">optionsIn value.</param>
         /// <returns>The data object instance if found; otherwise, null.</returns>
-        public TObject QueryAndAssert<TList, TObject>(TObject query, bool isNotNull = true) where TList : IEnergisticsCollection
+        public TObject QueryAndAssert<TList, TObject>(TObject query, bool isNotNull = true, string optionsIn = null) where TList : IEnergisticsCollection
         {
-            var results = Query<TList, TObject>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+            var results = Query<TList, TObject>(query, ObjectTypes.GetObjectType<TList>(), null, optionsIn ?? OptionsIn.ReturnElements.All);
             Assert.AreEqual(isNotNull ? 1 : 0, results.Count);
 
             var result = results.FirstOrDefault();
