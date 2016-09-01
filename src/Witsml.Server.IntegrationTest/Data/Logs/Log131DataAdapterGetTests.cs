@@ -85,6 +85,7 @@ namespace PDS.Witsml.Server.Data.Logs
             WitsmlSettings.TimeRangeSize = DevKitAspect.DefaultTimeChunkRange;
             WitsmlSettings.MaxDataPoints = DevKitAspect.DefaultMaxDataPoints;
             WitsmlSettings.MaxDataNodes = DevKitAspect.DefaultMaxDataNodes;
+            WitsmlOperationContext.Current = null;
         }
 
         [TestMethod]

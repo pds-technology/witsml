@@ -23,6 +23,7 @@ using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -59,6 +60,16 @@ namespace PDS.Witsml.Server.Data.Logs
             };
 
             _log = _devKit.CreateLog(_devKit.Uid(), _devKit.Name("Log 01"), _well.Uid, _well.Name, _wellbore.Uid, _wellbore.Name);
+        }
+
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            WitsmlSettings.DepthRangeSize = DevKitAspect.DefaultDepthChunkRange;
+            WitsmlSettings.TimeRangeSize = DevKitAspect.DefaultTimeChunkRange;
+            WitsmlSettings.MaxDataPoints = DevKitAspect.DefaultMaxDataPoints;
+            WitsmlSettings.MaxDataNodes = DevKitAspect.DefaultMaxDataNodes;
+            WitsmlOperationContext.Current = null;
         }
 
         [TestMethod]

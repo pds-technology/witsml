@@ -59,6 +59,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         public void TestCleanup()
         {
             WitsmlSettings.MaxStationCount = DevKitAspect.DefaultMaxStationCount;
+            WitsmlSettings.MaxDataNodes = DevKitAspect.DefaultMaxDataNodes;
         }
 
         [TestMethod]

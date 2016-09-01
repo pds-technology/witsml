@@ -27,14 +27,10 @@ namespace PDS.Witsml.Server.Data.Trajectories
 {
     public partial class Trajectory141ValidatorTests
     {
-        partial void OnTestSetUp()
-        {
-            Trajectory = DevKit.CreateTrajectory(DevKit.Uid(), DevKit.Name("Log 01"), Well.Uid, Well.Name, Wellbore.Uid, Wellbore.Name);
-        }
-
         partial void OnTestCleanUp()
         {
             WitsmlSettings.MaxStationCount = DevKitAspect.DefaultMaxStationCount;
+            WitsmlSettings.MaxDataNodes = DevKitAspect.DefaultMaxDataNodes;
         }
 
         [TestMethod]

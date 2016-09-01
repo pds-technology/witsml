@@ -79,11 +79,11 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestCleanup]
         public void TestCleanup()
         {
-            WitsmlOperationContext.Current = null;
             WitsmlSettings.DepthRangeSize = DevKitAspect.DefaultDepthChunkRange;
             WitsmlSettings.TimeRangeSize = DevKitAspect.DefaultTimeChunkRange;
             WitsmlSettings.MaxDataPoints = DevKitAspect.DefaultMaxDataPoints;
             WitsmlSettings.MaxDataNodes = DevKitAspect.DefaultMaxDataNodes;
+            WitsmlOperationContext.Current = null;
         }
 
         [TestMethod]

@@ -36,7 +36,8 @@ namespace PDS.Witsml.Server.Data.Logs
             WitsmlSettings.TimeRangeSize = DevKitAspect.DefaultTimeChunkRange;
             WitsmlSettings.MaxDataPoints = DevKitAspect.DefaultMaxDataPoints;
             WitsmlSettings.MaxDataNodes = DevKitAspect.DefaultMaxDataNodes;
-        }       
+            WitsmlOperationContext.Current = null;
+        }
 
         [TestMethod]
         public void Log141Validator_AddToStore_Error_447_Duplicate_Column_Identifiers_InLogCurveInfo()
