@@ -23,5 +23,9 @@ namespace PDS.Witsml.Server.Data.Trajectories
     /// </summary>
     public partial class Trajectory200TestBase
     {
+        partial void BeforeEachTest()
+        {
+            Trajectory.ServiceCompany = "Service Company T";
+        }
     }
 }

@@ -28,7 +28,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
     /// </summary>
     public partial class Trajectory141DataAdapterGetTests
     {
-
         [TestMethod]
         public void Trajectory141DataAdapter_GetFromStore_Can_Retrieve_Header_Return_Elements_All()
         {
@@ -36,13 +35,12 @@ namespace PDS.Witsml.Server.Data.Trajectories
             AddParents();
 
             // Add trajectory without stations
-            Trajectory.ServiceCompany = "Service Company T";
             DevKit.AddAndAssert(Trajectory);
 
             // Get trajectory
-            var query = DevKit.CreateTrajectory(Trajectory.Uid, null, Trajectory.UidWell, null, Trajectory.UidWellbore, null);
-            var result = DevKit.QueryAndAssert<TrajectoryList, Trajectory>(query);
-            AssertNames(result, Trajectory);
+            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory);
+
+            DevKit.AssertNames(result, Trajectory);
             Assert.AreEqual(Trajectory.ServiceCompany, result.ServiceCompany);
             Assert.IsNotNull(result.CommonData);
         }
@@ -54,13 +52,12 @@ namespace PDS.Witsml.Server.Data.Trajectories
             AddParents();
 
             // Add trajectory without stations
-            Trajectory.ServiceCompany = "Service Company T";
             DevKit.AddAndAssert(Trajectory);
 
             // Get trajectory
-            var query = DevKit.CreateTrajectory(Trajectory.Uid, null, Trajectory.UidWell, null, Trajectory.UidWellbore, null);
-            var result = DevKit.QueryAndAssert<TrajectoryList, Trajectory>(query, optionsIn: OptionsIn.ReturnElements.IdOnly);
-            AssertNames(result, Trajectory);
+            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory, optionsIn: OptionsIn.ReturnElements.IdOnly);
+
+            DevKit.AssertNames(result, Trajectory);
             Assert.IsNull(result.ServiceCompany);
         }
 
@@ -71,13 +68,12 @@ namespace PDS.Witsml.Server.Data.Trajectories
             AddParents();
 
             // Add trajectory without stations
-            Trajectory.ServiceCompany = "Service Company T";
             DevKit.AddAndAssert(Trajectory);
 
             // Get trajectory
-            var query = DevKit.CreateTrajectory(Trajectory.Uid, null, Trajectory.UidWell, null, Trajectory.UidWellbore, null);
-            var result = DevKit.QueryAndAssert<TrajectoryList, Trajectory>(query, optionsIn: string.Empty);
-            AssertNames(result);
+            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory, optionsIn: string.Empty);
+
+            DevKit.AssertNames(result);
             Assert.IsNull(result.ServiceCompany);
         }
 
@@ -95,8 +91,9 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var queryIn = string.Format(DevKit141Aspect.BasicTrajectoryXmlTemplate, Trajectory.Uid, Trajectory.UidWell, Trajectory.UidWellbore, "<serviceCompany />");
             var results = DevKit.Query<TrajectoryList, Trajectory>(ObjectTypes.Trajectory, queryIn, null, OptionsIn.ReturnElements.Requested);
             var result = results.FirstOrDefault();
+
             Assert.IsNotNull(result);
-            AssertNames(result);
+            DevKit.AssertNames(result);
             Assert.AreEqual(Trajectory.ServiceCompany, result.ServiceCompany);
         }
 
@@ -105,6 +102,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             var trajectory = new Trajectory();
             var result = DevKit.QueryAndAssert<TrajectoryList, Trajectory>(trajectory, optionsIn: OptionsIn.RequestObjectSelectionCapability.True);
+
             Assert.IsNotNull(result);
             Assert.AreEqual("abc", result.Uid);
             Assert.AreEqual(1, result.TrajectoryStation.Count);
@@ -122,8 +120,15 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.AddAndAssert(Trajectory);
 
             // Add a non-private trajectory
-            var trajectory2 = DevKit.CreateTrajectory(DevKit.Uid(), "Trajectory public", Trajectory.UidWell,
-                Trajectory.NameWell, Trajectory.UidWellbore, Trajectory.NameWellbore);
+            var trajectory2 = new Trajectory
+            {
+                Uid = DevKit.Uid(),
+                Name = "Trajectory public",
+                UidWell = Trajectory.UidWell,
+                NameWell = Trajectory.NameWell,
+                UidWellbore = Trajectory.UidWellbore,
+                NameWellbore = Trajectory.NameWellbore
+            };
 
             DevKit.AddAndAssert(trajectory2);
 
@@ -140,22 +145,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             var result = results.FirstOrDefault(x => x.Uid.Equals(Trajectory.Uid));
             Assert.IsNotNull(result);
-        }
-
-        private void AssertNames(Trajectory result, Trajectory entity = null)
-        {
-            if (entity != null)
-            {
-                Assert.AreEqual(entity.Name, result.Name);
-                Assert.AreEqual(entity.NameWell, result.NameWell);
-                Assert.AreEqual(entity.NameWellbore, result.NameWellbore);
-            }
-            else
-            {
-                Assert.IsNull(result.Name);
-                Assert.IsNull(result.NameWell);
-                Assert.IsNull(result.NameWellbore);
-            }
         }
     }
 }

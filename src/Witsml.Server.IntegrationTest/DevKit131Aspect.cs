@@ -185,19 +185,6 @@ namespace PDS.Witsml.Server
             };
         }
 
-        public Trajectory CreateTrajectory(string uid, string name, string uidWell, string nameWell, string uidWellbore, string nameWellbore)
-        {
-            return new Trajectory()
-            {
-                Uid = uid,
-                Name = name,
-                UidWell = uidWell,
-                NameWell = nameWell,
-                UidWellbore = uidWellbore,
-                NameWellbore = nameWellbore,
-            };
-        }
-
         /// <summary>
         /// Adds well object and test the return code
         /// </summary>
@@ -249,22 +236,6 @@ namespace PDS.Witsml.Server
         }
 
         /// <summary>
-        /// Adds a wellbore child object and test the return code
-        /// </summary>
-        /// <typeparam name="TList">The type of the container.</typeparam>
-        /// <typeparam name="TObject">The type of the data object.</typeparam>
-        /// <param name="dataObject">The data object.</param>
-        /// <param name="errorCode">The error code.</param>
-        /// <returns>The <see cref="WMLS_AddToStoreResponse"/> from the store.</returns>
-        public WMLS_AddToStoreResponse AddAndAssert<TList, TObject>(TObject dataObject, ErrorCodes errorCode = ErrorCodes.Success) where TList : IEnergisticsCollection
-        {
-            var response = Add<TList, TObject>(dataObject);
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)errorCode, response.Result);
-            return response;
-        }
-
-        /// <summary>
         /// Does get query for single well object and test for result count equal to 1 and is not null
         /// </summary>
         /// <param name="well">the well</param>
@@ -272,10 +243,7 @@ namespace PDS.Witsml.Server
         /// <returns>The first well from the response</returns>
         public Well GetAndAssert(Well well, bool isNotNull = true)
         {
-            Assert.IsNotNull(well.Uid);
-
-            var query = new Well { Uid = well.Uid };
-            return QueryAndAssert<WellList, Well>(query, isNotNull);
+            return GetAndAssert<WellList, Well>(well, isNotNull);
         }
 
         /// <summary>
@@ -286,11 +254,7 @@ namespace PDS.Witsml.Server
         /// <returns>The first wellbore from the response</returns>
         public Wellbore GetAndAssert(Wellbore wellbore, bool isNotNull = true)
         {
-            Assert.IsNotNull(wellbore.UidWell);
-            Assert.IsNotNull(wellbore.Uid);
-
-            var query = new Wellbore { UidWell = wellbore.UidWell, Uid = wellbore.Uid };
-            return QueryAndAssert<WellboreList, Wellbore>(query, isNotNull);
+            return QueryAndAssert<WellboreList, Wellbore>(wellbore, isNotNull);
         }
 
         /// <summary>
@@ -313,58 +277,6 @@ namespace PDS.Witsml.Server
         public Trajectory GetAndAssert(Trajectory trajectory, bool isNotNull = true)
         {
             return GetAndAssert<TrajectoryList, Trajectory>(trajectory, isNotNull);
-        }
-
-        /// <summary>
-        /// Executes GetFromStore and tests the response.
-        /// </summary>
-        /// <typeparam name="TList">The type of the container.</typeparam>
-        /// <typeparam name="TObject">The type of the data object.</typeparam>
-        /// <param name="example">The example data object.</param>
-        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
-        /// <returns>The data object instance if found; otherwise, null.</returns>
-        public TObject GetAndAssert<TList, TObject>(TObject example, bool isNotNull = true) where TList : IEnergisticsCollection where TObject : IDataObject
-        {
-            var wellObject = example as IWellObject;
-            var wellboreObject = example as IWellboreObject;
-            var query = Activator.CreateInstance<TObject>();
-
-            Assert.IsNotNull(example.Uid);
-            query.Uid = example.Uid;
-
-            if (wellObject != null)
-            {
-                Assert.IsNotNull(wellObject.UidWell);
-                ((IWellObject)query).UidWell = wellObject.UidWell;
-            }
-
-            if (wellboreObject != null)
-            {
-                Assert.IsNotNull(wellboreObject.UidWellbore);
-                ((IWellboreObject)query).UidWellbore = wellboreObject.UidWellbore;
-            }
-
-            return QueryAndAssert<TList, TObject>(query, isNotNull);
-        }
-
-        /// <summary>
-        /// Executes GetFromStore and tests the response.
-        /// </summary>
-        /// <typeparam name="TList">The type of the container.</typeparam>
-        /// <typeparam name="TObject">The type of the data object.</typeparam>
-        /// <param name="query">The query.</param>
-        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
-        /// <param name="optionsIn">optionsIn value.</param>
-        /// <returns>The data object instance if found; otherwise, null.</returns>
-        public TObject QueryAndAssert<TList, TObject>(TObject query, bool isNotNull = true, string optionsIn = null) where TList : IEnergisticsCollection
-        {
-            var results = Query<TList, TObject>(query, ObjectTypes.GetObjectType<TList>(), null, optionsIn ?? OptionsIn.ReturnElements.All);
-            Assert.AreEqual(isNotNull ? 1 : 0, results.Count);
-
-            var result = results.FirstOrDefault();
-            Assert.AreEqual(isNotNull, result != null);
-
-            return result;
         }
 
         /// <summary>
@@ -398,21 +310,6 @@ namespace PDS.Witsml.Server
         }
 
         /// <summary>
-        /// Updates the data object and test the return code
-        /// </summary>
-        /// <typeparam name="TList">The type of the container.</typeparam>
-        /// <typeparam name="TObject">The type of the data object.</typeparam>
-        /// <param name="dataObject">The data object.</param>
-        /// <param name="errorCode">The error code.</param>
-        public void UpdateAndAssert<TList, TObject>(TObject dataObject, ErrorCodes errorCode = ErrorCodes.Success) where TList : IEnergisticsCollection
-        {
-            var response = Update<TList, TObject>(dataObject);
-
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)errorCode, response.Result);
-        }
-
-        /// <summary>
         /// Deletes the well and test the return code
         /// </summary>
         /// <param name="well">The well.</param>
@@ -440,21 +337,6 @@ namespace PDS.Witsml.Server
         public void DeleteAndAssert(Log log, ErrorCodes errorCode = ErrorCodes.Success)
         {
             DeleteAndAssert<LogList, Log>(log);
-        }
-
-        /// <summary>
-        /// Deletes the data object and test the return code
-        /// </summary>
-        /// <typeparam name="TList">The type of the container.</typeparam>
-        /// <typeparam name="TObject">The type of the data object.</typeparam>
-        /// <param name="dataObject">The data object.</param>
-        /// <param name="errorCode">The error code.</param>
-        public void DeleteAndAssert<TList, TObject>(TObject dataObject, ErrorCodes errorCode = ErrorCodes.Success) where TList : IEnergisticsCollection
-        {
-            var response = Delete<TList, TObject>(dataObject);
-
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)errorCode, response.Result);
         }
 
         /// <summary>
