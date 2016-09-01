@@ -41,29 +41,33 @@ namespace PDS.Witsml.Server.Data
         public void Register()
         {
             // WITSML 1.3.1.1
-            Register<Witsml131.Well>();
-            Register<Witsml131.Wellbore>();
             Register<Witsml131.Log>();
+            Register<Witsml131.Message>();
             Register<Witsml131.Rig>();
             Register<Witsml131.Trajectory>();
-            Register<Witsml131.Message>();
+            Register<Witsml141.StandAloneWellboreGeometry>();
+            Register<Witsml131.Wellbore>();
+            Register<Witsml131.Well>();
 
             // WITSML 1.4.1.1
-            Register<Witsml141.Well>();
-            Register<Witsml141.Wellbore>();
+            Register<Witsml141.Attachment>();
             Register<Witsml141.Log>();
+            Register<Witsml141.Message>();
             Register<Witsml141.Rig>();
             Register<Witsml141.Trajectory>();
-            Register<Witsml141.Message>();
+            Register<Witsml141.StandAloneWellboreGeometry>();
+            Register<Witsml141.Wellbore>();
+            Register<Witsml141.Well>();
 
             // WITSML 2.0
-            Register2<Witsml200.Well>();
-            Register2<Witsml200.Wellbore>();
-            Register2<Witsml200.Log>();
-            Register2<Witsml200.ChannelSet>();
+            Register<Witsml141.Attachment>();
             Register2<Witsml200.Channel>();
-            Register2<Witsml200.Trajectory>();
+            Register2<Witsml200.ChannelSet>();
+            Register2<Witsml200.Log>();
             Register2<Witsml200.Rig>();
+            Register2<Witsml200.Trajectory>();
+            Register2<Witsml200.Wellbore>();
+            Register2<Witsml200.Well>();
 
             Register3<Witsml200.ComponentSchemas.GeodeticWellLocation>();
             Register3<Witsml200.ComponentSchemas.GeodeticEpsgCrs>();
