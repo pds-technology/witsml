@@ -55,36 +55,36 @@ namespace PDS.Witsml.Server.Data.Wells
                 .ToArray();
 
             Well = new Well
-			{
-				Uid = DevKit.Uid(),
-				Name = DevKit.Name("Well"),
-				TimeZone = DevKit.TimeZone
-			};
+            {
+                Uid = DevKit.Uid(),
+                Name = DevKit.Name("Well"),
+                TimeZone = DevKit.TimeZone
+            };
 
             QueryEmptyList = DevKit.List(new Well());
 
-			OnTestSetUp();
-			BeforeEachTest();
+            OnTestSetUp();
+            BeforeEachTest();
         }
 
         [TestCleanup]
         public void TestCleanUp()
         {
-			AfterEachTest();
-			OnTestCleanUp();
+            AfterEachTest();
+            OnTestCleanUp();
             DevKit = null;
         }
 
-		partial void BeforeEachTest();
+        partial void BeforeEachTest();
 
-		partial void AfterEachTest();
+        partial void AfterEachTest();
 
-		protected virtual void OnTestSetUp() { }
+        protected virtual void OnTestSetUp() { }
 
-		protected virtual void OnTestCleanUp() { }
+        protected virtual void OnTestCleanUp() { }
 
-		protected virtual void AddParents()
-		{
-		}
-	}
+        protected virtual void AddParents()
+        {
+        }
+    }
 }

@@ -36,14 +36,14 @@ namespace PDS.Witsml.Server.Data.Messages
     [TestClass]
     public partial class Message131ValidatorTests : Message131TestBase
     {
-		#region Error -401
+        #region Error -401
 
-		public static readonly string QueryInvalidPluralRoot =
-			"<message xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\">" + Environment.NewLine +
-			"  <message>" + Environment.NewLine +
-			"    <name>Test Plural Root Element</name>" + Environment.NewLine +
-			"  </message>" + Environment.NewLine +
-			"</message>";
+        public static readonly string QueryInvalidPluralRoot =
+            "<message xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\">" + Environment.NewLine +
+            "  <message>" + Environment.NewLine +
+            "    <name>Test Plural Root Element</name>" + Environment.NewLine +
+            "  </message>" + Environment.NewLine +
+            "</message>";
 
         [TestMethod]
         public void Message131Validator_GetFromStore_Error_401_No_Plural_Root_Element()
@@ -73,9 +73,9 @@ namespace PDS.Witsml.Server.Data.Messages
             Assert.AreEqual((short)ErrorCodes.MissingPluralRootElement, response?.Result);
         }
 
-		#endregion Error -401
+        #endregion Error -401
 
-		#region Error -403
+        #region Error -403
 
         [TestMethod]
         public void Message131Validator_GetFromStore_Error_403_RequestObjectSelectionCapability_True_MissingNamespace()
@@ -98,6 +98,6 @@ namespace PDS.Witsml.Server.Data.Messages
             Assert.AreEqual((short)ErrorCodes.MissingDefaultWitsmlNamespace, response.Result);
         }
 
-		#endregion Error -403
-	}
+        #endregion Error -403
+    }
 }

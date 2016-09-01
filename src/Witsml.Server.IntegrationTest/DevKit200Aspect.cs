@@ -259,5 +259,25 @@ namespace PDS.Witsml.Server
 
             return log;
         }
+
+        public void GetAndAssert<T>(T dataObject, bool isNotNull = true) where T : AbstractObject
+        {
+            
+        }
+
+        public void AddAndAssert<T>(T dataObject) where T : AbstractObject
+        {
+
+        }
+
+        public void UpdateAndAssert<T>(T dataObject) where T : AbstractObject
+        {
+
+        }
+
+        public void DeleteAndAssert<T>(T dataObject) where T : AbstractObject
+        {
+
+        }
     }
 }

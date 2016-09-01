@@ -179,28 +179,14 @@ namespace PDS.Witsml.Server
             };
         }
 
-        public Trajectory CreateTrajectory(string uid, string name, string uidWell, string nameWell, string uidWellbore, string nameWellbore)
-        {
-            return new Trajectory()
-            {
-                Uid = uid,
-                Name = name,
-                UidWell = uidWell,
-                NameWell = nameWell,
-                UidWellbore = uidWellbore,
-                NameWellbore = nameWellbore,
-            };
-        }
-
         /// <summary>
         /// Adds well object and test the return code
         /// </summary>
         /// <param name="well">the well</param>
         /// <param name="errorCode">the errorCode</param>
-        public void AddAndAssert(Well well, ErrorCodes errorCode = ErrorCodes.Success)
+        public WMLS_AddToStoreResponse AddAndAssert(Well well, ErrorCodes errorCode = ErrorCodes.Success)
         {
-            var response = Add<WellList, Well>(well);
-            Assert.AreEqual((short)errorCode, response.Result);
+            return AddAndAssert<WellList, Well>(well, errorCode);
         }
 
         /// <summary>
@@ -208,21 +194,19 @@ namespace PDS.Witsml.Server
         /// </summary>
         /// <param name="wellbore">the wellbore</param>
         /// <param name="errorCode">the errorCode</param>
-        public void AddAndAssert(Wellbore wellbore, ErrorCodes errorCode = ErrorCodes.Success)
+        public WMLS_AddToStoreResponse AddAndAssert(Wellbore wellbore, ErrorCodes errorCode = ErrorCodes.Success)
         {
-            var response = Add<WellboreList, Wellbore>(wellbore);
-            Assert.AreEqual((short)errorCode, response.Result);
+            return AddAndAssert<WellboreList, Wellbore>(wellbore, errorCode);
         }
 
         /// <summary>
         /// Adds log object and test the return code
         /// </summary>
-        /// <param name="log">the wellbore</param>
-        /// <param name="errorCode">the errorCode</param>
-        public void AddAndAssert(Log log, ErrorCodes errorCode = ErrorCodes.Success)
+        /// <param name="log">the log.</param>
+        /// <param name="errorCode">the errorCode.</param>
+        public WMLS_AddToStoreResponse AddAndAssert(Log log, ErrorCodes errorCode = ErrorCodes.Success)
         {
-            var response = Add<LogList, Log>(log);
-            Assert.AreEqual((short)errorCode, response.Result);
+            return AddAndAssert<LogList, Log>(log, errorCode);
         }
 
         /// <summary>
@@ -230,10 +214,9 @@ namespace PDS.Witsml.Server
         /// </summary>
         /// <param name="trajectory">the trajectory.</param>
         /// <param name="errorCode">the errorCode.</param>
-        public void AddAndAssert(Trajectory trajectory, ErrorCodes errorCode = ErrorCodes.Success)
+        public WMLS_AddToStoreResponse AddAndAssert(Trajectory trajectory, ErrorCodes errorCode = ErrorCodes.Success)
         {
-            var response = Add<TrajectoryList, Trajectory>(trajectory);
-            Assert.AreEqual((short)errorCode, response.Result);
+            return AddAndAssert<TrajectoryList, Trajectory>(trajectory, errorCode);
         }
 
         /// <summary>
@@ -241,91 +224,217 @@ namespace PDS.Witsml.Server
         /// </summary>
         /// <param name="rig">the rig</param>
         /// <param name="errorCode">the errorCode</param>
-        public void AddAndAssert(Rig rig, ErrorCodes errorCode = ErrorCodes.Success)
+        public WMLS_AddToStoreResponse AddAndAssert(Rig rig, ErrorCodes errorCode = ErrorCodes.Success)
         {
-            var response = Add<RigList, Rig>(rig);
+            return AddAndAssert<RigList, Rig>(rig, errorCode);
+        }
+
+        /// <summary>
+        /// Adds a wellbore child object and test the return code
+        /// </summary>
+        /// <typeparam name="TList">The type of the container.</typeparam>
+        /// <typeparam name="TObject">The type of the data object.</typeparam>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="errorCode">The error code.</param>
+        /// <returns>The <see cref="WMLS_AddToStoreResponse"/> from the store.</returns>
+        public WMLS_AddToStoreResponse AddAndAssert<TList, TObject>(TObject dataObject, ErrorCodes errorCode = ErrorCodes.Success) where TList : IEnergisticsCollection
+        {
+            var response = Add<TList, TObject>(dataObject);
+            Assert.IsNotNull(response);
             Assert.AreEqual((short)errorCode, response.Result);
+            return response;
         }
 
         /// <summary>
         /// Does get query for single well object and test for result count equal to 1 and is not null
         /// </summary>
         /// <param name="well">the well</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
         /// <returns>The first well from the response</returns>
-        public Well GetOneAndAssert(Well well)
+        public Well GetAndAssert(Well well, bool isNotNull = true)
         {
             Assert.IsNotNull(well.Uid);
 
             var query = new Well { Uid = well.Uid };
-
-            var results = Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
-            Assert.AreEqual(1, results.Count);
-            var result = results.FirstOrDefault();
-            Assert.IsNotNull(result);
-
-            return result;
+            return QueryAndAssert<WellList, Well>(query, isNotNull);
         }
 
         /// <summary>
         /// Does get query for single wellbore object and test for result count equal to 1 and is not null
         /// </summary>
         /// <param name="wellbore">the wellbore</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
         /// <returns>The first wellbore from the response</returns>
-        public Wellbore GetOneAndAssert(Wellbore wellbore)
+        public Wellbore GetAndAssert(Wellbore wellbore, bool isNotNull = true)
         {
             Assert.IsNotNull(wellbore.UidWell);
             Assert.IsNotNull(wellbore.Uid);
 
             var query = new Wellbore { UidWell = wellbore.UidWell, Uid = wellbore.Uid };
-
-            var results = Query<WellboreList, Wellbore>(query, ObjectTypes.Wellbore, null, optionsIn: OptionsIn.ReturnElements.All);
-            Assert.AreEqual(1, results.Count);
-            var result = results.FirstOrDefault();
-            Assert.IsNotNull(result);
-
-            return result;
+            return QueryAndAssert<WellboreList, Wellbore>(query, isNotNull);
         }
 
         /// <summary>
         /// Does get query for single log object and test for result count equal to 1 and is not null
         /// </summary>
         /// <param name="log">the log with UIDs for well and wellbore</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
         /// <returns>The first log from the response</returns>
-        public Log GetOneAndAssert(Log log)
+        public Log GetAndAssert(Log log, bool isNotNull = true)
         {
-            Assert.IsNotNull(log.UidWell);
-            Assert.IsNotNull(log.UidWellbore);
-            Assert.IsNotNull(log.Uid);
-
-            var query = CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
-            var results = Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
-            Assert.AreEqual(1, results.Count);
-
-            var result = results.FirstOrDefault();
-            Assert.IsNotNull(result);
-
-            return result;
+            return GetAndAssert<LogList, Log>(log, isNotNull);
         }
 
         /// <summary>
         /// Does get query for single trajectory object and test for result count equal to 1 and is not null
         /// </summary>
         /// <param name="trajectory">the log with UIDs for well and wellbore</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
         /// <returns>The first trajectory from the response</returns>
-        public Trajectory GetOneAndAssert(Trajectory trajectory)
+        public Trajectory GetAndAssert(Trajectory trajectory, bool isNotNull = true)
         {
-            Assert.IsNotNull(trajectory.UidWell);
-            Assert.IsNotNull(trajectory.UidWellbore);
-            Assert.IsNotNull(trajectory.Uid);
+            return GetAndAssert<TrajectoryList, Trajectory>(trajectory, isNotNull);
+        }
 
-            var query = CreateTrajectory(trajectory.Uid, null, trajectory.UidWell, null, trajectory.UidWellbore, null);
-            var results = Query<TrajectoryList, Trajectory>(query, optionsIn: OptionsIn.ReturnElements.All);
-            Assert.AreEqual(1, results.Count);
+        /// <summary>
+        /// Executes GetFromStore and tests the response.
+        /// </summary>
+        /// <typeparam name="TList">The type of the container.</typeparam>
+        /// <typeparam name="TObject">The type of the data object.</typeparam>
+        /// <param name="example">The example data object.</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <returns>The data object instance if found; otherwise, null.</returns>
+        public TObject GetAndAssert<TList, TObject>(TObject example, bool isNotNull = true) where TList : IEnergisticsCollection where TObject : IDataObject
+        {
+            var wellObject = example as IWellObject;
+            var wellboreObject = example as IWellboreObject;
+            var query = Activator.CreateInstance<TObject>();
+
+            Assert.IsNotNull(example.Uid);
+            query.Uid = example.Uid;
+
+            if (wellObject != null)
+            {
+                Assert.IsNotNull(wellObject.UidWell);
+                ((IWellObject)query).UidWell = wellObject.UidWell;
+            }
+
+            if (wellboreObject != null)
+            {
+                Assert.IsNotNull(wellboreObject.UidWellbore);
+                ((IWellboreObject)query).UidWellbore = wellboreObject.UidWellbore;
+            }
+
+            return QueryAndAssert<TList, TObject>(query, isNotNull);
+        }
+
+        /// <summary>
+        /// Executes GetFromStore and tests the response.
+        /// </summary>
+        /// <typeparam name="TList">The type of the container.</typeparam>
+        /// <typeparam name="TObject">The type of the data object.</typeparam>
+        /// <param name="query">The query.</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <returns>The data object instance if found; otherwise, null.</returns>
+        public TObject QueryAndAssert<TList, TObject>(TObject query, bool isNotNull = true) where TList : IEnergisticsCollection
+        {
+            var results = Query<TList, TObject>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+            Assert.AreEqual(isNotNull ? 1 : 0, results.Count);
 
             var result = results.FirstOrDefault();
-            Assert.IsNotNull(result);
+            Assert.AreEqual(isNotNull, result != null);
 
             return result;
+        }
+
+        /// <summary>
+        /// Does UpdateInStore on well object and test the return code
+        /// </summary>
+        /// <param name="well">the well</param>
+        /// <param name="errorCode">The error code.</param>
+        public void UpdateAndAssert(Well well, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            UpdateAndAssert<WellList, Well>(well);
+        }
+
+        /// <summary>
+        /// Does UpdateInStore on wellbore object and test the return code
+        /// </summary>
+        /// <param name="wellbore">the wellbore</param>
+        /// <param name="errorCode">The error code.</param>
+        public void UpdateAndAssert(Wellbore wellbore, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            UpdateAndAssert<WellboreList, Wellbore>(wellbore);
+        }
+
+        /// <summary>
+        /// Does UpdateInStore on log object and test the return code
+        /// </summary>
+        /// <param name="log">the log</param>
+        /// <param name="errorCode">The error code.</param>
+        public void UpdateAndAssert(Log log, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            UpdateAndAssert<LogList, Log>(log);
+        }
+
+        /// <summary>
+        /// Updates the data object and test the return code
+        /// </summary>
+        /// <typeparam name="TList">The type of the container.</typeparam>
+        /// <typeparam name="TObject">The type of the data object.</typeparam>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="errorCode">The error code.</param>
+        public void UpdateAndAssert<TList, TObject>(TObject dataObject, ErrorCodes errorCode = ErrorCodes.Success) where TList : IEnergisticsCollection
+        {
+            var response = Update<TList, TObject>(dataObject);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)errorCode, response.Result);
+        }
+
+        /// <summary>
+        /// Deletes the well and test the return code
+        /// </summary>
+        /// <param name="well">The well.</param>
+        /// <param name="errorCode">The error code.</param>
+        public void DeleteAndAssert(Well well, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            DeleteAndAssert<WellList, Well>(well);
+        }
+
+        /// <summary>
+        /// Deletes the wellbore and test the return code
+        /// </summary>
+        /// <param name="wellbore">The wellbore.</param>
+        /// <param name="errorCode">The error code.</param>
+        public void DeleteAndAssert(Wellbore wellbore, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            DeleteAndAssert<WellboreList, Wellbore>(wellbore);
+        }
+
+        /// <summary>
+        /// Deletes the log and test the return code
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="errorCode">The error code.</param>
+        public void DeleteAndAssert(Log log, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            DeleteAndAssert<LogList, Log>(log);
+        }
+
+        /// <summary>
+        /// Deletes the data object and test the return code
+        /// </summary>
+        /// <typeparam name="TList">The type of the container.</typeparam>
+        /// <typeparam name="TObject">The type of the data object.</typeparam>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="errorCode">The error code.</param>
+        public void DeleteAndAssert<TList, TObject>(TObject dataObject, ErrorCodes errorCode = ErrorCodes.Success) where TList : IEnergisticsCollection
+        {
+            var response = Delete<TList, TObject>(dataObject);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)errorCode, response.Result);
         }
 
         /// <summary>

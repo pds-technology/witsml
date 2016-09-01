@@ -1,3 +1,8 @@
+
+
+
+
+
 //----------------------------------------------------------------------- 
 // PDS.Witsml.Server, 2016.1
 //
@@ -23,25 +28,41 @@
 // </auto-generated>
 // ----------------------------------------------------------------------
 
+using Energistics.DataAccess;
+using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
     [TestClass]
     public partial class Trajectory141DataAdapterUpdateTests : Trajectory141TestBase
     {
-		partial void BeforeEachTest();
+        partial void BeforeEachTest();
 
-		partial void AfterEachTest();
+        partial void AfterEachTest();
 
-		protected override void OnTestSetUp()
-		{
-			BeforeEachTest();
-		}
+        protected override void OnTestSetUp()
+        {
+            BeforeEachTest();
+        }
 
-		protected override void OnTestCleanUp()
-		{
-			AfterEachTest();
-		}
-	}
+        protected override void OnTestCleanUp()
+        {
+            AfterEachTest();
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_UpdateInStore_Can_Update_Trajectory()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
+            DevKit.UpdateAndAssert<TrajectoryList, Trajectory>(Trajectory);
+            DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory);
+
+        }
+    }
 }

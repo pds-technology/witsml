@@ -40,7 +40,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public const string QueryEmptyRoot = "<wellbores xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"></wellbores>";
         public const string QueryEmptyObject = "<wellbores xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><wellbore /></wellbores>";
 
-		public Well Well { get; set; }
+        public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public DevKit141Aspect DevKit { get; set; }
         public TestContext TestContext { get; set; }
@@ -56,46 +56,45 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 .ToArray();
 
             Well = new Well
-			{
-				Uid = DevKit.Uid(),
-				Name = DevKit.Name("Well"),
-				TimeZone = DevKit.TimeZone
-			};
-			Wellbore = new Wellbore
-			{
-				Uid = DevKit.Uid(),
-				Name = DevKit.Name("Wellbore"),
-				UidWell = Well.Uid,
-				NameWell = Well.Name,
-				MD = new MeasuredDepthCoord(0, MeasuredDepthUom.ft)
-			};
+            {
+                Uid = DevKit.Uid(),
+                Name = DevKit.Name("Well"),
+                TimeZone = DevKit.TimeZone
+            };
+            Wellbore = new Wellbore
+            {
+                Uid = DevKit.Uid(),
+                Name = DevKit.Name("Wellbore"),
+                UidWell = Well.Uid,
+                NameWell = Well.Name,
+                MD = new MeasuredDepthCoord(0, MeasuredDepthUom.ft)
+            };
 
             QueryEmptyList = DevKit.List(new Wellbore());
 
-			OnTestSetUp();
-			BeforeEachTest();
+            OnTestSetUp();
+            BeforeEachTest();
         }
 
         [TestCleanup]
         public void TestCleanUp()
         {
-			AfterEachTest();
-			OnTestCleanUp();
+            AfterEachTest();
+            OnTestCleanUp();
             DevKit = null;
         }
 
-		partial void BeforeEachTest();
+        partial void BeforeEachTest();
 
-		partial void AfterEachTest();
+        partial void AfterEachTest();
 
-		protected virtual void OnTestSetUp() { }
+        protected virtual void OnTestSetUp() { }
 
-		protected virtual void OnTestCleanUp() { }
+        protected virtual void OnTestCleanUp() { }
 
-		protected virtual void AddParents()
-		{
-            var response = DevKit.Add<WellList, Well>(Well);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-		}
-	}
+        protected virtual void AddParents()
+        {
+            DevKit.AddAndAssert<WellList, Well>(Well);
+        }
+    }
 }
