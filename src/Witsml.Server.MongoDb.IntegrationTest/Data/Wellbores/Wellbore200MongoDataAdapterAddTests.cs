@@ -27,7 +27,7 @@ using PDS.Witsml.Server.Data.Wells;
 namespace PDS.Witsml.Server.Data.Wellbores
 {
     [TestClass]
-    public class Wellbore200DataAdapterAddTests
+    public class Wellbore200MongoDataAdapterAddTests
     {
         private DevKit200Aspect DevKit;
         private IDatabaseProvider Provider;

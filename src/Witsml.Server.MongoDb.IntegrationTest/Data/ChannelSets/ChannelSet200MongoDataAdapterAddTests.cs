@@ -21,12 +21,12 @@ using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Witsml.Server.Data.ChannelSets;
+using PDS.Witsml.Server.Data.Channels;
 
-namespace PDS.Witsml.Server.Data.Channels
+namespace PDS.Witsml.Server.Data.ChannelSets
 {
     [TestClass]
-    public class ChannelSet200DataAdapterAddTests
+    public class ChannelSet200MongoDataAdapterAddTests
     {
         private DevKit200Aspect DevKit;
         private IDatabaseProvider Provider;

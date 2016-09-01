@@ -26,7 +26,7 @@ using MongoDB.Driver;
 namespace PDS.Witsml.Server.Data.Wells
 {
     [TestClass]
-    public class Well200DataAdapterAddTests
+    public class Well200MongoDataAdapterAddTests
     {
         private DevKit200Aspect _devKit;
         private IDatabaseProvider _provider;

@@ -33,7 +33,7 @@ using PDS.Witsml.Server.Data.Wells;
 namespace PDS.Witsml.Server.Data.Logs
 {
     [TestClass]
-    public class Log200DataAdapterAddTests
+    public class Log200MongoDataAdapterAddTests
     {
         private DevKit200Aspect DevKit;
         private IDatabaseProvider Provider;
