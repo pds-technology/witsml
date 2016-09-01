@@ -220,6 +220,12 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
+        public void Trajectory141Validator_AddToStore_Error_481_Parent_Missing()
+        {
+            DevKit.AddAndAssert(Trajectory, ErrorCodes.MissingParentDataObject);
+        }
+
+        [TestMethod]
         public void Trajectory141Validator_AddToStore_Error_486_Data_Object_Types_Dont_Match()
         {
             AddParents();
