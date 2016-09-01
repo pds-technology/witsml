@@ -211,8 +211,12 @@ namespace PDS.Witsml.Server.Data.Logs
                     {
                         mergedLogCurveMnemonics.Add(l.Mnemonic);
                     }
+                    // Ensure UID
+                    if (string.IsNullOrWhiteSpace(l.Uid))
+                    {
+                        l.Uid = l.Mnemonic;
+                    }
                 });
-
 
                 // Validate Log does not exist
                 if (current == null)
@@ -423,7 +427,13 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private ValidationResult ValidateLogData(string indexCurve, List<LogCurveInfo> logCurves, List<string> logDatas, List<string> mergedLogCurveInfoMnemonics, string delimiter, bool insert = true)
         {
+            // Validate that all logCurveInfos have columnIndex
+            if (logCurves.Any(x => !x.ColumnIndex.HasValue))
+                return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogCurveInfo" });
 
+            // Validate there are no duplicate columnIndexes
+            if (logCurves.GroupBy(x => x.ColumnIndex.Value).SelectMany(x => x.Skip(1)).Any())
+                return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogCurveInfo" });
 
             if (logDatas.Count() > WitsmlSettings.MaxDataNodes)
             {

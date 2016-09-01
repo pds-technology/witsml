@@ -120,10 +120,11 @@ namespace PDS.Witsml.Data.Channels
 
             // Split index curve from other value curves
             var indexCurve = log.LogCurveInfo.GetByMnemonic(log.IndexCurve.Value);
-            var mnemonics = log.LogCurveInfo.Where(x => x != indexCurve).Select(x => x.Mnemonic).ToArray();
-            var units = log.LogCurveInfo.Where(x => x != indexCurve).Select(x => x.Unit).ToArray();
-            var nullValues = log.GetNullValues(mnemonics).ToArray();
-
+            var logCurveInfos = log.LogCurveInfo.Where(x => x != indexCurve).Select(x => new { x.Mnemonic, x.Unit, x.ColumnIndex, x.NullValue }).ToList();
+            logCurveInfos.Sort((x, y) => x.ColumnIndex.Value.CompareTo(y.ColumnIndex.Value));
+            var mnemonics = logCurveInfos.Select(x => x.Mnemonic).ToArray();
+            var units = logCurveInfos.Select(x => x.Unit).ToArray();
+            var nullValues = logCurveInfos.Select(x => x.NullValue).ToArray();
             return new ChannelDataReader(log.LogData, mnemonics.Length + 1, mnemonics, units, nullValues, log.GetUri())
                 // Add index curve to separate collection
                 .WithIndex(indexCurve.Mnemonic, indexCurve.Unit, increasing, isTimeIndex);

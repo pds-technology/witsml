@@ -329,6 +329,80 @@ namespace PDS.Witsml.Server
         }
 
         /// <summary>
+        /// Does UpdateInStore on well object and test the return code
+        /// </summary>
+        /// <param name="well">the well</param>
+        /// <param name="errorCode">The error code.</param>
+        public void UpdateAndAssert(Well well, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            var updateResponse = Update<WellList, Well>(well);
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)errorCode, updateResponse.Result);
+        }
+
+        /// <summary>
+        /// Does UpdateInStore on wellbore object and test the return code
+        /// </summary>
+        /// <param name="wellbore">the wellbore</param>
+        /// <param name="errorCode">The error code.</param>
+        public void UpdateAndAssert(Wellbore wellbore, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            var updateResponse = Update<WellboreList, Wellbore>(wellbore);
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)errorCode, updateResponse.Result);
+        }
+
+        /// <summary>
+        /// Does UpdateInStore on log object and test the return code
+        /// </summary>
+        /// <param name="log">the log</param>
+        /// <param name="errorCode">The error code.</param>
+        public void UpdateAndAssert(Log log, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            var updateResponse = Update<LogList, Log>(log);
+            Assert.AreEqual((short)errorCode, updateResponse.Result);
+        }
+
+        /// <summary>
+        /// Deletes the well and test the return code
+        /// </summary>
+        /// <param name="well">The well.</param>
+        /// <param name="errorCode">The error code.</param>
+        public void DeleteAndAssert(Well well, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            var response = Delete<WellList, Well>(well);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)errorCode, response.Result);
+        }
+
+        /// <summary>
+        /// Deletes the wellbore and test the return code
+        /// </summary>
+        /// <param name="wellbore">The wellbore.</param>
+        /// <param name="errorCode">The error code.</param>
+        public void DeleteAndAssert(Wellbore wellbore, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            var response = Delete<WellboreList, Wellbore>(wellbore);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)errorCode, response.Result);
+        }
+
+        /// <summary>
+        /// Deletes the log and test the return code
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="errorCode">The error code.</param>
+        public void DeleteAndAssert(Log log, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            var response = Delete<LogList, Log>(log);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)errorCode, response.Result);
+        }
+
+        /// <summary>
         /// Generations trajectory station data.
         /// </summary>
         /// <param name="numOfStations">The number of stations.</param>

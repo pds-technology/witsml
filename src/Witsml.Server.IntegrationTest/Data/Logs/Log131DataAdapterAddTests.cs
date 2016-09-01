@@ -16,7 +16,10 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
@@ -132,6 +135,84 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 Assert.IsNull(curve.MinIndex);
                 Assert.IsNull(curve.MaxIndex);
+            }
+        }
+
+        [TestMethod]
+        public void Log131DataAdapter_AddToStore_Add_Unordered_DepthLog()
+        {
+            AddParents();
+
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), 10);
+            Log.LogCurveInfo.Reverse();
+            DevKit.AddAndAssert(Log);
+            var indexCurve = Log.LogCurveInfo.FirstOrDefault(x => x.Mnemonic == Log.IndexCurve.Value);
+            var newCurve = new LogCurveInfo()
+            {
+                Mnemonic = "Test",
+                Unit = "gAPI",
+                ColumnIndex = 2,
+                NullValue = "|"
+            };
+
+            var update = new Log()
+            {
+                UidWell = Log.UidWell,
+                UidWellbore = Log.UidWellbore,
+                Uid = Log.Uid,
+                LogCurveInfo = new List<LogCurveInfo>()
+                {
+                    indexCurve,
+                    newCurve
+                }
+            };
+            DevKit.UpdateAndAssert(update);
+            update.LogData = new List<string>();
+            for (int i = 1; i < 11; i++)
+            {
+                var val = i%2 == 0 ? "|" : i.ToString();
+                update.LogData.Add($"{i},{val}");
+            }
+            DevKit.UpdateAndAssert(update);
+            var queryIn = "<logs version=\"1.3.1.1\" xmlns=\"http://www.witsml.org/schemas/131\" > " + Environment.NewLine +
+                $"  <log uidWell=\"{Log.UidWell}\" uidWellbore=\"{Log.UidWellbore}\" uid=\"{Log.Uid}\">" + Environment.NewLine +
+                "    <nameWell />" + Environment.NewLine +
+                "    <nameWellbore />" + Environment.NewLine +
+                "    <name />" + Environment.NewLine +
+                "    <objectGrowing />" + Environment.NewLine +
+                "    <serviceCompany />" + Environment.NewLine +
+                "    <runNumber />" + Environment.NewLine +
+                "    <creationDate />" + Environment.NewLine +
+                "    <indexType />" + Environment.NewLine +
+                "    <startIndex uom=\"\" />" + Environment.NewLine +
+                "    <endIndex uom=\"\" />" + Environment.NewLine +
+                "    <startDateTimeIndex />" + Environment.NewLine +
+                "    <endDateTimeIndex />" + Environment.NewLine +
+                "    <direction />" + Environment.NewLine +
+                "    <indexCurve columnIndex=\"\" />" + Environment.NewLine +
+                "    <logCurveInfo>" + Environment.NewLine +
+                $"      <mnemonic>{indexCurve.Mnemonic}</mnemonic>" + Environment.NewLine +
+                "    </logCurveInfo>" + Environment.NewLine +
+                "    <logCurveInfo>" + Environment.NewLine +
+                $"      <mnemonic>{newCurve.Mnemonic}</mnemonic>" + Environment.NewLine +
+                "    </logCurveInfo>" + Environment.NewLine +
+                "    <logData />" + Environment.NewLine +
+                "  </log>" + Environment.NewLine +
+                "</logs>";
+
+            var result = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
+            Assert.AreEqual((short)ErrorCodes.Success, result.Result);
+            Assert.IsNotNull(result);
+            var logs = EnergisticsConverter.XmlToObject<LogList>(result.XMLout);
+            Assert.IsNotNull(logs);
+            var log = logs.Log.FirstOrDefault();
+            Assert.IsNotNull(log);
+            Assert.IsNotNull(log.LogData);
+            Assert.AreEqual(log.LogData.Count, 10);
+            for (int i = 0; i < 10; i++)
+            {
+                Assert.AreEqual(log.LogData[i], update.LogData[i]);
             }
         }
     }
