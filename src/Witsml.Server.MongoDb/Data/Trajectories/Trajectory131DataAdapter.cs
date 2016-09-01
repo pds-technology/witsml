@@ -16,6 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.Linq;
 using Energistics.DataAccess.WITSML131;
 
 namespace PDS.Witsml.Server.Data.Trajectories
@@ -32,6 +35,71 @@ namespace PDS.Witsml.Server.Data.Trajectories
         protected override void ClearTrajectoryStations(Trajectory entity)
         {
             entity.TrajectoryStation = null;
+        }
+
+        /// <summary>
+        /// Formats the station data based on query parameters.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="stations">The trajectory stations.</param>
+        /// <param name="parser">The parser.</param>
+        protected override void FormatStationData(Trajectory entity, List<TrajectoryStation> stations, WitsmlQueryParser parser)
+        {
+            entity.TrajectoryStation = stations;
+        }
+
+        /// <summary>
+        /// Determines whether the current trajectory has station data.
+        /// </summary>
+        /// <param name="header">The trajectory.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified trajectory has data; otherwise, <c>false</c>.
+        /// </returns>
+        protected override bool HasData(Trajectory header)
+        {
+            return header.MDMax != null;
+        }
+
+        /// <summary>
+        /// Check if need to query mongo file for station data.
+        /// </summary>
+        /// <param name="entity">The result data object.</param>
+        /// <param name="header">The full header object.</param>
+        /// <returns><c>true</c> if needs to query mongo file; otherwise, <c>false</c>.</returns>
+        protected override bool QueryStationFile(Trajectory entity, Trajectory header)
+        {
+            return header.MDMin != null && entity.TrajectoryStation == null;
+        }
+
+        /// <summary>
+        /// Sets the MD index ranges.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        protected override void SetIndexRange(Trajectory dataObject)
+        {
+            Logger.Debug("Set trajectory MD ranges.");
+
+            if (dataObject.TrajectoryStation.Count <= 0)
+            {
+                dataObject.MDMin = null;
+                dataObject.MDMax = null;
+                return;
+            }
+
+            var mds = dataObject.TrajectoryStation.Select(t => t.MD).OrderBy(m => m.Value).ToList();
+
+            dataObject.MDMin = mds.FirstOrDefault();
+            dataObject.MDMax = mds.LastOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the trajectory station.
+        /// </summary>
+        /// <param name="dataObject">The trajectory data object.</param>
+        /// <returns>The trajectory station collection.</returns>
+        protected override List<TrajectoryStation> GetTrajectoryStation(Trajectory dataObject)
+        {
+            return dataObject.TrajectoryStation;
         }
     }
 }
