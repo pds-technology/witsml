@@ -38,7 +38,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.AddAndAssert(Trajectory);
 
             // Get trajectory
-            var result = DevKit.QueryAndAssert<TrajectoryList, Trajectory>(Trajectory);
+            var query = DevKit.CreateTrajectory(Trajectory.Uid, null, Trajectory.UidWell, null, Trajectory.UidWellbore, null);
+            var result = DevKit.QueryAndAssert<TrajectoryList, Trajectory>(query);
             AssertNames(result, Trajectory);
             Assert.AreEqual(Trajectory.ServiceCompany, result.ServiceCompany);
             Assert.IsNotNull(result.CommonData);
@@ -55,7 +56,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.AddAndAssert(Trajectory);
 
             // Get trajectory
-            var result = DevKit.QueryAndAssert<TrajectoryList, Trajectory>(Trajectory,optionsIn: OptionsIn.ReturnElements.IdOnly);
+            var query = DevKit.CreateTrajectory(Trajectory.Uid, null, Trajectory.UidWell, null, Trajectory.UidWellbore, null);
+            var result = DevKit.QueryAndAssert<TrajectoryList, Trajectory>(query, optionsIn: OptionsIn.ReturnElements.IdOnly);
             AssertNames(result, Trajectory);
             Assert.IsNull(result.ServiceCompany);
         }
@@ -71,7 +73,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.AddAndAssert(Trajectory);
 
             // Get trajectory
-            var result = DevKit.QueryAndAssert<TrajectoryList, Trajectory>(Trajectory, optionsIn: string.Empty);
+            var query = DevKit.CreateTrajectory(Trajectory.Uid, null, Trajectory.UidWell, null, Trajectory.UidWellbore, null);
+            var result = DevKit.QueryAndAssert<TrajectoryList, Trajectory>(query, optionsIn: string.Empty);
             AssertNames(result);
             Assert.IsNull(result.ServiceCompany);
         }

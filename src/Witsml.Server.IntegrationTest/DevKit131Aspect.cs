@@ -185,6 +185,19 @@ namespace PDS.Witsml.Server
             };
         }
 
+        public Trajectory CreateTrajectory(string uid, string name, string uidWell, string nameWell, string uidWellbore, string nameWellbore)
+        {
+            return new Trajectory()
+            {
+                Uid = uid,
+                Name = name,
+                UidWell = uidWell,
+                NameWell = nameWell,
+                UidWellbore = uidWellbore,
+                NameWellbore = nameWellbore,
+            };
+        }
+
         /// <summary>
         /// Adds well object and test the return code
         /// </summary>
@@ -345,7 +358,7 @@ namespace PDS.Witsml.Server
         /// <returns>The data object instance if found; otherwise, null.</returns>
         public TObject QueryAndAssert<TList, TObject>(TObject query, bool isNotNull = true, string optionsIn = null) where TList : IEnergisticsCollection
         {
-            var results = Query<TList, TObject>(query, ObjectTypes.Well, null, optionsIn: optionsIn ?? OptionsIn.ReturnElements.All);
+            var results = Query<TList, TObject>(query, ObjectTypes.GetObjectType<TList>(), null, optionsIn ?? OptionsIn.ReturnElements.All);
             Assert.AreEqual(isNotNull ? 1 : 0, results.Count);
 
             var result = results.FirstOrDefault();

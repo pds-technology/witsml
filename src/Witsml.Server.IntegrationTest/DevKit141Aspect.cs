@@ -614,7 +614,7 @@ namespace PDS.Witsml.Server
         /// <returns>The data object instance if found; otherwise, null.</returns>
         public TObject QueryAndAssert<TList, TObject>(TObject query, bool isNotNull = true, string optionsIn = null) where TList : IEnergisticsCollection
         {
-            var results = Query<TList, TObject>(query, ObjectTypes.Well, null, optionsIn: optionsIn ?? OptionsIn.ReturnElements.All);
+            var results = Query<TList, TObject>(query, ObjectTypes.GetObjectType<TList>(), null, optionsIn ?? OptionsIn.ReturnElements.All);
             Assert.AreEqual(isNotNull ? 1 : 0, results.Count);
 
             var result = results.FirstOrDefault();
