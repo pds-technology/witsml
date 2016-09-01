@@ -71,6 +71,12 @@ namespace PDS.Witsml.Server
                           "   </log>" + Environment.NewLine +
                           "</logs>";
 
+        public static readonly string BasicTrajectoryXmlTemplate = "<trajectorys xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                          "   <trajectory uid=\"{0}\" uidWell=\"{1}\" uidWellbore=\"{2}\">" + Environment.NewLine +
+                          "{3}" +
+                          "   </trajectory>" + Environment.NewLine +
+                          "</trajectorys>";
+
         private const MeasuredDepthUom MdUom = MeasuredDepthUom.m;
         private const WellVerticalCoordinateUom TvdUom = WellVerticalCoordinateUom.m;
         private const PlaneAngleUom AngleUom = PlaneAngleUom.dega;
@@ -571,15 +577,12 @@ namespace PDS.Witsml.Server
         /// Does get query for single trajectory object and test for result count equal to 1 and is not null
         /// </summary>
         /// <param name="trajectory">the log with UIDs for well and wellbore</param>
+        /// <param name="optionsIn">The optionsIn value</param>
         /// <returns>The first trajectory from the response</returns>
-        public Trajectory GetOneAndAssert(Trajectory trajectory)
+        public Trajectory GetOneAndAssert(Trajectory trajectory, string optionsIn = null)
         {
-            Assert.IsNotNull(trajectory.UidWell);
-            Assert.IsNotNull(trajectory.UidWellbore);
-            Assert.IsNotNull(trajectory.Uid);
-
             var query = CreateTrajectory(trajectory.Uid, null, trajectory.UidWell, null, trajectory.UidWellbore, null);
-            var results = Query<TrajectoryList, Trajectory>(query, optionsIn: OptionsIn.ReturnElements.All);
+            var results = Query<TrajectoryList, Trajectory>(query, optionsIn: optionsIn ?? OptionsIn.ReturnElements.All);
             Assert.AreEqual(1, results.Count);
 
             var result = results.FirstOrDefault();
