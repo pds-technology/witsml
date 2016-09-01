@@ -16,15 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 namespace PDS.Witsml.Server.Data.ChannelSets
 {
     /// <summary>
     /// ChannelSet200Validator tests.
     /// </summary>
-    [TestClass]
-    public class ChannelSet200ValidatorTests
+    public partial class ChannelSet200ValidatorTests
     {
         //[TestMethod]
         //public void ChannelSet200Validator_MethodName_ExpectedBehavior()

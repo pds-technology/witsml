@@ -27,12 +27,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
 {
     public partial class Trajectory131ValidatorTests
     {
-        partial void OnTestCleanUp()
-        {
-            WitsmlSettings.MaxStationCount = DevKitAspect.DefaultMaxStationCount;
-            WitsmlSettings.MaxDataNodes = DevKitAspect.DefaultMaxDataNodes;
-        }
-
         [TestMethod]
         public void Trajectory131Validator_AddToStore_Error_405_Trajectory_Already_Exists()
         {
@@ -203,15 +197,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
-        }
-
-        private void AddParents()
-        {
-            var response = DevKit.Add<WellList, Well>(Well);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
         }
     }
 }

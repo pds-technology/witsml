@@ -25,7 +25,7 @@ namespace PDS.Witsml.Server.Data.Logs
     /// </summary>
     public partial class Log131ValidatorTests
     {
-        partial void OnTestCleanUp()
+        protected override void OnTestCleanUp()
         {
             WitsmlSettings.DepthRangeSize = DevKitAspect.DefaultDepthChunkRange;
             WitsmlSettings.TimeRangeSize = DevKitAspect.DefaultTimeChunkRange;

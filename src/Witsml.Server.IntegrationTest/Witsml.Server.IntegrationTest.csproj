@@ -116,13 +116,32 @@
     <Compile Include="Configuration\WitsmlValidator131Tests.cs" />
     <Compile Include="Configuration\CapServer141ProviderTests.cs" />
     <Compile Include="Configuration\WitsmlValidator141Tests.cs" />
+    <Compile Include="Data\Attachments\Attachment141TestBase.cs" />
+    <Compile Include="Data\Attachments\Attachment141TestBase.generated.cs">
+      <DependentUpon>Attachment141TestBase.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Attachments\Attachment141ValidatorTests.cs" />
     <Compile Include="Data\Attachments\Attachment141ValidatorTests.generated.cs">
       <DependentUpon>Attachment141ValidatorTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\Attachments\Attachment200TestBase.cs" />
+    <Compile Include="Data\Attachments\Attachment200TestBase.generated.cs">
+      <DependentUpon>Attachment200TestBase.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Attachments\Attachment200ValidatorTests.cs" />
     <Compile Include="Data\Attachments\Attachment200ValidatorTests.generated.cs">
       <DependentUpon>Attachment200ValidatorTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ChannelSets\ChannelSet200TestBase.cs" />
+    <Compile Include="Data\ChannelSets\ChannelSet200TestBase.generated.cs">
+      <DependentUpon>ChannelSet200TestBase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ChannelSets\ChannelSet200ValidatorTests.generated.cs">
+      <DependentUpon>ChannelSet200ValidatorTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Channels\Channel200TestBase.cs" />
+    <Compile Include="Data\Channels\Channel200TestBase.generated.cs">
+      <DependentUpon>Channel200TestBase.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Channels\Channel200ValidatorTests.cs" />
     <Compile Include="Data\Channels\Channel200ValidatorTests.generated.cs">
@@ -137,6 +156,10 @@
     <Compile Include="Data\Logs\Log131DataAdapterAddTests.cs" />
     <Compile Include="Data\Logs\Log131DataAdapterGetTests.cs" />
     <Compile Include="Data\Logs\Log131DataAdapterDeleteTests.cs" />
+    <Compile Include="Data\Logs\Log131TestBase.cs" />
+    <Compile Include="Data\Logs\Log131TestBase.generated.cs">
+      <DependentUpon>Log131TestBase.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Logs\Log131ValidatorTests.cs" />
     <Compile Include="Data\Logs\Log131DataAdapterUpdateTests.cs" />
     <Compile Include="Data\Logs\Log131ValidatorTests.generated.cs">
@@ -146,6 +169,10 @@
     <Compile Include="Data\Logs\Log141DataAdapterAddTests.cs" />
     <Compile Include="Data\Logs\Log141DataAdapterDeleteTests.cs" />
     <Compile Include="Data\Logs\Log141DataAdapterUpdateTests.cs" />
+    <Compile Include="Data\Logs\Log141TestBase.cs" />
+    <Compile Include="Data\Logs\Log141TestBase.generated.cs">
+      <DependentUpon>Log141TestBase.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Logs\Log141ValidatorTests.cs" />
     <Compile Include="Data\Logs\Log141ValidatorTests.generated.cs">
       <DependentUpon>Log141ValidatorTests.cs</DependentUpon>
@@ -154,51 +181,99 @@
     <Compile Include="Data\Logs\Log200DataAdapterGetTests.cs" />
     <Compile Include="Data\Logs\Log200DataAdapterDeleteTests.cs" />
     <Compile Include="Data\Logs\Log200DataAdapterUpdateTests.cs" />
+    <Compile Include="Data\Logs\Log200TestBase.cs" />
+    <Compile Include="Data\Logs\Log200TestBase.generated.cs">
+      <DependentUpon>Log200TestBase.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Logs\Log200ValidatorTests.cs" />
     <Compile Include="Data\Logs\Log200ValidatorTests.generated.cs">
       <DependentUpon>Log200ValidatorTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Messages\Message131TestBase.cs" />
+    <Compile Include="Data\Messages\Message131TestBase.generated.cs">
+      <DependentUpon>Message131TestBase.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Messages\Message131ValidatorTests.cs" />
     <Compile Include="Data\Messages\Message131ValidatorTests.generated.cs">
       <DependentUpon>Message131ValidatorTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\Messages\Message141TestBase.cs" />
+    <Compile Include="Data\Messages\Message141TestBase.generated.cs">
+      <DependentUpon>Message141TestBase.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Messages\Message141ValidatorTests.cs" />
     <Compile Include="Data\Messages\Message141ValidatorTests.generated.cs">
       <DependentUpon>Message141ValidatorTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Rigs\Rig131TestBase.cs" />
+    <Compile Include="Data\Rigs\Rig131TestBase.generated.cs">
+      <DependentUpon>Rig131TestBase.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Rigs\Rig131ValidatorTests.cs" />
     <Compile Include="Data\Rigs\Rig131ValidatorTests.generated.cs">
       <DependentUpon>Rig131ValidatorTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\Rigs\Rig141TestBase.cs" />
+    <Compile Include="Data\Rigs\Rig141TestBase.generated.cs">
+      <DependentUpon>Rig141TestBase.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Rigs\Rig141ValidatorTests.cs" />
     <Compile Include="Data\Rigs\Rig141ValidatorTests.generated.cs">
       <DependentUpon>Rig141ValidatorTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Rigs\Rig200TestBase.cs" />
+    <Compile Include="Data\Rigs\Rig200TestBase.generated.cs">
+      <DependentUpon>Rig200TestBase.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Rigs\Rig200ValidatorTests.cs" />
     <Compile Include="Data\Rigs\Rig200ValidatorTests.generated.cs">
       <DependentUpon>Rig200ValidatorTests.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Trajectories\Trajectory131DataAdapterAddTests.cs" />
+    <Compile Include="Data\Trajectories\Trajectory131TestBase.cs" />
+    <Compile Include="Data\Trajectories\Trajectory131TestBase.generated.cs">
+      <DependentUpon>Trajectory131TestBase.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Trajectories\Trajectory131ValidatorTests.cs" />
     <Compile Include="Data\Trajectories\Trajectory131ValidatorTests.generated.cs">
       <DependentUpon>Trajectory131ValidatorTests.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Trajectories\Trajectory141DataAdapterAddTests.cs" />
+    <Compile Include="Data\Trajectories\Trajectory141TestBase.cs" />
+    <Compile Include="Data\Trajectories\Trajectory141TestBase.generated.cs">
+      <DependentUpon>Trajectory141TestBase.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Trajectories\Trajectory141ValidatorTests.cs" />
     <Compile Include="Data\Trajectories\Trajectory141ValidatorTests.generated.cs">
       <DependentUpon>Trajectory141ValidatorTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Trajectories\Trajectory200TestBase.cs" />
+    <Compile Include="Data\Trajectories\Trajectory200TestBase.generated.cs">
+      <DependentUpon>Trajectory200TestBase.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Trajectories\Trajectory200ValidatorTests.cs" />
     <Compile Include="Data\Trajectories\Trajectory200ValidatorTests.generated.cs">
       <DependentUpon>Trajectory200ValidatorTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\WbGeometries\WbGeometry131TestBase.cs" />
+    <Compile Include="Data\WbGeometries\WbGeometry131TestBase.generated.cs">
+      <DependentUpon>WbGeometry131TestBase.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\WbGeometries\WbGeometry131ValidatorTests.cs" />
     <Compile Include="Data\WbGeometries\WbGeometry131ValidatorTests.generated.cs">
       <DependentUpon>WbGeometry131ValidatorTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\WbGeometries\WbGeometry141TestBase.cs" />
+    <Compile Include="Data\WbGeometries\WbGeometry141TestBase.generated.cs">
+      <DependentUpon>WbGeometry141TestBase.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\WbGeometries\WbGeometry141ValidatorTests.cs" />
     <Compile Include="Data\WbGeometries\WbGeometry141ValidatorTests.generated.cs">
       <DependentUpon>WbGeometry141ValidatorTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wellbores\Wellbore131TestBase.cs" />
+    <Compile Include="Data\Wellbores\Wellbore131TestBase.generated.cs">
+      <DependentUpon>Wellbore131TestBase.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Wellbores\Wellbore131ValidatorTests.cs" />
     <Compile Include="Data\Wellbores\Wellbore131ValidatorTests.generated.cs">
@@ -208,6 +283,8 @@
     <Compile Include="Data\Wellbores\Wellbore141DataAdapterDeleteTests.cs" />
     <Compile Include="Data\Wellbores\Wellbore141DataAdapterAddTests.cs" />
     <Compile Include="Data\Wellbores\Wellbore141DataAdapterUpdateTests.cs" />
+    <Compile Include="Data\Wellbores\Wellbore141TestBase.cs" />
+    <Compile Include="Data\Wellbores\Wellbore141TestBase.generated.cs" />
     <Compile Include="Data\Wellbores\Wellbore141ValidatorTests.cs" />
     <Compile Include="Data\Wellbores\Wellbore141ValidatorTests.generated.cs">
       <DependentUpon>Wellbore141ValidatorTests.cs</DependentUpon>
@@ -215,10 +292,18 @@
     <Compile Include="Data\Wellbores\Wellbore200DataAdapterAddTests.cs" />
     <Compile Include="Data\Wellbores\Wellbore200DataAdapterGetTests.cs" />
     <Compile Include="Data\Wellbores\Wellbore200DataAdapterDeleteTests.cs" />
+    <Compile Include="Data\Wellbores\Wellbore200TestBase.cs" />
+    <Compile Include="Data\Wellbores\Wellbore200TestBase.generated.cs">
+      <DependentUpon>Wellbore200TestBase.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Wellbores\Wellbore200ValidatorTests.cs" />
     <Compile Include="Data\Wellbores\Wellbore200DataAdapterUpdateTests.cs" />
     <Compile Include="Data\Wellbores\Wellbore200ValidatorTests.generated.cs">
       <DependentUpon>Wellbore200ValidatorTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wells\Well131TestBase.cs" />
+    <Compile Include="Data\Wells\Well131TestBase.generated.cs">
+      <DependentUpon>Well131TestBase.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Wells\Well131ValidatorTests.cs" />
     <Compile Include="Data\Wells\Well131ValidatorTests.generated.cs">
@@ -228,6 +313,10 @@
     <Compile Include="Data\Wells\Well141DataAdapterGetTests.cs" />
     <Compile Include="Data\Wells\Well141DataAdapterDeleteTests.cs" />
     <Compile Include="Data\Wells\Well141DataAdapterUpdateTests.cs" />
+    <Compile Include="Data\Wells\Well141TestBase.cs" />
+    <Compile Include="Data\Wells\Well141TestBase.generated.cs">
+      <DependentUpon>Well141TestBase.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Wells\Well141ValidatorTests.cs" />
     <Compile Include="Data\Wells\Well141ValidatorTests.generated.cs">
       <DependentUpon>Well141ValidatorTests.cs</DependentUpon>
@@ -235,6 +324,10 @@
     <Compile Include="Data\Wells\Well200DataAdapterAddTests.cs" />
     <Compile Include="Data\Wells\Well200DataAdapterDeleteTests.cs" />
     <Compile Include="Data\Wells\Well200DataAdapterGetTests.cs" />
+    <Compile Include="Data\Wells\Well200TestBase.cs" />
+    <Compile Include="Data\Wells\Well200TestBase.generated.cs">
+      <DependentUpon>Well200TestBase.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Wells\Well200ValidatorTests.cs" />
     <Compile Include="Data\Wells\Well200DataAdapterUpdateTests.cs" />
     <Compile Include="Data\Wells\Well200ValidatorTests.generated.cs">

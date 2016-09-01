@@ -30,7 +30,7 @@ namespace PDS.Witsml.Server.Data.Logs
 {
     public partial class Log141ValidatorTests
     {
-        partial void OnTestCleanUp()
+        protected override void OnTestCleanUp()
         {
             WitsmlSettings.DepthRangeSize = DevKitAspect.DefaultDepthChunkRange;
             WitsmlSettings.TimeRangeSize = DevKitAspect.DefaultTimeChunkRange;
@@ -1177,15 +1177,6 @@ namespace PDS.Witsml.Server.Data.Logs
             log.DataDelimiter = dataDelimiter;
             var update = DevKit.Update<LogList, Log>(log);
             Assert.AreEqual((short)expectedReturnCode, update.Result);
-        }
-
-        private void AddParents()
-        {
-            var response = DevKit.Add<WellList, Well>(Well);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
         }
 
         private void AddLogBadColumnIdentifier(Log log, string badChar)
