@@ -16,6 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using PDS.Witsml.Server.Configuration;
+
 namespace PDS.Witsml.Server.Data.Wells
 {
     /// <summary>
@@ -23,5 +25,9 @@ namespace PDS.Witsml.Server.Data.Wells
     /// </summary>
     public partial class Well141TestBase
     {
+        partial void AfterEachTest()
+        {
+            WitsmlSettings.TruncateXmlOutDebugSize = DevKitAspect.DefaultXmlOutDebugSize;
+        }
     }
 }

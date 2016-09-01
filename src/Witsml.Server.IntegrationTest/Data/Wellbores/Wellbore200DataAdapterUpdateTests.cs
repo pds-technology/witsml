@@ -23,8 +23,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// <summary>
     /// Wellbore200DataAdapter Update tests.
     /// </summary>
-    [TestClass]
-    public class Wellbore200DataAdapterUpdateTests
+    public partial class Wellbore200DataAdapterUpdateTests
     {
         //[TestMethod]
         //public void Wellbore200DataAdapter_MethodName_ExpectedBehavior()

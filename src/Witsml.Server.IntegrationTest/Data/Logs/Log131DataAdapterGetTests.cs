@@ -29,63 +29,13 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Log131DataAdapter Get tests.
     /// </summary>
-    [TestClass]
-    public class Log131DataAdapterGetTests
+    public partial class Log131DataAdapterGetTests
     {
-        private DevKit131Aspect _devKit;
-        private Well _well;
-        private Wellbore _wellbore;
-        private Log _log;
-
-        public TestContext TestContext { get; set; }
-
-        [TestInitialize]
-        public void TestSetUp()
+        partial void BeforeEachTest()
         {
-            _devKit = new DevKit131Aspect(TestContext);
-
-            _devKit.Store.CapServerProviders = _devKit.Store.CapServerProviders
-                .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version131.Value)
-                .ToArray();
-
-            _well = new Well
-            {
-                Uid = _devKit.Uid(),
-                Name = _devKit.Name("Well 01"),
-                TimeZone = _devKit.TimeZone
-            };
-
-            _wellbore = new Wellbore()
-            {
-                Uid = _devKit.Uid(),
-                UidWell = _well.Uid,
-                NameWell = _well.Name,
-                Name = _devKit.Name("Wellbore 01")
-            };
-
-            _log = new Log()
-            {
-                Uid = _devKit.Uid(),
-                UidWell = _well.Uid,
-                UidWellbore = _wellbore.Uid,
-                NameWell = _well.Name,
-                NameWellbore = _wellbore.Name,
-                Name = _devKit.Name("Log 01")
-            };
-
             // Sets the depth and time chunk size
             WitsmlSettings.DepthRangeSize = 1000;
             WitsmlSettings.TimeRangeSize = 86400000000; // Number of microseconds equals to one day
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            WitsmlSettings.DepthRangeSize = DevKitAspect.DefaultDepthChunkRange;
-            WitsmlSettings.TimeRangeSize = DevKitAspect.DefaultTimeChunkRange;
-            WitsmlSettings.MaxDataPoints = DevKitAspect.DefaultMaxDataPoints;
-            WitsmlSettings.MaxDataNodes = DevKitAspect.DefaultMaxDataNodes;
-            WitsmlOperationContext.Current = null;
         }
 
         [TestMethod]
@@ -98,11 +48,11 @@ namespace PDS.Witsml.Server.Data.Logs
                 increasing: true);
             Assert.AreEqual((short)ErrorCodes.Success, logResponse.Result);
 
-            var queryHeaderOnly = _devKit.CreateLog(logResponse.SuppMsgOut, null, _log.UidWell, null, _log.UidWellbore, null);
+            var queryHeaderOnly = DevKit.CreateLog(logResponse.SuppMsgOut, null, Log.UidWell, null, Log.UidWellbore, null);
 
             // Perform a GetFromStore with multiple log queries
-            var result = _devKit.Get<LogList, Log>(
-                _devKit.List(queryHeaderOnly),
+            var result = DevKit.Get<LogList, Log>(
+                DevKit.List(queryHeaderOnly),
                 ObjectTypes.Log,
                 null,
                 OptionsIn.ReturnElements.HeaderOnly);
@@ -119,16 +69,16 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private WMLS_AddToStoreResponse AddSetupWellWellboreLog(int numRows, bool isDepthLog, bool hasEmptyChannel, bool increasing)
         {
-            _devKit.Add<WellList, Well>(_well);
-            _devKit.Add<WellboreList, Wellbore>(_wellbore);
-            _devKit.InitHeader(_log, LogIndexType.measureddepth, increasing);
+            DevKit.Add<WellList, Well>(Well);
+            DevKit.Add<WellboreList, Wellbore>(Wellbore);
+            DevKit.InitHeader(Log, LogIndexType.measureddepth, increasing);
 
             var startIndex = new GenericMeasure { Uom = "m", Value = 100 };
-            _log.StartIndex = startIndex;
-            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), numRows, 1, isDepthLog, hasEmptyChannel, increasing);
+            Log.StartIndex = startIndex;
+            DevKit.InitDataMany(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), numRows, 1, isDepthLog, hasEmptyChannel, increasing);
 
             // Add a log
-            return _devKit.Add<LogList, Log>(_log);
+            return DevKit.Add<LogList, Log>(Log);
         }
         #endregion Helper Methods
     }

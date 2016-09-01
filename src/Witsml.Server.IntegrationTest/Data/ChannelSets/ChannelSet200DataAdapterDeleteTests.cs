@@ -23,8 +23,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
     /// <summary>
     /// ChannelSet200DataAdapter Delete tests.
     /// </summary>
-    [TestClass]
-    public class ChannelSet200DataAdapterDeleteTests
+    public partial class ChannelSet200DataAdapterDeleteTests
     {
         //[TestMethod]
         //public void ChannelSet200DataAdapter_MethodName_ExpectedBehavior()

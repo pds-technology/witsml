@@ -26,48 +26,24 @@ using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
-    [TestClass]
-    public class Well141DataAdapterAddTests
+    public partial class Well141DataAdapterAddTests
     {
-        private DevKit141Aspect _devKit;
-        private Well _well;
-
-        public TestContext TestContext { get; set; }
-
-        [TestInitialize]
-        public void TestSetUp()
-        {
-            _devKit = new DevKit141Aspect(TestContext);
-
-            _devKit.Store.CapServerProviders = _devKit.Store.CapServerProviders
-                .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
-                .ToArray();
-
-            _well = new Well { Uid = _devKit.Uid(), Name = _devKit.Name("Well 01"), TimeZone = _devKit.TimeZone };
-        }
-
-        [TestCleanup]
-        public void TestCleanUp()
-        {
-            WitsmlSettings.TruncateXmlOutDebugSize = DevKitAspect.DefaultXmlOutDebugSize;
-        }
-
         [TestMethod]
-        public void Well141DataAdapter_AddToStore_Can_Add_Well()
+        public void Well141DataAdapter_AddToStore_Can_AddWell()
         {
-            _devKit.AddAndAssert(_well);
+            DevKit.AddAndAssert(Well);
         }
 
         [TestMethod]
         public void Well141DataAdapter_AddToStore_Uid_Returned()
         {
-            var response = _devKit.AddAndAssert(_well);
+            var response = DevKit.AddAndAssert(Well);
 
             var uid = response.SuppMsgOut;
-            Assert.AreEqual(_well.Uid, uid);
+            Assert.AreEqual(Well.Uid, uid);
 
             var query = new Well { Uid = uid };
-            var result = _devKit.Query<WellList, Well>(query);
+            var result = DevKit.Query<WellList, Well>(query);
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);
 
@@ -80,11 +56,11 @@ namespace PDS.Witsml.Server.Data.Wells
         public void Well141DataAdapter_AddToStore_Case_Preserved()
         {
             var nameLegal = "Well Legal Name";
-            _well.NameLegal = nameLegal;
-            _devKit.AddAndAssert(_well);
+            Well.NameLegal = nameLegal;
+            DevKit.AddAndAssert(Well);
 
-            var query = new Well { Uid = _well.Uid, NameLegal = string.Empty };
-            var result = _devKit.Query<WellList, Well>(query);
+            var query = new Well { Uid = Well.Uid, NameLegal = string.Empty };
+            var result = DevKit.Query<WellList, Well>(query);
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Count);
 
@@ -100,8 +76,8 @@ namespace PDS.Witsml.Server.Data.Wells
             WitsmlSettings.TruncateXmlOutDebugSize = 100;
 
             // Add a well with PrivateGroupOnly set to false
-            _well.CommonData = new CommonData() { PrivateGroupOnly = true };
-            var response = _devKit.Add<WellList, Well>(_well);
+            Well.CommonData = new CommonData() { PrivateGroupOnly = true };
+            var response = DevKit.Add<WellList, Well>(Well);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
@@ -110,7 +86,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             // Query all wells with default OptionsIn
             var query = new Well();
-            var result = _devKit.Query<WellList, Well>(query, optionsIn: OptionsIn.ReturnElements.All);
+            var result = DevKit.Query<WellList, Well>(query, optionsIn: OptionsIn.ReturnElements.All);
             Assert.IsNotNull(result);
 
             Assert.IsFalse(result.Any(x => x.CommonData?.PrivateGroupOnly ?? false));
@@ -125,8 +101,8 @@ namespace PDS.Witsml.Server.Data.Wells
             WitsmlSettings.TruncateXmlOutDebugSize = 100;
 
             // Add a well with PrivateGroupOnly set to false
-            _well.CommonData = new CommonData() { PrivateGroupOnly = false };
-            var response = _devKit.Add<WellList, Well>(_well);
+            Well.CommonData = new CommonData() { PrivateGroupOnly = false };
+            var response = DevKit.Add<WellList, Well>(Well);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
@@ -135,7 +111,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             // Query all wells with default OptionsIn
             var query = new Well();
-            var result = _devKit.Query<WellList, Well>(query, optionsIn: OptionsIn.ReturnElements.All);
+            var result = DevKit.Query<WellList, Well>(query, optionsIn: OptionsIn.ReturnElements.All);
             Assert.IsNotNull(result);
 
             Assert.IsFalse(result.Any(x => x.CommonData?.PrivateGroupOnly ?? false));
@@ -149,7 +125,7 @@ namespace PDS.Witsml.Server.Data.Wells
             WitsmlSettings.TruncateXmlOutDebugSize = 100;
 
             // Add a well with default PrivateGroupOnly
-            var response = _devKit.Add<WellList, Well>(_well);
+            var response = DevKit.Add<WellList, Well>(Well);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
@@ -158,7 +134,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             // Query all wells with default OptionsIn
             var query = new Well();
-            var result = _devKit.Query<WellList, Well>(query, optionsIn: OptionsIn.ReturnElements.All);
+            var result = DevKit.Query<WellList, Well>(query, optionsIn: OptionsIn.ReturnElements.All);
             Assert.IsNotNull(result);
 
             Assert.IsFalse(result.Any(x => x.CommonData?.PrivateGroupOnly ?? false));
@@ -166,53 +142,53 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
-        public void Well141DataAdapter_AddToStore_Can_Add_Well_And_Ignore_Invalid_Element()
+        public void Well141DataAdapter_AddToStore_Can_AddWell_And_Ignore_Invalid_Element()
         {
-            var wellName = _devKit.Name("Bug-5855-AddToStore-Bad-Element");
+            var wellName = DevKit.Name("Bug-5855-AddToStore-Bad-Element");
 
             string xmlIn = string.Format(DevKit141Aspect.BasicAddWellXmlTemplate, null, wellName, "<fieldsssssss>Big Field</fieldsssssss>");
 
-            var response = _devKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+            var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
         }
 
         [TestMethod]
-        public void Well141DataAdapter_AddToStore_Can_Add_Well_And_Ignore_Invalid_Attribute()
+        public void Well141DataAdapter_AddToStore_Can_AddWell_And_Ignore_Invalid_Attribute()
         {
-            var wellName = _devKit.Name("Bug-5855-AddToStore-Bad-Attribute");
+            var wellName = DevKit.Name("Bug-5855-AddToStore-Bad-Attribute");
 
             string xmlIn = string.Format(DevKit141Aspect.BasicAddWellXmlTemplate, null, wellName, "<field abc=\"cde\">Big Field</field>");
 
-            var response = _devKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+            var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             // Query
             var query = new Well { Uid = response.SuppMsgOut };
-            var result = _devKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
 
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual("Big Field", result[0].Field);
         }
 
         [TestMethod]
-        public void Well141DataAdapter_AddToStore_Can_Add_Well_With_Invalid_Child_Element()
+        public void Well141DataAdapter_AddToStore_Can_AddWell_With_Invalid_Child_Element()
         {
-            var wellName = _devKit.Name("Bug-5855-AddToStore-Invalid-Child-Element");
+            var wellName = DevKit.Name("Bug-5855-AddToStore-Invalid-Child-Element");
 
             string xmlIn = string.Format(DevKit141Aspect.BasicAddWellXmlTemplate, null, wellName, "<field><abc>Big Field</abc></field>");
 
-            var response = _devKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+            var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             // Query
             var query = new Well { Uid = response.SuppMsgOut };
-            var result = _devKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
 
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual(wellName, result[0].Name);
@@ -222,13 +198,13 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well141DataAdapter_AddToStore_Acquisition_Success()
         {
-            _devKit.AddValidAcquisition(_well);
+            DevKit.AddValidAcquisition(Well);
         }
 
         [TestMethod]
         public void Well141DataAdapter_AddToStore_Acquisition_Error_409()
         {
-            _well.CommonData = new CommonData
+            Well.CommonData = new CommonData
             {
                 AcquisitionTimeZone = new List<TimestampedTimeZone>()
                 {
@@ -238,7 +214,7 @@ namespace PDS.Witsml.Server.Data.Wells
                 }
             };
 
-            _devKit.AddAndAssert(_well, ErrorCodes.InputTemplateNonConforming);
+            DevKit.AddAndAssert(Well, ErrorCodes.InputTemplateNonConforming);
         }
     }
 }

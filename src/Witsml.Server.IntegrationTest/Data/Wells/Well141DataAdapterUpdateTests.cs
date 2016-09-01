@@ -29,35 +29,17 @@ namespace PDS.Witsml.Server.Data.Wells
     /// <summary>
     /// Well141DataAdapter Update tests.
     /// </summary>
-    [TestClass]
-    public class Well141DataAdapterUpdateTests
+    public partial class Well141DataAdapterUpdateTests
     {
-        private DevKit141Aspect _devKit;
-        private Well _well;
-
-        public TestContext TestContext { get; set; }
-
-        [TestInitialize]
-        public void TestSetUp()
-        {
-            _devKit = new DevKit141Aspect(TestContext);
-
-            _devKit.Store.CapServerProviders = _devKit.Store.CapServerProviders
-                .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
-                .ToArray();
-
-            _well = new Well { Uid = _devKit.Uid(), Name = _devKit.Name("Well 01"), TimeZone = _devKit.TimeZone };
-        }
-
         [TestMethod]
         public void Well141DataAdapter_UpdateInStore_Update_A_List_Element()
         {
             // Add well
-            var well = _devKit.CreateFullWell();
-            well.Uid = _devKit.Uid();
-            _devKit.AddAndAssert(well);
+            var well = DevKit.CreateFullWell();
+            well.Uid = DevKit.Uid();
+            DevKit.AddAndAssert(well);
             // Query well 
-            var returnWell = _devKit.GetOneAndAssert(well);
+            var returnWell = DevKit.GetOneAndAssert(well);
             
             var welldatum = returnWell.WellDatum.FirstOrDefault(x => x.Uid.Equals("SL"));
             Assert.IsNotNull(welldatum);
@@ -65,13 +47,13 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual(ElevCodeEnum.SL, welldatum.Code);
 
             // Update well
-            var datumSl = _devKit.WellDatum("Sea Level", ElevCodeEnum.LAT, "SL");
+            var datumSl = DevKit.WellDatum("Sea Level", ElevCodeEnum.LAT, "SL");
 
-            var update = new Well() { Uid = well.Uid, WellDatum = _devKit.List(datumSl) };
-            _devKit.UpdateAndAssert(update);
+            var update = new Well() { Uid = well.Uid, WellDatum = DevKit.List(datumSl) };
+            DevKit.UpdateAndAssert(update);
 
             // Query updated well
-            returnWell = _devKit.GetOneAndAssert(well);
+            returnWell = DevKit.GetOneAndAssert(well);
 
             welldatum = returnWell.WellDatum.FirstOrDefault(x => x.Uid.Equals("SL"));
             Assert.IsNotNull(welldatum);
@@ -80,42 +62,42 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
-        public void Well141DataAdapter_UpdateInStore_Update_Well_And_Ignore_Invalid_Element()
+        public void Well141DataAdapter_UpdateInStore_UpdateWell_And_Ignore_Invalid_Element()
         {
-            _well.Operator = "AAA Company";
+            Well.Operator = "AAA Company";
 
-            _devKit.AddAndAssert(_well);
+            DevKit.AddAndAssert(Well);
 
             // Update well with invalid element
-            var updateXml = string.Format(DevKit141Aspect.BasicWellXmlTemplate, _well.Uid,
+            var updateXml = string.Format(DevKit141Aspect.BasicWellXmlTemplate, Well.Uid,
                 "<operator>BBB Company</operator>" + 
                 "<fieldsssssss>Big Field</fieldsssssss>");
 
-            var results = _devKit.UpdateInStore(ObjectTypes.Well, updateXml, null, null);
+            var results = DevKit.UpdateInStore(ObjectTypes.Well, updateXml, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, results.Result);
 
             // Query the updated well 
-            var result = _devKit.GetOneAndAssert(_well);
+            var result = DevKit.GetOneAndAssert(Well);
             Assert.AreEqual("BBB Company", result.Operator);
         }
 
         [TestMethod]
-        public void Well141DataAdapter_UpdateInStore_Update_Well_And_Ignore_Invalid_Attribute()
+        public void Well141DataAdapter_UpdateInStore_UpdateWell_And_Ignore_Invalid_Attribute()
         {
-            _well.Operator = "AAA Company";
+            Well.Operator = "AAA Company";
 
-            _devKit.AddAndAssert(_well);
+            DevKit.AddAndAssert(Well);
 
             // Update well with invalid element
-            var updateXml = string.Format(DevKit141Aspect.BasicWellXmlTemplate, _well.Uid,
+            var updateXml = string.Format(DevKit141Aspect.BasicWellXmlTemplate, Well.Uid,
                 "<operator>BBB Company</operator>" + 
                 "<field abc=\"abc\">Big Field</field>");
 
-            var results = _devKit.UpdateInStore(ObjectTypes.Well, updateXml, null, null);
+            var results = DevKit.UpdateInStore(ObjectTypes.Well, updateXml, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, results.Result);
 
             // Query the updated well 
-            var result = _devKit.GetOneAndAssert(_well);
+            var result = DevKit.GetOneAndAssert(Well);
             Assert.AreEqual("BBB Company", result.Operator);
             Assert.AreEqual("Big Field", result.Field);
         }
@@ -123,19 +105,19 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well141DataAdapter_UpdateInStore_Update_With_Invalid_Child_Element()
         {
-            _well.Operator = "AAA Company";
-            _devKit.AddAndAssert(_well);
+            Well.Operator = "AAA Company";
+            DevKit.AddAndAssert(Well);
 
             // Update well with invalid element
-            var updateXml = string.Format(DevKit141Aspect.BasicWellXmlTemplate, _well.Uid,
+            var updateXml = string.Format(DevKit141Aspect.BasicWellXmlTemplate, Well.Uid,
                 "<operator><abc>BBB Company</abc></operator>");
 
-            var results = _devKit.UpdateInStore(ObjectTypes.Well, updateXml, null, null);
+            var results = DevKit.UpdateInStore(ObjectTypes.Well, updateXml, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, results.Result);
 
             // Query the updated well 
-            var result = _devKit.GetOneAndAssert(_well);
-            Assert.AreEqual(_well.Name, result.Name);
+            var result = DevKit.GetOneAndAssert(Well);
+            Assert.AreEqual(Well.Name, result.Name);
             Assert.IsNull(result.Operator);
         }
 
@@ -143,7 +125,7 @@ namespace PDS.Witsml.Server.Data.Wells
         public void Well141DataAdapter_UpdateInStore_Error_409_Missing_Required_Fields_For_Optional_Property()
         {
             // Add well
-            var response = _devKit.Add<WellList, Well>(_well);
+            var response = DevKit.Add<WellList, Well>(Well);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
@@ -162,7 +144,7 @@ namespace PDS.Witsml.Server.Data.Wells
                 WellDatum = new List<WellDatum> {wellDatum}
             };
 
-            var updateResponse = _devKit.Update<WellList, Well>(update);
+            var updateResponse = DevKit.Update<WellList, Well>(update);
 
             Assert.IsNotNull(updateResponse);
             Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, updateResponse.Result);
@@ -171,8 +153,8 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod, Description("Tests adding a recurring element for the first time on an UpdateInStore")]
         public void Wel141lDataAdapter_UpdateInStore_Add_Recurring_Element_Success()
         {
-            _well.Name = _devKit.Name("WellAddRecurringOnUpdate");
-            var response = _devKit.Add<WellList, Well>(_well);
+            Well.Name = DevKit.Name("WellAddRecurringOnUpdate");
+            var response = DevKit.Add<WellList, Well>(Well);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
@@ -182,11 +164,11 @@ namespace PDS.Witsml.Server.Data.Wells
                 Uid = response.SuppMsgOut,
                 WellDatum = new List<WellDatum>
                 {
-                    _devKit.WellDatum("Kelly Bushing", ElevCodeEnum.KB, "KB"),
-                    _devKit.WellDatum("Casing Flange", ElevCodeEnum.CF, "CF")
+                    DevKit.WellDatum("Kelly Bushing", ElevCodeEnum.KB, "KB"),
+                    DevKit.WellDatum("Casing Flange", ElevCodeEnum.CF, "CF")
                 }
             };
-            var updateResponse = _devKit.Update<WellList, Well>(updateWell);
+            var updateResponse = DevKit.Update<WellList, Well>(updateWell);
             Assert.IsNotNull(updateResponse);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
         }
@@ -195,8 +177,8 @@ namespace PDS.Witsml.Server.Data.Wells
         public void Well141DataAdapter_UpdateInStore_Add_Nested_Element_Success()
         {
             // Add a minimal test well and Assert its Success
-            _well.Name = _devKit.Name("WellAddNestedOnUpdate");
-            var response = _devKit.Add<WellList, Well>(_well);
+            Well.Name = DevKit.Name("WellAddNestedOnUpdate");
+            var response = DevKit.Add<WellList, Well>(Well);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
@@ -207,7 +189,7 @@ namespace PDS.Witsml.Server.Data.Wells
                 WellPublicLandSurveySystemLocation =
                     new PublicLandSurveySystem() {PrincipalMeridian = PrincipalMeridian.ChoctawMeridian, Range = 1}
             };
-            var updateResponse = _devKit.Update<WellList, Well>(updateWell);
+            var updateResponse = DevKit.Update<WellList, Well>(updateWell);
             Assert.IsNotNull(updateResponse);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
         }
@@ -215,12 +197,12 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod, Description("Tests adding an element with attributes for the first time on an UpdateInStore")]
         public void Well141DataAdapter_UpdateInStore_Add_Element_With_Attribute_Success()
         {
-            // Add a wellDatum to the test _well
-            _well.Name = _devKit.Name("WellAddWithAttributesOnUpdate");
-            _well.WellDatum = new List<WellDatum> {_devKit.WellDatum("Kelly Bushing", ElevCodeEnum.KB, "KB")};
+            // Add a wellDatum to the test Well
+            Well.Name = DevKit.Name("WellAddWithAttributesOnUpdate");
+            Well.WellDatum = new List<WellDatum> {DevKit.WellDatum("Kelly Bushing", ElevCodeEnum.KB, "KB")};
 
             // Add a well with a datum that we can reference in the update
-            var response = _devKit.Add<WellList, Well>(_well);
+            var response = DevKit.Add<WellList, Well>(Well);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
@@ -230,7 +212,7 @@ namespace PDS.Witsml.Server.Data.Wells
                 Uid = response.SuppMsgOut,
                 WellheadElevation = new WellElevationCoord() { Uom = WellVerticalCoordinateUom.m, Datum = "KB" }
             };
-            var updateResponse = _devKit.Update<WellList, Well>(updateWell);
+            var updateResponse = DevKit.Update<WellList, Well>(updateWell);
             Assert.IsNotNull(updateResponse);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
         }
@@ -238,10 +220,10 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod, Description("Tests adding a nested array element, e.g. referencePoint.location with elements having uom attributes, e.g. latitude during update")]
         public void Well141DataAdapter_UpdateInStore_Add_Nested_Array_Element_With_Uom_Success()
         {
-            var well = _devKit.CreateFullWell();
+            var well = DevKit.CreateFullWell();
             var referencePoint = well.ReferencePoint;
             well.ReferencePoint = null;
-            var response = _devKit.Add<WellList, Well>(well);
+            var response = DevKit.Add<WellList, Well>(well);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
@@ -252,7 +234,7 @@ namespace PDS.Witsml.Server.Data.Wells
                 Uid = response.SuppMsgOut,
                 ReferencePoint = referencePoint
             };
-            var updateResponse = _devKit.Update<WellList, Well>(updateWell);
+            var updateResponse = DevKit.Update<WellList, Well>(updateWell);
             Assert.IsNotNull(updateResponse);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
         }
@@ -261,14 +243,14 @@ namespace PDS.Witsml.Server.Data.Wells
         public void Well141DataAdapter_UpdateInStore_Add_Extension_Name_Value_Success()
         {
             // Add a minimal test well and Assert its Success
-            _devKit.AddAndAssert(_well);
+            DevKit.AddAndAssert(Well);
 
-            var extensionName1 = _devKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            var extensionName1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 
             // Create an update well that adds a nested (non-recurring) element for the first time on update
             var updateWell = new Well()
             {
-                Uid = _well.Uid,
+                Uid = Well.Uid,
                 CommonData = new CommonData
                 {
                     ExtensionNameValue = new List<ExtensionNameValue>
@@ -278,11 +260,11 @@ namespace PDS.Witsml.Server.Data.Wells
                 }
             };
 
-            var updateResponse = _devKit.Update<WellList, Well>(updateWell);
+            var updateResponse = DevKit.Update<WellList, Well>(updateWell);
             Assert.IsNotNull(updateResponse);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
 
-            var result = _devKit.GetOneAndAssert(_well);
+            var result = DevKit.GetOneAndAssert(Well);
             var commonData = result.CommonData;
             Assert.IsNotNull(commonData);
             var extensionNameValues = commonData.ExtensionNameValue;
@@ -300,7 +282,7 @@ namespace PDS.Witsml.Server.Data.Wells
         public void Well141DataAdapter_UpdateInStore_Add_Complex_Element_To_Existing_Recurring_Element()
         {
             // Add a minimal test well and Assert its Success
-            _well.WellDatum = new List<WellDatum>
+            Well.WellDatum = new List<WellDatum>
             {
                 new WellDatum()
                 {
@@ -309,7 +291,7 @@ namespace PDS.Witsml.Server.Data.Wells
                     Name = "Kelly Bushing"
                 }
             };
-            _devKit.AddAndAssert(_well);
+            DevKit.AddAndAssert(Well);
 
 
             // Create an update well that will update the existing KB datum with a datumName
@@ -326,7 +308,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             var updateWell = new Well()
             {
-                Uid = _well.Uid,
+                Uid = Well.Uid,
                 WellDatum = new List<WellDatum>()
                 {
                     datamWithDatumName
@@ -334,12 +316,12 @@ namespace PDS.Witsml.Server.Data.Wells
             };
 
             // Update well
-            var updateResponse = _devKit.Update<WellList, Well>(updateWell);
+            var updateResponse = DevKit.Update<WellList, Well>(updateWell);
             Assert.IsNotNull(updateResponse);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
 
             // Query well to make sure datumName was added
-            var result = _devKit.GetOneAndAssert(_well);
+            var result = DevKit.GetOneAndAssert(Well);
             var welldatum = result.WellDatum.FirstOrDefault(x => x.Uid.Equals("KB"));
             Assert.IsNotNull(welldatum);
             Assert.AreEqual("Kelly Bushing", welldatum.Name);
@@ -356,7 +338,7 @@ namespace PDS.Witsml.Server.Data.Wells
         public void Well141DataAdapter_UpdateInStore_Acquisition_Success()
         {
             // Add a valid well with three AcquisitionTimeZones
-            var response = _devKit.AddValidAcquisition(_well);
+            var response = DevKit.AddValidAcquisition(Well);
 
             var updateWell = new Well()
             {
@@ -371,10 +353,10 @@ namespace PDS.Witsml.Server.Data.Wells
             };
 
             // Update and Assert for success
-            _devKit.UpdateAndAssert(updateWell);
+            DevKit.UpdateAndAssert(updateWell);
 
             // Retrieve the updated well and check that there are four acquisitions
-            var queryWell = _devKit.GetOneAndAssert(new Well() {Uid = response.SuppMsgOut});
+            var queryWell = DevKit.GetOneAndAssert(new Well() {Uid = response.SuppMsgOut});
             Assert.IsNotNull(queryWell.CommonData);
             Assert.IsNotNull(queryWell.CommonData.AcquisitionTimeZone);
             Assert.AreEqual(4, queryWell.CommonData.AcquisitionTimeZone.Count);
@@ -384,7 +366,7 @@ namespace PDS.Witsml.Server.Data.Wells
         public void Well141DataAdapter_UpdateTinStore_Acquisition_Error_483()
         {
             // Add a valid well with three AcquisitionTimeZones
-            var response = _devKit.AddValidAcquisition(_well);
+            var response = DevKit.AddValidAcquisition(Well);
 
             var updateWell = new Well()
             {
@@ -400,7 +382,7 @@ namespace PDS.Witsml.Server.Data.Wells
             };
 
             // Update and Assert for error
-            _devKit.UpdateAndAssert(updateWell, ErrorCodes.UpdateTemplateNonConforming);
+            DevKit.UpdateAndAssert(updateWell, ErrorCodes.UpdateTemplateNonConforming);
         }
     }
 }

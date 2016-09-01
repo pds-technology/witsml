@@ -16,6 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using PDS.Witsml.Server.Configuration;
+
 namespace PDS.Witsml.Server.Data.Logs
 {
     /// <summary>
@@ -23,5 +25,13 @@ namespace PDS.Witsml.Server.Data.Logs
     /// </summary>
     public partial class Log131TestBase
     {
+        partial void AfterEachTest()
+        {
+            WitsmlSettings.DepthRangeSize = DevKitAspect.DefaultDepthChunkRange;
+            WitsmlSettings.TimeRangeSize = DevKitAspect.DefaultTimeChunkRange;
+            WitsmlSettings.MaxDataPoints = DevKitAspect.DefaultMaxDataPoints;
+            WitsmlSettings.MaxDataNodes = DevKitAspect.DefaultMaxDataNodes;
+            WitsmlOperationContext.Current = null;
+        }
     }
 }

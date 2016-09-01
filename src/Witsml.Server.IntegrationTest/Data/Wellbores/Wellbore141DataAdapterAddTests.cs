@@ -17,7 +17,6 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -26,68 +25,35 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// <summary>
     /// Wellbore141DataAdapter Add tests.
     /// </summary>
-    [TestClass]
-    public class Wellbore141DataAdapterAddTests
+    public partial class Wellbore141DataAdapterAddTests
     {
-        private DevKit141Aspect _devKit;
-        private Well _well;
-        private Wellbore _wellbore;
-
-        public TestContext TestContext { get; set; }
-
-        [TestInitialize]
-        public void TestSetUp()
-        {
-            _devKit = new DevKit141Aspect(TestContext);
-
-            _devKit.Store.CapServerProviders = _devKit.Store.CapServerProviders
-                .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
-                .ToArray();
-
-            _well = new Well {
-                Uid = _devKit.Uid(),
-                Name = _devKit.Name("Well 01"),
-                TimeZone = _devKit.TimeZone
-            };
-
-            _wellbore = new Wellbore
-            {
-                Uid = _devKit.Uid(),
-                UidWell = _well.Uid,
-                NameWell = _well.Name,
-                Name = _devKit.Name("Wellbore 01")
-            };
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            _devKit = null;
-        }
-
         [TestMethod]
-        public void Wellbore141DataAdapter_AddToStore_Can_Add_Wellbore()
+        public void Wellbore141DataAdapter_AddToStore_Can_AddWellbore()
         {
-            AddWellbore(_wellbore);
+            AddParents();
+            DevKit.AddAndAssert(Wellbore);
         }
 
         /// <summary>
         /// Test adding a <see cref="Wellbore"/> successfully with dTimKickoff specified
         /// </summary>
         [TestMethod]
-        public void Wellbore141DataAdapter_AddToStore_Can_Add_Wellbore_with_dTimKickoff()
+        public void Wellbore141DataAdapter_AddToStore_Can_AddWellbore_with_dTimKickoff()
         {
-            _wellbore.DateTimeKickoff = DateTimeOffset.Now;
-            AddWellbore(_wellbore);
+            Wellbore.DateTimeKickoff = DateTimeOffset.Now;
+
+            AddParents();
+            DevKit.AddAndAssert(Wellbore);
         }
 
         [TestMethod]
-        public void Wellbore141DataAdapter_AddToStore_Can_Add_Wellbore_With_Same_Uid_Under_Different_Well()
+        public void Wellbore141DataAdapter_AddToStore_Can_AddWellbore_With_Same_Uid_Under_DifferentWell()
         {
-            AddWellbore(_wellbore);
+            AddParents();
+            DevKit.AddAndAssert(Wellbore);
 
-            var well2 = new Well { Uid = _devKit.Uid(), Name = _devKit.Name("Well-to-add-02"), TimeZone = _devKit.TimeZone };
-            var response = _devKit.Add<WellList, Well>(well2);
+            var well2 = new Well { Uid = DevKit.Uid(), Name = DevKit.Name("Well-to-add-02"), TimeZone = DevKit.TimeZone };
+            var response = DevKit.Add<WellList, Well>(well2);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             var wellbore2 = new Wellbore()
@@ -95,19 +61,10 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 Uid = well2.Uid,
                 UidWell = response.SuppMsgOut,
                 NameWell = well2.Name,
-                Name = _devKit.Name("Wellbore 02-01")
+                Name = DevKit.Name("Wellbore 02-01")
             };
-            response = _devKit.Add<WellboreList, Wellbore>(wellbore2);
+            response = DevKit.Add<WellboreList, Wellbore>(wellbore2);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-        }
-
-        private void AddWellbore(Wellbore wellbore, ErrorCodes errorCode = ErrorCodes.Success)
-        {
-            var response = _devKit.Add<WellList, Well>(_well);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            response = _devKit.Add<WellboreList, Wellbore>(wellbore);
-            Assert.AreEqual((short)errorCode, response.Result);
         }
     }
 }

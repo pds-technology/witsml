@@ -23,8 +23,7 @@ namespace PDS.Witsml.Server.Data.Wells
     /// <summary>
     /// Well200DataAdapter Delete tests.
     /// </summary>
-    [TestClass]
-    public class Well200DataAdapterDeleteTests
+    public partial class Well200DataAdapterDeleteTests
     {
         //[TestMethod]
         //public void Well200DataAdapter_MethodName_ExpectedBehavior()

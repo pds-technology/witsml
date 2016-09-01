@@ -34,78 +34,31 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Log141DataAdapter Update tests.
     /// </summary>
-    [TestClass]
-    public class Log141DataAdapterUpdateTests
+    public partial class Log141DataAdapterUpdateTests
     {
         private const int MicrosecondsPerSecond = 1000000;
-        private DevKit141Aspect _devKit;
-        private Well _well;
-        private Wellbore _wellbore;
-        private Log _log;
         private string _dataDir;
-
-        public TestContext TestContext { get; set; }
-
-        [TestInitialize]
-        public void TestSetUp()
-        {
-            _devKit = new DevKit141Aspect(TestContext);
-
-            _devKit.Store.CapServerProviders = _devKit.Store.CapServerProviders
-                .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
-                .ToArray();
-
-            // Test data directory
-            _dataDir = new DirectoryInfo(@".\TestData").FullName;
-
-            _well = new Well()
-            {
-                Uid = _devKit.Uid(),
-                Name = _devKit.Name("Well 01"),
-                TimeZone = _devKit.TimeZone
-            };
-
-            _wellbore = new Wellbore()
-            {
-                UidWell = _well.Uid,
-                NameWell = _well.Name,
-                Uid = _devKit.Uid(),
-                Name = _devKit.Name("Wellbore 01"),
-            };
-
-            _log = _devKit.CreateLog(_devKit.Uid(), _devKit.Name("Log 01"), _well.Uid, _well.Name, _wellbore.Uid, _wellbore.Name);
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            WitsmlSettings.DepthRangeSize = DevKitAspect.DefaultDepthChunkRange;
-            WitsmlSettings.TimeRangeSize = DevKitAspect.DefaultTimeChunkRange;
-            WitsmlSettings.MaxDataPoints = DevKitAspect.DefaultMaxDataPoints;
-            WitsmlSettings.MaxDataNodes = DevKitAspect.DefaultMaxDataNodes;
-            WitsmlOperationContext.Current = null;
-        }
 
         [TestMethod]
         public void Log141DataAdapter_UpdateInStore_Supports_NaN_In_Numeric_Fields()
         {
             AddParents();
             // Add log
-            _log.BhaRunNumber = 123;          
+            Log.BhaRunNumber = 123;          
             
-            _devKit.InitHeader(_log, LogIndexType.measureddepth);
-            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), 3, hasEmptyChannel:false);
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), 3, hasEmptyChannel:false);
 
-            _log.LogCurveInfo[0].ClassIndex = 1;
-            _log.LogCurveInfo[1].ClassIndex = 2;
+            Log.LogCurveInfo[0].ClassIndex = 1;
+            Log.LogCurveInfo[1].ClassIndex = 2;
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
 
             // Update log
             var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
                 "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
                 "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
-                    "<log uid=\"" + _log.Uid + "\" uidWell=\"" + _log.UidWell + "\" uidWellbore=\"" + _log.UidWellbore + "\">" + Environment.NewLine +                        
+                    "<log uid=\"" + Log.Uid + "\" uidWell=\"" + Log.UidWell + "\" uidWellbore=\"" + Log.UidWellbore + "\">" + Environment.NewLine +                        
                         "<bhaRunNumber>NaN</bhaRunNumber>" + Environment.NewLine +                       
                         "<logCurveInfo uid=\"MD\">" + Environment.NewLine +                                            
                         "  <classIndex>NaN</classIndex>" + Environment.NewLine +                       
@@ -116,11 +69,11 @@ namespace PDS.Witsml.Server.Data.Logs
                     "</log>" + Environment.NewLine +
                "</logs>";
 
-            var updateResponse = _devKit.UpdateInStore(ObjectTypes.Log, xmlIn, null, null);
+            var updateResponse = DevKit.UpdateInStore(ObjectTypes.Log, xmlIn, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
 
             // Query log
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
 
             Assert.IsNull(result.BhaRunNumber);
             Assert.AreEqual(3, result.LogCurveInfo.Count);
@@ -140,15 +93,15 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             AddParents();
 
-            _devKit.InitHeader(_log, LogIndexType.measureddepth);
-            var logData = _log.LogData.First();
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            var logData = Log.LogData.First();
             logData.Data.Add("13,13.1,13.2");
             logData.Data.Add("14,14.1,");
             logData.Data.Add("15,15.1,15.2");
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
 
-            var logAdded = _devKit.GetOneAndAssert(_log);
+            var logAdded = DevKit.GetOneAndAssert(Log);
             Assert.IsNull(logAdded.Description);
 
             var logDataAdded = logAdded.LogData.First();
@@ -159,22 +112,22 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var update = new Log()
             {
-                Uid = _log.Uid,
-                UidWell = _log.UidWell,
-                UidWellbore = _log.UidWellbore,
+                Uid = Log.Uid,
+                UidWell = Log.UidWell,
+                UidWellbore = Log.UidWellbore,
                 Description = "Should not be updated"
             };
 
-            _devKit.InitHeader(update, LogIndexType.measureddepth);
+            DevKit.InitHeader(update, LogIndexType.measureddepth);
             logData = update.LogData.First();          
             logData.Data.Add("17,17.1,17.2");
             logData.Data.Add("21,21.1,21.2");
             logData.Data.Add("21,22.1,22.2");
 
-            var updateResponse = _devKit.Update<LogList, Log>(update);
+            var updateResponse = DevKit.Update<LogList, Log>(update);
             Assert.AreEqual((short)ErrorCodes.NodesWithSameIndex, updateResponse.Result);
 
-            var logUpdated = _devKit.GetOneAndAssert(_log);
+            var logUpdated = DevKit.GetOneAndAssert(Log);
 
             var logDataUpdated = logUpdated.LogData.First();
             for (var i = 0; i < logDataAdded.Data.Count; i++)
@@ -191,38 +144,38 @@ namespace PDS.Witsml.Server.Data.Logs
 
             AddParents();
 
-            _log.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
-            _log.NullValue = "-999.25";
+            Log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            Log.NullValue = "-999.25";
 
-            var logData = _log.LogData.First();
+            var logData = Log.LogData.First();
             logData.Data.Add("1700.0,17.1,-999.25");
             logData.Data.Add("1800.0,18.1,-999.25");
             logData.Data.Add("1900.0,19.1,-999.25");
 
-            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
 
             //Update
-            var updateLog = _devKit.CreateLog(_log.Uid, _log.Name, _log.UidWell, _log.NameWell, _log.UidWellbore, _log.NameWellbore);
-            updateLog.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
-            updateLog.LogData[0].MnemonicList = _log.LogData.First().MnemonicList;
-            updateLog.LogData[0].UnitList = _log.LogData.First().UnitList;
+            var updateLog = DevKit.CreateLog(Log.Uid, Log.Name, Log.UidWell, Log.NameWell, Log.UidWellbore, Log.NameWellbore);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = Log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = Log.LogData.First().UnitList;
             logData = updateLog.LogData.First();
             logData.Data.Add("2000.0,20.1,-999.25");
             logData.Data.Add("2100.0,21.1,-999.25");
             logData.Data.Add("2200.0,22.1,-999.25");
             logData.Data.Add("2300.0,23.1,23.2");
 
-            var updateResponse = _devKit.Update<LogList, Log>(updateLog);
+            var updateResponse = DevKit.Update<LogList, Log>(updateLog);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
 
             // Query
-            var query = _devKit.CreateLog(_log.Uid, null, _log.UidWell, null, _log.UidWellbore, null);
+            var query = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
             query.StartIndex = new GenericMeasure(1700, "ft");
             query.EndIndex = new GenericMeasure(2200, "ft");
 
-            var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
             Assert.IsNotNull(results);
             var result = results.FirstOrDefault();
             Assert.IsNotNull(result);
@@ -255,39 +208,39 @@ namespace PDS.Witsml.Server.Data.Logs
 
             AddParents();
 
-            _log.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
-            _log.NullValue = "-999.25";
+            Log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            Log.NullValue = "-999.25";
 
-            var logData = _log.LogData.First();
+            var logData = Log.LogData.First();
             logData.Data.Add("1700.0, 17.1, -999.25");
             logData.Data.Add("1800.0, 18.1, -999.25");
             logData.Data.Add("1900.0, 19.1, -999.25");
             logData.Data.Add("2000.0, 20.1,    20.1");
             logData.Data.Add("2100.0, 21.1,    21.1");
 
-            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
 
             //Update
-            var updateLog = _devKit.CreateLog(_log.Uid, _log.Name, _log.UidWell, _log.NameWell, _log.UidWellbore, _log.NameWellbore);
-            updateLog.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
-            updateLog.LogData[0].MnemonicList = _log.LogData.First().MnemonicList;
-            updateLog.LogData[0].UnitList = _log.LogData.First().UnitList;
+            var updateLog = DevKit.CreateLog(Log.Uid, Log.Name, Log.UidWell, Log.NameWell, Log.UidWellbore, Log.NameWellbore);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = Log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = Log.LogData.First().UnitList;
             logData = updateLog.LogData.First();
             logData.Data.Add("2000.0, 200.1, -999.25");
             logData.Data.Add("2100.0, 210.1, -999.25");
             logData.Data.Add("2200.0, 220.1,   22.1");
 
-            var updateResponse = _devKit.Update<LogList, Log>(updateLog);
+            var updateResponse = DevKit.Update<LogList, Log>(updateLog);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
 
             // Query
-            var query = _devKit.CreateLog(_log.Uid, null, _log.UidWell, null, _log.UidWellbore, null);
+            var query = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
             query.StartIndex = new GenericMeasure(1700, "ft");
             query.EndIndex = new GenericMeasure(2200, "ft");
 
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(6, result.LogData[0].Data.Count);
             Assert.AreEqual(3, result.LogData[0].MnemonicList.Split(',').Length);
@@ -310,38 +263,38 @@ namespace PDS.Witsml.Server.Data.Logs
 
             AddParents();
 
-            _log.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
-            _log.NullValue = "-999.25";
+            Log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            Log.NullValue = "-999.25";
 
-            var logData = _log.LogData.First();
+            var logData = Log.LogData.First();
             logData.Data.Add("1700.0, 17.1, 17.2");
             logData.Data.Add("1800.0, 18.1, 18.2");
             logData.Data.Add("1900.0, 19.1, 19.2");
             logData.Data.Add("2000.0, 20.1, 20.1");
             logData.Data.Add("2100.0, 21.1, 21.1");
 
-            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
 
             //Update
-            var updateLog = _devKit.CreateLog(_log.Uid, _log.Name, _log.UidWell, _log.NameWell, _log.UidWellbore, _log.NameWellbore);
-            updateLog.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
-            updateLog.LogData[0].MnemonicList = _log.LogData.First().MnemonicList;
-            updateLog.LogData[0].UnitList = _log.LogData.First().UnitList;
+            var updateLog = DevKit.CreateLog(Log.Uid, Log.Name, Log.UidWell, Log.NameWell, Log.UidWellbore, Log.NameWellbore);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = Log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = Log.LogData.First().UnitList;
             logData = updateLog.LogData.First();
             logData.Data.Add("1800.0, 180.1, -999.25");
             logData.Data.Add("2200.0, 220.1, 22.1");
 
-            var updateResponse = _devKit.Update<LogList, Log>(updateLog);
+            var updateResponse = DevKit.Update<LogList, Log>(updateLog);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
 
             // Query
-            var query = _devKit.CreateLog(_log.Uid, null, _log.UidWell, null, _log.UidWellbore, null);
+            var query = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
             query.StartIndex = new GenericMeasure(1700, "ft");
             query.EndIndex = new GenericMeasure(2200, "ft");
 
-            var results = _devKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.DataOnly);
+            var results = DevKit.Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.DataOnly);
             Assert.AreEqual(1, results.Count);
             Assert.AreEqual(1, results[0].LogData.Count);
             Assert.AreEqual(6, results[0].LogData[0].Data.Count);
@@ -365,82 +318,82 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_UpdateInStore_Lock_Transaction()
         {
-            _well.Uid = "Parent_Well_Testing_Lock";
-            _wellbore.UidWell = _well.Uid;
-            _wellbore.Uid = "Parent_Wellbore_Testing_Lock";
-            _log.UidWell = _well.Uid;
-            _log.UidWellbore = _wellbore.Uid;
-            _log.Uid = "Log_Testing_Lock";
-            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            Well.Uid = "ParentWell_Testing_Lock";
+            Wellbore.UidWell = Well.Uid;
+            Wellbore.Uid = "ParentWellbore_Testing_Lock";
+            Log.UidWell = Well.Uid;
+            Log.UidWellbore = Wellbore.Uid;
+            Log.Uid = "Log_Testing_Lock";
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
 
-            var queryWell = new Well { Uid = _well.Uid };
-            var resultWell = _devKit.Query<WellList, Well>(queryWell, optionsIn: OptionsIn.ReturnElements.All);
+            var queryWell = new Well { Uid = Well.Uid };
+            var resultWell = DevKit.Query<WellList, Well>(queryWell, optionsIn: OptionsIn.ReturnElements.All);
             if (resultWell.Count == 0)
             {
-                _devKit.Add<WellList, Well>(_well);
+                DevKit.Add<WellList, Well>(Well);
             }
 
-            var queryWellbore = new Wellbore { Uid = _wellbore.Uid, UidWell = _wellbore.UidWell };
-            var resultWellbore = _devKit.Query<WellboreList, Wellbore>(queryWellbore, optionsIn: OptionsIn.ReturnElements.All);
+            var queryWellbore = new Wellbore { Uid = Wellbore.Uid, UidWell = Wellbore.UidWell };
+            var resultWellbore = DevKit.Query<WellboreList, Wellbore>(queryWellbore, optionsIn: OptionsIn.ReturnElements.All);
             if (resultWellbore.Count == 0)
             {
-                _devKit.Add<WellboreList, Wellbore>(_wellbore);
+                DevKit.Add<WellboreList, Wellbore>(Wellbore);
             }
 
-            var queryLog = new Log { Uid = _log.Uid, UidWell = _log.UidWell, UidWellbore = _log.UidWellbore };
-            var resultLog = _devKit.Query<LogList, Log>(queryLog, optionsIn: OptionsIn.ReturnElements.HeaderOnly);
+            var queryLog = new Log { Uid = Log.Uid, UidWell = Log.UidWell, UidWellbore = Log.UidWellbore };
+            var resultLog = DevKit.Query<LogList, Log>(queryLog, optionsIn: OptionsIn.ReturnElements.HeaderOnly);
             if (resultLog.Count == 0)
             {
-                _devKit.Add<LogList, Log>(_log);
+                DevKit.Add<LogList, Log>(Log);
             }
 
             var update = new Log
             {
-                Uid = _log.Uid,
-                UidWell = _log.UidWell,
-                UidWellbore = _log.UidWellbore,
+                Uid = Log.Uid,
+                UidWell = Log.UidWell,
+                UidWellbore = Log.UidWellbore,
                 Description = "Update Description"
             };
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
         }
 
         [TestMethod]
         public void Log141DataAdapter_UpdateInStore_Structural_Ranges_Ignored()
         {
-            AddLogHeader(_log, LogIndexType.measureddepth);
+            AddLogHeader(Log, LogIndexType.measureddepth);
             
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
             Assert.IsNull(result.StartIndex);
             Assert.IsNull(result.EndIndex);
 
-            Assert.AreEqual(_log.LogCurveInfo.Count, result.LogCurveInfo.Count);
+            Assert.AreEqual(Log.LogCurveInfo.Count, result.LogCurveInfo.Count);
             foreach (var curve in result.LogCurveInfo)
             {
                 Assert.IsNull(curve.MinIndex);
                 Assert.IsNull(curve.MaxIndex);
             }
 
-            var update = _devKit.CreateLog(_log.Uid, null, _log.UidWell, null, _log.UidWellbore, null);
-            _devKit.InitHeader(update, LogIndexType.measureddepth);
+            var update = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
+            DevKit.InitHeader(update, LogIndexType.measureddepth);
 
             update.StartIndex = new GenericMeasure { Uom = "m", Value = 1.0 };
             update.EndIndex = new GenericMeasure { Uom = "m", Value = 10.0 };
 
             foreach (var curve in update.LogCurveInfo)
             {
-                curve.MinIndex = _log.StartIndex;
-                curve.MaxIndex = _log.EndIndex;
+                curve.MinIndex = Log.StartIndex;
+                curve.MaxIndex = Log.EndIndex;
             }
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
-            result = _devKit.GetOneAndAssert(_log);
+            result = DevKit.GetOneAndAssert(Log);
             Assert.IsNotNull(result);
             Assert.IsNull(result.StartIndex);
             Assert.IsNull(result.EndIndex);
 
-            Assert.AreEqual(_log.LogCurveInfo.Count, result.LogCurveInfo.Count);
+            Assert.AreEqual(Log.LogCurveInfo.Count, result.LogCurveInfo.Count);
             foreach (var curve in result.LogCurveInfo)
             {
                 Assert.IsNull(curve.MinIndex);
@@ -449,30 +402,30 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_Index_Curve_Not_First_In_LogCurveInfo()
+        public void Log141DataAdapter_UpdateInStore_Index_Curve_Not_First_InLogCurveInfo()
         {
-            AddLogHeader(_log, LogIndexType.measureddepth);
+            AddLogHeader(Log, LogIndexType.measureddepth);
 
-            var update = CreateLogDataUpdate(_log, LogIndexType.measureddepth, null, 10);
+            var update = CreateLogDataUpdate(Log, LogIndexType.measureddepth, null, 10);
             var logCurves = update.LogCurveInfo;
             var indexCurve = logCurves.First();
             logCurves.Remove(indexCurve);
             logCurves.Add(indexCurve);
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
         }
 
         [TestMethod]
         public void Log141DataAdapter_UpdateInStore_Update_Index_Range()
         {
             const int count = 10;
-            AddLogWithData(_log, LogIndexType.measureddepth, 10, false);
+            AddLogWithData(Log, LogIndexType.measureddepth, 10, false);
 
-            var update = CreateLogDataUpdate(_log, LogIndexType.measureddepth, new GenericMeasure {Uom = "m", Value = 11}, count, hasEmptyChannel: false);
-            _devKit.UpdateAndAssert(update);
+            var update = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure {Uom = "m", Value = 11}, count, hasEmptyChannel: false);
+            DevKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetOneAndAssert(_log);
-            var start = _log.StartIndex.Value;
+            var result = DevKit.GetOneAndAssert(Log);
+            var start = Log.StartIndex.Value;
             var end = update.StartIndex.Value + count - 1;
             Assert.AreEqual(start, result.StartIndex.Value);
             Assert.AreEqual(end, result.EndIndex.Value);
@@ -484,7 +437,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_Append_Large_Log_Data_In_Different_Chunks()
+        public void Log141DataAdapter_UpdateInStore_Append_LargeLog_Data_In_Different_Chunks()
         {
             // Set the depth range chunk size.
             WitsmlSettings.DepthRangeSize = 1000;
@@ -498,16 +451,16 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsNotNull(logList);
             Assert.AreEqual(1, logList.Log.Count);
 
-            var uidLog = _devKit.Uid();
+            var uidLog = DevKit.Uid();
 
             var log = logList.Log[0];
             log.Uid = uidLog;
-            log.UidWell = _well.Uid;
-            log.UidWellbore = _wellbore.Uid;
+            log.UidWell = Well.Uid;
+            log.UidWellbore = Wellbore.Uid;
 
-            _devKit.AddAndAssert(log);
+            DevKit.AddAndAssert(log);
 
-            var result = _devKit.GetOneAndAssert(log);
+            var result = DevKit.GetOneAndAssert(log);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(5000, result.LogData[0].Data.Count);
 
@@ -519,14 +472,14 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(1, logList.Log.Count);
 
             log = logList.Log[0];
-            log.UidWell = _well.Uid;
-            log.UidWellbore = _wellbore.Uid;
+            log.UidWell = Well.Uid;
+            log.UidWellbore = Wellbore.Uid;
             log.Uid = uidLog;
 
-            _devKit.UpdateAndAssert(log);
+            DevKit.UpdateAndAssert(log);
 
             // Query log after appending data
-            result = _devKit.GetOneAndAssert(log);
+            result = DevKit.GetOneAndAssert(log);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(15000, result.LogData[0].Data.Count);
         }
@@ -540,21 +493,21 @@ namespace PDS.Witsml.Server.Data.Logs
         /// The test log below has 50 curves.
         /// </summary>
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_Update_LogCurveInfo()
+        public void Log141DataAdapter_UpdateInStore_UpdateLogCurveInfo()
         {
             AddParents();
 
-            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
 
-            for (var i = _log.LogCurveInfo.Count; i < 50; i++)
+            for (var i = Log.LogCurveInfo.Count; i < 50; i++)
             {
                 var mnemonic = $"Log-Curve-{i}";
-                _log.LogCurveInfo.Add(_devKit.LogGenerator.CreateLogCurveInfo(mnemonic, "m", LogDataType.@double));
+                Log.LogCurveInfo.Add(DevKit.LogGenerator.CreateLogCurveInfo(mnemonic, "m", LogDataType.@double));
             }
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
 
-            _devKit.UpdateAndAssert(_log);
+            DevKit.UpdateAndAssert(Log);
         }
 
         [TestMethod]
@@ -562,13 +515,13 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             AddParents();
 
-            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
 
             // Create nested array elements
-            var curve = _log.LogCurveInfo.Last();
+            var curve = Log.LogCurveInfo.Last();
 
-            var extensionName1 = _devKit.ExtensionNameValue("Ext-1", "1.0", "m");
-            var extensionName4 = _devKit.ExtensionNameValue("Ext-4", "4.0", "cm");
+            var extensionName1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            var extensionName4 = DevKit.ExtensionNameValue("Ext-4", "4.0", "cm");
 
             curve.AxisDefinition = new List<AxisDefinition>
             {
@@ -581,32 +534,32 @@ namespace PDS.Witsml.Server.Data.Logs
                     ExtensionNameValue = new List<ExtensionNameValue>
                     {
                         extensionName1,
-                        _devKit.ExtensionNameValue("Ext-2", "2.0", "ft")
+                        DevKit.ExtensionNameValue("Ext-2", "2.0", "ft")
                     }
                 }
             };
 
             curve.ExtensionNameValue = new List<ExtensionNameValue>
             {
-                _devKit.ExtensionNameValue("Ext-3", "3.0", "mm"),
+                DevKit.ExtensionNameValue("Ext-3", "3.0", "mm"),
                 extensionName4
             };
 
             // Add Log
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
 
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
             AssertNestedElements(result, curve, extensionName1, extensionName4);
 
             // Update Log
-            extensionName1 = _devKit.ExtensionNameValue("Ext-1", "1.1", "m");
-            extensionName4 = _devKit.ExtensionNameValue("Ext-4", "4.4", "cm");
+            extensionName1 = DevKit.ExtensionNameValue("Ext-1", "1.1", "m");
+            extensionName4 = DevKit.ExtensionNameValue("Ext-4", "4.4", "cm");
 
             var update = new Log
             {
-                Uid = _log.Uid,
-                UidWell = _log.UidWell,
-                UidWellbore = _log.UidWellbore
+                Uid = Log.Uid,
+                UidWell = Log.UidWell,
+                UidWellbore = Log.UidWellbore
             };
 
             curve.ExtensionNameValue = new List<ExtensionNameValue>
@@ -634,9 +587,9 @@ namespace PDS.Witsml.Server.Data.Logs
                 curve
             };
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
-            result = _devKit.GetOneAndAssert(_log);
+            result = DevKit.GetOneAndAssert(Log);
             AssertNestedElements(result, curve, extensionName1, extensionName4);
         }
 
@@ -644,9 +597,9 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141DataAdapter_UpdateInStore_With_Custom_Data_Delimiter()
         {
             var delimiter = "|~";
-            AddLogWithData(_log, LogIndexType.measureddepth, 10, false);
+            AddLogWithData(Log, LogIndexType.measureddepth, 10, false);
 
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
             Assert.IsNotNull(result);
 
             // Assert null data delimiter
@@ -655,15 +608,15 @@ namespace PDS.Witsml.Server.Data.Logs
             // Update data delimiter
             var update = new Log
             {
-                Uid = _log.Uid,
-                UidWell = _log.UidWell,
-                UidWellbore = _log.UidWellbore,
+                Uid = Log.Uid,
+                UidWell = Log.UidWell,
+                UidWellbore = Log.UidWellbore,
                 DataDelimiter = delimiter
             };
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
-            result = _devKit.GetOneAndAssert(_log);
+            result = DevKit.GetOneAndAssert(Log);
 
             // Assert data delimiter is updated
             Assert.AreEqual(delimiter, result.DataDelimiter);
@@ -671,7 +624,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var data = result.LogData.FirstOrDefault()?.Data;
             Assert.IsNotNull(data);
 
-            var channelCount = _log.LogCurveInfo.Count;
+            var channelCount = Log.LogCurveInfo.Count;
 
             // Assert data delimiter in log data
             foreach (var row in data)
@@ -699,7 +652,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var channel2 = curves[2];
             var channel3 = curves[3];
             
-            var update = _devKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
+            var update = DevKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
 
             // Update 2rd channel
             update.LogData = new List<LogData>();
@@ -713,10 +666,10 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data = data;
             update.LogData.Add(logData);
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
             // Update 1st channel with a different chunk
-            update = _devKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
+            update = DevKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
             update.LogData = new List<LogData>();
 
             logData = new LogData
@@ -728,10 +681,10 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data = data;
             update.LogData.Add(logData);
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
             // Update 3rd channel spanning the previous 2 chunks
-            update = _devKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
+            update = DevKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
             update.LogData = new List<LogData>();
 
             logData = new LogData
@@ -743,9 +696,9 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data = data;
             update.LogData.Add(logData);
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
 
             // Assert log data
             logData = result.LogData.FirstOrDefault();
@@ -781,7 +734,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var channel3 = curves[3];
 
             // Update 1st channel
-            var update = _devKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
+            var update = DevKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
             update.LogData = new List<LogData>();
 
             var logData = new LogData
@@ -793,10 +746,10 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data = data;
             update.LogData.Add(logData);
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
             // Update 3rd channel spanning the previous 2 chunks
-            update = _devKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
+            update = DevKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
             update.LogData = new List<LogData>();
 
             logData = new LogData
@@ -808,10 +761,10 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data = data;
             update.LogData.Add(logData);
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
             // Update 2rd channel with a different chunk
-            update = _devKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);           
+            update = DevKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);           
             update.LogData = new List<LogData>();
 
             logData = new LogData
@@ -823,9 +776,9 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data = data;
             update.LogData.Add(logData);
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
 
             // Assert log data
             logData = result.LogData.FirstOrDefault();
@@ -861,7 +814,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var channel3 = curves[3];
 
             // Update 3rd channel spanning the previous 2 chunks
-            var update = _devKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
+            var update = DevKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
             update.LogData = new List<LogData>();
 
             var logData = new LogData
@@ -873,10 +826,10 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data = data;
             update.LogData.Add(logData);
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
             // Update 2rd channel
-            update = _devKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
+            update = DevKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
             update.LogData = new List<LogData>();
 
             logData = new LogData
@@ -888,10 +841,10 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data = data;
             update.LogData.Add(logData);
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
             // Update 1st channel with a different chunk
-            update = _devKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
+            update = DevKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
             update.LogData = new List<LogData>();
 
             logData = new LogData
@@ -903,9 +856,9 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data = data;
             update.LogData.Add(logData);
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
 
             // Assert log data
             logData = result.LogData.FirstOrDefault();
@@ -940,7 +893,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var channel3 = curves[3];
 
             // Update 3rd channel spanning the previous 2 chunks
-            var update = _devKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
+            var update = DevKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
             update.LogData = new List<LogData>();
 
             var logData = new LogData
@@ -952,25 +905,25 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data = data;
             update.LogData.Add(logData);
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
             // Update All channel for 1st chunk
-            update = _devKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
+            update = DevKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
             update.LogData = new List<LogData>();
 
             logData = new LogData
             {
-                MnemonicList = _devKit.Mnemonics(log),
-                UnitList = _devKit.Units(log)
+                MnemonicList = DevKit.Mnemonics(log),
+                UnitList = DevKit.Units(log)
             };
             data = new List<string> { "1,1.1,1.2,", "2,2.1,2.2,2.3" };
             logData.Data = data;
             update.LogData.Add(logData);
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
             // Update 1st channel with a different chunk
-            update = _devKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
+            update = DevKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
             update.LogData = new List<LogData>();
 
             logData = new LogData
@@ -982,9 +935,9 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data = data;
             update.LogData.Add(logData);
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
 
             // Assert log data
             logData = result.LogData.FirstOrDefault();
@@ -1006,26 +959,26 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             AddParents();
 
-            _devKit.InitHeader(_log, LogIndexType.measureddepth);
-            var logData = _log.LogData.First();
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            var logData = Log.LogData.First();
             logData.Data.Add("1,1.1,1.2");
             logData.Data.Add("2,2.1,2.2");
             logData.Data.Add("3,3.1,3.2");
             logData.Data.Add("4,4.1,4.2");
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
 
             var update = new Log()
             {
-                Uid = _log.Uid,
-                UidWell = _log.UidWell,
-                UidWellbore = _log.UidWellbore,
+                Uid = Log.Uid,
+                UidWell = Log.UidWell,
+                UidWellbore = Log.UidWellbore,
                 Description = "Should not be updated"
             };
 
-            var indexCurve = _log.LogCurveInfo.FirstOrDefault();
-            var channel1 = _log.LogCurveInfo[1];
-            var channel2 = _log.LogCurveInfo[2];
+            var indexCurve = Log.LogCurveInfo.FirstOrDefault();
+            var channel1 = Log.LogCurveInfo[1];
+            var channel2 = Log.LogCurveInfo[2];
 
             var logData1 = new LogData
             {
@@ -1043,9 +996,9 @@ namespace PDS.Witsml.Server.Data.Logs
 
             update.LogData = new List<LogData> {logData1, logData2};
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
 
             logData = result.LogData.FirstOrDefault();
             Assert.IsNotNull(logData);
@@ -1065,34 +1018,34 @@ namespace PDS.Witsml.Server.Data.Logs
 
             AddParents();
 
-            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
 
             var update = new Log
             {
-                Uid = _log.Uid,
-                UidWell = _log.UidWell,
-                UidWellbore = _log.UidWellbore,
+                Uid = Log.Uid,
+                UidWell = Log.UidWell,
+                UidWellbore = Log.UidWellbore,
                 DataDelimiter = dataDelimiter
             };
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
             Assert.AreEqual(dataDelimiter, result.DataDelimiter);
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_Append_Log_Data()
+        public void Log141DataAdapter_UpdateInStore_AppendLog_Data()
         {
-            _log.StartIndex = new GenericMeasure(5, "m");
-            AddLogWithData(_log, LogIndexType.measureddepth, 10);
+            Log.StartIndex = new GenericMeasure(5, "m");
+            AddLogWithData(Log, LogIndexType.measureddepth, 10);
 
-            var update = CreateLogDataUpdate(_log, LogIndexType.measureddepth, new GenericMeasure(17, "m"), 6);
-            _devKit.UpdateAndAssert(update);
+            var update = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure(17, "m"), 6);
+            DevKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
             var logData = result.LogData.FirstOrDefault();
 
             Assert.IsNotNull(logData);
@@ -1100,15 +1053,15 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_Prepend_Log_Data()
+        public void Log141DataAdapter_UpdateInStore_PrependLog_Data()
         {
-            _log.StartIndex = new GenericMeasure(17, "m");
-            AddLogWithData(_log, LogIndexType.measureddepth, 10);
+            Log.StartIndex = new GenericMeasure(17, "m");
+            AddLogWithData(Log, LogIndexType.measureddepth, 10);
 
-            var update = CreateLogDataUpdate(_log, LogIndexType.measureddepth, new GenericMeasure(5, "m"), 6);
-            _devKit.UpdateAndAssert(update);
+            var update = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure(5, "m"), 6);
+            DevKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
             var logData = result.LogData.FirstOrDefault();
 
             Assert.IsNotNull(logData);
@@ -1116,15 +1069,15 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_Update_Overlapping_Log_Data()
+        public void Log141DataAdapter_UpdateInStore_Update_OverlappingLog_Data()
         {           
-            _log.StartIndex = new GenericMeasure(1, "m");
-            AddLogWithData(_log, LogIndexType.measureddepth, 8);
+            Log.StartIndex = new GenericMeasure(1, "m");
+            AddLogWithData(Log, LogIndexType.measureddepth, 8);
 
-            var update = CreateLogDataUpdate(_log, LogIndexType.measureddepth, new GenericMeasure(4.1, "m"), 3, 0.9);
-            _devKit.UpdateAndAssert(update);
+            var update = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure(4.1, "m"), 3, 0.9);
+            DevKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
             var logData = result.LogData.FirstOrDefault();
 
             Assert.IsNotNull(logData);
@@ -1132,17 +1085,17 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_Overwrite_Log_Data_Chunk()
+        public void Log141DataAdapter_UpdateInStore_OverwriteLog_Data_Chunk()
         {       
-            _log.StartIndex = new GenericMeasure(17, "m");
-            AddLogWithData(_log, LogIndexType.measureddepth, 6);
+            Log.StartIndex = new GenericMeasure(17, "m");
+            AddLogWithData(Log, LogIndexType.measureddepth, 6);
 
-            var update = CreateLogDataUpdate(_log, LogIndexType.measureddepth, new GenericMeasure(4.1, "m"), 3, 0.9);
+            var update = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure(4.1, "m"), 3, 0.9);
             var logData = update.LogData.First();
             logData.Data.Add("21.5, 1, 21.7");
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
             logData = result.LogData.FirstOrDefault();
 
             Assert.IsNotNull(logData);
@@ -1152,10 +1105,10 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141DataAdapter_UpdateInStore_Update_Different_Data_Range_For_Each_Channel()
         {
-            _log.StartIndex = new GenericMeasure(15, "m");
-            AddLogWithData(_log, LogIndexType.measureddepth, 8);
+            Log.StartIndex = new GenericMeasure(15, "m");
+            AddLogWithData(Log, LogIndexType.measureddepth, 8);
 
-            var update = CreateLogDataUpdate(_log, LogIndexType.measureddepth, new GenericMeasure(13, "m"), 6, 0.9);
+            var update = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure(13, "m"), 6, 0.9);
             var logData = update.LogData.First();
             logData.Data.Clear();
 
@@ -1169,9 +1122,9 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Add("22,,22.2");
             logData.Data.Add("23,,23.2");
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
             logData = result.LogData.FirstOrDefault();
 
             Assert.IsNotNull(logData);
@@ -1182,33 +1135,33 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_Update_Log_Header()
+        public void Log141DataAdapter_UpdateInStore_UpdateLog_Header()
         {
             AddParents();
 
-            _log.Description = "Not updated field";
-            _log.RunNumber = "101";
-            _log.BhaRunNumber = 1;
+            Log.Description = "Not updated field";
+            Log.RunNumber = "101";
+            Log.BhaRunNumber = 1;
 
-            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
 
-            var logAdded = _devKit.GetOneAndAssert(_log);
+            var logAdded = DevKit.GetOneAndAssert(Log);
             Assert.IsNotNull(logAdded);
-            Assert.AreEqual(_log.Description, logAdded.Description);
-            Assert.AreEqual(_log.RunNumber, logAdded.RunNumber);
-            Assert.AreEqual(_log.BhaRunNumber, logAdded.BhaRunNumber);
+            Assert.AreEqual(Log.Description, logAdded.Description);
+            Assert.AreEqual(Log.RunNumber, logAdded.RunNumber);
+            Assert.AreEqual(Log.BhaRunNumber, logAdded.BhaRunNumber);
             Assert.IsNull(logAdded.CommonData.ItemState);
 
-            var update = _devKit.CreateLog(_log.Uid, null, _log.UidWell, null, _log.UidWellbore, null);
+            var update = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
             update.CommonData = new CommonData { ItemState = ItemState.actual };
             update.RunNumber = "102";
             update.BhaRunNumber = 2;
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
-            var logUpdated = _devKit.GetOneAndAssert(_log);
+            var logUpdated = DevKit.GetOneAndAssert(Log);
             Assert.IsNotNull(logUpdated);
             Assert.AreEqual(logAdded.Description, logUpdated.Description);
             Assert.AreEqual(update.RunNumber, logUpdated.RunNumber);
@@ -1217,46 +1170,46 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_Update_Log_Curve()
+        public void Log141DataAdapter_UpdateInStore_UpdateLog_Curve()
         {
             AddParents();
 
-            _log.Description = "Not updated field";
-            _log.RunNumber = "101";
-            _log.BhaRunNumber = 1;
+            Log.Description = "Not updated field";
+            Log.RunNumber = "101";
+            Log.BhaRunNumber = 1;
 
-            _devKit.InitHeader(_log, LogIndexType.measureddepth);
-            _log.LogCurveInfo.RemoveAt(2);
-            _log.LogData.Clear();
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            Log.LogCurveInfo.RemoveAt(2);
+            Log.LogData.Clear();
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
 
-            var logAdded = _devKit.GetOneAndAssert(_log);
+            var logAdded = DevKit.GetOneAndAssert(Log);
             Assert.IsNotNull(logAdded);
-            Assert.AreEqual(_log.Description, logAdded.Description);
-            Assert.AreEqual(_log.RunNumber, logAdded.RunNumber);
-            Assert.AreEqual(_log.BhaRunNumber, logAdded.BhaRunNumber);
+            Assert.AreEqual(Log.Description, logAdded.Description);
+            Assert.AreEqual(Log.RunNumber, logAdded.RunNumber);
+            Assert.AreEqual(Log.BhaRunNumber, logAdded.BhaRunNumber);
             Assert.IsNull(logAdded.CommonData.ItemState);
 
-            var logCurve = _devKit.GetLogCurveInfoByUid(logAdded.LogCurveInfo, "ROP") as LogCurveInfo;
+            var logCurve = DevKit.GetLogCurveInfoByUid(logAdded.LogCurveInfo, "ROP") as LogCurveInfo;
             Assert.IsNotNull(logCurve);
             Assert.IsNull(logCurve.CurveDescription);
 
-            var update = _devKit.CreateLog(_log.Uid, null, _log.UidWell, null, _log.UidWellbore, null);
+            var update = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
             update.CommonData = new CommonData { ItemState = ItemState.actual };
             update.RunNumber = "102";
             update.BhaRunNumber = 2;
 
-            _devKit.InitHeader(update, LogIndexType.measureddepth);
+            DevKit.InitHeader(update, LogIndexType.measureddepth);
             update.LogCurveInfo.RemoveAt(2);
             update.LogCurveInfo.RemoveAt(0);
             update.LogData.Clear();
             var updateCurve = update.LogCurveInfo.First();
             updateCurve.CurveDescription = "Updated description";
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
-            var logUpdated = _devKit.GetOneAndAssert(_log);
+            var logUpdated = DevKit.GetOneAndAssert(Log);
 
             Assert.IsNotNull(logUpdated);
             Assert.AreEqual(logAdded.Description, logUpdated.Description);
@@ -1264,7 +1217,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(update.BhaRunNumber, logUpdated.BhaRunNumber);
             Assert.AreEqual(update.CommonData.ItemState, logUpdated.CommonData.ItemState);
 
-            logCurve = _devKit.GetLogCurveInfoByUid(logUpdated.LogCurveInfo, "ROP") as LogCurveInfo;
+            logCurve = DevKit.GetLogCurveInfoByUid(logUpdated.LogCurveInfo, "ROP") as LogCurveInfo;
             Assert.IsNotNull(logCurve);
             Assert.AreEqual(updateCurve.CurveDescription, logCurve.CurveDescription);
         }
@@ -1274,25 +1227,25 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             AddParents();
 
-            _devKit.InitHeader(_log, LogIndexType.measureddepth);
-            _log.LogCurveInfo.RemoveRange(1, 2);
-            _log.LogData.Clear();
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            Log.LogCurveInfo.RemoveRange(1, 2);
+            Log.LogData.Clear();
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
 
-            var logAdded = _devKit.GetOneAndAssert(_log);
+            var logAdded = DevKit.GetOneAndAssert(Log);
             Assert.AreEqual(1, logAdded.LogCurveInfo.Count);
-            Assert.AreEqual(_log.LogCurveInfo.Count, logAdded.LogCurveInfo.Count);
+            Assert.AreEqual(Log.LogCurveInfo.Count, logAdded.LogCurveInfo.Count);
 
-            var update = _devKit.CreateLog(_log.Uid, null, _log.UidWell, null, _log.UidWellbore, null);
-            _devKit.InitHeader(update, LogIndexType.measureddepth);
+            var update = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
+            DevKit.InitHeader(update, LogIndexType.measureddepth);
             update.LogCurveInfo.RemoveAt(2);
             update.LogCurveInfo.RemoveAt(0);
             update.LogData.Clear();
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
-            var logUpdated = _devKit.GetOneAndAssert(_log);
+            var logUpdated = DevKit.GetOneAndAssert(Log);
             Assert.AreEqual(2, logUpdated.LogCurveInfo.Count);
         }
 
@@ -1301,63 +1254,63 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             AddParents();
 
-            _log.RunNumber = "101";
-            _log.IndexCurve = "MD";
-            _log.IndexType = LogIndexType.measureddepth;
+            Log.RunNumber = "101";
+            Log.IndexCurve = "MD";
+            Log.IndexType = LogIndexType.measureddepth;
 
-            _devKit.InitHeader(_log, _log.IndexType.Value);
-            _log.Direction = null;
+            DevKit.InitHeader(Log, Log.IndexType.Value);
+            Log.Direction = null;
 
-            Assert.IsFalse(_log.Direction.HasValue);
+            Assert.IsFalse(Log.Direction.HasValue);
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
 
-            var logAdded = _devKit.GetOneAndAssert(_log);
+            var logAdded = DevKit.GetOneAndAssert(Log);
             Assert.AreEqual(LogIndexDirection.increasing, logAdded.Direction);
-            Assert.AreEqual(_log.RunNumber, logAdded.RunNumber);
+            Assert.AreEqual(Log.RunNumber, logAdded.RunNumber);
 
-            var update = _devKit.CreateLog(_log.Uid, null, _log.UidWell, null, _log.UidWellbore, null);
+            var update = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
             update.Direction = LogIndexDirection.decreasing;
             update.RunNumber = "102";
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
-            var logUpdated = _devKit.GetOneAndAssert(_log);
+            var logUpdated = DevKit.GetOneAndAssert(Log);
             Assert.AreEqual(LogIndexDirection.increasing, logAdded.Direction);
             Assert.AreEqual(update.RunNumber, logUpdated.RunNumber);
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_Update_Log_Data_And_Index_Range()
+        public void Log141DataAdapter_UpdateInStore_UpdateLog_Data_And_Index_Range()
         {
-            _log.StartIndex = new GenericMeasure(15, "m");
-            AddLogWithData(_log, LogIndexType.measureddepth, 8);
+            Log.StartIndex = new GenericMeasure(15, "m");
+            AddLogWithData(Log, LogIndexType.measureddepth, 8);
 
             // Make sure there are 3 curves
-            var lciUids = _log.LogCurveInfo.Select(l => l.Uid).ToArray();
+            var lciUids = Log.LogCurveInfo.Select(l => l.Uid).ToArray();
             Assert.AreEqual(3, lciUids.Length);
 
-            var logAdded = _devKit.GetOneAndAssert(_log);
+            var logAdded = DevKit.GetOneAndAssert(Log);
             Assert.AreEqual(15, logAdded.StartIndex.Value);
             Assert.AreEqual(22, logAdded.EndIndex.Value);
 
             // Check the range of the index curve
-            var mdCurve = _devKit.GetLogCurveInfoByUid(logAdded.LogCurveInfo, logAdded.IndexCurve) as LogCurveInfo;
+            var mdCurve = DevKit.GetLogCurveInfoByUid(logAdded.LogCurveInfo, logAdded.IndexCurve) as LogCurveInfo;
             Assert.IsNotNull(mdCurve);
             Assert.AreEqual(logAdded.StartIndex.Value, mdCurve.MinIndex.Value);
             Assert.AreEqual(logAdded.EndIndex.Value, mdCurve.MaxIndex.Value);
 
             // Look for the 2nd LogCurveInfo by Mnemonic.  It should be filtered out and not exist.
-            var curve2 = _devKit.GetLogCurveInfoByUid(logAdded.LogCurveInfo, lciUids[1]) as LogCurveInfo;
+            var curve2 = DevKit.GetLogCurveInfoByUid(logAdded.LogCurveInfo, lciUids[1]) as LogCurveInfo;
             Assert.IsNull(curve2);
 
             // Check the range of the 3rd curve.
-            var curve3 = _devKit.GetLogCurveInfoByUid(logAdded.LogCurveInfo, lciUids[2]) as LogCurveInfo;
+            var curve3 = DevKit.GetLogCurveInfoByUid(logAdded.LogCurveInfo, lciUids[2]) as LogCurveInfo;
             Assert.IsNotNull(curve3);
             Assert.AreEqual(logAdded.StartIndex.Value, curve3.MinIndex.Value);
             Assert.AreEqual(logAdded.EndIndex.Value, curve3.MaxIndex.Value);
 
-            var update = CreateLogDataUpdate(_log, LogIndexType.measureddepth, new GenericMeasure(13, "m"), 6, 0.9);
+            var update = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure(13, "m"), 6, 0.9);
             var logData = update.LogData.First();
             logData.Data.Clear();
 
@@ -1371,9 +1324,9 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Add("22,,22.2");
             logData.Data.Add("23,,23.2");
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
-            var logUpdated = _devKit.GetOneAndAssert(_log);
+            var logUpdated = DevKit.GetOneAndAssert(Log);
             logData = logUpdated.LogData.FirstOrDefault();
 
             Assert.IsNotNull(logData);
@@ -1381,60 +1334,60 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(13, logUpdated.StartIndex.Value);
             Assert.AreEqual(23, logUpdated.EndIndex.Value);
 
-            mdCurve = _devKit.GetLogCurveInfoByUid(logUpdated.LogCurveInfo, lciUids[0]) as LogCurveInfo;
+            mdCurve = DevKit.GetLogCurveInfoByUid(logUpdated.LogCurveInfo, lciUids[0]) as LogCurveInfo;
             Assert.IsNotNull(mdCurve);
             Assert.AreEqual(logUpdated.StartIndex.Value, mdCurve.MinIndex.Value);
             Assert.AreEqual(logUpdated.EndIndex.Value, mdCurve.MaxIndex.Value);
 
-            curve2 = _devKit.GetLogCurveInfoByUid(logUpdated.LogCurveInfo, lciUids[1]) as LogCurveInfo;
+            curve2 = DevKit.GetLogCurveInfoByUid(logUpdated.LogCurveInfo, lciUids[1]) as LogCurveInfo;
             Assert.IsNotNull(curve2);
             Assert.AreEqual(13, curve2.MinIndex.Value);
             Assert.AreEqual(20, curve2.MaxIndex.Value);
 
-            curve3 = _devKit.GetLogCurveInfoByUid(logUpdated.LogCurveInfo, lciUids[2]) as LogCurveInfo;
+            curve3 = DevKit.GetLogCurveInfoByUid(logUpdated.LogCurveInfo, lciUids[2]) as LogCurveInfo;
             Assert.IsNotNull(curve3);
             Assert.AreEqual(15, curve3.MinIndex.Value);
             Assert.AreEqual(23, curve3.MaxIndex.Value);
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_Update_With_Unsequenced_Increasing_Depth_Log_Data_In_Same_Chunk()
+        public void Log141DataAdapter_UpdateInStore_Update_With_Unsequenced_Increasing_DepthLog_Data_In_Same_Chunk()
         {
             // Set the depth range chunk size.
             WitsmlSettings.DepthRangeSize = 1000;
 
             AddParents();
 
-            _log.StartIndex = new GenericMeasure(13, "ft");
-            _log.EndIndex = new GenericMeasure(17, "ft");
-            _log.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
+            Log.StartIndex = new GenericMeasure(13, "ft");
+            Log.EndIndex = new GenericMeasure(17, "ft");
+            Log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
 
-            var logData = _log.LogData.First();
+            var logData = Log.LogData.First();
             logData.Data.Add("10,10.1,10.2");
             logData.Data.Add("15,15.1,15.2");
             logData.Data.Add("16,16.1,16.2");
             logData.Data.Add("17,17.1,17.2");
             logData.Data.Add("18,18.1,18.2");
 
-            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
 
             // Update
-            var updateLog = _devKit.CreateLog(_log.Uid, _log.Name, _log.UidWell, _log.NameWell, _log.UidWellbore, _log.NameWellbore);
-            updateLog.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
-            updateLog.LogData[0].MnemonicList = _log.LogData.First().MnemonicList;
-            updateLog.LogData[0].UnitList = _log.LogData.First().UnitList;
+            var updateLog = DevKit.CreateLog(Log.Uid, Log.Name, Log.UidWell, Log.NameWell, Log.UidWellbore, Log.NameWellbore);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = Log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = Log.LogData.First().UnitList;
             logData = updateLog.LogData.First();
             logData.Data.Add("13,13.1,13.2");
             logData.Data.Add("12,12.1,12.2");
             logData.Data.Add("11,11.1,11.2");
             logData.Data.Add("14,14.1,14.2");
 
-            _devKit.UpdateAndAssert(updateLog);
+            DevKit.UpdateAndAssert(updateLog);
 
             // Query
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(9, result.LogData[0].Data.Count);
 
@@ -1456,31 +1409,31 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_Update_With_Unsequenced_Increasing_Depth_Log_Data_In_Differnet_Chunk()
+        public void Log141DataAdapter_UpdateInStore_Update_With_Unsequenced_Increasing_DepthLog_Data_In_Differnet_Chunk()
         {
             // Set the depth range chunk size.
             WitsmlSettings.DepthRangeSize = 1000;
 
             AddParents();
 
-            _log.StartIndex = new GenericMeasure(13, "ft");
-            _log.EndIndex = new GenericMeasure(17, "ft");
-            _log.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
+            Log.StartIndex = new GenericMeasure(13, "ft");
+            Log.EndIndex = new GenericMeasure(17, "ft");
+            Log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
 
-            var logData = _log.LogData.First();
+            var logData = Log.LogData.First();
             logData.Data.Add("1700.0,17.1,17.2");
             logData.Data.Add("1800.0,18.1,18.2");
             logData.Data.Add("1900.0,19.1,19.2");
 
-            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
 
             // Update
-            var updateLog = _devKit.CreateLog(_log.Uid, _log.Name, _log.UidWell, _log.NameWell, _log.UidWellbore, _log.NameWellbore);
-            updateLog.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
-            updateLog.LogData[0].MnemonicList = _log.LogData.First().MnemonicList;
-            updateLog.LogData[0].UnitList = _log.LogData.First().UnitList;
+            var updateLog = DevKit.CreateLog(Log.Uid, Log.Name, Log.UidWell, Log.NameWell, Log.UidWellbore, Log.NameWellbore);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = Log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = Log.LogData.First().UnitList;
             logData = updateLog.LogData.First();
             logData.Data.Add("2000.0,20.1,20.2");
             logData.Data.Add("2300.0,23.1,23.2");
@@ -1488,10 +1441,10 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Add("2100.0,21.1,21.2");
             logData.Data.Add("2400.0,24.1,24.2");
 
-            _devKit.UpdateAndAssert(updateLog);
+            DevKit.UpdateAndAssert(updateLog);
 
             // Query
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(8, result.LogData[0].Data.Count);
 
@@ -1513,42 +1466,42 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_Update_With_Unsequenced_Decreasing_Depth_Log_Data_In_Same_Chunk()
+        public void Log141DataAdapter_UpdateInStore_Update_With_Unsequenced_Decreasing_DepthLog_Data_In_Same_Chunk()
         {
             // Set the depth range chunk size.
             WitsmlSettings.DepthRangeSize = 1000;
 
             AddParents();
 
-            _log.StartIndex = new GenericMeasure(10, "ft");
-            _log.EndIndex = new GenericMeasure(18, "ft");
-            _log.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
+            Log.StartIndex = new GenericMeasure(10, "ft");
+            Log.EndIndex = new GenericMeasure(18, "ft");
+            Log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
 
-            _devKit.InitHeader(_log, LogIndexType.measureddepth, false);
-            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), 5);
-            var logData = _log.LogData.First();
+            DevKit.InitHeader(Log, LogIndexType.measureddepth, false);
+            DevKit.InitDataMany(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), 5);
+            var logData = Log.LogData.First();
             logData.Data.Clear();
             logData.Data.Add("19.0,19.1,19.2");
             logData.Data.Add("18.0,18.1,18.2");
             logData.Data.Add("17.0,17.1,17.2");
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
 
             // Update
-            var updateLog = _devKit.CreateLog(_log.Uid, null, _log.UidWell, null, _log.UidWellbore, null);
-            updateLog.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
-            updateLog.LogData[0].MnemonicList = _log.LogData.First().MnemonicList;
-            updateLog.LogData[0].UnitList = _log.LogData.First().UnitList;
+            var updateLog = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = Log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = Log.LogData.First().UnitList;
             logData = updateLog.LogData.First();
             logData.Data.Add("21.0,21.1,21.2");
             logData.Data.Add("23.0,23.1,23.2");
             logData.Data.Add("22.0,22.1,22.2");
             logData.Data.Add("24.0,24.1,24.2");
 
-            _devKit.UpdateAndAssert(updateLog);
+            DevKit.UpdateAndAssert(updateLog);
 
             // Query
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(7, result.LogData[0].Data.Count);
 
@@ -1571,32 +1524,32 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_Update_With_Unsequenced_Decreasing_Depth_Log_Data_In_Different_Chunk()
+        public void Log141DataAdapter_UpdateInStore_Update_With_Unsequenced_Decreasing_DepthLog_Data_In_Different_Chunk()
         {
             // Set the depth range chunk size.
             WitsmlSettings.DepthRangeSize = 1000;
 
             AddParents();
-            _log.StartIndex = new GenericMeasure(10, "ft");
-            _log.EndIndex = new GenericMeasure(18, "ft");
-            _log.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
+            Log.StartIndex = new GenericMeasure(10, "ft");
+            Log.EndIndex = new GenericMeasure(18, "ft");
+            Log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
 
-            _devKit.InitHeader(_log, LogIndexType.measureddepth, false);
-            _devKit.InitDataMany(_log, _devKit.Mnemonics(_log), _devKit.Units(_log), 5);
-            var logData = _log.LogData.First();
+            DevKit.InitHeader(Log, LogIndexType.measureddepth, false);
+            DevKit.InitDataMany(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), 5);
+            var logData = Log.LogData.First();
             logData.Data.Clear();
             logData.Data.Add("1900.0,19.1,19.2");
             logData.Data.Add("1800.0,18.1,18.2");
             logData.Data.Add("1700.0,17.1,17.2");
             logData.Data.Add("1600.0,16.1,16.2");
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
 
             // Update
-            var updateLog = _devKit.CreateLog(_log.Uid, null, _log.UidWell, null, _log.UidWellbore, null);
-            updateLog.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
-            updateLog.LogData[0].MnemonicList = _log.LogData.First().MnemonicList;
-            updateLog.LogData[0].UnitList = _log.LogData.First().UnitList;
+            var updateLog = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = Log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = Log.LogData.First().UnitList;
             logData = updateLog.LogData.First();
             logData.Data.Add("2000.0,21.1,21.2");
             logData.Data.Add("2100.0,21.1,21.2");
@@ -1604,10 +1557,10 @@ namespace PDS.Witsml.Server.Data.Logs
             logData.Data.Add("2200.0,22.1,22.2");
             logData.Data.Add("2400.0,24.1,24.2");
 
-            _devKit.UpdateAndAssert(updateLog);
+            DevKit.UpdateAndAssert(updateLog);
 
             // Query
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(9, result.LogData[0].Data.Count);
 
@@ -1630,41 +1583,41 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_Update_With_Unsequenced_Increasing_Time_Log_Data_In_Same_Chunk()
+        public void Log141DataAdapter_UpdateInStore_Update_With_Unsequenced_Increasing_TimeLog_Data_In_Same_Chunk()
         {
             // Set the time range chunk size to number of microseconds equivalent to one day
             WitsmlSettings.TimeRangeSize = 86400000000;
 
             AddParents();
 
-            _log.StartDateTimeIndex = new Timestamp();
-            _log.EndDateTimeIndex = new Timestamp();
-            _log.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
+            Log.StartDateTimeIndex = new Timestamp();
+            Log.EndDateTimeIndex = new Timestamp();
+            Log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
 
-            var logData = _log.LogData.First();
+            var logData = Log.LogData.First();
             logData.Data.Add("2016-04-13T15:30:42.0000000-05:00,30.1,30.2");
             logData.Data.Add("2016-04-13T15:31:42.0000000-05:00,31.1,31.2");
             logData.Data.Add("2016-04-13T15:32:42.0000000-05:00,32.1,32.2");
 
-            _devKit.InitHeader(_log, LogIndexType.datetime);
+            DevKit.InitHeader(Log, LogIndexType.datetime);
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
 
             // Update
-            var updateLog = _devKit.CreateLog(_log.Uid, null, _log.UidWell, null, _log.UidWellbore, null);
-            updateLog.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
-            updateLog.LogData[0].MnemonicList = _log.LogData.First().MnemonicList;
-            updateLog.LogData[0].UnitList = _log.LogData.First().UnitList;
+            var updateLog = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = Log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = Log.LogData.First().UnitList;
             logData = updateLog.LogData.First();
             logData.Data.Add("2016-04-13T15:35:42.0000000-05:00,35.1,35.2");
             logData.Data.Add("2016-04-13T15:34:42.0000000-05:00,34.1,34.2");
             logData.Data.Add("2016-04-13T15:33:42.0000000-05:00,33.1,33.2");
             logData.Data.Add("2016-04-13T15:36:42.0000000-05:00,36.1,36.2");
 
-            _devKit.UpdateAndAssert(updateLog);
+            DevKit.UpdateAndAssert(updateLog);
 
             // Query
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(7, result.LogData[0].Data.Count);
 
@@ -1692,41 +1645,41 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_Update_With_Unsequenced_Increasing_Time_Log_Data_In_Different_Chunk()
+        public void Log141DataAdapter_UpdateInStore_Update_With_Unsequenced_Increasing_TimeLog_Data_In_Different_Chunk()
         {
             // Set the time range chunk size to number of microseconds equivalent to one day
             WitsmlSettings.TimeRangeSize = 86400000000;
 
             AddParents();
 
-            _log.StartDateTimeIndex = new Timestamp();
-            _log.EndDateTimeIndex = new Timestamp();
-            _log.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
+            Log.StartDateTimeIndex = new Timestamp();
+            Log.EndDateTimeIndex = new Timestamp();
+            Log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
 
-            var logData = _log.LogData.First();
+            var logData = Log.LogData.First();
             logData.Data.Add("2016-04-13T15:30:42.0000000-05:00,30.1,30.2");
             logData.Data.Add("2016-04-13T15:31:42.0000000-05:00,31.1,31.2");
             logData.Data.Add("2016-04-13T15:32:42.0000000-05:00,32.1,32.2");
 
-            _devKit.InitHeader(_log, LogIndexType.datetime);
+            DevKit.InitHeader(Log, LogIndexType.datetime);
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
 
             // Update
-            var updateLog = _devKit.CreateLog(_log.Uid, null, _log.UidWell, null, _log.UidWellbore, null);
-            updateLog.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
-            updateLog.LogData[0].MnemonicList = _log.LogData.First().MnemonicList;
-            updateLog.LogData[0].UnitList = _log.LogData.First().UnitList;
+            var updateLog = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = Log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = Log.LogData.First().UnitList;
             logData = updateLog.LogData.First();
             logData.Data.Add("2016-04-20T15:35:42.0000000-05:00,35.1,35.2");
             logData.Data.Add("2016-04-20T15:34:42.0000000-05:00,34.1,34.2");
             logData.Data.Add("2016-04-20T15:33:42.0000000-05:00,33.1,33.2");
             logData.Data.Add("2016-04-20T15:36:42.0000000-05:00,36.1,36.2");
 
-            _devKit.UpdateAndAssert(updateLog);
+            DevKit.UpdateAndAssert(updateLog);
 
             // Query
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(7, result.LogData[0].Data.Count);
 
@@ -1754,41 +1707,41 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_Update_With_Unsequenced_Decreasing_Time_Log_Data_In_Same_Chunk()
+        public void Log141DataAdapter_UpdateInStore_Update_With_Unsequenced_Decreasing_TimeLog_Data_In_Same_Chunk()
         {
             // Set the time range chunk size to number of microseconds equivalent to one day
             WitsmlSettings.TimeRangeSize = 86400000000;
 
             AddParents();
 
-            _log.StartDateTimeIndex = new Timestamp();
-            _log.EndDateTimeIndex = new Timestamp();
-            _log.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
+            Log.StartDateTimeIndex = new Timestamp();
+            Log.EndDateTimeIndex = new Timestamp();
+            Log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
 
-            var logData = _log.LogData.First();
+            var logData = Log.LogData.First();
             logData.Data.Add("2016-04-13T15:32:42.0000000-05:00,32.1,32.2");
             logData.Data.Add("2016-04-13T15:31:42.0000000-05:00,31.1,31.2");
             logData.Data.Add("2016-04-13T15:30:42.0000000-05:00,30.1,30.2");
 
-            _devKit.InitHeader(_log, LogIndexType.datetime, false);
+            DevKit.InitHeader(Log, LogIndexType.datetime, false);
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
 
             // Update
-            var updateLog = _devKit.CreateLog(_log.Uid, null, _log.UidWell, null, _log.UidWellbore, null);
-            updateLog.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
-            updateLog.LogData[0].MnemonicList = _log.LogData.First().MnemonicList;
-            updateLog.LogData[0].UnitList = _log.LogData.First().UnitList;
+            var updateLog = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = Log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = Log.LogData.First().UnitList;
             logData = updateLog.LogData.First();
             logData.Data.Add("2016-04-13T15:35:42.0000000-05:00,35.1,35.2");
             logData.Data.Add("2016-04-13T15:34:42.0000000-05:00,34.1,34.2");
             logData.Data.Add("2016-04-13T15:33:42.0000000-05:00,33.1,33.2");
             logData.Data.Add("2016-04-13T15:36:42.0000000-05:00,36.1,36.2");
 
-            _devKit.UpdateAndAssert(updateLog);
+            DevKit.UpdateAndAssert(updateLog);
 
             // Query
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(7, result.LogData[0].Data.Count);
 
@@ -1816,40 +1769,40 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_Update_With_Unsequenced_Decreasing_Time_Log_Data_In_Different_Chunk()
+        public void Log141DataAdapter_UpdateInStore_Update_With_Unsequenced_Decreasing_TimeLog_Data_In_Different_Chunk()
         {
             // Set the time range chunk size to number of microseconds equivalent to one day
             WitsmlSettings.TimeRangeSize = 86400000000;
 
             AddParents();
-            _log.StartDateTimeIndex = new Timestamp();
-            _log.EndDateTimeIndex = new Timestamp();
-            _log.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
+            Log.StartDateTimeIndex = new Timestamp();
+            Log.EndDateTimeIndex = new Timestamp();
+            Log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
 
-            var logData = _log.LogData.First();
+            var logData = Log.LogData.First();
             logData.Data.Add("2016-04-13T15:32:42.0000000-05:00,32.1,32.2");
             logData.Data.Add("2016-04-13T15:31:42.0000000-05:00,31.1,31.2");
             logData.Data.Add("2016-04-13T15:30:42.0000000-05:00,30.1,30.2");
 
-            _devKit.InitHeader(_log, LogIndexType.datetime, false);
+            DevKit.InitHeader(Log, LogIndexType.datetime, false);
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
 
             // Update
-            var updateLog = _devKit.CreateLog(_log.Uid, null, _log.UidWell, null, _log.UidWellbore, null);
-            updateLog.LogData = _devKit.List(new LogData() { Data = _devKit.List<string>() });
-            updateLog.LogData[0].MnemonicList = _log.LogData.First().MnemonicList;
-            updateLog.LogData[0].UnitList = _log.LogData.First().UnitList;
+            var updateLog = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = Log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = Log.LogData.First().UnitList;
             logData = updateLog.LogData.First();
             logData.Data.Add("2016-04-10T15:35:42.0000000-05:00,35.1,35.2");
             logData.Data.Add("2016-04-10T15:34:42.0000000-05:00,34.1,34.2");
             logData.Data.Add("2016-04-10T15:33:42.0000000-05:00,33.1,33.2");
             logData.Data.Add("2016-04-10T15:36:42.0000000-05:00,36.1,36.2");
 
-            _devKit.UpdateAndAssert(updateLog);
+            DevKit.UpdateAndAssert(updateLog);
 
             // Query
-            var result = _devKit.GetOneAndAssert(_log);
+            var result = DevKit.GetOneAndAssert(Log);
             Assert.AreEqual(1, result.LogData.Count);
             Assert.AreEqual(7, result.LogData[0].Data.Count);
 
@@ -1881,15 +1834,15 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             AddParents();
 
-            _devKit.InitHeader(_log, LogIndexType.measureddepth);
-            var logData = _log.LogData.First();
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            var logData = Log.LogData.First();
             logData.Data.Add("13,13.1,13.2");
             logData.Data.Add("14,14.1,");
             logData.Data.Add("15,15.1,15.2");
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
 
-            var logAdded = _devKit.GetOneAndAssert(_log);
+            var logAdded = DevKit.GetOneAndAssert(Log);
             Assert.IsNull(logAdded.StepIncrement);
 
             var logDataAdded = logAdded.LogData.First();
@@ -1900,9 +1853,9 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var update = new Log()
             {
-                Uid = _log.Uid,
-                UidWell = _log.UidWell,
-                UidWellbore = _log.UidWellbore,
+                Uid = Log.Uid,
+                UidWell = Log.UidWell,
+                UidWellbore = Log.UidWellbore,
                 StepIncrement = new RatioGenericMeasure()
                 {
                     Value = 1.0,
@@ -1910,11 +1863,11 @@ namespace PDS.Witsml.Server.Data.Logs
                 }
             };
 
-            _devKit.InitHeader(update, LogIndexType.measureddepth);
+            DevKit.InitHeader(update, LogIndexType.measureddepth);
 
-            _devKit.UpdateAndAssert(update);
+            DevKit.UpdateAndAssert(update);
 
-            var logUpdated = _devKit.GetOneAndAssert(_log);
+            var logUpdated = DevKit.GetOneAndAssert(Log);
 
             var logDataUpdated = logUpdated.LogData.First();
             for (var i = 0; i < logDataAdded.Data.Count; i++)
@@ -1933,10 +1886,10 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             AddParents();
 
-            _devKit.InitHeader(_log, LogIndexType.measureddepth);
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
 
             var channelName = "channel3";
-            var curves = _log.LogCurveInfo;
+            var curves = Log.LogCurveInfo;
             var channel3 = new LogCurveInfo
             {
                 Uid = channelName,
@@ -1948,11 +1901,11 @@ namespace PDS.Witsml.Server.Data.Logs
                 TypeLogData = LogDataType.@double
             };
             curves.Add(channel3);
-            _log.LogData = null;
+            Log.LogData = null;
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
 
-            return _log;
+            return Log;
         }
 
         private void AssertNestedElements(Log log, LogCurveInfo curve, ExtensionNameValue extensionName1, ExtensionNameValue extensionName4)
@@ -1978,38 +1931,32 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(extensionName1.Value.Value, resultExtensionName.Value.Value);
         }
 
-        private void AddParents()
-        {
-            _devKit.AddAndAssert(_well);
-            _devKit.AddAndAssert(_wellbore);
-        }
-
         private void AddLogHeader(Log log, LogIndexType indexType)
         {
             AddParents();
 
-            _devKit.InitHeader(log, indexType);
+            DevKit.InitHeader(log, indexType);
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
         }
 
         private void AddLogWithData(Log log, LogIndexType indexType, int numOfRows, bool hasEmptyChannel = true)
         {
             AddParents();
 
-            _devKit.InitHeader(log, indexType);
-            _devKit.InitDataMany(log, _devKit.Mnemonics(log), _devKit.Units(log), numOfRows, hasEmptyChannel:hasEmptyChannel);
+            DevKit.InitHeader(log, indexType);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), numOfRows, hasEmptyChannel:hasEmptyChannel);
 
-            _devKit.AddAndAssert(_log);
+            DevKit.AddAndAssert(Log);
         }
 
         private Log CreateLogDataUpdate(Log log, LogIndexType indexType, GenericMeasure startIndex, int numOfRows, double factor = 1, bool hasEmptyChannel = true)
         {
-            var update = _devKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
+            var update = DevKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
             update.StartIndex = startIndex;
 
-            _devKit.InitHeader(update, indexType);
-            _devKit.InitDataMany(update, _devKit.Mnemonics(update), _devKit.Units(update), numOfRows, factor, hasEmptyChannel:hasEmptyChannel);
+            DevKit.InitHeader(update, indexType);
+            DevKit.InitDataMany(update, DevKit.Mnemonics(update), DevKit.Units(update), numOfRows, factor, hasEmptyChannel:hasEmptyChannel);
 
             return update;
         }

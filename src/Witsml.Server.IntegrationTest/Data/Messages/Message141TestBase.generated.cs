@@ -67,7 +67,8 @@ namespace PDS.Witsml.Server.Data.Messages
 				Uid = DevKit.Uid(),
 				Name = DevKit.Name("Wellbore"),
 				UidWell = Well.Uid,
-				NameWell = Well.Name
+				NameWell = Well.Name,
+				MD = new MeasuredDepthCoord(0, MeasuredDepthUom.ft)
 			};
 			Message = new Message
 			{

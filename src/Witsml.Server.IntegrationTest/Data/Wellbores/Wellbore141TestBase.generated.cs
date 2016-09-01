@@ -66,7 +66,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
 				Uid = DevKit.Uid(),
 				Name = DevKit.Name("Wellbore"),
 				UidWell = Well.Uid,
-				NameWell = Well.Name
+				NameWell = Well.Name,
+				MD = new MeasuredDepthCoord(0, MeasuredDepthUom.ft)
 			};
 
             QueryEmptyList = DevKit.List(new Wellbore());

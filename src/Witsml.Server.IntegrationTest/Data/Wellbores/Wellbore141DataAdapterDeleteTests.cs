@@ -29,107 +29,72 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// <summary>
     /// Wellbore141DataAdapter Delete tests.
     /// </summary>
-    [TestClass]
-    public class Wellbore141DataAdapterDeleteTests
+    public partial class Wellbore141DataAdapterDeleteTests
     {
-        private DevKit141Aspect _devKit;
-        private Well _well;
-        private Wellbore _wellbore;
-
-        [TestInitialize]
-        public void TestSetUp()
-        {
-            _devKit = new DevKit141Aspect(TestContext);
-
-            _devKit.Store.CapServerProviders = _devKit.Store.CapServerProviders
-                .Where(x => x.DataSchemaVersion == OptionsIn.DataVersion.Version141.Value)
-                .ToArray();
-
-            _well = new Well
-            {
-                Uid = _devKit.Uid(),
-                Name = _devKit.Name("Well 01"),
-                TimeZone = _devKit.TimeZone
-            };
-
-            _wellbore = new Wellbore
-            {
-                Uid = _devKit.Uid(),
-                UidWell = _well.Uid,
-                NameWell = _well.Name,
-                Name = _devKit.Name("Wellbore 01")
-            };
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            _devKit = null;
-        }
-
-        public TestContext TestContext { get; set; }
-
         [TestMethod]
-        public void Wellbore141DataAdapter_DeleteFromStore_Can_Delete_Full_Wellbore()
+        public void Wellbore141DataAdapter_DeleteFromStore_Can_Delete_FullWellbore()
         {
             // Add wellbore
-            AddWellbore(_well, _wellbore);
+            AddParents();
+            DevKit.AddAndAssert(Wellbore);
 
             // Assert wellbore is added
-             _devKit.GetOneAndAssert(_wellbore);
+             DevKit.GetOneAndAssert(Wellbore);
 
             // Delete wellbore
-            var delete = new Wellbore {Uid = _wellbore.Uid, UidWell = _wellbore.UidWell};
-            _devKit.DeleteAndAssert(delete);
+            var delete = new Wellbore {Uid = Wellbore.Uid, UidWell = Wellbore.UidWell};
+            DevKit.DeleteAndAssert(delete);
 
             // Assert the wellbore has been deleted
-            var results = _devKit.Query<WellboreList, Wellbore>(delete, ObjectTypes.Wellbore, null, optionsIn: OptionsIn.ReturnElements.All);
+            var results = DevKit.Query<WellboreList, Wellbore>(delete, ObjectTypes.Wellbore, null, optionsIn: OptionsIn.ReturnElements.All);
             Assert.AreEqual(0, results.Count);
         }
 
         [TestMethod]
-        public void Wellbore141DataAdapter_DeleteFromStore_Can_Delete_Full_Wellbore_With_Case_Insensitive_Uid()
+        public void Wellbore141DataAdapter_DeleteFromStore_Can_Delete_FullWellbore_With_Case_Insensitive_Uid()
         {
-            var uid = _devKit.Uid();
-            _wellbore.Uid = "wb" + uid;
+            var uid = DevKit.Uid();
+            Wellbore.Uid = "wb" + uid;
 
             // Add wellbore
-            AddWellbore(_well, _wellbore);
+            AddParents();
+            DevKit.AddAndAssert(Wellbore);
 
             // Assert wellbore is added
-             _devKit.GetOneAndAssert(_wellbore);
+            DevKit.GetOneAndAssert(Wellbore);
 
             // Delete wellbore
-            var delete = new Wellbore {Uid = "Wb" + uid, UidWell = _wellbore.UidWell};
-            _devKit.DeleteAndAssert(delete);
+            var delete = new Wellbore {Uid = "Wb" + uid, UidWell = Wellbore.UidWell};
+            DevKit.DeleteAndAssert(delete);
 
             // Assert the wellbore has been deleted
-            var results = _devKit.Query<WellboreList, Wellbore>(delete, ObjectTypes.Wellbore, null, optionsIn: OptionsIn.ReturnElements.All);
+            var results = DevKit.Query<WellboreList, Wellbore>(delete, ObjectTypes.Wellbore, null, optionsIn: OptionsIn.ReturnElements.All);
             Assert.AreEqual(0, results.Count);
         }
 
         [TestMethod]
         public void Wellbore141DataAdapter_DeleteFromStore_Can_Partial_Delete_Elements()
         {
-            _wellbore.PurposeWellbore = WellPurpose.appraisal;
-            _wellbore.DateTimeKickoff = DateTimeOffset.UtcNow;
+            Wellbore.PurposeWellbore = WellPurpose.appraisal;
+            Wellbore.DateTimeKickoff = DateTimeOffset.UtcNow;
 
             // Add wellbore
-            AddWellbore(_well, _wellbore);
+            AddParents();
+            DevKit.AddAndAssert(Wellbore);
 
             // Assert all testing elements are added
-            var result =  _devKit.GetOneAndAssert(_wellbore);
-            Assert.AreEqual(_wellbore.PurposeWellbore, result.PurposeWellbore);
-            Assert.AreEqual(_wellbore.DateTimeKickoff, result.DateTimeKickoff);
+            var result =  DevKit.GetOneAndAssert(Wellbore);
+            Assert.AreEqual(Wellbore.PurposeWellbore, result.PurposeWellbore);
+            Assert.AreEqual(Wellbore.DateTimeKickoff, result.DateTimeKickoff);
 
             // Partial delete wellbore
             const string delete = "<purposeWellbore /><dTimKickoff />";
-            var queryIn = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, _wellbore.Uid, _wellbore.UidWell, delete);
-            var response = _devKit.DeleteFromStore(ObjectTypes.Wellbore, queryIn, null, null);
+            var queryIn = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, Wellbore.Uid, Wellbore.UidWell, delete);
+            var response = DevKit.DeleteFromStore(ObjectTypes.Wellbore, queryIn, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             // Assert the wellbore elements has been deleted
-            result =  _devKit.GetOneAndAssert(_wellbore);
+            result =  DevKit.GetOneAndAssert(Wellbore);
             Assert.IsNull(result.PurposeWellbore);
             Assert.IsNull(result.DateTimeKickoff);
         }
@@ -138,25 +103,26 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public void Wellbore141DataAdapter_DeleteFromStore_Can_Partial_Delete_Attributes()
         {
             var md = new MeasuredDepthCoord {Uom = MeasuredDepthUom.m, Value = 1.0, Datum = "datum1"};
-            _wellbore.MD = md;
+            Wellbore.MD = md;
 
             // Add wellbore
-            AddWellbore(_well, _wellbore);
+            AddParents();
+            DevKit.AddAndAssert(Wellbore);
 
             // Assert all testing elements are added
-            var result =  _devKit.GetOneAndAssert(_wellbore);
+            var result =  DevKit.GetOneAndAssert(Wellbore);
             var resultMd = result.MD;
             Assert.IsNotNull(resultMd);
             Assert.IsNotNull(resultMd.Datum);
 
             // Partial delete wellbore
             var delete = "<md datum=\"\" />";
-            var queryIn = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, _wellbore.Uid, _wellbore.UidWell, delete);
-            var response = _devKit.DeleteFromStore(ObjectTypes.Wellbore, queryIn, null, null);
+            var queryIn = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, Wellbore.Uid, Wellbore.UidWell, delete);
+            var response = DevKit.DeleteFromStore(ObjectTypes.Wellbore, queryIn, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             // Assert the attributes has been deleted
-            result =  _devKit.GetOneAndAssert(_wellbore);
+            result =  DevKit.GetOneAndAssert(Wellbore);
             resultMd = result.MD;
             Assert.IsNotNull(resultMd);
             Assert.IsNull(resultMd.Datum);
@@ -171,13 +137,14 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 ItemState = ItemState.plan
             };
 
-            _wellbore.CommonData = testCommonData;
+            Wellbore.CommonData = testCommonData;
 
             // Add wellbore
-            AddWellbore(_well, _wellbore);
+            AddParents();
+            DevKit.AddAndAssert(Wellbore);
 
             // Assert all testing elements are added
-            var result =  _devKit.GetOneAndAssert(_wellbore);
+            var result =  DevKit.GetOneAndAssert(Wellbore);
             var commonData = result.CommonData;
             Assert.IsNotNull(commonData);
             Assert.AreEqual(testCommonData.Comments, commonData.Comments);
@@ -185,12 +152,12 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
             // Partial delete wellbore
             const string delete = "<commonData><comments /><itemState /></commonData>";
-            var queryIn = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, _wellbore.Uid, _wellbore.UidWell, delete);
-            var response = _devKit.DeleteFromStore(ObjectTypes.Wellbore, queryIn, null, null);
+            var queryIn = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, Wellbore.Uid, Wellbore.UidWell, delete);
+            var response = DevKit.DeleteFromStore(ObjectTypes.Wellbore, queryIn, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             // Assert the wellbore elements has been deleted
-            result =  _devKit.GetOneAndAssert(_wellbore);
+            result =  DevKit.GetOneAndAssert(Wellbore);
             commonData = result.CommonData;
             Assert.IsNotNull(commonData);
             Assert.IsNull(commonData.Comments);
@@ -201,20 +168,21 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [Description("Tests the removal of the 1st extensionNameValue element and unset the description element of the 2nd extensionNameValue element in commonData")]
         public void Wellbore141DataAdapter_DeleteFromStore_Can_Partial_Delete_Recurring_Elements()
         {
-            var ext1 = _devKit.ExtensionNameValue("Ext-1", "1.0", "m");
-            var ext2 = _devKit.ExtensionNameValue("Ext-2", "2.0", "ft");
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            var ext2 = DevKit.ExtensionNameValue("Ext-2", "2.0", "ft");
             ext2.Description = "Testing partial delete of nested recurring elements";
             var testCommonData = new CommonData
             {
                 ExtensionNameValue = new List<ExtensionNameValue> {ext1, ext2}
             };
-            _wellbore.CommonData = testCommonData;
+            Wellbore.CommonData = testCommonData;
 
             // Add wellbore
-            AddWellbore(_well, _wellbore);
+            AddParents();
+            DevKit.AddAndAssert(Wellbore);
 
             // Assert all testing elements are added
-            var result =  _devKit.GetOneAndAssert(_wellbore);
+            var result =  DevKit.GetOneAndAssert(Wellbore);
             var commonData = result.CommonData;
             Assert.IsNotNull(commonData);
             Assert.AreEqual(2, commonData.ExtensionNameValue.Count);
@@ -226,13 +194,13 @@ namespace PDS.Witsml.Server.Data.Wellbores
                         "<description />" + Environment.NewLine +
                     "</extensionNameValue>" + Environment.NewLine +
                 "</commonData>";
-            var queryIn = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, _wellbore.Uid, _wellbore.UidWell, delete);
-            var response = _devKit.DeleteFromStore(ObjectTypes.Wellbore, queryIn, null, null);
+            var queryIn = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, Wellbore.Uid, Wellbore.UidWell, delete);
+            var response = DevKit.DeleteFromStore(ObjectTypes.Wellbore, queryIn, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             // Assert the partial delete of the recurring elements
            
-            result =  _devKit.GetOneAndAssert(_wellbore);
+            result =  DevKit.GetOneAndAssert(Wellbore);
             commonData = result.CommonData;
             Assert.IsNotNull(commonData);
             var exts = commonData.ExtensionNameValue;
@@ -254,8 +222,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
                            "   </wellbore>" + Environment.NewLine +
                            "</wellbore>";
 
-            var xmlIn = string.Format(nonPluralWell, _well.Uid, _wellbore.Uid);
-            var response = _devKit.DeleteFromStore(ObjectTypes.Wellbore, xmlIn, null, null);
+            var xmlIn = string.Format(nonPluralWell, Well.Uid, Wellbore.Uid);
+            var response = DevKit.DeleteFromStore(ObjectTypes.Wellbore, xmlIn, null, null);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.MissingPluralRootElement, response.Result);
@@ -264,7 +232,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod, Description("Tests you cannot do DeleteFromStore while missing the object type")]
         public void Wellbore141DataAdapter_DeleteFromStore_Error_407_Missing_Witsml_Object_Type()
         {
-            var response = _devKit.Delete<WellboreList, Wellbore>(_wellbore, string.Empty);
+            var response = DevKit.Delete<WellboreList, Wellbore>(Wellbore, string.Empty);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.MissingWmlTypeIn, response.Result);
         }
@@ -272,7 +240,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod, Description("Tests you cannot do DeleteFromStore with empty queryIn")]
         public void Wellbore141DataAdapter_DeleteFromStore_Error_408_Empty_QueryIn()
         {
-            var response = _devKit.DeleteFromStore(ObjectTypes.Wellbore, string.Empty, null, null);
+            var response = DevKit.DeleteFromStore(ObjectTypes.Wellbore, string.Empty, null, null);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.MissingInputTemplate, response.Result);
@@ -282,16 +250,16 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public void Wellbore141DataAdapter_DeleteFromStore_Error_409_QueryIn_Must_Conform_To_Schema()
         {
             // Add well
-            _devKit.AddAndAssert(_well);
+            DevKit.AddAndAssert(Well);
 
             // Add wellbore
-            _wellbore.NumGovt = "101";
-            _devKit.AddAndAssert(_wellbore);
+            Wellbore.NumGovt = "101";
+            DevKit.AddAndAssert(Wellbore);
 
             // Delete well with invalid element
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, string.Empty, _well.Uid,
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, string.Empty, Well.Uid,
                 "<numGovt /><numGovt />");
-            var results = _devKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
+            var results = DevKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
             Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, results.Result);
         }
 
@@ -299,14 +267,14 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public void Wellbore141DataAdapter_DeleteFromStore_Error_415_Delete_Without_Specifing_UID()
         {
             // Add well
-            _devKit.AddAndAssert(_well);
+            DevKit.AddAndAssert(Well);
 
             // Add wellbore
-            _devKit.AddAndAssert(_wellbore);
+            DevKit.AddAndAssert(Wellbore);
 
             // Delete well with invalid element
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, string.Empty, _well.Uid, string.Empty);
-            var results = _devKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, string.Empty, Well.Uid, string.Empty);
+            var results = DevKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
             Assert.AreEqual((short)ErrorCodes.DataObjectUidMissing, results.Result);
         }
 
@@ -314,12 +282,12 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public void Wellbore141DataAdapter_DeleteFromStore_Error_416_Empty_UID()
         {
             // Add well
-            _devKit.AddAndAssert(_well);
+            DevKit.AddAndAssert(Well);
 
             // Add wellbore
 
-            var ext1 = _devKit.ExtensionNameValue("Ext-1", "1.0", "m");
-            _wellbore.CommonData = new CommonData
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            Wellbore.CommonData = new CommonData
             {
                 ExtensionNameValue = new List<ExtensionNameValue>
                 {
@@ -327,13 +295,13 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 }
             };
 
-            _devKit.AddAndAssert(_wellbore);
+            DevKit.AddAndAssert(Wellbore);
 
             // Delete well
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, _wellbore.Uid, _well.Uid,
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, Wellbore.Uid, Well.Uid,
                 "<commonData><extensionNameValue uid=\"\" /></commonData>");
 
-            var results = _devKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
+            var results = DevKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
 
             Assert.IsNotNull(results);
             Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
@@ -343,21 +311,21 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public void Wellbore141DataAdapter_DeleteFromStore_Error_417_Deleting_With_Empty_UOM_Attribute()
         {
             // Add well
-            _devKit.AddAndAssert(_well);
+            DevKit.AddAndAssert(Well);
 
             // Add wellbore
-            _wellbore.MD = new MeasuredDepthCoord()
+            Wellbore.MD = new MeasuredDepthCoord()
             {
                 Uom = MeasuredDepthUom.ft,
                 Value = 1.0
             };
-            _devKit.AddAndAssert(_wellbore);
+            DevKit.AddAndAssert(Wellbore);
 
             // Delete wellbore's MD
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, _wellbore.Uid, _well.Uid,
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, Wellbore.Uid, Well.Uid,
                 "<md uom=\"\" />");
 
-            var results = _devKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
+            var results = DevKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
 
             Assert.IsNotNull(results);
             Assert.AreEqual((short)ErrorCodes.EmptyUomSpecified, results.Result);
@@ -367,24 +335,24 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public void Wellbore141DataAdapter_DeleteFromStore_Error_418_Missing_Uid()
         {
             // Add well
-            _devKit.AddAndAssert(_well);
+            DevKit.AddAndAssert(Well);
 
             // Add wellbore
-            var ext1 = _devKit.ExtensionNameValue("Ext-1", "1.0", "m");
-            _wellbore.CommonData = new CommonData
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            Wellbore.CommonData = new CommonData
             {
                 ExtensionNameValue = new List<ExtensionNameValue>
                 {
                     ext1
                 }
             };
-            _devKit.AddAndAssert(_wellbore);
+            DevKit.AddAndAssert(Wellbore);
 
             // Delete well
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, _wellbore.Uid, _well.Uid,
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, Wellbore.Uid, Well.Uid,
                 "<commonData><extensionNameValue /></commonData>");
 
-            var results = _devKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
+            var results = DevKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
 
             Assert.IsNotNull(results);
             Assert.AreEqual((short)ErrorCodes.MissingElementUidForDelete, results.Result);
@@ -394,16 +362,16 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public void Wellbore141DataAdapter_DeleteFromStore_Error_419_Deleting_Empty_NonRecurring_Element_With_No_Uid()
         {
             // Add well
-            _devKit.AddAndAssert(_well);
+            DevKit.AddAndAssert(Well);
 
             // Add wellbore
-            _devKit.AddAndAssert(_wellbore);
+            DevKit.AddAndAssert(Wellbore);
 
             // Delete wellbore's MD
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, _wellbore.Uid, _well.Uid,
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, Wellbore.Uid, Well.Uid,
                 "<commonData />");
 
-            var results = _devKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
+            var results = DevKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
 
             Assert.IsNotNull(results);
             Assert.AreEqual((short)ErrorCodes.EmptyNonRecurringElementSpecified, results.Result);
@@ -413,60 +381,60 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public void Wellbore141DataAdapter_DeleteFromStore_Error_420_Delete_Required_Element()
         {
             // Add well
-            _devKit.AddAndAssert(_well);
+            DevKit.AddAndAssert(Well);
 
             // Add wellbore
-            _devKit.AddAndAssert(_wellbore);
+            DevKit.AddAndAssert(Wellbore);
 
             // Delete nameWell
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, _wellbore.Uid, _well.Uid,
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, Wellbore.Uid, Well.Uid,
                 "<nameWell />");
 
-            var results = _devKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
+            var results = DevKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
 
             Assert.IsNotNull(results);
             Assert.AreEqual((short)ErrorCodes.EmptyMandatoryNodeSpecified, results.Result);
         }
 
         [TestMethod, Description("Tests you cannot do DeleteFromStore if wellbore has any child data objects")]
-        public void Wellbore141DataAdapter_DeleteFromStore_Error_432_Wellbore_Has_Child_Data_Objects()
+        public void Wellbore141DataAdapter_DeleteFromStore_Error_432Wellbore_Has_Child_Data_Objects()
         {
             // Add well
-            _devKit.AddAndAssert(_well);
+            DevKit.AddAndAssert(Well);
 
             // Add wellbore
-            _devKit.AddAndAssert(_wellbore);
+            DevKit.AddAndAssert(Wellbore);
 
             // Add rig
             var rig = new Rig()
             {
-                UidWell = _well.Uid,
-                UidWellbore = _wellbore.Uid,
-                Uid = _devKit.Uid(),
-                NameWell = _well.Name,
-                NameWellbore = _wellbore.Name,
+                UidWell = Well.Uid,
+                UidWellbore = Wellbore.Uid,
+                Uid = DevKit.Uid(),
+                NameWell = Well.Name,
+                NameWellbore = Wellbore.Name,
                 Name = "Big Rig"
             };
-            _devKit.AddAndAssert(rig);
+            DevKit.AddAndAssert(rig);
 
             // Delete wellbore
-            var delete = new Wellbore { Uid = _wellbore.Uid, UidWell = _well.Uid };
+            var delete = new Wellbore { Uid = Wellbore.Uid, UidWell = Well.Uid };
 
-            var results = _devKit.Delete<WellboreList, Wellbore>(delete, ObjectTypes.Wellbore);
+            var results = DevKit.Delete<WellboreList, Wellbore>(delete, ObjectTypes.Wellbore);
             Assert.IsNotNull(results);
             Assert.AreEqual((short)ErrorCodes.NotBottomLevelDataObject, results.Result);
         }
 
         [TestMethod, Description("Tests you cannot do DeleteFromStore on a wellbore that does not exist")]
-        public void Wellbore141DataAdapter_DeleteFromStore_Error_433_Wellbore_Does_Not_Exist()
+        public void Wellbore141DataAdapter_DeleteFromStore_Error_433Wellbore_Does_Not_Exist()
         {
             // Add well
-            _devKit.AddAndAssert(_well);
+            DevKit.AddAndAssert(Well);
 
             // Delete wellbore
-            var delete = new Wellbore { Uid = _wellbore.Uid, UidWell = _well.Uid };
+            var delete = new Wellbore { Uid = Wellbore.Uid, UidWell = Well.Uid };
 
-            var results = _devKit.Delete<WellboreList, Wellbore>(delete, ObjectTypes.Wellbore);
+            var results = DevKit.Delete<WellboreList, Wellbore>(delete, ObjectTypes.Wellbore);
             Assert.IsNotNull(results);
             Assert.AreEqual((short)ErrorCodes.DataObjectNotExist, results.Result);
         }
@@ -475,32 +443,32 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public void Wellbore141DataAdapter_DeleteFromStore_Error_444_Updating_With_More_Than_One_Data_Object()
         {
             // Add well 
-            _devKit.AddAndAssert(_well);
+            DevKit.AddAndAssert(Well);
 
             // Add second well
             var well2 = new Well()
             {
-                Uid = _devKit.Uid(),
-                Name = _devKit.Name("Well 02"),
-                TimeZone = _devKit.TimeZone
+                Uid = DevKit.Uid(),
+                Name = DevKit.Name("Well 02"),
+                TimeZone = DevKit.TimeZone
             };
 
-            _devKit.AddAndAssert(well2);
+            DevKit.AddAndAssert(well2);
 
             // Add wellbore
-            _devKit.AddAndAssert(_wellbore);
+            DevKit.AddAndAssert(Wellbore);
 
             // Add second wellbore
             var wellbore2 = new Wellbore()
             {
                 UidWell = well2.Uid,
                 NameWell = well2.Name,
-                Uid = _devKit.Uid(),
-                Name = _devKit.Name("Wellbore 02"),
+                Uid = DevKit.Uid(),
+                Name = DevKit.Name("Wellbore 02"),
                 MD = new MeasuredDepthCoord(0, MeasuredDepthUom.ft)
             };
 
-            _devKit.AddAndAssert(wellbore2);
+            DevKit.AddAndAssert(wellbore2);
 
             var multiObjectXml = "<wellbores xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
                           "   <wellbore uidWell=\"{0}\" uid=\"{1}\">" + Environment.NewLine +
@@ -514,15 +482,15 @@ namespace PDS.Witsml.Server.Data.Wellbores
             // Delete wellbores
             var deleteXml = string.Format(
                 multiObjectXml,
-                _well.Uid,
-                _wellbore.Uid,
+                Well.Uid,
+                Wellbore.Uid,
                 "<md uom=\"ft\">1</md>",
                 well2.Uid,
                 wellbore2.Uid,
                 "<md uom=\"ft\">2</md>"
                 );
 
-            var results = _devKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
+            var results = DevKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
             Assert.IsNotNull(results);
             Assert.AreEqual((short)ErrorCodes.InputTemplateMultipleDataObjects, results.Result);
         }
@@ -531,30 +499,20 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public void Wellbore141DataAdapter_DeleteFromStore_Error_1021_Delete_Simple_Content_With_Non_Empty_Attribute()
         {
             // Add well
-            _devKit.AddAndAssert(_well);
+            DevKit.AddAndAssert(Well);
 
             // Add wellbore
-            _wellbore.MD = new MeasuredDepthCoord {Uom = MeasuredDepthUom.m, Datum = "abc", Value = 12.0};
-            _devKit.AddAndAssert(_wellbore);
+            Wellbore.MD = new MeasuredDepthCoord {Uom = MeasuredDepthUom.m, Datum = "abc", Value = 12.0};
+            DevKit.AddAndAssert(Wellbore);
 
             // Delete nameWell
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, _wellbore.Uid, _well.Uid,
+            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, Wellbore.Uid, Well.Uid,
                 "<md uom=\"m\" datum=\"abc\" />");
 
-            var results = _devKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
+            var results = DevKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
 
             Assert.IsNotNull(results);
             Assert.AreEqual((short)ErrorCodes.ErrorDeletingSimpleContent, results.Result);
         }
-
-        #region Helper Methods
-
-        private void AddWellbore(Well well, Wellbore wellbore)
-        {
-            _devKit.AddAndAssert(well);
-            _devKit.AddAndAssert(wellbore);
-        }
-      
-        #endregion
     }
 }

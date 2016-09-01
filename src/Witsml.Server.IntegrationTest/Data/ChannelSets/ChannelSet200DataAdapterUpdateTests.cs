@@ -23,8 +23,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
     /// <summary>
     /// ChannelSet200DataAdapter Update tests.
     /// </summary>
-    [TestClass]
-    public class ChannelSet200DataAdapterUpdateTests
+    public partial class ChannelSet200DataAdapterUpdateTests
     {
         //[TestMethod]
         //public void ChannelSet200DataAdapter_MethodName_ExpectedBehavior()
