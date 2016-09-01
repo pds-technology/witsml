@@ -119,7 +119,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <returns>A collection of data objects.</returns>
         public override List<T> GetAll(EtpUri? parentUri = null)
         {
-            Logger.DebugFormat("Fetching all Trajectorys; Parent URI: {0}", parentUri);
+            Logger.DebugFormat($"Fetching all Trajectorys; Parent URI: {parentUri}");
 
             return GetAllQuery(parentUri)
                 .OrderBy(x => x.Name)
@@ -202,7 +202,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// </summary>
         /// <param name="entity">The data object.</param>
         /// <param name="deleteFile">if set to <c>true</c> [delete file].</param>
-        protected void UpdateMongoFile(T entity, bool deleteFile = true)
+        private void UpdateMongoFile(T entity, bool deleteFile = true)
         {
             var uri = entity.GetUri();
             Logger.DebugFormat($"Updating MongoDb Trajectory Stations files: {uri}");
@@ -218,7 +218,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 {
                     Metadata = new BsonDocument
                     {
-                        { FileName, new Guid().ToString() },
+                        { FileName, Guid.NewGuid().ToString() },
                         { FileQueryField, uri.ToString() },
                         { "DataBytes", bytes.Length }
                     }
