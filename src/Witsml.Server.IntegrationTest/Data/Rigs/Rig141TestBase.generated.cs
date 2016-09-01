@@ -40,8 +40,8 @@ namespace PDS.Witsml.Server.Data.Rigs
         public const string QueryEmptyRoot = "<rigs xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"></rigs>";
         public const string QueryEmptyObject = "<rigs xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><rig /></rigs>";
 
-		public Well Well { get; set; }
-		public Wellbore Wellbore { get; set; }
+        public Well Well { get; set; }
+        public Wellbore Wellbore { get; set; }
         public Rig Rig { get; set; }
         public DevKit141Aspect DevKit { get; set; }
         public TestContext TestContext { get; set; }
@@ -57,58 +57,55 @@ namespace PDS.Witsml.Server.Data.Rigs
                 .ToArray();
 
             Well = new Well
-			{
-				Uid = DevKit.Uid(),
-				Name = DevKit.Name("Well"),
-				TimeZone = DevKit.TimeZone
-			};
+            {
+                Uid = DevKit.Uid(),
+                Name = DevKit.Name("Well"),
+                TimeZone = DevKit.TimeZone
+            };
             Wellbore = new Wellbore
-			{
-				Uid = DevKit.Uid(),
-				Name = DevKit.Name("Wellbore"),
-				UidWell = Well.Uid,
-				NameWell = Well.Name,
-				MD = new MeasuredDepthCoord(0, MeasuredDepthUom.ft)
-			};
-			Rig = new Rig
-			{
-				Uid = DevKit.Uid(),
-				Name = DevKit.Name("Rig"),
-				UidWell = Well.Uid,
-				NameWell = Well.Name,
-				UidWellbore = Wellbore.Uid,
-				NameWellbore = Wellbore.Name
-			};
+            {
+                Uid = DevKit.Uid(),
+                Name = DevKit.Name("Wellbore"),
+                UidWell = Well.Uid,
+                NameWell = Well.Name,
+                MD = new MeasuredDepthCoord(0, MeasuredDepthUom.ft)
+            };
+            Rig = new Rig
+            {
+                Uid = DevKit.Uid(),
+                Name = DevKit.Name("Rig"),
+                UidWell = Well.Uid,
+                NameWell = Well.Name,
+                UidWellbore = Wellbore.Uid,
+                NameWellbore = Wellbore.Name
+            };
 
             QueryEmptyList = DevKit.List(new Rig());
 
-			OnTestSetUp();
-			BeforeEachTest();
+            BeforeEachTest();
+            OnTestSetUp();
         }
 
         [TestCleanup]
         public void TestCleanUp()
         {
-			AfterEachTest();
-			OnTestCleanUp();
+            AfterEachTest();
+            OnTestCleanUp();
             DevKit = null;
         }
 
-		partial void BeforeEachTest();
+        partial void BeforeEachTest();
 
-		partial void AfterEachTest();
+        partial void AfterEachTest();
 
-		protected virtual void OnTestSetUp() { }
+        protected virtual void OnTestSetUp() { }
 
-		protected virtual void OnTestCleanUp() { }
+        protected virtual void OnTestCleanUp() { }
 
-		protected virtual void AddParents()
-		{
-            var response = DevKit.Add<WellList, Well>(Well);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-		}
-	}
+        protected virtual void AddParents()
+        {
+            DevKit.AddAndAssert<WellList, Well>(Well);
+            DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+        }
+    }
 }

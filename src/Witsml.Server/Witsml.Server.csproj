@@ -331,8 +331,10 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Providers\ChannelStreaming\ChannelStreamingContext.cs" />
     <Compile Include="Providers\ChannelStreaming\ChannelStreamingProducer.cs" />
     <Compile Include="Providers\ChannelStreaming\ChannelStreamingConsumer.cs" />
+    <Compile Include="Providers\ChannelStreaming\ChannelStreamingTypes.cs" />
     <Compile Include="Providers\ChannelStreaming\ChannelStreaming_Producer.cs" />
     <Compile Include="Providers\ChannelStreaming\IndexedDataItem.cs" />
     <Compile Include="Providers\Discovery\DiscoveryStore131Provider.cs" />

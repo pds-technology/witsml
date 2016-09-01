@@ -45,36 +45,36 @@ namespace PDS.Witsml.Server.Data.Rigs
         {
             DevKit = new DevKit200Aspect(TestContext);
 
-			Rig = new Rig
-			{
-				Uuid = DevKit.Uid(),
-				Citation = DevKit.Citation("Rig")
-			};
+            Rig = new Rig
+            {
+                Uuid = DevKit.Uid(),
+                Citation = DevKit.Citation("Rig")
+            };
 
             QueryEmptyList = DevKit.List(new Rig());
 
-			OnTestSetUp();
-			BeforeEachTest();
+            BeforeEachTest();
+            OnTestSetUp();
         }
 
         [TestCleanup]
         public void TestCleanUp()
         {
-			AfterEachTest();
-			OnTestCleanUp();
+            AfterEachTest();
+            OnTestCleanUp();
             DevKit = null;
         }
 
-		partial void BeforeEachTest();
+        partial void BeforeEachTest();
 
-		partial void AfterEachTest();
+        partial void AfterEachTest();
 
-		protected virtual void OnTestSetUp() { }
+        protected virtual void OnTestSetUp() { }
 
-		protected virtual void OnTestCleanUp() { }
+        protected virtual void OnTestCleanUp() { }
 
-		protected virtual void AddParents()
-		{
-		}
-	}
+        protected virtual void AddParents()
+        {
+        }
+    }
 }

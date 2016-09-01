@@ -44,8 +44,7 @@ namespace PDS.Witsml.Server.Data.Logs
             int numRows = 10;
 
             // Add the Setup Well, Wellbore and Log to the store.
-            var logResponse = AddSetupWellWellboreLog(numRows, isDepthLog: true, hasEmptyChannel: false,
-                increasing: true);
+            var logResponse = AddSetupWellWellboreLog(numRows, isDepthLog: true, hasEmptyChannel: false, increasing: true);
             Assert.AreEqual((short)ErrorCodes.Success, logResponse.Result);
 
             var queryHeaderOnly = DevKit.CreateLog(logResponse.SuppMsgOut, null, Log.UidWell, null, Log.UidWellbore, null);

@@ -844,7 +844,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private Log GetLog(Log log)
         {
-            return DevKit.GetOneAndAssert(log);
+            return DevKit.GetAndAssert(log);
         }
 
         private string FormatXmlIn(Log log, string description, string row)

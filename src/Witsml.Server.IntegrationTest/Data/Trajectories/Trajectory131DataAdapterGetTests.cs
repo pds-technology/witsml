@@ -16,6 +16,10 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Linq;
+using Energistics.DataAccess.WITSML131;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace PDS.Witsml.Server.Data.Trajectories
 {
     /// <summary>
@@ -23,5 +27,72 @@ namespace PDS.Witsml.Server.Data.Trajectories
     /// </summary>
     public partial class Trajectory131DataAdapterGetTests
     {
+        [TestMethod]
+        public void Trajectory131DataAdapter_GetFromStore_Can_Retrieve_Header_Return_Elements_All()
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory without stations
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory);
+
+            DevKit.AssertNames(result, Trajectory);
+            Assert.AreEqual(Trajectory.ServiceCompany, result.ServiceCompany);
+            Assert.IsNotNull(result.CommonData);
+        }
+
+        [TestMethod]
+        public void Trajectory131DataAdapter_GetFromStore_Can_Retrieve_Header_Return_Elements_Id_Only()
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory without stations
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory, optionsIn: OptionsIn.ReturnElements.IdOnly);
+
+            DevKit.AssertNames(result, Trajectory);
+            Assert.IsNull(result.ServiceCompany);
+        }
+
+        [TestMethod]
+        public void Trajectory131DataAdapter_GetFromStore_Can_Retrieve_Header_Return_Elements_Default()
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory without stations
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            var result = DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory, optionsIn: string.Empty);
+
+            DevKit.AssertNames(result);
+            Assert.IsNull(result.ServiceCompany);
+        }
+
+        [TestMethod]
+        public void Trajectory131DataAdapter_GetFromStore_Can_Retrieve_Header_Return_Elements_Requested()
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory without stations
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            var queryIn = string.Format(DevKit131Aspect.BasicTrajectoryXmlTemplate, Trajectory.Uid, Trajectory.UidWell, Trajectory.UidWellbore, "<serviceCompany />");
+            var results = DevKit.Query<TrajectoryList, Trajectory>(ObjectTypes.Trajectory, queryIn, null, OptionsIn.ReturnElements.Requested);
+            var result = results.FirstOrDefault();
+
+            Assert.IsNotNull(result);
+            DevKit.AssertNames(result);
+            Assert.AreEqual(Trajectory.ServiceCompany, result.ServiceCompany);
+        }
     }
 }

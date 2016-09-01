@@ -108,6 +108,140 @@ namespace PDS.Witsml.Server
             return element != null ? element.HasChildNodes : false;
         }
 
+        /// <summary>
+        /// Asserts the names of the specified data objects.
+        /// </summary>
+        /// <typeparam name="TObject">The type of the object.</typeparam>
+        /// <param name="result">The result.</param>
+        /// <param name="entity">The entity.</param>
+        public void AssertNames<TObject>(TObject result, TObject entity = null) where TObject : class, IWellboreObject
+        {
+            if (entity != null)
+            {
+                Assert.AreEqual(entity.Name, result.Name);
+                Assert.AreEqual(entity.NameWell, result.NameWell);
+                Assert.AreEqual(entity.NameWellbore, result.NameWellbore);
+            }
+            else
+            {
+                Assert.IsNull(result.Name);
+                Assert.IsNull(result.NameWell);
+                Assert.IsNull(result.NameWellbore);
+            }
+        }
+
+        /// <summary>
+        /// Executes GetFromStore and tests the response.
+        /// </summary>
+        /// <typeparam name="TList">The type of the container.</typeparam>
+        /// <typeparam name="TObject">The type of the data object.</typeparam>
+        /// <param name="example">The example data object.</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <returns>The data object instance if found; otherwise, null.</returns>
+        public TObject GetAndAssert<TList, TObject>(TObject example, bool isNotNull = true, string optionsIn = null) where TList : IEnergisticsCollection where TObject : IDataObject
+        {
+            var query = CreateQuery(example);
+            return QueryAndAssert<TList, TObject>(query, isNotNull, optionsIn);
+        }
+
+        /// <summary>
+        /// Executes GetFromStore and tests the response.
+        /// </summary>
+        /// <typeparam name="TList">The type of the container.</typeparam>
+        /// <typeparam name="TObject">The type of the data object.</typeparam>
+        /// <param name="query">The query.</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <returns>The data object instance if found; otherwise, null.</returns>
+        public TObject QueryAndAssert<TList, TObject>(TObject query, bool isNotNull = true, string optionsIn = null) where TList : IEnergisticsCollection
+        {
+            var results = Query<TList, TObject>(query, ObjectTypes.GetObjectType<TList>(), null, optionsIn ?? OptionsIn.ReturnElements.All);
+            Assert.AreEqual(isNotNull ? 1 : 0, results.Count);
+
+            var result = results.FirstOrDefault();
+            Assert.AreEqual(isNotNull, result != null);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Adds a wellbore child object and test the return code
+        /// </summary>
+        /// <typeparam name="TList">The type of the container.</typeparam>
+        /// <typeparam name="TObject">The type of the data object.</typeparam>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="errorCode">The error code.</param>
+        /// <returns>The <see cref="WMLS_AddToStoreResponse"/> from the store.</returns>
+        public WMLS_AddToStoreResponse AddAndAssert<TList, TObject>(TObject dataObject, ErrorCodes errorCode = ErrorCodes.Success) where TList : IEnergisticsCollection
+        {
+            var response = Add<TList, TObject>(dataObject);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)errorCode, response.Result);
+            return response;
+        }
+
+        /// <summary>
+        /// Updates the data object and test the return code
+        /// </summary>
+        /// <typeparam name="TList">The type of the container.</typeparam>
+        /// <typeparam name="TObject">The type of the data object.</typeparam>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="errorCode">The error code.</param>
+        public void UpdateAndAssert<TList, TObject>(TObject dataObject, ErrorCodes errorCode = ErrorCodes.Success) where TList : IEnergisticsCollection
+        {
+            var response = Update<TList, TObject>(dataObject);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)errorCode, response.Result);
+        }
+
+        /// <summary>
+        /// Deletes the data object and test the return code
+        /// </summary>
+        /// <typeparam name="TList">The type of the container.</typeparam>
+        /// <typeparam name="TObject">The type of the data object.</typeparam>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="errorCode">The error code.</param>
+        public void DeleteAndAssert<TList, TObject>(TObject dataObject, ErrorCodes errorCode = ErrorCodes.Success) where TList : IEnergisticsCollection where TObject : IDataObject
+        {
+            var query = CreateQuery(dataObject);
+            var response = Delete<TList, TObject>(query);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)errorCode, response.Result);
+        }
+
+        /// <summary>
+        /// Creates an id-only query from the specified data object.
+        /// </summary>
+        /// <typeparam name="TObject">The type of the object.</typeparam>
+        /// <param name="example">The example.</param>
+        /// <returns></returns>
+        public TObject CreateQuery<TObject>(TObject example) where TObject : IDataObject
+        {
+            var wellObject = example as IWellObject;
+            var wellboreObject = example as IWellboreObject;
+            var query = Activator.CreateInstance<TObject>();
+
+            Assert.IsNotNull(example.Uid);
+            query.Uid = example.Uid;
+
+            if (wellObject != null)
+            {
+                Assert.IsNotNull(wellObject.UidWell);
+                ((IWellObject)query).UidWell = wellObject.UidWell;
+            }
+
+            if (wellboreObject != null)
+            {
+                Assert.IsNotNull(wellboreObject.UidWellbore);
+                ((IWellboreObject)query).UidWellbore = wellboreObject.UidWellbore;
+            }
+
+            return query;
+        }
+
         public WMLS_AddToStoreResponse Add<TList, TObject>(TObject entity, string wmlTypeIn = null, string capClient = null, string optionsIn = null) where TList : IEnergisticsCollection
         {
             string typeIn, xmlIn;
@@ -120,6 +254,13 @@ namespace PDS.Witsml.Server
         {
             short result;
             return QueryWithErrorCode<TList, TObject>(entity, out result, wmlTypeIn, capClient, optionsIn);
+        }
+
+        public List<TObject> Query<TList, TObject>(string wmlTypeIn, string queryIn, string capClient = null, string optionsIn = null) where TList : IEnergisticsCollection
+        {
+            var response = GetFromStore(wmlTypeIn, queryIn, capClient, optionsIn);
+            var results = EnergisticsConverter.XmlToObject<TList>(response.XMLout);
+            return (List<TObject>)results.Items;
         }
 
         public List<TObject> QueryWithErrorCode<TList, TObject>(TObject entity, out short result, string wmlTypeIn = null, string capClient = null, string optionsIn = null) where TList : IEnergisticsCollection
@@ -182,9 +323,14 @@ namespace PDS.Witsml.Server
 
         private void SetupParameters<TList, TObject>(List<TObject> entityList, string wmlTypeIn, out string typeIn, out string queryIn) where TList : IEnergisticsCollection
         {
-            var info = typeof(TList).GetProperty(typeof(TObject).Name);
+            var objectType = ObjectTypes.GetObjectType<TList>();
+            var version = ObjectTypes.GetVersion(typeof(TList));
+            var property = ObjectTypes.GetObjectTypeListProperty(objectType, version);
+
+            var info = typeof(TList).GetProperty(property);
             var list = New<TList>(x => info.SetValue(x, entityList));
-            typeIn = wmlTypeIn ?? ObjectTypes.GetObjectType<TList>();
+
+            typeIn = wmlTypeIn ?? objectType;
             queryIn = EnergisticsConverter.ObjectToXml(list); // WitsmlParser.ToXml(list);
         }
 

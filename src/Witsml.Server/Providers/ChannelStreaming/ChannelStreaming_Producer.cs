@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Energistics.Common;
@@ -52,7 +51,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
         private readonly IContainer _container;
         private CancellationTokenSource _tokenSource;
-        private readonly List<IList<ChannelStreamingInfo>> _channelStreamingInfoLists;
+        private readonly List<IList<ChannelStreamingContext>> _channelStreamingContextLists;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelStreamingProducer"/> class.
@@ -63,7 +62,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         {
             _container = container;
             Channels = new Dictionary<long, Tuple<EtpUri, ChannelMetadataRecord>>();
-            _channelStreamingInfoLists = new List<IList<ChannelStreamingInfo>>();
+            _channelStreamingContextLists = new List<IList<ChannelStreamingContext>>();
         }
 
         /// <summary>
@@ -162,7 +161,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             foreach (var channel in channels)
             {
                 // Find the ChannelStreamingInfo list that contains the channelId
-                var streamingInfoList = _channelStreamingInfoLists.FirstOrDefault(list => list.Any(l => l.ChannelId == channel));
+                var streamingInfoList = _channelStreamingContextLists.FirstOrDefault(list => list.Any(l => l.ChannelId == channel));
 
                 if (streamingInfoList != null)
                 {
@@ -180,6 +179,39 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         }
 
         private void StartChannelStreaming(long messageId, IList<ChannelStreamingInfo> infos, CancellationToken token)
+        {
+            List<long> channelIds = ValidateAndRemoveStreamingChannels(messageId, infos);
+
+            // Get the channel metadata and parent uri for the channels to start streaming
+            var infoChannels = Channels.Where(c => channelIds.Contains(c.Key)).Select(c => c.Value);
+
+            // Join ChannelStreamingInfos and infoChannels into a list of ChannelStreamingContext
+            var streamingContextList =
+                from info in infos
+                join infoChannel in infoChannels on info.ChannelId equals infoChannel.Item2.ChannelId
+                select new ChannelStreamingContext()
+                {
+                    ChannelId = info.ChannelId,
+                    ChannelMetadata = infoChannel.Item2,
+                    ParentUri = infoChannel.Item1,
+                    StartIndex = info.StartIndex.Item as long?, // indexValue
+                    EndIndex = null,
+                    IndexCount = info.StartIndex.Item as int? ?? 0, // indexCount
+                    ChannelStreamingType = ToChannelStreamingType(info.StartIndex.Item),
+                    RangeRequestHeader = null,
+                    ReceiveChangeNotification = info.ReceiveChangeNotification
+                };
+
+            // Group the ChannelStreamingContext list by ChannelStreamingType and ParentUri
+            var streamingContextGrouping =
+                from x in streamingContextList
+                group x by new { x.ChannelStreamingType, x.ParentUri };
+
+            // Start a Task for each context group
+            Task.WhenAll(streamingContextGrouping.Select(context => StreamChannelData(context.ToList(), token)));
+        }
+
+        private List<long> ValidateAndRemoveStreamingChannels(long messageId, IList<ChannelStreamingInfo> infos)
         {
             var channelIds = infos
                 .Select(i => i.ChannelId)
@@ -199,54 +231,16 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             // Remove the infos for channels that are already streaming.
             var streamingInfos = infos.Where(i => streamingChannelIds.Contains(i.ChannelId));
             streamingInfos.ForEach(i => infos.Remove(i));
+            return channelIds;
+        }
 
-            var infoChannels = Channels.Where(c => channelIds.Contains(c.Key)).Select(c => c.Value);
-
-            // TODO: Is there a way to simplify this?
-            // TODO: Try to just use a Lookup without the GroupBy
-            // Group Infos by parent uri
-            var streamingInfosByParentUri =
-                infoChannels
-                    .GroupBy(
-                        i => i.Item1, // ParentUri
-                        i => i.Item2, // ChannelMetadataRecord
-                        (key, c) =>
-                        {
-                            return new
-                            {
-                                ParentUri = key,
-                                ChannelStreamingInfos =
-                                    infos.Where(i => c.Select(x => x.ChannelId).Contains(i.ChannelId))
-                            };
-                        })
-                    .ToLookup(i => i.ParentUri, i => i.ChannelStreamingInfos);
-
-            /*
-             * StreamingContext
-             *      ChannelId
-             *      ChannelMetadata
-             *      ParentUri
-             *      StartIndex
-             *      EndIndex
-             *      IndexCount
-             *      ChannelStreamingTypes (LatestValue, IndexCount, IndexValue, RangeRequest)
-             *      RangeRequestHeader
-             *      ReceiveChangeNotification
-             * 
-             */
-
-            // TODO: Handle 3 different StartIndex types
-            //if (x.StartIndex.Item is int) // indexCount (total values before and including the latest value)
-            //    // Stream Index Count Data
-            //else if (x.StartIndex.Item is long) // indexValue
-            //    // Stream Channel Data();
-            //else
-            //    // latestValue - Stream Latest Value Data
-
-            //primaryIndex.
-
-            // Stream data for ChannelStreamingInfo grouped by a common parent uri
-            Task.WhenAll(streamingInfosByParentUri.Select(uri => StreamChannelData(uri.FirstOrDefault().ToList(), uri.Key, token)));
+        private ChannelStreamingTypes ToChannelStreamingType(object item)
+        {
+            return item is long
+                ? ChannelStreamingTypes.IndexValue
+                : item is int 
+                    ? ChannelStreamingTypes.IndexCount 
+                    : ChannelStreamingTypes.LatestValue;
         }
 
         private void SendInvalidStateMessage(long messageId, long[] streamingChannelIds)
@@ -258,7 +252,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
         private long[] GetStreamingChannelIds(IEnumerable<long> channelIds)
         {
-            return _channelStreamingInfoLists
+            return _channelStreamingContextLists
                 .SelectMany(list => list
                     .Where(l => channelIds.Contains(l.ChannelId))
                     .Select(c => c.ChannelId))
@@ -266,36 +260,43 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
         }
 
-        private async Task StreamChannelData(IList<ChannelStreamingInfo> infos, EtpUri uri, CancellationToken token)
+        private async Task StreamChannelData(IList<ChannelStreamingContext> contextList, CancellationToken token)
         {
-            _channelStreamingInfoLists.Add(infos);
+            _channelStreamingContextLists.Add(contextList);
 
-            while (!token.IsCancellationRequested && infos.Count > 0)
+            // Loop until there is a cancellation or all channals have been removed
+            while (!token.IsCancellationRequested && contextList.Count > 0)
             {
-                var channelIds = infos.Select(i => i.ChannelId).Distinct().ToArray();
-                Logger.Debug($"Streaming data for parentUri {uri.Uri} and channelIds {string.Join(",", channelIds)}");
+                var channelIds = contextList.Select(i => i.ChannelId).Distinct().ToArray();
+                var firstContext = contextList.First();
+                var channelStreamingType = firstContext.ChannelStreamingType;
+                var parentUri = firstContext.ParentUri;
+                var primaryIndex = firstContext.ChannelMetadata.Indexes[0];
 
-                var channels = Channels
-                    .Where(c => channelIds.Contains(c.Key))
-                    .Select(c => c.Value.Item2)
-                    .ToList();
+                Logger.Debug($"Streaming data for parentUri {parentUri.Uri} and channelIds {string.Join(",", channelIds)}");
 
-                var primaryIndex = channels
-                    .Take(1)
-                    .Select(x => x.Indexes[0])
-                    .FirstOrDefault();
+                // We only need a start index value for IndexValue and RangeRequest
+                var minStart = 
+                    channelStreamingType == ChannelStreamingTypes.IndexValue ||
+                    channelStreamingType == ChannelStreamingTypes.RangeRequest
+                        ? contextList.Min(x => Convert.ToInt64(x.StartIndex)) 
+                        : (long?)null;
 
-                // indexValue
-                var minStart = infos.Min(x => Convert.ToInt64(x.StartIndex.Item));
+                // Only need and end index value for range request
+                var maxEnd = channelStreamingType == ChannelStreamingTypes.RangeRequest
+                    ? contextList.Max(x => Convert.ToInt64(x.EndIndex))
+                    : (long?) null;
+
                 var increasing = primaryIndex.Direction == IndexDirections.Increasing;
                 var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
                 var rangeSize = WitsmlSettings.GetRangeSize(isTimeIndex);
 
                 // Convert indexes from scaled values
-                var minStartIndex = minStart.IndexFromScale(primaryIndex.Scale, isTimeIndex);
-
-                var isChannel = ChannelTypes.ContainsIgnoreCase(uri.ObjectType);
-                var parentUri = isChannel ? uri.Parent : uri;
+                var minStartIndex = minStart?.IndexFromScale(primaryIndex.Scale, isTimeIndex);
+                var maxEndIndex = channelStreamingType == ChannelStreamingTypes.IndexValue
+                    ? (increasing ? minStartIndex + rangeSize : minStartIndex - rangeSize)
+                    : maxEnd?.IndexFromScale(primaryIndex.Scale, isTimeIndex);
+                
 
                 // TODO: Add get of channel data when ready
                 //var dataProvider = GetDataProvider(parentUri);
@@ -309,16 +310,19 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 //}
                 //else
                 {
-                    await StreamChannelData(infos, channels, null, increasing, token);
+                    await StreamChannelData(contextList, null, increasing, token);
                 }
+
+                // TODO: Add logic to test if we can remove a channel from the contextList
+                // TODO:... RangeRequest
+                // TODO:... A Channel's Status != Active
+                // TODO:... Channel's EndIndex has been reached
             }
         }
 
-        private async Task StreamChannelData(IList<ChannelStreamingInfo> infos, List<ChannelMetadataRecord> channels, IEnumerable<IChannelDataRecord> channelData, bool increasing, CancellationToken token)
+        private async Task StreamChannelData(IList<ChannelStreamingContext> contextList, IEnumerable<IChannelDataRecord> channelData, bool increasing, CancellationToken token)
         {
             var dataItemList = new List<DataItem>();
-
-            var firstChannel = channels.FirstOrDefault();
 
             // TODO: Change to loop while there is channelData...
             for (int i = 0; i < 15; i++) //while (true)
@@ -330,7 +334,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 if (token.IsCancellationRequested)
                     break;
 
-                if (infos.Count == 0)
+                if (contextList.Count == 0)
                     break;
 
                 if (dataItemList.Any())

@@ -25,7 +25,6 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Data.Trajectories;
 
@@ -70,6 +69,12 @@ namespace PDS.Witsml.Server
                           "{3}" +
                           "   </log>" + Environment.NewLine +
                           "</logs>";
+
+        public static readonly string BasicTrajectoryXmlTemplate = "<trajectorys xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                          "   <trajectory uid=\"{0}\" uidWell=\"{1}\" uidWellbore=\"{2}\">" + Environment.NewLine +
+                          "{3}" +
+                          "   </trajectory>" + Environment.NewLine +
+                          "</trajectorys>";
 
         private const MeasuredDepthUom MdUom = MeasuredDepthUom.m;
         private const WellVerticalCoordinateUom TvdUom = WellVerticalCoordinateUom.m;
@@ -296,19 +301,6 @@ namespace PDS.Witsml.Server
             };
         }
 
-        public Trajectory CreateTrajectory(string uid, string name, string uidWell, string nameWell, string uidWellbore, string nameWellbore)
-        {
-            return new Trajectory()
-            {
-                Uid = uid,
-                Name = name,
-                UidWell = uidWell,
-                NameWell = nameWell,
-                UidWellbore = uidWellbore,
-                NameWellbore = nameWellbore,
-            };
-        }
-
         public Well CreateTestWell()
         {
             var dateTimeSpud = DateTimeOffset.UtcNow;
@@ -456,11 +448,7 @@ namespace PDS.Witsml.Server
         /// <param name="errorCode">the errorCode</param>
         public WMLS_AddToStoreResponse AddAndAssert(Well well, ErrorCodes errorCode = ErrorCodes.Success)
         {
-            var response = Add<WellList, Well>(well);
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)errorCode, response.Result);
-
-            return response;
+            return AddAndAssert<WellList, Well>(well, errorCode);
         }
 
         /// <summary>
@@ -468,10 +456,9 @@ namespace PDS.Witsml.Server
         /// </summary>
         /// <param name="wellbore">the wellbore</param>
         /// <param name="errorCode">the errorCode</param>
-        public void AddAndAssert(Wellbore wellbore, ErrorCodes errorCode = ErrorCodes.Success)
+        public WMLS_AddToStoreResponse AddAndAssert(Wellbore wellbore, ErrorCodes errorCode = ErrorCodes.Success)
         {
-            var response = Add<WellboreList, Wellbore>(wellbore);
-            Assert.AreEqual((short)errorCode, response.Result);
+            return AddAndAssert<WellboreList, Wellbore>(wellbore, errorCode);
         }
 
         /// <summary>
@@ -479,10 +466,9 @@ namespace PDS.Witsml.Server
         /// </summary>
         /// <param name="log">the log.</param>
         /// <param name="errorCode">the errorCode.</param>
-        public void AddAndAssert(Log log, ErrorCodes errorCode = ErrorCodes.Success)
+        public WMLS_AddToStoreResponse AddAndAssert(Log log, ErrorCodes errorCode = ErrorCodes.Success)
         {
-            var response = Add<LogList, Log>(log);
-            Assert.AreEqual((short)errorCode, response.Result);
+            return AddAndAssert<LogList, Log>(log, errorCode);
         }
 
         /// <summary>
@@ -490,10 +476,9 @@ namespace PDS.Witsml.Server
         /// </summary>
         /// <param name="trajectory">the trajectory.</param>
         /// <param name="errorCode">the errorCode.</param>
-        public void AddAndAssert(Trajectory trajectory, ErrorCodes errorCode = ErrorCodes.Success)
+        public WMLS_AddToStoreResponse AddAndAssert(Trajectory trajectory, ErrorCodes errorCode = ErrorCodes.Success)
         {
-            var response = Add<TrajectoryList, Trajectory>(trajectory);
-            Assert.AreEqual((short)errorCode, response.Result);
+            return AddAndAssert<TrajectoryList, Trajectory>(trajectory, errorCode);
         }
 
         /// <summary>
@@ -501,91 +486,53 @@ namespace PDS.Witsml.Server
         /// </summary>
         /// <param name="rig">the rig</param>
         /// <param name="errorCode">the errorCode</param>
-        public void AddAndAssert(Rig rig, ErrorCodes errorCode = ErrorCodes.Success)
+        public WMLS_AddToStoreResponse AddAndAssert(Rig rig, ErrorCodes errorCode = ErrorCodes.Success)
         {
-            var response = Add<RigList, Rig>(rig);
-            Assert.AreEqual((short)errorCode, response.Result);
+            return AddAndAssert<RigList, Rig>(rig, errorCode);
         }
 
         /// <summary>
         /// Does get query for single well object and test for result count equal to 1 and is not null
         /// </summary>
         /// <param name="well">the well</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
         /// <returns>The first well from the response</returns>
-        public Well GetOneAndAssert(Well well)
+        public Well GetAndAssert(Well well, bool isNotNull = true)
         {
-            Assert.IsNotNull(well.Uid);
-
-            var query = new Well { Uid = well.Uid };
-
-            var results = Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
-            Assert.AreEqual(1, results.Count);
-            var result = results.FirstOrDefault();
-            Assert.IsNotNull(result);
-
-            return result;
+            return GetAndAssert<WellList, Well>(well, isNotNull);
         }
 
         /// <summary>
         /// Does get query for single wellbore object and test for result count equal to 1 and is not null
         /// </summary>
         /// <param name="wellbore">the wellbore</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
         /// <returns>The first wellbore from the response</returns>
-        public Wellbore GetOneAndAssert(Wellbore wellbore)
+        public Wellbore GetAndAssert(Wellbore wellbore, bool isNotNull = true)
         {
-            Assert.IsNotNull(wellbore.UidWell);
-            Assert.IsNotNull(wellbore.Uid);
-
-            var query = new Wellbore { UidWell = wellbore.UidWell, Uid = wellbore.Uid };
-
-            var results = Query<WellboreList, Wellbore>(query, ObjectTypes.Wellbore, null, optionsIn: OptionsIn.ReturnElements.All);
-            Assert.AreEqual(1, results.Count);
-            var result = results.FirstOrDefault();
-            Assert.IsNotNull(result);
-
-            return result;
+            return GetAndAssert<WellboreList, Wellbore>(wellbore, isNotNull);
         }
 
         /// <summary>
         /// Does get query for single log object and test for result count equal to 1 and is not null
         /// </summary>
         /// <param name="log">the log with UIDs for well and wellbore</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
         /// <returns>The first log from the response</returns>
-        public Log GetOneAndAssert(Log log)
+        public Log GetAndAssert(Log log, bool isNotNull = true)
         {
-            Assert.IsNotNull(log.UidWell);
-            Assert.IsNotNull(log.UidWellbore);
-            Assert.IsNotNull(log.Uid);
-
-            var query = CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
-            var results = Query<LogList, Log>(query, optionsIn: OptionsIn.ReturnElements.All);
-            Assert.AreEqual(1, results.Count);
-
-            var result = results.FirstOrDefault();
-            Assert.IsNotNull(result);
-
-            return result;
+            return GetAndAssert<LogList, Log>(log, isNotNull);
         }
 
         /// <summary>
         /// Does get query for single trajectory object and test for result count equal to 1 and is not null
         /// </summary>
         /// <param name="trajectory">the log with UIDs for well and wellbore</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
         /// <returns>The first trajectory from the response</returns>
-        public Trajectory GetOneAndAssert(Trajectory trajectory)
+        public Trajectory GetAndAssert(Trajectory trajectory, bool isNotNull = true)
         {
-            Assert.IsNotNull(trajectory.UidWell);
-            Assert.IsNotNull(trajectory.UidWellbore);
-            Assert.IsNotNull(trajectory.Uid);
-
-            var query = CreateTrajectory(trajectory.Uid, null, trajectory.UidWell, null, trajectory.UidWellbore, null);
-            var results = Query<TrajectoryList, Trajectory>(query, optionsIn: OptionsIn.ReturnElements.All);
-            Assert.AreEqual(1, results.Count);
-
-            var result = results.FirstOrDefault();
-            Assert.IsNotNull(result);
-
-            return result;
+            return GetAndAssert<TrajectoryList, Trajectory>(trajectory, isNotNull);
         }
 
         /// <summary>
@@ -595,9 +542,7 @@ namespace PDS.Witsml.Server
         /// <param name="errorCode">The error code.</param>
         public void UpdateAndAssert(Well well, ErrorCodes errorCode = ErrorCodes.Success)
         {
-            var updateResponse = Update<WellList, Well>(well);
-            Assert.IsNotNull(updateResponse);
-            Assert.AreEqual((short)errorCode, updateResponse.Result);
+            UpdateAndAssert<WellList, Well>(well);
         }
 
         /// <summary>
@@ -607,9 +552,7 @@ namespace PDS.Witsml.Server
         /// <param name="errorCode">The error code.</param>
         public void UpdateAndAssert(Wellbore wellbore, ErrorCodes errorCode = ErrorCodes.Success)
         {
-            var updateResponse = Update<WellboreList, Wellbore>(wellbore);
-            Assert.IsNotNull(updateResponse);
-            Assert.AreEqual((short)errorCode, updateResponse.Result);
+            UpdateAndAssert<WellboreList, Wellbore>(wellbore);
         }
 
         /// <summary>
@@ -619,8 +562,7 @@ namespace PDS.Witsml.Server
         /// <param name="errorCode">The error code.</param>
         public void UpdateAndAssert(Log log, ErrorCodes errorCode = ErrorCodes.Success)
         {
-            var updateResponse = Update<LogList, Log>(log);
-            Assert.AreEqual((short)errorCode, updateResponse.Result);
+            UpdateAndAssert<LogList, Log>(log);
         }
 
         /// <summary>
@@ -630,10 +572,7 @@ namespace PDS.Witsml.Server
         /// <param name="errorCode">The error code.</param>
         public void DeleteAndAssert(Well well, ErrorCodes errorCode = ErrorCodes.Success)
         {
-            var response = Delete<WellList, Well>(well);
-
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)errorCode, response.Result);
+            DeleteAndAssert<WellList, Well>(well);
         }
 
         /// <summary>
@@ -643,10 +582,7 @@ namespace PDS.Witsml.Server
         /// <param name="errorCode">The error code.</param>
         public void DeleteAndAssert(Wellbore wellbore, ErrorCodes errorCode = ErrorCodes.Success)
         {
-            var response = Delete<WellboreList, Wellbore>(wellbore);
-
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)errorCode, response.Result);
+            DeleteAndAssert<WellboreList, Wellbore>(wellbore);
         }
 
         /// <summary>
@@ -656,10 +592,7 @@ namespace PDS.Witsml.Server
         /// <param name="errorCode">The error code.</param>
         public void DeleteAndAssert(Log log, ErrorCodes errorCode = ErrorCodes.Success)
         {
-            var response = Delete<LogList, Log>(log);
-
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)errorCode, response.Result);
+            DeleteAndAssert<LogList, Log>(log);
         }
 
         public WMLS_AddToStoreResponse Add_Log_from_file(string xmlfile)

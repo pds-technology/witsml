@@ -42,7 +42,7 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.AddAndAssert(Log);
 
             // Query log
-            DevKit.GetOneAndAssert(Log);
+            DevKit.GetAndAssert(Log);
 
             // Delete log
             DeleteLog(Log, string.Empty);
@@ -65,7 +65,7 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.AddAndAssert(Log);
 
             // Query log
-            DevKit.GetOneAndAssert(Log);
+            DevKit.GetAndAssert(Log);
 
             // Delete log
             var delete = DevKit.CreateLog("L" + uid, null, Well.Uid, null, Wellbore.Uid, null);
@@ -91,7 +91,7 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.AddAndAssert(Log);
 
             // Assert all testing elements are added
-            var result = DevKit.GetOneAndAssert(Log);
+            var result = DevKit.GetAndAssert(Log);
             Assert.AreEqual(Log.ServiceCompany, result.ServiceCompany);
             Assert.AreEqual(Log.Direction, result.Direction);
 
@@ -100,7 +100,7 @@ namespace PDS.Witsml.Server.Data.Logs
             DeleteLog(Log, delete);
 
             // Assert the well elements has been deleted
-            result = DevKit.GetOneAndAssert(Log);
+            result = DevKit.GetAndAssert(Log);
             Assert.IsNull(result.ServiceCompany);
             Assert.IsNull(result.StepIncrement);
         }
@@ -124,7 +124,7 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.AddAndAssert(Log);
 
             // Assert all testing elements are added
-            var result = DevKit.GetOneAndAssert(Log);
+            var result = DevKit.GetAndAssert(Log);
             var commonData = result.CommonData;
             Assert.IsNotNull(commonData);
             Assert.AreEqual(testCommonData.Comments, commonData.Comments);
@@ -135,7 +135,7 @@ namespace PDS.Witsml.Server.Data.Logs
             DeleteLog(Log, delete);
 
             // Assert the well elements has been deleted
-            result = DevKit.GetOneAndAssert(Log);
+            result = DevKit.GetAndAssert(Log);
             commonData = result.CommonData;
             Assert.IsNotNull(commonData);
             Assert.IsNull(commonData.Comments);
@@ -159,7 +159,7 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.AddAndAssert(Log);
 
             // Assert all testing elements are added
-            var result = DevKit.GetOneAndAssert(Log);
+            var result = DevKit.GetAndAssert(Log);
             var curves = result.LogCurveInfo;
             var resultCurve1 = curves.FirstOrDefault(c => c.Uid == curve1.Uid);
             Assert.IsNotNull(resultCurve1);
@@ -175,7 +175,7 @@ namespace PDS.Witsml.Server.Data.Logs
             DeleteLog(Log, delete);
 
             // Assert the well elements has been deleted
-            result = DevKit.GetOneAndAssert(Log);
+            result = DevKit.GetAndAssert(Log);
             curves = result.LogCurveInfo;
             resultCurve1 = curves.FirstOrDefault(c => c.Uid == curve1.Uid);
             Assert.IsNull(resultCurve1);
@@ -198,7 +198,7 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.AddAndAssert(Log);
 
             // Assert all testing elements are added
-            var result = DevKit.GetOneAndAssert(Log);
+            var result = DevKit.GetAndAssert(Log);
             Assert.AreEqual(1, result.LogParam.Count);
 
             // Partial delete well
@@ -206,7 +206,7 @@ namespace PDS.Witsml.Server.Data.Logs
             DeleteLog(Log, delete);
 
             // Assert the well elements has been deleted
-            result = DevKit.GetOneAndAssert(Log);
+            result = DevKit.GetAndAssert(Log);
             Assert.AreEqual(0, result.LogParam.Count);
         }
 
@@ -246,7 +246,7 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.AddAndAssert(Log);
 
             // Assert all testing elements are added
-            var result = DevKit.GetOneAndAssert(Log);
+            var result = DevKit.GetAndAssert(Log);
 
             // Assert log curves
             var curves = result.LogCurveInfo;
@@ -276,7 +276,7 @@ namespace PDS.Witsml.Server.Data.Logs
             DeleteLog(Log, delete);
 
             // Assert the log elements has been deleted
-            result = DevKit.GetOneAndAssert(Log);
+            result = DevKit.GetAndAssert(Log);
 
             // Assert log curves
             curves = result.LogCurveInfo;
@@ -311,7 +311,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var indexCurve = Log.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == Log.IndexCurve);
             Assert.IsNotNull(indexCurve);
 
-            var result = DevKit.GetOneAndAssert(Log);
+            var result = DevKit.GetAndAssert(Log);
             var resultLogData = result.LogData.First();
             Assert.IsNotNull(resultLogData);
             Assert.AreEqual(Log.LogCurveInfo.Count, result.LogCurveInfo.Count);
@@ -323,7 +323,7 @@ namespace PDS.Witsml.Server.Data.Logs
             }
             DeleteLog(Log, delete);
 
-            result = DevKit.GetOneAndAssert(Log);
+            result = DevKit.GetAndAssert(Log);
             Assert.AreEqual(0, result.LogCurveInfo.Count);
             Assert.AreEqual(0, result.LogData.Count);
         }
@@ -344,7 +344,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var indexCurve = Log.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == Log.IndexCurve);
             Assert.IsNotNull(indexCurve);
 
-            var result = DevKit.GetOneAndAssert(Log);
+            var result = DevKit.GetAndAssert(Log);
             var resultLogData = result.LogData.First();
             Assert.IsNotNull(resultLogData);
             Assert.AreEqual(Log.LogCurveInfo.Count, result.LogCurveInfo.Count);
@@ -356,7 +356,7 @@ namespace PDS.Witsml.Server.Data.Logs
             }
             DeleteLog(Log, delete);
 
-            result = DevKit.GetOneAndAssert(Log);          
+            result = DevKit.GetAndAssert(Log);          
             Assert.AreEqual(0, result.LogData.Count);
 
             Assert.AreEqual(Log.LogCurveInfo.Count, result.LogCurveInfo.Count);
@@ -383,7 +383,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var indexCurve = Log.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == Log.IndexCurve);
             Assert.IsNotNull(indexCurve);
 
-            var result = DevKit.GetOneAndAssert(Log);
+            var result = DevKit.GetAndAssert(Log);
             var resultLogData = result.LogData.First();
             Assert.IsNotNull(resultLogData);
             Assert.AreEqual(Log.LogCurveInfo.Count, result.LogCurveInfo.Count);
@@ -395,7 +395,7 @@ namespace PDS.Witsml.Server.Data.Logs
             
             DeleteLog(Log, delete);
 
-            result = DevKit.GetOneAndAssert(Log);
+            result = DevKit.GetAndAssert(Log);
             Assert.AreEqual(0, result.LogData.Count);
 
             Assert.AreEqual(Log.LogCurveInfo.Count, result.LogCurveInfo.Count);
@@ -422,7 +422,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var indexCurve = Log.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == Log.IndexCurve);
             Assert.IsNotNull(indexCurve);
 
-            var result = DevKit.GetOneAndAssert(Log);
+            var result = DevKit.GetAndAssert(Log);
             var resultLogData = result.LogData.First();
             Assert.IsNotNull(resultLogData);
             foreach (var curve in result.LogCurveInfo)
@@ -434,7 +434,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var delete = "<endIndex uom=\"" + indexCurve.Unit + "\">20</endIndex>";
             DeleteLog(Log, delete);
 
-            result = DevKit.GetOneAndAssert(Log);
+            result = DevKit.GetAndAssert(Log);
             Assert.AreEqual(0, result.LogData.Count);
 
             foreach (var curve in result.LogCurveInfo)
@@ -460,7 +460,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var indexCurve = Log.LogCurveInfo.FirstOrDefault(l => l.Mnemonic.Value == Log.IndexCurve);
             Assert.IsNotNull(indexCurve);
 
-            var result = DevKit.GetOneAndAssert(Log);
+            var result = DevKit.GetAndAssert(Log);
             var resultLogData = result.LogData.First();
             Assert.IsNotNull(resultLogData);
             foreach (var curve in result.LogCurveInfo)
@@ -474,7 +474,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var delete = "<endIndex uom=\"" + indexCurve.Unit + "\">10</endIndex>";
             DeleteLog(Log, delete);
 
-            result = DevKit.GetOneAndAssert(Log);
+            result = DevKit.GetAndAssert(Log);
             Assert.AreEqual(0, result.LogData.Count);
 
             foreach (var curve in result.LogCurveInfo)
@@ -502,7 +502,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var lastCurve = Log.LogCurveInfo.Last();
             Assert.IsNotNull(lastCurve);
 
-            var result = DevKit.GetOneAndAssert(Log);
+            var result = DevKit.GetAndAssert(Log);
             var resultLogData = result.LogData.First();
             Assert.IsNotNull(resultLogData);
             foreach (var curve in result.LogCurveInfo)
@@ -516,7 +516,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 "</logCurveInfo>";
             DeleteLog(Log, delete);
 
-            result = DevKit.GetOneAndAssert(Log);
+            result = DevKit.GetAndAssert(Log);
             resultLogData = result.LogData.First();
             Assert.IsNotNull(resultLogData);
 
@@ -548,7 +548,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var lastCurve = Log.LogCurveInfo.Last();
             Assert.IsNotNull(lastCurve);
 
-            var result = DevKit.GetOneAndAssert(Log);
+            var result = DevKit.GetAndAssert(Log);
             var resultLogData = result.LogData.First();
             Assert.IsNotNull(resultLogData);
             foreach (var curve in result.LogCurveInfo)
@@ -564,7 +564,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 "</logCurveInfo>";
             DeleteLog(Log, delete);
 
-            result = DevKit.GetOneAndAssert(Log);
+            result = DevKit.GetAndAssert(Log);
             resultLogData = result.LogData.First();
             Assert.IsNotNull(resultLogData);
 
@@ -603,7 +603,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var curve2 = Log.LogCurveInfo[2];
             Assert.IsNotNull(curve2);
 
-            var result = DevKit.GetOneAndAssert(Log);
+            var result = DevKit.GetAndAssert(Log);
             var resultLogData = result.LogData.First();
             Assert.IsNotNull(resultLogData);
             foreach (var curve in result.LogCurveInfo)
@@ -620,7 +620,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 "</logCurveInfo>";
             DeleteLog(Log, delete);
 
-            result = DevKit.GetOneAndAssert(Log);
+            result = DevKit.GetAndAssert(Log);
 
             // Assert log data
             resultLogData = result.LogData.First();
@@ -664,7 +664,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var curve2 = Log.LogCurveInfo[2];
             Assert.IsNotNull(curve2);
 
-            var result = DevKit.GetOneAndAssert(Log);
+            var result = DevKit.GetAndAssert(Log);
             var resultLogData = result.LogData.First();
             Assert.IsNotNull(resultLogData);
             foreach (var curve in result.LogCurveInfo)
@@ -683,7 +683,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 "</logCurveInfo>";
             DeleteLog(Log, delete);
 
-            result = DevKit.GetOneAndAssert(Log);
+            result = DevKit.GetAndAssert(Log);
 
             // Assert log data
             resultLogData = result.LogData.First();
@@ -730,7 +730,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var curve2 = Log.LogCurveInfo[2];
             Assert.IsNotNull(curve2);
 
-            var result = DevKit.GetOneAndAssert(Log);
+            var result = DevKit.GetAndAssert(Log);
             var resultLogData = result.LogData.First();
             Assert.IsNotNull(resultLogData);
             foreach (var curve in result.LogCurveInfo)
@@ -746,7 +746,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 "</logCurveInfo>";
             DeleteLog(Log, delete);
 
-            result = DevKit.GetOneAndAssert(Log);
+            result = DevKit.GetAndAssert(Log);
 
             // Assert log data
             resultLogData = result.LogData.First();
@@ -797,7 +797,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var curve3 = Log.LogCurveInfo[3];
             Assert.IsNotNull(curve3);
 
-            var result = DevKit.GetOneAndAssert(Log);
+            var result = DevKit.GetAndAssert(Log);
             var resultLogData = result.LogData.First();
             Assert.IsNotNull(resultLogData);
             foreach (var curve in result.LogCurveInfo)
@@ -812,7 +812,7 @@ namespace PDS.Witsml.Server.Data.Logs
                          "<logCurveInfo><mnemonic>" + curve2.Mnemonic.Value + "</mnemonic></logCurveInfo>";
             DeleteLog(Log, delete);
 
-            result = DevKit.GetOneAndAssert(Log);
+            result = DevKit.GetAndAssert(Log);
 
             // Assert log data
             Assert.IsNotNull(result.LogData);

@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------- 
+﻿//----------------------------------------------------------------------- 
 // PDS.Witsml.Server, 2016.1
 //
 // Copyright 2016 Petrotechnical Data Systems
@@ -16,24 +16,32 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using PDS.Witsml.Server.Configuration;
-
-namespace PDS.Witsml.Server.Data.Trajectories
+namespace PDS.Witsml.Server.Providers.ChannelStreaming
 {
     /// <summary>
-    /// Trajectory131TestBase
+    /// An enumeration of Channel Streaming Types
     /// </summary>
-    public partial class Trajectory131TestBase
+    public enum ChannelStreamingTypes
     {
-        partial void BeforeEachTest()
-        {
-            Trajectory.ServiceCompany = "Service Company T";
-        }
+        /// <summary>
+        /// Channel streaming start - latest value
+        /// </summary>
+        LatestValue,
 
-        partial void AfterEachTest()
-        {
-            WitsmlSettings.MaxStationCount = DevKitAspect.DefaultMaxStationCount;
-            WitsmlSettings.MaxDataNodes = DevKitAspect.DefaultMaxDataNodes;
-        }
+        /// <summary>
+        /// Channel streaming start - index count values before 
+        /// and including the latest value.
+        /// </summary>
+        IndexCount,
+
+        /// <summary>
+        /// Channel streaming start - Stream from index value
+        /// </summary>
+        IndexValue,
+
+        /// <summary>
+        /// Channel range request
+        /// </summary>
+        RangeRequest
     }
 }
