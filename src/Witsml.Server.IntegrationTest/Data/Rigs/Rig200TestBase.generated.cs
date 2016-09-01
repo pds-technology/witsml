@@ -53,8 +53,8 @@ namespace PDS.Witsml.Server.Data.Rigs
 
             QueryEmptyList = DevKit.List(new Rig());
 
-            OnTestSetUp();
             BeforeEachTest();
+            OnTestSetUp();
         }
 
         [TestCleanup]

@@ -85,8 +85,8 @@ namespace PDS.Witsml.Server.Data.WbGeometries
 
             QueryEmptyList = DevKit.List(new WbGeometry());
 
-            OnTestSetUp();
             BeforeEachTest();
+            OnTestSetUp();
         }
 
         [TestCleanup]

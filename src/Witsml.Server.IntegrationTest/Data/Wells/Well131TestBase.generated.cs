@@ -63,8 +63,8 @@ namespace PDS.Witsml.Server.Data.Wells
 
             QueryEmptyList = DevKit.List(new Well());
 
-            OnTestSetUp();
             BeforeEachTest();
+            OnTestSetUp();
         }
 
         [TestCleanup]

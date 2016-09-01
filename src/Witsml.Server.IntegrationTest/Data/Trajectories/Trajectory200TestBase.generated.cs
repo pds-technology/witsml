@@ -69,8 +69,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             QueryEmptyList = DevKit.List(new Trajectory());
 
-            OnTestSetUp();
             BeforeEachTest();
+            OnTestSetUp();
         }
 
         [TestCleanup]

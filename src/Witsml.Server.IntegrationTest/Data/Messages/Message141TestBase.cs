@@ -16,6 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using Energistics.DataAccess.WITSML141.ReferenceData;
+
 namespace PDS.Witsml.Server.Data.Messages
 {
     /// <summary>
@@ -23,5 +26,10 @@ namespace PDS.Witsml.Server.Data.Messages
     /// </summary>
     public partial class Message141TestBase
     {
+        partial void BeforeEachTest()
+        {
+            Message.DateTime = DateTimeOffset.Now;
+            Message.TypeMessage = MessageType.informational;
+        }
     }
 }

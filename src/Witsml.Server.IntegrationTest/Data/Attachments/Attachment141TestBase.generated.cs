@@ -82,8 +82,8 @@ namespace PDS.Witsml.Server.Data.Attachments
 
             QueryEmptyList = DevKit.List(new Attachment());
 
-            OnTestSetUp();
             BeforeEachTest();
+            OnTestSetUp();
         }
 
         [TestCleanup]

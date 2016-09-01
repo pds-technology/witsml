@@ -82,8 +82,8 @@ namespace PDS.Witsml.Server.Data.Messages
 
             QueryEmptyList = DevKit.List(new Message());
 
-            OnTestSetUp();
             BeforeEachTest();
+            OnTestSetUp();
         }
 
         [TestCleanup]

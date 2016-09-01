@@ -72,8 +72,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
             QueryEmptyList = DevKit.List(new Wellbore());
 
-            OnTestSetUp();
             BeforeEachTest();
+            OnTestSetUp();
         }
 
         [TestCleanup]

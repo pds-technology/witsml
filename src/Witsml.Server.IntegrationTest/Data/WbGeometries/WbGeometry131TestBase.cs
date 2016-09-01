@@ -16,6 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+
 namespace PDS.Witsml.Server.Data.WbGeometries
 {
     /// <summary>
@@ -23,5 +25,9 @@ namespace PDS.Witsml.Server.Data.WbGeometries
     /// </summary>
     public partial class WbGeometry131TestBase
     {
+        partial void BeforeEachTest()
+        {
+            WbGeometry.DateTimeReport = DateTime.Now;
+        }
     }
 }

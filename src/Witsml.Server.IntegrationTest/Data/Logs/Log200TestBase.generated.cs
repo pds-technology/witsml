@@ -69,8 +69,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
             QueryEmptyList = DevKit.List(new Log());
 
-            OnTestSetUp();
             BeforeEachTest();
+            OnTestSetUp();
         }
 
         [TestCleanup]

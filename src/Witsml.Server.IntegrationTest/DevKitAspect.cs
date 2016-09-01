@@ -182,9 +182,14 @@ namespace PDS.Witsml.Server
 
         private void SetupParameters<TList, TObject>(List<TObject> entityList, string wmlTypeIn, out string typeIn, out string queryIn) where TList : IEnergisticsCollection
         {
-            var info = typeof(TList).GetProperty(typeof(TObject).Name);
+            var objectType = ObjectTypes.GetObjectType<TList>();
+            var version = ObjectTypes.GetVersion(typeof(TList));
+            var property = ObjectTypes.GetObjectTypeListProperty(objectType, version);
+
+            var info = typeof(TList).GetProperty(property);
             var list = New<TList>(x => info.SetValue(x, entityList));
-            typeIn = wmlTypeIn ?? ObjectTypes.GetObjectType<TList>();
+
+            typeIn = wmlTypeIn ?? objectType;
             queryIn = EnergisticsConverter.ObjectToXml(list); // WitsmlParser.ToXml(list);
         }
 

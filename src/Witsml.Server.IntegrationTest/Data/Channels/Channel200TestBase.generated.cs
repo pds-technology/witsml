@@ -69,8 +69,8 @@ namespace PDS.Witsml.Server.Data.Channels
 
             QueryEmptyList = DevKit.List(new Channel());
 
-            OnTestSetUp();
             BeforeEachTest();
+            OnTestSetUp();
         }
 
         [TestCleanup]

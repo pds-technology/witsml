@@ -16,6 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.DataAccess.WITSML141.ReferenceData;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -25,6 +27,12 @@ namespace PDS.Witsml.Server.Data.Logs
     /// </summary>
     public partial class Log141TestBase
     {
+        partial void BeforeEachTest()
+        {
+            Log.IndexType = LogIndexType.measureddepth;
+            Log.IndexCurve = "MD";
+        }
+
         partial void AfterEachTest()
         {
             WitsmlSettings.DepthRangeSize = DevKitAspect.DefaultDepthChunkRange;
