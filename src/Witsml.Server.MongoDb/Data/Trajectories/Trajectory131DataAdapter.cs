@@ -21,6 +21,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
@@ -46,7 +47,18 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <param name="parser">The parser.</param>
         protected override void FormatStationData(Trajectory entity, List<TrajectoryStation> stations, WitsmlQueryParser parser)
         {
-            entity.TrajectoryStation = stations;
+            if (stations.Count == 0)
+                return;
+
+            var range = GetQueryIndexRange(parser);
+
+            entity.TrajectoryStation = range.Start.HasValue
+                ? range.End.HasValue
+                    ? stations.Where(s => s.MD.Value > range.Start.Value && s.MD.Value < range.End.Value).ToList()
+                    : stations.Where(s => s.MD.Value > range.Start.Value).ToList()
+                : range.End.HasValue
+                    ? stations.Where(s => s.MD.Value < range.End.Value).ToList()
+                    : stations;
         }
 
         /// <summary>
