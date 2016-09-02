@@ -69,7 +69,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// A collection of data objects retrieved from the data store.
         /// </returns>
         public override List<T> Query(WitsmlQueryParser parser, ResponseContext context)
-        {
+        {          
             var entities = QueryEntities(parser);
 
             if (parser.IncludeTrajectoryStations())
@@ -179,7 +179,11 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <returns>A list of element names.</returns>
         protected override List<string> GetIgnoredElementNamesForQuery(WitsmlQueryParser parser)
         {
-            return new List<string> { "mdMn", "mdMx" };
+            var ignored = new List<string> {"mdMn", "mdMx"};
+            if (parser.IncludeTrajectoryStations())
+                ignored.Add("trajectoryStation");
+
+            return ignored;
         }
 
         /// <summary>
@@ -262,12 +266,15 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
         private void QueryTrajectoryStations(T entity, T header, WitsmlQueryParser parser, ResponseContext context)
         {
-            if (!QueryStationFile(entity, header))
-                return;
-
-            var uri = entity.GetUri();
-            var stations = GetMongoFileStationData(uri);
+            var stations = GetTrajectoryStation(entity);
+            if (QueryStationFile(entity, header))
+            {
+                var uri = entity.GetUri();
+                stations = GetMongoFileStationData(uri);
+            }
+            
             FormatStationData(entity, stations, parser);
+            SetIndexRange(entity);
         }
 
         private List<TChild> GetMongoFileStationData(string uri)
@@ -285,6 +292,23 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var bytes = bucket.DownloadAsBytes(mongoFile.Id);
             var json = Encoding.UTF8.GetString(bytes);
             return BsonSerializer.Deserialize<List<TChild>>(json);
+        }
+
+        /// <summary>
+        /// Gets the query index range.
+        /// </summary>
+        /// <param name="parser">The parser.</param>
+        /// <returns>the index range for the query.</returns>
+        protected Range<double?> GetQueryIndexRange(WitsmlQueryParser parser)
+        {
+            var mdMn = parser.Properties("mdMn").FirstOrDefault()?.Value;
+            var mdMx = parser.Properties("mdMx").FirstOrDefault()?.Value;
+
+            if (string.IsNullOrEmpty(mdMn) && string.IsNullOrEmpty(mdMx))
+                return new Range<double?>(null, null);
+            if (string.IsNullOrEmpty(mdMn))
+                return new Range<double?>(null, double.Parse(mdMx));
+            return string.IsNullOrEmpty(mdMx) ? new Range<double?>(double.Parse(mdMn), null) : new Range<double?>(double.Parse(mdMn), double.Parse(mdMx));
         }
 
         /// <summary>
