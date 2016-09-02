@@ -386,7 +386,8 @@ namespace PDS.Witsml.Server.Configuration
         /// Validates the selection criteria.
         /// </summary>
         /// <param name="document">The queryIn XML document.</param>
-        public static void ValidateSelectionCriteria(XDocument document)
+        /// <param name="allowEmptyRecurringElements">if set to <c>true</c> [allow empty recurring elements].</param>
+        public static void ValidateSelectionCriteria(XDocument document, bool allowEmptyRecurringElements = false)
         {
             _log.Debug("Validating selection criteria.");
 
@@ -394,7 +395,7 @@ namespace PDS.Witsml.Server.Configuration
 
             foreach (var entity in entities)
             {
-                ValidateSelectionCriteriaForAnEntity(entity);
+                ValidateSelectionCriteriaForAnEntity(entity, allowEmptyRecurringElements);
             }
         }
 
@@ -454,7 +455,8 @@ namespace PDS.Witsml.Server.Configuration
         /// Recursively validates the selection criteria for an element.
         /// </summary>
         /// <param name="entity">The entity.</param>
-        private static void ValidateSelectionCriteriaForAnEntity(XElement entity)
+        /// <param name="allowEmptyRecurringElements">if set to <c>true</c> [allow empty recurring elements].</param>
+        private static void ValidateSelectionCriteriaForAnEntity(XElement entity, bool allowEmptyRecurringElements = false)
         {
             _log.DebugFormat("Validating selection criteria for {0}", entity.Name.LocalName);
             if (entity == null) return;
@@ -477,12 +479,12 @@ namespace PDS.Witsml.Server.Configuration
                 }
                 else
                 {
-                    IsRecurringElementValueEmpty(selection);
+                    IsRecurringElementValueEmpty(selection, allowEmptyRecurringElements);
 
                     for (var i = 1; i < values.Count; i++)
                     {
                         var match = values[i];
-                        IsRecurringElementValueEmpty(match);
+                        IsRecurringElementValueEmpty(match, allowEmptyRecurringElements);
                         IsSelectionMatch(selection, match);
                         ValidateSelectionCriteriaForAnEntity(match);
                     }
@@ -519,10 +521,16 @@ namespace PDS.Witsml.Server.Configuration
             }
         }
 
-        private static void IsRecurringElementValueEmpty(XElement element)
+        /// <summary>
+        /// Determines whether there is empty recurring element
+        /// </summary>
+        /// <param name="element">The element.</param>
+        /// <param name="allowEmptyRecurringElements">if set to <c>true</c> [allow empty recurring elements].</param>
+        /// <exception cref="WitsmlException"></exception>
+        private static void IsRecurringElementValueEmpty(XElement element, bool allowEmptyRecurringElements = false)
         {
             // 131 Is allowed to have recurring empty elements
-            if (element.GetDefaultNamespace() == "http://www.witsml.org/schemas/131")
+            if (allowEmptyRecurringElements)
                 return;
 
             _log.Debug("Validating empty recurring elements.");
