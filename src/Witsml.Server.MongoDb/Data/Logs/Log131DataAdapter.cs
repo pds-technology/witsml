@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
@@ -70,6 +71,24 @@ namespace PDS.Witsml.Server.Data.Logs
             var uri = dataObject.GetUri();
             using (var transaction = DatabaseProvider.BeginTransaction(uri))
             {
+                // Update LogCurveInfo if missing UID
+                foreach (var lci in parser.Properties("logCurveInfo"))
+                {
+                    if (!string.IsNullOrWhiteSpace(lci.Attribute("uid")?.Value)) continue;
+                    var uid = lci.Attribute("uid");
+                    var mnemonic = lci.Element(lci.GetDefaultNamespace() + "mnemonic");
+                    if (uid != null)
+                    {
+                        if (mnemonic != null) uid.Value = mnemonic.Value;
+                    }
+                    else
+                    {
+                        var newUid = new XAttribute("uid", mnemonic.Value);
+                        lci.Add(newUid);
+                    }
+                }
+                
+
                 UpdateEntity(parser, uri, transaction);
 
                 // Update Log Data and Index Range
@@ -580,7 +599,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 entity.LogData = null;
                 return reader;
             }
-
+            existing.LogCurveInfo = entity.LogCurveInfo;
             existing.LogData = entity.LogData;
             return existing.GetReader();
         }
