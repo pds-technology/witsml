@@ -222,7 +222,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="propertyValue">The property value.</param>
         protected override void HandleByteArrayValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
-            SetProperty(propertyInfo, propertyPath, Encoding.ASCII.GetBytes(propertyValue));
+            SetProperty(propertyInfo, propertyPath, Convert.FromBase64String(propertyValue));
         }
 
         /// <summary>
