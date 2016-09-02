@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Xml.Linq;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
@@ -209,6 +210,19 @@ namespace PDS.Witsml.Server.Data
         protected override void HandleStringValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
             SetProperty(propertyInfo, propertyPath, propertyValue);
+        }
+
+        /// <summary>
+        /// Handles the byte array value.
+        /// </summary>void HandleStringValue
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="xmlObject">The XML object.</param>
+        /// <param name="propertyType">Type of the property.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <param name="propertyValue">The property value.</param>
+        protected override void HandleByteArrayValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
+        {
+            SetProperty(propertyInfo, propertyPath, Encoding.ASCII.GetBytes(propertyValue));
         }
 
         /// <summary>
