@@ -45,7 +45,7 @@ namespace PDS.Witsml.Server.Data
             Register<Witsml131.Message>();
             Register<Witsml131.Rig>();
             Register<Witsml131.Trajectory>();
-            Register<Witsml141.StandAloneWellboreGeometry>();
+            Register<Witsml131.StandAloneWellboreGeometry>();
             Register<Witsml131.Wellbore>();
             Register<Witsml131.Well>();
 
@@ -60,7 +60,7 @@ namespace PDS.Witsml.Server.Data
             Register<Witsml141.Well>();
 
             // WITSML 2.0
-            Register<Witsml141.Attachment>();
+            Register2<Witsml200.Attachment>();
             Register2<Witsml200.Channel>();
             Register2<Witsml200.ChannelSet>();
             Register2<Witsml200.Log>();
