@@ -168,6 +168,7 @@ namespace PDS.Witsml.Server.Data.Wells
                     DevKit.WellDatum("Casing Flange", ElevCodeEnum.CF, "CF")
                 }
             };
+
             var updateResponse = DevKit.Update<WellList, Well>(updateWell);
             Assert.IsNotNull(updateResponse);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
@@ -189,6 +190,7 @@ namespace PDS.Witsml.Server.Data.Wells
                 WellPublicLandSurveySystemLocation =
                     new PublicLandSurveySystem() {PrincipalMeridian = PrincipalMeridian.ChoctawMeridian, Range = 1}
             };
+
             var updateResponse = DevKit.Update<WellList, Well>(updateWell);
             Assert.IsNotNull(updateResponse);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
@@ -212,6 +214,7 @@ namespace PDS.Witsml.Server.Data.Wells
                 Uid = response.SuppMsgOut,
                 WellheadElevation = new WellElevationCoord() { Uom = WellVerticalCoordinateUom.m, Datum = "KB" }
             };
+
             var updateResponse = DevKit.Update<WellList, Well>(updateWell);
             Assert.IsNotNull(updateResponse);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
@@ -234,6 +237,7 @@ namespace PDS.Witsml.Server.Data.Wells
                 Uid = response.SuppMsgOut,
                 ReferencePoint = referencePoint
             };
+
             var updateResponse = DevKit.Update<WellList, Well>(updateWell);
             Assert.IsNotNull(updateResponse);
             Assert.AreEqual((short)ErrorCodes.Success, updateResponse.Result);
@@ -267,9 +271,11 @@ namespace PDS.Witsml.Server.Data.Wells
             var result = DevKit.GetAndAssert(Well);
             var commonData = result.CommonData;
             Assert.IsNotNull(commonData);
+
             var extensionNameValues = commonData.ExtensionNameValue;
             Assert.IsNotNull(extensionNameValues);
             Assert.AreEqual(1, extensionNameValues.Count);
+
             var extensionName = extensionNameValues.FirstOrDefault();
             Assert.IsNotNull(extensionName);
             Assert.AreEqual(extensionName1.Uid, extensionName.Uid);
@@ -326,6 +332,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.IsNotNull(welldatum);
             Assert.AreEqual("Kelly Bushing", welldatum.Name);
             Assert.AreEqual(ElevCodeEnum.KB, welldatum.Code);
+
             var datumName = welldatum.DatumName;
             Assert.IsNotNull(datumName);
             Assert.AreEqual("TestName", datumName.NamingSystem);
@@ -363,7 +370,7 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
-        public void Well141DataAdapter_UpdateTinStore_Acquisition_Error_483()
+        public void Well141DataAdapter_UpdateInStore_Acquisition_Error_483()
         {
             // Add a valid well with three AcquisitionTimeZones
             var response = DevKit.AddValidAcquisition(Well);
@@ -376,7 +383,7 @@ namespace PDS.Witsml.Server.Data.Wells
                     AcquisitionTimeZone = new List<TimestampedTimeZone>()
                     {
                         // Appending a subsequent TimestampedTimeZone without a DateTime specified is an error
-                        new TimestampedTimeZone() {DateTimeSpecified = false, Value = "+03:00"}
+                        new TimestampedTimeZone { DateTimeSpecified = false, Value = "+03:00" }
                     }
                 }
             };

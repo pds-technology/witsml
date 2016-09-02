@@ -496,10 +496,12 @@ namespace PDS.Witsml.Server
         /// </summary>
         /// <param name="well">the well</param>
         /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
         /// <returns>The first well from the response</returns>
-        public Well GetAndAssert(Well well, bool isNotNull = true)
+        public Well GetAndAssert(Well well, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
         {
-            return GetAndAssert<WellList, Well>(well, isNotNull);
+            return GetAndAssert<WellList, Well>(well, isNotNull, optionsIn, queryByExample);
         }
 
         /// <summary>
@@ -507,10 +509,12 @@ namespace PDS.Witsml.Server
         /// </summary>
         /// <param name="wellbore">the wellbore</param>
         /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
         /// <returns>The first wellbore from the response</returns>
-        public Wellbore GetAndAssert(Wellbore wellbore, bool isNotNull = true)
+        public Wellbore GetAndAssert(Wellbore wellbore, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
         {
-            return GetAndAssert<WellboreList, Wellbore>(wellbore, isNotNull);
+            return GetAndAssert<WellboreList, Wellbore>(wellbore, isNotNull, optionsIn, queryByExample);
         }
 
         /// <summary>
@@ -518,10 +522,12 @@ namespace PDS.Witsml.Server
         /// </summary>
         /// <param name="log">the log with UIDs for well and wellbore</param>
         /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
         /// <returns>The first log from the response</returns>
-        public Log GetAndAssert(Log log, bool isNotNull = true)
+        public Log GetAndAssert(Log log, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
         {
-            return GetAndAssert<LogList, Log>(log, isNotNull);
+            return GetAndAssert<LogList, Log>(log, isNotNull, optionsIn, queryByExample);
         }
 
         /// <summary>
@@ -529,10 +535,12 @@ namespace PDS.Witsml.Server
         /// </summary>
         /// <param name="trajectory">the log with UIDs for well and wellbore</param>
         /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
         /// <returns>The first trajectory from the response</returns>
-        public Trajectory GetAndAssert(Trajectory trajectory, bool isNotNull = true)
+        public Trajectory GetAndAssert(Trajectory trajectory, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
         {
-            return GetAndAssert<TrajectoryList, Trajectory>(trajectory, isNotNull);
+            return GetAndAssert<TrajectoryList, Trajectory>(trajectory, isNotNull, optionsIn, queryByExample);
         }
 
         /// <summary>
@@ -542,7 +550,7 @@ namespace PDS.Witsml.Server
         /// <param name="errorCode">The error code.</param>
         public void UpdateAndAssert(Well well, ErrorCodes errorCode = ErrorCodes.Success)
         {
-            UpdateAndAssert<WellList, Well>(well);
+            UpdateAndAssert<WellList, Well>(well, errorCode);
         }
 
         /// <summary>
@@ -552,7 +560,7 @@ namespace PDS.Witsml.Server
         /// <param name="errorCode">The error code.</param>
         public void UpdateAndAssert(Wellbore wellbore, ErrorCodes errorCode = ErrorCodes.Success)
         {
-            UpdateAndAssert<WellboreList, Wellbore>(wellbore);
+            UpdateAndAssert<WellboreList, Wellbore>(wellbore, errorCode);
         }
 
         /// <summary>
@@ -562,7 +570,7 @@ namespace PDS.Witsml.Server
         /// <param name="errorCode">The error code.</param>
         public void UpdateAndAssert(Log log, ErrorCodes errorCode = ErrorCodes.Success)
         {
-            UpdateAndAssert<LogList, Log>(log);
+            UpdateAndAssert<LogList, Log>(log, errorCode);
         }
 
         /// <summary>
@@ -570,9 +578,10 @@ namespace PDS.Witsml.Server
         /// </summary>
         /// <param name="well">The well.</param>
         /// <param name="errorCode">The error code.</param>
-        public void DeleteAndAssert(Well well, ErrorCodes errorCode = ErrorCodes.Success)
+         /// <param name="partialDelete">if set to <c>true</c> is partial delete.</param>
+       public void DeleteAndAssert(Well well, ErrorCodes errorCode = ErrorCodes.Success, bool partialDelete = false)
         {
-            DeleteAndAssert<WellList, Well>(well);
+            DeleteAndAssert<WellList, Well>(well, errorCode, partialDelete);
         }
 
         /// <summary>
@@ -580,9 +589,10 @@ namespace PDS.Witsml.Server
         /// </summary>
         /// <param name="wellbore">The wellbore.</param>
         /// <param name="errorCode">The error code.</param>
-        public void DeleteAndAssert(Wellbore wellbore, ErrorCodes errorCode = ErrorCodes.Success)
+        /// <param name="partialDelete">if set to <c>true</c> is partial delete.</param>
+        public void DeleteAndAssert(Wellbore wellbore, ErrorCodes errorCode = ErrorCodes.Success, bool partialDelete = false)
         {
-            DeleteAndAssert<WellboreList, Wellbore>(wellbore);
+            DeleteAndAssert<WellboreList, Wellbore>(wellbore, errorCode, partialDelete);
         }
 
         /// <summary>
@@ -590,9 +600,10 @@ namespace PDS.Witsml.Server
         /// </summary>
         /// <param name="log">The log.</param>
         /// <param name="errorCode">The error code.</param>
-        public void DeleteAndAssert(Log log, ErrorCodes errorCode = ErrorCodes.Success)
+        /// <param name="partialDelete">if set to <c>true</c> is partial delete.</param>
+        public void DeleteAndAssert(Log log, ErrorCodes errorCode = ErrorCodes.Success, bool partialDelete = false)
         {
-            DeleteAndAssert<LogList, Log>(log);
+            DeleteAndAssert<LogList, Log>(log, errorCode, partialDelete);
         }
 
         public WMLS_AddToStoreResponse Add_Log_from_file(string xmlfile)

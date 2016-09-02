@@ -138,10 +138,11 @@ namespace PDS.Witsml.Server
         /// <param name="example">The example data object.</param>
         /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
         /// <param name="optionsIn">The options in.</param>
+        /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
         /// <returns>The data object instance if found; otherwise, null.</returns>
-        public TObject GetAndAssert<TList, TObject>(TObject example, bool isNotNull = true, string optionsIn = null) where TList : IEnergisticsCollection where TObject : IDataObject
+        public TObject GetAndAssert<TList, TObject>(TObject example, bool isNotNull = true, string optionsIn = null, bool queryByExample = false) where TList : IEnergisticsCollection where TObject : IDataObject
         {
-            var query = CreateQuery(example);
+            var query = queryByExample ? example : CreateQuery(example);
             return QueryAndAssert<TList, TObject>(query, isNotNull, optionsIn);
         }
 
@@ -203,10 +204,11 @@ namespace PDS.Witsml.Server
         /// <typeparam name="TObject">The type of the data object.</typeparam>
         /// <param name="dataObject">The data object.</param>
         /// <param name="errorCode">The error code.</param>
-        public void DeleteAndAssert<TList, TObject>(TObject dataObject, ErrorCodes errorCode = ErrorCodes.Success) where TList : IEnergisticsCollection where TObject : IDataObject
+        /// <param name="partialDelete">if set to <c>true</c> is partial delete.</param>
+        public void DeleteAndAssert<TList, TObject>(TObject dataObject, ErrorCodes errorCode = ErrorCodes.Success, bool partialDelete = false) where TList : IEnergisticsCollection where TObject : IDataObject
         {
-            var query = CreateQuery(dataObject);
-            var response = Delete<TList, TObject>(query);
+            var query = partialDelete ? dataObject : CreateQuery(dataObject);
+            var response = Delete<TList, TObject>(query, partialDelete: partialDelete);
 
             Assert.IsNotNull(response);
             Assert.AreEqual((short)errorCode, response.Result);
@@ -224,18 +226,18 @@ namespace PDS.Witsml.Server
             var wellboreObject = example as IWellboreObject;
             var query = Activator.CreateInstance<TObject>();
 
-            Assert.IsNotNull(example.Uid);
-            query.Uid = example.Uid;
-
-            if (wellObject != null)
+            if (example.Uid != null)
             {
-                Assert.IsNotNull(wellObject.UidWell);
+                query.Uid = example.Uid;
+            }
+
+            if (wellObject?.UidWell != null)
+            {
                 ((IWellObject)query).UidWell = wellObject.UidWell;
             }
 
-            if (wellboreObject != null)
+            if (wellboreObject?.UidWellbore != null)
             {
-                Assert.IsNotNull(wellboreObject.UidWellbore);
                 ((IWellboreObject)query).UidWellbore = wellboreObject.UidWellbore;
             }
 
@@ -287,10 +289,17 @@ namespace PDS.Witsml.Server
             return Store.WMLS_AddToStore(request);
         }
 
-        public WMLS_DeleteFromStoreResponse Delete<TList, TObject>(TObject entity, string wmlTypeIn = null, string capClient = null, string optionsIn = null) where TList : IEnergisticsCollection
+        public WMLS_DeleteFromStoreResponse Delete<TList, TObject>(TObject entity, string wmlTypeIn = null, string capClient = null, string optionsIn = null, bool partialDelete = false) where TList : IEnergisticsCollection
         {
             string typeIn, xmlIn;
             SetupParameters<TList, TObject>(List(entity), wmlTypeIn, out typeIn, out xmlIn);
+
+            if (!partialDelete)
+            {
+                var element = WitsmlParser.Parse(xmlIn);
+                WitsmlParser.RemoveEmptyElements(element.Root);
+                xmlIn = element.ToString();
+            }
 
             return DeleteFromStore(typeIn, xmlIn, capClient, optionsIn);
         }
