@@ -64,6 +64,15 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
+        /// Sets the default values for the specified data object during update.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        protected override void UpdateDefaultValues(Log dataObject)
+        {
+            UpdateAdditionalDefaultValues(dataObject);
+        }
+
+        /// <summary>
         /// Creates a new <see cref="LogList" /> instance containing the specified data objects.
         /// </summary>
         /// <param name="dataObjects">The data objects.</param>
@@ -78,5 +87,11 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="dataObject">The data object.</param>
         partial void SetAdditionalDefaultValues(Log dataObject);
+
+        /// <summary>
+        /// Sets additional default values for the specified data object during update.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        partial void UpdateAdditionalDefaultValues(Log dataObject);
     }
 }

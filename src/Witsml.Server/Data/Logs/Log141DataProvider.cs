@@ -52,5 +52,23 @@ namespace PDS.Witsml.Server.Data.Logs
                 dataObject.LogCurveInfo.MoveToFirst(dataObject.IndexCurve);
             }
         }
+
+        /// <summary>
+        /// Sets additional default values for the specified data object during update.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        partial void UpdateAdditionalDefaultValues(Log dataObject)
+        {
+            // Ensure ObjectGrowing is false during AddToStore
+            dataObject.ObjectGrowing = new bool?();
+
+            // Ensure Direction
+            if (!dataObject.Direction.HasValue)
+                dataObject.Direction = LogIndexDirection.increasing;
+
+            // Ensure UID
+            dataObject.LogCurveInfo?.Where(x => string.IsNullOrWhiteSpace(x.Uid))
+                .ForEach(x => x.Uid = x.Mnemonic?.Value);
+        }
     }
 }

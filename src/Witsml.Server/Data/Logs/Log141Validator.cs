@@ -233,11 +233,6 @@ namespace PDS.Witsml.Server.Data.Logs
                     {
                         mergedLogCurveMnemonics.Add(l.Mnemonic.Value);
                     }
-                    // Ensure UID
-                    if (string.IsNullOrWhiteSpace(l.Uid))
-                    {
-                        l.Uid = l.Mnemonic.Value;
-                    }
                 });
 
                 // Validate Log does not exist

@@ -120,8 +120,7 @@ namespace PDS.Witsml.Data.Channels
 
             // Split index curve from other value curves
             var indexCurve = log.LogCurveInfo.GetByMnemonic(log.IndexCurve.Value);
-            var logCurveInfos = log.LogCurveInfo.Where(x => x != indexCurve).Select(x => new { x.Mnemonic, x.Unit, x.ColumnIndex, x.NullValue }).ToList();
-            logCurveInfos.Sort((x, y) => x.ColumnIndex.Value.CompareTo(y.ColumnIndex.Value));
+            var logCurveInfos = log.LogCurveInfo.Where(x => x != indexCurve).OrderBy(x => x.ColumnIndex.Value).ToList();
             var mnemonics = logCurveInfos.Select(x => x.Mnemonic).ToArray();
             var units = logCurveInfos.Select(x => x.Unit).ToArray();
             var nullValues = logCurveInfos.Select(x => x.NullValue).ToArray();
