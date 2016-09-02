@@ -72,22 +72,7 @@ namespace PDS.Witsml.Server.Data.Logs
             using (var transaction = DatabaseProvider.BeginTransaction(uri))
             {
                 // Update LogCurveInfo if missing UID
-                foreach (var lci in parser.Properties("logCurveInfo"))
-                {
-                    if (!string.IsNullOrWhiteSpace(lci.Attribute("uid")?.Value)) continue;
-                    var uid = lci.Attribute("uid");
-                    var mnemonic = lci.Element(lci.GetDefaultNamespace() + "mnemonic");
-                    if (uid != null)
-                    {
-                        if (mnemonic != null) uid.Value = mnemonic.Value;
-                    }
-                    else
-                    {
-                        var newUid = new XAttribute("uid", mnemonic.Value);
-                        lci.Add(newUid);
-                    }
-                }
-                
+                EnsureLogCurveInfoUid(parser);
 
                 UpdateEntity(parser, uri, transaction);
 
@@ -95,6 +80,29 @@ namespace PDS.Witsml.Server.Data.Logs
                 var reader = ExtractDataReader(dataObject, GetEntity(uri));
                 UpdateLogDataAndIndexRange(uri, new[] { reader }, transaction);
                 transaction.Commit();
+            }
+        }
+
+        /// <summary>
+        /// Ensures the log curve information uid.
+        /// </summary>
+        /// <param name="parser">The parser.</param>
+        private static void EnsureLogCurveInfoUid(WitsmlQueryParser parser)
+        {
+            foreach (var lci in parser.Properties("logCurveInfo"))
+            {
+                if (!string.IsNullOrWhiteSpace(lci.Attribute("uid")?.Value)) continue;
+                var uid = lci.Attribute("uid");
+                var mnemonic = lci.Element(lci.GetDefaultNamespace() + "mnemonic");
+                if (uid != null)
+                {
+                    if (mnemonic != null) uid.Value = mnemonic.Value;
+                }
+                else
+                {
+                    var newUid = new XAttribute("uid", mnemonic.Value);
+                    lci.Add(newUid);
+                }
             }
         }
 
