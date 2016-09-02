@@ -145,17 +145,29 @@ namespace PDS.Witsml.Server.Data.Logs
 
             DevKit.InitHeader(Log, LogIndexType.measureddepth);
             DevKit.InitDataMany(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), 10);
+
+            // Reverse logCurveInfo order
             Log.LogCurveInfo.Reverse();
             DevKit.AddAndAssert(Log);
             var indexCurve = Log.LogCurveInfo.FirstOrDefault(x => x.Mnemonic == Log.IndexCurve.Value);
-            var newCurve = new LogCurveInfo()
+
+            // Create two new curves
+            var newCurve1 = new LogCurveInfo()
             {
                 Mnemonic = "Test",
+                Unit = "gAPI",
+                ColumnIndex = 3,
+                NullValue = "|"
+            };
+            var newCurve2 = new LogCurveInfo()
+            {
+                Mnemonic = "Test2",
                 Unit = "gAPI",
                 ColumnIndex = 2,
                 NullValue = "|"
             };
 
+            // Update 2 new curves to the log header
             var update = new Log()
             {
                 UidWell = Log.UidWell,
@@ -164,17 +176,23 @@ namespace PDS.Witsml.Server.Data.Logs
                 LogCurveInfo = new List<LogCurveInfo>()
                 {
                     indexCurve,
-                    newCurve
+                    newCurve1,
+                    newCurve2
                 }
             };
             DevKit.UpdateAndAssert(update);
+
+            // Add data
             update.LogData = new List<string>();
             for (int i = 1; i < 11; i++)
             {
-                var val = i%2 == 0 ? "|" : i.ToString();
-                update.LogData.Add($"{i},{val}");
+                var val1 = i % 2 == 0 ? "|" : i.ToString();
+                var val2 = i % 2 == 1 ? "|" : i.ToString();
+                update.LogData.Add($"{i},{val1},{val2}");
             }
             DevKit.UpdateAndAssert(update);
+
+            // Query by example to get values from the index curve and 2 new curves
             var queryIn = "<logs version=\"1.3.1.1\" xmlns=\"http://www.witsml.org/schemas/131\" > " + Environment.NewLine +
                 $"  <log uidWell=\"{Log.UidWell}\" uidWellbore=\"{Log.UidWellbore}\" uid=\"{Log.Uid}\">" + Environment.NewLine +
                 "    <nameWell />" + Environment.NewLine +
@@ -193,9 +211,18 @@ namespace PDS.Witsml.Server.Data.Logs
                 "    <indexCurve columnIndex=\"\" />" + Environment.NewLine +
                 "    <logCurveInfo>" + Environment.NewLine +
                 $"      <mnemonic>{indexCurve.Mnemonic}</mnemonic>" + Environment.NewLine +
+                "       <unit />" + Environment.NewLine +
+                "       <columnIndex />" + Environment.NewLine +
                 "    </logCurveInfo>" + Environment.NewLine +
                 "    <logCurveInfo>" + Environment.NewLine +
-                $"      <mnemonic>{newCurve.Mnemonic}</mnemonic>" + Environment.NewLine +
+                $"      <mnemonic>{newCurve2.Mnemonic}</mnemonic>" + Environment.NewLine +
+                "       <unit />" + Environment.NewLine +
+                "       <columnIndex />" + Environment.NewLine +
+                "    </logCurveInfo>" + Environment.NewLine +
+                "    <logCurveInfo>" + Environment.NewLine +
+                $"      <mnemonic>{newCurve1.Mnemonic}</mnemonic>" + Environment.NewLine +
+                "       <unit />" + Environment.NewLine +
+                "       <columnIndex />" + Environment.NewLine +
                 "    </logCurveInfo>" + Environment.NewLine +
                 "    <logData />" + Environment.NewLine +
                 "  </log>" + Environment.NewLine +
@@ -209,10 +236,18 @@ namespace PDS.Witsml.Server.Data.Logs
             var log = logs.Log.FirstOrDefault();
             Assert.IsNotNull(log);
             Assert.IsNotNull(log.LogData);
+            Assert.AreEqual(log.LogCurveInfo.Count, 3);
             Assert.AreEqual(log.LogData.Count, 10);
-            for (int i = 0; i < 10; i++)
+            foreach (var lc in log.LogCurveInfo)
             {
-                Assert.AreEqual(log.LogData[i], update.LogData[i]);
+                var curve = update.LogCurveInfo.FirstOrDefault(x => x.Mnemonic == lc.Mnemonic);
+                Assert.IsNotNull(curve);
+                // Ensure that the value from the update matches the response using columnIndex
+                for (int i = 0; i < 10; i++)
+                {
+                    Assert.AreEqual(log.LogData[i].Split(',')[lc.ColumnIndex.Value - 1],
+                        update.LogData[i].Split(',')[curve.ColumnIndex.Value - 1]);
+                }
             }
         }
     }

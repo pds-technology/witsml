@@ -521,6 +521,10 @@ namespace PDS.Witsml.Server.Configuration
 
         private static void IsRecurringElementValueEmpty(XElement element)
         {
+            // 131 Is allowed to have recurring empty elements
+            if (element.GetDefaultNamespace() == "http://www.witsml.org/schemas/131")
+                return;
+
             _log.Debug("Validating empty recurring elements.");
 
             if (string.IsNullOrEmpty(element.Value) && !element.HasAttributes
