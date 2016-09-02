@@ -29,8 +29,12 @@ namespace PDS.Witsml.Data.Trajectories
     /// </summary>
     public class Trajectory131Generator
     {
-        private const string StationUidPrefix = "sta-";
-        private const MeasuredDepthUom MdUom = MeasuredDepthUom.m;
+        /// <summary>
+        /// The default Md uom
+        /// </summary>
+        public const MeasuredDepthUom MdUom = MeasuredDepthUom.m;
+
+        private const string StationUidPrefix = "sta-";       
         private const WellVerticalCoordinateUom TvdUom = WellVerticalCoordinateUom.m;
         private const PlaneAngleUom AngleUom = PlaneAngleUom.dega;
 
@@ -42,8 +46,9 @@ namespace PDS.Witsml.Data.Trajectories
         /// <param name="mdUom">The MD index uom.</param>
         /// <param name="tvdUom">The Tvd uom.</param>
         /// <param name="angleUom">The angle uom.</param>
+        /// <param name="inCludeExtra">True if to generate extra information for trajectory station.</param>
         /// <returns>The trajectoryStation collection.</returns>
-        public List<TrajectoryStation> GenerationStations(int numOfStations, double startMd, MeasuredDepthUom mdUom = MdUom, WellVerticalCoordinateUom tvdUom = TvdUom, PlaneAngleUom angleUom = AngleUom)
+        public List<TrajectoryStation> GenerationStations(int numOfStations, double startMd, MeasuredDepthUom mdUom = MdUom, WellVerticalCoordinateUom tvdUom = TvdUom, PlaneAngleUom angleUom = AngleUom, bool inCludeExtra = false)
         {
             var stations = new List<TrajectoryStation>();
             var random = new Random(numOfStations * 2);
@@ -57,8 +62,16 @@ namespace PDS.Witsml.Data.Trajectories
                     MD = new MeasuredDepthCoord { Uom = mdUom, Value = startMd },
                     Tvd = new WellVerticalDepthCoord() { Uom = tvdUom, Value = startMd + 0.5 },
                     Azi = new PlaneAngleMeasure { Uom = angleUom, Value = random.NextDouble() },
-                    Incl = new PlaneAngleMeasure { Uom = angleUom, Value = random.NextDouble() }
+                    Incl = new PlaneAngleMeasure { Uom = angleUom, Value = random.NextDouble() },
+                    DateTimeStn = DateTime.Parse("2016-09-01 16:00:00")
                 };
+
+                if (inCludeExtra)
+                {
+                    station.Mtf = new PlaneAngleMeasure { Uom = angleUom, Value = random.NextDouble() };
+                    station.MDDelta = new MeasuredDepthCoord { Uom = MeasuredDepthUom.m, Value = 0 };
+                    station.StatusTrajStation = TrajStationStatus.position;
+                }
                 stations.Add(station);
                 startMd++;
             }

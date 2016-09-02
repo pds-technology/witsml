@@ -267,10 +267,11 @@ namespace PDS.Witsml.Server
         /// <param name="mdUom">The MD index uom.</param>
         /// <param name="tvdUom">The Tvd uom.</param>
         /// <param name="angleUom">The angle uom.</param>
+        /// <param name="inCludeExtra">True if to generate extra information for trajectory station.</param>
         /// <returns>The trajectoryStation collection.</returns>
-        public List<TrajectoryStation> TrajectoryStations(int numOfStations, double startMd, MeasuredDepthUom mdUom = MdUom, WellVerticalCoordinateUom tvdUom = TvdUom, PlaneAngleUom angleUom = AngleUom)
+        public List<TrajectoryStation> TrajectoryStations(int numOfStations, double startMd, MeasuredDepthUom mdUom = MdUom, WellVerticalCoordinateUom tvdUom = TvdUom, PlaneAngleUom angleUom = AngleUom, bool inCludeExtra = false)
         {
-            return TrajectoryGenerator.GenerationStations(numOfStations, startMd, mdUom, tvdUom, angleUom);
+            return TrajectoryGenerator.GenerationStations(numOfStations, startMd, mdUom, tvdUom, angleUom, inCludeExtra);
         }
 
         public ExtensionNameValue ExtensionNameValue(string uid, string value, string uom, PrimitiveType dataType = PrimitiveType.@double, string name = null)
@@ -541,6 +542,26 @@ namespace PDS.Witsml.Server
         public Trajectory GetAndAssert(Trajectory trajectory, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
         {
             return GetAndAssert<TrajectoryList, Trajectory>(trajectory, isNotNull, optionsIn, queryByExample);
+        }
+
+        /// <summary>
+        /// Does get query for single trajectory object and test for result count equal to 1 and is not null
+        /// </summary>
+        /// <param name="trajectory">The trajectory.</param>
+        /// <param name="queryContent">The query xml descendants of the trajectory element.</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <returns>The first trajectory from the response.</returns>
+        public Trajectory GetAndAssertWithXml(Trajectory trajectory, string queryContent = null, bool isNotNull = true, string optionsIn = null)
+        {
+            var queryIn = string.Format(BasicTrajectoryXmlTemplate, trajectory.Uid, trajectory.UidWell, trajectory.UidWellbore, queryContent);
+
+            var results = Query<TrajectoryList, Trajectory>(ObjectTypes.Trajectory, queryIn, null, optionsIn ?? OptionsIn.ReturnElements.All);
+            Assert.AreEqual(isNotNull ? 1 : 0, results.Count);
+
+            var result = results.FirstOrDefault();
+            Assert.AreEqual(isNotNull, result != null);
+            return result;
         }
 
         /// <summary>
