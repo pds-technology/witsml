@@ -23,5 +23,10 @@ namespace PDS.Witsml.Server.Data.Attachments
     /// </summary>
     public partial class Attachment141DataAdapterUpdateTests
     {
+        partial void BeforeEachTest()
+        {
+            Attachment.FileName = "image.png";
+            Attachment.FileType = "image/png";
+        }
     }
 }

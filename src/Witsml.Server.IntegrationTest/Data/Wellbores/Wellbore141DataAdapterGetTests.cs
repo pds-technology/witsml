@@ -35,9 +35,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Wellbore.Number = "123";
             Wellbore.NumGovt = "Gov 123";
 
-            AddParents();
-            DevKit.AddAndAssert(Wellbore);
-
             _wellboreQuery = new Wellbore()
             {
                 Uid = Wellbore.Uid,
@@ -54,7 +51,10 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod]
         public void Wellbore141DataAdapter_GetFromStore_All()
         {
-            var wellbore = GetWellboreQueryWithOptionsIn(_wellboreQueryUid, OptionsIn.ReturnElements.All);
+            AddParents();
+            DevKit.AddAndAssert(Wellbore);
+
+            var wellbore = DevKit.GetAndAssert(_wellboreQueryUid, optionsIn: OptionsIn.ReturnElements.All);
             Assert.AreEqual(_wellboreQuery.Uid, wellbore.Uid);
             Assert.IsNotNull(wellbore.Number);
             Assert.AreEqual(Wellbore.Number, wellbore.Number);
@@ -63,7 +63,10 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod]
         public void Wellbore141DataAdapter_GetFromStore_IdOnly()
         {
-            var wellbore = GetWellboreQueryWithOptionsIn(_wellboreQueryUid, OptionsIn.ReturnElements.IdOnly);
+            AddParents();
+            DevKit.AddAndAssert(Wellbore);
+
+            var wellbore = DevKit.GetAndAssert(_wellboreQueryUid, optionsIn: OptionsIn.ReturnElements.IdOnly);
             Assert.AreEqual(_wellboreQuery.Uid, wellbore.Uid);
             Assert.AreEqual(Wellbore.Name, wellbore.Name);
             Assert.IsNull(wellbore.Number); // Will not exist in an IdOnly query
@@ -72,7 +75,10 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod]
         public void Wellbore141DataAdapter_GetFromStore_Requested()
         {
-            var wellbore = GetWellboreQueryWithOptionsIn(_wellboreQuery, OptionsIn.ReturnElements.Requested);
+            AddParents();
+            DevKit.AddAndAssert(Wellbore);
+
+            var wellbore = DevKit.GetAndAssert(_wellboreQuery, optionsIn: OptionsIn.ReturnElements.Requested, queryByExample: true);
             Assert.AreEqual(_wellboreQuery.Uid, wellbore.Uid);
             Assert.AreEqual(Wellbore.Name, wellbore.Name);
             Assert.AreEqual(Wellbore.Number, wellbore.Number);
@@ -83,22 +89,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public void Wellbore141DataAdapter_GetFromStore_RequestObjectSelection()
         {
             _wellboreQueryUid.Uid = null;
-            var result = DevKit.Query<WellboreList, Wellbore>(_wellboreQueryUid, ObjectTypes.Wellbore, null, optionsIn: OptionsIn.RequestObjectSelectionCapability.True);
-            Assert.AreEqual(1, result.Count);
-
-            var returnWell = result.FirstOrDefault();
-            Assert.IsNotNull(returnWell);
-            Assert.IsNotNull(returnWell.PurposeWellbore);  // We'd only see this for Request Object Selection Cap
-        }
-
-        private Wellbore GetWellboreQueryWithOptionsIn(Wellbore query, string optionsIn)
-        {
-            var result = DevKit.Query<WellboreList, Wellbore>(query, ObjectTypes.Wellbore, null, optionsIn: optionsIn);
-            Assert.AreEqual(1, result.Count);
-
-            var returnWellbore = result.FirstOrDefault();
-            Assert.IsNotNull(returnWellbore);
-            return returnWellbore;
+            var wellbore = DevKit.GetAndAssert(_wellboreQueryUid, optionsIn: OptionsIn.RequestObjectSelectionCapability.True);
+            Assert.IsNotNull(wellbore.PurposeWellbore);  // We'd only see this for Request Object Selection Cap
         }
     }
 }

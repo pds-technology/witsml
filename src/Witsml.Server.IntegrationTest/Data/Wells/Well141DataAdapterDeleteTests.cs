@@ -656,7 +656,7 @@ namespace PDS.Witsml.Server.Data.Wells
             };
 
             // Delete well acqusitions and Assert success
-            DevKit.DeleteAndAssert(deleteWellAcqusition);
+            DevKit.DeleteAndAssert(deleteWellAcqusition, partialDelete: true);
 
             var queryWell = DevKit.GetAndAssert(new Well() { Uid = response.SuppMsgOut });
             Assert.IsNotNull(queryWell.CommonData);

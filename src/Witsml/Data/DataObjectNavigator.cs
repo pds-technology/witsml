@@ -857,7 +857,8 @@ namespace PDS.Witsml.Data
             var args = propertyType.GetGenericArguments();
             var childType = args.FirstOrDefault() ?? propertyType.GetElementType();
 
-            if (typeof(IEnumerable).IsAssignableFrom(propertyType) && childType != null && !HasUidProperty(childType))
+            if (typeof(IEnumerable).IsAssignableFrom(propertyType) && propertyType != typeof(byte[]) &&
+                childType != null && !HasUidProperty(childType))
             {
                 return true;
             }
