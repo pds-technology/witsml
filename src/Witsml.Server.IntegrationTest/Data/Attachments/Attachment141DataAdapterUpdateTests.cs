@@ -16,6 +16,10 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Linq;
+using Energistics.DataAccess.WITSML141;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace PDS.Witsml.Server.Data.Attachments
 {
     /// <summary>
@@ -27,6 +31,19 @@ namespace PDS.Witsml.Server.Data.Attachments
         {
             Attachment.FileName = "image.png";
             Attachment.FileType = "image/png";
+        }
+
+        [TestMethod]
+        public void Attachment141DataAdapter_UpdateInStore_Can_Add_And_Update_Attachment()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
+            DevKit.UpdateAndAssert<AttachmentList, Attachment>(Attachment);
+            var result = DevKit.GetAndAssert<AttachmentList, Attachment>(Attachment);
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Content);
+            Assert.IsTrue(Attachment.Content.SequenceEqual(result.Content));
         }
     }
 }
