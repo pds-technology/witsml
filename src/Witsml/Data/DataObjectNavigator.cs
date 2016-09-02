@@ -388,6 +388,10 @@ namespace PDS.Witsml.Data
             {
                 HandleStringValue(propertyInfo, xmlObject, propertyType, propertyPath, propertyValue);
             }
+            else if (propertyType == typeof(byte[]))
+            {
+                HandleByteArrayValue(propertyInfo, xmlObject, propertyType, propertyPath, propertyValue);
+            }
             else if (propertyType.IsEnum)
             {
                 var value = ParseEnum(propertyType, propertyValue);
@@ -458,6 +462,18 @@ namespace PDS.Witsml.Data
         /// <param name="propertyPath">The property path.</param>
         /// <param name="propertyValue">The property value.</param>
         protected virtual void HandleStringValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
+        {
+        }
+
+        /// <summary>
+        /// Handles the byte array value.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="xmlObject">The XML object.</param>
+        /// <param name="propertyType">Type of the property.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <param name="propertyValue">The property value.</param>
+        protected virtual void HandleByteArrayValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
         {
         }
 
