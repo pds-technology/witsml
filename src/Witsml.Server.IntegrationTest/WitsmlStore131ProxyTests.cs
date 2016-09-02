@@ -256,7 +256,7 @@ namespace PDS.Witsml.Server
             _devKit.Proxy.Write(_devKit.New<LogList>(x => x.Log = _devKit.List(_log1)));
 
             // Update Log with new LogData
-            var log1 = new Log() { Uid = _log1.Uid, UidWell = _log1.UidWell, UidWellbore = _log1.UidWellbore };
+            var log1 = new Log() { Uid = _log1.Uid, UidWell = _log1.UidWell, UidWellbore = _log1.UidWellbore, LogCurveInfo = _log1.LogCurveInfo };
             _devKit.InitData(log1, _devKit.Mnemonics(_log1), _devKit.Units(_log1), 0, null, 0);
             _devKit.Proxy.Update(_devKit.New<LogList>(x => x.Log = _devKit.List(log1)));
 
@@ -288,12 +288,12 @@ namespace PDS.Witsml.Server
             _devKit.Proxy.Write(_devKit.New<LogList>(x => x.Log = _devKit.List(_log1)));
 
             // Update Log with new LogData
-            var log1 = new Log() { Uid = _log1.Uid, UidWell = _log1.UidWell, UidWellbore = _log1.UidWellbore };
+            var log1 = new Log() { Uid = _log1.Uid, UidWell = _log1.UidWell, UidWellbore = _log1.UidWellbore, LogCurveInfo = _log1.LogCurveInfo };
             _devKit.InitData(log1, _devKit.Mnemonics(_log1), _devKit.Units(_log1), 0, null, 0);
             _devKit.Proxy.Update(_devKit.New<LogList>(x => x.Log = _devKit.List(log1)));
 
             // Update Log with appended LogData
-            var log2 = new Log() { Uid = _log1.Uid, UidWell = _log1.UidWell, UidWellbore = _log1.UidWellbore };
+            var log2 = new Log() { Uid = _log1.Uid, UidWell = _log1.UidWell, UidWellbore = _log1.UidWellbore, LogCurveInfo = _log1.LogCurveInfo };
             _devKit.InitData(log2, _devKit.Mnemonics(_log1), _devKit.Units(_log1), 0.1, null, 1);
             _devKit.InitData(log2, _devKit.Mnemonics(_log1), _devKit.Units(_log1), 0.2, null, 2);
             _devKit.Proxy.Update(_devKit.New<LogList>(x => x.Log = _devKit.List(log2)));
@@ -328,13 +328,13 @@ namespace PDS.Witsml.Server
             _devKit.Proxy.Write(_devKit.New<LogList>(x => x.Log = _devKit.List(_log1)));
 
             // Update Log with new LogData
-            var log1 = new Log() { Uid = _log1.Uid, UidWell = _log1.UidWell, UidWellbore = _log1.UidWellbore };
+            var log1 = new Log() { Uid = _log1.Uid, UidWell = _log1.UidWell, UidWellbore = _log1.UidWellbore, LogCurveInfo = _log1.LogCurveInfo };
             _devKit.InitData(log1, _devKit.Mnemonics(_log1), _devKit.Units(_log1), 0, null, 0);
             _devKit.InitData(log1, _devKit.Mnemonics(_log1), _devKit.Units(_log1), 0.1, null, 1);
             _devKit.Proxy.Update(_devKit.New<LogList>(x => x.Log = _devKit.List(log1)));
 
             // Update Log with updated LogData
-            var log2 = new Log() { Uid = _log1.Uid, UidWell = _log1.UidWell, UidWellbore = _log1.UidWellbore };
+            var log2 = new Log() { Uid = _log1.Uid, UidWell = _log1.UidWell, UidWellbore = _log1.UidWellbore, LogCurveInfo = _log1.LogCurveInfo };
             _devKit.InitData(log2, _devKit.Mnemonics(_log1), _devKit.Units(_log1), 0.1, 10, 1.1);
             _devKit.Proxy.Update(_devKit.New<LogList>(x => x.Log = _devKit.List(log2)));
 
@@ -367,7 +367,7 @@ namespace PDS.Witsml.Server
             _devKit.Proxy.Write(_devKit.New<LogList>(x => x.Log = _devKit.List(_log1)));
 
             // Update Log with new LogData
-            var log1 = new Log() { Uid = _log1.Uid, UidWell = _log1.UidWell, UidWellbore = _log1.UidWellbore };
+            var log1 = new Log() { Uid = _log1.Uid, UidWell = _log1.UidWell, UidWellbore = _log1.UidWellbore, LogCurveInfo = _log1.LogCurveInfo };
             _devKit.InitDataMany(log1, _devKit.Mnemonics(_log1), _devKit.Units(_log1), 10);
             _devKit.Proxy.Update(_devKit.New<LogList>(x => x.Log = _devKit.List(log1)));
 
@@ -434,7 +434,7 @@ namespace PDS.Witsml.Server
             _devKit.Proxy.Write(_devKit.New<LogList>(x => x.Log = _devKit.List(_log1)));
 
             // Update Log with new LogData
-            var log1 = new Log() { Uid = _log1.Uid, UidWell = _log1.UidWell, UidWellbore = _log1.UidWellbore };
+            var log1 = new Log() { Uid = _log1.Uid, UidWell = _log1.UidWell, UidWellbore = _log1.UidWellbore, LogCurveInfo = _log1.LogCurveInfo };
             _devKit.InitDataMany(log1, _devKit.Mnemonics(_log1), _devKit.Units(_log1), 10);
             _devKit.Proxy.Update(_devKit.New<LogList>(x => x.Log = _devKit.List(log1)));
 
@@ -495,7 +495,7 @@ namespace PDS.Witsml.Server
             _devKit.Proxy.Write(_devKit.New<LogList>(x => x.Log = _devKit.List(_log1)));
 
             // Update Log with new LogData
-            var log1 = new Log() { Uid = _log1.Uid, UidWell = _log1.UidWell, UidWellbore = _log1.UidWellbore };
+            var log1 = new Log() { Uid = _log1.Uid, UidWell = _log1.UidWell, UidWellbore = _log1.UidWellbore, LogCurveInfo = _log1.LogCurveInfo };
             _devKit.InitDataMany(log1, _devKit.Mnemonics(_log1), _devKit.Units(_log1), 10);
             _devKit.Proxy.Update(_devKit.New<LogList>(x => x.Log = _devKit.List(log1)));
 
