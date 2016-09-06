@@ -315,7 +315,9 @@ namespace PDS.Witsml.Server.Data
 
             if (!list.Any())
             {
-                return new List<TObject>(0);
+                return GetCollection<TObject>(dbCollectionName)
+                    .Find("{}")
+                    .ToList();
             }
 
             var filters = list.Select(x => MongoDbUtility.GetEntityFilter<TObject>(x, IdPropertyName));

@@ -436,6 +436,17 @@ namespace PDS.Witsml.Server.Data.Logs
             UpdateIndexRange(uri, current, updatedRanges, updatedRanges.Keys.ToList(), current.IsTimeLog(), indexChannel?.Unit, offset, true);
         }
 
+        /// <summary>
+        /// Gets the channel URI.
+        /// </summary>
+        /// <param name="channel">The channel.</param>
+        /// <param name="entity">The data object.</param>
+        /// <returns>The channel URI.</returns>
+        protected override EtpUri GetChannelUri(LogCurveInfo channel, Log entity)
+        {
+            return channel.GetUri(entity);
+        }
+
         private List<string> GetDeletedChannels(Log current, Dictionary<string, string> uidToMnemonics)
         {
             var uids = current.LogCurveInfo.Select(l => l.Uid).ToList();
