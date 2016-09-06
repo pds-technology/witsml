@@ -54,6 +54,33 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
+        /// Gets the channels metadata.
+        /// </summary>
+        /// <param name="uris">The collection of URI to describe.</param>
+        /// <returns>A collection of channel metadata.</returns>
+        public IList<ChannelMetadataRecord> GetChannelsMetadata(List<EtpUri> uris)
+        {
+            var adapter = ChannelSetDataAdapter as IChannelDataProvider;
+
+            if (adapter == null)
+                throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, "IChannelDataProvider not configured.");
+
+            var channelUris = new List<EtpUri>();
+            channelUris.AddRange(uris.Where(u => u.ObjectType == ObjectTypes.ChannelSet).ToList());
+
+            var logUris = uris.Where(u => u.ObjectType == ObjectTypes.Log);
+            foreach (var logUri in logUris)
+            {
+                var entity = GetEntity(logUri);
+                channelUris.AddRange(entity.ChannelSet
+                    .Select(x => x.GetUri())
+                    .ToList());
+            }
+
+            return adapter.GetChannelsMetadata(channelUris);
+        }
+
+        /// <summary>
         /// Gets the channel data records for the specified data object URI and range.
         /// </summary>
         /// <param name="uri">The parent data object URI.</param>

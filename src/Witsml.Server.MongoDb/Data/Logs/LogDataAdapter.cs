@@ -121,6 +121,79 @@ namespace PDS.Witsml.Server.Data.Logs
         public IList<ChannelMetadataRecord> GetChannelMetadata(EtpUri uri)
         {
             var entity = GetEntity(uri);
+            return GetChannelMetadataForAnEntity(entity);
+        }
+
+        /// <summary>
+        /// Gets the channels metadata.
+        /// </summary>
+        /// <param name="uris">The collection of URI to describe.</param>
+        /// <returns>A collection of channel metadata.</returns>
+        public IList<ChannelMetadataRecord> GetChannelsMetadata(List<EtpUri> uris)
+        {
+            var metaDatas = new List<ChannelMetadataRecord>();
+            var entities = GetEntitiesForChannel(uris);
+
+            foreach (var entity in entities)
+            {
+                metaDatas.AddRange(GetChannelMetadataForAnEntity(entity, uris));
+            }
+
+            return metaDatas;
+        }
+
+        private List<T> GetEntitiesForChannel(List<EtpUri> uris)
+        {
+            if (!uris.Any())
+            {
+                return GetCollection<T>(DbCollectionName)
+                    .Find("{}")
+                    .ToList();
+            }
+
+            var filters = uris.Select(GetFilter);
+
+            return GetCollection<T>(DbCollectionName)
+                .Find(Builders<T>.Filter.Or(filters))
+                .ToList();
+        }
+
+        private FilterDefinition<T> GetFilter(EtpUri uri)
+        {
+            var builder = Builders<T>.Filter;
+            var filters = new List<FilterDefinition<T>>();
+
+            var objectIds = uri.GetObjectIds()
+                .ToDictionary(x => x.ObjectType, x => x.ObjectId);
+
+            if (ObjectTypes.Well.EqualsIgnoreCase(uri.ObjectType))
+            {
+                filters.Add(builder.EqIgnoreCase("UidWell", uri.ObjectId));
+            }
+            if (ObjectTypes.Wellbore.EqualsIgnoreCase(uri.ObjectType))
+            {
+                filters.Add(builder.EqIgnoreCase("UidWellbore", uri.ObjectId));
+                filters.Add(builder.EqIgnoreCase("UidWell", objectIds[ObjectTypes.Well]));
+            }
+            if (ObjectTypes.Log.EqualsIgnoreCase(uri.ObjectType))
+            {
+                filters.Add(builder.EqIgnoreCase("Uid", uri.ObjectId));
+                filters.Add(builder.EqIgnoreCase("UidWell", objectIds[ObjectTypes.Well]));
+                filters.Add(builder.EqIgnoreCase("UidWellbore", objectIds[ObjectTypes.Wellbore]));
+            }
+            if (ObjectTypes.LogCurveInfo.EqualsIgnoreCase(uri.ObjectType))
+            {
+                filters.Add(builder.EqIgnoreCase("LogCurveInfo.Mnemonic.Value", uri.ObjectId));
+                filters.Add(builder.EqIgnoreCase("UidWell", objectIds[ObjectTypes.Well]));
+                filters.Add(builder.EqIgnoreCase("UidWellbore", objectIds[ObjectTypes.Wellbore]));
+                filters.Add(builder.EqIgnoreCase("Uid", objectIds[ObjectTypes.Log]));
+            }
+
+            return builder.And(filters.Where(f => f != null));
+        }
+
+        private IList<ChannelMetadataRecord> GetChannelMetadataForAnEntity(T entity, List<EtpUri> uris = null)
+        {
             var logCurves = GetLogCurves(entity);
             var metadata = new List<ChannelMetadataRecord>();
             var index = 0;
@@ -135,7 +208,7 @@ namespace PDS.Witsml.Server.Data.Logs
             // Skip the indexCurve if StreamIndexValuePairs setting is false
             metadata.AddRange(
                 logCurves
-                .Where(x => _streamIndexValuePairs || !GetMnemonic(x).EqualsIgnoreCase(indexMetadata.Mnemonic))
+                .Where(x => _streamIndexValuePairs || (IsChannelMetaDataRequested(GetChannelUri(x, entity), uris) && !GetMnemonic(x).EqualsIgnoreCase(indexMetadata.Mnemonic)))
                 .Select(x =>
                 {
                     var channel = ToChannelMetadataRecord(entity, x, indexMetadata);
@@ -144,6 +217,15 @@ namespace PDS.Witsml.Server.Data.Logs
                 }));
 
             return metadata;
+        }
+
+        private bool IsChannelMetaDataRequested(EtpUri channelUri, List<EtpUri> uris)
+        {
+            if (uris == null || uris.Count == 0)
+                return true;
+
+            return uris.Contains(channelUri) || uris.Contains(channelUri.Parent) ||
+                   uris.Contains(channelUri.Parent.Parent) || uris.Contains(channelUri.Parent.Parent.Parent);
         }
 
         /// <summary>
@@ -991,6 +1073,14 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="currentRanges">The current channel index ranges.</param>
         /// <param name="transaction">The transaction.</param>
         protected abstract void PartialDeleteLogData(EtpUri uri, WitsmlQueryParser parser, List<TChild> channels, Dictionary<string, Range<double?>> currentRanges, MongoTransaction transaction);
+
+        /// <summary>
+        /// Gets the channel URI.
+        /// </summary>
+        /// <param name="channel">The channel.</param>
+        /// <param name="entity">The data object.</param>
+        /// <returns>The channel URI.</returns>
+        protected abstract EtpUri GetChannelUri(TChild channel, T entity);
 
         /// <summary>
         /// Gets the log data delimiter.
