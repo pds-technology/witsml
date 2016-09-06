@@ -54,6 +54,8 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         private CancellationTokenSource _tokenSource;
         private readonly List<IList<ChannelStreamingContext>> _channelStreamingContextLists;
 
+        private Dictionary<string, IChannelDataProvider> _providers;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelStreamingProducer"/> class.
         /// </summary>
@@ -64,6 +66,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             _container = container;
             Channels = new Dictionary<long, Tuple<EtpUri, ChannelMetadataRecord>>();
             _channelStreamingContextLists = new List<IList<ChannelStreamingContext>>();
+            InitializeChannelDataProviders();
         }
 
         /// <summary>
@@ -87,18 +90,14 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             // TODO: ... Breakdown the higher level uris to return the uri of a channel parent.
             // TODO: ... then loop through the parent uris
 
-            foreach (var uri in args.Message.Uris.Select(x => new EtpUri(x)))
+            var uris = args.Message.Uris.Select(x => new EtpUri(x)).ToList();
+
+            var uriDictionary = OptimizeDescribeUris(uris);
+
+            foreach (var pair in uriDictionary)
             {
-                if (!SupportedTypes.ContainsIgnoreCase(uri.ObjectType))
-                    continue;
-
-                var isChannel = ChannelTypes.ContainsIgnoreCase(uri.ObjectType);
-                var parentUri = isChannel ? uri.Parent : uri;
-
-                var dataProvider = GetDataProvider(parentUri);
-                var metadata = dataProvider.GetChannelMetadata(parentUri)
-                    .Where(x => !isChannel || x.ChannelUri == uri)
-                    .ToList();
+                var provider = _providers[pair.Key];
+                var metadata = provider.GetChannelsMetadata(pair.Value);
 
                 metadata.ForEach(m =>
                 {
@@ -110,7 +109,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     if (channelMetadataRecord == null)
                     {
                         m.ChannelId = Channels.Keys.Count;
-                        Channels.Add(m.ChannelId, new Tuple<EtpUri, ChannelMetadataRecord>(parentUri, m));
+                        Channels.Add(m.ChannelId, new Tuple<EtpUri, ChannelMetadataRecord>(new EtpUri(m.ChannelUri), m));
                         channelMetadataRecord = m;
                     }
                     args.Context.Add(channelMetadataRecord);
@@ -444,9 +443,140 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             await Task.Delay(MaxMessageRate);
         }
 
-        private IChannelDataProvider GetDataProvider(EtpUri uri)
+        private void InitializeChannelDataProviders()
         {
-            return _container.Resolve<IChannelDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
+            _providers = new Dictionary<string, IChannelDataProvider>
+            {
+                {OptionsIn.DataVersion.Version131.Value, _container.Resolve<IChannelDataProvider>(ObjectNames.Log131)},
+                {OptionsIn.DataVersion.Version141.Value, _container.Resolve<IChannelDataProvider>(ObjectNames.Log141)},
+                {OptionsIn.DataVersion.Version200.Value, _container.Resolve<IChannelDataProvider>(ObjectNames.Log200)}
+            };
+        }
+
+        /// <summary>
+        /// Optimizes the describe uris. Mainly remove child URI if its parent/ancestor is already included.
+        /// </summary>
+        /// <param name="uris">The requested URI list.</param>
+        /// <returns>The optimized list of URIs.</returns>
+        private Dictionary<string, List<EtpUri>> OptimizeDescribeUris(List<EtpUri> uris)
+        {
+            var urisDictionary = new Dictionary<string, List<EtpUri>>();
+            var uris13 = new List<EtpUri>();
+            var uris14 = new List<EtpUri>();
+            var uris20 = new List<EtpUri>();
+
+            if (uris.Any(u => EtpUri.IsRoot(u)))
+            {
+                urisDictionary.Add(OptionsIn.DataVersion.Version131.Value, uris13);
+                urisDictionary.Add(OptionsIn.DataVersion.Version141.Value, uris14);
+                urisDictionary.Add(OptionsIn.DataVersion.Version200.Value, uris20);
+            }
+            else
+            {
+                var versions = new List<string>();
+                if (uris.Any(u => u.Equals(new EtpUri("eml://witsml13/"))))
+                    urisDictionary.Add(OptionsIn.DataVersion.Version131.Value, uris13);
+                else
+                    versions.Add(OptionsIn.DataVersion.Version131.Value);
+                if (uris.Any(u => u.Equals(new EtpUri("eml://witsml14/"))))
+                    urisDictionary.Add(OptionsIn.DataVersion.Version141.Value, uris14);
+                else
+                    versions.Add(OptionsIn.DataVersion.Version141.Value);
+                if (uris.Any(u => u.Equals(new EtpUri("eml://witsml120/"))))
+                    urisDictionary.Add(OptionsIn.DataVersion.Version200.Value, uris20);
+                else
+                    versions.Add(OptionsIn.DataVersion.Version200.Value);
+
+                foreach (var version in versions)
+                {
+                    foreach (var uri in GetObjectUris(uris, version, ObjectTypes.Well))
+                        AddUriToDictionary(urisDictionary, uri, version, uri.ObjectType);
+
+                    foreach (var uri in GetObjectUris(uris, version, ObjectTypes.Wellbore))
+                        AddUriToDictionary(urisDictionary, uri, version, uri.ObjectType);
+
+                    foreach (var uri in GetObjectUris(uris, version, ObjectTypes.Log))
+                        AddUriToDictionary(urisDictionary, uri, version, uri.ObjectType);
+
+                    foreach (var uri in GetObjectUris(uris, version, ObjectTypes.LogCurveInfo))
+                        AddUriToDictionary(urisDictionary, uri, version, uri.ObjectType);
+
+                    if (version != OptionsIn.DataVersion.Version200.Value)
+                        continue;
+
+                    foreach (var uri in GetObjectUris(uris, version, ObjectTypes.ChannelSet))
+                        AddUriToDictionary(urisDictionary, uri, version, uri.ObjectType);
+                }
+            }
+
+            return urisDictionary;
+        }
+
+        private List<EtpUri> GetObjectUris(List<EtpUri> uris, string version, string objectType)
+        {
+            return uris.Where(u => u.Version == version && u.ObjectType == objectType).ToList();
+        }
+
+        private void AddUriToDictionary(Dictionary<string, List<EtpUri>> uriDictionary, EtpUri uri, string version, string objectType)
+        {
+            List<EtpUri> uris;
+            if (!uriDictionary.ContainsKey(version))
+            {
+                uris = new List<EtpUri> {uri};
+                uriDictionary.Add(version, uris);
+                return;
+            }
+
+            uris = uriDictionary[version];
+
+            switch (objectType)
+            {
+                case ObjectTypes.Well:
+                    uris.Add(uri);
+                    RemoveChildUris(uris, uri, uri.ObjectType);
+                    return;
+                case ObjectTypes.Wellbore:
+                    if (!uris.Contains(uri.Parent))
+                    {
+                        uris.Add(uri);
+                        RemoveChildUris(uris, uri, uri.ObjectType);
+                    }
+                    break;
+                case ObjectTypes.Log:
+                    if (!uris.Contains(uri.Parent.Parent) && !uris.Contains(uri.Parent))
+                    {
+                        uris.Add(uri);
+                        RemoveChildUris(uris, uri, uri.ObjectType);
+                    }
+                    break;
+                case ObjectTypes.LogCurveInfo:
+                    if (!uris.Contains(uri.Parent.Parent.Parent) && !uris.Contains(uri.Parent.Parent) &&
+                        !uris.Contains(uri.Parent))
+                    {
+                        uris.Add(uri);
+                        RemoveChildUris(uris, uri, uri.ObjectType);
+                    }
+                    break;
+            }
+        }
+
+        private void RemoveChildUris(List<EtpUri> uris, EtpUri uri, string objectType)
+        {
+            switch (objectType)
+            {
+                case ObjectTypes.Well:
+                    uris.RemoveAll(u => u.ObjectType == ObjectTypes.Wellbore && u.Parent == uri
+                                        || u.ObjectType == ObjectTypes.Log && u.Parent.Parent == uri
+                                        || u.ObjectType == ObjectTypes.LogCurveInfo && u.Parent.Parent.Parent == uri);
+                    break;
+                case ObjectTypes.Wellbore:
+                    uris.RemoveAll(u => u.ObjectType == ObjectTypes.Log && u.Parent == uri
+                                        || u.ObjectType == ObjectTypes.LogCurveInfo && u.Parent.Parent == uri);
+                    break;
+                case ObjectTypes.Log:
+                    uris.RemoveAll(u => u.ObjectType == ObjectTypes.LogCurveInfo && u.Parent == uri);
+                    break;
+            }
         }
 
         private object FormatValue(object value)
