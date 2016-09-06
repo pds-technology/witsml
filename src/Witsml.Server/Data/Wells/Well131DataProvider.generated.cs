@@ -26,13 +26,14 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML131;
 using PDS.Framework;
-
+using System.Xml.Linq;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Well"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{WellList, Well}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Well>))]
@@ -40,6 +41,7 @@ namespace PDS.Witsml.Server.Data.Wells
     [Export131(ObjectTypes.Well, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Well131DataProvider : WitsmlDataProvider<WellList, Well>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Well131DataProvider"/> class.
@@ -63,6 +65,16 @@ namespace PDS.Witsml.Server.Data.Wells
             SetAdditionalDefaultValues(dataObject);
         }
 
+		/// <summary>
+        /// Sets the default values for the specified data object during update.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+		/// <param name="element">The element.</param>
+        protected override void UpdateDefaultValues(Well dataObject, XElement element)
+        {
+            UpdateAdditionalDefaultValues(dataObject, element);
+        }
+
         /// <summary>
         /// Creates a new <see cref="WellList" /> instance containing the specified data objects.
         /// </summary>
@@ -78,5 +90,13 @@ namespace PDS.Witsml.Server.Data.Wells
         /// </summary>
         /// <param name="dataObject">The data object.</param>
         partial void SetAdditionalDefaultValues(Well dataObject);
+
+		/// <summary>
+        /// Sets additional default values for the specified data object during update.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+		/// <param name="element">The element.</param>
+        partial void UpdateAdditionalDefaultValues(Well dataObject, XElement element);
+
     }
 }

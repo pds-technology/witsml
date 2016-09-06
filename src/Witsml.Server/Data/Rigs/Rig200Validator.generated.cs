@@ -26,7 +26,6 @@ using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML200;
 using PDS.Framework;
 
-
 namespace PDS.Witsml.Server.Data.Rigs
 {
     /// <summary>

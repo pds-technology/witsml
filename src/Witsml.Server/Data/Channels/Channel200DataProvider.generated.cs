@@ -26,19 +26,21 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML200;
 using PDS.Framework;
-
+using System.Xml.Linq;
 
 namespace PDS.Witsml.Server.Data.Channels
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Channel"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{Channel}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Channel>))]
     [Export200(ObjectTypes.Channel, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Channel200DataProvider : EtpDataProvider<Channel>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Channel200DataProvider"/> class.
@@ -49,5 +51,6 @@ namespace PDS.Witsml.Server.Data.Channels
         public Channel200DataProvider(IContainer container, IWitsmlDataAdapter<Channel> dataAdapter) : base(container, dataAdapter)
         {
         }
+
     }
 }

@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML131;
 using PDS.Framework;
+using System.Xml.Linq;
 
 using WbGeometry = Energistics.DataAccess.WITSML131.StandAloneWellboreGeometry;
 using WbGeometryList = Energistics.DataAccess.WITSML131.WellboreGeometryList;
@@ -35,6 +36,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="WbGeometry"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{WbGeometryList, WbGeometry}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<WbGeometry>))]
@@ -42,6 +44,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
     [Export131(ObjectTypes.WbGeometry, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class WbGeometry131DataProvider : WitsmlDataProvider<WbGeometryList, WbGeometry>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="WbGeometry131DataProvider"/> class.
@@ -65,6 +68,16 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             SetAdditionalDefaultValues(dataObject);
         }
 
+		/// <summary>
+        /// Sets the default values for the specified data object during update.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+		/// <param name="element">The element.</param>
+        protected override void UpdateDefaultValues(WbGeometry dataObject, XElement element)
+        {
+            UpdateAdditionalDefaultValues(dataObject, element);
+        }
+
         /// <summary>
         /// Creates a new <see cref="WbGeometryList" /> instance containing the specified data objects.
         /// </summary>
@@ -80,5 +93,13 @@ namespace PDS.Witsml.Server.Data.WbGeometries
         /// </summary>
         /// <param name="dataObject">The data object.</param>
         partial void SetAdditionalDefaultValues(WbGeometry dataObject);
+
+		/// <summary>
+        /// Sets additional default values for the specified data object during update.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+		/// <param name="element">The element.</param>
+        partial void UpdateAdditionalDefaultValues(WbGeometry dataObject, XElement element);
+
     }
 }

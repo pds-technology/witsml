@@ -26,19 +26,21 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML200;
 using PDS.Framework;
-
+using System.Xml.Linq;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Trajectory"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{Trajectory}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Trajectory>))]
     [Export200(ObjectTypes.Trajectory, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Trajectory200DataProvider : EtpDataProvider<Trajectory>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Trajectory200DataProvider"/> class.
@@ -49,5 +51,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
         public Trajectory200DataProvider(IContainer container, IWitsmlDataAdapter<Trajectory> dataAdapter) : base(container, dataAdapter)
         {
         }
+
     }
 }

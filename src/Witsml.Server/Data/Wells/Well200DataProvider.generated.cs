@@ -26,19 +26,21 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML200;
 using PDS.Framework;
-
+using System.Xml.Linq;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Well"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{Well}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Well>))]
     [Export200(ObjectTypes.Well, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Well200DataProvider : EtpDataProvider<Well>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Well200DataProvider"/> class.
@@ -49,5 +51,6 @@ namespace PDS.Witsml.Server.Data.Wells
         public Well200DataProvider(IContainer container, IWitsmlDataAdapter<Well> dataAdapter) : base(container, dataAdapter)
         {
         }
+
     }
 }
