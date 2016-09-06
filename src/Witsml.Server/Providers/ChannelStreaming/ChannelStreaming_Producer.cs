@@ -443,6 +443,11 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             await Task.Delay(MaxMessageRate);
         }
 
+        private IChannelDataProvider GetDataProvider(EtpUri uri)
+        {
+            return _container.Resolve<IChannelDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
+        }
+
         private void InitializeChannelDataProviders()
         {
             _providers = new Dictionary<string, IChannelDataProvider>
