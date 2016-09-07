@@ -46,11 +46,11 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         /// <summary>
         /// Gets the channel metadata for the specified data object URI.
         /// </summary>
-        /// <param name="uri">The parent data object URI.</param>
+        /// <param name="uris">The parent data object URI.</param>
         /// <returns>A collection of channel metadata.</returns>
-        public IList<ChannelMetadataRecord> GetChannelMetadata(EtpUri uri)
+        public IList<ChannelMetadataRecord> GetChannelMetadata(params EtpUri[] uris)
         {
-            var entity = GetEntity(uri);
+            var entity = GetEntity(uris.FirstOrDefault());
             return GetChannelMetadataForAnEntity(entity);
         }
 

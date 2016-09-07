@@ -58,7 +58,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="uris">The collection of URI to describe.</param>
         /// <returns>A collection of channel metadata.</returns>
-        public IList<ChannelMetadataRecord> GetChannelsMetadata(List<EtpUri> uris)
+        public IList<ChannelMetadataRecord> GetChannelMetadata(params EtpUri[] uris)
         {
             var adapter = ChannelSetDataAdapter as IChannelDataProvider;
 
@@ -77,7 +77,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     .ToList());
             }
 
-            return adapter.GetChannelsMetadata(channelUris);
+            return adapter.GetChannelMetadata(channelUris.ToArray());
         }
 
         /// <summary>
