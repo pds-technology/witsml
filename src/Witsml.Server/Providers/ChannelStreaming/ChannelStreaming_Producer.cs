@@ -86,7 +86,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 ? new[] { EtpUris.Witsml131, EtpUris.Witsml141, EtpUris.Witsml200}
                 : args.Message.Uris.Select(x => new EtpUri(x));           
 
-            foreach (var family in uris.ToLookup(x => x.Family))
+            foreach (var family in uris.ToLookup(x => x.Version))
             {
                 var provider = _providers[family.Key];
                 var metadata = provider.GetChannelMetadata(family.ToArray());
@@ -95,7 +95,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 {
                     // Check by uri if we have the metadata in our dictionary.
                     var channelMetadataRecord =
-                        Channels.Values.Select(c => c.Item2).FirstOrDefault(c => c.ChannelUri == m.ChannelUri);
+                        Channels.Values.Select(c => c.Item2).FirstOrDefault(c => c.ChannelUri.EqualsIgnoreCase(m.ChannelUri));
 
                     // if not add it and set its channelId
                     if (channelMetadataRecord == null)
