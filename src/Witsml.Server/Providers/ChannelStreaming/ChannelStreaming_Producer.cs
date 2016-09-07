@@ -141,6 +141,25 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         }
 
         /// <summary>
+        /// Handles the channel range request.
+        /// </summary>
+        /// <param name="header">The header.</param>
+        /// <param name="channelRangeRequest">The channel range request.</param>
+        protected override void HandleChannelRangeRequest(MessageHeader header, ChannelRangeRequest channelRangeRequest)
+        {
+            base.HandleChannelRangeRequest(header, channelRangeRequest);
+
+            Request = header;
+            if (_tokenSource == null)
+                _tokenSource = new CancellationTokenSource();
+            var token = _tokenSource.Token;
+
+            Logger.Debug("Channel Range Request starting.");
+            Task.Run(() => StartChannelRangeRequest(header.MessageId, channelRangeRequest.ChannelRanges, token), token);
+
+        }
+
+        /// <summary>
         /// Handles the channel streaming stop.
         /// </summary>
         /// <param name="header">The header.</param>
@@ -208,10 +227,48 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     ReceiveChangeNotification = info.ReceiveChangeNotification
                 };
 
-            // Group the ChannelStreamingContext list by ChannelStreamingType and ParentUri
+            // Group the ChannelStreamingContext list by ChannelStreamingType, ParentUri and StartIndex
             var streamingContextGrouping =
                 from x in streamingContextList
-                group x by new { x.ChannelStreamingType, x.ParentUri };
+                group x by new { x.ChannelStreamingType, x.ParentUri, x.StartIndex };
+
+            // Start a Task for each context group
+            Task.WhenAll(streamingContextGrouping.Select(context => StreamChannelData(context.ToList(), token)));
+        }
+
+
+        private void StartChannelRangeRequest(long messageId, IList<ChannelRangeInfo> infos, CancellationToken token)
+        {
+            var channelIds = infos.SelectMany(c => c.ChannelId).Distinct();
+            
+            // Get the channel metadata and parent uri for the channels to start range request
+            var infoChannels = Channels.Where(c => channelIds.Contains(c.Key)).Select(c => c.Value);
+
+            var flatRangeInfos =
+                infos.SelectMany(
+                    i => i.ChannelId.Select(c => new {ChannelId = c, StartIndex = i.StartIndex, EndIndex = i.EndIndex}));
+
+            // Join FlatRangeInfos and infoChannels into a list of ChannelStreamingContext
+            var streamingContextList =
+                from info in flatRangeInfos
+                join infoChannel in infoChannels on info.ChannelId equals infoChannel.Item2.ChannelId
+                select new ChannelStreamingContext()
+                {
+                    ChannelId = info.ChannelId,
+                    ChannelMetadata = infoChannel.Item2,
+                    ParentUri = infoChannel.Item1,
+                    StartIndex = info.StartIndex, 
+                    EndIndex = info.EndIndex,
+                    IndexCount = 0,
+                    ChannelStreamingType = ChannelStreamingTypes.RangeRequest,
+                    RangeRequestHeader = Request,
+                    ReceiveChangeNotification = false
+                };
+
+            // Group the ChannelStreamingContext list by ChannelStreamingType, ParentUri and StartIndex
+            var streamingContextGrouping =
+                from x in streamingContextList
+                group x by new { x.ChannelStreamingType, x.ParentUri, x.StartIndex };
 
             // Start a Task for each context group
             Task.WhenAll(streamingContextGrouping.Select(context => StreamChannelData(context.ToList(), token)));
@@ -304,28 +361,22 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     : maxEnd?.IndexFromScale(primaryIndex.Scale, isTimeIndex);
                 
 
-                // TODO: Add get of channel data when ready
+                // Get channel data
                 var dataProvider = GetDataProvider(parentUri);
                 var channelData = dataProvider.GetChannelData(parentUri, new Range<double?>(minStartIndex, maxEndIndex));
 
-                // TODO: Bring back later
-                // Stream Channel Data with IndexedDataItems if StreamIndexValuePairs setting is true
-                //if (WitsmlSettings.StreamIndexValuePairs)
-                //{
-                //    await StreamIndexedChannelData(infos, channels, channelData, increasing, token);
-                //}
-                //else
-                {
-                    await StreamChannelData(contextList, channelData, increasing, token);
-                }
+                await StreamChannelData(contextList, channelData, increasing, token);
 
                 // Check each context to see of all the data has streamed.
                 var completedContexts = contextList
                     .Where(
                         c =>
-                            c.ChannelStreamingType != ChannelStreamingTypes.IndexValue ||
-                            (c.ChannelMetadata.Status != ChannelStatuses.Active && c.ChannelMetadata.EndIndex.HasValue &&
-                            c.StartIndex >= c.ChannelMetadata.EndIndex.Value))
+                            (c.ChannelStreamingType == ChannelStreamingTypes.IndexValue && 
+                            c.ChannelMetadata.Status != ChannelStatuses.Active && c.ChannelMetadata.EndIndex.HasValue &&
+                            c.StartIndex >= c.ChannelMetadata.EndIndex.Value) ||
+
+                            (c.ChannelStreamingType == ChannelStreamingTypes.RangeRequest &&
+                            c.StartIndex >= c.EndIndex))
                     .ToArray();
 
 
@@ -435,7 +486,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 };
             }
         }
-
 
         private async Task SendChannelData(List<DataItem> dataItemList, MessageFlags messageFlag = MessageFlags.MultiPart)
         {
