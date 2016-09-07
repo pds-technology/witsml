@@ -43,10 +43,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class ChannelStreaming_Producer : ChannelStreamingProducerHandler
     {
-        private static readonly string[] ParentTypes = new[] { ObjectTypes.Log, ObjectTypes.ChannelSet };
-        private static readonly string[] ChannelTypes = new[] { ObjectTypes.LogCurveInfo, ObjectTypes.Channel };
-        private static readonly string[] SupportedTypes = ParentTypes.Concat(ChannelTypes).ToArray();
-
         // TODO: Move to an enum (EtpErrorCodes)
         private static readonly int EINVALID_STATE_CODE = 8;
 
@@ -151,7 +147,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             var token = _tokenSource.Token;
 
             Logger.Debug("Channel Range Request starting.");
-            Task.Run(() => StartChannelRangeRequest(header.MessageId, channelRangeRequest.ChannelRanges, token), token);
+            Task.Run(() => StartChannelRangeRequest(channelRangeRequest.ChannelRanges, token), token);
 
         }
 
@@ -233,7 +229,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         }
 
 
-        private void StartChannelRangeRequest(long messageId, IList<ChannelRangeInfo> infos, CancellationToken token)
+        private void StartChannelRangeRequest(IList<ChannelRangeInfo> infos, CancellationToken token)
         {
             var channelIds = infos.SelectMany(c => c.ChannelId).Distinct();
             
@@ -242,7 +238,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
             var flatRangeInfos =
                 infos.SelectMany(
-                    i => i.ChannelId.Select(c => new {ChannelId = c, StartIndex = i.StartIndex, EndIndex = i.EndIndex}));
+                    i => i.ChannelId.Select(c => new {ChannelId = c, i.StartIndex, i.EndIndex}));
 
             // Join FlatRangeInfos and infoChannels into a list of ChannelStreamingContext
             var streamingContextList =
@@ -281,7 +277,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             var streamingChannelIds = GetStreamingChannelIds(channelIds);
 
             // Send a EINVALID_STATE message if any are already streaming.
-            if (streamingChannelIds == null || streamingChannelIds.Length > 0)
+            if (streamingChannelIds.Length > 0)
                 SendInvalidStateMessage(messageId, streamingChannelIds);
 
             // Remove the channelIds that are already streaming and continue with the rest.

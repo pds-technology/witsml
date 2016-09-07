@@ -41,8 +41,9 @@ namespace PDS.Witsml.Server.Data.Channels
         /// </summary>
         /// <param name="uri">The parent data object URI.</param>
         /// <param name="range">The data range to retrieve.</param>
+        /// <param name="requestLatestValues">The total number of requested latest values.</param>
         /// <returns>A collection of channel data.</returns>
-        IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, Range<double?> range);
+        IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, Range<double?> range, int? requestLatestValues = null);
 
         /// <summary>
         /// Updates the channel data for the specified data object URI.
