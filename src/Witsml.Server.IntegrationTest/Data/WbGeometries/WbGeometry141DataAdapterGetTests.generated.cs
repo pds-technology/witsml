@@ -1,8 +1,3 @@
-
-
-
-
-
 //----------------------------------------------------------------------- 
 // PDS.Witsml.Server, 2016.1
 //
@@ -34,10 +29,8 @@ using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-
 using WbGeometry = Energistics.DataAccess.WITSML141.StandAloneWellboreGeometry;
 using WbGeometryList = Energistics.DataAccess.WITSML141.WellboreGeometryList;
-
 
 namespace PDS.Witsml.Server.Data.WbGeometries
 {

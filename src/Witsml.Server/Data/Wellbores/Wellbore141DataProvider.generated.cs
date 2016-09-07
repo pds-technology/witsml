@@ -26,13 +26,14 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML141;
 using PDS.Framework;
-
+using System.Xml.Linq;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Wellbore"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{WellboreList, Wellbore}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Wellbore>))]
@@ -40,6 +41,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
     [Export141(ObjectTypes.Wellbore, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Wellbore141DataProvider : WitsmlDataProvider<WellboreList, Wellbore>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Wellbore141DataProvider"/> class.
@@ -63,6 +65,16 @@ namespace PDS.Witsml.Server.Data.Wellbores
             SetAdditionalDefaultValues(dataObject);
         }
 
+		/// <summary>
+        /// Sets the default values for the specified data object during update.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+		/// <param name="element">The element.</param>
+        protected override void UpdateDefaultValues(Wellbore dataObject, XElement element)
+        {
+            UpdateAdditionalDefaultValues(dataObject, element);
+        }
+
         /// <summary>
         /// Creates a new <see cref="WellboreList" /> instance containing the specified data objects.
         /// </summary>
@@ -78,5 +90,13 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// </summary>
         /// <param name="dataObject">The data object.</param>
         partial void SetAdditionalDefaultValues(Wellbore dataObject);
+
+		/// <summary>
+        /// Sets additional default values for the specified data object during update.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+		/// <param name="element">The element.</param>
+        partial void UpdateAdditionalDefaultValues(Wellbore dataObject, XElement element);
+
     }
 }

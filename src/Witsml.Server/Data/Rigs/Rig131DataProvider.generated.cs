@@ -26,13 +26,14 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML131;
 using PDS.Framework;
-
+using System.Xml.Linq;
 
 namespace PDS.Witsml.Server.Data.Rigs
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Rig"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{RigList, Rig}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Rig>))]
@@ -40,6 +41,7 @@ namespace PDS.Witsml.Server.Data.Rigs
     [Export131(ObjectTypes.Rig, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Rig131DataProvider : WitsmlDataProvider<RigList, Rig>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Rig131DataProvider"/> class.
@@ -63,6 +65,16 @@ namespace PDS.Witsml.Server.Data.Rigs
             SetAdditionalDefaultValues(dataObject);
         }
 
+		/// <summary>
+        /// Sets the default values for the specified data object during update.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+		/// <param name="element">The element.</param>
+        protected override void UpdateDefaultValues(Rig dataObject, XElement element)
+        {
+            UpdateAdditionalDefaultValues(dataObject, element);
+        }
+
         /// <summary>
         /// Creates a new <see cref="RigList" /> instance containing the specified data objects.
         /// </summary>
@@ -78,5 +90,13 @@ namespace PDS.Witsml.Server.Data.Rigs
         /// </summary>
         /// <param name="dataObject">The data object.</param>
         partial void SetAdditionalDefaultValues(Rig dataObject);
+
+		/// <summary>
+        /// Sets additional default values for the specified data object during update.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+		/// <param name="element">The element.</param>
+        partial void UpdateAdditionalDefaultValues(Rig dataObject, XElement element);
+
     }
 }

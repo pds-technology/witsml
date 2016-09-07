@@ -26,13 +26,14 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML131;
 using PDS.Framework;
-
+using System.Xml.Linq;
 
 namespace PDS.Witsml.Server.Data.Messages
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Message"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{MessageList, Message}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Message>))]
@@ -40,6 +41,7 @@ namespace PDS.Witsml.Server.Data.Messages
     [Export131(ObjectTypes.Message, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Message131DataProvider : WitsmlDataProvider<MessageList, Message>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Message131DataProvider"/> class.
@@ -63,6 +65,16 @@ namespace PDS.Witsml.Server.Data.Messages
             SetAdditionalDefaultValues(dataObject);
         }
 
+		/// <summary>
+        /// Sets the default values for the specified data object during update.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+		/// <param name="element">The element.</param>
+        protected override void UpdateDefaultValues(Message dataObject, XElement element)
+        {
+            UpdateAdditionalDefaultValues(dataObject, element);
+        }
+
         /// <summary>
         /// Creates a new <see cref="MessageList" /> instance containing the specified data objects.
         /// </summary>
@@ -78,5 +90,13 @@ namespace PDS.Witsml.Server.Data.Messages
         /// </summary>
         /// <param name="dataObject">The data object.</param>
         partial void SetAdditionalDefaultValues(Message dataObject);
+
+		/// <summary>
+        /// Sets additional default values for the specified data object during update.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+		/// <param name="element">The element.</param>
+        partial void UpdateAdditionalDefaultValues(Message dataObject, XElement element);
+
     }
 }

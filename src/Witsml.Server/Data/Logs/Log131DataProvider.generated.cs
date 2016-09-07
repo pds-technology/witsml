@@ -26,13 +26,14 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML131;
 using PDS.Framework;
-
+using System.Xml.Linq;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Log"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{LogList, Log}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Log>))]
@@ -40,6 +41,7 @@ namespace PDS.Witsml.Server.Data.Logs
     [Export131(ObjectTypes.Log, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Log131DataProvider : WitsmlDataProvider<LogList, Log>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Log131DataProvider"/> class.
@@ -63,13 +65,14 @@ namespace PDS.Witsml.Server.Data.Logs
             SetAdditionalDefaultValues(dataObject);
         }
 
-        /// <summary>
+		/// <summary>
         /// Sets the default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-        protected override void UpdateDefaultValues(Log dataObject)
+		/// <param name="element">The element.</param>
+        protected override void UpdateDefaultValues(Log dataObject, XElement element)
         {
-            UpdateAdditionalDefaultValues(dataObject);
+            UpdateAdditionalDefaultValues(dataObject, element);
         }
 
         /// <summary>
@@ -88,10 +91,12 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="dataObject">The data object.</param>
         partial void SetAdditionalDefaultValues(Log dataObject);
 
-        /// <summary>
+		/// <summary>
         /// Sets additional default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-        partial void UpdateAdditionalDefaultValues(Log dataObject);
+		/// <param name="element">The element.</param>
+        partial void UpdateAdditionalDefaultValues(Log dataObject, XElement element);
+
     }
 }

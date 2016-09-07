@@ -26,13 +26,14 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Energistics.DataAccess.WITSML141;
 using PDS.Framework;
-
+using System.Xml.Linq;
 
 namespace PDS.Witsml.Server.Data.Attachments
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Attachment"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{AttachmentList, Attachment}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Attachment>))]
@@ -40,6 +41,7 @@ namespace PDS.Witsml.Server.Data.Attachments
     [Export141(ObjectTypes.Attachment, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Attachment141DataProvider : WitsmlDataProvider<AttachmentList, Attachment>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Attachment141DataProvider"/> class.
@@ -63,6 +65,16 @@ namespace PDS.Witsml.Server.Data.Attachments
             SetAdditionalDefaultValues(dataObject);
         }
 
+		/// <summary>
+        /// Sets the default values for the specified data object during update.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+		/// <param name="element">The element.</param>
+        protected override void UpdateDefaultValues(Attachment dataObject, XElement element)
+        {
+            UpdateAdditionalDefaultValues(dataObject, element);
+        }
+
         /// <summary>
         /// Creates a new <see cref="AttachmentList" /> instance containing the specified data objects.
         /// </summary>
@@ -78,5 +90,13 @@ namespace PDS.Witsml.Server.Data.Attachments
         /// </summary>
         /// <param name="dataObject">The data object.</param>
         partial void SetAdditionalDefaultValues(Attachment dataObject);
+
+		/// <summary>
+        /// Sets additional default values for the specified data object during update.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+		/// <param name="element">The element.</param>
+        partial void UpdateAdditionalDefaultValues(Attachment dataObject, XElement element);
+
     }
 }

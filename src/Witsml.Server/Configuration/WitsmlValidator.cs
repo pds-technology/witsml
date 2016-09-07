@@ -240,7 +240,7 @@ namespace PDS.Witsml.Server.Configuration
         /// Validates the cascaded delete.
         /// </summary>
         /// <param name="options">The options.</param>
-        /// <param name="cascadedDelete">if set to <c>true</c> cascade delete is supported.</param>
+        /// <param name="cascadedDelete">if set to true cascade delete is supported.</param>
         public static void ValidateCascadedDelete(Dictionary<string, string> options, bool? cascadedDelete)
         {
             _log.DebugFormat("Validating compression method: {0}", cascadedDelete);
@@ -386,7 +386,7 @@ namespace PDS.Witsml.Server.Configuration
         /// Validates the selection criteria.
         /// </summary>
         /// <param name="document">The queryIn XML document.</param>
-        /// <param name="allowEmptyRecurringElements">if set to <c>true</c> [allow empty recurring elements].</param>
+        /// <param name="allowEmptyRecurringElements">If set to true then allow empty recurring elements.</param>
         public static void ValidateSelectionCriteria(XDocument document, bool allowEmptyRecurringElements = false)
         {
             _log.Debug("Validating selection criteria.");
@@ -455,7 +455,7 @@ namespace PDS.Witsml.Server.Configuration
         /// Recursively validates the selection criteria for an element.
         /// </summary>
         /// <param name="entity">The entity.</param>
-        /// <param name="allowEmptyRecurringElements">if set to <c>true</c> [allow empty recurring elements].</param>
+        /// <param name="allowEmptyRecurringElements">If set to true then allow empty recurring elements.</param>
         private static void ValidateSelectionCriteriaForAnEntity(XElement entity, bool allowEmptyRecurringElements = false)
         {
             _log.DebugFormat("Validating selection criteria for {0}", entity.Name.LocalName);
@@ -479,12 +479,12 @@ namespace PDS.Witsml.Server.Configuration
                 }
                 else
                 {
-                    IsRecurringElementValueEmpty(selection, allowEmptyRecurringElements);
+                    ValidateEmptyRecurringElement(selection, allowEmptyRecurringElements);
 
                     for (var i = 1; i < values.Count; i++)
                     {
                         var match = values[i];
-                        IsRecurringElementValueEmpty(match, allowEmptyRecurringElements);
+                        ValidateEmptyRecurringElement(match, allowEmptyRecurringElements);
                         IsSelectionMatch(selection, match);
                         ValidateSelectionCriteriaForAnEntity(match);
                     }
@@ -525,9 +525,9 @@ namespace PDS.Witsml.Server.Configuration
         /// Determines whether there is empty recurring element
         /// </summary>
         /// <param name="element">The element.</param>
-        /// <param name="allowEmptyRecurringElements">if set to <c>true</c> [allow empty recurring elements].</param>
+        /// <param name="allowEmptyRecurringElements">If set to true then allow empty recurring elements.</param>
         /// <exception cref="WitsmlException"></exception>
-        private static void IsRecurringElementValueEmpty(XElement element, bool allowEmptyRecurringElements = false)
+        private static void ValidateEmptyRecurringElement(XElement element, bool allowEmptyRecurringElements = false)
         {
             // 131 Is allowed to have recurring empty elements
             if (allowEmptyRecurringElements)
