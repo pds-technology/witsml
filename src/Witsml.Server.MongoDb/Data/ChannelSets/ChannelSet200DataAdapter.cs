@@ -98,8 +98,9 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         /// </summary>
         /// <param name="uri">The parent data object URI.</param>
         /// <param name="range">The data range to retrieve.</param>
+        /// <param name="requestLatestValues">The total number of requested latest values.</param>
         /// <returns>A collection of channel data.</returns>
-        public IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, Range<double?> range)
+        public IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, Range<double?> range, int? requestLatestValues = null)
         {
             var entity = GetEntity(uri);
             var indexChannel = entity.Index.FirstOrDefault();
