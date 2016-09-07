@@ -97,7 +97,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             foreach (var pair in uriDictionary)
             {
                 var provider = _providers[pair.Key];
-                var metadata = provider.GetChannelsMetadata(pair.Value);
+                var metadata = provider.GetChannelMetadata(pair.Value.ToArray());
 
                 metadata.ForEach(m =>
                 {
@@ -464,7 +464,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         /// <param name="uris">The requested URI list.</param>
         /// <returns>The optimized list of URIs.</returns>
         private Dictionary<string, List<EtpUri>> OptimizeDescribeUris(List<EtpUri> uris)
-        {
+        {          
             var urisDictionary = new Dictionary<string, List<EtpUri>>();
             var uris13 = new List<EtpUri>();
             var uris14 = new List<EtpUri>();

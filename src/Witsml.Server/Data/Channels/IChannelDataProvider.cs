@@ -30,18 +30,11 @@ namespace PDS.Witsml.Server.Data.Channels
     public interface IChannelDataProvider
     {
         /// <summary>
-        /// Gets the channel metadata for the specified data object URI.
-        /// </summary>
-        /// <param name="uri">The parent data object URI.</param>
-        /// <returns>A collection of channel metadata.</returns>
-        IList<ChannelMetadataRecord> GetChannelMetadata(EtpUri uri);
-
-        /// <summary>
         /// Gets the channels metadata.
         /// </summary>
         /// <param name="uris">The collection of URI to describe.</param>
         /// <returns>A collection of channel metadata.</returns>
-        IList<ChannelMetadataRecord> GetChannelsMetadata(List<EtpUri> uris);
+        IList<ChannelMetadataRecord> GetChannelMetadata(params EtpUri[] uris);
 
         /// <summary>
         /// Gets the channel data records for the specified data object URI and range.
