@@ -84,7 +84,9 @@ namespace PDS.Witsml.Server.Data.Logs
                 var uid = curve?.Uid ?? mnemonicElement.Value;
 
                 // Update entity with UID
-                dataObject.LogCurveInfo.FirstOrDefault(x => x.Mnemonic.Value == mnemonicElement.Value).Uid = uid;
+                curve = dataObject.LogCurveInfo.GetByMnemonic(mnemonicElement.Value);
+                if (curve != null)
+                    curve.Uid = uid;
 
                 // Create a new XAttribute or update the existing one
                 if (uidAttribute == null)
