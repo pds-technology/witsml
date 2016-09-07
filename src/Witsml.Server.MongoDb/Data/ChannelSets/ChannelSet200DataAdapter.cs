@@ -50,17 +50,6 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         /// <returns>A collection of channel metadata.</returns>
         public IList<ChannelMetadataRecord> GetChannelMetadata(params EtpUri[] uris)
         {
-            var entity = GetEntity(uris.FirstOrDefault());
-            return GetChannelMetadataForAnEntity(entity);
-        }
-
-        /// <summary>
-        /// Gets the channels metadata.
-        /// </summary>
-        /// <param name="uris">The collection of URI to describe.</param>
-        /// <returns>A collection of channel metadata.</returns>
-        public IList<ChannelMetadataRecord> GetChannelsMetadata(List<EtpUri> uris)
-        {
             var metaDatas = new List<ChannelMetadataRecord>();
             var entities = GetEntities(uris);
             foreach (var entity in entities)
@@ -69,7 +58,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             }
 
             return metaDatas;
-        }
+        }       
 
         private IList<ChannelMetadataRecord> GetChannelMetadataForAnEntity(ChannelSet entity)
         {
