@@ -35,25 +35,6 @@ namespace PDS.Witsml.Server.Data.Logs
     public partial class Log200DataAdapter : IChannelDataProvider
     {
         /// <summary>
-        /// Gets the channel metadata for the specified data object URI.
-        /// </summary>
-        /// <param name="uri">The parent data object URI.</param>
-        /// <returns>A collection of channel metadata.</returns>
-        public IList<ChannelMetadataRecord> GetChannelMetadata(EtpUri uri)
-        {
-            var adapter = ChannelSetDataAdapter as IChannelDataProvider;
-
-            if (adapter == null)
-                throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, "IChannelDataProvider not configured.");
-
-            var entity = GetEntity(uri);
-
-            return entity.ChannelSet
-                .SelectMany(x => adapter.GetChannelMetadata(x.GetUri()))
-                .ToList();
-        }
-
-        /// <summary>
         /// Gets the channels metadata.
         /// </summary>
         /// <param name="uris">The collection of URI to describe.</param>

@@ -120,17 +120,6 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>A collection of channel metadata.</returns>
         public IList<ChannelMetadataRecord> GetChannelMetadata(params EtpUri[] uris)
         {
-            var entity = GetEntity(uris.FirstOrDefault());
-            return GetChannelMetadataForAnEntity(entity);
-        }
-
-        /// <summary>
-        /// Gets the channels metadata.
-        /// </summary>
-        /// <param name="uris">The collection of URI to describe.</param>
-        /// <returns>A collection of channel metadata.</returns>
-        public IList<ChannelMetadataRecord> GetChannelsMetadata(List<EtpUri> uris)
-        {
             var metaDatas = new List<ChannelMetadataRecord>();
             var entities = GetEntitiesForChannel(uris);
 
@@ -141,93 +130,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             return metaDatas;
         }
-
-        private List<T> GetEntitiesForChannel(List<EtpUri> uris)
-        {
-            if (!uris.Any())
-            {
-                return GetCollection<T>(DbCollectionName)
-                    .Find("{}")
-                    .ToList();
-            }
-
-            var filters = uris.Select(GetFilter);
-
-            return GetCollection<T>(DbCollectionName)
-                .Find(Builders<T>.Filter.Or(filters))
-                .ToList();
-        }
-
-        private FilterDefinition<T> GetFilter(EtpUri uri)
-        {
-            var builder = Builders<T>.Filter;
-            var filters = new List<FilterDefinition<T>>();
-
-            var objectIds = uri.GetObjectIds()
-                .ToDictionary(x => x.ObjectType, x => x.ObjectId);
-
-            if (ObjectTypes.Well.EqualsIgnoreCase(uri.ObjectType))
-            {
-                filters.Add(builder.EqIgnoreCase("UidWell", uri.ObjectId));
-            }
-            if (ObjectTypes.Wellbore.EqualsIgnoreCase(uri.ObjectType))
-            {
-                filters.Add(builder.EqIgnoreCase("UidWellbore", uri.ObjectId));
-                filters.Add(builder.EqIgnoreCase("UidWell", objectIds[ObjectTypes.Well]));
-            }
-            if (ObjectTypes.Log.EqualsIgnoreCase(uri.ObjectType))
-            {
-                filters.Add(builder.EqIgnoreCase("Uid", uri.ObjectId));
-                filters.Add(builder.EqIgnoreCase("UidWell", objectIds[ObjectTypes.Well]));
-                filters.Add(builder.EqIgnoreCase("UidWellbore", objectIds[ObjectTypes.Wellbore]));
-            }
-            if (ObjectTypes.LogCurveInfo.EqualsIgnoreCase(uri.ObjectType))
-            {
-                filters.Add(builder.EqIgnoreCase("LogCurveInfo.Mnemonic.Value", uri.ObjectId));
-                filters.Add(builder.EqIgnoreCase("UidWell", objectIds[ObjectTypes.Well]));
-                filters.Add(builder.EqIgnoreCase("UidWellbore", objectIds[ObjectTypes.Wellbore]));
-                filters.Add(builder.EqIgnoreCase("Uid", objectIds[ObjectTypes.Log]));
-            }
-
-            return builder.And(filters.Where(f => f != null));
-        }
-
-        private IList<ChannelMetadataRecord> GetChannelMetadataForAnEntity(T entity, List<EtpUri> uris = null)
-        {
-            var logCurves = GetLogCurves(entity);
-            var metadata = new List<ChannelMetadataRecord>();
-            var index = 0;
-
-            if (!logCurves.Any())
-                return metadata;
-
-            var mnemonic = GetIndexCurveMnemonic(entity);
-            var indexCurve = logCurves.FirstOrDefault(x => GetMnemonic(x).EqualsIgnoreCase(mnemonic));
-            var indexMetadata = ToIndexMetadataRecord(entity, indexCurve);
-
-            // Skip the indexCurve if StreamIndexValuePairs setting is false
-            metadata.AddRange(
-                logCurves
-                .Where(x => _streamIndexValuePairs || (IsChannelMetaDataRequested(GetChannelUri(x, entity), uris) && !GetMnemonic(x).EqualsIgnoreCase(indexMetadata.Mnemonic)))
-                .Select(x =>
-                {
-                    var channel = ToChannelMetadataRecord(entity, x, indexMetadata);
-                    channel.ChannelId = index++;
-                    return channel;
-                }));
-
-            return metadata;
-        }
-
-        private bool IsChannelMetaDataRequested(EtpUri channelUri, List<EtpUri> uris)
-        {
-            if (uris == null || uris.Count == 0)
-                return true;
-
-            return uris.Contains(channelUri) || uris.Contains(channelUri.Parent) ||
-                   uris.Contains(channelUri.Parent.Parent) || uris.Contains(channelUri.Parent.Parent.Parent);
-        }
-
+        
         /// <summary>
         /// Gets the channel data records for the specified data object URI and range.
         /// </summary>
@@ -331,6 +234,519 @@ namespace PDS.Witsml.Server.Data.Logs
                     "minIndex", "maxIndex", "minDateTimeIndex", "maxDateTimeIndex"
                 })
                 .ToList();
+        }
+
+        /// <summary>
+        /// Formats the log curve infos.
+        /// </summary>
+        /// <param name="logCurves">The log curves.</param>
+        protected virtual void FormatLogCurveInfos(List<TChild> logCurves)
+        {
+        }
+
+        /// <summary>
+        /// Updates the log data and index range.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="readers">The readers.</param>
+        /// <param name="transaction">The transaction.</param>
+        protected void UpdateLogDataAndIndexRange(EtpUri uri, IEnumerable<ChannelDataReader> readers, MongoTransaction transaction = null)
+        {
+            Logger.DebugFormat("Updating log data and index for log uri '{0}'.", uri.Uri);
+
+            // Get Updated Log
+            var current = GetEntity(uri);
+
+            // Get current index information
+            var ranges = GetCurrentIndexRange(current);
+
+            TimeSpan? offset = null;
+            var isTimeLog = IsTimeLog(current, true);
+            var updateMnemonics = new List<string>();
+            var indexUnit = string.Empty;
+            var updateIndexRanges = false;
+            var checkOffset = true;
+
+            Logger.Debug("Merging ChannelDataChunks with ChannelDataReaders.");
+
+            // Merge ChannelDataChunks
+            foreach (var reader in readers)
+            {
+                if (reader == null)
+                    continue;
+
+                var indexCurve = reader.Indices[0];
+
+                if (string.IsNullOrEmpty(indexUnit))
+                {
+                    indexUnit = indexCurve.Unit;
+                }
+
+                updateMnemonics.Clear();
+                updateMnemonics.Add(indexCurve.Mnemonic);
+
+                updateMnemonics.AddRange(reader.Mnemonics
+                    .Where(m => !updateMnemonics.Contains(m)));
+
+                if (isTimeLog && checkOffset)
+                {
+                    offset = reader.GetChannelIndexRange(0).Offset;
+                    checkOffset = false;
+                }
+
+                // Update index range for each logData element
+                GetUpdatedIndexRange(reader, updateMnemonics.ToArray(), ranges, IsIncreasing(current));
+
+                // Update log data
+                ChannelDataChunkAdapter.Merge(reader, transaction);
+                updateIndexRanges = true;
+            }
+
+            // Update index range
+            if (updateIndexRanges)
+            {
+                UpdateIndexRange(uri, current, ranges, updateMnemonics, IsTimeLog(current), indexUnit, offset);
+            }
+        }
+
+        /// <summary>
+        /// Gets the current index range.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <returns></returns>
+        protected Dictionary<string, Range<double?>> GetCurrentIndexRange(T entity)
+        {
+            Logger.Debug("Getting index ranges for all logCurveInfos.");
+
+            var ranges = new Dictionary<string, Range<double?>>();
+            var logCurves = GetLogCurves(entity);
+            var isTimeLog = IsTimeLog(entity);
+            var increasing = IsIncreasing(entity);
+
+            foreach (var curve in logCurves)
+            {
+                var mnemonic = GetMnemonic(curve);
+                var range = GetIndexRange(curve, increasing, isTimeLog);
+
+                Logger.DebugFormat("Index range for curve '{0}' - start: {1}, end: {2}.", mnemonic, range.Start, range.End);
+                ranges.Add(mnemonic, range);
+            }
+
+            return ranges;
+        }
+
+        /// <summary>
+        /// Merge the partial delete ranges from QueryIn with the current index range and the default index range.
+        /// </summary>
+        /// <param name="deletedChannels">The deleted channels.</param>
+        /// <param name="defaultRange">The default delete range, i.e from startIndex/startDateTimeIndex, endIndex/endDateTimeIndex of the log header.</param>
+        /// <param name="current">The current index ranges.</param>
+        /// <param name="delete">The index range from the XmlIn.</param>
+        /// <param name="indexCurve">The index curve.</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <returns>The channel index ranges for the partial delete.</returns>
+        protected Dictionary<string, Range<double?>> MergePartialDeleteRanges(List<string> deletedChannels, Range<double?> defaultRange, Dictionary<string, Range<double?>> current, Dictionary<string, Range<double?>> delete, string indexCurve, bool increasing)
+        {
+            var ranges = new Dictionary<string, Range<double?>>();
+            var indexRange = current[indexCurve];
+
+            double? begin = null;
+            double? finish = null;
+
+            if (!delete.Keys.Any())
+            {
+                if (defaultRange.Start.HasValue || defaultRange.End.HasValue)
+                {
+                    foreach (var channel in current.Keys)
+                    {
+                        ranges.Add(channel,
+                            new Range<double?>(defaultRange.Start, defaultRange.End, defaultRange.Offset));
+                    }
+                }
+
+                return ranges;
+            }
+
+            foreach (var range in delete)
+            {
+                if (deletedChannels.Contains(range.Key))
+                    continue;
+
+                double? start;
+                double? end;
+                if (!range.Value.Start.HasValue && !range.Value.End.HasValue)
+                {
+                    if (defaultRange.Start.HasValue)
+                    {
+                        start = defaultRange.Start;
+                        end = defaultRange.End;                      
+                    }
+                    else
+                    {
+                        start = indexRange.Start;
+                        end = indexRange.End;
+                    }
+                    ranges.Add(range.Key, new Range<double?>(start, end, range.Value.Offset));
+                }
+                else
+                {
+                    start = range.Value.Start ?? indexRange.Start.GetValueOrDefault();
+                    end = range.Value.End ?? indexRange.End.GetValueOrDefault();
+                    ranges.Add(range.Key, new Range<double?>(start, end, range.Value.Offset));
+                }
+
+                if (!start.HasValue || !end.HasValue)
+                    continue;
+
+                if (begin.HasValue)
+                {
+                    if (StartsBefore(start.Value, begin.Value, increasing))
+                        begin = start;
+                    if (StartsBefore(end.Value, finish.Value, increasing))
+                        finish = end;
+                }
+                else
+                {
+                    begin = start;
+                    finish = end;
+                }
+            }
+
+            if (!ranges.ContainsKey(indexCurve))
+                ranges.Add(indexCurve, new Range<double?>(begin, finish, indexRange.Offset));
+
+            return ranges;
+        }
+
+        /// <summary>
+        /// Check if to delete channel data by mnemonic.
+        /// </summary>
+        /// <param name="parser">The parser.</param>
+        /// <param name="isTimeLog">if set to <c>true</c> [is time log].</param>
+        /// <returns>True if to delete channel data by mnemonic; false otherwise.</returns>
+        protected bool ToDeleteChannelDataByMnemonic(WitsmlQueryParser parser, bool isTimeLog)
+        {
+            var fields = new List<string> { "mnemonic" };
+            if (isTimeLog)
+            {
+                fields.Add("minDateTimeIndex");
+                fields.Add("maxDateTimeIndex");
+            }
+            else
+            {
+                fields.Add("minIndex");
+                fields.Add("maxDIndex");
+            }
+            var elements = parser.Properties(parser.Element(), "logCurveInfo");
+            foreach (var element in elements)
+            {
+                if (!element.HasElements || element.Elements().All(e => e.Name.LocalName == "mnemonic"))
+                    return true;
+
+                var curveElements = element.Elements();
+                var uidAttribute = element.Attribute("uid");
+                if (uidAttribute != null)
+                    continue;
+
+                if (curveElements.All(e => fields.Contains(e.Name.LocalName)))
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Check if value a starts the before value b.
+        /// </summary>
+        /// <param name="a">The value a.</param>
+        /// <param name="b">The value b.</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <returns>True is a starts before b.</returns>
+        protected bool StartsBefore(double a, double b, bool increasing)
+        {
+            return increasing
+                ? a <= b
+                : a >= b;
+        }
+
+        /// <summary>
+        /// Updates the index range.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="entity">The entity.</param>
+        /// <param name="ranges">The ranges.</param>
+        /// <param name="mnemonics">The mnemonics.</param>
+        /// <param name="isTimeLog">if set to <c>true</c> [is time log].</param>
+        /// <param name="indexUnit">The index unit.</param>
+        /// <param name="offset">The offset.</param>
+        /// <param name="isDelete">True if for delete log data.</param>
+        protected void UpdateIndexRange(EtpUri uri, T entity, Dictionary<string, Range<double?>> ranges, IEnumerable<string> mnemonics, bool isTimeLog, string indexUnit, TimeSpan? offset, bool isDelete = false)
+        {
+            Logger.DebugFormat("Updating index range with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
+
+            var mongoUpdate = new MongoDbUpdate<T>(Container, GetCollection(), null);
+            var filter = MongoDbUtility.GetEntityFilter<T>(uri);
+            var increasing = IsIncreasing(entity);
+            UpdateDefinition<T> logHeaderUpdate = null;
+
+            foreach (var mnemonic in mnemonics)
+            {
+                var curve = GetLogCurve(entity, mnemonic);
+                if (curve == null) continue;
+
+                var curveFilter = Builders<T>.Filter.And(filter,
+                    MongoDbUtility.BuildFilter<T>("LogCurveInfo.Uid", curve.Uid));
+
+                var range = ranges[mnemonic];
+                var isIndexCurve = mnemonic == GetIndexCurveMnemonic(entity);
+
+                var currentRange = GetIndexRange(curve, increasing, isTimeLog);
+                var updateRange = isDelete? range: GetUpdateRange(currentRange, range, increasing);
+
+                logHeaderUpdate = isTimeLog
+                    ? UpdateDateTimeIndexRange(mongoUpdate, curveFilter, logHeaderUpdate, updateRange, increasing, isIndexCurve, offset)
+                    : UpdateIndexRange(mongoUpdate, curveFilter, logHeaderUpdate, updateRange, increasing, isIndexCurve, indexUnit);
+            }
+
+            logHeaderUpdate = UpdateCommonData(logHeaderUpdate, entity, offset);
+
+            if (logHeaderUpdate != null)
+            {
+                mongoUpdate.UpdateFields(filter, logHeaderUpdate);
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the specified log is increasing.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns></returns>
+        protected abstract bool IsIncreasing(T log);
+
+        /// <summary>
+        /// Determines whether the specified log is a time log.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="includeElapsedTime">if set to <c>true</c> [include elapsed time].</param>
+        /// <returns></returns>
+        protected abstract bool IsTimeLog(T log, bool includeElapsedTime = false);
+
+        /// <summary>
+        /// Gets the log curve.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="mnemonic">The mnemonic.</param>
+        /// <returns></returns>
+        protected abstract TChild GetLogCurve(T log, string mnemonic);
+
+        /// <summary>
+        /// Gets the log curves.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns></returns>
+        protected abstract List<TChild> GetLogCurves(T log);
+
+        /// <summary>
+        /// Gets the mnemonic.
+        /// </summary>
+        /// <param name="curve">The curve.</param>
+        /// <returns></returns>
+        protected abstract string GetMnemonic(TChild curve);
+
+        /// <summary>
+        /// Gets the index curve mnemonic.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns></returns>
+        protected abstract string GetIndexCurveMnemonic(T log);
+
+        /// <summary>
+        /// Gets the units by column index.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns></returns>
+        protected abstract IDictionary<int, string> GetUnitsByColumnIndex(T log);
+
+        /// <summary>
+        /// Gets the null values by column index.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns></returns>
+        protected abstract IDictionary<int, string> GetNullValuesByColumnIndex(T log);
+
+        /// <summary>
+        /// Gets the index range.
+        /// </summary>
+        /// <param name="curve">The curve.</param>
+        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
+        /// <param name="isTimeIndex">if set to <c>true</c> [is time index].</param>
+        /// <returns></returns>
+        protected abstract Range<double?> GetIndexRange(TChild curve, bool increasing = true, bool isTimeIndex = false);
+
+        /// <summary>
+        /// Sets the log index range.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="logHeader">The log that has the header information.</param>
+        /// <param name="ranges">The ranges.</param>
+        /// <param name="indexCurve">The index curve.</param>
+        protected abstract void SetLogIndexRange(T log, T logHeader, Dictionary<string, Range<double?>> ranges, string indexCurve);
+
+        /// <summary>
+        /// Sets the log data values.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="logData">The log data.</param>
+        /// <param name="mnemonics">The mnemonics.</param>
+        /// <param name="units">The units.</param>
+        protected abstract void SetLogDataValues(T log, List<string> logData, IEnumerable<string> mnemonics, IEnumerable<string> units);
+
+        /// <summary>
+        /// Updates the common data.
+        /// </summary>
+        /// <param name="logHeaderUpdate">The log header update.</param>
+        /// <param name="entity">The entity.</param>
+        /// <param name="offset">The offset.</param>
+        /// <returns></returns>
+        protected abstract UpdateDefinition<T> UpdateCommonData(UpdateDefinition<T> logHeaderUpdate, T entity, TimeSpan? offset);
+
+        /// <summary>
+        /// Creates a generic measure.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="uom">The uom.</param>
+        /// <returns></returns>
+        protected abstract object CreateGenericMeasure(double value, string uom);
+
+        /// <summary>
+        /// Converts a logCurveInfo to an index metadata record.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="indexCurve">The index curve.</param>
+        /// <param name="scale">The scale.</param>
+        /// <returns></returns>
+        protected abstract IndexMetadataRecord ToIndexMetadataRecord(T entity, TChild indexCurve, int scale = 3);
+
+        /// <summary>
+        /// Converts a logCurveInfo to a channel metadata record.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="curve">The curve.</param>
+        /// <param name="indexMetadata">The index metadata.</param>
+        /// <returns></returns>
+        protected abstract ChannelMetadataRecord ToChannelMetadataRecord(T entity, TChild curve, IndexMetadataRecord indexMetadata);
+
+        /// <summary>
+        /// Partially delete the log data.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="parser">The parser.</param>
+        /// <param name="channels">The current logCurve information.</param>
+        /// <param name="currentRanges">The current channel index ranges.</param>
+        /// <param name="transaction">The transaction.</param>
+        protected abstract void PartialDeleteLogData(EtpUri uri, WitsmlQueryParser parser, List<TChild> channels, Dictionary<string, Range<double?>> currentRanges, MongoTransaction transaction);
+
+        /// <summary>
+        /// Gets the channel URI.
+        /// </summary>
+        /// <param name="channel">The channel.</param>
+        /// <param name="entity">The data object.</param>
+        /// <returns>The channel URI.</returns>
+        protected abstract EtpUri GetChannelUri(TChild channel, T entity);
+
+        /// <summary>
+        /// Gets the log data delimiter.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <returns></returns>
+        protected virtual string GetLogDataDelimiter(T entity)
+        {
+            return ChannelDataReader.DefaultDataDelimiter;
+        }
+
+        private List<T> GetEntitiesForChannel(params EtpUri[] uris)
+        {
+            if (uris.Any(u => u.IsBaseUri))
+            {
+                return GetCollection<T>(DbCollectionName)
+                    .Find("{}")
+                    .ToList();
+            }
+
+            var filters = uris.Select(GetFilter);
+
+            return GetCollection<T>(DbCollectionName)
+                .Find(Builders<T>.Filter.Or(filters))
+                .ToList();
+        }
+
+        private FilterDefinition<T> GetFilter(EtpUri uri)
+        {
+            var builder = Builders<T>.Filter;
+            var filters = new List<FilterDefinition<T>>();
+
+            var objectIds = uri.GetObjectIds()
+                .ToDictionary(x => x.ObjectType, x => x.ObjectId);
+
+            if (ObjectTypes.Well.EqualsIgnoreCase(uri.ObjectType))
+            {
+                filters.Add(builder.EqIgnoreCase("UidWell", uri.ObjectId));
+            }
+            if (ObjectTypes.Wellbore.EqualsIgnoreCase(uri.ObjectType))
+            {
+                filters.Add(builder.EqIgnoreCase("UidWellbore", uri.ObjectId));
+                filters.Add(builder.EqIgnoreCase("UidWell", objectIds[ObjectTypes.Well]));
+            }
+            if (ObjectTypes.Log.EqualsIgnoreCase(uri.ObjectType))
+            {
+                filters.Add(builder.EqIgnoreCase("Uid", uri.ObjectId));
+                filters.Add(builder.EqIgnoreCase("UidWell", objectIds[ObjectTypes.Well]));
+                filters.Add(builder.EqIgnoreCase("UidWellbore", objectIds[ObjectTypes.Wellbore]));
+            }
+            if (ObjectTypes.LogCurveInfo.EqualsIgnoreCase(uri.ObjectType))
+            {
+                filters.Add(builder.EqIgnoreCase("LogCurveInfo.Mnemonic.Value", uri.ObjectId));
+                filters.Add(builder.EqIgnoreCase("UidWell", objectIds[ObjectTypes.Well]));
+                filters.Add(builder.EqIgnoreCase("UidWellbore", objectIds[ObjectTypes.Wellbore]));
+                filters.Add(builder.EqIgnoreCase("Uid", objectIds[ObjectTypes.Log]));
+            }
+
+            return builder.And(filters.Where(f => f != null));
+        }
+
+        private IList<ChannelMetadataRecord> GetChannelMetadataForAnEntity(T entity, params EtpUri[] uris)
+        {
+            var logCurves = GetLogCurves(entity);
+            var metadata = new List<ChannelMetadataRecord>();
+            var index = 0;
+
+            if (!logCurves.Any())
+                return metadata;
+
+            var mnemonic = GetIndexCurveMnemonic(entity);
+            var indexCurve = logCurves.FirstOrDefault(x => GetMnemonic(x).EqualsIgnoreCase(mnemonic));
+            var indexMetadata = ToIndexMetadataRecord(entity, indexCurve);
+
+            metadata.AddRange(
+                logCurves
+                .Where(x => IsChannelMetaDataRequested(GetChannelUri(x, entity), uris) && !GetMnemonic(x).EqualsIgnoreCase(indexMetadata.Mnemonic))
+                .Select(x =>
+                {
+                    var channel = ToChannelMetadataRecord(entity, x, indexMetadata);
+                    channel.ChannelId = index++;
+                    return channel;
+                }));
+
+            return metadata;
+        }
+
+        private bool IsChannelMetaDataRequested(EtpUri channelUri, params EtpUri[] uris)
+        {
+            if (uris.Any(u => u.IsBaseUri))
+                return true;
+
+            return uris.Contains(channelUri) || uris.Contains(channelUri.Parent) ||
+                   uris.Contains(channelUri.Parent.Parent) || uris.Contains(channelUri.Parent.Parent.Parent);
         }
 
         private IDictionary<int, string> GetMnemonicList(T log, WitsmlQueryParser parser)
@@ -490,7 +906,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Slice the reader for the requested mnemonics
             //reader.Slice(mnemonics, units, nullValues);
-            var count = FormatLogData(log, logHeader, reader, context, mnemonics, units, nullValues);           
+            var count = FormatLogData(log, logHeader, reader, context, mnemonics, units, nullValues);
 
             // Update the response context growing object totals
             context.UpdateGrowingObjectTotals(count, keys.Length);
@@ -539,239 +955,6 @@ namespace PDS.Witsml.Server.Data.Logs
             logCurves?.RemoveAll(x => !mnemonics.Contains(GetMnemonic(x)));
         }
 
-        /// <summary>
-        /// Formats the log curve infos.
-        /// </summary>
-        /// <param name="logCurves">The log curves.</param>
-        protected virtual void FormatLogCurveInfos(List<TChild> logCurves)
-        {
-        }
-
-        /// <summary>
-        /// Updates the log data and index range.
-        /// </summary>
-        /// <param name="uri">The URI.</param>
-        /// <param name="readers">The readers.</param>
-        /// <param name="transaction">The transaction.</param>
-        protected void UpdateLogDataAndIndexRange(EtpUri uri, IEnumerable<ChannelDataReader> readers, MongoTransaction transaction = null)
-        {
-            Logger.DebugFormat("Updating log data and index for log uri '{0}'.", uri.Uri);
-
-            // Get Updated Log
-            var current = GetEntity(uri);
-
-            // Get current index information
-            var ranges = GetCurrentIndexRange(current);
-
-            TimeSpan? offset = null;
-            var isTimeLog = IsTimeLog(current, true);
-            var updateMnemonics = new List<string>();
-            var indexUnit = string.Empty;
-            var updateIndexRanges = false;
-            var checkOffset = true;
-
-            Logger.Debug("Merging ChannelDataChunks with ChannelDataReaders.");
-
-            // Merge ChannelDataChunks
-            foreach (var reader in readers)
-            {
-                if (reader == null)
-                    continue;
-
-                var indexCurve = reader.Indices[0];
-
-                if (string.IsNullOrEmpty(indexUnit))
-                {
-                    indexUnit = indexCurve.Unit;
-                }
-
-                updateMnemonics.Clear();
-                updateMnemonics.Add(indexCurve.Mnemonic);
-
-                updateMnemonics.AddRange(reader.Mnemonics
-                    .Where(m => !updateMnemonics.Contains(m)));
-
-                if (isTimeLog && checkOffset)
-                {
-                    offset = reader.GetChannelIndexRange(0).Offset;
-                    checkOffset = false;
-                }
-
-                // Update index range for each logData element
-                GetUpdatedIndexRange(reader, updateMnemonics.ToArray(), ranges, IsIncreasing(current));
-
-                // Update log data
-                ChannelDataChunkAdapter.Merge(reader, transaction);
-                updateIndexRanges = true;
-            }
-
-            // Update index range
-            if (updateIndexRanges)
-            {
-                UpdateIndexRange(uri, current, ranges, updateMnemonics, IsTimeLog(current), indexUnit, offset);
-            }
-        }
-
-        /// <summary>
-        /// Gets the current index range.
-        /// </summary>
-        /// <param name="entity">The entity.</param>
-        /// <returns></returns>
-        protected Dictionary<string, Range<double?>> GetCurrentIndexRange(T entity)
-        {
-            Logger.Debug("Getting index ranges for all logCurveInfos.");
-
-            var ranges = new Dictionary<string, Range<double?>>();
-            var logCurves = GetLogCurves(entity);
-            var isTimeLog = IsTimeLog(entity);
-            var increasing = IsIncreasing(entity);
-
-            foreach (var curve in logCurves)
-            {
-                var mnemonic = GetMnemonic(curve);
-                var range = GetIndexRange(curve, increasing, isTimeLog);
-
-                Logger.DebugFormat("Index range for curve '{0}' - start: {1}, end: {2}.", mnemonic, range.Start, range.End);
-                ranges.Add(mnemonic, range);
-            }
-
-            return ranges;
-        }
-
-        /// <summary>
-        /// Merge the partial delete ranges from QueryIn with the current index range and the default index range.
-        /// </summary>
-        /// <param name="deletedChannels">The deleted channels.</param>
-        /// <param name="defaultRange">The default delete range, i.e from startIndex/startDateTimeIndex, endIndex/endDateTimeIndex of the log header.</param>
-        /// <param name="current">The current index ranges.</param>
-        /// <param name="delete">The index range from the XmlIn.</param>
-        /// <param name="indexCurve">The index curve.</param>
-        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
-        /// <returns>The channel index ranges for the partial delete.</returns>
-        protected Dictionary<string, Range<double?>> MergePartialDeleteRanges(List<string> deletedChannels, Range<double?> defaultRange, Dictionary<string, Range<double?>> current, Dictionary<string, Range<double?>> delete, string indexCurve, bool increasing)
-        {
-            var ranges = new Dictionary<string, Range<double?>>();
-            var indexRange = current[indexCurve];
-
-            double? begin = null;
-            double? finish = null;
-            double? start = null;
-            double? end = null;
-
-            if (!delete.Keys.Any())
-            {
-                if (defaultRange.Start.HasValue || defaultRange.End.HasValue)
-                {
-                    foreach (var channel in current.Keys)
-                    {
-                        ranges.Add(channel,
-                            new Range<double?>(defaultRange.Start, defaultRange.End, defaultRange.Offset));
-                    }
-                }
-
-                return ranges;
-            }
-
-            foreach (var range in delete)
-            {
-                if (deletedChannels.Contains(range.Key))
-                    continue;
-
-                if (!range.Value.Start.HasValue && !range.Value.End.HasValue)
-                {
-                    if (defaultRange.Start.HasValue)
-                    {
-                        start = defaultRange.Start;
-                        end = defaultRange.End;                      
-                    }
-                    else
-                    {
-                        start = indexRange.Start;
-                        end = indexRange.End;
-                    }
-                    ranges.Add(range.Key, new Range<double?>(start, end, range.Value.Offset));
-                }
-                else
-                {
-                    start = range.Value.Start ?? indexRange.Start.GetValueOrDefault();
-                    end = range.Value.End ?? indexRange.End.GetValueOrDefault();
-                    ranges.Add(range.Key, new Range<double?>(start, end, range.Value.Offset));
-                }
-
-                if (!start.HasValue || !end.HasValue)
-                    continue;
-
-                if (begin.HasValue)
-                {
-                    if (StartsBefore(start.Value, begin.Value, increasing))
-                        begin = start;
-                    if (StartsBefore(end.Value, finish.Value, increasing))
-                        finish = end;
-                }
-                else
-                {
-                    begin = start;
-                    finish = end;
-                }
-            }
-
-            if (!ranges.ContainsKey(indexCurve))
-                ranges.Add(indexCurve, new Range<double?>(begin, finish, indexRange.Offset));
-
-            return ranges;
-        }
-
-        /// <summary>
-        /// Check if to delete channel data by mnemonic.
-        /// </summary>
-        /// <param name="parser">The parser.</param>
-        /// <param name="isTimeLog">if set to <c>true</c> [is time log].</param>
-        /// <returns>True if to delete channel data by mnemonic; false otherwise.</returns>
-        protected bool ToDeleteChannelDataByMnemonic(WitsmlQueryParser parser, bool isTimeLog)
-        {
-            var fields = new List<string> { "mnemonic" };
-            if (isTimeLog)
-            {
-                fields.Add("minDateTimeIndex");
-                fields.Add("maxDateTimeIndex");
-            }
-            else
-            {
-                fields.Add("minIndex");
-                fields.Add("maxDIndex");
-            }
-            var elements = parser.Properties(parser.Element(), "logCurveInfo");
-            foreach (var element in elements)
-            {
-                if (!element.HasElements || element.Elements().All(e => e.Name.LocalName == "mnemonic"))
-                    return true;
-
-                var curveElements = element.Elements();
-                var uidAttribute = element.Attribute("uid");
-                if (uidAttribute != null)
-                    continue;
-
-                if (curveElements.All(e => fields.Contains(e.Name.LocalName)))
-                    return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Check if value a starts the before value b.
-        /// </summary>
-        /// <param name="a">The value a.</param>
-        /// <param name="b">The value b.</param>
-        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
-        /// <returns>True is a starts before b.</returns>
-        protected bool StartsBefore(double a, double b, bool increasing)
-        {
-            return increasing
-                ? a <= b
-                : a >= b;
-        }
-
         private void GetUpdatedIndexRange(ChannelDataReader reader, string[] mnemonics, Dictionary<string, Range<double?>> ranges, bool increasing = true)
         {
             Logger.Debug("Getting updated index ranges for all logCurveInfos.");
@@ -801,52 +984,6 @@ namespace PDS.Witsml.Server.Data.Logs
             }
         }
 
-        /// <summary>
-        /// Updates the index range.
-        /// </summary>
-        /// <param name="uri">The URI.</param>
-        /// <param name="entity">The entity.</param>
-        /// <param name="ranges">The ranges.</param>
-        /// <param name="mnemonics">The mnemonics.</param>
-        /// <param name="isTimeLog">if set to <c>true</c> [is time log].</param>
-        /// <param name="indexUnit">The index unit.</param>
-        /// <param name="offset">The offset.</param>
-        /// <param name="isDelete">True if for delete log data.</param>
-        protected void UpdateIndexRange(EtpUri uri, T entity, Dictionary<string, Range<double?>> ranges, IEnumerable<string> mnemonics, bool isTimeLog, string indexUnit, TimeSpan? offset, bool isDelete = false)
-        {
-            Logger.DebugFormat("Updating index range with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
-
-            var mongoUpdate = new MongoDbUpdate<T>(Container, GetCollection(), null);
-            var filter = MongoDbUtility.GetEntityFilter<T>(uri);
-            var increasing = IsIncreasing(entity);
-            UpdateDefinition<T> logHeaderUpdate = null;
-
-            foreach (var mnemonic in mnemonics)
-            {
-                var curve = GetLogCurve(entity, mnemonic);
-                if (curve == null) continue;
-
-                var curveFilter = Builders<T>.Filter.And(filter,
-                    MongoDbUtility.BuildFilter<T>("LogCurveInfo.Uid", curve.Uid));
-
-                var range = ranges[mnemonic];
-                var isIndexCurve = mnemonic == GetIndexCurveMnemonic(entity);
-
-                var currentRange = GetIndexRange(curve, increasing, isTimeLog);
-                var updateRange = isDelete? range: GetUpdateRange(currentRange, range, increasing);
-
-                logHeaderUpdate = isTimeLog
-                    ? UpdateDateTimeIndexRange(mongoUpdate, curveFilter, logHeaderUpdate, updateRange, increasing, isIndexCurve, offset)
-                    : UpdateIndexRange(mongoUpdate, curveFilter, logHeaderUpdate, updateRange, increasing, isIndexCurve, indexUnit);
-            }
-
-            logHeaderUpdate = UpdateCommonData(logHeaderUpdate, entity, offset);
-
-            if (logHeaderUpdate != null)
-            {
-                mongoUpdate.UpdateFields(filter, logHeaderUpdate);
-            }
-        }
 
         private UpdateDefinition<T> UpdateIndexRange(MongoDbUpdate<T> mongoUpdate, FilterDefinition<T> curveFilter, UpdateDefinition<T> logHeaderUpdate, Range<double?> range, bool increasing, bool isIndexCurve, string indexUnit)
         {
@@ -943,154 +1080,6 @@ namespace PDS.Witsml.Server.Data.Logs
                 end = update.End.GetValueOrDefault();
 
             return new Range<double?>(start, end, update.Offset);
-        }
-
-        /// <summary>
-        /// Determines whether the specified log is increasing.
-        /// </summary>
-        /// <param name="log">The log.</param>
-        /// <returns></returns>
-        protected abstract bool IsIncreasing(T log);
-
-        /// <summary>
-        /// Determines whether the specified log is a time log.
-        /// </summary>
-        /// <param name="log">The log.</param>
-        /// <param name="includeElapsedTime">if set to <c>true</c> [include elapsed time].</param>
-        /// <returns></returns>
-        protected abstract bool IsTimeLog(T log, bool includeElapsedTime = false);
-
-        /// <summary>
-        /// Gets the log curve.
-        /// </summary>
-        /// <param name="log">The log.</param>
-        /// <param name="mnemonic">The mnemonic.</param>
-        /// <returns></returns>
-        protected abstract TChild GetLogCurve(T log, string mnemonic);
-
-        /// <summary>
-        /// Gets the log curves.
-        /// </summary>
-        /// <param name="log">The log.</param>
-        /// <returns></returns>
-        protected abstract List<TChild> GetLogCurves(T log);
-
-        /// <summary>
-        /// Gets the mnemonic.
-        /// </summary>
-        /// <param name="curve">The curve.</param>
-        /// <returns></returns>
-        protected abstract string GetMnemonic(TChild curve);
-
-        /// <summary>
-        /// Gets the index curve mnemonic.
-        /// </summary>
-        /// <param name="log">The log.</param>
-        /// <returns></returns>
-        protected abstract string GetIndexCurveMnemonic(T log);
-
-        /// <summary>
-        /// Gets the units by column index.
-        /// </summary>
-        /// <param name="log">The log.</param>
-        /// <returns></returns>
-        protected abstract IDictionary<int, string> GetUnitsByColumnIndex(T log);
-
-        /// <summary>
-        /// Gets the null values by column index.
-        /// </summary>
-        /// <param name="log">The log.</param>
-        /// <returns></returns>
-        protected abstract IDictionary<int, string> GetNullValuesByColumnIndex(T log);
-
-        /// <summary>
-        /// Gets the index range.
-        /// </summary>
-        /// <param name="curve">The curve.</param>
-        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
-        /// <param name="isTimeIndex">if set to <c>true</c> [is time index].</param>
-        /// <returns></returns>
-        protected abstract Range<double?> GetIndexRange(TChild curve, bool increasing = true, bool isTimeIndex = false);
-
-        /// <summary>
-        /// Sets the log index range.
-        /// </summary>
-        /// <param name="log">The log.</param>
-        /// <param name="logHeader">The log that has the header information.</param>
-        /// <param name="ranges">The ranges.</param>
-        /// <param name="indexCurve">The index curve.</param>
-        protected abstract void SetLogIndexRange(T log, T logHeader, Dictionary<string, Range<double?>> ranges, string indexCurve);
-
-        /// <summary>
-        /// Sets the log data values.
-        /// </summary>
-        /// <param name="log">The log.</param>
-        /// <param name="logData">The log data.</param>
-        /// <param name="mnemonics">The mnemonics.</param>
-        /// <param name="units">The units.</param>
-        protected abstract void SetLogDataValues(T log, List<string> logData, IEnumerable<string> mnemonics, IEnumerable<string> units);
-
-        /// <summary>
-        /// Updates the common data.
-        /// </summary>
-        /// <param name="logHeaderUpdate">The log header update.</param>
-        /// <param name="entity">The entity.</param>
-        /// <param name="offset">The offset.</param>
-        /// <returns></returns>
-        protected abstract UpdateDefinition<T> UpdateCommonData(UpdateDefinition<T> logHeaderUpdate, T entity, TimeSpan? offset);
-
-        /// <summary>
-        /// Creates a generic measure.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <param name="uom">The uom.</param>
-        /// <returns></returns>
-        protected abstract object CreateGenericMeasure(double value, string uom);
-
-        /// <summary>
-        /// Converts a logCurveInfo to an index metadata record.
-        /// </summary>
-        /// <param name="entity">The entity.</param>
-        /// <param name="indexCurve">The index curve.</param>
-        /// <param name="scale">The scale.</param>
-        /// <returns></returns>
-        protected abstract IndexMetadataRecord ToIndexMetadataRecord(T entity, TChild indexCurve, int scale = 3);
-
-        /// <summary>
-        /// Converts a logCurveInfo to a channel metadata record.
-        /// </summary>
-        /// <param name="entity">The entity.</param>
-        /// <param name="curve">The curve.</param>
-        /// <param name="indexMetadata">The index metadata.</param>
-        /// <returns></returns>
-        protected abstract ChannelMetadataRecord ToChannelMetadataRecord(T entity, TChild curve, IndexMetadataRecord indexMetadata);
-
-        /// <summary>
-        /// Partially delete the log data.
-        /// </summary>
-        /// <param name="uri">The URI.</param>
-        /// <param name="parser">The parser.</param>
-        /// <param name="channels">The current logCurve information.</param>
-        /// <param name="currentRanges">The current channel index ranges.</param>
-        /// <param name="transaction">The transaction.</param>
-        protected abstract void PartialDeleteLogData(EtpUri uri, WitsmlQueryParser parser, List<TChild> channels, Dictionary<string, Range<double?>> currentRanges, MongoTransaction transaction);
-
-        /// <summary>
-        /// Gets the channel URI.
-        /// </summary>
-        /// <param name="channel">The channel.</param>
-        /// <param name="entity">The data object.</param>
-        /// <returns>The channel URI.</returns>
-        protected abstract EtpUri GetChannelUri(TChild channel, T entity);
-
-        /// <summary>
-        /// Gets the log data delimiter.
-        /// </summary>
-        /// <param name="entity">The entity.</param>
-        /// <returns></returns>
-        protected virtual string GetLogDataDelimiter(T entity)
-        {
-            return ChannelDataReader.DefaultDataDelimiter;
         }
     }
 }
