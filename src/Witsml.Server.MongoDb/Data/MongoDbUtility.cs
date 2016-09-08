@@ -46,8 +46,9 @@ namespace PDS.Witsml.Server.Data
             var builder = Builders<T>.Filter;
             var filters = new List<FilterDefinition<T>>();
 
+            // Create dictionary with case-insensitive keys
             var objectIds = uri.GetObjectIds()
-                .ToDictionary(x => x.ObjectType, x => x.ObjectId);
+                .ToDictionary(x => x.ObjectType, x => x.ObjectId, StringComparer.CurrentCultureIgnoreCase);
 
             filters.Add(builder.EqIgnoreCase(idPropertyName, uri.ObjectId));
 

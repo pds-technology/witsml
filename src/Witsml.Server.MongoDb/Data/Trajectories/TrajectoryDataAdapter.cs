@@ -21,7 +21,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Energistics.DataAccess;
-using Energistics.Datatypes;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
@@ -81,7 +80,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
                 entities.ForEach(x =>
                 {
-                    // TODO: Implement trajectory station range query, if requested
                     var header = headers[x.GetUri()];
 
                     //Query the trajectory stations
@@ -110,41 +108,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 InsertEntity(dataObject, transaction);
                 transaction.Commit();
             }
-        }
-
-        /// <summary>
-        /// Gets a collection of data objects related to the specified URI.
-        /// </summary>
-        /// <param name="parentUri">The parent URI.</param>
-        /// <returns>A collection of data objects.</returns>
-        public override List<T> GetAll(EtpUri? parentUri = null)
-        {
-            Logger.DebugFormat($"Fetching all Trajectorys; Parent URI: {parentUri}");
-
-            return GetAllQuery(parentUri)
-                .OrderBy(x => x.Name)
-                .ToList();
-        }
-
-        /// <summary>
-        /// Gets an <see cref="IQueryable{T}" /> instance to by used by the GetAll method.
-        /// </summary>
-        /// <param name="parentUri">The parent URI.</param>
-        /// <returns>An executable query.</returns>
-        protected override IQueryable<T> GetAllQuery(EtpUri? parentUri)
-        {
-            var query = GetQuery().AsQueryable();
-
-            if (parentUri != null)
-            {
-                var ids = parentUri.Value.GetObjectIds().ToDictionary(x => x.ObjectType, y => y.ObjectId);
-                var uidWellbore = ids[ObjectTypes.Wellbore];
-                var uidWell = ids[ObjectTypes.Well];
-
-                query = query.Where(x => x.UidWell == uidWell && x.UidWellbore == uidWellbore);
-            }
-
-            return query;
         }
 
         /// <summary>
@@ -180,6 +143,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         protected override List<string> GetIgnoredElementNamesForQuery(WitsmlQueryParser parser)
         {
             var ignored = new List<string> {"mdMn", "mdMx"};
+
             if (parser.IncludeTrajectoryStations())
                 ignored.Add("trajectoryStation");
 
@@ -267,6 +231,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         private void QueryTrajectoryStations(T entity, T header, WitsmlQueryParser parser, ResponseContext context)
         {
             var stations = GetTrajectoryStation(entity);
+
             if (QueryStationFile(entity, header))
             {
                 var uri = entity.GetUri();
@@ -291,6 +256,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             var bytes = bucket.DownloadAsBytes(mongoFile.Id);
             var json = Encoding.UTF8.GetString(bytes);
+
             return BsonSerializer.Deserialize<List<TChild>>(json);
         }
 
@@ -306,9 +272,13 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             if (string.IsNullOrEmpty(mdMn) && string.IsNullOrEmpty(mdMx))
                 return new Range<double?>(null, null);
+
             if (string.IsNullOrEmpty(mdMn))
                 return new Range<double?>(null, double.Parse(mdMx));
-            return string.IsNullOrEmpty(mdMx) ? new Range<double?>(double.Parse(mdMn), null) : new Range<double?>(double.Parse(mdMn), double.Parse(mdMx));
+
+            return string.IsNullOrEmpty(mdMx)
+                ? new Range<double?>(double.Parse(mdMn), null)
+                : new Range<double?>(double.Parse(mdMn), double.Parse(mdMx));
         }
 
         /// <summary>

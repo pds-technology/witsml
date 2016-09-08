@@ -42,8 +42,6 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <seealso cref="PDS.Witsml.Server.Data.Channels.IChannelDataProvider" />
     public abstract class LogDataAdapter<T, TChild> : MongoDbDataAdapter<T>, IChannelDataProvider where T : IWellboreObject where TChild : IUniqueId
     {
-        private readonly bool _streamIndexValuePairs = WitsmlSettings.StreamIndexValuePairs;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="LogDataAdapter{T, TChild}" /> class.
         /// </summary>
@@ -104,16 +102,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Updates the channel data for the specified data object URI.
-        /// </summary>
-        /// <param name="uri">The parent data object URI.</param>
-        /// <param name="reader">The update reader.</param>
-        public void UpdateChannelData(EtpUri uri, ChannelDataReader reader)
-        {
-            UpdateLogDataAndIndexRange(uri, new[] { reader });
-        }
-
-        /// <summary>
         /// Gets the channel metadata for the specified data object URI.
         /// </summary>
         /// <param name="uris">The collection of URI.</param>
@@ -145,6 +133,16 @@ namespace PDS.Witsml.Server.Data.Logs
             var increasing = IsIncreasing(entity);
 
             return GetChannelData(uri, mnemonics.First(), range, increasing, requestLatestValues);
+        }
+
+        /// <summary>
+        /// Updates the channel data for the specified data object URI.
+        /// </summary>
+        /// <param name="uri">The parent data object URI.</param>
+        /// <param name="reader">The update reader.</param>
+        public void UpdateChannelData(EtpUri uri, ChannelDataReader reader)
+        {
+            UpdateLogDataAndIndexRange(uri, new[] { reader });
         }
 
         /// <summary>
@@ -427,6 +425,7 @@ namespace PDS.Witsml.Server.Data.Logs
         protected bool ToDeleteChannelDataByMnemonic(WitsmlQueryParser parser, bool isTimeLog)
         {
             var fields = new List<string> { "mnemonic" };
+
             if (isTimeLog)
             {
                 fields.Add("minDateTimeIndex");
@@ -437,7 +436,9 @@ namespace PDS.Witsml.Server.Data.Logs
                 fields.Add("minIndex");
                 fields.Add("maxDIndex");
             }
+
             var elements = parser.Properties(parser.Element(), "logCurveInfo");
+
             foreach (var element in elements)
             {
                 if (!element.HasElements || element.Elements().All(e => e.Name.LocalName == "mnemonic"))
@@ -668,50 +669,70 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             if (uris.Any(u => u.IsBaseUri))
             {
-                return GetCollection<T>(DbCollectionName)
-                    .Find("{}")
-                    .ToList();
+                return GetAll();
             }
 
-            var filters = uris.Select(GetFilter);
+            var filters = uris
+                .Select(GetChannelFilters)
+                .Where(x => x != null)
+                .ToList();
 
-            return GetCollection<T>(DbCollectionName)
+            if (!filters.Any())
+            {
+                return GetAll();
+            }
+
+            return GetCollection()
                 .Find(Builders<T>.Filter.Or(filters))
                 .ToList();
         }
 
-        private FilterDefinition<T> GetFilter(EtpUri uri)
+        private FilterDefinition<T> GetChannelFilters(EtpUri uri)
         {
             var builder = Builders<T>.Filter;
             var filters = new List<FilterDefinition<T>>();
 
+            // Create dictionary with case-insensitive keys
             var objectIds = uri.GetObjectIds()
-                .ToDictionary(x => x.ObjectType, x => x.ObjectId);
+                .ToDictionary(x => x.ObjectType, x => x.ObjectId, StringComparer.InvariantCultureIgnoreCase);
 
             if (ObjectTypes.Well.EqualsIgnoreCase(uri.ObjectType))
             {
-                filters.Add(builder.EqIgnoreCase("UidWell", uri.ObjectId));
+                AddChannelFilter(filters, builder, "UidWell", uri.ObjectId);
             }
-            if (ObjectTypes.Wellbore.EqualsIgnoreCase(uri.ObjectType))
+            else if (ObjectTypes.Wellbore.EqualsIgnoreCase(uri.ObjectType))
             {
-                filters.Add(builder.EqIgnoreCase("UidWellbore", uri.ObjectId));
-                filters.Add(builder.EqIgnoreCase("UidWell", objectIds[ObjectTypes.Well]));
+                AddChannelFilter(filters, builder, "UidWell", objectIds[ObjectTypes.Well]);
+                AddChannelFilter(filters, builder, "UidWellbore", uri.ObjectId);
             }
-            if (ObjectTypes.Log.EqualsIgnoreCase(uri.ObjectType))
+            else if (ObjectTypes.Log.EqualsIgnoreCase(uri.ObjectType))
             {
-                filters.Add(builder.EqIgnoreCase("Uid", uri.ObjectId));
-                filters.Add(builder.EqIgnoreCase("UidWell", objectIds[ObjectTypes.Well]));
-                filters.Add(builder.EqIgnoreCase("UidWellbore", objectIds[ObjectTypes.Wellbore]));
+                AddChannelFilter(filters, builder, "Uid", uri.ObjectId);
+                AddChannelFilter(filters, builder, "UidWell", objectIds[ObjectTypes.Well]);
+                AddChannelFilter(filters, builder, "UidWellbore", objectIds[ObjectTypes.Wellbore]);
             }
-            if (ObjectTypes.LogCurveInfo.EqualsIgnoreCase(uri.ObjectType))
+            else if (ObjectTypes.LogCurveInfo.EqualsIgnoreCase(uri.ObjectType))
             {
-                filters.Add(builder.EqIgnoreCase("LogCurveInfo.Mnemonic.Value", uri.ObjectId));
-                filters.Add(builder.EqIgnoreCase("UidWell", objectIds[ObjectTypes.Well]));
-                filters.Add(builder.EqIgnoreCase("UidWellbore", objectIds[ObjectTypes.Wellbore]));
-                filters.Add(builder.EqIgnoreCase("Uid", objectIds[ObjectTypes.Log]));
+                AddChannelFilter(filters, builder, "Uid", objectIds[ObjectTypes.Log]);
+                AddChannelFilter(filters, builder, "UidWell", objectIds[ObjectTypes.Well]);
+                AddChannelFilter(filters, builder, "UidWellbore", objectIds[ObjectTypes.Wellbore]);
+                AddChannelFilter(filters, builder, "LogCurveInfo.Mnemonic.Value", uri.ObjectId);
             }
 
-            return builder.And(filters.Where(f => f != null));
+            // Remove null items
+            filters = filters
+                .Where(x => x != null)
+                .ToList();
+
+            return filters.Any()
+                ? builder.And(filters)
+                : null;
+        }
+
+        private void AddChannelFilter(IList<FilterDefinition<T>> filters, FilterDefinitionBuilder<T> builder, string propertyPath, string propertyValue)
+        {
+            if (!string.IsNullOrWhiteSpace(propertyValue))
+                filters.Add(builder.EqIgnoreCase(propertyPath, propertyValue));
         }
 
         private IList<ChannelMetadataRecord> GetChannelMetadataForAnEntity(T entity, params EtpUri[] uris)
@@ -742,11 +763,39 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private bool IsChannelMetaDataRequested(EtpUri channelUri, params EtpUri[] uris)
         {
-            if (uris.Any(u => u.IsBaseUri))
+            // e.g. eml://witsml14 or eml://witsml14/well(well_uid)/wellbore(wellbore_uid)/log(log_uid)/logCurveInfo(GR)
+            if (uris.Any(u => u.IsBaseUri) || uris.Contains(channelUri))
                 return true;
 
-            return uris.Contains(channelUri) || uris.Contains(channelUri.Parent) ||
-                   uris.Contains(channelUri.Parent.Parent) || uris.Contains(channelUri.Parent.Parent.Parent);
+            // e.g. eml://witsml14/well(well_uid)/wellbore(wellbore_uid)/log(log_uid)
+            var parent = channelUri.Parent;
+            if (uris.Contains(parent)) return true;
+
+            // e.g. eml://witsml14/well(well_uid)/wellbore(wellbore_uid)/log(log_uid)/logCurveInfo
+            var folder = parent.Append(channelUri.ObjectType);
+            if (uris.Contains(folder)) return true;
+
+            // e.g. eml://witsml14/well(well_uid)/wellbore(wellbore_uid)
+            var grandParent = parent.Parent;
+            if (uris.Contains(grandParent)) return true;
+
+            // e.g. eml://witsml14/well(well_uid)/wellbore(wellbore_uid)/log
+            var parentFolder = grandParent.Append(parent.ObjectType);
+            if (uris.Contains(parentFolder)) return true;
+
+            // e.g. eml://witsml14/well(well_uid)
+            var greatGrandParent = grandParent.Parent;
+            if (uris.Contains(greatGrandParent)) return true;
+
+            // e.g. eml://witsml14/well(well_uid)/wellbore
+            var grandParentFolder = greatGrandParent.Append(grandParent.ObjectType);
+            if (uris.Contains(grandParentFolder)) return true;
+
+            // e.g. eml://witsml14/well
+            var greatGrandParentFolder = greatGrandParent.Parent.Append(greatGrandParent.ObjectType);
+            if (uris.Contains(greatGrandParentFolder)) return true;
+
+            return false;
         }
 
         private IDictionary<int, string> GetMnemonicList(T log, WitsmlQueryParser parser)
