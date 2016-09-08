@@ -101,7 +101,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     if (channelMetadataRecord == null)
                     {
                         m.ChannelId = Channels.Keys.Count;
-                        Channels.Add(m.ChannelId, new Tuple<EtpUri, ChannelMetadataRecord>(new EtpUri(m.ChannelUri), m));
+                        Channels.Add(m.ChannelId, new Tuple<EtpUri, ChannelMetadataRecord>(new EtpUri(m.ChannelUri).Parent, m));
                         channelMetadataRecord = m;
                     }
                     args.Context.Add(channelMetadataRecord);
@@ -327,6 +327,12 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 var channelStreamingType = firstContext.ChannelStreamingType;
                 var parentUri = firstContext.ParentUri;
                 var primaryIndex = firstContext.ChannelMetadata.Indexes[0];
+                var requestLatestValues = 
+                    channelStreamingType == ChannelStreamingTypes.IndexCount
+                        ? firstContext.IndexCount
+                        : channelStreamingType == ChannelStreamingTypes.LatestValue 
+                            ? 1 
+                            : (int?)null;
 
                 Logger.Debug($"Streaming data for parentUri {parentUri.Uri} and channelIds {string.Join(",", channelIds)}");
 
@@ -352,10 +358,17 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     ? (increasing ? minStartIndex + rangeSize : minStartIndex - rangeSize)
                     : maxEnd?.IndexFromScale(primaryIndex.Scale, isTimeIndex);
                 
-
                 // Get channel data
                 var dataProvider = GetDataProvider(parentUri);
-                var channelData = dataProvider.GetChannelData(parentUri, new Range<double?>(minStartIndex, maxEndIndex));
+                var channelData = dataProvider.GetChannelData(parentUri, new Range<double?>(minStartIndex, maxEndIndex), requestLatestValues);
+
+                // Channel data for IndexCount and LatestValue are in reverse order and must be reversed for output.
+                if (channelStreamingType == ChannelStreamingTypes.IndexCount ||
+                    channelStreamingType == ChannelStreamingTypes.LatestValue)
+                {
+                    channelData = channelData.ToList().Take(requestLatestValues ?? 1);
+                    channelData = channelData.Reverse();
+                }
 
                 await StreamChannelData(contextList, channelData, increasing, token);
 
@@ -368,7 +381,9 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                             c.StartIndex >= c.ChannelMetadata.EndIndex.Value) ||
 
                             (c.ChannelStreamingType == ChannelStreamingTypes.RangeRequest &&
-                            c.StartIndex >= c.EndIndex))
+                            c.StartIndex >= c.EndIndex) ||
+                            
+                            c.ChannelStreamingType == ChannelStreamingTypes.LatestValue || c.ChannelStreamingType == ChannelStreamingTypes.IndexCount)
                     .ToArray();
 
 
