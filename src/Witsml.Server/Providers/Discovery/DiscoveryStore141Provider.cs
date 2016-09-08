@@ -27,6 +27,7 @@ using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using Energistics.Protocol.Discovery;
 using PDS.Framework;
+using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data;
 
 namespace PDS.Witsml.Server.Providers.Discovery
@@ -74,6 +75,13 @@ namespace PDS.Witsml.Server.Providers.Discovery
         }
 
         /// <summary>
+        /// Gets or sets the collection of <see cref="IWitsml141Configuration"/> providers.
+        /// </summary>
+        /// <value>The collection of providers.</value>
+        [ImportMany]
+        public IEnumerable<IWitsml141Configuration> Providers { get; set; }
+
+        /// <summary>
         /// Gets a collection of resources associated to the specified URI.
         /// </summary>
         /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList}"/> instance containing the event data.</param>
@@ -86,40 +94,44 @@ namespace PDS.Witsml.Server.Providers.Discovery
             }
 
             var uri = new EtpUri(args.Message.Uri);
+            var parentUri = uri.Parent;
 
             if (!uri.IsRelatedTo(EtpUris.Witsml141))
             {
                 return;
             }
-            if (args.Message.Uri == EtpUris.Witsml141)
+            if (uri.IsBaseUri)
             {
                 _wellDataProvider.GetAll()
                     .ForEach(x => args.Context.Add(ToResource(x)));
             }
-            else if (string.IsNullOrWhiteSpace(uri.ObjectId))
+            else if (string.IsNullOrWhiteSpace(uri.ObjectId) && ObjectTypes.Wellbore.EqualsIgnoreCase(parentUri.ObjectType))
             {
                 var objectType = ObjectTypes.PluralToSingle(uri.ObjectType);
                 var dataProvider = _container.Resolve<IEtpDataProvider>(new ObjectName(objectType, uri.Version));
 
                 dataProvider
-                    .GetAll(uri.Parent)
+                    .GetAll(parentUri)
                     .Cast<IWellboreObject>()
                     .ForEach(x => args.Context.Add(ToResource(x)));
             }
-            else if (uri.ObjectType == ObjectTypes.Well)
+            else if (ObjectTypes.Well.EqualsIgnoreCase(uri.ObjectType))
             {
                 _wellboreDataProvider.GetAll(uri)
                     .ForEach(x => args.Context.Add(ToResource(x)));
             }
-            else if (uri.ObjectType == ObjectTypes.Wellbore)
+            else if (ObjectTypes.Wellbore.EqualsIgnoreCase(uri.ObjectType))
             {
-                args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Logs));
-                args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Message, ObjectFolders.Messages));
-                args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.MudLog, ObjectFolders.MudLogs));
-                args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Rig, ObjectFolders.Rigs));
-                args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Trajectory, ObjectFolders.Trajectories));
+                var wellboreObjectType = typeof (IWellboreObject);
+
+                Providers
+                    .OfType<IWitsmlDataAdapter>()
+                    .Where(x => wellboreObjectType.IsAssignableFrom(x.DataObjectType))
+                    .Select(x => ObjectTypes.GetObjectType(x.DataObjectType))
+                    .OrderBy(x => x)
+                    .ForEach(x => args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, x, ObjectTypes.SingleToPlural(x, false))));
             }
-            else if (uri.ObjectType == ObjectTypes.Log)
+            else if (ObjectTypes.Log.EqualsIgnoreCase(uri.ObjectType))
             {
                 var log = _logDataProvider.Get(uri);
                 log.LogCurveInfo.ForEach(x => args.Context.Add(ToResource(log, x)));
