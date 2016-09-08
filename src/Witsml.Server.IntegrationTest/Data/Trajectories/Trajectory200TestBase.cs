@@ -16,6 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Energistics.DataAccess.WITSML200.ReferenceData;
+
 namespace PDS.Witsml.Server.Data.Trajectories
 {
     /// <summary>
@@ -25,6 +27,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
     {
         partial void BeforeEachTest()
         {
+            Trajectory.GrowingStatus = ChannelStatus.inactive;
             Trajectory.ServiceCompany = "Service Company T";
         }
     }

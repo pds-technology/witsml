@@ -51,13 +51,15 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Well"),
                 GeographicLocationWGS84 = DevKit.Location(),
+				SchemaVersion = "2.0",
                 TimeZone = DevKit.TimeZone
             };
             Wellbore = new Wellbore
             {
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Wellbore"),
-                Well = DevKit.DataObjectReference(Well)
+                Well = DevKit.DataObjectReference(Well),
+				SchemaVersion = "2.0"
             };
 
             QueryEmptyList = DevKit.List(new Wellbore());

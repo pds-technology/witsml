@@ -52,19 +52,22 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Well"),
                 GeographicLocationWGS84 = DevKit.Location(),
+				SchemaVersion = "2.0",
                 TimeZone = DevKit.TimeZone
             };
             Wellbore = new Wellbore
             {
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Wellbore"),
-                Well = DevKit.DataObjectReference(Well)
+                Well = DevKit.DataObjectReference(Well),
+				SchemaVersion = "2.0"
             };
             Trajectory = new Trajectory
             {
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Trajectory"),
-                Wellbore = DevKit.DataObjectReference(Wellbore)
+                Wellbore = DevKit.DataObjectReference(Wellbore),
+				SchemaVersion = "2.0"
             };
 
             QueryEmptyList = DevKit.List(new Trajectory());

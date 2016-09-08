@@ -50,6 +50,7 @@ namespace PDS.Witsml.Server.Data.Wells
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Well"),
                 GeographicLocationWGS84 = DevKit.Location(),
+				SchemaVersion = "2.0",
                 TimeZone = DevKit.TimeZone
             };
 

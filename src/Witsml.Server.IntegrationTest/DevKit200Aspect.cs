@@ -26,6 +26,7 @@ using Energistics.DataAccess.WITSML200.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Framework;
 using PDS.Witsml.Data.Logs;
+using PDS.Witsml.Server.Data;
 
 namespace PDS.Witsml.Server
 {
@@ -48,8 +49,8 @@ namespace PDS.Witsml.Server
             return new Citation()
             {
                 Title = Name(name),
-                Originator = typeof(Log200Generator).Name,
-                Format = typeof(Log200Generator).Assembly.FullName,
+                Originator = typeof(DevKit200Aspect).Name,
+                Format = typeof(DevKit200Aspect).Assembly.FullName,
                 Creation = DateTime.UtcNow,
             };
         }
@@ -260,24 +261,41 @@ namespace PDS.Witsml.Server
             return log;
         }
 
-        public void GetAndAssert<T>(T dataObject, bool isNotNull = true) where T : AbstractObject
+        public T GetAndAssert<T>(T dataObject, bool isNotNull = true) where T : AbstractObject
         {
-            
+            var dataAdapter = Container.Resolve<IWitsmlDataAdapter<T>>();
+            var current = dataAdapter.Get(dataObject.GetUri());
+
+            Assert.AreEqual(isNotNull, current != null);
+            return current;
         }
 
         public void AddAndAssert<T>(T dataObject) where T : AbstractObject
         {
+            var dataAdapter = Container.Resolve<IWitsmlDataAdapter<T>>();
+            dataAdapter.Add(Parser(dataObject), dataObject);
 
+            var exists = dataAdapter.Exists(dataObject.GetUri());
+            Assert.IsTrue(exists);
         }
 
         public void UpdateAndAssert<T>(T dataObject) where T : AbstractObject
         {
+            var dataAdapter = Container.Resolve<IWitsmlDataAdapter<T>>();
+            dataAdapter.Update(Parser(dataObject), dataObject);
 
+            var exists = dataAdapter.Exists(dataObject.GetUri());
+            Assert.IsTrue(exists);
         }
 
         public void DeleteAndAssert<T>(T dataObject) where T : AbstractObject
         {
+            var uri = dataObject.GetUri();
+            var dataAdapter = Container.Resolve<IWitsmlDataAdapter<T>>();
+            dataAdapter.Delete(uri);
 
+            var exists = dataAdapter.Exists(uri);
+            Assert.IsFalse(exists);
         }
     }
 }

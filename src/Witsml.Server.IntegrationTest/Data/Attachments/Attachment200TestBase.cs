@@ -23,5 +23,9 @@ namespace PDS.Witsml.Server.Data.Attachments
     /// </summary>
     public partial class Attachment200TestBase
     {
+        partial void BeforeEachTest()
+        {
+            Attachment.Content = new byte[] { 0 };
+        }
     }
 }

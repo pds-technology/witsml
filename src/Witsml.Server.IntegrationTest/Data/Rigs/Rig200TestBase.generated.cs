@@ -47,6 +47,7 @@ namespace PDS.Witsml.Server.Data.Rigs
 
             Rig = new Rig
             {
+				SchemaVersion = "2.0",
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Rig")
             };

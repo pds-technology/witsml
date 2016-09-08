@@ -47,6 +47,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
 
             ChannelSet = new ChannelSet
             {
+				SchemaVersion = "2.0",
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("ChannelSet")
             };

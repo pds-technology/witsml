@@ -16,6 +16,10 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Energistics.DataAccess.WITSML200.ReferenceData;
+
 namespace PDS.Witsml.Server.Data.Channels
 {
     /// <summary>
@@ -23,5 +27,16 @@ namespace PDS.Witsml.Server.Data.Channels
     /// </summary>
     public partial class Channel200TestBase
     {
+        partial void BeforeEachTest()
+        {
+            Channel.CurveClass = "length";
+            Channel.DataType = EtpDataType.@double;
+            Channel.GrowingStatus = ChannelStatus.inactive;
+            Channel.Index = new List<ChannelIndex>();
+            Channel.Mnemonic = "CH1";
+            Channel.LoggingCompanyName = "PDS";
+            Channel.TimeDepth = "Depth";
+            Channel.Uom = "m";
+        }
     }
 }

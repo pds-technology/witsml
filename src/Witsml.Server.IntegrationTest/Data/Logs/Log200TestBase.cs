@@ -16,6 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
+using Energistics.DataAccess.WITSML200;
+
 namespace PDS.Witsml.Server.Data.Logs
 {
     /// <summary>
@@ -23,5 +26,9 @@ namespace PDS.Witsml.Server.Data.Logs
     /// </summary>
     public partial class Log200TestBase
     {
+        partial void BeforeEachTest()
+        {
+            Log.ChannelSet = new List<ChannelSet>();
+        }
     }
 }
