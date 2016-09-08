@@ -169,7 +169,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// Saves trajectory stations data in mongo file if trajectory stations count exceeds maximun count; removes if not.
         /// </summary>
         /// <param name="entity">The data object.</param>
-        /// <param name="deleteFile">if set to <c>true</c> [delete file].</param>
+        /// <param name="deleteFile">if set to <c>true</c> delete file.</param>
         private void UpdateMongoFile(T entity, bool deleteFile = true)
         {
             var uri = entity.GetUri();
