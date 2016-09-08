@@ -51,7 +51,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     .ForEach(x => x.Uid = x.Mnemonic);
 
                 // Ensure index curve is first
-                dataObject.LogCurveInfo.MoveToFirst(dataObject.IndexCurve.Value);
+                dataObject.LogCurveInfo.MoveToFirst(dataObject.IndexCurve?.Value);
             }
         }
 
