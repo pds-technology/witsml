@@ -22,6 +22,7 @@ using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
+using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Data.Channels;
@@ -49,12 +50,16 @@ namespace PDS.Witsml.Server.Data.Logs
             var channelUris = new List<EtpUri>();
             channelUris.AddRange(uris.Where(u => u.ObjectType == ObjectTypes.ChannelSet).ToList());
 
-            var logUris = uris.Where(u => u.ObjectType == ObjectTypes.Log);
-            foreach (var logUri in logUris)
+            var logs = GetLogsByUris(uris.ToList());
+
+            if (logs == null)
+                return adapter.GetChannelMetadata(channelUris.ToArray());
+
+            foreach (var log in logs)
             {
-                var entity = GetEntity(logUri);
-                channelUris.AddRange(entity.ChannelSet
+                channelUris.AddRange(log.ChannelSet
                     .Select(x => x.GetUri())
+                    .Where(u => !channelUris.Contains(u))
                     .ToList());
             }
 
@@ -151,6 +156,33 @@ namespace PDS.Witsml.Server.Data.Logs
         protected override List<string> GetIgnoredElementNamesForUpdate(WitsmlQueryParser parser)
         {
             return GetIgnoredElementNamesForQuery(parser);
+        }
+
+        private List<Log> GetLogsByUris(List<EtpUri> uris)
+        {
+            if (uris.Any(u => u.IsBaseUri))
+                return GetAll(null);
+
+            var logUris = GetObjectUris(uris, ObjectTypes.Log);
+            var wellboreUris = GetObjectUris(uris, ObjectTypes.Wellbore);
+            var wellUris = GetObjectUris(uris, ObjectTypes.Well);
+            if (wellUris.Any())
+            {
+                var wellboreFilters = wellUris.Select(wellUri => MongoDbUtility.BuildFilter<Wellbore>("Well.Uuid", wellUri.ObjectId)).ToList();
+                var wellbores = GetCollection<Wellbore>(ObjectNames.Wellbore200)
+                    .Find(Builders<Wellbore>.Filter.Or(wellboreFilters)).ToList();
+                wellboreUris.AddRange(wellbores.Select(w => w.GetUri()).Where(u => !wellboreUris.Contains(u)));
+            }
+
+            var logFilters = wellboreUris.Select(wellboreUri => MongoDbUtility.BuildFilter<Log>("Wellbore.Uuid", wellboreUri.ObjectId)).ToList();
+            logFilters.AddRange(logUris.Select(logUri => MongoDbUtility.GetEntityFilter<Log>(logUri, IdPropertyName)));
+
+            return logFilters.Any() ? GetCollection().Find(Builders<Log>.Filter.Or(logFilters)).ToList() : null;
+        }
+
+        private List<EtpUri> GetObjectUris(IEnumerable<EtpUri> uris, string objectType)
+        {
+            return uris.Where(u => u.ObjectType == objectType).ToList();
         }
     }
 }

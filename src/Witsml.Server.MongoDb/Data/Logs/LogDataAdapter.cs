@@ -108,15 +108,15 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>A collection of channel metadata.</returns>
         public IList<ChannelMetadataRecord> GetChannelMetadata(params EtpUri[] uris)
         {
-            var metaDatas = new List<ChannelMetadataRecord>();
+            var metadata = new List<ChannelMetadataRecord>();
             var entities = GetEntitiesForChannel(uris);
 
             foreach (var entity in entities)
             {
-                metaDatas.AddRange(GetChannelMetadataForAnEntity(entity, uris));
+                metadata.AddRange(GetChannelMetadataForAnEntity(entity, uris));
             }
 
-            return metaDatas;
+            return metadata;
         }
         
         /// <summary>
