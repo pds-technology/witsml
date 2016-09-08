@@ -477,19 +477,16 @@ namespace PDS.Witsml.Server.Data
 
                 var collection = GetCollection<TObject>(dbCollectionName);
                 var current = GetEntity<TObject>(uri, dbCollectionName);
-                if (current == null)
-                    return;
+                if (current == null) return;
+
+                var filter = MongoDbUtility.GetEntityFilter<TObject>(uri, IdPropertyName);
+                collection.DeleteOne(filter);
 
                 if (transaction != null)
                 {                   
                     var document = MongoDbUtility.GetDocumentId(current);
                     transaction.Attach(MongoDbAction.Delete, dbCollectionName, document, uri);
                     transaction.Save();
-                }
-                else
-                {
-                    var filter = MongoDbUtility.GetEntityFilter<TObject>(uri, IdPropertyName);
-                    collection.DeleteOne(filter);
                 }
             }
             catch (MongoException ex)
