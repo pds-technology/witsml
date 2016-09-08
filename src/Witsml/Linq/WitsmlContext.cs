@@ -197,8 +197,9 @@ namespace PDS.Witsml.Linq
             var values = new List<object>();
             var count = 0;
 
+            // Create dictionary with case-insensitive keys
             var objectIds = uri.GetObjectIds()
-                .ToDictionary(x => x.ObjectType, x => x.ObjectId);
+                .ToDictionary(x => x.ObjectType, x => x.ObjectId, StringComparer.InvariantCultureIgnoreCase);
 
             if (!string.IsNullOrWhiteSpace(uri.ObjectId))
             {

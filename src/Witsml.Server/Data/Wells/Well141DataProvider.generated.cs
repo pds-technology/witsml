@@ -24,16 +24,15 @@
 // ----------------------------------------------------------------------
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Xml.Linq;
 using Energistics.DataAccess.WITSML141;
 using PDS.Framework;
-using System.Xml.Linq;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Well"/>.
     /// </summary>
-
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{WellList, Well}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Well>))]
@@ -41,7 +40,6 @@ namespace PDS.Witsml.Server.Data.Wells
     [Export141(ObjectTypes.Well, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Well141DataProvider : WitsmlDataProvider<WellList, Well>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Well141DataProvider"/> class.
@@ -97,6 +95,5 @@ namespace PDS.Witsml.Server.Data.Wells
         /// <param name="dataObject">The data object.</param>
 		/// <param name="element">The element.</param>
         partial void UpdateAdditionalDefaultValues(Well dataObject, XElement element);
-
     }
 }

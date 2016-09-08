@@ -24,16 +24,15 @@
 // ----------------------------------------------------------------------
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Xml.Linq;
 using Energistics.DataAccess.WITSML131;
 using PDS.Framework;
-using System.Xml.Linq;
 
 namespace PDS.Witsml.Server.Data.Rigs
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Rig"/>.
     /// </summary>
-
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{RigList, Rig}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Rig>))]
@@ -41,7 +40,6 @@ namespace PDS.Witsml.Server.Data.Rigs
     [Export131(ObjectTypes.Rig, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Rig131DataProvider : WitsmlDataProvider<RigList, Rig>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Rig131DataProvider"/> class.
@@ -97,6 +95,5 @@ namespace PDS.Witsml.Server.Data.Rigs
         /// <param name="dataObject">The data object.</param>
 		/// <param name="element">The element.</param>
         partial void UpdateAdditionalDefaultValues(Rig dataObject, XElement element);
-
     }
 }

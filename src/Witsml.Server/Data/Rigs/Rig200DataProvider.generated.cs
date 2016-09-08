@@ -24,23 +24,21 @@
 // ----------------------------------------------------------------------
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Xml.Linq;
 using Energistics.DataAccess.WITSML200;
 using PDS.Framework;
-using System.Xml.Linq;
 
 namespace PDS.Witsml.Server.Data.Rigs
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Rig"/>.
     /// </summary>
-
     /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{Rig}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Rig>))]
     [Export200(ObjectTypes.Rig, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Rig200DataProvider : EtpDataProvider<Rig>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Rig200DataProvider"/> class.
@@ -51,6 +49,5 @@ namespace PDS.Witsml.Server.Data.Rigs
         public Rig200DataProvider(IContainer container, IWitsmlDataAdapter<Rig> dataAdapter) : base(container, dataAdapter)
         {
         }
-
     }
 }

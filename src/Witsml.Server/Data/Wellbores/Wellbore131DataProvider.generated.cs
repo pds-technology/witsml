@@ -24,16 +24,15 @@
 // ----------------------------------------------------------------------
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Xml.Linq;
 using Energistics.DataAccess.WITSML131;
 using PDS.Framework;
-using System.Xml.Linq;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Wellbore"/>.
     /// </summary>
-
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{WellboreList, Wellbore}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Wellbore>))]
@@ -41,7 +40,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
     [Export131(ObjectTypes.Wellbore, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Wellbore131DataProvider : WitsmlDataProvider<WellboreList, Wellbore>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Wellbore131DataProvider"/> class.
@@ -97,6 +95,5 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// <param name="dataObject">The data object.</param>
 		/// <param name="element">The element.</param>
         partial void UpdateAdditionalDefaultValues(Wellbore dataObject, XElement element);
-
     }
 }

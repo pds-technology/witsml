@@ -24,23 +24,21 @@
 // ----------------------------------------------------------------------
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Xml.Linq;
 using Energistics.DataAccess.WITSML200;
 using PDS.Framework;
-using System.Xml.Linq;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Log"/>.
     /// </summary>
-
     /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{Log}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Log>))]
     [Export200(ObjectTypes.Log, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Log200DataProvider : EtpDataProvider<Log>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Log200DataProvider"/> class.
@@ -51,6 +49,5 @@ namespace PDS.Witsml.Server.Data.Logs
         public Log200DataProvider(IContainer container, IWitsmlDataAdapter<Log> dataAdapter) : base(container, dataAdapter)
         {
         }
-
     }
 }
