@@ -366,11 +366,12 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 if (channelStreamingType == ChannelStreamingTypes.IndexCount ||
                     channelStreamingType == ChannelStreamingTypes.LatestValue)
                 {
-                    channelData = channelData.ToList().Take(requestLatestValues ?? 1);
-                    channelData = channelData.Reverse();
+                    channelData = channelData.Take(requestLatestValues ?? 1);
+                    //channelData = channelData.Reverse();
                 }
 
-                await StreamChannelData(contextList, channelData, increasing, token);
+                await StreamChannelData(contextList, channelData, requestLatestValues.HasValue ? !increasing : increasing, token);
+                //await StreamChannelData(contextList, channelData, increasing, token);
 
                 // Check each context to see of all the data has streamed.
                 var completedContexts = contextList
@@ -469,7 +470,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 var start = new Range<double?>(Convert.ToDouble(context.StartIndex), null);
 
                 // Handle decreasing data
-                if (start.StartsAfter(primaryIndexValue, increasing, inclusive: true))
+                if (context.StartIndex.HasValue && start.StartsAfter(primaryIndexValue, increasing, inclusive: true))
                     continue;
 
                 // Update ChannelStreamingInfo index value
