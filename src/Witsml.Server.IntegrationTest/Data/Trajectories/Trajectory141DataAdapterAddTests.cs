@@ -42,7 +42,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             // Add well and wellbore
             AddParents();
 
-            // Add trajectory without stations         
+            // Add trajectory with stations         
             Trajectory.TrajectoryStation = DevKit.TrajectoryStations(4, 0);
             DevKit.AddAndAssert(Trajectory);
 

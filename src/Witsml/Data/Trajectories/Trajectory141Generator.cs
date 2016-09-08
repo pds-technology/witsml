@@ -58,11 +58,11 @@ namespace PDS.Witsml.Data.Trajectories
                 var station = new TrajectoryStation
                 {
                     Uid = StationUidPrefix + (i + 1),
-                    TypeTrajStation = TrajStationType.tieinpoint,
-                    MD = new MeasuredDepthCoord {Uom = mdUom, Value = startMd},
-                    Tvd = new WellVerticalDepthCoord() {Uom = tvdUom, Value = startMd + 0.5},
-                    Azi = new PlaneAngleMeasure {Uom = angleUom, Value = random.NextDouble()},
-                    Incl = new PlaneAngleMeasure {Uom = angleUom, Value = random.NextDouble()},
+                    TypeTrajStation = i == 0 ? TrajStationType.tieinpoint : TrajStationType.magneticMWD,
+                    MD = new MeasuredDepthCoord { Uom = mdUom, Value = startMd },
+                    Tvd = new WellVerticalDepthCoord() { Uom = tvdUom, Value = startMd == 0 ? 0 : startMd - 0.1 },
+                    Azi = new PlaneAngleMeasure { Uom = angleUom, Value = startMd == 0 ? 0 : random.NextDouble() },
+                    Incl = new PlaneAngleMeasure { Uom = angleUom, Value = startMd == 0 ? 0 : random.NextDouble() },
                     DateTimeStn = DateTimeOffset.UtcNow
                 };
 
