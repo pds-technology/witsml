@@ -76,6 +76,13 @@ namespace PDS.Witsml.Server.Providers.Discovery
         }
 
         /// <summary>
+        /// Gets or sets the collection of <see cref="IEtpDataProvider"/> providers.
+        /// </summary>
+        /// <value>The collection of providers.</value>
+        [ImportMany]
+        public IEnumerable<IEtpDataProvider> Providers { get; set; }
+
+        /// <summary>
         /// Gets a collection of resources associated to the specified URI.
         /// </summary>
         /// <param name="args">The <see cref="ProtocolEventArgs{GetResources, IList}"/> instance containing the event data.</param>
@@ -88,20 +95,19 @@ namespace PDS.Witsml.Server.Providers.Discovery
             }
 
             var uri = new EtpUri(args.Message.Uri);
+            var parentUri = uri.Parent;
 
             if (!uri.IsRelatedTo(EtpUris.Witsml200))
             {
                 return;
             }
-            if (args.Message.Uri == EtpUris.Witsml200)
+            if (uri.IsBaseUri)
             {
                 _wellDataProvider.GetAll()
                     .ForEach(x => args.Context.Add(ToResource(x)));
             }
             else if (string.IsNullOrWhiteSpace(uri.ObjectId))
             {
-                var parentUri = uri.Parent;
-
                 if (ObjectFolders.Logs.EqualsIgnoreCase(uri.ObjectType))
                 {
                     args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Time));
@@ -122,29 +128,32 @@ namespace PDS.Witsml.Server.Providers.Discovery
                     var dataProvider = _container.Resolve<IEtpDataProvider>(new ObjectName(objectType, uri.Version));
 
                     dataProvider
-                        .GetAll(uri.Parent)
+                        .GetAll(parentUri)
                         .Cast<AbstractObject>()
                         .ForEach(x => args.Context.Add(ToResource(x)));
                 }
             }
-            else if (uri.ObjectType == ObjectTypes.Well)
+            else if (ObjectTypes.Well.EqualsIgnoreCase(uri.ObjectType))
             {
                 _wellboreDataProvider.GetAll(uri)
                     .ForEach(x => args.Context.Add(ToResource(x)));
             }
-            else if (uri.ObjectType == ObjectTypes.Wellbore)
+            else if (ObjectTypes.Wellbore.EqualsIgnoreCase(uri.ObjectType))
             {
-                args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Log, ObjectFolders.Logs));
-                args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.MudLog, ObjectFolders.MudLogs));
-                args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Rig, ObjectFolders.Rigs));
-                args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, ObjectTypes.Trajectory, ObjectFolders.Trajectories));
+                var contentTypes = new List<EtpContentType>();
+                Providers.ForEach(x => x.GetSupportedObjects(contentTypes));
+
+                contentTypes
+                    .Where(x => x.Version == DataSchemaVersion && ObjectTypes.GetObjectType(x.ObjectType, DataSchemaVersion)?.GetProperty("Wellbore") != null)
+                    .OrderBy(x => x.ObjectType)
+                    .ForEach(x => args.Context.Add(DiscoveryStoreProvider.NewFolder(uri, x.ObjectType, ObjectTypes.SingleToPlural(x.ObjectType, false))));
             }
-            else if (uri.ObjectType == ObjectTypes.Log)
+            else if (ObjectTypes.Log.EqualsIgnoreCase(uri.ObjectType))
             {
                 var log = _logDataProvider.Get(uri);
                 log.ChannelSet.ForEach(x => args.Context.Add(ToResource(x)));
             }
-            else if (uri.ObjectType == ObjectTypes.ChannelSet)
+            else if (ObjectTypes.ChannelSet.EqualsIgnoreCase(uri.ObjectType))
             {
                 //var uid = uri.GetObjectIds()
                 //    .Where(x => x.Key == ObjectTypes.Log)
