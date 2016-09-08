@@ -69,6 +69,18 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var response = DevKit.Add<LogList, Log>(Log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var result =
+                DevKit.GetAndAssert<LogList, Log>(new Log()
+                {
+                    Uid = Log.Uid,
+                    UidWell = Log.UidWell,
+                    UidWellbore = Log.UidWellbore
+                });
+            Assert.IsNotNull(result.LogCurveInfo);
+            Assert.AreEqual(result.LogCurveInfo.Count, 2);
+            Assert.AreEqual(result.LogCurveInfo[0].ColumnIndex.Value, 1);
+            Assert.AreEqual(result.LogCurveInfo[1].ColumnIndex.Value, 2);
         }
 
         [TestMethod]
@@ -249,6 +261,18 @@ namespace PDS.Witsml.Server.Data.Logs
                         update.LogData[i].Split(',')[curve.ColumnIndex.Value - 1]);
                 }
             }
+        }
+
+        [TestMethod]
+        public void Log131DataAdapter_AddToStore_Error_Add_DepthLog_Without_IndexCurve()
+        {
+            AddParents();
+
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), 10);
+            Log.IndexCurve = null;
+            var response = DevKit.Add<LogList, Log>(Log);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
         }
     }
 }
