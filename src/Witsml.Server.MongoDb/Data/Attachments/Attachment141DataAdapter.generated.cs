@@ -22,6 +22,7 @@
 //     if the code is regenerated.
 // </auto-generated>
 // ----------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -93,7 +94,7 @@ namespace PDS.Witsml.Server.Data.Attachments
 
             if (parentUri != null)
             {
-                var ids = parentUri.Value.GetObjectIds().ToDictionary(x => x.ObjectType, y => y.ObjectId);
+                var ids = parentUri.Value.GetObjectIds().ToDictionary(x => x.ObjectType, y => y.ObjectId, StringComparer.CurrentCultureIgnoreCase);
                 var uidWellbore = ids[ObjectTypes.Wellbore];
                 var uidWell = ids[ObjectTypes.Well];
 

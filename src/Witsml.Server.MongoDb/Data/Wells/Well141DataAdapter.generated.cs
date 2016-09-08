@@ -22,6 +22,7 @@
 //     if the code is regenerated.
 // </auto-generated>
 // ----------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
