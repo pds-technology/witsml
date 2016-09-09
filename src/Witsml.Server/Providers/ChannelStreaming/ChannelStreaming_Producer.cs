@@ -360,7 +360,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 
                 // Get channel data
                 var dataProvider = GetDataProvider(parentUri);
-                var channelData = dataProvider.GetChannelData(parentUri, new Range<double?>(minStartIndex, maxEndIndex), requestLatestValues);
+                var channelData = dataProvider.GetChannelData(parentUri, new Range<double?>(minStartIndex, maxEndIndex)); //, requestLatestValues);
 
                 // Channel data for IndexCount and LatestValue are in reverse order and must be reversed for output.
                 if (channelStreamingType == ChannelStreamingTypes.IndexCount ||
