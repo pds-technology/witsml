@@ -64,8 +64,8 @@ namespace PDS.Witsml.Server.Data.Logs
             Logger.DebugFormat("Getting the supported capabilities for Log data version {0}.", capServer.Version);
 
             capServer.Add(Functions.GetFromStore, ObjectTypes.Log, WitsmlSettings.MaxDataNodes, WitsmlSettings.MaxDataPoints);
-            capServer.Add(Functions.AddToStore, ObjectTypes.Log);
-            capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);
+            capServer.Add(Functions.AddToStore, ObjectTypes.Log, WitsmlSettings.MaxDataNodes, WitsmlSettings.MaxDataPoints);
+            capServer.Add(Functions.UpdateInStore, ObjectTypes.Log, WitsmlSettings.MaxDataNodes, WitsmlSettings.MaxDataPoints);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.Log);
         }
 
