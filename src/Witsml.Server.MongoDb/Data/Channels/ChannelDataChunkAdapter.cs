@@ -42,14 +42,10 @@ namespace PDS.Witsml.Server.Data.Channels
     {
         private const string ChannelDataChunk = "channelDataChunk";
 
-        /// <summary>
-        /// The file name
-        /// </summary>
+        /// <summary>The file name</summary>
         public const string FileName = "FileName";
 
-        /// <summary>
-        /// The bucket name
-        /// </summary>
+        /// <summary>The bucket name</summary>
         public const string BucketName = "channelData";
 
         /// <summary>
@@ -114,6 +110,8 @@ namespace PDS.Witsml.Server.Data.Channels
                     string.Join(",", reader.Units),
                     string.Join(",", reader.NullValues),
                     transaction);
+
+                CreateChannelDataChunkIndex();
             }
             catch (MongoException ex)
             {
@@ -126,7 +124,6 @@ namespace PDS.Witsml.Server.Data.Channels
                 throw new WitsmlException(ErrorCodes.ErrorMaxDocumentSizeExceeded, ex);
             }
         }
-
 
         /// <summary>
         /// Merges <see cref="ChannelDataChunk" /> data for updates.
@@ -175,6 +172,8 @@ namespace PDS.Witsml.Server.Data.Channels
                         string.Join(",", reader.Units),
                         string.Join(",", reader.NullValues),
                         transaction);
+
+                    CreateChannelDataChunkIndex();
                 }
                 catch (FormatException ex)
                 {
@@ -332,7 +331,6 @@ namespace PDS.Witsml.Server.Data.Channels
 
             transaction?.Save();
         }
-
 
         /// <summary>
         /// Combines <see cref="IEnumerable{IChannelDataRecord}"/> data into RangeSize chunks for storage into the database
@@ -801,6 +799,12 @@ namespace PDS.Witsml.Server.Data.Channels
                 filters.Add(builder.And(rangeFilters));
 
             return builder.And(filters);
+        }
+
+        private void CreateChannelDataChunkIndex()
+        {
+            var keys = Builders<ChannelDataChunk>.IndexKeys.Ascending("Indices.Start");
+            GetCollection().Indexes.CreateOneAsync(keys);
         }
 
         private void UpdateMongoFile(ChannelDataChunk dc)
