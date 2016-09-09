@@ -28,18 +28,6 @@ namespace PDS.Witsml.Server.Data.Wells
 {
     public partial class Well141ValidatorTests
     {
-        [TestMethod]
-        public void Well141Validator_AddToStore_Error_405_Uid_Exist()
-        {
-            var response = AddWell(Well);
-
-            var uid = response.SuppMsgOut;
-            Assert.AreEqual(Well.Uid, uid);
-
-            response = DevKit.Add<WellList, Well>(Well);
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.DataObjectUidAlreadyExists, response.Result);
-        }
 
         [TestMethod]
         public void WitsmlValidator_AddToStore_Error_407_Missing_Witsml_Object_Type()

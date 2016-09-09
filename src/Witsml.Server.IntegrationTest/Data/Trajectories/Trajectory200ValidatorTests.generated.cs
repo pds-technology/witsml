@@ -36,5 +36,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
     [TestClass]
     public partial class Trajectory200ValidatorTests : Trajectory200TestBase
     {
+
     }
 }

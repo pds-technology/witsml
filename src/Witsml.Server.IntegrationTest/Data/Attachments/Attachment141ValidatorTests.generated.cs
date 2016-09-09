@@ -36,6 +36,7 @@ namespace PDS.Witsml.Server.Data.Attachments
     [TestClass]
     public partial class Attachment141ValidatorTests : Attachment141TestBase
     {
+
         #region Error -401
 
         public static readonly string QueryInvalidPluralRoot =
@@ -99,5 +100,18 @@ namespace PDS.Witsml.Server.Data.Attachments
         }
 
         #endregion Error -403
+
+		#region Error -405
+
+		[TestMethod]
+        public void Attachment141Validator_AddToStore_Error_405_Attachment_Already_Exists()
+        {
+            AddParents();
+            DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
+			DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment, ErrorCodes.DataObjectUidAlreadyExists);
+        }
+
+		#endregion Error -405
+
     }
 }

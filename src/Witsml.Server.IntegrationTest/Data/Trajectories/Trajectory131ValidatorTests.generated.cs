@@ -36,6 +36,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
     [TestClass]
     public partial class Trajectory131ValidatorTests : Trajectory131TestBase
     {
+
         #region Error -401
 
         public static readonly string QueryInvalidPluralRoot =
@@ -99,5 +100,18 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         #endregion Error -403
+
+		#region Error -405
+
+		[TestMethod]
+        public void Trajectory131Validator_AddToStore_Error_405_Trajectory_Already_Exists()
+        {
+            AddParents();
+            DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
+			DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory, ErrorCodes.DataObjectUidAlreadyExists);
+        }
+
+		#endregion Error -405
+
     }
 }

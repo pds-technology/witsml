@@ -27,15 +27,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
 {
     public partial class Trajectory131ValidatorTests
     {
-        [TestMethod]
-        public void Trajectory131Validator_AddToStore_Error_405_Trajectory_Already_Exists()
-        {
-            AddParents();
-
-            DevKit.AddAndAssert(Trajectory);
-
-            DevKit.AddAndAssert(Trajectory, ErrorCodes.DataObjectUidAlreadyExists);
-        }
 
         [TestMethod]
         public void Trajectory131Validator_AddToStore_Error_406_Missing_Parent_Uid()

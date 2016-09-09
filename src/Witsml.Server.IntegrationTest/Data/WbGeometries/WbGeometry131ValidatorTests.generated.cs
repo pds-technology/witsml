@@ -39,6 +39,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
     [TestClass]
     public partial class WbGeometry131ValidatorTests : WbGeometry131TestBase
     {
+
         #region Error -401
 
         public static readonly string QueryInvalidPluralRoot =
@@ -102,5 +103,18 @@ namespace PDS.Witsml.Server.Data.WbGeometries
         }
 
         #endregion Error -403
+
+		#region Error -405
+
+		[TestMethod]
+        public void WbGeometry131Validator_AddToStore_Error_405_WbGeometry_Already_Exists()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
+			DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry, ErrorCodes.DataObjectUidAlreadyExists);
+        }
+
+		#endregion Error -405
+
     }
 }

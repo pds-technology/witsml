@@ -27,21 +27,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// </summary>
     public partial class Wellbore141ValidatorTests
     {
-        /// <summary>
-        /// Test adding an existing <see cref="Wellbore"/> 
-        /// </summary>
-        [TestMethod]
-        public void Wellbore141Validator_AddToStore_Error_405_Data_Object_Uid_Duplicate()
-        {
-            var response = DevKit.Add<WellList, Well>(Well);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            response = DevKit.Add<WellboreList, Wellbore>(Wellbore);
-            Assert.AreEqual((short)ErrorCodes.DataObjectUidAlreadyExists, response.Result);
-        }
 
         [TestMethod]
         public void Wellbore141Validator_AddToStore_Error_406_Missing_Parent_Uid()

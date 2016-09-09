@@ -36,6 +36,7 @@ namespace PDS.Witsml.Server.Data.Rigs
     [TestClass]
     public partial class Rig141ValidatorTests : Rig141TestBase
     {
+
         #region Error -401
 
         public static readonly string QueryInvalidPluralRoot =
@@ -99,5 +100,18 @@ namespace PDS.Witsml.Server.Data.Rigs
         }
 
         #endregion Error -403
+
+		#region Error -405
+
+		[TestMethod]
+        public void Rig141Validator_AddToStore_Error_405_Rig_Already_Exists()
+        {
+            AddParents();
+            DevKit.AddAndAssert<RigList, Rig>(Rig);
+			DevKit.AddAndAssert<RigList, Rig>(Rig, ErrorCodes.DataObjectUidAlreadyExists);
+        }
+
+		#endregion Error -405
+
     }
 }

@@ -36,6 +36,7 @@ namespace PDS.Witsml.Server.Data.Messages
     [TestClass]
     public partial class Message131ValidatorTests : Message131TestBase
     {
+
         #region Error -401
 
         public static readonly string QueryInvalidPluralRoot =
@@ -99,5 +100,18 @@ namespace PDS.Witsml.Server.Data.Messages
         }
 
         #endregion Error -403
+
+		#region Error -405
+
+		[TestMethod]
+        public void Message131Validator_AddToStore_Error_405_Message_Already_Exists()
+        {
+            AddParents();
+            DevKit.AddAndAssert<MessageList, Message>(Message);
+			DevKit.AddAndAssert<MessageList, Message>(Message, ErrorCodes.DataObjectUidAlreadyExists);
+        }
+
+		#endregion Error -405
+
     }
 }

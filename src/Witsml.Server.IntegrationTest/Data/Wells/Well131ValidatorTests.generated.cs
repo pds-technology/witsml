@@ -36,6 +36,7 @@ namespace PDS.Witsml.Server.Data.Wells
     [TestClass]
     public partial class Well131ValidatorTests : Well131TestBase
     {
+
         #region Error -401
 
         public static readonly string QueryInvalidPluralRoot =
@@ -99,5 +100,18 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         #endregion Error -403
+
+		#region Error -405
+
+		[TestMethod]
+        public void Well131Validator_AddToStore_Error_405_Well_Already_Exists()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WellList, Well>(Well);
+			DevKit.AddAndAssert<WellList, Well>(Well, ErrorCodes.DataObjectUidAlreadyExists);
+        }
+
+		#endregion Error -405
+
     }
 }

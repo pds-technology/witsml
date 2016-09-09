@@ -36,6 +36,7 @@ namespace PDS.Witsml.Server.Data.Logs
     [TestClass]
     public partial class Log131ValidatorTests : Log131TestBase
     {
+
         #region Error -401
 
         public static readonly string QueryInvalidPluralRoot =
@@ -99,5 +100,18 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         #endregion Error -403
+
+		#region Error -405
+
+		[TestMethod]
+        public void Log131Validator_AddToStore_Error_405_Log_Already_Exists()
+        {
+            AddParents();
+            DevKit.AddAndAssert<LogList, Log>(Log);
+			DevKit.AddAndAssert<LogList, Log>(Log, ErrorCodes.DataObjectUidAlreadyExists);
+        }
+
+		#endregion Error -405
+
     }
 }

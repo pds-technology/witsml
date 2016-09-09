@@ -36,6 +36,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
     [TestClass]
     public partial class Wellbore131ValidatorTests : Wellbore131TestBase
     {
+
         #region Error -401
 
         public static readonly string QueryInvalidPluralRoot =
@@ -99,5 +100,18 @@ namespace PDS.Witsml.Server.Data.Wellbores
         }
 
         #endregion Error -403
+
+		#region Error -405
+
+		[TestMethod]
+        public void Wellbore131Validator_AddToStore_Error_405_Wellbore_Already_Exists()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+			DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore, ErrorCodes.DataObjectUidAlreadyExists);
+        }
+
+		#endregion Error -405
+
     }
 }

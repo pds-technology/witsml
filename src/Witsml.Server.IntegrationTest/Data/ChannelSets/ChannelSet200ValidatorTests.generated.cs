@@ -36,5 +36,6 @@ namespace PDS.Witsml.Server.Data.ChannelSets
     [TestClass]
     public partial class ChannelSet200ValidatorTests : ChannelSet200TestBase
     {
+
     }
 }
