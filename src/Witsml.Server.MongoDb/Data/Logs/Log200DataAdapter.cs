@@ -71,10 +71,9 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="uri">The parent data object URI.</param>
         /// <param name="range">The data range to retrieve.</param>
-        /// <param name="requestLatestValues">The total number of requested latest values.</param>
         /// <returns>A collection of channel data.</returns>
         /// <exception cref="WitsmlException">IChannelDataProvider not configured.</exception>
-        public IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, Range<double?> range, int? requestLatestValues = null)
+        public IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, Range<double?> range)
         {
             var adapter = ChannelSetDataAdapter as IChannelDataProvider;
 
@@ -85,6 +84,18 @@ namespace PDS.Witsml.Server.Data.Logs
 
             return entity.ChannelSet
                 .SelectMany(x => adapter.GetChannelData(x.GetUri(), range));
+        }
+
+        /// <summary>
+        /// Gets the channel data records for the specified data object URI and range.
+        /// </summary>
+        /// <param name="uri">The parent data object URI.</param>
+        /// <param name="range">The data range to retrieve.</param>
+        /// <param name="requestLatestValues">The total number of requested latest values.</param>
+        /// <returns>A collection of channel data.</returns>
+        public List<List<List<object>>> GetChannelData(EtpUri uri, Range<double?> range, int? requestLatestValues)
+        {
+            return new List<List<List<object>>>();
         }
 
         /// <summary>

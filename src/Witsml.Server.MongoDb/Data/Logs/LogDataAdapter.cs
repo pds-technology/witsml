@@ -124,15 +124,26 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="uri">The parent data object URI.</param>
         /// <param name="range">The data range to retrieve.</param>
-        /// <param name="requestLatestValues">The total number of requested latest values.</param>
         /// <returns>A collection of channel data.</returns>
-        public IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, Range<double?> range, int? requestLatestValues = null)
+        public IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, Range<double?> range)
         {
             var entity = GetEntity(uri);
             var mnemonics = GetLogHeaderMnemonics(entity);
             var increasing = IsIncreasing(entity);
 
-            return GetChannelData(uri, mnemonics.First(), range, increasing, requestLatestValues);
+            return GetChannelData(uri, mnemonics.First(), range, increasing);
+        }
+
+        /// <summary>
+        /// Gets the channel data records for the specified data object URI and range.
+        /// </summary>
+        /// <param name="uri">The parent data object URI.</param>
+        /// <param name="range">The data range to retrieve.</param>
+        /// <param name="requestLatestValues">The total number of requested latest values.</param>
+        /// <returns>A collection of channel data.</returns>
+        public List<List<List<object>>> GetChannelData(EtpUri uri, Range<double?> range, int? requestLatestValues)
+        {
+            return new List<List<List<object>>>();
         }
 
         /// <summary>
