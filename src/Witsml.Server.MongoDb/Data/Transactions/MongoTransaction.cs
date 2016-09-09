@@ -39,9 +39,9 @@ namespace PDS.Witsml.Server.Data.Transactions
         internal static readonly int DefaultInterval = Settings.Default.DefaultTransactionWaitInterval;
         internal static readonly int MaximumAttempt = Settings.Default.DefaultMaximumTransactionAttempt;
 
-        private static readonly string _idField = "_id";
-        private static readonly string _uidWell = "UidWell";
-        private static readonly string _uidWellbore = "UidWellbore";
+        //private static readonly string _idField = "_id";
+        //private static readonly string _uidWell = "UidWell";
+        //private static readonly string _uidWellbore = "UidWellbore";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoTransaction"/> class.
@@ -203,48 +203,22 @@ namespace PDS.Witsml.Server.Data.Transactions
         private void Update(IMongoDatabase database, MongoDbTransaction transaction)
         {
             var collection = database.GetCollection<BsonDocument>(transaction.Collection);
-            var filter = GetDocumentFilter(transaction.Value);
+            var filter = GetDocumentFilter(new EtpUri(transaction.Uid));
             collection.ReplaceOne(filter, transaction.Value);
         }
 
         private void Delete(IMongoDatabase database, MongoDbTransaction transaction)
         {
             var collection = database.GetCollection<BsonDocument>(transaction.Collection);
-            var filter = GetDocumentFilter(transaction.Value);
+            var filter = GetDocumentFilter(new EtpUri(transaction.Uid));
             collection.DeleteOne(filter);
         }
 
-        private FilterDefinition<BsonDocument> GetDocumentFilter(BsonDocument document)
+        private FilterDefinition<BsonDocument> GetDocumentFilter(EtpUri uri)
         {
-            var filters = new List<FilterDefinition<BsonDocument>>();
-            if (document.Contains(ObjectTypes.Uid))
-            {
-                filters.Add(MongoDbUtility.BuildFilter<BsonDocument>(ObjectTypes.Uid, document[ObjectTypes.Uid].ToString()));
-                if (document.Contains(_uidWell))
-                {
-                    filters.Add(MongoDbUtility.BuildFilter<BsonDocument>(_uidWell, document[_uidWell].ToString()));
-                    if (document.Contains(_uidWellbore))
-                    {
-                        filters.Add(MongoDbUtility.BuildFilter<BsonDocument>(_uidWellbore, document[_uidWellbore].ToString()));
-                    }
-                }
-            }
-            else if (document.Contains(ObjectTypes.Uuid))
-            {
-                filters.Add(MongoDbUtility.BuildFilter<BsonDocument>(ObjectTypes.Uuid, document[ObjectTypes.Uuid]).ToString());
-            }
-            else if (document.Contains(ObjectTypes.Id))
-            {
-                filters.Add(MongoDbUtility.BuildFilter<BsonDocument>(ObjectTypes.Id, document[ObjectTypes.Id]));
-            }
-            else
-            {
-                filters.Add(MongoDbUtility.BuildFilter<BsonDocument>(_idField, document[_idField]));
-            }
-
-            return filters.Count > 0
-                ? Builders<BsonDocument>.Filter.And(filters)
-                : null;
+            return uri.Version == EtpUris.Witsml200.Version
+                ? MongoDbUtility.GetEntityFilter<BsonDocument>(uri, "Uuid")
+                : MongoDbUtility.GetEntityFilter<BsonDocument>(uri);
         }
 
         #region IDisposable Support

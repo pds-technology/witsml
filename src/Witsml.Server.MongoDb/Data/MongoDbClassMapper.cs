@@ -82,7 +82,7 @@ namespace PDS.Witsml.Server.Data
                 BsonClassMap.RegisterClassMap<Witsml200.AbstractObject>(cm =>
                 {
                     cm.AutoMap();
-                    cm.MapIdMember(x => x.Uuid).SetIdGenerator(UidGenerator.Instance);
+                    cm.SetIgnoreExtraElements(true);
                 });
             }
 
