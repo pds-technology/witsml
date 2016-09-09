@@ -391,8 +391,7 @@ namespace PDS.Witsml.Server.Data
                 
                 if (transaction != null)
                 {
-                    var document = MongoDbUtility.GetDocumentId(entity);
-                    transaction.Attach(MongoDbAction.Add, dbCollectionName, document);
+                    transaction.Attach(MongoDbAction.Add, dbCollectionName, null, uri);
                     transaction.Save();
                 }               
             }
