@@ -229,7 +229,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             AddParents();
 
             // Add trajectory without stations
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(20, 10.2, inCludeExtra: true);
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(20, 10, inCludeExtra: true);
             DevKit.AddAndAssert(Trajectory);
 
             // Get trajectory
@@ -245,7 +245,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             DevKit.AssertNames(result, Trajectory);
 
-            var stations = Trajectory.TrajectoryStation.Where(s => s.MD.Value > start).ToList();
+            var stations = Trajectory.TrajectoryStation.Where(s => s.MD.Value >= start).ToList();
             AssertTrajectoryStations(stations, result.TrajectoryStation);
         }
 
@@ -256,7 +256,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             AddParents();
 
             // Add trajectory without stations
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(20, 10.2, inCludeExtra: true);
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(20, 10, inCludeExtra: true);
             DevKit.AddAndAssert(Trajectory);
 
             // Get trajectory
@@ -274,7 +274,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             DevKit.AssertNames(result, Trajectory);
 
-            var stations = Trajectory.TrajectoryStation.Where(s => s.MD.Value > start && s.MD.Value < end).ToList();
+            var stations = Trajectory.TrajectoryStation.Where(s => s.MD.Value >= start && s.MD.Value <= end).ToList();
             AssertTrajectoryStations(stations, result.TrajectoryStation);
         }
 
