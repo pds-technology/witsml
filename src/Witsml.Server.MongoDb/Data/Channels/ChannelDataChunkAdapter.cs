@@ -803,7 +803,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
         private void CreateChannelDataChunkIndex()
         {
-            var keys = Builders<ChannelDataChunk>.IndexKeys.Ascending("Indices.Start");
+            var keys = Builders<ChannelDataChunk>.IndexKeys.Ascending("Indices.0.Start");
             GetCollection().Indexes.CreateOneAsync(keys);
         }
 
