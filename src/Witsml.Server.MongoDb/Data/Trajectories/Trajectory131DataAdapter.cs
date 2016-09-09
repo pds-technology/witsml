@@ -17,11 +17,9 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
-using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
@@ -54,10 +52,10 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             entity.TrajectoryStation = range.Start.HasValue
                 ? range.End.HasValue
-                    ? stations.Where(s => s.MD.Value > range.Start.Value && s.MD.Value < range.End.Value).ToList()
-                    : stations.Where(s => s.MD.Value > range.Start.Value).ToList()
+                    ? stations.Where(s => s.MD.Value >= range.Start.Value && s.MD.Value <= range.End.Value).ToList()
+                    : stations.Where(s => s.MD.Value >= range.Start.Value).ToList()
                 : range.End.HasValue
-                    ? stations.Where(s => s.MD.Value < range.End.Value).ToList()
+                    ? stations.Where(s => s.MD.Value <= range.End.Value).ToList()
                     : stations;
         }
 
