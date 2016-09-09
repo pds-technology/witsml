@@ -18,8 +18,6 @@
 
 using System.ComponentModel.Composition;
 using Energistics.DataAccess;
-using Witsml131 = Energistics.DataAccess.WITSML131;
-using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
@@ -33,41 +31,14 @@ namespace PDS.Witsml.Server.Data
     /// </summary>
     [Export]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class MongoDbClassMapper
+    public partial class MongoDbClassMapper
     {
         /// <summary>
         /// Registers all supported class and member mappings.
         /// </summary>
         public void Register()
         {
-            // WITSML 1.3.1.1
-            Register<Witsml131.Log>();
-            Register<Witsml131.Message>();
-            Register<Witsml131.Rig>();
-            Register<Witsml131.Trajectory>();
-            Register<Witsml131.StandAloneWellboreGeometry>();
-            Register<Witsml131.Wellbore>();
-            Register<Witsml131.Well>();
-
-            // WITSML 1.4.1.1
-            Register<Witsml141.Attachment>();
-            Register<Witsml141.Log>();
-            Register<Witsml141.Message>();
-            Register<Witsml141.Rig>();
-            Register<Witsml141.Trajectory>();
-            Register<Witsml141.StandAloneWellboreGeometry>();
-            Register<Witsml141.Wellbore>();
-            Register<Witsml141.Well>();
-
-            // WITSML 2.0
-            Register2<Witsml200.Attachment>();
-            Register2<Witsml200.Channel>();
-            Register2<Witsml200.ChannelSet>();
-            Register2<Witsml200.Log>();
-            Register2<Witsml200.Rig>();
-            Register2<Witsml200.Trajectory>();
-            Register2<Witsml200.Wellbore>();
-            Register2<Witsml200.Well>();
+            RegisterDataTypes();
 
             Register3<Witsml200.ComponentSchemas.GeodeticWellLocation>();
             Register3<Witsml200.ComponentSchemas.GeodeticEpsgCrs>();

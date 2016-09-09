@@ -225,6 +225,9 @@
       <DependentUpon>Message141DataAdapter.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\MongoDbClassMapper.cs" />
+    <Compile Include="Data\MongoDbClassMapper.generated.cs">
+      <DependentUpon>MongoDbClassMapper.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\MongoDbDataAdapter.cs" />
     <Compile Include="Data\MongoDbDelete.cs" />
     <Compile Include="Data\MongoDbDeleteContext.cs" />
