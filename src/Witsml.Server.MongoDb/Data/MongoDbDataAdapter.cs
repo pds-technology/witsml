@@ -134,6 +134,22 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Replaces a data object in the data store.
+        /// </summary>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The data object to be replaced.</param>
+        public override void Replace(WitsmlQueryParser parser, T dataObject)
+        {
+            var uri = GetUri(dataObject);
+            using (var transaction = DatabaseProvider.BeginTransaction(uri))
+            {
+                ReplaceEntity(dataObject, uri, transaction);
+                ValidateUpdatedEntity(uri);
+                transaction.Commit();
+            }
+        }
+
+        /// <summary>
         /// Deletes or partially updates the specified object by uid.
         /// </summary>
         /// <param name="parser">The query parser that specifies the object.</param>
@@ -446,6 +462,56 @@ namespace PDS.Witsml.Server.Data
             {
                 Logger.ErrorFormat("Error updating {0} MongoDb collection: {1}", dbCollectionName, ex);
                 throw new WitsmlException(ErrorCodes.ErrorUpdatingInDataStore, ex);
+            }
+        }
+
+        /// <summary>
+        /// Replaces an object in the data store.
+        /// </summary>
+        /// <param name="entity">The object to be replaced.</param>
+        /// <param name="uri">The data object URI.</param>
+        /// <param name="transaction">The transaction.</param>
+        protected void ReplaceEntity(T entity, EtpUri uri, MongoTransaction transaction = null)
+        {
+            ReplaceEntity(DbCollectionName, entity, uri, transaction);
+        }
+
+        /// <summary>
+        /// Replaces an object in the data store.
+        /// </summary>
+        /// <typeparam name="TObject">The type of the object.</typeparam>
+        /// <param name="dbCollectionName">The name of the database collection.</param>
+        /// <param name="entity">The object to be replaced.</param>
+        /// <param name="uri">The data object URI.</param>
+        /// <param name="transaction">The transaction.</param>
+        /// <exception cref="WitsmlException"></exception>
+        protected void ReplaceEntity<TObject>(string dbCollectionName, TObject entity, EtpUri uri, MongoTransaction transaction = null)
+        {
+            try
+            {
+                Logger.DebugFormat("Replacing {0} MongoDb collection", dbCollectionName);
+
+                var collection = GetCollection<TObject>(dbCollectionName);
+                var current = GetEntity<TObject>(uri, dbCollectionName);
+                //var updates = MongoDbUtility.CreateUpdateFields<TObject>();
+                //var ignores = MongoDbUtility.CreateIgnoreFields<TObject>(GetIgnoredElementNamesForUpdate(parser));
+
+                //var update = new MongoDbUpdate<TObject>(Container, collection, parser, IdPropertyName, ignores);
+                //update.Update(current, uri, updates);
+
+                var filter = GetEntityFilter<TObject>(uri, IdPropertyName);
+                collection.ReplaceOne(filter, entity);
+
+                if (transaction != null)
+                {
+                    transaction.Attach(MongoDbAction.Update, dbCollectionName, current.ToBsonDocument(), uri);
+                    transaction.Save();
+                }
+            }
+            catch (MongoException ex)
+            {
+                Logger.ErrorFormat("Error replacing {0} MongoDb collection: {1}", dbCollectionName, ex);
+                throw new WitsmlException(ErrorCodes.ErrorReplacingInDataStore, ex);
             }
         }
 
