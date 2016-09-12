@@ -138,19 +138,19 @@
     <comment>-423</comment>
   </data>
   <data name="ErrorAddingToDataStore" xml:space="preserve">
-    <value>Error adding to data store</value>
+    <value>Error adding data to data store</value>
     <comment>-1001</comment>
   </data>
   <data name="ErrorDeletingFromDataStore" xml:space="preserve">
-    <value>Error deleting from data store</value>
+    <value>Error deleting data from data store</value>
     <comment>-1004</comment>
   </data>
   <data name="ErrorReadingFromDataStore" xml:space="preserve">
-    <value>Error reading from data store</value>
+    <value>Error reading data from data store</value>
     <comment>-1002</comment>
   </data>
   <data name="ErrorUpdatingInDataStore" xml:space="preserve">
-    <value>Error updating in data store</value>
+    <value>Error updating data in data store</value>
     <comment>-1003</comment>
   </data>
   <data name="MissingClientUserAgent" xml:space="preserve">
@@ -516,5 +516,9 @@
   <data name="InvalidLogCurveInfoColumnIndex" xml:space="preserve">
     <value>The maximum columnIndex value was greater than the logData array length.</value>
     <comment>-1053</comment>
+  </data>
+  <data name="ErrorReplacingInDataStore" xml:space="preserve">
+    <value>Error replacing data in data store</value>
+    <comment>-1007</comment>
   </data>
 </root>

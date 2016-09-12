@@ -53,6 +53,13 @@ namespace PDS.Witsml.Server.Data
         void Update(WitsmlQueryParser parser, T dataObject);
 
         /// <summary>
+        /// Replaces a data object in the data store.
+        /// </summary>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The data object to be replaced.</param>
+        void Replace(WitsmlQueryParser parser, T dataObject);
+
+        /// <summary>
         /// Deletes or partially updates the specified object in the data store.
         /// </summary>
         /// <param name="parser">The input template parser.</param>

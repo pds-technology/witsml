@@ -304,7 +304,7 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error adding to data store.
+        ///   Looks up a localized string similar to Error adding data to data store.
         /// </summary>
         internal static string ErrorAddingToDataStore {
             get {
@@ -313,7 +313,7 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error deleting from data store.
+        ///   Looks up a localized string similar to Error deleting data from data store.
         /// </summary>
         internal static string ErrorDeletingFromDataStore {
             get {
@@ -349,11 +349,20 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error reading from data store.
+        ///   Looks up a localized string similar to Error reading data from data store.
         /// </summary>
         internal static string ErrorReadingFromDataStore {
             get {
                 return ResourceManager.GetString("ErrorReadingFromDataStore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error replacing data in data store.
+        /// </summary>
+        internal static string ErrorReplacingInDataStore {
+            get {
+                return ResourceManager.GetString("ErrorReplacingInDataStore", resourceCulture);
             }
         }
         
@@ -376,7 +385,7 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error updating in data store.
+        ///   Looks up a localized string similar to Error updating data in data store.
         /// </summary>
         internal static string ErrorUpdatingInDataStore {
             get {

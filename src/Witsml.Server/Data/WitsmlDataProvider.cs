@@ -159,7 +159,7 @@ namespace PDS.Witsml.Server.Data
 
             if (!string.IsNullOrWhiteSpace(uri.ObjectId) && Exists(uri))
             {
-                Update(parser);
+                Replace(parser);
             }
             else
             {
@@ -228,6 +228,30 @@ namespace PDS.Witsml.Server.Data
             Logger.DebugFormat("Validated {0} with URI '{1}' for Update", typeof(TObject).Name, uri);
 
             DataAdapter.Update(parser, dataObject);
+            return Success();
+        }
+
+        /// <summary>
+        /// Replaces a data object in the data store.
+        /// </summary>
+        /// <param name="parser">The input template parser.</param>
+        /// <returns>
+        /// A WITSML result that includes a positive value indicates a success or a negative value indicates an error.
+        /// </returns>
+        protected virtual WitsmlResult Replace(WitsmlQueryParser parser)
+        {
+            var validator = Container.Resolve<IDataObjectValidator<TObject>>();
+            var element = validator.Parse(Functions.AddToStore, parser);
+            var dataObject = Parse(element);
+
+            SetDefaultValues(dataObject);
+            var uri = GetUri(dataObject);
+            Logger.DebugFormat("Replacing {0} with URI '{1}'", typeof(TObject).Name, uri);
+
+            validator.Validate(Functions.AddToStore, parser, dataObject);
+            Logger.DebugFormat("Validated {0} with URI '{1}' for Replace", typeof(TObject).Name, uri);
+
+            DataAdapter.Replace(parser, dataObject);
             return Success();
         }
 

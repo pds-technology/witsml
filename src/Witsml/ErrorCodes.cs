@@ -508,22 +508,22 @@ namespace PDS.Witsml
         DataObjectTypeNotSupported = -487,
 
         /// <summary>
-        /// -1001 Error adding to data store.
+        /// -1001 Error adding data to data store.
         /// </summary>
         ErrorAddingToDataStore = -1001,
 
         /// <summary>
-        /// -1002 Error reading from data store.
+        /// -1002 Error reading data from data store.
         /// </summary>
         ErrorReadingFromDataStore = -1002,
 
         /// <summary>
-        /// -1003 Error updating in data store.
+        /// -1003 Error updating data in data store.
         /// </summary>
         ErrorUpdatingInDataStore = -1003,
 
         /// <summary>
-        /// -1004 Error deleting from data store.
+        /// -1004 Error deleting data from data store.
         /// </summary>
         ErrorDeletingFromDataStore = -1004,
 
@@ -536,6 +536,11 @@ namespace PDS.Witsml
         /// -1006 Max document size exceeded.
         /// </summary>
         ErrorMaxDocumentSizeExceeded = -1006,
+
+        /// <summary>
+        /// -1007 Error replacing data in data store.
+        /// </summary>
+        ErrorReplacingInDataStore = -1007,
 
         /// <summary>
         /// -1021 When deleting simple content that has attribute(s), the attribute(s) should not be specified.

@@ -96,10 +96,29 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Replacs a data object in the data store.
+        /// </summary>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The data object to be replaced.</param>
+        public virtual void Replace(WitsmlQueryParser parser, T dataObject)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Deletes or partially updates the specified object in the data store.
         /// </summary>
         /// <param name="parser">The input template parser.</param>
         public virtual void Delete(WitsmlQueryParser parser)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Deletes a data object by the specified URI.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        public virtual void Delete(EtpUri uri)
         {
             throw new NotImplementedException();
         }
@@ -170,15 +189,6 @@ namespace PDS.Witsml.Server.Data
         /// <param name="uri">The data object URI.</param>
         /// <returns>The data object instance.</returns>
         public virtual T Get(EtpUri uri)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Deletes a data object by the specified URI.
-        /// </summary>
-        /// <param name="uri">The data object URI.</param>
-        public virtual void Delete(EtpUri uri)
         {
             throw new NotImplementedException();
         }
