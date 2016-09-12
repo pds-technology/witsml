@@ -197,6 +197,14 @@ namespace PDS.Witsml.Server
             Assert.AreEqual((short)errorCode, response.Result);
         }
 
+        public void UpdateAndAssert(string typeIn, string xmlIn, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            var response = UpdateInStore(typeIn, xmlIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)errorCode, response.Result);
+        }
+
         /// <summary>
         /// Deletes the data object and test the return code
         /// </summary>

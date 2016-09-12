@@ -16,6 +16,10 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using Energistics.DataAccess.WITSML141.ReferenceData;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace PDS.Witsml.Server.Data.Trajectories
 {
     /// <summary>
@@ -23,5 +27,27 @@ namespace PDS.Witsml.Server.Data.Trajectories
     /// </summary>
     public partial class Trajectory141DataAdapterUpdateTests
     {
+        [TestMethod]
+        public void Trajectory141DataAdapter_UpdateInStore_Update_Trajectory_Header()
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory without stations
+            Trajectory.MagDeclUsed = new PlaneAngleMeasure { Uom = PlaneAngleUom.dega, Value = 20.0 };
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            var result = DevKit.GetAndAssert(Trajectory);
+            Assert.IsNull(result.AziRef);
+
+            const string content = "<magDeclUsed /><aziRef>grid north</aziRef>";
+            var xmlIn = string.Format(DevKit141Aspect.BasicTrajectoryXmlTemplate, Trajectory.Uid, Trajectory.UidWell, Trajectory.UidWellbore, content);
+            DevKit.UpdateAndAssert(ObjectTypes.Trajectory, xmlIn);
+
+            result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(AziRef.gridnorth, result.AziRef);
+            Assert.IsNull(result.MagDeclUsed);
+        }
     }
 }
