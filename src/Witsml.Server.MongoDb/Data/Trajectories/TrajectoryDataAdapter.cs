@@ -111,6 +111,21 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         /// <summary>
+        /// Updates a data object in the data store.
+        /// </summary>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The data object to be updated.</param>
+        public override void Update(WitsmlQueryParser parser, T dataObject)
+        {
+            var uri = dataObject.GetUri();
+            using (var transaction = DatabaseProvider.BeginTransaction(uri))
+            {
+                UpdateEntity(parser, uri, transaction);
+                transaction.Commit();
+            }
+        }
+
+        /// <summary>
         /// Gets a list of the property names to project during a query.
         /// </summary>
         /// <param name="parser">The WITSML parser.</param>
@@ -160,7 +175,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             return GetIgnoredElementNamesForQuery(parser)
                 .Concat(new[]
                 {
-                    "objectGrowing"
+                    "objectGrowing", "mdMn", "mdMx"
                 })
                 .ToList();
         }

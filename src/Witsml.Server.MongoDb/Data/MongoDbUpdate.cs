@@ -196,7 +196,8 @@ namespace PDS.Witsml.Server.Data
             if (!string.IsNullOrWhiteSpace(uomValue) && (string.IsNullOrWhiteSpace(measureValue) || measureValue.EqualsIgnoreCase("NaN")))
                 throw new WitsmlException(ErrorCodes.MissingMeasureDataForUnit);
 
-            NavigateProperty(propertyInfo, xmlObject, propertyType, propertyPath, uomValue);
+            if (!string.IsNullOrWhiteSpace(measureValue))
+                NavigateProperty(propertyInfo, xmlObject, propertyType, propertyPath, uomValue);
         }
 
         /// <summary>
