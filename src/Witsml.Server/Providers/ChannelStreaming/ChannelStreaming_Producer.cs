@@ -359,32 +359,23 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     : maxEnd?.IndexFromScale(primaryIndex.Scale, isTimeIndex);
                 
                 // Get channel data
+                var mnemonics = contextList.Select(c => c.ChannelMetadata.ChannelName).ToArray();
                 var dataProvider = GetDataProvider(parentUri);
-                var channelData = dataProvider.GetChannelData(parentUri, new Range<double?>(minStartIndex, maxEndIndex)); //, requestLatestValues);
+                var channelData = dataProvider.GetChannelData(parentUri, new Range<double?>(minStartIndex, maxEndIndex), mnemonics, requestLatestValues);
 
-                // Channel data for IndexCount and LatestValue are in reverse order and must be reversed for output.
-                if (channelStreamingType == ChannelStreamingTypes.IndexCount ||
-                    channelStreamingType == ChannelStreamingTypes.LatestValue)
-                {
-                    channelData = channelData.Take(requestLatestValues ?? 1);
-                    //channelData = channelData.Reverse();
-                }
-
-                await StreamChannelData(contextList, channelData, requestLatestValues.HasValue ? !increasing : increasing, token);
-                //await StreamChannelData(contextList, channelData, increasing, token);
+                // Stream the channel data
+                await StreamChannelData(contextList, channelData, mnemonics, increasing, isTimeIndex, primaryIndex.Scale, token);
 
                 // Check each context to see of all the data has streamed.
                 var completedContexts = contextList
                     .Where(
                         c =>
-                            (c.ChannelStreamingType == ChannelStreamingTypes.IndexValue && 
+                            (c.ChannelStreamingType != ChannelStreamingTypes.RangeRequest && 
                             c.ChannelMetadata.Status != ChannelStatuses.Active && c.ChannelMetadata.EndIndex.HasValue &&
                             c.StartIndex >= c.ChannelMetadata.EndIndex.Value) ||
 
                             (c.ChannelStreamingType == ChannelStreamingTypes.RangeRequest &&
-                            c.StartIndex >= c.EndIndex) ||
-                            
-                            c.ChannelStreamingType == ChannelStreamingTypes.LatestValue || c.ChannelStreamingType == ChannelStreamingTypes.IndexCount)
+                            c.StartIndex >= c.EndIndex))
                     .ToArray();
 
 
@@ -394,7 +385,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             }
         }
 
-        private async Task StreamChannelData(IList<ChannelStreamingContext> contextList, IEnumerable<IChannelDataRecord> channelData, bool increasing, CancellationToken token)
+        private async Task StreamChannelData(IList<ChannelStreamingContext> contextList, List<List<List<object>>> channelData, string[] mnemonics, bool increasing, bool isTimeIndex, int scale, CancellationToken token)
         {
             var dataItemList = new List<DataItem>();
             var firstContext = contextList.FirstOrDefault();
@@ -403,19 +394,18 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             if (firstContext == null)
                 return;
 
-            var indexes = firstContext.ChannelMetadata.Indexes;
-
             using (var channelDataEnum = channelData.GetEnumerator())
             {
                 var endOfChannelData = !channelDataEnum.MoveNext();
 
                 while (!endOfChannelData)
                 {
-                    foreach (var dataItem in CreateDataItems(contextList, indexes, channelDataEnum.Current, increasing))
+                    foreach (var dataItem in CreateDataItems(contextList, channelDataEnum.Current, mnemonics, increasing, isTimeIndex, scale))
                     {
                         if (IsStreamingStopped(contextList, ref token))
                             break;
 
+                        // If our data list has reached the maximum size, then send it.
                         if (dataItemList.Count >= MaxDataItems)
                         {
                             await SendChannelData(dataItemList);
@@ -425,6 +415,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                         if (IsStreamingStopped(contextList, ref token))
                             break;
 
+                        // Add the dataItem to a list to be streamed.
                         dataItemList.Add(dataItem);
                     }
                     endOfChannelData = !channelDataEnum.MoveNext();
@@ -433,6 +424,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                         break;
                 }
 
+                // Send any remaining channel data that has not been streamed.
                 if (dataItemList.Any())
                 {
                     await SendChannelData(dataItemList);
@@ -440,48 +432,44 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             }
         }
 
-        private static bool IsStreamingStopped(IList<ChannelStreamingContext> contextList, ref CancellationToken token)
+        private IEnumerable<DataItem> CreateDataItems(IList<ChannelStreamingContext> contextList, List<List<object>> record, string[] mnemonics, bool increasing, bool isTimeIndex, int scale)
         {
-            return token.IsCancellationRequested || contextList.Count == 0;
-        }
+            // Get the index and value components for the current record
+            var indexes = record[0];
+            var values = record[1];
 
-        private IEnumerable<DataItem> CreateDataItems(IList<ChannelStreamingContext> contextList, IList<IndexMetadataRecord> indexes, IChannelDataRecord record, bool increasing)
-        {
-            // Get primary index info and scaled value for the current record
-
-            var primaryIndex = indexes.First();
-            var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
-            var primaryIndexValue = record.GetIndexValue().IndexToScale(primaryIndex.Scale, isTimeIndex);
-
+            // Create a list of all of the records indexes, scaled
             var indexValues = new List<long>();
-            var i = 0;
             indexes.ForEach(x =>
             {
-                indexValues.Add((long)record.GetIndexValue(i++, x.Scale));
+                indexValues.Add(((double)x).IndexToScale(scale, isTimeIndex));
             });
 
+            var primaryIndexValue = indexValues[0];
+
+            // For each channel
             foreach (var context in contextList)
             {
-
+                // Get the channel from the context.
                 var channel = context.ChannelMetadata;
-                // Verify channel is included in the channelRangeInfo
-                //if (channel == null) continue;
 
+                // Create a range for the current start index.
                 var start = new Range<double?>(Convert.ToDouble(context.StartIndex), null);
 
-                // Handle decreasing data
+                // If we have an established Start and it starts after the current primaryIndexValue then skip this value.
                 if (context.StartIndex.HasValue && start.StartsAfter(primaryIndexValue, increasing, inclusive: true))
                     continue;
 
-                // Update ChannelStreamingInfo index value
+                // Update the current StartIndex for our context with the current index value
                 context.StartIndex = primaryIndexValue;
 
-                var value = FormatValue(record.GetValue(record.GetOrdinal(channel.ChannelName)));
+                var value = FormatValue(values[Array.IndexOf(mnemonics, channel.ChannelName)]);
 
                 // Filter null or empty data values
                 if (value == null || string.IsNullOrWhiteSpace($"{value}"))
                     continue;
 
+                // Create and return a DataItem.
                 yield return new DataItem()
                 {
                     ChannelId = context.ChannelId,
@@ -537,6 +525,11 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             }
 
             return value;
+        }
+
+        private static bool IsStreamingStopped(IList<ChannelStreamingContext> contextList, ref CancellationToken token)
+        {
+            return token.IsCancellationRequested || contextList.Count == 0;
         }
     }
 }
