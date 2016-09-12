@@ -281,6 +281,14 @@ namespace PDS.Witsml.Data
                     var properties = GetPropertyInfo(elementType);
                     NavigateAttributes(element, propertyPath, properties, true);
                 }
+                else
+                {
+                    if (string.IsNullOrWhiteSpace(element.Value))
+                    {
+                        NavigateElementTypeWithoutXmlText(propertyInfo, elementType, element, propertyPath);
+                        return;
+                    }
+                }
 
                 NavigateProperty(propertyInfo, element, propertyType, propertyName, element.Value);
             }
