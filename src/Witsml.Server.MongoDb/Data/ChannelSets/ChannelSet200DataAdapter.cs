@@ -102,9 +102,10 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         /// </summary>
         /// <param name="uri">The parent data object URI.</param>
         /// <param name="range">The data range to retrieve.</param>
+        /// <param name="mnemonics">The mnemonics to return data for.</param>
         /// <param name="requestLatestValues">The total number of requested latest values.</param>
         /// <returns>A collection of channel data.</returns>
-        public List<List<List<object>>> GetChannelData(EtpUri uri, Range<double?> range, int? requestLatestValues)
+        public List<List<List<object>>> GetChannelData(EtpUri uri, Range<double?> range, string[] mnemonics, int? requestLatestValues)
         {
             return new List<List<List<object>>>();
         }

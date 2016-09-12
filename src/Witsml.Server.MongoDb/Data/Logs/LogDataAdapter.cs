@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using Avro;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
@@ -139,11 +140,34 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="uri">The parent data object URI.</param>
         /// <param name="range">The data range to retrieve.</param>
+        /// <param name="mnemonics">The mnemonics to return data for.</param>
         /// <param name="requestLatestValues">The total number of requested latest values.</param>
         /// <returns>A collection of channel data.</returns>
-        public List<List<List<object>>> GetChannelData(EtpUri uri, Range<double?> range, int? requestLatestValues)
+        public List<List<List<object>>> GetChannelData(EtpUri uri, Range<double?> range, string[] mnemonics, int? requestLatestValues)
         {
-            return new List<List<List<object>>>();
+            var entity = GetEntity(uri);
+            var allMnemonics = GetLogHeaderMnemonics(entity);
+            var mnemonicIndexes = ComputeMnemonicIndexes(allMnemonics, mnemonics, string.Empty);
+            var records = GetChannelData(uri, allMnemonics[0], range, IsIncreasing(entity), requestLatestValues);
+
+            // Get a reader for the log's channel data
+            var keys = mnemonicIndexes.Keys.ToArray();
+            var units = GetUnitList(entity, keys);
+            var nullValues = GetNullValueList(entity, keys);
+            var reader = records.GetReader(allMnemonics, units, nullValues);
+
+            // Create a context to pass information required by the ChannelDataReader.
+            var context = new ResponseContext()
+            {
+                RequestLatestValues = requestLatestValues,
+                MaxDataNodes = WitsmlSettings.MaxDataNodes,
+                MaxDataPoints = WitsmlSettings.MaxDataPoints
+            };
+
+            Dictionary<string, Range<double?>> ranges;
+            var logData = reader.GetData(context, mnemonicIndexes, units, nullValues, out ranges);
+
+            return logData;
         }
 
         /// <summary>
