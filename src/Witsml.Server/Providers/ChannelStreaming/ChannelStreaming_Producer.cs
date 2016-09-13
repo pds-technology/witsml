@@ -29,7 +29,6 @@ using Energistics.Protocol;
 using Energistics.Protocol.ChannelStreaming;
 using Newtonsoft.Json.Linq;
 using PDS.Framework;
-using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
 
@@ -333,8 +332,10 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                         : channelStreamingType == ChannelStreamingTypes.LatestValue 
                             ? 1 
                             : (int?)null;
+                var increasing = primaryIndex.Direction == IndexDirections.Increasing;
 
                 Logger.Debug($"Streaming data for parentUri {parentUri.Uri} and channelIds {string.Join(",", channelIds)}");
+
 
                 // We only need a start index value for IndexValue and RangeRequest
                 var minStart = 
@@ -348,7 +349,14 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     ? contextList.Max(x => Convert.ToInt64(x.EndIndex))
                     : (long?) null;
 
-                var increasing = primaryIndex.Direction == IndexDirections.Increasing;
+
+                // Validate startIndex and endIndex are in the expected order based on Direction
+                if (channelStreamingType == ChannelStreamingTypes.RangeRequest)
+                {
+                    var minEnd = contextList.Min(x => Convert.ToInt64(x.EndIndex));
+                    ValidateRangeRequestIndexes(minStart ?? 0, minEnd, increasing);
+                }
+
                 var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
                 var rangeSize = WitsmlSettings.GetRangeSize(isTimeIndex);
 
@@ -442,7 +450,10 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             var indexValues = new List<long>();
             indexes.ForEach(x =>
             {
-                indexValues.Add(((double)x).IndexToScale(scale, isTimeIndex));
+                var indexValue = isTimeIndex 
+                    ? new DateTimeOffset(DateTime.Parse(x.ToString())).ToUnixTimeMicroseconds()
+                    : ((double)x).IndexToScale(scale);
+                indexValues.Add(indexValue);
             });
 
             var primaryIndexValue = indexValues[0];
@@ -530,6 +541,28 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         private static bool IsStreamingStopped(IList<ChannelStreamingContext> contextList, ref CancellationToken token)
         {
             return token.IsCancellationRequested || contextList.Count == 0;
+        }
+
+        private bool ValidateRangeRequestIndexes(long startIndex, long endIndex, bool increasing)
+        {
+            if (increasing)
+            {
+                if (startIndex > endIndex)
+                {
+                    this.InvalidArgument("startIndex > endIndex", Request.MessageId);
+                    return false;
+                }
+            }
+            else
+            {
+                if (startIndex < endIndex)
+                {
+                    this.InvalidArgument("startIndex < endIndex", Request.MessageId);
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }
