@@ -43,7 +43,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <param name="entity">The entity.</param>
         /// <param name="stations">The trajectory stations.</param>
         /// <param name="parser">The parser.</param>
-        protected override void FormatStationData(Trajectory entity, List<TrajectoryStation> stations, WitsmlQueryParser parser)
+        protected override void FormatStationData(Trajectory entity, List<TrajectoryStation> stations, WitsmlQueryParser parser = null)
         {
             if (stations.Count == 0)
                 return;

@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Energistics.DataAccess;
+using Energistics.Datatypes;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
@@ -47,6 +48,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// The file name
         /// </summary>
         private const string FileName = "FileName";
+
+        private bool _inFile;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TrajectoryDataAdapter{T, TChild}" /> class.
@@ -83,7 +86,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                     var header = headers[x.GetUri()];
 
                     //Query the trajectory stations
-                    QueryTrajectoryStations(x, header, parser, context);
+                    QueryTrajectoryStations(x, header, parser);
                 });
             }
             else if (!OptionsIn.RequestObjectSelectionCapability.True.Equals(parser.RequestObjectSelectionCapability()))
@@ -118,9 +121,56 @@ namespace PDS.Witsml.Server.Data.Trajectories
         public override void Update(WitsmlQueryParser parser, T dataObject)
         {
             var uri = dataObject.GetUri();
+            if (UpdateStations(dataObject))
+            {
+                var current = GetEntity(uri);
+                _inFile = QueryStationFile(current, current);
+                if (_inFile)
+                {
+                    var stations = GetMongoFileStationData(uri);
+                    FormatStationData(dataObject, stations);
+                }
+                MergeEntity(current, parser);
+                Replace(parser, current);
+            }
+            else
+            {
+                using (var transaction = DatabaseProvider.BeginTransaction(uri))
+                {
+                    UpdateEntity(parser, uri, transaction);
+                    transaction.Commit();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Replaces a data object in the data store.
+        /// </summary>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The data object to be replaced.</param>
+        public override void Replace(WitsmlQueryParser parser, T dataObject)
+        {
+            Delete(dataObject.GetUri());
+            Add(parser, dataObject);
+        }
+
+        /// <summary>
+        /// Deletes a data object by the specified identifier.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        public override void Delete(EtpUri uri)
+        {
             using (var transaction = DatabaseProvider.BeginTransaction(uri))
             {
-                UpdateEntity(parser, uri, transaction);
+                Logger.DebugFormat("Deleting Trajectory with uri '{0}'.", uri);
+
+                DeleteEntity(uri, transaction);
+                if (_inFile)
+                {
+                    var bucket = GetMongoFileBucket();
+                    DeleteMongoFile(bucket, uri);
+                }
+   
                 transaction.Commit();
             }
         }
@@ -243,7 +293,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             bucket.Delete(mongoFile.Id);
         }
 
-        private void QueryTrajectoryStations(T entity, T header, WitsmlQueryParser parser, ResponseContext context)
+        private void QueryTrajectoryStations(T entity, T header, WitsmlQueryParser parser)
         {
             var stations = GetTrajectoryStation(entity);
 
@@ -252,7 +302,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 var uri = entity.GetUri();
                 stations = GetMongoFileStationData(uri);
             }
-            
+
             FormatStationData(entity, stations, parser);
             SetIndexRange(entity);
         }
@@ -282,6 +332,9 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <returns>the index range for the query.</returns>
         protected Range<double?> GetQueryIndexRange(WitsmlQueryParser parser)
         {
+            if (parser == null)
+                return new Range<double?>(null, null);
+
             var mdMn = parser.Properties("mdMn").FirstOrDefault()?.Value;
             var mdMx = parser.Properties("mdMx").FirstOrDefault()?.Value;
 
@@ -308,7 +361,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <param name="entity">The entity.</param>
         /// <param name="stations">The trajectory stations.</param>
         /// <param name="parser">The parser.</param>
-        protected abstract void FormatStationData(T entity, List<TChild> stations, WitsmlQueryParser parser);
+        protected abstract void FormatStationData(T entity, List<TChild> stations, WitsmlQueryParser parser = null);
 
         /// <summary>
         /// Determines whether the current trajectory has station data.
@@ -339,5 +392,11 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <param name="dataObject">The trajectory data object.</param>
         /// <returns>The trajectory station collection.</returns>
         protected abstract List<TChild> GetTrajectoryStation(T dataObject);
+
+        private bool UpdateStations(T dataObject)
+        {
+            var stations = GetTrajectoryStation(dataObject);
+            return stations.Any();
+        }
     }
 }

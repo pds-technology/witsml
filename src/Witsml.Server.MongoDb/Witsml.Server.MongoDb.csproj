@@ -232,10 +232,12 @@
     <Compile Include="Data\MongoDbDelete.cs" />
     <Compile Include="Data\MongoDbDeleteContext.cs" />
     <Compile Include="Data\MongoDbExtensions.cs" />
+    <Compile Include="Data\MongoDbMerge.cs" />
     <Compile Include="Data\MongoDbQueryContext.cs" />
     <Compile Include="Data\MongoDbUtility.cs" />
     <Compile Include="Data\MongoDbQuery.cs" />
     <Compile Include="Data\MongoDbUpdate.cs" />
+    <Compile Include="Data\MongoDbWrite.cs" />
     <Compile Include="Data\Rigs\Rig131DataAdapter.cs" />
     <Compile Include="Data\Rigs\Rig131DataAdapter.generated.cs">
       <DependentUpon>Rig131DataAdapter.cs</DependentUpon>

@@ -22,13 +22,10 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Xml.Linq;
-using Energistics.DataAccess;
 using Energistics.Datatypes;
 using MongoDB.Driver;
 using PDS.Framework;
-using PDS.Witsml.Data;
 using PDS.Witsml.Server.Data.Common;
 
 namespace PDS.Witsml.Server.Data
@@ -37,15 +34,10 @@ namespace PDS.Witsml.Server.Data
     /// Encloses MongoDb update method and its helper methods
     /// </summary>
     /// <typeparam name="T">The data object type.</typeparam>
-    /// <seealso cref="PDS.Witsml.Data.DataObjectNavigator{MongoDbUpdateContext}" />
-    public class MongoDbUpdate<T> : DataObjectNavigator<MongoDbUpdateContext<T>>
+    /// <seealso cref="MongoDbWrite{T}" />
+    public class MongoDbUpdate<T> : MongoDbWrite<T>
     {
-        private readonly IMongoCollection<T> _collection;
-        private readonly WitsmlQueryParser _parser;
-        private readonly string _idPropertyName;
-
         private FilterDefinition<T> _entityFilter;
-        private T _entity;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoDbUpdate{T}" /> class.
@@ -55,14 +47,10 @@ namespace PDS.Witsml.Server.Data
         /// <param name="parser">The parser.</param>
         /// <param name="idPropertyName">Name of the identifier property.</param>
         /// <param name="ignored">The ignored.</param>
-        public MongoDbUpdate(IContainer container, IMongoCollection<T> collection, WitsmlQueryParser parser, string idPropertyName = "Uid", List<string> ignored = null) : base(container, new MongoDbUpdateContext<T>())
+        public MongoDbUpdate(IContainer container, IMongoCollection<T> collection, WitsmlQueryParser parser, string idPropertyName = "Uid", List<string> ignored = null) 
+            : base(container, collection, parser, idPropertyName, ignored)
         {
-            Logger.Debug("Instance created.");
-            Context.Ignored = ignored;
-
-            _collection = collection;
-            _parser = parser;
-            _idPropertyName = idPropertyName;
+            Logger.Debug("Instance created.");           
         }
 
         /// <summary>
@@ -75,14 +63,14 @@ namespace PDS.Witsml.Server.Data
         {
             Logger.DebugFormat("Updating data object: {0}", uri);
 
-            _entityFilter = MongoDbUtility.GetEntityFilter<T>(uri, _idPropertyName);
-            _entity = entity;
+            _entityFilter = MongoDbUtility.GetEntityFilter<T>(uri, IdPropertyName);
+            Entity = entity;
 
             Context.Update = Update(updates, uri.ObjectId);
-            BuildUpdate(_parser.Element());
+            BuildUpdate(Parser.Element());
 
             LogUpdateFilter(_entityFilter, Context.Update);
-            _collection.UpdateOne(_entityFilter, Context.Update);
+            Collection.UpdateOne(_entityFilter, Context.Update);
 
             WitsmlOperationContext.Current.Warnings.AddRange(Context.Warnings);
         }
@@ -95,7 +83,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The update definition.</returns>
         public UpdateDefinition<T> Update(Dictionary<string, object> updates, string uidValue)
         {
-            var update = Builders<T>.Update.Set(_idPropertyName, uidValue);
+            var update = Builders<T>.Update.Set(IdPropertyName, uidValue);
 
             foreach (var pair in updates)
                 update = update.Set(pair.Key, pair.Value);
@@ -111,74 +99,8 @@ namespace PDS.Witsml.Server.Data
         public void UpdateFields(FilterDefinition<T> filter, UpdateDefinition<T> update)
         {
             LogUpdateFilter(filter, update);
-            _collection.UpdateOne(filter, update);
-        }
-
-        /// <summary>
-        /// Navigates the element group.
-        /// </summary>
-        /// <param name="propertyInfo">The property information.</param>
-        /// <param name="elements">The elements.</param>
-        /// <param name="parentPath">The parent path.</param>
-        protected override void NavigateElementGroup(PropertyInfo propertyInfo, IGrouping<string, XElement> elements, string parentPath)
-        {
-            PushPropertyInfo(propertyInfo);
-
-            var parentValue = Context.PropertyValues.LastOrDefault();
-
-            if (parentValue == null)
-            {
-                var elementList = elements.ToList();
-
-                if (elementList.Count == 1 && 
-                    !propertyInfo.PropertyType.FullName.StartsWith("System.") && 
-                    propertyInfo.PropertyType != typeof(Timestamp))
-                {
-                    var propertyPath = GetPropertyPath(parentPath, propertyInfo.Name);
-                    var element = elementList.First();
-
-                    ValidateArrayElement(propertyInfo, propertyInfo.PropertyType, element, propertyPath);
-
-                    var childValue = ParseNestedElement(propertyInfo.PropertyType, element);
-                    HandleObjectValue(propertyInfo, null, null, propertyPath, null, childValue);
-                }
-                else
-                {
-                    base.NavigateElementGroup(propertyInfo, elements, parentPath);
-                }
-            }
-            else
-            {
-                base.NavigateElementGroup(propertyInfo, elements, parentPath);
-            }
-
-            PopPropertyInfo();
-        }
-
-        /// <summary>
-        /// Navigates the recurring elements.
-        /// </summary>
-        /// <param name="propertyInfo">The property information.</param>
-        /// <param name="elements">The elements.</param>
-        /// <param name="childType">Type of the child.</param>
-        /// <param name="propertyPath">The property path.</param>
-        protected override void NavigateRecurringElements(PropertyInfo propertyInfo, List<XElement> elements, Type childType, string propertyPath)
-        {
-            NavigateArrayElementType(propertyInfo, elements, childType, null, propertyPath);
-        }
-
-        /// <summary>
-        /// Navigates the array element type.
-        /// </summary>
-        /// <param name="propertyInfo">The property information.</param>
-        /// <param name="elements">The elements.</param>
-        /// <param name="childType">Type of the child.</param>
-        /// <param name="element">The element.</param>
-        /// <param name="propertyPath">The property path.</param>
-        protected override void NavigateArrayElementType(PropertyInfo propertyInfo, List<XElement> elements, Type childType, XElement element, string propertyPath)
-        {
-            UpdateArrayElements(elements, propertyInfo, Context.PropertyValues.Last(), childType, propertyPath);
-        }
+            Collection.UpdateOne(filter, update);
+        }      
 
         /// <summary>
         /// Navigates the uom attribute.
@@ -198,100 +120,6 @@ namespace PDS.Witsml.Server.Data
 
             if (!string.IsNullOrWhiteSpace(measureValue))
                 NavigateProperty(propertyInfo, xmlObject, propertyType, propertyPath, uomValue);
-        }
-
-        /// <summary>
-        /// Handles the string value.
-        /// </summary>
-        /// <param name="propertyInfo">The property information.</param>
-        /// <param name="xmlObject">The XML object.</param>
-        /// <param name="propertyType">Type of the property.</param>
-        /// <param name="propertyPath">The property path.</param>
-        /// <param name="propertyValue">The property value.</param>
-        protected override void HandleStringValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
-        {
-            SetProperty(propertyInfo, propertyPath, propertyValue);
-        }
-
-        /// <summary>
-        /// Handles the byte array value.
-        /// </summary>void HandleStringValue
-        /// <param name="propertyInfo">The property information.</param>
-        /// <param name="xmlObject">The XML object.</param>
-        /// <param name="propertyType">Type of the property.</param>
-        /// <param name="propertyPath">The property path.</param>
-        /// <param name="propertyValue">The property value.</param>
-        protected override void HandleByteArrayValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
-        {
-            SetProperty(propertyInfo, propertyPath, Convert.FromBase64String(propertyValue));
-        }
-
-        /// <summary>
-        /// Handles the date time value.
-        /// </summary>
-        /// <param name="propertyInfo">The property information.</param>
-        /// <param name="xmlObject">The XML object.</param>
-        /// <param name="propertyType">Type of the property.</param>
-        /// <param name="propertyPath">The property path.</param>
-        /// <param name="propertyValue">The property value.</param>
-        /// <param name="dateTimeValue">The date time value.</param>
-        protected override void HandleDateTimeValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, DateTime dateTimeValue)
-        {
-            SetProperty(propertyInfo, propertyPath, dateTimeValue);
-        }
-
-        /// <summary>
-        /// Handles the timestamp value.
-        /// </summary>
-        /// <param name="propertyInfo">The property information.</param>
-        /// <param name="xmlObject">The XML object.</param>
-        /// <param name="propertyType">Type of the property.</param>
-        /// <param name="propertyPath">The property path.</param>
-        /// <param name="propertyValue">The property value.</param>
-        /// <param name="timestampValue">The timestamp value.</param>
-        protected override void HandleTimestampValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, Timestamp timestampValue)
-        {
-            SetProperty(propertyInfo, propertyPath, timestampValue);
-        }
-
-        /// <summary>
-        /// Handles the object value.
-        /// </summary>
-        /// <param name="propertyInfo">The property information.</param>
-        /// <param name="xmlObject">The XML object.</param>
-        /// <param name="propertyType">Type of the property.</param>
-        /// <param name="propertyPath">The property path.</param>
-        /// <param name="propertyValue">The property value.</param>
-        /// <param name="objectValue">The object value.</param>
-        protected override void HandleObjectValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue, object objectValue)
-        {
-            SetProperty(propertyInfo, propertyPath, objectValue);
-        }
-
-        /// <summary>
-        /// Handles the null value.
-        /// </summary>
-        /// <param name="propertyInfo">The property information.</param>
-        /// <param name="xmlObject">The XML object.</param>
-        /// <param name="propertyType">Type of the property.</param>
-        /// <param name="propertyPath">The property path.</param>
-        /// <param name="propertyValue">The property value.</param>
-        protected override void HandleNullValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
-        {
-            UnsetProperty(propertyInfo, propertyPath);
-        }
-
-        /// <summary>
-        /// Handles the na n value.
-        /// </summary>
-        /// <param name="propertyInfo">The property information.</param>
-        /// <param name="xmlObject">The XML object.</param>
-        /// <param name="propertyType">Type of the property.</param>
-        /// <param name="propertyPath">The property path.</param>
-        /// <param name="propertyValue">The property value.</param>
-        protected override void HandleNaNValue(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string propertyValue)
-        {
-            UnsetProperty(propertyInfo, propertyPath);
         }
 
         /// <summary>
@@ -316,7 +144,7 @@ namespace PDS.Witsml.Server.Data
             var args = propertyType.GetGenericArguments();
             var childType = args.FirstOrDefault() ?? propertyType.GetElementType();
 
-            if (childType != typeof (string))
+            if (childType != typeof(string))
             {
                 var version = ObjectTypes.GetVersion(childType);
                 var validator = Container.Resolve<IRecurringElementValidator>(new ObjectName(childType.Name, version));
@@ -333,47 +161,26 @@ namespace PDS.Witsml.Server.Data
             NavigateElement(element, Context.DataObjectType);
         }
 
-        private void PushPropertyInfo(PropertyInfo propertyInfo)
-        {
-            var parentValue = Context.PropertyValues.LastOrDefault();
-
-            object propertyValue;
-
-            if (_entity == null)
-            {
-                propertyValue = null;
-            }
-            else
-            {
-                propertyValue = Context.PropertyValues.Count == 0
-                    ? propertyInfo.GetValue(_entity)
-                    : parentValue != null
-                    ? propertyInfo.GetValue(parentValue)
-                    : null;
-            }
-
-            PushPropertyInfo(propertyInfo, propertyValue);
-        }
-
-        private void PushPropertyInfo(PropertyInfo propertyInfo, object propertyValue)
-        {
-            Context.PropertyInfos.Add(propertyInfo);
-            Context.PropertyValues.Add(propertyValue);
-        }
-
-        private void PopPropertyInfo()
-        {
-            Context.PropertyInfos.Remove(Context.PropertyInfos.Last());
-            Context.PropertyValues.Remove(Context.PropertyValues.Last());
-        }
-
-        private void SetProperty<TValue>(PropertyInfo propertyInfo, string propertyPath, TValue propertyValue)
+        /// <summary>
+        /// Sets the property.
+        /// </summary>
+        /// <typeparam name="TValue">The type of the value.</typeparam>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <param name="propertyValue">The property value.</param>
+        protected override void SetProperty<TValue>(PropertyInfo propertyInfo, string propertyPath, TValue propertyValue)
         {
             Context.Update = Context.Update.Set(propertyPath, propertyValue);
             SetSpecifiedProperty(propertyInfo, propertyPath, true);
         }
 
-        private void UnsetProperty(PropertyInfo propertyInfo, string propertyPath)
+        /// <summary>
+        /// Unsets the property.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <exception cref="WitsmlException"></exception>
+        protected override void UnsetProperty(PropertyInfo propertyInfo, string propertyPath)
         {
             if (propertyInfo.IsDefined(typeof(RequiredAttribute), false))
                 throw new WitsmlException(ErrorCodes.MissingRequiredData);
@@ -392,14 +199,15 @@ namespace PDS.Witsml.Server.Data
             }
         }
 
-        private IList CreateList(Type listType, object item)
-        {
-            var list = Activator.CreateInstance(listType) as IList;
-            list?.Add(item);
-            return list;
-        }
-
-        private void UpdateArrayElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
+        /// <summary>
+        /// Updates the array elements.
+        /// </summary>
+        /// <param name="elements">The elements.</param>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="propertyValue">The property value.</param>
+        /// <param name="type">The type.</param>
+        /// <param name="parentPath">The parent path.</param>
+        protected override void UpdateArrayElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
         {
             Logger.DebugFormat("Updating array elements: {0} {1}", parentPath, propertyInfo?.Name);
 
@@ -468,7 +276,7 @@ namespace PDS.Witsml.Server.Data
                 .ToList();
 
             if (updateList.Count > 0)
-                _collection.BulkWrite(updateList);
+                Collection.BulkWrite(updateList);
         }
 
         private void UpdateArrayElementsWithoutUid(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
@@ -514,90 +322,16 @@ namespace PDS.Witsml.Server.Data
                 .ToList();
 
             if (updateList.Count > 0)
-                _collection.BulkWrite(updateList);
+                Collection.BulkWrite(updateList);
         }
-
-        private string GetElementId(XElement element, string idField)
-        {
-            var idAttribute = element.Attributes().FirstOrDefault(a => a.Name.LocalName.EqualsIgnoreCase(idField));
-            if (idAttribute != null)
-                return idAttribute.Value.Trim();
-
-            var idElement = element.Elements().FirstOrDefault(e => e.Name.LocalName.EqualsIgnoreCase(idField));
-            if (idElement != null)
-                return idElement.Value.Trim();
-
-            return string.Empty;
-        }
-
-        private IDictionary<string, object> GetItemsById(IEnumerable items, IList<PropertyInfo> properties, string idField, List<string> idList)
-        {
-            var idProp = GetPropertyInfoForAnElement(properties, idField);            
-
-            return (items ?? Enumerable.Empty<object>())
-                .Cast<object>()
-                .ToDictionary(x =>
-                {
-                    var id = idProp.GetValue(x).ToString();
-                    idList.Add(id);
-                    return id;
-                });
-        }
-
-        private void ValidateArrayElement(PropertyInfo propertyInfo, Type type, XElement element, string propertyPath)
-        {
-            var validator = new MongoDbUpdate<T>(Container, _collection, _parser, _idPropertyName, Context.Ignored);
-            validator.Context.ValidationOnly = true;
-            validator.NavigateElementType(propertyInfo, type, element, propertyPath);
-        }
-
-        private void ValidateArrayElement(XElement element, IList<PropertyInfo> properties, bool isAdd = true)
-        {
-            Logger.DebugFormat("Validating array element: {0}", element.Name.LocalName);
-
-            if (isAdd)
-            {
-                WitsmlParser.RemoveEmptyElements(element);
-
-                if (!element.HasElements)
-                    throw new WitsmlException(ErrorCodes.EmptyNewElementsOrAttributes);
-            }
-            else
-            {
-                var emptyElements = element.Elements()
-                    .Where(e => e.IsEmpty || string.IsNullOrWhiteSpace(e.Value))
-                    .ToList();
-
-                foreach (var child in emptyElements)
-                {
-                    var prop = GetPropertyInfoForAnElement(properties, child.Name.LocalName);
-                    if (prop == null) continue;
-
-                    if (prop.IsDefined(typeof(RequiredAttribute), false))
-                        throw new WitsmlException(ErrorCodes.EmptyNewElementsOrAttributes);
-                }
-
-                var emptyAttributes = element.Attributes()
-                    .Where(a => string.IsNullOrWhiteSpace(a.Value))
-                    .ToList();
-
-                foreach (var child in emptyAttributes)
-                {
-                    var prop = GetPropertyInfoForAnElement(properties, child.Name.LocalName);
-                    if (prop == null) continue;
-
-                    if (prop.IsDefined(typeof(RequiredAttribute), false))
-                        throw new WitsmlException(ErrorCodes.MissingRequiredData);
-                }
-            }
-        }
+        
 
         private void LogUpdateFilter(FilterDefinition<T> filter, UpdateDefinition<T> update)
         {
             if (Logger.IsDebugEnabled)
             {
-                var filterJson = filter.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
-                var updateJson = update.Render(_collection.DocumentSerializer, _collection.Settings.SerializerRegistry);
+                var filterJson = filter.Render(Collection.DocumentSerializer, Collection.Settings.SerializerRegistry);
+                var updateJson = update.Render(Collection.DocumentSerializer, Collection.Settings.SerializerRegistry);
                 Logger.DebugFormat("Detected update parameters: {0}", updateJson);
                 Logger.DebugFormat("Detected update filters: {0}", filterJson);
             }
