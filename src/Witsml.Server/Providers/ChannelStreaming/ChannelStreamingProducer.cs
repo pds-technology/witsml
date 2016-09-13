@@ -115,6 +115,8 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         /// <param name="channelStreamingStart">The channel streaming start.</param>
         protected override void HandleChannelStreamingStart(MessageHeader header, ChannelStreamingStart channelStreamingStart)
         {
+            // TODO: Send ChannelStatusChanged if the receiveChangeNotification field is true
+
             // no action needed if streaming already started
             //if (_tokenSource != null)
             //    return;
@@ -160,7 +162,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             // no action needed if streaming not in progress
             if (_tokenSource == null) return;
 
-            StopStreamingChannels(channelStreamingStop.Channels);
+            StopStreamingChannels(header.MessageId, channelStreamingStop.Channels);
 
             base.HandleChannelStreamingStop(header, channelStreamingStop);
 
@@ -168,7 +170,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             //_tokenSource = null;
         }
 
-        private void StopStreamingChannels(IList<long> channels)
+        private void StopStreamingChannels(long messageId, IList<long> channels)
         {
             foreach (var channel in channels)
             {
@@ -186,10 +188,10 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     // If the context list is empty remove it from its list of lists.
                     if (streamingContextList.Count == 0)
                         _channelStreamingContextLists.Remove(streamingContextList);
-
-                    // if ChannelStreamingInfo record used to start this channel is set to True...
-                    //if (infoToRemove.ReceiveChangeNotification)
-                    // TODO: Send ChannelStatusChanged if the receiveChangeNotification field 
+                }
+                else
+                {
+                    SendInvalidStateMessage(messageId, "EINVALID_STATE_CODE: Channel {0} is not currently streaming and cannot be stopped.", channel);
                 }
             }
         }
@@ -277,7 +279,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
             // Send a EINVALID_STATE message if any are already streaming.
             if (streamingChannelIds.Length > 0)
-                SendInvalidStateMessage(messageId, streamingChannelIds);
+                SendInvalidStateMessage(messageId, "EINVALID_STATE_CODE: Channel {0} is already streaming.", streamingChannelIds);
 
             // Remove the channelIds that are already streaming and continue with the rest.
             streamingChannelIds.ForEach(s => channelIds.Remove(s));
@@ -297,11 +299,12 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     : ChannelStreamingTypes.LatestValue;
         }
 
-        private void SendInvalidStateMessage(long messageId, long[] streamingChannelIds)
+        private void SendInvalidStateMessage(long messageId, string messageFormat, params long[] channelIds)
         {
-            streamingChannelIds.ForEach(c => ProtocolException(EINVALID_STATE_CODE, $"EINVALID_STATE_CODE: Channel with channelId {c} is already streaming.", messageId));
+            
+            channelIds.ForEach(c => ProtocolException(EINVALID_STATE_CODE, string.Format(messageFormat, c), messageId));
 
-            Logger.Warn($"Channels {string.Join(",", streamingChannelIds)} are already streaming.");
+            Logger.Warn($"Channels {string.Join(",", channelIds)} are already streaming.");
         }
 
         private long[] GetStreamingChannelIds(IEnumerable<long> channelIds)
