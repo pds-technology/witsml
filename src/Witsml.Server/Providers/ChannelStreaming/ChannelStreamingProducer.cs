@@ -318,29 +318,32 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         {
             _channelStreamingContextLists.Add(contextList);
 
+            // These values can be set outside of our processing loop as the won't chnage
+            //... as context is processed and completed.
+            var firstContext = contextList.First();
+            var channelStreamingType = firstContext.ChannelStreamingType;
+            var parentUri = firstContext.ParentUri;
+            var primaryIndex = firstContext.ChannelMetadata.Indexes[0];
+            var requestLatestValues =
+                channelStreamingType == ChannelStreamingTypes.IndexCount
+                    ? firstContext.IndexCount
+                    : channelStreamingType == ChannelStreamingTypes.LatestValue
+                        ? 1
+                        : (int?)null;
+            var increasing = primaryIndex.Direction == IndexDirections.Increasing;
+
             // Loop until there is a cancellation or all channals have been removed
             while (!IsStreamingStopped(contextList, ref token))
             {
                 var channelIds = contextList.Select(i => i.ChannelId).Distinct().ToArray();
-                var firstContext = contextList.First();
-                var channelStreamingType = firstContext.ChannelStreamingType;
-                var parentUri = firstContext.ParentUri;
-                var primaryIndex = firstContext.ChannelMetadata.Indexes[0];
-                var requestLatestValues =
-                    channelStreamingType == ChannelStreamingTypes.IndexCount
-                        ? firstContext.IndexCount
-                        : channelStreamingType == ChannelStreamingTypes.LatestValue
-                            ? 1
-                            : (int?)null;
-                var increasing = primaryIndex.Direction == IndexDirections.Increasing;
-
                 Logger.Debug($"Streaming data for parentUri {parentUri.Uri} and channelIds {string.Join(",", channelIds)}");
 
-
-                // We only need a start index value for IndexValue and RangeRequest
+                // We only need a start index value for IndexValue and RangeRequest or if we're streaming
+                //... IndexCount or LatestValue and requestLatestValues is no longer set.
                 var minStart =
-                    channelStreamingType == ChannelStreamingTypes.IndexValue ||
-                    channelStreamingType == ChannelStreamingTypes.RangeRequest
+                    (channelStreamingType == ChannelStreamingTypes.IndexValue || channelStreamingType == ChannelStreamingTypes.RangeRequest) ||
+                    ((channelStreamingType == ChannelStreamingTypes.IndexCount || channelStreamingType == ChannelStreamingTypes.LatestValue) && 
+                    !requestLatestValues.HasValue)
                         ? contextList.Min(x => Convert.ToInt64(x.StartIndex))
                         : (long?)null;
 
@@ -373,6 +376,14 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
                 // Stream the channel data
                 await StreamChannelData(contextList, channelData, mnemonics, increasing, isTimeIndex, primaryIndex.Scale, token);
+
+                // If we have processed an IndexCount or LatestValue query clear requestLatestValues so we can 
+                //... keep streaming new data as long as the channel is active.
+                if (channelStreamingType == ChannelStreamingTypes.IndexCount ||
+                    channelStreamingType == ChannelStreamingTypes.LatestValue)
+                {
+                    requestLatestValues = null;
+                }
 
                 // Check each context to see of all the data has streamed.
                 var completedContexts = contextList
