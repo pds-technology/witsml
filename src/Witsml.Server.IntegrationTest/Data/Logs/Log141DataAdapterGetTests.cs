@@ -246,6 +246,60 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(95, secondChannel.MaxIndex.Value);
         }
 
+        [TestMethod, Description("Tests selecting the last column for RequestLatestValue returns the correct data")]
+        public void Log141DataAdapter_GetFromStore_Sliced_RequestLatestValue_OptionsIn()
+        {
+            var row = 10;
+            var response = AddLogWithAction(row, () =>
+            {
+                Log.StartIndex = new GenericMeasure { Uom = "m", Value = 100 };
+
+                var logData = Log.LogData.First();
+                logData.Data.Clear();
+                logData.Data.Add("1,10,100");
+                logData.Data.Add("2,20,200");
+                logData.Data.Add("3,30,300");
+                logData.Data.Add("4,40,400");
+                logData.Data.Add("5,50,500"); 
+                logData.Data.Add("6,60,600"); 
+                logData.Data.Add("7,70,700"); 
+                logData.Data.Add("8,80,800"); 
+                logData.Data.Add("9,90,900");                             
+                logData.Data.Add("10,100,1000"); // The Latest Values
+            }, 1, true, false, true);
+
+            // Assert that the log was added successfully
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var firstAndLast = Log.LogCurveInfo[0].Mnemonic + "," + Log.LogCurveInfo[2].Mnemonic;
+            var uidLog = response.SuppMsgOut;
+            var query = new Log
+            {
+                Uid = uidLog,
+                UidWell = Log.UidWell,
+                UidWellbore = Log.UidWellbore,
+                LogData = new List<LogData>() { new LogData() { MnemonicList = firstAndLast} }
+            };
+
+            var result = DevKit.Query<LogList, Log>(
+                query,
+                ObjectTypes.Log, null, OptionsIn.ReturnElements.DataOnly + ';' +
+                                       OptionsIn.RequestLatestValues.Eq(1));
+
+            // Assert that Log Data was returned
+            var queryLogData = result.First().LogData;
+            Assert.IsTrue(queryLogData != null && queryLogData.First() != null,
+                "No LogData returned in results from Log query");
+
+            // Assert that only one row was returned
+            var queryData = queryLogData.First().Data;
+            Assert.AreEqual(1, queryData.Count, "No data returned in results from Log query");
+
+            // Assert that the data for the last column of the latest values is correct
+            Assert.AreEqual("1000", queryData[0].Split(',')[1], "The last data value row should be 1000");
+
+        }
+
         [TestMethod]
         public void Log141DataAdapter_GetFromStore_Decreasing_RequestLatestValue_OptionsIn()
         {
