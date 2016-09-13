@@ -22,6 +22,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.Validation;
+using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -507,6 +508,42 @@ namespace PDS.Witsml.Server.Data
                     transaction.Attach(MongoDbAction.Update, dbCollectionName, current.ToBsonDocument(), uri);
                     transaction.Save();
                 }
+            }
+            catch (MongoException ex)
+            {
+                Logger.ErrorFormat("Error replacing {0} MongoDb collection: {1}", dbCollectionName, ex);
+                throw new WitsmlException(ErrorCodes.ErrorReplacingInDataStore, ex);
+            }
+        }
+
+        /// <summary>
+        /// Merges the entity.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="parser">The WITSML query parser.</param>
+        /// <param name="transaction">The transaction.</param>
+        protected void MergeEntity(T entity, WitsmlQueryParser parser, MongoTransaction transaction = null)
+        {
+            MergeEntity(DbCollectionName, entity, parser, transaction);
+        }
+
+        /// <summary>
+        /// Merges the entity.
+        /// </summary>
+        /// <typeparam name="TObject">The type of the object.</typeparam>
+        /// <param name="dbCollectionName">Name of the database collection.</param>
+        /// <param name="entity">The entity.</param>
+        /// <param name="parser">The WITSML query parser.</param>
+        /// <param name="transaction">The transaction.</param>
+        protected void MergeEntity<TObject>(string dbCollectionName, TObject entity, WitsmlQueryParser parser, MongoTransaction transaction = null)
+        {
+            try
+            {
+                Logger.DebugFormat($"Merging {dbCollectionName} MongoDb collection");
+
+                var collection = GetCollection<TObject>(dbCollectionName);
+                var merge = new MongoDbMerge<TObject>(Container, collection, parser, IdPropertyName);
+                merge.Merge(entity);
             }
             catch (MongoException ex)
             {
