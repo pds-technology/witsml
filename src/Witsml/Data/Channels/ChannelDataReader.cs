@@ -1377,7 +1377,7 @@ namespace PDS.Witsml.Data.Channels
                 requestedValueCount = new Dictionary<int, int>();
                 if (_allSliceOrdinals == null)
                 {
-                    _allSliceOrdinals = Enumerable.Range(0, Depth).ToArray().Concat(mnemonicSlices.Select((m, i) => i)).Skip(1).ToArray();
+                    _allSliceOrdinals = Enumerable.Range(0, Depth).ToArray().Concat(mnemonicSlices.Select((m, i) => m.Key)).Skip(1).ToArray();
                 }
                 _allSliceOrdinals.ForEach(s => requestedValueCount.Add(s, 0));
             }
@@ -1426,7 +1426,7 @@ namespace PDS.Witsml.Data.Channels
                     // Update the latest value count for each channel.
                     if (requestLatestValues.HasValue)
                     {
-                        UpdateRequestedValueCount(requestedValueCount, allValues, ranges, primaryIndex);
+                        UpdateRequestedValueCount(requestedValueCount, mnemonicSlices, allValues, ranges, primaryIndex);
                     }
                     // if it's not a lastest values request then update indexes
                     else
@@ -1565,7 +1565,7 @@ namespace PDS.Witsml.Data.Channels
             return valueAdded;
         }
 
-        private void UpdateRequestedValueCount(Dictionary<int, int> requestedValueCount, List<object> values, Dictionary<string, Range<double?>> ranges, double primaryIndex)
+        private void UpdateRequestedValueCount(Dictionary<int, int> requestedValueCount, IDictionary<int, string> mnemonicSlices, List<object> values, Dictionary<string, Range<double?>> ranges, double primaryIndex)
         {
             _log.Debug("Updating request latest values count for all channels.");
 
@@ -1574,7 +1574,7 @@ namespace PDS.Witsml.Data.Channels
             for (var i = 0; i < valueArray.Length; i++)
             {
                 var ordinal = _allSliceOrdinals[i];
-                var mnemonic = _queryMnemonics[ordinal];
+                var mnemonic = mnemonicSlices[ordinal];
 
                 if (requestedValueCount.ContainsKey(ordinal) && !IsNull(valueArray[i], ordinal))
                 {
