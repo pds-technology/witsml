@@ -51,6 +51,7 @@ namespace PDS.Witsml.Web.Controllers
 
         // GET: .well-known/etp-server-capabilities
         [Route(".well-known/etp-server-capabilities")]
+        [Route("api/etp/.well-known/etp-server-capabilities")]
         [ResponseType(typeof(ServerCapabilities))]
         public IHttpActionResult GetServerCapabilities()
         {
