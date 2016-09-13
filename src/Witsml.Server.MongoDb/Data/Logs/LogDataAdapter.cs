@@ -154,7 +154,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var keys = mnemonicIndexes.Keys.ToArray();
             var units = GetUnitList(entity, keys);
             var nullValues = GetNullValueList(entity, keys);
-            var reader = records.GetReader(allMnemonics, units, nullValues);
+            var reader = records.GetReader(mnemonicIndexes.Values.ToArray(), units, nullValues);
 
             // Create a context to pass information required by the ChannelDataReader.
             var context = new ResponseContext()
