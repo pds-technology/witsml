@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.DataAnnotations;
@@ -429,6 +430,12 @@ namespace PDS.Witsml.Server.Data.Logs
             // Validate there are no duplicate columnIndexes
             if (logCurves.GroupBy(x => x.ColumnIndex.Value).SelectMany(x => x.Skip(1)).Any())
                 return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogCurveInfo" });
+
+            // Validate there are no duplicate indexes
+            if (logDatas.GroupBy(x => x.Split(new[] { delimiter }, StringSplitOptions.None)[0]).Any(x => x.Count() > 1))
+            {
+                return new ValidationResult(ErrorCodes.NodesWithSameIndex.ToString(), new[] { "LogData", "Data" });
+            }
 
             if (logDatas.Count() > WitsmlSettings.MaxDataNodes)
             {
