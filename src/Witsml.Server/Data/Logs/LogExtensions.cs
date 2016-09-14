@@ -127,10 +127,10 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Checks the log data for duplicates.
+        /// Checks the log data for duplicate indexes.
         /// </summary>
         /// <param name="logData">The log data.</param>
-        /// <param name="delimiter">The logData</param>
+        /// <param name="delimiter">The logData delimiter</param>
         /// <returns><c>true</c> if Log data has duplicates; otherwise, <c>false</c>.</returns>
         public static bool CheckLogDataForDuplicates(this List<string> logData, string delimiter)
         {
