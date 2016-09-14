@@ -125,5 +125,24 @@ namespace PDS.Witsml.Server.Data.Logs
                 ? Enumerable.Empty<string>()
                 : ChannelDataReader.Split(mnemonicList.Value);
         }
+
+        /// <summary>
+        /// Checks the log data for duplicate indexes.
+        /// </summary>
+        /// <param name="logData">The log data.</param>
+        /// <param name="delimiter">The logData delimiter</param>
+        /// <returns><c>true</c> if Log data has duplicates; otherwise, <c>false</c>.</returns>
+        public static bool CheckLogDataForDuplicates(this List<string> logData, string delimiter)
+        {
+            var dictionary = new Dictionary<string, string>();
+            foreach (var s in logData)
+            {
+                var value = s.Substring(0, s.IndexOf(delimiter));
+                if (dictionary.ContainsKey(value))
+                    return true;
+                dictionary.Add(value, string.Empty);
+            }
+            return false;
+        }
     }
 }

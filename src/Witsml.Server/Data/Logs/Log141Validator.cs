@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.DataAnnotations;
@@ -492,7 +493,13 @@ namespace PDS.Witsml.Server.Data.Logs
                     {
                         var mnemonics = ChannelDataReader.Split(logData.MnemonicList);
                         if (logData.Data != null && logData.Data.Count > 0)
+                        {
+                            if (logData.Data.CheckLogDataForDuplicates(delimiter))
+                            {
+                                return new ValidationResult(ErrorCodes.NodesWithSameIndex.ToString(), new[] { "LogData", "Data" });
+                            }
                             totalPoints += logData.Data.Count * ChannelDataReader.Split(logData.Data[0], delimiter).Length;
+                        }
 
                         if (totalPoints > WitsmlSettings.MaxDataPoints)
                         {
