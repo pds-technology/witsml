@@ -194,7 +194,9 @@
     <Compile Include="Data\Attachments\Attachment200DataAdapter.generated.cs">
       <DependentUpon>Attachment200DataAdapter.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\ChannelSets\ChannelSet200DataAdapter.generated.cs" />
+    <Compile Include="Data\ChannelSets\ChannelSet200DataAdapter.generated.cs">
+      <DependentUpon>ChannelSet200DataAdapter.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Channels\Channel200DataAdapter.cs" />
     <Compile Include="Data\Channels\Channel200DataAdapter.generated.cs">
       <DependentUpon>Channel200DataAdapter.cs</DependentUpon>

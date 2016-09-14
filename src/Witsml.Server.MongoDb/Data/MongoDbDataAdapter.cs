@@ -129,7 +129,7 @@ namespace PDS.Witsml.Server.Data
             using (var transaction = DatabaseProvider.BeginTransaction(uri))
             {
                 UpdateEntity(parser, uri, transaction);
-                ValidateUpdatedEntity(uri);
+                ValidateUpdatedEntity(Functions.UpdateInStore, uri);
                 transaction.Commit();
             }
         }
@@ -145,7 +145,7 @@ namespace PDS.Witsml.Server.Data
             using (var transaction = DatabaseProvider.BeginTransaction(uri))
             {
                 ReplaceEntity(dataObject, uri, transaction);
-                ValidateUpdatedEntity(uri);
+                ValidateUpdatedEntity(Functions.PutObject, uri);
                 transaction.Commit();
             }
         }
@@ -669,13 +669,18 @@ namespace PDS.Witsml.Server.Data
             return null;
         }
 
-        private void ValidateUpdatedEntity(EtpUri uri)
+        /// <summary>
+        /// Validates the updated entity.
+        /// </summary>
+        /// <param name="function">The WITSML API function.</param>
+        /// <param name="uri">The URI.</param>
+        protected void ValidateUpdatedEntity(Functions function, EtpUri uri)
         {
             IList<ValidationResult> results;
 
             var entity = GetEntity(uri);
             DataObjectValidator.TryValidate(entity, out results);
-            ValidateResults(results);
+            WitsmlValidator.ValidateResults(function, results);
         }
 
         private static void ValidateResults(IList<ValidationResult> results)

@@ -52,10 +52,13 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 ClearIndexValues(dataObject);
 
-                // Extract Data                    
+                // Separate log header and log data
                 var readers = ExtractDataReaders(dataObject);
+                // Insert log header
                 InsertEntity(dataObject, transaction);
+                // Update log data and index ranges
                 UpdateLogDataAndIndexRange(dataObject.GetUri(), readers, transaction);
+                // Commit transaction
                 transaction.Commit();
             }
         }
@@ -70,9 +73,40 @@ namespace PDS.Witsml.Server.Data.Logs
             var uri = dataObject.GetUri();
             using (var transaction = DatabaseProvider.BeginTransaction(uri))
             {
+                // Update log header
                 UpdateEntity(parser, uri, transaction);
+                // Separate log header and log data
                 var readers = ExtractDataReaders(dataObject, GetEntity(uri));
+                // Update log data and index ranges
                 UpdateLogDataAndIndexRange(uri, readers, transaction);
+                // Validate log header result
+                ValidateUpdatedEntity(Functions.PutObject, uri);
+                // Commit transaction
+                transaction.Commit();
+            }
+        }
+
+        /// <summary>
+        /// Replaces the specified <see cref="Log" /> instance in the store.
+        /// </summary>
+        /// <param name="parser">The update parser.</param>
+        /// <param name="dataObject">The data object to be replaced.</param>
+        public override void Replace(WitsmlQueryParser parser, Log dataObject)
+        {
+            var uri = dataObject.GetUri();
+            using (var transaction = DatabaseProvider.BeginTransaction(uri))
+            {
+                // Remove previous log data
+                ChannelDataChunkAdapter.Delete(uri);
+                // Separate log header and log data
+                var readers = ExtractDataReaders(dataObject, GetEntity(uri));
+                // Replace log header
+                ReplaceEntity(dataObject, uri, transaction);
+                // Update log data and index ranges
+                UpdateLogDataAndIndexRange(uri, readers, transaction);
+                // Validate log header result
+                ValidateUpdatedEntity(Functions.PutObject, uri);
+                // Commit transaction
                 transaction.Commit();
             }
         }

@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using Avro;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
@@ -207,17 +206,6 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 Delete(uri);
             }
-        }
-
-        /// <summary>
-        /// Replaces a data object in the data store.
-        /// </summary>
-        /// <param name="parser">The input template parser.</param>
-        /// <param name="dataObject">The data object to be replaced.</param>
-        public override void Replace(WitsmlQueryParser parser, T dataObject)
-        {
-            Delete(dataObject.GetUri());
-            Add(parser, dataObject);
         }
 
         /// <summary>

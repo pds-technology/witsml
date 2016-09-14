@@ -53,10 +53,13 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 ClearIndexValues(dataObject);
 
-                // Extract Data
+                // Separate log header and log data
                 var reader = ExtractDataReader(dataObject);
+                // Insert log header
                 InsertEntity(dataObject, transaction);
+                // Update log data and index ranges
                 UpdateLogDataAndIndexRange(dataObject.GetUri(), new[] { reader }, transaction);
+                // Commit transaction
                 transaction.Commit();
             }               
         }
@@ -71,38 +74,41 @@ namespace PDS.Witsml.Server.Data.Logs
             var uri = dataObject.GetUri();
             using (var transaction = DatabaseProvider.BeginTransaction(uri))
             {
-                // Update LogCurveInfo if missing UID
-                EnsureLogCurveInfoUid(parser);
-
+                // Update log header
                 UpdateEntity(parser, uri, transaction);
-
-                // Update Log Data and Index Range
+                // Separate log header and log data
                 var reader = ExtractDataReader(dataObject, GetEntity(uri));
+                // Update log data and index ranges
                 UpdateLogDataAndIndexRange(uri, new[] { reader }, transaction);
+                // Validate log header result
+                ValidateUpdatedEntity(Functions.UpdateInStore, uri);
+                // Commit transaction
                 transaction.Commit();
             }
         }
 
         /// <summary>
-        /// Ensures the log curve information uid.
+        /// Replaces the specified <see cref="Log" /> instance in the store.
         /// </summary>
-        /// <param name="parser">The parser.</param>
-        private static void EnsureLogCurveInfoUid(WitsmlQueryParser parser)
+        /// <param name="parser">The update parser.</param>
+        /// <param name="dataObject">The data object to be replaced.</param>
+        public override void Replace(WitsmlQueryParser parser, Log dataObject)
         {
-            foreach (var lci in parser.Properties("logCurveInfo"))
+            var uri = dataObject.GetUri();
+            using (var transaction = DatabaseProvider.BeginTransaction(uri))
             {
-                if (!string.IsNullOrWhiteSpace(lci.Attribute("uid")?.Value)) continue;
-                var uid = lci.Attribute("uid");
-                var mnemonic = lci.Element(lci.GetDefaultNamespace() + "mnemonic");
-                if (uid != null)
-                {
-                    if (mnemonic != null) uid.Value = mnemonic.Value;
-                }
-                else
-                {
-                    var newUid = new XAttribute("uid", mnemonic.Value);
-                    lci.Add(newUid);
-                }
+                // Remove previous log data
+                ChannelDataChunkAdapter.Delete(uri);
+                // Separate log header and log data
+                var reader = ExtractDataReader(dataObject, GetEntity(uri));
+                // Replace log header
+                ReplaceEntity(dataObject, uri, transaction);
+                // Update log data and index ranges
+                UpdateLogDataAndIndexRange(uri, new [] { reader }, transaction);
+                // Validate log header result
+                ValidateUpdatedEntity(Functions.PutObject, uri);
+                // Commit transaction
+                transaction.Commit();
             }
         }
 
