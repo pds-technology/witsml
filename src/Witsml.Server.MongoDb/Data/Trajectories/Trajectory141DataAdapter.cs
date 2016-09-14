@@ -60,18 +60,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         /// <summary>
-        /// Determines whether the current trajectory has station data.
-        /// </summary>
-        /// <param name="header">The trajectory.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified trajectory has data; otherwise, <c>false</c>.
-        /// </returns>
-        protected override bool HasData(Trajectory header)
-        {
-            return header.MDMax != null;
-        }
-
-        /// <summary>
         /// Check if need to query mongo file for station data.
         /// </summary>
         /// <param name="entity">The result data object.</param>

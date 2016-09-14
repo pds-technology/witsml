@@ -49,8 +49,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// </summary>
         private const string FileName = "FileName";
 
-        private bool _chunked;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="TrajectoryDataAdapter{T, TChild}" /> class.
         /// </summary>
@@ -123,15 +121,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var uri = dataObject.GetUri();
             if (UpdateStations(dataObject))
             {
-                var current = GetEntity(uri);
-                _chunked = QueryStationFile(current, current);
-                if (_chunked)
-                {
-                    var stations = GetMongoFileStationData(uri);
-                    FormatStationData(dataObject, stations);
-                }
-                MergeEntity(current, parser);
-                Replace(parser, current);
+                UpdateTrajectoryWithStations(parser, dataObject, uri, true);
             }
             else
             {
@@ -150,8 +140,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <param name="dataObject">The data object to be replaced.</param>
         public override void Replace(WitsmlQueryParser parser, T dataObject)
         {
-            Delete(dataObject.GetUri());
-            Add(parser, dataObject);
+            var uri = dataObject.GetUri();
+            UpdateTrajectoryWithStations(parser, dataObject, uri);
         }
 
         /// <summary>
@@ -162,10 +152,13 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             using (var transaction = DatabaseProvider.BeginTransaction(uri))
             {
-                Logger.DebugFormat("Deleting Trajectory with uri '{0}'.", uri);
+                Logger.DebugFormat($"Deleting Trajectory with uri '{uri}'.");
 
+                var current = GetEntity(uri);
+                var chunked = QueryStationFile(current, current);
                 DeleteEntity(uri, transaction);
-                if (_chunked)
+
+                if (chunked)
                 {
                     var bucket = GetMongoFileBucket();
                     DeleteMongoFile(bucket, uri);
@@ -364,15 +357,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
         protected abstract void FormatStationData(T entity, List<TChild> stations, WitsmlQueryParser parser = null);
 
         /// <summary>
-        /// Determines whether the current trajectory has station data.
-        /// </summary>
-        /// <param name="header">The trajectory.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified trajectory has data; otherwise, <c>false</c>.
-        /// </returns>
-        protected abstract bool HasData(T header);
-
-        /// <summary>
         /// Check if need to query mongo file for station data.
         /// </summary>
         /// <param name="entity">The result data object.</param>
@@ -397,6 +381,37 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             var stations = GetTrajectoryStation(dataObject);
             return stations.Any();
+        }
+
+        private void UpdateTrajectoryWithStations(WitsmlQueryParser parser, T dataObject, EtpUri uri, bool merge = false)
+        {
+            var current = GetEntity(uri);
+            var chunked = QueryStationFile(current, current);
+
+            if (merge)
+            {
+                if (chunked)
+                {
+                    var stations = GetMongoFileStationData(uri);
+                    FormatStationData(dataObject, stations);
+                }
+
+                MergeEntity(current, parser);
+                dataObject = current;
+            }
+
+            using (var transaction = DatabaseProvider.BeginTransaction(uri))
+            {
+                if (chunked)
+                {
+                    var bucket = GetMongoFileBucket();
+                    DeleteMongoFile(bucket, uri);
+                }
+
+                UpdateMongoFile(dataObject, false);
+                ReplaceEntity(dataObject, uri, transaction);
+                transaction.Commit();
+            }
         }
     }
 }
