@@ -53,7 +53,7 @@ namespace PDS.Witsml.Server.Data.Common
         /// <param name="elementList">The list of all child elements being validated.</param>
         public void Validate(Functions function, Type childType, IEnumerable currentItems, IList<XElement> elementList)
         {
-            if (function != Functions.AddToStore && function != Functions.UpdateInStore)
+            if (function != Functions.AddToStore && function != Functions.UpdateInStore && function != Functions.PutObject)
                 return;
 
             var hasItems = (currentItems as IEnumerable<TimestampedTimeZone>)?.Any() ?? false;

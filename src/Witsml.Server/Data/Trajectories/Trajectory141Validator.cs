@@ -46,46 +46,13 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <returns>A collection of validation results.</returns>
         protected override IEnumerable<ValidationResult> ValidateForInsert()
         {
-            var uri = DataObject.GetUri();
-            var uriWellbore = uri.Parent;
-            var uriWell = uriWellbore.Parent;
-            var wellbore = WellboreDataAdapter.Get(uriWellbore);
-
             var stations = DataObject.TrajectoryStation;
 
-            // Validate parent uid property
-            if (string.IsNullOrWhiteSpace(DataObject.UidWell))
-            {
-                yield return new ValidationResult(ErrorCodes.MissingElementUidForAdd.ToString(), new[] { "UidWell" });
-            }
-            // Validate parent uid property
-            else if (string.IsNullOrWhiteSpace(DataObject.UidWellbore))
-            {
-                yield return new ValidationResult(ErrorCodes.MissingElementUidForAdd.ToString(), new[] { "UidWellbore" });
-            }
+            // Validate common attributes
+            foreach (var result in base.ValidateForInsert())
+                yield return result;
 
-            // Validate parent exists
-            else if (!WellDataAdapter.Exists(uriWell))
-            {
-                yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWell" });
-            }
-            // Validate parent exists
-            else if (wellbore == null)
-            {
-                yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWellbore" });
-            }
-
-            else if (!wellbore.UidWell.Equals(DataObject.UidWell) || !wellbore.Uid.Equals(DataObject.UidWellbore))
-            {
-                yield return new ValidationResult(ErrorCodes.IncorrectCaseParentUid.ToString(), new[] { "UidWellbore" });
-            }
-
-            // Validate UID does not exist
-            else if (DataAdapter.Exists(uri))
-            {
-                yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
-            }
-            else if (stations != null)
+            if (stations != null)
             {
                 if (stations.Any(s => string.IsNullOrWhiteSpace(s.Uid)))
                 {
