@@ -104,7 +104,7 @@ namespace PDS.Witsml.Server.Data
             }
 
             // Validate UID does not exist
-            else if (DataAdapter.Exists(uri))
+            else if (Context.Function != Functions.PutObject && DataAdapter.Exists(uri))
             {
                 yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
             }
@@ -116,7 +116,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>A collection of validation results.</returns>
         protected override IEnumerable<ValidationResult> ValidateForUpdate()
         {
-            return ValidateObjectExistance();
+            return ValidateObjectExistence();
         }
 
         /// <summary>
@@ -127,10 +127,10 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         protected override IEnumerable<ValidationResult> ValidateForDelete()
         {
-            return ValidateObjectExistance();
+            return ValidateObjectExistence();
         }
 
-        private IEnumerable<ValidationResult> ValidateObjectExistance()
+        private IEnumerable<ValidationResult> ValidateObjectExistence()
         {
             var uri = DataObject.GetUri();
 

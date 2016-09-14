@@ -241,14 +241,14 @@ namespace PDS.Witsml.Server.Data
         protected virtual WitsmlResult Replace(WitsmlQueryParser parser)
         {
             var validator = Container.Resolve<IDataObjectValidator<TObject>>();
-            var element = validator.Parse(Functions.AddToStore, parser);
+            var element = validator.Parse(Functions.PutObject, parser);
             var dataObject = Parse(element);
 
             SetDefaultValues(dataObject);
             var uri = GetUri(dataObject);
             Logger.DebugFormat("Replacing {0} with URI '{1}'", typeof(TObject).Name, uri);
 
-            validator.Validate(Functions.AddToStore, parser, dataObject);
+            validator.Validate(Functions.PutObject, parser, dataObject);
             Logger.DebugFormat("Validated {0} with URI '{1}' for Replace", typeof(TObject).Name, uri);
 
             DataAdapter.Replace(parser, dataObject);

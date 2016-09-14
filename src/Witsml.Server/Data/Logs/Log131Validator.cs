@@ -116,41 +116,12 @@ namespace PDS.Witsml.Server.Data.Logs
 
             logCurves?.ForEach(l => logCurveInfoMnemonics.Add(l.Mnemonic));
 
-            // Validate parent uid property
-            if (string.IsNullOrWhiteSpace(DataObject.UidWell))
-            {
-                yield return new ValidationResult(ErrorCodes.MissingElementUidForAdd.ToString(), new[] { "UidWell" });
-            }
-            // Validate parent uid property
-            else if (string.IsNullOrWhiteSpace(DataObject.UidWellbore))
-            {
-                yield return new ValidationResult(ErrorCodes.MissingElementUidForAdd.ToString(), new[] { "UidWellbore" });
-            }
-
-            // Validate parent exists
-            else if (!WellDataAdapter.Exists(uriWell))
-            {
-                yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWell" });
-            }
-            // Validate parent exists
-            else if (wellbore == null)
-            {
-                yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWellbore" });
-            }
-
-            else if (!wellbore.UidWell.Equals(DataObject.UidWell) || !wellbore.Uid.Equals(DataObject.UidWellbore))
-            {
-                yield return new ValidationResult(ErrorCodes.IncorrectCaseParentUid.ToString(), new[] { "UidWellbore" });
-            }
-
-            // Validate UID does not exist
-            else if (DataAdapter.Exists(uri))
-            {
-                yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
-            }
+            // Validate common attributes
+            foreach (var result in base.ValidateForInsert())
+                yield return result;
 
             // Validate that uid for LogParam exists
-            else if (DataObject.LogParam != null && DataObject.LogParam.Any(lp => string.IsNullOrWhiteSpace(lp.Index.ToString())))
+            if (DataObject.LogParam != null && DataObject.LogParam.Any(lp => string.IsNullOrWhiteSpace(lp.Index.ToString())))
             {
                 yield return new ValidationResult(ErrorCodes.MissingElementUidForAdd.ToString(), new[] { "LogParam", "Uid" });
             }

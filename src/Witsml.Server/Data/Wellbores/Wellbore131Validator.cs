@@ -66,7 +66,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             }
 
             // Validate UID does not exist
-            else if (_wellboreDataAdapter.Exists(uri))
+            else if (Context.Function != Functions.PutObject && _wellboreDataAdapter.Exists(uri))
             {
                 yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
             }

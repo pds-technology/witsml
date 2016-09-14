@@ -93,7 +93,7 @@ namespace PDS.Witsml.Server.Data
             Context.RemoveNaNElements = true;
             Context.Function = function;
 
-            if (function == Functions.AddToStore || function == Functions.UpdateInStore || function == Functions.DeleteFromStore)
+            if (function == Functions.AddToStore || function == Functions.UpdateInStore || function == Functions.DeleteFromStore || function == Functions.PutObject)
                 Navigate(root.Elements().FirstOrDefault());
 
             return root;
@@ -113,6 +113,7 @@ namespace PDS.Witsml.Server.Data
                         yield return result;
                     break;
 
+                case Functions.PutObject:
                 case Functions.AddToStore:
                     foreach (var result in ValidateProperties().Union(ValidateForInsert()))
                         yield return result;
@@ -126,11 +127,6 @@ namespace PDS.Witsml.Server.Data
                 case Functions.DeleteObject:
                 case Functions.DeleteFromStore:
                     foreach (var result in ValidateForDelete())
-                        yield return result;
-                    break;
-
-                case Functions.PutObject:
-                    foreach (var result in ValidateForPutObject())
                         yield return result;
                     break;
             }
@@ -210,7 +206,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>true if the special case was handled, false otherwise.</returns>
         protected override bool HandleSpecialCase(PropertyInfo propertyInfo, List<XElement> elementList, string parentPath, string elementName)
         {
-            if (Context.Function != Functions.AddToStore || !IsSpecialCase(propertyInfo))
+            if ((Context.Function != Functions.AddToStore && Context.Function != Functions.PutObject) || !IsSpecialCase(propertyInfo))
             {
                 return base.HandleSpecialCase(propertyInfo, elementList, parentPath, elementName);
             }
@@ -282,15 +278,6 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <returns>A collection of validation results.</returns>
         protected virtual IEnumerable<ValidationResult> ValidateForDelete()
-        {
-            yield break;
-        }
-
-        /// <summary>
-        /// Validates the data object while executing PutObject.
-        /// </summary>
-        /// <returns>A collection of validation results.</returns>
-        protected virtual IEnumerable<ValidationResult> ValidateForPutObject()
         {
             yield break;
         }

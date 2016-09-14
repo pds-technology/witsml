@@ -37,7 +37,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var uri = DataObject.GetUri();
 
             // Validate UID does not exist
-            if (_wellDataAdapter.Exists(uri))
+            if (Context.Function != Functions.PutObject && _wellDataAdapter.Exists(uri))
             {
                 yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] {"Uid"});
             }

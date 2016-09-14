@@ -16,8 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using Energistics.DataAccess.WITSML200;
 
 namespace PDS.Witsml.Server.Data.Wellbores
@@ -27,25 +25,5 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// </summary>
     public partial class Wellbore200Validator
     {
-        /// <summary>
-        /// Validates the data object while executing PutObject.
-        /// </summary>
-        /// <returns>A collection of validation results.</returns>
-        protected override IEnumerable<ValidationResult> ValidateForPutObject()
-        {
-            // Validate parent exists
-            //if (!_wellDataAdapter.Exists(DataObject.UidWell))
-            //{
-            //    yield return new ValidationResult(ErrorCodes.MissingParentDataObject.ToString(), new[] { "UidWell" });
-            //}
-
-            // Validate UID does not exist
-            //else if (_wellboreDataAdapter.Exists(DataObject.Uid))
-            //{
-            //    yield return new ValidationResult(ErrorCodes.DataObjectUidAlreadyExists.ToString(), new[] { "Uid" });
-            //}
-
-            yield break;
-        }
     }
 }

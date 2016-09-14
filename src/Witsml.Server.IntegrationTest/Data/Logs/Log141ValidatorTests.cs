@@ -738,40 +738,27 @@ namespace PDS.Witsml.Server.Data.Logs
                 UidWellbore = Log.UidWellbore,
             };
 
-            update.LogData = new List<LogData> { new LogData
+            update.LogData = new List<LogData>
             {
-                MnemonicList = "MD,MD,GR",
-                UnitList = "m,m,gAPI",
-                Data = new List<string> {"1,1,1" }
-            } };
+                new LogData
+                {
+                    MnemonicList = "MD,MD,GR",
+                    UnitList = "m,m,gAPI",
+                    Data = new List<string> { "1,1,1" }
+                }
+            };
 
             var updateResponse = DevKit.Update<LogList, Log>(update);
             Assert.AreEqual((short)ErrorCodes.MnemonicsNotUnique, updateResponse.Result);
         }
 
         [TestMethod]
-        public void Log141Validator_AddToStore_Error_481Well_Missing()
+        public void Log141Validator_AddToStore_Error_481_Well_Missing()
         {
             DevKit.InitHeader(Log, LogIndexType.measureddepth);
 
             var response = DevKit.Add<LogList, Log>(Log);
             Assert.AreEqual((short)ErrorCodes.MissingParentDataObject, response.Result);
-        }
-
-        [TestMethod]
-        public void Log141Validator_AddToStore_Error_405Log_Already_Exists()
-        {
-            AddParents();
-
-            DevKit.InitHeader(Log, LogIndexType.measureddepth);
-
-            var response = DevKit.Add<LogList, Log>(Log);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-
-            DevKit.InitHeader(Log, LogIndexType.measureddepth);
-
-            response = DevKit.Add<LogList, Log>(Log);
-            Assert.AreEqual((short)ErrorCodes.DataObjectUidAlreadyExists, response.Result);
         }
 
         [TestMethod]
