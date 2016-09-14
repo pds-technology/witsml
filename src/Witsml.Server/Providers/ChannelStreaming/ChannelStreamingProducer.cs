@@ -22,6 +22,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Energistics;
 using Energistics.Common;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
@@ -42,9 +43,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class ChannelStreamingProducer : ChannelStreamingProducerHandler
     {
-        // TODO: Move to an enum (EtpErrorCodes)
-        private static readonly int EINVALID_STATE_CODE = 8;
-
         private readonly IContainer _container;
         private CancellationTokenSource _tokenSource;
         private readonly List<IList<ChannelStreamingContext>> _channelStreamingContextLists;
@@ -160,14 +158,15 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         protected override void HandleChannelStreamingStop(MessageHeader header, ChannelStreamingStop channelStreamingStop)
         {
             // no action needed if streaming not in progress
-            if (_tokenSource == null) return;
+            if (_tokenSource == null)
+            {
+                SendInvalidStateMessage(header.MessageId, "EINVALID_STATE_CODE: There are currently no channels streaming.");
+                return;
+            }
 
             StopStreamingChannels(header.MessageId, channelStreamingStop.Channels);
 
             base.HandleChannelStreamingStop(header, channelStreamingStop);
-
-            //_tokenSource?.Cancel();
-            //_tokenSource = null;
         }
 
         private void StopStreamingChannels(long messageId, IList<long> channels)
@@ -191,7 +190,9 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 }
                 else
                 {
-                    SendInvalidStateMessage(messageId, "EINVALID_STATE_CODE: Channel {0} is not currently streaming and cannot be stopped.", channel);
+                    // Try to get the mnemonic from the Described channels
+                    var mnemonic = Channels.ContainsKey(channel) ? $" ({Channels[channel].Item2.ChannelName})" : string.Empty;
+                    SendInvalidStateMessage(messageId, $"EINVALID_STATE_CODE: Channel {channel}{mnemonic} is not currently streaming.");
                 }
             }
         }
@@ -275,17 +276,22 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 .ToList();
 
             // Get an array of any channelId that are already streaming.
-            var streamingChannelIds = GetStreamingChannelIds(channelIds);
+            var streamingChannels = GetStreamingChannels(channelIds);
+            var streamingChannelIds = streamingChannels.Select(c => c.ChannelId).ToArray();
 
             // Send a EINVALID_STATE message if any are already streaming.
-            if (streamingChannelIds.Length > 0)
-                SendInvalidStateMessage(messageId, "EINVALID_STATE_CODE: Channel {0} is already streaming.", streamingChannelIds);
+            if (streamingChannels.Length > 0)
+            {
+                streamingChannels.ForEach(c => 
+                    SendInvalidStateMessage(messageId, $"EINVALID_STATE_CODE: Channel {c.ChannelId} ({c.ChannelName}) is already streaming."));
+                Logger.Warn($"Channels {string.Join(",", streamingChannelIds)} are already streaming.");
+            }
 
             // Remove the channelIds that are already streaming and continue with the rest.
             streamingChannelIds.ForEach(s => channelIds.Remove(s));
 
             // Remove the infos for channels that are already streaming.
-            var streamingInfos = infos.Where(i => streamingChannelIds.Contains(i.ChannelId));
+            var streamingInfos = infos.Where(i => streamingChannelIds.Contains(i.ChannelId)).ToList();
             streamingInfos.ForEach(i => infos.Remove(i));
             return channelIds;
         }
@@ -299,20 +305,17 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     : ChannelStreamingTypes.LatestValue;
         }
 
-        private void SendInvalidStateMessage(long messageId, string messageFormat, params long[] channelIds)
+        private void SendInvalidStateMessage(long messageId, string message)
         {
-            
-            channelIds.ForEach(c => ProtocolException(EINVALID_STATE_CODE, string.Format(messageFormat, c), messageId));
-
-            Logger.Warn($"Channels {string.Join(",", channelIds)} are already streaming.");
+            ProtocolException((int)EtpErrorCodes.InvalidState, message, messageId);
         }
 
-        private long[] GetStreamingChannelIds(IEnumerable<long> channelIds)
+        private ChannelMetadataRecord[] GetStreamingChannels(IEnumerable<long> channelIds)
         {
             return _channelStreamingContextLists
                 .SelectMany(list => list
                     .Where(l => channelIds.Contains(l.ChannelId))
-                    .Select(c => c.ChannelId))
+                    .Select(c => c.ChannelMetadata))
                 .ToArray();
 
         }
