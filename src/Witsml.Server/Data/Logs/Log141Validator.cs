@@ -494,7 +494,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         var mnemonics = ChannelDataReader.Split(logData.MnemonicList);
                         if (logData.Data != null && logData.Data.Count > 0)
                         {
-                            if (logData.Data.GroupBy(x => x.Split(new[] { delimiter }, StringSplitOptions.None)[0]).Any(x => x.Count() > 1))
+                            if (logData.Data.CheckLogDataForDuplicates(delimiter))
                             {
                                 return new ValidationResult(ErrorCodes.NodesWithSameIndex.ToString(), new[] { "LogData", "Data" });
                             }
