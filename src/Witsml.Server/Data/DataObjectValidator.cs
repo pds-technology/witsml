@@ -26,6 +26,7 @@ using System.Xml.Linq;
 using Energistics.DataAccess.Validation;
 using PDS.Framework;
 using PDS.Witsml.Data;
+using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Common;
 
 namespace PDS.Witsml.Server.Data
@@ -76,7 +77,7 @@ namespace PDS.Witsml.Server.Data
 
             IList<ValidationResult> results;
             DataObjectValidator.TryValidate(this, out results);
-            ValidateResults(results);
+            WitsmlValidator.ValidateResults(function, results);
 
             WitsmlOperationContext.Current.Warnings.AddRange(Context.Warnings);
         }
@@ -242,7 +243,7 @@ namespace PDS.Witsml.Server.Data
         {
             IList<ValidationResult> results;
             DataObjectValidator.TryValidate(DataObject, out results);
-            ValidateResults(results);
+            WitsmlValidator.ValidateResults(Context.Function, results);
             yield break;
         }
 
@@ -399,27 +400,6 @@ namespace PDS.Witsml.Server.Data
             }
 
             return uidAttribute.Value;
-        }
-
-        private void ValidateResults(IList<ValidationResult> results)
-        {
-            if (!results.Any()) return;
-
-            ErrorCodes errorCode;
-            var witsmlValidationResult = results.OfType<WitsmlValidationResult>().FirstOrDefault();
-
-            if (witsmlValidationResult != null)
-            {
-                throw new WitsmlException((ErrorCodes)witsmlValidationResult.ErrorCode);
-            }
-
-            if (Enum.TryParse(results.First().ErrorMessage, out errorCode))
-            {
-                throw new WitsmlException(errorCode);
-            }
-
-            throw new WitsmlException(Context.Function.GetNonConformingErrorCode(),
-                string.Join("; ", results.Select(x => x.ErrorMessage)));
         }
     }
 }
