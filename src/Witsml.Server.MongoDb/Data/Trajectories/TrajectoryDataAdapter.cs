@@ -49,7 +49,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// </summary>
         private const string FileName = "FileName";
 
-        private bool _inFile;
+        private bool _chunked;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TrajectoryDataAdapter{T, TChild}" /> class.
@@ -124,8 +124,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             if (UpdateStations(dataObject))
             {
                 var current = GetEntity(uri);
-                _inFile = QueryStationFile(current, current);
-                if (_inFile)
+                _chunked = QueryStationFile(current, current);
+                if (_chunked)
                 {
                     var stations = GetMongoFileStationData(uri);
                     FormatStationData(dataObject, stations);
@@ -165,7 +165,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 Logger.DebugFormat("Deleting Trajectory with uri '{0}'.", uri);
 
                 DeleteEntity(uri, transaction);
-                if (_inFile)
+                if (_chunked)
                 {
                     var bucket = GetMongoFileBucket();
                     DeleteMongoFile(bucket, uri);

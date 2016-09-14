@@ -22,19 +22,16 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using Energistics.DataAccess;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data;
-using PDS.Witsml.Server.Data.Common;
 
 namespace PDS.Witsml.Server.Data
 {
     /// <summary>
-    /// Encloses MongoDb write method and its helper methods
+    /// An abstract class that encloses methods to update Mongo collection and its helper methods
     /// </summary>
     /// <typeparam name="T">The data object type.</typeparam>
     /// <seealso cref="PDS.Witsml.Data.DataObjectNavigator{MongoDbUpdateContext}" />
@@ -226,7 +223,7 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Handles the na n value.
+        /// Handles the NaN value.
         /// </summary>
         /// <param name="propertyInfo">The property information.</param>
         /// <param name="xmlObject">The XML object.</param>
@@ -345,11 +342,10 @@ namespace PDS.Witsml.Server.Data
         /// <param name="element">The element.</param>
         /// <param name="properties">The properties.</param>
         /// <param name="isAdd">if set to <c>true</c> [is add].</param>
-        /// <exception cref="WitsmlException">
-        /// </exception>
+        /// <exception cref="WitsmlException">The Witsml exception with specified error code.</exception>
         protected void ValidateArrayElement(XElement element, IList<PropertyInfo> properties, bool isAdd = true)
         {
-            Logger.DebugFormat("Validating array element: {0}", element.Name.LocalName);
+            Logger.DebugFormat($"Validating array element: {element.Name.LocalName}");
 
             if (isAdd)
             {

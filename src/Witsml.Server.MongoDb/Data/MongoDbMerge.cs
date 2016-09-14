@@ -56,7 +56,6 @@ namespace PDS.Witsml.Server.Data
         public void Merge(T entity)
         {
             Entity = entity;
-
             Merge(Parser.Element());
         }
 
@@ -172,13 +171,19 @@ namespace PDS.Witsml.Server.Data
                 return;
 
             if (Context.PropertyValues.Count == 1)
+            {
                 propertyInfo.SetValue(Entity, propertyValue);
+                SetSpecifiedProperty(propertyInfo, Entity, true);
+            }              
             else
             {
                 var count = Context.PropertyValues.Count;
                 var parent = Context.PropertyValues[count - 2];
-                if (parent != null)
-                    propertyInfo.SetValue(parent, propertyValue);
+                if (parent == null)
+                    return;
+
+                propertyInfo.SetValue(parent, propertyValue);
+                SetSpecifiedProperty(propertyInfo, parent, true);
             }
         }
 
@@ -213,16 +218,6 @@ namespace PDS.Witsml.Server.Data
                 SetSpecifiedProperty(propertyInfo, parent, false);
             }
             
-        }
-
-        private void SetSpecifiedProperty(PropertyInfo propertyInfo, object obj, bool specified)
-        {
-            var property = propertyInfo.DeclaringType?.GetProperty(propertyInfo.Name + "Specified");
-
-            if (property != null && property.CanWrite)
-            {
-                property.SetValue(obj, specified);
-            }
         }
 
         /// <summary>
@@ -261,15 +256,11 @@ namespace PDS.Witsml.Server.Data
                         continue;
 
                     var item = ParseNestedElement(type, element);
-                    if (propertyValue != null)
-                    {
-                        var list = propertyValue as IList;
-                        list?.Add(item);
-                    }
-                    else
-                    {
-                        var list = CreateList(type, item);
-                    }
+                    if (propertyValue == null)
+                        continue;
+
+                    var list = propertyValue as IList;
+                    list?.Add(item);
                 }
                 else
                 {
@@ -287,6 +278,16 @@ namespace PDS.Witsml.Server.Data
         private void Merge(XElement element)
         {
             NavigateElement(element, Context.DataObjectType);
+        }
+
+        private void SetSpecifiedProperty(PropertyInfo propertyInfo, object obj, bool specified)
+        {
+            var property = propertyInfo.DeclaringType?.GetProperty(propertyInfo.Name + "Specified");
+
+            if (property != null && property.CanWrite)
+            {
+                property.SetValue(obj, specified);
+            }
         }
     }
 }

@@ -61,7 +61,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="updates">The updates.</param>
         public void Update(T entity, EtpUri uri, Dictionary<string, object> updates)
         {
-            Logger.DebugFormat("Updating data object: {0}", uri);
+            Logger.DebugFormat($"Updating data object: {uri}");
 
             _entityFilter = MongoDbUtility.GetEntityFilter<T>(uri, IdPropertyName);
             Entity = entity;
@@ -73,22 +73,6 @@ namespace PDS.Witsml.Server.Data
             Collection.UpdateOne(_entityFilter, Context.Update);
 
             WitsmlOperationContext.Current.Warnings.AddRange(Context.Warnings);
-        }
-
-        /// <summary>
-        /// Creates an <see cref="UpdateDefinition{T}"/> based on the supplied dictionary of name/value pairs.
-        /// </summary>
-        /// <param name="updates">The updates.</param>
-        /// <param name="uidValue">The uid value.</param>
-        /// <returns>The update definition.</returns>
-        public UpdateDefinition<T> Update(Dictionary<string, object> updates, string uidValue)
-        {
-            var update = Builders<T>.Update.Set(IdPropertyName, uidValue);
-
-            foreach (var pair in updates)
-                update = update.Set(pair.Key, pair.Value);
-
-            return update;
         }
 
         /// <summary>
@@ -179,7 +163,7 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="propertyInfo">The property information.</param>
         /// <param name="propertyPath">The property path.</param>
-        /// <exception cref="WitsmlException"></exception>
+        /// <exception cref="WitsmlException">The Witsml exception with specified error code.</exception>
         protected override void UnsetProperty(PropertyInfo propertyInfo, string propertyPath)
         {
             if (propertyInfo.IsDefined(typeof(RequiredAttribute), false))
@@ -187,17 +171,7 @@ namespace PDS.Witsml.Server.Data
 
             Context.Update = Context.Update.Unset(propertyPath);
             SetSpecifiedProperty(propertyInfo, propertyPath, false);
-        }
-
-        private void SetSpecifiedProperty(PropertyInfo propertyInfo, string propertyPath, bool specified)
-        {
-            var property = propertyInfo.DeclaringType?.GetProperty(propertyInfo.Name + "Specified");
-
-            if (property != null && property.CanWrite)
-            {
-                Context.Update = Context.Update.Set(propertyPath + "Specified", specified);
-            }
-        }
+        }    
 
         /// <summary>
         /// Updates the array elements.
@@ -209,7 +183,7 @@ namespace PDS.Witsml.Server.Data
         /// <param name="parentPath">The parent path.</param>
         protected override void UpdateArrayElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
         {
-            Logger.DebugFormat("Updating array elements: {0} {1}", parentPath, propertyInfo?.Name);
+            Logger.DebugFormat($"Updating array elements: {parentPath} {propertyInfo?.Name}");
 
             var updateBuilder = Builders<T>.Update;
             var filterBuilder = Builders<T>.Filter;
@@ -279,9 +253,25 @@ namespace PDS.Witsml.Server.Data
                 Collection.BulkWrite(updateList);
         }
 
+        /// <summary>
+        /// Creates an <see cref="UpdateDefinition{T}"/> based on the supplied dictionary of name/value pairs.
+        /// </summary>
+        /// <param name="updates">The updates.</param>
+        /// <param name="uidValue">The uid value.</param>
+        /// <returns>The update definition.</returns>
+        private UpdateDefinition<T> Update(Dictionary<string, object> updates, string uidValue)
+        {
+            var update = Builders<T>.Update.Set(IdPropertyName, uidValue);
+
+            foreach (var pair in updates)
+                update = update.Set(pair.Key, pair.Value);
+
+            return update;
+        }
+
         private void UpdateArrayElementsWithoutUid(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
         {
-            Logger.DebugFormat("Updating recurring elements without a uid: {0} {1}", parentPath, propertyInfo?.Name);
+            Logger.DebugFormat($"Updating recurring elements without a uid: {parentPath} {propertyInfo?.Name}");
 
             var updateBuilder = Builders<T>.Update;
             var filterBuilder = Builders<T>.Filter;
@@ -324,17 +314,26 @@ namespace PDS.Witsml.Server.Data
             if (updateList.Count > 0)
                 Collection.BulkWrite(updateList);
         }
-        
+
+        private void SetSpecifiedProperty(PropertyInfo propertyInfo, string propertyPath, bool specified)
+        {
+            var property = propertyInfo.DeclaringType?.GetProperty(propertyInfo.Name + "Specified");
+
+            if (property != null && property.CanWrite)
+            {
+                Context.Update = Context.Update.Set(propertyPath + "Specified", specified);
+            }
+        }
 
         private void LogUpdateFilter(FilterDefinition<T> filter, UpdateDefinition<T> update)
         {
-            if (Logger.IsDebugEnabled)
-            {
-                var filterJson = filter.Render(Collection.DocumentSerializer, Collection.Settings.SerializerRegistry);
-                var updateJson = update.Render(Collection.DocumentSerializer, Collection.Settings.SerializerRegistry);
-                Logger.DebugFormat("Detected update parameters: {0}", updateJson);
-                Logger.DebugFormat("Detected update filters: {0}", filterJson);
-            }
+            if (!Logger.IsDebugEnabled)
+                return;
+
+            var filterJson = filter.Render(Collection.DocumentSerializer, Collection.Settings.SerializerRegistry);
+            var updateJson = update.Render(Collection.DocumentSerializer, Collection.Settings.SerializerRegistry);
+            Logger.DebugFormat($"Detected update parameters: {updateJson}");
+            Logger.DebugFormat($"Detected update filters: {filterJson}");
         }
     }
 }
