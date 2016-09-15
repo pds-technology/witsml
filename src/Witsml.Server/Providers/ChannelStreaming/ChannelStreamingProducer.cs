@@ -378,7 +378,8 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 // Get channel data
                 var mnemonics = contextList.Select(c => c.ChannelMetadata.ChannelName).ToArray();
                 var dataProvider = GetDataProvider(parentUri);
-                var channelData = dataProvider.GetChannelData(parentUri, new Range<double?>(minStartIndex, maxEndIndex), mnemonics, requestLatestValues);
+                var optimiseStart = channelStreamingType == ChannelStreamingTypes.IndexValue ? true : false;
+                var channelData = dataProvider.GetChannelData(parentUri, new Range<double?>(minStartIndex, maxEndIndex), mnemonics, requestLatestValues, optimiseStart);
 
                 // Stream the channel data
                 await StreamChannelData(contextList, channelData, mnemonics, increasing, isTimeIndex, primaryIndex.Scale, token);
