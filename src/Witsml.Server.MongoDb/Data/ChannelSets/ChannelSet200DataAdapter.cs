@@ -104,8 +104,9 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         /// <param name="range">The data range to retrieve.</param>
         /// <param name="mnemonics">The mnemonics to return data for.</param>
         /// <param name="requestLatestValues">The total number of requested latest values.</param>
+        /// <param name="optimizeStart">if set to <c>true</c> start range can be optimized.</param>
         /// <returns>A collection of channel data.</returns>
-        public List<List<List<object>>> GetChannelData(EtpUri uri, Range<double?> range, string[] mnemonics, int? requestLatestValues)
+        public List<List<List<object>>> GetChannelData(EtpUri uri, Range<double?> range, string[] mnemonics, int? requestLatestValues, bool optimizeStart = false)
         {
             return new List<List<List<object>>>();
         }
