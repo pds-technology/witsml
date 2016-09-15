@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using log4net;
@@ -130,17 +131,40 @@ namespace PDS.Witsml.Server.Data.Logs
         /// Checks the log data for duplicate indexes.
         /// </summary>
         /// <param name="logData">The log data.</param>
-        /// <param name="delimiter">The logData delimiter</param>
+        /// <param name="delimiter">The logData delimiter.</param>
+        /// <param name="isTimeLog">Is the log a time log.</param>
         /// <returns><c>true</c> if Log data has duplicates; otherwise, <c>false</c>.</returns>
-        public static bool CheckLogDataForDuplicates(this List<string> logData, string delimiter)
+        public static bool LogDataHasDuplicateIndexes(this List<string> logData, string delimiter, bool isTimeLog)
         {
-            var dictionary = new Dictionary<string, string>();
+           
             foreach (var s in logData)
             {
-                var value = s.Substring(0, s.IndexOf(delimiter));
-                if (dictionary.ContainsKey(value))
-                    return true;
-                dictionary.Add(value, string.Empty);
+                if (isTimeLog)
+                {
+                    var dictionary = new Dictionary<long, string>();
+                    var value = s.Substring(0, s.IndexOf(delimiter, StringComparison.InvariantCulture));
+                    DateTimeOffset dto;
+                    if (!DateTimeOffset.TryParse(value, out dto))
+                        throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
+
+                    if (dictionary.ContainsKey(dto.UtcTicks))
+                        return true;
+
+                    dictionary.Add(dto.UtcTicks, string.Empty);
+                }
+                else
+                {
+                    var dictionary = new Dictionary<double, string>();
+                    var value = s.Substring(0, s.IndexOf(delimiter, StringComparison.InvariantCulture));
+                    double doubleValue;
+                    if (!double.TryParse(value, out doubleValue))
+                        throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
+
+                    if (dictionary.ContainsKey(doubleValue))
+                        return true;
+
+                    dictionary.Add(doubleValue, string.Empty);
+                }
             }
             return false;
         }

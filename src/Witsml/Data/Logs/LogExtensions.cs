@@ -83,10 +83,10 @@ namespace PDS.Witsml.Data.Logs
             if (log.LogData == null) return true;
 
             var data = log.LogData.FirstOrDefault();
-            DateTimeOffset value;
-
-            return DateTimeOffset.TryParse(ChannelDataReader.Split(data).FirstOrDefault(), out value);
+            return data.IsFirstValueDateTime();
         }
+
+
 
         /// <summary>
         /// Determines whether the <see cref="Witsml141.Log"/> is a time log.
@@ -108,12 +108,22 @@ namespace PDS.Witsml.Data.Logs
             if (log.LogData == null) return true;
 
             var data = log.LogData.SelectMany(x => x.Data ?? new List<string>(0)).FirstOrDefault();
-            DateTimeOffset value;
 
-            return
-                DateTimeOffset.TryParse(
-                    ChannelDataReader.Split(data, log.GetDataDelimiterOrDefault()).FirstOrDefault(),
-                    out value);
+            return data.IsFirstValueDateTime(log.GetDataDelimiterOrDefault());
+        }
+
+        /// <summary>
+        /// Determines if the first value in the data row is a type of datetime.
+        /// </summary>
+        /// <param name="dataRow">A row of data from log data.</param>
+        /// <param name="delimiter">The delimeter of the log data row.</param>
+        /// <returns>
+        /// <c>true</c> if the first value of the row is a type of date time; otherwise, false.
+        /// </returns>
+        public static bool IsFirstValueDateTime(this string dataRow, string delimiter = ",")
+        {
+            DateTimeOffset value;
+            return DateTimeOffset.TryParse(ChannelDataReader.Split(dataRow, delimiter).FirstOrDefault(), out value);
         }
 
         /// <summary>

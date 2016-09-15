@@ -94,7 +94,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 var logCurveInfoMnemonics = Parser.GetLogCurveInfoMnemonics().ToList();                
                 var logCurveInfos = Parser.Properties("logCurveInfo").ToArray();
 
-                if (logCurveInfoMnemonics.Count() != logCurveInfos.Length)
+                if (logCurveInfoMnemonics.Count != logCurveInfos.Length)
                 {
                     yield return new ValidationResult(ErrorCodes.MissingMnemonicElement.ToString(), new[] { "LogCurveInfo", "Mnemonic" });
                 }
@@ -478,8 +478,7 @@ namespace PDS.Witsml.Server.Data.Logs
         private ValidationResult ValidateLogData(string indexCurve, List<LogCurveInfo> logCurves, List<LogData> logDatas, List<string> mergedLogCurveInfoMnemonics, string delimiter, bool insert = true)
         {
             var totalPoints = 0;
-
-            if (logDatas.SelectMany(ld => ld.Data).Count() > WitsmlSettings.MaxDataNodes)
+            if (logDatas.Sum(x => x.Data.Count) > WitsmlSettings.MaxDataNodes) 
             {
                 return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "LogData", "Data" });
             }
@@ -494,7 +493,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         var mnemonics = ChannelDataReader.Split(logData.MnemonicList);
                         if (logData.Data != null && logData.Data.Count > 0)
                         {
-                            if (logData.Data.CheckLogDataForDuplicates(delimiter))
+                            if (logData.Data.LogDataHasDuplicateIndexes(delimiter, logData.Data[0].IsFirstValueDateTime(delimiter)))
                             {
                                 return new ValidationResult(ErrorCodes.NodesWithSameIndex.ToString(), new[] { "LogData", "Data" });
                             }
@@ -505,7 +504,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         {
                             return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "LogData", "Data" });
                         }
-                        else if (mnemonics.Distinct().Count() < mnemonics.Count())
+                        else if (mnemonics.Distinct().Count() < mnemonics.Length)
                         {
                             return new ValidationResult(ErrorCodes.MnemonicsNotUnique.ToString(), new[] { "LogData", "MnemonicList" });
                         }
@@ -517,7 +516,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         {
                             return new ValidationResult(ErrorCodes.MissingColumnIdentifiers.ToString(), new[] { "LogData", "MnemonicList" });
                         }
-                        else if (insert && logCurves != null && mnemonics.Count() > logCurves.Count)
+                        else if (insert && logCurves != null && mnemonics.Length > logCurves.Count)
                         {
                             return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogData", "MnemonicList" });
                         }

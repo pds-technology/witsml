@@ -91,7 +91,7 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 var logCurveInfos = Parser.Properties("logCurveInfo").ToArray();
 
-                if (logCurveInfoMnemonics.Count() != logCurveInfos.Length)
+                if (logCurveInfoMnemonics.Count != logCurveInfos.Length)
                 {
                     yield return new ValidationResult(ErrorCodes.MissingMnemonicElement.ToString(), new[] { "LogCurveInfo", "Mnemonic" });
                 }
@@ -403,19 +403,19 @@ namespace PDS.Witsml.Server.Data.Logs
                 return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogCurveInfo" });
 
             // Validate there are no duplicate indexes
-            if (logDatas.CheckLogDataForDuplicates(delimiter))
+            if (logDatas.LogDataHasDuplicateIndexes(delimiter, logDatas[0].IsFirstValueDateTime()))
             {
                 return new ValidationResult(ErrorCodes.NodesWithSameIndex.ToString(), new[] { "LogData", "Data" });
             }
 
-            if (logDatas.Count() > WitsmlSettings.MaxDataNodes)
+            if (logDatas.Count > WitsmlSettings.MaxDataNodes)
             {
                 return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] {"LogData", "Data"});
             }
             else
             {
                 var logDataColumnLength = logDatas[0].Split(',').Length;
-                var totalPoints = logDatas.Count() * logDataColumnLength;
+                var totalPoints = logDatas.Count * logDataColumnLength;
 
                 if (totalPoints > WitsmlSettings.MaxDataPoints)
                 {
@@ -426,7 +426,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     return new ValidationResult(ErrorCodes.InvalidLogCurveInfoColumnIndex.ToString(), new[] { "LogCurveInfo" });
                 }
 
-                else if (mergedLogCurveInfoMnemonics.Distinct().Count() < mergedLogCurveInfoMnemonics.Count())
+                else if (mergedLogCurveInfoMnemonics.Distinct().Count() < mergedLogCurveInfoMnemonics.Count)
                 {
                     return new ValidationResult(ErrorCodes.MnemonicsNotUnique.ToString(),
                         new[] { "LogCurveInfo" });
@@ -436,7 +436,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(),
                         new[] {"LogCurveInfo"});
                 }
-                else if (insert && logCurves != null && mergedLogCurveInfoMnemonics.Count() > logCurves.Count)
+                else if (insert && logCurves != null && mergedLogCurveInfoMnemonics.Count > logCurves.Count)
                 {
                     return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(),
                         new[] {"LogCurveInfo"});
