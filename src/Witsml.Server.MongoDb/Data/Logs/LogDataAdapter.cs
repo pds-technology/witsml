@@ -613,9 +613,16 @@ namespace PDS.Witsml.Server.Data.Logs
         /// Gets the log curves.
         /// </summary>
         /// <param name="log">The log.</param>
+        /// <returns>The LogCurveInfo for the log.</returns>
+        protected abstract List<TChild> GetLogCurves(T log);
+
+        /// <summary>
+        /// Gets the log curves.
+        /// </summary>
+        /// <param name="log">The log.</param>
         /// <param name="mnemonics">A list of mnemonics to filter curves by if specified.</param>
         /// <returns>A list of log curves filtered by mneonics if specified, otherwise all curves.</returns>
-        protected abstract List<TChild> GetLogCurves(T log, string[] mnemonics = null);
+        protected abstract List<TChild> GetLogCurves(T log, string[] mnemonics);
 
         /// <summary>
         /// Gets the mnemonic.
