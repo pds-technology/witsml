@@ -220,7 +220,7 @@ namespace PDS.Witsml.Server.Data
             var element = validator.Parse(Functions.UpdateInStore, parser);
             var dataObject = Parse(element);
 
-            UpdateDefaultValues(dataObject, element);
+            UpdateDefaultValues(dataObject, parser);
             var uri = GetUri(dataObject);
             Logger.DebugFormat("Updating {0} with URI '{1}'", typeof(TObject).Name, uri);
 
@@ -330,8 +330,8 @@ namespace PDS.Witsml.Server.Data
         /// Sets the default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-        /// <param name="element">The element.</param>
-        protected virtual void UpdateDefaultValues(TObject dataObject, XElement element)
+        /// <param name="parser">The element.</param>
+        protected virtual void UpdateDefaultValues(TObject dataObject, WitsmlQueryParser parser)
         {
         }
     }

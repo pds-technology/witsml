@@ -36,6 +36,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="WbGeometry"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{WbGeometryList, WbGeometry}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<WbGeometry>))]
@@ -43,6 +44,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
     [Export141(ObjectTypes.WbGeometry, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class WbGeometry141DataProvider : WitsmlDataProvider<WbGeometryList, WbGeometry>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="WbGeometry141DataProvider"/> class.
@@ -70,10 +72,10 @@ namespace PDS.Witsml.Server.Data.WbGeometries
         /// Sets the default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-		/// <param name="element">The element.</param>
-        protected override void UpdateDefaultValues(WbGeometry dataObject, XElement element)
+		/// <param name="parser">The input template.</param>
+        protected override void UpdateDefaultValues(WbGeometry dataObject, WitsmlQueryParser parser)
         {
-            UpdateAdditionalDefaultValues(dataObject, element);
+            UpdateAdditionalDefaultValues(dataObject, parser);
         }
 
         /// <summary>
@@ -96,7 +98,8 @@ namespace PDS.Witsml.Server.Data.WbGeometries
         /// Sets additional default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-		/// <param name="element">The element.</param>
-        partial void UpdateAdditionalDefaultValues(WbGeometry dataObject, XElement element);
+		/// <param name="parser">The input template.</param>
+        partial void UpdateAdditionalDefaultValues(WbGeometry dataObject, WitsmlQueryParser parser);
+
     }
 }

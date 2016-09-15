@@ -59,8 +59,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// Sets additional default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-        /// <param name="element">The element.</param>
-        partial void UpdateAdditionalDefaultValues(Log dataObject, XElement element)
+        /// <param name="parser">The input template.</param>
+        partial void UpdateAdditionalDefaultValues(Log dataObject, WitsmlQueryParser parser)
         {
             // Prevent unnecessary processing
             if (dataObject?.LogCurveInfo == null || !dataObject.LogCurveInfo.Any(x => string.IsNullOrWhiteSpace(x.Uid)))
@@ -68,9 +68,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var uri = dataObject.GetUri();
             var current = DataAdapter.Get(uri);
-            var ns = element.GetDefaultNamespace();
-
-            foreach (var lci in element.Descendants(ns + "logCurveInfo"))
+            var ns = parser.Root.GetDefaultNamespace();
+            foreach (var lci in parser.Properties("logCurveInfo"))
             {
                 var uidAttribute = lci.Attribute("uid");
                 var mnemonicElement = lci.Element(ns + "mnemonic");

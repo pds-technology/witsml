@@ -78,9 +78,9 @@ namespace PDS.Witsml.Server.Data.Logs
                     UidWellbore = Log.UidWellbore
                 });
             Assert.IsNotNull(result.LogCurveInfo);
-            Assert.AreEqual(result.LogCurveInfo.Count, 2);
-            Assert.AreEqual(result.LogCurveInfo[0].ColumnIndex.Value, 1);
-            Assert.AreEqual(result.LogCurveInfo[1].ColumnIndex.Value, 2);
+            Assert.AreEqual(2, result.LogCurveInfo.Count);
+            Assert.AreEqual(1, result.LogCurveInfo[0].ColumnIndex.Value);
+            Assert.AreEqual(2, result.LogCurveInfo[1].ColumnIndex.Value);
         }
 
         [TestMethod]
@@ -151,7 +151,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log131DataAdapter_AddToStore_Add_Unordered_DepthLog()
+        public void Log131DataAdapter_AddToStore_Add_DepthLog_With_Unordered_LogCurveInfo()
         {
             AddParents();
 
@@ -248,8 +248,8 @@ namespace PDS.Witsml.Server.Data.Logs
             var log = logs.Log.FirstOrDefault();
             Assert.IsNotNull(log);
             Assert.IsNotNull(log.LogData);
-            Assert.AreEqual(log.LogCurveInfo.Count, 3);
-            Assert.AreEqual(log.LogData.Count, 10);
+            Assert.AreEqual(3, log.LogCurveInfo.Count);
+            Assert.AreEqual(10, log.LogData.Count);
             foreach (var lc in log.LogCurveInfo)
             {
                 var curve = update.LogCurveInfo.FirstOrDefault(x => x.Mnemonic == lc.Mnemonic);

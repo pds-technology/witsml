@@ -33,6 +33,7 @@ namespace PDS.Witsml.Server.Data.Wells
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Well"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{WellList, Well}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Well>))]
@@ -40,6 +41,7 @@ namespace PDS.Witsml.Server.Data.Wells
     [Export131(ObjectTypes.Well, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Well131DataProvider : WitsmlDataProvider<WellList, Well>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Well131DataProvider"/> class.
@@ -67,10 +69,10 @@ namespace PDS.Witsml.Server.Data.Wells
         /// Sets the default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-		/// <param name="element">The element.</param>
-        protected override void UpdateDefaultValues(Well dataObject, XElement element)
+		/// <param name="parser">The input template.</param>
+        protected override void UpdateDefaultValues(Well dataObject, WitsmlQueryParser parser)
         {
-            UpdateAdditionalDefaultValues(dataObject, element);
+            UpdateAdditionalDefaultValues(dataObject, parser);
         }
 
         /// <summary>
@@ -93,7 +95,8 @@ namespace PDS.Witsml.Server.Data.Wells
         /// Sets additional default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-		/// <param name="element">The element.</param>
-        partial void UpdateAdditionalDefaultValues(Well dataObject, XElement element);
+		/// <param name="parser">The input template.</param>
+        partial void UpdateAdditionalDefaultValues(Well dataObject, WitsmlQueryParser parser);
+
     }
 }

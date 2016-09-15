@@ -33,6 +33,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Trajectory"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{TrajectoryList, Trajectory}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Trajectory>))]
@@ -40,6 +41,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
     [Export131(ObjectTypes.Trajectory, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Trajectory131DataProvider : WitsmlDataProvider<TrajectoryList, Trajectory>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Trajectory131DataProvider"/> class.
@@ -67,10 +69,10 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// Sets the default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-		/// <param name="element">The element.</param>
-        protected override void UpdateDefaultValues(Trajectory dataObject, XElement element)
+		/// <param name="parser">The input template.</param>
+        protected override void UpdateDefaultValues(Trajectory dataObject, WitsmlQueryParser parser)
         {
-            UpdateAdditionalDefaultValues(dataObject, element);
+            UpdateAdditionalDefaultValues(dataObject, parser);
         }
 
         /// <summary>
@@ -93,7 +95,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// Sets additional default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-		/// <param name="element">The element.</param>
-        partial void UpdateAdditionalDefaultValues(Trajectory dataObject, XElement element);
+		/// <param name="parser">The input template.</param>
+        partial void UpdateAdditionalDefaultValues(Trajectory dataObject, WitsmlQueryParser parser);
+
     }
 }

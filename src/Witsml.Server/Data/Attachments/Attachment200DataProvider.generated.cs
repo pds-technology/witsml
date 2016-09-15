@@ -33,12 +33,14 @@ namespace PDS.Witsml.Server.Data.Attachments
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Attachment"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{Attachment}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Attachment>))]
     [Export200(ObjectTypes.Attachment, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Attachment200DataProvider : EtpDataProvider<Attachment>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Attachment200DataProvider"/> class.
@@ -49,5 +51,6 @@ namespace PDS.Witsml.Server.Data.Attachments
         public Attachment200DataProvider(IContainer container, IWitsmlDataAdapter<Attachment> dataAdapter) : base(container, dataAdapter)
         {
         }
+
     }
 }

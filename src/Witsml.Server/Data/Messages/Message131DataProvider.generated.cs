@@ -33,6 +33,7 @@ namespace PDS.Witsml.Server.Data.Messages
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Message"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{MessageList, Message}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Message>))]
@@ -40,6 +41,7 @@ namespace PDS.Witsml.Server.Data.Messages
     [Export131(ObjectTypes.Message, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Message131DataProvider : WitsmlDataProvider<MessageList, Message>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Message131DataProvider"/> class.
@@ -67,10 +69,10 @@ namespace PDS.Witsml.Server.Data.Messages
         /// Sets the default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-		/// <param name="element">The element.</param>
-        protected override void UpdateDefaultValues(Message dataObject, XElement element)
+		/// <param name="parser">The input template.</param>
+        protected override void UpdateDefaultValues(Message dataObject, WitsmlQueryParser parser)
         {
-            UpdateAdditionalDefaultValues(dataObject, element);
+            UpdateAdditionalDefaultValues(dataObject, parser);
         }
 
         /// <summary>
@@ -93,7 +95,8 @@ namespace PDS.Witsml.Server.Data.Messages
         /// Sets additional default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-		/// <param name="element">The element.</param>
-        partial void UpdateAdditionalDefaultValues(Message dataObject, XElement element);
+		/// <param name="parser">The input template.</param>
+        partial void UpdateAdditionalDefaultValues(Message dataObject, WitsmlQueryParser parser);
+
     }
 }

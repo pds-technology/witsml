@@ -33,6 +33,7 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Log"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{LogList, Log}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Log>))]
@@ -40,6 +41,7 @@ namespace PDS.Witsml.Server.Data.Logs
     [Export141(ObjectTypes.Log, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Log141DataProvider : WitsmlDataProvider<LogList, Log>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Log141DataProvider"/> class.
@@ -67,10 +69,10 @@ namespace PDS.Witsml.Server.Data.Logs
         /// Sets the default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-		/// <param name="element">The element.</param>
-        protected override void UpdateDefaultValues(Log dataObject, XElement element)
+		/// <param name="parser">The input template.</param>
+        protected override void UpdateDefaultValues(Log dataObject, WitsmlQueryParser parser)
         {
-            UpdateAdditionalDefaultValues(dataObject, element);
+            UpdateAdditionalDefaultValues(dataObject, parser);
         }
 
         /// <summary>
@@ -93,7 +95,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// Sets additional default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-		/// <param name="element">The element.</param>
-        partial void UpdateAdditionalDefaultValues(Log dataObject, XElement element);
+		/// <param name="parser">The input template.</param>
+        partial void UpdateAdditionalDefaultValues(Log dataObject, WitsmlQueryParser parser);
+
     }
 }

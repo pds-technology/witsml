@@ -122,8 +122,8 @@ namespace PDS.Witsml.Data.Logs
         /// </returns>
         public static bool IsFirstValueDateTime(this string dataRow, string delimiter = ",")
         {
-            DateTimeOffset value;
-            return DateTimeOffset.TryParse(ChannelDataReader.Split(dataRow, delimiter).FirstOrDefault(), out value);
+            double value;
+            return !double.TryParse(ChannelDataReader.Split(dataRow, delimiter).FirstOrDefault(), out value);
         }
 
         /// <summary>

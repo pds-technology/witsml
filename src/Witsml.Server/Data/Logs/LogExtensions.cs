@@ -136,13 +136,13 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns><c>true</c> if Log data has duplicates; otherwise, <c>false</c>.</returns>
         public static bool LogDataHasDuplicateIndexes(this List<string> logData, string delimiter, bool isTimeLog)
         {
-           
             foreach (var s in logData)
             {
                 if (isTimeLog)
                 {
                     var dictionary = new Dictionary<long, string>();
                     var value = s.Substring(0, s.IndexOf(delimiter, StringComparison.InvariantCulture));
+
                     DateTimeOffset dto;
                     if (!DateTimeOffset.TryParse(value, out dto))
                         throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
@@ -150,12 +150,13 @@ namespace PDS.Witsml.Server.Data.Logs
                     if (dictionary.ContainsKey(dto.UtcTicks))
                         return true;
 
-                    dictionary.Add(dto.UtcTicks, string.Empty);
+                    dictionary.Add(dto.UtcTicks, null);
                 }
                 else
                 {
                     var dictionary = new Dictionary<double, string>();
                     var value = s.Substring(0, s.IndexOf(delimiter, StringComparison.InvariantCulture));
+
                     double doubleValue;
                     if (!double.TryParse(value, out doubleValue))
                         throw new WitsmlException(ErrorCodes.InputTemplateNonConforming);
@@ -163,7 +164,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     if (dictionary.ContainsKey(doubleValue))
                         return true;
 
-                    dictionary.Add(doubleValue, string.Empty);
+                    dictionary.Add(doubleValue, null);
                 }
             }
             return false;
