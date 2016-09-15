@@ -16,10 +16,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.ServiceModel.Web;
 using System.Xml.Linq;
+using Energistics.DataAccess.Validation;
 using log4net;
 using PDS.Framework;
 
@@ -397,6 +400,32 @@ namespace PDS.Witsml.Server.Configuration
             {
                 ValidateSelectionCriteriaForAnEntity(entity, allowEmptyRecurringElements);
             }
+        }
+
+        /// <summary>
+        /// Process the validation results to raise a <see cref="WitsmlException" />.
+        /// </summary>
+        /// <param name="function">The WITSML API function.</param>
+        /// <param name="results">The results.</param>
+        public static void ValidateResults(Functions function, IList<ValidationResult> results)
+        {
+            if (!results.Any()) return;
+
+            ErrorCodes errorCode;
+            var witsmlValidationResult = results.OfType<WitsmlValidationResult>().FirstOrDefault();
+
+            if (witsmlValidationResult != null)
+            {
+                throw new WitsmlException((ErrorCodes)witsmlValidationResult.ErrorCode);
+            }
+
+            if (Enum.TryParse(results.First().ErrorMessage, out errorCode))
+            {
+                throw new WitsmlException(errorCode);
+            }
+
+            throw new WitsmlException(function.GetNonConformingErrorCode(),
+                string.Join("; ", results.Select(x => x.ErrorMessage)));
         }
 
         /// <summary>

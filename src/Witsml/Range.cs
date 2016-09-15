@@ -113,6 +113,24 @@ namespace PDS.Witsml
         }
 
         /// <summary>
+        /// Determines whether a range starts before the specified value.
+        /// </summary>
+        /// <param name="range">The range.</param>
+        /// <param name="value">The value.</param>
+        /// <param name="increasing">if set to <c>true</c> the range is increasing.</param>
+        /// <param name="inclusive">if set to <c>true</c> the comparison should include value, false otherwise.</param>
+        /// <returns><c>true</c> if the range starts before the specified value; otherwise, <c>false</c>.</returns>
+        public static bool StartsBefore(this Range<double?> range, double value, bool increasing = true, bool inclusive = false)
+        {
+            if (!range.Start.HasValue)
+                return false;
+
+            return increasing
+                ? (inclusive ? value >= range.Start.Value : value > range.Start.Value)
+                : (inclusive ? value <= range.Start.Value : value < range.Start.Value);
+        }
+
+        /// <summary>
         /// Determines whether a range ends before the specified value.
         /// </summary>
         /// <param name="range">The range.</param>
@@ -128,6 +146,24 @@ namespace PDS.Witsml
             return increasing
                 ? (inclusive ? value >= range.End.Value : value > range.End.Value)
                 : (inclusive ? value <= range.End.Value : value < range.End.Value);
+        }
+
+        /// <summary>
+        /// Determines whether a range ends after the specified value.
+        /// </summary>
+        /// <param name="range">The range.</param>
+        /// <param name="value">The value.</param>
+        /// <param name="increasing">if set to <c>true</c> the range is increasing.</param>
+        /// <param name="inclusive">if set to <c>true</c> the comparison should include value, false otherwise.</param>
+        /// <returns><c>true</c> if the range ends after the specified value; otherwise, <c>false</c>.</returns>
+        public static bool EndsAfter(this Range<double?> range, double value, bool increasing = true, bool inclusive = false)
+        {
+            if (!range.End.HasValue)
+                return false;
+
+            return increasing
+                ? (inclusive ? value <= range.End.Value : value < range.End.Value)
+                : (inclusive ? value >= range.End.Value : value > range.End.Value);
         }
 
         /// <summary>
