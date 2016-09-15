@@ -124,10 +124,17 @@ namespace PDS.Witsml.Server.Data.Logs
         /// Gets the log curves.
         /// </summary>
         /// <param name="log">The log.</param>
-        /// <returns></returns>
-        protected override List<LogCurveInfo> GetLogCurves(Log log)
+        /// <param name="mnemonics">A list of mnemonics to filter curves by if specified.</param>
+        /// <returns>A list of log curves filtered by mneonics if specified, otherwise all curves.</returns>
+        protected override List<LogCurveInfo> GetLogCurves(Log log, string[] mnemonics = null)
         {
-            return log.LogCurveInfo;
+            return log
+                .LogCurveInfo
+                .Where(l => 
+                    mnemonics == null || 
+                    mnemonics.Length == 0 || 
+                    mnemonics.Contains(l.Mnemonic.Value))
+                .ToList();
         }
 
         /// <summary>

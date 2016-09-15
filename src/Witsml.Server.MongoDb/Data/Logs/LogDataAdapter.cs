@@ -142,10 +142,24 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="range">The data range to retrieve.</param>
         /// <param name="mnemonics">The mnemonics to return data for.</param>
         /// <param name="requestLatestValues">The total number of requested latest values.</param>
+        /// <param name="optimizeStart">if set to <c>true</c> start range can be optimized.</param>
         /// <returns>A collection of channel data.</returns>
-        public List<List<List<object>>> GetChannelData(EtpUri uri, Range<double?> range, string[] mnemonics, int? requestLatestValues)
+        public List<List<List<object>>> GetChannelData(EtpUri uri, Range<double?> range, string[] mnemonics, int? requestLatestValues, bool optimizeStart = false)
         {
             var entity = GetEntity(uri);
+
+            if (optimizeStart)
+            {
+                var minStart = GetMinRangeStart(entity, mnemonics);
+                var increasing = IsIncreasing(entity);
+
+                // Reset the start if specified start is before the minStart
+                if (minStart.HasValue && range.StartsBefore(minStart.Value, increasing))
+                {
+                    range = new Range<double?>(minStart, range.End);
+                }
+            }
+
             var allMnemonics = GetLogHeaderMnemonics(entity);
             var mnemonicIndexes = ComputeMnemonicIndexes(allMnemonics, mnemonics, string.Empty);
             var records = GetChannelData(uri, allMnemonics[0], range, IsIncreasing(entity), requestLatestValues);
@@ -168,6 +182,27 @@ namespace PDS.Witsml.Server.Data.Logs
             var logData = reader.GetData(context, mnemonicIndexes, units, nullValues, out ranges);
 
             return logData;
+        }
+
+        /// <summary>
+        /// Gets the minimum range start.
+        /// </summary>
+        /// <param name="entity">The log.</param>
+        /// <param name="mnemonics">The mnemonics to filter by.</param>
+        /// <returns>The mathematical min start for increasing logs or mathematical max start for decreasing logs
+        /// from the list of curves in the specified mnemonics or all curves if no mnemonics specified.</returns>
+        public double? GetMinRangeStart(T entity, string[] mnemonics = null)
+        {
+            // Get the logCurves for the mnemonics
+            var logCurves = GetLogCurves(entity, mnemonics);
+            var isTimeLog = IsTimeLog(entity);
+            var increasing = IsIncreasing(entity);
+
+            // Get the ranges for the log curves
+            var ranges = new List<Range<double?>>();
+            logCurves.ForEach(l => ranges.Add(GetIndexRange(l, increasing, isTimeLog)));
+
+            return increasing ? ranges.Min(r => r.Start) : ranges.Max(r => r.Start);
         }
 
         /// <summary>
@@ -590,8 +625,9 @@ namespace PDS.Witsml.Server.Data.Logs
         /// Gets the log curves.
         /// </summary>
         /// <param name="log">The log.</param>
-        /// <returns></returns>
-        protected abstract List<TChild> GetLogCurves(T log);
+        /// <param name="mnemonics">A list of mnemonics to filter curves by if specified.</param>
+        /// <returns>A list of log curves filtered by mneonics if specified, otherwise all curves.</returns>
+        protected abstract List<TChild> GetLogCurves(T log, string[] mnemonics = null);
 
         /// <summary>
         /// Gets the mnemonic.
