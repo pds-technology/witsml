@@ -277,7 +277,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             var results = DevKit.UpdateInStore(ObjectTypes.Wellbore, updateXml, null, null);
 
             Assert.IsNotNull(results);
-            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, results.Result);
+            Assert.AreEqual((short)ErrorCodes.UpdateTemplateNonConforming, results.Result);
         }
 
         [TestMethod, Description("Tests you cannot do UpdateInStore without specifying the wellbore uid")]

@@ -147,7 +147,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var updateResponse = DevKit.Update<WellList, Well>(update);
 
             Assert.IsNotNull(updateResponse);
-            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, updateResponse.Result);
+            Assert.AreEqual((short)ErrorCodes.UpdateTemplateNonConforming, updateResponse.Result);
         }
 
         [TestMethod, Description("Tests adding a recurring element for the first time on an UpdateInStore")]
