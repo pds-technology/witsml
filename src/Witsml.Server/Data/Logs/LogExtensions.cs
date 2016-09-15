@@ -138,9 +138,9 @@ namespace PDS.Witsml.Server.Data.Logs
         public static bool HasDuplicateIndexes(this List<string> logData, Functions function, string delimiter, bool isTimeLog)
         {
             var indexValues = new HashSet<double>();
-            foreach (var s in logData)
+            foreach (var row in logData)
             {
-                var value = s.Substring(0, s.IndexOf(delimiter, StringComparison.InvariantCulture));
+                var value = row.Substring(0, row.IndexOf(delimiter, StringComparison.InvariantCulture));
                 if (isTimeLog)
                 {
                     DateTimeOffset dto;
