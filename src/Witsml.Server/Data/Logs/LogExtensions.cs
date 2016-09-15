@@ -132,7 +132,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="logData">The log data.</param>
         /// <param name="function">The context function</param>
-        /// <param name="delimiter">The logData delimiter.</param>
+        /// <param name="delimiter">The data delimiter.</param>
         /// <param name="isTimeLog">Is the log a time log.</param>
         /// <returns><c>true</c> if Log data has duplicates; otherwise, <c>false</c>.</returns>
         public static bool HasDuplicateIndexes(this List<string> logData, Functions function, string delimiter, bool isTimeLog)
@@ -140,10 +140,9 @@ namespace PDS.Witsml.Server.Data.Logs
             var indexValues = new HashSet<double>();
             foreach (var s in logData)
             {
+                var value = s.Substring(0, s.IndexOf(delimiter, StringComparison.InvariantCulture));
                 if (isTimeLog)
                 {
-                    var value = s.Substring(0, s.IndexOf(delimiter, StringComparison.InvariantCulture));
-
                     DateTimeOffset dto;
                     if (!DateTimeOffset.TryParse(value, out dto))
                         throw new WitsmlException(function.GetNonConformingErrorCode());
@@ -155,8 +154,6 @@ namespace PDS.Witsml.Server.Data.Logs
                 }
                 else
                 {
-                    var value = s.Substring(0, s.IndexOf(delimiter, StringComparison.InvariantCulture));
-
                     double doubleValue;
                     if (!double.TryParse(value, out doubleValue))
                         throw new WitsmlException(function.GetNonConformingErrorCode());

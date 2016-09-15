@@ -147,7 +147,7 @@ namespace PDS.Witsml.Server.Data.Logs
             // Validate if MaxDataPoints has been exceeded
             else if (logDatas != null && logDatas.Count > 0)
             {
-                yield return ValidateLogData(indexCurve.Value, logCurves, logDatas, logCurveInfoMnemonics, ",", Functions.AddToStore);
+                yield return ValidateLogData(Functions.AddToStore, indexCurve.Value, logCurves, logDatas, logCurveInfoMnemonics, ",");
             }
         }
 
@@ -242,7 +242,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     }
                     else if (logData != null && logData.Count > 0)
                     {
-                        yield return ValidateLogData(indexCurve.Value, logCurves, logData, mergedLogCurveMnemonics, delimiter, Functions.UpdateInStore, false);
+                        yield return ValidateLogData(Functions.UpdateInStore, indexCurve.Value, logCurves, logData, mergedLogCurveMnemonics, delimiter, false);
                     }
                 }
 
@@ -251,7 +251,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 // Validate LogData
                 else if (logData != null && logData.Count > 0)
                 {
-                    yield return ValidateLogData(current.IndexCurve.Value, null, logData, mergedLogCurveMnemonics, delimiter, Functions.UpdateInStore, false);
+                    yield return ValidateLogData(Functions.UpdateInStore, current.IndexCurve.Value, null, logData, mergedLogCurveMnemonics, delimiter, false);
                 }
             }
         }
@@ -392,7 +392,7 @@ namespace PDS.Witsml.Server.Data.Logs
             return element.Elements().All(e => fields.Contains(e.Name.LocalName));
         }
 
-        private ValidationResult ValidateLogData(string indexCurve, List<LogCurveInfo> logCurves, List<string> logDatas, List<string> mergedLogCurveInfoMnemonics, string delimiter, Functions function, bool insert = true)
+        private ValidationResult ValidateLogData(Functions function, string indexCurve, List<LogCurveInfo> logCurves, List<string> logDatas, List<string> mergedLogCurveInfoMnemonics, string delimiter, bool insert = true)
         {
             // Validate that all logCurveInfos have columnIndex
             if (logCurves.Any(x => !x.ColumnIndex.HasValue))
