@@ -169,7 +169,9 @@ namespace PDS.Witsml.Server.Data.Logs
             // Validate if MaxDataPoints has been exceeded
             else if (logDatas != null && logDatas.Count > 0 )
             {
-                yield return ValidateLogData(indexCurve, logCurves, logDatas, logCurveInfoMnemonics, DataObject.GetDataDelimiterOrDefault());
+                yield return
+                    ValidateLogData(indexCurve, logCurves, logDatas, logCurveInfoMnemonics,
+                        DataObject.GetDataDelimiterOrDefault(), Functions.AddToStore);
             }
         }
 
@@ -270,7 +272,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     }
                     else if (logData != null && logData.Count > 0)
                     {
-                        yield return ValidateLogData(indexCurve, logCurves, logData, mergedLogCurveMnemonics, delimiter, false);
+                        yield return ValidateLogData(indexCurve, logCurves, logData, mergedLogCurveMnemonics, delimiter, Functions.UpdateInStore, false);
                     }
                 }
 
@@ -279,7 +281,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 // Validate LogData
                 else if (logData != null && logData.Count > 0)
                 {
-                    yield return ValidateLogData(current.IndexCurve, null, logData, mergedLogCurveMnemonics, delimiter, false);
+                    yield return ValidateLogData(current.IndexCurve, null, logData, mergedLogCurveMnemonics, delimiter, Functions.UpdateInStore, false);
                 }
             }
         }
@@ -475,7 +477,7 @@ namespace PDS.Witsml.Server.Data.Logs
             return true;
         }
 
-        private ValidationResult ValidateLogData(string indexCurve, List<LogCurveInfo> logCurves, List<LogData> logDatas, List<string> mergedLogCurveInfoMnemonics, string delimiter, bool insert = true)
+        private ValidationResult ValidateLogData(string indexCurve, List<LogCurveInfo> logCurves, List<LogData> logDatas, List<string> mergedLogCurveInfoMnemonics, string delimiter, Functions function, bool insert = true)
         {
             var totalPoints = 0;
             if (logDatas.Sum(x => x.Data.Count) > WitsmlSettings.MaxDataNodes) 
@@ -493,7 +495,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         var mnemonics = ChannelDataReader.Split(logData.MnemonicList);
                         if (logData.Data != null && logData.Data.Count > 0)
                         {
-                            if (logData.Data.LogDataHasDuplicateIndexes(delimiter, logData.Data[0].IsFirstValueDateTime(delimiter)))
+                            if (logData.Data.HasDuplicateIndexes(function, delimiter, logData.Data[0].IsFirstValueDateTime(delimiter)))
                             {
                                 return new ValidationResult(ErrorCodes.NodesWithSameIndex.ToString(), new[] { "LogData", "Data" });
                             }

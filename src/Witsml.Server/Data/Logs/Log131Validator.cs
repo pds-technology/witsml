@@ -147,7 +147,7 @@ namespace PDS.Witsml.Server.Data.Logs
             // Validate if MaxDataPoints has been exceeded
             else if (logDatas != null && logDatas.Count > 0)
             {
-                yield return ValidateLogData(indexCurve.Value, logCurves, logDatas, logCurveInfoMnemonics, ",");
+                yield return ValidateLogData(indexCurve.Value, logCurves, logDatas, logCurveInfoMnemonics, ",", Functions.AddToStore);
             }
         }
 
@@ -242,7 +242,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     }
                     else if (logData != null && logData.Count > 0)
                     {
-                        yield return ValidateLogData(indexCurve.Value, logCurves, logData, mergedLogCurveMnemonics, delimiter, false);
+                        yield return ValidateLogData(indexCurve.Value, logCurves, logData, mergedLogCurveMnemonics, delimiter, Functions.UpdateInStore, false);
                     }
                 }
 
@@ -251,7 +251,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 // Validate LogData
                 else if (logData != null && logData.Count > 0)
                 {
-                    yield return ValidateLogData(current.IndexCurve.Value, null, logData, mergedLogCurveMnemonics, delimiter, false);
+                    yield return ValidateLogData(current.IndexCurve.Value, null, logData, mergedLogCurveMnemonics, delimiter, Functions.UpdateInStore, false);
                 }
             }
         }
@@ -392,7 +392,7 @@ namespace PDS.Witsml.Server.Data.Logs
             return element.Elements().All(e => fields.Contains(e.Name.LocalName));
         }
 
-        private ValidationResult ValidateLogData(string indexCurve, List<LogCurveInfo> logCurves, List<string> logDatas, List<string> mergedLogCurveInfoMnemonics, string delimiter, bool insert = true)
+        private ValidationResult ValidateLogData(string indexCurve, List<LogCurveInfo> logCurves, List<string> logDatas, List<string> mergedLogCurveInfoMnemonics, string delimiter, Functions function, bool insert = true)
         {
             // Validate that all logCurveInfos have columnIndex
             if (logCurves.Any(x => !x.ColumnIndex.HasValue))
@@ -403,7 +403,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogCurveInfo" });
 
             // Validate there are no duplicate indexes
-            if (logDatas.LogDataHasDuplicateIndexes(delimiter, logDatas[0].IsFirstValueDateTime()))
+            if (logDatas.HasDuplicateIndexes(function, delimiter, logDatas[0].IsFirstValueDateTime())) 
             {
                 return new ValidationResult(ErrorCodes.NodesWithSameIndex.ToString(), new[] { "LogData", "Data" });
             }
