@@ -44,6 +44,16 @@ namespace PDS.Witsml.Server.Configuration
         public static long TimeRangeSize = Properties.Settings.Default.ChannelDataChunkTimeRangeSize;
 
         /// <summary>
+        /// The depth range step size
+        /// </summary>
+        public static long DepthRangeStepSize = Properties.Settings.Default.ChannelDataDepthRangeStepSize;
+
+        /// <summary>
+        /// The time range step size
+        /// </summary>
+        public static long TimeRangeStepSize = Properties.Settings.Default.ChannelDataTimeRangeStepSize;
+
+        /// <summary>
         /// The maximum data nodes
         /// </summary>
         public static int MaxDataNodes = Properties.Settings.Default.MaxDataNodes;
@@ -111,6 +121,16 @@ namespace PDS.Witsml.Server.Configuration
         public static long GetRangeSize(bool isTimeIndex)
         {
             return isTimeIndex ? TimeRangeSize : DepthRangeSize;
+        }
+
+        /// <summary>
+        /// Gets the step size of the range.
+        /// </summary>
+        /// <param name="isTimeIndex"><c>true</c> if is time index.</param>
+        /// <returns></returns>
+        public static long GetRangeStepSize(bool isTimeIndex)
+        {
+            return isTimeIndex ? TimeRangeStepSize : DepthRangeStepSize;
         }
     }
 }

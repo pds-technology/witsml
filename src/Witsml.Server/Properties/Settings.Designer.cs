@@ -194,5 +194,23 @@ namespace PDS.Witsml.Server.Properties {
                 return ((int)(this["MaxStationCount"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public long ChannelDataDepthRangeStepSize {
+            get {
+                return ((long)(this["ChannelDataDepthRangeStepSize"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5000000")]
+        public long ChannelDataTimeRangeStepSize {
+            get {
+                return ((long)(this["ChannelDataTimeRangeStepSize"]));
+            }
+        }
     }
 }
