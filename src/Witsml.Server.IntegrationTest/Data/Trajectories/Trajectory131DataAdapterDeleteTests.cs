@@ -101,6 +101,34 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
+        public void Trajectory131DataAdapter_DeleteFromStore_Partial_Delete_Stations_By_Structural_Range()
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory without stations
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(10, 0);
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            var result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+
+            // Delete all trajectory stations
+            const int start = 5;
+            const int end = 8;
+            var delete = "<mdMn uom=\"m\">" + start + "</mdMn><mdMx uom=\"m\">" + end + "</mdMx>";
+            var queryIn = string.Format(DevKit131Aspect.BasicTrajectoryXmlTemplate, Trajectory.Uid, Trajectory.UidWell,
+                Trajectory.UidWellbore, delete);
+            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn);
+
+            // Assert delete results
+            result = DevKit.GetAndAssert(Trajectory);
+            Trajectory.TrajectoryStation.RemoveAll(s => s.MD.Value >= start && s.MD.Value <= end);
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+        }
+
+        [TestMethod]
         public void Trajectory131DataAdapter_DeleteFromStore_Partial_Delete_Station_Items()
         {
             // Add well and wellbore

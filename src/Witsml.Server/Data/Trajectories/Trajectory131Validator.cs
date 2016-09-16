@@ -36,7 +36,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             Context.Ignored = new List<string>
             {
-                "mdMin", "mdMx", "trajectoryStation"
+                "mdMn", "mdMx", "trajectoryStation"
             };
         }
 
