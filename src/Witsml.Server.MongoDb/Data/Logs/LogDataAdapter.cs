@@ -145,29 +145,19 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>A collection of channel data.</returns>
         public List<List<List<object>>> GetChannelData(EtpUri uri, Range<double?> range, string[] mnemonics, int? requestLatestValues, bool optimizeStart = false)
         {
+            List<List<List<object>>> logData;
+
             var entity = GetEntity(uri);
-
-            if (optimizeStart)
-            {
-                var minStart = GetMinRangeStart(entity, mnemonics);
-                var increasing = IsIncreasing(entity);
-
-                // Reset the start if specified start is before the minStart
-                if (minStart.HasValue && range.StartsBefore(minStart.Value, increasing))
-                {
-                    range = new Range<double?>(minStart, range.End);
-                }
-            }
-
             var allMnemonics = GetLogHeaderMnemonics(entity);
             var mnemonicIndexes = ComputeMnemonicIndexes(allMnemonics, mnemonics, string.Empty);
-            var records = GetChannelData(uri, allMnemonics[0], range, IsIncreasing(entity), requestLatestValues);
-
-            // Get a reader for the log's channel data
             var keys = mnemonicIndexes.Keys.ToArray();
             var units = GetUnitList(entity, keys);
             var nullValues = GetNullValueList(entity, keys);
-            var reader = records.GetReader(mnemonicIndexes.Values.ToArray(), units, nullValues);
+            var logCurveRanges = GetLogCurveRanges(entity, mnemonics);
+            var increasing = IsIncreasing(entity);
+            var rangeStart = GetMinRangeStart(logCurveRanges, increasing);
+            var optimizeRangeStart = GetOptimizeRangeStart(logCurveRanges, increasing);
+            var rangeEnd = GetMaxRangeEnd(logCurveRanges, increasing);
 
             // Create a context to pass information required by the ChannelDataReader.
             var context = new ResponseContext()
@@ -177,20 +167,94 @@ namespace PDS.Witsml.Server.Data.Logs
                 MaxDataPoints = WitsmlSettings.MaxDataPoints
             };
 
-            Dictionary<string, Range<double?>> ranges;
-            var logData = reader.GetData(context, mnemonicIndexes, units, nullValues, out ranges);
+            bool finished;
+            const int maxRequestFactor = 3;
+            var requestFactor = 1;
+
+            // Try an initial optimization for non-latest values and latest values.
+            if (!requestLatestValues.HasValue && optimizeStart)
+            {
+                // Reset the start if specified start is before the minStart
+                if (rangeStart.HasValue && range.StartsBefore(rangeStart.Value, increasing))
+                {
+                    range = new Range<double?>(rangeStart, range.End);
+                }
+            }
+            else if (requestLatestValues.HasValue)
+            {
+                range = OptimizeLatestValuesRange(range, requestLatestValues, entity, increasing, rangeStart, optimizeRangeStart, rangeEnd, requestFactor);
+            }
+
+            do // until finished
+            {
+                // Retrieve the data from the database
+                var records = GetChannelData(uri, allMnemonics[0], range, IsIncreasing(entity), requestLatestValues);
+
+                // Get a reader to process the log's channel data records
+                var reader = records.GetReader(mnemonicIndexes.Values.ToArray(), units, nullValues);
+
+                // Get the data from the reader based on the context and mnemonicIndexes (slices)
+                Dictionary<string, Range<double?>> ranges;
+                logData = reader.GetData(context, mnemonicIndexes, units, nullValues, out ranges);
+
+                
+                // Test if we're finished reading data
+                finished =                              // Finished if...
+                    !requestLatestValues.HasValue ||        // not request latest values
+                    reader.HasAllRequestedValues ||         // request latest values and all values returned
+                    (rangeStart.HasValue &&                 // query range is at start of all channel data
+                    range.StartsBefore(rangeStart.Value, increasing, true)) ||
+                    !range.Start.HasValue;                  // query was for all data
+
+                // If we're not finished try a bigger range
+                if (!finished)
+                {
+                    requestFactor += 1;
+                    if (requestFactor < maxRequestFactor)
+                    {
+                        range = OptimizeLatestValuesRange(
+                            range, requestLatestValues, entity, increasing, rangeStart, optimizeRangeStart, rangeEnd, requestFactor);
+                    }
+                    else
+                    {
+                        // This is the final optimization and will stop the iterations after the next pass
+                        range = new Range<double?>(null, null);
+                    }
+                }
+
+            } while (!finished);
 
             return logData;
         }
 
+        private Range<double?> OptimizeLatestValuesRange(Range<double?> range, int? requestLatestValues, T entity, bool increasing, double? rangeStart, double? optimizeRangeStart, double? rangeEnd, int requestFactor)
+        {
+            if (requestLatestValues.HasValue && optimizeRangeStart.HasValue)
+            {
+                var optimizationEstimate =
+                    (requestFactor*(requestLatestValues.Value + 1) * WitsmlSettings.GetRangeStepSize(IsTimeLog(entity)));
+
+                range = increasing 
+                    ? new Range<double?>(optimizeRangeStart.Value - optimizationEstimate, rangeEnd) 
+                    : new Range<double?>(optimizeRangeStart.Value + optimizationEstimate, rangeEnd);
+
+                if (rangeStart.HasValue && range.StartsBefore(rangeStart.Value, increasing))
+                {
+                    range = new Range<double?>(rangeStart, rangeEnd);
+                }
+            }
+
+            return range;
+        }
+
         /// <summary>
-        /// Gets the minimum range start.
+        /// Gets the min/max ranges for a Log's LogCurveInfos
         /// </summary>
         /// <param name="entity">The log.</param>
         /// <param name="mnemonics">The mnemonics to filter by.</param>
-        /// <returns>The mathematical min start for increasing logs or mathematical max start for decreasing logs
-        /// from the list of curves in the specified mnemonics or all curves if no mnemonics specified.</returns>
-        public double? GetMinRangeStart(T entity, string[] mnemonics = null)
+        /// <returns>The min/max ranges for a list of curves in the specified mnemonics 
+        /// or all curves if no mnemonics specified.</returns>
+        public List<Range<double?>> GetLogCurveRanges(T entity, string[] mnemonics = null)
         {
             // Get the logCurves for the mnemonics
             var logCurves = GetLogCurves(entity, mnemonics);
@@ -201,7 +265,22 @@ namespace PDS.Witsml.Server.Data.Logs
             var ranges = new List<Range<double?>>();
             logCurves.ForEach(l => ranges.Add(GetIndexRange(l, increasing, isTimeLog)));
 
+            return ranges;
+        }
+
+        private double? GetMinRangeStart(List<Range<double?>> ranges, bool increasing)
+        {
             return increasing ? ranges.Min(r => r.Start) : ranges.Max(r => r.Start);
+        }
+
+        private double? GetOptimizeRangeStart(List<Range<double?>> ranges, bool increasing)
+        {
+            return increasing ? ranges.Min(r => r.End) : ranges.Max(r => r.End);
+        }
+
+        private double? GetMaxRangeEnd(List<Range<double?>> ranges, bool increasing)
+        {
+            return increasing ? ranges.Max(r => r.End) : ranges.Min(r => r.End);
         }
 
         /// <summary>
@@ -938,9 +1017,15 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             Logger.DebugFormat("Getting channel data for log: {0}", uri);
 
-            increasing = requestLatestValues.HasValue ? !increasing : increasing;
+            // The increasing value passed in may be flipped we need to send in a reverse
+            //... flag to signal that there was a flip because not all code paths should be reversed.
+            var chunks = ChannelDataChunkAdapter.GetData(
+                uri, indexChannel, range, 
+                requestLatestValues.HasValue 
+                    ? !increasing 
+                    : increasing, 
+                reverse: requestLatestValues.HasValue);
 
-            var chunks = ChannelDataChunkAdapter.GetData(uri, indexChannel, range, increasing);
             return chunks.GetRecords(range, increasing, reverse: requestLatestValues.HasValue);
         }
 

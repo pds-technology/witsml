@@ -66,15 +66,18 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="indexChannel">The index channel.</param>
         /// <param name="range">The index range to select data for.</param>
         /// <param name="ascending">if set to <c>true</c> the data will be sorted in ascending order.</param>
-        /// <returns>A collection of <see cref="List{ChannelDataChunk}" /> items.</returns>
+        /// <param name="reverse">if set to <c>true</c> if the ascending flag was reversed.</param>
+        /// <returns>
+        /// A collection of <see cref="List{ChannelDataChunk}" /> items.
+        /// </returns>
         /// <exception cref="WitsmlException"></exception>
-        public List<ChannelDataChunk> GetData(string uri, string indexChannel, Range<double?> range, bool ascending)
+        public List<ChannelDataChunk> GetData(string uri, string indexChannel, Range<double?> range, bool ascending, bool reverse = false)
         {
             Logger.DebugFormat("Getting channel data for {0}; Index Channel: {1}; {2}", uri, indexChannel, range);
 
             try
             {
-                var filter = BuildDataFilter(uri, indexChannel, range, ascending);
+                var filter = BuildDataFilter(uri, indexChannel, range, reverse ? !ascending : ascending);
 
                 var data = GetData(filter, ascending);
                 GetMongoFileData(data);
