@@ -223,6 +223,20 @@ namespace PDS.Witsml.Server
         }
 
         /// <summary>
+        /// Deletes the data object and assert.
+        /// </summary>
+        /// <param name="wmlTypeIn">The Witsml type of the data object.</param>
+        /// <param name="queryIn">The query XML.</param>
+        /// <param name="errorCode">The error code to assert for the response.</param>
+        public void DeleteAndAssert(string wmlTypeIn, string queryIn, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            var response = DeleteFromStore(wmlTypeIn, queryIn, null, null);
+
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)errorCode, response.Result);
+        }
+
+        /// <summary>
         /// Creates an id-only query from the specified data object.
         /// </summary>
         /// <typeparam name="TObject">The type of the object.</typeparam>

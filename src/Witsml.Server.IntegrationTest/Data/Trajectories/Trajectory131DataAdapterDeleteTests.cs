@@ -17,6 +17,8 @@
 //-----------------------------------------------------------------------
 
 using Energistics.DataAccess.WITSML131;
+using Energistics.DataAccess.WITSML131.ComponentSchemas;
+using Energistics.DataAccess.WITSML131.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Server.Data.Trajectories
@@ -46,6 +48,30 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             // Assert null for get
             DevKit.GetAndAssert(Trajectory, false);
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_DeleteFromStore_Partial_Delete_Trajectory_Header()
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory without stations
+            Trajectory.MagDeclUsed = new PlaneAngleMeasure { Uom = PlaneAngleUom.dega, Value = 20.0 };
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            var result = DevKit.GetAndAssert(Trajectory);
+            Assert.IsNotNull(result.MagDeclUsed);
+
+            // Delete trajectory
+            var delete = string.Format(DevKit131Aspect.BasicTrajectoryXmlTemplate, Trajectory.Uid, Trajectory.UidWell,
+                Trajectory.UidWellbore, "<magDeclUsed />");
+            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, delete);
+
+            // Assert null for get
+            result = DevKit.GetAndAssert(Trajectory);
+            Assert.IsNull(result.MagDeclUsed);
         }
     }
 }
