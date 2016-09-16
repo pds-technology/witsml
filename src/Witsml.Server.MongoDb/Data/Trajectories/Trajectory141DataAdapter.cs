@@ -60,6 +60,20 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         /// <summary>
+        /// Filters the station data with the query structural range.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="parser">The parser.</param>
+        protected override void FilterStationData(Trajectory entity, WitsmlQueryParser parser)
+        {
+            if (!entity.TrajectoryStation.Any())
+                return;
+
+            var range = GetQueryIndexRange(parser);
+            entity.TrajectoryStation.RemoveAll(s => WithinRange(s.MD.Value, range));
+        }
+
+        /// <summary>
         /// Check if need to query mongo file for station data.
         /// </summary>
         /// <param name="entity">The result data object.</param>

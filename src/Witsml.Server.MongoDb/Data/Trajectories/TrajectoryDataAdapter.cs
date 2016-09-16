@@ -372,6 +372,27 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         /// <summary>
+        /// check if md is within the range.
+        /// </summary>
+        /// <param name="md">The md.</param>
+        /// <param name="range">The range.</param>
+        /// <returns>True is md is within the range; false otherwise.</returns>
+        protected bool WithinRange(double md, Range<double?> range)
+        {
+            if (!range.Start.HasValue && !range.End.HasValue)
+                return false;
+
+            if (range.Start.HasValue)
+            {
+                return range.End.HasValue
+                    ? md >= range.Start.Value && md <= range.End.Value
+                    : md >= range.Start.Value;
+            }
+
+            return md <= range.End.Value;
+        }
+
+        /// <summary>
         /// Clears the trajectory stations.
         /// </summary>
         /// <param name="entity">The entity.</param>
@@ -384,6 +405,13 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <param name="stations">The trajectory stations.</param>
         /// <param name="parser">The parser.</param>
         protected abstract void FormatStationData(T entity, List<TChild> stations, WitsmlQueryParser parser = null);
+
+        /// <summary>
+        /// Filters the station data with the query structural range.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="parser">The parser.</param>
+        protected abstract void FilterStationData(T entity, WitsmlQueryParser parser);
 
         /// <summary>
         /// Check if need to query mongo file for station data.
@@ -414,6 +442,10 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
         private bool DeleteStations(WitsmlQueryParser parser)
         {
+            var range = GetQueryIndexRange(parser);
+            if (range.Start.HasValue || range.End.HasValue)
+                return true;
+
             var element = parser.Element();
             return element.Elements().Any(e => e.Name.LocalName == "trajectoryStation");
         }
@@ -461,6 +493,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 FormatStationData(current, stations);
             }
 
+            FilterStationData(current, parser);
             MergeEntity(current, parser, true);
 
             using (var transaction = DatabaseProvider.BeginTransaction(uri))
