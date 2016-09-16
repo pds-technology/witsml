@@ -16,6 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Energistics.DataAccess.WITSML141;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace PDS.Witsml.Server.Data.Trajectories
 {
     /// <summary>
@@ -23,5 +26,25 @@ namespace PDS.Witsml.Server.Data.Trajectories
     /// </summary>
     public partial class Trajectory141DataAdapterDeleteTests
     {
+        [TestMethod]
+        public void Trajectory141DataAdapter_DeleteFromStore_Delete_Full_Trajectory()
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory without stations
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(4, 0);
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            DevKit.GetAndAssert(Trajectory);
+            
+            // Delete trajectory
+            var delete = DevKit.CreateQuery(Trajectory);
+            DevKit.DeleteAndAssert<TrajectoryList, Trajectory>(delete);
+
+            // Assert null for get
+            DevKit.GetAndAssert(Trajectory, false);
+        }
     }
 }
