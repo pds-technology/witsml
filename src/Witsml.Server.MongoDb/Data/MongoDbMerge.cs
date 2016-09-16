@@ -50,6 +50,13 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether to remove empty recurring elements.
+        /// </summary>
+        /// <value>True if it is partial delete; false otherwise.
+        /// </value>
+        public bool MergeDelete { get; set; }
+
+        /// <summary>
         /// Merges the entity with the update query.
         /// </summary>
         /// <param name="entity">The entity to be merged.</param>
@@ -202,22 +209,7 @@ namespace PDS.Witsml.Server.Data
             if (propertyInfo.IsDefined(typeof(RequiredAttribute), false))
                 throw new WitsmlException(ErrorCodes.MissingRequiredData);
 
-            if (Context.PropertyValues.Count == 1)
-            {
-                propertyInfo.SetValue(Entity, null);
-                SetSpecifiedProperty(propertyInfo, Entity, false);
-            }
-            else
-            {
-                var count = Context.PropertyValues.Count;
-                var parent = Context.PropertyValues[count - 2];
-                if (parent == null)
-                    return;
-
-                propertyInfo.SetValue(parent, null);
-                SetSpecifiedProperty(propertyInfo, parent, false);
-            }
-            
+            UnsetProperty(propertyInfo);
         }
 
         /// <summary>
@@ -231,6 +223,13 @@ namespace PDS.Witsml.Server.Data
         protected override void UpdateArrayElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, Type type, string parentPath)
         {
             Logger.DebugFormat($"Merge array elements: {parentPath} {propertyInfo?.Name}");
+
+            if (MergeDelete && RemoveAll(elements))
+            {
+                var list = propertyValue as IList;
+                list?.Clear();
+                return;
+            }
 
             var idField = MongoDbUtility.LookUpIdField(type);
             var properties = GetPropertyInfo(type);
@@ -249,6 +248,9 @@ namespace PDS.Witsml.Server.Data
 
                 if (current == null)
                 {
+                    if (MergeDelete)
+                        continue;
+
                     ValidateArrayElement(element, properties);
                     ValidateArrayElement(propertyInfo, type, element, parentPath);
 
@@ -264,13 +266,21 @@ namespace PDS.Witsml.Server.Data
                 }
                 else
                 {
-                    var position = ids.IndexOf(elementId);
-                    var positionPath = parentPath + "." + position;
-                    ValidateArrayElement(element, properties, false);
+                    if (MergeDelete && RemoveItem(element))
+                    {
+                        var list = propertyValue as IList;
+                        list?.Remove(current);
+                    }
+                    else
+                    {
+                        var position = ids.IndexOf(elementId);
+                        var positionPath = parentPath + "." + position;
+                        ValidateArrayElement(element, properties, false);
 
-                    PushPropertyInfo(propertyInfo, current);
-                    NavigateElement(element, type, positionPath);
-                    PopPropertyInfo();
+                        PushPropertyInfo(propertyInfo, current);
+                        NavigateElement(element, type, positionPath);
+                        PopPropertyInfo();
+                    }
                 }
             }
         }
@@ -278,6 +288,25 @@ namespace PDS.Witsml.Server.Data
         private void Merge(XElement element)
         {
             NavigateElement(element, Context.DataObjectType);
+        }
+
+        private void UnsetProperty(PropertyInfo propertyInfo)
+        {
+            if (Context.PropertyValues.Count == 1)
+            {
+                propertyInfo.SetValue(Entity, null);
+                SetSpecifiedProperty(propertyInfo, Entity, false);
+            }
+            else
+            {
+                var count = Context.PropertyValues.Count;
+                var parent = Context.PropertyValues[count - 2];
+                if (parent == null)
+                    return;
+
+                propertyInfo.SetValue(parent, null);
+                SetSpecifiedProperty(propertyInfo, parent, false);
+            }
         }
 
         private void SetSpecifiedProperty(PropertyInfo propertyInfo, object obj, bool specified)
@@ -288,6 +317,20 @@ namespace PDS.Witsml.Server.Data
             {
                 property.SetValue(obj, specified);
             }
+        }
+
+        private bool RemoveItem(XElement element)
+        {
+            if (element.HasElements)
+                return false;
+
+            var attributes = element.Attributes().ToList();
+            return attributes.Count == 1 && attributes.Any(a => a.Name.LocalName == "uid");
+        }
+
+        private bool RemoveAll(List<XElement> elements)
+        {
+            return elements.Count == 1 && elements.Any(e => !e.HasElements && !e.HasAttributes);
         }
     }
 }

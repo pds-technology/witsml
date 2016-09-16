@@ -78,7 +78,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             Logger.Debug("Set trajectory MD ranges.");
 
-            if (dataObject.TrajectoryStation.Count <= 0)
+            if (dataObject.TrajectoryStation == null || dataObject.TrajectoryStation.Count <= 0)
             {
                 dataObject.MDMin = null;
                 dataObject.MDMax = null;

@@ -45,7 +45,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <param name="parser">The parser.</param>
         protected override void FormatStationData(Trajectory entity, List<TrajectoryStation> stations, WitsmlQueryParser parser = null)
         {
-            if (stations.Count == 0)
+            if (stations == null || stations.Count == 0)
                 return;
 
             var range = GetQueryIndexRange(parser);
@@ -78,7 +78,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             Logger.Debug("Set trajectory MD ranges.");
 
-            if (dataObject.TrajectoryStation.Count <= 0)
+            if (dataObject.TrajectoryStation == null || dataObject.TrajectoryStation.Count <= 0)
             {
                 dataObject.MDMin = null;
                 dataObject.MDMax = null;

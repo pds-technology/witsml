@@ -521,10 +521,10 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="parser">The WITSML query parser.</param>
-        /// <param name="transaction">The transaction.</param>
-        protected void MergeEntity(T entity, WitsmlQueryParser parser, MongoTransaction transaction = null)
+        /// <param name="mergeDelete">Indicate if it is partial delete.</param>
+        protected void MergeEntity(T entity, WitsmlQueryParser parser, bool mergeDelete = false)
         {
-            MergeEntity(DbCollectionName, entity, parser, transaction);
+            MergeEntity(DbCollectionName, entity, parser, mergeDelete);
         }
 
         /// <summary>
@@ -534,8 +534,8 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dbCollectionName">Name of the database collection.</param>
         /// <param name="entity">The entity.</param>
         /// <param name="parser">The WITSML query parser.</param>
-        /// <param name="transaction">The transaction.</param>
-        protected void MergeEntity<TObject>(string dbCollectionName, TObject entity, WitsmlQueryParser parser, MongoTransaction transaction = null)
+        /// <param name="mergeDelete">Indicate if it is partial delete.</param>
+        private void MergeEntity<TObject>(string dbCollectionName, TObject entity, WitsmlQueryParser parser, bool mergeDelete = false)
         {
             try
             {
@@ -543,6 +543,7 @@ namespace PDS.Witsml.Server.Data
 
                 var collection = GetCollection<TObject>(dbCollectionName);
                 var merge = new MongoDbMerge<TObject>(Container, collection, parser, IdPropertyName);
+                merge.MergeDelete = mergeDelete;
                 merge.Merge(entity);
             }
             catch (MongoException ex)

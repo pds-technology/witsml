@@ -145,6 +145,35 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         /// <summary>
+        /// Deletes or partially updates the specified object by uid.
+        /// </summary>
+        /// <param name="parser">The query parser that specifies the object.</param>
+        public override void Delete(WitsmlQueryParser parser)
+        {
+            var uri = parser.GetUri<T>();
+
+            if (parser.HasElements())
+            {
+                if (DeleteStations(parser))
+                {
+                    PartialDeleteTrajectoryWithStations(parser, uri);
+                }
+                else
+                {
+                    using (var transaction = DatabaseProvider.BeginTransaction(uri))
+                    {
+                        PartialDeleteEntity(parser, uri, transaction);
+                        transaction.Commit();
+                    }                   
+                }               
+            }
+            else
+            {
+                Delete(uri);
+            }
+        }
+
+        /// <summary>
         /// Deletes a data object by the specified identifier.
         /// </summary>
         /// <param name="uri">The data object URI.</param>
@@ -236,7 +265,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var bucket = GetMongoFileBucket();
             var stations = GetTrajectoryStation(entity);
 
-            if (stations.Count >= WitsmlSettings.MaxStationCount)
+            if (stations != null && stations.Count >= WitsmlSettings.MaxStationCount)
             {
                 var bytes = Encoding.UTF8.GetBytes(stations.ToJson());
 
@@ -383,6 +412,12 @@ namespace PDS.Witsml.Server.Data.Trajectories
             return stations.Any();
         }
 
+        private bool DeleteStations(WitsmlQueryParser parser)
+        {
+            var element = parser.Element();
+            return element.Elements().Any(e => e.Name.LocalName == "trajectoryStation");
+        }
+
         private void UpdateTrajectoryWithStations(WitsmlQueryParser parser, T dataObject, EtpUri uri, bool merge = false)
         {
             var current = GetEntity(uri);
@@ -393,7 +428,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 if (chunked)
                 {
                     var stations = GetMongoFileStationData(uri);
-                    FormatStationData(dataObject, stations);
+                    FormatStationData(current, stations);
                 }
 
                 MergeEntity(current, parser);
@@ -408,8 +443,37 @@ namespace PDS.Witsml.Server.Data.Trajectories
                     DeleteMongoFile(bucket, uri);
                 }
 
+                SetIndexRange(dataObject);
                 UpdateMongoFile(dataObject, false);
                 ReplaceEntity(dataObject, uri, transaction);
+                transaction.Commit();
+            }
+        }
+
+        private void PartialDeleteTrajectoryWithStations(WitsmlQueryParser parser, EtpUri uri)
+        {
+            var current = GetEntity(uri);
+            var chunked = QueryStationFile(current, current);
+
+            if (chunked)
+            {
+                var stations = GetMongoFileStationData(uri);
+                FormatStationData(current, stations);
+            }
+
+            MergeEntity(current, parser, true);
+
+            using (var transaction = DatabaseProvider.BeginTransaction(uri))
+            {
+                if (chunked)
+                {
+                    var bucket = GetMongoFileBucket();
+                    DeleteMongoFile(bucket, uri);
+                }
+
+                SetIndexRange(current);
+                UpdateMongoFile(current, false);
+                ReplaceEntity(current, uri, transaction);
                 transaction.Commit();
             }
         }
