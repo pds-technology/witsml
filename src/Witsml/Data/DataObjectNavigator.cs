@@ -59,7 +59,6 @@ namespace PDS.Witsml.Data
             Logger = LogManager.GetLogger(GetType());
             Container = container;
             Context = context;
-            ConfigureContext();
         }
 
         /// <summary>
@@ -117,6 +116,8 @@ namespace PDS.Witsml.Data
         protected void Navigate(XElement element)
         {
             Logger.DebugFormat("Navigating XML element: {0}", element?.Name.LocalName);
+
+            ConfigureContext();
             NavigateElement(element, Context.DataObjectType);
         }
 

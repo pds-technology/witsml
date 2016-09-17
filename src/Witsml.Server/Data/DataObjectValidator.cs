@@ -74,6 +74,7 @@ namespace PDS.Witsml.Server.Data
             Context.Function = function;
             DataObject = dataObject;
             Parser = parser;
+            ConfigureContext();
 
             IList<ValidationResult> results;
             DataObjectValidator.TryValidate(this, out results);
