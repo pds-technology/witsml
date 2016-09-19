@@ -145,7 +145,6 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>A collection of channel data.</returns>
         public List<List<List<object>>> GetChannelData(EtpUri uri, Range<double?> range, string[] mnemonics, int? requestLatestValues, bool optimizeStart = false)
         {
-            List<List<List<object>>> logData;
 
             var entity = GetEntity(uri);
             var allMnemonics = GetLogHeaderMnemonics(entity);
@@ -153,11 +152,6 @@ namespace PDS.Witsml.Server.Data.Logs
             var keys = mnemonicIndexes.Keys.ToArray();
             var units = GetUnitList(entity, keys);
             var nullValues = GetNullValueList(entity, keys);
-            var logCurveRanges = GetLogCurveRanges(entity, mnemonics);
-            var increasing = IsIncreasing(entity);
-            var rangeStart = GetMinRangeStart(logCurveRanges, increasing);
-            var optimizeRangeStart = GetOptimizeRangeStart(logCurveRanges, increasing);
-            var rangeEnd = GetMaxRangeEnd(logCurveRanges, increasing);
 
             // Create a context to pass information required by the ChannelDataReader.
             var context = new ResponseContext()
@@ -166,6 +160,22 @@ namespace PDS.Witsml.Server.Data.Logs
                 MaxDataNodes = WitsmlSettings.MaxDataNodes,
                 MaxDataPoints = WitsmlSettings.MaxDataPoints
             };
+
+            Dictionary<string, Range<double?>> ranges;
+            return QueryChannelData(context, uri, entity, range, mnemonicIndexes, units, nullValues, mnemonics, requestLatestValues, out ranges, optimizeStart);
+
+        }
+
+        private List<List<List<object>>> QueryChannelData(ResponseContext context, EtpUri uri, T entity, Range<double?> range, IDictionary<int, string> mnemonicIndexes, IDictionary<int, string> units, IDictionary<int, string> nullValues,
+            string[] queryMnemonics, int? requestLatestValues, out Dictionary<string, Range<double?>> ranges, bool optimizeStart = false)
+        {
+            List<List<List<object>>> logData;
+
+            var logCurveRanges = GetLogCurveRanges(entity, queryMnemonics);
+            var increasing = IsIncreasing(entity);
+            var rangeStart = GetMinRangeStart(logCurveRanges, increasing);
+            var optimizeRangeStart = GetOptimizeRangeStart(logCurveRanges, increasing);
+            var rangeEnd = GetMaxRangeEnd(logCurveRanges, increasing);
 
             bool finished;
             const int maxRequestFactor = 3;
@@ -188,16 +198,16 @@ namespace PDS.Witsml.Server.Data.Logs
             do // until finished
             {
                 // Retrieve the data from the database
-                var records = GetChannelData(uri, allMnemonics[0], range, IsIncreasing(entity), requestLatestValues);
+                var records = GetChannelData(uri, mnemonicIndexes[0], range, IsIncreasing(entity), requestLatestValues);
 
                 // Get a reader to process the log's channel data records
                 var reader = records.GetReader(mnemonicIndexes.Values.ToArray(), units, nullValues);
 
                 // Get the data from the reader based on the context and mnemonicIndexes (slices)
-                Dictionary<string, Range<double?>> ranges;
+                // TODO: Dictionary<string, Range<double?>> ranges;
                 logData = reader.GetData(context, mnemonicIndexes, units, nullValues, out ranges);
 
-                
+
                 // Test if we're finished reading data
                 finished =                              // Finished if...
                     !requestLatestValues.HasValue ||        // not request latest values
@@ -964,6 +974,13 @@ namespace PDS.Witsml.Server.Data.Logs
                 return new Dictionary<int, string>(0);
             }
 
+            string[] queryMnemonics = GetQueryMnemonics(parser);
+
+            return ComputeMnemonicIndexes(allMnemonics, queryMnemonics, parser.ReturnElements());
+        }
+
+        private static string[] GetQueryMnemonics(WitsmlQueryParser parser)
+        {
             var queryMnemonics = parser.GetLogDataMnemonics()?.ToArray() ?? new string[0];
             if (!queryMnemonics.Any())
             {
@@ -972,7 +989,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     .ToArray();
             }
 
-            return ComputeMnemonicIndexes(allMnemonics, queryMnemonics, parser.ReturnElements());
+            return queryMnemonics;
         }
 
         private string[] GetLogHeaderMnemonics(T log)
@@ -1101,7 +1118,6 @@ namespace PDS.Witsml.Server.Data.Logs
                 Logger.DebugFormat("Request latest value = {0}", requestLatestValues);
             }
 
-            // TODO: If requesting latest values figure out a range that will contain the last values that we want.
             // if there is a request for latest values then the range should be ignored.
             var range = requestLatestValues.HasValue
                 ? Range.Empty
@@ -1110,18 +1126,14 @@ namespace PDS.Witsml.Server.Data.Logs
             var keys = mnemonics.Keys.ToArray();
             var units = GetUnitList(logHeader, keys);
             var nullValues = GetNullValueList(logHeader, keys);
-
-            var records = GetChannelData(logHeader.GetUri(), mnemonics[0], range, IsIncreasing(logHeader), requestLatestValues);
-
-            // Get a reader for the log's channel data
-            var reader = records.GetReader(mnemonics.Values.ToArray(), units, nullValues);
-
-            // Get the data from the reader.
+            string[] queryMnemonics = GetQueryMnemonics(parser);
             Dictionary<string, Range<double?>> ranges;
-            var logData = reader.GetData(context, mnemonics, units, nullValues, out ranges);
+
+            var logData = QueryChannelData(
+                context, logHeader.GetUri(), logHeader, range, mnemonics, units, nullValues, queryMnemonics, requestLatestValues, out ranges, optimizeStart: true);
 
             // Format the data for output
-            var count = FormatLogData(log, logHeader, reader, mnemonics, units, logData, ranges);
+            var count = FormatLogData(log, logHeader, mnemonics, units, logData, ranges);
 
             // Update the response context growing object totals
             context.UpdateGrowingObjectTotals(count, keys.Length);
@@ -1137,7 +1149,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 isTimeLog);
         }
 
-        private int FormatLogData(T log, T logHeader, ChannelDataReader reader, IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units, 
+        private int FormatLogData(T log, T logHeader, IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units, 
             IReadOnlyCollection<List<List<object>>> logData, Dictionary<string, Range<double?>> ranges)
         {
             Logger.Debug("Formatting logData values.");
@@ -1149,7 +1161,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 .Select(row => string.Join(GetLogDataDelimiter(logHeader), row.SelectMany(x => x)))
                 .ToList();
             SetLogDataValues(log, data, mnemonicSlices.Values, units.Values);
-            SetLogIndexRange(log, logHeader, ranges, reader.Indices.FirstOrDefault()?.Mnemonic);
+            SetLogIndexRange(log, logHeader, ranges, mnemonicSlices[0]);
 
             return logData.Count;
         }
