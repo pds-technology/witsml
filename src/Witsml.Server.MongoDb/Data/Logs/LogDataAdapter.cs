@@ -1110,14 +1110,18 @@ namespace PDS.Witsml.Server.Data.Logs
             var keys = mnemonics.Keys.ToArray();
             var units = GetUnitList(logHeader, keys);
             var nullValues = GetNullValueList(logHeader, keys);
+
             var records = GetChannelData(logHeader.GetUri(), mnemonics[0], range, IsIncreasing(logHeader), requestLatestValues);
 
             // Get a reader for the log's channel data
             var reader = records.GetReader(mnemonics.Values.ToArray(), units, nullValues);
 
-            // Slice the reader for the requested mnemonics
-            //reader.Slice(mnemonics, units, nullValues);
-            var count = FormatLogData(log, logHeader, reader, context, mnemonics, units, nullValues);
+            // Get the data from the reader.
+            Dictionary<string, Range<double?>> ranges;
+            var logData = reader.GetData(context, mnemonics, units, nullValues, out ranges);
+
+            // Format the data for output
+            var count = FormatLogData(log, logHeader, reader, mnemonics, units, logData, ranges);
 
             // Update the response context growing object totals
             context.UpdateGrowingObjectTotals(count, keys.Length);
@@ -1133,22 +1137,19 @@ namespace PDS.Witsml.Server.Data.Logs
                 isTimeLog);
         }
 
-        private int FormatLogData(
-            T log, T logHeader, ChannelDataReader reader, ResponseContext context,
-            IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units, IDictionary<int, string> nullValues)
+        private int FormatLogData(T log, T logHeader, ChannelDataReader reader, IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units, 
+            IReadOnlyCollection<List<List<object>>> logData, Dictionary<string, Range<double?>> ranges)
         {
             Logger.Debug("Formatting logData values.");
-            Dictionary<string, Range<double?>> ranges;
 
-            var logData = reader.GetData(context, mnemonicSlices, units, nullValues, out ranges);
-            if (logData.Count > 0)
-            {
-                var data = logData
-                    .Select(row => string.Join(GetLogDataDelimiter(logHeader), row.SelectMany(x => x)))
-                    .ToList();
-                SetLogDataValues(log, data, mnemonicSlices.Values, units.Values);
-                SetLogIndexRange(log, logHeader, ranges, reader.Indices.FirstOrDefault()?.Mnemonic);
-            }
+            if (logData.Count <= 0)
+                return logData.Count;
+
+            var data = logData
+                .Select(row => string.Join(GetLogDataDelimiter(logHeader), row.SelectMany(x => x)))
+                .ToList();
+            SetLogDataValues(log, data, mnemonicSlices.Values, units.Values);
+            SetLogIndexRange(log, logHeader, ranges, reader.Indices.FirstOrDefault()?.Mnemonic);
 
             return logData.Count;
         }
