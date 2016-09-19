@@ -34,7 +34,7 @@ namespace PDS.Witsml.Server.Providers.Store
     /// </summary>
     /// <seealso cref="Energistics.Protocol.Store.StoreStoreHandler" />
     [Export(typeof(IStoreStore))]
-    [PartCreationPolicy(CreationPolicy.Shared)]
+    [PartCreationPolicy(CreationPolicy.NonShared)]
     public class StoreStoreProvider : StoreStoreHandler
     {
         /// <summary>

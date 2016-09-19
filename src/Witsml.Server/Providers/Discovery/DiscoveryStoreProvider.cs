@@ -32,7 +32,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
     /// </summary>
     /// <seealso cref="Energistics.Protocol.Discovery.DiscoveryStoreHandler" />
     [Export(typeof(IDiscoveryStore))]
-    [PartCreationPolicy(CreationPolicy.Shared)]
+    [PartCreationPolicy(CreationPolicy.NonShared)]
     public class DiscoveryStoreProvider : DiscoveryStoreHandler
     {
         /// <summary>
