@@ -211,7 +211,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 // Test if we're finished reading data
                 finished =                              // Finished if...
                     !requestLatestValues.HasValue ||        // not request latest values
-                    reader.HasAllRequestedValues ||         // request latest values and all values returned
+                    context.HasAllRequestedValues ||         // request latest values and all values returned
                     (rangeStart.HasValue &&                 // query range is at start of all channel data
                     range.StartsBefore(rangeStart.Value, increasing, true)) ||
                     !range.Start.HasValue;                  // query was for all data
