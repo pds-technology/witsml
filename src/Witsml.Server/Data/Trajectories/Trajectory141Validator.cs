@@ -36,8 +36,11 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             Context.Ignored = new List<string>
             {
-                "mdMn", "mdMx", "trajectoryStation"
+                "mdMn", "mdMx"
             };
+
+            if (Context.Function != Functions.AddToStore)
+                Context.Ignored.Add("trajectoryStation");
         }
 
         /// <summary>
