@@ -56,6 +56,14 @@ namespace PDS.Witsml.Data.Channels
         bool DataTruncated { get; set; }
 
         /// <summary>
+        /// Gets a value indicating whether all requested values have been found.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if all requested values have been found; otherwise, <c>false</c>.
+        /// </value>
+        bool HasAllRequestedValues { get; set; }
+
+        /// <summary>
         /// Clones this instance.
         /// </summary>
         /// <returns>A clone of this instance</returns>

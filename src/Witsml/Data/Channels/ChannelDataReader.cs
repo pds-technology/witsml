@@ -143,7 +143,6 @@ namespace PDS.Witsml.Data.Channels
             _queryMnemonics = queryMnemonics;
             _queryUnits = units;
             _queryNullValues = nullValues;
-            _hasAllRequestedValues = false;
         }
 
         /// <summary>
@@ -173,7 +172,6 @@ namespace PDS.Witsml.Data.Channels
             Uri = uri;
             Id = id;
             _queryMnemonics = mnemonics;
-            _hasAllRequestedValues = false;
         }
 
         /// <summary>
@@ -298,17 +296,6 @@ namespace PDS.Witsml.Data.Channels
         public int RecordsAffected
         {
             get { return _records.Count; }
-        }
-
-        private bool _hasAllRequestedValues;
-        /// <summary>
-        /// Gets a value indicating whether this instance has all requested values.
-        /// </summary>
-        /// <value>
-        /// <c>true</c> if this instance has all requested values; otherwise, <c>false</c>.
-        /// </value>
-        public bool HasAllRequestedValues {
-            get { return _hasAllRequestedValues; }
         }
 
         /// <summary>
@@ -1367,7 +1354,7 @@ namespace PDS.Witsml.Data.Channels
         {
             _log.Debug("Getting the sliced channel data.");
 
-            _hasAllRequestedValues = false;
+            context.HasAllRequestedValues = false;
             int? requestLatestValues = context.RequestLatestValues;
             int maxDataNodes = context.MaxDataNodes;
             int maxDataPoints = context.MaxDataPoints;
@@ -1454,7 +1441,7 @@ namespace PDS.Witsml.Data.Channels
                 if (requestLatestValues.HasValue && HasRequestedValuesForAllChannels(requestedValueCount, requestLatestValues.Value))
                 {
                     _log.Debug("Finished getting latest values for all channels.");
-                    _hasAllRequestedValues = true;
+                    context.HasAllRequestedValues = true;
                     break;
                 }
 
