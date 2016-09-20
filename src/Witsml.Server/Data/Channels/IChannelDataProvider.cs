@@ -49,11 +49,12 @@ namespace PDS.Witsml.Server.Data.Channels
         /// </summary>
         /// <param name="uri">The parent data object URI.</param>
         /// <param name="range">The data range to retrieve.</param>
-        /// <param name="mnemonics">The mnemonics to return data for.</param>
+        /// <param name="mnemonics">The mnemonics to fetch channel data for.  
+        /// This list will be modified to contain only those mnemonics that data was returned for.</param>
         /// <param name="requestLatestValues">The total number of requested latest values.</param>
         /// <param name="optimizeStart">if set to <c>true</c> start range can be optimized.</param>
         /// <returns>A collection of channel data.</returns>
-        List<List<List<object>>> GetChannelData(EtpUri uri, Range<double?> range, string[] mnemonics, int? requestLatestValues, bool optimizeStart = false);
+        List<List<List<object>>> GetChannelData(EtpUri uri, Range<double?> range, List<string> mnemonics, int? requestLatestValues, bool optimizeStart = false);
 
         /// <summary>
         /// Updates the channel data for the specified data object URI.

@@ -376,13 +376,13 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     : maxEnd?.IndexFromScale(primaryIndex.Scale, isTimeIndex);
 
                 // Get channel data
-                var mnemonics = contextList.Select(c => c.ChannelMetadata.ChannelName).ToArray();
+                var mnemonics = contextList.Select(c => c.ChannelMetadata.ChannelName).ToList();
                 var dataProvider = GetDataProvider(parentUri);
                 var optimiseStart = channelStreamingType == ChannelStreamingTypes.IndexValue ? true : false;
                 var channelData = dataProvider.GetChannelData(parentUri, new Range<double?>(minStartIndex, maxEndIndex), mnemonics, requestLatestValues, optimiseStart);
 
                 // Stream the channel data
-                await StreamChannelData(contextList, channelData, mnemonics, increasing, isTimeIndex, primaryIndex.Scale, token);
+                await StreamChannelData(contextList, channelData, mnemonics.ToArray(), increasing, isTimeIndex, primaryIndex.Scale, token);
 
                 // If we have processed an IndexCount or LatestValue query clear requestLatestValues so we can 
                 //... keep streaming new data as long as the channel is active.
@@ -491,6 +491,10 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
                 // Update the current StartIndex for our context with the current index value
                 context.StartIndex = primaryIndexValue;
+
+                // If the data does not include values for the channel we're streaming, then skip
+                if (!mnemonics.Contains(channel.ChannelName))
+                    continue;
 
                 var value = FormatValue(values[Array.IndexOf(mnemonics, channel.ChannelName)]);
 
