@@ -95,7 +95,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                     {
                         yield return new ValidationResult(ErrorCodes.MissingElementUidForUpdate.ToString(), new[] { "TrajectoryStation", "Uid" });
                     }
-                    else if (stations.Count > WitsmlSettings.MaxDataNodes)
+                    else if (stations.Count > WitsmlSettings.MaxStationCount)
                     {
                         yield return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "TrajectoryStation" });
                     }
