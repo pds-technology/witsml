@@ -47,7 +47,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         private CancellationTokenSource _tokenSource;
         private readonly List<IList<ChannelStreamingContext>> _channelStreamingContextLists;
 
-        private Dictionary<string, IChannelDataProvider> _providers;
+        private Dictionary<string, List<IChannelDataProvider>> _providers;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelStreamingProducer"/> class.
@@ -85,24 +85,27 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
             foreach (var family in uris.ToLookup(x => x.Version))
             {
-                var provider = _providers[family.Key];
-                var metadata = provider.GetChannelMetadata(family.ToArray());
-
-                metadata.ForEach(m =>
+                var providers = _providers[family.Key];
+                foreach (var provider in providers)
                 {
-                    // Check by uri if we have the metadata in our dictionary.
-                    var channelMetadataRecord =
-                        Channels.Values.Select(c => c.Item2).FirstOrDefault(c => c.ChannelUri.EqualsIgnoreCase(m.ChannelUri));
+                    var metadata = provider.GetChannelMetadata(family.ToArray());
 
-                    // if not add it and set its channelId
-                    if (channelMetadataRecord == null)
+                    metadata.ForEach(m =>
                     {
-                        m.ChannelId = Channels.Keys.Count;
-                        Channels.Add(m.ChannelId, new Tuple<EtpUri, ChannelMetadataRecord>(new EtpUri(m.ChannelUri).Parent, m));
-                        channelMetadataRecord = m;
-                    }
-                    args.Context.Add(channelMetadataRecord);
-                });
+                        // Check by uri if we have the metadata in our dictionary.
+                        var channelMetadataRecord =
+                            Channels.Values.Select(c => c.Item2).FirstOrDefault(c => c.ChannelUri.EqualsIgnoreCase(m.ChannelUri));
+
+                        // if not add it and set its channelId
+                        if (channelMetadataRecord == null)
+                        {
+                            m.ChannelId = Channels.Keys.Count;
+                            Channels.Add(m.ChannelId, new Tuple<EtpUri, ChannelMetadataRecord>(new EtpUri(m.ChannelUri).Parent, m));
+                            channelMetadataRecord = m;
+                        }
+                        args.Context.Add(channelMetadataRecord);
+                    });
+                }
             }
         }
 
@@ -529,11 +532,15 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
         private void InitializeChannelDataProviders()
         {
-            _providers = new Dictionary<string, IChannelDataProvider>
+            _providers = new Dictionary<string, List<IChannelDataProvider>>
             {
-                {OptionsIn.DataVersion.Version131.Value, _container.Resolve<IChannelDataProvider>(ObjectNames.Log131)},
-                {OptionsIn.DataVersion.Version141.Value, _container.Resolve<IChannelDataProvider>(ObjectNames.Log141)},
-                {OptionsIn.DataVersion.Version200.Value, _container.Resolve<IChannelDataProvider>(ObjectNames.Log200)}
+                {OptionsIn.DataVersion.Version131.Value, new List<IChannelDataProvider>{_container.Resolve<IChannelDataProvider>(ObjectNames.Log131)}},
+                {OptionsIn.DataVersion.Version141.Value, new List<IChannelDataProvider> {_container.Resolve<IChannelDataProvider>(ObjectNames.Log141)}},
+                {OptionsIn.DataVersion.Version200.Value, new List<IChannelDataProvider>
+                {
+                    _container.Resolve<IChannelDataProvider>(ObjectNames.Log200),
+                    _container.Resolve<IChannelDataProvider>(ObjectNames.Channel200)
+                }}
             };
         }
 
