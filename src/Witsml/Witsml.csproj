@@ -163,6 +163,7 @@
     </Compile>
     <Compile Include="EtpUris.cs" />
     <Compile Include="Range.cs" />
+    <Compile Include="Units.cs" />
     <Compile Include="WitsmlException.cs" />
     <Compile Include="WitsmlParser.cs" />
     <Compile Include="WitsmlParserContext.cs" />
