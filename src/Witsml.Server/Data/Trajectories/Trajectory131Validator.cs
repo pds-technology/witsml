@@ -61,6 +61,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 {
                     yield return new ValidationResult(ErrorCodes.MissingElementUidForAdd.ToString(), new[] { "TrajectoryStation", "Uid" });
                 }
+                // TODO: update with trajectory maxDataNodes
                 else if (stations.Count > WitsmlSettings.MaxDataNodes)
                 {
                     yield return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "TrajectoryStation" });
@@ -95,7 +96,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
                     {
                         yield return new ValidationResult(ErrorCodes.MissingElementUidForUpdate.ToString(), new[] { "TrajectoryStation", "Uid" });
                     }
-                    else if (stations.Count > WitsmlSettings.MaxStationCount)
+                    // TODO: update with trajectory maxDataNodes
+                    else if (stations.Count > WitsmlSettings.MaxDataNodes)
                     {
                         yield return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "TrajectoryStation" });
                     }
