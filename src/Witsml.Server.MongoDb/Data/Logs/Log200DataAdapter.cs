@@ -52,7 +52,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var logs = GetLogsByUris(uris.ToList());
 
-            if (logs == null)
+            if (logs == null || logs.Count == 0)
                 return adapter.GetChannelMetadata(channelUris.Any() ? channelUris.ToArray() : null);
 
             foreach (var log in logs)

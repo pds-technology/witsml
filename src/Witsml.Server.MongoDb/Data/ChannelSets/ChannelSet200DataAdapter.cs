@@ -43,6 +43,9 @@ namespace PDS.Witsml.Server.Data.ChannelSets
     {
         private readonly string _utcFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffK";
 
+        private List<EtpUri> _wellboreUris;
+        private List<EtpUri> _channelSetUris;
+
         /// <summary>
         /// Gets the channel metadata for the specified data object URI.
         /// </summary>
@@ -478,6 +481,9 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             if (uris.Any(u => u.IsBaseUri))
                 return GetAll(null);
 
+            _wellboreUris = new List<EtpUri>();
+            _channelSetUris = new List<EtpUri>();
+
             var channelSetUris = GetObjectUris(uris, ObjectTypes.ChannelSet);
             var wellboreUris = GetObjectUris(uris, ObjectTypes.Wellbore);
             var wellUris = GetObjectUris(uris, ObjectTypes.Well);
@@ -489,7 +495,10 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                 wellboreUris.AddRange(wellbores.Select(w => w.GetUri()).Where(u => !wellboreUris.Contains(u)));
             }
 
+            _wellboreUris.AddRange(wellboreUris);
             var channelSetFilters = wellboreUris.Select(wellboreUri => MongoDbUtility.BuildFilter<ChannelSet>("Wellbore.Uuid", wellboreUri.ObjectId)).ToList();
+
+            _channelSetUris.AddRange(channelSetUris);
             channelSetFilters.AddRange(channelSetUris.Select(u => MongoDbUtility.GetEntityFilter<ChannelSet>(u, IdPropertyName)));
 
             var channelUris = GetObjectUris(uris, ObjectTypes.Channel);
@@ -509,7 +518,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
 
         private bool IsChannelMetaDataRequested(EtpUri channelUri, params EtpUri[] uris)
         {
-            // e.g. eml://witsml14 or eml://witsml14/well(well_uid)/wellbore(wellbore_uid)/log(log_uid)/logCurveInfo(GR)
+            // e.g. eml://witsml20 or eml://witsml20/channelSet(channelSet_uuid)/channel(GR)
             if (uris.Any(u => u.IsBaseUri) || uris.Contains(channelUri))
                 return true;
 
@@ -520,6 +529,14 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             // e.g. eml://witsml20/channelSet(channelSet_uuid)/channel
             var folder = parent.Append(channelUri.ObjectType);
             if (uris.Contains(folder)) return true;
+
+            if (_channelSetUris != null &&
+                _channelSetUris.Any(u => u.ObjectId.EqualsIgnoreCase(channelUri.Parent.ObjectId)))
+                return true;
+
+            if (_wellboreUris != null &&
+                _wellboreUris.Any(u => u.ObjectId.EqualsIgnoreCase(channelUri.Parent.Parent.ObjectId)))
+                return true;
 
             return false;
         }

@@ -48,9 +48,8 @@ namespace PDS.Witsml.Server.Data.Channels
         public IList<ChannelMetadataRecord> GetChannelMetadata(params EtpUri[] uris)
         {
             var metadatas = new List<ChannelMetadataRecord>();
-            var channelUris = uris.Where(u => u.ObjectType == ObjectTypes.Channel).ToList();
 
-            var channels = GetChannelsByUris(channelUris.ToList());
+            var channels = GetChannelsByUris(uris);
             if (channels == null)
                 return metadatas;
 
@@ -196,7 +195,7 @@ namespace PDS.Witsml.Server.Data.Channels
             return new Range<double?>(startValue, endValue);
         }
 
-        private List<Channel> GetChannelsByUris(List<EtpUri> uris)
+        private List<Channel> GetChannelsByUris(params EtpUri[] uris)
         {
             if (uris.Any(u => u.IsBaseUri))
                 return GetAll(null);
