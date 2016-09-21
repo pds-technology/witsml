@@ -398,7 +398,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 DataType = curve.TypeLogData.GetValueOrDefault(LogDataType.@double).ToString().Replace("@", string.Empty),
                 Description = curve.CurveDescription ?? curve.Mnemonic,
                 ChannelName = curve.Mnemonic,
-                Uom = curve.Unit,
+                Uom = Units.GetUnit(curve.Unit),
                 MeasureClass = curve.ClassWitsml?.Name ?? ObjectTypes.Unknown,
                 Source = curve.DataSource ?? ObjectTypes.Unknown,
                 Uuid = curve.Mnemonic,

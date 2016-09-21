@@ -233,7 +233,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                 DataType = channel.DataType.GetValueOrDefault(EtpDataType.@double).ToString().Replace("@", string.Empty),
                 Description = channel.Citation != null ? channel.Citation.Description ?? channel.Mnemonic : channel.Mnemonic,
                 ChannelName = channel.Mnemonic,
-                Uom = channel.Uom,
+                Uom = Units.GetUnit(channel.Uom),
                 MeasureClass = channel.CurveClass ?? ObjectTypes.Unknown,
                 Source = channel.Source ?? ObjectTypes.Unknown,
                 Uuid = channel.Mnemonic,
