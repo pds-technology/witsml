@@ -595,12 +595,22 @@ namespace PDS.Witsml.Server
         }
 
         /// <summary>
+        /// Does UpdateInStore on trajectory object and test the return code
+        /// </summary>
+        /// <param name="trajectory">the trajectory</param>
+        /// <param name="errorCode">The error code.</param>
+        public void UpdateAndAssert(Trajectory trajectory, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            UpdateAndAssert<TrajectoryList, Trajectory>(trajectory, errorCode);
+        }
+
+        /// <summary>
         /// Deletes the well and test the return code
         /// </summary>
         /// <param name="well">The well.</param>
         /// <param name="errorCode">The error code.</param>
-         /// <param name="partialDelete">if set to <c>true</c> is partial delete.</param>
-       public void DeleteAndAssert(Well well, ErrorCodes errorCode = ErrorCodes.Success, bool partialDelete = false)
+        /// <param name="partialDelete">if set to <c>true</c> is partial delete.</param>
+        public void DeleteAndAssert(Well well, ErrorCodes errorCode = ErrorCodes.Success, bool partialDelete = false)
         {
             DeleteAndAssert<WellList, Well>(well, errorCode, partialDelete);
         }

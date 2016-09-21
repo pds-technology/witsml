@@ -338,6 +338,16 @@ namespace PDS.Witsml.Server
         }
 
         /// <summary>
+        /// Does UpdateInStore on trajectory object and test the return code
+        /// </summary>
+        /// <param name="trajectory">the trajectory</param>
+        /// <param name="errorCode">The error code.</param>
+        public void UpdateAndAssert(Trajectory trajectory, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            UpdateAndAssert<TrajectoryList, Trajectory>(trajectory, errorCode);
+        }
+
+        /// <summary>
         /// Deletes the well and test the return code
         /// </summary>
         /// <param name="well">The well.</param>

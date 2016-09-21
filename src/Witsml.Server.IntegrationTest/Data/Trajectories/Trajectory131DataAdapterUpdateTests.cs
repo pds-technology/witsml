@@ -106,5 +106,83 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var updatedStation5 = result.TrajectoryStation.FirstOrDefault(s => s.Uid == station5.Uid);
             Assert.IsNotNull(updatedStation5);
         }
+
+        [TestMethod]
+        public void Trajectory131DataAdapter_UpdateInStore_Update_With_Unordered_Stations()
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory without stations
+            var stations = DevKit.TrajectoryStations(1, 0);
+            Trajectory.TrajectoryStation = stations;
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            var result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+
+            // Create 4 new stations
+            var updateStations = DevKit.TrajectoryStations(4, 1);
+
+            // Assign new UIDs
+            updateStations.ForEach(x => x.Uid = DevKit.Uid());
+
+            // Reverse stations
+            updateStations.Reverse();
+
+            Trajectory.TrajectoryStation = updateStations;
+
+            // Update trajectory with reversed stations
+            DevKit.UpdateAndAssert(Trajectory);
+
+            // Get trajectory and ensure stations are ordered
+            updateStations.Reverse();
+            result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(stations?.FirstOrDefault()?.MD.Value, result.MDMin.Value);
+            Assert.AreEqual(Trajectory.TrajectoryStation?.LastOrDefault()?.MD.Value, result.MDMax.Value);
+        }
+
+        [TestMethod]
+        public void Trajectory131DataAdapter_UpdateInStore_Error_448_Missing_Station_UID()
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory without stations
+            var stations = DevKit.TrajectoryStations(5, 0);
+            Trajectory.TrajectoryStation = stations;
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            var result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+
+            // Remove UID from station 2
+            stations[2].Uid = string.Empty;
+
+            DevKit.UpdateAndAssert(Trajectory, ErrorCodes.MissingElementUidForUpdate);
+        }
+
+        [TestMethod]
+        public void Trajectory131DataAdapter_UpdateInStore_Error_464_Duplicate_Station_UIDs()
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory without stations
+            var stations = DevKit.TrajectoryStations(5, 0);
+            Trajectory.TrajectoryStation = stations;
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            var result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+
+            // Set station 2 UID to station 3 UID
+            stations[2].Uid = stations[3].Uid;
+
+            DevKit.UpdateAndAssert(Trajectory, ErrorCodes.ChildUidNotUnique);
+        }
     }
 }
