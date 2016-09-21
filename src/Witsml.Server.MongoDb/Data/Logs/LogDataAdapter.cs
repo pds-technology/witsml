@@ -139,16 +139,18 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="uri">The parent data object URI.</param>
         /// <param name="range">The data range to retrieve.</param>
-        /// <param name="mnemonics">The mnemonics to return data for.</param>
+        /// <param name="mnemonics">The mnemonics to fetch channel data for.
+        /// This list will be modified to contain only those mnemonics that data was returned for.</param>
         /// <param name="requestLatestValues">The total number of requested latest values.</param>
         /// <param name="optimizeStart">if set to <c>true</c> start range can be optimized.</param>
         /// <returns>A collection of channel data.</returns>
-        public List<List<List<object>>> GetChannelData(EtpUri uri, Range<double?> range, string[] mnemonics, int? requestLatestValues, bool optimizeStart = false)
+        public List<List<List<object>>> GetChannelData(EtpUri uri, Range<double?> range, List<string> mnemonics, int? requestLatestValues, bool optimizeStart = false)
         {
 
             var entity = GetEntity(uri);
+            var queryMnemonics = mnemonics.ToArray();
             var allMnemonics = GetLogHeaderMnemonics(entity);
-            var mnemonicIndexes = ComputeMnemonicIndexes(allMnemonics, mnemonics, string.Empty);
+            var mnemonicIndexes = ComputeMnemonicIndexes(allMnemonics, queryMnemonics, string.Empty);
             var keys = mnemonicIndexes.Keys.ToArray();
             var units = GetUnitList(entity, keys);
             var nullValues = GetNullValueList(entity, keys);
@@ -162,8 +164,17 @@ namespace PDS.Witsml.Server.Data.Logs
             };
 
             Dictionary<string, Range<double?>> ranges;
-            return QueryChannelData(context, uri, entity, range, mnemonicIndexes, units, nullValues, mnemonics, requestLatestValues, out ranges, optimizeStart);
+            var logData = QueryChannelData(context, uri, entity, range, mnemonicIndexes, units, nullValues, queryMnemonics, requestLatestValues, out ranges, optimizeStart);
 
+            // Update mnemonics to what was returned by QueryChannelData.  These mnemonics will match the data that is returned in logData.
+            var tempMnemonics = mnemonics.ToArray();
+            mnemonics.Clear();
+
+            // mnemonicIndexs will always contain the index mnemonic.  
+            //.. We need to filter the index mnemonic out if it was not in the incoming mnemonic list.
+            mnemonicIndexes.Values.ForEach(m => { if (tempMnemonics.Contains(m)) mnemonics.Add(m); });
+
+            return logData;
         }
 
         private List<List<List<object>>> QueryChannelData(ResponseContext context, EtpUri uri, T entity, Range<double?> range, IDictionary<int, string> mnemonicIndexes, IDictionary<int, string> units, IDictionary<int, string> nullValues,
