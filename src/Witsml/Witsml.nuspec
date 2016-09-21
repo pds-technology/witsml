@@ -13,7 +13,7 @@
         <dependency id="Energistics.DataAccess" version="2.0.20160830.1" />
       </group>
       <group targetFramework="net45">
-        <dependency id="ETP.DevKit" version="1.1.20160830.1" />
+        <dependency id="ETP.DevKit" version="1.1.20160920.1" />
         <dependency id="FluentValidationNA" version="1.2.16" />
         <dependency id="LinqExtender" version="3.0.1" />
         <dependency id="PDS.Framework" version="$BuildNumber$" />
