@@ -48,9 +48,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
             if (stations.Count == 0)
                 return;
 
-            // Sort stations by MD
-            stations = stations.OrderBy(x => x.MD.Value).ToList();
-
             var range = GetQueryIndexRange(parser);
 
             entity.TrajectoryStation = range.Start.HasValue
@@ -102,10 +99,20 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 return;
             }
 
-            var mds = dataObject.TrajectoryStation.Select(t => t.MD).OrderBy(m => m.Value).ToList();
+            SortStationData(dataObject);
 
-            dataObject.MDMin = mds.FirstOrDefault();
-            dataObject.MDMax = mds.LastOrDefault();
+            dataObject.MDMin = dataObject.TrajectoryStation.FirstOrDefault()?.MD;
+            dataObject.MDMax = dataObject.TrajectoryStation.LastOrDefault()?.MD;
+        }
+
+        /// <summary>
+        /// Sorts the stations by md.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        protected override void SortStationData(Trajectory dataObject)
+        {
+            // Sort stations by MD
+            dataObject.TrajectoryStation = dataObject.TrajectoryStation.OrderBy(x => x.MD.Value).ToList();
         }
 
         /// <summary>
