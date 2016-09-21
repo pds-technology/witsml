@@ -51,16 +51,19 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         public IList<ChannelMetadataRecord> GetChannelMetadata(params EtpUri[] uris)
         {
             var metaDatas = new List<ChannelMetadataRecord>();
-            var entities = GetEntities(uris);
+            if (uris == null)
+                return metaDatas;
+
+            var entities = GetChannelSetByUris(uris.ToList());
             foreach (var entity in entities)
             {
-                metaDatas.AddRange(GetChannelMetadataForAnEntity(entity));
+                metaDatas.AddRange(GetChannelMetadataForAnEntity(entity, uris));
             }
 
             return metaDatas;
         }       
 
-        private IList<ChannelMetadataRecord> GetChannelMetadataForAnEntity(ChannelSet entity)
+        private IList<ChannelMetadataRecord> GetChannelMetadataForAnEntity(ChannelSet entity, params EtpUri[] uris)
         {
             var metadata = new List<ChannelMetadataRecord>();
             var index = 0;
@@ -72,7 +75,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                 .Select(x => ToIndexMetadataRecord(entity, x))
                 .ToList();
 
-            metadata.AddRange(entity.Channel.Select(x =>
+            metadata.AddRange(entity.Channel.Where(c => IsChannelMetaDataRequested(c.GetUri(entity), uris)).Select(x =>
             {
                 var channel = ToChannelMetadataRecord(entity, x, indexMetadata);
                 channel.ChannelId = index++;
@@ -468,6 +471,57 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                     mongoUpdate.UpdateFields(channelFilter, updates);
                 }
             }
+        }
+
+        private List<ChannelSet> GetChannelSetByUris(List<EtpUri> uris)
+        {
+            if (uris.Any(u => u.IsBaseUri))
+                return GetAll(null);
+
+            var channelSetUris = GetObjectUris(uris, ObjectTypes.ChannelSet);
+            var wellboreUris = GetObjectUris(uris, ObjectTypes.Wellbore);
+            var wellUris = GetObjectUris(uris, ObjectTypes.Well);
+            if (wellUris.Any())
+            {
+                var wellboreFilters = wellUris.Select(wellUri => MongoDbUtility.BuildFilter<Wellbore>("Well.Uuid", wellUri.ObjectId)).ToList();
+                var wellbores = GetCollection<Wellbore>(ObjectNames.Wellbore200)
+                    .Find(Builders<Wellbore>.Filter.Or(wellboreFilters)).ToList();
+                wellboreUris.AddRange(wellbores.Select(w => w.GetUri()).Where(u => !wellboreUris.Contains(u)));
+            }
+
+            var channelSetFilters = wellboreUris.Select(wellboreUri => MongoDbUtility.BuildFilter<ChannelSet>("Wellbore.Uuid", wellboreUri.ObjectId)).ToList();
+            channelSetFilters.AddRange(channelSetUris.Select(u => MongoDbUtility.GetEntityFilter<ChannelSet>(u, IdPropertyName)));
+
+            var channelUris = GetObjectUris(uris, ObjectTypes.Channel);
+            foreach (var channelUri in channelUris)
+            {
+                if (channelUri.Parent.ObjectType == ObjectTypes.ChannelSet)
+                    channelSetFilters.Add(MongoDbUtility.BuildFilter<ChannelSet>(IdPropertyName, channelUri.Parent.ObjectId));
+            }
+
+            return channelSetFilters.Any() ? GetCollection().Find(Builders<ChannelSet>.Filter.Or(channelSetFilters)).ToList() : null;
+        }
+
+        private List<EtpUri> GetObjectUris(IEnumerable<EtpUri> uris, string objectType)
+        {
+            return uris.Where(u => u.ObjectType == objectType).ToList();
+        }
+
+        private bool IsChannelMetaDataRequested(EtpUri channelUri, params EtpUri[] uris)
+        {
+            // e.g. eml://witsml14 or eml://witsml14/well(well_uid)/wellbore(wellbore_uid)/log(log_uid)/logCurveInfo(GR)
+            if (uris.Any(u => u.IsBaseUri) || uris.Contains(channelUri))
+                return true;
+
+            // e.g. eml://witsml20/channelSet(channelSet_uuid)
+            var parent = channelUri.Parent;
+            if (uris.Contains(parent)) return true;
+
+            // e.g. eml://witsml20/channelSet(channelSet_uuid)/channel
+            var folder = parent.Append(channelUri.ObjectType);
+            if (uris.Contains(folder)) return true;
+
+            return false;
         }
     }
 }
