@@ -187,6 +187,18 @@ namespace PDS.Witsml
         /// Gets the <see cref="EtpUri"/> for a given <see cref="Energistics.DataAccess.WITSML200.ComponentSchemas.ChannelIndex"/>
         /// </summary>
         /// <param name="entity">The entity.</param>
+        /// <param name="channel">The channel.</param>
+        /// <returns>A <see cref="EtpUri"/> instance.</returns>
+        public static EtpUri GetUri(this Witsml200.ComponentSchemas.ChannelIndex entity, Witsml200.Channel channel)
+        {
+            return channel.GetUri()
+                .Append(ObjectTypes.ChannelIndex, entity.Mnemonic);
+        }
+
+        /// <summary>
+        /// Gets the <see cref="EtpUri"/> for a given <see cref="Energistics.DataAccess.WITSML200.ComponentSchemas.ChannelIndex"/>
+        /// </summary>
+        /// <param name="entity">The entity.</param>
         /// <param name="channelSet">The channel set.</param>
         /// <returns>A <see cref="EtpUri"/> instance.</returns>
         public static EtpUri GetUri(this Witsml200.ComponentSchemas.ChannelIndex entity, Witsml200.ChannelSet channelSet)
