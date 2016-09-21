@@ -48,6 +48,9 @@ namespace PDS.Witsml.Server.Data.Trajectories
             if (stations == null || stations.Count == 0)
                 return;
 
+            // Sort stations by MD
+            stations = stations.OrderBy(x => x.MD.Value).ToList();
+
             var range = GetQueryIndexRange(parser);
 
             entity.TrajectoryStation = range.Start.HasValue
