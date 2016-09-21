@@ -16,13 +16,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
@@ -142,6 +142,86 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
+        public void Trajectory141DataAdapter_UpdateInStore_Error_443_Invalid_UOM()
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory without stations
+            var stations = DevKit.TrajectoryStations(5, 0);
+            Trajectory.TrajectoryStation = stations;
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            var result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+
+            // Update trajectory with XML
+            var station2 = stations[2];
+            var queryIn = string.Format(DevKit141Aspect.BasicTrajectoryXmlTemplate, Trajectory.Uid, Trajectory.UidWell,
+                Trajectory.UidWellbore,
+                $"<nameWell>{Trajectory.NameWell}</nameWell>" + Environment.NewLine +
+                $"<nameWellbore>{Trajectory.NameWellbore}</nameWellbore>" + Environment.NewLine +
+                $"<name>{Trajectory.Name}</name>" + Environment.NewLine +
+                $"<trajectoryStation uid=\"{station2.Uid}\">" + Environment.NewLine +
+                "	<typeTrajStation>magnetic MWD</typeTrajStation>" + Environment.NewLine +
+                $"	<md uom=\"{station2.MD.Uom}\">{station2.MD.Value}</md>" + Environment.NewLine +
+                "	<rawData>" + Environment.NewLine +
+                "		<gravAxialRaw uom=\"ft/s2\">0.116</gravAxialRaw>" + Environment.NewLine +
+                "		<gravTran1Raw uom=\"ft/s2\">-0.168</gravTran1Raw>" + Environment.NewLine +
+                "		<gravTran2Raw uom=\"000\">-1654</gravTran2Raw>" + Environment.NewLine +
+                "		<magAxialRaw uom=\"nT\">22.77</magAxialRaw>" + Environment.NewLine +
+                "		<magTran1Raw uom=\"nT\">22.5</magTran1Raw>" + Environment.NewLine +
+                "		<magTran2Raw uom=\"nT\">27.05</magTran2Raw>" + Environment.NewLine +
+                "	</rawData>" + Environment.NewLine +
+                "</trajectoryStation>");
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Trajectory, queryIn, null, null);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.InvalidUnitOfMeasure, response.Result);
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_UpdateInStore_Error_446_Missing_Value_When_UOM_Specified()
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory without stations
+            var stations = DevKit.TrajectoryStations(5, 0);
+            Trajectory.TrajectoryStation = stations;
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            var result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+
+            // Update trajectory with XML
+            var station2 = stations[2];
+            var queryIn = string.Format(DevKit141Aspect.BasicTrajectoryXmlTemplate, Trajectory.Uid, Trajectory.UidWell,
+                Trajectory.UidWellbore,
+                $"<nameWell>{Trajectory.NameWell}</nameWell>" + Environment.NewLine +
+                $"<nameWellbore>{Trajectory.NameWellbore}</nameWellbore>" + Environment.NewLine +
+                $"<name>{Trajectory.Name}</name>" + Environment.NewLine +
+                $"<trajectoryStation uid=\"{station2.Uid}\">" + Environment.NewLine +
+                "	<typeTrajStation>magnetic MWD</typeTrajStation>" + Environment.NewLine +
+                $"	<md uom=\"{station2.MD.Uom}\">{station2.MD.Value}</md>" + Environment.NewLine +
+                "	<rawData>" + Environment.NewLine +
+                "		<gravAxialRaw uom=\"ft/s2\">0.116</gravAxialRaw>" + Environment.NewLine +
+                "		<gravTran1Raw uom=\"ft/s2\">-0.168</gravTran1Raw>" + Environment.NewLine +
+                "		<gravTran2Raw uom=\"ft/s2\" />" + Environment.NewLine +
+                "		<magAxialRaw uom=\"nT\">22.77</magAxialRaw>" + Environment.NewLine +
+                "		<magTran1Raw uom=\"nT\">22.5</magTran1Raw>" + Environment.NewLine +
+                "		<magTran2Raw uom=\"nT\">27.05</magTran2Raw>" + Environment.NewLine +
+                "	</rawData>" + Environment.NewLine +
+                "</trajectoryStation>");
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Trajectory, queryIn, null, null);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingMeasureDataForUnit, response.Result);
+        }
+
+        [TestMethod]
         public void Trajectory141DataAdapter_UpdateInStore_Error_448_Missing_Station_UID()
         {
             // Add well and wellbore
@@ -160,6 +240,46 @@ namespace PDS.Witsml.Server.Data.Trajectories
             stations[2].Uid = string.Empty;
 
             DevKit.UpdateAndAssert(Trajectory, ErrorCodes.MissingElementUidForUpdate);
+        }
+
+        [TestMethod]
+        public void Trajectory141DataAdapter_UpdateInStore_Error_453_Missing_UOM()
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory without stations
+            var stations = DevKit.TrajectoryStations(5, 0);
+            Trajectory.TrajectoryStation = stations;
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            var result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+
+            // Update trajectory with XML
+            var station2 = stations[2];
+            var queryIn = string.Format(DevKit141Aspect.BasicTrajectoryXmlTemplate, Trajectory.Uid, Trajectory.UidWell,
+                Trajectory.UidWellbore,
+                $"<nameWell>{Trajectory.NameWell}</nameWell>" + Environment.NewLine +
+                $"<nameWellbore>{Trajectory.NameWellbore}</nameWellbore>" + Environment.NewLine +
+                $"<name>{Trajectory.Name}</name>" + Environment.NewLine +
+                $"<trajectoryStation uid=\"{station2.Uid}\">" + Environment.NewLine +
+                "	<typeTrajStation>magnetic MWD</typeTrajStation>" + Environment.NewLine +
+                $"	<md uom=\"{station2.MD.Uom}\">{station2.MD.Value}</md>" + Environment.NewLine +
+                "	<rawData>" + Environment.NewLine +
+                "		<gravAxialRaw uom=\"ft/s2\">0.116</gravAxialRaw>" + Environment.NewLine +
+                "		<gravTran1Raw uom=\"ft/s2\">-0.168</gravTran1Raw>" + Environment.NewLine +
+                "		<gravTran2Raw>-1654</gravTran2Raw>" + Environment.NewLine +
+                "		<magAxialRaw uom=\"nT\">22.77</magAxialRaw>" + Environment.NewLine +
+                "		<magTran1Raw uom=\"nT\">22.5</magTran1Raw>" + Environment.NewLine +
+                "		<magTran2Raw uom=\"nT\">27.05</magTran2Raw>" + Environment.NewLine +
+                "	</rawData>" + Environment.NewLine +
+                "</trajectoryStation>");
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Trajectory, queryIn, null, null);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingUnitForMeasureData, response.Result);
         }
 
         [TestMethod]

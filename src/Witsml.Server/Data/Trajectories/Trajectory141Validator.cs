@@ -39,7 +39,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 "mdMn", "mdMx"
             };
 
-            if (Context.Function != Functions.AddToStore)
+            if (Context.Function != Functions.AddToStore && Context.Function != Functions.UpdateInStore)
                 Context.Ignored.Add("trajectoryStation");
         }
 
