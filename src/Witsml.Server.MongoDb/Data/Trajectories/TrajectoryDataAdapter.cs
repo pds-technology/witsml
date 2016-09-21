@@ -428,7 +428,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         protected abstract void SetIndexRange(T dataObject);
 
         /// <summary>
-        /// Sorts the station data.
+        /// Sorts the stations by MD.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
         protected abstract void SortStationData(T dataObject);

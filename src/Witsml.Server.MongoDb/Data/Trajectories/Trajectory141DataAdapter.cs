@@ -106,7 +106,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         /// <summary>
-        /// Sorts the stations by md.
+        /// Sorts the stations by MD.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
         protected override void SortStationData(Trajectory dataObject)
