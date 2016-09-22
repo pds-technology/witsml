@@ -183,5 +183,16 @@ namespace PDS.Witsml.Server.Data
 
             return copy.ToBsonDocument();
         }
+
+        /// <summary>
+        /// Gets the list of URI by object type.
+        /// </summary>
+        /// <param name="uris">The URI list.</param>
+        /// <param name="objectType">Type of the object.</param>
+        /// <returns>the list of URI specified by the object type.</returns>
+        public static List<EtpUri> GetObjectUris(IEnumerable<EtpUri> uris, string objectType)
+        {
+            return uris.Where(u => u.ObjectType == objectType).ToList();
+        }
     }
 }

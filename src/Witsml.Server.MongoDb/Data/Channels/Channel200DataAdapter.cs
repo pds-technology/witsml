@@ -50,9 +50,6 @@ namespace PDS.Witsml.Server.Data.Channels
             var metadatas = new List<ChannelMetadataRecord>();
 
             var channels = GetChannelsByUris(uris);
-            if (channels == null)
-                return metadatas;
-
             foreach (var channel in channels)
             {
                 var indexMetadata = channel.Index
@@ -200,9 +197,9 @@ namespace PDS.Witsml.Server.Data.Channels
             if (uris.Any(u => u.IsBaseUri))
                 return GetAll(null);
 
-            var channelUris = GetObjectUris(uris, ObjectTypes.Channel);
-            var wellboreUris = GetObjectUris(uris, ObjectTypes.Wellbore);
-            var wellUris = GetObjectUris(uris, ObjectTypes.Well);
+            var channelUris = MongoDbUtility.GetObjectUris(uris, ObjectTypes.Channel);
+            var wellboreUris = MongoDbUtility.GetObjectUris(uris, ObjectTypes.Wellbore);
+            var wellUris = MongoDbUtility.GetObjectUris(uris, ObjectTypes.Well);
             if (wellUris.Any())
             {
                 var wellboreFilters = wellUris.Select(wellUri => MongoDbUtility.BuildFilter<Wellbore>("Well.Uuid", wellUri.ObjectId)).ToList();
@@ -214,12 +211,7 @@ namespace PDS.Witsml.Server.Data.Channels
             var channelFilters = wellboreUris.Select(wellboreUri => MongoDbUtility.BuildFilter<Channel>("Wellbore.Uuid", wellboreUri.ObjectId)).ToList();
             channelFilters.AddRange(channelUris.Select(u => MongoDbUtility.GetEntityFilter<Channel>(u, IdPropertyName)));
 
-            return channelFilters.Any() ? GetCollection().Find(Builders<Channel>.Filter.Or(channelFilters)).ToList() : null;
-        }
-
-        private List<EtpUri> GetObjectUris(IEnumerable<EtpUri> uris, string objectType)
-        {
-            return uris.Where(u => u.ObjectType == objectType).ToList();
+            return channelFilters.Any() ? GetCollection().Find(Builders<Channel>.Filter.Or(channelFilters)).ToList() : new List<Channel>();
         }
     }
 }

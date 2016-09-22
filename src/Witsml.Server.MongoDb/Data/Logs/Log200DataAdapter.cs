@@ -52,7 +52,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var logs = GetLogsByUris(uris.ToList());
 
-            if (logs == null || logs.Count == 0)
+            if (!logs.Any())
                 return adapter.GetChannelMetadata(channelUris.Any() ? channelUris.ToArray() : null);
 
             foreach (var log in logs)
@@ -177,9 +177,9 @@ namespace PDS.Witsml.Server.Data.Logs
             if (uris.Any(u => u.IsBaseUri))
                 return GetAll(null);
 
-            var logUris = GetObjectUris(uris, ObjectTypes.Log);
-            var wellboreUris = GetObjectUris(uris, ObjectTypes.Wellbore);
-            var wellUris = GetObjectUris(uris, ObjectTypes.Well);
+            var logUris = MongoDbUtility.GetObjectUris(uris, ObjectTypes.Log);
+            var wellboreUris = MongoDbUtility.GetObjectUris(uris, ObjectTypes.Wellbore);
+            var wellUris = MongoDbUtility.GetObjectUris(uris, ObjectTypes.Well);
             if (wellUris.Any())
             {
                 var wellboreFilters = wellUris.Select(wellUri => MongoDbUtility.BuildFilter<Wellbore>("Well.Uuid", wellUri.ObjectId)).ToList();
@@ -191,12 +191,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var logFilters = wellboreUris.Select(wellboreUri => MongoDbUtility.BuildFilter<Log>("Wellbore.Uuid", wellboreUri.ObjectId)).ToList();
             logFilters.AddRange(logUris.Select(logUri => MongoDbUtility.GetEntityFilter<Log>(logUri, IdPropertyName)));
 
-            return logFilters.Any() ? GetCollection().Find(Builders<Log>.Filter.Or(logFilters)).ToList() : null;
-        }
-
-        private List<EtpUri> GetObjectUris(IEnumerable<EtpUri> uris, string objectType)
-        {
-            return uris.Where(u => u.ObjectType == objectType).ToList();
+            return logFilters.Any() ? GetCollection().Find(Builders<Log>.Filter.Or(logFilters)).ToList() : new List<Log>();
         }
     }
 }

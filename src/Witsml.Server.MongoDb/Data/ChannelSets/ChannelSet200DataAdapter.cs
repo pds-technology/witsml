@@ -484,9 +484,9 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             _wellboreUris = new List<EtpUri>();
             _channelSetUris = new List<EtpUri>();
 
-            var channelSetUris = GetObjectUris(uris, ObjectTypes.ChannelSet);
-            var wellboreUris = GetObjectUris(uris, ObjectTypes.Wellbore);
-            var wellUris = GetObjectUris(uris, ObjectTypes.Well);
+            var channelSetUris = MongoDbUtility.GetObjectUris(uris, ObjectTypes.ChannelSet);
+            var wellboreUris = MongoDbUtility.GetObjectUris(uris, ObjectTypes.Wellbore);
+            var wellUris = MongoDbUtility.GetObjectUris(uris, ObjectTypes.Well);
             if (wellUris.Any())
             {
                 var wellboreFilters = wellUris.Select(wellUri => MongoDbUtility.BuildFilter<Wellbore>("Well.Uuid", wellUri.ObjectId)).ToList();
@@ -501,19 +501,13 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             _channelSetUris.AddRange(channelSetUris);
             channelSetFilters.AddRange(channelSetUris.Select(u => MongoDbUtility.GetEntityFilter<ChannelSet>(u, IdPropertyName)));
 
-            var channelUris = GetObjectUris(uris, ObjectTypes.Channel);
+            var channelUris = MongoDbUtility.GetObjectUris(uris, ObjectTypes.Channel).Where(u => u.Parent.ObjectType == ObjectTypes.ChannelSet);
             foreach (var channelUri in channelUris)
             {
-                if (channelUri.Parent.ObjectType == ObjectTypes.ChannelSet)
-                    channelSetFilters.Add(MongoDbUtility.BuildFilter<ChannelSet>(IdPropertyName, channelUri.Parent.ObjectId));
+                channelSetFilters.Add(MongoDbUtility.BuildFilter<ChannelSet>(IdPropertyName, channelUri.Parent.ObjectId));
             }
 
-            return channelSetFilters.Any() ? GetCollection().Find(Builders<ChannelSet>.Filter.Or(channelSetFilters)).ToList() : null;
-        }
-
-        private List<EtpUri> GetObjectUris(IEnumerable<EtpUri> uris, string objectType)
-        {
-            return uris.Where(u => u.ObjectType == objectType).ToList();
+            return channelSetFilters.Any() ? GetCollection().Find(Builders<ChannelSet>.Filter.Or(channelSetFilters)).ToList() : new List<ChannelSet>();
         }
 
         private bool IsChannelMetaDataRequested(EtpUri channelUri, params EtpUri[] uris)
