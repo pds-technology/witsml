@@ -22,7 +22,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.Validation;
-using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
 using MongoDB.Bson;
 using MongoDB.Driver;
