@@ -179,6 +179,7 @@ namespace PDS.Witsml.Data.Logs
         {
             return new Channel()
             {
+                Uuid = Uid(),
                 Citation = CreateCitation(citationName),
                 Mnemonic = mnemonic,
                 Uom = uom,
