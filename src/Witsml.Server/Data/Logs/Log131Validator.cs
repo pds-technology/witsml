@@ -105,10 +105,6 @@ namespace PDS.Witsml.Server.Data.Logs
         protected override IEnumerable<ValidationResult> ValidateForInsert()
         {
             var logCurves = DataObject.LogCurveInfo;
-            var uri = DataObject.GetUri();
-            var uriWellbore = uri.Parent;
-            var uriWell = uriWellbore.Parent;
-            var wellbore = WellboreDataAdapter.Get(uriWellbore);
             var indexCurve = DataObject.IndexCurve;
 
             var logDatas = DataObject.LogData;
@@ -130,6 +126,12 @@ namespace PDS.Witsml.Server.Data.Logs
             else if (_illegalColumnIdentifiers.Any(s => { return logCurves != null && logCurves.Any(m => m.Mnemonic.Contains(s)); }))
             {
                 yield return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogCurveInfo.Mnemonic" });
+            }
+
+            // Validate that uids in LogCurveInfo are unique
+            else if (logCurves != null && logCurves.HasDuplicateUids())
+            {
+                yield return new ValidationResult(ErrorCodes.ChildUidNotUnique.ToString(), new[] { "LogCurveInfo", "Uid" });
             }
 
             // Validate that column-identifiers in LogCurveInfo are unique
@@ -204,7 +206,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 }
 
                 // Validate that uids in LogCurveInfo are unique
-                else if (logCurves != null && DuplicateUid(logCurves.Select(l => l.Uid)))
+                else if (logCurves != null && logCurves.HasDuplicateUids())
                 {
                     yield return new ValidationResult(ErrorCodes.ChildUidNotUnique.ToString(), new[] { "LogCurveInfo", "Uid" });
                 }
@@ -276,7 +278,6 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 var uri = DataObject.GetUri();
                 var logCurves = DataObject.LogCurveInfo;
-                var logData = DataObject.LogData;
                 var current = DataAdapter.Get(uri);
 
                 // Validate Log does not exist

@@ -61,14 +61,14 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 {
                     yield return new ValidationResult(ErrorCodes.MissingElementUidForAdd.ToString(), new[] {"TrajectoryStation", "Uid"});
                 }
+                else if (stations.HasDuplicateUids())
+                {
+                    yield return new ValidationResult(ErrorCodes.ChildUidNotUnique.ToString(), new[] { "TrajectoryStation", "Uid" });
+                }
                 // TODO: update with trajectory maxDataNodes
                 else if (stations.Count > WitsmlSettings.MaxDataNodes)
                 {
                     yield return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] {"TrajectoryStation"});
-                }
-                else if (stations.HasDuplicateUids())
-                {
-                    yield return new ValidationResult(ErrorCodes.ChildUidNotUnique.ToString(), new[] { "TrajectoryStation", "Uid" });
                 }
             }
         }
@@ -96,14 +96,14 @@ namespace PDS.Witsml.Server.Data.Trajectories
                     {
                         yield return new ValidationResult(ErrorCodes.MissingElementUidForUpdate.ToString(), new[] { "TrajectoryStation", "Uid" });
                     }
+                    else if (stations.HasDuplicateUids())
+                    {
+                        yield return new ValidationResult(ErrorCodes.ChildUidNotUnique.ToString(), new[] { "TrajectoryStation", "Uid" });
+                    }
                     // TODO: update with trajectory maxDataNodes
                     else if (stations.Count > WitsmlSettings.MaxDataNodes)
                     {
                         yield return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "TrajectoryStation" });
-                    }
-                    else if (stations.HasDuplicateUids())
-                    {
-                        yield return new ValidationResult(ErrorCodes.ChildUidNotUnique.ToString(), new[] { "TrajectoryStation", "Uid" });
                     }
                 }
 

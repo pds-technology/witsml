@@ -16,7 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.DataAnnotations;
@@ -121,13 +120,10 @@ namespace PDS.Witsml.Server.Data.Logs
         protected override IEnumerable<ValidationResult> ValidateForInsert()
         {
             var logCurves = DataObject.LogCurveInfo;
-            var uri = DataObject.GetUri();
-            var uriWellbore = uri.Parent;
-            var uriWell = uriWellbore.Parent;
-            var wellbore = WellboreDataAdapter.Get(uriWellbore);
             var indexCurve = DataObject.IndexCurve;
 
             var logDatas = DataObject.LogData;
+            var logParams = DataObject.LogParam;
             var logCurveInfoMnemonics = new List<string>();
 
             logCurves?.ForEach(l => logCurveInfoMnemonics.Add(l.Mnemonic.Value));
@@ -137,7 +133,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 yield return result;
 
             // Validate that uid for LogParam exists
-            if (DataObject.LogParam != null && DataObject.LogParam.Any(lp => string.IsNullOrWhiteSpace(lp.Uid)))
+            if (logParams != null && logParams.Any(lp => string.IsNullOrWhiteSpace(lp.Uid)))
             {
                 yield return new ValidationResult(ErrorCodes.MissingElementUidForAdd.ToString(), new[] { "LogParam", "Uid" });
             }
@@ -146,6 +142,18 @@ namespace PDS.Witsml.Server.Data.Logs
             else if (_illegalColumnIdentifiers.Any(s => { return logCurves != null && logCurves.Any(m => m.Mnemonic.Value.Contains(s)); }))
             {
                 yield return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogCurveInfo.Mnemonic" });
+            }
+
+            // Validate that uids in LogCurveInfo are unique
+            else if (logCurves != null && logCurves.HasDuplicateUids())
+            {
+                yield return new ValidationResult(ErrorCodes.ChildUidNotUnique.ToString(), new[] { "LogCurveInfo", "Uid" });
+            }
+
+            // Validate that uids in LogParam are unique
+            else if (logParams != null && logParams.HasDuplicateUids())
+            {
+                yield return new ValidationResult(ErrorCodes.ChildUidNotUnique.ToString(), new[] { "LogParam", "Uid" });
             }
 
             // Validate that column-identifiers in LogCurveInfo are unique
@@ -228,13 +236,13 @@ namespace PDS.Witsml.Server.Data.Logs
                 }
 
                 // Validate that uids in LogCurveInfo are unique
-                else if (logCurves != null && DuplicateUid(logCurves.Select(l => l.Uid)))
+                else if (logCurves != null && logCurves.HasDuplicateUids())
                 {
                     yield return new ValidationResult(ErrorCodes.ChildUidNotUnique.ToString(), new[] { "LogCurveInfo", "Uid" });
                 }
 
                 // Validate that uids in LogParam are unique
-                else if (logParams != null && DuplicateUid(logParams.Select(l => l.Uid)))
+                else if (logParams != null && logParams.HasDuplicateUids())
                 {
                     yield return new ValidationResult(ErrorCodes.ChildUidNotUnique.ToString(), new[] { "LogParam", "Uid" });
                 }

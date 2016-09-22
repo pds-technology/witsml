@@ -19,6 +19,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Energistics.DataAccess;
+using PDS.Framework;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
@@ -159,6 +161,25 @@ namespace PDS.Witsml.Server.Data
             citation.LastUpdate = DateTime.UtcNow;
 
             return citation;
+        }
+
+        /// <summary>
+        /// Determines whether the list has duplicate UIDs.
+        /// </summary>
+        /// <param name="list">The list of items with UIDs.</param>
+        /// <returns>
+        ///   <c>true</c> if the list has duplicate UIDs; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool HasDuplicateUids<T>(this List<T> list) where T : IUniqueId
+        {
+            var uids = new HashSet<string>();
+            foreach (var item in list)
+            {
+                if (uids.ContainsIgnoreCase(item.Uid))
+                    return true;
+                uids.Add(item.Uid);
+            }
+            return false;
         }
     }
 }
