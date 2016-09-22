@@ -28,6 +28,7 @@ using Energistics.Datatypes.Object;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
+using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Server.Models;
 using PDS.Witsml.Server.Providers.Store;
@@ -96,11 +97,21 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         /// <returns>A collection of channel data.</returns>
         public IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, Range<double?> range)
         {
+            return GetChannelData(uri, range, null);
+        }
+
+        private IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, Range<double?> range, int? requestLatestValues)
+        {
             var entity = GetEntity(uri);
             var indexChannel = entity.Index.FirstOrDefault();
             var increasing = indexChannel.IsIncreasing();
-            var chunks = ChannelDataChunkAdapter.GetData(uri, indexChannel.Mnemonic, range, increasing);
-            return chunks.GetRecords(range, increasing);
+            var chunks = ChannelDataChunkAdapter.GetData(
+                uri, indexChannel.Mnemonic, range,
+                requestLatestValues.HasValue
+                    ? !increasing
+                    : increasing,
+                reverse: requestLatestValues.HasValue);
+            return chunks.GetRecords(range, increasing, reverse: requestLatestValues.HasValue);
         }
 
         /// <summary>
@@ -115,7 +126,229 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         /// <returns>A collection of channel data.</returns>
         public List<List<List<object>>> GetChannelData(EtpUri uri, Range<double?> range, List<string> mnemonics, int? requestLatestValues, bool optimizeStart = false)
         {
-            return new List<List<List<object>>>();
+            List<List<List<object>>> logData;
+
+            var entity = GetEntity(uri);
+            var queryMnemonics = mnemonics.ToArray();
+            var allMnemonics = GetAllMnemonics(entity);
+            var mnemonicIndexes = ComputeMnemonicIndexes(entity, allMnemonics, queryMnemonics);
+            var keys = mnemonicIndexes.Keys.ToArray();
+            var units = GetUnitList(entity, keys);
+            var nullValues = GetNullValueList(entity, keys);
+
+            // Create a context to pass information required by the ChannelDataReader.
+            var context = new ResponseContext()
+            {
+                RequestLatestValues = requestLatestValues,
+                MaxDataNodes = WitsmlSettings.MaxDataNodes,
+                MaxDataPoints = WitsmlSettings.MaxDataPoints
+            };
+
+            // Get the ranges for the query mnemonics
+            var curveRanges = 
+                GetCurrentIndexRange(entity)
+                .Where(c => queryMnemonics.Contains(c.Key))
+                .Select(r => r.Value).ToList(); 
+            
+            var indexChannel = entity.Index.FirstOrDefault();
+            var increasing = indexChannel.IsIncreasing();
+            var isTimeIndex = entity.IsTimeIndex();
+            var rangeStart = GetMinRangeStart(curveRanges, increasing);
+            var optimizeRangeStart = GetOptimizeRangeStart(curveRanges, increasing);
+            var rangeEnd = GetMaxRangeEnd(curveRanges, increasing);
+
+            bool finished;
+            const int maxRequestFactor = 3;
+            var requestFactor = 1;
+
+            // Try an initial optimization for non-latest values and latest values.
+            if (!requestLatestValues.HasValue && optimizeStart)
+            {
+                // Reset the start if specified start is before the minStart
+                if (rangeStart.HasValue && range.StartsBefore(rangeStart.Value, increasing))
+                {
+                    range = new Range<double?>(rangeStart, range.End);
+                }
+            }
+            else if (requestLatestValues.HasValue)
+            {
+                range = OptimizeLatestValuesRange(range, requestLatestValues, isTimeIndex, increasing, rangeStart, optimizeRangeStart, rangeEnd, requestFactor);
+            }
+
+            do // until finished
+            {
+                // Retrieve the data from the database
+                var records = GetChannelData(uri, range, requestLatestValues);
+
+                // Get a reader to process the log's channel data records
+                var reader = records.GetReader(mnemonicIndexes.Values.ToArray(), units, nullValues);
+
+                // Get the data from the reader based on the context and mnemonicIndexes (slices)
+                Dictionary<string, Range<double?>> ranges;
+                logData = reader.GetData(context, mnemonicIndexes, units, nullValues, out ranges);
+
+
+                // Test if we're finished reading data
+                finished =                              // Finished if...
+                    !requestLatestValues.HasValue ||        // not request latest values
+                    context.HasAllRequestedValues ||         // request latest values and all values returned
+                    (rangeStart.HasValue &&                 // query range is at start of all channel data
+                    range.StartsBefore(rangeStart.Value, increasing, true)) ||
+                    !range.Start.HasValue;                  // query was for all data
+
+                // If we're not finished try a bigger range
+                if (!finished)
+                {
+                    requestFactor += 1;
+                    if (requestFactor < maxRequestFactor)
+                    {
+                        range = OptimizeLatestValuesRange(
+                            range, requestLatestValues, isTimeIndex, increasing, rangeStart, optimizeRangeStart, rangeEnd, requestFactor);
+                    }
+                    else
+                    {
+                        // This is the final optimization and will stop the iterations after the next pass
+                        range = new Range<double?>(null, null);
+                    }
+                }
+
+            } while (!finished);
+
+            return logData;
+        }
+
+        // TODO: Refactor to be common with LogDataAdapter version
+        private Range<double?> OptimizeLatestValuesRange(Range<double?> range, int? requestLatestValues, bool isTimeIndex, bool increasing, double? rangeStart, double? optimizeRangeStart, double? rangeEnd, int requestFactor)
+        {
+            if (requestLatestValues.HasValue && optimizeRangeStart.HasValue)
+            {
+                var optimizationEstimate =
+                    (requestFactor * (requestLatestValues.Value + 1) * WitsmlSettings.GetRangeStepSize(isTimeIndex));
+
+                range = increasing
+                    ? new Range<double?>(optimizeRangeStart.Value - optimizationEstimate, rangeEnd)
+                    : new Range<double?>(optimizeRangeStart.Value + optimizationEstimate, rangeEnd);
+
+                if (rangeStart.HasValue && range.StartsBefore(rangeStart.Value, increasing))
+                {
+                    range = new Range<double?>(rangeStart, rangeEnd);
+                }
+            }
+
+            return range;
+        }
+
+        // TODO: Refactor to be common with LogDataAdapter version
+        private double? GetMinRangeStart(List<Range<double?>> ranges, bool increasing)
+        {
+            return increasing ? ranges.Min(r => r.Start) : ranges.Max(r => r.Start);
+        }
+
+        // TODO: Refactor to be common with LogDataAdapter version
+        private double? GetOptimizeRangeStart(List<Range<double?>> ranges, bool increasing)
+        {
+            return increasing ? ranges.Min(r => r.End) : ranges.Max(r => r.End);
+        }
+
+        // TODO: Refactor to be common with LogDataAdapter version
+        private double? GetMaxRangeEnd(List<Range<double?>> ranges, bool increasing)
+        {
+            return increasing ? ranges.Max(r => r.End) : ranges.Min(r => r.End);
+        }
+
+
+        private string[] GetAllMnemonics(ChannelSet entity)
+        {
+            return entity.Index.Select(i => i.Mnemonic).Concat(entity.Channel.Select(c => c.Mnemonic)).ToArray();
+        }
+
+        private IDictionary<int, string> ComputeMnemonicIndexes(ChannelSet entity, string[] allMnemonics, string[] queryMnemonics)
+        {
+            Logger.DebugFormat("Computing mnemonic indexes for ChannelSet.");
+            
+            // Start with all mnemonics
+            var mnemonicIndexes = allMnemonics
+                .Select((mn, index) => new { Mnemonic = mn, Index = index });
+
+            // Check if mnemonics need to be filtered
+            if (queryMnemonics.Any())
+            {
+                // always return the index channel
+                mnemonicIndexes = mnemonicIndexes
+                    .Where(x => x.Index < entity.Index.Count || queryMnemonics.Contains(x.Mnemonic));
+            }
+
+            // create an index-to-mnemonic map
+            return mnemonicIndexes
+                .ToDictionary(x => x.Index, x => x.Mnemonic);
+        }
+
+        private IDictionary<int, string> GetUnitsByColumnIndex(ChannelSet entity)
+        {
+            Logger.Debug("Getting ChannelSet Channel units by column index.");
+            
+            return entity.Index.Select(i => i.Uom)
+                .Concat(entity.Channel.Select(c => c.Uom))
+                .ToArray()
+                .Select((unit, index) => new { Unit = unit, Index = index })
+                .ToDictionary(x => x.Index, x => x.Unit);
+        }
+
+        private IDictionary<int, string> GetNullValuesByColumnIndex(ChannelSet entity)
+        {
+            Logger.Debug("Getting ChannelSet Channel null values by column index.");
+
+            return entity.Index.Select(i => "null")
+                .Concat(entity.Channel.Select(c => "null"))
+                .ToArray()
+                .Select((unit, index) => new { Unit = unit, Index = index })
+                .ToDictionary(x => x.Index, x => x.Unit);
+        }
+
+        // TODO: See if this can be refactored to be common with LogDataAdapter.GetUnitList
+        private IDictionary<int, string> GetUnitList(ChannelSet entity, int[] slices)
+        {
+            Logger.Debug("Getting unit list for log.");
+
+            // Get a list of all of the units
+            var allUnits = GetUnitsByColumnIndex(entity);
+
+            // Start with all units
+            var unitIndexes = allUnits
+                .Select((unit, index) => new { Unit = unit.Value, Index = index });
+
+            // Get indexes for each slice
+            if (slices.Any())
+            {
+                // always return the index channel
+                unitIndexes = unitIndexes
+                    .Where(x => x.Index == 0 || slices.Contains(x.Index));
+            }
+
+            return unitIndexes.ToDictionary(x => x.Index, x => x.Unit);
+        }
+
+        // TODO: See if this can be refactored to be common with LogDataAdapter.GetNullValueList
+        private IDictionary<int, string> GetNullValueList(ChannelSet entity, int[] slices)
+        {
+            Logger.Debug("Getting null value list for log.");
+
+            // Get a list of all of the null values
+            var allNullValues = GetNullValuesByColumnIndex(entity);
+
+            // Start with all units
+            var nullValuesIndexes = allNullValues
+                .Select((nullValue, index) => new { NullValue = nullValue.Value, Index = index });
+
+            // Get indexes for each slice
+            if (slices.Any())
+            {
+                // always return the index channel
+                nullValuesIndexes = nullValuesIndexes
+                    .Where(x => x.Index == 0 || slices.Contains(x.Index));
+            }
+
+            return nullValuesIndexes.ToDictionary(x => x.Index, x => x.NullValue);
         }
 
         /// <summary>
