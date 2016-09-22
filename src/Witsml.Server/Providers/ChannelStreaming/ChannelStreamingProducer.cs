@@ -340,10 +340,13 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                         ? 1
                         : (int?)null;
             var increasing = primaryIndex.Direction == IndexDirections.Increasing;
+            bool? firstStart = null;
 
             // Loop until there is a cancellation or all channals have been removed
             while (!IsStreamingStopped(contextList, ref token))
             {
+                firstStart = !firstStart.HasValue;
+
                 var channelIds = contextList.Select(i => i.ChannelId).Distinct().ToArray();
                 Logger.Debug($"Streaming data for parentUri {parentUri.Uri} and channelIds {string.Join(",", channelIds)}");
 
@@ -385,7 +388,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 var channelData = dataProvider.GetChannelData(parentUri, new Range<double?>(minStartIndex, maxEndIndex), mnemonics, requestLatestValues, optimiseStart);
 
                 // Stream the channel data
-                await StreamChannelData(contextList, channelData, mnemonics.ToArray(), increasing, isTimeIndex, primaryIndex.Scale, token);
+                await StreamChannelData(contextList, channelData, mnemonics.ToArray(), increasing, isTimeIndex, primaryIndex.Scale, firstStart.Value, token);
 
                 // If we have processed an IndexCount or LatestValue query clear requestLatestValues so we can 
                 //... keep streaming new data as long as the channel is active.
@@ -414,7 +417,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             }
         }
 
-        private async Task StreamChannelData(IList<ChannelStreamingContext> contextList, List<List<List<object>>> channelData, string[] mnemonics, bool increasing, bool isTimeIndex, int scale, CancellationToken token)
+        private async Task StreamChannelData(IList<ChannelStreamingContext> contextList, List<List<List<object>>> channelData, string[] mnemonics, bool increasing, bool isTimeIndex, int scale, bool firstStart, CancellationToken token)
         {
             var dataItemList = new List<DataItem>();
             var firstContext = contextList.FirstOrDefault();
@@ -429,7 +432,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
                 while (!endOfChannelData)
                 {
-                    foreach (var dataItem in CreateDataItems(contextList, channelDataEnum.Current, mnemonics, increasing, isTimeIndex, scale))
+                    foreach (var dataItem in CreateDataItems(contextList, channelDataEnum.Current, mnemonics, increasing, isTimeIndex, scale, firstStart))
                     {
                         if (IsStreamingStopped(contextList, ref token))
                             break;
@@ -461,7 +464,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             }
         }
 
-        private IEnumerable<DataItem> CreateDataItems(IList<ChannelStreamingContext> contextList, List<List<object>> record, string[] mnemonics, bool increasing, bool isTimeIndex, int scale)
+        private IEnumerable<DataItem> CreateDataItems(IList<ChannelStreamingContext> contextList, List<List<object>> record, string[] mnemonics, bool increasing, bool isTimeIndex, int scale, bool firstStart)
         {
             // Get the index and value components for the current record
             var indexes = record[0];
@@ -489,7 +492,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 var start = new Range<double?>(Convert.ToDouble(context.StartIndex), null);
 
                 // If we have an established Start and it starts after the current primaryIndexValue then skip this value.
-                if (context.StartIndex.HasValue && start.StartsAfter(primaryIndexValue, increasing, inclusive: true))
+                if (context.StartIndex.HasValue && start.StartsAfter(primaryIndexValue, increasing, inclusive: !firstStart))
                     continue;
 
                 // Update the current StartIndex for our context with the current index value
