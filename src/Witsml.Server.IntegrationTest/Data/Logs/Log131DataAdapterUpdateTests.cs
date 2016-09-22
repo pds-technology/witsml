@@ -127,7 +127,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_UpdateLog_Data_And_Index_Range()
+        public void Log131DataAdapter_UpdateInStore_UpdateLog_Data_And_Index_Range()
         {
             Log.StartIndex = new GenericMeasure(15, "m");
             AddLogWithData(Log, LogIndexType.measureddepth, 8);

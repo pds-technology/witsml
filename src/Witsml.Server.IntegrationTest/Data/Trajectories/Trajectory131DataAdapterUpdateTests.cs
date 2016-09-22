@@ -145,7 +145,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory141DataAdapter_UpdateInStore_Error_443_Invalid_UOM()
+        public void Trajectory131DataAdapter_UpdateInStore_Error_443_Invalid_UOM()
         {
             // Add well and wellbore
             AddParents();
@@ -179,13 +179,11 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 "	</rawData>" + Environment.NewLine +
                 "</trajectoryStation>");
 
-            var response = DevKit.UpdateInStore(ObjectTypes.Trajectory, queryIn, null, null);
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.InvalidUnitOfMeasure, response.Result);
+            DevKit.UpdateAndAssert(ObjectTypes.Trajectory, queryIn, ErrorCodes.InvalidUnitOfMeasure);
         }
 
         [TestMethod]
-        public void Trajectory141DataAdapter_UpdateInStore_Error_446_Missing_Value_When_UOM_Specified()
+        public void Trajectory131DataAdapter_UpdateInStore_Error_446_Missing_Value_When_UOM_Specified()
         {
             // Add well and wellbore
             AddParents();
@@ -219,9 +217,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 "	</rawData>" + Environment.NewLine +
                 "</trajectoryStation>");
 
-            var response = DevKit.UpdateInStore(ObjectTypes.Trajectory, queryIn, null, null);
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.MissingMeasureDataForUnit, response.Result);
+            DevKit.UpdateAndAssert(ObjectTypes.Trajectory, queryIn, ErrorCodes.InvalidUnitOfMeasure);
         }
 
         [TestMethod]
@@ -246,7 +242,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory141DataAdapter_UpdateInStore_Error_453_Missing_UOM()
+        public void Trajectory131DataAdapter_UpdateInStore_Error_453_Missing_UOM()
         {
             // Add well and wellbore
             AddParents();
@@ -280,9 +276,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 "	</rawData>" + Environment.NewLine +
                 "</trajectoryStation>");
 
-            var response = DevKit.UpdateInStore(ObjectTypes.Trajectory, queryIn, null, null);
-            Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.MissingUnitForMeasureData, response.Result);
+            DevKit.UpdateAndAssert(ObjectTypes.Trajectory, queryIn, ErrorCodes.InvalidUnitOfMeasure);
         }
 
         [TestMethod]
