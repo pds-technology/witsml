@@ -217,7 +217,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 "	</rawData>" + Environment.NewLine +
                 "</trajectoryStation>");
 
-            DevKit.UpdateAndAssert(ObjectTypes.Trajectory, queryIn, ErrorCodes.InvalidUnitOfMeasure);
+            DevKit.UpdateAndAssert(ObjectTypes.Trajectory, queryIn, ErrorCodes.MissingMeasureDataForUnit);
         }
 
         [TestMethod]
@@ -276,7 +276,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 "	</rawData>" + Environment.NewLine +
                 "</trajectoryStation>");
 
-            DevKit.UpdateAndAssert(ObjectTypes.Trajectory, queryIn, ErrorCodes.InvalidUnitOfMeasure);
+            DevKit.UpdateAndAssert(ObjectTypes.Trajectory, queryIn, ErrorCodes.MissingUnitForMeasureData);
         }
 
         [TestMethod]
