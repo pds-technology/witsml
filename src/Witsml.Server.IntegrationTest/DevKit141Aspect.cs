@@ -32,12 +32,6 @@ namespace PDS.Witsml.Server
 {
     public class DevKit141Aspect : DevKitAspect
     {
-        public static readonly string BasicWellXmlTemplate = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-                          "   <well uid=\"{0}\">" + Environment.NewLine +
-                          "{1}" +
-                          "   </well>" + Environment.NewLine +
-                          "</wells>";
-
         public static readonly string BasicAddWellXmlTemplate = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
                           "   <well uid=\"{0}\">" + Environment.NewLine +
                           "     <name>{1}</name>" + Environment.NewLine +
@@ -46,35 +40,11 @@ namespace PDS.Witsml.Server
                           "   </well>" + Environment.NewLine +
                           "</wells>";
 
-        public static readonly string BasicUpdateWellboreXmlTemplate = "<wellbores xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-                          "   <wellbore uidWell=\"{0}\" uid=\"{1}\">" + Environment.NewLine +
-                          "{2}" +
-                          "   </wellbore>" + Environment.NewLine +
-                          "</wellbores>";
-
-        public static readonly string BasicDeleteWellXmlTemplate = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-                          "   <well uid=\"{0}\">" + Environment.NewLine +
-                          "{1}" +
-                          "   </well>" + Environment.NewLine +
-                          "</wells>";
-
-        public static readonly string BasicDeleteWellboreXmlTemplate = "<wellbores xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-                          "   <wellbore uid=\"{0}\" uidWell=\"{1}\">" + Environment.NewLine +
-                          "{2}" +
-                          "   </wellbore>" + Environment.NewLine +
-                          "</wellbores>";
-
         public static readonly string BasicDeleteLogXmlTemplate = "<logs xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
                           "   <log uid=\"{0}\" uidWell=\"{1}\" uidWellbore=\"{2}\">" + Environment.NewLine +
                           "{3}" +
                           "   </log>" + Environment.NewLine +
                           "</logs>";
-
-        public static readonly string BasicTrajectoryXmlTemplate = "<trajectorys xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
-                          "   <trajectory uid=\"{0}\" uidWell=\"{1}\" uidWellbore=\"{2}\">" + Environment.NewLine +
-                          "{3}" +
-                          "   </trajectory>" + Environment.NewLine +
-                          "</trajectorys>";
 
         private const MeasuredDepthUom MdUom = MeasuredDepthUom.m;
         private const WellVerticalCoordinateUom TvdUom = WellVerticalCoordinateUom.m;
@@ -547,14 +517,15 @@ namespace PDS.Witsml.Server
         /// <summary>
         /// Does get query for single trajectory object and test for result count equal to 1 and is not null
         /// </summary>
+        /// <param name="basicXmlTemplate">A XML string with reference parameters for UIDs and body elements</param>
         /// <param name="trajectory">The trajectory.</param>
         /// <param name="queryContent">The query xml descendants of the trajectory element.</param>
         /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
         /// <param name="optionsIn">The options in.</param>
         /// <returns>The first trajectory from the response.</returns>
-        public Trajectory GetAndAssertWithXml(Trajectory trajectory, string queryContent = null, bool isNotNull = true, string optionsIn = null)
+        public Trajectory GetAndAssertWithXml(string basicXmlTemplate, Trajectory trajectory, string queryContent = null, bool isNotNull = true, string optionsIn = null)
         {
-            var queryIn = string.Format(BasicTrajectoryXmlTemplate, trajectory.Uid, trajectory.UidWell, trajectory.UidWellbore, queryContent);
+            var queryIn = string.Format(basicXmlTemplate, trajectory.UidWell, trajectory.UidWellbore, trajectory.Uid, queryContent);
 
             var results = Query<TrajectoryList, Trajectory>(ObjectTypes.Trajectory, queryIn, null, optionsIn ?? OptionsIn.ReturnElements.All);
             Assert.AreEqual(isNotNull ? 1 : 0, results.Count);

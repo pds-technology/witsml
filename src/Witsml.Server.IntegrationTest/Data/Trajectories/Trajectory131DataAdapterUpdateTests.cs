@@ -46,7 +46,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             Assert.IsNull(result.AziRef);
 
             const string content = "<magDeclUsed /><aziRef>grid north</aziRef>";
-            var xmlIn = string.Format(DevKit131Aspect.BasicTrajectoryXmlTemplate, Trajectory.Uid, Trajectory.UidWell, Trajectory.UidWellbore, content);
+            var xmlIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, content);
             DevKit.UpdateAndAssert(ObjectTypes.Trajectory, xmlIn);
 
             result = DevKit.GetAndAssert(Trajectory);
@@ -161,7 +161,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             // Update trajectory with XML
             var station2 = stations[2];
-            var queryIn = string.Format(DevKit131Aspect.BasicTrajectoryXmlTemplate, Trajectory.Uid, Trajectory.UidWell,
+            var queryIn = string.Format(BasicXMLTemplate, Trajectory.Uid, Trajectory.UidWell,
                 Trajectory.UidWellbore,
                 $"<nameWell>{Trajectory.NameWell}</nameWell>" + Environment.NewLine +
                 $"<nameWellbore>{Trajectory.NameWellbore}</nameWellbore>" + Environment.NewLine +
@@ -199,8 +199,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             // Update trajectory with XML
             var station2 = stations[2];
-            var queryIn = string.Format(DevKit131Aspect.BasicTrajectoryXmlTemplate, Trajectory.Uid, Trajectory.UidWell,
-                Trajectory.UidWellbore,
+            var queryIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid,
                 $"<nameWell>{Trajectory.NameWell}</nameWell>" + Environment.NewLine +
                 $"<nameWellbore>{Trajectory.NameWellbore}</nameWellbore>" + Environment.NewLine +
                 $"<name>{Trajectory.Name}</name>" + Environment.NewLine +
@@ -258,7 +257,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             // Update trajectory with XML
             var station2 = stations[2];
-            var queryIn = string.Format(DevKit131Aspect.BasicTrajectoryXmlTemplate, Trajectory.Uid, Trajectory.UidWell,
+            var queryIn = string.Format(BasicXMLTemplate, Trajectory.Uid, Trajectory.UidWell,
                 Trajectory.UidWellbore,
                 $"<nameWell>{Trajectory.NameWell}</nameWell>" + Environment.NewLine +
                 $"<nameWellbore>{Trajectory.NameWellbore}</nameWellbore>" + Environment.NewLine +

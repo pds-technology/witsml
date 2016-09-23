@@ -78,7 +78,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AddAndAssert(Wellbore);
 
             // Update wellbore with invalid element
-            var updateXml = string.Format(DevKit141Aspect.BasicUpdateWellboreXmlTemplate, Well.Uid, Wellbore.Uid,
+            var updateXml = string.Format(BasicXMLTemplate, Well.Uid, Wellbore.Uid,
                 "<suffixAPI>1</suffixAPI>" +
                 "<numGovtxxxxxxxx>101</numGovtxxxxxxxx>");
 
@@ -102,7 +102,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AddAndAssert(Wellbore);
 
             // Update wellbore with invalid element
-            var updateXml = string.Format(DevKit141Aspect.BasicUpdateWellboreXmlTemplate, Well.Uid, Wellbore.Uid,
+            var updateXml = string.Format(BasicXMLTemplate, Well.Uid, Wellbore.Uid,
                 "<suffixAPI>1</suffixAPI>" +
                 "<numGovt abc=\"abc\">101</numGovt>");
 
@@ -127,7 +127,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AddAndAssert(Wellbore);
 
             // Update wellbore with invalid element
-            var updateXml = string.Format(DevKit141Aspect.BasicUpdateWellboreXmlTemplate, Well.Uid, Wellbore.Uid,
+            var updateXml = string.Format(BasicXMLTemplate, Well.Uid, Wellbore.Uid,
                 "<suffixAPI><abc>1</abc></suffixAPI>");
 
             var results = DevKit.UpdateInStore(ObjectTypes.Wellbore, updateXml, null, null);
@@ -271,7 +271,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AddAndAssert(Wellbore);
 
             // Update wellbore
-            var updateXml = string.Format(DevKit141Aspect.BasicUpdateWellboreXmlTemplate, Well.Uid, Wellbore.Uid,
+            var updateXml = string.Format(BasicXMLTemplate, Well.Uid, Wellbore.Uid,
                 "<commonData><extensionNameValue uid=\"Ext - 1\"><name>Ext-1</name><dataType>double</dataType></extensionNameValue></commonData>");
 
             var results = DevKit.UpdateInStore(ObjectTypes.Wellbore, updateXml, null, null);
@@ -287,7 +287,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AddAndAssert(Well);
 
             // Update wellbore with invalid element
-            var updateXml = string.Format(DevKit141Aspect.BasicUpdateWellboreXmlTemplate, Well.Uid, string.Empty, string.Empty);
+            var updateXml = string.Format(BasicXMLTemplate, string.Empty, Well.Uid, string.Empty);
             var results = DevKit.UpdateInStore(ObjectTypes.Wellbore, updateXml, null, null);
             Assert.AreEqual((short)ErrorCodes.DataObjectUidMissing, results.Result);
         }
@@ -322,7 +322,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Assert.AreEqual(0, mdElement.Value);
 
             // Update wellbore with invalid element
-            var updateXml = string.Format(DevKit141Aspect.BasicUpdateWellboreXmlTemplate, Well.Uid, Wellbore.Uid,
+            var updateXml = string.Format(BasicXMLTemplate, Wellbore.Uid, Well.Uid,
                 "<md uom=\"xxx\">1</md>");
 
             var results = DevKit.UpdateInStore(ObjectTypes.Wellbore, updateXml, null, null);
@@ -395,7 +395,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AddAndAssert(Wellbore);
 
             // Update wellbore
-            var updateXml = string.Format(DevKit141Aspect.BasicUpdateWellboreXmlTemplate, Well.Uid, Wellbore.Uid,
+            var updateXml = string.Format(BasicXMLTemplate, Well.Uid, Wellbore.Uid,
                 "<commonData><extensionNameValue uid=\"test of empty element\"></extensionNameValue></commonData>");
 
             var results = DevKit.UpdateInStore(ObjectTypes.Wellbore, updateXml, null, null);
@@ -414,7 +414,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AddAndAssert(Wellbore);
 
             // Update wellbore with invalid element
-            var updateXml = string.Format(DevKit141Aspect.BasicUpdateWellboreXmlTemplate, Well.Uid, Wellbore.Uid,
+            var updateXml = string.Format(BasicXMLTemplate, Well.Uid, Wellbore.Uid,
                 "<tvd uom=\"ft\"></tvd>");
 
             var results = DevKit.UpdateInStore(ObjectTypes.Wellbore, updateXml, null, null);
@@ -432,7 +432,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AddAndAssert(Wellbore);
 
             // Update wellbore with invalid element
-            var updateXml = string.Format(DevKit141Aspect.BasicUpdateWellboreXmlTemplate, Well.Uid, Wellbore.Uid,
+            var updateXml = string.Format(BasicXMLTemplate, Well.Uid, Wellbore.Uid,
                           "<commonData><extensionNameValue><name>Ext-1</name><value uom=\"m\">1.0</value><dataType>double</dataType></extensionNameValue></commonData>");
 
             var results = DevKit.UpdateInStore(ObjectTypes.Wellbore, updateXml, null, null);
@@ -450,7 +450,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AddAndAssert(Wellbore);
 
             // Update wellbore with invalid element
-            var updateXml = string.Format(DevKit141Aspect.BasicUpdateWellboreXmlTemplate, Well.Uid, Wellbore.Uid,
+            var updateXml = string.Format(BasicXMLTemplate, Well.Uid, Wellbore.Uid,
                 "<tvd uom=\"\">1</tvd>");
 
             var results = DevKit.UpdateInStore(ObjectTypes.Wellbore, updateXml, null, null);

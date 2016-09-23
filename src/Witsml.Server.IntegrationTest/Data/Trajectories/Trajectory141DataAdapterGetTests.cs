@@ -110,7 +110,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.AddAndAssert(Trajectory);
 
             // Get trajectory
-            var result = DevKit.GetAndAssertWithXml(Trajectory, "<serviceCompany />", optionsIn: OptionsIn.ReturnElements.Requested);
+            var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, "<serviceCompany />", optionsIn: OptionsIn.ReturnElements.Requested);
 
             DevKit.AssertNames(result);
             Assert.AreEqual(Trajectory.ServiceCompany, result.ServiceCompany);
@@ -127,7 +127,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.AddAndAssert(Trajectory);
 
             // Get trajectory
-            var result = DevKit.GetAndAssertWithXml(Trajectory, "<serviceCompany /><trajectoryStation />", optionsIn: OptionsIn.ReturnElements.Requested);
+            var result = DevKit.GetAndAssertWithXml(BasicXMLTemplate, Trajectory, "<serviceCompany /><trajectoryStation />", optionsIn: OptionsIn.ReturnElements.Requested);
 
             DevKit.AssertNames(result);
             Assert.AreEqual(Trajectory.ServiceCompany, result.ServiceCompany);

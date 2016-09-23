@@ -67,8 +67,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             Assert.IsNotNull(result.MagDeclUsed);
 
             // Delete trajectory header element
-            var delete = string.Format(DevKit131Aspect.BasicTrajectoryXmlTemplate, Trajectory.Uid, Trajectory.UidWell,
-                Trajectory.UidWellbore, "<magDeclUsed />");
+            var delete = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid,
+                "<magDeclUsed />");
             DevKit.DeleteAndAssert(ObjectTypes.Trajectory, delete);
 
             // Assert delete results
@@ -91,8 +91,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
 
             // Delete all trajectory stations
-            var delete = string.Format(DevKit131Aspect.BasicTrajectoryXmlTemplate, Trajectory.Uid, Trajectory.UidWell,
-                Trajectory.UidWellbore, "<trajectoryStation />");
+            var delete = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, "<trajectoryStation />");
             DevKit.DeleteAndAssert(ObjectTypes.Trajectory, delete);
 
             // Assert delete results
@@ -118,8 +117,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             const int start = 5;
             const int end = 8;
             var delete = "<mdMn uom=\"m\">" + start + "</mdMn><mdMx uom=\"m\">" + end + "</mdMx>";
-            var queryIn = string.Format(DevKit131Aspect.BasicTrajectoryXmlTemplate, Trajectory.Uid, Trajectory.UidWell,
-                Trajectory.UidWellbore, delete);
+            var queryIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, delete);
             DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn);
 
             // Assert delete results
@@ -154,8 +152,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var delete = "<trajectoryStation uid=\"" + station1.Uid + "\" />" + Environment.NewLine
                          + "<trajectoryStation uid=\"" + station2.Uid + "\" />" + Environment.NewLine
                          + "<trajectoryStation uid=\"" + station3.Uid + "\"><mdDelta /></trajectoryStation>";
-            var queryIn = string.Format(DevKit131Aspect.BasicTrajectoryXmlTemplate, Trajectory.Uid, Trajectory.UidWell,
-                Trajectory.UidWellbore, delete);
+            var queryIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid,
+                delete);
             DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn);
 
             // Assert delete results

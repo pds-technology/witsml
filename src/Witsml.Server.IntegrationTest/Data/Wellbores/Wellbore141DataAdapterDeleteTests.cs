@@ -89,7 +89,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
             // Partial delete wellbore
             const string delete = "<purposeWellbore /><dTimKickoff />";
-            var queryIn = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, Wellbore.Uid, Wellbore.UidWell, delete);
+            var queryIn = string.Format(BasicXMLTemplate, Well.Uid, Wellbore.Uid, delete);
             var response = DevKit.DeleteFromStore(ObjectTypes.Wellbore, queryIn, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
@@ -117,7 +117,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
             // Partial delete wellbore
             var delete = "<md datum=\"\" />";
-            var queryIn = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, Wellbore.Uid, Wellbore.UidWell, delete);
+            var queryIn = string.Format(BasicXMLTemplate, Well.Uid, Wellbore.Uid, delete);
             var response = DevKit.DeleteFromStore(ObjectTypes.Wellbore, queryIn, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
@@ -152,7 +152,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
             // Partial delete wellbore
             const string delete = "<commonData><comments /><itemState /></commonData>";
-            var queryIn = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, Wellbore.Uid, Wellbore.UidWell, delete);
+            var queryIn = string.Format(BasicXMLTemplate, Well.Uid, Wellbore.Uid, delete);
             var response = DevKit.DeleteFromStore(ObjectTypes.Wellbore, queryIn, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
@@ -194,7 +194,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
                         "<description />" + Environment.NewLine +
                     "</extensionNameValue>" + Environment.NewLine +
                 "</commonData>";
-            var queryIn = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, Wellbore.Uid, Wellbore.UidWell, delete);
+            var queryIn = string.Format(BasicXMLTemplate, Well.Uid, Wellbore.Uid, delete);
             var response = DevKit.DeleteFromStore(ObjectTypes.Wellbore, queryIn, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
@@ -257,7 +257,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AddAndAssert(Wellbore);
 
             // Delete well with invalid element
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, string.Empty, Well.Uid,
+            var deleteXml = string.Format(BasicXMLTemplate, Well.Uid, Wellbore.Uid,
                 "<numGovt /><numGovt />");
             var results = DevKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
             Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, results.Result);
@@ -273,7 +273,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AddAndAssert(Wellbore);
 
             // Delete well with invalid element
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, string.Empty, Well.Uid, string.Empty);
+            var deleteXml = string.Format(BasicXMLTemplate, Well.Uid, string.Empty, string.Empty);
             var results = DevKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
             Assert.AreEqual((short)ErrorCodes.DataObjectUidMissing, results.Result);
         }
@@ -298,7 +298,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AddAndAssert(Wellbore);
 
             // Delete well
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, Wellbore.Uid, Well.Uid,
+            var deleteXml = string.Format(BasicXMLTemplate,Well.Uid, Wellbore.Uid,
                 "<commonData><extensionNameValue uid=\"\" /></commonData>");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
@@ -322,7 +322,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AddAndAssert(Wellbore);
 
             // Delete wellbore's MD
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, Wellbore.Uid, Well.Uid,
+            var deleteXml = string.Format(BasicXMLTemplate, Well.Uid, Wellbore.Uid,
                 "<md uom=\"\" />");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
@@ -349,7 +349,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AddAndAssert(Wellbore);
 
             // Delete well
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, Wellbore.Uid, Well.Uid,
+            var deleteXml = string.Format(BasicXMLTemplate, Well.Uid, Wellbore.Uid,
                 "<commonData><extensionNameValue /></commonData>");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
@@ -368,7 +368,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AddAndAssert(Wellbore);
 
             // Delete wellbore's MD
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, Wellbore.Uid, Well.Uid,
+            var deleteXml = string.Format(BasicXMLTemplate, Well.Uid, Wellbore.Uid,
                 "<commonData />");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
@@ -387,7 +387,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AddAndAssert(Wellbore);
 
             // Delete nameWell
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, Wellbore.Uid, Well.Uid,
+            var deleteXml = string.Format(BasicXMLTemplate, Well.Uid, Wellbore.Uid,
                 "<nameWell />");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
@@ -506,7 +506,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.AddAndAssert(Wellbore);
 
             // Delete nameWell
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellboreXmlTemplate, Wellbore.Uid, Well.Uid,
+            var deleteXml = string.Format(BasicXMLTemplate, Well.Uid, Wellbore.Uid,
                 "<md uom=\"m\" datum=\"abc\" />");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);

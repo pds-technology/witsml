@@ -94,7 +94,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             // Partial delete well
             const string delete = "<country /><dTimSpud />";
-            var queryIn = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, Well.Uid, delete);
+            var queryIn = string.Format(BasicXMLTemplate, Well.Uid, delete);
             var response = DevKit.DeleteFromStore(ObjectTypes.Well, queryIn, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
@@ -125,7 +125,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var delete = "<wellDatum uid=\"KB\">" + Environment.NewLine +
                     "<datumName code=\"\" />" + Environment.NewLine +
                 "</wellDatum>";
-            var queryIn = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, Well.Uid, delete);
+            var queryIn = string.Format(BasicXMLTemplate, Well.Uid, delete);
             var response = DevKit.DeleteFromStore(ObjectTypes.Well, queryIn, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
@@ -163,7 +163,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
             // Partial delete well
             const string delete = "<commonData><comments /><itemState /></commonData>";
-            var queryIn = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, Well.Uid, delete);
+            var queryIn = string.Format(BasicXMLTemplate, Well.Uid, delete);
             var response = DevKit.DeleteFromStore(ObjectTypes.Well, queryIn, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
@@ -200,7 +200,7 @@ namespace PDS.Witsml.Server.Data.Wells
                 "<wellDatum uid=\"SL\">" + Environment.NewLine +
                     "<code />" + Environment.NewLine +
                 "</wellDatum>";
-            var queryIn = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, Well.Uid, delete);
+            var queryIn = string.Format(BasicXMLTemplate, Well.Uid, delete);
             var response = DevKit.DeleteFromStore(ObjectTypes.Well, queryIn, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
@@ -258,7 +258,7 @@ namespace PDS.Witsml.Server.Data.Wells
                         "<description />" + Environment.NewLine +
                     "</extensionNameValue>" + Environment.NewLine +
                 "</wellDatum>";
-            var queryIn = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, Well.Uid, delete);
+            var queryIn = string.Format(BasicXMLTemplate, Well.Uid, delete);
             var response = DevKit.DeleteFromStore(ObjectTypes.Well, queryIn, null, null);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
@@ -324,7 +324,7 @@ namespace PDS.Witsml.Server.Data.Wells
             DevKit.AddAndAssert(Well);
 
             // Delete well
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, Well.Uid,
+            var deleteXml = string.Format(BasicXMLTemplate, Well.Uid,
                 $"<field /><field />");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
@@ -340,7 +340,7 @@ namespace PDS.Witsml.Server.Data.Wells
             DevKit.AddAndAssert(Well);
 
             // Delete well with invalid element
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, string.Empty, string.Empty);
+            var deleteXml = string.Format(BasicXMLTemplate, string.Empty, string.Empty);
             var results = DevKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
             Assert.AreEqual((short)ErrorCodes.DataObjectUidMissing, results.Result);
         }
@@ -361,7 +361,7 @@ namespace PDS.Witsml.Server.Data.Wells
             DevKit.AddAndAssert(Well);
 
             // Delete well
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, Well.Uid,
+            var deleteXml = string.Format(BasicXMLTemplate, Well.Uid,
                 "<commonData><extensionNameValue uid=\"\" /></commonData>");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
@@ -378,7 +378,7 @@ namespace PDS.Witsml.Server.Data.Wells
             DevKit.AddAndAssert(Well);
 
             // Delete well
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, Well.Uid,
+            var deleteXml = string.Format(BasicXMLTemplate, Well.Uid,
                 "<pcInterest uom=\"\" />");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
@@ -403,7 +403,7 @@ namespace PDS.Witsml.Server.Data.Wells
             DevKit.AddAndAssert(Well);
 
             // Delete well
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, Well.Uid,
+            var deleteXml = string.Format(BasicXMLTemplate, Well.Uid,
                 "<commonData><extensionNameValue /></commonData>");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
@@ -461,7 +461,7 @@ namespace PDS.Witsml.Server.Data.Wells
             DevKit.UpdateAndAssert(returnWell);
             
             // Delete 
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, Well.Uid,
+            var deleteXml = string.Format(BasicXMLTemplate, Well.Uid,
                 $"<wellDatum uid=\"{wellDatum.Uid}\"><rig /></wellDatum>");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
@@ -477,7 +477,7 @@ namespace PDS.Witsml.Server.Data.Wells
             DevKit.AddAndAssert(Well);
 
             // Delete sub-node (element) "timeZone" which is required.
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, Well.Uid, "<timeZone />" );
+            var deleteXml = string.Format(BasicXMLTemplate, Well.Uid, "<timeZone />" );
 
             var results = DevKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
 
@@ -510,7 +510,7 @@ namespace PDS.Witsml.Server.Data.Wells
             DevKit.AddAndAssert(Well);
 
             // Delete 
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, Well.Uid,
+            var deleteXml = string.Format(BasicXMLTemplate, Well.Uid,
                 $"<wellDatum uid=\"{wellDatum.Uid}\"><datumName namingSystem=\"\" /></wellDatum>");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
@@ -552,7 +552,7 @@ namespace PDS.Witsml.Server.Data.Wells
             DevKit.AddAndAssert(Well);
 
             // Delete well
-            var deleteXml = string.Format(DevKit141Aspect.BasicDeleteWellXmlTemplate, Well.Uid,
+            var deleteXml = string.Format(BasicXMLTemplate, Well.Uid,
                 $"<referencePoint uid=\"{referencePoint.Uid}\"><location uid=\"{location.Uid}\" /></referencePoint>");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);

@@ -31,18 +31,6 @@ namespace PDS.Witsml.Server
 {
     public class DevKit131Aspect : DevKitAspect
     {
-        public static readonly string BasicDeleteLogXmlTemplate = "<logs xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\">" + Environment.NewLine +
-                          "   <log uid=\"{0}\" uidWell=\"{1}\" uidWellbore=\"{2}\">" + Environment.NewLine +
-                          "{3}" +
-                          "   </log>" + Environment.NewLine +
-                          "</logs>";
-
-        public static readonly string BasicTrajectoryXmlTemplate = "<trajectorys xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\">" + Environment.NewLine +
-                          "   <trajectory uid=\"{0}\" uidWell=\"{1}\" uidWellbore=\"{2}\">" + Environment.NewLine +
-                          "{3}" +
-                          "   </trajectory>" + Environment.NewLine +
-                          "</trajectorys>";
-
         private const MeasuredDepthUom MdUom = MeasuredDepthUom.m;
         private const WellVerticalCoordinateUom TvdUom = WellVerticalCoordinateUom.m;
         private const PlaneAngleUom AngleUom = PlaneAngleUom.dega;
@@ -290,14 +278,15 @@ namespace PDS.Witsml.Server
         /// <summary>
         /// Does get query for single trajectory object and test for result count equal to 1 and is not null
         /// </summary>
+        /// <param name="basicXmlTemplate">A XML string with reference parameters for UIDs and body elements</param>
         /// <param name="trajectory">The trajectory.</param>
         /// <param name="queryContent">The query xml descendants of the trajectory element.</param>
         /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
         /// <param name="optionsIn">The options in.</param>
         /// <returns>The first trajectory from the response.</returns>
-        public Trajectory GetAndAssertWithXml(Trajectory trajectory, string queryContent = null, bool isNotNull = true, string optionsIn = null)
+        public Trajectory GetAndAssertWithXml(string basicXmlTemplate, Trajectory trajectory, string queryContent = null, bool isNotNull = true, string optionsIn = null)
         {
-            var queryIn = string.Format(BasicTrajectoryXmlTemplate, trajectory.Uid, trajectory.UidWell, trajectory.UidWellbore, queryContent);
+            var queryIn = string.Format(basicXmlTemplate,trajectory.UidWell, trajectory.UidWellbore, trajectory.Uid, queryContent);
 
             var results = Query<TrajectoryList, Trajectory>(ObjectTypes.Trajectory, queryIn, null, optionsIn ?? OptionsIn.ReturnElements.All);
             Assert.AreEqual(isNotNull ? 1 : 0, results.Count);

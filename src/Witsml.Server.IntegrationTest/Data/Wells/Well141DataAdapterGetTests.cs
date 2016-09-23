@@ -752,7 +752,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var uidWell = response.SuppMsgOut;
 
             // Query well with invalid element
-            var queryIn = string.Format(DevKit141Aspect.BasicWellXmlTemplate, uidWell,
+            var queryIn = string.Format(BasicXMLTemplate, uidWell,
                 "<operator/>" +
                 "<fieldsssssss>Big Field</fieldsssssss>");
 
@@ -777,7 +777,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var uidWell = response.SuppMsgOut;
 
             // Query well with invalid attribute
-            var queryIn = string.Format(DevKit141Aspect.BasicWellXmlTemplate, uidWell,
+            var queryIn = string.Format(BasicXMLTemplate, uidWell,
                 "<operator/>" +
                 "<field abc=\"abc\"></field>");
 
@@ -802,7 +802,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var uidWell = response.SuppMsgOut;
 
             // Query well with invalid attribute
-            var queryIn = string.Format(DevKit141Aspect.BasicWellXmlTemplate, uidWell,
+            var queryIn = string.Format(BasicXMLTemplate, uidWell,
                 "<name/>" +
                 "<operator><abc>BBB Company</abc></operator>");
 

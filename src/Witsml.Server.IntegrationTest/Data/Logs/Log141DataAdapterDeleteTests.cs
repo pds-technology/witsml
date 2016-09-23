@@ -1052,7 +1052,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
         private void DeleteLog(Log log, string delete, ErrorCodes error = ErrorCodes.Success)
         {
-            var queryIn = string.Format(DevKit141Aspect.BasicDeleteLogXmlTemplate, log.Uid, log.UidWell, log.UidWellbore, delete);
+            var queryIn = string.Format(BasicXMLTemplate, log.UidWell, log.UidWellbore, log.Uid, delete);
             var response = DevKit.DeleteFromStore(ObjectTypes.Log, queryIn, null, null);
             Assert.AreEqual((short)error, response.Result);
         }

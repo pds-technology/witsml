@@ -69,7 +69,7 @@ namespace PDS.Witsml.Server.Data.Wells
             DevKit.AddAndAssert(Well);
 
             // Update well with invalid element
-            var updateXml = string.Format(DevKit141Aspect.BasicWellXmlTemplate, Well.Uid,
+            var updateXml = string.Format(BasicXMLTemplate, Well.Uid,
                 "<operator>BBB Company</operator>" + 
                 "<fieldsssssss>Big Field</fieldsssssss>");
 
@@ -89,7 +89,7 @@ namespace PDS.Witsml.Server.Data.Wells
             DevKit.AddAndAssert(Well);
 
             // Update well with invalid element
-            var updateXml = string.Format(DevKit141Aspect.BasicWellXmlTemplate, Well.Uid,
+            var updateXml = string.Format(BasicXMLTemplate, Well.Uid,
                 "<operator>BBB Company</operator>" + 
                 "<field abc=\"abc\">Big Field</field>");
 
@@ -109,7 +109,7 @@ namespace PDS.Witsml.Server.Data.Wells
             DevKit.AddAndAssert(Well);
 
             // Update well with invalid element
-            var updateXml = string.Format(DevKit141Aspect.BasicWellXmlTemplate, Well.Uid,
+            var updateXml = string.Format(BasicXMLTemplate, Well.Uid,
                 "<operator><abc>BBB Company</abc></operator>");
 
             var results = DevKit.UpdateInStore(ObjectTypes.Well, updateXml, null, null);
