@@ -217,6 +217,110 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             return logData;
         }
 
+        /// <summary>
+        /// Updates the specified <see cref="Log" /> instance in the store.
+        /// </summary>
+        /// <param name="parser">The update parser.</param>
+        /// <param name="dataObject">The data object to be updated.</param>
+        public override void Update(WitsmlQueryParser parser, ChannelSet dataObject)
+        {
+            var uri = dataObject.GetUri();
+            UpdateEntity(parser, uri);
+
+            // Extract Data
+            var reader = ExtractDataReader(dataObject, GetEntity(uri));
+            UpdateChannelDataAndIndexRange(uri, reader);
+        }
+
+        /// <summary>
+        /// Updates the channel data for the specified data object URI.
+        /// </summary>
+        /// <param name="uri">The parent data object URI.</param>
+        /// <param name="reader">The update reader.</param>
+        public void UpdateChannelData(EtpUri uri, ChannelDataReader reader)
+        {
+            UpdateChannelDataAndIndexRange(uri, reader);
+        }
+
+        /// <summary>
+        /// Deletes a data object by the specified identifier.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        public override void Delete(EtpUri uri)
+        {
+            base.Delete(uri);
+            ChannelDataChunkAdapter.Delete(uri);
+        }
+
+        /// <summary>
+        /// Adds <see cref="ChannelSet" /> to the data store.
+        /// </summary>
+        /// <param name="parser">The input template parser.</param>
+        /// <param name="dataObject">The <see cref="ChannelSet" /> to be added.</param>
+        public override void Add(WitsmlQueryParser parser, ChannelSet dataObject)
+        {
+            // Extract Data
+            var reader = ExtractDataReader(dataObject);
+
+            InsertEntity(dataObject);
+
+            if (reader != null)
+            {
+                Logger.DebugFormat("Adding ChannelSet data with uid '{0}' and name '{1}'", dataObject.Uuid, dataObject.Citation.Title);
+                var increasing = dataObject.IsIncreasing();
+                var allMnemonics = reader.Indices.Select(i => i.Mnemonic).Concat(reader.Mnemonics).ToArray();
+
+                // Get current index information
+                var ranges = GetCurrentIndexRange(dataObject);
+                var indexCurve = dataObject.Index[0];
+                Logger.DebugFormat("Index curve mnemonic: {0}.", indexCurve.Mnemonic);
+
+                GetUpdatedLogHeaderIndexRange(reader, allMnemonics, ranges, increasing);
+
+                // Add ChannelDataChunks
+                ChannelDataChunkAdapter.Add(reader);
+
+                // Update index range
+                UpdateIndexRange(dataObject.GetUri(), dataObject, ranges, allMnemonics);
+            }
+        }
+
+        internal ChannelDataReader ExtractDataReader(ChannelSet entity, ChannelSet existing = null)
+        {
+            // TODO: Handle: if (!string.IsNullOrEmpty(entity.Data.FileUri))
+            // return null;
+
+            if (existing == null)
+            {
+                var reader = entity.GetReader();
+                entity.Data = null;
+                return reader;
+            }
+
+            existing.Data = entity.Data;
+            return existing.GetReader();
+        }
+
+        /// <summary>
+        /// Gets a list of the element names to ignore during a query.
+        /// </summary>
+        /// <param name="parser">The WITSML parser.</param>
+        /// <returns>A list of element names.</returns>
+        protected override List<string> GetIgnoredElementNamesForQuery(WitsmlQueryParser parser)
+        {
+            return new List<string> { "Data" };
+        }
+
+        /// <summary>
+        /// Gets a list of the element names to ignore during an update.
+        /// </summary>
+        /// <param name="parser">The WITSML parser.</param>
+        /// <returns>A list of element names.</returns>
+        protected override List<string> GetIgnoredElementNamesForUpdate(WitsmlQueryParser parser)
+        {
+            return GetIgnoredElementNamesForQuery(parser);
+        }
+
         private string[] GetAllMnemonics(ChannelSet entity)
         {
             return entity.Index.Select(i => i.Mnemonic).Concat(entity.Channel.Select(c => c.Mnemonic)).ToArray();
@@ -225,7 +329,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         private IDictionary<int, string> ComputeMnemonicIndexes(ChannelSet entity, string[] allMnemonics, string[] queryMnemonics)
         {
             Logger.DebugFormat("Computing mnemonic indexes for ChannelSet.");
-            
+
             // Start with all mnemonics
             var mnemonicIndexes = allMnemonics
                 .Select((mn, index) => new { Mnemonic = mn, Index = index });
@@ -246,7 +350,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         private IDictionary<int, string> GetUnitsByColumnIndex(ChannelSet entity)
         {
             Logger.Debug("Getting ChannelSet Channel units by column index.");
-            
+
             return new SortedDictionary<int, string>(entity.Index.Select(i => i.Uom)
                 .Concat(entity.Channel.Select(c => c.Uom))
                 .ToArray()
@@ -309,110 +413,6 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             }
 
             return new SortedDictionary<int, string>(nullValuesIndexes.ToDictionary(x => x.Index, x => x.NullValue));
-        }
-
-        /// <summary>
-        /// Adds <see cref="ChannelSet" /> to the data store.
-        /// </summary>
-        /// <param name="parser">The input template parser.</param>
-        /// <param name="dataObject">The <see cref="ChannelSet" /> to be added.</param>
-        public override void Add(WitsmlQueryParser parser, ChannelSet dataObject)
-        {
-            // Extract Data
-            var reader = ExtractDataReader(dataObject);
-
-            InsertEntity(dataObject);
-
-            if (reader != null)
-            {
-                Logger.DebugFormat("Adding ChannelSet data with uid '{0}' and name '{1}'", dataObject.Uuid, dataObject.Citation.Title);
-                var increasing = dataObject.IsIncreasing();
-                var allMnemonics = reader.Indices.Select(i => i.Mnemonic).Concat(reader.Mnemonics).ToArray();
-
-                // Get current index information
-                var ranges = GetCurrentIndexRange(dataObject);
-                var indexCurve = dataObject.Index[0];
-                Logger.DebugFormat("Index curve mnemonic: {0}.", indexCurve.Mnemonic);
-
-                GetUpdatedLogHeaderIndexRange(reader, allMnemonics, ranges, increasing);
-
-                // Add ChannelDataChunks
-                ChannelDataChunkAdapter.Add(reader);
-
-                // Update index range
-                UpdateIndexRange(dataObject.GetUri(), dataObject, ranges, allMnemonics);
-            }
-        }
-
-        /// <summary>
-        /// Updates the specified <see cref="Log" /> instance in the store.
-        /// </summary>
-        /// <param name="parser">The update parser.</param>
-        /// <param name="dataObject">The data object to be updated.</param>
-        public override void Update(WitsmlQueryParser parser, ChannelSet dataObject)
-        {
-            var uri = dataObject.GetUri();
-            UpdateEntity(parser, uri);
-
-            // Extract Data
-            var reader = ExtractDataReader(dataObject, GetEntity(uri));
-            UpdateChannelDataAndIndexRange(uri, reader);
-        }
-
-        /// <summary>
-        /// Updates the channel data for the specified data object URI.
-        /// </summary>
-        /// <param name="uri">The parent data object URI.</param>
-        /// <param name="reader">The update reader.</param>
-        public void UpdateChannelData(EtpUri uri, ChannelDataReader reader)
-        {
-            UpdateChannelDataAndIndexRange(uri, reader);
-        }
-
-        /// <summary>
-        /// Deletes a data object by the specified identifier.
-        /// </summary>
-        /// <param name="uri">The data object URI.</param>
-        public override void Delete(EtpUri uri)
-        {
-            base.Delete(uri);
-            ChannelDataChunkAdapter.Delete(uri);
-        }
-
-        internal ChannelDataReader ExtractDataReader(ChannelSet entity, ChannelSet existing = null)
-        {
-            // TODO: Handle: if (!string.IsNullOrEmpty(entity.Data.FileUri))
-            // return null;
-
-            if (existing == null)
-            {
-                var reader = entity.GetReader();
-                entity.Data = null;
-                return reader;
-            }
-
-            existing.Data = entity.Data;
-            return existing.GetReader();
-        }
-
-        /// <summary>
-        /// Gets a list of the element names to ignore during a query.
-        /// </summary>
-        /// <param name="parser">The WITSML parser.</param>
-        /// <returns>A list of element names.</returns>
-        protected override List<string> GetIgnoredElementNamesForQuery(WitsmlQueryParser parser)
-        {
-            return new List<string> { "Data" };
-        }
-
-        /// <summary>
-        /// Gets a list of the element names to ignore during an update.
-        /// </summary>
-        /// <param name="parser">The WITSML parser.</param>
-        /// <returns>A list of element names.</returns>
-        protected override List<string> GetIgnoredElementNamesForUpdate(WitsmlQueryParser parser)
-        {
-            return GetIgnoredElementNamesForQuery(parser);
         }
 
         private ChannelMetadataRecord ToChannelMetadataRecord(ChannelSet entity, Channel channel, IList<IndexMetadataRecord> indexMetadata)
