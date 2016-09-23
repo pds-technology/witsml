@@ -279,30 +279,30 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             }
 
             // create an index-to-mnemonic map
-            return mnemonicIndexes
-                .ToDictionary(x => x.Index, x => x.Mnemonic);
+            return new SortedDictionary<int, string>(mnemonicIndexes
+                .ToDictionary(x => x.Index, x => x.Mnemonic));
         }
 
         private IDictionary<int, string> GetUnitsByColumnIndex(ChannelSet entity)
         {
             Logger.Debug("Getting ChannelSet Channel units by column index.");
             
-            return entity.Index.Select(i => i.Uom)
+            return new SortedDictionary<int, string>(entity.Index.Select(i => i.Uom)
                 .Concat(entity.Channel.Select(c => c.Uom))
                 .ToArray()
                 .Select((unit, index) => new { Unit = unit, Index = index })
-                .ToDictionary(x => x.Index, x => x.Unit);
+                .ToDictionary(x => x.Index, x => x.Unit));
         }
 
         private IDictionary<int, string> GetNullValuesByColumnIndex(ChannelSet entity)
         {
             Logger.Debug("Getting ChannelSet Channel null values by column index.");
 
-            return entity.Index.Select(i => "null")
+            return new SortedDictionary<int, string>(entity.Index.Select(i => "null")
                 .Concat(entity.Channel.Select(c => "null"))
                 .ToArray()
                 .Select((unit, index) => new { Unit = unit, Index = index })
-                .ToDictionary(x => x.Index, x => x.Unit);
+                .ToDictionary(x => x.Index, x => x.Unit));
         }
 
         // TODO: See if this can be refactored to be common with LogDataAdapter.GetUnitList
@@ -325,7 +325,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                     .Where(x => x.Index == 0 || slices.Contains(x.Index));
             }
 
-            return unitIndexes.ToDictionary(x => x.Index, x => x.Unit);
+            return new SortedDictionary<int, string>(unitIndexes.ToDictionary(x => x.Index, x => x.Unit));
         }
 
         // TODO: See if this can be refactored to be common with LogDataAdapter.GetNullValueList
@@ -348,7 +348,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                     .Where(x => x.Index == 0 || slices.Contains(x.Index));
             }
 
-            return nullValuesIndexes.ToDictionary(x => x.Index, x => x.NullValue);
+            return new SortedDictionary<int, string>(nullValuesIndexes.ToDictionary(x => x.Index, x => x.NullValue));
         }
 
         /// <summary>
