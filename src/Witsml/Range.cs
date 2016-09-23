@@ -17,6 +17,8 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using PDS.Framework;
 
 namespace PDS.Witsml
@@ -194,6 +196,73 @@ namespace PDS.Witsml
         {
             var rangeIndex = increasing ? (long)Math.Floor(index / rangeSize) : (long)Math.Ceiling(index / rangeSize);
             return new Range<long>(rangeIndex * rangeSize, rangeIndex * rangeSize + (increasing ? rangeSize : -rangeSize));
+        }
+
+        /// <summary>
+        /// Gets the minimum range start from a list of ranges.
+        /// </summary>
+        /// <param name="ranges">The list of ranges.</param>
+        /// <param name="increasing">if set to <c>true</c> if ranges are from increasing data, otherwise false.</param>
+        /// <returns>Min start range.</returns>
+        public static double? GetMinRangeStart(this List<Range<double?>> ranges, bool increasing)
+        {
+            return increasing ? ranges.Min(r => r.Start) : ranges.Max(r => r.Start);
+        }
+
+        /// <summary>
+        /// Gets the optimize range start from a list of ranges.
+        /// This is the same as the min range end or max range start.
+        /// </summary>
+        /// <param name="ranges">The list of ranges.</param>
+        /// <param name="increasing">if set to <c>true</c> if ranges are from increasing data, otherwise false.</param>
+        /// <returns>The optimized range start.</returns>
+        public static double? GetOptimizeRangeStart(this List<Range<double?>> ranges, bool increasing)
+        {
+            return increasing ? ranges.Min(r => r.End) : ranges.Max(r => r.End);
+        }
+
+        /// <summary>
+        /// Gets the maximum range end from a list of ranges.
+        /// </summary>
+        /// <param name="ranges">The list of ranges.</param>
+        /// <param name="increasing">if set to <c>true</c> if ranges are from increasing data, otherwise false.</param>
+        /// <returns>The maximum end range.</returns>
+        public static double? GetMaxRangeEnd(this List<Range<double?>> ranges, bool increasing)
+        {
+            return increasing ? ranges.Max(r => r.End) : ranges.Min(r => r.End);
+        }
+
+        /// <summary>
+        /// Optimizes the latest values range.
+        /// </summary>
+        /// <param name="range">The range.</param>
+        /// <param name="requestLatestValues">The number of request latest values.</param>
+        /// <param name="isTimeIndex">if set to <c>true</c> range is a time index, othewise depth.</param>
+        /// <param name="increasing">if set to <c>true</c> index is increasing, otherwise decreasing.</param>
+        /// <param name="rangeStart">The range start.</param>
+        /// <param name="optimizeRangeStart">The optimize range start.</param>
+        /// <param name="rangeEnd">The range end.</param>
+        /// <param name="requestFactor">The request factor.</param>
+        /// <param name="rangeStepSize">Size of the range step.</param>
+        /// <returns>The optimized range</returns>
+        public static Range<double?> OptimizeLatestValuesRange(this Range<double?> range, int? requestLatestValues, bool isTimeIndex, bool increasing, double? rangeStart, double? optimizeRangeStart, double? rangeEnd, int requestFactor, long rangeStepSize)
+        {
+            if (requestLatestValues.HasValue && optimizeRangeStart.HasValue)
+            {
+                var optimizationEstimate =
+                    (requestFactor * (requestLatestValues.Value + 1) * rangeStepSize);
+
+                range = increasing
+                    ? new Range<double?>(optimizeRangeStart.Value - optimizationEstimate, rangeEnd)
+                    : new Range<double?>(optimizeRangeStart.Value + optimizationEstimate, rangeEnd);
+
+                if (rangeStart.HasValue && range.StartsBefore(rangeStart.Value, increasing))
+                {
+                    range = new Range<double?>(rangeStart, rangeEnd);
+                }
+            }
+
+            return range;
         }
     }
 }
