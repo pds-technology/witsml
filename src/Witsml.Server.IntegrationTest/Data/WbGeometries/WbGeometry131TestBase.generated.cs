@@ -40,9 +40,10 @@ namespace PDS.Witsml.Server.Data.WbGeometries
     {
         public const string QueryMissingNamespace = "<wbGeometrys version=\"1.3.1.1\"><wbGeometry /></wbGeometrys>";
         public const string QueryInvalidNamespace = "<wbGeometrys xmlns=\"www.witsml.org/schemas/123\" version=\"1.3.1.1\"></wbGeometrys>";
+        public const string QueryMissingVersion = "<wbGeometrys xmlns=\"http://www.witsml.org/schemas/131\"></wbGeometrys>";
         public const string QueryEmptyRoot = "<wbGeometrys xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"></wbGeometrys>";
         public const string QueryEmptyObject = "<wbGeometrys xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><wbGeometry /></wbGeometrys>";
-
+        public const string BasicXMLTemplate = "<wbGeometrys xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><wbGeometry uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</wbGeometry></wbGeometrys>";
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public WbGeometry WbGeometry { get; set; }

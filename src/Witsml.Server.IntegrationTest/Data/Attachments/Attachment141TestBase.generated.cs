@@ -37,9 +37,10 @@ namespace PDS.Witsml.Server.Data.Attachments
     {
         public const string QueryMissingNamespace = "<attachments version=\"1.4.1.1\"><attachment /></attachments>";
         public const string QueryInvalidNamespace = "<attachments xmlns=\"www.witsml.org/schemas/123\" version=\"1.4.1.1\"></attachments>";
+        public const string QueryMissingVersion = "<attachments xmlns=\"http://www.witsml.org/schemas/1series\"></attachments>";
         public const string QueryEmptyRoot = "<attachments xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"></attachments>";
         public const string QueryEmptyObject = "<attachments xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><attachment /></attachments>";
-
+        public const string BasicXMLTemplate = "<attachments xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><attachment uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</attachment></attachments>";
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public Attachment Attachment { get; set; }

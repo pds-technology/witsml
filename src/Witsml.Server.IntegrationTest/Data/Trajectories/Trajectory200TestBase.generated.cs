@@ -35,6 +35,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 {
     public abstract partial class Trajectory200TestBase
     {
+        public const string BasicXMLTemplate = "<trajectorys xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><trajectory uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</trajectory></trajectorys>";
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public Trajectory Trajectory { get; set; }

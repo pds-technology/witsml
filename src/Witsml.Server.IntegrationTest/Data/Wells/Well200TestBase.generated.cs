@@ -35,6 +35,7 @@ namespace PDS.Witsml.Server.Data.Wells
 {
     public abstract partial class Well200TestBase
     {
+        public const string BasicXMLTemplate = "<wells xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><well uid=\"{0}\">{1}</well></wells>";
         public Well Well { get; set; }
         public DevKit200Aspect DevKit { get; set; }
         public TestContext TestContext { get; set; }

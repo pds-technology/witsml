@@ -37,9 +37,10 @@ namespace PDS.Witsml.Server.Data.Wellbores
     {
         public const string QueryMissingNamespace = "<wellbores version=\"1.4.1.1\"><wellbore /></wellbores>";
         public const string QueryInvalidNamespace = "<wellbores xmlns=\"www.witsml.org/schemas/123\" version=\"1.4.1.1\"></wellbores>";
+        public const string QueryMissingVersion = "<wellbores xmlns=\"http://www.witsml.org/schemas/1series\"></wellbores>";
         public const string QueryEmptyRoot = "<wellbores xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"></wellbores>";
         public const string QueryEmptyObject = "<wellbores xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><wellbore /></wellbores>";
-
+        public const string BasicXMLTemplate = "<wellbores xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><wellbore uidWell=\"{0}\" uid=\"{1}\">{2}</wellbore></wellbores>";
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public DevKit141Aspect DevKit { get; set; }

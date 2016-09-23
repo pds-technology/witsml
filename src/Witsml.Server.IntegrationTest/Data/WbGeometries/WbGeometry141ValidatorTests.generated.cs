@@ -116,5 +116,132 @@ namespace PDS.Witsml.Server.Data.WbGeometries
 
 		#endregion Error -405
 
+        #region Error -407
+
+		[TestMethod]
+        public void WbGeometry141Validator_UpdateInStore_Error_407_WbGeometry_Missing_Witsml_Object_Type()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
+			var response = DevKit.Update<WbGeometryList, WbGeometry>(WbGeometry, string.Empty);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingWmlTypeIn, response.Result);
+        }
+
+		#endregion Error -407
+
+        #region Error -408
+
+		[TestMethod]
+        public void WbGeometry141Validator_UpdateInStore_Error_408_WbGeometry_Empty_QueryIn()
+        {
+			var response = DevKit.UpdateInStore(ObjectTypes.WbGeometry, string.Empty, null, null);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingInputTemplate, response.Result);
+        }
+
+		#endregion Error -408
+
+        #region Error -409
+
+		[TestMethod]
+        public void WbGeometry141Validator_UpdateInStore_Error_409_WbGeometry_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, WbGeometry.UidWell, WbGeometry.UidWellbore, WbGeometry.Uid,
+                $"<name>{WbGeometry.Name}</name><name>{WbGeometry.Name}</name>");
+
+            var response = DevKit.UpdateInStore(ObjectTypes.WbGeometry, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+		#endregion Error -409
+
+        #region Error -415
+
+		[TestMethod]
+        public void WbGeometry141Validator_UpdateInStore_Error_415_WbGeometry_Update_Without_Specifing_UID()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
+            WbGeometry.Uid = string.Empty;
+			DevKit.UpdateAndAssert<WbGeometryList, WbGeometry>(WbGeometry, ErrorCodes.DataObjectUidMissing);
+        }
+
+		#endregion Error -415
+
+        #region Error -433
+
+		[TestMethod]
+        public void WbGeometry141Validator_UpdateInStore_Error_433_WbGeometry_Does_Not_Exist()
+        {
+            AddParents();
+			DevKit.UpdateAndAssert<WbGeometryList, WbGeometry>(WbGeometry, ErrorCodes.DataObjectNotExist);
+        }
+
+		#endregion Error -433
+
+        #region Error -444
+
+		[TestMethod]
+        public void WbGeometry141Validator_UpdateInStore_Error_444_WbGeometry_Updating_More_Than_One_Data_Object()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
+
+            var updateXml = "<wbGeometrys xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><wbGeometry uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\"></wbGeometry><wbGeometry uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\"></wbGeometry></wbGeometrys>";
+            updateXml = string.Format(updateXml, WbGeometry.UidWell, WbGeometry.UidWellbore, WbGeometry.Uid);
+
+            var response = DevKit.UpdateInStore(ObjectTypes.WbGeometry, updateXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateMultipleDataObjects, response.Result);
+        }
+
+		#endregion Error -444
+
+        #region Error -468
+
+		[TestMethod]
+        public void WbGeometry141Validator_UpdateInStore_Error_468_WbGeometry_No_Schema_Version_Declared()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
+            var response = DevKit.UpdateInStore(ObjectTypes.WbGeometry, QueryMissingVersion, null, null);
+            Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
+        }
+
+		#endregion Error -468
+
+        #region Error -483
+
+		[TestMethod]
+        public void WbGeometry141Validator_UpdateInStore_Error_483_WbGeometry_Update_With_Non_Conforming_Template()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
+            var response = DevKit.UpdateInStore(ObjectTypes.WbGeometry, QueryEmptyRoot, null, null);
+            Assert.AreEqual((short)ErrorCodes.UpdateTemplateNonConforming, response.Result);
+        }
+
+		#endregion Error -483
+
+        #region Error -484
+
+		[TestMethod]
+        public void WbGeometry141Validator_UpdateInStore_Error_484_WbGeometry_Update_Will_Delete_Required_Element()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, WbGeometry.UidWell, WbGeometry.UidWellbore, WbGeometry.Uid,
+                $"<name></name>");
+
+            var response = DevKit.UpdateInStore(ObjectTypes.WbGeometry, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);
+        }
+
+		#endregion Error -484
+
     }
 }

@@ -35,6 +35,7 @@ namespace PDS.Witsml.Server.Data.Rigs
 {
     public abstract partial class Rig200TestBase
     {
+        public const string BasicXMLTemplate = "<rigs xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><rig uid=\"{0}\">{1}</rig></rigs>";
         public Rig Rig { get; set; }
         public DevKit200Aspect DevKit { get; set; }
         public TestContext TestContext { get; set; }

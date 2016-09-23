@@ -35,6 +35,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
 {
     public abstract partial class Wellbore200TestBase
     {
+        public const string BasicXMLTemplate = "<wellbores xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><wellbore uidWell=\"{0}\" uid=\"{1}\">{2}</wellbore></wellbores>";
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public DevKit200Aspect DevKit { get; set; }

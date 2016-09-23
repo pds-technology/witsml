@@ -113,5 +113,132 @@ namespace PDS.Witsml.Server.Data.Messages
 
 		#endregion Error -405
 
+        #region Error -407
+
+		[TestMethod]
+        public void Message131Validator_UpdateInStore_Error_407_Message_Missing_Witsml_Object_Type()
+        {
+            AddParents();
+            DevKit.AddAndAssert<MessageList, Message>(Message);
+			var response = DevKit.Update<MessageList, Message>(Message, string.Empty);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingWmlTypeIn, response.Result);
+        }
+
+		#endregion Error -407
+
+        #region Error -408
+
+		[TestMethod]
+        public void Message131Validator_UpdateInStore_Error_408_Message_Empty_QueryIn()
+        {
+			var response = DevKit.UpdateInStore(ObjectTypes.Message, string.Empty, null, null);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingInputTemplate, response.Result);
+        }
+
+		#endregion Error -408
+
+        #region Error -409
+
+		[TestMethod]
+        public void Message131Validator_UpdateInStore_Error_409_Message_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<MessageList, Message>(Message);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Message.UidWell, Message.UidWellbore, Message.Uid,
+                $"<name>{Message.Name}</name><name>{Message.Name}</name>");
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Message, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+		#endregion Error -409
+
+        #region Error -415
+
+		[TestMethod]
+        public void Message131Validator_UpdateInStore_Error_415_Message_Update_Without_Specifing_UID()
+        {
+            AddParents();
+            DevKit.AddAndAssert<MessageList, Message>(Message);
+            Message.Uid = string.Empty;
+			DevKit.UpdateAndAssert<MessageList, Message>(Message, ErrorCodes.DataObjectUidMissing);
+        }
+
+		#endregion Error -415
+
+        #region Error -433
+
+		[TestMethod]
+        public void Message131Validator_UpdateInStore_Error_433_Message_Does_Not_Exist()
+        {
+            AddParents();
+			DevKit.UpdateAndAssert<MessageList, Message>(Message, ErrorCodes.DataObjectNotExist);
+        }
+
+		#endregion Error -433
+
+        #region Error -444
+
+		[TestMethod]
+        public void Message131Validator_UpdateInStore_Error_444_Message_Updating_More_Than_One_Data_Object()
+        {
+            AddParents();
+            DevKit.AddAndAssert<MessageList, Message>(Message);
+
+            var updateXml = "<messages xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><message uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\"></message><message uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\"></message></messages>";
+            updateXml = string.Format(updateXml, Message.UidWell, Message.UidWellbore, Message.Uid);
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Message, updateXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateMultipleDataObjects, response.Result);
+        }
+
+		#endregion Error -444
+
+        #region Error -468
+
+		[TestMethod]
+        public void Message131Validator_UpdateInStore_Error_468_Message_No_Schema_Version_Declared()
+        {
+            AddParents();
+            DevKit.AddAndAssert<MessageList, Message>(Message);
+            var response = DevKit.UpdateInStore(ObjectTypes.Message, QueryMissingVersion, null, null);
+            Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
+        }
+
+		#endregion Error -468
+
+        #region Error -483
+
+		[TestMethod]
+        public void Message131Validator_UpdateInStore_Error_483_Message_Update_With_Non_Conforming_Template()
+        {
+            AddParents();
+            DevKit.AddAndAssert<MessageList, Message>(Message);
+            var response = DevKit.UpdateInStore(ObjectTypes.Message, QueryEmptyRoot, null, null);
+            Assert.AreEqual((short)ErrorCodes.UpdateTemplateNonConforming, response.Result);
+        }
+
+		#endregion Error -483
+
+        #region Error -484
+
+		[TestMethod]
+        public void Message131Validator_UpdateInStore_Error_484_Message_Update_Will_Delete_Required_Element()
+        {
+            AddParents();
+            DevKit.AddAndAssert<MessageList, Message>(Message);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Message.UidWell, Message.UidWellbore, Message.Uid,
+                $"<name></name>");
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Message, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);
+        }
+
+		#endregion Error -484
+
     }
 }

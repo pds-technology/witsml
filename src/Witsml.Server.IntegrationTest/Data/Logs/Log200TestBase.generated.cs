@@ -35,6 +35,7 @@ namespace PDS.Witsml.Server.Data.Logs
 {
     public abstract partial class Log200TestBase
     {
+        public const string BasicXMLTemplate = "<logs xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><log uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</log></logs>";
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public Log Log { get; set; }

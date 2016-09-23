@@ -37,9 +37,10 @@ namespace PDS.Witsml.Server.Data.Messages
     {
         public const string QueryMissingNamespace = "<messages version=\"1.4.1.1\"><message /></messages>";
         public const string QueryInvalidNamespace = "<messages xmlns=\"www.witsml.org/schemas/123\" version=\"1.4.1.1\"></messages>";
+        public const string QueryMissingVersion = "<messages xmlns=\"http://www.witsml.org/schemas/1series\"></messages>";
         public const string QueryEmptyRoot = "<messages xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"></messages>";
         public const string QueryEmptyObject = "<messages xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><message /></messages>";
-
+        public const string BasicXMLTemplate = "<messages xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><message uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</message></messages>";
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public Message Message { get; set; }

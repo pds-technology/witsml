@@ -113,5 +113,132 @@ namespace PDS.Witsml.Server.Data.Rigs
 
 		#endregion Error -405
 
+        #region Error -407
+
+		[TestMethod]
+        public void Rig131Validator_UpdateInStore_Error_407_Rig_Missing_Witsml_Object_Type()
+        {
+            AddParents();
+            DevKit.AddAndAssert<RigList, Rig>(Rig);
+			var response = DevKit.Update<RigList, Rig>(Rig, string.Empty);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingWmlTypeIn, response.Result);
+        }
+
+		#endregion Error -407
+
+        #region Error -408
+
+		[TestMethod]
+        public void Rig131Validator_UpdateInStore_Error_408_Rig_Empty_QueryIn()
+        {
+			var response = DevKit.UpdateInStore(ObjectTypes.Rig, string.Empty, null, null);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingInputTemplate, response.Result);
+        }
+
+		#endregion Error -408
+
+        #region Error -409
+
+		[TestMethod]
+        public void Rig131Validator_UpdateInStore_Error_409_Rig_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<RigList, Rig>(Rig);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Rig.UidWell, Rig.UidWellbore, Rig.Uid,
+                $"<name>{Rig.Name}</name><name>{Rig.Name}</name>");
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Rig, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+		#endregion Error -409
+
+        #region Error -415
+
+		[TestMethod]
+        public void Rig131Validator_UpdateInStore_Error_415_Rig_Update_Without_Specifing_UID()
+        {
+            AddParents();
+            DevKit.AddAndAssert<RigList, Rig>(Rig);
+            Rig.Uid = string.Empty;
+			DevKit.UpdateAndAssert<RigList, Rig>(Rig, ErrorCodes.DataObjectUidMissing);
+        }
+
+		#endregion Error -415
+
+        #region Error -433
+
+		[TestMethod]
+        public void Rig131Validator_UpdateInStore_Error_433_Rig_Does_Not_Exist()
+        {
+            AddParents();
+			DevKit.UpdateAndAssert<RigList, Rig>(Rig, ErrorCodes.DataObjectNotExist);
+        }
+
+		#endregion Error -433
+
+        #region Error -444
+
+		[TestMethod]
+        public void Rig131Validator_UpdateInStore_Error_444_Rig_Updating_More_Than_One_Data_Object()
+        {
+            AddParents();
+            DevKit.AddAndAssert<RigList, Rig>(Rig);
+
+            var updateXml = "<rigs xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><rig uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\"></rig><rig uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\"></rig></rigs>";
+            updateXml = string.Format(updateXml, Rig.UidWell, Rig.UidWellbore, Rig.Uid);
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Rig, updateXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateMultipleDataObjects, response.Result);
+        }
+
+		#endregion Error -444
+
+        #region Error -468
+
+		[TestMethod]
+        public void Rig131Validator_UpdateInStore_Error_468_Rig_No_Schema_Version_Declared()
+        {
+            AddParents();
+            DevKit.AddAndAssert<RigList, Rig>(Rig);
+            var response = DevKit.UpdateInStore(ObjectTypes.Rig, QueryMissingVersion, null, null);
+            Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
+        }
+
+		#endregion Error -468
+
+        #region Error -483
+
+		[TestMethod]
+        public void Rig131Validator_UpdateInStore_Error_483_Rig_Update_With_Non_Conforming_Template()
+        {
+            AddParents();
+            DevKit.AddAndAssert<RigList, Rig>(Rig);
+            var response = DevKit.UpdateInStore(ObjectTypes.Rig, QueryEmptyRoot, null, null);
+            Assert.AreEqual((short)ErrorCodes.UpdateTemplateNonConforming, response.Result);
+        }
+
+		#endregion Error -483
+
+        #region Error -484
+
+		[TestMethod]
+        public void Rig131Validator_UpdateInStore_Error_484_Rig_Update_Will_Delete_Required_Element()
+        {
+            AddParents();
+            DevKit.AddAndAssert<RigList, Rig>(Rig);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Rig.UidWell, Rig.UidWellbore, Rig.Uid,
+                $"<name></name>");
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Rig, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);
+        }
+
+		#endregion Error -484
+
     }
 }

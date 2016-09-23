@@ -35,6 +35,7 @@ namespace PDS.Witsml.Server.Data.Attachments
 {
     public abstract partial class Attachment200TestBase
     {
+        public const string BasicXMLTemplate = "<attachments xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><attachment uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</attachment></attachments>";
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public Attachment Attachment { get; set; }

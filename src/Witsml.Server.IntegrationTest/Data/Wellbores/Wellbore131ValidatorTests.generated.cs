@@ -113,5 +113,132 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
 		#endregion Error -405
 
+        #region Error -407
+
+		[TestMethod]
+        public void Wellbore131Validator_UpdateInStore_Error_407_Wellbore_Missing_Witsml_Object_Type()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+			var response = DevKit.Update<WellboreList, Wellbore>(Wellbore, string.Empty);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingWmlTypeIn, response.Result);
+        }
+
+		#endregion Error -407
+
+        #region Error -408
+
+		[TestMethod]
+        public void Wellbore131Validator_UpdateInStore_Error_408_Wellbore_Empty_QueryIn()
+        {
+			var response = DevKit.UpdateInStore(ObjectTypes.Wellbore, string.Empty, null, null);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingInputTemplate, response.Result);
+        }
+
+		#endregion Error -408
+
+        #region Error -409
+
+		[TestMethod]
+        public void Wellbore131Validator_UpdateInStore_Error_409_Wellbore_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Wellbore.UidWell, Wellbore.Uid,
+                $"<name>{Wellbore.Name}</name><name>{Wellbore.Name}</name>");
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Wellbore, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+		#endregion Error -409
+
+        #region Error -415
+
+		[TestMethod]
+        public void Wellbore131Validator_UpdateInStore_Error_415_Wellbore_Update_Without_Specifing_UID()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+            Wellbore.Uid = string.Empty;
+			DevKit.UpdateAndAssert<WellboreList, Wellbore>(Wellbore, ErrorCodes.DataObjectUidMissing);
+        }
+
+		#endregion Error -415
+
+        #region Error -433
+
+		[TestMethod]
+        public void Wellbore131Validator_UpdateInStore_Error_433_Wellbore_Does_Not_Exist()
+        {
+            AddParents();
+			DevKit.UpdateAndAssert<WellboreList, Wellbore>(Wellbore, ErrorCodes.DataObjectNotExist);
+        }
+
+		#endregion Error -433
+
+        #region Error -444
+
+		[TestMethod]
+        public void Wellbore131Validator_UpdateInStore_Error_444_Wellbore_Updating_More_Than_One_Data_Object()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+
+            var updateXml = "<wellbores xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><wellbore uidWell=\"{0}\" uid=\"{1}\"></wellbore><wellbore uidWell=\"{0}\" uid=\"{1}\"></wellbore></wellbores>";
+            updateXml = string.Format(updateXml, Wellbore.UidWell, Wellbore.Uid);
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Wellbore, updateXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateMultipleDataObjects, response.Result);
+        }
+
+		#endregion Error -444
+
+        #region Error -468
+
+		[TestMethod]
+        public void Wellbore131Validator_UpdateInStore_Error_468_Wellbore_No_Schema_Version_Declared()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+            var response = DevKit.UpdateInStore(ObjectTypes.Wellbore, QueryMissingVersion, null, null);
+            Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
+        }
+
+		#endregion Error -468
+
+        #region Error -483
+
+		[TestMethod]
+        public void Wellbore131Validator_UpdateInStore_Error_483_Wellbore_Update_With_Non_Conforming_Template()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+            var response = DevKit.UpdateInStore(ObjectTypes.Wellbore, QueryEmptyRoot, null, null);
+            Assert.AreEqual((short)ErrorCodes.UpdateTemplateNonConforming, response.Result);
+        }
+
+		#endregion Error -483
+
+        #region Error -484
+
+		[TestMethod]
+        public void Wellbore131Validator_UpdateInStore_Error_484_Wellbore_Update_Will_Delete_Required_Element()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Wellbore.UidWell, Wellbore.Uid,
+                $"<name></name>");
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Wellbore, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);
+        }
+
+		#endregion Error -484
+
     }
 }

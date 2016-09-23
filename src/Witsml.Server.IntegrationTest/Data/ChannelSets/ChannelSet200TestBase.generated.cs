@@ -35,6 +35,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
 {
     public abstract partial class ChannelSet200TestBase
     {
+        public const string BasicXMLTemplate = "<channelSets xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><channelSet uid=\"{0}\">{1}</channelSet></channelSets>";
         public ChannelSet ChannelSet { get; set; }
         public DevKit200Aspect DevKit { get; set; }
         public TestContext TestContext { get; set; }

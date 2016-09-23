@@ -113,5 +113,132 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
 		#endregion Error -405
 
+        #region Error -407
+
+		[TestMethod]
+        public void Trajectory131Validator_UpdateInStore_Error_407_Trajectory_Missing_Witsml_Object_Type()
+        {
+            AddParents();
+            DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
+			var response = DevKit.Update<TrajectoryList, Trajectory>(Trajectory, string.Empty);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingWmlTypeIn, response.Result);
+        }
+
+		#endregion Error -407
+
+        #region Error -408
+
+		[TestMethod]
+        public void Trajectory131Validator_UpdateInStore_Error_408_Trajectory_Empty_QueryIn()
+        {
+			var response = DevKit.UpdateInStore(ObjectTypes.Trajectory, string.Empty, null, null);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.MissingInputTemplate, response.Result);
+        }
+
+		#endregion Error -408
+
+        #region Error -409
+
+		[TestMethod]
+        public void Trajectory131Validator_UpdateInStore_Error_409_Trajectory_QueryIn_Must_Conform_To_Schema()
+        {
+            AddParents();
+            DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid,
+                $"<name>{Trajectory.Name}</name><name>{Trajectory.Name}</name>");
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Trajectory, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+		#endregion Error -409
+
+        #region Error -415
+
+		[TestMethod]
+        public void Trajectory131Validator_UpdateInStore_Error_415_Trajectory_Update_Without_Specifing_UID()
+        {
+            AddParents();
+            DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
+            Trajectory.Uid = string.Empty;
+			DevKit.UpdateAndAssert<TrajectoryList, Trajectory>(Trajectory, ErrorCodes.DataObjectUidMissing);
+        }
+
+		#endregion Error -415
+
+        #region Error -433
+
+		[TestMethod]
+        public void Trajectory131Validator_UpdateInStore_Error_433_Trajectory_Does_Not_Exist()
+        {
+            AddParents();
+			DevKit.UpdateAndAssert<TrajectoryList, Trajectory>(Trajectory, ErrorCodes.DataObjectNotExist);
+        }
+
+		#endregion Error -433
+
+        #region Error -444
+
+		[TestMethod]
+        public void Trajectory131Validator_UpdateInStore_Error_444_Trajectory_Updating_More_Than_One_Data_Object()
+        {
+            AddParents();
+            DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
+
+            var updateXml = "<trajectorys xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><trajectory uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\"></trajectory><trajectory uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\"></trajectory></trajectorys>";
+            updateXml = string.Format(updateXml, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid);
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Trajectory, updateXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.InputTemplateMultipleDataObjects, response.Result);
+        }
+
+		#endregion Error -444
+
+        #region Error -468
+
+		[TestMethod]
+        public void Trajectory131Validator_UpdateInStore_Error_468_Trajectory_No_Schema_Version_Declared()
+        {
+            AddParents();
+            DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
+            var response = DevKit.UpdateInStore(ObjectTypes.Trajectory, QueryMissingVersion, null, null);
+            Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
+        }
+
+		#endregion Error -468
+
+        #region Error -483
+
+		[TestMethod]
+        public void Trajectory131Validator_UpdateInStore_Error_483_Trajectory_Update_With_Non_Conforming_Template()
+        {
+            AddParents();
+            DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
+            var response = DevKit.UpdateInStore(ObjectTypes.Trajectory, QueryEmptyRoot, null, null);
+            Assert.AreEqual((short)ErrorCodes.UpdateTemplateNonConforming, response.Result);
+        }
+
+		#endregion Error -483
+
+        #region Error -484
+
+		[TestMethod]
+        public void Trajectory131Validator_UpdateInStore_Error_484_Trajectory_Update_Will_Delete_Required_Element()
+        {
+            AddParents();
+            DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
+
+            var nonConformingXml = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid,
+                $"<name></name>");
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Trajectory, nonConformingXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);
+        }
+
+		#endregion Error -484
+
     }
 }

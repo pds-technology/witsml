@@ -35,6 +35,7 @@ namespace PDS.Witsml.Server.Data.Channels
 {
     public abstract partial class Channel200TestBase
     {
+        public const string BasicXMLTemplate = "<channels xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><channel uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</channel></channels>";
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public Channel Channel { get; set; }

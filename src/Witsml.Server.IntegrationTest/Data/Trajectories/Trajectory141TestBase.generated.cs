@@ -37,9 +37,10 @@ namespace PDS.Witsml.Server.Data.Trajectories
     {
         public const string QueryMissingNamespace = "<trajectorys version=\"1.4.1.1\"><trajectory /></trajectorys>";
         public const string QueryInvalidNamespace = "<trajectorys xmlns=\"www.witsml.org/schemas/123\" version=\"1.4.1.1\"></trajectorys>";
+        public const string QueryMissingVersion = "<trajectorys xmlns=\"http://www.witsml.org/schemas/1series\"></trajectorys>";
         public const string QueryEmptyRoot = "<trajectorys xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"></trajectorys>";
         public const string QueryEmptyObject = "<trajectorys xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><trajectory /></trajectorys>";
-
+        public const string BasicXMLTemplate = "<trajectorys xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><trajectory uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</trajectory></trajectorys>";
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public Trajectory Trajectory { get; set; }
