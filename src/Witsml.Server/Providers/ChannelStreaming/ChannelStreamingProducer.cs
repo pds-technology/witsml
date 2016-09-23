@@ -333,6 +333,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             var channelStreamingType = firstContext.ChannelStreamingType;
             var parentUri = firstContext.ParentUri;
             var primaryIndex = firstContext.ChannelMetadata.Indexes[0];
+            var isTimeIndex = firstContext.ChannelMetadata.Indexes.Select(i => i.IndexType == ChannelIndexTypes.Time).ToArray();
             var requestLatestValues =
                 channelStreamingType == ChannelStreamingTypes.IndexCount
                     ? firstContext.IndexCount
@@ -372,14 +373,14 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     ValidateRangeRequestIndexes(minStart ?? 0, minEnd, increasing);
                 }
 
-                var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
-                var rangeSize = WitsmlSettings.GetRangeSize(isTimeIndex);
+                //var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
+                var rangeSize = WitsmlSettings.GetRangeSize(isTimeIndex[0]);
 
                 // Convert indexes from scaled values
-                var minStartIndex = minStart?.IndexFromScale(primaryIndex.Scale, isTimeIndex);
+                var minStartIndex = minStart?.IndexFromScale(primaryIndex.Scale, isTimeIndex[0]);
                 var maxEndIndex = channelStreamingType == ChannelStreamingTypes.IndexValue
                     ? (increasing ? minStartIndex + rangeSize : minStartIndex - rangeSize)
-                    : maxEnd?.IndexFromScale(primaryIndex.Scale, isTimeIndex);
+                    : maxEnd?.IndexFromScale(primaryIndex.Scale, isTimeIndex[0]);
 
                 // Get channel data
                 var mnemonics = contextList.Select(c => c.ChannelMetadata.ChannelName).ToList();
@@ -417,7 +418,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             }
         }
 
-        private async Task StreamChannelData(IList<ChannelStreamingContext> contextList, List<List<List<object>>> channelData, string[] mnemonics, bool increasing, bool isTimeIndex, int scale, bool firstStart, CancellationToken token)
+        private async Task StreamChannelData(IList<ChannelStreamingContext> contextList, List<List<List<object>>> channelData, string[] mnemonics, bool increasing, bool[] isTimeIndex, int scale, bool firstStart, CancellationToken token)
         {
             var dataItemList = new List<DataItem>();
             var firstContext = contextList.FirstOrDefault();
@@ -464,7 +465,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             }
         }
 
-        private IEnumerable<DataItem> CreateDataItems(IList<ChannelStreamingContext> contextList, List<List<object>> record, string[] mnemonics, bool increasing, bool isTimeIndex, int scale, bool firstStart)
+        private IEnumerable<DataItem> CreateDataItems(IList<ChannelStreamingContext> contextList, List<List<object>> record, string[] mnemonics, bool increasing, bool[] isTimeIndex, int scale, bool firstStart)
         {
             // Get the index and value components for the current record
             var indexes = record[0];
@@ -472,13 +473,20 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
             // Create a list of all of the records indexes, scaled
             var indexValues = new List<long>();
-            indexes.ForEach(x =>
+            for (var i = 0; i < indexes.Count; i++)
             {
-                var indexValue = isTimeIndex
-                    ? new DateTimeOffset(DateTime.Parse(x.ToString())).ToUnixTimeMicroseconds()
-                    : ((double)x).IndexToScale(scale);
+                var indexValue = isTimeIndex[i]
+                    ? new DateTimeOffset(DateTime.Parse(indexes[i].ToString())).ToUnixTimeMicroseconds()
+                    : ((double)indexes[i]).IndexToScale(scale);
                 indexValues.Add(indexValue);
-            });
+            }
+            //indexes.ForEach(x =>
+            //{
+            //    var indexValue = isTimeIndex
+            //        ? new DateTimeOffset(DateTime.Parse(x.ToString())).ToUnixTimeMicroseconds()
+            //        : ((double)x).IndexToScale(scale);
+            //    indexValues.Add(indexValue);
+            //});
 
             var primaryIndexValue = indexValues[0];
 

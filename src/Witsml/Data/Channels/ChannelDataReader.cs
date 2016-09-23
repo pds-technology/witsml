@@ -1422,7 +1422,7 @@ namespace PDS.Witsml.Data.Channels
 
                 if (!requestLatestValues.HasValue || IsRequestedValueNeeded(allValues, requestedValueCount, requestLatestValues.Value))
                 {
-                    channelData.Add(new List<List<object>>() { indexValues, allValues.GetRange(Depth, allValues.Count - 1) });
+                    channelData.Add(new List<List<object>>() { indexValues, allValues.GetRange(Depth, allValues.Count - Depth) });
 
                     // Update the latest value count for each channel.
                     if (requestLatestValues.HasValue)
