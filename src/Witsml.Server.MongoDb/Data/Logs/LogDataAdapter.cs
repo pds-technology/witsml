@@ -184,9 +184,11 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var logCurveRanges = GetLogCurveRanges(entity, queryMnemonics);
             var increasing = IsIncreasing(entity);
-            var rangeStart = GetMinRangeStart(logCurveRanges, increasing);
-            var optimizeRangeStart = GetOptimizeRangeStart(logCurveRanges, increasing);
-            var rangeEnd = GetMaxRangeEnd(logCurveRanges, increasing);
+            var isTimeIndex = IsTimeLog(entity);
+            var rangeStart = logCurveRanges.GetMinRangeStart(increasing);
+            var optimizeRangeStart = logCurveRanges.GetOptimizeRangeStart(increasing);
+            var rangeEnd = logCurveRanges.GetMaxRangeEnd(increasing);
+            var rangeStepSize = WitsmlSettings.GetRangeStepSize(isTimeIndex);
 
             bool finished;
             const int maxRequestFactor = 3;
@@ -203,7 +205,7 @@ namespace PDS.Witsml.Server.Data.Logs
             }
             else if (requestLatestValues.HasValue)
             {
-                range = OptimizeLatestValuesRange(range, requestLatestValues, entity, increasing, rangeStart, optimizeRangeStart, rangeEnd, requestFactor);
+                range = range.OptimizeLatestValuesRange(requestLatestValues, isTimeIndex, increasing, rangeStart, optimizeRangeStart, rangeEnd, requestFactor, rangeStepSize);
             }
 
             do // until finished
@@ -232,8 +234,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     requestFactor += 1;
                     if (requestFactor < maxRequestFactor)
                     {
-                        range = OptimizeLatestValuesRange(
-                            range, requestLatestValues, entity, increasing, rangeStart, optimizeRangeStart, rangeEnd, requestFactor);
+                        range = range.OptimizeLatestValuesRange(requestLatestValues, isTimeIndex, increasing, rangeStart, optimizeRangeStart, rangeEnd, requestFactor, rangeStepSize);
                     }
                     else
                     {
@@ -245,26 +246,6 @@ namespace PDS.Witsml.Server.Data.Logs
             } while (!finished);
 
             return logData;
-        }
-
-        private Range<double?> OptimizeLatestValuesRange(Range<double?> range, int? requestLatestValues, T entity, bool increasing, double? rangeStart, double? optimizeRangeStart, double? rangeEnd, int requestFactor)
-        {
-            if (requestLatestValues.HasValue && optimizeRangeStart.HasValue)
-            {
-                var optimizationEstimate =
-                    (requestFactor*(requestLatestValues.Value + 1) * WitsmlSettings.GetRangeStepSize(IsTimeLog(entity)));
-
-                range = increasing 
-                    ? new Range<double?>(optimizeRangeStart.Value - optimizationEstimate, rangeEnd) 
-                    : new Range<double?>(optimizeRangeStart.Value + optimizationEstimate, rangeEnd);
-
-                if (rangeStart.HasValue && range.StartsBefore(rangeStart.Value, increasing))
-                {
-                    range = new Range<double?>(rangeStart, rangeEnd);
-                }
-            }
-
-            return range;
         }
 
         /// <summary>
@@ -286,21 +267,6 @@ namespace PDS.Witsml.Server.Data.Logs
             logCurves.ForEach(l => ranges.Add(GetIndexRange(l, increasing, isTimeLog)));
 
             return ranges;
-        }
-
-        private double? GetMinRangeStart(List<Range<double?>> ranges, bool increasing)
-        {
-            return increasing ? ranges.Min(r => r.Start) : ranges.Max(r => r.Start);
-        }
-
-        private double? GetOptimizeRangeStart(List<Range<double?>> ranges, bool increasing)
-        {
-            return increasing ? ranges.Min(r => r.End) : ranges.Max(r => r.End);
-        }
-
-        private double? GetMaxRangeEnd(List<Range<double?>> ranges, bool increasing)
-        {
-            return increasing ? ranges.Max(r => r.End) : ranges.Min(r => r.End);
         }
 
         /// <summary>

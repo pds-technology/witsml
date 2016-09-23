@@ -153,9 +153,10 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             var indexChannel = entity.Index.FirstOrDefault();
             var increasing = indexChannel.IsIncreasing();
             var isTimeIndex = entity.IsTimeIndex();
-            var rangeStart = GetMinRangeStart(curveRanges, increasing);
-            var optimizeRangeStart = GetOptimizeRangeStart(curveRanges, increasing);
-            var rangeEnd = GetMaxRangeEnd(curveRanges, increasing);
+            var rangeStart = curveRanges.GetMinRangeStart(increasing);
+            var optimizeRangeStart = curveRanges.GetOptimizeRangeStart(increasing);
+            var rangeEnd = curveRanges.GetMaxRangeEnd(increasing);
+            var rangeStepSize = WitsmlSettings.GetRangeStepSize(isTimeIndex);
 
             bool finished;
             const int maxRequestFactor = 3;
@@ -172,7 +173,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             }
             else if (requestLatestValues.HasValue)
             {
-                range = OptimizeLatestValuesRange(range, requestLatestValues, isTimeIndex, increasing, rangeStart, optimizeRangeStart, rangeEnd, requestFactor);
+                range = range.OptimizeLatestValuesRange(requestLatestValues, isTimeIndex, increasing, rangeStart, optimizeRangeStart, rangeEnd, requestFactor, rangeStepSize);
             }
 
             do // until finished
@@ -202,8 +203,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                     requestFactor += 1;
                     if (requestFactor < maxRequestFactor)
                     {
-                        range = OptimizeLatestValuesRange(
-                            range, requestLatestValues, isTimeIndex, increasing, rangeStart, optimizeRangeStart, rangeEnd, requestFactor);
+                        range = range.OptimizeLatestValuesRange(requestLatestValues, isTimeIndex, increasing, rangeStart, optimizeRangeStart, rangeEnd, requestFactor, rangeStepSize);
                     }
                     else
                     {
@@ -216,46 +216,6 @@ namespace PDS.Witsml.Server.Data.ChannelSets
 
             return logData;
         }
-
-        // TODO: Refactor to be common with LogDataAdapter version
-        private Range<double?> OptimizeLatestValuesRange(Range<double?> range, int? requestLatestValues, bool isTimeIndex, bool increasing, double? rangeStart, double? optimizeRangeStart, double? rangeEnd, int requestFactor)
-        {
-            if (requestLatestValues.HasValue && optimizeRangeStart.HasValue)
-            {
-                var optimizationEstimate =
-                    (requestFactor * (requestLatestValues.Value + 1) * WitsmlSettings.GetRangeStepSize(isTimeIndex));
-
-                range = increasing
-                    ? new Range<double?>(optimizeRangeStart.Value - optimizationEstimate, rangeEnd)
-                    : new Range<double?>(optimizeRangeStart.Value + optimizationEstimate, rangeEnd);
-
-                if (rangeStart.HasValue && range.StartsBefore(rangeStart.Value, increasing))
-                {
-                    range = new Range<double?>(rangeStart, rangeEnd);
-                }
-            }
-
-            return range;
-        }
-
-        // TODO: Refactor to be common with LogDataAdapter version
-        private double? GetMinRangeStart(List<Range<double?>> ranges, bool increasing)
-        {
-            return increasing ? ranges.Min(r => r.Start) : ranges.Max(r => r.Start);
-        }
-
-        // TODO: Refactor to be common with LogDataAdapter version
-        private double? GetOptimizeRangeStart(List<Range<double?>> ranges, bool increasing)
-        {
-            return increasing ? ranges.Min(r => r.End) : ranges.Max(r => r.End);
-        }
-
-        // TODO: Refactor to be common with LogDataAdapter version
-        private double? GetMaxRangeEnd(List<Range<double?>> ranges, bool increasing)
-        {
-            return increasing ? ranges.Max(r => r.End) : ranges.Min(r => r.End);
-        }
-
 
         private string[] GetAllMnemonics(ChannelSet entity)
         {
