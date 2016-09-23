@@ -346,6 +346,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
             var data = new List<string>();
             var id = string.Empty;
+            List<ChannelIndexInfo> indexes = null;
             ChannelIndexInfo indexChannel = null;
             Range<long>? plannedRange = null;
             double startIndex = 0;
@@ -359,6 +360,7 @@ namespace PDS.Witsml.Server.Data.Channels
             foreach (var record in records)
             {
                 indexChannel = record.GetIndex();
+                indexes = record.Indices.Select(x => x.Clone()).ToList();
                 var increasing = indexChannel.Increasing;
                 var index = record.GetIndexValue();
                 var rangeSize = WitsmlSettings.GetRangeSize(indexChannel.IsTimeIndex);
@@ -404,16 +406,20 @@ namespace PDS.Witsml.Server.Data.Channels
                 }
                 else
                 {
-                    var newIndex = indexChannel.Clone();
-                    newIndex.Start = startIndex;
-                    newIndex.End = endIndex;
+                    //var newIndex = indexChannel.Clone();
+                    //newIndex.Start = startIndex;
+                    //newIndex.End = endIndex;
+                    indexes[0].Start = startIndex;
+                    indexes[0].End = endIndex;
+
                     Logger.DebugFormat("ChannelDataChunk created with id '{0}', startIndex '{1}' and endIndex '{2}'.", id, startIndex, endIndex);
 
                     yield return new ChannelDataChunk()
                     {
                         Uid = id,
                         Data = "[" + String.Join(",", data) + "]",
-                        Indices = new List<ChannelIndexInfo> {newIndex},
+                        //Indices = new List<ChannelIndexInfo> { newIndex },
+                        Indices = indexes,
                         RecordCount = data.Count,
                         MnemonicList = string.Join(",", chunkMnemonics),
                         UnitList = string.Join(",", chunkUnits),
@@ -431,18 +437,23 @@ namespace PDS.Witsml.Server.Data.Channels
                 }
             }
 
-            if (data.Count > 0 && indexChannel != null)
+            if (data.Count > 0 && indexes != null)
             {
-                var newIndex = indexChannel.Clone();
-                newIndex.Start = startIndex;
-                newIndex.End = endIndex;
+                //var newIndex = indexChannel.Clone();
+                //newIndex.Start = startIndex;
+                //newIndex.End = endIndex;
+                indexes = indexes.Select(x => x.Clone()).ToList();
+                indexes[0].Start = startIndex;
+                indexes[0].End = endIndex;
+
                 Logger.DebugFormat("ChannelDataChunk created with id '{0}', startIndex '{1}' and endIndex '{2}'.", id, startIndex, endIndex);
 
                 var chunk = new ChannelDataChunk()
                 {
                     Uid = id,
                     Data = "[" + string.Join(",", data) + "]",
-                    Indices = new List<ChannelIndexInfo> { newIndex },
+                    //Indices = new List<ChannelIndexInfo> { newIndex },
+                    Indices = indexes,
                     RecordCount = data.Count
                 };
 
@@ -535,18 +546,18 @@ namespace PDS.Witsml.Server.Data.Channels
                 Uri = chunk.Uri
             };
 
-            var newIndex = indexChannel.Clone();
-            newIndex.Start = start.GetValueOrDefault();
-            newIndex.End = end.GetValueOrDefault();
-            newChunk.Indices = new List<ChannelIndexInfo> { indexChannel };
+            var indexes = chunk.Indices.Select(x => x.Clone()).ToList();
+            indexes[0].Start = start.GetValueOrDefault();
+            indexes[0].End = end.GetValueOrDefault();
+            newChunk.Indices = indexes;
                 
             DeleteChunkChannels(newChunk, deletedChannels);
             newChunk.RecordCount = data.Count;
             newChunk.Data = "[" + string.Join(",", data) + "]";
 
             if (!indexRange[0].HasValue)
-                indexRange[0] = newIndex.Start;
-            indexRange[1] = newIndex.End;
+                indexRange[0] = indexes[0].Start;
+            indexRange[1] = indexes[0].End;
 
             return newChunk;
         }

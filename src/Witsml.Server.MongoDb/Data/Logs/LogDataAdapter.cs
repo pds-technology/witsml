@@ -215,7 +215,6 @@ namespace PDS.Witsml.Server.Data.Logs
                 var reader = records.GetReader(mnemonicIndexes.Values.ToArray(), units, nullValues);
 
                 // Get the data from the reader based on the context and mnemonicIndexes (slices)
-                // TODO: Dictionary<string, Range<double?>> ranges;
                 logData = reader.GetData(context, mnemonicIndexes, units, nullValues, out ranges);
 
 
