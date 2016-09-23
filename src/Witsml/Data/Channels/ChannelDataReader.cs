@@ -1486,22 +1486,36 @@ namespace PDS.Witsml.Data.Channels
         {
             var rowMnemonics = _recordMnemonics != null ? _recordMnemonics[_current] : slicedMnemonics;
             var fullRow = new object[slicedMnemonics.Length];
-            fullRow[0] = rowValues[0];
-            for (var i = 1; i < fullRow.Length; i++)
+
+            // Add all of the indexes to the full row
+            for (var i = 0; i < Depth; i++)
+            {
+                fullRow[i] = rowValues[i];
+            }
+
+            //... now add the sliced mnemonics to the full row
+            for (var i = Depth; i < fullRow.Length; i++)
             {
                 if (_allSliceOrdinals == null)
                 {
+                    // Compute the source index for the sliced mnemonic we're looking for
                     var channel = slicedMnemonics[i];
                     var index = Array.IndexOf(rowMnemonics, channel);
+
+                    // If the mnemonic is not in our row try another
                     if (index <= -1)
                         continue;
 
+                    // Advance the index to account for the number of index values (Depth) in the row.
                     if (_recordMnemonics != null)
-                        index++;
+                        index = index + Depth;
+
+                    // Add the mnemonic's value to the full row
                     fullRow[i] = rowValues[index];
                 }
                 else
                 {
+                    // If we already have a array of our sliced indexes, use that.
                     fullRow[i] = rowValues[_allSliceOrdinals[i]];
                 }
             }
