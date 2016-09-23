@@ -1027,8 +1027,8 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             // create an index-to-mnemonic map
-            return mnemonicIndexes
-                .ToDictionary(x => x.Index, x => x.Mnemonic);
+            return new SortedDictionary<int, string>(mnemonicIndexes
+                .ToDictionary(x => x.Index, x => x.Mnemonic));
         }
 
         /// <summary>
@@ -1075,7 +1075,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     .Where(x => x.Index == 0 || slices.Contains(x.Index));
             }
 
-            return unitIndexes.ToDictionary(x => x.Index, x => x.Unit);
+            return new SortedDictionary<int, string>(unitIndexes.ToDictionary(x => x.Index, x => x.Unit));
         }
 
         private IDictionary<int, string> GetNullValueList(T log, int[] slices)
@@ -1097,7 +1097,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     .Where(x => x.Index == 0 || slices.Contains(x.Index));
             }
 
-            return nullValuesIndexes.ToDictionary(x => x.Index, x => x.NullValue);
+            return new SortedDictionary<int, string>(nullValuesIndexes.ToDictionary(x => x.Index, x => x.NullValue));
         }
 
         private void QueryLogDataValues(T log, T logHeader, WitsmlQueryParser parser, IDictionary<int, string> mnemonics, ResponseContext context)
