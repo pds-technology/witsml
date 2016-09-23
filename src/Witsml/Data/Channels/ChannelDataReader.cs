@@ -1378,7 +1378,7 @@ namespace PDS.Witsml.Data.Channels
                 requestedValueCount = new Dictionary<int, int>();
                 if (_allSliceOrdinals == null)
                 {
-                    _allSliceOrdinals = Enumerable.Range(0, Depth).ToArray().Concat(mnemonicSlices.Select((m, i) => m.Key)).Skip(1).ToArray();
+                    _allSliceOrdinals = Enumerable.Range(0, Depth).ToArray().Concat(mnemonicSlices.Select((m, i) => m.Key)).Skip(Depth).ToArray();
                 }
                 _allSliceOrdinals.ForEach(s => requestedValueCount.Add(s, 0));
             }
