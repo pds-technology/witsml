@@ -302,9 +302,9 @@ namespace PDS.Witsml.Server.Data.Logs
                     if (isTimeLog)
                     {
                         if (range.Start.HasValue && !double.IsNaN(range.Start.Value) && logCurve.MinDateTimeIndex.HasValue)
-                            logCurve.MinDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.Start.Value).DateTime;
+                            logCurve.MinDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.Start.Value);
                         if (range.End.HasValue && !double.IsNaN(range.End.Value) && logCurve.MaxDateTimeIndex.HasValue)
-                            logCurve.MaxDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.End.Value).DateTime;
+                            logCurve.MaxDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.End.Value);
                     }
                     else
                     {
@@ -694,7 +694,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 if (log.StartDateTimeIndex != null)
                 {
                     if (range.Start.HasValue && !double.IsNaN(range.Start.Value))
-                        log.StartDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.Start.Value).DateTime;
+                        log.StartDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.Start.Value);
                     else
                         log.StartDateTimeIndex = null;
                 }
@@ -702,7 +702,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 if (log.EndDateTimeIndex != null)
                 {
                     if (range.End.HasValue && !double.IsNaN(range.End.Value))
-                        log.EndDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.End.Value).DateTime;
+                        log.EndDateTimeIndex = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.End.Value);
                     else
                         log.EndDateTimeIndex = null;
                 }
