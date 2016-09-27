@@ -27,7 +27,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
     {
         partial void BeforeEachTest()
         {
-            WbGeometry.DateTimeReport = DateTime.Now;
+            WbGeometry.DateTimeReport = DateTimeOffset.Now;
         }
     }
 }

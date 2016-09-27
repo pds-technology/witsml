@@ -125,8 +125,8 @@ namespace PDS.Witsml.Server.Data
             if (commonData == null)
                 commonData = new Witsml131Schemas.CommonData();
 
-            commonData.DateTimeCreation = DateTime.UtcNow;
-            commonData.DateTimeLastChange = DateTime.UtcNow;
+            commonData.DateTimeCreation = DateTimeOffset.UtcNow;
+            commonData.DateTimeLastChange = commonData.DateTimeCreation;
 
             return commonData;
         }
@@ -142,7 +142,7 @@ namespace PDS.Witsml.Server.Data
                 commonData = new Witsml141Schemas.CommonData();
 
             commonData.DateTimeCreation = DateTimeOffset.UtcNow;
-            commonData.DateTimeLastChange = DateTimeOffset.UtcNow;
+            commonData.DateTimeLastChange = commonData.DateTimeCreation;
 
             return commonData;
         }

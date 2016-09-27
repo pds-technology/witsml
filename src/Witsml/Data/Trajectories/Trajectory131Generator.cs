@@ -52,6 +52,7 @@ namespace PDS.Witsml.Data.Trajectories
         {
             var stations = new List<TrajectoryStation>();
             var random = new Random(numOfStations * 2);
+            var now = DateTimeOffset.Now.AddDays(-1);
 
             for (var i = 0; i < numOfStations; i++)
             {
@@ -63,7 +64,7 @@ namespace PDS.Witsml.Data.Trajectories
                     Tvd = new WellVerticalDepthCoord() { Uom = tvdUom, Value = startMd == 0 ? 0 : startMd - 0.1 },
                     Azi = new PlaneAngleMeasure { Uom = angleUom, Value = startMd == 0 ? 0 : random.NextDouble() },
                     Incl = new PlaneAngleMeasure { Uom = angleUom, Value = startMd == 0 ? 0 : random.NextDouble() },
-                    DateTimeStn = DateTime.Parse("2016-09-01 16:00:00")
+                    DateTimeStn = now.AddMinutes(i)
                 };
 
                 if (includeExtra)
@@ -72,6 +73,7 @@ namespace PDS.Witsml.Data.Trajectories
                     station.MDDelta = new MeasuredDepthCoord { Uom = MeasuredDepthUom.m, Value = 0 };
                     station.StatusTrajStation = TrajStationStatus.position;
                 }
+
                 stations.Add(station);
                 startMd++;
             }

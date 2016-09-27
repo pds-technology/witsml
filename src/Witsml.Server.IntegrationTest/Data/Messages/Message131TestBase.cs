@@ -28,7 +28,7 @@ namespace PDS.Witsml.Server.Data.Messages
     {
         partial void BeforeEachTest()
         {
-            Message.DateTime = DateTime.Now;
+            Message.DateTime = DateTimeOffset.Now;
             Message.TypeMessage = MessageType.informational;
         }
     }
