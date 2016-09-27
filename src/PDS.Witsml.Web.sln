@@ -4,26 +4,31 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Web", "Witsml.Web\Witsml.Web.csproj", "{9E51075C-D571-42F5-A311-0589231DBA9C}"
-	ProjectSection(ProjectDependencies) = postProject
-		{2BF576B6-BAC6-4E62-9971-AA71EC226F3A} = {2BF576B6-BAC6-4E62-9971-AA71EC226F3A}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Server.MongoDb", "Witsml.Server.MongoDb\Witsml.Server.MongoDb.csproj", "{692D27D9-2F4C-44A6-8D71-8B291E0DC1A3}"
-	ProjectSection(ProjectDependencies) = postProject
-		{2BF576B6-BAC6-4E62-9971-AA71EC226F3A} = {2BF576B6-BAC6-4E62-9971-AA71EC226F3A}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Server.MongoDb.IntegrationTest", "Witsml.Server.MongoDb.IntegrationTest\Witsml.Server.MongoDb.IntegrationTest.csproj", "{F0BB0099-5016-4206-8385-312B9664DDEC}"
-	ProjectSection(ProjectDependencies) = postProject
-		{2BF576B6-BAC6-4E62-9971-AA71EC226F3A} = {2BF576B6-BAC6-4E62-9971-AA71EC226F3A}
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{B01AE4D3-D6E0-4E02-8051-FDB4AB7B7518}"
 	ProjectSection(SolutionItems) = preProject
 		External\GlobalAssemblyInfo.cs = External\GlobalAssemblyInfo.cs
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Debug", "Witsml.Debug\Witsml.Debug.csproj", "{2BF576B6-BAC6-4E62-9971-AA71EC226F3A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PDS.Witsml", "PDS.Witsml", "{A5268269-F5F0-4B28-A9B5-A2A86D45C916}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Framework", "..\ext\witsml\src\Framework\Framework.csproj", "{FAE228AA-4917-4B02-B239-0A24DF883898}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Framework.Web", "..\ext\witsml\src\Framework.Web\Framework.Web.csproj", "{90A1FD9F-6A85-4AD2-8523-1360034DCD76}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml", "..\ext\witsml\src\Witsml\Witsml.csproj", "{0EF1D73F-E7A0-40B0-803B-7CE4B6B27112}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Server", "..\ext\witsml\src\Witsml.Server\Witsml.Server.csproj", "{93FAAE2F-13AA-46DF-A94B-36155B51EBFA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Server.IntegrationTest", "..\ext\witsml\src\Witsml.Server.IntegrationTest\Witsml.Server.IntegrationTest.csproj", "{C050AB68-0543-4A23-870C-2D07F872484B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Server.Web", "..\ext\witsml\src\Witsml.Server.Web\Witsml.Server.Web.csproj", "{5FF377F4-56C5-49D9-BA0A-1955A33C4902}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.UnitTest", "..\ext\witsml\src\Witsml.UnitTest\Witsml.UnitTest.csproj", "{750F795F-0C36-4CB3-9372-C4A5A716C635}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,12 +48,45 @@ Global
 		{F0BB0099-5016-4206-8385-312B9664DDEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F0BB0099-5016-4206-8385-312B9664DDEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F0BB0099-5016-4206-8385-312B9664DDEC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2BF576B6-BAC6-4E62-9971-AA71EC226F3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2BF576B6-BAC6-4E62-9971-AA71EC226F3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2BF576B6-BAC6-4E62-9971-AA71EC226F3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2BF576B6-BAC6-4E62-9971-AA71EC226F3A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FAE228AA-4917-4B02-B239-0A24DF883898}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAE228AA-4917-4B02-B239-0A24DF883898}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAE228AA-4917-4B02-B239-0A24DF883898}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAE228AA-4917-4B02-B239-0A24DF883898}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90A1FD9F-6A85-4AD2-8523-1360034DCD76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90A1FD9F-6A85-4AD2-8523-1360034DCD76}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90A1FD9F-6A85-4AD2-8523-1360034DCD76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90A1FD9F-6A85-4AD2-8523-1360034DCD76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EF1D73F-E7A0-40B0-803B-7CE4B6B27112}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EF1D73F-E7A0-40B0-803B-7CE4B6B27112}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EF1D73F-E7A0-40B0-803B-7CE4B6B27112}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EF1D73F-E7A0-40B0-803B-7CE4B6B27112}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93FAAE2F-13AA-46DF-A94B-36155B51EBFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93FAAE2F-13AA-46DF-A94B-36155B51EBFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93FAAE2F-13AA-46DF-A94B-36155B51EBFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93FAAE2F-13AA-46DF-A94B-36155B51EBFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C050AB68-0543-4A23-870C-2D07F872484B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C050AB68-0543-4A23-870C-2D07F872484B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C050AB68-0543-4A23-870C-2D07F872484B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C050AB68-0543-4A23-870C-2D07F872484B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FF377F4-56C5-49D9-BA0A-1955A33C4902}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FF377F4-56C5-49D9-BA0A-1955A33C4902}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FF377F4-56C5-49D9-BA0A-1955A33C4902}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FF377F4-56C5-49D9-BA0A-1955A33C4902}.Release|Any CPU.Build.0 = Release|Any CPU
+		{750F795F-0C36-4CB3-9372-C4A5A716C635}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{750F795F-0C36-4CB3-9372-C4A5A716C635}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{750F795F-0C36-4CB3-9372-C4A5A716C635}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{750F795F-0C36-4CB3-9372-C4A5A716C635}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FAE228AA-4917-4B02-B239-0A24DF883898} = {A5268269-F5F0-4B28-A9B5-A2A86D45C916}
+		{90A1FD9F-6A85-4AD2-8523-1360034DCD76} = {A5268269-F5F0-4B28-A9B5-A2A86D45C916}
+		{0EF1D73F-E7A0-40B0-803B-7CE4B6B27112} = {A5268269-F5F0-4B28-A9B5-A2A86D45C916}
+		{93FAAE2F-13AA-46DF-A94B-36155B51EBFA} = {A5268269-F5F0-4B28-A9B5-A2A86D45C916}
+		{C050AB68-0543-4A23-870C-2D07F872484B} = {A5268269-F5F0-4B28-A9B5-A2A86D45C916}
+		{5FF377F4-56C5-49D9-BA0A-1955A33C4902} = {A5268269-F5F0-4B28-A9B5-A2A86D45C916}
+		{750F795F-0C36-4CB3-9372-C4A5A716C635} = {A5268269-F5F0-4B28-A9B5-A2A86D45C916}
 	EndGlobalSection
 EndGlobal

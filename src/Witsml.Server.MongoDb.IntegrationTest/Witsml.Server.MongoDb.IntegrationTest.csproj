@@ -41,7 +41,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Energistics.DataAccess, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bacb93980f36ff32, processorArchitecture=MSIL">
-      <HintPath>..\packages\Energistics.DataAccess.2.0.20160830.1\lib\net40\Energistics.DataAccess.dll</HintPath>
+      <HintPath>..\packages\Energistics.DataAccess.2.0.20160927.2\lib\net40\Energistics.DataAccess.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ETP.DevKit, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -50,18 +50,6 @@
     </Reference>
     <Reference Include="ETP.Messages, Version=1.4.1.0, Culture=neutral, PublicKeyToken=c2b7028481fb2795, processorArchitecture=MSIL">
       <HintPath>..\packages\ETP.1.4.1.0\lib\ETP.Messages.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Fare, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Fare.1.0.2\lib\net35\Fare.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FluentValidationNA, Version=1.2.16.24816, Culture=neutral, PublicKeyToken=0950390b87309e14, processorArchitecture=MSIL">
-      <HintPath>..\packages\FluentValidationNA.1.2.16\lib\net40\FluentValidationNA.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="LinqExtender, Version=3.0.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\LinqExtender.3.0.1\lib\LinqExtender.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
@@ -92,26 +80,6 @@
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="PDS.Framework, Version=2016.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PDS.Framework.2016.1.20160927.1\lib\net45\PDS.Framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="PDS.Framework.Web, Version=2016.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PDS.Framework.Web.2016.1.20160927.1\lib\net45\PDS.Framework.Web.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="PDS.Witsml, Version=2016.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PDS.Witsml.2016.1.20160927.1\lib\net45\PDS.Witsml.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="PDS.Witsml.Server, Version=2016.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PDS.Witsml.Server.2016.1.20160927.1\lib\net45\PDS.Witsml.Server.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="PDS.Witsml.Server.IntegrationTest, Version=2016.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PDS.Witsml.Server.IntegrationTest.2016.1.20160927.1\lib\net45\PDS.Witsml.Server.IntegrationTest.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="SuperSocket.Common, Version=1.6.0.4, Culture=neutral, PublicKeyToken=6c80000676988ebb, processorArchitecture=MSIL">
       <HintPath>..\packages\SuperWebSocket.0.9.0.2\lib\net40\SuperSocket.Common.dll</HintPath>
       <Private>True</Private>
@@ -132,50 +100,10 @@
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
-    <Reference Include="System.Linq.Dynamic, Version=1.1.14.15853, Culture=neutral, PublicKeyToken=b72be0322d1b32a8, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Linq.Dynamic.Library.1.1.14\lib\net40\System.Linq.Dynamic.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System.Net.Http" />
-    <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.ApplicationServices" />
-    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.Helpers.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Web.Http.WebHost, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.3\lib\net45\System.Web.Http.WebHost.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Web.Mvc, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.3\lib\net45\System.Web.Mvc.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.3\lib\net45\System.Web.Razor.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="WebSocket4Net, Version=0.14.1.0, Culture=neutral, PublicKeyToken=eb4e154b696bf72a, processorArchitecture=MSIL">
@@ -229,57 +157,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="TestData\49025109020000_13345_Log.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TestData\490251090200_Well.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TestData\490251090200_Wellbore.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TestData\49025109170000_13344_Log.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TestData\490251091700_Well.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TestData\490251091700_Wellbore.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TestData\49025230310000_283712_Log.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TestData\490252303100_Well.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TestData\490252303100_Wellbore.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TestData\Generated_Time_Log_Log.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TestData\Generated_Time_Log_Well.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TestData\Generated_Time_Log_Wellbore.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TestData\LargeLog.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TestData\LargeLog_append.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TestData\Test-exceed-max-doc-size-log-0001.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TestData\Test-exceed-max-doc-size-well-0001.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="TestData\Test-exceed-max-doc-size-wellbore-0001.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
@@ -314,14 +191,15 @@
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>powershell.exe -file "$(SolutionDir)\External\InsertCopyright.ps1" -target $(ProjectDir) -productname "PDS.Witsml.Server"</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>if "$(ConfigurationName)" == "Debug" (
-    COPY "$(TargetPath)" "$(TargetDir)temp.dll"
-    "$(SolutionDir)External\ILMerge\ILMerge.exe" /targetplatform:v4 /out:"$(TargetPath)" "$(TargetDir)temp.dll" "$(TargetDir)PDS.Witsml.Server.IntegrationTest.dll"
-    DEL "$(TargetDir)temp.dll"
-)</PostBuildEvent>
+    <PostBuildEvent>rem if "$(ConfigurationName)" == "Debug" (
+rem     COPY "$(TargetPath)" "$(TargetDir)temp.dll"
+rem     "$(SolutionDir)External\ILMerge\ILMerge.exe" /targetplatform:v4 /out:"$(TargetPath)" "$(TargetDir)temp.dll" "$(TargetDir)PDS.Witsml.Server.IntegrationTest.dll"
+rem     DEL "$(TargetDir)temp.dll"
+rem )</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
