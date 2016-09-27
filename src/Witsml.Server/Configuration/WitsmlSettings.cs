@@ -114,6 +114,11 @@ namespace PDS.Witsml.Server.Configuration
         public static int MaxStationCount = Properties.Settings.Default.MaxStationCount;
 
         /// <summary>
+        /// The time in milliseconds to wait during the StreamChannelData loop
+        /// </summary>
+        public static int StreamChannelDataWaitLength = Properties.Settings.Default.StreamChannelDataWaitLength;
+
+        /// <summary>
         /// Gets the size of the range.
         /// </summary>
         /// <param name="isTimeIndex"><c>true</c> if is time index.</param>

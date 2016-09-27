@@ -415,6 +415,9 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 // Remove any contexts from the list that have completed returning all data
                 completedContexts
                     .ForEach(c => contextList.Remove(c));
+
+                // Delay to prevent CPU overhead
+                await Task.Delay(WitsmlSettings.StreamChannelDataWaitLength, token);
             }
         }
 

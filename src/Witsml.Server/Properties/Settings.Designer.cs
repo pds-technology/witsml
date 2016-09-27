@@ -212,5 +212,14 @@ namespace PDS.Witsml.Server.Properties {
                 return ((long)(this["ChannelDataTimeRangeStepSize"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int StreamChannelDataWaitLength {
+            get {
+                return ((int)(this["StreamChannelDataWaitLength"]));
+            }
+        }
     }
 }
