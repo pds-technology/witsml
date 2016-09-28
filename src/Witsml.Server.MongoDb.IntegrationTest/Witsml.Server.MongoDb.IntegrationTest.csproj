@@ -251,7 +251,10 @@
     </PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>rem if "$(ConfigurationName)" == "Debug" (
+    <PostBuildEvent>xcopy $(TargetDir)*.dll $(SolutionDir)..\ext\witsml\src\Witsml.Server.IntegrationTest\$(OutDir) /y
+xcopy $(TargetDir)*.pdb $(SolutionDir)..\ext\witsml\src\Witsml.Server.IntegrationTest\$(OutDir) /y
+
+rem if "$(ConfigurationName)" == "Debug" (
 rem     COPY "$(TargetPath)" "$(TargetDir)temp.dll"
 rem     "$(SolutionDir)External\ILMerge\ILMerge.exe" /targetplatform:v4 /out:"$(TargetPath)" "$(TargetDir)temp.dll" "$(TargetDir)PDS.Witsml.Server.IntegrationTest.dll"
 rem     DEL "$(TargetDir)temp.dll"
