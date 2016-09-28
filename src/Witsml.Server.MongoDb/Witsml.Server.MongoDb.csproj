@@ -292,8 +292,8 @@
     </PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>xcopy $(TargetDir)*.dll $(SolutionDir)..\ext\witsml\src\Witsml.Server.IntegrationTest\$(OutDir) /y
+xcopy $(TargetDir)*.pdb $(SolutionDir)..\ext\witsml\src\Witsml.Server.IntegrationTest\$(OutDir) /y</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
