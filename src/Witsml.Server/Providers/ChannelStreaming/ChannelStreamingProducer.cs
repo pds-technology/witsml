@@ -417,7 +417,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     .ForEach(c => contextList.Remove(c));
 
                 // Delay to prevent CPU overhead
-                await Task.Delay(WitsmlSettings.StreamChannelDataWaitLength, token);
+                await Task.Delay(WitsmlSettings.StreamChannelDataDelayMilliseconds, token);
             }
         }
 

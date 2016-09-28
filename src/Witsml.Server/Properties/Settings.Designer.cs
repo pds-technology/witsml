@@ -216,9 +216,9 @@ namespace PDS.Witsml.Server.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("100")]
-        public int StreamChannelDataWaitLength {
+        public int StreamChannelDataDelayMilliseconds {
             get {
-                return ((int)(this["StreamChannelDataWaitLength"]));
+                return ((int)(this["StreamChannelDataDelayMilliseconds"]));
             }
         }
     }

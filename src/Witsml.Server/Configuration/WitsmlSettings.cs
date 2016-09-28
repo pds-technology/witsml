@@ -116,7 +116,7 @@ namespace PDS.Witsml.Server.Configuration
         /// <summary>
         /// The time in milliseconds to wait during the StreamChannelData loop
         /// </summary>
-        public static int StreamChannelDataWaitLength = Properties.Settings.Default.StreamChannelDataWaitLength;
+        public static int StreamChannelDataDelayMilliseconds = Properties.Settings.Default.StreamChannelDataDelayMilliseconds;
 
         /// <summary>
         /// Gets the size of the range.

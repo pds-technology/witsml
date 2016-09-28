@@ -65,7 +65,7 @@
     <Setting Name="ChannelDataTimeRangeStepSize" Type="System.Int64" Scope="Application">
       <Value Profile="(Default)">5000000</Value>
     </Setting>
-    <Setting Name="StreamChannelDataWaitLength" Type="System.Int32" Scope="Application">
+    <Setting Name="StreamChannelDataDelayMilliseconds" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">100</Value>
     </Setting>
   </Settings>
