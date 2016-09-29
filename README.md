@@ -3,6 +3,7 @@ The "PDS.Witsml.Web" solution builds PDS WITSML Server with MongoDB for data sto
 
 ##### PDS.Witsml.Server.MongoDb
 Contains the WitsmlDataAdapter implementation for MongoDB.
+
 - MongoDbDataAdapter - is a data adapter that encapsulates CRUD functionality for WITSML objects.
 ````C#
     /// <summary>
@@ -51,10 +52,10 @@ Contains the WitsmlDataAdapter implementation for MongoDB.
         Committed = true;
     }
 ````
+
 ##### PDS.Witsml.Server.MongoDb.IntegrationTest
 Integration tests for PDS.Witsml.Server.MongoDb.
-<br>
-<br>
+
 ##### PDS.Witsml.Web
 Configures and hosts PDS WITSML Server on IIS.
 
