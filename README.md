@@ -1,32 +1,45 @@
-# You've added your first ReadMe file!
-A README.md file is intended to quickly orient readers to what your project can do.  New to Markdown? [Learn more](http://go.microsoft.com/fwlink/p/?LinkId=524306&clcid=0x409)
 
-## Edit this ReadMe and commit your change to a topic branch
-In Git, branches are cheap.  You should use them whenever you're making changes to your repository.  Edit this file by clicking on the edit icon.
+## WITSML
+The “PDS.Witsml” solution provides reusable components referenced by all PDS WITSML applications containing the following projects: 
 
-Then make some changes to this ReadMe file.
+##### Framework
+Provides the composition container used to resolve dependencies.
+<br/>
+<br/>
+##### Framework Web
+Configures the composition container to resolve dependencies for web projects and provides security.
+<br/>
+<br/>
+##### WITSML
+Contains basic classes related to WITSML and are referenced by other projects, including but not limiting to the following:
+- ChannelDataReader - facilitates parsing and reading of log channel data
+- DataObjectNavigator - a framework for navigating a WITSML document
+- WitsmlParser - static helper methods to parse WITSML XML strings
+- Extension methods – commonly used methods for WITSML classes
+<br/>
+<br/>
+##### WITSML Server
+Hosts WITSML store service implementation, including service interfaces and high level data provider implementation, including:
+- WitsmlDataAdapter – encapsulates basic CRUD functionality for WITSML data objects
+- WitsmlDataProvider – implements support for WITSML API functions
+- WitsmlQueryParser – handles parsing of WITSML input in a request
+- EtpDataProvider – implements support for ETP API functions
+<br/>
+<br/>
+##### WITSML Server Integration Test
+Contains integration tests for PDS.Witsml.Server.
+<br/>
+<br/>
+##### WITSML Server Web
+Implements configuration and security for WITSML and ETP endpoints.
+<br/>
+<br/>
+##### WITSML Server Unit Test
+Contains unit tests for the solution
 
-> Make some **edits** to _this_ blockquote
+---
 
-When you are done, click the dropdown arrow next to the save button - that will allow you to commit your changes to a new branch.
+### Copyright and License
+Copyright &copy; 2016 Petrotechnical Data Systems
 
-## Create a pull request to contribute your changes back into master
-Pull requests are the way to move changes from a topic branch back into the master branch.
-
-Click on the **Pull Requests** page in the **CODE** hub, then click "New Pull Request" to create a new pull request from your topic branch to the master branch.
-
-When you are done adding details, click "Create Pull request". Once a pull request is sent, reviewers can see your changes, recommend modifications, or even push follow-up commits.
-
-First time creating a pull request?  [Learn more](http://go.microsoft.com/fwlink/?LinkId=533211&clcid=0x409)
-
-### Congratulations! You've completed the grand tour of the CODE hub!
-
-# Next steps
-
-If you haven't done so yet:
-* [Install Visual Studio](http://go.microsoft.com/fwlink/?LinkId=309297&clcid=0x409&slcid=0x409)
-* [Install Git](http://git-scm.com/downloads)
-
-Then clone this repo to your local machine to get started with your own project.
-
-Happy coding!
+Released under the Apache License, Version 2.0
