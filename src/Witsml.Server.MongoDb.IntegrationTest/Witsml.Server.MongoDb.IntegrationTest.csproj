@@ -203,6 +203,10 @@
       <Project>{93faae2f-13aa-46df-a94b-36155b51ebfa}</Project>
       <Name>Witsml.Server</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\ext\witsml\src\Witsml.UnitTest\Witsml.UnitTest.csproj">
+      <Project>{750f795f-0c36-4cb3-9372-c4a5a716c635}</Project>
+      <Name>Witsml.UnitTest</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\ext\witsml\src\Witsml\Witsml.csproj">
       <Project>{0ef1d73f-e7a0-40b0-803b-7ce4b6b27112}</Project>
       <Name>Witsml</Name>
@@ -251,11 +255,8 @@
     </PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>rem if "$(ConfigurationName)" == "Debug" (
-rem     COPY "$(TargetPath)" "$(TargetDir)temp.dll"
-rem     "$(SolutionDir)External\ILMerge\ILMerge.exe" /targetplatform:v4 /out:"$(TargetPath)" "$(TargetDir)temp.dll" "$(TargetDir)PDS.Witsml.Server.IntegrationTest.dll"
-rem     DEL "$(TargetDir)temp.dll"
-rem )</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
