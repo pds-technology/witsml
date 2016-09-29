@@ -1,32 +1,66 @@
-# You've added your first ReadMe file!
-A README.md file is intended to quickly orient readers to what your project can do.  New to Markdown? [Learn more](http://go.microsoft.com/fwlink/p/?LinkId=524306&clcid=0x409)
+## WITSML Server
+The "PDS.Witsml.Web" solution builds PDS WITSML Server with MongoDB for data storage and configures Witsml.Web as an IIS web application. It contains the following projects: 
 
-## Edit this ReadMe and commit your change to a topic branch
-In Git, branches are cheap.  You should use them whenever you're making changes to your repository.  Edit this file by clicking on the edit icon.
+##### PDS.Witsml.Server.MongoDb
+Contains the WitsmlDataAdapter implementation for MongoDB.
+- MongoDbDataAdapter - is a data adapter that encapsulates CRUD functionality for WITSML objects.
+````C#
+    /// <summary>
+    /// Updates a data object in the data store.
+    /// </summary>
+    /// <param name="parser">The input template parser.</param>
+    /// <param name="dataObject">The data object to be updated.</param>
+    public override void Update(WitsmlQueryParser parser, T dataObject)
+    {
+        var uri = GetUri(dataObject);
+        using (var transaction = DatabaseProvider.BeginTransaction(uri))
+        {
+            UpdateEntity(parser, uri, transaction);
+            ValidateUpdatedEntity(Functions.UpdateInStore, uri);
+            transaction.Commit();
+        }
+    }
+````
+- MongoDbUtility - a utility class that encapsulates helper methods for parsing element in query and update
+````C#
+    /// <summary>
+    /// Gets the list of URI by object type.
+    /// </summary>
+    /// <param name="uris">The URI list.</param>
+    /// <param name="objectType">Type of the object.</param>
+    /// <returns>the list of URI specified by the object type.</returns>
+    public static List<EtpUri> GetObjectUris(IEnumerable<EtpUri> uris, string objectType)
+    {
+        return uris.Where(u => u.ObjectType == objectType).ToList();
+    }
+````
+- MongoTransaction - encapsulates transaction-like behavior on MongoDb
+````C#
+    /// <summary>
+    /// Commits the transaction in MongoDb.
+    /// </summary>
+    public void Commit()
+    {
+        var database = DatabaseProvider.GetDatabase();
+        foreach (var transaction in Transactions.Where(t => t.Status == TransactionStatus.Pending && t.Action == MongoDbAction.Delete))
+        {
+            Delete(database, transaction);
+        }
 
-Then make some changes to this ReadMe file.
+        ClearTransactions();
+        Committed = true;
+    }
+````
+##### PDS.Witsml.Server.MongoDb.IntegrationTest
+Integration tests for PDS.Witsml.Server.MongoDb.
+<br>
+<br>
+##### PDS.Witsml.Web
+Configures and hosts PDS WITSML Server on IIS.
 
-> Make some **edits** to _this_ blockquote
+---
 
-When you are done, click the dropdown arrow next to the save button - that will allow you to commit your changes to a new branch.
+### Copyright and License
+Copyright &copy; 2016 Petrotechnical Data Systems
 
-## Create a pull request to contribute your changes back into master
-Pull requests are the way to move changes from a topic branch back into the master branch.
-
-Click on the **Pull Requests** page in the **CODE** hub, then click "New Pull Request" to create a new pull request from your topic branch to the master branch.
-
-When you are done adding details, click "Create Pull request". Once a pull request is sent, reviewers can see your changes, recommend modifications, or even push follow-up commits.
-
-First time creating a pull request?  [Learn more](http://go.microsoft.com/fwlink/?LinkId=533211&clcid=0x409)
-
-### Congratulations! You've completed the grand tour of the CODE hub!
-
-# Next steps
-
-If you haven't done so yet:
-* [Install Visual Studio](http://go.microsoft.com/fwlink/?LinkId=309297&clcid=0x409&slcid=0x409)
-* [Install Git](http://git-scm.com/downloads)
-
-Then clone this repo to your local machine to get started with your own project.
-
-Happy coding!
+Released under the Apache License, Version 2.0
