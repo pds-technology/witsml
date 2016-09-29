@@ -188,11 +188,12 @@ namespace PDS.Witsml.Server.Data
                 var parent = Context.PropertyValues[count - 2];
                 if (parent == null)
                     return;
-
-                propertyInfo.SetValue(parent, propertyValue);
+                if (!IsTypeOfEnumValueName(propertyInfo))
+                    propertyInfo.SetValue(parent, propertyValue);
                 SetSpecifiedProperty(propertyInfo, parent, true);
             }
         }
+
 
         /// <summary>
         /// Unsets the property.
@@ -331,6 +332,20 @@ namespace PDS.Witsml.Server.Data
         private bool RemoveAll(List<XElement> elements)
         {
             return elements.Count == 1 && elements.Any(e => !e.HasElements && !e.HasAttributes);
+        }
+
+        /// <summary>
+        /// Determines whether the propertyInfo is a type of Energistics.DataAccess.EnumValue.EnumValue property Name.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <returns>
+        ///   <c>true</c> if propertyInfo is a type of Energistics.DataAccess.EnumValue.EnumValue property Name; otherwise, <c>false</c>.
+        /// </returns>
+        private static bool IsTypeOfEnumValueName(PropertyInfo propertyInfo)
+        {
+            return propertyInfo.DeclaringType != null && 
+                propertyInfo.DeclaringType.IsAssignableFrom(typeof(Energistics.DataAccess.EnumValue.EnumValue)) && 
+                propertyInfo.Name.Equals("Name");
         }
     }
 }

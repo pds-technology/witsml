@@ -545,7 +545,16 @@ namespace PDS.Witsml.Server.Data
                 merge.MergeDelete = mergeDelete;
                 merge.Merge(entity);
             }
+            catch (WitsmlException ex)
+            {
+                throw new WitsmlException(ex.ErrorCode, ex);
+            }
             catch (MongoException ex)
+            {
+                Logger.ErrorFormat("Error replacing {0} MongoDb collection: {1}", dbCollectionName, ex);
+                throw new WitsmlException(ErrorCodes.ErrorReplacingInDataStore, ex);
+            }
+            catch (Exception ex)
             {
                 Logger.ErrorFormat("Error replacing {0} MongoDb collection: {1}", dbCollectionName, ex);
                 throw new WitsmlException(ErrorCodes.ErrorReplacingInDataStore, ex);
