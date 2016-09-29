@@ -14,61 +14,77 @@ Contains basic classes related to WITSML and are referenced by other projects, i
 - ChannelDataReader - facilitates parsing and reading of log channel data
 ````C#
     /// <summary>
-    /// Adds ChannelDataChunks using the specified reader.
+    /// Gets multiple readers for each LogData from a <see cref="Witsml141.Log"/> instance.
     /// </summary>
-    /// <param name="reader">The <see cref="ChannelDataReader" /> used to parse the data.</param>
-    /// <param name="transaction">The transaction.</param>
-    /// <exception cref="WitsmlException"></exception>
-    public void Add(ChannelDataReader reader, MongoTransaction transaction = null)
+    /// <param name="log">The log.</param>
+    /// <returns>An <see cref="IEnumerable{ChannelDataReader}"/>.</returns>
+    public static IEnumerable<ChannelDataReader> GetReaders(this Witsml141.Log log)
     {
-        if (reader == null || reader.RecordsAffected <= 0) return;
+        if (log?.LogData == null) yield break;
 
-        try
+        _log.DebugFormat("Creating ChannelDataReaders for {0}", log.GetType().FullName);
+
+        var isTimeIndex = log.IsTimeLog();
+        var increasing = log.IsIncreasing();
+
+        foreach (var logData in log.LogData)
         {
-            BulkWriteChunks(
-                ToChunks(
-                    reader.AsEnumerable()),
-                reader.Uri,
-                string.Join(",", reader.Mnemonics),
-                string.Join(",", reader.Units),
-                string.Join(",", reader.NullValues),
-                transaction);
+            if (logData?.Data == null || !logData.Data.Any())
+                continue;
 
-            CreateChannelDataChunkIndex();
+            var mnemonics = ChannelDataReader.Split(logData.MnemonicList);
+            var units = ChannelDataReader.Split(logData.UnitList);
+            var nullValues = log.GetNullValues(mnemonics).Skip(1).ToArray();
+
+            // Split index curve from other value curves
+            var indexCurve = log.LogCurveInfo.GetByMnemonic(log.IndexCurve) ?? new Witsml141.ComponentSchemas.LogCurveInfo
+            {
+                Mnemonic = new Witsml141.ComponentSchemas.ShortNameStruct(mnemonics.FirstOrDefault()),
+                Unit = units.FirstOrDefault()
+            };
+
+            // Skip index curve when passing mnemonics to reader
+            mnemonics = mnemonics.Skip(1).ToArray();
+            units = units.Skip(1).ToArray();
+
+            yield return new ChannelDataReader(logData.Data, mnemonics.Length + 1, mnemonics, units, nullValues, log.GetUri(), dataDelimiter: log.GetDataDelimiterOrDefault())
+                // Add index curve to separate collection
+                .WithIndex(indexCurve.Mnemonic.Value, indexCurve.Unit, increasing, isTimeIndex);
         }
-        ...
+    }
 ````
 - DataObjectNavigator - a framework for navigating a WITSML document
 ````C#
     /// <summary>
-    /// Validates the uom/value pair for the element.
+    /// Navigates the element.
     /// </summary>
     /// <param name="element">The element.</param>
-    /// <param name="uomProperty">The uom property.</param>
-    /// <param name="measureValue">The measure value.</param>
-    /// <returns>The uom value if valid.</returns>
-    /// <exception cref="WitsmlException"></exception>
-    protected string ValidateMeasureUom(XElement element, PropertyInfo uomProperty, string measureValue)
+    /// <param name="type">The type.</param>
+    /// <param name="parentPath">The parent path.</param>
+    protected void NavigateElement(XElement element, Type type, string parentPath = null)
     {
-        var xmlAttribute = uomProperty.GetCustomAttribute<XmlAttributeAttribute>();
-        var isRequired = IsRequired(uomProperty);
+        if (IsIgnored(element.Name.LocalName)) return;
 
-        // validation not needed if uom attribute is not defined
-        if (xmlAttribute == null)
-            return null;
+        var properties = GetPropertyInfo(type);
+        var groupings = element.Elements().GroupBy(e => e.Name.LocalName);
 
-        var uomValue = element.Attributes()
-            .Where(x => x.Name.LocalName == xmlAttribute.AttributeName)
-            .Select(x => x.Value)
-            .FirstOrDefault();
-
-        // uom is required when a measure value is specified
-        if (isRequired && !string.IsNullOrWhiteSpace(measureValue) && string.IsNullOrWhiteSpace(uomValue))
+        foreach (var group in groupings)
         {
-            throw new WitsmlException(ErrorCodes.MissingUnitForMeasureData);
+            if (IsIgnored(group.Key, GetPropertyPath(parentPath, group.Key))) continue;
+
+            var propertyInfo = GetPropertyInfoForAnElement(properties, group.Key);
+
+            if (propertyInfo != null)
+            {
+                NavigateElementGroup(propertyInfo, group, parentPath);
+            } 
+            else
+            {
+                HandleInvalidElementGroup(group.Key);
+            }
         }
 
-        return uomValue;
+        NavigateAttributes(element, parentPath, properties);
     }
 ````
 - DataObjectValidator - a framework for validating a WITSML document
@@ -109,28 +125,30 @@ Contains basic classes related to WITSML and are referenced by other projects, i
 - WitsmlParser - static helper methods to parse WITSML XML strings
 ````C#
     /// <summary>
-    /// Serialize WITSML query results to XML and remove empty elements and xsi:nil attributes.
+    /// Parses the specified XML document using LINQ to XML.
     /// </summary>
-    /// <param name="obj">The object.</param>
-    /// <returns>The serialized XML string.</returns>
-    public static string ToXml(object obj)
+    /// <param name="xml">The XML string.</param>
+    /// <param name="debug">if set to <c>true</c> includes debug log output.</param>
+    /// <returns>An <see cref="XDocument" /> instance.</returns>
+    /// <exception cref="WitsmlException"></exception>
+    public static XDocument Parse(string xml, bool debug = true)
     {
-        _log.Debug("Serializing object to XML.");
-
-        if (obj == null) return string.Empty;
-
-        var xml = EnergisticsConverter.ObjectToXml(obj);
-        var xmlDoc = Parse(xml);
-        var root = xmlDoc.Root;
-
-        if (root == null) return string.Empty;
-
-        foreach (var element in root.Elements())
+        if (debug)
         {
-            RemoveEmptyElements(element);
+            _log.Debug("Parsing XML string.");
         }
 
-        return root.ToString();
+        try
+        {
+            // remove invalid character along with leading/trailing white space
+            xml = xml?.Trim().Replace("\x00", string.Empty) ?? string.Empty;
+
+            return XDocument.Parse(xml);
+        }
+        catch (XmlException ex)
+        {
+            throw new WitsmlException(ErrorCodes.InputTemplateNonConforming, ex);
+        }
     }
 ````
 - Extensions – methods commonly used for WITSML classes
@@ -199,10 +217,21 @@ Hosts WITSML store service implementation, including service interfaces and high
 ````
 - WitsmlExtensions – commonly used methods for WITSML classes
 ````C#
-    // Validate that uids in LogCurveInfo are unique
-    else if (logCurves != null && logCurves.HasDuplicateUids())
+    /// <summary>
+    /// Adds support for the specified function and data object to the capServer instance.
+    /// </summary>
+    /// <param name="capServer">The capServer instance.</param>
+    /// <param name="function">The WITSML Store API function.</param>
+    /// <param name="dataObject">The data object.</param>
+    /// <param name="maxDataNodes">The maximum data nodes.</param>
+    /// <param name="maxDataPoints">The maximum data points.</param>
+    public static void Add(this Witsml141.CapServer capServer, Functions function, string dataObject, int maxDataNodes, int maxDataPoints)
     {
-        yield return new ValidationResult(ErrorCodes.ChildUidNotUnique.ToString(), new[] { "LogCurveInfo", "Uid" });
+        Add(capServer, function, new Witsml141Schemas.ObjectWithConstraint(dataObject)
+        {
+            MaxDataNodes = maxDataNodes,
+            MaxDataPoints = maxDataPoints
+        });
     }
 ```` 
 ##### PDS.Witsml.Server.Integration.Test
