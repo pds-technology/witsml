@@ -1,16 +1,14 @@
 ## WITSML
-The ìPDS.Witsmlî solution provides reusable components referenced by all PDS WITSML applications containing the following projects: 
+The ‚ÄúPDS.Witsml‚Äù solution provides reusable components referenced by all PDS WITSML applications containing the following projects: 
 
 ##### PDS.Framework
 Provides the composition container used to resolve dependencies.
-<br/>
-<br/>
+
 ##### PDS.Framework.Web
 Configures the composition container to resolve dependencies for web projects and provides security.
-<br/>
-<br/>
+
 ##### PDS.Witsml
-Contains basic classes related to WITSML and are referenced by other projects, including but not limiting to the following:
+Contains common classes related to WITSML that are referenced by other projects, including but not limited to the following:
 - ChannelDataReader - facilitates parsing and reading of log channel data
 ````C#
     /// <summary>
@@ -151,7 +149,7 @@ Contains basic classes related to WITSML and are referenced by other projects, i
         }
     }
 ````
-- Extensions ñ methods commonly used for WITSML classes
+- Extensions ‚Äì methods commonly used for WITSML classes
 ````C#
     /// <summary>
     /// Converts the <see cref="Timestamp"/> to unix time microseconds.
@@ -165,7 +163,7 @@ Contains basic classes related to WITSML and are referenced by other projects, i
 ````
 ##### PDS.Witsml.Server
 Hosts WITSML store service implementation, including service interfaces and high level data provider implementation, including:
-- WitsmlDataAdapter ñ encapsulates basic CRUD functionality for WITSML data objects
+- WitsmlDataAdapter ‚Äì encapsulates basic CRUD functionality for WITSML data objects
 ````C#
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Well" />
@@ -178,14 +176,14 @@ Hosts WITSML store service implementation, including service interfaces and high
     {
         ...
 ````
-- WitsmlDataProvider ñ implements support for WITSML API functions
+- WitsmlDataProvider ‚Äì implements support for WITSML API functions
 ````C#
     var context = WitsmlOperationContext.Current.Request = request.ToContext();
     var version = string.Empty;
     var dataProvider = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
     var result = dataProvider.GetFromStore(context);
 ````
-- WitsmlQueryParser ñ handles parsing of WITSML input in a request
+- WitsmlQueryParser ‚Äì handles parsing of WITSML input in a request
 ````C#
     var Parser = new WitsmlQueryParser(root, context.ObjectType, context.Options);
     ...
@@ -195,7 +193,7 @@ Hosts WITSML store service implementation, including service interfaces and high
         yield return new ValidationResult(ErrorCodes.RecurringLogData.ToString(), new[] { "LogData" });
     }
 ````
-- EtpDataProvider ñ implements support for ETP API functions
+- EtpDataProvider ‚Äì implements support for ETP API functions
 ````C#
     /// <summary>
     /// Initializes a new instance of the <see cref="EtpDataProvider{TObject}"/> class.
@@ -215,7 +213,7 @@ Hosts WITSML store service implementation, including service interfaces and high
         DataAdapter.Delete(uri);
     }
 ````
-- WitsmlExtensions ñ commonly used methods for WITSML classes
+- WitsmlExtensions ‚Äì commonly used methods for WITSML classes
 ````C#
     /// <summary>
     /// Adds support for the specified function and data object to the capServer instance.
@@ -236,12 +234,10 @@ Hosts WITSML store service implementation, including service interfaces and high
 ```` 
 ##### PDS.Witsml.Server.Integration.Test
 Contains integration tests for PDS.Witsml.Server.
-<br/>
-<br/>
+
 ##### PDS.Witsml.Server.Web
 Implements configuration and security for WITSML and ETP endpoints.
-<br/>
-<br/>
+
 ##### PDS.Witsml.Server.UnitTest
 Contains unit tests for the solution.
 
