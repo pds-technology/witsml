@@ -9,6 +9,7 @@ Configures the composition container to resolve dependencies for web projects an
 
 ##### PDS.Witsml
 Contains common classes related to WITSML that are referenced by other projects, including but not limited to the following:
+
 - ChannelDataReader - facilitates parsing and reading of log channel data
 ````C#
     /// <summary>
@@ -161,8 +162,10 @@ Contains common classes related to WITSML that are referenced by other projects,
         return ((DateTimeOffset) timestamp).ToUnixTimeMicroseconds();
     }
 ````
+
 ##### PDS.Witsml.Server
 Hosts WITSML store service implementation, including service interfaces and high level data provider implementation, including:
+
 - WitsmlDataAdapter – encapsulates basic CRUD functionality for WITSML data objects
 ````C#
     /// <summary>
@@ -232,6 +235,7 @@ Hosts WITSML store service implementation, including service interfaces and high
         });
     }
 ```` 
+
 ##### PDS.Witsml.Server.Integration.Test
 Contains integration tests for PDS.Witsml.Server.
 
