@@ -142,6 +142,73 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
+        public void Trajectory141DataAdapter_UpdateInStore_Update_Trajectory_With_Existing_ExtensionNameValue()
+        {
+            // Add well and wellbore
+            AddParents();
+
+            // Add trajectory without stations
+            var stations = DevKit.TrajectoryStations(5, 0);
+            var station5 = stations.LastOrDefault();
+            Assert.IsNotNull(station5);
+            stations.Remove(station5);
+            Trajectory.TrajectoryStation = stations;
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            var result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+
+            var station1 = Trajectory.TrajectoryStation.FirstOrDefault();
+            Assert.IsNotNull(station1);
+            station1.Azi.Value++;
+            var ext1 = new List<ExtensionNameValue>
+            {
+                DevKit.ExtensionNameValue("Ext-1", "1.0", "m")
+            };
+            var station1Update = new TrajectoryStation
+            {
+                Uid = station1.Uid,
+                TypeTrajStation = station1.TypeTrajStation,
+                Azi = station1.Azi,
+                ExtensionNameValue = ext1
+            };
+
+            var update = new Trajectory
+            {
+                Uid = Trajectory.Uid,
+                UidWell = Trajectory.UidWell,
+                UidWellbore = Trajectory.UidWellbore,
+                TrajectoryStation = new List<TrajectoryStation> { station1Update, station5 }
+            };
+
+            DevKit.UpdateAndAssert<TrajectoryList, Trajectory>(update);
+
+            result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(5, result.TrajectoryStation.Count);
+            var updatedStation1 = result.TrajectoryStation.FirstOrDefault(s => s.Uid == station1.Uid);
+            Assert.IsNotNull(updatedStation1);
+            Assert.AreEqual(station1.Azi.Value, updatedStation1.Azi.Value);
+            Assert.AreEqual(station1Update.ExtensionNameValue.Count, updatedStation1.ExtensionNameValue.Count);
+            var updatedStation5 = result.TrajectoryStation.FirstOrDefault(s => s.Uid == station5.Uid);
+            Assert.IsNotNull(updatedStation5);
+
+            // Modify ExtensionNameValue's value and update
+            ext1[0].Value.Value = "2.0";
+            DevKit.UpdateAndAssert<TrajectoryList, Trajectory>(update);
+
+            result = DevKit.GetAndAssert(Trajectory);
+            Assert.AreEqual(5, result.TrajectoryStation.Count);
+            updatedStation1 = result.TrajectoryStation.FirstOrDefault(s => s.Uid == station1.Uid);
+            Assert.IsNotNull(updatedStation1);
+            Assert.AreEqual(station1.Azi.Value, updatedStation1.Azi.Value);
+            Assert.AreEqual(station1Update.ExtensionNameValue.Count, updatedStation1.ExtensionNameValue.Count);
+            var updatedExtensionNameValue = updatedStation1.ExtensionNameValue[0];
+            Assert.IsNotNull(updatedExtensionNameValue);
+            Assert.AreEqual("2.0", updatedExtensionNameValue.Value?.Value);
+        }
+
+        [TestMethod]
         public void Trajectory141DataAdapter_UpdateInStore_Error_443_Invalid_UOM()
         {
             // Add well and wellbore
