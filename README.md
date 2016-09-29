@@ -134,7 +134,7 @@ Contains basic classes related to WITSML and are referenced by other projects, i
         return root.ToString();
     }
 ````
-- Extension methods – commonly used methods for WITSML classes
+- Extensions – methods commonly used for WITSML classes
 ````C#
     /// <summary>
     /// Converts the <see cref="Timestamp"/> to unix time microseconds.
@@ -198,7 +198,7 @@ Hosts WITSML store service implementation, including service interfaces and high
         DataAdapter.Delete(uri);
     }
 ````
-- Witsml Extensions – commonly used methods for WITSML classes
+- WitsmlExtensions – commonly used methods for WITSML classes
 ````C#
     // Validate that uids in LogCurveInfo are unique
     else if (logCurves != null && logCurves.HasDuplicateUids())
