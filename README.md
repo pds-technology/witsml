@@ -34,7 +34,7 @@ Contains the WitsmlDataAdapter implementation for MongoDB.
         return uris.Where(u => u.ObjectType == objectType).ToList();
     }
 ````
-- MongoTransaction - encapsulates transaction-like behavior on MongoDb
+- MongoTransaction - encapsulates transaction-like behavior for MongoDB
 ````C#
     /// <summary>
     /// Commits the transaction in MongoDb.
