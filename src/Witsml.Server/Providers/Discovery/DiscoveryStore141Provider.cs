@@ -96,6 +96,10 @@ namespace PDS.Witsml.Server.Providers.Discovery
             var uri = new EtpUri(args.Message.Uri);
             var parentUri = uri.Parent;
 
+            // Append query string, if any
+            if (!string.IsNullOrWhiteSpace(uri.Query))
+                parentUri = new EtpUri(parentUri + uri.Query);
+
             if (!uri.IsRelatedTo(EtpUris.Witsml141))
             {
                 return;

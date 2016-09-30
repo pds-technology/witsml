@@ -97,6 +97,10 @@ namespace PDS.Witsml.Server.Providers.Discovery
             var uri = new EtpUri(args.Message.Uri);
             var parentUri = uri.Parent;
 
+            // Append query string, if any
+            if (!string.IsNullOrWhiteSpace(uri.Query))
+                parentUri = new EtpUri(parentUri + uri.Query);
+
             if (!uri.IsRelatedTo(EtpUris.Witsml200))
             {
                 return;
@@ -117,6 +121,10 @@ namespace PDS.Witsml.Server.Providers.Discovery
                     (ObjectFolders.Time.EqualsIgnoreCase(uri.ObjectType) || ObjectFolders.Depth.EqualsIgnoreCase(uri.ObjectType)))
                 {
                     var wellboreUri = parentUri.Parent;
+
+                    // Append query string, if any
+                    if (!string.IsNullOrWhiteSpace(uri.Query))
+                        wellboreUri = new EtpUri(wellboreUri + uri.Query);
 
                     _logDataProvider.GetAll(wellboreUri)
                         .Where(x => x.TimeDepth.EqualsIgnoreCase(uri.ObjectType))
