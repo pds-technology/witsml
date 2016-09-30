@@ -89,12 +89,9 @@ namespace PDS.Witsml.Server.Data.Wellbores
         protected override IEnumerable<ValidationResult> ValidateForDelete()
         {
             var uri = DataObject.GetUri();
-            var cascadeDeleteOff = OptionsIn.CascadedDelete.False.Value.ToLower();
-            var parserCascadedDelete = Parser.CascadedDelete().ToString().ToLower();
-
             yield return ValidateObjectExistence(uri);
 
-            if (!Parser.HasElements() && cascadeDeleteOff.Equals(parserCascadedDelete))
+            if (!Parser.HasElements() && !Parser.CascadedDelete())
             {
                 // Validate that there are no child data-objects if cascading deletes are not invoked.
                 foreach (var dataAdapter in Providers.Cast<IWitsmlDataAdapter>())

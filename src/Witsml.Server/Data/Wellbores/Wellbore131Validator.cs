@@ -89,27 +89,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         protected override IEnumerable<ValidationResult> ValidateForDelete()
         {
             var uri = DataObject.GetUri();
-            var cascadeDeleteOff = OptionsIn.CascadedDelete.False.Value.ToLower();
-            var parserCascadedDelete = Parser.CascadedDelete().ToString().ToLower();
-
-            if (!Parser.HasElements() && cascadeDeleteOff.Equals(parserCascadedDelete))
-            {
-                yield return ValidateObjectExistence(uri);
-
-                // Validate that there are no child data-objects if cascading deletes are not invoked.
-                foreach (var dataAdapter in Providers.Cast<IWitsmlDataAdapter>())
-                {
-                    if (dataAdapter.DataObjectType == typeof(Well) || dataAdapter.DataObjectType == typeof(Wellbore))
-                        continue;
-
-                    if (dataAdapter.Any(uri))
-                        yield return new ValidationResult(ErrorCodes.NotBottomLevelDataObject.ToString());
-                }
-            }
-            else
-            {
-                yield return ValidateObjectExistence(uri);
-            }
+            yield return ValidateObjectExistence(uri);
         }
 
         private ValidationResult ValidateObjectExistence(EtpUri uri)
