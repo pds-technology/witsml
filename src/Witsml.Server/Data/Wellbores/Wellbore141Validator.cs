@@ -92,10 +92,10 @@ namespace PDS.Witsml.Server.Data.Wellbores
             var cascadeDeleteOff = OptionsIn.CascadedDelete.False.Value.ToLower();
             var parserCascadedDelete = Parser.CascadedDelete().ToString().ToLower();
 
+            yield return ValidateObjectExistence(uri);
+
             if (!Parser.HasElements() && cascadeDeleteOff.Equals(parserCascadedDelete))
             {
-                yield return ValidateObjectExistence(uri);
-
                 // Validate that there are no child data-objects if cascading deletes are not invoked.
                 foreach (var dataAdapter in Providers.Cast<IWitsmlDataAdapter>())
                 {
@@ -105,10 +105,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
                     if (dataAdapter.Any(uri))
                         yield return new ValidationResult(ErrorCodes.NotBottomLevelDataObject.ToString());
                 }
-            }
-            else
-            {
-                yield return ValidateObjectExistence(uri);
             }
         }
 
