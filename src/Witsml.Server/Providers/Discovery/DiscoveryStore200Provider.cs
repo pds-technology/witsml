@@ -103,7 +103,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
             }
             if (uri.IsBaseUri)
             {
-                _wellDataProvider.GetAll()
+                _wellDataProvider.GetAll(uri)
                     .ForEach(x => args.Context.Add(ToResource(x)));
             }
             else if (string.IsNullOrWhiteSpace(uri.ObjectId))
