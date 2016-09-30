@@ -29,6 +29,7 @@ using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.Datatypes;
+using LinqToQuerystring;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
@@ -89,6 +90,9 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             {
                 //var uidWellbore = parentUri.Value.ObjectId;
                 //query = query.Where(x => x.Wellbore.Uuid == uidWellbore);
+
+                if (!string.IsNullOrWhiteSpace(parentUri.Value.Query))
+                    query = query.LinqToQuerystring(parentUri.Value.Query);
             }
 
             return query;

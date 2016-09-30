@@ -29,6 +29,7 @@ using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.Datatypes;
+using LinqToQuerystring;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 
@@ -95,7 +96,12 @@ namespace PDS.Witsml.Server.Data.Wellbores
             if (parentUri != null)
             {
                 var uidWell = parentUri.Value.ObjectId;
-                query = query.Where(x => x.UidWell == uidWell);
+
+                if (!string.IsNullOrWhiteSpace(uidWell))
+                    query = query.Where(x => x.UidWell == uidWell);
+
+                if (!string.IsNullOrWhiteSpace(parentUri.Value.Query))
+                    query = query.LinqToQuerystring(parentUri.Value.Query);
             }
 
             return query;
