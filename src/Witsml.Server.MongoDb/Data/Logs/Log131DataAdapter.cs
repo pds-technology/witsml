@@ -363,7 +363,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 Uri = indexCurve.GetUri(entity),
                 Mnemonic = indexCurve.Mnemonic,
                 Description = indexCurve.CurveDescription,
-                Uom = indexCurve.Unit,
+                Uom = Units.GetUnit(indexCurve.Unit),
                 Scale = scale,
                 IndexType = IsTimeLog(entity, true)
                     ? ChannelIndexTypes.Time

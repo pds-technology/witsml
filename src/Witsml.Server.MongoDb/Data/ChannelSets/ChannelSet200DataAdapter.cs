@@ -452,7 +452,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                 Uri = indexChannel.GetUri(entity),
                 Mnemonic = indexChannel.Mnemonic,
                 Description = indexChannel.Mnemonic,
-                Uom = indexChannel.Uom,
+                Uom = Units.GetUnit(indexChannel.Uom),
                 Scale = scale,
                 IndexType = indexChannel.IsTimeIndex(true)
                     ? ChannelIndexTypes.Time
