@@ -264,7 +264,7 @@ The U.S. Government Department of Commerce, Bureau of Industry and Security (BIS
 
 This source code is published here:  
 
-> <https://github.com/petrotechnicaldatasystems/>
+> <https://github.com/pds-technology/>
 
 In accordance with BIS Export Administration Regulations (EAR) Section 742.15(b), this source code is exempt from EAR:
 

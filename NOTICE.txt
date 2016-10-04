@@ -39,7 +39,7 @@ includes information security software using or performing cryptographic functio
 symmetric and/or asymmetric algorithms.
 
 The PDS.Witsml's source code is published here:
-  https://github.com/petrotechnicaldatasystems
+  https://github.com/pds-technology
 
 In accordance with BIS Export Administration Regulations (EAR) Section 742.15(b), this application is exempt from EAR:
  - The PDS.Witsml source code has been made publicly available in accordance with BIS EAR Section 734.3(b)(3) by
