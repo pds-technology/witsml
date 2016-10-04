@@ -13,6 +13,7 @@ The following Energistics © products were used in the creation of this work:
  - PRODML™ Web Service Specifications, Version 2.1.0.1
  - RESQML™ Data Schema Specifications, Version 1.1 
  - Standards DevKit
+ - ETP DevKit
  
 Energistics®, WITSML™, PRODML™, RESQML™ and their logos are trademarks or registered
 trademarks of Energistics Consortium, Inc.  All rights in the Energistics Trasfer Protocol
@@ -22,44 +23,28 @@ with Energistics and/or its suppliers and shall remain subject to the terms of t
 License Agreement available at:
 http://www.energistics.org/product-license-agreement. 
 
-HDF5
-HDF5 (Hierarchical Data Format 5) Software Library and Utilities
-Copyright 2006-2015 by The HDF Group.
+Cryptographic Notice
+-----------------------------------------------------------
+PDS.Witsml makes use of cryptographic software.
 
-NCSA HDF5 (Hierarchical Data Format 5) Software Library and Utilities
-Copyright 1998-2006 by the Board of Trustees of the University of Illinois.
+The country in which you currently reside may have restrictions on the import, possession,
+use, and/or re-export to another country, of encryption software.  BEFORE using any 
+encryption software, please check your country's laws, regulations and policies concerning
+the import, possession, or use, and re-export of encryption software, to see if this is
+permitted.  See http://www.wassenaar.org for more information.
 
-All rights reserved.
+The U.S. Government Department of Commerce, Bureau of Industry and Security (BIS), has 
+classified this application as Export Commodity Control Number (ECCN) 5D002.c.1, which
+includes information security software using or performing cryptographic functions with
+symmetric and/or asymmetric algorithms.
 
-Redistribution and use in source and binary forms, with or without 
-modification, are permitted for any purpose (including commercial purposes) 
-provided that the following conditions are met:
+The PDS.Witsml's source code is published here:
+  https://github.com/petrotechnicaldatasystems
 
-1. Redistributions of source code must retain the above copyright notice, 
-   this list of conditions, and the following disclaimer.
+In accordance with BIS Export Administration Regulations (EAR) Section 742.15(b), this application is exempt from EAR:
+ - The PDS.Witsml source code has been made publicly available in accordance with BIS EAR Section 734.3(b)(3) by
+   publishing it in accordance with BIS EAR Section 734.7(a)(4) at the above source code URL.
+ - The BIS and the ENC Encryption Request Coordinator have been notified via e-mail of the source code URL.
 
-2. Redistributions in binary form must reproduce the above copyright notice, 
-   this list of conditions, and the following disclaimer in the documentation 
-   and/or materials provided with the distribution.
-
-3. In addition, redistributions of modified forms of the source or binary 
-   code must carry prominent notices stating that the original code was 
-   changed and the date of the change.
-
-4. All publications or advertising materials mentioning features or use of 
-   this software are asked, but not required, to acknowledge that it was 
-   developed by The HDF Group and by the National Center for Supercomputing 
-   Applications at the University of Illinois at Urbana-Champaign and 
-   credit the contributors.
-
-5. Neither the name of The HDF Group, the name of the University, nor the 
-   name of any Contributor may be used to endorse or promote products derived 
-   from this software without specific prior written permission from 
-   The HDF Group, the University, or the Contributor, respectively.
-
-DISCLAIMER: 
-THIS SOFTWARE IS PROVIDED BY THE HDF GROUP AND THE CONTRIBUTORS 
-"AS IS" WITH NO WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED.  In no 
-event shall The HDF Group or the Contributors be liable for any damages 
-suffered by the users arising out of the use of this software, even if 
-advised of the possibility of such damage.
+The following provides more details on the included cryptographic software:
+ - SSL/TLS is optionally used to secure web communications
