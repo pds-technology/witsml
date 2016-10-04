@@ -1,4 +1,12 @@
 ## WITSML Server
+
+**Quick Links:**&nbsp;
+[Blog](https://witsml.pds.technology/blog) |
+[Getting Started](https://witsml.pds.technology/docs/getting-started) |
+[Documentation](https://witsml.pds.technology/docs/documentation) |
+[Downloads](https://witsml.pds.technology/docs/downloads) |
+[Support](https://witsml.pds.technology/docs/support)
+
 The "PDS.Witsml.Web" solution builds PDS WITSML Server with MongoDB for data storage and configures Witsml.Web as an IIS web application. It contains the following projects: 
 
 ##### PDS.Witsml.Server.MongoDb
