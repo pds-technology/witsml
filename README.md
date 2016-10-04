@@ -1,4 +1,12 @@
 ## WITSML
+
+**Quick Links:**&nbsp;
+[Blog](https://witsml.pds.technology/blog) |
+[Getting Started](https://witsml.pds.technology/docs/getting-started) |
+[Documentation](https://witsml.pds.technology/docs/documentation) |
+[Downloads](https://witsml.pds.technology/docs/downloads) |
+[Support](https://witsml.pds.technology/docs/support)
+
 The “PDS.Witsml” solution provides reusable components referenced by all PDS WITSML applications containing the following projects: 
 
 ##### PDS.Framework
