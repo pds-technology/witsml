@@ -12,6 +12,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{B01AE4D3-D6E0-4E02-8051-FDB4AB7B7518}"
 	ProjectSection(SolutionItems) = preProject
 		External\GlobalAssemblyInfo.cs = External\GlobalAssemblyInfo.cs
+		..\NOTICE.txt = ..\NOTICE.txt
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
