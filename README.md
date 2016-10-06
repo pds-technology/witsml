@@ -7,6 +7,8 @@
 [Downloads](https://witsml.pds.technology/docs/downloads) |
 [Support](https://witsml.pds.technology/docs/support)
 
+> **Note:** Be sure to perform a recursive clone of the repository to retrieve the `witsml` submodule.
+
 The "PDS.Witsml.Web" solution builds PDS WITSML Server with MongoDB for data storage and configures Witsml.Web as an IIS web application. It contains the following projects: 
 
 ##### PDS.Witsml.Server.MongoDb
