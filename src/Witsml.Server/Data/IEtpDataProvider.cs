@@ -59,5 +59,11 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="uri">The data object URI.</param>
         void Delete(EtpUri uri);
+
+        /// <summary>
+        /// Ensures the data object exists with the specified URI, otherwise, it is created.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        void Ensure(EtpUri uri);
     }
 }

@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using Energistics.DataAccess.WITSML141;
+using Energistics.Datatypes;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
@@ -25,5 +26,15 @@ namespace PDS.Witsml.Server.Data.Wells
     /// </summary>
     public partial class Well141DataProvider
     {
+        /// <summary>
+        /// Sets the default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The data object URI.</param>
+        protected override void SetDefaultValues(Well dataObject, EtpUri uri)
+        {
+            base.SetDefaultValues(dataObject, uri);
+            dataObject.TimeZone = "00:00";
+        }
     }
 }

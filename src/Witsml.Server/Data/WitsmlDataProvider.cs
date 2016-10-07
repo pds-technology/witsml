@@ -16,15 +16,18 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using Energistics.DataAccess;
+using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using log4net;
 using PDS.Framework;
+using PDS.Witsml.Server.Providers.Store;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -177,10 +180,36 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Ensures the data object exists with the specified URI, otherwise, it is created.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        public virtual void Ensure(EtpUri uri)
+        {
+            if (Exists(uri)) return;
+            var parent = uri.Parent;
+
+            if (!parent.IsBaseUri)
+            {
+                var dataProvider = Container.Resolve<IEtpDataProvider>(new ObjectName(parent.ObjectType, parent.Version));
+                dataProvider.Ensure(parent);
+            }
+
+            // Create Object instance
+            var instance = Activator.CreateInstance<TObject>();
+            SetDefaultValues(instance, uri);
+
+            // Initialize data object
+            var dataObject = new DataObject();
+            StoreStoreProvider.SetDataObject(dataObject, instance, uri, uri.ObjectId);
+
+            Put(dataObject);
+        }
+
+        /// <summary>
         /// Gets the URI for the specified data object.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-        /// <returns></returns>
+        /// <returns>The data object URI.</returns>
         protected abstract EtpUri GetUri(TObject dataObject);
 
         /// <summary>
@@ -324,6 +353,22 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dataObject">The data object.</param>
         protected virtual void SetDefaultValues(TObject dataObject)
         {
+        }
+
+        /// <summary>
+        /// Sets the default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The data object URI.</param>
+        protected virtual void SetDefaultValues(TObject dataObject, EtpUri uri)
+        {
+            var abstractObject = dataObject as AbstractObject;
+            if (abstractObject == null) return;
+
+            abstractObject.Uuid = uri.ObjectId;
+            abstractObject.Citation = abstractObject.Citation.Create();
+            abstractObject.Citation.Title = uri.ObjectId;
+            abstractObject.Citation.Originator = uri;
         }
 
         /// <summary>
