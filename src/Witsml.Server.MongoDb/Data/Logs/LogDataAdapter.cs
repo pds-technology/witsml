@@ -205,6 +205,9 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="reader">The update reader.</param>
         public void UpdateChannelData(EtpUri uri, ChannelDataReader reader)
         {
+            //var dataProvider = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
+            //dataProvider.Ensure(uri);
+
             UpdateLogDataAndIndexRange(uri, new[] { reader });
         }
 
