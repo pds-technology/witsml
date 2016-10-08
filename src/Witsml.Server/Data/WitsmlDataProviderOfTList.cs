@@ -152,17 +152,6 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Sets the default values for the specified data object.
-        /// </summary>
-        /// <param name="dataObject">The data object.</param>
-        /// <param name="uri">The data object URI.</param>
-        protected override void SetDefaultValues(TObject dataObject, EtpUri uri)
-        {
-            dataObject.Uid = uri.ObjectId;
-            dataObject.Name = dataObject.Uid;
-        }
-
-        /// <summary>
         /// Creates a new <see cref="WitsmlQueryParser"/> from the specified data object.
         /// </summary>
         /// <param name="dataObject">The data object.</param>

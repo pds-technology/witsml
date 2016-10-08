@@ -27,13 +27,12 @@ namespace PDS.Witsml.Server.Data.Wells
     public partial class Well141DataProvider
     {
         /// <summary>
-        /// Sets the default values for the specified data object.
+        /// Sets additional default values for the specified data object and URI.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
         /// <param name="uri">The data object URI.</param>
-        protected override void SetDefaultValues(Well dataObject, EtpUri uri)
+        partial void SetAdditionalDefaultValues(Well dataObject, EtpUri uri)
         {
-            base.SetDefaultValues(dataObject, uri);
             dataObject.TimeZone = "Z";
         }
     }

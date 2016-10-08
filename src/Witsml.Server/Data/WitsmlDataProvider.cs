@@ -372,13 +372,6 @@ namespace PDS.Witsml.Server.Data
         /// <param name="uri">The data object URI.</param>
         protected virtual void SetDefaultValues(TObject dataObject, EtpUri uri)
         {
-            var abstractObject = dataObject as AbstractObject;
-            if (abstractObject == null) return;
-
-            abstractObject.Uuid = uri.ObjectId;
-            abstractObject.Citation = abstractObject.Citation.Create();
-            abstractObject.Citation.Title = uri.ObjectId;
-            abstractObject.Citation.Originator = uri;
         }
 
         /// <summary>

@@ -19,7 +19,9 @@
 using System.Linq;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML131;
+using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
+using Energistics.Datatypes;
 using PDS.Framework;
 using PDS.Witsml.Data.Logs;
 
@@ -53,6 +55,20 @@ namespace PDS.Witsml.Server.Data.Logs
                 // Ensure index curve is first
                 dataObject.LogCurveInfo.MoveToFirst(dataObject.IndexCurve?.Value);
             }
+        }
+
+        /// <summary>
+        /// Sets additional default values for the specified data object and URI.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The data object URI.</param>
+        partial void SetAdditionalDefaultValues(Log dataObject, EtpUri uri)
+        {
+            if (!dataObject.IndexType.HasValue)
+                dataObject.IndexType = LogIndexType.datetime;
+
+            if (dataObject.IndexCurve == null)
+                dataObject.IndexCurve = new IndexCurve("TIME");
         }
 
         /// <summary>

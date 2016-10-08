@@ -32,26 +32,6 @@ namespace PDS.Witsml.Server.Data.Logs
     public partial class Log141DataProvider
     {
         /// <summary>
-        /// Sets the default values for the specified data object.
-        /// </summary>
-        /// <param name="dataObject">The data object.</param>
-        /// <param name="uri">The data object URI.</param>
-        protected override void SetDefaultValues(Log dataObject, EtpUri uri)
-        {
-            base.SetDefaultValues(dataObject, uri);
-
-            // Wellbore
-            var parentUri = uri.Parent;
-            dataObject.UidWellbore = parentUri.ObjectId;
-            dataObject.NameWellbore = dataObject.UidWellbore;
-
-            // Well
-            parentUri = parentUri.Parent;
-            dataObject.UidWell = parentUri.ObjectId;
-            dataObject.NameWell = dataObject.UidWell;
-        }
-
-        /// <summary>
         /// Sets additional default values for the specified data object.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
@@ -77,6 +57,20 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
+        /// Sets additional default values for the specified data object and URI.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The data object URI.</param>
+        partial void SetAdditionalDefaultValues(Log dataObject, EtpUri uri)
+        {
+            if (!dataObject.IndexType.HasValue)
+                dataObject.IndexType = LogIndexType.datetime;
+
+            if (string.IsNullOrWhiteSpace(dataObject.IndexCurve))
+                dataObject.IndexCurve = "TIME";
+        }
+
+        /// <summary>
         /// Sets additional default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
@@ -90,6 +84,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var uri = dataObject.GetUri();
             var current = DataAdapter.Get(uri);
             var ns = parser.Root.GetDefaultNamespace();
+
             foreach (var lci in parser.Properties("logCurveInfo"))
             {
                 var uidAttribute = lci.Attribute("uid");
@@ -106,7 +101,9 @@ namespace PDS.Witsml.Server.Data.Logs
                 // Update entity with UID
                 curve = dataObject.LogCurveInfo.GetByMnemonic(mnemonicElement.Value);
                 if (curve != null)
+                {
                     curve.Uid = uid;
+                }
 
                 // Create a new XAttribute or update the existing one
                 if (uidAttribute == null)
