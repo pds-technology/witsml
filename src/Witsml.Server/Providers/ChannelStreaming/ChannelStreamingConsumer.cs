@@ -24,6 +24,7 @@ using Energistics.Common;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
 using Energistics.Protocol.ChannelStreaming;
+using Energistics.Protocol.Core;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Data.Channels;
@@ -39,7 +40,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
     [PartCreationPolicy(CreationPolicy.NonShared)]
     public class ChannelStreamingConsumer : ChannelStreamingConsumerHandler
     {
-        private static readonly int MaxMessageRate = Settings.Default.MaxMessageRate;
+        private static readonly int _maxMessageRate = Settings.Default.MaxMessageRate;
 
         private readonly IContainer _container;
         private readonly IDictionary<EtpUri, ChannelDataBlock> _dataBlocks;
@@ -64,14 +65,15 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         public override void OnSessionOpened(IList<SupportedProtocol> supportedProtocols)
         {
             // Is the client requesting the ChannelStreaming consumer role
-            if (supportedProtocols.Contains(Protocol, Role))
-            {
-                Start(maxMessageRate: MaxMessageRate);
+            if (!supportedProtocols.Contains(Protocol, Role)) return;
+            Start(maxMessageRate: _maxMessageRate);
 
-                if (!supportedProtocols.IsSimpleStreamer())
-                {
-                    ChannelDescribe(new[] { EtpUri.RootUri });
-                }
+            var coreHandler = Session.Handler<ICoreServer>() as CoreServerHandler;
+            var requestedProtocols = coreHandler?.RequestedProtocols;
+
+            if (requestedProtocols != null && !requestedProtocols.IsSimpleStreamer())
+            {
+                ChannelDescribe(new[] { EtpUri.RootUri });
             }
         }
 
@@ -119,8 +121,9 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 var dataBlock = _dataBlocks[parentUri];
 
                 var channel = ChannelMetadataRecords.FirstOrDefault(x => x.ChannelId == dataItem.ChannelId);
-                var indexes = DownscaleIndexValues(channel.Indexes, dataItem.Indexes);
+                if (channel == null) continue;
 
+                var indexes = DownscaleIndexValues(channel.Indexes, dataItem.Indexes);
                 dataBlock.Append(dataItem.ChannelId, indexes, dataItem.Value.Item);
             }
         }

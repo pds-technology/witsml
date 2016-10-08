@@ -165,17 +165,17 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Creates a new <see cref="DataObject" /> instance to wrap the specified data object.
+        /// Creates a new <see cref="WitsmlQueryParser"/> from the specified data object.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-        /// <param name="uri">The data object URI.</param>
-        /// <returns></returns>
-        protected override DataObject CreateDataObject(TObject dataObject, EtpUri uri)
+        /// <returns>A new <see cref="WitsmlQueryParser"/> instance.</returns>
+        protected override WitsmlQueryParser CreateQueryParser(TObject dataObject)
         {
-            var instance = new DataObject();
             var container = CreateCollection(dataObject.AsList());
-            StoreStoreProvider.SetDataObject(instance, container, uri, uri.ObjectId);
-            return instance;
+            var document = WitsmlParser.Parse(WitsmlParser.ToXml(container));
+            var objectType = ObjectTypes.GetObjectType(container);
+
+            return new WitsmlQueryParser(document.Root, objectType, null);
         }
 
         /// <summary>

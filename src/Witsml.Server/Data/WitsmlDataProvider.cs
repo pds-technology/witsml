@@ -196,12 +196,11 @@ namespace PDS.Witsml.Server.Data
 
             // Create object instance
             var instance = Activator.CreateInstance<TObject>();
-            // Set default values
             SetDefaultValues(instance, uri);
-            // Initialize data object
-            var dataObject = CreateDataObject(instance, uri);
 
-            Put(dataObject);
+            // Add to data store using parser
+            var parser = CreateQueryParser(instance);
+            Add(parser);
         }
 
         /// <summary>
@@ -347,16 +346,16 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Creates a new <see cref="DataObject"/> instance to wrap the specified data object.
+        /// Creates a new <see cref="WitsmlQueryParser"/> from the specified data object.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-        /// <param name="uri">The data object URI.</param>
-        /// <returns></returns>
-        protected virtual DataObject CreateDataObject(TObject dataObject, EtpUri uri)
+        /// <returns>A new <see cref="WitsmlQueryParser"/> instance.</returns>
+        protected virtual WitsmlQueryParser CreateQueryParser(TObject dataObject)
         {
-            var instance = new DataObject();
-            StoreStoreProvider.SetDataObject(instance, dataObject, uri, uri.ObjectId);
-            return instance;
+            var document = WitsmlParser.Parse(WitsmlParser.ToXml(dataObject));
+            var objectType = ObjectTypes.GetObjectType(dataObject as AbstractObject);
+
+            return new WitsmlQueryParser(document.Root, objectType, null);
         }
 
         /// <summary>
