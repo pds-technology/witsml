@@ -21,10 +21,8 @@ using System.Linq;
 using System.Xml.Linq;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
-using Energistics.Datatypes.Object;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
-using PDS.Witsml.Server.Providers.Store;
 
 namespace PDS.Witsml.Server.Data
 {

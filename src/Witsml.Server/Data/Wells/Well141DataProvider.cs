@@ -34,7 +34,7 @@ namespace PDS.Witsml.Server.Data.Wells
         protected override void SetDefaultValues(Well dataObject, EtpUri uri)
         {
             base.SetDefaultValues(dataObject, uri);
-            dataObject.TimeZone = "00:00";
+            dataObject.TimeZone = "Z";
         }
     }
 }

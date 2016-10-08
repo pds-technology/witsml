@@ -27,7 +27,6 @@ using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using log4net;
 using PDS.Framework;
-using PDS.Witsml.Server.Providers.Store;
 
 namespace PDS.Witsml.Server.Data
 {

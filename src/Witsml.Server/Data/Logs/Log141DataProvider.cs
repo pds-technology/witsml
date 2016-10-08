@@ -20,6 +20,7 @@ using System.Linq;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ReferenceData;
+using Energistics.Datatypes;
 using PDS.Framework;
 using PDS.Witsml.Data.Logs;
 
@@ -30,6 +31,26 @@ namespace PDS.Witsml.Server.Data.Logs
     /// </summary>
     public partial class Log141DataProvider
     {
+        /// <summary>
+        /// Sets the default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The data object URI.</param>
+        protected override void SetDefaultValues(Log dataObject, EtpUri uri)
+        {
+            base.SetDefaultValues(dataObject, uri);
+
+            // Wellbore
+            var parentUri = uri.Parent;
+            dataObject.UidWellbore = parentUri.ObjectId;
+            dataObject.NameWellbore = dataObject.UidWellbore;
+
+            // Well
+            parentUri = parentUri.Parent;
+            dataObject.UidWell = parentUri.ObjectId;
+            dataObject.NameWell = dataObject.UidWell;
+        }
+
         /// <summary>
         /// Sets additional default values for the specified data object.
         /// </summary>
