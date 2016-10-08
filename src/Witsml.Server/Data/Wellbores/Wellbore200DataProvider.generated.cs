@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML200;
+using Energistics.Datatypes;
 using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Wellbores
@@ -33,14 +34,12 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Wellbore"/>.
     /// </summary>
-
     /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{Wellbore}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Wellbore>))]
     [Export200(ObjectTypes.Wellbore, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Wellbore200DataProvider : EtpDataProvider<Wellbore>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Wellbore200DataProvider"/> class.
@@ -52,5 +51,26 @@ namespace PDS.Witsml.Server.Data.Wellbores
         {
         }
 
+        /// <summary>
+        /// Sets the default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The data object URI.</param>
+        protected override void SetDefaultValues(Wellbore dataObject, EtpUri uri)
+        {
+            dataObject.Uuid = uri.ObjectId;
+            dataObject.Citation = dataObject.Citation.Create();
+            dataObject.Citation.Title = uri.ObjectId;
+            dataObject.Citation.Originator = uri;
+
+            SetAdditionalDefaultValues(dataObject, uri);
+        }
+
+        /// <summary>
+        /// Sets additional default values for the specified data object and URI.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The data object URI.</param>
+        partial void SetAdditionalDefaultValues(Wellbore dataObject, EtpUri uri);
     }
 }

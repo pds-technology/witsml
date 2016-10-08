@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML200;
+using Energistics.Datatypes;
 using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Channels
@@ -33,14 +34,12 @@ namespace PDS.Witsml.Server.Data.Channels
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Channel"/>.
     /// </summary>
-
     /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{Channel}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Channel>))]
     [Export200(ObjectTypes.Channel, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Channel200DataProvider : EtpDataProvider<Channel>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Channel200DataProvider"/> class.
@@ -52,5 +51,26 @@ namespace PDS.Witsml.Server.Data.Channels
         {
         }
 
+        /// <summary>
+        /// Sets the default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The data object URI.</param>
+        protected override void SetDefaultValues(Channel dataObject, EtpUri uri)
+        {
+            dataObject.Uuid = uri.ObjectId;
+            dataObject.Citation = dataObject.Citation.Create();
+            dataObject.Citation.Title = uri.ObjectId;
+            dataObject.Citation.Originator = uri;
+
+            SetAdditionalDefaultValues(dataObject, uri);
+        }
+
+        /// <summary>
+        /// Sets additional default values for the specified data object and URI.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The data object URI.</param>
+        partial void SetAdditionalDefaultValues(Channel dataObject, EtpUri uri);
     }
 }

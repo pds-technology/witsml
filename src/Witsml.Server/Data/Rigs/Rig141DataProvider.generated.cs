@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML141;
+using Energistics.Datatypes;
 using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Rigs
@@ -33,7 +34,6 @@ namespace PDS.Witsml.Server.Data.Rigs
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Rig"/>.
     /// </summary>
-
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{RigList, Rig}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Rig>))]
@@ -41,7 +41,6 @@ namespace PDS.Witsml.Server.Data.Rigs
     [Export141(ObjectTypes.Rig, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Rig141DataProvider : WitsmlDataProvider<RigList, Rig>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Rig141DataProvider"/> class.
@@ -63,6 +62,29 @@ namespace PDS.Witsml.Server.Data.Rigs
             dataObject.CommonData = dataObject.CommonData.Create();
 
             SetAdditionalDefaultValues(dataObject);
+        }
+
+        /// <summary>
+        /// Sets the default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The data object URI.</param>
+        protected override void SetDefaultValues(Rig dataObject, EtpUri uri)
+        {
+            dataObject.Uid = uri.ObjectId;
+            dataObject.Name = dataObject.Uid;
+
+            // Wellbore
+            var parentUri = uri.Parent;
+            dataObject.UidWellbore = parentUri.ObjectId;
+            dataObject.NameWellbore = dataObject.UidWellbore;
+
+            // Well
+            parentUri = parentUri.Parent;
+            dataObject.UidWell = parentUri.ObjectId;
+            dataObject.NameWell = dataObject.UidWell;
+
+            SetAdditionalDefaultValues(dataObject, uri);
         }
 
 		/// <summary>
@@ -91,12 +113,18 @@ namespace PDS.Witsml.Server.Data.Rigs
         /// <param name="dataObject">The data object.</param>
         partial void SetAdditionalDefaultValues(Rig dataObject);
 
+        /// <summary>
+        /// Sets additional default values for the specified data object and URI.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The data object URI.</param>
+        partial void SetAdditionalDefaultValues(Rig dataObject, EtpUri uri);
+
 		/// <summary>
         /// Sets additional default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
 		/// <param name="parser">The input template.</param>
         partial void UpdateAdditionalDefaultValues(Rig dataObject, WitsmlQueryParser parser);
-
     }
 }

@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML141;
+using Energistics.Datatypes;
 using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Wellbores
@@ -33,7 +34,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Wellbore"/>.
     /// </summary>
-
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{WellboreList, Wellbore}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Wellbore>))]
@@ -41,7 +41,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
     [Export141(ObjectTypes.Wellbore, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Wellbore141DataProvider : WitsmlDataProvider<WellboreList, Wellbore>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Wellbore141DataProvider"/> class.
@@ -63,6 +62,24 @@ namespace PDS.Witsml.Server.Data.Wellbores
             dataObject.CommonData = dataObject.CommonData.Create();
 
             SetAdditionalDefaultValues(dataObject);
+        }
+
+        /// <summary>
+        /// Sets the default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The data object URI.</param>
+        protected override void SetDefaultValues(Wellbore dataObject, EtpUri uri)
+        {
+            dataObject.Uid = uri.ObjectId;
+            dataObject.Name = dataObject.Uid;
+
+            // Well
+            var parentUri = uri.Parent;
+            dataObject.UidWell = parentUri.ObjectId;
+            dataObject.NameWell = dataObject.UidWell;
+
+            SetAdditionalDefaultValues(dataObject, uri);
         }
 
 		/// <summary>
@@ -91,12 +108,18 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// <param name="dataObject">The data object.</param>
         partial void SetAdditionalDefaultValues(Wellbore dataObject);
 
+        /// <summary>
+        /// Sets additional default values for the specified data object and URI.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The data object URI.</param>
+        partial void SetAdditionalDefaultValues(Wellbore dataObject, EtpUri uri);
+
 		/// <summary>
         /// Sets additional default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
 		/// <param name="parser">The input template.</param>
         partial void UpdateAdditionalDefaultValues(Wellbore dataObject, WitsmlQueryParser parser);
-
     }
 }

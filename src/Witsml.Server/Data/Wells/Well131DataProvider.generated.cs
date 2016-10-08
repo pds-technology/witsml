@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML131;
+using Energistics.Datatypes;
 using PDS.Framework;
 
 namespace PDS.Witsml.Server.Data.Wells
@@ -33,7 +34,6 @@ namespace PDS.Witsml.Server.Data.Wells
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Well"/>.
     /// </summary>
-
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{WellList, Well}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Well>))]
@@ -41,7 +41,6 @@ namespace PDS.Witsml.Server.Data.Wells
     [Export131(ObjectTypes.Well, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Well131DataProvider : WitsmlDataProvider<WellList, Well>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Well131DataProvider"/> class.
@@ -63,6 +62,19 @@ namespace PDS.Witsml.Server.Data.Wells
             dataObject.CommonData = dataObject.CommonData.Create();
 
             SetAdditionalDefaultValues(dataObject);
+        }
+
+        /// <summary>
+        /// Sets the default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The data object URI.</param>
+        protected override void SetDefaultValues(Well dataObject, EtpUri uri)
+        {
+            dataObject.Uid = uri.ObjectId;
+            dataObject.Name = dataObject.Uid;
+
+            SetAdditionalDefaultValues(dataObject, uri);
         }
 
 		/// <summary>
@@ -91,12 +103,18 @@ namespace PDS.Witsml.Server.Data.Wells
         /// <param name="dataObject">The data object.</param>
         partial void SetAdditionalDefaultValues(Well dataObject);
 
+        /// <summary>
+        /// Sets additional default values for the specified data object and URI.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The data object URI.</param>
+        partial void SetAdditionalDefaultValues(Well dataObject, EtpUri uri);
+
 		/// <summary>
         /// Sets additional default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
 		/// <param name="parser">The input template.</param>
         partial void UpdateAdditionalDefaultValues(Well dataObject, WitsmlQueryParser parser);
-
     }
 }
