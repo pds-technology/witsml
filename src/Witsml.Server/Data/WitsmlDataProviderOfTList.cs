@@ -21,8 +21,10 @@ using System.Linq;
 using System.Xml.Linq;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
+using Energistics.Datatypes.Object;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
+using PDS.Witsml.Server.Providers.Store;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -160,6 +162,20 @@ namespace PDS.Witsml.Server.Data
         {
             dataObject.Uid = uri.ObjectId;
             dataObject.Name = dataObject.Uid;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="DataObject" /> instance to wrap the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The data object URI.</param>
+        /// <returns></returns>
+        protected override DataObject CreateDataObject(TObject dataObject, EtpUri uri)
+        {
+            var instance = new DataObject();
+            var container = CreateCollection(dataObject.AsList());
+            StoreStoreProvider.SetDataObject(instance, container, uri, uri.ObjectId);
+            return instance;
         }
 
         /// <summary>

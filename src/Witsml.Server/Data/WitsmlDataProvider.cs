@@ -194,13 +194,12 @@ namespace PDS.Witsml.Server.Data
                 dataProvider.Ensure(parent);
             }
 
-            // Create Object instance
+            // Create object instance
             var instance = Activator.CreateInstance<TObject>();
+            // Set default values
             SetDefaultValues(instance, uri);
-
             // Initialize data object
-            var dataObject = new DataObject();
-            StoreStoreProvider.SetDataObject(dataObject, instance, uri, uri.ObjectId);
+            var dataObject = CreateDataObject(instance, uri);
 
             Put(dataObject);
         }
@@ -345,6 +344,19 @@ namespace PDS.Witsml.Server.Data
         {
             var validator = Container.Resolve<IDataObjectValidator<TObject>>();
             validator.Validate(function, parser, dataObject);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="DataObject"/> instance to wrap the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The data object URI.</param>
+        /// <returns></returns>
+        protected virtual DataObject CreateDataObject(TObject dataObject, EtpUri uri)
+        {
+            var instance = new DataObject();
+            StoreStoreProvider.SetDataObject(instance, dataObject, uri, uri.ObjectId);
+            return instance;
         }
 
         /// <summary>
