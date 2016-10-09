@@ -123,6 +123,65 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
+        /// Gets the index type for the specified index information.
+        /// </summary>
+        /// <param name="indexInfo">The index information.</param>
+        /// <returns></returns>
+        protected override object GetIndexType(ChannelIndexInfo indexInfo)
+        {
+            return indexInfo.IsTimeIndex ? LogIndexType.datetime : LogIndexType.measureddepth;
+        }
+
+        /// <summary>
+        /// Gets the index curve for the specified index information.
+        /// </summary>
+        /// <param name="indexInfo">The index information.</param>
+        /// <returns></returns>
+        protected override object GetIndexCurve(ChannelIndexInfo indexInfo)
+        {
+            return indexInfo.Mnemonic;
+        }
+
+        /// <summary>
+        /// Gets the direction for the specified index information.
+        /// </summary>
+        /// <param name="indexInfo">The index information.</param>
+        /// <returns></returns>
+        protected override object GetDirection(ChannelIndexInfo indexInfo)
+        {
+            return indexInfo.Increasing ? LogIndexDirection.increasing : LogIndexDirection.decreasing;
+        }
+
+        /// <summary>
+        /// Creates a logCurveInfo for the specified log curve information.
+        /// </summary>
+        /// <param name="indexInfo">The index information.</param>
+        /// <returns></returns>
+        protected override LogCurveInfo CreateLogCurveInfo(ChannelIndexInfo indexInfo)
+        {
+            return CreateLogCurveInfo(indexInfo.Mnemonic, indexInfo.Unit, indexInfo.IsTimeIndex, 0);
+        }
+
+        /// <summary>
+        /// Creates a logCurveInfo for the specified mnemonic.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic.</param>
+        /// <param name="unit">The unit of measure.</param>
+        /// <param name="isTimeIndex">if set to <c>true</c> the primary index is time-based.</param>
+        /// <param name="columnIndex">Index of the column.</param>
+        /// <returns></returns>
+        protected override LogCurveInfo CreateLogCurveInfo(string mnemonic, string unit, bool isTimeIndex, int columnIndex)
+        {
+            return new LogCurveInfo
+            {
+                Uid = mnemonic,
+                Mnemonic = new ShortNameStruct(mnemonic),
+                TypeLogData = isTimeIndex ? LogDataType.datetime : LogDataType.@double,
+                Unit = unit
+            };
+        }
+
+        /// <summary>
         /// Determines whether the specified log is increasing.
         /// </summary>
         /// <param name="log">The log.</param>

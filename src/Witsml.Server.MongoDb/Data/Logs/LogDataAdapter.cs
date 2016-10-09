@@ -205,9 +205,26 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="reader">The update reader.</param>
         public void UpdateChannelData(EtpUri uri, ChannelDataReader reader)
         {
-            //var dataProvider = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
-            //dataProvider.Ensure(uri);
+            // Capture primary index info when auto-creating data object
+            var indexInfo = Exists(uri) ? null : reader.Indices.FirstOrDefault();
+            var offset = reader.Indices.Select(x => x.IsTimeIndex).FirstOrDefault()
+                ? reader.GetChannelIndexRange(0).Offset
+                : null;
 
+            // Ensure data object and parent data objects exist
+            var dataProvider = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
+            dataProvider.Ensure(uri);
+
+            if (indexInfo != null)
+            {
+                // Update data object with primary index info after it has been auto-created
+                UpdateIndexInfo(uri, indexInfo, offset);
+            }
+
+            // Ensure all logCurveInfo elements exist
+            UpdateLogCurveInfos(uri, reader, offset);
+
+            // Update channel data and index range
             UpdateLogDataAndIndexRange(uri, new[] { reader });
         }
 
@@ -537,6 +554,60 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
+        /// Updates the collection of logCurveInfo elements.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="reader">The reader.</param>
+        /// <param name="offset">The offset.</param>
+        protected void UpdateLogCurveInfos(EtpUri uri, ChannelDataReader reader, TimeSpan? offset)
+        {
+            var entity = GetEntity(uri);
+            Logger.DebugFormat("Updating index info with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
+
+            var isTimeIndex = reader.Indices.Select(x => x.IsTimeIndex).FirstOrDefault();
+            var count = GetLogCurves(entity).Count;
+
+            var curves = reader.Mnemonics
+                .Select((x, i) => new { Mnemonic = x, Index = i })
+                .Where(x => GetLogCurve(entity, x.Mnemonic) == null)
+                .Select(x => CreateLogCurveInfo(x.Mnemonic, reader.Units[x.Index], isTimeIndex, count++));
+
+            var mongoUpdate = new MongoDbUpdate<T>(Container, GetCollection(), null);
+            var logHeaderUpdate = MongoDbUtility.BuildPushEach<T, TChild>(null, "LogCurveInfo", curves);
+            var filter = MongoDbUtility.GetEntityFilter<T>(uri);
+
+            mongoUpdate.UpdateFields(filter, logHeaderUpdate);
+        }
+
+        /// <summary>
+        /// Updates the primary index information.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="indexInfo">The index information.</param>
+        /// <param name="offset">The offset.</param>
+        protected void UpdateIndexInfo(EtpUri uri, ChannelIndexInfo indexInfo, TimeSpan? offset)
+        {
+            var entity = GetEntity(uri);
+            Logger.DebugFormat("Updating index info with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
+
+            // Add LogCurveInfo for primary index
+            var logHeaderUpdate = MongoDbUtility.BuildPush<T>(null, "LogCurveInfo", CreateLogCurveInfo(indexInfo));
+            // Update IndexType
+            logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, "IndexType", GetIndexType(indexInfo));
+            // Update IndexCurve
+            logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, "IndexCurve", GetIndexCurve(indexInfo));
+            // Update Direction
+            logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, "Direction", GetDirection(indexInfo));
+            // Update CommonData
+            logHeaderUpdate = UpdateCommonData(logHeaderUpdate, entity, offset);
+
+            var mongoUpdate = new MongoDbUpdate<T>(Container, GetCollection(), null);
+            var filter = MongoDbUtility.GetEntityFilter<T>(uri);
+
+            mongoUpdate.UpdateFields(filter, logHeaderUpdate);
+        }
+
+        /// <summary>
         /// Updates the index range.
         /// </summary>
         /// <param name="uri">The URI.</param>
@@ -582,6 +653,44 @@ namespace PDS.Witsml.Server.Data.Logs
                 mongoUpdate.UpdateFields(filter, logHeaderUpdate);
             }
         }
+
+        /// <summary>
+        /// Gets the index type for the specified index information.
+        /// </summary>
+        /// <param name="indexInfo">The index information.</param>
+        /// <returns></returns>
+        protected abstract object GetIndexType(ChannelIndexInfo indexInfo);
+
+        /// <summary>
+        /// Gets the index curve for the specified index information.
+        /// </summary>
+        /// <param name="indexInfo">The index information.</param>
+        /// <returns></returns>
+        protected abstract object GetIndexCurve(ChannelIndexInfo indexInfo);
+
+        /// <summary>
+        /// Gets the direction for the specified index information.
+        /// </summary>
+        /// <param name="indexInfo">The index information.</param>
+        /// <returns></returns>
+        protected abstract object GetDirection(ChannelIndexInfo indexInfo);
+
+        /// <summary>
+        /// Creates a logCurveInfo for the specified log curve information.
+        /// </summary>
+        /// <param name="indexInfo">The index information.</param>
+        /// <returns></returns>
+        protected abstract TChild CreateLogCurveInfo(ChannelIndexInfo indexInfo);
+
+        /// <summary>
+        /// Creates a logCurveInfo for the specified mnemonic.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic.</param>
+        /// <param name="unit">The unit of measure.</param>
+        /// <param name="isTimeIndex">if set to <c>true</c> the primary index is time-based.</param>
+        /// <param name="columnIndex">Index of the column.</param>
+        /// <returns></returns>
+        protected abstract TChild CreateLogCurveInfo(string mnemonic, string unit, bool isTimeIndex, int columnIndex);
 
         /// <summary>
         /// Determines whether the specified log is increasing.

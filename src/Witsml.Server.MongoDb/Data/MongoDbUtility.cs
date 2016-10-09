@@ -135,6 +135,39 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Builds the push for a MongoDb array field.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="updates">The updates.</param>
+        /// <param name="field">The MongoDb field.</param>
+        /// <param name="value">The value.</param>
+        /// <returns>The update.</returns>
+        public static UpdateDefinition<T> BuildPush<T>(UpdateDefinition<T> updates, string field, object value)
+        {
+            if (updates == null)
+                return Builders<T>.Update.Push(field, value);
+
+            return updates.Push(field, value);
+        }
+
+        /// <summary>
+        /// Builds the push for a MongoDb array field.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TChild">The type of the child.</typeparam>
+        /// <param name="updates">The updates.</param>
+        /// <param name="field">The MongoDb field.</param>
+        /// <param name="values">The values.</param>
+        /// <returns>The update.</returns>
+        public static UpdateDefinition<T> BuildPushEach<T, TChild>(UpdateDefinition<T> updates, string field, IEnumerable<TChild> values)
+        {
+            if (updates == null)
+                return Builders<T>.Update.PushEach(field, values);
+
+            return updates.PushEach(field, values);
+        }
+
+        /// <summary>
         /// Looks up identifier field.
         /// </summary>
         /// <param name="type">The type.</param>
