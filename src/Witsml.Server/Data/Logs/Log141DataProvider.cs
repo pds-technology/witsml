@@ -16,9 +16,11 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Energistics.Datatypes;
 using PDS.Framework;
@@ -68,6 +70,9 @@ namespace PDS.Witsml.Server.Data.Logs
 
             if (string.IsNullOrWhiteSpace(dataObject.IndexCurve))
                 dataObject.IndexCurve = "TIME";
+
+            if (dataObject.LogCurveInfo == null)
+                dataObject.LogCurveInfo = new List<LogCurveInfo>();
         }
 
         /// <summary>

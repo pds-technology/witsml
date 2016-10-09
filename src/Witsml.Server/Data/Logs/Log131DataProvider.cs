@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML131;
@@ -69,6 +70,9 @@ namespace PDS.Witsml.Server.Data.Logs
 
             if (dataObject.IndexCurve == null)
                 dataObject.IndexCurve = new IndexCurve("TIME");
+
+            if (dataObject.LogCurveInfo == null)
+                dataObject.LogCurveInfo = new List<LogCurveInfo>();
         }
 
         /// <summary>
