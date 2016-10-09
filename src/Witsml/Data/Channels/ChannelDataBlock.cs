@@ -28,15 +28,13 @@ namespace PDS.Witsml.Data.Channels
     /// </summary>
     public class ChannelDataBlock
     {
-
         /// <summary>
         /// The default batch size
         /// </summary>
         public static readonly int BatchSize = Settings.Default.ChannelDataBlockBatchSize;
 
         private readonly List<List<List<object>>> _records;
-        private readonly Dictionary<double, List<List<object>>> _recordsByIndex;
-
+        private readonly Dictionary<object, List<List<object>>> _recordsByIndex;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelDataBlock"/> class.
@@ -45,7 +43,7 @@ namespace PDS.Witsml.Data.Channels
         public ChannelDataBlock(string uri)
         {
             _records = new List<List<List<object>>>();
-            _recordsByIndex = new Dictionary<double, List<List<object>>>();
+            _recordsByIndex = new Dictionary<object, List<List<object>>>();
             Indices = new List<ChannelIndexInfo>();
             ChannelIds = new List<long>();
             Mnemonics = new List<string>();
@@ -53,46 +51,30 @@ namespace PDS.Witsml.Data.Channels
             Uri = uri;
         }
 
-
         /// <summary>
         /// Gets the URI.
         /// </summary>
-        /// <value>
-        /// The URI.
-        /// </value>
-        public string Uri { get; private set; }
+        public string Uri { get; }
 
         /// <summary>
         /// Gets the indices.
         /// </summary>
-        /// <value>
-        /// The indices.
-        /// </value>
-        public List<ChannelIndexInfo> Indices { get; private set; }
+        public List<ChannelIndexInfo> Indices { get; }
 
         /// <summary>
         /// Gets the channel ids.
         /// </summary>
-        /// <value>
-        /// The channel ids.
-        /// </value>
-        public List<long> ChannelIds { get; private set; }
+        public List<long> ChannelIds { get; }
 
         /// <summary>
         /// Gets the mnemonics.
         /// </summary>
-        /// <value>
-        /// The mnemonics.
-        /// </value>
-        public List<string> Mnemonics { get; private set; }
+        public List<string> Mnemonics { get; }
 
         /// <summary>
         /// Gets the units.
         /// </summary>
-        /// <value>
-        /// The units.
-        /// </value>
-        public List<string> Units { get; private set; }
+        public List<string> Units { get; }
 
         /// <summary>
         /// Adds the index.
@@ -132,12 +114,12 @@ namespace PDS.Witsml.Data.Channels
         }
 
         /// <summary>
-        /// Appends the specified channel identifier.
+        /// Appends the index and data values for the specified channel identifier.
         /// </summary>
         /// <param name="channelId">The channel identifier.</param>
-        /// <param name="indexes">The indexes.</param>
-        /// <param name="value">The value.</param>
-        public void Append(long channelId, IList<double> indexes, object value)
+        /// <param name="indexes">The index values.</param>
+        /// <param name="value">The data value.</param>
+        public void Append(long channelId, IList<object> indexes, object value)
         {
             var primaryIndex = indexes.First();
             List<List<object>> record;
@@ -162,7 +144,7 @@ namespace PDS.Witsml.Data.Channels
             // Secondary indexes
             if (indexes.Count > 1)
             {
-                channelIndexes.AddRange(indexes.Cast<object>());
+                channelIndexes.AddRange(indexes);
             }
 
             // Ensure available channel value slots

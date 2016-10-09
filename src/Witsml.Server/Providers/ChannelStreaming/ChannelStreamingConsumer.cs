@@ -128,15 +128,15 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             }
         }
 
-        private IList<double> DownscaleIndexValues(IList<IndexMetadataRecord> indexMetadata, IList<long> indexValues)
+        private IList<object> DownscaleIndexValues(IList<IndexMetadataRecord> indexMetadata, IList<long> indexValues)
         {
             return indexValues
                 .Select((x, i) =>
                 {
                     var index = indexMetadata[i];
                     return index.IndexType == ChannelIndexTypes.Depth
-                        ? indexValues[i] / Math.Pow(10, index.Scale)
-                        : indexValues[i];
+                        ? (object)(indexValues[i] / Math.Pow(10, index.Scale))
+                        : DateTimeExtensions.FromUnixTimeMicroseconds(indexValues[i]);
                 })
                 .ToList();
         }
