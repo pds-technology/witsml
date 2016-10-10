@@ -63,7 +63,7 @@ namespace PDS.Witsml.Server.Data.Logs
             ChannelSetAdapter = new ChannelSet200DataAdapter(DevKit.Container, Provider, new ChannelDataChunkAdapter(DevKit.Container, Provider));
             LogAdapter = new Log200DataAdapter(DevKit.Container, Provider, ChannelSetAdapter);
 
-            Well1 = new Well() { Citation = DevKit.Citation("Well 01"), TimeZone = DevKit.TimeZone, Uuid = DevKit.Uid() };
+            Well1 = new Well() { Citation = DevKit.Citation("Well 01"), TimeZone = DevKit.TimeZone, SchemaVersion = DevKit.DataSchemaVersion, Uuid = DevKit.Uid() };
             Well1.GeographicLocationWGS84 = DevKit.Location();
 
             WellReference = new DataObjectReference
@@ -73,7 +73,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 Uuid = Well1.Uuid
             };
 
-            Wellbore1 = new Wellbore() { Citation = DevKit.Citation("Wellbore 01"), Well = WellReference, Uuid = DevKit.Uid() };
+            Wellbore1 = new Wellbore() { Citation = DevKit.Citation("Wellbore 01"), Well = WellReference, SchemaVersion = DevKit.DataSchemaVersion, Uuid = DevKit.Uid() };
 
             WellboreReference = new DataObjectReference
             {
@@ -82,9 +82,9 @@ namespace PDS.Witsml.Server.Data.Logs
                 Uuid = Wellbore1.Uuid
             };
 
-            Log1 = new Log() { Citation = DevKit.Citation("Log 01"), Wellbore = WellboreReference, Uuid = DevKit.Uid() };
-            Log2 = new Log() { Citation = DevKit.Citation("Log 02"), Wellbore = WellboreReference };
-            LogDecreasing = new Log() { Citation = DevKit.Citation("Log Decreasing"), Wellbore = WellboreReference, Uuid = DevKit.Uid() };
+            Log1 = new Log() { Citation = DevKit.Citation("Log 01"), Wellbore = WellboreReference, SchemaVersion = DevKit.DataSchemaVersion, Uuid = DevKit.Uid() };
+            Log2 = new Log() { Citation = DevKit.Citation("Log 02"), Wellbore = WellboreReference, SchemaVersion = DevKit.DataSchemaVersion };
+            LogDecreasing = new Log() { Citation = DevKit.Citation("Log Decreasing"), Wellbore = WellboreReference, SchemaVersion = DevKit.DataSchemaVersion, Uuid = DevKit.Uid() };
 
             ChannelIndex mdChannelIndex = DevKit.LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
             ChannelIndex mdChannelIndexDecreasing = DevKit.LogGenerator.CreateMeasuredDepthIndex(IndexDirection.decreasing);
@@ -129,6 +129,10 @@ namespace PDS.Witsml.Server.Data.Logs
             
             DevKit.CreateMockChannelSetData(channelSet, channelSet.Index);
 
+            File.WriteAllText("TestData/DepthLogWithSecondaryIndex-2.0-Well.xml", WitsmlParser.ToXml(Well1));
+            File.WriteAllText("TestData/DepthLogWithSecondaryIndex-2.0-Wellbore.xml", WitsmlParser.ToXml(Wellbore1));
+            File.WriteAllText("TestData/DepthLogWithSecondaryIndex-2.0.xml", WitsmlParser.ToXml(Log1));
+
             WellAdapter.Add(DevKit.Parser(Well1), Well1);
             WellboreAdapter.Add(DevKit.Parser(Wellbore1), Wellbore1);
             LogAdapter.Add(DevKit.Parser(Log1), Log1);
@@ -153,8 +157,8 @@ namespace PDS.Witsml.Server.Data.Logs
             // Generate 150 rows of data
             DevKit.LogGenerator.GenerateChannelData(Log1.ChannelSet, numDataValue);
 
-            File.WriteAllText("TestData/Well-for-DepthLog-2.0.xml", EnergisticsConverter.ObjectToXml(Well1));
-            File.WriteAllText("TestData/Wellbore-for-DepthLog-2.0.xml", EnergisticsConverter.ObjectToXml(Wellbore1));
+            File.WriteAllText("TestData/DepthLog-2.0-Well.xml", EnergisticsConverter.ObjectToXml(Well1));
+            File.WriteAllText("TestData/DepthLog-2.0-Wellbore.xml", EnergisticsConverter.ObjectToXml(Wellbore1));
             File.WriteAllText("TestData/DepthLog-2.0.xml", EnergisticsConverter.ObjectToXml(Log1));
 
             LogAdapter.Add(DevKit.Parser(Log1), Log1);
@@ -228,8 +232,8 @@ namespace PDS.Witsml.Server.Data.Logs
             // Generate 150 rows of data
             DevKit.LogGenerator.GenerateChannelData(Log2.ChannelSet, numDataValue);
 
-            File.WriteAllText("TestData/Well-for-TimeLog-2.0.xml", EnergisticsConverter.ObjectToXml(Well1));
-            File.WriteAllText("TestData/Wellbore-for-TimeLog-2.0.xml", EnergisticsConverter.ObjectToXml(Wellbore1));
+            File.WriteAllText("TestData/TimeLog-2.0-Well.xml", EnergisticsConverter.ObjectToXml(Well1));
+            File.WriteAllText("TestData/TimeLog-2.0-Wellbore.xml", EnergisticsConverter.ObjectToXml(Wellbore1));
             File.WriteAllText("TestData/TimeLog-2.0.xml", EnergisticsConverter.ObjectToXml(Log2));
 
             LogAdapter.Add(DevKit.Parser(Log2), Log2);
