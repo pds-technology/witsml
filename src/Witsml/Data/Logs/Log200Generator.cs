@@ -24,7 +24,6 @@ using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Newtonsoft.Json;
 using PDS.Framework;
-using PDS.Witsml.Data.Channels;
 
 namespace PDS.Witsml.Data.Logs
 {
@@ -49,6 +48,11 @@ namespace PDS.Witsml.Data.Logs
         /// </summary>
         public readonly ChannelIndexType[] OtherIndexTypes = new ChannelIndexType[] { ChannelIndexType.pressure, ChannelIndexType.temperature };
 
+        /// <summary>
+        /// The WITSML 2.0 data schema version.
+        /// </summary>
+        public static readonly string DataSchemaVersion = OptionsIn.DataVersion.Version200.Value;
+
         private const int Seed = 123;
         private Random _random;
 
@@ -70,8 +74,8 @@ namespace PDS.Witsml.Data.Logs
             return new Citation()
             {
                 Title = Name(name),
-                Originator = GetType().Name,
-                Format = GetType().Assembly.FullName,
+                Originator = typeof(DataGenerator).Name,
+                Format = typeof(DataGenerator).Assembly.FullName,
                 Creation = DateTime.UtcNow,
             };
         }
@@ -196,6 +200,7 @@ namespace PDS.Witsml.Data.Logs
                                (AbstractIndexValue)new DepthIndexValue() : (new TimeIndexValue())),
                 TimeDepth = log.TimeDepth,
                 PointMetadata = pointMetadataList,
+                SchemaVersion = DataSchemaVersion
             };
         }
 
@@ -251,6 +256,7 @@ namespace PDS.Witsml.Data.Logs
             {
                 Uuid = Uid(),
                 Citation = CreateCitation("ChannelSet"),
+                SchemaVersion = DataSchemaVersion,
                 ExistenceKind = ExistenceKind.simulated,
                 Index = new List<ChannelIndex>(),
 
@@ -267,6 +273,7 @@ namespace PDS.Witsml.Data.Logs
                     Data = null
                 }
             };
+
             return channelSet;
         }
 

@@ -46,13 +46,7 @@ namespace PDS.Witsml.Server
 
         public Citation Citation(string name)
         {
-            return new Citation()
-            {
-                Title = Name(name),
-                Originator = typeof(DevKit200Aspect).Name,
-                Format = typeof(DevKit200Aspect).Assembly.FullName,
-                Creation = DateTime.UtcNow,
-            };
+            return LogGenerator.CreateCitation(name);
         }
 
         public GeodeticWellLocation Location()
@@ -187,6 +181,7 @@ namespace PDS.Witsml.Server
             ChannelSet channelSet = LogGenerator.CreateChannelSet(log);
             channelSet.Index = indexList;
             bool isDepth = log.TimeDepth.EqualsIgnoreCase(ObjectFolders.Depth);
+
             if (isDepth)
             {
                 var pointMetadataList = List(LogGenerator.CreatePointMetadata("Quality", "Quality", EtpDataType.boolean));
@@ -200,9 +195,9 @@ namespace PDS.Witsml.Server
 
                 channelSet.Channel.Add(LogGenerator.CreateChannel(log, indexList, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: pointMetadataList));
             }
+
             log.ChannelSet = new List<ChannelSet>();
             log.ChannelSet.Add(channelSet);
-
 
             LogGenerator.GenerateChannelData(log.ChannelSet, numDataValue: numDataValue);
         }
@@ -226,10 +221,12 @@ namespace PDS.Witsml.Server
 
             List<ChannelIndex> indexList = new List<ChannelIndex>();
             IndexDirection direction = isIncreasing ? IndexDirection.increasing : IndexDirection.decreasing;
+
             if (LogGenerator.DepthIndexTypes.Contains(indexType))
             {
                 log.TimeDepth = ObjectFolders.Depth;
                 ChannelIndex channelIndex = LogGenerator.CreateMeasuredDepthIndex(direction);
+
                 if (indexType.Equals(ChannelIndexType.trueverticaldepth))
                 {
                     channelIndex = LogGenerator.CreateTrueVerticalDepthIndex(direction);
@@ -238,12 +235,14 @@ namespace PDS.Witsml.Server
                 {
                     channelIndex = LogGenerator.CreatePassIndexDepthIndex(direction);
                 }
+
                 indexList.Add(channelIndex);
             }
             else if (LogGenerator.TimeIndexTypes.Contains(indexType))
             {
                 log.TimeDepth = ObjectFolders.Time;
                 ChannelIndex channelIndex = LogGenerator.CreateElapsedTimeIndex(direction);
+
                 if (indexType.Equals(ChannelIndexType.datetime))
                 {
                     // DateTime should be increasing only
