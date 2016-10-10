@@ -11,5 +11,8 @@
     <Setting Name="UnknownElementSetting" Type="System.String" Scope="Application">
       <Value Profile="(Default)">Ignore</Value>
     </Setting>
+    <Setting Name="ChannelDataBlockFlushRateInMilliseconds" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">10000</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

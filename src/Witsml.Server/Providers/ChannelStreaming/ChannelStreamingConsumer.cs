@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Threading;
 using Energistics.Common;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
@@ -45,6 +46,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         private readonly IContainer _container;
         private readonly IDictionary<EtpUri, ChannelDataBlock> _dataBlocks;
         private readonly IDictionary<long, EtpUri> _channelParentUris;
+        private Timer _flushIntervalTimer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelStreamingConsumer"/> class.
@@ -109,6 +111,10 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             if (!channelData.Data.Any())
                 return;
 
+            // Reset timer
+            _flushIntervalTimer?.Dispose();
+            _flushIntervalTimer = new Timer(FlushDataBlocks, null, ChannelDataBlock.BlockFlushRateInMilliseconds, 0);
+
             AppendChannelData(channelData.Data);
             ProcessDataBlocks();
         }
@@ -167,13 +173,20 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             }
         }
 
-        private void ProcessDataBlocks()
+        private void ProcessDataBlocks(bool flush = false)
         {
             foreach (var item in _dataBlocks)
             {
                 if (item.Value.Count() >= ChannelDataBlock.BatchSize)
                     ProcessDataBlock(item.Key, item.Value);
+                else if (flush)
+                    ProcessDataBlock(item.Key, item.Value);
             }
+        }
+
+        private void FlushDataBlocks(object state)
+        {
+            ProcessDataBlocks(true);
         }
 
         private void ProcessDataBlock(EtpUri uri, ChannelDataBlock dataBlock)

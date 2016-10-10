@@ -33,6 +33,11 @@ namespace PDS.Witsml.Data.Channels
         /// </summary>
         public static readonly int BatchSize = Settings.Default.ChannelDataBlockBatchSize;
 
+        /// <summary>
+        /// The block flush rate in milliseconds
+        /// </summary>
+        public static readonly int BlockFlushRateInMilliseconds = Settings.Default.ChannelDataBlockFlushRateInMilliseconds;
+
         private readonly List<List<List<object>>> _records;
         private readonly Dictionary<object, List<List<object>>> _recordsByIndex;
 
