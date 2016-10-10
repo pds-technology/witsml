@@ -26,12 +26,11 @@ namespace PDS.Witsml.Server.Data.ChannelSets
     public partial class ChannelSet200DataProvider
     {
         /// <summary>
-        /// Sets the default values for the specified data object.
+        /// Sets additional default values for the specified data object.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-        protected override void SetDefaultValues(ChannelSet dataObject)
+        partial void SetAdditionalDefaultValues(ChannelSet dataObject)
         {
-            base.SetDefaultValues(dataObject);
             dataObject.Channel.ForEach(c => c.Uuid = c.NewUuid());
         }
     }
