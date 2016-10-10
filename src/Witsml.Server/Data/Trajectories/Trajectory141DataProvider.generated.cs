@@ -34,6 +34,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Trajectory"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{TrajectoryList, Trajectory}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Trajectory>))]
@@ -41,6 +42,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
     [Export141(ObjectTypes.Trajectory, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Trajectory141DataProvider : WitsmlDataProvider<TrajectoryList, Trajectory>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Trajectory141DataProvider"/> class.
@@ -87,11 +89,11 @@ namespace PDS.Witsml.Server.Data.Trajectories
             SetAdditionalDefaultValues(dataObject, uri);
         }
 
-		/// <summary>
+        /// <summary>
         /// Sets the default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-		/// <param name="parser">The input template.</param>
+        /// <param name="parser">The input template.</param>
         protected override void UpdateDefaultValues(Trajectory dataObject, WitsmlQueryParser parser)
         {
             UpdateAdditionalDefaultValues(dataObject, parser);
@@ -120,11 +122,11 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <param name="uri">The data object URI.</param>
         partial void SetAdditionalDefaultValues(Trajectory dataObject, EtpUri uri);
 
-		/// <summary>
+        /// <summary>
         /// Sets additional default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-		/// <param name="parser">The input template.</param>
+        /// <param name="parser">The input template.</param>
         partial void UpdateAdditionalDefaultValues(Trajectory dataObject, WitsmlQueryParser parser);
     }
 }

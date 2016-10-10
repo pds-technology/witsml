@@ -34,6 +34,7 @@ namespace PDS.Witsml.Server.Data.Messages
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Message"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{MessageList, Message}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Message>))]
@@ -41,6 +42,7 @@ namespace PDS.Witsml.Server.Data.Messages
     [Export141(ObjectTypes.Message, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Message141DataProvider : WitsmlDataProvider<MessageList, Message>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Message141DataProvider"/> class.
@@ -87,11 +89,11 @@ namespace PDS.Witsml.Server.Data.Messages
             SetAdditionalDefaultValues(dataObject, uri);
         }
 
-		/// <summary>
+        /// <summary>
         /// Sets the default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-		/// <param name="parser">The input template.</param>
+        /// <param name="parser">The input template.</param>
         protected override void UpdateDefaultValues(Message dataObject, WitsmlQueryParser parser)
         {
             UpdateAdditionalDefaultValues(dataObject, parser);
@@ -120,11 +122,11 @@ namespace PDS.Witsml.Server.Data.Messages
         /// <param name="uri">The data object URI.</param>
         partial void SetAdditionalDefaultValues(Message dataObject, EtpUri uri);
 
-		/// <summary>
+        /// <summary>
         /// Sets additional default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-		/// <param name="parser">The input template.</param>
+        /// <param name="parser">The input template.</param>
         partial void UpdateAdditionalDefaultValues(Message dataObject, WitsmlQueryParser parser);
     }
 }

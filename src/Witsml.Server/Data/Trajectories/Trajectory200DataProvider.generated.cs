@@ -34,12 +34,14 @@ namespace PDS.Witsml.Server.Data.Trajectories
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Trajectory"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{Trajectory}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Trajectory>))]
     [Export200(ObjectTypes.Trajectory, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Trajectory200DataProvider : EtpDataProvider<Trajectory>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Trajectory200DataProvider"/> class.
@@ -49,6 +51,19 @@ namespace PDS.Witsml.Server.Data.Trajectories
         [ImportingConstructor]
         public Trajectory200DataProvider(IContainer container, IWitsmlDataAdapter<Trajectory> dataAdapter) : base(container, dataAdapter)
         {
+        }
+
+        /// <summary>
+        /// Sets the default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        protected override void SetDefaultValues(Trajectory dataObject)
+        {
+            dataObject.Uuid = dataObject.NewUuid();
+            dataObject.Citation = dataObject.Citation.Create();
+            dataObject.SchemaVersion = OptionsIn.DataVersion.Version200.Value;
+
+            SetAdditionalDefaultValues(dataObject);
         }
 
         /// <summary>
@@ -67,10 +82,33 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         /// <summary>
+        /// Sets the default values for the specified data object during update.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="parser">The input template.</param>
+        protected override void UpdateDefaultValues(Trajectory dataObject, WitsmlQueryParser parser)
+        {
+            UpdateAdditionalDefaultValues(dataObject, parser);
+        }
+
+        /// <summary>
+        /// Sets additional default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        partial void SetAdditionalDefaultValues(Trajectory dataObject);
+
+        /// <summary>
         /// Sets additional default values for the specified data object and URI.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
         /// <param name="uri">The data object URI.</param>
         partial void SetAdditionalDefaultValues(Trajectory dataObject, EtpUri uri);
+
+        /// <summary>
+        /// Sets additional default values for the specified data object during update.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="parser">The input template.</param>
+        partial void UpdateAdditionalDefaultValues(Trajectory dataObject, WitsmlQueryParser parser);
     }
 }

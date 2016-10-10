@@ -34,6 +34,7 @@ namespace PDS.Witsml.Server.Data.Attachments
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Attachment"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{AttachmentList, Attachment}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Attachment>))]
@@ -41,6 +42,7 @@ namespace PDS.Witsml.Server.Data.Attachments
     [Export141(ObjectTypes.Attachment, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Attachment141DataProvider : WitsmlDataProvider<AttachmentList, Attachment>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Attachment141DataProvider"/> class.
@@ -87,11 +89,11 @@ namespace PDS.Witsml.Server.Data.Attachments
             SetAdditionalDefaultValues(dataObject, uri);
         }
 
-		/// <summary>
+        /// <summary>
         /// Sets the default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-		/// <param name="parser">The input template.</param>
+        /// <param name="parser">The input template.</param>
         protected override void UpdateDefaultValues(Attachment dataObject, WitsmlQueryParser parser)
         {
             UpdateAdditionalDefaultValues(dataObject, parser);
@@ -120,11 +122,11 @@ namespace PDS.Witsml.Server.Data.Attachments
         /// <param name="uri">The data object URI.</param>
         partial void SetAdditionalDefaultValues(Attachment dataObject, EtpUri uri);
 
-		/// <summary>
+        /// <summary>
         /// Sets additional default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-		/// <param name="parser">The input template.</param>
+        /// <param name="parser">The input template.</param>
         partial void UpdateAdditionalDefaultValues(Attachment dataObject, WitsmlQueryParser parser);
     }
 }

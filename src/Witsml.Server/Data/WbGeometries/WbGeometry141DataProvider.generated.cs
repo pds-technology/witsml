@@ -37,6 +37,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="WbGeometry"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{WbGeometryList, WbGeometry}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<WbGeometry>))]
@@ -44,6 +45,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
     [Export141(ObjectTypes.WbGeometry, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class WbGeometry141DataProvider : WitsmlDataProvider<WbGeometryList, WbGeometry>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="WbGeometry141DataProvider"/> class.
@@ -90,11 +92,11 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             SetAdditionalDefaultValues(dataObject, uri);
         }
 
-		/// <summary>
+        /// <summary>
         /// Sets the default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-		/// <param name="parser">The input template.</param>
+        /// <param name="parser">The input template.</param>
         protected override void UpdateDefaultValues(WbGeometry dataObject, WitsmlQueryParser parser)
         {
             UpdateAdditionalDefaultValues(dataObject, parser);
@@ -123,11 +125,11 @@ namespace PDS.Witsml.Server.Data.WbGeometries
         /// <param name="uri">The data object URI.</param>
         partial void SetAdditionalDefaultValues(WbGeometry dataObject, EtpUri uri);
 
-		/// <summary>
+        /// <summary>
         /// Sets additional default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-		/// <param name="parser">The input template.</param>
+        /// <param name="parser">The input template.</param>
         partial void UpdateAdditionalDefaultValues(WbGeometry dataObject, WitsmlQueryParser parser);
     }
 }

@@ -34,12 +34,14 @@ namespace PDS.Witsml.Server.Data.Attachments
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Attachment"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{Attachment}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Attachment>))]
     [Export200(ObjectTypes.Attachment, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Attachment200DataProvider : EtpDataProvider<Attachment>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Attachment200DataProvider"/> class.
@@ -49,6 +51,19 @@ namespace PDS.Witsml.Server.Data.Attachments
         [ImportingConstructor]
         public Attachment200DataProvider(IContainer container, IWitsmlDataAdapter<Attachment> dataAdapter) : base(container, dataAdapter)
         {
+        }
+
+        /// <summary>
+        /// Sets the default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        protected override void SetDefaultValues(Attachment dataObject)
+        {
+            dataObject.Uuid = dataObject.NewUuid();
+            dataObject.Citation = dataObject.Citation.Create();
+            dataObject.SchemaVersion = OptionsIn.DataVersion.Version200.Value;
+
+            SetAdditionalDefaultValues(dataObject);
         }
 
         /// <summary>
@@ -67,10 +82,33 @@ namespace PDS.Witsml.Server.Data.Attachments
         }
 
         /// <summary>
+        /// Sets the default values for the specified data object during update.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="parser">The input template.</param>
+        protected override void UpdateDefaultValues(Attachment dataObject, WitsmlQueryParser parser)
+        {
+            UpdateAdditionalDefaultValues(dataObject, parser);
+        }
+
+        /// <summary>
+        /// Sets additional default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        partial void SetAdditionalDefaultValues(Attachment dataObject);
+
+        /// <summary>
         /// Sets additional default values for the specified data object and URI.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
         /// <param name="uri">The data object URI.</param>
         partial void SetAdditionalDefaultValues(Attachment dataObject, EtpUri uri);
+
+        /// <summary>
+        /// Sets additional default values for the specified data object during update.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="parser">The input template.</param>
+        partial void UpdateAdditionalDefaultValues(Attachment dataObject, WitsmlQueryParser parser);
     }
 }

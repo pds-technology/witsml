@@ -34,12 +34,14 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Log"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{Log}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Log>))]
     [Export200(ObjectTypes.Log, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Log200DataProvider : EtpDataProvider<Log>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Log200DataProvider"/> class.
@@ -49,6 +51,19 @@ namespace PDS.Witsml.Server.Data.Logs
         [ImportingConstructor]
         public Log200DataProvider(IContainer container, IWitsmlDataAdapter<Log> dataAdapter) : base(container, dataAdapter)
         {
+        }
+
+        /// <summary>
+        /// Sets the default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        protected override void SetDefaultValues(Log dataObject)
+        {
+            dataObject.Uuid = dataObject.NewUuid();
+            dataObject.Citation = dataObject.Citation.Create();
+            dataObject.SchemaVersion = OptionsIn.DataVersion.Version200.Value;
+
+            SetAdditionalDefaultValues(dataObject);
         }
 
         /// <summary>
@@ -67,10 +82,33 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
+        /// Sets the default values for the specified data object during update.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="parser">The input template.</param>
+        protected override void UpdateDefaultValues(Log dataObject, WitsmlQueryParser parser)
+        {
+            UpdateAdditionalDefaultValues(dataObject, parser);
+        }
+
+        /// <summary>
+        /// Sets additional default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        partial void SetAdditionalDefaultValues(Log dataObject);
+
+        /// <summary>
         /// Sets additional default values for the specified data object and URI.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
         /// <param name="uri">The data object URI.</param>
         partial void SetAdditionalDefaultValues(Log dataObject, EtpUri uri);
+
+        /// <summary>
+        /// Sets additional default values for the specified data object during update.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="parser">The input template.</param>
+        partial void UpdateAdditionalDefaultValues(Log dataObject, WitsmlQueryParser parser);
     }
 }

@@ -34,6 +34,7 @@ namespace PDS.Witsml.Server.Data.Rigs
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Rig"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{RigList, Rig}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Rig>))]
@@ -41,6 +42,7 @@ namespace PDS.Witsml.Server.Data.Rigs
     [Export141(ObjectTypes.Rig, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Rig141DataProvider : WitsmlDataProvider<RigList, Rig>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Rig141DataProvider"/> class.
@@ -87,11 +89,11 @@ namespace PDS.Witsml.Server.Data.Rigs
             SetAdditionalDefaultValues(dataObject, uri);
         }
 
-		/// <summary>
+        /// <summary>
         /// Sets the default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-		/// <param name="parser">The input template.</param>
+        /// <param name="parser">The input template.</param>
         protected override void UpdateDefaultValues(Rig dataObject, WitsmlQueryParser parser)
         {
             UpdateAdditionalDefaultValues(dataObject, parser);
@@ -120,11 +122,11 @@ namespace PDS.Witsml.Server.Data.Rigs
         /// <param name="uri">The data object URI.</param>
         partial void SetAdditionalDefaultValues(Rig dataObject, EtpUri uri);
 
-		/// <summary>
+        /// <summary>
         /// Sets additional default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-		/// <param name="parser">The input template.</param>
+        /// <param name="parser">The input template.</param>
         partial void UpdateAdditionalDefaultValues(Rig dataObject, WitsmlQueryParser parser);
     }
 }

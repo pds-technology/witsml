@@ -34,6 +34,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Wellbore"/>.
     /// </summary>
+
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{WellboreList, Wellbore}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Wellbore>))]
@@ -41,6 +42,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
     [Export131(ObjectTypes.Wellbore, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Wellbore131DataProvider : WitsmlDataProvider<WellboreList, Wellbore>
+
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Wellbore131DataProvider"/> class.
@@ -82,11 +84,11 @@ namespace PDS.Witsml.Server.Data.Wellbores
             SetAdditionalDefaultValues(dataObject, uri);
         }
 
-		/// <summary>
+        /// <summary>
         /// Sets the default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-		/// <param name="parser">The input template.</param>
+        /// <param name="parser">The input template.</param>
         protected override void UpdateDefaultValues(Wellbore dataObject, WitsmlQueryParser parser)
         {
             UpdateAdditionalDefaultValues(dataObject, parser);
@@ -115,11 +117,11 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// <param name="uri">The data object URI.</param>
         partial void SetAdditionalDefaultValues(Wellbore dataObject, EtpUri uri);
 
-		/// <summary>
+        /// <summary>
         /// Sets additional default values for the specified data object during update.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-		/// <param name="parser">The input template.</param>
+        /// <param name="parser">The input template.</param>
         partial void UpdateAdditionalDefaultValues(Wellbore dataObject, WitsmlQueryParser parser);
     }
 }
