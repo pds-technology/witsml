@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML200;
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.Datatypes;
 using PDS.Framework;
 
@@ -34,14 +35,12 @@ namespace PDS.Witsml.Server.Data.ChannelSets
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="ChannelSet"/>.
     /// </summary>
-
     /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{ChannelSet}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<ChannelSet>))]
     [Export200(ObjectTypes.ChannelSet, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class ChannelSet200DataProvider : EtpDataProvider<ChannelSet>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelSet200DataProvider"/> class.
@@ -59,10 +58,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         /// <param name="dataObject">The data object.</param>
         protected override void SetDefaultValues(ChannelSet dataObject)
         {
-            dataObject.Uuid = dataObject.NewUuid();
-            dataObject.Citation = dataObject.Citation.Create();
-            dataObject.SchemaVersion = OptionsIn.DataVersion.Version200.Value;
-
+            base.SetDefaultValues(dataObject);
             SetAdditionalDefaultValues(dataObject);
         }
 
@@ -73,10 +69,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         /// <param name="uri">The data object URI.</param>
         protected override void SetDefaultValues(ChannelSet dataObject, EtpUri uri)
         {
-            dataObject.Uuid = uri.ObjectId;
-            dataObject.Citation = dataObject.Citation.Create();
-            dataObject.Citation.Title = uri.ObjectId;
-            dataObject.Citation.Originator = uri;
+            base.SetDefaultValues(dataObject, uri);
 
             SetAdditionalDefaultValues(dataObject, uri);
         }

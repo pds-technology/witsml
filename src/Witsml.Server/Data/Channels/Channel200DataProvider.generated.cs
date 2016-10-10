@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML200;
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.Datatypes;
 using PDS.Framework;
 
@@ -34,14 +35,12 @@ namespace PDS.Witsml.Server.Data.Channels
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Channel"/>.
     /// </summary>
-
     /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{Channel}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Channel>))]
     [Export200(ObjectTypes.Channel, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Channel200DataProvider : EtpDataProvider<Channel>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Channel200DataProvider"/> class.
@@ -59,10 +58,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="dataObject">The data object.</param>
         protected override void SetDefaultValues(Channel dataObject)
         {
-            dataObject.Uuid = dataObject.NewUuid();
-            dataObject.Citation = dataObject.Citation.Create();
-            dataObject.SchemaVersion = OptionsIn.DataVersion.Version200.Value;
-
+            base.SetDefaultValues(dataObject);
             SetAdditionalDefaultValues(dataObject);
         }
 
@@ -73,10 +69,16 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="uri">The data object URI.</param>
         protected override void SetDefaultValues(Channel dataObject, EtpUri uri)
         {
-            dataObject.Uuid = uri.ObjectId;
-            dataObject.Citation = dataObject.Citation.Create();
-            dataObject.Citation.Title = uri.ObjectId;
-            dataObject.Citation.Originator = uri;
+            base.SetDefaultValues(dataObject, uri);
+
+            // Wellbore
+            var parentUri = uri.Parent;
+            dataObject.Wellbore = new DataObjectReference
+            {
+                ContentType = parentUri.ContentType,
+                Title = parentUri.ObjectId,
+                Uuid = parentUri.ObjectId
+            };
 
             SetAdditionalDefaultValues(dataObject, uri);
         }

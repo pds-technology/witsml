@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML131;
+using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.Datatypes;
 using PDS.Framework;
 
@@ -34,7 +35,6 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Log"/>.
     /// </summary>
-
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{LogList, Log}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Log>))]
@@ -42,7 +42,6 @@ namespace PDS.Witsml.Server.Data.Logs
     [Export131(ObjectTypes.Log, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Log131DataProvider : WitsmlDataProvider<LogList, Log>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Log131DataProvider"/> class.

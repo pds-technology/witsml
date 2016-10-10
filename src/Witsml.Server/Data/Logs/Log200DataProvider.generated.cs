@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML200;
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.Datatypes;
 using PDS.Framework;
 
@@ -34,14 +35,12 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Log"/>.
     /// </summary>
-
     /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{Log}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Log>))]
     [Export200(ObjectTypes.Log, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Log200DataProvider : EtpDataProvider<Log>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Log200DataProvider"/> class.
@@ -59,10 +58,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="dataObject">The data object.</param>
         protected override void SetDefaultValues(Log dataObject)
         {
-            dataObject.Uuid = dataObject.NewUuid();
-            dataObject.Citation = dataObject.Citation.Create();
-            dataObject.SchemaVersion = OptionsIn.DataVersion.Version200.Value;
-
+            base.SetDefaultValues(dataObject);
             SetAdditionalDefaultValues(dataObject);
         }
 
@@ -73,10 +69,16 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="uri">The data object URI.</param>
         protected override void SetDefaultValues(Log dataObject, EtpUri uri)
         {
-            dataObject.Uuid = uri.ObjectId;
-            dataObject.Citation = dataObject.Citation.Create();
-            dataObject.Citation.Title = uri.ObjectId;
-            dataObject.Citation.Originator = uri;
+            base.SetDefaultValues(dataObject, uri);
+
+            // Wellbore
+            var parentUri = uri.Parent;
+            dataObject.Wellbore = new DataObjectReference
+            {
+                ContentType = parentUri.ContentType,
+                Title = parentUri.ObjectId,
+                Uuid = parentUri.ObjectId
+            };
 
             SetAdditionalDefaultValues(dataObject, uri);
         }

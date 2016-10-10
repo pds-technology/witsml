@@ -16,7 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using Energistics.DataAccess.WITSML200;
+using Energistics.Datatypes;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -25,5 +27,15 @@ namespace PDS.Witsml.Server.Data.Logs
     /// </summary>
     public partial class Log200DataProvider
     {
+        /// <summary>
+        /// Sets additional default values for the specified data object and URI.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The data object URI.</param>
+        partial void SetAdditionalDefaultValues(Log dataObject, EtpUri uri)
+        {
+            if (dataObject.ChannelSet == null)
+                dataObject.ChannelSet = new List<ChannelSet>();
+        }
     }
 }

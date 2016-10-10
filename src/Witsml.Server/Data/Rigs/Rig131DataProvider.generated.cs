@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML131;
+using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.Datatypes;
 using PDS.Framework;
 
@@ -34,7 +35,6 @@ namespace PDS.Witsml.Server.Data.Rigs
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Rig"/>.
     /// </summary>
-
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{RigList, Rig}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Rig>))]
@@ -42,7 +42,6 @@ namespace PDS.Witsml.Server.Data.Rigs
     [Export131(ObjectTypes.Rig, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Rig131DataProvider : WitsmlDataProvider<RigList, Rig>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Rig131DataProvider"/> class.

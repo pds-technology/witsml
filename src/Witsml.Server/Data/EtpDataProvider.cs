@@ -57,6 +57,20 @@ namespace PDS.Witsml.Server.Data
         {
             dataObject.Uuid = dataObject.NewUuid();
             dataObject.Citation = dataObject.Citation.Create();
+            dataObject.SchemaVersion = OptionsIn.DataVersion.Version200.Value;
+        }
+
+        /// <summary>
+        /// Sets the default values for the specified data object.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The data object URI.</param>
+        protected override void SetDefaultValues(TObject dataObject, EtpUri uri)
+        {
+            dataObject.Uuid = uri.ObjectId;
+            dataObject.Citation = dataObject.Citation.Create();
+            dataObject.Citation.Title = uri.ObjectId;
+            dataObject.Citation.Originator = uri;
         }
     }
 }

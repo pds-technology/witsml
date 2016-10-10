@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.Datatypes;
 using PDS.Framework;
 
@@ -34,7 +35,6 @@ namespace PDS.Witsml.Server.Data.Messages
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Message"/>.
     /// </summary>
-
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{MessageList, Message}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Message>))]
@@ -42,7 +42,6 @@ namespace PDS.Witsml.Server.Data.Messages
     [Export141(ObjectTypes.Message, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Message141DataProvider : WitsmlDataProvider<MessageList, Message>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Message141DataProvider"/> class.

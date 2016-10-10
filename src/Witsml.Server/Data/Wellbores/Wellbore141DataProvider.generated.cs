@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.Datatypes;
 using PDS.Framework;
 
@@ -34,7 +35,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Wellbore"/>.
     /// </summary>
-
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{WellboreList, Wellbore}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Wellbore>))]
@@ -42,7 +42,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
     [Export141(ObjectTypes.Wellbore, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Wellbore141DataProvider : WitsmlDataProvider<WellboreList, Wellbore>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Wellbore141DataProvider"/> class.

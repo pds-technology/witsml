@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.Datatypes;
 using PDS.Framework;
 
@@ -34,7 +35,6 @@ namespace PDS.Witsml.Server.Data.Attachments
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Attachment"/>.
     /// </summary>
-
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{AttachmentList, Attachment}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Attachment>))]
@@ -42,7 +42,6 @@ namespace PDS.Witsml.Server.Data.Attachments
     [Export141(ObjectTypes.Attachment, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Attachment141DataProvider : WitsmlDataProvider<AttachmentList, Attachment>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Attachment141DataProvider"/> class.

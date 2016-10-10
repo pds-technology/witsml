@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML141;
+using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.Datatypes;
 using PDS.Framework;
 
@@ -37,7 +38,6 @@ namespace PDS.Witsml.Server.Data.WbGeometries
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="WbGeometry"/>.
     /// </summary>
-
     /// <seealso cref="PDS.Witsml.Server.Data.WitsmlDataProvider{WbGeometryList, WbGeometry}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<WbGeometry>))]
@@ -45,7 +45,6 @@ namespace PDS.Witsml.Server.Data.WbGeometries
     [Export141(ObjectTypes.WbGeometry, typeof(IWitsmlDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class WbGeometry141DataProvider : WitsmlDataProvider<WbGeometryList, WbGeometry>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="WbGeometry141DataProvider"/> class.

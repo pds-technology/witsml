@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Xml.Linq;
 using Energistics.DataAccess.WITSML200;
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.Datatypes;
 using PDS.Framework;
 
@@ -34,14 +35,12 @@ namespace PDS.Witsml.Server.Data.Rigs
     /// <summary>
     /// Data provider that implements support for WITSML API functions for <see cref="Rig"/>.
     /// </summary>
-
     /// <seealso cref="PDS.Witsml.Server.Data.EtpDataProvider{Rig}" />
     [Export(typeof(IEtpDataProvider))]
     [Export(typeof(IEtpDataProvider<Rig>))]
     [Export200(ObjectTypes.Rig, typeof(IEtpDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Rig200DataProvider : EtpDataProvider<Rig>
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Rig200DataProvider"/> class.
@@ -59,10 +58,7 @@ namespace PDS.Witsml.Server.Data.Rigs
         /// <param name="dataObject">The data object.</param>
         protected override void SetDefaultValues(Rig dataObject)
         {
-            dataObject.Uuid = dataObject.NewUuid();
-            dataObject.Citation = dataObject.Citation.Create();
-            dataObject.SchemaVersion = OptionsIn.DataVersion.Version200.Value;
-
+            base.SetDefaultValues(dataObject);
             SetAdditionalDefaultValues(dataObject);
         }
 
@@ -73,10 +69,7 @@ namespace PDS.Witsml.Server.Data.Rigs
         /// <param name="uri">The data object URI.</param>
         protected override void SetDefaultValues(Rig dataObject, EtpUri uri)
         {
-            dataObject.Uuid = uri.ObjectId;
-            dataObject.Citation = dataObject.Citation.Create();
-            dataObject.Citation.Title = uri.ObjectId;
-            dataObject.Citation.Originator = uri;
+            base.SetDefaultValues(dataObject, uri);
 
             SetAdditionalDefaultValues(dataObject, uri);
         }

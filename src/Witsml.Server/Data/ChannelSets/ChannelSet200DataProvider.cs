@@ -16,7 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using Energistics.DataAccess.WITSML200;
+using Energistics.Datatypes;
 
 namespace PDS.Witsml.Server.Data.ChannelSets
 {
@@ -32,6 +34,17 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         partial void SetAdditionalDefaultValues(ChannelSet dataObject)
         {
             dataObject.Channel.ForEach(c => c.Uuid = c.NewUuid());
+        }
+
+        /// <summary>
+        /// Sets additional default values for the specified data object and URI.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The data object URI.</param>
+        partial void SetAdditionalDefaultValues(ChannelSet dataObject, EtpUri uri)
+        {
+            if (dataObject.Channel == null)
+                dataObject.Channel = new List<Channel>();
         }
     }
 }
