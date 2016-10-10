@@ -177,9 +177,9 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         {
             foreach (var item in _dataBlocks)
             {
-                if (item.Value.Count() >= ChannelDataBlock.BatchSize)
+                if (flush)
                     ProcessDataBlock(item.Key, item.Value);
-                else if (flush)
+                else if (item.Value.Count() >= ChannelDataBlock.BatchSize)
                     ProcessDataBlock(item.Key, item.Value);
             }
         }
