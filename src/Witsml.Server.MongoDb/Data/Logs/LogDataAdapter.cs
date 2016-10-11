@@ -562,7 +562,7 @@ namespace PDS.Witsml.Server.Data.Logs
         protected void UpdateLogCurveInfos(EtpUri uri, ChannelDataReader reader, TimeSpan? offset)
         {
             var entity = GetEntity(uri);
-            Logger.DebugFormat("Updating index info with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
+            Logger.DebugFormat("Updating log curves for uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
 
             var isTimeIndex = reader.Indices.Select(x => x.IsTimeIndex).FirstOrDefault();
             var count = GetLogCurves(entity).Count;
@@ -588,7 +588,7 @@ namespace PDS.Witsml.Server.Data.Logs
         protected void UpdateIndexInfo(EtpUri uri, ChannelIndexInfo indexInfo, TimeSpan? offset)
         {
             var entity = GetEntity(uri);
-            Logger.DebugFormat("Updating index info with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
+            Logger.DebugFormat("Updating index info for uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
 
             // Add LogCurveInfo for primary index
             var logHeaderUpdate = MongoDbUtility.BuildPush<T>(null, "LogCurveInfo", CreateLogCurveInfo(indexInfo));

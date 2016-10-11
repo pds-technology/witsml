@@ -294,6 +294,16 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Gets the entity filter for the specified URI.
         /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <returns>The entity filter.</returns>
+        protected virtual FilterDefinition<T> GetEntityFilter(EtpUri uri)
+        {
+            return GetEntityFilter<T>(uri, IdPropertyName);
+        }
+
+        /// <summary>
+        /// Gets the entity filter for the specified URI.
+        /// </summary>
         /// <typeparam name="TObject">The type of the object.</typeparam>
         /// <param name="uri">The URI.</param>
         /// <param name="idPropertyName">Name of the identifier property.</param>

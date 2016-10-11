@@ -28,6 +28,7 @@ using Energistics.Datatypes.Object;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
+using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Server.Models;
@@ -239,6 +240,26 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         /// <param name="reader">The update reader.</param>
         public void UpdateChannelData(EtpUri uri, ChannelDataReader reader)
         {
+            // Capture primary index info when auto-creating data object
+            var indexInfos = Exists(uri) ? null : reader.Indices;
+            var offset = reader.Indices.Take(1).Select(x => x.IsTimeIndex).FirstOrDefault()
+                ? reader.GetChannelIndexRange(0).Offset
+                : null;
+
+            // Ensure data object and parent data objects exist
+            var dataProvider = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
+            dataProvider.Ensure(uri);
+
+            if (indexInfos != null)
+            {
+                // Update data object with primary index info after it has been auto-created
+                UpdateIndexInfo(uri, indexInfos, offset);
+            }
+
+            // Ensure all logCurveInfo elements exist
+            UpdateChannels(uri, reader, offset);
+
+            // Update channel data and index range
             UpdateChannelDataAndIndexRange(uri, reader);
         }
 
@@ -596,11 +617,8 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         private void UpdateIndexRange(EtpUri uri, ChannelSet entity, Dictionary<string, Range<double?>> ranges, IEnumerable<string> mnemonics)
         {
             var mongoUpdate = new MongoDbUpdate<ChannelSet>(Container, GetCollection(), null);
-
-            var idField = MongoDbUtility.LookUpIdField(typeof(ChannelSet), "Uuid");
-
-            var filter = MongoDbUtility.GetEntityFilter<ChannelSet>(uri, idField);
-            UpdateDefinition<ChannelSet> channelIndexUpdate = null;
+            var channelIndexUpdate = default(UpdateDefinition<ChannelSet>);
+            var filter = GetEntityFilter(uri);
 
             if (entity.Citation != null)
             {
@@ -636,7 +654,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             if (channelIndexUpdate != null)
                 mongoUpdate.UpdateFields(filter, channelIndexUpdate);
 
-            idField = MongoDbUtility.LookUpIdField(typeof(Channel), "Uuid");
+            var idField = MongoDbUtility.LookUpIdField(typeof(Channel), "Uuid");
 
             foreach (var mnemonic in mnemonics)
             {
@@ -669,6 +687,75 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             }
         }
 
+        private void UpdateChannels(EtpUri uri, ChannelDataReader reader, TimeSpan? offset)
+        {
+            var entity = GetEntity(uri);
+            Logger.DebugFormat("Updating channels for uid '{0}' and name '{1}'.", entity.Uuid, entity.Citation.Title);
+
+            var isTimeIndex = reader.Indices.Take(1).Select(x => x.IsTimeIndex).FirstOrDefault();
+
+            var channels = reader.Mnemonics
+                .Select((x, i) => new { Mnemonic = x, Index = i })
+                .Where(x => entity.Channel.GetByMnemonic(x.Mnemonic) == null)
+                .Select(x => CreateChannel(uri, x.Mnemonic, reader.Units[x.Index], isTimeIndex, entity.Index));
+
+            var mongoUpdate = new MongoDbUpdate<ChannelSet>(Container, GetCollection(), null);
+            var headerUpdate = MongoDbUtility.BuildPushEach<ChannelSet, Channel>(null, "Channel", channels);
+            var filter = GetEntityFilter(uri);
+
+            mongoUpdate.UpdateFields(filter, headerUpdate);
+        }
+
+        private void UpdateIndexInfo(EtpUri uri, IList<ChannelIndexInfo> indexInfos, TimeSpan? offset)
+        {
+            var entity = GetEntity(uri);
+            Logger.DebugFormat("Updating index info for uid '{0}' and name '{1}'.", entity.Uuid, entity.Citation.Title);
+
+            // Add ChannelIndex for each index
+            var headerUpdate = MongoDbUtility.BuildPushEach<ChannelSet, ChannelIndex>(null, "Index", indexInfos.Select(CreateChannelIndex));
+            // TODO: Update Citation
+            //headerUpdate = UpdateCommonData(headerUpdate, entity, offset);
+
+            var mongoUpdate = new MongoDbUpdate<ChannelSet>(Container, GetCollection(), null);
+            var filter = GetEntityFilter(uri);
+
+            mongoUpdate.UpdateFields(filter, headerUpdate);
+        }
+
+        private ChannelIndex CreateChannelIndex(ChannelIndexInfo indexInfo)
+        {
+            return new ChannelIndex
+            {
+                Mnemonic = indexInfo.Mnemonic,
+                Uom = indexInfo.Unit,
+                IndexType = indexInfo.IsTimeIndex ? ChannelIndexType.datetime : ChannelIndexType.measureddepth,
+                Direction = indexInfo.Increasing ? IndexDirection.increasing : IndexDirection.decreasing,
+                DatumReference = "MSL"
+            };
+        }
+
+        private Channel CreateChannel(EtpUri uri, string mnemonic, string unit, bool isTimeIndex, List<ChannelIndex> indexes)
+        {
+            var channel = new Channel
+            {
+                Mnemonic = mnemonic,
+                DataType = EtpDataType.@double,
+                GrowingStatus = ChannelStatus.active,
+                Uom = unit,
+                TimeDepth = isTimeIndex ? "time" : "depth",
+                LoggingCompanyName = "unknown",
+                CurveClass = "unknown",
+                Index = indexes
+            };
+
+            channel.Uuid = channel.NewUuid();
+            channel.Citation = channel.Citation.Create();
+            channel.Citation.Title = mnemonic;
+            channel.SchemaVersion = uri.Version;
+
+            return channel;
+        }
+
         private List<ChannelSet> GetChannelSetByUris(List<EtpUri> uris)
         {
             if (uris.Any(u => u.IsBaseUri))
@@ -680,6 +767,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             var channelSetUris = MongoDbUtility.GetObjectUris(uris, ObjectTypes.ChannelSet);
             var wellboreUris = MongoDbUtility.GetObjectUris(uris, ObjectTypes.Wellbore);
             var wellUris = MongoDbUtility.GetObjectUris(uris, ObjectTypes.Well);
+
             if (wellUris.Any())
             {
                 var wellboreFilters = wellUris.Select(wellUri => MongoDbUtility.BuildFilter<Wellbore>("Well.Uuid", wellUri.ObjectId)).ToList();
@@ -692,7 +780,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             var channelSetFilters = wellboreUris.Select(wellboreUri => MongoDbUtility.BuildFilter<ChannelSet>("Wellbore.Uuid", wellboreUri.ObjectId)).ToList();
 
             _channelSetUris.AddRange(channelSetUris);
-            channelSetFilters.AddRange(channelSetUris.Select(u => MongoDbUtility.GetEntityFilter<ChannelSet>(u, IdPropertyName)));
+            channelSetFilters.AddRange(channelSetUris.Select(GetEntityFilter));
 
             var channelUris = MongoDbUtility.GetObjectUris(uris, ObjectTypes.Channel).Where(u => u.Parent.ObjectType == ObjectTypes.ChannelSet);
             foreach (var channelUri in channelUris)

@@ -44,13 +44,22 @@ namespace PDS.Witsml.Server.Data
         public static FilterDefinition<T> GetEntityFilter<T>(EtpUri uri, string idPropertyName = "Uid")
         {
             var builder = Builders<T>.Filter;
-            var filters = new List<FilterDefinition<T>>();
+
+            // Uuid filter
+            if (ObjectTypes.Uuid.Equals(idPropertyName))
+            {
+                return builder.EqIgnoreCase(idPropertyName, uri.ObjectId);
+            }
 
             // Create dictionary with case-insensitive keys
             var objectIds = uri.GetObjectIds()
                 .ToDictionary(x => x.ObjectType, x => x.ObjectId, StringComparer.CurrentCultureIgnoreCase);
 
-            filters.Add(builder.EqIgnoreCase(idPropertyName, uri.ObjectId));
+            // Uid filter
+            var filters = new List<FilterDefinition<T>>
+            {
+                builder.EqIgnoreCase(idPropertyName, uri.ObjectId)
+            };
 
             if (!ObjectTypes.Well.EqualsIgnoreCase(uri.ObjectType) && objectIds.ContainsKey(ObjectTypes.Well))
             {
