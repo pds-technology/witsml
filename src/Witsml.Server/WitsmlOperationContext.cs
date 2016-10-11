@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.ServiceModel;
+using System.Threading;
 using System.Xml.Linq;
 using Energistics.DataAccess.Validation;
 using log4net;
@@ -77,6 +78,12 @@ namespace PDS.Witsml.Server
                     _current = value;
             }
         }
+
+        /// <summary>
+        /// Gets the name of the current user.
+        /// </summary>
+        /// <value>The current user's name.</value>
+        public string User => Thread.CurrentPrincipal?.Identity?.Name ?? "unknown";
 
         /// <summary>
         /// Gets or sets the request context.
