@@ -53,6 +53,7 @@ namespace PDS.Witsml.Data.Channels
             ChannelIds = new List<long>();
             Mnemonics = new List<string>();
             Units = new List<string>();
+            NullValues = new List<string>();
             Uri = uri;
         }
 
@@ -82,13 +83,19 @@ namespace PDS.Witsml.Data.Channels
         public List<string> Units { get; }
 
         /// <summary>
+        /// Gets the null values.
+        /// </summary>
+        public List<string> NullValues { get; }
+
+        /// <summary>
         /// Adds the index.
         /// </summary>
         /// <param name="mnemonic">The mnemonic.</param>
         /// <param name="unit">The unit.</param>
         /// <param name="increasing">if set to <c>true</c> if data is incresting, false otherwise.</param>
         /// <param name="isTimeIndex">if set to <c>true</c> if index is time, false otherwise.</param>
-        public void AddIndex(string mnemonic, string unit, bool increasing, bool isTimeIndex)
+        /// <param name="nullValue">The null value.</param>
+        public void AddIndex(string mnemonic, string unit, bool increasing, bool isTimeIndex, string nullValue = null)
         {
             if (Indices.Any(x => x.Mnemonic.EqualsIgnoreCase(mnemonic)))
                 return;
@@ -98,7 +105,8 @@ namespace PDS.Witsml.Data.Channels
                 Mnemonic = mnemonic,
                 Increasing = increasing,
                 IsTimeIndex = isTimeIndex,
-                Unit = unit
+                Unit = unit,
+                NullValue = nullValue
             });
         }
 
@@ -108,7 +116,8 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="channelId">The channel identifier.</param>
         /// <param name="mnemonic">The mnemonic.</param>
         /// <param name="unit">The unit.</param>
-        public void AddChannel(long channelId, string mnemonic, string unit)
+        /// <param name="nullValue">The null value.</param>
+        public void AddChannel(long channelId, string mnemonic, string unit, string nullValue = null)
         {
             if (Mnemonics.Any(x => x.EqualsIgnoreCase(mnemonic)))
                 return;
@@ -116,6 +125,7 @@ namespace PDS.Witsml.Data.Channels
             ChannelIds.Add(channelId);
             Mnemonics.Add(mnemonic);
             Units.Add(unit);
+            NullValues.Add(nullValue);
         }
 
         /// <summary>
@@ -177,7 +187,7 @@ namespace PDS.Witsml.Data.Channels
         {
             var records = new List<List<List<object>>>(_records);
 
-            return new ChannelDataReader(records, Mnemonics.ToArray(), Units.ToArray(), null, Uri)
+            return new ChannelDataReader(records, Mnemonics.ToArray(), Units.ToArray(), NullValues.ToArray(), Uri)
                 .WithIndices(Indices, true);
         }
 
