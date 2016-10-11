@@ -18,6 +18,7 @@
 
 using System.Collections.Generic;
 using Energistics.DataAccess.WITSML200;
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.Datatypes;
 
 namespace PDS.Witsml.Server.Data.ChannelSets
@@ -43,6 +44,9 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         /// <param name="uri">The data object URI.</param>
         partial void SetAdditionalDefaultValues(ChannelSet dataObject, EtpUri uri)
         {
+            if (dataObject.Index == null)
+                dataObject.Index = new List<ChannelIndex>();
+
             if (dataObject.Channel == null)
                 dataObject.Channel = new List<Channel>();
         }
