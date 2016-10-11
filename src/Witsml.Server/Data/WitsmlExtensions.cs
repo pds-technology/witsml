@@ -159,6 +159,7 @@ namespace PDS.Witsml.Server.Data
 
             citation.Creation = DateTime.UtcNow;
             citation.LastUpdate = DateTime.UtcNow;
+            citation.Originator = WitsmlOperationContext.Current.User;
             citation.Format = typeof(WitsmlExtensions).Assembly.FullName;
 
             return citation;

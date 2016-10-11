@@ -70,7 +70,6 @@ namespace PDS.Witsml.Server.Data
             dataObject.Uuid = uri.ObjectId;
             dataObject.Citation = dataObject.Citation.Create();
             dataObject.Citation.Title = uri.ObjectId;
-            dataObject.Citation.Originator = WitsmlOperationContext.Current.User;
         }
     }
 }
