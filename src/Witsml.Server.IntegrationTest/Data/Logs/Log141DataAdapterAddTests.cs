@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
@@ -85,6 +86,36 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
 
             GetLog(Log);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_AddToStore_Benchmark_Add_TimeLog_With_Data()
+        {
+            AddParents();
+            var sw = new System.Diagnostics.Stopwatch();
+            var times = new List<long>();
+
+            DevKit.InitHeader(Log, LogIndexType.datetime);
+            DevKit.InitDataMany(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), 50, 1, false, false);
+
+            for (int i = 0; i < 1000; i++)
+            {
+                Log.Uid = DevKit.Uid();
+                Log.Name = DevKit.Name($"Benchmark{i}");
+
+                // Measure time taken to add log to store
+                sw.Restart();
+                var response = DevKit.Add<LogList, Log>(Log);
+                sw.Stop();
+
+                // Ignore first add in case server was restarted
+                if (i != 0)
+                    times.Add(sw.ElapsedMilliseconds);
+                Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+            }
+
+            Assert.IsTrue(times.Max() < 5000);
+            Assert.IsTrue(times.Average() < 5000);
         }
 
         [TestMethod]
