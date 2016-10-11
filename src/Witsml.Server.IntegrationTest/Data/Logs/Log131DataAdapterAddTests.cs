@@ -96,6 +96,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
+        [Ignore, Description("For Benchmarking")]
         public void Log131DataAdapter_AddToStore_Benchmark_Add_TimeLog_With_Data()
         {
             AddParents();
@@ -103,9 +104,24 @@ namespace PDS.Witsml.Server.Data.Logs
             var times = new List<long>();
 
             DevKit.InitHeader(Log, LogIndexType.datetime);
+
+            // Add 40 more mnemonics
+            for (int i = 0; i < 40; i++)
+            {
+                Log.LogCurveInfo.Add(DevKit.LogGenerator.CreateDoubleLogCurveInfo($"Curve{i}", "m"));
+            }
+
             DevKit.InitDataMany(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), 50, 1, false, false);
 
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < Log.LogData.Count; i++)
+            {
+                for (int x = 0; x < Log.LogCurveInfo.Count - 3; x++)
+                {
+                    Log.LogData[i] += $",{i}";
+                }
+            }
+
+            for (int i = 0; i < 50; i++)
             {
                 Log.Uid = DevKit.Uid();
                 Log.Name = DevKit.Name($"Benchmark{i}");
