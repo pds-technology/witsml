@@ -44,6 +44,15 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         /// <param name="uri">The data object URI.</param>
         partial void SetAdditionalDefaultValues(ChannelSet dataObject, EtpUri uri)
         {
+            if (string.IsNullOrWhiteSpace(dataObject.TimeDepth))
+                dataObject.TimeDepth = "time";
+
+            if (string.IsNullOrWhiteSpace(dataObject.CurveClass))
+                dataObject.CurveClass = "unknown";
+
+            if (string.IsNullOrWhiteSpace(dataObject.LoggingCompanyName))
+                dataObject.LoggingCompanyName = "unknown";
+
             if (dataObject.Index == null)
                 dataObject.Index = new List<ChannelIndex>();
 
