@@ -249,12 +249,16 @@ namespace PDS.Witsml
         {
             if (requestLatestValues.HasValue && optimizeRangeStart.HasValue)
             {
+                // Initial search limit amount of rows to be returned
+                if (requestLatestValues.Value == 1 && requestFactor == 1)
+                    return new Range<double?>(optimizeRangeStart.Value, null);
+
                 var optimizationEstimate =
                     (requestFactor * (requestLatestValues.Value + 1) * rangeStepSize);
 
                 range = increasing
-                    ? new Range<double?>(optimizeRangeStart.Value - optimizationEstimate, rangeEnd)
-                    : new Range<double?>(optimizeRangeStart.Value + optimizationEstimate, rangeEnd);
+                    ? new Range<double?>(optimizeRangeStart.Value - optimizationEstimate, null)
+                    : new Range<double?>(optimizeRangeStart.Value + optimizationEstimate, null);
 
                 if (rangeStart.HasValue && range.StartsBefore(rangeStart.Value, increasing))
                 {
