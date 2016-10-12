@@ -64,7 +64,7 @@ namespace PDS.Witsml.Server.Models
 
             foreach (var chunk in channelDataChunks)
             {
-                bool reverse = ShouldBeReversed(range, chunk);
+                bool reverse = IsReverseOptimal(range, chunk);
                 var records = chunk.GetReader(reverse).AsEnumerable();
 
                 foreach (var record in records)
@@ -95,15 +95,16 @@ namespace PDS.Witsml.Server.Models
         /// <param name="range">The range.</param>
         /// <param name="chunk">The chunk.</param>
         /// <returns>
-        ///   <c>true</c> if the specified range should be reversed; otherwise, <c>false</c>.
+        ///   <c>true</c> if the records should be reversed; otherwise, <c>false</c>.
         /// </returns>
-        private static bool ShouldBeReversed(Range<double?>? range, ChannelDataChunk chunk)
+        private static bool IsReverseOptimal(Range<double?>? range, ChannelDataChunk chunk)
         {
             var start = chunk.Indices[0].Start;
             var end = chunk.Indices[0].End;
             bool reverse = false;
-            // If start is defined or start and end is defined then reverse depending on
-            // which direction is smallest
+
+            // If start is defined or start and end are defined then evaluate if the records
+            // should be reversed for fastest evaluation.
             if (range?.Start != null || (range?.Start != null && range?.End != null))
             {
                 reverse = Math.Abs(start - (double)range?.Start.Value) >
