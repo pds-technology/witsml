@@ -61,19 +61,17 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         }
 
         /// <summary>
-        /// Called when [session opened].
+        /// Called when the ETP session is opened.
         /// </summary>
+        /// <param name="requestedProtocols">The requested protocols.</param>
         /// <param name="supportedProtocols">The supported protocols.</param>
-        public override void OnSessionOpened(IList<SupportedProtocol> supportedProtocols)
+        public override void OnSessionOpened(IList<SupportedProtocol> requestedProtocols, IList<SupportedProtocol> supportedProtocols)
         {
             // Is the client requesting the ChannelStreaming consumer role
             if (!supportedProtocols.Contains(Protocol, Role)) return;
             Start(maxMessageRate: _maxMessageRate);
 
-            var coreHandler = Session.Handler<ICoreServer>() as CoreServerHandler;
-            var requestedProtocols = coreHandler?.RequestedProtocols;
-
-            if (requestedProtocols != null && !requestedProtocols.IsSimpleStreamer())
+            if (!requestedProtocols.IsSimpleStreamer())
             {
                 ChannelDescribe(new[] { EtpUri.RootUri });
             }
