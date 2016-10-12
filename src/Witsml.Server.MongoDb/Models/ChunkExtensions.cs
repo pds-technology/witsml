@@ -64,13 +64,16 @@ namespace PDS.Witsml.Server.Models
 
             foreach (var chunk in channelDataChunks)
             {
-                var records = chunk.GetReader(reverse: reverse).AsEnumerable();
+                var records = chunk.GetReader(reverse).AsEnumerable();
 
                 foreach (var record in records)
                 {
                     if (range?.Start != null || range?.End != null)
                     {
                         var index = record.GetIndexValue();
+
+                        if (reverse && range.Value.StartsAfter(index, ascending)) 
+                            yield break;
 
                         if (range.Value.StartsAfter(index, ascending))
                             continue;
