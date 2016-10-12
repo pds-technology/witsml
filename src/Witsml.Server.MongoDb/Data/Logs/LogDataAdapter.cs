@@ -1131,7 +1131,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     : increasing, 
                 reverse: requestLatestValues.HasValue);
 
-            return chunks.GetRecords(range, increasing, reverse: (requestLatestValues.HasValue || (increasing && range.Start != null && range.End == null)));
+            return chunks.GetRecords(range, increasing);
         }
 
         private IDictionary<int, string> GetUnitList(T log, int[] slices)

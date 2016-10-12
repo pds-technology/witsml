@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using log4net;
 using PDS.Framework;
@@ -54,9 +55,8 @@ namespace PDS.Witsml.Server.Models
         /// <param name="channelDataChunks">The channel data chunks.</param>
         /// <param name="range">The range.</param>
         /// <param name="ascending">if set to <c>true</c> the data will be sorted in ascending order.</param>
-        /// <param name="reverse">if set to <c>true</c> [reverse].</param>
         /// <returns></returns>
-        public static IEnumerable<IChannelDataRecord> GetRecords(this IEnumerable<ChannelDataChunk> channelDataChunks, Range<double?>? range = null, bool ascending = true, bool reverse = false)
+        public static IEnumerable<IChannelDataRecord> GetRecords(this IEnumerable<ChannelDataChunk> channelDataChunks, Range<double?>? range = null, bool ascending = true)
         {
             if (channelDataChunks == null) yield break;
 
@@ -64,6 +64,7 @@ namespace PDS.Witsml.Server.Models
 
             foreach (var chunk in channelDataChunks)
             {
+                bool reverse = ShouldBeReversed(range, chunk);
                 var records = chunk.GetReader(reverse).AsEnumerable();
 
                 foreach (var record in records)
@@ -72,7 +73,7 @@ namespace PDS.Witsml.Server.Models
                     {
                         var index = record.GetIndexValue();
 
-                        if (reverse && range.Value.StartsAfter(index, ascending)) 
+                        if (reverse && range.Value.StartsAfter(index, ascending))
                             yield break;
 
                         if (range.Value.StartsAfter(index, ascending))
@@ -85,6 +86,31 @@ namespace PDS.Witsml.Server.Models
                     yield return record;
                 }
             }
+        }
+
+        /// <summary>
+        /// Determines whether the records in the chunk should be reversed based on the fastest
+        /// route of evaluation.
+        /// </summary>
+        /// <param name="range">The range.</param>
+        /// <param name="chunk">The chunk.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified range should be reversed; otherwise, <c>false</c>.
+        /// </returns>
+        private static bool ShouldBeReversed(Range<double?>? range, ChannelDataChunk chunk)
+        {
+            var start = chunk.Indices[0].Start;
+            var end = chunk.Indices[0].End;
+            bool reverse = false;
+            // If start is defined or start and end is defined then reverse depending on
+            // which direction is smallest
+            if (range?.Start != null || (range?.Start != null && range?.End != null))
+            {
+                reverse = Math.Abs(start - (double)range?.Start.Value) >
+                          Math.Abs(end - (double)range?.Start.Value);
+            }
+
+            return reverse;
         }
     }
 }

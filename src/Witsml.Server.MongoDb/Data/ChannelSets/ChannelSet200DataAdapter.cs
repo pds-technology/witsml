@@ -112,7 +112,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                     ? !increasing
                     : increasing,
                 reverse: requestLatestValues.HasValue);
-            return chunks.GetRecords(range, increasing, reverse: requestLatestValues.HasValue);
+            return chunks.GetRecords(range, increasing);
         }
 
         /// <summary>
