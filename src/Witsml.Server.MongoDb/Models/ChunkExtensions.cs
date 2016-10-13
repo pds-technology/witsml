@@ -54,7 +54,7 @@ namespace PDS.Witsml.Server.Models
         /// </summary>
         /// <param name="channelDataChunks">The channel data chunks.</param>
         /// <param name="range">The range.</param>
-        /// <param name="ascending">if set to <c>true</c> the data will be sorted in ascending order.</param>
+        /// <param name="ascending">If set to <c>true</c> the data will be sorted in ascending order.</param>
         /// <returns></returns>
         public static IEnumerable<IChannelDataRecord> GetRecords(this IEnumerable<ChannelDataChunk> channelDataChunks, Range<double?>? range = null, bool ascending = true)
         {
@@ -64,7 +64,7 @@ namespace PDS.Witsml.Server.Models
 
             foreach (var chunk in channelDataChunks)
             {
-                bool reverse = IsReverseOptimal(range, chunk);
+                var reverse = chunk.IsReverseOptimal(range);
                 var records = chunk.GetReader(reverse).AsEnumerable();
 
                 foreach (var record in records)
@@ -92,12 +92,12 @@ namespace PDS.Witsml.Server.Models
         /// Determines whether the records in the chunk should be reversed based on the fastest
         /// route of evaluation.
         /// </summary>
-        /// <param name="range">The range.</param>
         /// <param name="chunk">The chunk.</param>
+        /// <param name="range">The range.</param>
         /// <returns>
-        ///   <c>true</c> if the records should be reversed; otherwise, <c>false</c>.
+        ///   <c>true</c> if reversing the records optimal; otherwise, <c>false</c>.
         /// </returns>
-        private static bool IsReverseOptimal(Range<double?>? range, ChannelDataChunk chunk)
+        private static bool IsReverseOptimal(this ChannelDataChunk chunk, Range<double?>? range)
         {
             var start = chunk.Indices[0].Start;
             var end = chunk.Indices[0].End;
