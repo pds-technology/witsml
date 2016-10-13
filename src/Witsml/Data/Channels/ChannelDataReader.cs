@@ -1347,10 +1347,11 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="units">The units for the log curve.</param>
         /// <param name="nullValues">The null value map for log curve.</param>
         /// <param name="ranges">The ranges map.</param>
+        /// <param name="increasing">If the context is increasing</param>
         /// <returns>The channel data managed by the reader.</returns>
         public List<List<List<object>>> GetData(
             IQueryContext context, IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units, IDictionary<int, string> nullValues,
-            out Dictionary<string, Range<double?>> ranges)
+            out Dictionary<string, Range<double?>> ranges, bool increasing = false)
         {
             _log.Debug("Getting the sliced channel data.");
 
@@ -1454,13 +1455,13 @@ namespace PDS.Witsml.Data.Channels
                 }
             }
 
-            // For requested values reverse the order before output because the channel data
-            //... was retrieved from the bottom up.
-            if (requestLatestValues.HasValue)
-            {
-                _log.Debug("Reversing the order of channel data for request latest values.");
-                channelData.Reverse();
-            }
+            // Sort the data in case it was reversed during the query
+            _log.Debug("Sorting the order of channel data for request latest values.");
+            channelData.Sort(
+                (x, y) =>
+                    increasing
+                        ? Convert.ToInt64(x[0][0]).CompareTo(Convert.ToInt64(y[0][0]))
+                        : Convert.ToInt64(y[0][0]).CompareTo(Convert.ToInt64(x[0][0])));
 
             // if any ranges are empty, then we must (re)slice
             if (ranges.Values.All(r => r.Start.HasValue) || Mnemonics.Length <= 0)
