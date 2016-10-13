@@ -342,9 +342,10 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                         : (int?)null;
             var increasing = primaryIndex.Direction == IndexDirections.Increasing;
             bool? firstStart = null;
+            var isInvalidRequest = false;
 
             // Loop until there is a cancellation or all channals have been removed
-            while (!IsStreamingStopped(contextList, ref token))
+            while (!isInvalidRequest && !IsStreamingStopped(contextList, ref token))
             {
                 firstStart = !firstStart.HasValue;
 
@@ -370,7 +371,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 if (channelStreamingType == ChannelStreamingTypes.RangeRequest)
                 {
                     var minEnd = contextList.Min(x => Convert.ToInt64(x.EndIndex));
-                    ValidateRangeRequestIndexes(minStart ?? 0, minEnd, increasing);
+                    isInvalidRequest = ValidateRangeRequestIndexes(minStart ?? 0, minEnd, increasing);
                 }
 
                 //var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
@@ -586,13 +587,14 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             return token.IsCancellationRequested || contextList.Count == 0;
         }
 
-        private void ValidateRangeRequestIndexes(long startIndex, long endIndex, bool increasing)
+        private bool ValidateRangeRequestIndexes(long startIndex, long endIndex, bool increasing)
         {
             if (increasing)
             {
                 if (startIndex > endIndex)
                 {
                     this.InvalidArgument("startIndex > endIndex", Request.MessageId);
+                    return true;
                 }
             }
             else
@@ -600,8 +602,10 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 if (startIndex < endIndex)
                 {
                     this.InvalidArgument("startIndex < endIndex", Request.MessageId);
+                    return true;
                 }
             }
+            return false;
         }
     }
 }
