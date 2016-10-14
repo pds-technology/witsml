@@ -55,8 +55,9 @@ namespace PDS.Witsml.Server.Models
         /// <param name="channelDataChunks">The channel data chunks.</param>
         /// <param name="range">The range.</param>
         /// <param name="ascending">If set to <c>true</c> the data will be sorted in ascending order.</param>
+        /// <param name="reverse">if set to <c>true</c> reverse the records.</param>
         /// <returns></returns>
-        public static IEnumerable<IChannelDataRecord> GetRecords(this IEnumerable<ChannelDataChunk> channelDataChunks, Range<double?>? range = null, bool ascending = true)
+        public static IEnumerable<IChannelDataRecord> GetRecords(this IEnumerable<ChannelDataChunk> channelDataChunks, Range<double?>? range = null, bool ascending = true, bool reverse = false)
         {
             if (channelDataChunks == null) yield break;
 
@@ -64,7 +65,7 @@ namespace PDS.Witsml.Server.Models
 
             foreach (var chunk in channelDataChunks)
             {
-                var reverse = chunk.IsReverseOptimal(range);
+                //var reverse = chunk.IsReverseOptimal(range);
                 var records = chunk.GetReader(reverse).AsEnumerable();
 
                 foreach (var record in records)
