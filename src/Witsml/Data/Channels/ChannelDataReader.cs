@@ -449,7 +449,7 @@ namespace PDS.Witsml.Data.Channels
                 var index = Array.IndexOf(_originalMnemonics, mnemonic);
                 if (index < 0)
                     continue;
-                
+
                 values[i] = row[1][index];
             }
 
@@ -523,7 +523,7 @@ namespace PDS.Witsml.Data.Channels
                         NullValues = record.NullValues.Concat(nullValues.ToArray()).ToArray();
                     }
                 }
-                              
+
                 _settingMerged = true;
             }
             else
@@ -586,7 +586,7 @@ namespace PDS.Witsml.Data.Channels
                             updatedRange[0] = index;
                         updatedRange[1] = index;
                     }
-                        
+
                 }
                 else
                 {
@@ -603,7 +603,7 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="record">The record.</param>
         /// <param name="range">The planned chunk range.</param>
         public void CopyChannelSettings(IChannelDataRecord record, Range<double?> range)
-        {          
+        {
             Mnemonics = record.Mnemonics;
             Units = record.Units;
             NullValues = record.NullValues;
@@ -1347,11 +1347,10 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="units">The units for the log curve.</param>
         /// <param name="nullValues">The null value map for log curve.</param>
         /// <param name="ranges">The ranges map.</param>
-        /// <param name="increasing">If the context is increasing</param>
         /// <returns>The channel data managed by the reader.</returns>
         public List<List<List<object>>> GetData(
             IQueryContext context, IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units, IDictionary<int, string> nullValues,
-            out Dictionary<string, Range<double?>> ranges, bool increasing = false)
+            out Dictionary<string, Range<double?>> ranges)
         {
             _log.Debug("Getting the sliced channel data.");
 
@@ -1455,13 +1454,13 @@ namespace PDS.Witsml.Data.Channels
                 }
             }
 
-            // Sort the data in case it was reversed during the query
-            _log.Debug("Sorting the order of channel data for request latest values.");
-            channelData.Sort(
-                (x, y) =>
-                    increasing
-                        ? Convert.ToInt64(x[0][0]).CompareTo(Convert.ToInt64(y[0][0]))
-                        : Convert.ToInt64(y[0][0]).CompareTo(Convert.ToInt64(x[0][0])));
+            // For requested values reverse the order before output because the channel data
+            //... was retrieved from the bottom up.
+            if (requestLatestValues.HasValue)
+            {
+                _log.Debug("Reversing the order of channel data for request latest values.");
+                channelData.Reverse();
+            }
 
             // if any ranges are empty, then we must (re)slice
             if (ranges.Values.All(r => r.Start.HasValue) || Mnemonics.Length <= 0)
@@ -1471,7 +1470,7 @@ namespace PDS.Witsml.Data.Channels
 
             var reader = new ChannelDataReader(channelData, _queryMnemonics.Skip(Depth).ToArray(), _queryUnits.Values.Skip(Depth).ToArray(), _queryNullValues.Values.Skip(Depth).ToArray())
                 .WithIndices(Indices);
-                    
+
             reader.Slice(mnemonicSlices, _queryUnits, _queryNullValues);
 
             // Clone the context without RequestLatestValues
@@ -1566,7 +1565,7 @@ namespace PDS.Witsml.Data.Channels
             {
                 if (channelValues[i] == null)
                     continue;
-                
+
                 // For the current channel, if the requested value count has not already been reached and then
                 // ... current channel value is not null or blank then a value is being added.
                 if (requestedValueCount[_allSliceOrdinals[i]] < requestLatestValue && !IsNull(channelValues[i], _allSliceOrdinals[i]))
@@ -1716,7 +1715,7 @@ namespace PDS.Witsml.Data.Channels
                 .SelectMany(x => x.Last())
                 .Select((v, i) => new { Value = v, Index = i })
                 .Where((r, i) => SliceExists(i + Depth))  // We need to look at the i-th + Depth slice since we're only looking at channel values
-                .ToDictionary(x => x.Index + Depth, x => x.Value );
+                .ToDictionary(x => x.Index + Depth, x => x.Value);
         }
 
         /// <summary>
@@ -1781,7 +1780,7 @@ namespace PDS.Witsml.Data.Channels
         /// <returns></returns>
         private static List<List<List<object>>> Deserialize(string data, string dataDelimiter = null)
         {
-            _log.Debug("Deserializing channel data json.");       
+            _log.Debug("Deserializing channel data json.");
 
             if (string.IsNullOrWhiteSpace(data))
                 return new List<List<List<object>>>();
@@ -1831,7 +1830,7 @@ namespace PDS.Witsml.Data.Channels
 
             return json.ToString();
         }
-       
+
         /// <summary>
         /// Formats the specified value.
         /// </summary>
@@ -2054,7 +2053,7 @@ namespace PDS.Witsml.Data.Channels
             // NOTE: uncomment the following line if the finalizer is overridden above.
             // GC.SuppressFinalize(this);
         }
-        
+
         #endregion
     }
 }
