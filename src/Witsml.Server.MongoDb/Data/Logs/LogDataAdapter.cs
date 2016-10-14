@@ -888,7 +888,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 var reader = records.GetReader(mnemonicIndexes.Values.ToArray(), units, nullValues);
 
                 // Get the data from the reader based on the context and mnemonicIndexes (slices)
-                logData = reader.GetData(context, mnemonicIndexes, units, nullValues, out ranges, increasing);
+                logData = reader.GetData(context, mnemonicIndexes, units, nullValues, out ranges);
 
 
                 // Test if we're finished reading data
