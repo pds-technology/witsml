@@ -120,7 +120,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 {
                     if (string.IsNullOrWhiteSpace(objectId.ObjectId))
                     {
-                        this.InvalidUri($"EINVALID_URI:  Channel {channel.ChannelName}({channel.ChannelId}) is missing the objectId of a parent.", messageId);
+                        this.InvalidUri($"Channel {channel.ChannelName}({channel.ChannelId}) is missing the objectId of a parent.", messageId);
                         channelsToBeStopped.Add(channel);
                         channelIndex.Add(i);
                     }

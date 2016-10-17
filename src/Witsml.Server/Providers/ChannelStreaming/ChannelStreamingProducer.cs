@@ -163,7 +163,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             // no action needed if streaming not in progress
             if (_tokenSource == null)
             {
-                this.InvalidState("EINVALID_STATE_CODE: There are currently no channels streaming.", header.MessageId);
+                this.InvalidState("There are currently no channels streaming.", header.MessageId);
                 return;
             }
 
@@ -195,7 +195,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 {
                     // Try to get the mnemonic from the Described channels
                     var mnemonic = Channels.ContainsKey(channel) ? $" ({Channels[channel].Item2.ChannelName})" : string.Empty;
-                    this.InvalidState($"EINVALID_STATE_CODE: Channel {channel}{mnemonic} is not currently streaming.", messageId);
+                    this.InvalidState($"Channel {channel}{mnemonic} is not currently streaming.", messageId);
                 }
             }
         }
@@ -286,7 +286,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             if (streamingChannels.Length > 0)
             {
                 streamingChannels.ForEach(c =>
-                    this.InvalidState($"EINVALID_STATE_CODE: Channel {c.ChannelId} ({c.ChannelName}) is already streaming.", messageId));
+                    this.InvalidState($"Channel {c.ChannelId} ({c.ChannelName}) is already streaming.", messageId));
                 Logger.Warn($"Channels {string.Join(",", streamingChannelIds)} are already streaming.");
             }
 
