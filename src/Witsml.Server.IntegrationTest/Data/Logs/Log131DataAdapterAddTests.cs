@@ -111,6 +111,12 @@ namespace PDS.Witsml.Server.Data.Logs
                 Log.LogCurveInfo.Add(DevKit.LogGenerator.CreateDoubleLogCurveInfo($"Curve{i}", "m"));
             }
 
+            // Set column indexes
+            for (int i = 0; i < Log.LogCurveInfo.Count; i++)
+            {
+                Log.LogCurveInfo[i].ColumnIndex = (short?)(i + 1);
+            }
+
             DevKit.InitDataMany(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), 50, 1, false, false);
 
             for (int i = 0; i < Log.LogData.Count; i++)
