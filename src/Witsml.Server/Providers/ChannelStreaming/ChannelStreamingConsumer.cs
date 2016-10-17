@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Threading;
+using Energistics;
 using Energistics.Common;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
@@ -87,7 +88,14 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             // Base implementation caches ChannelMetadataRecord items sent from the producer
             base.HandleChannelMetadata(header, channelMetadata);
 
-            InitializeDataBlocks(channelMetadata.Channels);
+            // Remove invalid channels
+            EvaluateChannelMetadata(header.MessageId, channelMetadata);
+
+            // Ensure there are still channels to stream
+            if (channelMetadata.Channels.Count < 1)
+                return;
+
+            InitializeDataBlocks(header.MessageId, channelMetadata.Channels);
 
             var infos = channelMetadata.Channels
                 .Select(ToChannelStreamingInfo)
@@ -95,6 +103,36 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
             // Send ChannelStreamingStart message
             ChannelStreamingStart(infos);
+        }
+
+        private void EvaluateChannelMetadata(long messageId, ChannelMetadata channelMetadata)
+        {
+            var channelsToBeStopped = new List<ChannelMetadataRecord>();
+            var channelIndex = new List<int>();
+
+            for (int i = 0; i < channelMetadata.Channels.Count; i++)
+            {
+                var channel = channelMetadata.Channels[i];
+                var uri = new EtpUri(channel.ChannelUri);
+
+                // Ensure that all parent UIDs are populated
+                foreach (var objectId in uri.GetObjectIds())
+                {
+                    if (string.IsNullOrWhiteSpace(objectId.ObjectId))
+                    {
+                        this.InvalidUri($"EINVALID_URI:  Channel {channel.ChannelName}({channel.ChannelId}) is missing the objectId of a parent.", messageId);
+                        channelsToBeStopped.Add(channel);
+                        channelIndex.Add(i);
+                    }
+                }
+            }
+
+            // Notify producer to stop streaming the channels
+            ChannelStreamingStop(channelsToBeStopped.Select(x => x.ChannelId).ToList());
+
+            // Remove the channels from the metadata
+            channelIndex.Reverse();
+            channelIndex.ForEach(x => channelMetadata.Channels.RemoveAt(x));
         }
 
         /// <summary>
@@ -117,11 +155,25 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             ProcessDataBlocks();
         }
 
+        /// <summary>
+        /// Handles the channel streaming stop.
+        /// </summary>
+        /// <param name="channelIds">The  list of channel ids to be stopped.</param>
+        protected void ChannelStreamingStop(List<long> channelIds)
+        {
+            base.ChannelStreamingStop(channelIds);
+        }
+
         private void AppendChannelData(IList<DataItem> data)
         {
             foreach (var dataItem in data)
             {
+                // Check to see if we are accepting data for this channel
+                if (!_channelParentUris.ContainsKey(dataItem.ChannelId))
+                    continue;
+
                 var parentUri = _channelParentUris[dataItem.ChannelId];
+
                 var dataBlock = _dataBlocks[parentUri];
 
                 var channel = ChannelMetadataRecords.FirstOrDefault(x => x.ChannelId == dataItem.ChannelId);
@@ -145,11 +197,12 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 .ToList();
         }
 
-        private void InitializeDataBlocks(IList<ChannelMetadataRecord> channels)
+        private void InitializeDataBlocks(long messageId, IList<ChannelMetadataRecord> channels)
         {
             foreach (var channel in channels)
             {
                 var uri = new EtpUri(channel.ChannelUri);
+
                 var parentUri = uri.Parent; // Log or ChannelSet
 
                 if (!_dataBlocks.ContainsKey(parentUri))
@@ -175,9 +228,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         {
             foreach (var item in _dataBlocks)
             {
-                if (flush)
-                    ProcessDataBlock(item.Key, item.Value);
-                else if (item.Value.Count() >= ChannelDataBlock.BatchSize)
+                if (flush || item.Value.Count() >= ChannelDataBlock.BatchSize)
                     ProcessDataBlock(item.Key, item.Value);
             }
         }

@@ -163,7 +163,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             // no action needed if streaming not in progress
             if (_tokenSource == null)
             {
-                SendInvalidStateMessage(header.MessageId, "EINVALID_STATE_CODE: There are currently no channels streaming.");
+                this.InvalidState("EINVALID_STATE_CODE: There are currently no channels streaming.", header.MessageId);
                 return;
             }
 
@@ -195,7 +195,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 {
                     // Try to get the mnemonic from the Described channels
                     var mnemonic = Channels.ContainsKey(channel) ? $" ({Channels[channel].Item2.ChannelName})" : string.Empty;
-                    SendInvalidStateMessage(messageId, $"EINVALID_STATE_CODE: Channel {channel}{mnemonic} is not currently streaming.");
+                    this.InvalidState($"EINVALID_STATE_CODE: Channel {channel}{mnemonic} is not currently streaming.", messageId);
                 }
             }
         }
@@ -285,8 +285,8 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             // Send a EINVALID_STATE message if any are already streaming.
             if (streamingChannels.Length > 0)
             {
-                streamingChannels.ForEach(c => 
-                    SendInvalidStateMessage(messageId, $"EINVALID_STATE_CODE: Channel {c.ChannelId} ({c.ChannelName}) is already streaming."));
+                streamingChannels.ForEach(c =>
+                    this.InvalidState($"EINVALID_STATE_CODE: Channel {c.ChannelId} ({c.ChannelName}) is already streaming.", messageId));
                 Logger.Warn($"Channels {string.Join(",", streamingChannelIds)} are already streaming.");
             }
 
@@ -306,11 +306,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 : item is int
                     ? ChannelStreamingTypes.IndexCount
                     : ChannelStreamingTypes.LatestValue;
-        }
-
-        private void SendInvalidStateMessage(long messageId, string message)
-        {
-            ProtocolException((int)EtpErrorCodes.InvalidState, message, messageId);
         }
 
         private ChannelMetadataRecord[] GetStreamingChannels(IEnumerable<long> channelIds)
@@ -356,7 +351,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 //... IndexCount or LatestValue and requestLatestValues is no longer set.
                 var minStart =
                     (channelStreamingType == ChannelStreamingTypes.IndexValue || channelStreamingType == ChannelStreamingTypes.RangeRequest) ||
-                    ((channelStreamingType == ChannelStreamingTypes.IndexCount || channelStreamingType == ChannelStreamingTypes.LatestValue) && 
+                    ((channelStreamingType == ChannelStreamingTypes.IndexCount || channelStreamingType == ChannelStreamingTypes.LatestValue) &&
                     !requestLatestValues.HasValue)
                         ? contextList.Min(x => Convert.ToInt64(x.StartIndex))
                         : (long?)null;
