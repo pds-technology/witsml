@@ -786,8 +786,8 @@ namespace PDS.Witsml.Server.Data.Channels
             if (range.Start.HasValue)
             {
                 var endFilter = ascending
-                    ? builder.Gte("Indices.End", range.Start.Value)
-                    : builder.Lte("Indices.End", range.Start.Value);
+                    ? builder.Gte("Indices.0.End", range.Start.Value)
+                    : builder.Lte("Indices.0.End", range.Start.Value);
 
                 Logger.DebugFormat("Building end filter with start range '{0}'.", range.Start.Value);
                 rangeFilters.Add(endFilter);
@@ -796,8 +796,8 @@ namespace PDS.Witsml.Server.Data.Channels
             if (range.End.HasValue)
             {
                 var startFilter = ascending
-                    ? builder.Lte("Indices.Start", range.End)
-                    : builder.Gte("Indices.Start", range.End);
+                    ? builder.Lte("Indices.0.Start", range.End)
+                    : builder.Gte("Indices.0.Start", range.End);
 
                 Logger.DebugFormat("Building start filter with end range '{0}'.", range.End.Value);
                 rangeFilters.Add(startFilter);
@@ -817,7 +817,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
         private void CreateChannelDataChunkIndex()
         {
-            var keys = Builders<ChannelDataChunk>.IndexKeys.Ascending("Indices.0.Start");
+            var keys = Builders<ChannelDataChunk>.IndexKeys.Ascending("Indices.0.Start").Ascending("Indices.0.End").Ascending("Indices.Mnemonic");
             GetCollection().Indexes.CreateOneAsync(keys);
         }
 
