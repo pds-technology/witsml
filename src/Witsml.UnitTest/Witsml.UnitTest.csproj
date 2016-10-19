@@ -110,6 +110,7 @@
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Data\Logs\LogExtensionsTests.cs" />
+    <Compile Include="DateTimeExtensionsTests.cs" />
     <Compile Include="FrameworkExtensionsTests.cs" />
     <Compile Include="OptionsInTests.cs" />
     <Compile Include="EtpUrisTests.cs" />

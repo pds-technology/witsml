@@ -26,7 +26,8 @@ namespace PDS.Framework
     /// </summary>
     public static class DateTimeExtensions
     {
-        private const long MicroToNanoFactor = 10L;
+        private static readonly DateTimeOffset _epochTime = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        private const long TicksToMicroSeconds = 10L;
 
         /// <summary>
         /// Converts a Unix time expressed as the number of microseconds that have elapsed
@@ -47,7 +48,7 @@ namespace PDS.Framework
         /// <returns>The number of microseconds that have elapsed since 1970-01-01T00:00:00.000Z.</returns>
         public static long ToUnixTimeMicroseconds(this DateTimeOffset dateTimeOffset)
         {
-            return dateTimeOffset.UtcTicks / MicroToNanoFactor;
+            return FromUnixTicks(dateTimeOffset.UtcTicks);
         }
 
         /// <summary>
@@ -98,13 +99,23 @@ namespace PDS.Framework
         }
 
         /// <summary>
-        /// Converts microseconds to nanoseconds (ticks).
+        /// Converts microseconds to ticks.
         /// </summary>
         /// <param name="microseconds">The microseconds.</param>
-        /// <returns>The value converted to nanoseconds (ticks).</returns>
+        /// <returns>The value converted to ticks.</returns>
         private static long ToUnixTicks(long microseconds)
         {
-            return microseconds * MicroToNanoFactor;
+            return microseconds * TicksToMicroSeconds + _epochTime.UtcTicks;
+        }
+
+        /// <summary>
+        /// Converts ticks to microseconds.
+        /// </summary>
+        /// <param name="ticks">The ticks.</param>
+        /// <returns>The value converted to microseconds.</returns>
+        private static long FromUnixTicks(long ticks)
+        {
+            return (ticks - _epochTime.UtcTicks) / TicksToMicroSeconds;
         }
     }
 }
