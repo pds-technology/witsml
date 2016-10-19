@@ -1,6 +1,10 @@
 PDS.Witsml.Server, 2016.1
 Copyright 2016 Petrotechnical Data Systems
 
+PDS.Witsml.Server incorporates ETP, WITSML™, PRODML™ and RESQML™ technology and standards
+provided by the Energistics Consortium, Inc.  Energistics®, WITSML™, PRODML™, RESQML™ and
+their logos are trademarks or registered trademarks of Energistics Consortium, Inc.
+
 Third Party Software
 
 Energistics 
@@ -23,28 +27,33 @@ with Energistics and/or its suppliers and shall remain subject to the terms of t
 License Agreement available at:
 http://www.energistics.org/product-license-agreement. 
 
-Cryptographic Notice
+Export Compliance
 -----------------------------------------------------------
-PDS.Witsml.Web makes use of cryptographic software.
+This application makes use of cryptographic software.
+- SSL/TLS is optionally used to secure web communications
 
 The country in which you currently reside may have restrictions on the import, possession,
-use, and/or re-export to another country, of encryption software.  BEFORE using any 
+use, and/or re-export to another country, of encryption software.  BEFORE using any
 encryption software, please check your country's laws, regulations and policies concerning
 the import, possession, or use, and re-export of encryption software, to see if this is
-permitted.  See http://www.wassenaar.org for more information.
+permitted.  See <http://www.wassenaar.org/> for more information.
 
-The U.S. Government Department of Commerce, Bureau of Industry and Security (BIS), has 
-classified this application as Export Commodity Control Number (ECCN) 5D002.c.1, which
-includes information security software using or performing cryptographic functions with
-symmetric and/or asymmetric algorithms.
+The U.S. Government Department of Commerce, Bureau of Industry and Security (BIS), has
+classified this application as Export Control Classification Number (ECCN)
+5D002.c.1, which includes information security software using or performing cryptographic
+functions with symmetric and/or asymmetric algorithms.
 
-The PDS.Witsml.Web's source code is published here:
-  https://github.com/pds-technology
+The application source code is published here:
+  https://github.com/pds-technology/witsml-server
 
-In accordance with BIS Export Administration Regulations (EAR) Section 742.15(b), this application is exempt from EAR:
- - The PDS.Witsml.Web source code has been made publicly available in accordance with BIS EAR Section 734.3(b)(3) by
-   publishing it in accordance with BIS EAR Section 734.7(a)(4) at the above source code URL.
- - The BIS and the ENC Encryption Request Coordinator have been notified via e-mail of the source code URL.
-
-The following provides more details on the included cryptographic software:
- - SSL/TLS is optionally used to secure web communications
+In accordance with US Export Administration Regulations (EAR) Section 742.15(b), this
+application is not subject to EAR:
+ - The application source code has been made publicly available in accordance
+   with EAR Section 734.3(b)(3)(i) by publishing it in accordance with EAR Section
+   734.7(a)(4)
+   at the above source code URL.
+ - The BIS and the ENC Encryption Request Coordinator have been notified via e-mail of the
+   source code URL.
+ - The application has been made publicly available in accordance with EAR
+   Section 734.3(b)(3) by publishing it in accordance with EAR Section 734.7(a)(4) at the
+   above application URL.
