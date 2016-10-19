@@ -804,12 +804,6 @@ namespace PDS.Witsml.Server.Data.Channels
             }
 
             if (rangeFilters.Count > 0)
-            {
-                Logger.DebugFormat("Building mnemonic filter with index channel '{0}'.", indexChannel);
-                rangeFilters.Add(builder.EqIgnoreCase("Indices.Mnemonic", indexChannel));
-            }
-
-            if (rangeFilters.Count > 0)
                 filters.Add(builder.And(rangeFilters));
 
             return builder.And(filters);
@@ -817,10 +811,14 @@ namespace PDS.Witsml.Server.Data.Channels
 
         private void CreateChannelDataChunkIndex()
         {
-            var keys = Builders<ChannelDataChunk>.IndexKeys.Ascending("Uri").Ascending("Indices.0.Start").Ascending("Indices.0.End").Ascending("Indices.Mnemonic");
+            var keys = Builders<ChannelDataChunk>.IndexKeys.Ascending("Uri").Ascending("Indices.0.Start").Ascending("Indices.0.End");
             GetCollection().Indexes.CreateOneAsync(keys);
             var uri = Builders<ChannelDataChunk>.IndexKeys.Ascending("Uri");
-
+            GetCollection().Indexes.CreateOneAsync(uri);
+            var start = Builders<ChannelDataChunk>.IndexKeys.Ascending("Indices.0.Start");
+            GetCollection().Indexes.CreateOneAsync(start);
+            var end = Builders<ChannelDataChunk>.IndexKeys.Ascending("Indices.0.End");
+            GetCollection().Indexes.CreateOneAsync(end);
         }
 
         private void UpdateMongoFile(ChannelDataChunk dc)
