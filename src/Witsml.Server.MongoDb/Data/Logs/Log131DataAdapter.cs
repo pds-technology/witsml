@@ -221,7 +221,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>The LogCurveInfo for the log.</returns>
         protected override List<LogCurveInfo> GetLogCurves(Log log)
         {
-            return log.LogCurveInfo;
+            return log?.LogCurveInfo;
         }
 
         /// <summary>
