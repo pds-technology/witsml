@@ -171,7 +171,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
                 //var set = log.ChannelSet.FirstOrDefault(x => x.Uuid == uri.ObjectId);
 
                 var set = _channelSetDataProvider.Get(uri);
-                set.Channel.ForEach(x => args.Context.Add(ToResource(set, x)));
+                set?.Channel?.ForEach(x => args.Context.Add(ToResource(set, x)));
             }
         }
 
