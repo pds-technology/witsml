@@ -42,9 +42,6 @@ namespace PDS.Witsml.Server.Data.Channels
     {
         private const string ChannelDataChunk = "channelDataChunk";
 
-        /// <summary> The URI in lowercase </summary>
-        private string _uriLower;
-
         /// <summary>The file name</summary>
         public const string FileName = "FileName";
 
@@ -272,7 +269,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
             var collection = GetCollection();
 
-            _uriLower = uri.ToLower();
+            var uriLower = uri.ToLower();
 
             var writeModels = chunks
                 .Select(dc =>
@@ -283,7 +280,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     if (string.IsNullOrWhiteSpace(dc.Uid))
                     {
                         dc.Uid = Guid.NewGuid().ToString();
-                        dc.Uri = _uriLower;
+                        dc.Uri = uriLower;
                         dc.MnemonicList = mnemonics;
                         dc.UnitList = units;
                         dc.NullValueList = nullValues;
@@ -309,7 +306,7 @@ namespace PDS.Witsml.Server.Data.Channels
                         UpdateMongoFile(dc);
 
                         return new UpdateOneModel<ChannelDataChunk>(
-                            filter.Eq(f => f.Uri, _uriLower) & filter.Eq(f => f.Uid, dc.Uid),
+                            filter.Eq(f => f.Uri, uriLower) & filter.Eq(f => f.Uid, dc.Uid),
                             update
                                 .Set(u => u.Indices, dc.Indices)
                                 .Set(u => u.MnemonicList, dc.MnemonicList)
@@ -328,7 +325,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     DeleteMongoFiles(mongoFileFilter);
 
                     return
-                        new DeleteOneModel<ChannelDataChunk>(chunkFilter.Eq(f => f.Uri, _uriLower) &
+                        new DeleteOneModel<ChannelDataChunk>(chunkFilter.Eq(f => f.Uri, uriLower) &
                                                              chunkFilter.Eq(f => f.Uid, dc.Uid));
                 })
                 .Where(wm => wm != null)
