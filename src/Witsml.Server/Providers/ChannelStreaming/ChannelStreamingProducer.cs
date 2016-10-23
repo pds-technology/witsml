@@ -587,24 +587,24 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         /// <param name="infos">The infos.</param>
         private void ValidateChannelRangeInfos(IList<ChannelRangeInfo> infos)
         {
-            // Validate the infos
-            var invalidInfos = new List<int>();
-            for (var i = 0; i < infos.Count; i++)
-            {
-                // Remove any infos with invalid ranges
-                invalidInfos.AddRange(
-                    infos[i].ChannelId.Select(channelId => Channels[channelId])
-                        .Where(
-                            channel =>
-                                ValidateRangeRequestIndexes(infos[i].StartIndex, infos[i].EndIndex,
-                                    channel.Item2.Indexes[0].Direction == IndexDirections.Increasing))
-                        .Select(channel => i));
-            }
-
             // Remove invalid channel range infos from streaming context
-            invalidInfos.Reverse();
-            foreach (var index in invalidInfos)
-                infos.RemoveAt(index);
+            infos
+                .Select((info, i) => new
+                {
+                    Channels = info.ChannelId
+                        .Where(channelId => Channels.ContainsKey(channelId))
+                        .Select(channelId => Channels[channelId].Item2),
+                    Info = info,
+                    Index = i
+                })
+                .Where(x =>
+                    x.Channels.Any(channel =>
+                        ValidateRangeRequestIndexes(x.Info.StartIndex, x.Info.EndIndex,
+                            channel.Indexes[0].Direction == IndexDirections.Increasing))
+                )
+                .Select(x => x.Index)
+                .Reverse()
+                .ForEach(infos.RemoveAt);
         }
 
         private bool ValidateRangeRequestIndexes(long startIndex, long endIndex, bool increasing)
