@@ -177,8 +177,9 @@ namespace PDS.Witsml.Server.Data
         /// Gets a data object by the specified URI.
         /// </summary>
         /// <param name="uri">The data object URI.</param>
+        /// <param name="fields">The requested fields.</param>
         /// <returns>The data object instance.</returns>
-        object IWitsmlDataAdapter.Get(EtpUri uri)
+        object IWitsmlDataAdapter.Get(EtpUri uri, params string[] fields)
         {
             return Get(uri);
         }
@@ -187,30 +188,9 @@ namespace PDS.Witsml.Server.Data
         /// Gets a data object by the specified URI.
         /// </summary>
         /// <param name="uri">The data object URI.</param>
+        /// <param name="fields">The requested fields.</param>
         /// <returns>The data object instance.</returns>
-        public virtual T Get(EtpUri uri)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets a partial data object by the specfied URI and requested fields.
-        /// </summary>
-        /// <param name="uri">The data object URI.</param>
-        /// <param name="fieldList">The requested fields.</param>
-        /// <returns>The partial data object instance.</returns>
-        object IWitsmlDataAdapter.Get(EtpUri uri, List<string> fieldList)
-        {
-            return Get(uri, fieldList);
-        }
-
-        /// <summary>
-        /// Gets a partial data object by the specfied URI and requested fields.
-        /// </summary>
-        /// <param name="uri">The data object URI.</param>
-        /// <param name="fieldList">The requested fields.</param>
-        /// <returns>The partial data object instance.</returns>
-        public virtual T Get(EtpUri uri, List<string> fieldList)
+        public virtual T Get(EtpUri uri, params string[] fields)
         {
             throw new NotImplementedException();
         }
