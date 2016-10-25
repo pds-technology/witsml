@@ -215,15 +215,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>true if the entity exists; otherwise, false</returns>
         protected bool Exists<TObject>(EtpUri uri, string dbCollectionName)
         {
-            try
-            {
-                return DoesEntityExist<TObject>(uri, dbCollectionName).Result;
-            }
-            catch (MongoException ex)
-            {
-                Logger.Error("Error querying " + dbCollectionName, ex);
-                throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, ex);
-            }
+            return GetEntity<TObject>(uri, dbCollectionName, new List<string>() {IdPropertyName}) != null;
         }
 
         /// <summary>
@@ -271,21 +263,11 @@ namespace PDS.Witsml.Server.Data
         /// Gets an object from the data store by uid
         /// </summary>
         /// <param name="uri">The data object URI.</param>
-        /// <returns>The object represented by the UID.</returns>
-        protected T GetEntity(EtpUri uri)
-        {
-            return GetEntity<T>(uri, DbCollectionName);
-        }
-
-        /// <summary>
-        /// Gets a partial data object by the specfied URI and requested fields.
-        /// </summary>
-        /// <param name="uri">The data object URI.</param>
         /// <param name="fieldList">The requested fields.</param>
-        /// <returns>The partial data object instance.</returns>
-        protected T GetEntity(EtpUri uri, List<string> fieldList)
+        /// <returns>The object represented by the UID.</returns>
+        protected T GetEntity(EtpUri uri, List<string> fieldList = null)
         {
-            return (T) GetEntity<T>(uri, DbCollectionName, fieldList).Result;
+            return GetEntity<T>(uri, DbCollectionName, fieldList);
         }
 
         /// <summary>
@@ -293,9 +275,10 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="uri">The data object URI.</param>
         /// <param name="dbCollectionName">The naame of the database collection.</param>
+        /// <param name="fieldList">The requested fields.</param>
         /// <typeparam name="TObject">The data object type.</typeparam>
         /// <returns>The entity represented by the indentifier.</returns>
-        protected TObject GetEntity<TObject>(EtpUri uri, string dbCollectionName)
+        protected TObject GetEntity<TObject>(EtpUri uri, string dbCollectionName, List<string> fieldList = null)
         {
             try
             {
@@ -303,80 +286,25 @@ namespace PDS.Witsml.Server.Data
 
                 var filter = GetEntityFilter<TObject>(uri, IdPropertyName);
 
+                // If the field list is specified use projection to filter the results
+                if (fieldList != null)
+                {
+                    var projection = Builders<TObject>.Projection.Include(fieldList.First());
+
+                    foreach (var item in fieldList.Skip(1))
+                        projection = projection.Include(item);
+
+                    return GetCollection<TObject>(dbCollectionName)
+                        .Find(filter)
+                        .Project<TObject>(projection)
+                        .Limit(1)
+                        .FirstOrDefault();
+                }
+                // Otherwise retrieve the full document
                 return GetCollection<TObject>(dbCollectionName)
                     .Find(filter)
                     .Limit(1)
                     .FirstOrDefault();
-            }
-            catch (MongoException ex)
-            {
-                Logger.ErrorFormat("Error querying {0} MongoDb collection:{1}{2}", dbCollectionName, Environment.NewLine, ex);
-                throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, ex);
-            }
-        }
-
-        /// <summary>
-        /// Gets an object from the data store by uid and requested fields.
-        /// </summary>
-        /// <param name="uri">The data object URI.</param>
-        /// <param name="dbCollectionName">The naame of the database collection.</param>
-        /// <param name="fieldList">The requested fields.</param>
-        /// <typeparam name="TObject">The data object type.</typeparam>
-        /// <returns>The entity represented by the indentifier.</returns>
-        protected async Task<object> GetEntity<TObject>(EtpUri uri, string dbCollectionName, List<string> fieldList)
-        {
-            try
-            {
-                Logger.DebugFormat("Querying {0} MongoDb collection; uid: {1}; fields: {2}", dbCollectionName,
-                    uri.ObjectId, string.Join(",", fieldList));
-
-                var filter = GetEntityFilter<TObject>(uri, IdPropertyName);
-                var projection = Builders<TObject>.Projection.Include(fieldList.First());
-                foreach (var item in fieldList.Skip(1))
-                    projection = projection.Include(item);
-
-                var options = new FindOptions<TObject>() { Projection = projection, Limit = 1 };
-                
-                using (var cursor = await GetCollection<TObject>(dbCollectionName).FindAsync(filter, options))
-                {
-                    while (await cursor.MoveNextAsync())
-                    {
-                        return cursor.Current.FirstOrDefault();
-                    }
-                }
-                return null;
-            }
-            catch (MongoException ex)
-            {
-                Logger.ErrorFormat("Error querying {0} MongoDb collection:{1}{2}", dbCollectionName, Environment.NewLine, ex);
-                throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, ex);
-            }
-        }
-
-        /// <summary>
-        /// Gets an object from the data store by uid
-        /// </summary>
-        /// <param name="uri">The data object URI.</param>
-        /// <param name="dbCollectionName">The naame of the database collection.</param>
-        /// <typeparam name="TObject">The data object type.</typeparam>
-        /// <returns>The entity represented by the indentifier.</returns>
-        protected async Task<bool> DoesEntityExist<TObject>(EtpUri uri, string dbCollectionName)
-        {
-            try
-            {
-                Logger.DebugFormat("Querying {0} MongoDb collection for object existance; uid: {1}", dbCollectionName, uri.ObjectId);
-
-                var filter = GetEntityFilter<TObject>(uri, IdPropertyName);
-                var projection = Builders<TObject>.Projection.Include("Uid");
-                var options = new FindOptions<TObject>() { Projection = projection, Limit = 1 };
-                using (var cursor = await GetCollection<TObject>(dbCollectionName).FindAsync(filter, options))
-                {
-                    while (await cursor.MoveNextAsync())
-                    {
-                        return cursor.Current.Any();
-                    }
-                }
-                return false;
             }
             catch (MongoException ex)
             {
