@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Energistics.Datatypes;
 
 namespace PDS.Witsml.Server.Data
@@ -66,6 +67,14 @@ namespace PDS.Witsml.Server.Data
         /// <param name="uri">The data object URI.</param>
         /// <returns>The data object instance.</returns>
         object Get(EtpUri uri);
+
+        /// <summary>
+        /// Gets a partial data object by the specfied URI and requested fields.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        /// <param name="fieldList">The requested fields.</param>
+        /// <returns>The partial data object instance.</returns>
+        object Get(EtpUri uri, List<string> fieldList);
 
         /// <summary>
         /// Deletes a data object by the specified URI.

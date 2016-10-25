@@ -73,7 +73,7 @@ namespace PDS.Witsml.Server.Data
             var uri = DataObject.GetUri();
             var uriWellbore = uri.Parent;
             var uriWell = uriWellbore.Parent;
-            var wellbore = WellboreDataAdapter.Get(uriWellbore);
+            var wellbore = WellboreDataAdapter.Get(uriWellbore, new List<string>() { "Uid", "UidWell" });
 
             // Validate parent uid property
             if (string.IsNullOrWhiteSpace(DataObject.UidWell))
