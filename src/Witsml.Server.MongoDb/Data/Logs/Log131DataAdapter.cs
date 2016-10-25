@@ -215,6 +215,20 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
+        /// Gets the index of the curve in the LogCurveInfo array.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <param name="mnemonic">The mnemonic.</param>
+        /// <returns>The index of the curve.</returns>
+        protected override int GetLogCurveIndex(Log log, string mnemonic)
+        {
+            if (log?.LogCurveInfo == null)
+                return -1;
+
+            return log.LogCurveInfo.IndexOf(log.LogCurveInfo.GetByUid(mnemonic) ?? log.LogCurveInfo.GetByMnemonic(mnemonic));
+        }
+
+        /// <summary>
         /// Gets the log curves.
         /// </summary>
         /// <param name="log">The log.</param>
