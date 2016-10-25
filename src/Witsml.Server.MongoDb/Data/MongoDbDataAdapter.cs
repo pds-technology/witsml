@@ -85,21 +85,11 @@ namespace PDS.Witsml.Server.Data
         /// Gets a data object by the specified UUID.
         /// </summary>
         /// <param name="uri">The data object URI.</param>
+        /// <param name="fields">The requested fields.</param>
         /// <returns>The data object instance.</returns>
-        public override T Get(EtpUri uri)
+        public override T Get(EtpUri uri, params string[] fields)
         {
             return GetEntity(uri);
-        }
-
-        /// <summary>
-        /// Gets a partial data object by the specfied URI and requested fields.
-        /// </summary>
-        /// <param name="uri">The data object URI.</param>
-        /// <param name="fieldList">The requested fields.</param>
-        /// <returns>The partial data object instance.</returns>
-        public override T Get(EtpUri uri, List<string> fieldList)
-        {
-            return GetEntity(uri, fieldList);
         }
 
         /// <summary>
@@ -215,7 +205,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>true if the entity exists; otherwise, false</returns>
         protected bool Exists<TObject>(EtpUri uri, string dbCollectionName)
         {
-            return GetEntity<TObject>(uri, dbCollectionName, new List<string>() {IdPropertyName}) != null;
+            return GetEntity<TObject>(uri, dbCollectionName, IdPropertyName) != null;
         }
 
         /// <summary>
@@ -263,11 +253,11 @@ namespace PDS.Witsml.Server.Data
         /// Gets an object from the data store by uid
         /// </summary>
         /// <param name="uri">The data object URI.</param>
-        /// <param name="fieldList">The requested fields.</param>
+        /// <param name="fields">The requested fields.</param>
         /// <returns>The object represented by the UID.</returns>
-        protected T GetEntity(EtpUri uri, List<string> fieldList = null)
+        protected T GetEntity(EtpUri uri, params string[] fields)
         {
-            return GetEntity<T>(uri, DbCollectionName, fieldList);
+            return GetEntity<T>(uri, DbCollectionName, fields);
         }
 
         /// <summary>
@@ -275,10 +265,10 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="uri">The data object URI.</param>
         /// <param name="dbCollectionName">The naame of the database collection.</param>
-        /// <param name="fieldList">The requested fields.</param>
+        /// <param name="fields">The requested fields.</param>
         /// <typeparam name="TObject">The data object type.</typeparam>
         /// <returns>The entity represented by the indentifier.</returns>
-        protected TObject GetEntity<TObject>(EtpUri uri, string dbCollectionName, List<string> fieldList = null)
+        protected TObject GetEntity<TObject>(EtpUri uri, string dbCollectionName, params string[] fields)
         {
             try
             {
@@ -287,12 +277,12 @@ namespace PDS.Witsml.Server.Data
                 var filter = GetEntityFilter<TObject>(uri, IdPropertyName);
 
                 // If the field list is specified use projection to filter the results
-                if (fieldList != null)
+                if (fields.Any())
                 {
-                    var projection = Builders<TObject>.Projection.Include(fieldList.First());
+                    var projection = Builders<TObject>.Projection.Include(fields.First());
 
-                    foreach (var item in fieldList.Skip(1))
-                        projection = projection.Include(item);
+                    foreach (var field in fields.Skip(1))
+                        projection = projection.Include(field);
 
                     return GetCollection<TObject>(dbCollectionName)
                         .Find(filter)
