@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Threading.Tasks;
 using Energistics.DataAccess;
 using Energistics.DataAccess.Validation;
 using Energistics.Datatypes;
@@ -88,6 +89,17 @@ namespace PDS.Witsml.Server.Data
         public override T Get(EtpUri uri)
         {
             return GetEntity(uri);
+        }
+
+        /// <summary>
+        /// Gets a partial data object by the specfied URI and requested fields.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        /// <param name="fieldList">The requested fields.</param>
+        /// <returns>The partial data object instance.</returns>
+        public override T Get(EtpUri uri, List<string> fieldList)
+        {
+            return GetEntity(uri, fieldList);
         }
 
         /// <summary>
@@ -205,7 +217,7 @@ namespace PDS.Witsml.Server.Data
         {
             try
             {
-                return GetEntity<TObject>(uri, dbCollectionName) != null;
+                return DoesEntityExist<TObject>(uri, dbCollectionName).Result;
             }
             catch (MongoException ex)
             {
@@ -266,6 +278,17 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Gets a partial data object by the specfied URI and requested fields.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        /// <param name="fieldList">The requested fields.</param>
+        /// <returns>The partial data object instance.</returns>
+        protected T GetEntity(EtpUri uri, List<string> fieldList)
+        {
+            return (T) GetEntity<T>(uri, DbCollectionName, fieldList).Result;
+        }
+
+        /// <summary>
         /// Gets an object from the data store by uid
         /// </summary>
         /// <param name="uri">The data object URI.</param>
@@ -282,7 +305,78 @@ namespace PDS.Witsml.Server.Data
 
                 return GetCollection<TObject>(dbCollectionName)
                     .Find(filter)
+                    .Limit(1)
                     .FirstOrDefault();
+            }
+            catch (MongoException ex)
+            {
+                Logger.ErrorFormat("Error querying {0} MongoDb collection:{1}{2}", dbCollectionName, Environment.NewLine, ex);
+                throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, ex);
+            }
+        }
+
+        /// <summary>
+        /// Gets an object from the data store by uid and requested fields.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        /// <param name="dbCollectionName">The naame of the database collection.</param>
+        /// <param name="fieldList">The requested fields.</param>
+        /// <typeparam name="TObject">The data object type.</typeparam>
+        /// <returns>The entity represented by the indentifier.</returns>
+        protected async Task<object> GetEntity<TObject>(EtpUri uri, string dbCollectionName, List<string> fieldList)
+        {
+            try
+            {
+                Logger.DebugFormat("Querying {0} MongoDb collection; uid: {1}; fields: {2}", dbCollectionName,
+                    uri.ObjectId, string.Join(",", fieldList));
+
+                var filter = GetEntityFilter<TObject>(uri, IdPropertyName);
+                var projection = Builders<TObject>.Projection.Include(fieldList.First());
+                foreach (var item in fieldList.Skip(1))
+                    projection = projection.Include(item);
+
+                var options = new FindOptions<TObject>() { Projection = projection, Limit = 1 };
+                
+                using (var cursor = await GetCollection<TObject>(dbCollectionName).FindAsync(filter, options))
+                {
+                    while (await cursor.MoveNextAsync())
+                    {
+                        return cursor.Current.FirstOrDefault();
+                    }
+                }
+                return null;
+            }
+            catch (MongoException ex)
+            {
+                Logger.ErrorFormat("Error querying {0} MongoDb collection:{1}{2}", dbCollectionName, Environment.NewLine, ex);
+                throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, ex);
+            }
+        }
+
+        /// <summary>
+        /// Gets an object from the data store by uid
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        /// <param name="dbCollectionName">The naame of the database collection.</param>
+        /// <typeparam name="TObject">The data object type.</typeparam>
+        /// <returns>The entity represented by the indentifier.</returns>
+        protected async Task<bool> DoesEntityExist<TObject>(EtpUri uri, string dbCollectionName)
+        {
+            try
+            {
+                Logger.DebugFormat("Querying {0} MongoDb collection for object existance; uid: {1}", dbCollectionName, uri.ObjectId);
+
+                var filter = GetEntityFilter<TObject>(uri, IdPropertyName);
+                var projection = Builders<TObject>.Projection.Include("Uid");
+                var options = new FindOptions<TObject>() { Projection = projection, Limit = 1 };
+                using (var cursor = await GetCollection<TObject>(dbCollectionName).FindAsync(filter, options))
+                {
+                    while (await cursor.MoveNextAsync())
+                    {
+                        return cursor.Current.Any();
+                    }
+                }
+                return false;
             }
             catch (MongoException ex)
             {
