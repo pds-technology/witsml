@@ -632,20 +632,18 @@ namespace PDS.Witsml.Server.Data.Logs
                 var curve = GetLogCurve(entity, mnemonic);
                 if (curve == null) continue;
 
+                var curveIndex = GetLogCurves(entity)?.IndexOf(GetLogCurve(entity, mnemonic));
+                if (!curveIndex.HasValue) continue;
+
                 var range = ranges[mnemonic];
                 var isIndexCurve = mnemonic == GetIndexCurveMnemonic(entity);
 
                 var currentRange = GetIndexRange(curve, increasing, isTimeLog);
                 var updateRange = isDelete? range: GetUpdateRange(currentRange, range, increasing);
 
-                var curveIndex = GetLogCurveIndex(entity, mnemonic);
-
-                if(curveIndex < 0)
-                    continue;
-
                 logHeaderUpdate = isTimeLog
-                    ? UpdateDateTimeIndexRange(logHeaderUpdate, curveIndex, updateRange, increasing, isIndexCurve, offset)
-                    : UpdateIndexRange(logHeaderUpdate, curveIndex, updateRange, increasing, isIndexCurve, indexUnit);
+                    ? UpdateDateTimeIndexRange(logHeaderUpdate, curveIndex.Value, updateRange, increasing, isIndexCurve, offset)
+                    : UpdateIndexRange(logHeaderUpdate, curveIndex.Value, updateRange, increasing, isIndexCurve, indexUnit);
             }
 
             logHeaderUpdate = UpdateCommonData(logHeaderUpdate, entity, offset);
@@ -716,14 +714,6 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="mnemonic">The mnemonic.</param>
         /// <returns></returns>
         protected abstract TChild GetLogCurve(T log, string mnemonic);
-
-        /// <summary>
-        /// Gets the index of the curve in the LogCurveInfo array.
-        /// </summary>
-        /// <param name="log">The log.</param>
-        /// <param name="mnemonic">The mnemonic.</param>
-        /// <returns></returns>
-        protected abstract int GetLogCurveIndex(T log, string mnemonic);
 
         /// <summary>
         /// Gets the log curves.
@@ -1317,12 +1307,12 @@ namespace PDS.Witsml.Server.Data.Logs
 
             if (range.Start.HasValue)
                 minIndex = CreateGenericMeasure(range.Start.Value, indexUnit);
-            logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, "LogCurveInfo." + arrayIndex + ".MinIndex", minIndex);
+            logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, $"LogCurveInfo.{arrayIndex}.MinIndex", minIndex);
             Logger.DebugFormat("Building MongoDb Update for MinIndex '{0}'", minIndex);
 
             if (range.End.HasValue)
                 maxIndex = CreateGenericMeasure(range.End.Value, indexUnit);
-            logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, "LogCurveInfo." + arrayIndex + ".MaxIndex", maxIndex);
+            logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, $"LogCurveInfo.{arrayIndex}.MaxIndex", maxIndex);
             Logger.DebugFormat("Building MongoDb Update for MaxIndex '{0}'", maxIndex);
 
             if (isIndexCurve)
@@ -1349,16 +1339,20 @@ namespace PDS.Witsml.Server.Data.Logs
             if (range.Start.HasValue)
             {
                 minDate = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.Start.Value).ToOffsetTime(offset).ToString("o");
-                logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, "LogCurveInfo." + arrayIndex + ".MinDateTimeIndex", minDate);
-                logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, "LogCurveInfo." + arrayIndex + ".MinDateTimeIndexSpecified", true);
+                logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate,
+                    $"LogCurveInfo.{arrayIndex}.MinDateTimeIndex", minDate);
+                logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate,
+                    $"LogCurveInfo.{arrayIndex}.MinDateTimeIndexSpecified", true);
                 Logger.DebugFormat("Building MongoDb Update for MinDateTimeIndex '{0}'", minDate);
             }
 
             if (range.End.HasValue)
             {
                 maxDate = DateTimeExtensions.FromUnixTimeMicroseconds((long)range.End.Value).ToOffsetTime(offset).ToString("o");
-                logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, "LogCurveInfo." + arrayIndex + ".MaxDateTimeIndex", maxDate);
-                logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, "LogCurveInfo." + arrayIndex + ".MaxDateTimeIndexSpecified", true);
+                logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate,
+                    $"LogCurveInfo.{arrayIndex}.MaxDateTimeIndex", maxDate);
+                logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate,
+                    $"LogCurveInfo.{arrayIndex}.MaxDateTimeIndexSpecified", true);
                 Logger.DebugFormat("Building MongoDb Update for MaxDateTimeIndex '{0}'", maxDate);
             }
 
