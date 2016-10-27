@@ -60,7 +60,7 @@ namespace PDS.Witsml.Server.Data
         /// <summary>
         /// Gets the data object type.
         /// </summary>
-        public Type DataObjectType => typeof (T);
+        public Type DataObjectType => typeof(T);
 
         /// <summary>
         /// Retrieves data objects from the data store using the specified parser.
@@ -177,8 +177,9 @@ namespace PDS.Witsml.Server.Data
         /// Gets a data object by the specified URI.
         /// </summary>
         /// <param name="uri">The data object URI.</param>
+        /// <param name="fields">The requested fields.</param>
         /// <returns>The data object instance.</returns>
-        object IWitsmlDataAdapter.Get(EtpUri uri)
+        object IWitsmlDataAdapter.Get(EtpUri uri, params string[] fields)
         {
             return Get(uri);
         }
@@ -187,8 +188,9 @@ namespace PDS.Witsml.Server.Data
         /// Gets a data object by the specified URI.
         /// </summary>
         /// <param name="uri">The data object URI.</param>
+        /// <param name="fields">The requested fields.</param>
         /// <returns>The data object instance.</returns>
-        public virtual T Get(EtpUri uri)
+        public virtual T Get(EtpUri uri, params string[] fields)
         {
             throw new NotImplementedException();
         }

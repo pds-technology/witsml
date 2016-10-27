@@ -138,7 +138,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
             else if (ObjectTypes.Log.EqualsIgnoreCase(uri.ObjectType))
             {
                 var log = _logDataProvider.Get(uri);
-                log.LogCurveInfo.ForEach(x => args.Context.Add(ToResource(log, x)));
+                log?.LogCurveInfo?.ForEach(x => args.Context.Add(ToResource(log, x)));
             }
         }
 

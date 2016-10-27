@@ -233,9 +233,15 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             Task.WhenAll(streamingContextGrouping.Select(context => StreamChannelData(context.ToList(), token)));
         }
 
-
         private void StartChannelRangeRequest(IList<ChannelRangeInfo> infos, CancellationToken token)
         {
+            // Validate each channel range info
+            ValidateChannelRangeInfos(infos);
+
+            // Return if there are no valid channel range infos remaining
+            if (infos.Count < 1)
+                return;
+
             var channelIds = infos.SelectMany(c => c.ChannelId).Distinct();
 
             // Get the channel metadata and parent uri for the channels to start range request
@@ -266,6 +272,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             var streamingContextGrouping =
                 from x in streamingContextList
                 group x by new { x.ChannelStreamingType, x.ParentUri, x.StartIndex };
+
 
             // Start a Task for each context group
             Task.WhenAll(streamingContextGrouping.Select(context => StreamChannelData(context.ToList(), token)));
@@ -337,10 +344,9 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                         : (int?)null;
             var increasing = primaryIndex.Direction == IndexDirections.Increasing;
             bool? firstStart = null;
-            var isInvalidRequest = false;
 
             // Loop until there is a cancellation or all channals have been removed
-            while (!isInvalidRequest && !IsStreamingStopped(contextList, ref token))
+            while (!IsStreamingStopped(contextList, ref token))
             {
                 firstStart = !firstStart.HasValue;
 
@@ -360,14 +366,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 var maxEnd = channelStreamingType == ChannelStreamingTypes.RangeRequest
                     ? contextList.Max(x => Convert.ToInt64(x.EndIndex))
                     : (long?)null;
-
-
-                // Validate startIndex and endIndex are in the expected order based on Direction
-                if (channelStreamingType == ChannelStreamingTypes.RangeRequest)
-                {
-                    var minEnd = contextList.Min(x => Convert.ToInt64(x.EndIndex));
-                    isInvalidRequest = ValidateRangeRequestIndexes(minStart ?? 0, minEnd, increasing);
-                }
 
                 //var isTimeIndex = primaryIndex.IndexType == ChannelIndexTypes.Time;
                 var rangeSize = WitsmlSettings.GetRangeSize(isTimeIndex[0]);
@@ -580,6 +578,33 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         private static bool IsStreamingStopped(IList<ChannelStreamingContext> contextList, ref CancellationToken token)
         {
             return token.IsCancellationRequested || contextList.Count == 0;
+        }
+
+
+        /// <summary>
+        /// Validates the channel range request.
+        /// </summary>
+        /// <param name="infos">The infos.</param>
+        private void ValidateChannelRangeInfos(IList<ChannelRangeInfo> infos)
+        {
+            // Remove invalid channel range infos from streaming context
+            infos
+                .Select((info, i) => new
+                {
+                    Channels = info.ChannelId
+                        .Where(channelId => Channels.ContainsKey(channelId))
+                        .Select(channelId => Channels[channelId].Item2),
+                    Info = info,
+                    Index = i
+                })
+                .Where(x =>
+                    x.Channels.Any(channel =>
+                        ValidateRangeRequestIndexes(x.Info.StartIndex, x.Info.EndIndex,
+                            channel.Indexes[0].Direction == IndexDirections.Increasing))
+                )
+                .Select(x => x.Index)
+                .Reverse()
+                .ForEach(infos.RemoveAt);
         }
 
         private bool ValidateRangeRequestIndexes(long startIndex, long endIndex, bool increasing)
