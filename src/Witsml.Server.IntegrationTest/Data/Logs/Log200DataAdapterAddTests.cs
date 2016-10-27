@@ -16,217 +16,294 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-/*
+
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 using PDS.Framework;
 using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Server.Data.Channels;
-using PDS.Witsml.Server.Data.Wellbores;
-using PDS.Witsml.Server.Data.Wells;
+using Energistics.Datatypes;
+using Energistics.Datatypes.ChannelData;
+using PDS.Witsml.Data.Channels;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
-    [TestClass]
-    public class Log200DataAdapterAddTests
+    public partial class Log200DataAdapterAddTests
     {
-        private DevKit200Aspect DevKit;
-        private Log200Generator LogGenerator;
-        private IContainer Container;
-        private IDatabaseProvider Provider;
-        private IWitsmlDataAdapter<Well> WellAdapter;
-        private IWitsmlDataAdapter<Wellbore> WellboreAdapter;
-        private IWitsmlDataAdapter<Log> LogAdapter;
-        private IWitsmlDataAdapter<ChannelSet> ChannelSetAdapter;
-
-        private Well Well1;
-        private Wellbore Wellbore1;
-        private Log Log1;
-        private Log Log2;
-        private Log LogDecreasing;
-        private DataObjectReference WellReference;
-        private DataObjectReference WellboreReference;
-
-        [TestInitialize]
-        public void TestSetUp()
+        /// <summary>
+        /// To test adding log with special characters using ChannelStreamingConsumer
+        /// ~ ! @ # $ % ^ & * ( ) _ + { } | &lt; > ? ; : ' " , . / \ [ ] 
+        /// \b Backspace, \f Form feed, \n New line, \r Carriage return, \t Tab, \"  Double quote, \\  Backslash character
+        /// </summary>
+        [TestMethod]
+        public void Channel200DataAdapter_Add_With_Special_Characters_Escape_ChannelDataBlock()
         {
-            var container = ContainerFactory.Create();
-            DevKit = new DevKit200Aspect();
-            LogGenerator = new Log200Generator();
-            Container = ContainerFactory.Create();
-            Provider = new DatabaseProvider(container, new MongoDbClassMapper());
+            AddParents();
 
-            WellAdapter = new Well200DataAdapter(Provider);
-            WellboreAdapter = new Wellbore200DataAdapter(Provider);
-            ChannelSetAdapter = new ChannelSet200DataAdapter(Provider, new ChannelDataChunkAdapter(Provider));
-            LogAdapter = new Log200DataAdapter(Provider, ChannelSetAdapter);
+            var logGenerator = new Log200Generator();
+            ChannelIndex mdChannelIndex = logGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
+            DevKit.InitHeader(Log, LoggingMethod.MWD, mdChannelIndex);
 
-            Well1 = new Well() { Citation = DevKit.Citation("Well 01"), TimeZone = DevKit.TimeZone, Uuid = DevKit.Uid() };
-            Well1.GeographicLocationWGS84 = DevKit.Location();
+            var channelSet = Log.ChannelSet.First();
 
-            WellReference = new DataObjectReference
+            var channelMetadataRecords = new List<ChannelMetadataRecord>();
+            var dataBlocks = new Dictionary<EtpUri, ChannelDataBlock>();
+            var channelParentUris = new Dictionary<long, EtpUri>();
+            var dataItems = new List<DataItem>();
+            var specialCharacters = @"~ ! @ # $ % ^ & * ( ) _ + { } | < > ? ; : ' , . / [ ] \b \f \n \r \t \ """;
+
+            // Create metadata records
+            CreateMetadataRecords(channelSet, mdChannelIndex, channelMetadataRecords);
+
+            // InitializeDataBlocks with special characters
+            InitializeDataBlocks(channelMetadataRecords, dataBlocks, channelParentUris, specialCharacters, dataItems);
+
+            // Append
+            AppendChannelData(dataItems, channelParentUris, dataBlocks, channelMetadataRecords);
+
+            // Process
+            ProcessDataBlock(dataBlocks, channelSet);
+
+            var dataAdapter = DevKit.Container.Resolve<IWitsmlDataAdapter<ChannelSet>>() as IChannelDataProvider;
+            Assert.IsNotNull(dataAdapter);
+            var mnemonics = channelSet.Index.Select(i => i.Mnemonic).Concat(channelSet.Channel.Select(c => c.Mnemonic)).ToList();
+            var dataOut = dataAdapter.GetChannelData(GetEtpUri(channelSet, false), new Range<double?>(0, 1), mnemonics, null);
+
+            Assert.AreEqual(1, dataOut.Count);
+            Assert.AreEqual(2, dataOut[0].Count);
+            Assert.AreEqual(3, dataOut[0][1].Count);
+            Assert.AreEqual(0.0, dataOut[0][1][0]);
+            Assert.AreEqual(new DateTimeOffset(2016, 1, 1, 0, 0, 0, new TimeSpan()), dataOut[0][1][1]);
+            Assert.AreEqual(specialCharacters, dataOut[0][1][2]);
+        }
+
+        /// <summary>
+        /// Gets the ETP URI.
+        /// </summary>
+        /// <param name="channelSet">The channel set.</param>
+        /// <param name="withChannel">if set to <c>true</c> append channel.</param>
+        /// <returns></returns>
+        private EtpUri GetEtpUri(ChannelSet channelSet, bool withChannel)
+        {
+            if (withChannel)
+                return EtpUris.Witsml200
+                    .Append(ObjectTypes.Well, Well.Uuid)
+                    .Append(ObjectTypes.Wellbore, Wellbore.Uuid)
+                    .Append(ObjectTypes.Log, Log.Uuid)
+                    .Append(ObjectTypes.ChannelSet, channelSet.Uuid)
+                    .Append(ObjectTypes.Channel, channelSet.Index[0].Mnemonic);
+
+            return EtpUris.Witsml200
+                .Append(ObjectTypes.Well, Well.Uuid)
+                .Append(ObjectTypes.Wellbore, Wellbore.Uuid)
+                .Append(ObjectTypes.Log, Log.Uuid)
+                .Append(ObjectTypes.ChannelSet, channelSet.Uuid);
+        }
+
+        /// <summary>
+        /// Creates the metadata records.
+        /// </summary>
+        /// <param name="channelSet">The channel set.</param>
+        /// <param name="mdChannelIndex">Index of the md channel.</param>
+        /// <param name="channelMetadataRecords">The channel metadata records.</param>
+        private void CreateMetadataRecords(ChannelSet channelSet, ChannelIndex mdChannelIndex, List<ChannelMetadataRecord> channelMetadataRecords)
+        {
+            var uri = GetEtpUri(channelSet, true);
+
+            var indexMetadataRecord = new IndexMetadataRecord()
             {
-                ContentType = EtpContentTypes.Witsml200.For(ObjectTypes.Well),
-                Title = Well1.Citation.Title,
-                Uuid = Well1.Uuid
+                Uri = uri,
+                Mnemonic = channelSet.Index[0].Mnemonic,
+                Description = "Depth Index",
+                Uom = channelSet.Index[0].Uom,
+                Scale = 3,
+                IndexType =
+                    mdChannelIndex.IndexType.HasValue && mdChannelIndex.IndexType.Value == ChannelIndexType.datetime
+                        ? ChannelIndexTypes.Time
+                        : ChannelIndexTypes.Depth,
+                Direction = IndexDirections.Increasing,
+                CustomData = new Dictionary<string, DataValue>(0),
             };
 
-            Wellbore1 = new Wellbore() { Citation = DevKit.Citation("Wellbore 01"), ReferenceWell = WellReference, Uuid = DevKit.Uid() };
-
-            WellboreReference = new DataObjectReference
+            var channelId = 0;
+            foreach (var channel in channelSet.Channel)
             {
-                ContentType = EtpContentTypes.Witsml200.For(ObjectTypes.Wellbore),
-                Title = Wellbore1.Citation.Title,
-                Uuid = Wellbore1.Uuid
-            };
+                string channelDataType;
 
-            Log1 = new Log() { Citation = DevKit.Citation("Log 01"), Wellbore = WellboreReference, Uuid = DevKit.Uid() };
-            Log2 = new Log() { Citation = DevKit.Citation("Log 02"), Wellbore = WellboreReference };
-            LogDecreasing = new Log() { Citation = DevKit.Citation("Log Decreasing"), Wellbore = WellboreReference, Uuid = DevKit.Uid() };
+                switch (channelId)
+                {
+                    case 0:
+                        channelDataType = "double";
+                        break;
+                    case 1:
+                        channelDataType = "string";
+                        break;
+                    default:
+                        channelDataType = "string";
+                        break;
+                }
 
-            ChannelIndex mdChannelIndex = LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
-            ChannelIndex mdChannelIndexDecreasing = LogGenerator.CreateMeasuredDepthIndex(IndexDirection.decreasing);
-            ChannelIndex dtChannelIndex = LogGenerator.CreateDateTimeIndex();
+                channelMetadataRecords.Add(new ChannelMetadataRecord
+                {
+                    ChannelUri = uri,
+                    ContentType = channel.GetUri().ContentType,
+                    ChannelId = channelId++,
+                    ChannelName = channel.Mnemonic,
+                    Uom = channel.Uom,
+                    MeasureClass = channel.CurveClass,
+                    DataType = channelDataType,
+                    Description = channel.Citation.Description,
+                    Uuid = channel.Uuid,
+                    Status = 0,
+                    Source = channel.Source,
+                    Indexes = new[]
+                    {
+                        indexMetadataRecord
+                    },
+                    CustomData = new Dictionary<string, DataValue>()
+                });
 
-            DevKit.InitHeader(Log1, LoggingMethod.MWD, mdChannelIndex);
-            DevKit.InitHeader(Log2, LoggingMethod.surface, dtChannelIndex);
-            DevKit.InitHeader(LogDecreasing, LoggingMethod.surface, mdChannelIndexDecreasing);
+            }
         }
 
-        [TestMethod]
-        public void Log_can_be_added_with_uuid()
+        /// <summary>
+        /// Initializes the data blocks.
+        /// </summary>
+        /// <param name="channelMetadataRecords">The channel metadata records.</param>
+        /// <param name="dataBlocks">The data blocks.</param>
+        /// <param name="channelParentUris">The channel parent uris.</param>
+        /// <param name="specialCharacters">The special characters.</param>
+        /// <param name="dataItems">The data items.</param>
+        private static void InitializeDataBlocks(List<ChannelMetadataRecord> channelMetadataRecords, Dictionary<EtpUri, ChannelDataBlock> dataBlocks,
+            Dictionary<long, EtpUri> channelParentUris, string specialCharacters, List<DataItem> dataItems)
         {
-            WellAdapter.Add(DevKit.Parser(Well1), Well1);
-            WellboreAdapter.Add(DevKit.Parser(Wellbore1), Wellbore1);
-            LogAdapter.Add(DevKit.Parser(Log1), Log1);
+            foreach (var channel in channelMetadataRecords)
+            {
+                var uri = new EtpUri(channel.ChannelUri);
 
-            var log1 = LogAdapter.Get(Log1.GetUri());
+                var parentUri = uri.Parent; // Log or ChannelSet
 
-            Assert.AreEqual(Log1.Citation.Title, log1.Citation.Title);
+                if (!dataBlocks.ContainsKey(parentUri))
+                    dataBlocks[parentUri] = new ChannelDataBlock(parentUri);
+
+                var dataBlock = dataBlocks[parentUri];
+                channelParentUris[channel.ChannelId] = parentUri;
+
+                foreach (var index in channel.Indexes)
+                {
+                    dataBlock.AddIndex(
+                        index.Mnemonic,
+                        index.Uom,
+                        index.Direction == IndexDirections.Increasing,
+                        index.IndexType == ChannelIndexTypes.Time);
+                }
+
+                dataBlock.AddChannel(channel.ChannelId, channel.ChannelName, channel.Uom);
+            }
+
+            foreach (var channel in channelMetadataRecords)
+            {
+                DataValue dataValue;
+                switch (channel.ChannelId)
+                {
+                    case 0:
+                        dataValue = new DataValue() { Item = 0.0 };
+                        break;
+                    case 1:
+                        dataValue = new DataValue()
+                        {
+                            Item = new DateTimeOffset(2016, 1, 1, 0, 0, 0, new TimeSpan()).ToString("O")
+                        };
+                        break;
+                    default:
+                        dataValue = new DataValue()
+                        {
+                            Item = specialCharacters
+                        };
+                        break;
+                }
+
+                dataItems.Add(new DataItem()
+                {
+                    ChannelId = channel.ChannelId,
+                    Indexes = new List<long>() { 0 },
+                    ValueAttributes = new DataAttribute[0],
+                    Value = dataValue
+                });
+            }
         }
 
-        [TestMethod]
-        public void Log_can_be_added_without_uuid()
+        /// <summary>
+        /// Processes the data block.
+        /// </summary>
+        /// <param name="dataBlocks">The data blocks.</param>
+        /// <param name="channelSet">The channel set.</param>
+        private void ProcessDataBlock(Dictionary<EtpUri, ChannelDataBlock> dataBlocks, ChannelSet channelSet)
         {
-            WellAdapter.Add(DevKit.Parser(Well1), Well1);
-            WellboreAdapter.Add(DevKit.Parser(Wellbore1), Wellbore1);
-            LogAdapter.Add(DevKit.Parser(Log2), Log2);
+            foreach (var item in dataBlocks)
+            {
+                var dataBlockItem = item.Value;
+                var uri = item.Key;
+                var reader = dataBlockItem.GetReader();
+                dataBlockItem.Clear();
 
-            var log2 = Provider.GetDatabase().GetCollection<Log>(ObjectNames.Log200).AsQueryable()
-                .First(x => x.Citation.Title == Log2.Citation.Title);
+                var dataProvider =
+                    DevKit.Container.Resolve<IChannelDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
+                dataProvider.UpdateChannelData(uri, reader);
+            }
 
-            Assert.AreEqual(Log2.Citation.Title, log2.Citation.Title);
         }
 
-        [TestMethod]
-        public void Log_can_be_added_with_secondary_index()
+        /// <summary>
+        /// Appends the channel data.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        /// <param name="channelParentUris">The channel parent uris.</param>
+        /// <param name="dataBlocks">The data blocks.</param>
+        /// <param name="channelMetadataRecords">The channel metadata records.</param>
+        private void AppendChannelData(IList<DataItem> data, Dictionary<long, EtpUri> channelParentUris,
+            Dictionary<EtpUri, ChannelDataBlock> dataBlocks, IList<ChannelMetadataRecord> channelMetadataRecords)
         {
-            var secondaryIndex = LogGenerator.CreateDateTimeIndex();
-            var channelSet = Log1.ChannelSet.First();
-            channelSet.Index.Add(secondaryIndex);
-            
-            DevKit.CreateMockChannelSetData(channelSet, channelSet.Index);
+            foreach (var dataItem in data)
+            {
+                // Check to see if we are accepting data for this channel
+                if (!channelParentUris.ContainsKey(dataItem.ChannelId))
+                    continue;
 
-            WellAdapter.Add(DevKit.Parser(Well1), Well1);
-            WellboreAdapter.Add(DevKit.Parser(Wellbore1), Wellbore1);
-            LogAdapter.Add(DevKit.Parser(Log1), Log1);
+                var parentUri = channelParentUris[dataItem.ChannelId];
 
-            var log1 = LogAdapter.Get(Log1.GetUri());
+                var dataBlock = dataBlocks[parentUri];
 
-            Assert.AreEqual(Log1.Citation.Title, log1.Citation.Title);
+                var channel = channelMetadataRecords.FirstOrDefault(x => x.ChannelId == dataItem.ChannelId);
+                if (channel == null) continue;
+
+                var indexes = DownscaleIndexValues(channel.Indexes, dataItem.Indexes);
+                dataBlock.Append(dataItem.ChannelId, indexes, dataItem.Value.Item);
+            }
         }
 
-        [TestMethod]
-        public void Log_can_be_added_with_increasing_log_data()
+        /// <summary>
+        /// Downscales the index values.
+        /// </summary>
+        /// <param name="indexMetadata">The index metadata.</param>
+        /// <param name="indexValues">The index values.</param>
+        /// <returns></returns>
+        private IList<object> DownscaleIndexValues(IList<IndexMetadataRecord> indexMetadata, IList<long> indexValues)
         {
-            var numDataValue = 150;
-            var secondaryIndex = LogGenerator.CreateDateTimeIndex();
-            var channelSet = Log1.ChannelSet.First();
-            channelSet.Index.Add(secondaryIndex);
-
-            // Save the Well and Wellbore
-            WellAdapter.Add(DevKit.Parser(Well1), Well1);
-            WellboreAdapter.Add(DevKit.Parser(Wellbore1), Wellbore1);
-
-            // Generate 150 rows of data
-            LogGenerator.GenerateChannelData(Log1.ChannelSet, numDataValue);
-            LogAdapter.Add(DevKit.Parser(Log1), Log1);
-
-            var cda = new ChannelDataChunkAdapter(Provider);
-
-            // Retrieve the data
-            var indexCurve = channelSet.Channel.Select(c => c.Mnemonic).FirstOrDefault();
-            var range = new Range<double?>(null, null);
-            var logData = cda.GetData(channelSet.GetUri(), indexCurve, range, true);
-
-            var rowCount = logData.Sum(ld => LogGenerator.DeserializeChannelSetData(ld.Data).Count);
-
-            var start = logData.First().Indices.First().Start;
-            var end = logData.Last().Indices.First().End;
-
-            // Test that the rows of data before and after are the same.
-            Assert.AreEqual(numDataValue, rowCount);
-
-            // Test the log is still increasing
-            Assert.IsTrue(end > start);
-        }
-
-        [TestMethod]
-        public void Log_can_be_added_with_decreasing_log_data()
-        {
-            var numDataValue = 150;
-            var secondaryIndex = LogGenerator.CreateDateTimeIndex();
-            var channelSet = LogDecreasing.ChannelSet.First();
-            channelSet.Index.Add(secondaryIndex);
-
-            // Save the Well and Wellbore
-            WellAdapter.Add(DevKit.Parser(Well1), Well1);
-            WellboreAdapter.Add(DevKit.Parser(Wellbore1), Wellbore1);
-
-            // Generate 150 rows of data
-            LogGenerator.GenerateChannelData(LogDecreasing.ChannelSet, numDataValue);
-            LogAdapter.Add(DevKit.Parser(LogDecreasing), LogDecreasing);
-
-            var cda = new ChannelDataChunkAdapter(Provider);
-
-            // Retrieve the data
-            var indexCurve = channelSet.Channel.Select(c => c.Mnemonic).FirstOrDefault();
-            var range = new Range<double?>(null, null);
-            var logData = cda.GetData(channelSet.GetUri(), indexCurve, range, false);
-
-            var rowCount = logData.Sum(ld => LogGenerator.DeserializeChannelSetData(ld.Data).Count);
-
-            var start = logData.First().Indices.First().Start;
-            var end = logData.Last().Indices.First().End;
-
-            // Test that the rows of data before and after are the same.
-            Assert.AreEqual(numDataValue, rowCount);
-
-            // Test the log is still decreasing
-            Assert.IsTrue(end < start);
-        }
-
-        [TestMethod]
-        public void Log_can_be_added_with_increasing_time_data()
-        {
-            var numDataValue = 150;
-            var secondaryIndex = LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
-            var channelSet = Log2.ChannelSet.First();
-            channelSet.Index.Add(secondaryIndex);
-
-            // Save the Well and Wellbore
-            WellAdapter.Add(DevKit.Parser(Well1), Well1);
-            WellboreAdapter.Add(DevKit.Parser(Wellbore1), Wellbore1);
-
-            // Generate 150 rows of data
-            LogGenerator.GenerateChannelData(Log2.ChannelSet, numDataValue);
-            LogAdapter.Add(DevKit.Parser(Log2), Log2);
+            return indexValues
+                .Select((x, i) =>
+                {
+                    var index = indexMetadata[i];
+                    return index.IndexType == ChannelIndexTypes.Depth
+                        ? (object)(indexValues[i] / Math.Pow(10, index.Scale))
+                        : DateTimeExtensions.FromUnixTimeMicroseconds(indexValues[i]);
+                })
+                .ToList();
         }
     }
 }
-*/
