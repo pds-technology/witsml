@@ -19,8 +19,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Energistics.DataAccess;
+using Energistics.DataAccess.Validation;
 using Energistics.Datatypes;
 using log4net;
 using PDS.Framework;
@@ -280,6 +282,20 @@ namespace PDS.Witsml.Server.Data
             if (abstractObject != null) return abstractObject.GetUri();
 
             throw new InvalidOperationException();
+        }
+
+        /// <summary>
+        /// Validates the updated entity.
+        /// </summary>
+        /// <param name="function">The WITSML API function.</param>
+        /// <param name="uri">The URI.</param>
+        protected virtual void ValidateUpdatedEntity(Functions function, EtpUri uri)
+        {
+            IList<ValidationResult> results;
+
+            var entity = Get(uri);
+            DataObjectValidator.TryValidate(entity, out results);
+            WitsmlValidator.ValidateResults(function, results);
         }
     }
 }
