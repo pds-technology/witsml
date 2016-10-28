@@ -18,11 +18,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Threading.Tasks;
 using Energistics.DataAccess;
-using Energistics.DataAccess.Validation;
 using Energistics.Datatypes;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -698,41 +695,6 @@ namespace PDS.Witsml.Server.Data
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// Validates the updated entity.
-        /// </summary>
-        /// <param name="function">The WITSML API function.</param>
-        /// <param name="uri">The URI.</param>
-        protected void ValidateUpdatedEntity(Functions function, EtpUri uri)
-        {
-            IList<ValidationResult> results;
-
-            var entity = GetEntity(uri);
-            DataObjectValidator.TryValidate(entity, out results);
-            WitsmlValidator.ValidateResults(function, results);
-        }
-
-        private static void ValidateResults(IList<ValidationResult> results)
-        {
-            if (!results.Any()) return;
-
-            ErrorCodes errorCode;
-            var witsmlValidationResult = results.OfType<WitsmlValidationResult>().FirstOrDefault();
-
-            if (witsmlValidationResult != null)
-            {
-                throw new WitsmlException((ErrorCodes)witsmlValidationResult.ErrorCode);
-            }
-
-            if (Enum.TryParse(results.First().ErrorMessage, out errorCode))
-            {
-                throw new WitsmlException(errorCode);
-            }
-
-            throw new WitsmlException(ErrorCodes.InputTemplateNonConforming,
-                string.Join("; ", results.Select(x => x.ErrorMessage)));
         }
     }
 }
