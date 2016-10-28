@@ -72,7 +72,8 @@ namespace PDS.Witsml.Server.Data.Logs
             var dataAdapter = DevKit.Container.Resolve<IWitsmlDataAdapter<ChannelSet>>() as IChannelDataProvider;
             Assert.IsNotNull(dataAdapter);
             var mnemonics = channelSet.Index.Select(i => i.Mnemonic).Concat(channelSet.Channel.Select(c => c.Mnemonic)).ToList();
-            var dataOut = dataAdapter.GetChannelData(GetEtpUri(channelSet, false), new Range<double?>(0, 1), mnemonics, null);
+            var dataOut = dataAdapter.GetChannelData(EtpUris.Witsml200.Append(ObjectTypes.ChannelSet, channelSet.Uuid),
+               new Range<double?>(0, 1), mnemonics, null);
 
             Assert.AreEqual(1, dataOut.Count);
             Assert.AreEqual(2, dataOut[0].Count);
