@@ -250,6 +250,10 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             var dataProvider = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
             dataProvider.Ensure(uri);
 
+            // Only use the URI of the channelSet as it is a top level object
+            uri = EtpUris.Witsml200.Append(ObjectTypes.ChannelSet, uri.ObjectId);
+            reader.Uri = uri.Uri;
+
             if (indexInfos != null)
             {
                 // Update data object with primary index info after it has been auto-created
@@ -297,6 +301,10 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                 Logger.DebugFormat("Index curve mnemonic: {0}.", indexCurve.Mnemonic);
 
                 GetUpdatedLogHeaderIndexRange(reader, allMnemonics, ranges, increasing);
+
+                // Only use the URI of the channelSet as it is a top level object
+                var uri = new EtpUri(reader.Uri);
+                reader.Uri = EtpUris.Witsml200.Append(ObjectTypes.ChannelSet, uri.ObjectId);
 
                 // Add ChannelDataChunks
                 ChannelDataChunkAdapter.Add(reader);
