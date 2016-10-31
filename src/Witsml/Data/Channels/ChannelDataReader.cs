@@ -1682,7 +1682,8 @@ namespace PDS.Witsml.Data.Channels
             if (_allDataTypes == null)
             {
                 _log.Debug("Initializing _allDataTypes array.");
-                _allDataTypes = Indices.Select(i => i.DataType).Concat(_originalDataTypes).ToArray();
+                //todo: When data type is persisted in chunk use _originalDataTypes instead
+                _allDataTypes = Indices.Select(i => i.DataType).Concat(_originalMnemonics).ToArray();
             }
 
             return _allDataTypes;
