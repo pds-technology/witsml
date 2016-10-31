@@ -164,7 +164,7 @@ namespace PDS.Witsml.Server.Data.Logs
             };
 
             Dictionary<string, Range<double?>> ranges;
-            var logData = QueryChannelData(context, uri, entity, range, mnemonicIndexes, units, nullValues, queryMnemonics, requestLatestValues, out ranges, optimizeStart);
+            var logData = QueryChannelData(context, uri, entity, range, mnemonicIndexes, units, null, nullValues, queryMnemonics, requestLatestValues, out ranges, optimizeStart);
 
             // Update mnemonics to what was returned by QueryChannelData.  These mnemonics will match the data that is returned in logData.
             var tempMnemonics = mnemonics.ToArray();
@@ -848,7 +848,7 @@ namespace PDS.Witsml.Server.Data.Logs
             return ChannelDataReader.DefaultDataDelimiter;
         }
 
-        private List<List<List<object>>> QueryChannelData(ResponseContext context, EtpUri uri, T entity, Range<double?> range, IDictionary<int, string> mnemonicIndexes, IDictionary<int, string> units, IDictionary<int, string> nullValues,
+        private List<List<List<object>>> QueryChannelData(ResponseContext context, EtpUri uri, T entity, Range<double?> range, IDictionary<int, string> mnemonicIndexes, IDictionary<int, string> units, IDictionary<int, string> dataTypes, IDictionary<int, string> nullValues,
             string[] queryMnemonics, int? requestLatestValues, out Dictionary<string, Range<double?>> ranges, bool optimizeStart = false)
         {
             List<List<List<object>>> logData;
@@ -885,10 +885,10 @@ namespace PDS.Witsml.Server.Data.Logs
                 var records = GetChannelData(uri, mnemonicIndexes[0], range, IsIncreasing(entity), requestLatestValues);
 
                 // Get a reader to process the log's channel data records
-                var reader = records.GetReader(mnemonicIndexes.Values.ToArray(), units, nullValues);
+                var reader = records.GetReader(mnemonicIndexes.Values.ToArray(), units, dataTypes, nullValues);
 
                 // Get the data from the reader based on the context and mnemonicIndexes (slices)
-                logData = reader.GetData(context, mnemonicIndexes, units, nullValues, out ranges);
+                logData = reader.GetData(context, mnemonicIndexes, units, dataTypes, nullValues, out ranges);
 
 
                 // Test if we're finished reading data
@@ -1218,7 +1218,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Dictionary<string, Range<double?>> ranges;
 
             var logData = QueryChannelData(
-                context, logHeader.GetUri(), logHeader, range, mnemonics, units, nullValues, queryMnemonics, requestLatestValues, out ranges, optimizeStart: true);
+                context, logHeader.GetUri(), logHeader, range, mnemonics, units, null, nullValues, queryMnemonics, requestLatestValues, out ranges, optimizeStart: true);
 
             // Format the data for output
             var count = FormatLogData(log, logHeader, mnemonics, units, logData, ranges);
