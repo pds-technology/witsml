@@ -209,7 +209,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         index.IndexType == ChannelIndexTypes.Time);
                 }
 
-                dataBlock.AddChannel(channel.ChannelId, channel.ChannelName, channel.Uom);
+                dataBlock.AddChannel(channel.ChannelId, channel.ChannelName, channel.Uom, channel.DataType);
             }
 
             foreach (var channel in channelMetadataRecords)
