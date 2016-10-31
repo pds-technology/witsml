@@ -135,6 +135,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             var mnemonicIndexes = ComputeMnemonicIndexes(entity, allMnemonics, queryMnemonics);
             var keys = mnemonicIndexes.Keys.ToArray();
             var units = GetUnitList(entity, keys);
+            var dataTypes = GetDataTypes(entity, keys);
             var nullValues = GetNullValueList(entity, keys);
 
             // Create a context to pass information required by the ChannelDataReader.
@@ -183,11 +184,11 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                 var records = GetChannelData(uri, range, requestLatestValues);
 
                 // Get a reader to process the log's channel data records
-                var reader = records.GetReader(mnemonicIndexes.Values.ToArray(), units, nullValues);
+                var reader = records.GetReader(mnemonicIndexes.Values.ToArray(), units, dataTypes, nullValues);
 
                 // Get the data from the reader based on the context and mnemonicIndexes (slices)
                 Dictionary<string, Range<double?>> ranges;
-                logData = reader.GetData(context, mnemonicIndexes, units, nullValues, out ranges);
+                logData = reader.GetData(context, mnemonicIndexes, units, dataTypes, nullValues, out ranges);
 
 
                 // Test if we're finished reading data
@@ -387,6 +388,17 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                 .ToDictionary(x => x.Index, x => x.Unit));
         }
 
+        private IDictionary<int, string> GetDataTypesByColumnIndex(ChannelSet entity)
+        {
+            Logger.Debug("Getting ChannelSet Channel data types by column index.");
+
+            return new SortedDictionary<int, string>(entity.Index.Select(ToDataType)
+                .Concat(entity.Channel.Select(c => c.DataType?.ToString()))
+                .ToArray()
+                .Select((dataType, index) => new { DataType = dataType, Index = index })
+                .ToDictionary(x => x.Index, x => x.DataType?.ToString()));
+        }
+
         private IDictionary<int, string> GetNullValuesByColumnIndex(ChannelSet entity)
         {
             Logger.Debug("Getting ChannelSet Channel null values by column index.");
@@ -420,6 +432,29 @@ namespace PDS.Witsml.Server.Data.ChannelSets
 
             return new SortedDictionary<int, string>(unitIndexes.ToDictionary(x => x.Index, x => x.Unit));
         }
+
+        // TODO: See if this can be refactored to be common with LogDataAdapter.GetDataTypes
+        private IDictionary<int, string> GetDataTypes(ChannelSet entity, int[] slices)
+        {
+            Logger.Debug("Getting data types list for log.");
+
+            // Get a list of all of the units
+            var allDataTypes = GetDataTypesByColumnIndex(entity);
+
+            // Start with all units
+            var dataTypeIndexes = allDataTypes
+                .Select((dataType, index) => new { DataType = dataType.Value, Index = index });
+
+            // Get indexes for each slice
+            if (slices.Any())
+            {
+                // always return the index channel
+                dataTypeIndexes = dataTypeIndexes
+                    .Where(x => x.Index == 0 || slices.Contains(x.Index));
+            }
+
+            return new SortedDictionary<int, string>(dataTypeIndexes.ToDictionary(x => x.Index, x => x.DataType));
+        }        
 
         // TODO: See if this can be refactored to be common with LogDataAdapter.GetNullValueList
         private IDictionary<int, string> GetNullValueList(ChannelSet entity, int[] slices)
@@ -491,6 +526,13 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                     : IndexDirections.Decreasing,
                 CustomData = new Dictionary<string, DataValue>(0),
             };
+        }
+
+        private string ToDataType(ChannelIndex channelIndex)
+        {
+            return channelIndex.IndexType == ChannelIndexType.datetime
+                ? EtpDataType.@null.ToString()
+                : EtpDataType.@double.ToString();
         }
 
         private void UpdateChannelDataAndIndexRange(EtpUri uri, ChannelDataReader reader)
@@ -705,7 +747,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             var channels = reader.Mnemonics
                 .Select((x, i) => new { Mnemonic = x, Index = i })
                 .Where(x => entity.Channel.GetByMnemonic(x.Mnemonic) == null)
-                .Select(x => CreateChannel(uri, x.Mnemonic, reader.Units[x.Index], isTimeIndex, entity.Index));
+                .Select(x => CreateChannel(uri, x.Mnemonic, reader.Units[x.Index], reader.DataTypes[x.Index], isTimeIndex, entity.Index));
 
             var mongoUpdate = new MongoDbUpdate<ChannelSet>(Container, GetCollection(), null);
             var headerUpdate = MongoDbUtility.BuildPushEach<ChannelSet, Channel>(null, "Channel", channels);
@@ -742,12 +784,16 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             };
         }
 
-        private Channel CreateChannel(EtpUri uri, string mnemonic, string unit, bool isTimeIndex, List<ChannelIndex> indexes)
+        private Channel CreateChannel(EtpUri uri, string mnemonic, string unit, string dataType, bool isTimeIndex, List<ChannelIndex> indexes)
         {
+            EtpDataType etpDataType;
+
+            var etpDataTypeExists = Enum.TryParse(dataType, out etpDataType);
+
             var channel = new Channel
             {
                 Mnemonic = mnemonic,
-                DataType = EtpDataType.@double,
+                DataType = etpDataTypeExists ? etpDataType : EtpDataType.@double,
                 GrowingStatus = ChannelStatus.active,
                 Uom = unit,
                 TimeDepth = isTimeIndex ? "time" : "depth",
