@@ -142,7 +142,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         channelDataType = "double";
                         break;
                     case 1:
-                        channelDataType = "string";
+                        channelDataType = "long";
                         break;
                     default:
                         channelDataType = "string";
@@ -197,9 +197,14 @@ namespace PDS.Witsml.Server.Data.Logs
 
                 foreach (var index in channel.Indexes)
                 {
+                    var dataType = index.IndexType == ChannelIndexTypes.Time
+                        ? EtpDataType.@null.ToString()
+                        : EtpDataType.@double.ToString();
+
                     dataBlock.AddIndex(
                         index.Mnemonic,
                         index.Uom,
+                        dataType,
                         index.Direction == IndexDirections.Increasing,
                         index.IndexType == ChannelIndexTypes.Time);
                 }
