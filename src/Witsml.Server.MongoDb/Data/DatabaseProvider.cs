@@ -19,10 +19,8 @@
 using System;
 using System.ComponentModel.Composition;
 using System.Configuration;
-using Energistics.Datatypes;
 using MongoDB.Driver;
 using PDS.Framework;
-using PDS.Witsml.Server.Data.Transactions;
 using PDS.Witsml.Server.MongoDb;
 
 namespace PDS.Witsml.Server.Data
@@ -86,22 +84,6 @@ namespace PDS.Witsml.Server.Data
         public IMongoDatabase GetDatabase()
         {
             return Client.GetDatabase(_databaseName);
-        }
-
-        /// <summary>
-        /// Creates a transaction.
-        /// </summary>
-        /// <returns>The transaction</returns>
-        public MongoTransaction BeginTransaction(EtpUri? uri = null)
-        {
-            var transaction = _container.Resolve<MongoTransaction>();
-
-            if (uri.HasValue)
-            {
-                transaction.Wait(uri.Value);
-            }
-
-            return transaction;
         }
 
         /// <summary>

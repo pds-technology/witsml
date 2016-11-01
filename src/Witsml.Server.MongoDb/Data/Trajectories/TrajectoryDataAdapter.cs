@@ -102,11 +102,12 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <param name="dataObject">The data object to be added.</param>
         public override void Add(WitsmlQueryParser parser, T dataObject)
         {
-            using (var transaction = DatabaseProvider.BeginTransaction())
+            using (var transaction = GetTransaction())
             {
+                transaction.SetContext(dataObject.GetUri());
                 SetIndexRange(dataObject);
                 UpdateMongoFile(dataObject, false);
-                InsertEntity(dataObject, transaction);
+                InsertEntity(dataObject);
                 transaction.Commit();
             }
         }
@@ -119,15 +120,17 @@ namespace PDS.Witsml.Server.Data.Trajectories
         public override void Update(WitsmlQueryParser parser, T dataObject)
         {
             var uri = dataObject.GetUri();
+
             if (UpdateStations(dataObject))
             {
                 UpdateTrajectoryWithStations(parser, dataObject, uri, true);
             }
             else
             {
-                using (var transaction = DatabaseProvider.BeginTransaction(uri))
+                using (var transaction = GetTransaction())
                 {
-                    UpdateEntity(parser, uri, transaction);
+                    transaction.SetContext(uri);
+                    UpdateEntity(parser, uri);
                     transaction.Commit();
                 }
             }
@@ -160,9 +163,10 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 }
                 else
                 {
-                    using (var transaction = DatabaseProvider.BeginTransaction(uri))
+                    using (var transaction = GetTransaction())
                     {
-                        PartialDeleteEntity(parser, uri, transaction);
+                        transaction.SetContext(uri);
+                        PartialDeleteEntity(parser, uri);
                         transaction.Commit();
                     }                   
                 }               
@@ -179,13 +183,14 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// <param name="uri">The data object URI.</param>
         public override void Delete(EtpUri uri)
         {
-            using (var transaction = DatabaseProvider.BeginTransaction(uri))
+            using (var transaction = GetTransaction())
             {
                 Logger.DebugFormat($"Deleting Trajectory with uri '{uri}'.");
+                transaction.SetContext(uri);
 
                 var current = GetEntity(uri);
                 var chunked = QueryStationFile(current, current);
-                DeleteEntity(uri, transaction);
+                DeleteEntity(uri);
 
                 if (chunked)
                 {
@@ -473,8 +478,10 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 dataObject = current;
             }
 
-            using (var transaction = DatabaseProvider.BeginTransaction(uri))
+            using (var transaction = GetTransaction())
             {
+                transaction.SetContext(uri);
+
                 if (chunked)
                 {
                     var bucket = GetMongoFileBucket();
@@ -483,7 +490,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
                 SetIndexRange(dataObject);
                 UpdateMongoFile(dataObject, false);
-                ReplaceEntity(dataObject, uri, transaction);
+                ReplaceEntity(dataObject, uri);
                 transaction.Commit();
             }
         }
@@ -502,8 +509,10 @@ namespace PDS.Witsml.Server.Data.Trajectories
             FilterStationData(current, parser);
             MergeEntity(current, parser, true);
 
-            using (var transaction = DatabaseProvider.BeginTransaction(uri))
+            using (var transaction = GetTransaction())
             {
+                transaction.SetContext(uri);
+
                 if (chunked)
                 {
                     var bucket = GetMongoFileBucket();
@@ -512,7 +521,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
                 SetIndexRange(current);
                 UpdateMongoFile(current, false);
-                ReplaceEntity(current, uri, transaction);
+                ReplaceEntity(current, uri);
                 transaction.Commit();
             }
         }

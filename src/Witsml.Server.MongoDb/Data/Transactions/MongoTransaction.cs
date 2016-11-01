@@ -22,9 +22,11 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Threading;
 using Energistics.Datatypes;
+using log4net;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using PDS.Witsml.Server.MongoDb;
+using PDS.Witsml.Server.Transactions;
 
 namespace PDS.Witsml.Server.Data.Transactions
 {
@@ -32,16 +34,16 @@ namespace PDS.Witsml.Server.Data.Transactions
     /// Encapsulates transaction-like behavior on MongoDb
     /// </summary>
     /// <seealso cref="System.IDisposable" />
-    [Export]
+    [Export(typeof(IWitsmlTransaction))]
     [PartCreationPolicy(CreationPolicy.NonShared)]
-    public class MongoTransaction : IDisposable
+    public class MongoTransaction : WitsmlTransaction
     {
+        private static readonly ILog _log = LogManager.GetLogger(typeof(MongoTransaction));
+
         internal static readonly int DefaultInterval = Settings.Default.DefaultTransactionWaitInterval;
         internal static readonly int MaximumAttempt = Settings.Default.DefaultMaximumTransactionAttempt;
 
-        //private static readonly string _idField = "_id";
-        //private static readonly string _uidWell = "UidWell";
-        //private static readonly string _uidWellbore = "UidWellbore";
+        private IDatabaseProvider _databaseProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoTransaction"/> class.
@@ -51,35 +53,28 @@ namespace PDS.Witsml.Server.Data.Transactions
         [ImportingConstructor]
         public MongoTransaction(IDatabaseProvider databaseProvider, MongoDbTransactionAdapter adapter)
         {
-            DatabaseProvider = databaseProvider;
+            _databaseProvider = databaseProvider;
             Adapter = adapter;
             Id = Guid.NewGuid().ToString();
             Transactions = new List<MongoDbTransaction>();
-            Committed = false;
+            InitializeRootTransaction();
         }       
 
         /// <summary>
         /// Gets or sets the transaction identifier.
         /// </summary>
         /// <value>The tid.</value>
-        public string Id { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="MongoTransaction"/> is committed.
-        /// </summary>
-        /// <value><c>true</c> if committed; otherwise, <c>false</c>.</value>
-        public bool Committed { get; set; }
+        public string Id { get; }
 
         /// <summary>
         /// The list of transaction records. 
         /// </summary>
-        public List<MongoDbTransaction> Transactions;
+        public List<MongoDbTransaction> Transactions { get; }
 
         /// <summary>
-        /// Gets the database provider.
+        /// Gets the <see cref="IMongoDatabase"/> instance associated with the current transaction.
         /// </summary>
-        /// <value>The database provider.</value>
-        public IDatabaseProvider DatabaseProvider { get; }
+        public IMongoDatabase Database { get; private set; }
 
         /// <summary>
         /// Gets the transaction adapter.
@@ -88,45 +83,34 @@ namespace PDS.Witsml.Server.Data.Transactions
         public MongoDbTransactionAdapter Adapter { get; }
 
         /// <summary>
+        /// Sets the context for the root transaction.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        public override void SetContext(EtpUri uri)
+        {
+            var root = WitsmlOperationContext.Current.Transaction;
+            base.SetContext(uri);
+
+            if (root == null || !root.Uri.Equals(uri))
+            {
+                Wait(uri);
+            }
+        }
+
+        /// <summary>
         /// Commits the transaction in MongoDb.
         /// </summary>
-        public void Commit()
+        public override void Commit()
         {
-            var database = DatabaseProvider.GetDatabase();
+            _log.Debug($"Committing transaction for URI: {Uri}");
+
             foreach (var transaction in Transactions.Where(t => t.Status == TransactionStatus.Pending && t.Action == MongoDbAction.Delete))
             {
-                Delete(database, transaction);
+                Delete(transaction);
             }
 
             ClearTransactions();
             Committed = true;
-        }
-
-        /// <summary>
-        /// Rollbacks the transaction in MongoDb.
-        /// </summary>
-        public void Rollback()
-        {
-            var pending = Transactions.Where(t => t.Status == TransactionStatus.Pending).ToList();
-            if (!pending.Any())
-                return;
-
-            var database = DatabaseProvider.GetDatabase();
-            foreach (var transaction in pending)
-            {
-                var action = transaction.Action;
-
-                if (action == MongoDbAction.Add)
-                {
-                    Delete(database, transaction);
-                }
-                else if (action == MongoDbAction.Update)
-                {
-                    Update(database, transaction);
-                }
-            }
-
-            ClearTransactions();
         }
 
         /// <summary>
@@ -138,6 +122,8 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// <param name="uri">The URI.</param>
         public void Attach(MongoDbAction action, string collection, BsonDocument document, EtpUri? uri = null)
         {
+            _log.Debug($"Attaching transaction for MongoDb collection {collection} with URI: {uri}");
+
             var transaction = new MongoDbTransaction
             {
                 TransactionId = Id,
@@ -156,10 +142,95 @@ namespace PDS.Witsml.Server.Data.Transactions
         }
 
         /// <summary>
-        /// Waits this instance if the transaction is attached.
+        /// Saves the transaction records in MongoDb and change status to pending
+        /// </summary>
+        public void Save()
+        {
+            _log.Debug($"Saving attached transactions for URI: {Uri}");
+
+            var created = Transactions.Where(t => t.Status == TransactionStatus.Created).ToList();
+            if (!created.Any()) return;
+
+            foreach (var transaction in created)
+                transaction.Status = TransactionStatus.Pending;
+
+            Adapter.InsertEntities(created);
+        }
+
+        /// <summary>
+        /// Initializes the transaction.
+        /// </summary>
+        protected override void Initialize()
+        {
+            _log.Debug($"Initializing transaction for URI: {Uri}");
+            Database = _databaseProvider.GetDatabase();
+        }
+
+        /// <summary>
+        /// Rollbacks the transaction in MongoDb.
+        /// </summary>
+        protected override void Rollback()
+        {
+            var pending = Transactions.Where(t => t.Status == TransactionStatus.Pending).ToList();
+            if (!pending.Any()) return;
+
+            _log.Debug($"Rolling back transaction for URI: {Uri}");
+
+            foreach (var transaction in pending)
+            {
+                var action = transaction.Action;
+
+                if (action == MongoDbAction.Add)
+                {
+                    Delete(transaction);
+                }
+                else if (action == MongoDbAction.Update)
+                {
+                    Update(transaction);
+                }
+            }
+
+            ClearTransactions();
+        }
+
+        private void ClearTransactions()
+        {
+            if (Transactions.Any())
+            {
+                Adapter.DeleteTransactions(Id);
+                Transactions.Clear();
+            }
+
+            _databaseProvider = null;
+            Database = null;
+        }
+
+        private void Update(MongoDbTransaction transaction)
+        {
+            var collection = Database.GetCollection<BsonDocument>(transaction.Collection);
+            var filter = GetDocumentFilter(new EtpUri(transaction.Uid));
+            collection.ReplaceOne(filter, transaction.Value);
+        }
+
+        private void Delete(MongoDbTransaction transaction)
+        {
+            var collection = Database.GetCollection<BsonDocument>(transaction.Collection);
+            var filter = GetDocumentFilter(new EtpUri(transaction.Uid));
+            collection.DeleteOne(filter);
+        }
+
+        private FilterDefinition<BsonDocument> GetDocumentFilter(EtpUri uri)
+        {
+            return uri.Version == EtpUris.Witsml200.Version
+                ? MongoDbUtility.GetEntityFilter<BsonDocument>(uri, ObjectTypes.Uuid)
+                : MongoDbUtility.GetEntityFilter<BsonDocument>(uri);
+        }
+
+        /// <summary>
+        /// Blocks the current thread if there is a pending transaction for the specified URI.
         /// </summary>
         /// <param name="uri">The uri of the data object.</param>
-        public void Wait(EtpUri uri)
+        private void Wait(EtpUri uri)
         {
             var count = MaximumAttempt;
 
@@ -168,101 +239,10 @@ namespace PDS.Witsml.Server.Data.Transactions
                 Thread.Sleep(DefaultInterval);
                 count--;
 
-                if (count == 0)
-                {
-                    var message = string.Format("Transaction deadlock on data object with Uri: {0}", uri);
-                    throw new WitsmlException(ErrorCodes.ErrorTransactionDeadlock, message);
-                }
+                if (count > 0) continue;
+                var message = $"Transaction deadlock on data object with URI: {uri}";
+                throw new WitsmlException(ErrorCodes.ErrorTransactionDeadlock, message);
             }
         }
-
-        /// <summary>
-        /// Saves the transaction records in MongoDb and change status to pending
-        /// </summary>
-        public void Save()
-        {
-            var created = Transactions.Where(t => t.Status == TransactionStatus.Created).ToList();
-            if (!created.Any())
-                return;
-
-            foreach (var transaction in created)
-                transaction.Status = TransactionStatus.Pending;
-
-            Adapter.InsertEntities(created);
-        }
-
-        private void ClearTransactions()
-        {
-            if (!Transactions.Any())
-                return;
-
-            Adapter.DeleteTransactions(Id);
-            Transactions.Clear();
-        }
-
-        private void Update(IMongoDatabase database, MongoDbTransaction transaction)
-        {
-            var collection = database.GetCollection<BsonDocument>(transaction.Collection);
-            var filter = GetDocumentFilter(new EtpUri(transaction.Uid));
-            collection.ReplaceOne(filter, transaction.Value);
-        }
-
-        private void Delete(IMongoDatabase database, MongoDbTransaction transaction)
-        {
-            var collection = database.GetCollection<BsonDocument>(transaction.Collection);
-            var filter = GetDocumentFilter(new EtpUri(transaction.Uid));
-            collection.DeleteOne(filter);
-        }
-
-        private FilterDefinition<BsonDocument> GetDocumentFilter(EtpUri uri)
-        {
-            return uri.Version == EtpUris.Witsml200.Version
-                ? MongoDbUtility.GetEntityFilter<BsonDocument>(uri, "Uuid")
-                : MongoDbUtility.GetEntityFilter<BsonDocument>(uri);
-        }
-
-        #region IDisposable Support
-        private bool _disposedValue; // To detect redundant calls
-
-        /// <summary>
-        /// Releases unmanaged and - optionally - managed resources.
-        /// </summary>
-        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposedValue)
-            {
-                if (disposing)
-                {
-                    // NOTE: dispose managed state (managed objects).
-
-                    if (!Committed)
-                        Rollback();
-                }
-
-                // NOTE: free unmanaged resources (unmanaged objects) and override a finalizer below.
-                // NOTE: set large fields to null.
-
-                _disposedValue = true;
-            }
-        }
-
-        // NOTE: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        // ~MongoTransaction() {
-        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-        //   Dispose(false);
-        // }
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            // NOTE: uncomment the following line if the finalizer is overridden above.
-            // GC.SuppressFinalize(this);
-        }
-        #endregion
     }
 }

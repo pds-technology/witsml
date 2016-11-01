@@ -58,25 +58,30 @@ namespace PDS.Witsml.Server.Data
         /// Gets the database provider used for accessing MongoDb.
         /// </summary>
         /// <value>The database provider.</value>
-        protected IDatabaseProvider DatabaseProvider { get; private set; }
+        protected IDatabaseProvider DatabaseProvider { get; }
+
+        /// <summary>
+        /// Gets a reference to the current <see cref="MongoTransaction"/> instance.
+        /// </summary>
+        protected MongoTransaction Transaction => WitsmlOperationContext.Current.Transaction as MongoTransaction;
 
         /// <summary>
         /// Gets the database collection name for the data object.
         /// </summary>
         /// <value>The database collection name.</value>
-        protected string DbCollectionName { get; private set; }
+        protected string DbCollectionName { get; }
 
         /// <summary>
         /// Gets the name of the identifier property.
         /// </summary>
         /// <value>The name of the identifier property.</value>
-        protected string IdPropertyName { get; private set; }
+        protected string IdPropertyName { get; }
 
         /// <summary>
         /// Gets the name of the Name property.
         /// </summary>
         /// <value>The name of the Name property.</value>
-        protected string NamePropertyName { get; private set; }
+        protected string NamePropertyName { get; }
 
         /// <summary>
         /// Gets a data object by the specified UUID.
@@ -109,9 +114,12 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dataObject">The data object to be added.</param>
         public override void Add(WitsmlQueryParser parser, T dataObject)
         {
-            using (var transaction = DatabaseProvider.BeginTransaction())
+            using (var transaction = GetTransaction())
             {
-                InsertEntity(dataObject, transaction);
+                var uri = GetUri(dataObject);
+                transaction.SetContext(uri);
+
+                InsertEntity(dataObject);
                 transaction.Commit();
             }
         }
@@ -124,9 +132,10 @@ namespace PDS.Witsml.Server.Data
         public override void Update(WitsmlQueryParser parser, T dataObject)
         {
             var uri = GetUri(dataObject);
-            using (var transaction = DatabaseProvider.BeginTransaction(uri))
+            using (var transaction = GetTransaction())
             {
-                UpdateEntity(parser, uri, transaction);
+                transaction.SetContext(uri);
+                UpdateEntity(parser, uri);
                 ValidateUpdatedEntity(Functions.UpdateInStore, uri);
                 transaction.Commit();
             }
@@ -140,9 +149,10 @@ namespace PDS.Witsml.Server.Data
         public override void Replace(WitsmlQueryParser parser, T dataObject)
         {
             var uri = GetUri(dataObject);
-            using (var transaction = DatabaseProvider.BeginTransaction(uri))
+            using (var transaction = GetTransaction())
             {
-                ReplaceEntity(dataObject, uri, transaction);
+                transaction.SetContext(uri);
+                ReplaceEntity(dataObject, uri);
                 ValidateUpdatedEntity(Functions.PutObject, uri);
                 transaction.Commit();
             }
@@ -158,9 +168,10 @@ namespace PDS.Witsml.Server.Data
 
             if (parser.HasElements())
             {
-                using (var transaction = DatabaseProvider.BeginTransaction(uri))
+                using (var transaction = GetTransaction())
                 {
-                    PartialDeleteEntity(parser, uri, transaction);
+                    transaction.SetContext(uri);
+                    PartialDeleteEntity(parser, uri);
                     transaction.Commit();
                 }
             }
@@ -176,9 +187,10 @@ namespace PDS.Witsml.Server.Data
         /// <param name="uri">The data object URI.</param>
         public override void Delete(EtpUri uri)
         {
-            using (var transaction = DatabaseProvider.BeginTransaction(uri))
+            using (var transaction = GetTransaction())
             {
-                DeleteEntity(uri, transaction);
+                transaction.SetContext(uri);
+                DeleteEntity(uri);
                 transaction.Commit();
             }
         }
@@ -222,8 +234,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns></returns>
         protected IMongoCollection<TObject> GetCollection<TObject>(string dbCollectionName)
         {
-            var database = DatabaseProvider.GetDatabase();
-            return database.GetCollection<TObject>(dbCollectionName);
+            return GetDatabase().GetCollection<TObject>(dbCollectionName);
         }
 
         /// <summary>
@@ -400,10 +411,9 @@ namespace PDS.Witsml.Server.Data
         /// Inserts an object into the data store.
         /// </summary>
         /// <param name="entity">The object to be inserted.</param>
-        /// <param name="transaction">The transaction.</param>
-        protected void InsertEntity(T entity, MongoTransaction transaction = null)
+        protected void InsertEntity(T entity)
         {
-            InsertEntity(entity, DbCollectionName, GetUri(entity), transaction);
+            InsertEntity(entity, DbCollectionName, GetUri(entity));
         }
 
         /// <summary>
@@ -413,9 +423,8 @@ namespace PDS.Witsml.Server.Data
         /// <param name="entity">The object to be inserted.</param>
         /// <param name="dbCollectionName">The name of the database collection.</param>
         /// <param name="uri">The data object URI.</param>
-        /// <param name="transaction">The transaction.</param>
         /// <exception cref="WitsmlException"></exception>
-        protected void InsertEntity<TObject>(TObject entity, string dbCollectionName, EtpUri uri, MongoTransaction transaction = null)
+        protected void InsertEntity<TObject>(TObject entity, string dbCollectionName, EtpUri uri)
         {
             try
             {
@@ -423,12 +432,12 @@ namespace PDS.Witsml.Server.Data
 
                 var collection = GetCollection<TObject>(dbCollectionName);
                 collection.InsertOne(entity);
-                
-                if (transaction != null)
-                {
-                    transaction.Attach(MongoDbAction.Add, dbCollectionName, null, uri);
-                    transaction.Save();
-                }               
+
+                var transaction = Transaction;
+                if (transaction == null) return;
+
+                transaction.Attach(MongoDbAction.Add, dbCollectionName, null, uri);
+                transaction.Save();
             }
             catch (MongoException ex)
             {
@@ -442,10 +451,9 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="parser">The WITSML query parser.</param>
         /// <param name="uri">The data object URI.</param>
-        /// <param name="transaction">The transaction.</param>
-        protected void UpdateEntity(WitsmlQueryParser parser, EtpUri uri, MongoTransaction transaction = null)
+        protected void UpdateEntity(WitsmlQueryParser parser, EtpUri uri)
         {
-            UpdateEntity<T>(DbCollectionName, parser, uri, transaction);
+            UpdateEntity<T>(DbCollectionName, parser, uri);
         }
 
         /// <summary>
@@ -455,9 +463,8 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dbCollectionName">The name of the database collection.</param>
         /// <param name="parser">The WITSML query parser.</param>
         /// <param name="uri">The data object URI.</param>
-        /// <param name="transaction">The transaction.</param>
         /// <exception cref="WitsmlException"></exception>
-        protected void UpdateEntity<TObject>(string dbCollectionName, WitsmlQueryParser parser, EtpUri uri, MongoTransaction transaction = null)
+        protected void UpdateEntity<TObject>(string dbCollectionName, WitsmlQueryParser parser, EtpUri uri)
         {
             try
             {
@@ -471,11 +478,11 @@ namespace PDS.Witsml.Server.Data
                 var update = new MongoDbUpdate<TObject>(Container, collection, parser, IdPropertyName, ignores);
                 update.Update(current, uri, updates);
 
-                if (transaction != null)
-                {
-                    transaction.Attach(MongoDbAction.Update, dbCollectionName, current.ToBsonDocument(), uri);
-                    transaction.Save();
-                }
+                var transaction = Transaction;
+                if (transaction == null) return;
+
+                transaction.Attach(MongoDbAction.Update, dbCollectionName, current.ToBsonDocument(), uri);
+                transaction.Save();
             }
             catch (MongoException ex)
             {
@@ -489,10 +496,9 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="entity">The object to be replaced.</param>
         /// <param name="uri">The data object URI.</param>
-        /// <param name="transaction">The transaction.</param>
-        protected void ReplaceEntity(T entity, EtpUri uri, MongoTransaction transaction = null)
+        protected void ReplaceEntity(T entity, EtpUri uri)
         {
-            ReplaceEntity(DbCollectionName, entity, uri, transaction);
+            ReplaceEntity(DbCollectionName, entity, uri);
         }
 
         /// <summary>
@@ -502,9 +508,8 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dbCollectionName">The name of the database collection.</param>
         /// <param name="entity">The object to be replaced.</param>
         /// <param name="uri">The data object URI.</param>
-        /// <param name="transaction">The transaction.</param>
         /// <exception cref="WitsmlException"></exception>
-        protected void ReplaceEntity<TObject>(string dbCollectionName, TObject entity, EtpUri uri, MongoTransaction transaction = null)
+        protected void ReplaceEntity<TObject>(string dbCollectionName, TObject entity, EtpUri uri)
         {
             try
             {
@@ -521,11 +526,11 @@ namespace PDS.Witsml.Server.Data
                 var filter = GetEntityFilter<TObject>(uri, IdPropertyName);
                 collection.ReplaceOne(filter, entity);
 
-                if (transaction != null)
-                {
-                    transaction.Attach(MongoDbAction.Update, dbCollectionName, current.ToBsonDocument(), uri);
-                    transaction.Save();
-                }
+                var transaction = Transaction;
+                if (transaction == null) return;
+
+                transaction.Attach(MongoDbAction.Update, dbCollectionName, current.ToBsonDocument(), uri);
+                transaction.Save();
             }
             catch (MongoException ex)
             {
@@ -564,9 +569,9 @@ namespace PDS.Witsml.Server.Data
                 merge.MergeDelete = mergeDelete;
                 merge.Merge(entity);
             }
-            catch (WitsmlException ex)
+            catch (WitsmlException)
             {
-                throw new WitsmlException(ex.ErrorCode, ex);
+                throw;
             }
             catch (MongoException ex)
             {
@@ -584,11 +589,10 @@ namespace PDS.Witsml.Server.Data
         /// Deletes a data object by the specified identifier.
         /// </summary>
         /// <param name="uri">The data object URI.</param>
-        /// <param name="transaction">The transaction.</param>
         /// <exception cref="WitsmlException"></exception>
-        protected void DeleteEntity(EtpUri uri, MongoTransaction transaction = null)
+        protected void DeleteEntity(EtpUri uri)
         {
-            DeleteEntity<T>(uri, DbCollectionName, transaction);
+            DeleteEntity<T>(uri, DbCollectionName);
         }
 
         /// <summary>
@@ -597,9 +601,8 @@ namespace PDS.Witsml.Server.Data
         /// <typeparam name="TObject">The type of data object.</typeparam>
         /// <param name="uri">The data object URI.</param>
         /// <param name="dbCollectionName">The name of the database collection.</param>
-        /// <param name="transaction">The transaction.</param>
         /// <exception cref="WitsmlException"></exception>
-        protected void DeleteEntity<TObject>(EtpUri uri, string dbCollectionName, MongoTransaction transaction = null)
+        protected void DeleteEntity<TObject>(EtpUri uri, string dbCollectionName)
         {
             try
             {
@@ -610,6 +613,7 @@ namespace PDS.Witsml.Server.Data
                 if (current == null)
                     return;
 
+                var transaction = Transaction;
                 if (transaction != null)
                 {
                     //var document = MongoDbUtility.GetDocumentId(current);
@@ -634,10 +638,9 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="parser">The parser.</param>
         /// <param name="uri">The URI.</param>
-        /// <param name="transaction">The transaction.</param>
-        protected void PartialDeleteEntity(WitsmlQueryParser parser, EtpUri uri, MongoTransaction transaction = null)
+        protected void PartialDeleteEntity(WitsmlQueryParser parser, EtpUri uri)
         {
-            PartialDeleteEntity<T>(DbCollectionName, parser, uri, transaction);
+            PartialDeleteEntity<T>(DbCollectionName, parser, uri);
         }
 
         /// <summary>
@@ -647,9 +650,8 @@ namespace PDS.Witsml.Server.Data
         /// <param name="dbCollectionName">Name of the database collection.</param>
         /// <param name="parser">The parser.</param>
         /// <param name="uri">The URI.</param>
-        /// <param name="transaction">The transaction.</param>
         /// <exception cref="WitsmlException"></exception>
-        protected void PartialDeleteEntity<TObject>(string dbCollectionName, WitsmlQueryParser parser, EtpUri uri, MongoTransaction transaction = null)
+        protected void PartialDeleteEntity<TObject>(string dbCollectionName, WitsmlQueryParser parser, EtpUri uri)
         {
             try
             {
@@ -663,11 +665,11 @@ namespace PDS.Witsml.Server.Data
                 var partialDelete = new MongoDbDelete<TObject>(Container, collection, parser, IdPropertyName, ignores);
                 partialDelete.PartialDelete(current, uri, updates);
 
-                if (transaction != null)
-                {
-                    transaction.Attach(MongoDbAction.Update, dbCollectionName, current.ToBsonDocument(), uri);
-                    transaction.Save();
-                }
+                var transaction = Transaction;
+                if (transaction == null) return;
+
+                transaction.Attach(MongoDbAction.Update, dbCollectionName, current.ToBsonDocument(), uri);
+                transaction.Save();
             }
             catch (MongoException ex)
             {
@@ -695,6 +697,16 @@ namespace PDS.Witsml.Server.Data
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="IMongoDatabase"/> associated with the current transaction, if available; 
+        /// otherwise, a new <see cref="IMongoDatabase"/> instance is requested.
+        /// </summary>
+        /// <returns></returns>
+        protected IMongoDatabase GetDatabase()
+        {
+            return Transaction?.Database ?? DatabaseProvider.GetDatabase();
         }
     }
 }

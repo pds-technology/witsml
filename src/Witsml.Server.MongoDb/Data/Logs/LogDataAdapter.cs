@@ -28,7 +28,6 @@ using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
-using PDS.Witsml.Server.Data.Transactions;
 using PDS.Witsml.Server.Models;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -238,16 +237,16 @@ namespace PDS.Witsml.Server.Data.Logs
 
             if (parser.HasElements())
             {
-                using (var transaction = DatabaseProvider.BeginTransaction(uri))
+                using (var transaction = GetTransaction())
                 {
+                    transaction.SetContext(uri);
+
                     var current = Get(uri);
                     var channels = GetLogCurves(current);
                     var currentRanges = GetCurrentIndexRange(current);
 
-                    PartialDeleteEntity(parser, uri, transaction);
-
-                    PartialDeleteLogData(uri, parser, channels, currentRanges, transaction);
-
+                    PartialDeleteEntity(parser, uri);
+                    PartialDeleteLogData(uri, parser, channels, currentRanges);
                     transaction.Commit();
                 }
             }
@@ -263,11 +262,12 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="uri">The data object URI.</param>
         public override void Delete(EtpUri uri)
         {
-            using (var transaction = DatabaseProvider.BeginTransaction(uri))
+            using (var transaction = GetTransaction())
             {
                 Logger.DebugFormat("Deleting Log with uri '{0}'.", uri);
+                transaction.SetContext(uri);
 
-                DeleteEntity(uri, transaction);
+                DeleteEntity(uri);
                 ChannelDataChunkAdapter.Delete(uri);
                 transaction.Commit();
             }
@@ -330,8 +330,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="uri">The URI.</param>
         /// <param name="readers">The readers.</param>
-        /// <param name="transaction">The transaction.</param>
-        protected void UpdateLogDataAndIndexRange(EtpUri uri, IEnumerable<ChannelDataReader> readers, MongoTransaction transaction = null)
+        protected void UpdateLogDataAndIndexRange(EtpUri uri, IEnumerable<ChannelDataReader> readers)
         {
             Logger.DebugFormat("Updating log data and index for log uri '{0}'.", uri.Uri);
 
@@ -379,7 +378,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 GetUpdatedIndexRange(reader, updateMnemonics.ToArray(), ranges, IsIncreasing(current));
 
                 // Update log data
-                ChannelDataChunkAdapter.Merge(reader, transaction);
+                ChannelDataChunkAdapter.Merge(reader);
                 updateIndexRanges = true;
             }
 
@@ -827,8 +826,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="parser">The parser.</param>
         /// <param name="channels">The current logCurve information.</param>
         /// <param name="currentRanges">The current channel index ranges.</param>
-        /// <param name="transaction">The transaction.</param>
-        protected abstract void PartialDeleteLogData(EtpUri uri, WitsmlQueryParser parser, List<TChild> channels, Dictionary<string, Range<double?>> currentRanges, MongoTransaction transaction);
+        protected abstract void PartialDeleteLogData(EtpUri uri, WitsmlQueryParser parser, List<TChild> channels, Dictionary<string, Range<double?>> currentRanges);
 
         /// <summary>
         /// Gets the channel URI.

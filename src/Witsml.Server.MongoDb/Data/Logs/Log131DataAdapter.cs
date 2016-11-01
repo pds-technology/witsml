@@ -30,7 +30,6 @@ using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Server.Data.Channels;
-using PDS.Witsml.Server.Data.Transactions;
 using PDS.Witsml.Server.Providers.Store;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -48,16 +47,17 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="dataObject">The Log instance to add to the store.</param>
         public override void Add(WitsmlQueryParser parser, Log dataObject)
         {
-            using (var transaction = DatabaseProvider.BeginTransaction())
+            using (var transaction = GetTransaction())
             {
+                transaction.SetContext(dataObject.GetUri());
                 ClearIndexValues(dataObject);
 
                 // Separate log header and log data
                 var reader = ExtractDataReader(dataObject);
                 // Insert log header
-                InsertEntity(dataObject, transaction);
+                InsertEntity(dataObject);
                 // Update log data and index ranges
-                UpdateLogDataAndIndexRange(dataObject.GetUri(), new[] { reader }, transaction);
+                UpdateLogDataAndIndexRange(dataObject.GetUri(), new[] { reader });
                 // Commit transaction
                 transaction.Commit();
             }               
@@ -71,14 +71,15 @@ namespace PDS.Witsml.Server.Data.Logs
         public override void Update(WitsmlQueryParser parser, Log dataObject)
         {
             var uri = dataObject.GetUri();
-            using (var transaction = DatabaseProvider.BeginTransaction(uri))
+            using (var transaction = GetTransaction())
             {
+                transaction.SetContext(uri);
                 // Update log header
-                UpdateEntity(parser, uri, transaction);
+                UpdateEntity(parser, uri);
                 // Separate log header and log data
                 var reader = ExtractDataReader(dataObject, GetEntity(uri));
                 // Update log data and index ranges
-                UpdateLogDataAndIndexRange(uri, new[] { reader }, transaction);
+                UpdateLogDataAndIndexRange(uri, new[] { reader });
                 // Validate log header result
                 ValidateUpdatedEntity(Functions.UpdateInStore, uri);
                 // Commit transaction
@@ -94,16 +95,17 @@ namespace PDS.Witsml.Server.Data.Logs
         public override void Replace(WitsmlQueryParser parser, Log dataObject)
         {
             var uri = dataObject.GetUri();
-            using (var transaction = DatabaseProvider.BeginTransaction(uri))
+            using (var transaction = GetTransaction())
             {
+                transaction.SetContext(uri);
                 // Remove previous log data
                 ChannelDataChunkAdapter.Delete(uri);
                 // Separate log header and log data
                 var reader = ExtractDataReader(dataObject, GetEntity(uri));
                 // Replace log header
-                ReplaceEntity(dataObject, uri, transaction);
+                ReplaceEntity(dataObject, uri);
                 // Update log data and index ranges
-                UpdateLogDataAndIndexRange(uri, new [] { reader }, transaction);
+                UpdateLogDataAndIndexRange(uri, new [] { reader });
                 // Validate log header result
                 ValidateUpdatedEntity(Functions.PutObject, uri);
                 // Commit transaction
@@ -480,8 +482,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="parser">The parser.</param>
         /// <param name="channels">The current logCurve information.</param>
         /// <param name="currentRanges">The current channel index ranges.</param>
-        /// <param name="transaction">The transaction.</param>
-        protected override void PartialDeleteLogData(EtpUri uri, WitsmlQueryParser parser, List<LogCurveInfo> channels, Dictionary<string, Range<double?>> currentRanges, MongoTransaction transaction)
+        protected override void PartialDeleteLogData(EtpUri uri, WitsmlQueryParser parser, List<LogCurveInfo> channels, Dictionary<string, Range<double?>> currentRanges)
         {
             var uidToMnemonics = channels.ToDictionary(c => c.Uid, c => c.Mnemonic);
             var updatedRanges = new Dictionary<string, Range<double?>>();
@@ -520,7 +521,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
                 var ranges = MergePartialDeleteRanges(deletedChannels, defaultDeleteRange, currentRanges, updateRanges, indexCurve, current.IsIncreasing());
 
-                ChannelDataChunkAdapter.PartialDeleteLogData(uri, indexCurve, current.IsIncreasing(), isTimeLog, deletedChannels, ranges, updatedRanges, transaction);
+                ChannelDataChunkAdapter.PartialDeleteLogData(uri, indexCurve, current.IsIncreasing(), isTimeLog, deletedChannels, ranges, updatedRanges);
             }
 
             UpdateIndexRange(uri, current, updatedRanges, updatedRanges.Keys.ToList(), current.IsTimeLog(), indexChannel?.Unit, offset, true);

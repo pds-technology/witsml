@@ -16,9 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Energistics.Datatypes;
 using MongoDB.Driver;
-using PDS.Witsml.Server.Data.Transactions;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -38,11 +36,5 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <returns>The database interface.</returns>
         IMongoDatabase GetDatabase();
-
-        /// <summary>
-        /// Creates a transaction.
-        /// </summary>
-        /// <returns>The transaction</returns>
-        MongoTransaction BeginTransaction(EtpUri? uri = null);
     }
 }

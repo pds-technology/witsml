@@ -95,9 +95,8 @@ namespace PDS.Witsml.Server.Data.Channels
         /// Adds ChannelDataChunks using the specified reader.
         /// </summary>
         /// <param name="reader">The <see cref="ChannelDataReader" /> used to parse the data.</param>
-        /// <param name="transaction">The transaction.</param>
         /// <exception cref="WitsmlException"></exception>
-        public void Add(ChannelDataReader reader, MongoTransaction transaction = null)
+        public void Add(ChannelDataReader reader)
         {
             if (reader == null || reader.RecordsAffected <= 0) return;
 
@@ -111,8 +110,8 @@ namespace PDS.Witsml.Server.Data.Channels
                     reader.Uri,
                     string.Join(",", reader.Mnemonics),
                     string.Join(",", reader.Units),
-                    string.Join(",", reader.NullValues),
-                    transaction);
+                    string.Join(",", reader.NullValues)
+                );
 
                 CreateChannelDataChunkIndex();
             }
@@ -132,9 +131,8 @@ namespace PDS.Witsml.Server.Data.Channels
         /// Merges <see cref="ChannelDataChunk" /> data for updates.
         /// </summary>
         /// <param name="reader">The reader.</param>
-        /// <param name="transaction">The transaction.</param>
         /// <exception cref="WitsmlException"></exception>
-        public void Merge(ChannelDataReader reader, MongoTransaction transaction = null)
+        public void Merge(ChannelDataReader reader)
         {
             if (reader == null || reader.RecordsAffected <= 0) return;
 
@@ -173,8 +171,8 @@ namespace PDS.Witsml.Server.Data.Channels
                         reader.Uri,
                         string.Join(",", reader.Mnemonics),
                         string.Join(",", reader.Units),
-                        string.Join(",", reader.NullValues),
-                        transaction);
+                        string.Join(",", reader.NullValues)
+                    );
 
                     CreateChannelDataChunkIndex();
                 }
@@ -222,8 +220,7 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="deletedChannels">The deleted channels.</param>
         /// <param name="ranges">The ranges.</param>
         /// <param name="updatedRanges">The updated ranges.</param>
-        /// <param name="transaction">The transaction.</param>
-        public void PartialDeleteLogData(EtpUri uri, string indexCurve, bool increasing, bool isTimeLog, List<string> deletedChannels, Dictionary<string, Range<double?>> ranges, Dictionary<string, Range<double?>> updatedRanges, MongoTransaction transaction)
+        public void PartialDeleteLogData(EtpUri uri, string indexCurve, bool increasing, bool isTimeLog, List<string> deletedChannels, Dictionary<string, Range<double?>> ranges, Dictionary<string, Range<double?>> updatedRanges)
         {
             try
             {
@@ -239,7 +236,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 if (!channelRanges.ContainsKey(indexCurve))
                     channelRanges.Add(indexCurve, new List<double?> { null, null });
 
-                BulkWriteChunks(PartialDeleteChunks(results, deletedChannels, ranges, channelRanges, increasing), uri, null, null, null, transaction);
+                BulkWriteChunks(PartialDeleteChunks(results, deletedChannels, ranges, channelRanges, increasing), uri, null, null, null);
 
                 foreach (var chanelRange in channelRanges)
                 {
@@ -262,13 +259,12 @@ namespace PDS.Witsml.Server.Data.Channels
         /// <param name="mnemonics">The mnemonics.</param>
         /// <param name="units">The units.</param>
         /// <param name="nullValues">The null values.</param>
-        /// <param name="transaction">The transaction.</param>
-        private void BulkWriteChunks(IEnumerable<ChannelDataChunk> chunks, string uri, string mnemonics, string units, string nullValues, MongoTransaction transaction = null)
+        private void BulkWriteChunks(IEnumerable<ChannelDataChunk> chunks, string uri, string mnemonics, string units, string nullValues)
         {
             Logger.DebugFormat("Bulk writing ChannelDataChunks for uri '{0}', mnemonics '{1}' and units '{2}'.", uri, mnemonics, units);
 
+            var transaction = Transaction;
             var collection = GetCollection();
-
             var uriLower = uri.ToLower();
 
             var writeModels = chunks
