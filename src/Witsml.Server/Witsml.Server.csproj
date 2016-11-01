@@ -349,6 +349,8 @@
     <Compile Include="Providers\Store\StoreStore200Provider.cs" />
     <Compile Include="Providers\Store\StoreStore141Provider.cs" />
     <Compile Include="Providers\Store\StoreStoreProvider.cs" />
+    <Compile Include="Transactions\IWitsmlTransaction.cs" />
+    <Compile Include="Transactions\WitsmlTransaction.cs" />
     <Compile Include="WitsmlOperationContext.cs" />
     <Compile Include="WitsmlResult.cs" />
     <Compile Include="WitsmlStore.cs" />
