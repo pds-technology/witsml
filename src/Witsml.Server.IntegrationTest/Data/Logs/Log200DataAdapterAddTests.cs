@@ -81,6 +81,31 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(0.0, dataOut[0][1][0]);
             Assert.AreEqual(new DateTimeOffset(2016, 1, 1, 0, 0, 0, new TimeSpan()), dataOut[0][1][1]);
             Assert.AreEqual(specialCharacters, dataOut[0][1][2]);
+
+            var channelMetadata = dataAdapter.GetChannelMetadata(EtpUris.Witsml200.Append(ObjectTypes.ChannelSet, channelSet.Uuid));
+            Assert.AreEqual(3, channelMetadata.Count);
+
+            var mnemonicList = channelMetadata.Select(m => m.ChannelName).ToList();
+            Assert.IsTrue(mnemonicList.Contains("ROP"));
+            Assert.IsTrue(mnemonicList.Contains("HKLD"));
+            Assert.IsTrue(mnemonicList.Contains("GR"));
+
+            foreach (var channel in channelMetadata)
+            {
+                var channelDataType = channel.DataType;
+                switch (channel.ChannelName)
+                {
+                    case "ROP":
+                        Assert.AreEqual(EtpDataType.@double.ToString(), channelDataType);
+                        break;
+                    case "HKLD":
+                        Assert.AreEqual(EtpDataType.@long.ToString(), channelDataType);
+                        break;
+                    case "GR":
+                        Assert.AreEqual(EtpDataType.@string.ToString(), channelDataType);
+                        break;
+                }
+            }
         }
 
         /// <summary>
@@ -134,17 +159,17 @@ namespace PDS.Witsml.Server.Data.Logs
             var channelId = 0;
             foreach (var channel in channelSet.Channel)
             {
-                string channelDataType;
+                string channelDataType = "double";
 
-                switch (channelId)
+                switch (channel.Mnemonic)
                 {
-                    case 0:
+                    case "ROP":
                         channelDataType = "double";
                         break;
-                    case 1:
+                    case "HKLD":
                         channelDataType = "long";
                         break;
-                    default:
+                    case "GR":
                         channelDataType = "string";
                         break;
                 }
@@ -214,19 +239,19 @@ namespace PDS.Witsml.Server.Data.Logs
 
             foreach (var channel in channelMetadataRecords)
             {
-                DataValue dataValue;
-                switch (channel.ChannelId)
+                DataValue dataValue = new DataValue() { Item = 0.0 };
+                switch (channel.ChannelName)
                 {
-                    case 0:
+                    case "ROP":
                         dataValue = new DataValue() { Item = 0.0 };
                         break;
-                    case 1:
+                    case "HKLD":
                         dataValue = new DataValue()
                         {
                             Item = new DateTimeOffset(2016, 1, 1, 0, 0, 0, new TimeSpan()).ToString("O")
                         };
                         break;
-                    default:
+                    case "GR":
                         dataValue = new DataValue()
                         {
                             Item = specialCharacters
