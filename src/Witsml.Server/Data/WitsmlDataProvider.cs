@@ -27,6 +27,7 @@ using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using log4net;
 using PDS.Framework;
+using PDS.Witsml.Server.Transactions;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -175,7 +176,12 @@ namespace PDS.Witsml.Server.Data
         /// <param name="uri">The data object URI.</param>
         public virtual void Delete(EtpUri uri)
         {
-            DataAdapter.Delete(uri);
+            using (var transaction = GetTransaction())
+            {
+                transaction.SetContext(uri);
+                DataAdapter.Delete(uri);
+                transaction.Commit();
+            }
         }
 
         /// <summary>
@@ -187,19 +193,26 @@ namespace PDS.Witsml.Server.Data
             if (Exists(uri)) return;
             var parent = uri.Parent;
 
-            if (!parent.IsBaseUri)
+            using (var transaction = GetTransaction())
             {
-                var dataProvider = Container.Resolve<IEtpDataProvider>(new ObjectName(parent.ObjectType, parent.Version));
-                dataProvider.Ensure(parent);
+                transaction.SetContext(uri);
+
+                if (!parent.IsBaseUri)
+                {
+                    var dataProvider = Container.Resolve<IEtpDataProvider>(new ObjectName(parent.ObjectType, parent.Version));
+                    dataProvider.Ensure(parent);
+                }
+
+                // Create object instance
+                var instance = Activator.CreateInstance<TObject>();
+                SetDefaultValues(instance, uri);
+
+                // Add to data store using parser
+                var parser = CreateQueryParser(instance);
+                Add(parser);
+
+                transaction.Commit();
             }
-
-            // Create object instance
-            var instance = Activator.CreateInstance<TObject>();
-            SetDefaultValues(instance, uri);
-
-            // Add to data store using parser
-            var parser = CreateQueryParser(instance);
-            Add(parser);
         }
 
         /// <summary>
@@ -218,19 +231,25 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         protected virtual WitsmlResult Add(WitsmlQueryParser parser)
         {
-            var validator = Container.Resolve<IDataObjectValidator<TObject>>();
-            var element = validator.Parse(Functions.AddToStore, parser);
-            var dataObject = Parse(element);
+            using (var transaction = GetTransaction())
+            {
+                var validator = Container.Resolve<IDataObjectValidator<TObject>>();
+                var element = validator.Parse(Functions.AddToStore, parser);
+                var dataObject = Parse(element);
 
-            SetDefaultValues(dataObject);
-            var uri = GetUri(dataObject);
-            Logger.DebugFormat("Adding {0} with URI '{1}'", typeof(TObject).Name, uri);
+                SetDefaultValues(dataObject);
+                var uri = GetUri(dataObject);
+                transaction.SetContext(uri);
+                Logger.DebugFormat("Adding {0} with URI '{1}'", typeof(TObject).Name, uri);
 
-            validator.Validate(Functions.AddToStore, parser, dataObject);
-            Logger.DebugFormat("Validated {0} with URI '{1}' for Add", typeof(TObject).Name, uri);
+                validator.Validate(Functions.AddToStore, parser, dataObject);
+                Logger.DebugFormat("Validated {0} with URI '{1}' for Add", typeof(TObject).Name, uri);
 
-            DataAdapter.Add(parser, dataObject);
-            return Success(uri.ObjectId);
+                DataAdapter.Add(parser, dataObject);
+                transaction.Commit();
+
+                return Success(uri.ObjectId);
+            }
         }
 
         /// <summary>
@@ -242,19 +261,25 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         protected virtual WitsmlResult Update(WitsmlQueryParser parser)
         {
-            var validator = Container.Resolve<IDataObjectValidator<TObject>>();
-            var element = validator.Parse(Functions.UpdateInStore, parser);
-            var dataObject = Parse(element);
+            using (var transaction = GetTransaction())
+            {
+                var validator = Container.Resolve<IDataObjectValidator<TObject>>();
+                var element = validator.Parse(Functions.UpdateInStore, parser);
+                var dataObject = Parse(element);
 
-            UpdateDefaultValues(dataObject, parser);
-            var uri = GetUri(dataObject);
-            Logger.DebugFormat("Updating {0} with URI '{1}'", typeof(TObject).Name, uri);
+                UpdateDefaultValues(dataObject, parser);
+                var uri = GetUri(dataObject);
+                transaction.SetContext(uri);
+                Logger.DebugFormat("Updating {0} with URI '{1}'", typeof(TObject).Name, uri);
 
-            validator.Validate(Functions.UpdateInStore, parser, dataObject);
-            Logger.DebugFormat("Validated {0} with URI '{1}' for Update", typeof(TObject).Name, uri);
+                validator.Validate(Functions.UpdateInStore, parser, dataObject);
+                Logger.DebugFormat("Validated {0} with URI '{1}' for Update", typeof(TObject).Name, uri);
 
-            DataAdapter.Update(parser, dataObject);
-            return Success();
+                DataAdapter.Update(parser, dataObject);
+                transaction.Commit();
+
+                return Success();
+            }
         }
 
         /// <summary>
@@ -266,19 +291,25 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         protected virtual WitsmlResult Replace(WitsmlQueryParser parser)
         {
-            var validator = Container.Resolve<IDataObjectValidator<TObject>>();
-            var element = validator.Parse(Functions.PutObject, parser);
-            var dataObject = Parse(element);
+            using (var transaction = GetTransaction())
+            {
+                var validator = Container.Resolve<IDataObjectValidator<TObject>>();
+                var element = validator.Parse(Functions.PutObject, parser);
+                var dataObject = Parse(element);
 
-            SetDefaultValues(dataObject);
-            var uri = GetUri(dataObject);
-            Logger.DebugFormat("Replacing {0} with URI '{1}'", typeof(TObject).Name, uri);
+                SetDefaultValues(dataObject);
+                var uri = GetUri(dataObject);
+                transaction.SetContext(uri);
+                Logger.DebugFormat("Replacing {0} with URI '{1}'", typeof(TObject).Name, uri);
 
-            validator.Validate(Functions.PutObject, parser, dataObject);
-            Logger.DebugFormat("Validated {0} with URI '{1}' for Replace", typeof(TObject).Name, uri);
+                validator.Validate(Functions.PutObject, parser, dataObject);
+                Logger.DebugFormat("Validated {0} with URI '{1}' for Replace", typeof(TObject).Name, uri);
 
-            DataAdapter.Replace(parser, dataObject);
-            return Success();
+                DataAdapter.Replace(parser, dataObject);
+                transaction.Commit();
+
+                return Success();
+            }
         }
 
         /// <summary>
@@ -290,18 +321,24 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         protected virtual WitsmlResult Delete(WitsmlQueryParser parser)
         {
-            var validator = Container.Resolve<IDataObjectValidator<TObject>>();
-            var element = validator.Parse(Functions.DeleteFromStore, parser);
-            var dataObject = Parse(element);
+            using (var transaction = GetTransaction())
+            {
+                var validator = Container.Resolve<IDataObjectValidator<TObject>>();
+                var element = validator.Parse(Functions.DeleteFromStore, parser);
+                var dataObject = Parse(element);
 
-            var uri = GetUri(dataObject);
-            Logger.DebugFormat("Deleting {0} with URI '{1}'", typeof(TObject).Name, uri);
+                var uri = GetUri(dataObject);
+                transaction.SetContext(uri);
+                Logger.DebugFormat("Deleting {0} with URI '{1}'", typeof(TObject).Name, uri);
 
-            validator.Validate(Functions.DeleteFromStore, parser, dataObject);
-            Logger.DebugFormat("Validated {0} with URI '{1}' for Delete", typeof(TObject).Name, uri);
+                validator.Validate(Functions.DeleteFromStore, parser, dataObject);
+                Logger.DebugFormat("Validated {0} with URI '{1}' for Delete", typeof(TObject).Name, uri);
 
-            DataAdapter.Delete(parser);
-            return Success();
+                DataAdapter.Delete(parser);
+                transaction.Commit();
+
+                return Success();
+            }
         }
 
         /// <summary>
@@ -320,6 +357,15 @@ namespace PDS.Witsml.Server.Data
             return new WitsmlResult(
                 op.Warnings.Any() ? ErrorCodes.SuccessWithWarnings : ErrorCodes.Success,
                 string.Join(" ", messages));
+        }
+
+        /// <summary>
+        /// Gets a reference to a new <see cref="IWitsmlTransaction"/> instance.
+        /// </summary>
+        /// <returns></returns>
+        protected virtual IWitsmlTransaction GetTransaction()
+        {
+            return Container.Resolve<IWitsmlTransaction>();
         }
 
         /// <summary>

@@ -52,11 +52,12 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="records">The records.</param>
         /// <param name="queryMnemonics">The query mnemonics</param>
         /// <param name="units">The channel units for the query.</param>
+        /// <param name="dataTypes">The data types for the query.</param>        
         /// <param name="nullValues">The null values for the query.</param>
         /// <returns>A <see cref="ChannelDataReader"/></returns>
-        public static ChannelDataReader GetReader(this IEnumerable<IChannelDataRecord> records, string[] queryMnemonics, IDictionary<int, string> units, IDictionary<int, string> nullValues)
+        public static ChannelDataReader GetReader(this IEnumerable<IChannelDataRecord> records, string[] queryMnemonics, IDictionary<int, string> units, IDictionary<int, string> dataTypes, IDictionary<int, string> nullValues)
         {
-            return new ChannelDataReader(records, queryMnemonics, units, nullValues);
+            return new ChannelDataReader(records, queryMnemonics, units, dataTypes, nullValues);
         }
 
         /// <summary>
@@ -123,9 +124,10 @@ namespace PDS.Witsml.Data.Channels
             var logCurveInfos = log.LogCurveInfo.Where(x => x != indexCurve).OrderBy(x => x.ColumnIndex.GetValueOrDefault()).ToList();
             var mnemonics = logCurveInfos.Select(x => x.Mnemonic).ToArray();
             var units = logCurveInfos.Select(x => x.Unit).ToArray();
+            var dataTypes = logCurveInfos.Select(x => x.TypeLogData?.ToString()).ToArray();
             var nullValues = logCurveInfos.Select(x => x.NullValue).ToArray();
 
-            return new ChannelDataReader(log.LogData, mnemonics.Length + 1, mnemonics, units, nullValues, log.GetUri())
+            return new ChannelDataReader(log.LogData, mnemonics.Length + 1, mnemonics, units, dataTypes, nullValues, log.GetUri())
                 // Add index curve to separate collection
                 .WithIndex(indexCurve.Mnemonic, indexCurve.Unit, increasing, isTimeIndex);
         }
@@ -151,6 +153,7 @@ namespace PDS.Witsml.Data.Channels
 
                 var mnemonics = ChannelDataReader.Split(logData.MnemonicList);
                 var units = ChannelDataReader.Split(logData.UnitList);
+                var dataTypes = log.LogCurveInfo.Select(x => x.TypeLogData?.ToString()).ToArray();
                 var nullValues = log.GetNullValues(mnemonics).Skip(1).ToArray();
 
                 // Split index curve from other value curves
@@ -164,7 +167,7 @@ namespace PDS.Witsml.Data.Channels
                 mnemonics = mnemonics.Skip(1).ToArray();
                 units = units.Skip(1).ToArray();
 
-                yield return new ChannelDataReader(logData.Data, mnemonics.Length + 1, mnemonics, units, nullValues, log.GetUri(), dataDelimiter: log.GetDataDelimiterOrDefault())
+                yield return new ChannelDataReader(logData.Data, mnemonics.Length + 1, mnemonics, units, dataTypes, nullValues, log.GetUri(), dataDelimiter: log.GetDataDelimiterOrDefault())
                     // Add index curve to separate collection
                     .WithIndex(indexCurve.Mnemonic.Value, indexCurve.Unit, increasing, isTimeIndex);
             }
@@ -204,9 +207,10 @@ namespace PDS.Witsml.Data.Channels
             // Not including index channels with value channels
             var mnemonics = channelSet.Channel.Select(x => x.Mnemonic).ToArray();
             var units = channelSet.Channel.Select(x => x.Uom).ToArray();
+            var dataTypes = channelSet.Channel.Select(x => x.DataType?.ToString()).ToArray();
             var nullValues = new string[units.Length];
 
-            return new ChannelDataReader(data, mnemonics, units, nullValues, channelSet.GetUri())
+            return new ChannelDataReader(data, mnemonics, units, dataTypes, nullValues, channelSet.GetUri())
                 // Add index channels to separate collection
                 .WithIndices(channelSet.Index.Select(ToChannelIndexInfo), true);
         }

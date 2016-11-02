@@ -43,6 +43,14 @@ namespace PDS.Witsml.Data.Channels
         public string Unit { get; set; }
 
         /// <summary>
+        /// Gets or sets the data type.
+        /// </summary>
+        /// <value>
+        /// The data type.
+        /// </value>
+        public string DataType { get; set; }
+
+        /// <summary>
         /// Gets or sets the null value.
         /// </summary>
         /// <value>

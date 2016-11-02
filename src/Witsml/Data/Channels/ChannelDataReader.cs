@@ -59,9 +59,11 @@ namespace PDS.Witsml.Data.Channels
         private readonly string[] _originalMnemonics;
         private readonly string[] _originalUnits;
         private readonly string[] _originalNullValues;
+        private readonly string[] _originalDataTypes;
         private string[] _allMnemonics;
         private string[] _allUnits;
         private string[] _allNullValues;
+        private string[] _allDataTypes;
         private readonly int _indexCount;
         private readonly int _count;
         private int _current = -1;
@@ -85,12 +87,13 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="count">The number of mnemonics in mnemonicList element.</param>
         /// <param name="mnemonics">The channel mnemonics.</param>
         /// <param name="units">The channel units.</param>
+        /// <param name="dataTypes">The data types.</param>
         /// <param name="nullValues">The null values.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="id">The identifier.</param>
         /// <param name="dataDelimiter">The log data delimiter.</param>
-        public ChannelDataReader(IList<string> data, int count, string[] mnemonics = null, string[] units = null, string[] nullValues = null, string uri = null, string id = null, string dataDelimiter = null)
-            : this(Combine(data, dataDelimiter, count), mnemonics, units, nullValues, uri, id)
+        public ChannelDataReader(IList<string> data, int count, string[] mnemonics = null, string[] units = null, string[] dataTypes = null, string[] nullValues = null, string uri = null, string id = null, string dataDelimiter = null)
+            : this(Combine(data, dataDelimiter, count), mnemonics, units, dataTypes, nullValues, uri, id)
         {
         }
 
@@ -100,11 +103,12 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="data">The channel data.</param>
         /// <param name="mnemonics">The channel mnemonics.</param>
         /// <param name="units">The channel units.</param>
+        /// <param name="dataTypes">The data types.</param>
         /// <param name="nullValues">The null values.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="id">The identifier.</param>
-        public ChannelDataReader(string data, string[] mnemonics = null, string[] units = null, string[] nullValues = null, string uri = null, string id = null)
-            : this(Deserialize(data), mnemonics, units, nullValues, uri, id)
+        public ChannelDataReader(string data, string[] mnemonics = null, string[] units = null, string[] dataTypes = null, string[] nullValues = null, string uri = null, string id = null)
+            : this(Deserialize(data), mnemonics, units, dataTypes, nullValues, uri, id)
         {
         }
 
@@ -114,8 +118,9 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="records">The collection of data records.</param>
         /// <param name="queryMnemonics">The query mnemonics</param>
         /// <param name="units">The channel units for the query.</param>
+        /// <param name="dataTypes">The data types.</param>
         /// <param name="nullValues">The null values for the query.</param>
-        public ChannelDataReader(IEnumerable<IChannelDataRecord> records, string[] queryMnemonics, IDictionary<int, string> units, IDictionary<int, string> nullValues)
+        public ChannelDataReader(IEnumerable<IChannelDataRecord> records, string[] queryMnemonics, IDictionary<int, string> units, IDictionary<int, string> dataTypes, IDictionary<int, string> nullValues)
         {
             _log.Debug("ChannelDataReader instance created for IChannelDataRecords");
 
@@ -134,6 +139,7 @@ namespace PDS.Witsml.Data.Channels
             _originalMnemonics = record?.Mnemonics ?? _empty;
             _originalUnits = record?.Units ?? _empty;
             _originalNullValues = record?.NullValues ?? _empty;
+            _originalDataTypes = record?.NullValues ?? _empty;
 
             Indices = record?.Indices ?? new List<ChannelIndexInfo>();
             Mnemonics = _originalMnemonics;
@@ -151,10 +157,11 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="records">The channel records.</param>
         /// <param name="mnemonics">The channel mnemonics.</param>
         /// <param name="units">The channel units.</param>
+        /// <param name="dataTypes">The data types.</param>
         /// <param name="nullValues">The null values.</param>
         /// <param name="uri">The URI.</param>
         /// <param name="id">The identifier.</param>
-        internal ChannelDataReader(List<List<List<object>>> records, string[] mnemonics = null, string[] units = null, string[] nullValues = null, string uri = null, string id = null)
+        internal ChannelDataReader(List<List<List<object>>> records, string[] mnemonics = null, string[] units = null, string[] dataTypes = null, string[] nullValues = null, string uri = null, string id = null)
         {
             _log.Debug("ChannelDataReader instance created");
 
@@ -164,11 +171,13 @@ namespace PDS.Witsml.Data.Channels
             _originalMnemonics = mnemonics ?? _empty;
             _originalUnits = units ?? _empty;
             _originalNullValues = nullValues ?? _empty;
+            _originalDataTypes = dataTypes ?? _empty;
 
             Indices = new List<ChannelIndexInfo>();
             Mnemonics = _originalMnemonics;
             Units = _originalUnits;
             NullValues = _originalNullValues;
+            DataTypes = _originalDataTypes;
             Uri = uri;
             Id = id;
             _queryMnemonics = mnemonics;
@@ -221,6 +230,20 @@ namespace PDS.Witsml.Data.Channels
         public string[] Units { get; private set; }
 
         /// <summary>
+        /// Get all data types.
+        /// </summary>
+        public string[] AllDataTypes
+        {
+            get { return Indices.Select(i => i.DataType).Concat(DataTypes).ToArray(); }
+        }
+
+        /// <summary>
+        /// Gets the data types included in slicing or all units if not sliced.
+        /// </summary>
+        /// <value> The data types. </value>
+        public string[] DataTypes { get; private set; }
+
+        /// <summary>
         /// Gets the null values included in slicing or all null values if not sliced.
         /// </summary>
         /// <value>The list of null values.</value>
@@ -239,7 +262,6 @@ namespace PDS.Witsml.Data.Channels
         /// </summary>
         /// <value>A list of indices.</value>
         public List<ChannelIndexInfo> Indices { get; }
-
         /// <summary>
         /// Indexer property that gets the value with the specified mnemonic name for the current row referenced by the reader.
         /// </summary>
@@ -1279,8 +1301,9 @@ namespace PDS.Witsml.Data.Channels
         /// </summary>
         /// <param name="mnemonicSlices">The mnemonic slices.</param>
         /// <param name="units">The units.</param>
+        /// <param name="dataTypes">The data types.</param>
         /// <param name="nullValues">The null values.</param>
-        public void Slice(IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units, IDictionary<int, string> nullValues)
+        public void Slice(IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units, IDictionary<int, string> dataTypes, IDictionary<int, string> nullValues)
         {
             _log.Debug("Slicing the channels without any data.");
 
@@ -1293,12 +1316,15 @@ namespace PDS.Witsml.Data.Channels
             _allMnemonics = null;
             _allUnits = null;
             _allSliceOrdinals = null;
+            _allDataTypes = null;
             Mnemonics = slices;
+            DataTypes = null;
             Units = null;
             NullValues = null;
 
             var allUnits = GetAllUnits();
             var allNulls = GetAllNullValues();
+            var allDataTypes = GetAllDataTypes();
 
             // Cache all mnemonic ordinal positions
             var allOrdinals = GetAllMnemonics()
@@ -1320,6 +1346,7 @@ namespace PDS.Witsml.Data.Channels
 
             Units = Mnemonics.Select(m => allUnits[allOrdinals[m]]).ToArray();
             NullValues = Mnemonics.Select(m => allNulls[allOrdinals[m]]).ToArray();
+            DataTypes = Mnemonics.Select(m => allDataTypes[allOrdinals[m]]).ToArray();
 
             // If there is data then update the mnemonics and units from the caller.
             if (RecordsAffected > 0)
@@ -1335,6 +1362,7 @@ namespace PDS.Witsml.Data.Channels
                     mnemonicSlices.Remove(k);
                     units.Remove(k);
                     nullValues.Remove(k);
+                    dataTypes?.Remove(k);
                 });
             }
         }
@@ -1345,11 +1373,12 @@ namespace PDS.Witsml.Data.Channels
         /// <param name="context">The query context.</param>
         /// <param name="mnemonicSlices">The index map for requested mnemonics in current log.</param>
         /// <param name="units">The units for the log curve.</param>
+        /// <param name="dataTypes">The data type map for log curve.</param>
         /// <param name="nullValues">The null value map for log curve.</param>
         /// <param name="ranges">The ranges map.</param>
         /// <returns>The channel data managed by the reader.</returns>
         public List<List<List<object>>> GetData(
-            IQueryContext context, IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units, IDictionary<int, string> nullValues,
+            IQueryContext context, IDictionary<int, string> mnemonicSlices, IDictionary<int, string> units, IDictionary<int, string> dataTypes, IDictionary<int, string> nullValues,
             out Dictionary<string, Range<double?>> ranges)
         {
             _log.Debug("Getting the sliced channel data.");
@@ -1468,16 +1497,16 @@ namespace PDS.Witsml.Data.Channels
 
             _log.Debug("Re-slicing remaining channels with no data.");
 
-            var reader = new ChannelDataReader(channelData, _queryMnemonics.Skip(Depth).ToArray(), _queryUnits.Values.Skip(Depth).ToArray(), _queryNullValues.Values.Skip(Depth).ToArray())
+            var reader = new ChannelDataReader(channelData, _queryMnemonics.Skip(Depth).ToArray(), _queryUnits.Values.Skip(Depth).ToArray(), null ,_queryNullValues.Values.Skip(Depth).ToArray())
                 .WithIndices(Indices);
 
-            reader.Slice(mnemonicSlices, _queryUnits, _queryNullValues);
+            reader.Slice(mnemonicSlices, _queryUnits, null, _queryNullValues);
 
             // Clone the context without RequestLatestValues
             var resliceContext = context.Clone();
             resliceContext.RequestLatestValues = null;
 
-            channelData = reader.GetData(resliceContext, mnemonicSlices, _queryUnits, _queryNullValues, out ranges);
+            channelData = reader.GetData(resliceContext, mnemonicSlices, _queryUnits, null, _queryNullValues, out ranges);
 
             return channelData;
         }
@@ -1643,6 +1672,21 @@ namespace PDS.Witsml.Data.Channels
             }
 
             return _allUnits;
+        }
+
+        /// <summary>
+        /// Sets an array of all of the original data types including the index data types.
+        /// </summary>
+        private string[] GetAllDataTypes()
+        {
+            if (_allDataTypes == null)
+            {
+                _log.Debug("Initializing _allDataTypes array.");
+                //todo: When data type is persisted in chunk use _originalDataTypes instead
+                _allDataTypes = Indices.Select(i => i.DataType).Concat(_originalMnemonics).ToArray();
+            }
+
+            return _allDataTypes;
         }
 
         /// <summary>

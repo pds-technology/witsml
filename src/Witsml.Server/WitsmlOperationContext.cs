@@ -25,6 +25,7 @@ using System.Xml.Linq;
 using Energistics.DataAccess.Validation;
 using log4net;
 using PDS.Witsml.Server.Configuration;
+using PDS.Witsml.Server.Transactions;
 
 namespace PDS.Witsml.Server
 {
@@ -96,6 +97,12 @@ namespace PDS.Witsml.Server
                 return string.IsNullOrWhiteSpace(user) ? "unknown" : user;
             }
         }
+
+        /// <summary>
+        /// Gets or sets the transaction.
+        /// </summary>
+        /// <value>The transaction.</value>
+        public IWitsmlTransaction Transaction { get; set; }
 
         /// <summary>
         /// Gets or sets the request context.

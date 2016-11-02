@@ -216,11 +216,12 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                     dataBlock.AddIndex(
                         index.Mnemonic,
                         index.Uom,
+                        "long",
                         index.Direction == IndexDirections.Increasing,
                         index.IndexType == ChannelIndexTypes.Time);
                 }
 
-                dataBlock.AddChannel(channel.ChannelId, channel.ChannelName, channel.Uom);
+                dataBlock.AddChannel(channel.ChannelId, channel.ChannelName, channel.Uom, channel.DataType);
             }
         }
 

@@ -27,6 +27,7 @@ using Energistics.Datatypes;
 using log4net;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
+using PDS.Witsml.Server.Transactions;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -296,6 +297,15 @@ namespace PDS.Witsml.Server.Data
             var entity = Get(uri);
             DataObjectValidator.TryValidate(entity, out results);
             WitsmlValidator.ValidateResults(function, results);
+        }
+
+        /// <summary>
+        /// Gets a reference to a new <see cref="IWitsmlTransaction"/> instance.
+        /// </summary>
+        /// <returns></returns>
+        protected virtual IWitsmlTransaction GetTransaction()
+        {
+            return Container.Resolve<IWitsmlTransaction>();
         }
     }
 }
