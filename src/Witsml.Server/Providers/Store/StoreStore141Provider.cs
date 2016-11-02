@@ -72,19 +72,18 @@ namespace PDS.Witsml.Server.Providers.Store
             var uri = new EtpUri(args.Message.Uri);
             var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(uri.ObjectType, uri.Version));
             var entity = dataAdapter.Get(uri) as IDataObject;
-            var list = GetList(entity);
+            var list = GetList(entity, uri);
 
             StoreStoreProvider.SetDataObject(args.Context, list, uri, GetName(entity));
         }
 
-        private IEnergisticsCollection GetList(IDataObject entity)
+        private IEnergisticsCollection GetList(IDataObject entity, EtpUri uri)
         {
             if (entity == null)
                 return null;
 
-            var entityType = entity.GetType();
-            var groupType = entityType.Assembly.GetType(entityType.FullName + "List");
-            var property = groupType.GetProperty(entityType.Name);
+            var groupType = ObjectTypes.GetObjectGroupType(uri.ObjectType, WMLSVersion.WITSML141);
+            var property = ObjectTypes.GetObjectTypeListPropertyInfo(uri.ObjectType, uri.Version);
 
             var group = Activator.CreateInstance(groupType) as IEnergisticsCollection;
             var list = Activator.CreateInstance(property.PropertyType) as IList;
@@ -95,7 +94,7 @@ namespace PDS.Witsml.Server.Providers.Store
 
             return group;
         }
-    
+
         private string GetName(IDataObject entity)
         {
             return entity == null ? string.Empty : entity.Name;

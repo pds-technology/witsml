@@ -16,6 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Linq;
+using PDS.Framework;
+
 namespace PDS.Witsml
 {
     /// <summary>
@@ -40,7 +43,8 @@ namespace PDS.Witsml
         /// <param name="version">The version.</param>
         public ObjectName(string name, string version)
         {
-            Name = name;
+            // Get the ObjectType identifier
+            Name = ObjectTypes.SupportedObjectTypes.FirstOrDefault(x => x.EqualsIgnoreCase(name));
             Version = version;
 
             _value = string.Format("{0}_{1}", Name, Version.Replace(".", string.Empty).Substring(0, 2));

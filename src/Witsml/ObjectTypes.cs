@@ -107,6 +107,29 @@ namespace PDS.Witsml
         private static readonly string[] GrowingPartTypes = { LogCurveInfo, GeologyInterval, TrajectoryStation };
 
         /// <summary>
+        /// The ObjectType identifiers for each supported object
+        /// </summary>
+        public static readonly string[] SupportedObjectTypes =
+        {
+            Attachment,
+            ChangeLog,
+            Channel,
+            ChannelSet,
+            GeologyInterval,
+            Log,
+            LogCurveInfo,
+            Message,
+            MudLog,
+            Rig,
+            Trajectory,
+            TrajectoryStation,
+            WbGeometry,
+            Well,
+            Wellbore,
+            WellboreGeometry
+        };
+
+        /// <summary>
         /// Gets the type of the object.
         /// </summary>
         /// <param name="pluralObject">The plural object.</param>
@@ -248,6 +271,22 @@ namespace PDS.Witsml
                 .Select(x => new { x.Name, Attribute = x.GetCustomAttribute<XmlElementAttribute>() })
                 .Where(x => x.Attribute != null && x.Attribute.ElementName.EqualsIgnoreCase(objectType))
                 .Select(x => x.Name)
+                .FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the propertyinfo for the recurring element within the container.
+        /// </summary>
+        /// <param name="objectType">The data object type.</param>
+        /// <param name="version">The version.</param>
+        /// <returns>The recurring element propertyinfo.</returns>
+        public static PropertyInfo GetObjectTypeListPropertyInfo(string objectType, string version)
+        {
+            var objectGroupType = GetObjectGroupType(objectType, version);
+
+            return objectGroupType?.GetProperties()
+                .Where(x => x.GetCustomAttribute<XmlElementAttribute>().ElementName.EqualsIgnoreCase(objectType))
+                .Select(x => x)
                 .FirstOrDefault();
         }
 
