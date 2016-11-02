@@ -154,7 +154,7 @@ namespace PDS.Witsml.Server.Providers.Store
         protected override void HandleDeleteObject(MessageHeader header, DeleteObject deleteObject)
         {
             base.HandleDeleteObject(header, deleteObject);
-            deleteObject.Uri.ForEach(x => DeleteObject(header, x));
+            DeleteObject(header, deleteObject.Uri);
         }
 
         /// <summary>
