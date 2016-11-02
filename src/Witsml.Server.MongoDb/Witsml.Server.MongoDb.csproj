@@ -50,11 +50,11 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="ETP.DevKit, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ETP.DevKit-PDS.1.1.20161017.1\lib\net452\ETP.DevKit.dll</HintPath>
+      <HintPath>..\packages\ETP.DevKit-PDS.1.1.20161102.1\lib\net452\ETP.DevKit.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="ETP.Messages, Version=1.4.1.0, Culture=neutral, PublicKeyToken=c2b7028481fb2795, processorArchitecture=MSIL">
-      <HintPath>..\packages\ETP.1.4.1.0\lib\ETP.Messages.dll</HintPath>
+    <Reference Include="ETP.Messages, Version=1.5.0.0, Culture=neutral, PublicKeyToken=c2b7028481fb2795, processorArchitecture=MSIL">
+      <HintPath>..\packages\ETP.1.5.0.0\lib\ETP.Messages.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="LinqToQuerystring, Version=0.7.0.8, Culture=neutral, processorArchitecture=MSIL">
