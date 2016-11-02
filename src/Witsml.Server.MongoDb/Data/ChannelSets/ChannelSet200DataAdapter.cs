@@ -303,10 +303,6 @@ namespace PDS.Witsml.Server.Data.ChannelSets
 
                 GetUpdatedLogHeaderIndexRange(reader, allMnemonics, ranges, increasing);
 
-                // Only use the URI of the channelSet as it is a top level object
-                var uri = new EtpUri(reader.Uri);
-                reader.Uri = EtpUris.Witsml200.Append(ObjectTypes.ChannelSet, uri.ObjectId);
-
                 // Add ChannelDataChunks
                 ChannelDataChunkAdapter.Add(reader);
 

@@ -48,7 +48,11 @@ namespace PDS.Witsml.Server.Data.Logs
                 throw new WitsmlException(ErrorCodes.ErrorReadingFromDataStore, "IChannelDataProvider not configured.");
 
             var channelUris = new List<EtpUri>();
-            channelUris.AddRange(uris.Where(u => u.ObjectType == ObjectTypes.ChannelSet || u.ObjectType == ObjectTypes.Channel).ToList());
+            channelUris.AddRange(
+                uris.Where(
+                    u =>
+                        u.ObjectType.EqualsIgnoreCase(ObjectTypes.ChannelSet) ||
+                        u.ObjectType.EqualsIgnoreCase(ObjectTypes.Channel)).ToList());
 
             var logs = GetLogsByUris(uris.ToList());
 
