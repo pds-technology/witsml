@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
@@ -107,27 +108,19 @@ namespace PDS.Witsml
         private static readonly string[] GrowingPartTypes = { LogCurveInfo, GeologyInterval, TrajectoryStation };
 
         /// <summary>
-        /// The ObjectType identifiers for each supported object
+        /// The object type map
         /// </summary>
-        public static readonly string[] SupportedObjectTypes =
+        public static readonly IDictionary<string, string> ObjectTypeMap;
+
+        static ObjectTypes()
         {
-            Attachment,
-            ChangeLog,
-            Channel,
-            ChannelSet,
-            GeologyInterval,
-            Log,
-            LogCurveInfo,
-            Message,
-            MudLog,
-            Rig,
-            Trajectory,
-            TrajectoryStation,
-            WbGeometry,
-            Well,
-            Wellbore,
-            WellboreGeometry
-        };
+            ObjectTypeMap = typeof(ObjectTypes)
+                .GetFields(BindingFlags.Public | BindingFlags.Static)
+                .Where(x => x.GetValue(null) != null)
+                .Select(x => x.GetValue(null))
+                .Cast<string>()
+                .ToDictionary(x => x, StringComparer.InvariantCultureIgnoreCase);
+        }
 
         /// <summary>
         /// Gets the type of the object.
@@ -265,13 +258,7 @@ namespace PDS.Witsml
         /// <returns>The recurring element property name.</returns>
         public static string GetObjectTypeListProperty(string objectType, string version)
         {
-            var objectGroupType = GetObjectGroupType(objectType, version);
-
-            return objectGroupType?.GetProperties()
-                .Select(x => new { x.Name, Attribute = x.GetCustomAttribute<XmlElementAttribute>() })
-                .Where(x => x.Attribute != null && x.Attribute.ElementName.EqualsIgnoreCase(objectType))
-                .Select(x => x.Name)
-                .FirstOrDefault();
+            return GetObjectTypeListPropertyInfo(objectType, version)?.Name;
         }
 
         /// <summary>
@@ -285,9 +272,8 @@ namespace PDS.Witsml
             var objectGroupType = GetObjectGroupType(objectType, version);
 
             return objectGroupType?.GetProperties()
-                .Where(x => x.GetCustomAttribute<XmlElementAttribute>().ElementName.EqualsIgnoreCase(objectType))
-                .Select(x => x)
-                .FirstOrDefault();
+                .FirstOrDefault(
+                    x => x.GetCustomAttribute<XmlElementAttribute>().ElementName.EqualsIgnoreCase(objectType));
         }
 
         /// <summary>
