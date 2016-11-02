@@ -44,18 +44,10 @@ namespace PDS.Witsml
         public ObjectName(string name, string version)
         {
             // Get the ObjectType identifier
-            Name = string.Empty;
-            try
-            {
-                Name = ObjectTypes.ObjectTypeMap[name];
-            }
-            catch (System.Exception)
-            {
-                // Ignore
-            }
+            Name = ObjectTypes.ObjectTypeMap.ContainsKey(name) ? ObjectTypes.ObjectTypeMap[name] : name;
             Version = version;
 
-            _value = string.Format("{0}_{1}", Name, Version.Replace(".", string.Empty).Substring(0, 2));
+            _value = $"{Name}_{Version.Replace(".", string.Empty).Substring(0, 2)}";
         }
 
         /// <summary>

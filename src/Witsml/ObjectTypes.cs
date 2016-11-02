@@ -116,8 +116,8 @@ namespace PDS.Witsml
         {
             ObjectTypeMap = typeof(ObjectTypes)
                 .GetFields(BindingFlags.Public | BindingFlags.Static)
-                .Where(x => x.GetValue(null) != null)
                 .Select(x => x.GetValue(null))
+                .Where(x => x != null)
                 .Cast<string>()
                 .ToDictionary(x => x, StringComparer.InvariantCultureIgnoreCase);
         }
