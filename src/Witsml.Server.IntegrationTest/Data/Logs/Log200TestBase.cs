@@ -18,6 +18,7 @@
 
 using System.Collections.Generic;
 using Energistics.DataAccess.WITSML200;
+using PDS.Witsml.Data.Logs;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -26,8 +27,11 @@ namespace PDS.Witsml.Server.Data.Logs
     /// </summary>
     public partial class Log200TestBase
     {
+        public Log200Generator LogGenerator { get; set; }
+
         partial void BeforeEachTest()
         {
+            LogGenerator = new Log200Generator();
             Log.ChannelSet = new List<ChannelSet>();
         }
     }

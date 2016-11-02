@@ -16,7 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,6 +34,106 @@ namespace PDS.Witsml.Server.Data.Logs
 {
     public partial class Log200DataAdapterAddTests
     {
+        private const string SpecialCharacters = @"~ ! @ # $ % ^ & * ( ) _ + { } | < > ? ; : ' , . / [ ] \b \f \n \r \t \ """;
+        private static readonly Random _random = new Random(123);
+        private IChannelDataProvider _channelDataProvider;
+
+        partial void BeforeEachTest()
+        {
+            _channelDataProvider = DevKit.Container.Resolve<IWitsmlDataAdapter<ChannelSet>>() as IChannelDataProvider;
+        }
+
+        [TestMethod]
+        public void Channel200DataAdapter_UpdateChannelData_With_Special_Characters()
+        {
+            AddParents();
+
+            // Initialize ChannelSet
+            var mdChannelIndex = LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
+            DevKit.InitHeader(Log, LoggingMethod.MWD, mdChannelIndex);
+
+            // Add special channels
+            var channelSet = Log.ChannelSet.First();
+            channelSet.Channel.Add(LogGenerator.CreateChannel(Log, channelSet.Index, "Message", "MSG", "none", "none", EtpDataType.@string, null));
+            channelSet.Channel.Add(LogGenerator.CreateChannel(Log, channelSet.Index, "Count", "CNT", "none", "none", EtpDataType.@long, null));
+
+            // Initialize data block
+            var uri = channelSet.GetUri();
+            var dataBlock = new ChannelDataBlock(uri);
+            var channelId = 1;
+            var numRows = 10;
+
+            foreach (var channelIndex in channelSet.Index)
+            {
+                // TODO: Refactor into new method or extension - ChannelDataBlock.AddIndex(ChannelIndex)
+                dataBlock.AddIndex(
+                    channelIndex.Mnemonic,
+                    channelIndex.Uom,
+                    EtpDataType.@long.ToString(),
+                    channelIndex.IsIncreasing(),
+                    channelIndex.IsTimeIndex());
+            }
+
+            foreach (var channel in channelSet.Channel)
+            {
+                // TODO: Refactor into new method or extension - ChannelDataBlock.AddChannel(Channel)
+                dataBlock.AddChannel(
+                    channelId++,
+                    channel.Mnemonic,
+                    channel.Uom,
+                    channel.DataType?.ToString());
+            }
+
+            // TODO: Refactor into new method - LogGenerator.GenerateChannelData(ChannelDataBlock dataBlock, int numRows);
+            // rows
+            for (var i = 0; i < numRows; i++)
+            {
+                var index = (i * 0.1).IndexToScale(3);
+                var indexes = new List<object> { index };
+
+                // columns
+                for (var j = 1; j < channelId; j++)
+                {
+                    dataBlock.Append(j, indexes, GenerateDataValue(channelSet.Channel[j - 1]));
+                }
+            }
+
+            // Submit channel data
+            _channelDataProvider.UpdateChannelData(uri, dataBlock.GetReader());
+
+            var mnemonics = channelSet.Index.Select(i => i.Mnemonic)
+                .Concat(channelSet.Channel.Select(c => c.Mnemonic))
+                .ToList();
+
+            // Query channel data
+            var dataOut = _channelDataProvider.GetChannelData(uri, new Range<double?>(0, 1), mnemonics, null);
+
+            // Assert
+            Assert.AreEqual(numRows, dataOut.Count);
+
+            // TODO: Add remaining asserts
+        }
+
+        // TODO: Refactor into new method - LogGenerator.GenerateDataValue(Channel)
+        private static object GenerateDataValue(Channel channel)
+        {
+            var dataType = channel.DataType.GetValueOrDefault(EtpDataType.@double);
+
+            switch (dataType)
+            {
+                case EtpDataType.@long:
+                    return _random.Next();
+
+                case EtpDataType.@string:
+                    return SpecialCharacters;
+
+                case EtpDataType.@null:
+                    return null;
+            }
+
+            return _random.NextDouble();
+        }
+
         /// <summary>
         /// To test adding log with special characters using ChannelStreamingConsumer
         /// ~ ! @ # $ % ^ & * ( ) _ + { } | &lt; > ? ; : ' " , . / \ [ ] 
