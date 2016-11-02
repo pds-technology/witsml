@@ -106,7 +106,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 .ToList();
 
             // Query channel data
-            var dataOut = _channelDataProvider.GetChannelData(uri, new Range<double?>(0, 1), mnemonics, null);
+            var dataOut = _channelDataProvider.GetChannelData(uri, new Range<double?>(0, null), mnemonics, null);
 
             // Assert
             Assert.AreEqual(numRows, dataOut.Count);
