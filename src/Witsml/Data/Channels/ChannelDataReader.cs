@@ -58,8 +58,8 @@ namespace PDS.Witsml.Data.Channels
         private IList<Range<double?>> _ranges;
         private readonly string[] _originalMnemonics;
         private readonly string[] _originalUnits;
-        private readonly string[] _originalNullValues;
         private readonly string[] _originalDataTypes;
+        private readonly string[] _originalNullValues;
         private string[] _allMnemonics;
         private string[] _allUnits;
         private string[] _allNullValues;
@@ -73,6 +73,7 @@ namespace PDS.Witsml.Data.Channels
         private readonly string[] _queryMnemonics;
         private readonly List<string[]> _recordMnemonics;
         private readonly IDictionary<int, string> _queryUnits;
+        private readonly IDictionary<int, string> _queryDataTypes;
         private readonly IDictionary<int, string> _queryNullValues;
 
         /// <summary>
@@ -138,16 +139,18 @@ namespace PDS.Witsml.Data.Channels
             _indexCount = GetIndexValues(0).Count();
             _originalMnemonics = record?.Mnemonics ?? _empty;
             _originalUnits = record?.Units ?? _empty;
+            _originalDataTypes = record?.DataTypes ?? _empty;
             _originalNullValues = record?.NullValues ?? _empty;
-            _originalDataTypes = record?.NullValues ?? _empty;
 
             Indices = record?.Indices ?? new List<ChannelIndexInfo>();
             Mnemonics = _originalMnemonics;
             Units = _originalUnits;
+            DataTypes = _originalDataTypes;
             NullValues = _originalNullValues;
             Uri = record?.Uri;
             _queryMnemonics = queryMnemonics;
             _queryUnits = units;
+            _queryDataTypes = dataTypes;
             _queryNullValues = nullValues;
         }
 
@@ -170,17 +173,20 @@ namespace PDS.Witsml.Data.Channels
             _indexCount = GetIndexValues(0).Count();
             _originalMnemonics = mnemonics ?? _empty;
             _originalUnits = units ?? _empty;
-            _originalNullValues = nullValues ?? _empty;
             _originalDataTypes = dataTypes ?? _empty;
+            _originalNullValues = nullValues ?? _empty;
 
             Indices = new List<ChannelIndexInfo>();
             Mnemonics = _originalMnemonics;
             Units = _originalUnits;
-            NullValues = _originalNullValues;
             DataTypes = _originalDataTypes;
+            NullValues = _originalNullValues;
             Uri = uri;
             Id = id;
             _queryMnemonics = mnemonics;
+            //_queryUnits = units;
+            //_queryDataTypes = dataTypes;
+            //_queryNullValues = nullValues;
         }
 
         /// <summary>
@@ -262,6 +268,7 @@ namespace PDS.Witsml.Data.Channels
         /// </summary>
         /// <value>A list of indices.</value>
         public List<ChannelIndexInfo> Indices { get; }
+
         /// <summary>
         /// Indexer property that gets the value with the specified mnemonic name for the current row referenced by the reader.
         /// </summary>
@@ -1317,11 +1324,12 @@ namespace PDS.Witsml.Data.Channels
             _allUnits = null;
             _allSliceOrdinals = null;
             _allDataTypes = null;
+            _allNullValues = null;
             Mnemonics = slices;
-            DataTypes = null;
             Units = null;
+            DataTypes = null;
             NullValues = null;
-
+            
             var allUnits = GetAllUnits();
             var allNulls = GetAllNullValues();
             var allDataTypes = GetAllDataTypes();
@@ -1345,8 +1353,8 @@ namespace PDS.Witsml.Data.Channels
                 .Concat(sliceOrdinals).ToArray();
 
             Units = Mnemonics.Select(m => allUnits[allOrdinals[m]]).ToArray();
-            NullValues = Mnemonics.Select(m => allNulls[allOrdinals[m]]).ToArray();
             DataTypes = Mnemonics.Select(m => allDataTypes[allOrdinals[m]]).ToArray();
+            NullValues = Mnemonics.Select(m => allNulls[allOrdinals[m]]).ToArray();
 
             // If there is data then update the mnemonics and units from the caller.
             if (RecordsAffected > 0)
@@ -1361,8 +1369,8 @@ namespace PDS.Witsml.Data.Channels
                 {
                     mnemonicSlices.Remove(k);
                     units.Remove(k);
+                    dataTypes.Remove(k);
                     nullValues.Remove(k);
-                    dataTypes?.Remove(k);
                 });
             }
         }
@@ -1497,16 +1505,16 @@ namespace PDS.Witsml.Data.Channels
 
             _log.Debug("Re-slicing remaining channels with no data.");
 
-            var reader = new ChannelDataReader(channelData, _queryMnemonics.Skip(Depth).ToArray(), _queryUnits.Values.Skip(Depth).ToArray(), null ,_queryNullValues.Values.Skip(Depth).ToArray())
+            var reader = new ChannelDataReader(channelData, _queryMnemonics.Skip(Depth).ToArray(), _queryUnits.Values.Skip(Depth).ToArray(), _queryDataTypes.Values.Skip(Depth).ToArray(), _queryNullValues.Values.Skip(Depth).ToArray())
                 .WithIndices(Indices);
 
-            reader.Slice(mnemonicSlices, _queryUnits, null, _queryNullValues);
+            reader.Slice(mnemonicSlices, _queryUnits, _queryDataTypes, _queryNullValues);
 
             // Clone the context without RequestLatestValues
             var resliceContext = context.Clone();
             resliceContext.RequestLatestValues = null;
 
-            channelData = reader.GetData(resliceContext, mnemonicSlices, _queryUnits, null, _queryNullValues, out ranges);
+            channelData = reader.GetData(resliceContext, mnemonicSlices, _queryUnits, _queryDataTypes, _queryNullValues, out ranges);
 
             return channelData;
         }

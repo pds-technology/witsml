@@ -65,23 +65,12 @@ namespace PDS.Witsml.Server.Data.Logs
 
             foreach (var channelIndex in channelSet.Index)
             {
-                // TODO: Refactor into new method or extension - ChannelDataBlock.AddIndex(ChannelIndex)
-                dataBlock.AddIndex(
-                    channelIndex.Mnemonic,
-                    channelIndex.Uom,
-                    EtpDataType.@long.ToString(),
-                    channelIndex.IsIncreasing(),
-                    channelIndex.IsTimeIndex());
+                dataBlock.AddIndex(channelIndex);
             }
 
             foreach (var channel in channelSet.Channel)
             {
-                // TODO: Refactor into new method or extension - ChannelDataBlock.AddChannel(Channel)
-                dataBlock.AddChannel(
-                    channelId++,
-                    channel.Mnemonic,
-                    channel.Uom,
-                    channel.DataType?.ToString());
+                dataBlock.AddChannel(channelId++, channel);
             }
 
             // TODO: Refactor into new method - LogGenerator.GenerateChannelData(ChannelDataBlock dataBlock, int numRows);
@@ -110,8 +99,9 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Assert
             Assert.AreEqual(numRows, dataOut.Count);
-
-            // TODO: Add remaining asserts
+            Assert.AreEqual(2, dataOut[0].Count);
+            Assert.AreEqual(5, dataOut[0][1].Count);
+            Assert.AreEqual(SpecialCharacters, dataOut[0][1][3]);
         }
 
         // TODO: Refactor into new method - LogGenerator.GenerateDataValue(Channel)

@@ -282,7 +282,7 @@ namespace PDS.Witsml.Data.Channels
                 Increasing = channelIndex.IsIncreasing(),
                 IsTimeIndex = channelIndex.IsTimeIndex()
             };
-        }
+        }        
 
         /// <summary>
         /// Calculates the index range for a <see cref="ChannelDataReader"/>
@@ -297,6 +297,36 @@ namespace PDS.Witsml.Data.Channels
             var range = reader.GetIndexRange(index);
             channelIndex.Start = range.Start.GetValueOrDefault(double.NaN);
             channelIndex.End = range.End.GetValueOrDefault(double.NaN);
+        }
+
+        /// <summary>
+        /// Adds the channel to a <see cref="ChannelDataBlock"/> instance from a <see cref="Witsml200.ChannelSet"/>.
+        /// </summary>
+        /// <param name="dataBlock">The channel data block.</param>
+        /// <param name="channelId">Then channel Id.</param>
+        /// <param name="channel">The channel.</param>
+        public static void AddChannel(this ChannelDataBlock dataBlock, int channelId, Witsml200.Channel channel)
+        {
+            dataBlock.AddChannel(
+                channelId,
+                channel.Mnemonic,
+                channel.Uom,
+                channel.DataType?.ToString());
+        }
+
+        /// <summary>
+        /// Adds the index to a <see cref="ChannelDataBlock"/> instance from a <see cref="Witsml200.ComponentSchemas.ChannelIndex"/>.
+        /// </summary>
+        /// <param name="dataBlock">The channel data block.</param>
+        /// <param name="channelIndex">Index of the channel.</param>
+        public static void AddIndex(this ChannelDataBlock dataBlock, Witsml200.ComponentSchemas.ChannelIndex channelIndex)
+        {
+            dataBlock.AddIndex(
+                channelIndex.Mnemonic,
+                channelIndex.Uom,
+                Witsml200.ReferenceData.EtpDataType.@long.ToString(),
+                channelIndex.IsIncreasing(),
+                channelIndex.IsTimeIndex());
         }
     }
 }
