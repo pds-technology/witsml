@@ -135,7 +135,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             var mnemonicIndexes = ComputeMnemonicIndexes(entity, allMnemonics, queryMnemonics);
             var keys = mnemonicIndexes.Keys.ToArray();
             var units = GetUnitList(entity, keys);
-            var dataTypes = GetDataTypes(entity, keys);
+            var dataTypes = GetDataTypeList(entity, keys);
             var nullValues = GetNullValueList(entity, keys);
 
             // Create a context to pass information required by the ChannelDataReader.
@@ -429,15 +429,15 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             return new SortedDictionary<int, string>(unitIndexes.ToDictionary(x => x.Index, x => x.Unit));
         }
 
-        // TODO: See if this can be refactored to be common with LogDataAdapter.GetDataTypes
-        private IDictionary<int, string> GetDataTypes(ChannelSet entity, int[] slices)
+        // TODO: See if this can be refactored to be common with LogDataAdapter.GetDataTypeList
+        private IDictionary<int, string> GetDataTypeList(ChannelSet entity, int[] slices)
         {
             Logger.Debug("Getting data types list for log.");
 
-            // Get a list of all of the units
+            // Get a list of all of the data types
             var allDataTypes = GetDataTypesByColumnIndex(entity);
 
-            // Start with all units
+            // Start with all data types
             var dataTypeIndexes = allDataTypes
                 .Select((dataType, index) => new { DataType = dataType.Value, Index = index });
 
@@ -450,8 +450,8 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             }
 
             return new SortedDictionary<int, string>(dataTypeIndexes.ToDictionary(x => x.Index, x => x.DataType));
-        }        
-
+        }
+       
         // TODO: See if this can be refactored to be common with LogDataAdapter.GetNullValueList
         private IDictionary<int, string> GetNullValueList(ChannelSet entity, int[] slices)
         {
