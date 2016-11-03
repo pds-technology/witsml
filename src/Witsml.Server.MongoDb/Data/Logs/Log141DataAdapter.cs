@@ -161,7 +161,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns></returns>
         protected override LogCurveInfo CreateLogCurveInfo(ChannelIndexInfo indexInfo)
         {
-            return CreateLogCurveInfo(indexInfo.Mnemonic, indexInfo.Unit, indexInfo.IsTimeIndex, 0);
+            return CreateLogCurveInfo(indexInfo.Mnemonic, indexInfo.Unit, indexInfo.DataType, indexInfo.IsTimeIndex, 0);
         }
 
         /// <summary>
@@ -169,10 +169,11 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="mnemonic">The mnemonic.</param>
         /// <param name="unit">The unit of measure.</param>
+        /// <param name="dataType">The data type.</param>
         /// <param name="isTimeIndex">if set to <c>true</c> the primary index is time-based.</param>
         /// <param name="columnIndex">Index of the column.</param>
         /// <returns></returns>
-        protected override LogCurveInfo CreateLogCurveInfo(string mnemonic, string unit, bool isTimeIndex, int columnIndex)
+        protected override LogCurveInfo CreateLogCurveInfo(string mnemonic, string unit, string dataType, bool isTimeIndex, int columnIndex)
         {
             return new LogCurveInfo
             {
@@ -278,6 +279,22 @@ namespace PDS.Witsml.Server.Data.Logs
                 .ToArray()
                 .Select((unit, index) => new { Unit = unit, Index = index })
                 .ToDictionary(x => x.Index, x => x.Unit));
+        }
+
+        /// <summary>
+        /// Gets the data types by column index.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns></returns>
+        protected override IDictionary<int, string> GetDataTypesByColumnIndex(Log log)
+        {
+            Logger.Debug("Getting logCurveInfo data types by column index.");
+
+            return new SortedDictionary<int, string>(log.LogCurveInfo
+                .Select(x => x.TypeLogData)
+                .ToArray()
+                .Select((logTypeData, index) => new { LogDataType = logTypeData, Index = index })
+                .ToDictionary(x => x.Index, x => x.LogDataType?.ToString()));
         }
 
         /// <summary>

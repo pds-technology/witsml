@@ -152,6 +152,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var mnemonicIndexes = ComputeMnemonicIndexes(allMnemonics, queryMnemonics, string.Empty);
             var keys = mnemonicIndexes.Keys.ToArray();
             var units = GetUnitList(entity, keys);
+            var dataTypes = GetDataTypeList(entity, keys);
             var nullValues = GetNullValueList(entity, keys);
 
             // Create a context to pass information required by the ChannelDataReader.
@@ -163,7 +164,7 @@ namespace PDS.Witsml.Server.Data.Logs
             };
 
             Dictionary<string, Range<double?>> ranges;
-            var logData = QueryChannelData(context, uri, entity, range, mnemonicIndexes, units, null, nullValues, queryMnemonics, requestLatestValues, out ranges, optimizeStart);
+            var logData = QueryChannelData(context, uri, entity, range, mnemonicIndexes, units, dataTypes, nullValues, queryMnemonics, requestLatestValues, out ranges, optimizeStart);
 
             // Update mnemonics to what was returned by QueryChannelData.  These mnemonics will match the data that is returned in logData.
             var tempMnemonics = mnemonics.ToArray();
@@ -569,7 +570,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var curves = reader.Mnemonics
                 .Select((x, i) => new { Mnemonic = x, Index = i })
                 .Where(x => GetLogCurve(entity, x.Mnemonic) == null)
-                .Select(x => CreateLogCurveInfo(x.Mnemonic, reader.Units[x.Index], isTimeIndex, count++));
+                .Select(x => CreateLogCurveInfo(x.Mnemonic, reader.Units[x.Index], reader.DataTypes[x.Index], isTimeIndex, count++));
 
             var mongoUpdate = new MongoDbUpdate<T>(Container, GetCollection(), null);
             var logHeaderUpdate = MongoDbUtility.BuildPushEach<T, TChild>(null, "LogCurveInfo", curves);
@@ -686,10 +687,11 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="mnemonic">The mnemonic.</param>
         /// <param name="unit">The unit of measure.</param>
+        /// <param name="dataType">The data type.</param>
         /// <param name="isTimeIndex">if set to <c>true</c> the primary index is time-based.</param>
         /// <param name="columnIndex">Index of the column.</param>
         /// <returns></returns>
-        protected abstract TChild CreateLogCurveInfo(string mnemonic, string unit, bool isTimeIndex, int columnIndex);
+        protected abstract TChild CreateLogCurveInfo(string mnemonic, string unit, string dataType, bool isTimeIndex, int columnIndex);
 
         /// <summary>
         /// Determines whether the specified log is increasing.
@@ -749,6 +751,13 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="log">The log.</param>
         /// <returns></returns>
         protected abstract IDictionary<int, string> GetUnitsByColumnIndex(T log);
+
+        /// <summary>
+        /// Gets the data types by column index.
+        /// </summary>
+        /// <param name="log">The log.</param>
+        /// <returns></returns>
+        protected abstract IDictionary<int, string> GetDataTypesByColumnIndex(T log);
 
         /// <summary>
         /// Gets the null values by column index.
@@ -1154,6 +1163,28 @@ namespace PDS.Witsml.Server.Data.Logs
             return new SortedDictionary<int, string>(unitIndexes.ToDictionary(x => x.Index, x => x.Unit));
         }
 
+        private IDictionary<int, string> GetDataTypeList(T log, int[] slices)
+        {
+            Logger.Debug("Getting data types list for log.");
+
+            // Get a list of all of the data types
+            var allDataTypes = GetDataTypesByColumnIndex(log);
+
+            // Start with all data types
+            var dataTypeIndexes = allDataTypes
+                .Select((dataType, index) => new { DataType = dataType.Value, Index = index });
+
+            // Get indexes for each slice
+            if (slices.Any())
+            {
+                // always return the index channel
+                dataTypeIndexes = dataTypeIndexes
+                    .Where(x => x.Index == 0 || slices.Contains(x.Index));
+            }
+
+            return new SortedDictionary<int, string>(dataTypeIndexes.ToDictionary(x => x.Index, x => x.DataType));
+        }
+
         private IDictionary<int, string> GetNullValueList(T log, int[] slices)
         {
             Logger.Debug("Getting null value list for log.");
@@ -1211,12 +1242,13 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var keys = mnemonics.Keys.ToArray();
             var units = GetUnitList(logHeader, keys);
+            var dataTypes = GetDataTypeList(logHeader, keys);
             var nullValues = GetNullValueList(logHeader, keys);
             string[] queryMnemonics = GetQueryMnemonics(parser);
             Dictionary<string, Range<double?>> ranges;
 
             var logData = QueryChannelData(
-                context, logHeader.GetUri(), logHeader, range, mnemonics, units, null, nullValues, queryMnemonics, requestLatestValues, out ranges, optimizeStart: true);
+                context, logHeader.GetUri(), logHeader, range, mnemonics, units, dataTypes, nullValues, queryMnemonics, requestLatestValues, out ranges, optimizeStart: true);
 
             // Format the data for output
             var count = FormatLogData(log, logHeader, mnemonics, units, logData, ranges);
