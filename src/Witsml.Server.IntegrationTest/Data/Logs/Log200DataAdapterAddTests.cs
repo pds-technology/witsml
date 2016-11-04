@@ -73,19 +73,10 @@ namespace PDS.Witsml.Server.Data.Logs
                 dataBlock.AddChannel(channelId++, channel);
             }
 
-            // TODO: Refactor into new method - LogGenerator.GenerateChannelData(ChannelDataBlock dataBlock, int numRows);
-            // rows
-            for (var i = 0; i < numRows; i++)
-            {
-                var index = (i * 0.1).IndexToScale(3);
-                var indexes = new List<object> { index };
+            LogGenerator.GenerateChannelData(dataBlock, numRows);
 
-                // columns
-                for (var j = 1; j < channelId; j++)
-                {
-                    dataBlock.Append(j, indexes, GenerateDataValue(channelSet.Channel[j - 1]));
-                }
-            }
+            // Read the first value for mnemonic "MSG"
+            var msgValue = dataBlock.GetReader()["MSG"];
 
             // Submit channel data
             _channelDataProvider.UpdateChannelData(uri, dataBlock.GetReader());
@@ -101,27 +92,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(numRows, dataOut.Count);
             Assert.AreEqual(2, dataOut[0].Count);
             Assert.AreEqual(5, dataOut[0][1].Count);
-            Assert.AreEqual(SpecialCharacters, dataOut[0][1][3]);
-        }
-
-        // TODO: Refactor into new method - LogGenerator.GenerateDataValue(Channel)
-        private static object GenerateDataValue(Channel channel)
-        {
-            var dataType = channel.DataType.GetValueOrDefault(EtpDataType.@double);
-
-            switch (dataType)
-            {
-                case EtpDataType.@long:
-                    return _random.Next();
-
-                case EtpDataType.@string:
-                    return SpecialCharacters;
-
-                case EtpDataType.@null:
-                    return null;
-            }
-
-            return _random.NextDouble();
+            Assert.AreEqual(msgValue, dataOut[0][1][3]);
         }
 
         /// <summary>

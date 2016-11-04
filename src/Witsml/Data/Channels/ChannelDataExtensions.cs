@@ -285,21 +285,6 @@ namespace PDS.Witsml.Data.Channels
         }        
 
         /// <summary>
-        /// Calculates the index range for a <see cref="ChannelDataReader"/>
-        /// </summary>
-        /// <param name="reader">The reader.</param>
-        /// <param name="channelIndex">Index of the channel.</param>
-        /// <param name="index">The index.</param>
-        private static void CalculateIndexRange(ChannelDataReader reader, ChannelIndexInfo channelIndex, int index)
-        {
-            _log.DebugFormat("Calculating channel index range for {0}", channelIndex.Mnemonic);
-
-            var range = reader.GetIndexRange(index);
-            channelIndex.Start = range.Start.GetValueOrDefault(double.NaN);
-            channelIndex.End = range.End.GetValueOrDefault(double.NaN);
-        }
-
-        /// <summary>
         /// Adds the channel to a <see cref="ChannelDataBlock"/> instance from a <see cref="Witsml200.ChannelSet"/>.
         /// </summary>
         /// <param name="dataBlock">The channel data block.</param>
@@ -327,6 +312,21 @@ namespace PDS.Witsml.Data.Channels
                 Witsml200.ReferenceData.EtpDataType.@long.ToString(),
                 channelIndex.IsIncreasing(),
                 channelIndex.IsTimeIndex());
+        }
+
+        /// <summary>
+        /// Calculates the index range for a <see cref="ChannelDataReader"/>
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <param name="channelIndex">Index of the channel.</param>
+        /// <param name="index">The index.</param>
+        private static void CalculateIndexRange(ChannelDataReader reader, ChannelIndexInfo channelIndex, int index)
+        {
+            _log.DebugFormat("Calculating channel index range for {0}", channelIndex.Mnemonic);
+
+            var range = reader.GetIndexRange(index);
+            channelIndex.Start = range.Start.GetValueOrDefault(double.NaN);
+            channelIndex.End = range.End.GetValueOrDefault(double.NaN);
         }
     }
 }

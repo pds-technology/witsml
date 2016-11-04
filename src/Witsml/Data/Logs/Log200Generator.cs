@@ -24,6 +24,7 @@ using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Newtonsoft.Json;
 using PDS.Framework;
+using PDS.Witsml.Data.Channels;
 
 namespace PDS.Witsml.Data.Logs
 {
@@ -54,6 +55,7 @@ namespace PDS.Witsml.Data.Logs
         public static readonly string DataSchemaVersion = OptionsIn.DataVersion.Version200.Value;
 
         private const int Seed = 123;
+        private const string SpecialCharacters = @"~ ! @ # $ % ^ & * ( ) _ + { } | < > ? ; : ' , . / [ ] \b \f \n \r \t \ """;
         private Random _random;
 
         /// <summary>
@@ -312,6 +314,26 @@ namespace PDS.Witsml.Data.Logs
             }
         }
 
+        /// <summary>
+        /// Generates the channel data.
+        /// </summary>
+        /// <param name="dataBlock">The data block.</param>
+        /// <param name="numRows">The number rows.</param>
+        public void GenerateChannelData(ChannelDataBlock dataBlock, int numRows)
+        {
+            for (var i = 0; i < numRows; i++)
+            {
+                var index = (i * 0.1).IndexToScale(3);
+                var indexes = new List<object> { index };
+
+                // columns
+                for (var j = 1; j < dataBlock.ChannelIds.Count + 1; j++)
+                {
+                    dataBlock.Append(j, indexes, GenerateDataValue(dataBlock.DataTypes[j - 1]));
+                }
+            }
+        }
+
         private string GenerateIndexValues(Random random, ChannelSet channelSet, object[] indexesStart)
         {
             var indexValues = string.Empty;
@@ -477,5 +499,26 @@ namespace PDS.Witsml.Data.Logs
             }
             return column;
         }
+
+        private object GenerateDataValue(string dataType)
+        {
+            EtpDataType enumType;
+            Enum.TryParse(dataType, out enumType);
+            //var dataType = channel.DataType.GetValueOrDefault(EtpDataType.@double);
+
+            switch (enumType)
+            {
+                case EtpDataType.@long:
+                    return _random.Next();
+
+                case EtpDataType.@string:
+                    return SpecialCharacters;
+
+                case EtpDataType.@null:
+                    return null;
+            }
+
+            return _random.NextDouble();
+        }
     }
-    }
+}    

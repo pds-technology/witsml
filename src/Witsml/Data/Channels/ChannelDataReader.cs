@@ -62,8 +62,8 @@ namespace PDS.Witsml.Data.Channels
         private readonly string[] _originalNullValues;
         private string[] _allMnemonics;
         private string[] _allUnits;
-        private string[] _allNullValues;
         private string[] _allDataTypes;
+        private string[] _allNullValues;
         private readonly int _indexCount;
         private readonly int _count;
         private int _current = -1;
@@ -1331,8 +1331,8 @@ namespace PDS.Witsml.Data.Channels
             NullValues = null;
             
             var allUnits = GetAllUnits();
-            var allNulls = GetAllNullValues();
             var allDataTypes = GetAllDataTypes();
+            var allNulls = GetAllNullValues();
 
             // Cache all mnemonic ordinal positions
             var allOrdinals = GetAllMnemonics()
