@@ -504,7 +504,6 @@ namespace PDS.Witsml.Data.Logs
         {
             EtpDataType enumType;
             Enum.TryParse(dataType, out enumType);
-            //var dataType = channel.DataType.GetValueOrDefault(EtpDataType.@double);
 
             switch (enumType)
             {
