@@ -405,6 +405,30 @@
     <Compile Include="Data\Rigs\Rig200ValidatorTests.generated.cs">
       <DependentUpon>Rig200ValidatorTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\RigUtilizations\RigUtilization200DataAdapterAddTests.cs" />
+    <Compile Include="Data\RigUtilizations\RigUtilization200DataAdapterAddTests.generated.cs">
+      <DependentUpon>RigUtilization200DataAdapterAddTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\RigUtilizations\RigUtilization200DataAdapterDeleteTests.cs" />
+    <Compile Include="Data\RigUtilizations\RigUtilization200DataAdapterDeleteTests.generated.cs">
+      <DependentUpon>RigUtilization200DataAdapterDeleteTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\RigUtilizations\RigUtilization200DataAdapterGetTests.cs" />
+    <Compile Include="Data\RigUtilizations\RigUtilization200DataAdapterGetTests.generated.cs">
+      <DependentUpon>RigUtilization200DataAdapterGetTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\RigUtilizations\RigUtilization200DataAdapterUpdateTests.cs" />
+    <Compile Include="Data\RigUtilizations\RigUtilization200DataAdapterUpdateTests.generated.cs">
+      <DependentUpon>RigUtilization200DataAdapterUpdateTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\RigUtilizations\RigUtilization200TestBase.cs" />
+    <Compile Include="Data\RigUtilizations\RigUtilization200TestBase.generated.cs">
+      <DependentUpon>RigUtilization200TestBase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\RigUtilizations\RigUtilization200ValidatorTests.cs" />
+    <Compile Include="Data\RigUtilizations\RigUtilization200ValidatorTests.generated.cs">
+      <DependentUpon>RigUtilization200ValidatorTests.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Trajectories\Trajectory131DataAdapterAddTests.cs" />
     <Compile Include="Data\Trajectories\Trajectory131DataAdapterAddTests.generated.cs">
       <DependentUpon>Trajectory131DataAdapterAddTests.cs</DependentUpon>

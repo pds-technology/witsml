@@ -60,6 +60,11 @@ namespace PDS.Witsml
         public const string Rig = "rig";
 
         /// <summary>
+        /// The data object type for a RigUtilization.
+        /// </summary>
+        public const string RigUtilization = "rigUtilization";
+
+        /// <summary>
         /// The data object type for a Trajectory.
         /// </summary>
         public const string Trajectory = "trajectory";

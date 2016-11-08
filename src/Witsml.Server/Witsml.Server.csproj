@@ -218,6 +218,14 @@
     <Compile Include="Data\Rigs\Rig200Validator.generated.cs">
       <DependentUpon>Rig200Validator.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\RigUtilizations\RigUtilization200DataProvider.cs" />
+    <Compile Include="Data\RigUtilizations\RigUtilization200DataProvider.generated.cs">
+      <DependentUpon>RigUtilization200DataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\RigUtilizations\RigUtilization200Validator.cs" />
+    <Compile Include="Data\RigUtilizations\RigUtilization200Validator.generated.cs">
+      <DependentUpon>RigUtilization200Validator.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Trajectories\Trajectory131DataProvider.generated.cs">
       <DependentUpon>Trajectory131DataProvider.cs</DependentUpon>
     </Compile>

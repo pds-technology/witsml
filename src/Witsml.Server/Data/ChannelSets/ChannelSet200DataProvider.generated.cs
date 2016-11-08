@@ -71,6 +71,15 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         {
             base.SetDefaultValues(dataObject, uri);
 
+            // Wellbore
+            var parentUri = uri.Parent;
+            dataObject.Wellbore = new DataObjectReference
+            {
+                ContentType = parentUri.ContentType,
+                Title = parentUri.ObjectId,
+                Uuid = parentUri.ObjectId
+            };
+
             SetAdditionalDefaultValues(dataObject, uri);
         }
 

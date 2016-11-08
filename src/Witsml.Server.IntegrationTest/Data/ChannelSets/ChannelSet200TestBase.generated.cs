@@ -35,7 +35,9 @@ namespace PDS.Witsml.Server.Data.ChannelSets
 {
     public abstract partial class ChannelSet200TestBase
     {
-        public const string BasicXMLTemplate = "<channelSets xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><channelSet uid=\"{0}\">{1}</channelSet></channelSets>";
+        public const string BasicXMLTemplate = "<channelSets xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><channelSet uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</channelSet></channelSets>";
+        public Well Well { get; set; }
+        public Wellbore Wellbore { get; set; }
         public ChannelSet ChannelSet { get; set; }
         public DevKit200Aspect DevKit { get; set; }
         public TestContext TestContext { get; set; }
@@ -46,11 +48,27 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         {
             DevKit = new DevKit200Aspect(TestContext);
 
+            Well = new Well
+            {
+                Uuid = DevKit.Uid(),
+                Citation = DevKit.Citation("Well"),
+                GeographicLocationWGS84 = DevKit.Location(),
+				SchemaVersion = "2.0",
+                TimeZone = DevKit.TimeZone
+            };
+            Wellbore = new Wellbore
+            {
+                Uuid = DevKit.Uid(),
+                Citation = DevKit.Citation("Wellbore"),
+                Well = DevKit.DataObjectReference(Well),
+				SchemaVersion = "2.0"
+            };
             ChannelSet = new ChannelSet
             {
-				SchemaVersion = "2.0",
                 Uuid = DevKit.Uid(),
-                Citation = DevKit.Citation("ChannelSet")
+                Citation = DevKit.Citation("ChannelSet"),
+                Wellbore = DevKit.DataObjectReference(Wellbore),
+				SchemaVersion = "2.0"
             };
 
             QueryEmptyList = DevKit.List(new ChannelSet());
@@ -77,6 +95,8 @@ namespace PDS.Witsml.Server.Data.ChannelSets
 
         protected virtual void AddParents()
         {
+            DevKit.AddAndAssert(Well);
+            DevKit.AddAndAssert(Wellbore);
         }
     }
 }

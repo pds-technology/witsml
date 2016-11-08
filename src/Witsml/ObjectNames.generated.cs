@@ -90,6 +90,11 @@ namespace PDS.Witsml
         public static readonly ObjectName Rig200 = new ObjectName(ObjectTypes.Rig, Version200);
 
         /// <summary>
+        /// The data object name for a 2.0 RigUtilization.
+        /// </summary>
+        public static readonly ObjectName RigUtilization200 = new ObjectName(ObjectTypes.RigUtilization, Version200);
+
+        /// <summary>
         /// The data object name for a 1.3.1.1 Trajectory.
         /// </summary>
         public static readonly ObjectName Trajectory131 = new ObjectName(ObjectTypes.Trajectory, Version131);
