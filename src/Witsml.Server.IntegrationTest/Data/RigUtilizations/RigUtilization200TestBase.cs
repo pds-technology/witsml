@@ -16,6 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Energistics.DataAccess.WITSML200;
+
 namespace PDS.Witsml.Server.Data.RigUtilizations
 {
     /// <summary>
@@ -23,5 +25,20 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
     /// </summary>
     public partial class RigUtilization200TestBase
     {
+        public Rig Rig { get; set; }
+
+        partial void BeforeEachTest()
+        {
+            Rig = new Rig
+            {
+                Uuid = DevKit.Uid(),
+                Citation = DevKit.Citation("Rig"),
+                SchemaVersion = "2.0"
+            };
+
+            DevKit.AddAndAssert(Rig);
+
+            RigUtilization.Rig = DevKit.DataObjectReference(Rig);
+        }
     }
 }
