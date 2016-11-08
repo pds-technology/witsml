@@ -73,12 +73,15 @@ namespace PDS.Witsml.Server.Data.Attachments
 
             // Wellbore
             var parentUri = uri.Parent;
-            dataObject.Wellbore = new DataObjectReference
+            if (ObjectTypes.Wellbore.EqualsIgnoreCase(parentUri.ObjectType))
             {
-                ContentType = parentUri.ContentType,
-                Title = parentUri.ObjectId,
-                Uuid = parentUri.ObjectId
-            };
+                dataObject.Wellbore = new DataObjectReference
+                {
+                    ContentType = parentUri.ContentType,
+                    Title = parentUri.ObjectId,
+                    Uuid = parentUri.ObjectId
+                };
+            }
 
             SetAdditionalDefaultValues(dataObject, uri);
         }
