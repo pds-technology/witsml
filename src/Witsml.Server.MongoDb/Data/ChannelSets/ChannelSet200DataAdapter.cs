@@ -493,7 +493,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                 Description = channel.Citation != null ? channel.Citation.Description ?? channel.Mnemonic : channel.Mnemonic,
                 ChannelName = channel.Mnemonic,
                 Uom = Units.GetUnit(channel.Uom),
-                MeasureClass = channel.CurveClass ?? ObjectTypes.Unknown,
+                MeasureClass = channel.ChannelClass ?? ObjectTypes.Unknown,
                 Source = channel.Source ?? ObjectTypes.Unknown,
                 Uuid = channel.Mnemonic,
                 DomainObject = dataObject,
@@ -557,9 +557,11 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         private Dictionary<string, Range<double?>> GetCurrentIndexRange(ChannelSet entity)
         {
             var ranges = new Dictionary<string, Range<double?>>();
-            var index = entity.Index.FirstOrDefault();
 
-            AddIndexRange(index.Mnemonic, entity.StartIndex, entity.EndIndex, ranges);
+            foreach (var index in entity.Index)
+            {
+                AddIndexRange(index.Mnemonic, entity.StartIndex, entity.EndIndex, ranges);
+            }
 
             foreach (var channel in entity.Channel)
             {
@@ -576,29 +578,29 @@ namespace PDS.Witsml.Server.Data.ChannelSets
 
             if (start is TimeIndexValue)
             {
-                var startTime = start as TimeIndexValue;
-                if (startTime != null && !string.IsNullOrEmpty(startTime.Time))
-                    startValue = DateTimeOffset.Parse(startTime.Time).ToUnixTimeMicroseconds();
+                var startTime = (TimeIndexValue)start;
+                if (startTime.Time.HasValue)
+                    startValue = startTime.Time.ToUnixTimeMicroseconds();
                 var endTime = end as TimeIndexValue;
-                if (endTime != null && !string.IsNullOrEmpty(endTime.Time))
-                    endValue = DateTimeOffset.Parse(endTime.Time).ToUnixTimeMicroseconds();
+                if (endTime?.Time.HasValue ?? false)
+                    endValue = endTime.Time.ToUnixTimeMicroseconds();
             }
             else if (start is DepthIndexValue)
             {
-                var startDepth = start as DepthIndexValue;
-                if (startDepth != null && startDepth.Depth.HasValue)
+                var startDepth = (DepthIndexValue)start;
+                if (startDepth.Depth.HasValue)
                     startValue = startDepth.Depth.Value;
                 var endDepth = end as DepthIndexValue;
-                if (endDepth != null && endDepth.Depth.HasValue)
+                if (endDepth?.Depth.HasValue ?? false)
                     endValue = endDepth.Depth.Value;
             }
             else
             {
                 var startPass = start as PassIndexedDepth;
-                if (startPass != null && startPass.Depth.HasValue)
+                if (startPass?.Depth.HasValue ?? false)
                     startValue = startPass.Depth.Value;
                 var endPass = end as PassIndexedDepth;
-                if (endPass != null && endPass.Depth.HasValue)
+                if (endPass?.Depth.HasValue ?? false)
                     endValue = endPass.Depth.Value;
             }
 
@@ -607,30 +609,21 @@ namespace PDS.Witsml.Server.Data.ChannelSets
 
         private AbstractIndexValue UpdateIndexValue(ChannelIndexType? indexType, AbstractIndexValue current, double value)
         {
-            AbstractIndexValue indexValue = null;
+            AbstractIndexValue indexValue;
 
             if (indexType == ChannelIndexType.datetime || indexType == ChannelIndexType.elapsedtime)
             {
-                if (current == null)
-                    indexValue = new TimeIndexValue();
-                else
-                    indexValue = current;
-                ((TimeIndexValue)indexValue).Time = DateTimeExtensions.FromUnixTimeMicroseconds((long)value).ToUniversalTime().ToString(_utcFormat);
+                indexValue = current ?? new TimeIndexValue();
+                ((TimeIndexValue)indexValue).Time = DateTimeExtensions.FromUnixTimeMicroseconds((long)value);
             }
             else if (indexType == ChannelIndexType.passindexeddepth)
             {
-                if (current == null)
-                    indexValue = new PassIndexedDepth();
-                else
-                    indexValue = current;
+                indexValue = current ?? new PassIndexedDepth();
                 ((PassIndexedDepth)indexValue).Depth = (float)value;
             }
             else
             {
-                if (current == null)
-                    indexValue = new DepthIndexValue();
-                else
-                    indexValue = current;
+                indexValue = current ?? new DepthIndexValue();
                 ((DepthIndexValue)indexValue).Depth = (float)value;
             }
 
@@ -793,8 +786,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                 GrowingStatus = ChannelStatus.active,
                 Uom = unit,
                 TimeDepth = isTimeIndex ? "time" : "depth",
-                LoggingCompanyName = "unknown",
-                CurveClass = "unknown",
+                ChannelClass = "unknown",
                 Index = indexes
             };
 

@@ -123,7 +123,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 Description = channel.Citation != null ? channel.Citation.Description ?? channel.Mnemonic : channel.Mnemonic,
                 ChannelName = channel.Mnemonic,
                 Uom = Units.GetUnit(channel.Uom),
-                MeasureClass = channel.CurveClass ?? ObjectTypes.Unknown,
+                MeasureClass = channel.ChannelClass ?? ObjectTypes.Unknown,
                 Source = channel.Source ?? ObjectTypes.Unknown,
                 Uuid = channel.Mnemonic,
                 DomainObject = dataObject,
@@ -164,28 +164,28 @@ namespace PDS.Witsml.Server.Data.Channels
             if (start is TimeIndexValue)
             {
                 var startTime = start as TimeIndexValue;
-                if (startTime != null && !string.IsNullOrEmpty(startTime.Time))
-                    startValue = DateTimeOffset.Parse(startTime.Time).ToUnixTimeMicroseconds();
+                if (startTime.Time.HasValue)
+                    startValue = startTime.Time.ToUnixTimeMicroseconds();
                 var endTime = end as TimeIndexValue;
-                if (endTime != null && !string.IsNullOrEmpty(endTime.Time))
-                    endValue = DateTimeOffset.Parse(endTime.Time).ToUnixTimeMicroseconds();
+                if (endTime?.Time.HasValue ?? false)
+                    endValue = endTime.Time.ToUnixTimeMicroseconds();
             }
             else if (start is DepthIndexValue)
             {
                 var startDepth = start as DepthIndexValue;
-                if (startDepth != null && startDepth.Depth.HasValue)
+                if (startDepth.Depth.HasValue)
                     startValue = startDepth.Depth.Value;
                 var endDepth = end as DepthIndexValue;
-                if (endDepth != null && endDepth.Depth.HasValue)
+                if (endDepth?.Depth.HasValue ?? false)
                     endValue = endDepth.Depth.Value;
             }
             else
             {
                 var startPass = start as PassIndexedDepth;
-                if (startPass != null && startPass.Depth.HasValue)
+                if (startPass?.Depth.HasValue ?? false)
                     startValue = startPass.Depth.Value;
                 var endPass = end as PassIndexedDepth;
-                if (endPass != null && endPass.Depth.HasValue)
+                if (endPass?.Depth.HasValue ?? false)
                     endValue = endPass.Depth.Value;
             }
 
