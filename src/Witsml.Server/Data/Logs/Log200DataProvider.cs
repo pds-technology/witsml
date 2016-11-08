@@ -34,15 +34,6 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="uri">The data object URI.</param>
         partial void SetAdditionalDefaultValues(Log dataObject, EtpUri uri)
         {
-            if (string.IsNullOrWhiteSpace(dataObject.TimeDepth))
-                dataObject.TimeDepth = "time";
-
-            if (string.IsNullOrWhiteSpace(dataObject.CurveClass))
-                dataObject.CurveClass = "unknown";
-
-            if (string.IsNullOrWhiteSpace(dataObject.LoggingCompanyName))
-                dataObject.LoggingCompanyName = "unknown";
-
             if (dataObject.ChannelSet == null)
                 dataObject.ChannelSet = new List<ChannelSet>();
         }

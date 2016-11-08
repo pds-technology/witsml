@@ -177,11 +177,11 @@ namespace PDS.Witsml.Data.Logs
         /// <param name="citationName">Name of the citation.</param>
         /// <param name="mnemonic">The mnemonic.</param>
         /// <param name="uom">The uom.</param>
-        /// <param name="curveClass">The curve class.</param>
+        /// <param name="channelClass">The channel class.</param>
         /// <param name="etpDataType">Type of the ETP data.</param>
         /// <param name="pointMetadataList">The point metadata list.</param>
         /// <returns></returns>
-        public Channel CreateChannel(Log log, List<ChannelIndex> indexList, string citationName, string mnemonic, string uom, string curveClass, EtpDataType etpDataType, List<PointMetadata> pointMetadataList)
+        public Channel CreateChannel(Log log, List<ChannelIndex> indexList, string citationName, string mnemonic, string uom, string channelClass, EtpDataType etpDataType, List<PointMetadata> pointMetadataList)
         {
             return new Channel()
             {
@@ -189,7 +189,7 @@ namespace PDS.Witsml.Data.Logs
                 Citation = CreateCitation(citationName),
                 Mnemonic = mnemonic,
                 Uom = uom,
-                CurveClass = curveClass,
+                ChannelClass = channelClass,
                 LoggingMethod = log.LoggingMethod,
                 LoggingCompanyName = log.LoggingCompanyName,
                 Source = log.LoggingMethod.ToString(),
@@ -261,15 +261,9 @@ namespace PDS.Witsml.Data.Logs
                 SchemaVersion = DataSchemaVersion,
                 ExistenceKind = ExistenceKind.simulated,
                 Index = new List<ChannelIndex>(),
-
                 LoggingCompanyName = log.LoggingCompanyName,
-                TimeDepth = log.TimeDepth,
-                CurveClass = log.CurveClass,
-
                 Channel = channelList,
-
                 DataContext = indexRangeContext,
-
                 Data = new ChannelData()
                 {
                     Data = null

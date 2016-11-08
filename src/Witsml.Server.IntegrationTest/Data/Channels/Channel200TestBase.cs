@@ -29,7 +29,7 @@ namespace PDS.Witsml.Server.Data.Channels
     {
         partial void BeforeEachTest()
         {
-            Channel.CurveClass = "length";
+            Channel.ChannelClass = "length";
             Channel.DataType = EtpDataType.@double;
             Channel.GrowingStatus = ChannelStatus.inactive;
             Channel.Index = new List<ChannelIndex>();

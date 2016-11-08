@@ -16,7 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess;
@@ -54,8 +53,8 @@ namespace PDS.Witsml.Server
             return new GeodeticWellLocation()
             {
                 Crs = new GeodeticEpsgCrs() { EpsgCode = 26914 },
-                Latitude = 28.5597,
-                Longitude = -90.6671,
+                Latitude = new PlaneAngleMeasure(28.5597, PlaneAngleUom.Item0001seca),
+                Longitude = new PlaneAngleMeasure(-90.6671, PlaneAngleUom.Item0001seca),
                 Uid = "loc-01"
             };
         }
@@ -79,8 +78,6 @@ namespace PDS.Witsml.Server
         public void InitHeader(Log log, LoggingMethod loggingMethod, ChannelIndex channelIndex, IndexDirection direction = IndexDirection.increasing)
         {
             log.ChannelSet = new List<ChannelSet>();
-            log.LoggingCompanyName = "Service Co.";
-            log.CurveClass = "unknown";
             log.LoggingMethod = loggingMethod;
 
             var index = List(channelIndex);
@@ -215,8 +212,6 @@ namespace PDS.Witsml.Server
             log.Uuid = Uid();
 
             log.ChannelSet = new List<ChannelSet>();
-            log.CurveClass = Name("Curve class");
-            log.LoggingCompanyName = Name("ABC Logging Company");
             log.Wellbore = DataObjectReference(ObjectTypes.Wellbore, Name("Wellbore"), Uid());
 
             List<ChannelIndex> indexList = new List<ChannelIndex>();
@@ -241,12 +236,15 @@ namespace PDS.Witsml.Server
             else if (LogGenerator.TimeIndexTypes.Contains(indexType))
             {
                 log.TimeDepth = ObjectFolders.Time;
-                ChannelIndex channelIndex = LogGenerator.CreateElapsedTimeIndex(direction);
 
                 if (indexType.Equals(ChannelIndexType.datetime))
                 {
                     // DateTime should be increasing only
                     indexList.Add(LogGenerator.CreateDateTimeIndex());
+                }
+                else if (indexType.Equals(ChannelIndexType.elapsedtime))
+                {
+                    indexList.Add(LogGenerator.CreateElapsedTimeIndex(direction));
                 }
             }
             else

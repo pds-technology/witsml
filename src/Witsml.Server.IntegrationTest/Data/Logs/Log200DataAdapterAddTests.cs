@@ -241,7 +241,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     ChannelId = channelId++,
                     ChannelName = channel.Mnemonic,
                     Uom = channel.Uom,
-                    MeasureClass = channel.CurveClass,
+                    MeasureClass = channel.ChannelClass,
                     DataType = channelDataType,
                     Description = channel.Citation.Description,
                     Uuid = channel.Uuid,
