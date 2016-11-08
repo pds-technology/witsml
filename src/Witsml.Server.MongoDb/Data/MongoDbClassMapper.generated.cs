@@ -60,6 +60,9 @@ namespace PDS.Witsml.Server.Data
             Register<Witsml141.Rig>();
             Register2<Witsml200.Rig>();
 
+            // rigUtilization
+            Register2<Witsml200.RigUtilization>();
+
             // trajectory
             Register<Witsml131.Trajectory>();
             Register<Witsml141.Trajectory>();

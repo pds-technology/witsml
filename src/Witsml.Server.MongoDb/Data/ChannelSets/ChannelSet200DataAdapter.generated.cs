@@ -88,8 +88,10 @@ namespace PDS.Witsml.Server.Data.ChannelSets
 
             if (parentUri != null)
             {
-                //var uidWellbore = parentUri.Value.ObjectId;
-                //query = query.Where(x => x.Wellbore.Uuid == uidWellbore);
+                var uidWellbore = parentUri.Value.ObjectId;
+
+                if (!string.IsNullOrWhiteSpace(uidWellbore))
+                    query = query.Where(x => x.Wellbore.Uuid == uidWellbore);
 
                 if (!string.IsNullOrWhiteSpace(parentUri.Value.Query))
                     query = query.LinqToQuerystring(parentUri.Value.Query);
