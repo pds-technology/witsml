@@ -18,6 +18,8 @@
 
 using System;
 using System.Collections.Generic;
+using Energistics.DataAccess.WITSML200;
+using Energistics.DataAccess.WITSML200.ReferenceData;
 
 namespace PDS.Witsml.Data
 {
@@ -62,6 +64,24 @@ namespace PDS.Witsml.Data
         public List<T> List<T>(params T[] instances)
         {
             return new List<T>(instances);
+        }
+
+        /// <summary>
+        /// Converts the specified curve class string to a <see cref="PropertyKind"/> instance.
+        /// </summary>
+        /// <param name="curveClass">The curve class.</param>
+        /// <returns>A new <see cref="PropertyKind"/> instance.</returns>
+        public PropertyKind ToPropertyKind(string curveClass)
+        {
+            QuantityClassKind quantityClass;
+
+            if (!Enum.TryParse(curveClass, out quantityClass))
+                quantityClass = QuantityClassKind.dimensionless;
+
+            return new PropertyKind
+            {
+                QuantityClass = quantityClass
+            };
         }
     }
 }
