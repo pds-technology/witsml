@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ReferenceData;
+using PDS.Witsml.Data.Logs;
 
 namespace PDS.Witsml.Data
 {
@@ -78,9 +79,13 @@ namespace PDS.Witsml.Data
             if (!Enum.TryParse(curveClass, out quantityClass))
                 quantityClass = QuantityClassKind.dimensionless;
 
+            var logGenerator = new Log200Generator();
             return new PropertyKind
             {
-                QuantityClass = quantityClass
+                QuantityClass = quantityClass,
+                Citation = logGenerator.CreateCitation("ChannelClass"),
+                SchemaVersion = "2.0",
+                Uuid = Uid()
             };
         }
     }
