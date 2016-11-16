@@ -788,9 +788,10 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                 TimeDepth = isTimeIndex ? "time" : "depth",
                 ChannelClass = new PropertyKind
                 {
+                    SchemaVersion = uri.Version,
                     QuantityClass = isTimeIndex
                         ? QuantityClassKind.time
-                        : QuantityClassKind.dimensionless
+                        : (QuantityClassKind?)null
                 },
                 Index = indexes
             };
@@ -799,6 +800,9 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             channel.Citation = channel.Citation.Create();
             channel.Citation.Title = mnemonic;
             channel.SchemaVersion = uri.Version;
+            channel.ChannelClass.Uuid = channel.ChannelClass.NewUuid();
+            channel.ChannelClass.Citation = channel.ChannelClass.Citation.Create();
+            channel.ChannelClass.Citation.Title = channel.ChannelClass.QuantityClass?.ToString() ?? ObjectTypes.Unknown;
 
             return channel;
         }
