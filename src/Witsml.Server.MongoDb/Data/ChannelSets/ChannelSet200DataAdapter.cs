@@ -493,7 +493,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                 Description = channel.Citation != null ? channel.Citation.Description ?? channel.Mnemonic : channel.Mnemonic,
                 ChannelName = channel.Mnemonic,
                 Uom = Units.GetUnit(channel.Uom),
-                MeasureClass = channel.ChannelClass ?? ObjectTypes.Unknown,
+                MeasureClass = channel.ChannelClass?.QuantityClass?.ToString() ?? ObjectTypes.Unknown,
                 Source = channel.Source ?? ObjectTypes.Unknown,
                 Uuid = channel.Mnemonic,
                 DomainObject = dataObject,
@@ -786,7 +786,12 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                 GrowingStatus = ChannelStatus.active,
                 Uom = unit,
                 TimeDepth = isTimeIndex ? "time" : "depth",
-                ChannelClass = "unknown",
+                ChannelClass = new PropertyKind
+                {
+                    QuantityClass = isTimeIndex
+                        ? QuantityClassKind.time
+                        : QuantityClassKind.dimensionless
+                },
                 Index = indexes
             };
 
