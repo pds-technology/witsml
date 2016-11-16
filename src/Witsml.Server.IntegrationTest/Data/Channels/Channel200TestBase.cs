@@ -30,6 +30,10 @@ namespace PDS.Witsml.Server.Data.Channels
         partial void BeforeEachTest()
         {
             Channel.ChannelClass = DevKit.ToPropertyKind("length");
+            Channel.ChannelClass.Citation = DevKit.Citation("ChannelClass");
+            Channel.ChannelClass.SchemaVersion = "2.0";
+            Channel.ChannelClass.Uuid = DevKit.Uid();
+            Channel.SchemaVersion = "2.0";
             Channel.DataType = EtpDataType.@double;
             Channel.GrowingStatus = ChannelStatus.inactive;
             Channel.Index = new List<ChannelIndex>();
