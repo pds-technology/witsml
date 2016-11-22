@@ -1505,16 +1505,21 @@ namespace PDS.Witsml.Data.Channels
 
             _log.Debug("Re-slicing remaining channels with no data.");
 
-            var reader = new ChannelDataReader(channelData, _queryMnemonics.Skip(Depth).ToArray(), _queryUnits.Values.Skip(Depth).ToArray(), _queryDataTypes.Values.Skip(Depth).ToArray(), _queryNullValues.Values.Skip(Depth).ToArray())
-                .WithIndices(Indices);
+            using (
+                var reader = new ChannelDataReader(channelData, _queryMnemonics.Skip(Depth).ToArray(),
+                        _queryUnits.Values.Skip(Depth).ToArray(), _queryDataTypes.Values.Skip(Depth).ToArray(),
+                        _queryNullValues.Values.Skip(Depth).ToArray())
+                    .WithIndices(Indices))
+            {
+                reader.Slice(mnemonicSlices, _queryUnits, _queryDataTypes, _queryNullValues);
 
-            reader.Slice(mnemonicSlices, _queryUnits, _queryDataTypes, _queryNullValues);
+                // Clone the context without RequestLatestValues
+                var resliceContext = context.Clone();
+                resliceContext.RequestLatestValues = null;
 
-            // Clone the context without RequestLatestValues
-            var resliceContext = context.Clone();
-            resliceContext.RequestLatestValues = null;
-
-            channelData = reader.GetData(resliceContext, mnemonicSlices, _queryUnits, _queryDataTypes, _queryNullValues, out ranges);
+                channelData = reader.GetData(resliceContext, mnemonicSlices, _queryUnits, _queryDataTypes,
+                    _queryNullValues, out ranges);
+            }
 
             return channelData;
         }
