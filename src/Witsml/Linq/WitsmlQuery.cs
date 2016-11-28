@@ -91,10 +91,20 @@ namespace PDS.Witsml.Linq
             using (var client = Context.Connection.CreateClientProxy())
             {
                 var wmls = (IWitsmlClient)client;
-                string suppMsgOut, xmlOut;
-
-                var returnCode = wmls.WMLS_GetFromStore(objectType, xmlIn, optionsIn, null, out xmlOut, out suppMsgOut);
+                string suppMsgOut, xmlOut = string.Empty;
                 var result = Enumerable.Empty<T>();
+                short returnCode;
+
+                try
+                {
+                    returnCode = wmls.WMLS_GetFromStore(objectType, xmlIn, optionsIn, null, out xmlOut, out suppMsgOut);
+                }
+                catch (Exception ex)
+                {
+                    Logger.ErrorFormat("Error querying store: {0}", ex);
+                    returnCode = -1;
+                    suppMsgOut = "Error querying store:" + ex.GetBaseException().Message;
+                }
 
                 try
                 {
