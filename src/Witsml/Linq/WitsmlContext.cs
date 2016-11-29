@@ -184,6 +184,18 @@ namespace PDS.Witsml.Linq
         }
 
         /// <summary>
+        /// Gets the object details.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="uri">The URI.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <returns>The object detail.</returns>
+        public IDataObject GetObjectDetails(string objectType, EtpUri uri, params OptionsIn[] optionsIn)
+        {
+            return GetObjects<IDataObject>(objectType, uri, optionsIn).FirstOrDefault();
+        }
+
+        /// <summary>
         /// Gets the objects of the specified type.
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -191,7 +203,7 @@ namespace PDS.Witsml.Linq
         /// <param name="uri">The URI.</param>
         /// <param name="optionsIn">The options in.</param>
         /// <returns></returns>
-        protected IEnumerable<T> GetObjects<T>(string objectType, EtpUri uri, OptionsIn optionsIn) where T : IDataObject
+        protected IEnumerable<T> GetObjects<T>(string objectType, EtpUri uri, params OptionsIn[] optionsIn) where T : IDataObject
         {
             var filters = new List<string>();
             var values = new List<object>();
@@ -217,8 +229,11 @@ namespace PDS.Witsml.Linq
                 values.Add(objectIds[ObjectTypes.Wellbore]);
             }
 
-            var result = CreateWitsmlQuery(objectType)
-                .With(optionsIn)
+            var query = CreateWitsmlQuery(objectType);
+
+            optionsIn.ForEach(x => query.With(x));
+
+            var result = query                
                 .Where(string.Join(" && ", filters), values.ToArray())
                 .GetEnumerator();
 

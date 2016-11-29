@@ -88,5 +88,14 @@ namespace PDS.Witsml.Linq
         /// <param name="uri">The URI.</param>
         /// <returns>The object detail.</returns>
         IDataObject GetObjectDetails(string objectType, EtpUri uri);
+
+        /// <summary>
+        /// Gets the object details.
+        /// </summary>
+        /// <param name="objectType">Type of the object.</param>
+        /// <param name="uri">The URI.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <returns>The object detail.</returns>
+        IDataObject GetObjectDetails(string objectType, EtpUri uri, params OptionsIn[] optionsIn);
     }
 }
