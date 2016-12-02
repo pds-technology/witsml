@@ -78,8 +78,17 @@ namespace PDS.Witsml.Server.Data.Channels
             try
             {
                 var filter = BuildDataFilter(uri, indexChannel, range, reverse ? !ascending : ascending);
+                var count = 0;
 
-                var data = GetData(filter, ascending);
+                var data = GetData(filter, ascending)
+                    .TakeWhile(x =>
+                    {
+                        var keep = count <= WitsmlSettings.MaxDataNodes;
+                        count += x.RecordCount;
+                        return keep;
+                    })
+                    .ToList();
+
                 GetMongoFileData(data);
 
                 return data;
