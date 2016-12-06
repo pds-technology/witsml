@@ -54,14 +54,84 @@ namespace PDS.Witsml.Server.Configuration
         public static long TimeRangeStepSize = Properties.Settings.Default.ChannelDataTimeRangeStepSize;
 
         /// <summary>
-        /// The maximum data nodes
+        /// The log GetFromStore maximum data nodes
         /// </summary>
-        public static int MaxDataNodes = Properties.Settings.Default.MaxDataNodes;
+        public static int LogMaxDataNodesGet = Properties.Settings.Default.LogMaxDataNodesGet;
 
         /// <summary>
-        /// The maximum data points
+        /// The log AddToStore maximum data nodes
         /// </summary>
-        public static int MaxDataPoints = Properties.Settings.Default.MaxDataPoints;
+        public static int LogMaxDataNodesAdd = Properties.Settings.Default.LogMaxDataNodesAdd;
+
+        /// <summary>
+        /// The log UpdateInStore maximum data nodes
+        /// </summary>
+        public static int LogMaxDataNodesUpdate = Properties.Settings.Default.LogMaxDataNodesUpdate;
+
+        /// <summary>
+        /// The log DeleteFromStore maximum data nodes
+        /// </summary>
+        public static int LogMaxDataNodesDelete = Properties.Settings.Default.LogMaxDataNodesDelete;
+
+        /// <summary>
+        /// The log GetFromStore maximum data points
+        /// </summary>
+        public static int LogMaxDataPointsGet = Properties.Settings.Default.LogMaxDataPointsGet;
+
+        /// <summary>
+        /// The log AddToStore maximum data points
+        /// </summary>
+        public static int LogMaxDataPointsAdd = Properties.Settings.Default.LogMaxDataPointsAdd;
+
+        /// <summary>
+        /// The log UpdateInStore maximum data points
+        /// </summary>
+        public static int LogMaxDataPointsUpdate = Properties.Settings.Default.LogMaxDataPointsUpdate;
+
+        /// <summary>
+        /// The log DeleteFromStore maximum data points
+        /// </summary>
+        public static int LogMaxDataPointsDelete = Properties.Settings.Default.LogMaxDataPointsDelete;
+
+        /// <summary>
+        /// The Trajectory GetFromStore maximum data nodes
+        /// </summary>
+        public static int TrajectoryMaxDataNodesGet = Properties.Settings.Default.TrajectoryMaxDataNodesGet;
+
+        /// <summary>
+        /// The Trajectory AddToStore maximum data nodes
+        /// </summary>
+        public static int TrajectoryMaxDataNodesAdd = Properties.Settings.Default.TrajectoryMaxDataNodesAdd;
+
+        /// <summary>
+        /// The Trajectory UpdateInStore maximum data nodes
+        /// </summary>
+        public static int TrajectoryMaxDataNodesUpdate = Properties.Settings.Default.TrajectoryMaxDataNodesUpdate;
+
+        /// <summary>
+        /// The Trajectory DeleteFromStore maximum data nodes
+        /// </summary>
+        public static int TrajectoryMaxDataNodesDelete = Properties.Settings.Default.TrajectoryMaxDataNodesDelete;
+
+        /// <summary>
+        /// The MudLog GetFromStore maximum data nodes
+        /// </summary>
+        public static int MudLogMaxDataNodesGet = Properties.Settings.Default.MudLogMaxDataNodesGet;
+
+        /// <summary>
+        /// The MudLog AddToStore maximum data nodes
+        /// </summary>
+        public static int MudLogMaxDataNodesAdd = Properties.Settings.Default.MudLogMaxDataNodesAdd;
+
+        /// <summary>
+        /// The MudLog UpdateInStore maximum data nodes
+        /// </summary>
+        public static int MudLogMaxDataNodesUpdate = Properties.Settings.Default.MudLogMaxDataNodesUpdate;
+
+        /// <summary>
+        /// The MudLog DeleteFromStore maximum data nodes
+        /// </summary>
+        public static int MudLogMaxDataNodesDelete = Properties.Settings.Default.MudLogMaxDataNodesDelete;
 
         /// <summary>
         /// The default server name
