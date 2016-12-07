@@ -409,7 +409,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 return new ValidationResult(ErrorCodes.NodesWithSameIndex.ToString(), new[] { "LogData", "Data" });
             }
 
-            if (logDatas.Count > WitsmlSettings.MaxDataNodes)
+            if (Context.Function.IsDataNodesValid(DataObject, logDatas.Count))
             {
                 return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] {"LogData", "Data"});
             }
@@ -418,9 +418,9 @@ namespace PDS.Witsml.Server.Data.Logs
                 var logDataColumnLength = logDatas[0].Split(',').Length;
                 var totalPoints = logDatas.Count * logDataColumnLength;
 
-                if (totalPoints > WitsmlSettings.MaxDataPoints)
+                if (function.IsTotalDataPointsValid(totalPoints))
                 {
-                    return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] {"LogData", "Data"});
+                    return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "LogData", "Data" });
                 }
                 else if (ColumnIndexGreaterThanLength(logCurves, logDataColumnLength))
                 {

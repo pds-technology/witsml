@@ -488,7 +488,7 @@ namespace PDS.Witsml.Server.Data.Logs
         private ValidationResult ValidateLogData(string indexCurve, List<LogCurveInfo> logCurves, List<LogData> logDatas, List<string> mergedLogCurveInfoMnemonics, string delimiter, Functions function, bool insert = true)
         {
             var totalPoints = 0;
-            if (logDatas.Sum(x => x.Data.Count) > WitsmlSettings.MaxDataNodes) 
+            if (Context.Function.IsDataNodesValid(DataObject, logDatas.Sum(x => x.Data.Count)))
             {
                 return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "LogData", "Data" });
             }
@@ -509,8 +509,7 @@ namespace PDS.Witsml.Server.Data.Logs
                             }
                             totalPoints += logData.Data.Count * ChannelDataReader.Split(logData.Data[0], delimiter).Length;
                         }
-
-                        if (totalPoints > WitsmlSettings.MaxDataPoints)
+                        if (function.IsTotalDataPointsValid(totalPoints))
                         {
                             return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "LogData", "Data" });
                         }
@@ -521,7 +520,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         else if (mnemonics.Any(m => _illegalColumnIdentifiers.Any(c => m.Contains(c))))
                         {
                             return new ValidationResult(ErrorCodes.BadColumnIdentifier.ToString(), new[] { "LogData", "MnemonicList" });
-                        } 
+                        }
                         else if (!IsValidLogDataMnemonics(mergedLogCurveInfoMnemonics, mnemonics))
                         {
                             return new ValidationResult(ErrorCodes.MissingColumnIdentifiers.ToString(), new[] { "LogData", "MnemonicList" });
@@ -549,7 +548,7 @@ namespace PDS.Witsml.Server.Data.Logs
                         else if (DuplicateUid(mnemonics))
                         {
                             return new ValidationResult(ErrorCodes.MnemonicsNotUnique.ToString(), new[] { "LogData", "MnemonicList" });
-                        }                      
+                        }
                         else if (logCurves != null && !UnitsMatch(logCurves, logData))
                         {
                             return new ValidationResult(ErrorCodes.UnitListNotMatch.ToString(), new[] { "LogData", "UnitList" });
