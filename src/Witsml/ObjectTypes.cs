@@ -59,6 +59,16 @@ namespace PDS.Witsml
         public const string Unknown = "unknown";
 
         /// <summary>
+        /// The ObjectType identifier for a DocumentInfo.
+        /// </summary>
+        public const string DocumentInfo = "documentInfo";
+
+        /// <summary>
+        /// The ObjectType identifier for a FileCreationInformation.
+        /// </summary>
+        public const string FileCreationInformation = "fileCreationInformation";
+
+        /// <summary>
         /// The ObjectType identifier for a CapClient.
         /// </summary>
         public const string CapClient = "capClient";
@@ -103,9 +113,9 @@ namespace PDS.Witsml
         /// </summary>
         public const string WellboreGeometry = "wellboreGeometry";
 
-        private static readonly string[] GrowingObjects = { Log, MudLog, Trajectory };
+        private static readonly string[] _growingObjects = { Log, MudLog, Trajectory };
 
-        private static readonly string[] GrowingPartTypes = { LogCurveInfo, GeologyInterval, TrajectoryStation };
+        private static readonly string[] _growingPartTypes = { LogCurveInfo, GeologyInterval, TrajectoryStation };
 
         /// <summary>
         /// The object type map
@@ -174,7 +184,7 @@ namespace PDS.Witsml
                 !typeof(IDataObject).IsAssignableFrom(type) &&
                 !typeof(Witsml200.AbstractObject).IsAssignableFrom(type))
             {
-                throw new ArgumentException("Invalid WITSML object type, does not implement IEnergisticsCollection, IDataObject or AbstractObject", nameof(type));
+                throw new ArgumentException(@"Invalid WITSML object type, does not implement IEnergisticsCollection, IDataObject or AbstractObject", nameof(type));
             }
 
             if (typeof(IDataObject).IsAssignableFrom(type))
@@ -208,6 +218,7 @@ namespace PDS.Witsml
             try
             {
                 return element.Elements()
+                    .Where(x => !DocumentInfo.EqualsIgnoreCase(x.Name.LocalName))
                     .Select(x => x.Name.LocalName)
                     .FirstOrDefault() ?? Unknown;
             }
@@ -404,7 +415,7 @@ namespace PDS.Witsml
         /// <returns></returns>
         public static bool IsGrowingDataObject(string objectType)
         {
-            return GrowingObjects.Contains(objectType);
+            return _growingObjects.Contains(objectType);
         }
 
         /// <summary>
@@ -416,8 +427,8 @@ namespace PDS.Witsml
         {
             if (!IsGrowingDataObject(objectType)) return null;
 
-            var index = Array.IndexOf(GrowingObjects, objectType);
-            return GrowingPartTypes.Skip(index).FirstOrDefault();
+            var index = Array.IndexOf(_growingObjects, objectType);
+            return _growingPartTypes.Skip(index).FirstOrDefault();
         }
 
         /// <summary>

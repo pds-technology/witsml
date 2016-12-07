@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 using Energistics.DataAccess;
 using PDS.Framework;
 using Witsml131 = Energistics.DataAccess.WITSML131;
@@ -182,6 +183,101 @@ namespace PDS.Witsml.Server.Data
                 uids.Add(item.Uid);
             }
             return false;
+        }
+
+        /// <summary>
+        /// Sets the document information if it doesn't already exist.
+        /// </summary>
+        /// <typeparam name="T">The data object type.</typeparam>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="parser">The query parser.</param>
+        /// <param name="username">The current username.</param>
+        /// <returns>The data object instance.</returns>
+        public static T SetDocumentInfo<T>(this T dataObject, WitsmlQueryParser parser, string username) where T : IEnergisticsCollection
+        {
+            var property = dataObject.GetType().GetProperty("DocumentInfo");
+            var documentInfo = property.GetValue(dataObject);
+
+            if (documentInfo == null)
+            {
+                var version = ObjectTypes.GetVersion(typeof(T));
+
+                documentInfo = OptionsIn.DataVersion.Version131.Equals(version)
+                    ? (object)CreateDocumentInfo131(parser, username)
+                    : CreateDocumentInfo141(parser, username);
+
+                property.SetValue(dataObject, documentInfo);
+            }
+
+            return dataObject;
+        }
+
+        private static Witsml131Schemas.DocumentInfo CreateDocumentInfo131(WitsmlQueryParser parser, string username)
+        {
+            var documentInfo = new Witsml131Schemas.DocumentInfo
+            {
+                DocumentName = new Witsml131Schemas.NameStruct(parser.ObjectType)
+            };
+
+            var documentInfoElement = parser.DocumentInfo();
+
+            if (IncludeFileCreationInformation(documentInfoElement))
+            {
+                documentInfo.FileCreationInformation = new Witsml131Schemas.FileCreationType
+                {
+                    FileCreationDate = DateTimeOffset.UtcNow
+                };
+
+                if (IncludeFileCreator(documentInfoElement))
+                {
+                    documentInfo.FileCreationInformation.FileCreator = username;
+                }
+            }
+
+            return documentInfo;
+        }
+
+        private static Witsml141Schemas.DocumentInfo CreateDocumentInfo141(WitsmlQueryParser parser, string username)
+        {
+            var documentInfo = new Witsml141Schemas.DocumentInfo
+            {
+                DocumentName = new Witsml141Schemas.NameStruct(parser.ObjectType)
+            };
+
+            var documentInfoElement = parser.DocumentInfo();
+
+            if (IncludeFileCreationInformation(documentInfoElement))
+            {
+                documentInfo.FileCreationInformation = new Witsml141Schemas.DocumentFileCreation
+                {
+                    FileCreationDate = DateTimeOffset.UtcNow
+                };
+
+                if (IncludeFileCreator(documentInfoElement))
+                {
+                    documentInfo.FileCreationInformation.FileCreator = username;
+                }
+            }
+
+            return documentInfo;
+        }
+
+        private static bool IncludeFileCreationInformation(XElement documentInfoElement)
+        {
+            var ns = documentInfoElement.GetDefaultNamespace();
+
+            return documentInfoElement.IsEmpty
+                || documentInfoElement.Elements(ns + ObjectTypes.FileCreationInformation).Any();
+        }
+
+        private static bool IncludeFileCreator(XElement documentInfoElement)
+        {
+            var ns = documentInfoElement.GetDefaultNamespace();
+            var fileCreationElement = documentInfoElement.Element(ns + ObjectTypes.FileCreationInformation);
+
+            return fileCreationElement == null
+                || fileCreationElement.IsEmpty
+                || fileCreationElement.Elements(ns + "fileCreator").Any();
         }
     }
 }

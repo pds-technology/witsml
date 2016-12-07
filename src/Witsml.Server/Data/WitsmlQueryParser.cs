@@ -33,6 +33,7 @@ namespace PDS.Witsml.Server.Data
     {
         private readonly string _options;
         private readonly XNamespace _namespace;
+        private readonly XElement _element;
         private readonly IEnumerable<XElement> _elements;
 
         /// <summary>
@@ -50,6 +51,7 @@ namespace PDS.Witsml.Server.Data
             _options = options;
             _namespace = element.GetDefaultNamespace();
 
+            _element = element;
             _elements = element.Attributes("version").Any()
                 ? element.Elements(_namespace + objectType)
                 : new[] { element };
@@ -232,6 +234,24 @@ namespace PDS.Witsml.Server.Data
         {
             var element = Element();
             return element != null && element.Attribute(name) != null;
+        }
+
+        /// <summary>
+        /// Determines whether the query contains a documentInfo element.
+        /// </summary>
+        /// <returns>True if the query contains a documentInfo element.</returns>
+        public bool HasDocumentInfo()
+        {
+            return _element?.Elements(_namespace + ObjectTypes.DocumentInfo).Any() ?? false;
+        }
+
+        /// <summary>
+        /// Gets the documents information element.
+        /// </summary>
+        /// <returns></returns>
+        public XElement DocumentInfo()
+        {
+            return _element?.Element(_namespace + ObjectTypes.DocumentInfo);
         }
 
         /// <summary>

@@ -81,7 +81,9 @@ namespace PDS.Witsml.Server.Configuration
             var context = WitsmlOperationContext.Current;
             ValidateNamespace(context.Document);
 
+            // Skip any documentInfo elements
             context.Document.Root?.Elements()
+                .Where(x => !ObjectTypes.DocumentInfo.EqualsIgnoreCase(x.Name.LocalName))
                 .ForEach(e => ValidateObjectType(context.Request.Function, context.Request.ObjectType, e.Name.LocalName));
 
             ValidatePluralRootElement(context.Request.ObjectType, context.Document);
