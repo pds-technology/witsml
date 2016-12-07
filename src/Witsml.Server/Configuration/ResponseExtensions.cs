@@ -40,10 +40,10 @@ namespace PDS.Witsml.Server.Configuration
                 context.RequestLatestValues = parser.RequestLatestValues();
 
                 context.MaxDataNodes = context.MaxReturnNodes.HasValue
-                    ? Math.Min(context.MaxReturnNodes.Value, WitsmlSettings.MaxDataNodes)
-                    : WitsmlSettings.MaxDataNodes;
-                context.MaxDataPoints = WitsmlSettings.MaxDataPoints;
-                context.TotalMaxDataNodes = Math.Min(context.MaxDataNodes * parser.QueryCount, WitsmlSettings.MaxDataNodes);
+                    ? Math.Min(context.MaxReturnNodes.Value, WitsmlSettings.LogMaxDataNodesGet)
+                    : WitsmlSettings.LogMaxDataNodesGet;
+                context.MaxDataPoints = WitsmlSettings.LogMaxDataPointsGet;
+                context.TotalMaxDataNodes = Math.Min(context.MaxDataNodes * parser.QueryCount, WitsmlSettings.LogMaxDataNodesGet);
 
                 context.TotalDataNodes = 0;
                 context.TotalDataPoints = 0;
@@ -71,7 +71,7 @@ namespace PDS.Witsml.Server.Configuration
 
                 // Update query maximums for the next query
                 context.MaxDataNodes = Math.Min(context.MaxDataNodes, context.TotalMaxDataNodes - context.TotalDataNodes);
-                context.MaxDataPoints = WitsmlSettings.MaxDataPoints - context.TotalDataPoints;
+                context.MaxDataPoints = WitsmlSettings.LogMaxDataPointsGet - context.TotalDataPoints;
             }
         }
 

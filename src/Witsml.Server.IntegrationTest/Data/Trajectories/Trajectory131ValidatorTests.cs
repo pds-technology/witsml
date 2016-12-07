@@ -135,19 +135,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory131Validator_AddToStore_Error_456_Max_Data_Exceeded_For_Nodes()
-        {
-            var maxDataNodes = 5;
-            WitsmlSettings.MaxDataNodes = maxDataNodes;
-
-            AddParents();
-
-            // Add trajectory without stations         
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(6, 0);
-            DevKit.AddAndAssert(Trajectory, ErrorCodes.MaxDataExceeded);
-        }
-
-        [TestMethod]
         public void Trajectory131Validator_AddToStore_Error_464_Child_Uids_Not_Unique()
         {
             AddParents();

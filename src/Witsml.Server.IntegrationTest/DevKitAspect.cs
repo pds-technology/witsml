@@ -35,8 +35,22 @@ namespace PDS.Witsml.Server
         public static readonly int DefaultXmlOutDebugSize = WitsmlSettings.TruncateXmlOutDebugSize;
         public static readonly long DefaultDepthChunkRange = WitsmlSettings.DepthRangeSize;
         public static readonly long DefaultTimeChunkRange = WitsmlSettings.TimeRangeSize;
-        public static readonly int DefaultMaxDataPoints = WitsmlSettings.MaxDataPoints;
-        public static readonly int DefaultMaxDataNodes = WitsmlSettings.MaxDataNodes;
+        public static readonly int DefaultLogMaxDataPointsGet = WitsmlSettings.LogMaxDataPointsGet;
+        public static readonly int DefaultLogMaxDataPointsAdd = WitsmlSettings.LogMaxDataPointsAdd;
+        public static readonly int DefaultLogMaxDataPointsUpdate = WitsmlSettings.LogMaxDataPointsUpdate;
+        public static readonly int DefaultLogMaxDataPointsDelete = WitsmlSettings.LogMaxDataPointsDelete;
+        public static readonly int DefaultLogMaxDataNodesGet = WitsmlSettings.LogMaxDataNodesGet;
+        public static readonly int DefaultLogMaxDataNodesAdd = WitsmlSettings.LogMaxDataNodesAdd;
+        public static readonly int DefaultLogMaxDataNodesUpdate = WitsmlSettings.LogMaxDataNodesUpdate;
+        public static readonly int DefaultLogMaxDataNodesDelete = WitsmlSettings.LogMaxDataNodesDelete;
+        public static readonly int DefaultTrajectoryMaxDataNodesGet = WitsmlSettings.TrajectoryMaxDataNodesGet;
+        public static readonly int DefaultTrajectoryMaxDataNodesAdd = WitsmlSettings.TrajectoryMaxDataNodesAdd;
+        public static readonly int DefaultTrajectoryMaxDataNodesUpdate = WitsmlSettings.TrajectoryMaxDataNodesUpdate;
+        public static readonly int DefaultTrajectoryMaxDataNodesDelete = WitsmlSettings.TrajectoryMaxDataNodesDelete;
+        public static readonly int DefaultMudLogMaxDataNodesGet = WitsmlSettings.MudLogMaxDataNodesGet;
+        public static readonly int DefaultMudLogMaxDataNodesAdd = WitsmlSettings.MudLogMaxDataNodesAdd;
+        public static readonly int DefaultMudLogMaxDataNodesUpdate = WitsmlSettings.MudLogMaxDataNodesUpdate;
+        public static readonly int DefaultMudLogMaxDataNodesDelete = WitsmlSettings.MudLogMaxDataNodesDelete;
         public static readonly int DefaultMaxStationCount = WitsmlSettings.MaxStationCount;
 
         public readonly string TimeZone = "-06:00";

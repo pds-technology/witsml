@@ -1250,8 +1250,8 @@ namespace PDS.Witsml.Server.Data.Logs
             var query2 = DevKit.CreateLog(log2Response.SuppMsgOut, null, log2.UidWell, null, log2.UidWellbore, null);
 
             // This will cap the total response nodes to 8 instead of 10 if this was not specified.
-            var previousMaxDataNodes = WitsmlSettings.MaxDataNodes;
-            WitsmlSettings.MaxDataNodes = 8;
+            var previousMaxDataNodes = WitsmlSettings.LogMaxDataNodesGet;
+            WitsmlSettings.LogMaxDataNodesGet = 8;
 
             try
             {
@@ -1276,14 +1276,14 @@ namespace PDS.Witsml.Server.Data.Logs
                 // Since there is a total cap of 8 rows the last log should have only 3 rows.
                 var log1 = (logList.Items[1] as Log);
                 Assert.IsNotNull(log1);
-                Assert.AreEqual(WitsmlSettings.MaxDataNodes - maxReturnNodes,
+                Assert.AreEqual(WitsmlSettings.LogMaxDataNodesGet - maxReturnNodes,
                     log1.LogData[0].Data.Count);
 
-                WitsmlSettings.MaxDataNodes = previousMaxDataNodes;
+                WitsmlSettings.LogMaxDataNodesGet = previousMaxDataNodes;
             }
             catch
             {
-                WitsmlSettings.MaxDataNodes = previousMaxDataNodes;
+                WitsmlSettings.LogMaxDataNodesGet = previousMaxDataNodes;
             }
         }
 
@@ -1316,7 +1316,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsTrue(maxDataPoints < returnDataPoints);
 
             // Change the MaxDataPoints in Settings to a small number and query the log again
-            WitsmlSettings.MaxDataPoints = maxDataPoints;
+            WitsmlSettings.LogMaxDataPointsGet = maxDataPoints;
 
             result = DevKit.QueryWithErrorCode<LogList, Log>(query, out errorCode, ObjectTypes.Log, null,
                 OptionsIn.ReturnElements.All);

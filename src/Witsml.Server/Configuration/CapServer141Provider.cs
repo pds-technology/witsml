@@ -140,7 +140,7 @@ namespace PDS.Witsml.Server.Configuration
             capServer.SchemaVersion = DataSchemaVersion;
             capServer.SupportUomConversion = false; // TODO: update after UoM conversion implemented
             capServer.CompressionMethod = OptionsIn.CompressionMethod.None.Value; // TODO: update when compression is supported
-            capServer.MaxRequestLatestValues = WitsmlSettings.MaxDataNodes;
+            capServer.MaxRequestLatestValues = WitsmlSettings.MaxRequestLatestValues;
 
             capServer.Name = WitsmlSettings.DefaultServerName;
             capServer.Version = WitsmlSettings.OverrideServerVersion;

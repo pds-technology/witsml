@@ -2,9 +2,6 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="PDS.Witsml.Server.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="MaxDataNodes" Type="System.Int32" Scope="Application">
-      <Value Profile="(Default)">15000</Value>
-    </Setting>
     <Setting Name="DefaultServerName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">PDS.Witsml.Server</Value>
     </Setting>
@@ -31,9 +28,6 @@
     </Setting>
     <Setting Name="MaxMessageRate" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">1000</Value>
-    </Setting>
-    <Setting Name="MaxDataPoints" Type="System.Int32" Scope="Application">
-      <Value Profile="(Default)">5000000</Value>
     </Setting>
     <Setting Name="ChannelDataChunkDepthRangeSize" Type="System.Int64" Scope="Application">
       <Value Profile="(Default)">5000</Value>
@@ -67,6 +61,57 @@
     </Setting>
     <Setting Name="StreamChannelDataDelayMilliseconds" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">100</Value>
+    </Setting>
+    <Setting Name="LogMaxDataNodesGet" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">15000</Value>
+    </Setting>
+    <Setting Name="LogMaxDataNodesAdd" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">15000</Value>
+    </Setting>
+    <Setting Name="LogMaxDataNodesUpdate" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">15000</Value>
+    </Setting>
+    <Setting Name="LogMaxDataNodesDelete" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">15000</Value>
+    </Setting>
+    <Setting Name="LogMaxDataPointsGet" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">3000000</Value>
+    </Setting>
+    <Setting Name="LogMaxDataPointsAdd" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">4500000</Value>
+    </Setting>
+    <Setting Name="LogMaxDataPointsUpdate" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">3000000</Value>
+    </Setting>
+    <Setting Name="LogMaxDataPointsDelete" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">3000000</Value>
+    </Setting>
+    <Setting Name="TrajectoryMaxReturnNodesGet" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">10000</Value>
+    </Setting>
+    <Setting Name="TrajectoryMaxReturnNodesAdd" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">10000</Value>
+    </Setting>
+    <Setting Name="TrajectoryMaxReturnNodesUpdate" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">10000</Value>
+    </Setting>
+    <Setting Name="TrajectoryMaxReturnNodesDelete" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">10000</Value>
+    </Setting>
+    <Setting Name="MudlogMaxReturnNodesGet" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">10000</Value>
+    </Setting>
+    <Setting Name="MudlogMaxReturnNodesAdd" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">10000</Value>
+    </Setting>
+    <Setting Name="MudlogMaxReturnNodesUpdate" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">10000</Value>
+    </Setting>
+    <Setting Name="MudlogMaxReturnNodesDelete" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">10000</Value>
+    </Setting>
+    <Setting Name="MaxRequestLatestValues" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">500</Value>
     </Setting>
   </Settings>
 </SettingsFile>

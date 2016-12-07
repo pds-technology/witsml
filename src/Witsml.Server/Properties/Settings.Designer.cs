@@ -25,15 +25,6 @@ namespace PDS.Witsml.Server.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("15000")]
-        public int MaxDataNodes {
-            get {
-                return ((int)(this["MaxDataNodes"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("PDS.Witsml.Server")]
         public string DefaultServerName {
             get {
@@ -110,15 +101,6 @@ namespace PDS.Witsml.Server.Properties {
         public int MaxMessageRate {
             get {
                 return ((int)(this["MaxMessageRate"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("5000000")]
-        public int MaxDataPoints {
-            get {
-                return ((int)(this["MaxDataPoints"]));
             }
         }
         
@@ -219,6 +201,159 @@ namespace PDS.Witsml.Server.Properties {
         public int StreamChannelDataDelayMilliseconds {
             get {
                 return ((int)(this["StreamChannelDataDelayMilliseconds"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("15000")]
+        public int LogMaxDataNodesGet {
+            get {
+                return ((int)(this["LogMaxDataNodesGet"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("15000")]
+        public int LogMaxDataNodesAdd {
+            get {
+                return ((int)(this["LogMaxDataNodesAdd"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("15000")]
+        public int LogMaxDataNodesUpdate {
+            get {
+                return ((int)(this["LogMaxDataNodesUpdate"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("15000")]
+        public int LogMaxDataNodesDelete {
+            get {
+                return ((int)(this["LogMaxDataNodesDelete"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("3000000")]
+        public int LogMaxDataPointsGet {
+            get {
+                return ((int)(this["LogMaxDataPointsGet"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("4500000")]
+        public int LogMaxDataPointsAdd {
+            get {
+                return ((int)(this["LogMaxDataPointsAdd"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("3000000")]
+        public int LogMaxDataPointsUpdate {
+            get {
+                return ((int)(this["LogMaxDataPointsUpdate"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("3000000")]
+        public int LogMaxDataPointsDelete {
+            get {
+                return ((int)(this["LogMaxDataPointsDelete"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10000")]
+        public int TrajectoryMaxDataNodesGet {
+            get {
+                return ((int)(this["TrajectoryMaxReturnNodesGet"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10000")]
+        public int TrajectoryMaxDataNodesAdd {
+            get {
+                return ((int)(this["TrajectoryMaxReturnNodesAdd"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10000")]
+        public int TrajectoryMaxDataNodesUpdate {
+            get {
+                return ((int)(this["TrajectoryMaxReturnNodesUpdate"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10000")]
+        public int TrajectoryMaxDataNodesDelete {
+            get {
+                return ((int)(this["TrajectoryMaxReturnNodesDelete"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10000")]
+        public int MudlogMaxDataNodesGet {
+            get {
+                return ((int)(this["MudlogMaxReturnNodesGet"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10000")]
+        public int MudlogMaxDataNodesAdd {
+            get {
+                return ((int)(this["MudlogMaxReturnNodesAdd"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10000")]
+        public int MudlogMaxDataNodesUpdate {
+            get {
+                return ((int)(this["MudlogMaxReturnNodesUpdate"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10000")]
+        public int MudlogMaxDataNodesDelete {
+            get {
+                return ((int)(this["MudlogMaxReturnNodesDelete"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("500")]
+        public int MaxRequestLatestValues {
+            get {
+                return ((int)(this["MaxRequestLatestValues"]));
             }
         }
     }
