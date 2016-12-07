@@ -56,6 +56,11 @@ namespace PDS.Witsml.Server.Configuration
         /// <summary>
         /// The log GetFromStore maximum data nodes
         /// </summary>
+        public static int MaxRequestLatestValues = Properties.Settings.Default.MaxRequestLatestValues;
+
+        /// <summary>
+        /// The log GetFromStore maximum data nodes
+        /// </summary>
         public static int LogMaxDataNodesGet = Properties.Settings.Default.LogMaxDataNodesGet;
 
         /// <summary>
@@ -116,22 +121,22 @@ namespace PDS.Witsml.Server.Configuration
         /// <summary>
         /// The MudLog GetFromStore maximum data nodes
         /// </summary>
-        public static int MudLogMaxDataNodesGet = Properties.Settings.Default.MudLogMaxDataNodesGet;
+        public static int MudLogMaxDataNodesGet = Properties.Settings.Default.MudlogMaxDataNodesGet;
 
         /// <summary>
         /// The MudLog AddToStore maximum data nodes
         /// </summary>
-        public static int MudLogMaxDataNodesAdd = Properties.Settings.Default.MudLogMaxDataNodesAdd;
+        public static int MudLogMaxDataNodesAdd = Properties.Settings.Default.MudlogMaxDataNodesAdd;
 
         /// <summary>
         /// The MudLog UpdateInStore maximum data nodes
         /// </summary>
-        public static int MudLogMaxDataNodesUpdate = Properties.Settings.Default.MudLogMaxDataNodesUpdate;
+        public static int MudLogMaxDataNodesUpdate = Properties.Settings.Default.MudlogMaxDataNodesUpdate;
 
         /// <summary>
         /// The MudLog DeleteFromStore maximum data nodes
         /// </summary>
-        public static int MudLogMaxDataNodesDelete = Properties.Settings.Default.MudLogMaxDataNodesDelete;
+        public static int MudLogMaxDataNodesDelete = Properties.Settings.Default.MudlogMaxDataNodesDelete;
 
         /// <summary>
         /// The default server name

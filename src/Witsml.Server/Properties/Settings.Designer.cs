@@ -25,15 +25,6 @@ namespace PDS.Witsml.Server.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("15000")]
-        public int LogMaxDataNodesGet {
-            get {
-                return ((int)(this["LogMaxDataNodesGet"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("PDS.Witsml.Server")]
         public string DefaultServerName {
             get {
@@ -110,15 +101,6 @@ namespace PDS.Witsml.Server.Properties {
         public int MaxMessageRate {
             get {
                 return ((int)(this["MaxMessageRate"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("3000000")]
-        public int LogMaxDataPointsGet {
-            get {
-                return ((int)(this["LogMaxDataPointsGet"]));
             }
         }
         
@@ -225,6 +207,15 @@ namespace PDS.Witsml.Server.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("15000")]
+        public int LogMaxDataNodesGet {
+            get {
+                return ((int)(this["LogMaxDataNodesGet"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("15000")]
         public int LogMaxDataNodesAdd {
             get {
                 return ((int)(this["LogMaxDataNodesAdd"]));
@@ -246,6 +237,15 @@ namespace PDS.Witsml.Server.Properties {
         public int LogMaxDataNodesDelete {
             get {
                 return ((int)(this["LogMaxDataNodesDelete"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("3000000")]
+        public int LogMaxDataPointsGet {
+            get {
+                return ((int)(this["LogMaxDataPointsGet"]));
             }
         }
         
@@ -315,7 +315,7 @@ namespace PDS.Witsml.Server.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("10000")]
-        public int MudLogMaxDataNodesGet {
+        public int MudlogMaxDataNodesGet {
             get {
                 return ((int)(this["MudlogMaxReturnNodesGet"]));
             }
@@ -324,7 +324,7 @@ namespace PDS.Witsml.Server.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("10000")]
-        public int MudLogMaxDataNodesAdd {
+        public int MudlogMaxDataNodesAdd {
             get {
                 return ((int)(this["MudlogMaxReturnNodesAdd"]));
             }
@@ -333,7 +333,7 @@ namespace PDS.Witsml.Server.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("10000")]
-        public int MudLogMaxDataNodesUpdate {
+        public int MudlogMaxDataNodesUpdate {
             get {
                 return ((int)(this["MudlogMaxReturnNodesUpdate"]));
             }
@@ -342,9 +342,18 @@ namespace PDS.Witsml.Server.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("10000")]
-        public int MudLogMaxDataNodesDelete {
+        public int MudlogMaxDataNodesDelete {
             get {
                 return ((int)(this["MudlogMaxReturnNodesDelete"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("500")]
+        public int MaxRequestLatestValues {
+            get {
+                return ((int)(this["MaxRequestLatestValues"]));
             }
         }
     }
