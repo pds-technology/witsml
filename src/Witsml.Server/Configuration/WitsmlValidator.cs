@@ -391,8 +391,7 @@ namespace PDS.Witsml.Server.Configuration
         /// Validates the selection criteria.
         /// </summary>
         /// <param name="document">The queryIn XML document.</param>
-        /// <param name="allowEmptyRecurringElements">If set to true then allow empty recurring elements.</param>
-        public static void ValidateSelectionCriteria(XDocument document, bool allowEmptyRecurringElements = false)
+        public static void ValidateSelectionCriteria(XDocument document)
         {
             _log.Debug("Validating selection criteria.");
 
@@ -400,7 +399,7 @@ namespace PDS.Witsml.Server.Configuration
 
             foreach (var entity in entities)
             {
-                ValidateSelectionCriteriaForAnEntity(entity, allowEmptyRecurringElements);
+                ValidateSelectionCriteriaForAnEntity(entity);
             }
         }
 
@@ -486,36 +485,27 @@ namespace PDS.Witsml.Server.Configuration
         /// Recursively validates the selection criteria for an element.
         /// </summary>
         /// <param name="entity">The entity.</param>
-        /// <param name="allowEmptyRecurringElements">If set to true then allow empty recurring elements.</param>
-        private static void ValidateSelectionCriteriaForAnEntity(XElement entity, bool allowEmptyRecurringElements = false)
+        private static void ValidateSelectionCriteriaForAnEntity(XElement entity)
         {
-            _log.DebugFormat("Validating selection criteria for {0}", entity.Name.LocalName);
             if (entity == null) return;
 
-            var elements = entity.Elements();
-            if (elements == null) return;
+            _log.Debug($"Validating selection criteria for {entity.Name.LocalName}");
 
-            var groupings = elements.GroupBy(e => e.Name.LocalName);
+            var groupings = entity.Elements().GroupBy(e => e.Name.LocalName);
 
             foreach (var group in groupings)
             {
                 var values = group.ToList();
-                var count = values.Count;
-
                 var selection = values[0];
 
-                if (count == 1)
+                if (values.Count == 1)
                 {
                     ValidateSelectionCriteriaForAnEntity(selection);
                 }
                 else
                 {
-                    ValidateEmptyRecurringElement(selection, allowEmptyRecurringElements);
-
-                    for (var i = 1; i < values.Count; i++)
+                    foreach (var match in values.Skip(1))
                     {
-                        var match = values[i];
-                        ValidateEmptyRecurringElement(match, allowEmptyRecurringElements);
                         IsSelectionMatch(selection, match);
                         ValidateSelectionCriteriaForAnEntity(match);
                     }
@@ -529,48 +519,50 @@ namespace PDS.Witsml.Server.Configuration
 
             foreach (var attribute in source.Attributes())
             {
-                if (!target.Attributes().Any(a => a.Name.LocalName == attribute.Name.LocalName))
+                var other = target.Attributes()
+                    .FirstOrDefault(a => a.Name.LocalName == attribute.Name.LocalName);
+
+                if (other == null)
                     throw new WitsmlException(ErrorCodes.RecurringItemsInconsistentSelection);
+
+                if (string.IsNullOrWhiteSpace(other.Value) != string.IsNullOrWhiteSpace(attribute.Value))
+                    throw new WitsmlException(ErrorCodes.RecurringItemsEmptySelection);
             }
 
             foreach (var attribute in target.Attributes())
             {
-                if (!source.Attributes().Any(a => a.Name.LocalName == attribute.Name.LocalName))
+                var other = source.Attributes()
+                    .FirstOrDefault(a => a.Name.LocalName == attribute.Name.LocalName);
+
+                if (other == null)
                     throw new WitsmlException(ErrorCodes.RecurringItemsInconsistentSelection);
+
+                if (string.IsNullOrWhiteSpace(other.Value) != string.IsNullOrWhiteSpace(attribute.Value))
+                    throw new WitsmlException(ErrorCodes.RecurringItemsEmptySelection);
             }
 
             foreach (var element in source.Elements())
             {
-                if (!target.Elements().Any(e => e.Name.LocalName == element.Name.LocalName))
+                var other = target.Elements()
+                    .FirstOrDefault(a => a.Name.LocalName == element.Name.LocalName);
+
+                if (other == null)
                     throw new WitsmlException(ErrorCodes.RecurringItemsInconsistentSelection);
+
+                if (string.IsNullOrWhiteSpace(other.Value) != string.IsNullOrWhiteSpace(element.Value))
+                    throw new WitsmlException(ErrorCodes.RecurringItemsEmptySelection);
             }
 
             foreach (var element in target.Elements())
             {
-                if (!source.Elements().Any(e => e.Name.LocalName == element.Name.LocalName))
+                var other = source.Elements()
+                    .FirstOrDefault(a => a.Name.LocalName == element.Name.LocalName);
+
+                if (other == null)
                     throw new WitsmlException(ErrorCodes.RecurringItemsInconsistentSelection);
-            }
-        }
 
-        /// <summary>
-        /// Determines whether there is empty recurring element
-        /// </summary>
-        /// <param name="element">The element.</param>
-        /// <param name="allowEmptyRecurringElements">If set to true then allow empty recurring elements.</param>
-        /// <exception cref="WitsmlException"></exception>
-        private static void ValidateEmptyRecurringElement(XElement element, bool allowEmptyRecurringElements = false)
-        {
-            // 131 Is allowed to have recurring empty elements
-            if (allowEmptyRecurringElements)
-                return;
-
-            _log.Debug("Validating empty recurring elements.");
-
-            if (string.IsNullOrEmpty(element.Value) && !element.HasAttributes
-                || element.Elements().Any(e => string.IsNullOrEmpty(e.Value))
-                || element.Attributes().Any(a => string.IsNullOrEmpty(a.Value)))
-            {
-                throw new WitsmlException(ErrorCodes.RecurringItemsEmptySelection);
+                if (string.IsNullOrWhiteSpace(other.Value) != string.IsNullOrWhiteSpace(element.Value))
+                    throw new WitsmlException(ErrorCodes.RecurringItemsEmptySelection);
             }
         }
     }
