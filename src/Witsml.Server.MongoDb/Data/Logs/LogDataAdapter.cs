@@ -159,8 +159,8 @@ namespace PDS.Witsml.Server.Data.Logs
             var context = new ResponseContext()
             {
                 RequestLatestValues = requestLatestValues,
-                MaxDataNodes = WitsmlSettings.MaxDataNodes,
-                MaxDataPoints = WitsmlSettings.MaxDataPoints
+                MaxDataNodes = WitsmlSettings.LogMaxDataNodesGet,
+                MaxDataPoints = WitsmlSettings.LogMaxDataPointsGet
             };
 
             Dictionary<string, Range<double?>> ranges;
@@ -1231,7 +1231,7 @@ namespace PDS.Witsml.Server.Data.Logs
             //... don't allow more than the maximum.
             if (requestLatestValues.HasValue)
             {
-                requestLatestValues = Math.Min(WitsmlSettings.MaxDataNodes, requestLatestValues.Value);
+                requestLatestValues = Math.Min(WitsmlSettings.LogMaxDataNodesGet, requestLatestValues.Value);
                 Logger.DebugFormat("Request latest value = {0}", requestLatestValues);
             }
 

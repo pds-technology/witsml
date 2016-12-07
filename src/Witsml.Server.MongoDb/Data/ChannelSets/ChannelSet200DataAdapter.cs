@@ -142,8 +142,8 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             var context = new ResponseContext()
             {
                 RequestLatestValues = requestLatestValues,
-                MaxDataNodes = WitsmlSettings.MaxDataNodes,
-                MaxDataPoints = WitsmlSettings.MaxDataPoints
+                MaxDataNodes = WitsmlSettings.LogMaxDataNodesGet,
+                MaxDataPoints = WitsmlSettings.LogMaxDataPointsGet
             };
 
             // Get the ranges for the query mnemonics

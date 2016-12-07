@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
@@ -57,6 +58,9 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 : range.End.HasValue
                     ? stations.Where(s => s.MD.Value <= range.End.Value).ToList()
                     : stations;
+
+            if (entity.TrajectoryStation.Count > WitsmlSettings.TrajectoryMaxDataNodesGet)
+                entity.TrajectoryStation = entity.TrajectoryStation.GetRange(0, WitsmlSettings.TrajectoryMaxDataNodesGet);
         }
 
         /// <summary>
