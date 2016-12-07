@@ -95,6 +95,45 @@ namespace PDS.Witsml.Server.Data.Trajectories
                     {
                         yield return new ValidationResult(ErrorCodes.MissingElementUidForUpdate.ToString(), new[] { "TrajectoryStation", "Uid" });
                     }
+                    else if (Context.Function.IsDataNodesValid(DataObject, stations.Count))
+                    {
+                        yield return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "TrajectoryStation" });
+                    }
+                }
+
+                var current = DataAdapter.Get(uri);
+
+                // Validate Trajectory does not exist
+                if (current == null)
+                {
+                    yield return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] { "Uid", "UidWell", "UidWellbore" });
+                }
+            }
+        }
+
+        /// <summary>
+        /// Validates the data object while executing UpdateInStore.
+        /// </summary>
+        /// <returns>
+        /// A collection of validation results.
+        /// </returns>
+        protected override IEnumerable<ValidationResult> ValidateForDelete()
+        {
+            // Validate Trajectory uid property
+            if (string.IsNullOrWhiteSpace(DataObject.UidWell) || string.IsNullOrWhiteSpace(DataObject.UidWellbore) || string.IsNullOrWhiteSpace(DataObject.Uid))
+            {
+                yield return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] { "Uid", "UidWell", "UidWellbore" });
+            }
+            else
+            {
+                var uri = DataObject.GetUri();
+                var stations = DataObject.TrajectoryStation;
+                if (stations != null)
+                {
+                    if (stations.Any(s => string.IsNullOrWhiteSpace(s.Uid)))
+                    {
+                        yield return new ValidationResult(ErrorCodes.MissingElementUidForUpdate.ToString(), new[] { "TrajectoryStation", "Uid" });
+                    }
                     else if (stations.HasDuplicateUids())
                     {
                         yield return new ValidationResult(ErrorCodes.ChildUidNotUnique.ToString(), new[] { "TrajectoryStation", "Uid" });

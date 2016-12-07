@@ -260,6 +260,8 @@ namespace PDS.Witsml.Server.Data
                         return nodeCount > WitsmlSettings.TrajectoryMaxDataNodesAdd;
                     case Functions.UpdateInStore:
                         return nodeCount > WitsmlSettings.TrajectoryMaxDataNodesUpdate;
+                    case Functions.DeleteFromStore:
+                        return nodeCount > WitsmlSettings.TrajectoryMaxDataNodesDelete;
                     default:
                         // Return error as the function is not supported
                         return true;
@@ -273,6 +275,8 @@ namespace PDS.Witsml.Server.Data
                         return nodeCount > WitsmlSettings.MudLogMaxDataNodesAdd;
                     case Functions.UpdateInStore:
                         return nodeCount > WitsmlSettings.MudLogMaxDataNodesUpdate;
+                    case Functions.DeleteFromStore:
+                        return nodeCount > WitsmlSettings.MudLogMaxDataNodesDelete;
                     default:
                         // Return error as the function is not supported
                         return true;
