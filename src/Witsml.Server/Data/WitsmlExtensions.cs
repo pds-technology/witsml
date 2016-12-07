@@ -244,9 +244,9 @@ namespace PDS.Witsml.Server.Data
                 switch (function)
                 {
                     case Functions.AddToStore:
-                        return nodeCount > WitsmlSettings.TrajectoryMaxDataNodesAdd;
+                        return nodeCount > WitsmlSettings.LogMaxDataNodesAdd;
                     case Functions.UpdateInStore:
-                        return nodeCount > WitsmlSettings.TrajectoryMaxDataNodesUpdate;
+                        return nodeCount > WitsmlSettings.LogMaxDataNodesUpdate;
                     default:
                         // Return error as the function is not supported
                         return true;

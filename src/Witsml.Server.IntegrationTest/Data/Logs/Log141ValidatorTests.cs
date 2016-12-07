@@ -104,7 +104,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141Validator_AddToStore_Error_456_Max_Data_Exceeded_For_Nodes()
         {
             var maxDataNodes = 5;
-            WitsmlSettings.LogMaxDataNodesGet = maxDataNodes;
+            WitsmlSettings.LogMaxDataPointsAdd = maxDataNodes;
 
             AddParents();
 
@@ -121,13 +121,13 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141Validator_AddToStore_Error_456_Max_Data_Exceeded_For_Points()
         {
             var maxDataPoints = 20;
-            WitsmlSettings.LogMaxDataPointsGet = maxDataPoints;
+            WitsmlSettings.LogMaxDataPointsAdd = maxDataPoints;
 
             AddParents();
 
             DevKit.InitHeader(Log, LogIndexType.measureddepth);
 
-            // Create a Data set with one more row than maxNodes
+            // Create a Data set with one more row than maxDataPoints
             DevKit.InitDataMany(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), (maxDataPoints / Log.LogCurveInfo.Count) + 1);
 
             var response = DevKit.Add<LogList, Log>(Log);

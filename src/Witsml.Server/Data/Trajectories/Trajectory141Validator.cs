@@ -130,7 +130,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 var stations = DataObject.TrajectoryStation;
                 if (stations != null)
                 {
-                    if (stations.Any(s => string.IsNullOrWhiteSpace(s.Uid)))
+                    // Only ignore if the UID is present without a value
+                    if (stations.Any(s => s.Uid != null && string.IsNullOrWhiteSpace(s.Uid)))
                     {
                         yield return new ValidationResult(ErrorCodes.MissingElementUidForUpdate.ToString(), new[] { "TrajectoryStation", "Uid" });
                     }
