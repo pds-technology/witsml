@@ -66,6 +66,14 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestCleanup]
         public void TestCleanup()
         {
+            WitsmlSettings.LogMaxDataPointsGet = DevKitAspect.DefaultLogMaxDataPointsGet;
+            WitsmlSettings.LogMaxDataPointsUpdate = DevKitAspect.DefaultLogMaxDataPointsAdd;
+            WitsmlSettings.LogMaxDataPointsAdd = DevKitAspect.DefaultLogMaxDataPointsUpdate;
+            WitsmlSettings.LogMaxDataPointsDelete = DevKitAspect.DefaultLogMaxDataPointsDelete;
+            WitsmlSettings.LogMaxDataNodesGet = DevKitAspect.DefaultLogMaxDataNodesGet;
+            WitsmlSettings.LogMaxDataNodesAdd = DevKitAspect.DefaultLogMaxDataNodesAdd;
+            WitsmlSettings.LogMaxDataNodesUpdate = DevKitAspect.DefaultLogMaxDataNodesUpdate;
+            WitsmlSettings.LogMaxDataNodesDelete = DevKitAspect.DefaultLogMaxDataNodesDelete;
             _devKit = null;
         }
 
@@ -73,6 +81,12 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141Adapter_AddToStore_Can_Add_Data_Chunk_Exceeds_MongoDb_Document_Size()
         {
             var response = _devKit.Add<WellList, Well>(_well);
+
+            // Adjust Points and Nodes for large file
+            WitsmlSettings.LogMaxDataPointsAdd = 5000000;
+            WitsmlSettings.LogMaxDataNodesAdd = 15000;
+            WitsmlSettings.LogMaxDataPointsGet = 5000000;
+            WitsmlSettings.LogMaxDataNodesGet = 15000;
 
             _wellbore.UidWell = response.SuppMsgOut;
             response = _devKit.Add<WellboreList, Wellbore>(_wellbore);

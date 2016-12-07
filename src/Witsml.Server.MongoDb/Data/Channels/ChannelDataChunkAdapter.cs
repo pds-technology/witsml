@@ -83,7 +83,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 var data = GetData(filter, ascending)
                     .TakeWhile(x =>
                     {
-                        var keep = count <= WitsmlSettings.MaxDataNodes;
+                        var keep = count <= WitsmlSettings.LogMaxDataNodesGet;
                         count += x.RecordCount;
                         return keep;
                     })

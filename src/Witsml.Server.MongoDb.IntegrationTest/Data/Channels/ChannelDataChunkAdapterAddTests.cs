@@ -68,13 +68,23 @@ namespace PDS.Witsml.Server.Data.Channels
         {
             WitsmlSettings.DepthRangeSize = DevKitAspect.DefaultDepthChunkRange;
             WitsmlSettings.TimeRangeSize = DevKitAspect.DefaultTimeChunkRange;
-            WitsmlSettings.MaxDataPoints = DevKitAspect.DefaultMaxDataPoints;
-            WitsmlSettings.MaxDataNodes = DevKitAspect.DefaultMaxDataNodes;
+            WitsmlSettings.LogMaxDataPointsGet = DevKitAspect.DefaultLogMaxDataPointsGet;
+            WitsmlSettings.LogMaxDataPointsUpdate = DevKitAspect.DefaultLogMaxDataPointsAdd;
+            WitsmlSettings.LogMaxDataPointsAdd = DevKitAspect.DefaultLogMaxDataPointsUpdate;
+            WitsmlSettings.LogMaxDataPointsDelete = DevKitAspect.DefaultLogMaxDataPointsDelete;
+            WitsmlSettings.LogMaxDataNodesGet = DevKitAspect.DefaultLogMaxDataNodesGet;
+            WitsmlSettings.LogMaxDataNodesAdd = DevKitAspect.DefaultLogMaxDataNodesAdd;
+            WitsmlSettings.LogMaxDataNodesUpdate = DevKitAspect.DefaultLogMaxDataNodesUpdate;
+            WitsmlSettings.LogMaxDataNodesDelete = DevKitAspect.DefaultLogMaxDataNodesDelete;
         }
 
         [TestMethod, Description("Test that a document larger than 16MB can be added to MongoDB")]
         public void ChannelDataChunkAdapter_AddToStore_Max_Document_Size_Exceeded_Successfully()
         {
+            // Adjust Points and Nodes for large file
+            WitsmlSettings.LogMaxDataPointsAdd = 5000000;
+            WitsmlSettings.LogMaxDataNodesAdd = 15000;
+
             // Load Well from file and assert success response
             var response = DevKit.Add_Well_from_file(
                 BuildDataFileName(string.Format(_exceedFileFormat, "well")));
