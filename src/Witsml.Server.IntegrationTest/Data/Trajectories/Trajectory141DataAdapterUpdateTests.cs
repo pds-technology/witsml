@@ -23,6 +23,7 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
@@ -344,6 +345,27 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var response = DevKit.UpdateInStore(ObjectTypes.Trajectory, queryIn, null, null);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.MissingUnitForMeasureData, response.Result);
+        }
+
+        [TestMethod, Description("Tests you cannot do UpdateInStore with more data nodes than specified in Trajectory MaxDataNodes")]
+        public void Trajectory141DataAdapter_UpdateInStore_Error_456_Exceed_MaxDataNodes()
+        {
+            // Add well and wellbore
+            AddParents();
+            var maxDataNodes = 5;
+            WitsmlSettings.TrajectoryMaxDataNodesUpdate = maxDataNodes;
+
+            // Add trajectory with 1 station
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(1, 0);
+            DevKit.AddAndAssert(Trajectory);
+
+            // Update trajectory with exceeding amount of stations
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(maxDataNodes + 1, 1);
+            DevKit.UpdateAndAssert(Trajectory, ErrorCodes.MaxDataExceeded);
+
+            // Add trajetory with max allowed stations
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(maxDataNodes, 1);
+            DevKit.UpdateAndAssert(Trajectory);
         }
 
         [TestMethod]

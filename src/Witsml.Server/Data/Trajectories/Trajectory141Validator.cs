@@ -112,7 +112,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         /// <summary>
-        /// Validates the data object while executing UpdateInStore.
+        /// Validates the data object while executing DeleteFromStore.
         /// </summary>
         /// <returns>
         /// A collection of validation results.
