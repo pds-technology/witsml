@@ -138,7 +138,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         public void Trajectory131Validator_AddToStore_Error_456_Max_Data_Exceeded_For_Nodes()
         {
             var maxDataNodes = 5;
-            WitsmlSettings.MaxDataNodes = maxDataNodes;
+            WitsmlSettings.TrajectoryMaxDataNodesGet = maxDataNodes;
 
             AddParents();
 
