@@ -281,7 +281,7 @@ namespace PDS.Witsml.Server.Properties {
         [global::System.Configuration.DefaultSettingValueAttribute("10000")]
         public int TrajectoryMaxDataNodesGet {
             get {
-                return ((int)(this["TrajectoryMaxReturnNodesGet"]));
+                return ((int)(this["TrajectoryMaxDataNodesGet"]));
             }
         }
         
@@ -290,7 +290,7 @@ namespace PDS.Witsml.Server.Properties {
         [global::System.Configuration.DefaultSettingValueAttribute("10000")]
         public int TrajectoryMaxDataNodesAdd {
             get {
-                return ((int)(this["TrajectoryMaxReturnNodesAdd"]));
+                return ((int)(this["TrajectoryMaxDataNodesAdd"]));
             }
         }
         
@@ -299,7 +299,7 @@ namespace PDS.Witsml.Server.Properties {
         [global::System.Configuration.DefaultSettingValueAttribute("10000")]
         public int TrajectoryMaxDataNodesUpdate {
             get {
-                return ((int)(this["TrajectoryMaxReturnNodesUpdate"]));
+                return ((int)(this["TrajectoryMaxDataNodesUpdate"]));
             }
         }
         
@@ -308,7 +308,7 @@ namespace PDS.Witsml.Server.Properties {
         [global::System.Configuration.DefaultSettingValueAttribute("10000")]
         public int TrajectoryMaxDataNodesDelete {
             get {
-                return ((int)(this["TrajectoryMaxReturnNodesDelete"]));
+                return ((int)(this["TrajectoryMaxDataNodesDelete"]));
             }
         }
         
@@ -317,7 +317,7 @@ namespace PDS.Witsml.Server.Properties {
         [global::System.Configuration.DefaultSettingValueAttribute("10000")]
         public int MudlogMaxDataNodesGet {
             get {
-                return ((int)(this["MudlogMaxReturnNodesGet"]));
+                return ((int)(this["MudlogMaxDataNodesGet"]));
             }
         }
         
@@ -326,7 +326,7 @@ namespace PDS.Witsml.Server.Properties {
         [global::System.Configuration.DefaultSettingValueAttribute("10000")]
         public int MudlogMaxDataNodesAdd {
             get {
-                return ((int)(this["MudlogMaxReturnNodesAdd"]));
+                return ((int)(this["MudlogMaxDataNodesAdd"]));
             }
         }
         
@@ -335,7 +335,7 @@ namespace PDS.Witsml.Server.Properties {
         [global::System.Configuration.DefaultSettingValueAttribute("10000")]
         public int MudlogMaxDataNodesUpdate {
             get {
-                return ((int)(this["MudlogMaxReturnNodesUpdate"]));
+                return ((int)(this["MudlogMaxDataNodesUpdate"]));
             }
         }
         
@@ -344,7 +344,7 @@ namespace PDS.Witsml.Server.Properties {
         [global::System.Configuration.DefaultSettingValueAttribute("10000")]
         public int MudlogMaxDataNodesDelete {
             get {
-                return ((int)(this["MudlogMaxReturnNodesDelete"]));
+                return ((int)(this["MudlogMaxDataNodesDelete"]));
             }
         }
         

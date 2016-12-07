@@ -86,28 +86,28 @@
     <Setting Name="LogMaxDataPointsDelete" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">3000000</Value>
     </Setting>
-    <Setting Name="TrajectoryMaxReturnNodesGet" Type="System.Int32" Scope="Application">
+    <Setting Name="TrajectoryMaxDataNodesGet" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">10000</Value>
     </Setting>
-    <Setting Name="TrajectoryMaxReturnNodesAdd" Type="System.Int32" Scope="Application">
+    <Setting Name="TrajectoryMaxDataNodesAdd" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">10000</Value>
     </Setting>
-    <Setting Name="TrajectoryMaxReturnNodesUpdate" Type="System.Int32" Scope="Application">
+    <Setting Name="TrajectoryMaxDataNodesUpdate" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">10000</Value>
     </Setting>
-    <Setting Name="TrajectoryMaxReturnNodesDelete" Type="System.Int32" Scope="Application">
+    <Setting Name="TrajectoryMaxDataNodesDelete" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">10000</Value>
     </Setting>
-    <Setting Name="MudlogMaxReturnNodesGet" Type="System.Int32" Scope="Application">
+    <Setting Name="MudlogMaxDataNodesGet" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">10000</Value>
     </Setting>
-    <Setting Name="MudlogMaxReturnNodesAdd" Type="System.Int32" Scope="Application">
+    <Setting Name="MudlogMaxDataNodesAdd" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">10000</Value>
     </Setting>
-    <Setting Name="MudlogMaxReturnNodesUpdate" Type="System.Int32" Scope="Application">
+    <Setting Name="MudlogMaxDataNodesUpdate" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">10000</Value>
     </Setting>
-    <Setting Name="MudlogMaxReturnNodesDelete" Type="System.Int32" Scope="Application">
+    <Setting Name="MudlogMaxDataNodesDelete" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">10000</Value>
     </Setting>
     <Setting Name="MaxRequestLatestValues" Type="System.Int32" Scope="Application">
