@@ -107,6 +107,22 @@ namespace PDS.Witsml.Server.Data
             return entities;
         }
 
+        /// <summary>
+        /// Navigates the uom attribute.
+        /// </summary>
+        /// <param name="propertyInfo">The property information.</param>
+        /// <param name="xmlObject">The XML object.</param>
+        /// <param name="propertyType">Type of the property.</param>
+        /// <param name="propertyPath">The property path.</param>
+        /// <param name="measureValue">The measure value.</param>
+        /// <param name="uomValue">The uom value.</param>
+        protected override void NavigateUomAttribute(PropertyInfo propertyInfo, XObject xmlObject, Type propertyType, string propertyPath, string measureValue, string uomValue)
+        {
+            // TODO: may need to adjust this method override when unit conversion is implemented
+            // NOTE: not applying uom filter, only using attribute for projection
+            //base.NavigateUomAttribute(propertyInfo, xmlObject, propertyType, propertyPath, measureValue, uomValue);
+            AddProjectionProperty(propertyPath);
+        }
 
         /// <summary>
         /// Handles the string value.
