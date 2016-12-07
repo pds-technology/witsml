@@ -22,6 +22,7 @@ using System.Linq;
 using System.Xml.Linq;
 using Energistics.DataAccess;
 using PDS.Framework;
+using PDS.Witsml.Server.Configuration;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
@@ -87,6 +88,21 @@ namespace PDS.Witsml.Server.Data
             {
                 MaxDataNodes = maxDataNodes,
                 MaxDataPoints = maxDataPoints
+            });
+        }
+
+        /// <summary>
+        /// Adds support for the specified function and data object to the capServer instance.
+        /// </summary>
+        /// <param name="capServer">The capServer instance.</param>
+        /// <param name="function">The WITSML Store API function.</param>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="maxDataNodes">The maximum data nodes.</param>
+        public static void Add(this Witsml141.CapServer capServer, Functions function, string dataObject, int maxDataNodes)
+        {
+            Add(capServer, function, new Witsml141Schemas.ObjectWithConstraint(dataObject)
+            {
+                MaxDataNodes = maxDataNodes,
             });
         }
 
@@ -210,6 +226,88 @@ namespace PDS.Witsml.Server.Data
             }
 
             return dataObject;
+        }
+
+
+        /// <summary>
+        /// Determines whether the logs total data points are valid for the specified function.
+        /// </summary>
+        /// <param name="function">The function.</param>
+        /// <param name="totalPoints">The total points.</param>
+        /// <returns>
+        ///   <c>true</c> if the logs total data points are valid for the specified function; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsTotalDataPointsValid(this Functions function, int totalPoints)
+        {
+            switch (function)
+            {
+                case Functions.GetFromStore:
+                    return totalPoints > WitsmlSettings.LogMaxDataPointsGet;
+                case Functions.AddToStore:
+                    return totalPoints > WitsmlSettings.LogMaxDataPointsAdd;
+                case Functions.UpdateInStore:
+                    return totalPoints > WitsmlSettings.LogMaxDataPointsUpdate;
+                case Functions.DeleteFromStore:
+                    return totalPoints > WitsmlSettings.LogMaxDataPointsDelete;
+                default:
+                    // Return error as the function is not supported
+                    return true;
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the WTISML object's node count is valid for the specified function.
+        /// </summary>
+        /// <param name="function">The function.</param>
+        /// <param name="dataObject">The WITSML object.</param>
+        /// <param name="nodeCount">The node count.</param>
+        /// <returns>
+        ///   <c>true</c> if the  WTISML object's node count is valid for the specified function; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsDataNodesValid<T>(this Functions function, T dataObject, int nodeCount)
+        {
+            var objectType = dataObject.GetType();
+            if (objectType == typeof(Witsml131.Log) || objectType == typeof(Witsml141.Log))
+            {
+                switch (function)
+                {
+                    case Functions.AddToStore:
+                        return nodeCount > WitsmlSettings.TrajectoryMaxDataNodesAdd;
+                    case Functions.UpdateInStore:
+                        return nodeCount > WitsmlSettings.TrajectoryMaxDataNodesUpdate;
+                    default:
+                        // Return error as the function is not supported
+                        return true;
+                }
+            }
+            if (objectType == typeof(Witsml131.Trajectory) || objectType == typeof(Witsml141.Trajectory))
+            {
+                switch (function)
+                {
+                    case Functions.AddToStore:
+                        return nodeCount > WitsmlSettings.TrajectoryMaxDataNodesAdd;
+                    case Functions.UpdateInStore:
+                        return nodeCount > WitsmlSettings.TrajectoryMaxDataNodesUpdate;
+                    default:
+                        // Return error as the function is not supported
+                        return true;
+                }
+            }
+            if (objectType == typeof(Witsml131.MudLog) || objectType == typeof(Witsml141.MudLog))
+            {
+                switch (function)
+                {
+                    case Functions.AddToStore:
+                        return nodeCount > WitsmlSettings.MudLogMaxDataNodesAdd;
+                    case Functions.UpdateInStore:
+                        return nodeCount > WitsmlSettings.MudLogMaxDataNodesUpdate;
+                    default:
+                        // Return error as the function is not supported
+                        return true;
+                }
+            }
+            // Return error as the object is not supported
+            return true;
         }
 
         private static Witsml131Schemas.DocumentInfo CreateDocumentInfo131(WitsmlQueryParser parser, string username)
