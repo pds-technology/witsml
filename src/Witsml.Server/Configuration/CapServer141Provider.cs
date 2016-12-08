@@ -72,6 +72,7 @@ namespace PDS.Witsml.Server.Configuration
                 ValidateKeywords(optionsIn, OptionsIn.ReturnElements.Keyword, OptionsIn.RequestObjectSelectionCapability.Keyword, OptionsIn.RequestPrivateGroupOnly.Keyword, 
                                  OptionsIn.CompressionMethod.Keyword, OptionsIn.MaxReturnNodes.Keyword, OptionsIn.RequestLatestValues.Keyword);
                 ValidateRequestMaxReturnNodes(optionsIn);
+                ValidateRequestRequestLatestValue(optionsIn);
                 ValidateRequestObjectSelectionCapability(optionsIn, request.ObjectType, document);
                 ValidateEmptyRootElement(request.ObjectType, document);
                 ValidateReturnElements(optionsIn, request.ObjectType);

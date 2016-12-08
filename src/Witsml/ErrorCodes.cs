@@ -560,6 +560,11 @@ namespace PDS.Witsml
         /// <summary>
         /// -1053 The maximum columnIndex value was greater than the logData array length.
         /// </summary>
-        InvalidLogCurveInfoColumnIndex = -1053
+        InvalidLogCurveInfoColumnIndex = -1053,
+
+        /// <summary>
+        /// -1054 The value of the OptionsIn keyword of ‘requestLatestValue’ MUST be greater than zero and less than the MaxRequestLatestValue.
+        /// </summary>
+        InvalidRequestLatestValue = -1054
     }
 }

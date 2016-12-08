@@ -547,6 +547,15 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The value of the OptionsIn keyword of ‘requestLatestValue’ MUST be greater than zero and less than the MaxRequestLatestValue..
+        /// </summary>
+        internal static string InvalidRequestLatestValue {
+            get {
+                return ResourceManager.GetString("InvalidRequestLatestValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to For WMLS_GetBaseMsg, a non-empty value must be specified for ReturnValueIn..
         /// </summary>
         internal static string InvalidReturnValueIn {

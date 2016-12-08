@@ -295,6 +295,30 @@ namespace PDS.Witsml.Server.Configuration
         }
 
         /// <summary>
+        /// Validates the request latest value.
+        /// </summary>
+        /// <param name="options">The options.</param>
+        /// <exception cref="WitsmlException"></exception>
+        public void ValidateRequestRequestLatestValue(Dictionary<string, string> options)
+        {
+            _log.Debug("Validating request latest values.");
+
+            string optionValue;
+            if (!options.TryGetValue(OptionsIn.RequestLatestValues.Keyword, out optionValue))
+            {
+                return;
+            }
+
+            // Validate value 
+            int requestLatestValue;
+            if (!int.TryParse(optionValue, out requestLatestValue) ||
+                (requestLatestValue <= 0 || requestLatestValue > WitsmlSettings.MaxRequestLatestValues))
+            {
+                throw new WitsmlException(ErrorCodes.InvalidKeywordValue);
+            }
+        }
+
+        /// <summary>
         /// Validates the requestObjectSelectionCapability option.
         /// </summary>
         /// <param name="options">The options.</param>
