@@ -290,7 +290,7 @@ namespace PDS.Witsml.Server.Configuration
             int maxReturnNodes;
             if (!int.TryParse(optionValue, out maxReturnNodes) || maxReturnNodes <= 0)
             {
-                throw new WitsmlException(ErrorCodes.InvalidRequestLatestValue);
+                throw new WitsmlException(ErrorCodes.InvalidMaxReturnNodes);
             }
         }
 
