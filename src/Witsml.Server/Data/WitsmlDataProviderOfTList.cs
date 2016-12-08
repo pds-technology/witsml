@@ -67,16 +67,22 @@ namespace PDS.Witsml.Server.Data
             var responseContext = parser.ToContext();
 
             // Execute each query separately
-            var queries = childParsers
+            var results = childParsers
                 .SelectMany(p => DataAdapter.Query(p, responseContext))
                 .ToList(); // Fully evaluate before setting the error code.
+
+            var collection = CreateCollection(results);
+
+            // Generate documentInfo, if requested
+            if (collection.Items.Count > 0 && parser.HasDocumentInfo())
+                collection.SetDocumentInfo(parser, op.User);
 
             return new WitsmlResult<IEnergisticsCollection>(
                 responseContext.DataTruncated 
                     ? op.Warnings.Any() ? ErrorCodes.PartialSuccessWithWarnings : ErrorCodes.ParialSuccess 
                     : op.Warnings.Any() ? ErrorCodes.SuccessWithWarnings : ErrorCodes.Success,
                 string.Join(" ", op.Warnings.Select(x => x.ErrorMessage)),
-                CreateCollection(queries));
+                collection);
         }
 
         /// <summary>

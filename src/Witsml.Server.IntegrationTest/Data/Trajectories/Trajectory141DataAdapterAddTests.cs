@@ -16,8 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using Energistics.DataAccess.WITSML141;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
@@ -49,6 +49,23 @@ namespace PDS.Witsml.Server.Data.Trajectories
             // Get trajectory
             var result = DevKit.GetAndAssert(Trajectory);
             Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
+        }
+
+        [TestMethod, Description("Tests you cannot do AddToStore with more data nodes than specified in Trajectory MaxDataNodes")]
+        public void Trajectory141DataAdapter_AddToStore_Error_456_Exceed_MaxDataNodes()
+        {
+            // Add well and wellbore
+            AddParents();
+            var maxDataNodes = 5;
+            WitsmlSettings.TrajectoryMaxDataNodesAdd = maxDataNodes;
+
+            // Add trajectory with exceeding amount of stations
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(maxDataNodes + 1, 0);
+            DevKit.AddAndAssert(Trajectory, ErrorCodes.MaxDataExceeded);
+
+            // Add trajetory with max allowed stations
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(maxDataNodes, 0);
+            DevKit.AddAndAssert(Trajectory);
         }
     }
 }

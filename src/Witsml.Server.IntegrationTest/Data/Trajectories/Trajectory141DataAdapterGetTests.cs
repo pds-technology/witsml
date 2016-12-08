@@ -23,6 +23,7 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Witsml.Data.Trajectories;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
@@ -276,6 +277,24 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             var stations = Trajectory.TrajectoryStation.Where(s => s.MD.Value >= start && s.MD.Value <= end).ToList();
             AssertTrajectoryStations(stations, result.TrajectoryStation);
+        }
+
+        [TestMethod, Description("Tests GetFromStore on Trajectory is limited to MaxDataNodes")]
+        public void Trajectory141DataAdapter_UpdateInStore_Results_Are_Limited_To_MaxDataNodes()
+        {
+            // Add well and wellbore
+            AddParents();
+            var maxDataNodes = 5;
+            WitsmlSettings.TrajectoryMaxDataNodesGet = maxDataNodes;
+
+            // Add trajectory with 1 station more than MaxDataNodes
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(maxDataNodes + 1, 0);
+            DevKit.AddAndAssert(Trajectory);
+
+            // Get trajectory
+            var traj = DevKit.GetAndAssert(Trajectory);
+            Assert.IsNotNull(traj);
+            Assert.AreEqual(maxDataNodes, traj.TrajectoryStation.Count);
         }
 
         private void AssertTrajectoryStations(List<TrajectoryStation> stations, List<TrajectoryStation> results, bool fullStation = false)

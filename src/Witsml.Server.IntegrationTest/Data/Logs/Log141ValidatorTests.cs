@@ -34,8 +34,14 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             WitsmlSettings.DepthRangeSize = DevKitAspect.DefaultDepthChunkRange;
             WitsmlSettings.TimeRangeSize = DevKitAspect.DefaultTimeChunkRange;
-            WitsmlSettings.MaxDataPoints = DevKitAspect.DefaultMaxDataPoints;
-            WitsmlSettings.MaxDataNodes = DevKitAspect.DefaultMaxDataNodes;
+            WitsmlSettings.LogMaxDataPointsGet = DevKitAspect.DefaultLogMaxDataPointsGet;
+            WitsmlSettings.LogMaxDataPointsUpdate = DevKitAspect.DefaultLogMaxDataPointsAdd;
+            WitsmlSettings.LogMaxDataPointsAdd = DevKitAspect.DefaultLogMaxDataPointsUpdate;
+            WitsmlSettings.LogMaxDataPointsDelete = DevKitAspect.DefaultLogMaxDataPointsDelete;
+            WitsmlSettings.LogMaxDataNodesGet = DevKitAspect.DefaultLogMaxDataNodesGet;
+            WitsmlSettings.LogMaxDataNodesAdd = DevKitAspect.DefaultLogMaxDataNodesAdd;
+            WitsmlSettings.LogMaxDataNodesUpdate = DevKitAspect.DefaultLogMaxDataNodesUpdate;
+            WitsmlSettings.LogMaxDataNodesDelete = DevKitAspect.DefaultLogMaxDataNodesDelete;
             WitsmlOperationContext.Current = null;
         }
 
@@ -98,7 +104,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141Validator_AddToStore_Error_456_Max_Data_Exceeded_For_Nodes()
         {
             var maxDataNodes = 5;
-            WitsmlSettings.MaxDataNodes = maxDataNodes;
+            WitsmlSettings.LogMaxDataPointsAdd = maxDataNodes;
 
             AddParents();
 
@@ -115,13 +121,13 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141Validator_AddToStore_Error_456_Max_Data_Exceeded_For_Points()
         {
             var maxDataPoints = 20;
-            WitsmlSettings.MaxDataPoints = maxDataPoints;
+            WitsmlSettings.LogMaxDataPointsAdd = maxDataPoints;
 
             AddParents();
 
             DevKit.InitHeader(Log, LogIndexType.measureddepth);
 
-            // Create a Data set with one more row than maxNodes
+            // Create a Data set with one more row than maxDataPoints
             DevKit.InitDataMany(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), (maxDataPoints / Log.LogCurveInfo.Count) + 1);
 
             var response = DevKit.Add<LogList, Log>(Log);
@@ -1124,6 +1130,22 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.ErrorRowDataCount, updateResponse.Result);
         }
 
+        [TestMethod, Description("Tests that you cannot perform a requestLatestValues OptionsIn with a value less than 1")]
+        public void WitsmlValidator_GetFromStore_Error_1054_MaxRequestLatestValue_Not_Greater_Than_Zero()
+        {
+            var result = DevKit.Get<LogList, Log>(DevKit.List(Log), ObjectTypes.Log, optionsIn: "requestLatestValues=0");
+
+            Assert.AreEqual((short)ErrorCodes.InvalidRequestLatestValue, result.Result);
+        }
+
+        [TestMethod, Description("Tests that you cannot perform a requestLatestValues OptionsIn with a value greater than MaxRequestLatestValues")]
+        public void WitsmlValidator_GetFromStore_Error_1054_MaxRequestLatestValue_Not_Greater_Than_MaxReturnLatestValue()
+        {
+            var result = DevKit.Get<LogList, Log>(DevKit.List(Log), ObjectTypes.Log,
+                optionsIn: $"requestLatestValues={WitsmlSettings.MaxRequestLatestValues + 1}");
+
+            Assert.AreEqual((short)ErrorCodes.InvalidRequestLatestValue, result.Result);
+        }
 
         #region Helper Methods
 

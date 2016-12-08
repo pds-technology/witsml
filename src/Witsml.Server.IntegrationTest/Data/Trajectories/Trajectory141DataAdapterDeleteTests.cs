@@ -23,6 +23,7 @@ using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Witsml.Data.Trajectories;
+using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
@@ -125,14 +126,45 @@ namespace PDS.Witsml.Server.Data.Trajectories
             Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
         }
 
-        [TestMethod]
-        public void Trajectory141DataAdapter_DeleteFromStore_Partial_Delete_Station_Items()
+        [TestMethod, Description("Tests you cannot do DeleteFromStore without specifying the trajectory uid")]
+        public void Log141DataAdapter_DeleteFromStore_Error_415_Delete_Without_Specifing_UID()
+        {
+            AddParents();
+
+            var queryIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, string.Empty, string.Empty);
+            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn, ErrorCodes.DataObjectUidMissing);
+        }
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore without specifying the trajectory station uid")]
+        public void Log141DataAdapter_DeleteFromStore_Error_448_Delete_Without_Specifing_Station_UID()
         {
             // Add well and wellbore
             AddParents();
 
             // Add trajectory without stations
-            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(4, 0, inCludeExtra: true);
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(4, 0);
+            DevKit.AddAndAssert(Trajectory);
+
+            var stations = Trajectory.TrajectoryStation;
+            var station1 = stations[0];
+
+            // Delete trajectory stations and elements
+            var delete = "<trajectoryStation uid=\"\" />";
+            var queryIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, delete);
+            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn, ErrorCodes.MissingElementUidForUpdate);
+        }
+
+
+        [TestMethod, Description("Tests you cannot do DeleteFromStore with more stations than specified in Trajectory MaxDataNodes")]
+        public void Trajectory141DataAdapter_DeleteFromStore_Error_456_Exceed_MaxDataNodes()
+        {
+            // Add well and wellbore
+            AddParents();
+            var maxDataNodes = 2;
+            WitsmlSettings.TrajectoryMaxDataNodesDelete = maxDataNodes;
+
+            // Add trajectory without stations
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(4, 0);
             DevKit.AddAndAssert(Trajectory);
 
             var stations = Trajectory.TrajectoryStation;
@@ -140,29 +172,34 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var station2 = stations[1];
             var station3 = stations[2];
 
-            // Get trajectory
-            var result = DevKit.GetAndAssert(Trajectory);
-            Assert.AreEqual(Trajectory.TrajectoryStation.Count, result.TrajectoryStation.Count);
-            var resultStation3 = stations.FirstOrDefault(s => s.Uid == station3.Uid);
-            Assert.IsNotNull(resultStation3);
-            Assert.IsNotNull(resultStation3.MDDelta);
-
             // Delete trajectory stations and elements
             var delete = "<trajectoryStation uid=\"" + station1.Uid + "\" />" + Environment.NewLine
                          + "<trajectoryStation uid=\"" + station2.Uid + "\" />" + Environment.NewLine
-                         + "<trajectoryStation uid=\"" + station3.Uid + "\"><mdDelta /></trajectoryStation>";
+                         + "<trajectoryStation uid=\"" + station3.Uid + "\" />";
             var queryIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, delete);
-            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn);
+            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn, ErrorCodes.MaxDataExceeded);
+        }
 
-            // Assert delete results
-            result = DevKit.GetAndAssert(Trajectory);
-            stations = result.TrajectoryStation;
-            Assert.AreEqual(2, stations.Count);
-            Assert.IsNull(stations.FirstOrDefault(s => s.Uid == station1.Uid));
-            Assert.IsNull(stations.FirstOrDefault(s => s.Uid == station2.Uid));
-            resultStation3 = stations.FirstOrDefault(s => s.Uid == station3.Uid);
-            Assert.IsNotNull(resultStation3);
-            Assert.IsNull(resultStation3.MDDelta);
+        [TestMethod, Description("Tests you cannot do DeleteFromStore with duplicate station UIDs")]
+        public void Trajectory141DataAdapter_DeleteFromStore_Error_464_Duplicate_Station_UIDs()
+        {
+            // Add well and wellbore
+            AddParents();
+            var maxDataNodes = 2;
+            WitsmlSettings.TrajectoryMaxDataNodesDelete = maxDataNodes;
+
+            // Add trajectory without stations
+            Trajectory.TrajectoryStation = DevKit.TrajectoryStations(4, 0);
+            DevKit.AddAndAssert(Trajectory);
+
+            var stations = Trajectory.TrajectoryStation;
+            var station1 = stations[0];
+
+            // Delete trajectory stations and elements
+            var delete = "<trajectoryStation uid=\"" + station1.Uid + "\" />" + Environment.NewLine
+                         + "<trajectoryStation uid=\"" + station1.Uid + "\" />";
+            var queryIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid, delete);
+            DevKit.DeleteAndAssert(ObjectTypes.Trajectory, queryIn, ErrorCodes.ChildUidNotUnique);
         }
     }
 }

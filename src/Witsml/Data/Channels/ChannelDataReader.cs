@@ -1812,18 +1812,29 @@ namespace PDS.Witsml.Data.Channels
 
             if (SliceExists(i))
             {
-                _records.ForEach(x =>
+                // Find start
+                foreach (var record in _records)
                 {
-                    var value = x.Last().Skip(valueIndex).FirstOrDefault();
+                    var value = record.Last().Skip(valueIndex).FirstOrDefault();
 
                     if (!IsNull(value, i))
                     {
-                        end = x[0][0];
-
-                        if (start == null)
-                            start = end;
+                        start = record[0][0];
+                        break;
                     }
-                });
+                }
+
+                // Find end
+                foreach (var record in _records.AsEnumerable().Reverse())
+                {
+                    var value = record.Last().Skip(valueIndex).FirstOrDefault();
+
+                    if (!IsNull(value, i))
+                    {
+                        end = record[0][0];
+                        break;
+                    }
+                }
             }
 
             return Range.Parse(start, end, isTimeIndex);

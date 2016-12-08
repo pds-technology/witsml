@@ -72,6 +72,7 @@ namespace PDS.Witsml.Server.Configuration
                 ValidateKeywords(optionsIn, OptionsIn.ReturnElements.Keyword, OptionsIn.RequestObjectSelectionCapability.Keyword, OptionsIn.RequestPrivateGroupOnly.Keyword, 
                                  OptionsIn.CompressionMethod.Keyword, OptionsIn.MaxReturnNodes.Keyword, OptionsIn.RequestLatestValues.Keyword);
                 ValidateRequestMaxReturnNodes(optionsIn);
+                ValidateRequestRequestLatestValue(optionsIn);
                 ValidateRequestObjectSelectionCapability(optionsIn, request.ObjectType, document);
                 ValidateEmptyRootElement(request.ObjectType, document);
                 ValidateReturnElements(optionsIn, request.ObjectType);
@@ -140,7 +141,7 @@ namespace PDS.Witsml.Server.Configuration
             capServer.SchemaVersion = DataSchemaVersion;
             capServer.SupportUomConversion = false; // TODO: update after UoM conversion implemented
             capServer.CompressionMethod = OptionsIn.CompressionMethod.None.Value; // TODO: update when compression is supported
-            capServer.MaxRequestLatestValues = WitsmlSettings.MaxDataNodes;
+            capServer.MaxRequestLatestValues = WitsmlSettings.MaxRequestLatestValues;
 
             capServer.Name = WitsmlSettings.DefaultServerName;
             capServer.Version = WitsmlSettings.OverrideServerVersion;
