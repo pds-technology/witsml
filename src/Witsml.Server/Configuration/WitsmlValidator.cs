@@ -290,7 +290,7 @@ namespace PDS.Witsml.Server.Configuration
             int maxReturnNodes;
             if (!int.TryParse(optionValue, out maxReturnNodes) || maxReturnNodes <= 0)
             {
-                throw new WitsmlException(ErrorCodes.InvalidMaxReturnNodes);
+                throw new WitsmlException(ErrorCodes.InvalidRequestLatestValue);
             }
         }
 
@@ -314,7 +314,7 @@ namespace PDS.Witsml.Server.Configuration
             if (!int.TryParse(optionValue, out requestLatestValue) ||
                 (requestLatestValue <= 0 || requestLatestValue > WitsmlSettings.MaxRequestLatestValues))
             {
-                throw new WitsmlException(ErrorCodes.InvalidKeywordValue);
+                throw new WitsmlException(ErrorCodes.InvalidRequestLatestValue);
             }
         }
 
