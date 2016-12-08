@@ -96,23 +96,27 @@ namespace PDS.Witsml.Server.Providers.Store
             try
             {
                 var uri = this.CreateAndValidateUri(args.Message.Uri, args.Header.MessageId);
+                var isInvalidObjectType = string.IsNullOrWhiteSpace(uri.ObjectType);
 
-                if (!uri.IsValid)
+                if (!uri.IsValid || isInvalidObjectType)
                 {
+                    if (isInvalidObjectType)
+                        this.UnsupportedObject(null, $"{uri.Uri}", args.Header.MessageId);
+
                     args.Cancel = true;
                     return;
                 }
 
                 WitsmlOperationContext.Current.Request = new RequestContext(Functions.GetObject, uri.ObjectType, null, null, null);
 
-                var provider = Container.Resolve<IStoreStoreProvider>(new ObjectName(uri.Version));
+                var provider = Container.Resolve<IStoreStoreProvider>(new ObjectName(uri.Version));                                
                 provider.GetObject(args);
             }
             catch (ContainerException ex)
             {
                 this.UnsupportedObject(ex, args.Message.Uri, args.Header.MessageId);
                 args.Cancel = true;
-            }
+            }            
         }
 
         /// <summary>
