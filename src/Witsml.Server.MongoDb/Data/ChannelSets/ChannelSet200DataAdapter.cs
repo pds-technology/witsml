@@ -98,21 +98,11 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         /// <returns>A collection of channel data.</returns>
         public IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, Range<double?> range)
         {
-            return GetChannelData(uri, range, null);
-        }
-
-        private IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, Range<double?> range, int? requestLatestValues)
-        {
             var entity = GetEntity(uri);
             var indexChannel = entity.Index.FirstOrDefault();
             var increasing = indexChannel.IsIncreasing();
-            var chunks = ChannelDataChunkAdapter.GetData(
-                uri, indexChannel.Mnemonic, range,
-                requestLatestValues.HasValue
-                    ? !increasing
-                    : increasing,
-                reverse: requestLatestValues.HasValue);
-            return chunks.GetRecords(range, increasing);
+
+            return GetChannelData(uri, indexChannel?.Mnemonic, range, increasing);
         }
 
         /// <summary>
@@ -181,7 +171,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             do // until finished
             {
                 // Retrieve the data from the database
-                var records = GetChannelData(uri, range, requestLatestValues);
+                var records = GetChannelData(uri, indexChannel?.Mnemonic, range, increasing, requestLatestValues);
 
                 // Get a reader to process the log's channel data records
                 var reader = records.GetReader(mnemonicIndexes.Values.ToArray(), units, dataTypes, nullValues);
@@ -569,6 +559,31 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             }
 
             return ranges;
+        }
+
+        /// <summary>
+        /// Gets the channel data for a given index range.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="indexChannel">The index channel.</param>
+        /// <param name="range">The range to query the channel data.</param>
+        /// <param name="increasing">if set to <c>true</c> if the log is increasing, false otherwise.</param>
+        /// <param name="requestLatestValues">The number of latest values requested, null if not requested.</param>
+        /// <returns>The channel data records requested</returns>
+        private IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, string indexChannel, Range<double?> range, bool increasing, int? requestLatestValues = null)
+        {
+            Logger.DebugFormat("Getting channel data for channelSet: {0}", uri);
+
+            // The increasing value passed in may be flipped we need to send in a reverse
+            //... flag to signal that there was a flip because not all code paths should be reversed.
+            var chunks = ChannelDataChunkAdapter.GetData(
+                uri, indexChannel, range,
+                requestLatestValues.HasValue
+                    ? !increasing
+                    : increasing,
+                reverse: requestLatestValues.HasValue);
+
+            return chunks.GetRecords(range, increasing, reverse: requestLatestValues.HasValue);
         }
 
         private void AddIndexRange(string mnemonic, AbstractIndexValue start, AbstractIndexValue end, Dictionary<string, Range<double?>> ranges)
