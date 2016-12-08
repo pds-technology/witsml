@@ -1130,6 +1130,22 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.ErrorRowDataCount, updateResponse.Result);
         }
 
+        [TestMethod]
+        public void WitsmlValidator_GetFromStore_Error_1054_MaxRequestLatestValue_Not_Greater_Than_Zero()
+        {
+            var result = DevKit.Get<LogList, Log>(DevKit.List(Log), ObjectTypes.Log, optionsIn: "requestLatestValues=0");
+
+            Assert.AreEqual((short)ErrorCodes.InvalidRequestLatestValue, result.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_GetFromStore_Error_1054_MaxRequestLatestValue_Not_Greater_Than_MaxReturnLatestValue()
+        {
+            var result = DevKit.Get<LogList, Log>(DevKit.List(Log), ObjectTypes.Log,
+                optionsIn: $"requestLatestValues={WitsmlSettings.MaxRequestLatestValues + 1}");
+
+            Assert.AreEqual((short)ErrorCodes.InvalidRequestLatestValue, result.Result);
+        }
 
         #region Helper Methods
 
