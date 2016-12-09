@@ -39,10 +39,26 @@ namespace PDS.Witsml.Server.Providers
 
             if (!etpUri.IsValid)
             {
-                handler.InvalidArgument(uri, messageId);
+                handler.InvalidUri(uri, messageId);
             }
 
             return etpUri;
+        }
+
+        /// <summary>
+        /// Validates URI Object Type.
+        /// </summary>
+        /// <param name="handler">The handler.</param>
+        /// <param name="etpUri">The ETP URI.</param>
+        /// <param name="messageId">The message identifier.</param>
+        /// <returns></returns>
+        public static bool ValidateUriObjectType(this EtpProtocolHandler handler, EtpUri etpUri, long messageId = 0)
+        {
+            if (!string.IsNullOrWhiteSpace(etpUri.ObjectType))
+                return true;
+
+            handler.UnsupportedObject(null, $"{etpUri.Uri}", messageId);
+            return false;
         }
     }
 }

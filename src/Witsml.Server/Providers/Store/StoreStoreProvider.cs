@@ -96,27 +96,28 @@ namespace PDS.Witsml.Server.Providers.Store
             try
             {
                 var uri = this.CreateAndValidateUri(args.Message.Uri, args.Header.MessageId);
-                var isInvalidObjectType = string.IsNullOrWhiteSpace(uri.ObjectType);
-
-                if (!uri.IsValid || isInvalidObjectType)
+                if (!uri.IsValid)
                 {
-                    if (isInvalidObjectType)
-                        this.UnsupportedObject(null, $"{uri.Uri}", args.Header.MessageId);
+                    args.Cancel = true;
+                    return;
+                }
 
+                if (!this.ValidateUriObjectType(uri, args.Header.MessageId))
+                {
                     args.Cancel = true;
                     return;
                 }
 
                 WitsmlOperationContext.Current.Request = new RequestContext(Functions.GetObject, uri.ObjectType, null, null, null);
 
-                var provider = Container.Resolve<IStoreStoreProvider>(new ObjectName(uri.Version));                                
+                var provider = Container.Resolve<IStoreStoreProvider>(new ObjectName(uri.Version));
                 provider.GetObject(args);
             }
             catch (ContainerException ex)
             {
                 this.UnsupportedObject(ex, args.Message.Uri, args.Header.MessageId);
                 args.Cancel = true;
-            }            
+            }
         }
 
         /// <summary>
@@ -130,6 +131,7 @@ namespace PDS.Witsml.Server.Providers.Store
 
             var uri = this.CreateAndValidateUri(putObject.DataObject.Resource.Uri, header.MessageId);
             if (!uri.IsValid) return;
+            if (!this.ValidateUriObjectType(uri, header.MessageId)) return;
 
             try
             {
@@ -172,6 +174,7 @@ namespace PDS.Witsml.Server.Providers.Store
             {
                 var etpUri = this.CreateAndValidateUri(uri, header.MessageId);
                 if (!etpUri.IsValid) return;
+                if (!this.ValidateUriObjectType(etpUri, header.MessageId)) return;
 
                 WitsmlOperationContext.Current.Request = new RequestContext(Functions.DeleteObject, etpUri.ObjectType, null, null, null);
 
