@@ -487,7 +487,7 @@ namespace PDS.Witsml.Server.Data.Logs
             // Query log after appending data
             result = DevKit.GetAndAssert(log);
             Assert.AreEqual(1, result.LogData.Count);
-            Assert.AreEqual(15000, result.LogData[0].Data.Count);
+            Assert.AreEqual(WitsmlSettings.LogMaxDataNodesGet, result.LogData[0].Data.Count);
         }
 
         /// <summary>
