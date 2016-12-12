@@ -20,6 +20,7 @@
                 <ModulePath>.*Energistics.DataAccess.*</ModulePath>  
                 <ModulePath>.*Etp.DevKit.*</ModulePath>  
                 <ModulePath>.*LinqExtender.*</ModulePath>  
+                <ModulePath>.*PDS.*Test\.dll$</ModulePath>  
               </Exclude>  
             </ModulePaths>  
           </CodeCoverage>  
