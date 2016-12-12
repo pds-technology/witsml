@@ -563,7 +563,7 @@ namespace PDS.Witsml
         InvalidLogCurveInfoColumnIndex = -1053,
 
         /// <summary>
-        /// -1054 The value of the OptionsIn keyword of ‘requestLatestValue’ MUST be greater than zero and less than the MaxRequestLatestValue.
+        /// -1054 The value of the OptionsIn keyword of ‘requestLatestValue’ MUST be greater than zero and less than or equal to the MaxRequestLatestValue.
         /// </summary>
         InvalidRequestLatestValue = -1054
     }

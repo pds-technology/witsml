@@ -547,7 +547,7 @@ namespace PDS.Witsml.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The value of the OptionsIn keyword of ‘requestLatestValue’ MUST be greater than zero and less than the MaxRequestLatestValue..
+        ///   Looks up a localized string similar to The value of the OptionsIn keyword of ‘requestLatestValue’ MUST be greater than zero and less than or equal to the MaxRequestLatestValue..
         /// </summary>
         internal static string InvalidRequestLatestValue {
             get {
