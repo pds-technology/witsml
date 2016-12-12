@@ -17,9 +17,9 @@
           <CodeCoverage>  
             <ModulePaths>  
               <Exclude>  
-                <ModulePath>*Energistics.DataAccess.*</ModulePath>  
-                <ModulePath>*Etp.DevKit.*</ModulePath>  
-                <ModulePath>*LinqExtender.*</ModulePath>  
+                <ModulePath>.*Energistics.DataAccess.*</ModulePath>  
+                <ModulePath>.*Etp.DevKit.*</ModulePath>  
+                <ModulePath>.*LinqExtender.*</ModulePath>  
               </Exclude>  
             </ModulePaths>  
           </CodeCoverage>  
