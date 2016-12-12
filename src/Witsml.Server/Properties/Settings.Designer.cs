@@ -206,7 +206,7 @@ namespace PDS.Witsml.Server.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("15000")]
+        [global::System.Configuration.DefaultSettingValueAttribute("10000")]
         public int LogMaxDataNodesGet {
             get {
                 return ((int)(this["LogMaxDataNodesGet"]));
@@ -260,7 +260,7 @@ namespace PDS.Witsml.Server.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("3000000")]
+        [global::System.Configuration.DefaultSettingValueAttribute("4500000")]
         public int LogMaxDataPointsUpdate {
             get {
                 return ((int)(this["LogMaxDataPointsUpdate"]));
