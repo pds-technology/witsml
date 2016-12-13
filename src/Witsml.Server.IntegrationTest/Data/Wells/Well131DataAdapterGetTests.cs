@@ -18,6 +18,7 @@
 
 using System;
 using System.Linq;
+using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -61,6 +62,56 @@ namespace PDS.Witsml.Server.Data.Wells
             // Section 6.6.4
             Assert.IsTrue(result.Any(x => x.Uid == uid02));
             Assert.IsFalse(result.Any(x => x.Uid == uid01));
+        }
+
+        [TestMethod]
+        public void Well131DataAdapter_GetFromStore_Parse_DocumentInfo_Element()
+        {
+            string queryInWithDocumentInfo =
+                    @"<wells xmlns=""http://www.witsml.org/schemas/131"" xmlns:xlink=""http://www.w3.org/1999/xlink"" 
+                            xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:dc=""http://purl.org/dc/terms/"" 
+                            xmlns:gml=""http://www.opengis.net/gml/3.2"" version=""1.3.1.1"" >                      
+                        <documentInfo />
+                        <well />
+                    </wells>";
+
+            var response = DevKit.GetFromStore(ObjectTypes.Well, queryInWithDocumentInfo, null, "");
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var wellListObject = EnergisticsConverter.XmlToObject<WellList>(response.XMLout);
+            Assert.IsNotNull(wellListObject);
+            Assert.IsNotNull(wellListObject.DocumentInfo);
+            Assert.AreEqual(ObjectTypes.Well, wellListObject.DocumentInfo.DocumentName.Value);
+        }
+
+        [TestMethod]
+        public void Well131DataAdapter_GetFromStore_Ignore_Uom_Attributes()
+        {
+            var well = DevKit.CreateTestWell();
+            var responseAddWell = DevKit.Add<WellList, Well>(well);
+
+            Assert.IsNotNull(responseAddWell);
+            Assert.AreEqual((short)ErrorCodes.Success, responseAddWell.Result);
+
+            var uid = responseAddWell.SuppMsgOut;
+
+            string queryIn = @" <wells xmlns=""http://www.witsml.org/schemas/131"" version=""1.3.1.1"">                                
+                                <well uid=""" + uid + @""">
+                                    <name />
+                                    <groundElevation uom=""m"" />
+                                    <measuredDepth uom=""ft"" /> 
+                                    <waterDepth uom=""ft"" />                               
+                                </well>
+                                </wells>";
+
+            var response = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, "");
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var wellListObject = EnergisticsConverter.XmlToObject<WellList>(response.XMLout);
+            Assert.IsNotNull(wellListObject);
+            Assert.AreEqual(1, wellListObject.Well.Count);
+            Assert.AreEqual(uid, wellListObject.Well[0].Uid);
+            Assert.AreEqual(well.Name, wellListObject.Well[0].Name);
         }
     }
 }

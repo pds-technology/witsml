@@ -401,9 +401,9 @@ namespace PDS.Witsml
             if (string.IsNullOrWhiteSpace(type.Namespace)) return null;
             var ns = type.Namespace;
 
-            return ns.StartsWith("Energistics.DataAccess.WITSML131.")
+            return ns.StartsWith("Energistics.DataAccess.WITSML131")
                 ? OptionsIn.DataVersion.Version131.Value
-                : ns.StartsWith("Energistics.DataAccess.WITSML200.")
+                : ns.StartsWith("Energistics.DataAccess.WITSML200")
                 ? OptionsIn.DataVersion.Version200.Value
                 : OptionsIn.DataVersion.Version141.Value;
         }

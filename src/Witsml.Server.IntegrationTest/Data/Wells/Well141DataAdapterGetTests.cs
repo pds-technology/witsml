@@ -25,6 +25,7 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
@@ -48,7 +49,7 @@ namespace PDS.Witsml.Server.Data.Wells
             "     <wellheadElevation uom=\"ft\">{2}</wellheadElevation>" + Environment.NewLine +
             "   </well>" + Environment.NewLine +
             "</wells>";
-
+        
         [TestMethod]
         public void Well141DataProvider_GetFromStore_Query_OptionsIn_requestObjectSelectionCapability()
         {
@@ -813,6 +814,50 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual(1, wellList.Well.Count);
             Assert.AreEqual(Well.Name, wellList.Well[0].Name);
             Assert.AreEqual("AAA Company", wellList.Well[0].Operator);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Parse_DocumentInfo_Element()
+        {
+            string queryInWithDocumentInfo = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><documentInfo /><well /></wells>";
+            var response = DevKit.GetFromStore(ObjectTypes.Well, queryInWithDocumentInfo, null, "");
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var wellListObject = EnergisticsConverter.XmlToObject<WellList>(response.XMLout);
+            Assert.IsNotNull(wellListObject);
+            Assert.IsNotNull(wellListObject.DocumentInfo);
+            Assert.AreEqual(ObjectTypes.Well, wellListObject.DocumentInfo.DocumentName.Value);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_GetFromStore_Ignore_Uom_Attributes()
+        {
+            var well = DevKit.CreateTestWell();
+            var responseAddWell = DevKit.Add<WellList, Well>(well);
+
+            Assert.IsNotNull(responseAddWell);
+            Assert.AreEqual((short)ErrorCodes.Success, responseAddWell.Result);
+
+            var uid = responseAddWell.SuppMsgOut;
+
+            string queryIn = @" <wells xmlns=""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">                                
+                                <well uid=""" + uid + @""">
+                                    <name />
+                                    <groundElevation uom=""m"" />
+                                    <measuredDepth uom=""ft"" /> 
+                                    <waterDepth uom=""ft"" />                               
+                                </well>
+                                </wells>";
+
+            var response = DevKit.GetFromStore(ObjectTypes.Well, queryIn, null, "");
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var wellListObject = EnergisticsConverter.XmlToObject<WellList>(response.XMLout);
+            Assert.IsNotNull(wellListObject);
+            Assert.AreEqual(1, wellListObject.Well.Count);
+            Assert.AreEqual(uid, wellListObject.Well[0].Uid);
+            Assert.AreEqual(well.Name, wellListObject.Well[0].Name);
         }
 
         private void AssertTestWell(Well expected, Well actual)

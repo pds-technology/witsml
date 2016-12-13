@@ -64,6 +64,35 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(0, logList.Log[0].LogData.Count);
         }
 
+        [TestMethod]
+        public void Log131DataAdapter_GetFromStore_Request_Multiple_Recurring_Items_With_Empty_Value()
+        {
+            AddParents();
+
+            DevKit.InitHeader(Log, LogIndexType.measureddepth, false);
+            var responseAddLog = DevKit.Add<LogList, Log>(Log);
+            Assert.IsNotNull(responseAddLog);
+            Assert.AreEqual((short)ErrorCodes.Success, responseAddLog.Result);
+
+            var queryIn = @"
+                            <logs xmlns=""http://www.witsml.org/schemas/131"" version=""1.3.1.1"">      
+                                <log uid=""" + Log.Uid + @""">
+                                    <logCurveInfo> 
+                                        <mnemonic>ROP</mnemonic> 
+                                        <unit /> 
+                                    </logCurveInfo>
+                                    <logCurveInfo>
+                                        <mnemonic>GR</mnemonic> 
+                                        <unit /> 
+                                    </logCurveInfo>
+                                </log>
+                            </logs>";
+
+            var response = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, null);
+            Assert.IsNotNull(response);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+        }
+
         #region Helper Methods
 
         private WMLS_AddToStoreResponse AddSetupWellWellboreLog(int numRows, bool isDepthLog, bool hasEmptyChannel, bool increasing)
