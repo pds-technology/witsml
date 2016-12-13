@@ -247,6 +247,12 @@ namespace PDS.Witsml.Server.Data
                     return totalPoints > WitsmlSettings.LogMaxDataPointsAdd;
                 case Functions.UpdateInStore:
                     return totalPoints > WitsmlSettings.LogMaxDataPointsUpdate;
+                case Functions.PutObject:
+                    // Use the lesser of the two MaxDataPoint values
+                    return totalPoints >
+                           (WitsmlSettings.LogMaxDataPointsUpdate < WitsmlSettings.LogMaxDataPointsAdd
+                               ? WitsmlSettings.LogMaxDataPointsUpdate
+                               : WitsmlSettings.LogMaxDataPointsAdd);
                 case Functions.DeleteFromStore:
                     return totalPoints > WitsmlSettings.LogMaxDataPointsDelete;
                 default:
@@ -275,6 +281,12 @@ namespace PDS.Witsml.Server.Data
                         return nodeCount > WitsmlSettings.LogMaxDataNodesAdd;
                     case Functions.UpdateInStore:
                         return nodeCount > WitsmlSettings.LogMaxDataNodesUpdate;
+                    // Use the lesser of the two MaxDataNode values
+                    case Functions.PutObject:
+                        return nodeCount > 
+                            (WitsmlSettings.LogMaxDataNodesUpdate < WitsmlSettings.LogMaxDataNodesAdd
+                                   ? WitsmlSettings.LogMaxDataNodesUpdate
+                                   : WitsmlSettings.LogMaxDataNodesAdd);
                     default:
                         // Return error as the function is not supported
                         return true;
@@ -288,6 +300,12 @@ namespace PDS.Witsml.Server.Data
                         return nodeCount > WitsmlSettings.TrajectoryMaxDataNodesAdd;
                     case Functions.UpdateInStore:
                         return nodeCount > WitsmlSettings.TrajectoryMaxDataNodesUpdate;
+                    case Functions.PutObject:
+                        // Use the lesser of the two MaxDataNode values
+                        return nodeCount >
+                               (WitsmlSettings.TrajectoryMaxDataNodesUpdate < WitsmlSettings.TrajectoryMaxDataNodesAdd
+                                   ? WitsmlSettings.TrajectoryMaxDataNodesUpdate
+                                   : WitsmlSettings.TrajectoryMaxDataNodesAdd);
                     case Functions.DeleteFromStore:
                         return nodeCount > WitsmlSettings.TrajectoryMaxDataNodesDelete;
                     default:
@@ -303,6 +321,12 @@ namespace PDS.Witsml.Server.Data
                         return nodeCount > WitsmlSettings.MudLogMaxDataNodesAdd;
                     case Functions.UpdateInStore:
                         return nodeCount > WitsmlSettings.MudLogMaxDataNodesUpdate;
+                    case Functions.PutObject:
+                        // Use the lesser of the two MaxDataNode values
+                        return nodeCount >
+                            (WitsmlSettings.MudLogMaxDataNodesUpdate < WitsmlSettings.MudLogMaxDataNodesAdd
+                                   ? WitsmlSettings.MudLogMaxDataNodesUpdate
+                                   : WitsmlSettings.MudLogMaxDataNodesAdd);
                     case Functions.DeleteFromStore:
                         return nodeCount > WitsmlSettings.MudLogMaxDataNodesDelete;
                     default:
