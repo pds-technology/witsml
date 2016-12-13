@@ -1624,15 +1624,19 @@ namespace PDS.Witsml.Server.Data.Logs
                                         <unit /> 
                                     </logCurveInfo>
                                     <logCurveInfo>
-                                        <mnemonic>GR</mnemonic> 
+                                        <mnemonic>{0}</mnemonic> 
                                         <unit /> 
                                     </logCurveInfo>
                                 </log>
                             </logs>";
 
-            var response = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, null);
+            var response = DevKit.GetFromStore(ObjectTypes.Log, string.Format(queryIn, "GR"), null, null);
             Assert.IsNotNull(response);
-            Assert.AreEqual((short)ErrorCodes.Success, response.Result);            
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var responseError = DevKit.GetFromStore(ObjectTypes.Log, string.Format(queryIn, ""), null, null);
+            Assert.IsNotNull(responseError);
+            Assert.AreEqual((short)ErrorCodes.RecurringItemsEmptySelection, responseError.Result);
         }
 
         #region Helper Methods
