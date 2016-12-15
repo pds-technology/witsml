@@ -238,7 +238,7 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         public static bool IsTotalDataPointsValid(this Functions function, int totalPoints)
         {
-            return totalPoints > function.LogGetMaxDataPoints();
+            return totalPoints > function.GetLogMaxDataPoints();
         }
 
         /// <summary>
@@ -345,7 +345,7 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="function">The function.</param>
         /// <returns>The MaxDataPoints value.</returns>
-        public static int LogGetMaxDataPoints(this Functions function)
+        public static int GetLogMaxDataPoints(this Functions function)
         {
             switch (function)
             {
