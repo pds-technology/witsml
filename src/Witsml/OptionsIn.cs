@@ -180,12 +180,22 @@ namespace PDS.Witsml
             /// <summary>
             /// The CompressionMethod for no compression
             /// </summary>
-            public static readonly CompressionMethod None = new CompressionMethod("None");
+            public static readonly CompressionMethod None = new CompressionMethod("none");
 
             /// <summary>
             /// The CompressionMethod for gzip compression
             /// </summary>
             public static readonly CompressionMethod Gzip = new CompressionMethod("gzip");
+
+            /// <summary>
+            /// Gets a collection of CompressionMethod option values.
+            /// </summary>
+            /// <returns>A collection of all CompressionMethod option values.</returns>
+            public static IEnumerable<CompressionMethod> GetValues()
+            {
+                yield return None;
+                yield return Gzip;
+            }
         }
 
         /// <summary>
