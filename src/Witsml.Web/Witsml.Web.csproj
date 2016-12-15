@@ -224,6 +224,7 @@
     <Content Include="log4net.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="Properties\PublishProfiles\pds-witsml-web.pubxml" />
     <None Include="Properties\PublishProfiles\pds-witsml.pubxml" />
     <None Include="Properties\PublishProfiles\witsml-server.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
