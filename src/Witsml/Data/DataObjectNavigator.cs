@@ -738,7 +738,7 @@ namespace PDS.Witsml.Data
             // uom is required when a measure value is specified
             if (isRequired && !string.IsNullOrWhiteSpace(measureValue) && string.IsNullOrWhiteSpace(uomValue))
             {
-                throw new WitsmlException(ErrorCodes.MissingUnitForMeasureData);
+                throw new WitsmlException(Context.Function.GetMissingUomValueErrorCode());
             }
 
             return uomValue;

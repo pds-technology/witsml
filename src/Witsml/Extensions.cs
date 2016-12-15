@@ -234,5 +234,17 @@ namespace PDS.Witsml
                 ? ErrorCodes.MissingElementUidForDelete 
                 : ErrorCodes.MissingElementUidForUpdate;
         }
+
+        /// <summary>
+        /// Gets the missing uom value error code.
+        /// </summary>
+        /// <param name="function">The function.</param>
+        /// <returns>The proper error code based on the specified function.</returns>
+        public static ErrorCodes GetMissingUomValueErrorCode(this Functions function)
+        {
+            return (function == Functions.AddToStore || function == Functions.UpdateInStore)
+                ? ErrorCodes.MissingUnitForMeasureData
+                : ErrorCodes.EmptyUomSpecified;
+        }
     }
 }
