@@ -252,17 +252,17 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         public static bool IsDataNodesValid(this Functions function, string dataObject, int nodeCount)
         {
-            if (dataObject.EqualsIgnoreCase("log"))
+            if (ObjectTypes.Log.EqualsIgnoreCase(dataObject))
             {
-                return nodeCount > function.LogGetMaxNodes();
+                return nodeCount > function.GetLogMaxNodes();
             }
-            if (dataObject.EqualsIgnoreCase("trajectory"))
+            if (ObjectTypes.Trajectory.EqualsIgnoreCase(dataObject))
             {
-                return nodeCount > function.TrajectoryGetMaxNodes();
+                return nodeCount > function.GetTrajectoryMaxNodes();
             }
-            if (dataObject.EqualsIgnoreCase("mudlog"))
+            if (ObjectTypes.MudLog.EqualsIgnoreCase(dataObject))
             {
-                return nodeCount > function.MudLogGetMaxNodes();
+                return nodeCount > function.GetMudLogMaxNodes();
             }
             // Return error as the object is not supported
             return true;
@@ -273,7 +273,7 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="function">The function.</param>
         /// <returns>The MaxDataNodes value.</returns>
-        public static int LogGetMaxNodes(this Functions function)
+        public static int GetLogMaxNodes(this Functions function)
         {
             switch (function)
             {
@@ -297,7 +297,7 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="function">The function.</param>
         /// <returns>The MaxDataNodes value.</returns>
-        public static int TrajectoryGetMaxNodes(this Functions function)
+        public static int GetTrajectoryMaxNodes(this Functions function)
         {
             switch (function)
             {
@@ -321,7 +321,7 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="function">The function.</param>
         /// <returns>The MaxDataNodes value.</returns>
-        public static int MudLogGetMaxNodes(this Functions function)
+        public static int GetMudLogMaxNodes(this Functions function)
         {
             switch (function)
             {
