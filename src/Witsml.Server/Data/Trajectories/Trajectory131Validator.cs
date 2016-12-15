@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Energistics.DataAccess.WITSML131;
+using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Trajectories
@@ -57,18 +58,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             if (stations != null)
             {
-                if (stations.Any(s => string.IsNullOrWhiteSpace(s.Uid)))
-                {
-                    yield return new ValidationResult(ErrorCodes.MissingElementUidForAdd.ToString(), new[] { "TrajectoryStation", "Uid" });
-                }
-                else if (stations.HasDuplicateUids())
-                {
-                    yield return new ValidationResult(ErrorCodes.ChildUidNotUnique.ToString(), new[] { "TrajectoryStation", "Uid" });
-                }
-                else if (Context.Function.IsDataNodesValid(DataObject, stations.Count))
-                {
-                    yield return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "TrajectoryStation" });
-                }
+                foreach (var validationResult in ValidateTrajectoryStations(stations))
+                    yield return validationResult;
             }
         }
 
@@ -91,15 +82,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 var stations = DataObject.TrajectoryStation;
                 if (stations != null)
                 {
-                    // Only ignore if the UID is present without a value
-                    if (stations.Any(s => s.Uid != null && string.IsNullOrWhiteSpace(s.Uid)))
-                    {
-                        yield return new ValidationResult(ErrorCodes.MissingElementUidForUpdate.ToString(), new[] { "TrajectoryStation", "Uid" });
-                    }
-                    else if (stations.HasDuplicateUids())
-                    {
-                        yield return new ValidationResult(ErrorCodes.ChildUidNotUnique.ToString(), new[] { "TrajectoryStation", "Uid" });
-                    }
+                    foreach (var validationResult in ValidateTrajectoryStations(stations))
+                        yield return validationResult;
                 }
 
                 var current = DataAdapter.Get(uri);
@@ -109,6 +93,64 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 {
                     yield return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] { "Uid", "UidWell", "UidWellbore" });
                 }
+            }
+        }
+
+        /// <summary>
+        /// Validates the data object while executing DeleteFromStore.
+        /// </summary>
+        /// <returns>
+        /// A collection of validation results.
+        /// </returns>
+        protected override IEnumerable<ValidationResult> ValidateForDelete()
+        {
+            // Validate Trajectory uid property
+            if (string.IsNullOrWhiteSpace(DataObject.UidWell) || string.IsNullOrWhiteSpace(DataObject.UidWellbore) || string.IsNullOrWhiteSpace(DataObject.Uid))
+            {
+                yield return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] { "Uid", "UidWell", "UidWellbore" });
+            }
+            else
+            {
+                var uri = DataObject.GetUri();
+                var stations = DataObject.TrajectoryStation;
+                if (stations != null)
+                {
+                    foreach (var validationResult in ValidateTrajectoryStations(stations))
+                        yield return validationResult;
+                }
+
+                var current = DataAdapter.Get(uri);
+
+                // Validate Trajectory does not exist
+                if (current == null)
+                {
+                    yield return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] { "Uid", "UidWell", "UidWellbore" });
+                }
+            }
+        }
+
+        /// <summary>
+        /// Validates the trajectory stations.
+        /// </summary>
+        /// <param name="stations">The trajectory stations.</param>
+        /// <returns>
+        /// A collection of validation results.
+        /// </returns>
+        private IEnumerable<ValidationResult> ValidateTrajectoryStations(List<TrajectoryStation> stations)
+        {
+            // Only ignore if the UID is present without a value
+            if (stations.Any(s => s.Uid != null && string.IsNullOrWhiteSpace(s.Uid)))
+            {
+                yield return
+                    new ValidationResult(ErrorCodes.MissingElementUidForUpdate.ToString(), new[] { "TrajectoryStation", "Uid" });
+            }
+            else if (stations.HasDuplicateUids())
+            {
+                yield return new ValidationResult(ErrorCodes.ChildUidNotUnique.ToString(), new[] { "TrajectoryStation", "Uid" });
+            }
+            else if (Context.Function.IsDataNodesValid(ObjectTypes.GetObjectType(DataObject), stations.Count))
+            {
+                yield return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "TrajectoryStation" });
             }
         }
     }

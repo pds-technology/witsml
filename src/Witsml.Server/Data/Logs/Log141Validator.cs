@@ -488,7 +488,7 @@ namespace PDS.Witsml.Server.Data.Logs
         private ValidationResult ValidateLogData(string indexCurve, List<LogCurveInfo> logCurves, List<LogData> logDatas, List<string> mergedLogCurveInfoMnemonics, string delimiter, Functions function, bool insert = true)
         {
             var totalPoints = 0;
-            if (Context.Function.IsDataNodesValid(DataObject, logDatas.Sum(x => x.Data.Count)))
+            if (Context.Function.IsDataNodesValid(ObjectTypes.GetObjectType(DataObject), logDatas.Sum(x => x.Data.Count)))
             {
                 return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] { "LogData", "Data" });
             }

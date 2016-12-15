@@ -228,7 +228,6 @@ namespace PDS.Witsml.Server.Data
             return dataObject;
         }
 
-
         /// <summary>
         /// Determines whether the logs total data points are valid for the specified function.
         /// </summary>
@@ -239,26 +238,7 @@ namespace PDS.Witsml.Server.Data
         /// </returns>
         public static bool IsTotalDataPointsValid(this Functions function, int totalPoints)
         {
-            switch (function)
-            {
-                case Functions.GetFromStore:
-                    return totalPoints > WitsmlSettings.LogMaxDataPointsGet;
-                case Functions.AddToStore:
-                    return totalPoints > WitsmlSettings.LogMaxDataPointsAdd;
-                case Functions.UpdateInStore:
-                    return totalPoints > WitsmlSettings.LogMaxDataPointsUpdate;
-                case Functions.PutObject:
-                    // Use the lesser of the two MaxDataPoint values
-                    return totalPoints >
-                           (WitsmlSettings.LogMaxDataPointsUpdate < WitsmlSettings.LogMaxDataPointsAdd
-                               ? WitsmlSettings.LogMaxDataPointsUpdate
-                               : WitsmlSettings.LogMaxDataPointsAdd);
-                case Functions.DeleteFromStore:
-                    return totalPoints > WitsmlSettings.LogMaxDataPointsDelete;
-                default:
-                    // Return error as the function is not supported
-                    return true;
-            }
+            return totalPoints > function.LogGetMaxDataPoints();
         }
 
         /// <summary>
@@ -270,72 +250,118 @@ namespace PDS.Witsml.Server.Data
         /// <returns>
         ///   <c>true</c> if the  WTISML object's node count is valid for the specified function; otherwise, <c>false</c>.
         /// </returns>
-        public static bool IsDataNodesValid<T>(this Functions function, T dataObject, int nodeCount)
+        public static bool IsDataNodesValid(this Functions function, string dataObject, int nodeCount)
         {
-            var objectType = dataObject.GetType();
-            if (objectType == typeof(Witsml131.Log) || objectType == typeof(Witsml141.Log))
+            if (dataObject.EqualsIgnoreCase("log"))
             {
-                switch (function)
-                {
-                    case Functions.AddToStore:
-                        return nodeCount > WitsmlSettings.LogMaxDataNodesAdd;
-                    case Functions.UpdateInStore:
-                        return nodeCount > WitsmlSettings.LogMaxDataNodesUpdate;
-                    // Use the lesser of the two MaxDataNode values
-                    case Functions.PutObject:
-                        return nodeCount > 
-                            (WitsmlSettings.LogMaxDataNodesUpdate < WitsmlSettings.LogMaxDataNodesAdd
-                                   ? WitsmlSettings.LogMaxDataNodesUpdate
-                                   : WitsmlSettings.LogMaxDataNodesAdd);
-                    default:
-                        // Return error as the function is not supported
-                        return true;
-                }
+                return nodeCount > function.LogGetMaxNodes();
             }
-            if (objectType == typeof(Witsml131.Trajectory) || objectType == typeof(Witsml141.Trajectory))
+            if (dataObject.EqualsIgnoreCase("trajectory"))
             {
-                switch (function)
-                {
-                    case Functions.AddToStore:
-                        return nodeCount > WitsmlSettings.TrajectoryMaxDataNodesAdd;
-                    case Functions.UpdateInStore:
-                        return nodeCount > WitsmlSettings.TrajectoryMaxDataNodesUpdate;
-                    case Functions.PutObject:
-                        // Use the lesser of the two MaxDataNode values
-                        return nodeCount >
-                               (WitsmlSettings.TrajectoryMaxDataNodesUpdate < WitsmlSettings.TrajectoryMaxDataNodesAdd
-                                   ? WitsmlSettings.TrajectoryMaxDataNodesUpdate
-                                   : WitsmlSettings.TrajectoryMaxDataNodesAdd);
-                    case Functions.DeleteFromStore:
-                        return nodeCount > WitsmlSettings.TrajectoryMaxDataNodesDelete;
-                    default:
-                        // Return error as the function is not supported
-                        return true;
-                }
+                return nodeCount > function.TrajectoryGetMaxNodes();
             }
-            if (objectType == typeof(Witsml131.MudLog) || objectType == typeof(Witsml141.MudLog))
+            if (dataObject.EqualsIgnoreCase("mudlog"))
             {
-                switch (function)
-                {
-                    case Functions.AddToStore:
-                        return nodeCount > WitsmlSettings.MudLogMaxDataNodesAdd;
-                    case Functions.UpdateInStore:
-                        return nodeCount > WitsmlSettings.MudLogMaxDataNodesUpdate;
-                    case Functions.PutObject:
-                        // Use the lesser of the two MaxDataNode values
-                        return nodeCount >
-                            (WitsmlSettings.MudLogMaxDataNodesUpdate < WitsmlSettings.MudLogMaxDataNodesAdd
-                                   ? WitsmlSettings.MudLogMaxDataNodesUpdate
-                                   : WitsmlSettings.MudLogMaxDataNodesAdd);
-                    case Functions.DeleteFromStore:
-                        return nodeCount > WitsmlSettings.MudLogMaxDataNodesDelete;
-                    default:
-                        // Return error as the function is not supported
-                        return true;
-                }
+                return nodeCount > function.MudLogGetMaxNodes();
             }
             // Return error as the object is not supported
             return true;
+        }
+
+        /// <summary>
+        /// Get the Log MaxDataNodes for the function.
+        /// </summary>
+        /// <param name="function">The function.</param>
+        /// <returns>The MaxDataNodes value.</returns>
+        public static int LogGetMaxNodes(this Functions function)
+        {
+            switch (function)
+            {
+                case Functions.GetFromStore:
+                    return WitsmlSettings.LogMaxDataNodesGet;
+                case Functions.AddToStore:
+                    return WitsmlSettings.LogMaxDataNodesAdd;
+                case Functions.UpdateInStore:
+                    return WitsmlSettings.LogMaxDataNodesUpdate;
+                case Functions.DeleteFromStore:
+                    return WitsmlSettings.LogMaxDataNodesDelete;
+                case Functions.PutObject:
+                    return Math.Min(WitsmlSettings.LogMaxDataNodesAdd, WitsmlSettings.LogMaxDataNodesUpdate);
+                default:
+                    return WitsmlSettings.LogMaxDataNodesGet;
+            }
+        }
+
+        /// <summary>
+        /// Get the Trajectory MaxDataNodes for the function.
+        /// </summary>
+        /// <param name="function">The function.</param>
+        /// <returns>The MaxDataNodes value.</returns>
+        public static int TrajectoryGetMaxNodes(this Functions function)
+        {
+            switch (function)
+            {
+                case Functions.GetFromStore:
+                    return WitsmlSettings.TrajectoryMaxDataNodesGet;
+                case Functions.AddToStore:
+                    return WitsmlSettings.TrajectoryMaxDataNodesAdd;
+                case Functions.UpdateInStore:
+                    return WitsmlSettings.TrajectoryMaxDataNodesUpdate;
+                case Functions.DeleteFromStore:
+                    return WitsmlSettings.TrajectoryMaxDataNodesDelete;
+                case Functions.PutObject:
+                    return Math.Min(WitsmlSettings.TrajectoryMaxDataNodesAdd, WitsmlSettings.TrajectoryMaxDataNodesUpdate);
+                default:
+                    return WitsmlSettings.TrajectoryMaxDataNodesGet;
+            }
+        }
+
+        /// <summary>
+        /// Get the MudLog MaxDataNodes for the function.
+        /// </summary>
+        /// <param name="function">The function.</param>
+        /// <returns>The MaxDataNodes value.</returns>
+        public static int MudLogGetMaxNodes(this Functions function)
+        {
+            switch (function)
+            {
+                case Functions.GetFromStore:
+                    return WitsmlSettings.MudLogMaxDataNodesGet;
+                case Functions.AddToStore:
+                    return WitsmlSettings.MudLogMaxDataNodesAdd;
+                case Functions.UpdateInStore:
+                    return WitsmlSettings.MudLogMaxDataNodesUpdate;
+                case Functions.DeleteFromStore:
+                    return WitsmlSettings.MudLogMaxDataNodesDelete;
+                case Functions.PutObject:
+                    return Math.Min(WitsmlSettings.MudLogMaxDataNodesAdd, WitsmlSettings.MudLogMaxDataNodesUpdate);
+                default:
+                    return WitsmlSettings.MudLogMaxDataNodesGet;
+            }
+        }
+
+        /// <summary>
+        /// Get the Log MaxDataPoints for the function.
+        /// </summary>
+        /// <param name="function">The function.</param>
+        /// <returns>The MaxDataPoints value.</returns>
+        public static int LogGetMaxDataPoints(this Functions function)
+        {
+            switch (function)
+            {
+                case Functions.GetFromStore:
+                    return WitsmlSettings.LogMaxDataPointsGet;
+                case Functions.AddToStore:
+                    return WitsmlSettings.LogMaxDataPointsAdd;
+                case Functions.UpdateInStore:
+                    return WitsmlSettings.LogMaxDataPointsUpdate;
+                case Functions.DeleteFromStore:
+                    return WitsmlSettings.LogMaxDataPointsDelete;
+                case Functions.PutObject:
+                    return Math.Min(WitsmlSettings.LogMaxDataPointsAdd, WitsmlSettings.LogMaxDataPointsUpdate);
+                default:
+                    return WitsmlSettings.LogMaxDataPointsGet;
+            }
         }
 
         private static Witsml131Schemas.DocumentInfo CreateDocumentInfo131(WitsmlQueryParser parser, string username)

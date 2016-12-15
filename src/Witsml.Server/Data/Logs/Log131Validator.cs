@@ -409,7 +409,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 return new ValidationResult(ErrorCodes.NodesWithSameIndex.ToString(), new[] { "LogData", "Data" });
             }
 
-            if (Context.Function.IsDataNodesValid(DataObject, logDatas.Count))
+            if (Context.Function.IsDataNodesValid(ObjectTypes.GetObjectType(DataObject), logDatas.Count))
             {
                 return new ValidationResult(ErrorCodes.MaxDataExceeded.ToString(), new[] {"LogData", "Data"});
             }
