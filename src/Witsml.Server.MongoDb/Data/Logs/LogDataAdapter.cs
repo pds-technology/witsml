@@ -1105,7 +1105,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 .Select((mn, index) => new { Mnemonic = mn, Index = index });
 
             // Check if mnemonics need to be filtered
-            if (queryMnemonics.Any() && !OptionsIn.ReturnElements.All.Equals(returnElements))
+            if (queryMnemonics.Any())
             {
                 // always return the index channel
                 mnemonicIndexes = mnemonicIndexes
