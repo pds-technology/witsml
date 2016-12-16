@@ -76,6 +76,10 @@ namespace PDS.Witsml.Server.Data.Wells
 
         #endregion Error -401
 
+        #region Error -402
+
+        #endregion Error -402
+
         #region Error -403
 
         [TestMethod]
@@ -169,6 +173,25 @@ namespace PDS.Witsml.Server.Data.Wells
 
 		#endregion Error -415
 
+        #region Error -420
+
+		[TestMethod]
+        public void Well131Validator_DeleteFromStore_Error_420_Well_Specifying_A_Non_Recuring_Element_That_Is_Required()
+        {
+
+            DevKit.AddAndAssert(Well);
+
+            var deleteXml = string.Format(BasicXMLTemplate,Well.Uid,
+
+                "<name />");
+            var results = DevKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
+        }
+
+		#endregion Error -420
+
         #region Error -433
 
 		[TestMethod]
@@ -202,7 +225,6 @@ namespace PDS.Witsml.Server.Data.Wells
 		[TestMethod]
         public void Well131Validator_UpdateInStore_Error_468_Well_No_Schema_Version_Declared()
         {
-            AddParents();
             DevKit.AddAndAssert<WellList, Well>(Well);
             var response = DevKit.UpdateInStore(ObjectTypes.Well, QueryMissingVersion, null, null);
             Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
@@ -228,7 +250,6 @@ namespace PDS.Witsml.Server.Data.Wells
 		[TestMethod]
         public void Well131Validator_UpdateInStore_Error_484_Well_Update_Will_Delete_Required_Element()
         {
-            AddParents();
             DevKit.AddAndAssert<WellList, Well>(Well);
 
             var nonConformingXml = string.Format(BasicXMLTemplate, Well.Uid,
@@ -239,6 +260,37 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
 		#endregion Error -484
+
+        #region Error -486
+
+		[TestMethod]
+        public void Well131Validator_AddToStore_Error_486_Well_Data_Object_Types_Dont_Match()
+        {
+
+            var xmlIn = string.Format(BasicXMLTemplate, Well.Uid,
+                string.Empty);
+
+            var response = DevKit.AddToStore(ObjectTypes.Wellbore, xmlIn, null, null);
+            Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
+        }
+
+		#endregion Error -486
+
+        #region Error -487
+
+		[TestMethod]
+        public void Well131Validator_AddToStore_Error_487_Well_Data_Object_Not_Supported()
+        {
+
+            var xmlIn = string.Format(BasicXMLTemplate, Well.Uid,
+                string.Empty);
+
+            var response = DevKit.AddToStore("target", xmlIn, null, null);
+
+            Assert.AreEqual((short)ErrorCodes.DataObjectTypeNotSupported, response.Result);
+        }
+
+		#endregion Error -487
 
     }
 }

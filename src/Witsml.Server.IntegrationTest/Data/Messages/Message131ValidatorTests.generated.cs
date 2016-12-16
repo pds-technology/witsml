@@ -76,6 +76,10 @@ namespace PDS.Witsml.Server.Data.Messages
 
         #endregion Error -401
 
+        #region Error -402
+
+        #endregion Error -402
+
         #region Error -403
 
         [TestMethod]
@@ -112,6 +116,19 @@ namespace PDS.Witsml.Server.Data.Messages
         }
 
 		#endregion Error -405
+
+        #region Error -406
+
+		[TestMethod]
+        public void Message131Validator_AddToStore_Error_406_Message_Missing_Parent_Uid()
+        {
+            AddParents();
+
+            Message.UidWellbore = null;
+            DevKit.AddAndAssert(Message, ErrorCodes.MissingElementUidForAdd);
+        }
+
+		#endregion Error -406
 
         #region Error -407
 
@@ -169,6 +186,27 @@ namespace PDS.Witsml.Server.Data.Messages
 
 		#endregion Error -415
 
+        #region Error -420
+
+		[TestMethod]
+        public void Message131Validator_DeleteFromStore_Error_420_Message_Specifying_A_Non_Recuring_Element_That_Is_Required()
+        {
+
+            AddParents();
+
+            DevKit.AddAndAssert(Message);
+
+            var deleteXml = string.Format(BasicXMLTemplate,Message.UidWell, Message.UidWellbore,Message.Uid,
+
+                "<name />");
+            var results = DevKit.DeleteFromStore(ObjectTypes.Message, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
+        }
+
+		#endregion Error -420
+
         #region Error -433
 
 		[TestMethod]
@@ -202,6 +240,7 @@ namespace PDS.Witsml.Server.Data.Messages
 		[TestMethod]
         public void Message131Validator_UpdateInStore_Error_468_Message_No_Schema_Version_Declared()
         {
+
             AddParents();
             DevKit.AddAndAssert<MessageList, Message>(Message);
             var response = DevKit.UpdateInStore(ObjectTypes.Message, QueryMissingVersion, null, null);
@@ -209,6 +248,29 @@ namespace PDS.Witsml.Server.Data.Messages
         }
 
 		#endregion Error -468
+
+        #region Error -478
+
+		[TestMethod]
+        public void Message131Validator_AddToStore_Error_478_Message_Parent_Uid_Case_Not_Matching()
+        {
+            Well.Uid = Well.Uid.ToUpper();
+            AddParents();
+            Message.UidWell = Well.Uid.ToLower();
+            DevKit.AddAndAssert(Message, ErrorCodes.IncorrectCaseParentUid);
+        }
+
+		#endregion Error -478
+
+        #region Error -481
+
+		[TestMethod]
+        public void Message131Validator_AddToStore_Error_481_Message_Parent_Does_Not_Exist()
+        {
+            DevKit.AddAndAssert(Message, ErrorCodes.MissingParentDataObject);
+        }
+
+		#endregion Error -481
 
         #region Error -483
 
@@ -228,6 +290,7 @@ namespace PDS.Witsml.Server.Data.Messages
 		[TestMethod]
         public void Message131Validator_UpdateInStore_Error_484_Message_Update_Will_Delete_Required_Element()
         {
+
             AddParents();
             DevKit.AddAndAssert<MessageList, Message>(Message);
 
@@ -239,6 +302,41 @@ namespace PDS.Witsml.Server.Data.Messages
         }
 
 		#endregion Error -484
+
+        #region Error -486
+
+		[TestMethod]
+        public void Message131Validator_AddToStore_Error_486_Message_Data_Object_Types_Dont_Match()
+        {
+
+            AddParents();
+
+            var xmlIn = string.Format(BasicXMLTemplate, Message.UidWell, Message.UidWellbore, Message.Uid,
+                string.Empty);
+
+            var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+            Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
+        }
+
+		#endregion Error -486
+
+        #region Error -487
+
+		[TestMethod]
+        public void Message131Validator_AddToStore_Error_487_Message_Data_Object_Not_Supported()
+        {
+
+            AddParents();
+
+            var xmlIn = string.Format(BasicXMLTemplate, Message.UidWell, Message.UidWellbore, Message.Uid,
+                string.Empty);
+
+            var response = DevKit.AddToStore("target", xmlIn, null, null);
+
+            Assert.AreEqual((short)ErrorCodes.DataObjectTypeNotSupported, response.Result);
+        }
+
+		#endregion Error -487
 
     }
 }

@@ -76,6 +76,10 @@ namespace PDS.Witsml.Server.Data.Logs
 
         #endregion Error -401
 
+        #region Error -402
+
+        #endregion Error -402
+
         #region Error -403
 
         [TestMethod]
@@ -112,6 +116,19 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
 		#endregion Error -405
+
+        #region Error -406
+
+		[TestMethod]
+        public void Log131Validator_AddToStore_Error_406_Log_Missing_Parent_Uid()
+        {
+            AddParents();
+
+            Log.UidWellbore = null;
+            DevKit.AddAndAssert(Log, ErrorCodes.MissingElementUidForAdd);
+        }
+
+		#endregion Error -406
 
         #region Error -407
 
@@ -169,6 +186,27 @@ namespace PDS.Witsml.Server.Data.Logs
 
 		#endregion Error -415
 
+        #region Error -420
+
+		[TestMethod]
+        public void Log131Validator_DeleteFromStore_Error_420_Log_Specifying_A_Non_Recuring_Element_That_Is_Required()
+        {
+
+            AddParents();
+
+            DevKit.AddAndAssert(Log);
+
+            var deleteXml = string.Format(BasicXMLTemplate,Log.UidWell, Log.UidWellbore,Log.Uid,
+
+                "<name />");
+            var results = DevKit.DeleteFromStore(ObjectTypes.Log, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
+        }
+
+		#endregion Error -420
+
         #region Error -433
 
 		[TestMethod]
@@ -202,6 +240,7 @@ namespace PDS.Witsml.Server.Data.Logs
 		[TestMethod]
         public void Log131Validator_UpdateInStore_Error_468_Log_No_Schema_Version_Declared()
         {
+
             AddParents();
             DevKit.AddAndAssert<LogList, Log>(Log);
             var response = DevKit.UpdateInStore(ObjectTypes.Log, QueryMissingVersion, null, null);
@@ -209,6 +248,29 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
 		#endregion Error -468
+
+        #region Error -478
+
+		[TestMethod]
+        public void Log131Validator_AddToStore_Error_478_Log_Parent_Uid_Case_Not_Matching()
+        {
+            Well.Uid = Well.Uid.ToUpper();
+            AddParents();
+            Log.UidWell = Well.Uid.ToLower();
+            DevKit.AddAndAssert(Log, ErrorCodes.IncorrectCaseParentUid);
+        }
+
+		#endregion Error -478
+
+        #region Error -481
+
+		[TestMethod]
+        public void Log131Validator_AddToStore_Error_481_Log_Parent_Does_Not_Exist()
+        {
+            DevKit.AddAndAssert(Log, ErrorCodes.MissingParentDataObject);
+        }
+
+		#endregion Error -481
 
         #region Error -483
 
@@ -228,6 +290,7 @@ namespace PDS.Witsml.Server.Data.Logs
 		[TestMethod]
         public void Log131Validator_UpdateInStore_Error_484_Log_Update_Will_Delete_Required_Element()
         {
+
             AddParents();
             DevKit.AddAndAssert<LogList, Log>(Log);
 
@@ -239,6 +302,41 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
 		#endregion Error -484
+
+        #region Error -486
+
+		[TestMethod]
+        public void Log131Validator_AddToStore_Error_486_Log_Data_Object_Types_Dont_Match()
+        {
+
+            AddParents();
+
+            var xmlIn = string.Format(BasicXMLTemplate, Log.UidWell, Log.UidWellbore, Log.Uid,
+                string.Empty);
+
+            var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+            Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
+        }
+
+		#endregion Error -486
+
+        #region Error -487
+
+		[TestMethod]
+        public void Log131Validator_AddToStore_Error_487_Log_Data_Object_Not_Supported()
+        {
+
+            AddParents();
+
+            var xmlIn = string.Format(BasicXMLTemplate, Log.UidWell, Log.UidWellbore, Log.Uid,
+                string.Empty);
+
+            var response = DevKit.AddToStore("target", xmlIn, null, null);
+
+            Assert.AreEqual((short)ErrorCodes.DataObjectTypeNotSupported, response.Result);
+        }
+
+		#endregion Error -487
 
     }
 }

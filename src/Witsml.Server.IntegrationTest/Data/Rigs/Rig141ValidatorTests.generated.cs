@@ -76,6 +76,10 @@ namespace PDS.Witsml.Server.Data.Rigs
 
         #endregion Error -401
 
+        #region Error -402
+
+        #endregion Error -402
+
         #region Error -403
 
         [TestMethod]
@@ -112,6 +116,19 @@ namespace PDS.Witsml.Server.Data.Rigs
         }
 
 		#endregion Error -405
+
+        #region Error -406
+
+		[TestMethod]
+        public void Rig141Validator_AddToStore_Error_406_Rig_Missing_Parent_Uid()
+        {
+            AddParents();
+
+            Rig.UidWellbore = null;
+            DevKit.AddAndAssert(Rig, ErrorCodes.MissingElementUidForAdd);
+        }
+
+		#endregion Error -406
 
         #region Error -407
 
@@ -169,6 +186,120 @@ namespace PDS.Witsml.Server.Data.Rigs
 
 		#endregion Error -415
 
+        #region Error -416
+
+		[TestMethod]
+        public void Rig141Validator_DeleteFromStore_Error_416_Rig_Delete_With_Empty_UID()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            Rig.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            DevKit.AddAndAssert(Rig);
+
+            var deleteXml = string.Format(BasicXMLTemplate,Rig.UidWell, Rig.UidWellbore,Rig.Uid,
+
+                "<commonData><extensionNameValue uid=\"\" /></commonData>");
+
+            var results = DevKit.DeleteFromStore(ObjectTypes.Rig, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
+        }
+
+		#endregion Error -416
+
+        #region Error -418
+
+		[TestMethod]
+        public void Rig141Validator_DeleteFromStore_Error_418_Rig_Delete_With_Missing_Uid()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            Rig.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            DevKit.AddAndAssert(Rig);
+
+            var deleteXml = string.Format(BasicXMLTemplate,Rig.UidWell, Rig.UidWellbore,Rig.Uid,
+
+                "<commonData><extensionNameValue /></commonData>");
+
+            var results = DevKit.DeleteFromStore(ObjectTypes.Rig, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
+        }
+
+		#endregion Error -418
+
+        #region Error -419
+
+		[TestMethod]
+        public void Rig141Validator_DeleteFromStore_Error_419_Rig_Deleting_Empty_NonRecurring_Container_Element()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            Rig.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            DevKit.AddAndAssert(Rig);
+
+            var deleteXml = string.Format(BasicXMLTemplate,Rig.UidWell, Rig.UidWellbore,Rig.Uid,
+
+                "<commonData />");
+
+            var results = DevKit.DeleteFromStore(ObjectTypes.Rig, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
+        }
+
+		#endregion Error -419
+
+        #region Error -420
+
+		[TestMethod]
+        public void Rig141Validator_DeleteFromStore_Error_420_Rig_Specifying_A_Non_Recuring_Element_That_Is_Required()
+        {
+
+            AddParents();
+
+            DevKit.AddAndAssert(Rig);
+
+            var deleteXml = string.Format(BasicXMLTemplate,Rig.UidWell, Rig.UidWellbore,Rig.Uid,
+
+                "<name />");
+            var results = DevKit.DeleteFromStore(ObjectTypes.Rig, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
+        }
+
+		#endregion Error -420
+
         #region Error -433
 
 		[TestMethod]
@@ -179,6 +310,78 @@ namespace PDS.Witsml.Server.Data.Rigs
         }
 
 		#endregion Error -433
+
+        #region Error -438
+
+		[TestMethod]
+        public void Rig141Validator_GetFromStore_Error_438_Rig_Recurring_Elements_Have_Inconsistent_Selection()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            var ext2 = DevKit.ExtensionNameValue("Ext-2", "1.0", "m");
+
+            Rig.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1, ext2
+                }
+            };
+
+            DevKit.AddAndAssert(Rig);
+
+            var queryXml = string.Format(BasicXMLTemplate,Rig.UidWell, Rig.UidWellbore,Rig.Uid,
+
+                "<commonData>" +
+                $"<extensionNameValue uid=\"{ext1.Uid}\"><name>Ext-1</name></extensionNameValue>" +
+                "<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
+                "</commonData>");
+
+            var results = DevKit.GetFromStore(ObjectTypes.Rig, queryXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.RecurringItemsInconsistentSelection, results.Result);
+        }
+
+		#endregion Error -438
+
+        #region Error -439
+
+		[TestMethod]
+        public void Rig141Validator_GetFromStore_Error_439_Rig_Recurring_Elements_Has_Empty_Selection_Value()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            var ext2 = DevKit.ExtensionNameValue("Ext-2", "1.0", "m");
+
+            Rig.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1, ext2
+                }
+            };
+
+            DevKit.AddAndAssert(Rig);
+
+            var queryXml = string.Format(BasicXMLTemplate,Rig.UidWell, Rig.UidWellbore,Rig.Uid,
+
+                "<commonData>" +
+                $"<extensionNameValue uid=\"{ext1.Uid}\"><name>Ext-1</name></extensionNameValue>" +
+                "<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
+                "</commonData>");
+
+            var results = DevKit.GetFromStore(ObjectTypes.Rig, queryXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.RecurringItemsInconsistentSelection, results.Result);
+        }
+
+		#endregion Error -439
 
         #region Error -444
 
@@ -197,11 +400,133 @@ namespace PDS.Witsml.Server.Data.Rigs
 
 		#endregion Error -444
 
+        #region Error -445
+
+        [TestMethod]
+        public void Rig141Validator_UpdateInStore_Error_445_Rig_Empty_New_Element()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+
+            Rig.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            DevKit.AddAndAssert(Rig);
+
+            ext1 = DevKit.ExtensionNameValue("Ext-1", string.Empty, string.Empty, PrimitiveType.@double, string.Empty);
+            Rig.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            DevKit.UpdateAndAssert(Rig, ErrorCodes.EmptyNewElementsOrAttributes);
+        }
+
+		#endregion Error -445
+
+        #region Error -448
+
+        [TestMethod]
+        public void Rig141Validator_UpdateInStore_Error_448_Rig_Missing_Uid()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+
+            Rig.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            DevKit.AddAndAssert(Rig);
+
+                        var updateXml = string.Format(BasicXMLTemplate,Rig.UidWell, Rig.UidWellbore,Rig.Uid,
+
+                "<commonData>" +
+                $"<extensionNameValue uid=\"\"><value uom=\"ft\" /></extensionNameValue>" +
+                "</commonData>");
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Rig, updateXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.MissingElementUidForUpdate, response.Result);
+        }
+
+		#endregion Error -448
+
+        #region Error -464
+
+        [TestMethod]
+        public void Rig141Validator_AddToStore_Error_464_Rig_Uid_Not_Unique()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            var ext2 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+
+            Rig.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1, ext2
+                }
+            };
+
+            DevKit.AddAndAssert(Rig, ErrorCodes.ChildUidNotUnique);
+        }
+
+        [TestMethod]
+        public void Rig141Validator_UpdateInStore_Error_464_Rig_Uid_Not_Unique()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+
+            Rig.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            DevKit.AddAndAssert(Rig, ErrorCodes.ChildUidNotUnique);
+
+            var ext2 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+
+            Rig.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1, ext2
+                }
+            };
+
+            DevKit.UpdateAndAssert(Rig, ErrorCodes.ChildUidNotUnique);
+        }
+
+		#endregion Error -464
+
         #region Error -468
 
 		[TestMethod]
         public void Rig141Validator_UpdateInStore_Error_468_Rig_No_Schema_Version_Declared()
         {
+
             AddParents();
             DevKit.AddAndAssert<RigList, Rig>(Rig);
             var response = DevKit.UpdateInStore(ObjectTypes.Rig, QueryMissingVersion, null, null);
@@ -209,6 +534,29 @@ namespace PDS.Witsml.Server.Data.Rigs
         }
 
 		#endregion Error -468
+
+        #region Error -478
+
+		[TestMethod]
+        public void Rig141Validator_AddToStore_Error_478_Rig_Parent_Uid_Case_Not_Matching()
+        {
+            Well.Uid = Well.Uid.ToUpper();
+            AddParents();
+            Rig.UidWell = Well.Uid.ToLower();
+            DevKit.AddAndAssert(Rig, ErrorCodes.IncorrectCaseParentUid);
+        }
+
+		#endregion Error -478
+
+        #region Error -481
+
+		[TestMethod]
+        public void Rig141Validator_AddToStore_Error_481_Rig_Parent_Does_Not_Exist()
+        {
+            DevKit.AddAndAssert(Rig, ErrorCodes.MissingParentDataObject);
+        }
+
+		#endregion Error -481
 
         #region Error -483
 
@@ -228,6 +576,7 @@ namespace PDS.Witsml.Server.Data.Rigs
 		[TestMethod]
         public void Rig141Validator_UpdateInStore_Error_484_Rig_Update_Will_Delete_Required_Element()
         {
+
             AddParents();
             DevKit.AddAndAssert<RigList, Rig>(Rig);
 
@@ -239,6 +588,41 @@ namespace PDS.Witsml.Server.Data.Rigs
         }
 
 		#endregion Error -484
+
+        #region Error -486
+
+		[TestMethod]
+        public void Rig141Validator_AddToStore_Error_486_Rig_Data_Object_Types_Dont_Match()
+        {
+
+            AddParents();
+
+            var xmlIn = string.Format(BasicXMLTemplate, Rig.UidWell, Rig.UidWellbore, Rig.Uid,
+                string.Empty);
+
+            var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+            Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
+        }
+
+		#endregion Error -486
+
+        #region Error -487
+
+		[TestMethod]
+        public void Rig141Validator_AddToStore_Error_487_Rig_Data_Object_Not_Supported()
+        {
+
+            AddParents();
+
+            var xmlIn = string.Format(BasicXMLTemplate, Rig.UidWell, Rig.UidWellbore, Rig.Uid,
+                string.Empty);
+
+            var response = DevKit.AddToStore("target", xmlIn, null, null);
+
+            Assert.AreEqual((short)ErrorCodes.DataObjectTypeNotSupported, response.Result);
+        }
+
+		#endregion Error -487
 
     }
 }

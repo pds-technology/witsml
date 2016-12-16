@@ -76,6 +76,10 @@ namespace PDS.Witsml.Server.Data.Attachments
 
         #endregion Error -401
 
+        #region Error -402
+
+        #endregion Error -402
+
         #region Error -403
 
         [TestMethod]
@@ -112,6 +116,19 @@ namespace PDS.Witsml.Server.Data.Attachments
         }
 
 		#endregion Error -405
+
+        #region Error -406
+
+		[TestMethod]
+        public void Attachment141Validator_AddToStore_Error_406_Attachment_Missing_Parent_Uid()
+        {
+            AddParents();
+
+            Attachment.UidWellbore = null;
+            DevKit.AddAndAssert(Attachment, ErrorCodes.MissingElementUidForAdd);
+        }
+
+		#endregion Error -406
 
         #region Error -407
 
@@ -169,6 +186,120 @@ namespace PDS.Witsml.Server.Data.Attachments
 
 		#endregion Error -415
 
+        #region Error -416
+
+		[TestMethod]
+        public void Attachment141Validator_DeleteFromStore_Error_416_Attachment_Delete_With_Empty_UID()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            Attachment.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            DevKit.AddAndAssert(Attachment);
+
+            var deleteXml = string.Format(BasicXMLTemplate,Attachment.UidWell, Attachment.UidWellbore,Attachment.Uid,
+
+                "<commonData><extensionNameValue uid=\"\" /></commonData>");
+
+            var results = DevKit.DeleteFromStore(ObjectTypes.Attachment, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
+        }
+
+		#endregion Error -416
+
+        #region Error -418
+
+		[TestMethod]
+        public void Attachment141Validator_DeleteFromStore_Error_418_Attachment_Delete_With_Missing_Uid()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            Attachment.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            DevKit.AddAndAssert(Attachment);
+
+            var deleteXml = string.Format(BasicXMLTemplate,Attachment.UidWell, Attachment.UidWellbore,Attachment.Uid,
+
+                "<commonData><extensionNameValue /></commonData>");
+
+            var results = DevKit.DeleteFromStore(ObjectTypes.Attachment, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
+        }
+
+		#endregion Error -418
+
+        #region Error -419
+
+		[TestMethod]
+        public void Attachment141Validator_DeleteFromStore_Error_419_Attachment_Deleting_Empty_NonRecurring_Container_Element()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            Attachment.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            DevKit.AddAndAssert(Attachment);
+
+            var deleteXml = string.Format(BasicXMLTemplate,Attachment.UidWell, Attachment.UidWellbore,Attachment.Uid,
+
+                "<commonData />");
+
+            var results = DevKit.DeleteFromStore(ObjectTypes.Attachment, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
+        }
+
+		#endregion Error -419
+
+        #region Error -420
+
+		[TestMethod]
+        public void Attachment141Validator_DeleteFromStore_Error_420_Attachment_Specifying_A_Non_Recuring_Element_That_Is_Required()
+        {
+
+            AddParents();
+
+            DevKit.AddAndAssert(Attachment);
+
+            var deleteXml = string.Format(BasicXMLTemplate,Attachment.UidWell, Attachment.UidWellbore,Attachment.Uid,
+
+                "<name />");
+            var results = DevKit.DeleteFromStore(ObjectTypes.Attachment, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
+        }
+
+		#endregion Error -420
+
         #region Error -433
 
 		[TestMethod]
@@ -179,6 +310,78 @@ namespace PDS.Witsml.Server.Data.Attachments
         }
 
 		#endregion Error -433
+
+        #region Error -438
+
+		[TestMethod]
+        public void Attachment141Validator_GetFromStore_Error_438_Attachment_Recurring_Elements_Have_Inconsistent_Selection()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            var ext2 = DevKit.ExtensionNameValue("Ext-2", "1.0", "m");
+
+            Attachment.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1, ext2
+                }
+            };
+
+            DevKit.AddAndAssert(Attachment);
+
+            var queryXml = string.Format(BasicXMLTemplate,Attachment.UidWell, Attachment.UidWellbore,Attachment.Uid,
+
+                "<commonData>" +
+                $"<extensionNameValue uid=\"{ext1.Uid}\"><name>Ext-1</name></extensionNameValue>" +
+                "<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
+                "</commonData>");
+
+            var results = DevKit.GetFromStore(ObjectTypes.Attachment, queryXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.RecurringItemsInconsistentSelection, results.Result);
+        }
+
+		#endregion Error -438
+
+        #region Error -439
+
+		[TestMethod]
+        public void Attachment141Validator_GetFromStore_Error_439_Attachment_Recurring_Elements_Has_Empty_Selection_Value()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            var ext2 = DevKit.ExtensionNameValue("Ext-2", "1.0", "m");
+
+            Attachment.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1, ext2
+                }
+            };
+
+            DevKit.AddAndAssert(Attachment);
+
+            var queryXml = string.Format(BasicXMLTemplate,Attachment.UidWell, Attachment.UidWellbore,Attachment.Uid,
+
+                "<commonData>" +
+                $"<extensionNameValue uid=\"{ext1.Uid}\"><name>Ext-1</name></extensionNameValue>" +
+                "<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
+                "</commonData>");
+
+            var results = DevKit.GetFromStore(ObjectTypes.Attachment, queryXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.RecurringItemsInconsistentSelection, results.Result);
+        }
+
+		#endregion Error -439
 
         #region Error -444
 
@@ -197,11 +400,133 @@ namespace PDS.Witsml.Server.Data.Attachments
 
 		#endregion Error -444
 
+        #region Error -445
+
+        [TestMethod]
+        public void Attachment141Validator_UpdateInStore_Error_445_Attachment_Empty_New_Element()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+
+            Attachment.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            DevKit.AddAndAssert(Attachment);
+
+            ext1 = DevKit.ExtensionNameValue("Ext-1", string.Empty, string.Empty, PrimitiveType.@double, string.Empty);
+            Attachment.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            DevKit.UpdateAndAssert(Attachment, ErrorCodes.EmptyNewElementsOrAttributes);
+        }
+
+		#endregion Error -445
+
+        #region Error -448
+
+        [TestMethod]
+        public void Attachment141Validator_UpdateInStore_Error_448_Attachment_Missing_Uid()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+
+            Attachment.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            DevKit.AddAndAssert(Attachment);
+
+                        var updateXml = string.Format(BasicXMLTemplate,Attachment.UidWell, Attachment.UidWellbore,Attachment.Uid,
+
+                "<commonData>" +
+                $"<extensionNameValue uid=\"\"><value uom=\"ft\" /></extensionNameValue>" +
+                "</commonData>");
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Attachment, updateXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.MissingElementUidForUpdate, response.Result);
+        }
+
+		#endregion Error -448
+
+        #region Error -464
+
+        [TestMethod]
+        public void Attachment141Validator_AddToStore_Error_464_Attachment_Uid_Not_Unique()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            var ext2 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+
+            Attachment.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1, ext2
+                }
+            };
+
+            DevKit.AddAndAssert(Attachment, ErrorCodes.ChildUidNotUnique);
+        }
+
+        [TestMethod]
+        public void Attachment141Validator_UpdateInStore_Error_464_Attachment_Uid_Not_Unique()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+
+            Attachment.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            DevKit.AddAndAssert(Attachment, ErrorCodes.ChildUidNotUnique);
+
+            var ext2 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+
+            Attachment.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1, ext2
+                }
+            };
+
+            DevKit.UpdateAndAssert(Attachment, ErrorCodes.ChildUidNotUnique);
+        }
+
+		#endregion Error -464
+
         #region Error -468
 
 		[TestMethod]
         public void Attachment141Validator_UpdateInStore_Error_468_Attachment_No_Schema_Version_Declared()
         {
+
             AddParents();
             DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
             var response = DevKit.UpdateInStore(ObjectTypes.Attachment, QueryMissingVersion, null, null);
@@ -209,6 +534,29 @@ namespace PDS.Witsml.Server.Data.Attachments
         }
 
 		#endregion Error -468
+
+        #region Error -478
+
+		[TestMethod]
+        public void Attachment141Validator_AddToStore_Error_478_Attachment_Parent_Uid_Case_Not_Matching()
+        {
+            Well.Uid = Well.Uid.ToUpper();
+            AddParents();
+            Attachment.UidWell = Well.Uid.ToLower();
+            DevKit.AddAndAssert(Attachment, ErrorCodes.IncorrectCaseParentUid);
+        }
+
+		#endregion Error -478
+
+        #region Error -481
+
+		[TestMethod]
+        public void Attachment141Validator_AddToStore_Error_481_Attachment_Parent_Does_Not_Exist()
+        {
+            DevKit.AddAndAssert(Attachment, ErrorCodes.MissingParentDataObject);
+        }
+
+		#endregion Error -481
 
         #region Error -483
 
@@ -228,6 +576,7 @@ namespace PDS.Witsml.Server.Data.Attachments
 		[TestMethod]
         public void Attachment141Validator_UpdateInStore_Error_484_Attachment_Update_Will_Delete_Required_Element()
         {
+
             AddParents();
             DevKit.AddAndAssert<AttachmentList, Attachment>(Attachment);
 
@@ -239,6 +588,41 @@ namespace PDS.Witsml.Server.Data.Attachments
         }
 
 		#endregion Error -484
+
+        #region Error -486
+
+		[TestMethod]
+        public void Attachment141Validator_AddToStore_Error_486_Attachment_Data_Object_Types_Dont_Match()
+        {
+
+            AddParents();
+
+            var xmlIn = string.Format(BasicXMLTemplate, Attachment.UidWell, Attachment.UidWellbore, Attachment.Uid,
+                string.Empty);
+
+            var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+            Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
+        }
+
+		#endregion Error -486
+
+        #region Error -487
+
+		[TestMethod]
+        public void Attachment141Validator_AddToStore_Error_487_Attachment_Data_Object_Not_Supported()
+        {
+
+            AddParents();
+
+            var xmlIn = string.Format(BasicXMLTemplate, Attachment.UidWell, Attachment.UidWellbore, Attachment.Uid,
+                string.Empty);
+
+            var response = DevKit.AddToStore("target", xmlIn, null, null);
+
+            Assert.AreEqual((short)ErrorCodes.DataObjectTypeNotSupported, response.Result);
+        }
+
+		#endregion Error -487
 
     }
 }

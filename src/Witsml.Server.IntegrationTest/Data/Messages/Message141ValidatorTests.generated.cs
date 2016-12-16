@@ -76,6 +76,10 @@ namespace PDS.Witsml.Server.Data.Messages
 
         #endregion Error -401
 
+        #region Error -402
+
+        #endregion Error -402
+
         #region Error -403
 
         [TestMethod]
@@ -112,6 +116,19 @@ namespace PDS.Witsml.Server.Data.Messages
         }
 
 		#endregion Error -405
+
+        #region Error -406
+
+		[TestMethod]
+        public void Message141Validator_AddToStore_Error_406_Message_Missing_Parent_Uid()
+        {
+            AddParents();
+
+            Message.UidWellbore = null;
+            DevKit.AddAndAssert(Message, ErrorCodes.MissingElementUidForAdd);
+        }
+
+		#endregion Error -406
 
         #region Error -407
 
@@ -169,6 +186,120 @@ namespace PDS.Witsml.Server.Data.Messages
 
 		#endregion Error -415
 
+        #region Error -416
+
+		[TestMethod]
+        public void Message141Validator_DeleteFromStore_Error_416_Message_Delete_With_Empty_UID()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            Message.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            DevKit.AddAndAssert(Message);
+
+            var deleteXml = string.Format(BasicXMLTemplate,Message.UidWell, Message.UidWellbore,Message.Uid,
+
+                "<commonData><extensionNameValue uid=\"\" /></commonData>");
+
+            var results = DevKit.DeleteFromStore(ObjectTypes.Message, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
+        }
+
+		#endregion Error -416
+
+        #region Error -418
+
+		[TestMethod]
+        public void Message141Validator_DeleteFromStore_Error_418_Message_Delete_With_Missing_Uid()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            Message.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            DevKit.AddAndAssert(Message);
+
+            var deleteXml = string.Format(BasicXMLTemplate,Message.UidWell, Message.UidWellbore,Message.Uid,
+
+                "<commonData><extensionNameValue /></commonData>");
+
+            var results = DevKit.DeleteFromStore(ObjectTypes.Message, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
+        }
+
+		#endregion Error -418
+
+        #region Error -419
+
+		[TestMethod]
+        public void Message141Validator_DeleteFromStore_Error_419_Message_Deleting_Empty_NonRecurring_Container_Element()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            Message.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            DevKit.AddAndAssert(Message);
+
+            var deleteXml = string.Format(BasicXMLTemplate,Message.UidWell, Message.UidWellbore,Message.Uid,
+
+                "<commonData />");
+
+            var results = DevKit.DeleteFromStore(ObjectTypes.Message, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
+        }
+
+		#endregion Error -419
+
+        #region Error -420
+
+		[TestMethod]
+        public void Message141Validator_DeleteFromStore_Error_420_Message_Specifying_A_Non_Recuring_Element_That_Is_Required()
+        {
+
+            AddParents();
+
+            DevKit.AddAndAssert(Message);
+
+            var deleteXml = string.Format(BasicXMLTemplate,Message.UidWell, Message.UidWellbore,Message.Uid,
+
+                "<name />");
+            var results = DevKit.DeleteFromStore(ObjectTypes.Message, deleteXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
+        }
+
+		#endregion Error -420
+
         #region Error -433
 
 		[TestMethod]
@@ -179,6 +310,78 @@ namespace PDS.Witsml.Server.Data.Messages
         }
 
 		#endregion Error -433
+
+        #region Error -438
+
+		[TestMethod]
+        public void Message141Validator_GetFromStore_Error_438_Message_Recurring_Elements_Have_Inconsistent_Selection()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            var ext2 = DevKit.ExtensionNameValue("Ext-2", "1.0", "m");
+
+            Message.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1, ext2
+                }
+            };
+
+            DevKit.AddAndAssert(Message);
+
+            var queryXml = string.Format(BasicXMLTemplate,Message.UidWell, Message.UidWellbore,Message.Uid,
+
+                "<commonData>" +
+                $"<extensionNameValue uid=\"{ext1.Uid}\"><name>Ext-1</name></extensionNameValue>" +
+                "<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
+                "</commonData>");
+
+            var results = DevKit.GetFromStore(ObjectTypes.Message, queryXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.RecurringItemsInconsistentSelection, results.Result);
+        }
+
+		#endregion Error -438
+
+        #region Error -439
+
+		[TestMethod]
+        public void Message141Validator_GetFromStore_Error_439_Message_Recurring_Elements_Has_Empty_Selection_Value()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            var ext2 = DevKit.ExtensionNameValue("Ext-2", "1.0", "m");
+
+            Message.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1, ext2
+                }
+            };
+
+            DevKit.AddAndAssert(Message);
+
+            var queryXml = string.Format(BasicXMLTemplate,Message.UidWell, Message.UidWellbore,Message.Uid,
+
+                "<commonData>" +
+                $"<extensionNameValue uid=\"{ext1.Uid}\"><name>Ext-1</name></extensionNameValue>" +
+                "<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
+                "</commonData>");
+
+            var results = DevKit.GetFromStore(ObjectTypes.Message, queryXml, null, null);
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual((short)ErrorCodes.RecurringItemsInconsistentSelection, results.Result);
+        }
+
+		#endregion Error -439
 
         #region Error -444
 
@@ -197,11 +400,133 @@ namespace PDS.Witsml.Server.Data.Messages
 
 		#endregion Error -444
 
+        #region Error -445
+
+        [TestMethod]
+        public void Message141Validator_UpdateInStore_Error_445_Message_Empty_New_Element()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+
+            Message.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            DevKit.AddAndAssert(Message);
+
+            ext1 = DevKit.ExtensionNameValue("Ext-1", string.Empty, string.Empty, PrimitiveType.@double, string.Empty);
+            Message.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            DevKit.UpdateAndAssert(Message, ErrorCodes.EmptyNewElementsOrAttributes);
+        }
+
+		#endregion Error -445
+
+        #region Error -448
+
+        [TestMethod]
+        public void Message141Validator_UpdateInStore_Error_448_Message_Missing_Uid()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+
+            Message.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            DevKit.AddAndAssert(Message);
+
+                        var updateXml = string.Format(BasicXMLTemplate,Message.UidWell, Message.UidWellbore,Message.Uid,
+
+                "<commonData>" +
+                $"<extensionNameValue uid=\"\"><value uom=\"ft\" /></extensionNameValue>" +
+                "</commonData>");
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Message, updateXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.MissingElementUidForUpdate, response.Result);
+        }
+
+		#endregion Error -448
+
+        #region Error -464
+
+        [TestMethod]
+        public void Message141Validator_AddToStore_Error_464_Message_Uid_Not_Unique()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+            var ext2 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+
+            Message.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1, ext2
+                }
+            };
+
+            DevKit.AddAndAssert(Message, ErrorCodes.ChildUidNotUnique);
+        }
+
+        [TestMethod]
+        public void Message141Validator_UpdateInStore_Error_464_Message_Uid_Not_Unique()
+        {
+
+            AddParents();
+
+            var ext1 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+
+            Message.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1
+                }
+            };
+
+            DevKit.AddAndAssert(Message, ErrorCodes.ChildUidNotUnique);
+
+            var ext2 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
+
+            Message.CommonData = new CommonData
+            {
+                ExtensionNameValue = new List<ExtensionNameValue>
+                {
+                    ext1, ext2
+                }
+            };
+
+            DevKit.UpdateAndAssert(Message, ErrorCodes.ChildUidNotUnique);
+        }
+
+		#endregion Error -464
+
         #region Error -468
 
 		[TestMethod]
         public void Message141Validator_UpdateInStore_Error_468_Message_No_Schema_Version_Declared()
         {
+
             AddParents();
             DevKit.AddAndAssert<MessageList, Message>(Message);
             var response = DevKit.UpdateInStore(ObjectTypes.Message, QueryMissingVersion, null, null);
@@ -209,6 +534,29 @@ namespace PDS.Witsml.Server.Data.Messages
         }
 
 		#endregion Error -468
+
+        #region Error -478
+
+		[TestMethod]
+        public void Message141Validator_AddToStore_Error_478_Message_Parent_Uid_Case_Not_Matching()
+        {
+            Well.Uid = Well.Uid.ToUpper();
+            AddParents();
+            Message.UidWell = Well.Uid.ToLower();
+            DevKit.AddAndAssert(Message, ErrorCodes.IncorrectCaseParentUid);
+        }
+
+		#endregion Error -478
+
+        #region Error -481
+
+		[TestMethod]
+        public void Message141Validator_AddToStore_Error_481_Message_Parent_Does_Not_Exist()
+        {
+            DevKit.AddAndAssert(Message, ErrorCodes.MissingParentDataObject);
+        }
+
+		#endregion Error -481
 
         #region Error -483
 
@@ -228,6 +576,7 @@ namespace PDS.Witsml.Server.Data.Messages
 		[TestMethod]
         public void Message141Validator_UpdateInStore_Error_484_Message_Update_Will_Delete_Required_Element()
         {
+
             AddParents();
             DevKit.AddAndAssert<MessageList, Message>(Message);
 
@@ -239,6 +588,41 @@ namespace PDS.Witsml.Server.Data.Messages
         }
 
 		#endregion Error -484
+
+        #region Error -486
+
+		[TestMethod]
+        public void Message141Validator_AddToStore_Error_486_Message_Data_Object_Types_Dont_Match()
+        {
+
+            AddParents();
+
+            var xmlIn = string.Format(BasicXMLTemplate, Message.UidWell, Message.UidWellbore, Message.Uid,
+                string.Empty);
+
+            var response = DevKit.AddToStore(ObjectTypes.Well, xmlIn, null, null);
+            Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
+        }
+
+		#endregion Error -486
+
+        #region Error -487
+
+		[TestMethod]
+        public void Message141Validator_AddToStore_Error_487_Message_Data_Object_Not_Supported()
+        {
+
+            AddParents();
+
+            var xmlIn = string.Format(BasicXMLTemplate, Message.UidWell, Message.UidWellbore, Message.Uid,
+                string.Empty);
+
+            var response = DevKit.AddToStore("target", xmlIn, null, null);
+
+            Assert.AreEqual((short)ErrorCodes.DataObjectTypeNotSupported, response.Result);
+        }
+
+		#endregion Error -487
 
     }
 }
