@@ -202,7 +202,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             var results = DevKit.DeleteFromStore(ObjectTypes.Wellbore, deleteXml, null, null);
 
             Assert.IsNotNull(results);
-            Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
+            Assert.AreEqual((short)ErrorCodes.EmptyMandatoryNodeSpecified, results.Result);
         }
 
 		#endregion Error -420

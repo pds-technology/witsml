@@ -281,7 +281,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var results = DevKit.DeleteFromStore(ObjectTypes.Log, deleteXml, null, null);
 
             Assert.IsNotNull(results);
-            Assert.AreEqual((short)ErrorCodes.EmptyMandatoryNodeSpecified, results.Result);
+            Assert.AreEqual((short)ErrorCodes.EmptyNonRecurringElementSpecified, results.Result);
         }
 
 		#endregion Error -419
@@ -302,7 +302,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var results = DevKit.DeleteFromStore(ObjectTypes.Log, deleteXml, null, null);
 
             Assert.IsNotNull(results);
-            Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
+            Assert.AreEqual((short)ErrorCodes.EmptyMandatoryNodeSpecified, results.Result);
         }
 
 		#endregion Error -420

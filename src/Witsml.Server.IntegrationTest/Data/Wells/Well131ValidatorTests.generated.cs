@@ -187,7 +187,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var results = DevKit.DeleteFromStore(ObjectTypes.Well, deleteXml, null, null);
 
             Assert.IsNotNull(results);
-            Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
+            Assert.AreEqual((short)ErrorCodes.EmptyMandatoryNodeSpecified, results.Result);
         }
 
 		#endregion Error -420
