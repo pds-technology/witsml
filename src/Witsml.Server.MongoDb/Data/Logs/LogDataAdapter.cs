@@ -867,6 +867,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var optimizeRangeStart = logCurveRanges.GetOptimizeRangeStart(increasing);
             var rangeEnd = logCurveRanges.GetMaxRangeEnd(increasing);
             var rangeStepSize = WitsmlSettings.GetRangeStepSize(isTimeIndex);
+            var mnemonicFilter = queryMnemonics.Length > 0 ? queryMnemonics : mnemonicIndexes.Values.ToArray();
 
             bool finished;
             const int maxRequestFactor = 3;
@@ -892,7 +893,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 var records = GetChannelData(uri, mnemonicIndexes[0], range, IsIncreasing(entity), requestLatestValues);
 
                 // Get a reader to process the log's channel data records
-                using (var reader = records.GetReader(mnemonicIndexes.Values.ToArray(), units, dataTypes, nullValues))
+                using (var reader = records.GetReader(mnemonicFilter, units, dataTypes, nullValues))
                 {
                     // Get the data from the reader based on the context and mnemonicIndexes (slices)
                     logData = reader.GetData(context, mnemonicIndexes, units, dataTypes, nullValues, out ranges);
