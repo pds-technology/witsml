@@ -417,7 +417,9 @@ namespace PDS.Witsml.Data.Channels
                                     var range = update.GetChannelIndexRange(index + Depth);
                                     if (range.Contains(GetIndexValue(), increasing))
                                     {
-                                        row[i] = NullValues[i];
+                                        row[i] = IsNull(NullValues[i])
+                                            ? null
+                                            : NullValues[i];
                                     }
                                 }
                             }
