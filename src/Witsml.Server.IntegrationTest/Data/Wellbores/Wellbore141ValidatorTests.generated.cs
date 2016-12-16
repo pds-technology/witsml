@@ -485,7 +485,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 }
             };
 
-            DevKit.AddAndAssert(Wellbore);
+            DevKit.AddAndAssert(Wellbore, ErrorCodes.ChildUidNotUnique);
         }
 
         [TestMethod]
@@ -540,9 +540,12 @@ namespace PDS.Witsml.Server.Data.Wellbores
 		[TestMethod]
         public void Wellbore141Validator_AddToStore_Error_478_Wellbore_Parent_Uid_Case_Not_Matching()
         {
+
             Well.Uid = Well.Uid.ToUpper();
             AddParents();
+
             Wellbore.UidWell = Well.Uid.ToLower();
+
             DevKit.AddAndAssert(Wellbore, ErrorCodes.IncorrectCaseParentUid);
         }
 

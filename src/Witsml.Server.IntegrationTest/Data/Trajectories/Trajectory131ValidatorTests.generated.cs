@@ -254,9 +254,14 @@ namespace PDS.Witsml.Server.Data.Trajectories
 		[TestMethod]
         public void Trajectory131Validator_AddToStore_Error_478_Trajectory_Parent_Uid_Case_Not_Matching()
         {
+
             Well.Uid = Well.Uid.ToUpper();
+            Wellbore.Uid = Wellbore.Uid.ToUpper();
+            Wellbore.UidWell = Well.Uid.ToUpper();
             AddParents();
+
             Trajectory.UidWell = Well.Uid.ToLower();
+
             DevKit.AddAndAssert(Trajectory, ErrorCodes.IncorrectCaseParentUid);
         }
 

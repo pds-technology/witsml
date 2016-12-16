@@ -492,7 +492,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 }
             };
 
-            DevKit.AddAndAssert(Trajectory);
+            DevKit.AddAndAssert(Trajectory, ErrorCodes.ChildUidNotUnique);
         }
 
         [TestMethod]
@@ -547,9 +547,14 @@ namespace PDS.Witsml.Server.Data.Trajectories
 		[TestMethod]
         public void Trajectory141Validator_AddToStore_Error_478_Trajectory_Parent_Uid_Case_Not_Matching()
         {
+
             Well.Uid = Well.Uid.ToUpper();
+            Wellbore.Uid = Wellbore.Uid.ToUpper();
+            Wellbore.UidWell = Well.Uid.ToUpper();
             AddParents();
+
             Trajectory.UidWell = Well.Uid.ToLower();
+
             DevKit.AddAndAssert(Trajectory, ErrorCodes.IncorrectCaseParentUid);
         }
 

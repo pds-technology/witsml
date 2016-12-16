@@ -257,9 +257,14 @@ namespace PDS.Witsml.Server.Data.WbGeometries
 		[TestMethod]
         public void WbGeometry131Validator_AddToStore_Error_478_WbGeometry_Parent_Uid_Case_Not_Matching()
         {
+
             Well.Uid = Well.Uid.ToUpper();
+            Wellbore.Uid = Wellbore.Uid.ToUpper();
+            Wellbore.UidWell = Well.Uid.ToUpper();
             AddParents();
+
             WbGeometry.UidWell = Well.Uid.ToLower();
+
             DevKit.AddAndAssert(WbGeometry, ErrorCodes.IncorrectCaseParentUid);
         }
 

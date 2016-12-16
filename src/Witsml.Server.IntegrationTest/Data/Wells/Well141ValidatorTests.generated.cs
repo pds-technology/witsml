@@ -454,7 +454,7 @@ namespace PDS.Witsml.Server.Data.Wells
                 }
             };
 
-            DevKit.AddAndAssert(Well);
+            DevKit.AddAndAssert(Well, ErrorCodes.ChildUidNotUnique);
         }
 
         [TestMethod]

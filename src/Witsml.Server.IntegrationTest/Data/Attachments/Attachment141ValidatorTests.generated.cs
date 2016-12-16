@@ -485,7 +485,7 @@ namespace PDS.Witsml.Server.Data.Attachments
                 }
             };
 
-            DevKit.AddAndAssert(Attachment);
+            DevKit.AddAndAssert(Attachment, ErrorCodes.ChildUidNotUnique);
         }
 
         [TestMethod]
@@ -540,9 +540,14 @@ namespace PDS.Witsml.Server.Data.Attachments
 		[TestMethod]
         public void Attachment141Validator_AddToStore_Error_478_Attachment_Parent_Uid_Case_Not_Matching()
         {
+
             Well.Uid = Well.Uid.ToUpper();
+            Wellbore.Uid = Wellbore.Uid.ToUpper();
+            Wellbore.UidWell = Well.Uid.ToUpper();
             AddParents();
+
             Attachment.UidWell = Well.Uid.ToLower();
+
             DevKit.AddAndAssert(Attachment, ErrorCodes.IncorrectCaseParentUid);
         }
 

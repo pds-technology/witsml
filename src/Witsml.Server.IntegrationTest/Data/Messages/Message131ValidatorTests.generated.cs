@@ -254,9 +254,14 @@ namespace PDS.Witsml.Server.Data.Messages
 		[TestMethod]
         public void Message131Validator_AddToStore_Error_478_Message_Parent_Uid_Case_Not_Matching()
         {
+
             Well.Uid = Well.Uid.ToUpper();
+            Wellbore.Uid = Wellbore.Uid.ToUpper();
+            Wellbore.UidWell = Well.Uid.ToUpper();
             AddParents();
+
             Message.UidWell = Well.Uid.ToLower();
+
             DevKit.AddAndAssert(Message, ErrorCodes.IncorrectCaseParentUid);
         }
 

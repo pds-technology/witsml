@@ -254,9 +254,14 @@ namespace PDS.Witsml.Server.Data.Logs
 		[TestMethod]
         public void Log131Validator_AddToStore_Error_478_Log_Parent_Uid_Case_Not_Matching()
         {
+
             Well.Uid = Well.Uid.ToUpper();
+            Wellbore.Uid = Wellbore.Uid.ToUpper();
+            Wellbore.UidWell = Well.Uid.ToUpper();
             AddParents();
+
             Log.UidWell = Well.Uid.ToLower();
+
             DevKit.AddAndAssert(Log, ErrorCodes.IncorrectCaseParentUid);
         }
 

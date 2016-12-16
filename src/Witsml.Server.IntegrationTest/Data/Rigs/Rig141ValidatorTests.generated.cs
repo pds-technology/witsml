@@ -485,7 +485,7 @@ namespace PDS.Witsml.Server.Data.Rigs
                 }
             };
 
-            DevKit.AddAndAssert(Rig);
+            DevKit.AddAndAssert(Rig, ErrorCodes.ChildUidNotUnique);
         }
 
         [TestMethod]
@@ -540,9 +540,14 @@ namespace PDS.Witsml.Server.Data.Rigs
 		[TestMethod]
         public void Rig141Validator_AddToStore_Error_478_Rig_Parent_Uid_Case_Not_Matching()
         {
+
             Well.Uid = Well.Uid.ToUpper();
+            Wellbore.Uid = Wellbore.Uid.ToUpper();
+            Wellbore.UidWell = Well.Uid.ToUpper();
             AddParents();
+
             Rig.UidWell = Well.Uid.ToLower();
+
             DevKit.AddAndAssert(Rig, ErrorCodes.IncorrectCaseParentUid);
         }
 
