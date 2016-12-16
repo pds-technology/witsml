@@ -238,7 +238,7 @@ namespace PDS.Witsml.Server.Data.Rigs
 
             var deleteXml = string.Format(BasicXMLTemplate,Rig.UidWell, Rig.UidWellbore,Rig.Uid,
 
-                "<commonData><extensionNameValue /></commonData>");
+                "<commonData><extensionNameValue  uid=\"\" /></commonData>");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.Rig, deleteXml, null, null);
 
@@ -274,7 +274,7 @@ namespace PDS.Witsml.Server.Data.Rigs
             var results = DevKit.DeleteFromStore(ObjectTypes.Rig, deleteXml, null, null);
 
             Assert.IsNotNull(results);
-            Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
+            Assert.AreEqual((short)ErrorCodes.EmptyMandatoryNodeSpecified, results.Result);
         }
 
 		#endregion Error -419
@@ -335,8 +335,8 @@ namespace PDS.Witsml.Server.Data.Rigs
             var queryXml = string.Format(BasicXMLTemplate,Rig.UidWell, Rig.UidWellbore,Rig.Uid,
 
                 "<commonData>" +
-                $"<extensionNameValue uid=\"{ext1.Uid}\"><name>Ext-1</name></extensionNameValue>" +
-                "<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
+                $"<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
+                "<extensionNameValue uid=\"\"><value uom=\"\">1.0</value></extensionNameValue>" +
                 "</commonData>");
 
             var results = DevKit.GetFromStore(ObjectTypes.Rig, queryXml, null, null);
@@ -371,14 +371,14 @@ namespace PDS.Witsml.Server.Data.Rigs
             var queryXml = string.Format(BasicXMLTemplate,Rig.UidWell, Rig.UidWellbore,Rig.Uid,
 
                 "<commonData>" +
-                $"<extensionNameValue uid=\"{ext1.Uid}\"><name>Ext-1</name></extensionNameValue>" +
-                "<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
+                $"<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
+                "<extensionNameValue uid=\"\"><name></name></extensionNameValue>" +
                 "</commonData>");
 
             var results = DevKit.GetFromStore(ObjectTypes.Rig, queryXml, null, null);
 
             Assert.IsNotNull(results);
-            Assert.AreEqual((short)ErrorCodes.RecurringItemsInconsistentSelection, results.Result);
+            Assert.AreEqual((short)ErrorCodes.RecurringItemsEmptySelection, results.Result);
         }
 
 		#endregion Error -439
@@ -485,7 +485,7 @@ namespace PDS.Witsml.Server.Data.Rigs
                 }
             };
 
-            DevKit.AddAndAssert(Rig, ErrorCodes.ChildUidNotUnique);
+            DevKit.AddAndAssert(Rig);
         }
 
         [TestMethod]
@@ -605,24 +605,6 @@ namespace PDS.Witsml.Server.Data.Rigs
         }
 
 		#endregion Error -486
-
-        #region Error -487
-
-		[TestMethod]
-        public void Rig141Validator_AddToStore_Error_487_Rig_Data_Object_Not_Supported()
-        {
-
-            AddParents();
-
-            var xmlIn = string.Format(BasicXMLTemplate, Rig.UidWell, Rig.UidWellbore, Rig.Uid,
-                string.Empty);
-
-            var response = DevKit.AddToStore("target", xmlIn, null, null);
-
-            Assert.AreEqual((short)ErrorCodes.DataObjectTypeNotSupported, response.Result);
-        }
-
-		#endregion Error -487
 
     }
 }

@@ -245,7 +245,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             var deleteXml = string.Format(BasicXMLTemplate,Trajectory.UidWell, Trajectory.UidWellbore,Trajectory.Uid,
 
-                "<commonData><extensionNameValue /></commonData>");
+                "<commonData><extensionNameValue  uid=\"\" /></commonData>");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.Trajectory, deleteXml, null, null);
 
@@ -281,7 +281,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var results = DevKit.DeleteFromStore(ObjectTypes.Trajectory, deleteXml, null, null);
 
             Assert.IsNotNull(results);
-            Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
+            Assert.AreEqual((short)ErrorCodes.EmptyMandatoryNodeSpecified, results.Result);
         }
 
 		#endregion Error -419
@@ -342,8 +342,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var queryXml = string.Format(BasicXMLTemplate,Trajectory.UidWell, Trajectory.UidWellbore,Trajectory.Uid,
 
                 "<commonData>" +
-                $"<extensionNameValue uid=\"{ext1.Uid}\"><name>Ext-1</name></extensionNameValue>" +
-                "<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
+                $"<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
+                "<extensionNameValue uid=\"\"><value uom=\"\">1.0</value></extensionNameValue>" +
                 "</commonData>");
 
             var results = DevKit.GetFromStore(ObjectTypes.Trajectory, queryXml, null, null);
@@ -378,14 +378,14 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var queryXml = string.Format(BasicXMLTemplate,Trajectory.UidWell, Trajectory.UidWellbore,Trajectory.Uid,
 
                 "<commonData>" +
-                $"<extensionNameValue uid=\"{ext1.Uid}\"><name>Ext-1</name></extensionNameValue>" +
-                "<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
+                $"<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
+                "<extensionNameValue uid=\"\"><name></name></extensionNameValue>" +
                 "</commonData>");
 
             var results = DevKit.GetFromStore(ObjectTypes.Trajectory, queryXml, null, null);
 
             Assert.IsNotNull(results);
-            Assert.AreEqual((short)ErrorCodes.RecurringItemsInconsistentSelection, results.Result);
+            Assert.AreEqual((short)ErrorCodes.RecurringItemsEmptySelection, results.Result);
         }
 
 		#endregion Error -439
@@ -492,7 +492,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 }
             };
 
-            DevKit.AddAndAssert(Trajectory, ErrorCodes.ChildUidNotUnique);
+            DevKit.AddAndAssert(Trajectory);
         }
 
         [TestMethod]
@@ -612,24 +612,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
 		#endregion Error -486
-
-        #region Error -487
-
-		[TestMethod]
-        public void Trajectory141Validator_AddToStore_Error_487_Trajectory_Data_Object_Not_Supported()
-        {
-
-            AddParents();
-
-            var xmlIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid,
-                string.Empty);
-
-            var response = DevKit.AddToStore("target", xmlIn, null, null);
-
-            Assert.AreEqual((short)ErrorCodes.DataObjectTypeNotSupported, response.Result);
-        }
-
-		#endregion Error -487
 
     }
 }

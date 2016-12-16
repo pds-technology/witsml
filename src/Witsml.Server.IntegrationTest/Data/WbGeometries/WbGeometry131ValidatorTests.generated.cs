@@ -323,23 +323,5 @@ namespace PDS.Witsml.Server.Data.WbGeometries
 
 		#endregion Error -486
 
-        #region Error -487
-
-		[TestMethod]
-        public void WbGeometry131Validator_AddToStore_Error_487_WbGeometry_Data_Object_Not_Supported()
-        {
-
-            AddParents();
-
-            var xmlIn = string.Format(BasicXMLTemplate, WbGeometry.UidWell, WbGeometry.UidWellbore, WbGeometry.Uid,
-                string.Empty);
-
-            var response = DevKit.AddToStore("target", xmlIn, null, null);
-
-            Assert.AreEqual((short)ErrorCodes.DataObjectTypeNotSupported, response.Result);
-        }
-
-		#endregion Error -487
-
     }
 }

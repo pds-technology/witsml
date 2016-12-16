@@ -241,7 +241,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
 
             var deleteXml = string.Format(BasicXMLTemplate,WbGeometry.UidWell, WbGeometry.UidWellbore,WbGeometry.Uid,
 
-                "<commonData><extensionNameValue /></commonData>");
+                "<commonData><extensionNameValue  uid=\"\" /></commonData>");
 
             var results = DevKit.DeleteFromStore(ObjectTypes.WbGeometry, deleteXml, null, null);
 
@@ -277,7 +277,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             var results = DevKit.DeleteFromStore(ObjectTypes.WbGeometry, deleteXml, null, null);
 
             Assert.IsNotNull(results);
-            Assert.AreEqual((short)ErrorCodes.EmptyUidSpecified, results.Result);
+            Assert.AreEqual((short)ErrorCodes.EmptyMandatoryNodeSpecified, results.Result);
         }
 
 		#endregion Error -419
@@ -338,8 +338,8 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             var queryXml = string.Format(BasicXMLTemplate,WbGeometry.UidWell, WbGeometry.UidWellbore,WbGeometry.Uid,
 
                 "<commonData>" +
-                $"<extensionNameValue uid=\"{ext1.Uid}\"><name>Ext-1</name></extensionNameValue>" +
-                "<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
+                $"<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
+                "<extensionNameValue uid=\"\"><value uom=\"\">1.0</value></extensionNameValue>" +
                 "</commonData>");
 
             var results = DevKit.GetFromStore(ObjectTypes.WbGeometry, queryXml, null, null);
@@ -374,14 +374,14 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             var queryXml = string.Format(BasicXMLTemplate,WbGeometry.UidWell, WbGeometry.UidWellbore,WbGeometry.Uid,
 
                 "<commonData>" +
-                $"<extensionNameValue uid=\"{ext1.Uid}\"><name>Ext-1</name></extensionNameValue>" +
-                "<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
+                $"<extensionNameValue uid=\"\"><name>Ext-1</name></extensionNameValue>" +
+                "<extensionNameValue uid=\"\"><name></name></extensionNameValue>" +
                 "</commonData>");
 
             var results = DevKit.GetFromStore(ObjectTypes.WbGeometry, queryXml, null, null);
 
             Assert.IsNotNull(results);
-            Assert.AreEqual((short)ErrorCodes.RecurringItemsInconsistentSelection, results.Result);
+            Assert.AreEqual((short)ErrorCodes.RecurringItemsEmptySelection, results.Result);
         }
 
 		#endregion Error -439
@@ -488,7 +488,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
                 }
             };
 
-            DevKit.AddAndAssert(WbGeometry, ErrorCodes.ChildUidNotUnique);
+            DevKit.AddAndAssert(WbGeometry);
         }
 
         [TestMethod]
@@ -608,24 +608,6 @@ namespace PDS.Witsml.Server.Data.WbGeometries
         }
 
 		#endregion Error -486
-
-        #region Error -487
-
-		[TestMethod]
-        public void WbGeometry141Validator_AddToStore_Error_487_WbGeometry_Data_Object_Not_Supported()
-        {
-
-            AddParents();
-
-            var xmlIn = string.Format(BasicXMLTemplate, WbGeometry.UidWell, WbGeometry.UidWellbore, WbGeometry.Uid,
-                string.Empty);
-
-            var response = DevKit.AddToStore("target", xmlIn, null, null);
-
-            Assert.AreEqual((short)ErrorCodes.DataObjectTypeNotSupported, response.Result);
-        }
-
-		#endregion Error -487
 
     }
 }

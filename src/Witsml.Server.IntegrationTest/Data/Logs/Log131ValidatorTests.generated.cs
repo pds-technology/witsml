@@ -320,23 +320,5 @@ namespace PDS.Witsml.Server.Data.Logs
 
 		#endregion Error -486
 
-        #region Error -487
-
-		[TestMethod]
-        public void Log131Validator_AddToStore_Error_487_Log_Data_Object_Not_Supported()
-        {
-
-            AddParents();
-
-            var xmlIn = string.Format(BasicXMLTemplate, Log.UidWell, Log.UidWellbore, Log.Uid,
-                string.Empty);
-
-            var response = DevKit.AddToStore("target", xmlIn, null, null);
-
-            Assert.AreEqual((short)ErrorCodes.DataObjectTypeNotSupported, response.Result);
-        }
-
-		#endregion Error -487
-
     }
 }

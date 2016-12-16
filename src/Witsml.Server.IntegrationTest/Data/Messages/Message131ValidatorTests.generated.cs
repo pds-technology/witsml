@@ -320,23 +320,5 @@ namespace PDS.Witsml.Server.Data.Messages
 
 		#endregion Error -486
 
-        #region Error -487
-
-		[TestMethod]
-        public void Message131Validator_AddToStore_Error_487_Message_Data_Object_Not_Supported()
-        {
-
-            AddParents();
-
-            var xmlIn = string.Format(BasicXMLTemplate, Message.UidWell, Message.UidWellbore, Message.Uid,
-                string.Empty);
-
-            var response = DevKit.AddToStore("target", xmlIn, null, null);
-
-            Assert.AreEqual((short)ErrorCodes.DataObjectTypeNotSupported, response.Result);
-        }
-
-		#endregion Error -487
-
     }
 }

@@ -320,23 +320,5 @@ namespace PDS.Witsml.Server.Data.Rigs
 
 		#endregion Error -486
 
-        #region Error -487
-
-		[TestMethod]
-        public void Rig131Validator_AddToStore_Error_487_Rig_Data_Object_Not_Supported()
-        {
-
-            AddParents();
-
-            var xmlIn = string.Format(BasicXMLTemplate, Rig.UidWell, Rig.UidWellbore, Rig.Uid,
-                string.Empty);
-
-            var response = DevKit.AddToStore("target", xmlIn, null, null);
-
-            Assert.AreEqual((short)ErrorCodes.DataObjectTypeNotSupported, response.Result);
-        }
-
-		#endregion Error -487
-
     }
 }

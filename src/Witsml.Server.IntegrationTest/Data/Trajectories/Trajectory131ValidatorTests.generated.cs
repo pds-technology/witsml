@@ -320,23 +320,5 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
 		#endregion Error -486
 
-        #region Error -487
-
-		[TestMethod]
-        public void Trajectory131Validator_AddToStore_Error_487_Trajectory_Data_Object_Not_Supported()
-        {
-
-            AddParents();
-
-            var xmlIn = string.Format(BasicXMLTemplate, Trajectory.UidWell, Trajectory.UidWellbore, Trajectory.Uid,
-                string.Empty);
-
-            var response = DevKit.AddToStore("target", xmlIn, null, null);
-
-            Assert.AreEqual((short)ErrorCodes.DataObjectTypeNotSupported, response.Result);
-        }
-
-		#endregion Error -487
-
     }
 }

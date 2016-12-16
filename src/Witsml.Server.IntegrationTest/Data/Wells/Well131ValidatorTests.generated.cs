@@ -276,21 +276,5 @@ namespace PDS.Witsml.Server.Data.Wells
 
 		#endregion Error -486
 
-        #region Error -487
-
-		[TestMethod]
-        public void Well131Validator_AddToStore_Error_487_Well_Data_Object_Not_Supported()
-        {
-
-            var xmlIn = string.Format(BasicXMLTemplate, Well.Uid,
-                string.Empty);
-
-            var response = DevKit.AddToStore("target", xmlIn, null, null);
-
-            Assert.AreEqual((short)ErrorCodes.DataObjectTypeNotSupported, response.Result);
-        }
-
-		#endregion Error -487
-
     }
 }
