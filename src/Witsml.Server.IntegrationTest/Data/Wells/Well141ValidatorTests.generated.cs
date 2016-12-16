@@ -471,7 +471,7 @@ namespace PDS.Witsml.Server.Data.Wells
                 }
             };
 
-            DevKit.AddAndAssert(Well, ErrorCodes.ChildUidNotUnique);
+            DevKit.AddAndAssert(Well);
 
             var ext2 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 

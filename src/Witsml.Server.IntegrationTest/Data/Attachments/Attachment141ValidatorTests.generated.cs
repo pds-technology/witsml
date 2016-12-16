@@ -504,7 +504,7 @@ namespace PDS.Witsml.Server.Data.Attachments
                 }
             };
 
-            DevKit.AddAndAssert(Attachment, ErrorCodes.ChildUidNotUnique);
+            DevKit.AddAndAssert(Attachment);
 
             var ext2 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 

@@ -504,7 +504,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 }
             };
 
-            DevKit.AddAndAssert(Wellbore, ErrorCodes.ChildUidNotUnique);
+            DevKit.AddAndAssert(Wellbore);
 
             var ext2 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 

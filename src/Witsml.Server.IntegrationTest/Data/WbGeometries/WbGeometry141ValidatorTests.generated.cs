@@ -507,7 +507,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
                 }
             };
 
-            DevKit.AddAndAssert(WbGeometry, ErrorCodes.ChildUidNotUnique);
+            DevKit.AddAndAssert(WbGeometry);
 
             var ext2 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 

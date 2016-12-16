@@ -511,7 +511,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 }
             };
 
-            DevKit.AddAndAssert(Log, ErrorCodes.ChildUidNotUnique);
+            DevKit.AddAndAssert(Log);
 
             var ext2 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 

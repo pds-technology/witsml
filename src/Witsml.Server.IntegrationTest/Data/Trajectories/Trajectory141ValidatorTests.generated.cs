@@ -511,7 +511,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 }
             };
 
-            DevKit.AddAndAssert(Trajectory, ErrorCodes.ChildUidNotUnique);
+            DevKit.AddAndAssert(Trajectory);
 
             var ext2 = DevKit.ExtensionNameValue("Ext-1", "1.0", "m");
 
