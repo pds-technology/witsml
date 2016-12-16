@@ -463,6 +463,36 @@ namespace PDS.Witsml.Server
         }
 
         /// <summary>
+        /// Adds attachment object and test the return code
+        /// </summary>
+        /// <param name="attachment">the attachment</param>
+        /// <param name="errorCode">the errorCode</param>
+        public WMLS_AddToStoreResponse AddAndAssert(Attachment attachment, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            return AddAndAssert<AttachmentList, Attachment>(attachment, errorCode);
+        }
+
+        /// <summary>
+        /// Adds message object and test the return code
+        /// </summary>
+        /// <param name="message">the message</param>
+        /// <param name="errorCode">the errorCode</param>
+        public WMLS_AddToStoreResponse AddAndAssert(Message message, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            return AddAndAssert<MessageList, Message>(message, errorCode);
+        }
+
+        /// <summary>
+        /// Adds wbGeometry object and test the return code
+        /// </summary>
+        /// <param name="wbGeometry">the wbGeometry</param>
+        /// <param name="errorCode">the errorCode</param>
+        public WMLS_AddToStoreResponse AddAndAssert(StandAloneWellboreGeometry wbGeometry, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            return AddAndAssert<WellboreGeometryList, StandAloneWellboreGeometry>(wbGeometry, errorCode);
+        }
+
+        /// <summary>
         /// Does get query for single well object and test for result count equal to 1 and is not null
         /// </summary>
         /// <param name="well">the well</param>
@@ -504,7 +534,7 @@ namespace PDS.Witsml.Server
         /// <summary>
         /// Does get query for single trajectory object and test for result count equal to 1 and is not null
         /// </summary>
-        /// <param name="trajectory">the log with UIDs for well and wellbore</param>
+        /// <param name="trajectory">the trajectory with UIDs for well and wellbore</param>
         /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
         /// <param name="optionsIn">The options in.</param>
         /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
@@ -512,6 +542,19 @@ namespace PDS.Witsml.Server
         public Trajectory GetAndAssert(Trajectory trajectory, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
         {
             return GetAndAssert<TrajectoryList, Trajectory>(trajectory, isNotNull, optionsIn, queryByExample);
+        }
+
+        /// <summary>
+        /// Does get query for single trajectory object and test for result count equal to 1 and is not null
+        /// </summary>
+        /// <param name="attachment">the attachment with UIDs for well and wellbore</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
+        /// <returns>The first trajectory from the response</returns>
+        public Attachment GetAndAssert(Attachment attachment, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
+        {
+            return GetAndAssert<AttachmentList, Attachment>(attachment, isNotNull, optionsIn, queryByExample);
         }
 
         /// <summary>
@@ -573,6 +616,46 @@ namespace PDS.Witsml.Server
         public void UpdateAndAssert(Trajectory trajectory, ErrorCodes errorCode = ErrorCodes.Success)
         {
             UpdateAndAssert<TrajectoryList, Trajectory>(trajectory, errorCode);
+        }
+
+        /// <summary>
+        /// Does UpdateInStore on rig object and test the return code
+        /// </summary>
+        /// <param name="rig">the rig</param>
+        /// <param name="errorCode">The error code.</param>
+        public void UpdateAndAssert(Rig rig, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            UpdateAndAssert<RigList, Rig>(rig, errorCode);
+        }
+
+        /// <summary>
+        /// Does UpdateInStore on attachment object and test the return code
+        /// </summary>
+        /// <param name="attachment">the attachment</param>
+        /// <param name="errorCode">The error code.</param>
+        public void UpdateAndAssert(Attachment attachment, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            UpdateAndAssert<AttachmentList, Attachment>(attachment, errorCode);
+        }
+
+        /// <summary>
+        /// Does UpdateInStore on message object and test the return code
+        /// </summary>
+        /// <param name="message">the message</param>
+        /// <param name="errorCode">The error code.</param>
+        public void UpdateAndAssert(Message message, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            UpdateAndAssert<MessageList, Message>(message, errorCode);
+        }
+
+        /// <summary>
+        /// Does UpdateInStore on wbGeometry object and test the return code
+        /// </summary>
+        /// <param name="wbGeometry">the wbGeometry</param>
+        /// <param name="errorCode">The error code.</param>
+        public void UpdateAndAssert(StandAloneWellboreGeometry wbGeometry, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            UpdateAndAssert<WellboreGeometryList, StandAloneWellboreGeometry>(wbGeometry, errorCode);
         }
 
         /// <summary>

@@ -248,6 +248,26 @@ namespace PDS.Witsml.Server
         }
 
         /// <summary>
+        /// Adds message object and test the return code
+        /// </summary>
+        /// <param name="message">the message</param>
+        /// <param name="errorCode">the errorCode</param>
+        public WMLS_AddToStoreResponse AddAndAssert(Message message, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            return AddAndAssert<MessageList, Message>(message, errorCode);
+        }
+
+        /// <summary>
+        /// Adds wbGeometry object and test the return code
+        /// </summary>
+        /// <param name="wbGeometry">the wbGeometry</param>
+        /// <param name="errorCode">the errorCode</param>
+        public WMLS_AddToStoreResponse AddAndAssert(StandAloneWellboreGeometry wbGeometry, ErrorCodes errorCode = ErrorCodes.Success)
+        {
+            return AddAndAssert<WellboreGeometryList, StandAloneWellboreGeometry>(wbGeometry, errorCode);
+        }
+
+        /// <summary>
         /// Does get query for single well object and test for result count equal to 1 and is not null
         /// </summary>
         /// <param name="well">the well</param>
@@ -297,6 +317,45 @@ namespace PDS.Witsml.Server
         public Trajectory GetAndAssert(Trajectory trajectory, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
         {
             return GetAndAssert<TrajectoryList, Trajectory>(trajectory, isNotNull, optionsIn, queryByExample);
+        }
+
+        /// <summary>
+        /// Does get query for single rig object and test for result count equal to 1 and is not null
+        /// </summary>
+        /// <param name="rig">the rig with UIDs for well and wellbore</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
+        /// <returns>The first rig from the response</returns>
+        public Rig GetAndAssert(Rig rig, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
+        {
+            return GetAndAssert<RigList, Rig>(rig, isNotNull, optionsIn, queryByExample);
+        }
+
+        /// <summary>
+        /// Does get query for single message object and test for result count equal to 1 and is not null
+        /// </summary>
+        /// <param name="message">the message with UIDs for well and wellbore</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
+        /// <returns>The first message from the response</returns>
+        public Message GetAndAssert(Message message, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
+        {
+            return GetAndAssert<MessageList, Message>(message, isNotNull, optionsIn, queryByExample);
+        }
+
+        /// <summary>
+        /// Does get query for single wbGeometry object and test for result count equal to 1 and is not null
+        /// </summary>
+        /// <param name="wbGeometry">the wbGeometry with UIDs for well and wellbore</param>
+        /// <param name="isNotNull">if set to <c>true</c> the result should not be null.</param>
+        /// <param name="optionsIn">The options in.</param>
+        /// <param name="queryByExample">if set to <c>true</c> query by example.</param>
+        /// <returns>The first wbGeometry from the response</returns>
+        public StandAloneWellboreGeometry GetAndAssert(StandAloneWellboreGeometry wbGeometry, bool isNotNull = true, string optionsIn = null, bool queryByExample = false)
+        {
+            return GetAndAssert<WellboreGeometryList, StandAloneWellboreGeometry>(wbGeometry, isNotNull, optionsIn, queryByExample);
         }
 
         /// <summary>
