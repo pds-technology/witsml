@@ -122,7 +122,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 DataType = channel.DataType.GetValueOrDefault(EtpDataType.@double).ToString().Replace("@", string.Empty),
                 Description = channel.Citation != null ? channel.Citation.Description ?? channel.Mnemonic : channel.Mnemonic,
                 ChannelName = channel.Mnemonic,
-                Uom = Units.GetUnit(channel.Uom),
+                Uom = Units.GetUnit(channel.Uom.ToString()),
                 MeasureClass = channel.ChannelClass?.QuantityClass?.ToString() ?? ObjectTypes.Unknown,
                 Source = channel.Source ?? ObjectTypes.Unknown,
                 Uuid = channel.Mnemonic,
@@ -142,7 +142,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 Uri = indexChannel.GetUri(entity),
                 Mnemonic = indexChannel.Mnemonic,
                 Description = indexChannel.Mnemonic,
-                Uom = Units.GetUnit(indexChannel.Uom),
+                Uom = Units.GetUnit(indexChannel.Uom.ToString()),
                 Scale = scale,
                 IndexType = indexChannel.IsTimeIndex(true)
                     ? ChannelIndexTypes.Time
