@@ -1091,6 +1091,77 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
+        public void Log141DataAdapter_UpdateInStore_Merge_Overlapping_Data()
+        {
+            AddParents();
+
+            Log.StartDateTimeIndex = new Timestamp();
+            Log.EndDateTimeIndex = new Timestamp();
+            Log.LogData = DevKit.List(new LogData { Data = DevKit.List<string>() });
+
+            //add data for cureves ROP, GR
+            var logData = Log.LogData.First();
+            logData.Data.Add("2016-12-16T15:17:14.5100106+00:00, 30.1, 40.2");
+            logData.Data.Add("2016-12-16T15:17:15.5100106+00:00, 31.1, 41.2");
+            logData.Data.Add("2016-12-16T15:17:16.5100106+00:00, 32.1, 42.2");
+            logData.Data.Add("2016-12-16T15:17:17.5100106+00:00, 33.1, 43.2");
+            logData.Data.Add("2016-12-16T15:17:18.5100106+00:00, 34.1, 44.2");
+
+            DevKit.InitHeader(Log, LogIndexType.datetime);
+
+            var additionalCurves = new List<LogCurveInfo>
+            {
+                DevKit.LogGenerator.CreateDoubleLogCurveInfo("MFIA", "galUS/min"),
+                DevKit.LogGenerator.CreateDoubleLogCurveInfo("RPMA", "rpm")
+            };
+            Log.LogCurveInfo.AddRange(additionalCurves);
+
+            DevKit.AddAndAssert(Log);
+            var resultAdd = DevKit.GetAndAssert(Log);
+            Assert.AreEqual(1, resultAdd.LogData.Count);
+            Assert.AreEqual(5, resultAdd.LogData[0].Data.Count);
+
+            var timeIndex = Log.LogCurveInfo.Find(c => c.Mnemonic.Value == Log.IndexCurve);
+            var mnemonicListForUpdate = timeIndex.Mnemonic + "," + string.Join(",", additionalCurves.Select(x => x.Mnemonic));
+            var unitListForUpdate = (timeIndex.TypeLogData.HasValue ? timeIndex.TypeLogData.Value + "," : string.Empty)
+                + string.Join(",", additionalCurves.Select(x => x.Unit ?? string.Empty));
+
+            // Update with data for additional curves MFIA, RPMA
+            var updateLog = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
+            updateLog.LogData = DevKit.List(new LogData { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = mnemonicListForUpdate;
+            updateLog.LogData[0].UnitList = unitListForUpdate;
+            logData = updateLog.LogData.First();
+            logData.Data.Add("2016-12-16T15:17:14.5100106+00:00, 335.1, 35.7");
+            logData.Data.Add("2016-12-16T15:17:18.5100106+00:00, 335.1 ,");
+            logData.Data.Add("2016-12-16T15:17:20.5100106+00:00, 335.1, 35.2");
+
+            DevKit.UpdateAndAssert(updateLog);
+            var resultUpdate = DevKit.GetAndAssert(Log);
+            Assert.AreEqual(1, resultUpdate.LogData.Count);
+            Assert.AreEqual(6, resultUpdate.LogData[0].Data.Count);
+
+            // Update with overlapping data for merging
+            var updateLogMerge = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
+            updateLogMerge.LogData = DevKit.List(new LogData { Data = DevKit.List<string>() });
+            updateLogMerge.LogData[0].MnemonicList = mnemonicListForUpdate;
+            updateLogMerge.LogData[0].UnitList = unitListForUpdate;
+            logData = updateLogMerge.LogData.First();
+            logData.Data.Add("2016-12-16T15:17:17.5100106+00:00, 335.1, 35.7");
+            logData.Data.Add("2016-12-16T15:17:24.5100106+00:00, 335.1, 33.5");
+
+            DevKit.UpdateAndAssert(updateLogMerge);
+            var resultMerge = DevKit.GetAndAssert(Log);
+            Assert.AreEqual(1, resultMerge.LogData.Count);
+            Assert.AreEqual(6, resultMerge.LogData[0].Data.Count);
+            Assert.IsFalse(resultMerge.LogData[0].Data[4].Split(',').Contains("null"));
+            Assert.IsTrue(resultMerge.LogData[0].Data[4].Split(',')[3] == string.Empty
+                , "Set to empty for 2016-12-16T15:17:18.5100106+00:00 while merging at start: 2016-12-16T15:17:17.5100106+00:00");
+            Assert.IsTrue(resultMerge.LogData[0].Data[5].Split(',')[0] == "2016-12-16T15:17:24.5100106+00:00"
+                , "Row deleted for 2016-12-16T15:17:20.5100106+00:00 and new row added for 2016-12-16T15:17:24.5100106+00:00");
+        }
+
+        [TestMethod]
         public void Log141DataAdapter_UpdateInStore_OverwriteLog_Data_Chunk()
         {       
             Log.StartIndex = new GenericMeasure(17, "m");
