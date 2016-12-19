@@ -36,7 +36,7 @@ namespace PDS.Witsml.Server.Data.Channels
             Channel.Mnemonic = "CH1";
             Channel.LoggingCompanyName = "PDS";
             Channel.TimeDepth = "Depth";
-            Channel.Uom = "m";
+            Channel.Uom = UnitOfMeasure.m;
         }
     }
 }

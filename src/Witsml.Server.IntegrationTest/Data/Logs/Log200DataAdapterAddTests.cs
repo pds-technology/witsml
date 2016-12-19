@@ -206,7 +206,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 Uri = uri,
                 Mnemonic = channelSet.Index[0].Mnemonic,
                 Description = "Depth Index",
-                Uom = channelSet.Index[0].Uom,
+                Uom = channelSet.Index[0].Uom.ToString(),
                 Scale = 3,
                 IndexType =
                     mdChannelIndex.IndexType.HasValue && mdChannelIndex.IndexType.Value == ChannelIndexType.datetime
@@ -240,7 +240,7 @@ namespace PDS.Witsml.Server.Data.Logs
                     ContentType = channel.GetUri().ContentType,
                     ChannelId = channelId++,
                     ChannelName = channel.Mnemonic,
-                    Uom = channel.Uom,
+                    Uom = channel.Uom.ToString(),
                     MeasureClass = channel.ChannelClass?.QuantityClass?.ToString() ?? "none",
                     DataType = channelDataType,
                     Description = channel.Citation.Description,
