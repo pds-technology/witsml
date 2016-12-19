@@ -92,7 +92,7 @@ namespace PDS.Witsml.Server
 
                 channelSet.Channel.Add(LogGenerator.CreateChannel(log, index, "Rate of Penetration", "ROP", UnitOfMeasure.mh.ToString(), "Velocity", EtpDataType.@double, pointMetadataList: pointMetadataList));
                 channelSet.Channel.Add(LogGenerator.CreateChannel(log, index, "Hookload", "HKLD", UnitOfMeasure.klbf.ToString(), "Force", EtpDataType.@double, null));
-                channelSet.Channel.Add(LogGenerator.CreateChannel(log, index, "GR1AX", "GR", "api", UnitOfMeasure.gAPI.ToString(), EtpDataType.@double, null));
+                channelSet.Channel.Add(LogGenerator.CreateChannel(log, index, "GR1AX", "GR", UnitOfMeasure.gAPI.ToString(), "Gamma_Ray", EtpDataType.@double, null));
 
                 CreateMockChannelSetData(channelSet, channelSet.Index);
                 log.ChannelSet.Add(channelSet);
