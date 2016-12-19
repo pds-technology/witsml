@@ -1407,6 +1407,425 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_With_Requested_Elements_Requested()
+        {
+            new SampleDataTests()
+                .AddSampleData();
+            
+            var queryIn = @"
+                           <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
+                                <log uidWell=""490251090200"" uidWellbore=""62-TpX-11"" uid=""490251090200_13346"">
+                                    <logData>
+                                        <mnemonicList>TIME,SSAS,WDSSA</mnemonicList>
+                                    </logData>
+                                </log>
+                           </logs>";
+
+            var results = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(results.XMLout);
+            Assert.AreEqual(1, logList.Log.Count);
+
+            var logData = logList.Log[0].LogData;
+            Assert.AreEqual(1, logData.Count);
+            Assert.AreEqual(3, logData[0].MnemonicList.Split(',').Length);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_With_Requested_Elements_All()
+        {
+            new SampleDataTests()
+                .AddSampleData();
+
+            var queryIn = @"
+                           <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
+                                <log uidWell=""490251090200"" uidWellbore=""62-TpX-11"" uid=""490251090200_13346"">
+                                    <logData>
+                                        <mnemonicList>TIME,SSAS,WDSSA</mnemonicList>
+                                    </logData>
+                                </log>
+                           </logs>";
+
+            var results = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=all");
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(results.XMLout);
+            Assert.AreEqual(1, logList.Log.Count);
+
+            var logData = logList.Log[0].LogData;            
+            Assert.AreEqual(1, logData.Count);
+            Assert.AreEqual(3, logData[0].MnemonicList.Split(',').Length);           
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_StartIndex_With_Requested_Elements_Requested()
+        {
+            new SampleDataTests()
+                .AddSampleData();
+
+            var queryIn = @"
+                           <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
+                                <log uidWell=""490251090200"" uidWellbore=""62-TpX-11"" uid=""490251090200_13346"">
+                                    <startDateTimeIndex>2016-12-16T06:15:45.0000000+00:00</startDateTimeIndex>                                    
+                                    <logData>            
+                                        <mnemonicList/>
+                                    </logData>
+                                </log>
+                           </logs>";
+
+            var results = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(results.XMLout);
+            Assert.AreEqual(1, logList.Log.Count);
+            Assert.IsTrue(logList.Log[0].StartDateTimeIndex.HasValue);
+            Assert.IsFalse(logList.Log[0].EndDateTimeIndex.HasValue);
+
+            var logData = logList.Log[0].LogData;
+            Assert.AreEqual(1, logData.Count);
+            Assert.AreEqual(20, logData[0].MnemonicList.Split(',').Length);
+            Assert.AreEqual(27, logData[0].Data.Count);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_StartIndex_With_Requested_Elements_All()
+        {
+            new SampleDataTests()
+                .AddSampleData();
+
+            var queryIn = @"
+                           <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
+                                <log uidWell=""490251090200"" uidWellbore=""62-TpX-11"" uid=""490251090200_13346"">
+                                    <startDateTimeIndex>2016-12-16T06:15:45.0000000+00:00</startDateTimeIndex>                                                                       
+                                </log>
+                           </logs>";
+
+            var results = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=all");
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(results.XMLout);
+            Assert.AreEqual(1, logList.Log.Count);
+            Assert.IsTrue(logList.Log[0].StartDateTimeIndex.HasValue);
+            Assert.IsTrue(logList.Log[0].EndDateTimeIndex.HasValue);
+
+            var logData = logList.Log[0].LogData;
+            Assert.AreEqual(1, logData.Count);
+            Assert.AreEqual(20, logData[0].MnemonicList.Split(',').Length);
+            Assert.AreEqual(27, logData[0].Data.Count);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_EndIndex_With_Requested_Elements_Requested()
+        {
+            new SampleDataTests()
+                .AddSampleData();
+
+            var queryIn = @"
+                           <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
+                                <log uidWell=""490251090200"" uidWellbore=""62-TpX-11"" uid=""490251090200_13346"">
+                                    <endDateTimeIndex>2016-12-15T21:51:15.0000000+00:00</endDateTimeIndex>                                    
+                                    <logData>            
+                                        <mnemonicList/>
+                                    </logData>
+                                </log>
+                           </logs>";
+
+            var results = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(results.XMLout);
+            Assert.AreEqual(1, logList.Log.Count);
+            Assert.IsTrue(logList.Log[0].EndDateTimeIndex.HasValue);
+            Assert.IsFalse(logList.Log[0].StartDateTimeIndex.HasValue);
+
+            var logData = logList.Log[0].LogData;
+            Assert.AreEqual(1, logData.Count);
+            Assert.AreEqual(9, logData[0].MnemonicList.Split(',').Length);
+            Assert.AreEqual(24, logData[0].Data.Count);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_EndIndex_With_Requested_Elements_All()
+        {
+            new SampleDataTests()
+                .AddSampleData();
+
+            var queryIn = @"
+                           <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
+                                <log uidWell=""490251090200"" uidWellbore=""62-TpX-11"" uid=""490251090200_13346"">
+                                    <endDateTimeIndex>2016-12-15T21:51:15.0000000+00:00</endDateTimeIndex>                                                                        
+                                </log>
+                           </logs>";
+
+            var results = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=all");
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(results.XMLout);
+            Assert.AreEqual(1, logList.Log.Count);
+            Assert.IsTrue(logList.Log[0].EndDateTimeIndex.HasValue);
+            Assert.IsTrue(logList.Log[0].StartDateTimeIndex.HasValue);
+
+            var logData = logList.Log[0].LogData;
+            Assert.AreEqual(1, logData.Count);
+            Assert.AreEqual(9, logData[0].MnemonicList.Split(',').Length);
+            Assert.AreEqual(24, logData[0].Data.Count);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_And_StartIndex_With_Requested_Elements_Requested()
+        {
+            new SampleDataTests()
+                .AddSampleData();
+
+            var queryIn = @"
+                           <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
+                                <log uidWell=""490251090200"" uidWellbore=""62-TpX-11"" uid=""490251090200_13346"">                                    
+                                    <startDateTimeIndex>2016-12-16T06:15:45.0000000+00:00</startDateTimeIndex>                                    
+                                    <logData>            
+                                        <mnemonicList>TIME,SSAS,WDSSA,RCBROP</mnemonicList>
+                                    </logData>
+                                </log>
+                           </logs>";
+
+            var results = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(results.XMLout);
+            Assert.AreEqual(1, logList.Log.Count);
+            Assert.IsTrue(logList.Log[0].StartDateTimeIndex.HasValue);
+            Assert.IsFalse(logList.Log[0].EndDateTimeIndex.HasValue);
+
+            var logData = logList.Log[0].LogData;
+            Assert.AreEqual(1, logData.Count);            
+            Assert.AreEqual(4, logData[0].MnemonicList.Split(',').Length);
+            Assert.AreEqual(27, logData[0].Data.Count);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_And_StartIndex_With_Requested_Elements_All()
+        {
+            new SampleDataTests()
+                .AddSampleData();
+
+            var queryIn = @"
+                           <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
+                                <log uidWell=""490251090200"" uidWellbore=""62-TpX-11"" uid=""490251090200_13346"">
+                                    <startDateTimeIndex>2016-12-16T06:15:45.0000000+00:00</startDateTimeIndex>                                    
+                                    <logData>            
+                                        <mnemonicList>TIME,SSAS,WDSSA,RCBROP</mnemonicList>
+                                    </logData>
+                                </log>
+                           </logs>";
+
+            var results = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=all");
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(results.XMLout);
+            Assert.AreEqual(1, logList.Log.Count);
+            Assert.IsTrue(logList.Log[0].StartDateTimeIndex.HasValue);
+            Assert.IsTrue(logList.Log[0].EndDateTimeIndex.HasValue);
+
+            var logData = logList.Log[0].LogData;
+            Assert.AreEqual(1, logData.Count);
+            Assert.AreEqual(4, logData[0].MnemonicList.Split(',').Length);
+            Assert.AreEqual(27, logData[0].Data.Count);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_And_EndIndex_With_Requested_Elements_Requested()
+        {
+            new SampleDataTests()
+                .AddSampleData();
+
+            var queryIn = @"
+                           <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
+                                <log uidWell=""490251090200"" uidWellbore=""62-TpX-11"" uid=""490251090200_13346"">
+                                    <endDateTimeIndex>2016-12-15T21:51:30.0000000+00:00</endDateTimeIndex>
+                                    <logData>
+                                        <mnemonicList>TIME,SSAS,WDSSA,RCBROP,BAS,WDBA</mnemonicList>
+                                    </logData>
+                                </log>
+                           </logs>";
+
+            var results = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+            
+            var logList = EnergisticsConverter.XmlToObject<LogList>(results.XMLout);
+            Assert.IsFalse(logList.Log[0].StartDateTimeIndex.HasValue);
+            Assert.IsTrue(logList.Log[0].EndDateTimeIndex.HasValue);
+            Assert.AreEqual(1, logList.Log.Count);
+
+            var logData = logList.Log[0].LogData;
+            Assert.AreEqual(1, logData.Count);
+            Assert.AreEqual(5, logData[0].MnemonicList.Split(',').Length);
+            Assert.AreEqual(39, logData[0].Data.Count);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_And_EndIndex_With_Requested_Elements_All()
+        {
+            new SampleDataTests()
+                .AddSampleData();
+
+            var queryIn = @"
+                           <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
+                                <log uidWell=""490251090200"" uidWellbore=""62-TpX-11"" uid=""490251090200_13346"">
+                                    <endDateTimeIndex>2016-12-15T21:51:30.0000000+00:00</endDateTimeIndex>
+                                    <logData>
+                                        <mnemonicList>TIME,SSAS,WDSSA,RCBROP,BAS,WDBA</mnemonicList>
+                                    </logData>
+                                </log>
+                           </logs>";
+
+            var results = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=all");
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(results.XMLout);
+            Assert.AreEqual(1, logList.Log.Count);
+            Assert.IsTrue(logList.Log[0].StartDateTimeIndex.HasValue);
+            Assert.IsTrue(logList.Log[0].EndDateTimeIndex.HasValue);
+
+            var logData = logList.Log[0].LogData;
+            Assert.AreEqual(1, logData.Count);
+            Assert.AreEqual(5, logData[0].MnemonicList.Split(',').Length);
+            Assert.AreEqual(39, logData[0].Data.Count);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_StartIndex_And_EndIndex_With_Requested_Elements_Requested()
+        {
+            new SampleDataTests()
+                .AddSampleData();
+
+            var queryIn = @"
+                            <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
+                                <log uidWell=""490251090200"" uidWellbore=""62-TpX-11"" uid=""490251090200_13346"">
+                                    <startDateTimeIndex>2016-12-15T21:50:59.0000000+00:00</startDateTimeIndex>  
+                                    <endDateTimeIndex>2016-12-15T21:51:11.0000000+00:00</endDateTimeIndex>                                    
+                                    <logData>
+                                        <mnemonicList/>
+                                    </logData>
+                                </log>
+                           </logs>";
+
+            var results = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+            
+            var logList = EnergisticsConverter.XmlToObject<LogList>(results.XMLout);
+            Assert.AreEqual(1, logList.Log.Count);
+
+            var logData = logList.Log[0].LogData;
+            Assert.AreEqual(1, logList.Log.Count);
+            Assert.IsTrue(logList.Log[0].StartDateTimeIndex.HasValue);
+            Assert.IsTrue(logList.Log[0].EndDateTimeIndex.HasValue);
+            Assert.IsFalse(logList.Log[0].Direction.HasValue);
+
+            Assert.AreEqual(1, logData.Count);
+            Assert.AreEqual(9, logData[0].MnemonicList.Split(',').Length);
+            Assert.AreEqual(13, logData[0].Data.Count);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_StartIndex_And_EndIndex_With_Requested_Elements_All()
+        {
+            new SampleDataTests()
+                .AddSampleData();
+
+            var queryIn = @"
+                            <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
+                                <log uidWell=""490251090200"" uidWellbore=""62-TpX-11"" uid=""490251090200_13346"">
+                                    <startDateTimeIndex>2016-12-15T21:50:59.0000000+00:00</startDateTimeIndex>  
+                                    <endDateTimeIndex>2016-12-15T21:51:11.0000000+00:00</endDateTimeIndex>                                                                        
+                                </log>
+                           </logs>";
+
+            var results = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=all");
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(results.XMLout);
+            Assert.AreEqual(1, logList.Log.Count);
+
+            var logData = logList.Log[0].LogData;
+            Assert.AreEqual(1, logList.Log.Count);
+            Assert.IsTrue(logList.Log[0].StartDateTimeIndex.HasValue);
+            Assert.IsTrue(logList.Log[0].EndDateTimeIndex.HasValue);
+            Assert.IsTrue(logList.Log[0].Direction.HasValue);
+
+            Assert.AreEqual(1, logData.Count);
+            Assert.AreEqual(9, logData[0].MnemonicList.Split(',').Length);
+            Assert.AreEqual(13, logData[0].Data.Count);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_And_StartIndex_And_EndIndex_With_Requested_Elements_Requested()
+        {
+            new SampleDataTests()
+                 .AddSampleData();
+
+            var queryIn = @"
+                            <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
+                                <log uidWell=""490251090200"" uidWellbore=""62-TpX-11"" uid=""490251090200_13346"">
+                                    <startDateTimeIndex>2016-12-15T21:50:59.0000000+00:00</startDateTimeIndex>  
+                                    <endDateTimeIndex>2016-12-15T21:51:11.0000000+00:00</endDateTimeIndex>                                    
+                                    <logData>
+                                        <mnemonicList>TIME,SSAS,WDSSA,ROPS</mnemonicList>
+                                    </logData>
+                                </log>
+                           </logs>";
+
+            var results = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=requested");
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(results.XMLout);
+            Assert.AreEqual(1, logList.Log.Count);
+
+            var logData = logList.Log[0].LogData;
+            Assert.AreEqual(1, logList.Log.Count);
+            Assert.IsTrue(logList.Log[0].StartDateTimeIndex.HasValue);
+            Assert.IsTrue(logList.Log[0].EndDateTimeIndex.HasValue);
+            Assert.IsFalse(logList.Log[0].Direction.HasValue);
+
+            Assert.AreEqual(1, logData.Count);
+            Assert.AreEqual(4, logData[0].MnemonicList.Split(',').Length);
+            Assert.AreEqual(13, logData[0].Data.Count);
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_And_StartIndex_And_EndIndex_With_Requested_Elements_All()
+        {
+            new SampleDataTests()
+                 .AddSampleData();
+
+            var queryIn = @"
+                            <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
+                                <log uidWell=""490251090200"" uidWellbore=""62-TpX-11"" uid=""490251090200_13346"">
+                                    <startDateTimeIndex>2016-12-15T21:50:59.0000000+00:00</startDateTimeIndex>  
+                                    <endDateTimeIndex>2016-12-15T21:51:11.0000000+00:00</endDateTimeIndex>                                    
+                                    <logData>
+                                        <mnemonicList>TIME,SSAS,WDSSA,ROPS</mnemonicList>
+                                    </logData>
+                                </log>
+                           </logs>";
+
+            var results = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=all");
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(results.XMLout);
+            Assert.AreEqual(1, logList.Log.Count);
+
+            var logData = logList.Log[0].LogData;
+            Assert.AreEqual(1, logList.Log.Count);
+            Assert.IsTrue(logList.Log[0].StartDateTimeIndex.HasValue);
+            Assert.IsTrue(logList.Log[0].EndDateTimeIndex.HasValue);
+            Assert.IsTrue(logList.Log[0].Direction.HasValue);
+
+            Assert.AreEqual(1, logData.Count);
+            Assert.AreEqual(4, logData[0].MnemonicList.Split(',').Length);
+            Assert.AreEqual(13, logData[0].Data.Count);
+        }
+
+        [TestMethod]
         public void Log141DataAdapter_GetFromStore_Header_Only_No_Data()
         {
             int numRows = 10;

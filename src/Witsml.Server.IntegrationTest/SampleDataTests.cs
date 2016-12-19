@@ -55,6 +55,13 @@ namespace PDS.Witsml.Server
 
         #region Helper Methods
 
+        internal void AddSampleData()
+        {
+            TestSetUp();
+            Add_parents();
+            Add_logs();
+        }
+
         private void Add_parents()
         {
             var wellFiles = Directory.GetFiles(_dataDir, "*_Well.xml");
