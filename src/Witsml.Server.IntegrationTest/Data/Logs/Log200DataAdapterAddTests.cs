@@ -54,8 +54,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Add special channels
             var channelSet = Log.ChannelSet.First();
-            channelSet.Channel.Add(LogGenerator.CreateChannel(Log, channelSet.Index, "Message", "MSG", "none", "none", EtpDataType.@string, null));
-            channelSet.Channel.Add(LogGenerator.CreateChannel(Log, channelSet.Index, "Count", "CNT", "none", "none", EtpDataType.@long, null));
+            channelSet.Channel.Add(LogGenerator.CreateChannel(Log, channelSet.Index, "Message", "MSG", null, "none", EtpDataType.@string, null));
+            channelSet.Channel.Add(LogGenerator.CreateChannel(Log, channelSet.Index, "Count", "CNT", null, "none", EtpDataType.@long, null));
 
             // Initialize data block
             var uri = channelSet.GetUri();

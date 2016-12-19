@@ -255,7 +255,7 @@ namespace PDS.Witsml
         /// <returns>The UnitOfMeasure</returns>
         public static UnitOfMeasure? GetUnitOfMeasure(this string uom)
         {
-            return (UnitOfMeasure?)Enum.Parse(typeof(UnitOfMeasure), uom);
+            return string.IsNullOrWhiteSpace(uom) ? null : (UnitOfMeasure?)Enum.Parse(typeof(UnitOfMeasure), uom);
         }
     }
 }
