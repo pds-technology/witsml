@@ -109,6 +109,7 @@
     <Compile Include="..\External\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="DataObjectTests.cs" />
     <Compile Include="Data\Logs\LogExtensionsTests.cs" />
     <Compile Include="DateTimeExtensionsTests.cs" />
     <Compile Include="FrameworkExtensionsTests.cs" />
