@@ -55,8 +55,9 @@ namespace PDS.Witsml.Server
 
         #region Helper Methods
 
-        internal void AddSampleData()
+        internal void AddSampleData(TestContext context)
         {
+            TestContext = context;
             TestSetUp();
             Add_parents();
             Add_logs();

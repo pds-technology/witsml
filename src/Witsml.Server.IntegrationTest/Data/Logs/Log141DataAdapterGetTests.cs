@@ -1410,7 +1410,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_With_Requested_Elements_Requested()
         {
             new SampleDataTests()
-                .AddSampleData();
+                .AddSampleData(TestContext);
             
             var queryIn = @"
                            <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
@@ -1436,7 +1436,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_With_Requested_Elements_All()
         {
             new SampleDataTests()
-                .AddSampleData();
+                .AddSampleData(TestContext);
 
             var queryIn = @"
                            <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
@@ -1462,7 +1462,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_StartIndex_With_Requested_Elements_Requested()
         {
             new SampleDataTests()
-                .AddSampleData();
+                .AddSampleData(TestContext);
 
             var queryIn = @"
                            <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
@@ -1492,7 +1492,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_StartIndex_With_Requested_Elements_All()
         {
             new SampleDataTests()
-                .AddSampleData();
+                .AddSampleData(TestContext);
 
             var queryIn = @"
                            <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
@@ -1519,7 +1519,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_EndIndex_With_Requested_Elements_Requested()
         {
             new SampleDataTests()
-                .AddSampleData();
+                .AddSampleData(TestContext);
 
             var queryIn = @"
                            <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
@@ -1549,7 +1549,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_EndIndex_With_Requested_Elements_All()
         {
             new SampleDataTests()
-                .AddSampleData();
+                .AddSampleData(TestContext);
 
             var queryIn = @"
                            <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
@@ -1576,7 +1576,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_And_StartIndex_With_Requested_Elements_Requested()
         {
             new SampleDataTests()
-                .AddSampleData();
+                .AddSampleData(TestContext);
 
             var queryIn = @"
                            <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
@@ -1606,7 +1606,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_And_StartIndex_With_Requested_Elements_All()
         {
             new SampleDataTests()
-                .AddSampleData();
+                .AddSampleData(TestContext);
 
             var queryIn = @"
                            <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
@@ -1636,7 +1636,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_And_EndIndex_With_Requested_Elements_Requested()
         {
             new SampleDataTests()
-                .AddSampleData();
+                .AddSampleData(TestContext);
 
             var queryIn = @"
                            <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
@@ -1666,7 +1666,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_And_EndIndex_With_Requested_Elements_All()
         {
             new SampleDataTests()
-                .AddSampleData();
+                .AddSampleData(TestContext);
 
             var queryIn = @"
                            <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
@@ -1696,7 +1696,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_StartIndex_And_EndIndex_With_Requested_Elements_Requested()
         {
             new SampleDataTests()
-                .AddSampleData();
+                .AddSampleData(TestContext);
 
             var queryIn = @"
                             <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
@@ -1730,7 +1730,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_StartIndex_And_EndIndex_With_Requested_Elements_All()
         {
             new SampleDataTests()
-                .AddSampleData();
+                .AddSampleData(TestContext);
 
             var queryIn = @"
                             <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
@@ -1761,7 +1761,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_And_StartIndex_And_EndIndex_With_Requested_Elements_Requested()
         {
             new SampleDataTests()
-                 .AddSampleData();
+                 .AddSampleData(TestContext);
 
             var queryIn = @"
                             <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
@@ -1795,7 +1795,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_Specified_MenmonicList_And_StartIndex_And_EndIndex_With_Requested_Elements_All()
         {
             new SampleDataTests()
-                 .AddSampleData();
+                 .AddSampleData(TestContext);
 
             var queryIn = @"
                             <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
