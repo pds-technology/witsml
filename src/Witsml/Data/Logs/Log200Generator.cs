@@ -115,7 +115,7 @@ namespace PDS.Witsml.Data.Logs
                 Direction = direction,
                 IndexType = indexType,
                 Mnemonic = mnemonic,
-                Uom = uom,
+                Uom = uom.GetUnitOfMeasure(),
                 DatumReference = datumReference
             };
         }
@@ -188,7 +188,7 @@ namespace PDS.Witsml.Data.Logs
                 Uuid = Uid(),
                 Citation = CreateCitation(citationName),
                 Mnemonic = mnemonic,
-                Uom = uom,
+                Uom = uom.GetUnitOfMeasure(),
                 ChannelClass = ToPropertyKind(channelClass),
                 LoggingMethod = log.LoggingMethod,
                 LoggingCompanyName = log.LoggingCompanyName,

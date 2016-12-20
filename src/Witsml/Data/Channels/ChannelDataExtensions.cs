@@ -206,7 +206,7 @@ namespace PDS.Witsml.Data.Channels
 
             // Not including index channels with value channels
             var mnemonics = channelSet.Channel.Select(x => x.Mnemonic).ToArray();
-            var units = channelSet.Channel.Select(x => x.Uom).ToArray();
+            var units = channelSet.Channel.Select(x => x.Uom.ToString()).ToArray();
             var dataTypes = channelSet.Channel.Select(x => x.DataType?.ToString()).ToArray();
             var nullValues = new string[units.Length];
 
@@ -278,7 +278,7 @@ namespace PDS.Witsml.Data.Channels
             return new ChannelIndexInfo()
             {
                 Mnemonic = channelIndex.Mnemonic,
-                Unit = channelIndex.Uom,
+                Unit = channelIndex.Uom.ToString(),
                 Increasing = channelIndex.IsIncreasing(),
                 IsTimeIndex = channelIndex.IsTimeIndex()
             };
@@ -295,7 +295,7 @@ namespace PDS.Witsml.Data.Channels
             dataBlock.AddChannel(
                 channelId,
                 channel.Mnemonic,
-                channel.Uom,
+                channel.Uom.ToString(),
                 channel.DataType?.ToString());
         }
 
@@ -308,7 +308,7 @@ namespace PDS.Witsml.Data.Channels
         {
             dataBlock.AddIndex(
                 channelIndex.Mnemonic,
-                channelIndex.Uom,
+                channelIndex.Uom.ToString(),
                 Witsml200.ReferenceData.EtpDataType.@long.ToString(),
                 channelIndex.IsIncreasing(),
                 channelIndex.IsTimeIndex());

@@ -63,12 +63,11 @@ namespace PDS.Witsml.Data.Logs
             _depthLogChannelSet = _logGenerator.CreateChannelSet(_depthLog);
             _depthLogChannelSet.Index.Add(_measuredDepthIndex);
             _depthLogChannelSet.Index.Add(_dateTimeIndex);
-            _depthLogChannelSet.Channel.Add(_logGenerator.CreateChannel(_depthLog, _depthLogChannelSet.Index, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: _logGenerator.List(_booleanPointMetadata)));
-            _depthLogChannelSet.Channel.Add(_logGenerator.CreateChannel(_depthLog, _depthLogChannelSet.Index, "Hookload", "HKLD", "klbf", "Force", EtpDataType.@double, null));
-
+            _depthLogChannelSet.Channel.Add(_logGenerator.CreateChannel(_depthLog, _depthLogChannelSet.Index, "Rate of Penetration", "ROP", UnitOfMeasure.mh.ToString(), "Velocity", EtpDataType.@double, pointMetadataList: _logGenerator.List(_booleanPointMetadata)));
+            _depthLogChannelSet.Channel.Add(_logGenerator.CreateChannel(_depthLog, _depthLogChannelSet.Index, "Hookload", "HKLD", UnitOfMeasure.klbf.ToString(), "Force", EtpDataType.@double, null));
             _timeLogChannelSet = _logGenerator.CreateChannelSet(_timeLog);
             _timeLogChannelSet.Index.Add(_elapseTimeIndex);
-            _timeLogChannelSet.Channel.Add(_logGenerator.CreateChannel(_timeLog, _timeLogChannelSet.Index, "Rate of Penetration", "ROP", "m/h", "Velocity", EtpDataType.@double, pointMetadataList: _logGenerator.List(_floatPointMetadata)));
+            _timeLogChannelSet.Channel.Add(_logGenerator.CreateChannel(_timeLog, _timeLogChannelSet.Index, "Rate of Penetration", "ROP", UnitOfMeasure.mh.ToString(), "Velocity", EtpDataType.@double, pointMetadataList: _logGenerator.List(_floatPointMetadata)));
         }
 
         [TestMethod]
@@ -120,7 +119,7 @@ namespace PDS.Witsml.Data.Logs
             var channelSet2 = _logGenerator.CreateChannelSet(_depthLog);
             channelSet2.Index.Add(_measuredDepthIndex);
             channelSet2.Index.Add(_dateTimeIndex);
-            channelSet2.Channel.Add(_logGenerator.CreateChannel(_depthLog, channelSet2.Index, "GR", "GR", "api", "gamma_ray", EtpDataType.@double, pointMetadataList: _logGenerator.List(_floatPointMetadata)));
+            channelSet2.Channel.Add(_logGenerator.CreateChannel(_depthLog, channelSet2.Index, "GR", "GR", UnitOfMeasure.gAPI.ToString(), "gamma_ray", EtpDataType.@double, pointMetadataList: _logGenerator.List(_floatPointMetadata)));
 
             var channelSetList = new List<ChannelSet> {_depthLogChannelSet, channelSet2};
 

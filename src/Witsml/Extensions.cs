@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Energistics.DataAccess;
+using Energistics.DataAccess.WITSML200.ReferenceData;
 using Witsml200 = Energistics.DataAccess.WITSML200;
 using PDS.Framework;
 using PDS.Witsml.Properties;
@@ -245,6 +246,16 @@ namespace PDS.Witsml
             return (function == Functions.AddToStore || function == Functions.UpdateInStore)
                 ? ErrorCodes.MissingUnitForMeasureData
                 : ErrorCodes.EmptyUomSpecified;
+        }
+
+        /// <summary>
+        /// Gets the enum UnitOfMeasure from a string.
+        /// </summary>
+        /// <param name="uom">The uom.</param>
+        /// <returns>The UnitOfMeasure</returns>
+        public static UnitOfMeasure? GetUnitOfMeasure(this string uom)
+        {
+            return string.IsNullOrWhiteSpace(uom) ? null : (UnitOfMeasure?)Enum.Parse(typeof(UnitOfMeasure), uom);
         }
     }
 }
