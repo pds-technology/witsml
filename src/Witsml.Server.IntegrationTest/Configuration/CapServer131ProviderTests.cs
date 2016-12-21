@@ -18,6 +18,7 @@
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
+using Energistics.DataAccess.WITSML131;
 
 namespace PDS.Witsml.Server.Configuration
 {
@@ -54,7 +55,6 @@ namespace PDS.Witsml.Server.Configuration
         public void CapServer131Provider_Providers_Can_Get_Providers()
         {
             Assert.IsNotNull(_capServer131Provider.Providers);
-            Assert.AreEqual(7, _capServer131Provider.Providers.Count());
         }
 
         [TestMethod]
@@ -64,7 +64,7 @@ namespace PDS.Witsml.Server.Configuration
 
             Assert.IsTrue(capServerXml != string.Empty);
 
-            var capServerObject = Energistics.DataAccess.EnergisticsConverter.XmlToObject<Energistics.DataAccess.WITSML131.CapServers>(capServerXml).CapServer;
+            var capServerObject = Energistics.DataAccess.EnergisticsConverter.XmlToObject<CapServers>(capServerXml).CapServer;
 
             Assert.AreEqual("1.3.1", capServerObject.ApiVers);
             Assert.AreEqual(Properties.Settings.Default.DefaultServerName, capServerObject.Name, "Server Name");
@@ -81,49 +81,69 @@ namespace PDS.Witsml.Server.Configuration
         [TestMethod]
         public void CapServer131Provider_IsSupported_AddToStore_Can_Check_Supported_Object_Type()
         {
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.AddToStore, ObjectTypes.Well), ObjectTypes.Well);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.AddToStore, ObjectTypes.Wellbore), ObjectTypes.Wellbore);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.AddToStore, ObjectTypes.Message), ObjectTypes.Message);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.AddToStore, ObjectTypes.Log), ObjectTypes.Log);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.AddToStore, ObjectTypes.Rig), ObjectTypes.Rig);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.AddToStore, ObjectTypes.Trajectory), ObjectTypes.Trajectory);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.AddToStore, ObjectTypes.WbGeometry), ObjectTypes.WbGeometry);
+            var capServerObject = GetCapServerObject();
+
+            var addToStore = capServerObject.Function.Where(n => n.Name.EndsWith(Functions.AddToStore.ToString())).ToArray();
+            Assert.IsNotNull(addToStore);
+
+            addToStore.FirstOrDefault()?.DataObject.ForEach(
+                    dataObject =>
+                    {
+                        Assert.IsTrue(_capServer131Provider.IsSupported(Functions.AddToStore, dataObject), dataObject);
+                    });
+
+            Assert.IsFalse(_capServer131Provider.IsSupported(Functions.AddToStore, ObjectTypes.Unknown), ObjectTypes.Unknown);
         }
 
         [TestMethod]
         public void CapServer131Provider_IsSupported_GetFromStore_Can_Check_Supported_Object_Type()
         {
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.GetFromStore, ObjectTypes.Well), ObjectTypes.Well);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.GetFromStore, ObjectTypes.Wellbore), ObjectTypes.Wellbore);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.GetFromStore, ObjectTypes.Message), ObjectTypes.Message);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.GetFromStore, ObjectTypes.Log), ObjectTypes.Log);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.GetFromStore, ObjectTypes.Rig), ObjectTypes.Rig);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.GetFromStore, ObjectTypes.Trajectory), ObjectTypes.Trajectory);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.GetFromStore, ObjectTypes.WbGeometry), ObjectTypes.WbGeometry);
+            var capServerObject = GetCapServerObject();
+
+            var getFromStore = capServerObject.Function.Where(n => n.Name.EndsWith(Functions.GetFromStore.ToString())).ToArray();
+            Assert.IsNotNull(getFromStore);
+
+            getFromStore.FirstOrDefault()?.DataObject.ForEach(
+                    dataObject =>
+                    {
+                        Assert.IsTrue(_capServer131Provider.IsSupported(Functions.GetFromStore, dataObject), dataObject);
+                    });
+
+            Assert.IsFalse(_capServer131Provider.IsSupported(Functions.GetFromStore, ObjectTypes.Unknown), ObjectTypes.Unknown);
         }
 
         [TestMethod]
         public void CapServer131Provider_IsSupported_UpdateInStore_Can_Check_Supported_Object_Type()
         {
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.UpdateInStore, ObjectTypes.Well), ObjectTypes.Well);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.UpdateInStore, ObjectTypes.Wellbore), ObjectTypes.Wellbore);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.UpdateInStore, ObjectTypes.Message), ObjectTypes.Message);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.UpdateInStore, ObjectTypes.Log), ObjectTypes.Log);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.UpdateInStore, ObjectTypes.Rig), ObjectTypes.Rig);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.UpdateInStore, ObjectTypes.Trajectory), ObjectTypes.Trajectory);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.UpdateInStore, ObjectTypes.WbGeometry), ObjectTypes.WbGeometry);
+            var capServerObject = GetCapServerObject();
+
+            var updateInStore = capServerObject.Function.Where(n => n.Name.EndsWith(Functions.UpdateInStore.ToString())).ToArray();
+            Assert.IsNotNull(updateInStore);
+
+            updateInStore.FirstOrDefault()?.DataObject.ForEach(
+                    dataObject =>
+                    {
+                        Assert.IsTrue(_capServer131Provider.IsSupported(Functions.UpdateInStore, dataObject), dataObject);
+                    });
+
+            Assert.IsFalse(_capServer131Provider.IsSupported(Functions.UpdateInStore, ObjectTypes.Unknown), ObjectTypes.Unknown);
         }
 
         [TestMethod]
         public void CapServer131Provider_IsSupported_DeleteFromStore_Can_Check_Supported_Object_Type()
         {
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.DeleteFromStore, ObjectTypes.Well), ObjectTypes.Well);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.DeleteFromStore, ObjectTypes.Wellbore), ObjectTypes.Wellbore);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.DeleteFromStore, ObjectTypes.Message), ObjectTypes.Message);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.DeleteFromStore, ObjectTypes.Log), ObjectTypes.Log);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.DeleteFromStore, ObjectTypes.Rig), ObjectTypes.Rig);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.DeleteFromStore, ObjectTypes.Trajectory), ObjectTypes.Trajectory);
-            Assert.IsTrue(_capServer131Provider.IsSupported(Functions.DeleteFromStore, ObjectTypes.WbGeometry), ObjectTypes.WbGeometry);
+            var capServerObject = GetCapServerObject();
+
+            var deleteFromStore = capServerObject.Function.Where(n => n.Name.EndsWith(Functions.DeleteFromStore.ToString())).ToArray();
+            Assert.IsNotNull(deleteFromStore);
+
+            deleteFromStore.FirstOrDefault()?.DataObject.ForEach(
+                    dataObject =>
+                    {
+                        Assert.IsTrue(_capServer131Provider.IsSupported(Functions.DeleteFromStore, dataObject), dataObject);
+                    });
+
+            Assert.IsFalse(_capServer131Provider.IsSupported(Functions.DeleteFromStore, ObjectTypes.Unknown), ObjectTypes.Unknown);
         }
 
         [TestCleanup]
@@ -131,5 +151,13 @@ namespace PDS.Witsml.Server.Configuration
         {
             _devKit = null;
         }
+
+        private CapServer GetCapServerObject()
+        {
+            var capServerXml = _capServer131Provider.ToXml();
+
+            return Energistics.DataAccess.EnergisticsConverter.XmlToObject<CapServers>(capServerXml).CapServer;
+        }
+
     }
 }
