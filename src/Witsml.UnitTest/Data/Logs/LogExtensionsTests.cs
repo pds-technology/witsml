@@ -19,12 +19,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Energistics.DataAccess;
-using Energistics.DataAccess.WITSML131.ComponentSchemas;
-using Energistics.DataAccess.WITSML141.ComponentSchemas;
-using Energistics.DataAccess.WITSML200.ComponentSchemas;
-using Energistics.DataAccess.WITSML200.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Witsml131 = Energistics.DataAccess.WITSML131;
+using Witsml141 = Energistics.DataAccess.WITSML141;
+using Witsml200 = Energistics.DataAccess.WITSML200;
+using Energistics.DataAccess;
 
 namespace PDS.Witsml.Data.Logs
 {
@@ -46,9 +45,9 @@ namespace PDS.Witsml.Data.Logs
         [TestMethod]
         public void LogExtensions_Can_Return_Null_Values_In_The_Order_Of_Mnemonics()
         {
-            var log = new Energistics.DataAccess.WITSML141.Log
+            var log = new Witsml141.Log
             {
-                LogCurveInfo = new List<Energistics.DataAccess.WITSML141.ComponentSchemas.LogCurveInfo>()
+                LogCurveInfo = new List<Witsml141.ComponentSchemas.LogCurveInfo>()
             };
 
             var lci0 = _log141Generator.CreateDoubleLogCurveInfo("DEPTH", "m");
@@ -77,10 +76,10 @@ namespace PDS.Witsml.Data.Logs
         [TestMethod]
         public void LogExtensions_Has_Null_Indicator_Can_Return_Null_Values_In_The_Order_Of_Mnemonics()
         {
-            var log = new Energistics.DataAccess.WITSML141.Log
+            var log = new Witsml141.Log
             {
                 NullValue = "-9999.25",
-                LogCurveInfo = new List<Energistics.DataAccess.WITSML141.ComponentSchemas.LogCurveInfo>()
+                LogCurveInfo = new List<Witsml141.ComponentSchemas.LogCurveInfo>()
             };
 
             var lci0 = _log141Generator.CreateDoubleLogCurveInfo("DEPTH", "m");
@@ -111,10 +110,10 @@ namespace PDS.Witsml.Data.Logs
         [TestMethod]
         public void LogExtensions_GetNullValues_For_131_Log()
         {
-            var log = new Energistics.DataAccess.WITSML131.Log
+            var log = new Witsml131.Log
             {
                 NullValue = "-9999.25",
-                LogCurveInfo = new List<Energistics.DataAccess.WITSML131.ComponentSchemas.LogCurveInfo>()
+                LogCurveInfo = new List<Witsml131.ComponentSchemas.LogCurveInfo>()
             };
 
             var lci0 = _log131Generator.CreateDoubleLogCurveInfo("DEPTH", "m");
@@ -137,7 +136,7 @@ namespace PDS.Witsml.Data.Logs
         [TestMethod]
         public void LogExtensions_IsValidDataDelimiter_Validation_Fail_Tests()
         {
-            var log = new Energistics.DataAccess.WITSML141.Log
+            var log = new Witsml141.Log
             {
                 DataDelimiter = "long"
             };
@@ -171,7 +170,7 @@ namespace PDS.Witsml.Data.Logs
         [TestMethod]
         public void LogExtensions_Data_Delimiter_Validation_Pass_Tests()
         {
-            var log = new Energistics.DataAccess.WITSML141.Log();
+            var log = new Witsml141.Log();
 
             Assert.IsTrue(log.IsValidDataDelimiter());
 
@@ -210,45 +209,45 @@ namespace PDS.Witsml.Data.Logs
         [TestMethod]
         public void LogExtensions_IsIncreasing_Returns_Bool_For_131_Log_Direction()
         {
-            var log = new Energistics.DataAccess.WITSML131.Log
+            var log = new Witsml131.Log
             {
-                Direction = Energistics.DataAccess.WITSML131.ReferenceData.LogIndexDirection.increasing
+                Direction = Witsml131.ReferenceData.LogIndexDirection.increasing
             };
 
             Assert.IsTrue(log.IsIncreasing());
 
-            log.Direction = Energistics.DataAccess.WITSML131.ReferenceData.LogIndexDirection.decreasing;
+            log.Direction = Witsml131.ReferenceData.LogIndexDirection.decreasing;
             Assert.IsFalse(log.IsIncreasing());
         }
 
         [TestMethod]
         public void LogExtensions_IsIncreasing_Returns_Bool_For_141_Log_Direction()
         {
-            var log = new Energistics.DataAccess.WITSML141.Log
+            var log = new Witsml141.Log
             {
-                Direction = Energistics.DataAccess.WITSML141.ReferenceData.LogIndexDirection.increasing
+                Direction = Witsml141.ReferenceData.LogIndexDirection.increasing
             };
 
             Assert.IsTrue(log.IsIncreasing());
 
-            log.Direction = Energistics.DataAccess.WITSML141.ReferenceData.LogIndexDirection.decreasing;
+            log.Direction = Witsml141.ReferenceData.LogIndexDirection.decreasing;
             Assert.IsFalse(log.IsIncreasing());
         }
 
         [TestMethod]
         public void LogExtensions_IsIncreasing_Returns_Bool_If_131_Log_Is_Timelog()
         {
-            var log = new Energistics.DataAccess.WITSML131.Log
+            var log = new Witsml131.Log
             {
-                IndexType = Energistics.DataAccess.WITSML131.ReferenceData.LogIndexType.datetime
+                IndexType = Witsml131.ReferenceData.LogIndexType.datetime
             };
 
             Assert.IsTrue(log.IsTimeLog());
 
-            log.IndexType = Energistics.DataAccess.WITSML131.ReferenceData.LogIndexType.elapsedtime;
+            log.IndexType = Witsml131.ReferenceData.LogIndexType.elapsedtime;
             Assert.IsTrue(log.IsTimeLog(true));
 
-            log.IndexType = Energistics.DataAccess.WITSML131.ReferenceData.LogIndexType.measureddepth;
+            log.IndexType = Witsml131.ReferenceData.LogIndexType.measureddepth;
             Assert.IsFalse(log.IsTimeLog());
 
             log.IndexType = null;
@@ -272,7 +271,7 @@ namespace PDS.Witsml.Data.Logs
         [TestMethod]
         public void LogExtensions_GetDataDelimiterOrDefault_When_Log_Is_Null()
         {
-            var log = new Energistics.DataAccess.WITSML141.Log();
+            var log = new Witsml141.Log();
 
             log = null;
 
@@ -284,25 +283,25 @@ namespace PDS.Witsml.Data.Logs
         [TestMethod]
         public void LogExtensions_IsIncreasing_Returns_Bool_If_141_Log_Is_Timelog()
         {
-            var log = new Energistics.DataAccess.WITSML141.Log
+            var log = new Witsml141.Log
             {
-                IndexType = Energistics.DataAccess.WITSML141.ReferenceData.LogIndexType.datetime
+                IndexType = Witsml141.ReferenceData.LogIndexType.datetime
             };
 
             Assert.IsTrue(log.IsTimeLog());
 
-            log.IndexType = Energistics.DataAccess.WITSML141.ReferenceData.LogIndexType.elapsedtime;
+            log.IndexType = Witsml141.ReferenceData.LogIndexType.elapsedtime;
             Assert.IsTrue(log.IsTimeLog(true));
 
-            log.IndexType = Energistics.DataAccess.WITSML141.ReferenceData.LogIndexType.measureddepth;
+            log.IndexType = Witsml141.ReferenceData.LogIndexType.measureddepth;
             Assert.IsFalse(log.IsTimeLog());
 
             log.IndexType = null;
             Assert.IsTrue(log.IsTimeLog());
 
-            log.LogData = new List<LogData>()
+            log.LogData = new List<Witsml141.ComponentSchemas.LogData>()
             {
-                new LogData
+                new Witsml141.ComponentSchemas.LogData
                 {
                     MnemonicList = "TIME,A,B,C",
                 }
@@ -310,9 +309,9 @@ namespace PDS.Witsml.Data.Logs
 
             Assert.IsTrue(log.IsTimeLog());
 
-            log.LogData = new List<LogData>()
+            log.LogData = new List<Witsml141.ComponentSchemas.LogData>()
             {
-                new LogData
+                new Witsml141.ComponentSchemas.LogData
                 {
                     Data = new List<string>()
                     {
@@ -323,9 +322,9 @@ namespace PDS.Witsml.Data.Logs
                 }
             };
 
-            log.LogData = new List<LogData>()
+            log.LogData = new List<Witsml141.ComponentSchemas.LogData>()
             {
-                new LogData
+                new Witsml141.ComponentSchemas.LogData
                 {
                     Data = new List<string>()
                     {
@@ -342,18 +341,18 @@ namespace PDS.Witsml.Data.Logs
         [TestMethod]
         public void LogExtensions_GetByUid_Returns_131_LogCurveInfo_By_UID()
         {
-            var log = new Energistics.DataAccess.WITSML131.Log();
+            var log = new Witsml131.Log();
 
             var logCurveInfo = log.LogCurveInfo.GetByUid("depth");
             Assert.IsNull(logCurveInfo);
 
-            log.LogCurveInfo = new List<Energistics.DataAccess.WITSML131.ComponentSchemas.LogCurveInfo>();
+            log.LogCurveInfo = new List<Witsml131.ComponentSchemas.LogCurveInfo>();
 
             logCurveInfo = log.LogCurveInfo.GetByUid("depth");
             Assert.IsNull(logCurveInfo);
 
             // Add curves
-            log.LogCurveInfo = new List<Energistics.DataAccess.WITSML131.ComponentSchemas.LogCurveInfo>();
+            log.LogCurveInfo = new List<Witsml131.ComponentSchemas.LogCurveInfo>();
             var lci0 = _log131Generator.CreateDoubleLogCurveInfo("DEPTH", "m");
             lci0.NullValue = "-1000.00";
             log.LogCurveInfo.Add(lci0);
@@ -369,18 +368,18 @@ namespace PDS.Witsml.Data.Logs
         [TestMethod]
         public void LogExtensions_GetByUid_Returns_141_LogCurveInfo_By_UID()
         {
-            var log = new Energistics.DataAccess.WITSML141.Log();
+            var log = new Witsml141.Log();
 
             var logCurveInfo = log.LogCurveInfo.GetByUid("depth");
             Assert.IsNull(logCurveInfo);
 
-            log.LogCurveInfo = new List<Energistics.DataAccess.WITSML141.ComponentSchemas.LogCurveInfo>();
+            log.LogCurveInfo = new List<Witsml141.ComponentSchemas.LogCurveInfo>();
 
             logCurveInfo = log.LogCurveInfo.GetByUid("depth");
             Assert.IsNull(logCurveInfo);
 
             // Add curves
-            log.LogCurveInfo = new List<Energistics.DataAccess.WITSML141.ComponentSchemas.LogCurveInfo>();
+            log.LogCurveInfo = new List<Witsml141.ComponentSchemas.LogCurveInfo>();
             var lci0 = _log141Generator.CreateDoubleLogCurveInfo("DEPTH", "m");
             lci0.NullValue = "-1000.00";
             log.LogCurveInfo.Add(lci0);
@@ -399,13 +398,13 @@ namespace PDS.Witsml.Data.Logs
             var log = new Energistics.DataAccess.WITSML200.Log
             {
                 Uuid = "uid",
-                Citation = new Citation(),
-                Wellbore = new DataObjectReference(),
+                Citation = new Witsml200.ComponentSchemas.Citation(),
+                Wellbore = new Witsml200.ComponentSchemas.DataObjectReference(),
                 SchemaVersion = "2.0"
             };
             // Create channel set
             var channelSet = _log20Generator.CreateChannelSet(log);
-            channelSet.Index.Add(_log20Generator.CreateMeasuredDepthIndex(IndexDirection.increasing));
+            channelSet.Index.Add(_log20Generator.CreateMeasuredDepthIndex(Witsml200.ReferenceData.IndexDirection.increasing));
 
             channelSet.Channel = null;
             var channel = channelSet.Channel.GetByUuid("uuid");
@@ -417,8 +416,8 @@ namespace PDS.Witsml.Data.Logs
             Assert.IsNull(channel);
 
             // Add curves
-            channelSet.Channel.Add(_log20Generator.CreateChannel(log, channelSet.Index, "HKLD", "HKLD", UnitOfMeasure.klbf, "hookload", EtpDataType.@double, new List<PointMetadata>()));
-            var gammaChannel = _log20Generator.CreateChannel(log, channelSet.Index, "GR", "GR", UnitOfMeasure.gAPI, "gamma_ray", EtpDataType.@double, new List<PointMetadata>());
+            channelSet.Channel.Add(_log20Generator.CreateChannel(log, channelSet.Index, "HKLD", "HKLD", Witsml200.ReferenceData.UnitOfMeasure.klbf, "hookload", Witsml200.ReferenceData.EtpDataType.@double, new List<Witsml200.ComponentSchemas.PointMetadata>()));
+            var gammaChannel = _log20Generator.CreateChannel(log, channelSet.Index, "GR", "GR", Witsml200.ReferenceData.UnitOfMeasure.gAPI, "gamma_ray", Witsml200.ReferenceData.EtpDataType.@double, new List<Witsml200.ComponentSchemas.PointMetadata>());
             channelSet.Channel.Add(gammaChannel);
 
             channel = channelSet.Channel.GetByUuid(gammaChannel.Uuid.ToLower());
@@ -429,18 +428,18 @@ namespace PDS.Witsml.Data.Logs
         [TestMethod]
         public void LogExtensions_GetByMnemonic_Returns_131_LogCurveInfo_By_Mnemonic()
         {
-            var log = new Energistics.DataAccess.WITSML131.Log();
+            var log = new Witsml131.Log();
 
             var logCurveInfo = log.LogCurveInfo.GetByMnemonic("depth");
             Assert.IsNull(logCurveInfo);
 
-            log.LogCurveInfo = new List<Energistics.DataAccess.WITSML131.ComponentSchemas.LogCurveInfo>();
+            log.LogCurveInfo = new List<Witsml131.ComponentSchemas.LogCurveInfo>();
 
             logCurveInfo = log.LogCurveInfo.GetByMnemonic("depth");
             Assert.IsNull(logCurveInfo);
 
             // Add curves
-            log.LogCurveInfo = new List<Energistics.DataAccess.WITSML131.ComponentSchemas.LogCurveInfo>();
+            log.LogCurveInfo = new List<Witsml131.ComponentSchemas.LogCurveInfo>();
             var lci0 = _log131Generator.CreateDoubleLogCurveInfo("DEPTH", "m");
             lci0.NullValue = "-1000.00";
             log.LogCurveInfo.Add(lci0);
@@ -456,18 +455,18 @@ namespace PDS.Witsml.Data.Logs
         [TestMethod]
         public void LogExtensions_GetByMnemonic_Returns_141_LogCurveInfo_By_Mnemonic()
         {
-            var log = new Energistics.DataAccess.WITSML141.Log();
+            var log = new Witsml141.Log();
 
             var logCurveInfo = log.LogCurveInfo.GetByMnemonic("depth");
             Assert.IsNull(logCurveInfo);
 
-            log.LogCurveInfo = new List<Energistics.DataAccess.WITSML141.ComponentSchemas.LogCurveInfo>();
+            log.LogCurveInfo = new List<Witsml141.ComponentSchemas.LogCurveInfo>();
 
             logCurveInfo = log.LogCurveInfo.GetByMnemonic("depth");
             Assert.IsNull(logCurveInfo);
 
             // Add curves
-            log.LogCurveInfo = new List<Energistics.DataAccess.WITSML141.ComponentSchemas.LogCurveInfo>();
+            log.LogCurveInfo = new List<Witsml141.ComponentSchemas.LogCurveInfo>();
             var lci0 = _log141Generator.CreateDoubleLogCurveInfo("DEPTH", "m");
             lci0.NullValue = "-1000.00";
             log.LogCurveInfo.Add(lci0);
@@ -486,13 +485,13 @@ namespace PDS.Witsml.Data.Logs
             var log = new Energistics.DataAccess.WITSML200.Log
             {
                 Uuid = "uid",
-                Citation = new Citation(),
-                Wellbore = new DataObjectReference(),
+                Citation = new Witsml200.ComponentSchemas.Citation(),
+                Wellbore = new Witsml200.ComponentSchemas.DataObjectReference(),
                 SchemaVersion = "2.0"
             };
             // Create channel set
             var channelSet = _log20Generator.CreateChannelSet(log);
-            channelSet.Index.Add(_log20Generator.CreateMeasuredDepthIndex(IndexDirection.increasing));
+            channelSet.Index.Add(_log20Generator.CreateMeasuredDepthIndex(Witsml200.ReferenceData.IndexDirection.increasing));
 
             channelSet.Channel = null;
             var channel = channelSet.Channel.GetByMnemonic("gr");
@@ -504,8 +503,8 @@ namespace PDS.Witsml.Data.Logs
             Assert.IsNull(channel);
 
             // Add curves
-            channelSet.Channel.Add(_log20Generator.CreateChannel(log, channelSet.Index, "HKLD", "HKLD", UnitOfMeasure.klbf, "hookload", EtpDataType.@double, new List<PointMetadata>()));
-            var gammaChannel = _log20Generator.CreateChannel(log, channelSet.Index, "GR", "GR", UnitOfMeasure.gAPI, "gamma_ray", EtpDataType.@double, new List<PointMetadata>());
+            channelSet.Channel.Add(_log20Generator.CreateChannel(log, channelSet.Index, "HKLD", "HKLD", Witsml200.ReferenceData.UnitOfMeasure.klbf, "hookload", Witsml200.ReferenceData.EtpDataType.@double, new List<Witsml200.ComponentSchemas.PointMetadata>()));
+            var gammaChannel = _log20Generator.CreateChannel(log, channelSet.Index, "GR", "GR", Witsml200.ReferenceData.UnitOfMeasure.gAPI, "gamma_ray", Witsml200.ReferenceData.EtpDataType.@double, new List<Witsml200.ComponentSchemas.PointMetadata>());
             channelSet.Channel.Add(gammaChannel);
 
             channel = channelSet.Channel.GetByMnemonic("gr");
@@ -521,12 +520,12 @@ namespace PDS.Witsml.Data.Logs
             var startAsLong = start.ToUnixTimeMicroseconds();
             var endAsLong = end.ToUnixTimeMicroseconds();
 
-            var log = new Energistics.DataAccess.WITSML131.Log
+            var log = new Witsml131.Log
             {
-                LogCurveInfo = new List<Energistics.DataAccess.WITSML131.ComponentSchemas.LogCurveInfo>()
+                LogCurveInfo = new List<Witsml131.ComponentSchemas.LogCurveInfo>()
             };
 
-            var logCurveInfo = new Energistics.DataAccess.WITSML131.ComponentSchemas.LogCurveInfo();
+            var logCurveInfo = new Witsml131.ComponentSchemas.LogCurveInfo();
             logCurveInfo = null;
             var result = logCurveInfo.GetIndexRange();
 
@@ -581,12 +580,12 @@ namespace PDS.Witsml.Data.Logs
             double start, end;
             InitDepthIndexes(out start, out end);
 
-            var log = new Energistics.DataAccess.WITSML131.Log
+            var log = new Witsml131.Log
             {
-                LogCurveInfo = new List<Energistics.DataAccess.WITSML131.ComponentSchemas.LogCurveInfo>()
+                LogCurveInfo = new List<Witsml131.ComponentSchemas.LogCurveInfo>()
             };
 
-            var result = new Energistics.DataAccess.WITSML131.ComponentSchemas.LogCurveInfo().GetIndexRange();
+            var result = new Witsml131.ComponentSchemas.LogCurveInfo().GetIndexRange();
 
             Assert.IsNull(result.Start);
             Assert.IsNull(result.End);
@@ -594,7 +593,7 @@ namespace PDS.Witsml.Data.Logs
             // Add logCurveInfo with just start index
             var lci0 = _log131Generator.CreateDoubleLogCurveInfo("DEPTH", "m");
             lci0.NullValue = "-1000.00";
-            lci0.MinIndex = new Energistics.DataAccess.WITSML131.ComponentSchemas.GenericMeasure(start, "m");
+            lci0.MinIndex = new Witsml131.ComponentSchemas.GenericMeasure(start, "m");
             log.LogCurveInfo.Add(lci0);
 
             result = log.LogCurveInfo[0].GetIndexRange();
@@ -613,7 +612,7 @@ namespace PDS.Witsml.Data.Logs
             Assert.AreEqual(start, result.End.Value);
 
             // Update end index
-            lci0.MaxIndex = new Energistics.DataAccess.WITSML131.ComponentSchemas.GenericMeasure(end, "m");
+            lci0.MaxIndex = new Witsml131.ComponentSchemas.GenericMeasure(end, "m");
 
             result = log.LogCurveInfo[0].GetIndexRange();
 
@@ -642,12 +641,12 @@ namespace PDS.Witsml.Data.Logs
             var startAsLong = start.ToUnixTimeMicroseconds();
             var endAsLong = end.ToUnixTimeMicroseconds();
 
-            var log = new Energistics.DataAccess.WITSML141.Log
+            var log = new Witsml141.Log
             {
-                LogCurveInfo = new List<Energistics.DataAccess.WITSML141.ComponentSchemas.LogCurveInfo>()
+                LogCurveInfo = new List<Witsml141.ComponentSchemas.LogCurveInfo>()
             };
 
-            var logCurveInfo = new Energistics.DataAccess.WITSML141.ComponentSchemas.LogCurveInfo();
+            var logCurveInfo = new Witsml141.ComponentSchemas.LogCurveInfo();
             logCurveInfo = null;
             var result = logCurveInfo.GetIndexRange();
 
@@ -702,12 +701,12 @@ namespace PDS.Witsml.Data.Logs
             double start, end;
             InitDepthIndexes(out start, out end);
 
-            var log = new Energistics.DataAccess.WITSML141.Log
+            var log = new Witsml141.Log
             {
-                LogCurveInfo = new List<Energistics.DataAccess.WITSML141.ComponentSchemas.LogCurveInfo>()
+                LogCurveInfo = new List<Witsml141.ComponentSchemas.LogCurveInfo>()
             };
 
-            var result = new Energistics.DataAccess.WITSML141.ComponentSchemas.LogCurveInfo().GetIndexRange();
+            var result = new Witsml141.ComponentSchemas.LogCurveInfo().GetIndexRange();
 
             Assert.IsNull(result.Start);
             Assert.IsNull(result.End);
@@ -715,7 +714,7 @@ namespace PDS.Witsml.Data.Logs
             // Add logCurveInfo with just start index
             var lci0 = _log141Generator.CreateDoubleLogCurveInfo("DEPTH", "m");
             lci0.NullValue = "-1000.00";
-            lci0.MinIndex = new Energistics.DataAccess.WITSML141.ComponentSchemas.GenericMeasure(start, "m");
+            lci0.MinIndex = new Witsml141.ComponentSchemas.GenericMeasure(start, "m");
             log.LogCurveInfo.Add(lci0);
 
             result = log.LogCurveInfo[0].GetIndexRange();
@@ -734,7 +733,7 @@ namespace PDS.Witsml.Data.Logs
             Assert.AreEqual(start, result.End.Value);
 
             // Update end index
-            lci0.MaxIndex = new Energistics.DataAccess.WITSML141.ComponentSchemas.GenericMeasure(end, "m");
+            lci0.MaxIndex = new Witsml141.ComponentSchemas.GenericMeasure(end, "m");
 
             result = log.LogCurveInfo[0].GetIndexRange();
 
