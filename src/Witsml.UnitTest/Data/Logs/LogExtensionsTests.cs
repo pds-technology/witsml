@@ -417,8 +417,8 @@ namespace PDS.Witsml.Data.Logs
             Assert.IsNull(channel);
 
             // Add curves
-            channelSet.Channel.Add(_log20Generator.CreateChannel(log, channelSet.Index, "HKLD", "HKLD", UnitOfMeasure.klbf.ToString(), "hookload", EtpDataType.@double, new List<PointMetadata>()));
-            var gammaChannel = _log20Generator.CreateChannel(log, channelSet.Index, "GR", "GR", UnitOfMeasure.gAPI.ToString(), "gamma_ray", EtpDataType.@double, new List<PointMetadata>());
+            channelSet.Channel.Add(_log20Generator.CreateChannel(log, channelSet.Index, "HKLD", "HKLD", UnitOfMeasure.klbf, "hookload", EtpDataType.@double, new List<PointMetadata>()));
+            var gammaChannel = _log20Generator.CreateChannel(log, channelSet.Index, "GR", "GR", UnitOfMeasure.gAPI, "gamma_ray", EtpDataType.@double, new List<PointMetadata>());
             channelSet.Channel.Add(gammaChannel);
 
             channel = channelSet.Channel.GetByUuid(gammaChannel.Uuid.ToLower());
@@ -504,8 +504,8 @@ namespace PDS.Witsml.Data.Logs
             Assert.IsNull(channel);
 
             // Add curves
-            channelSet.Channel.Add(_log20Generator.CreateChannel(log, channelSet.Index, "HKLD", "HKLD", UnitOfMeasure.klbf.ToString(), "hookload", EtpDataType.@double, new List<PointMetadata>()));
-            var gammaChannel = _log20Generator.CreateChannel(log, channelSet.Index, "GR", "GR", UnitOfMeasure.gAPI.ToString(), "gamma_ray", EtpDataType.@double, new List<PointMetadata>());
+            channelSet.Channel.Add(_log20Generator.CreateChannel(log, channelSet.Index, "HKLD", "HKLD", UnitOfMeasure.klbf, "hookload", EtpDataType.@double, new List<PointMetadata>()));
+            var gammaChannel = _log20Generator.CreateChannel(log, channelSet.Index, "GR", "GR", UnitOfMeasure.gAPI, "gamma_ray", EtpDataType.@double, new List<PointMetadata>());
             channelSet.Channel.Add(gammaChannel);
 
             channel = channelSet.Channel.GetByMnemonic("gr");

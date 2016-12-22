@@ -108,14 +108,14 @@ namespace PDS.Witsml.Data.Logs
         /// <param name="uom">The uom.</param>
         /// <param name="datumReference">The datum reference.</param>
         /// <returns></returns>
-        public ChannelIndex CreateChannelIndex(ChannelIndexType indexType, IndexDirection direction, string mnemonic, string uom, string datumReference)
+        public ChannelIndex CreateChannelIndex(ChannelIndexType indexType, IndexDirection direction, string mnemonic, UnitOfMeasure? uom, string datumReference)
         {
             return new ChannelIndex()
             {
                 Direction = direction,
                 IndexType = indexType,
                 Mnemonic = mnemonic,
-                Uom = uom.GetUnitOfMeasure(),
+                Uom = uom,
                 DatumReference = datumReference
             };
         }
@@ -127,7 +127,7 @@ namespace PDS.Witsml.Data.Logs
         /// <returns></returns>
         public ChannelIndex CreateMeasuredDepthIndex(IndexDirection direction)
         {
-            return CreateChannelIndex( ChannelIndexType.measureddepth, direction, "MD", "m", "MSL");
+            return CreateChannelIndex( ChannelIndexType.measureddepth, direction, "MD", UnitOfMeasure.m, "MSL");
         }
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace PDS.Witsml.Data.Logs
         /// <returns></returns>
         public ChannelIndex CreateTrueVerticalDepthIndex(IndexDirection direction)
         {
-            return CreateChannelIndex(ChannelIndexType.trueverticaldepth, direction, "TVD", "ft", "MSL");
+            return CreateChannelIndex(ChannelIndexType.trueverticaldepth, direction, "TVD", UnitOfMeasure.ft, "MSL");
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace PDS.Witsml.Data.Logs
         /// <returns></returns>
         public ChannelIndex CreatePassIndexDepthIndex(IndexDirection direction)
         {
-            return CreateChannelIndex(ChannelIndexType.passindexeddepth, direction, "PID", "m", "MSL");
+            return CreateChannelIndex(ChannelIndexType.passindexeddepth, direction, "PID", UnitOfMeasure.m, "MSL");
         }
 
         /// <summary>
@@ -156,7 +156,7 @@ namespace PDS.Witsml.Data.Logs
         /// <returns></returns>
         public ChannelIndex CreateDateTimeIndex()
         {
-            return CreateChannelIndex(ChannelIndexType.datetime, IndexDirection.increasing, "TIME", "s", "MSL");
+            return CreateChannelIndex(ChannelIndexType.datetime, IndexDirection.increasing, "TIME", UnitOfMeasure.s, "MSL");
         }
 
         /// <summary>
@@ -166,7 +166,7 @@ namespace PDS.Witsml.Data.Logs
         /// <returns></returns>
         public ChannelIndex CreateElapsedTimeIndex(IndexDirection direction)
         {
-            return CreateChannelIndex(ChannelIndexType.elapsedtime, direction, "TIME", "ms", "MSL");
+            return CreateChannelIndex(ChannelIndexType.elapsedtime, direction, "TIME", UnitOfMeasure.ms, "MSL");
         }
 
         /// <summary>
@@ -181,14 +181,14 @@ namespace PDS.Witsml.Data.Logs
         /// <param name="etpDataType">Type of the ETP data.</param>
         /// <param name="pointMetadataList">The point metadata list.</param>
         /// <returns></returns>
-        public Channel CreateChannel(Log log, List<ChannelIndex> indexList, string citationName, string mnemonic, string uom, string channelClass, EtpDataType etpDataType, List<PointMetadata> pointMetadataList)
+        public Channel CreateChannel(Log log, List<ChannelIndex> indexList, string citationName, string mnemonic, UnitOfMeasure? uom, string channelClass, EtpDataType etpDataType, List<PointMetadata> pointMetadataList)
         {
             return new Channel()
             {
                 Uuid = Uid(),
                 Citation = CreateCitation(citationName),
                 Mnemonic = mnemonic,
-                Uom = uom.GetUnitOfMeasure(),
+                Uom = uom,
                 ChannelClass = ToPropertyKind(channelClass),
                 LoggingMethod = log.LoggingMethod,
                 LoggingCompanyName = log.LoggingCompanyName,
