@@ -18,6 +18,8 @@
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
+using Energistics.DataAccess.WITSML141;
+using PDS.Framework;
 
 namespace PDS.Witsml.Server.Configuration
 {
@@ -41,7 +43,6 @@ namespace PDS.Witsml.Server.Configuration
                 .ToArray();
 
             _capServer141Provider = _devKit.Store.CapServerProviders.FirstOrDefault() as CapServer141Provider;
-
         }
 
         [TestMethod]
@@ -55,7 +56,6 @@ namespace PDS.Witsml.Server.Configuration
         public void CapServer141Provider_Providers_Can_Get_Providers()
         {
             Assert.IsNotNull(_capServer141Provider.Providers);
-            Assert.AreEqual(8, _capServer141Provider.Providers.Count());
         }
 
         [TestMethod]
@@ -65,7 +65,7 @@ namespace PDS.Witsml.Server.Configuration
 
             Assert.IsTrue(capServerXml != string.Empty);
 
-            var capServerObject = Energistics.DataAccess.EnergisticsConverter.XmlToObject<Energistics.DataAccess.WITSML141.CapServers>(capServerXml).CapServer;
+            var capServerObject = Energistics.DataAccess.EnergisticsConverter.XmlToObject<CapServers>(capServerXml).CapServer;
 
             Assert.AreEqual("1.4.1", capServerObject.ApiVers);
             Assert.AreEqual(Properties.Settings.Default.DefaultServerName, capServerObject.Name, "Server Name");
@@ -85,193 +85,172 @@ namespace PDS.Witsml.Server.Configuration
         }
 
         [TestMethod]
-        public void CapServer141Provider_ToXml_Can_Get_Server_Capabilities_For_AddToStore_With_Object_Contraints_For_Log()
+        public void CapServer141Provider_ToXml_Can_Get_Server_Capabilities_For_GetFromStore_With_Object_Contraints_For_GrowingObjects()
         {
-            var capServerXml = _capServer141Provider.ToXml();
-
-            Assert.IsTrue(capServerXml != string.Empty);
-
-            var capServerObject = Energistics.DataAccess.EnergisticsConverter.XmlToObject<Energistics.DataAccess.WITSML141.CapServers>(capServerXml).CapServer;
-
-            var addToStore = capServerObject.Function.Where(n => n.Name.EndsWith(Functions.AddToStore.ToString())).ToArray();
-            Assert.IsNotNull(addToStore);
-            var logDataObject = addToStore.FirstOrDefault()?.DataObject.Where(d => d.Value == ObjectTypes.Log).ToArray();
-            Assert.IsNotNull(logDataObject);
-            Assert.AreEqual(Properties.Settings.Default.LogMaxDataPointsAdd, logDataObject.FirstOrDefault()?.MaxDataPoints, "MaxDataPoints");
-            Assert.AreEqual(Properties.Settings.Default.LogMaxDataNodesAdd, logDataObject.FirstOrDefault()?.MaxDataNodes, "MaxDataNodes");
-        }
-
-        [TestMethod]
-        public void CapServer141Provider_ToXml_Can_Get_Server_Capabilities_For_AddToStore_With_Object_Contraints_For_Trajectory()
-        {
-            var capServerXml = _capServer141Provider.ToXml();
-
-            Assert.IsTrue(capServerXml != string.Empty);
-
-            var capServerObject = Energistics.DataAccess.EnergisticsConverter.XmlToObject<Energistics.DataAccess.WITSML141.CapServers>(capServerXml).CapServer;
-
-            var addToStore = capServerObject.Function.Where(n => n.Name.EndsWith(Functions.AddToStore.ToString())).ToArray();
-            Assert.IsNotNull(addToStore);
-            var logDataObject = addToStore.FirstOrDefault()?.DataObject.Where(d => d.Value == ObjectTypes.Trajectory).ToArray();
-            Assert.IsNotNull(logDataObject);
-            Assert.AreEqual(Properties.Settings.Default.TrajectoryMaxDataNodesAdd, logDataObject.FirstOrDefault()?.MaxDataNodes, "MaxDataNodes");
-        }
-
-        [TestMethod]
-        public void CapServer141Provider_ToXml_Can_Get_Server_Capabilities_For_UpdateInStore_With_Object_Contraints_For_Log()
-        {
-            var capServerXml = _capServer141Provider.ToXml();
-
-            Assert.IsTrue(capServerXml != string.Empty);
-
-            var capServerObject = Energistics.DataAccess.EnergisticsConverter.XmlToObject<Energistics.DataAccess.WITSML141.CapServers>(capServerXml).CapServer;
-
-            var updateInStore = capServerObject.Function.Where(n => n.Name.EndsWith(Functions.UpdateInStore.ToString())).ToArray();
-            Assert.IsNotNull(updateInStore);
-            var logDataObject = updateInStore.FirstOrDefault()?.DataObject.Where(d => d.Value == ObjectTypes.Log).ToArray();
-            Assert.IsNotNull(logDataObject);
-            Assert.AreEqual(Properties.Settings.Default.LogMaxDataPointsUpdate, logDataObject.FirstOrDefault()?.MaxDataPoints, "MaxDataPoints");
-            Assert.AreEqual(Properties.Settings.Default.LogMaxDataNodesUpdate, logDataObject.FirstOrDefault()?.MaxDataNodes, "MaxDataNodes");
-        }
-
-        [TestMethod]
-        public void CapServer141Provider_ToXml_Can_Get_Server_Capabilities_For_UpdateInStore_With_Object_Contraints_For_Trajectory()
-        {
-            var capServerXml = _capServer141Provider.ToXml();
-
-            Assert.IsTrue(capServerXml != string.Empty);
-
-            var capServerObject = Energistics.DataAccess.EnergisticsConverter.XmlToObject<Energistics.DataAccess.WITSML141.CapServers>(capServerXml).CapServer;
-
-            var updateInStore = capServerObject.Function.Where(n => n.Name.EndsWith(Functions.UpdateInStore.ToString())).ToArray();
-            Assert.IsNotNull(updateInStore);
-            var logDataObject = updateInStore.FirstOrDefault()?.DataObject.Where(d => d.Value == ObjectTypes.Trajectory).ToArray();
-            Assert.IsNotNull(logDataObject);
-            Assert.AreEqual(Properties.Settings.Default.TrajectoryMaxDataNodesUpdate, logDataObject.FirstOrDefault()?.MaxDataNodes, "MaxDataNodes");
-        }
-
-        [TestMethod]
-        public void CapServer141Provider_ToXml_Can_Get_Server_Capabilities_For_DeleteFromStore_With_Object_Contraints_For_Log()
-        {
-            var capServerXml = _capServer141Provider.ToXml();
-
-            Assert.IsTrue(capServerXml != string.Empty);
-
-            var capServerObject = Energistics.DataAccess.EnergisticsConverter.XmlToObject<Energistics.DataAccess.WITSML141.CapServers>(capServerXml).CapServer;
-
-            var deleteFromStore = capServerObject.Function.Where(n => n.Name.EndsWith(Functions.DeleteFromStore.ToString())).ToArray();
-            Assert.IsNotNull(deleteFromStore);
-            var logDataObject = deleteFromStore.FirstOrDefault()?.DataObject.Where(d => d.Value == ObjectTypes.Log).ToArray();
-            Assert.IsNotNull(logDataObject);
-            Assert.AreEqual(Properties.Settings.Default.LogMaxDataPointsDelete, logDataObject.FirstOrDefault()?.MaxDataPoints, "MaxDataPoints");
-            Assert.AreEqual(Properties.Settings.Default.LogMaxDataNodesDelete, logDataObject.FirstOrDefault()?.MaxDataNodes, "MaxDataNodes");
-        }
-
-        [TestMethod]
-        public void CapServer141Provider_ToXml_Can_Get_Server_Capabilities_For_DeleteFromStore_With_Object_Contraints_For_Trajectory()
-        {
-            var capServerXml = _capServer141Provider.ToXml();
-
-            Assert.IsTrue(capServerXml != string.Empty);
-
-            var capServerObject = Energistics.DataAccess.EnergisticsConverter.XmlToObject<Energistics.DataAccess.WITSML141.CapServers>(capServerXml).CapServer;
-
-            var deleteFromStore = capServerObject.Function.Where(n => n.Name.EndsWith(Functions.DeleteFromStore.ToString())).ToArray();
-            Assert.IsNotNull(deleteFromStore);
-            var logDataObject = deleteFromStore.FirstOrDefault()?.DataObject.Where(d => d.Value == ObjectTypes.Trajectory).ToArray();
-            Assert.IsNotNull(logDataObject);
-            Assert.AreEqual(Properties.Settings.Default.TrajectoryMaxDataNodesDelete, logDataObject.FirstOrDefault()?.MaxDataNodes, "MaxDataNodes");
-        }
-
-        [TestMethod]
-        public void CapServer141Provider_ToXml_Can_Get_Server_Capabilities_For_GetFromStore_With_Object_Contraints_For_Log()
-        {
-            var capServerXml = _capServer141Provider.ToXml();
-
-            Assert.IsTrue(capServerXml != string.Empty);
-
-            var capServerObject = Energistics.DataAccess.EnergisticsConverter.XmlToObject<Energistics.DataAccess.WITSML141.CapServers>(capServerXml).CapServer;
+            var capServerObject = GetCapServerObject();
 
             var getFromStore = capServerObject.Function.Where(n => n.Name.EndsWith(Functions.GetFromStore.ToString())).ToArray();
             Assert.IsNotNull(getFromStore);
-            var logDataObject = getFromStore.FirstOrDefault()?.DataObject.Where(d => d.Value == ObjectTypes.Log).ToArray();
-            Assert.IsNotNull(logDataObject);
-            Assert.AreEqual(Properties.Settings.Default.LogMaxDataPointsGet, logDataObject.FirstOrDefault()?.MaxDataPoints, "MaxDataPoints");
-            Assert.AreEqual(Properties.Settings.Default.LogMaxDataNodesGet, logDataObject.FirstOrDefault()?.MaxDataNodes, "MaxDataNodes");
+
+            getFromStore.FirstOrDefault()?.DataObject.ForEach(
+                    dataObject =>
+                    {
+                        if (ObjectTypes.IsGrowingDataObject(dataObject.Value))
+                        {
+                            if (dataObject.Value == ObjectTypes.Log)
+                                Assert.AreEqual(Properties.Settings.Default.LogMaxDataPointsGet, dataObject.MaxDataPoints, "MaxDataPoints");
+
+                            var propertyNameMaxDataNodeGet = dataObject.Value.ToPascalCase() + "MaxDataNodesGet";
+                            Assert.AreEqual(Properties.Settings.Default[propertyNameMaxDataNodeGet], dataObject.MaxDataNodes, propertyNameMaxDataNodeGet);
+                        }
+                    });
         }
 
         [TestMethod]
-        public void CapServer141Provider_ToXml_Can_Get_Server_Capabilities_For_GetFromStore_With_Object_Contraints_For_Trajectory()
+        public void CapServer141Provider_ToXml_Can_Get_Server_Capabilities_For_AddToStore_With_Object_Contraints_For_GrowingObjects()
         {
-            var capServerXml = _capServer141Provider.ToXml();
+            var capServerObject = GetCapServerObject();
 
-            Assert.IsTrue(capServerXml != string.Empty);
+            var addToStore = capServerObject.Function.Where(n => n.Name.EndsWith(Functions.AddToStore.ToString())).ToArray();
+            Assert.IsNotNull(addToStore);
 
-            var capServerObject = Energistics.DataAccess.EnergisticsConverter.XmlToObject<Energistics.DataAccess.WITSML141.CapServers>(capServerXml).CapServer;
+            addToStore.FirstOrDefault()?.DataObject.ForEach(
+                    dataObject =>
+                    {
+                        if (ObjectTypes.IsGrowingDataObject(dataObject.Value))
+                        {
+                            if (dataObject.Value == ObjectTypes.Log)
+                                Assert.AreEqual(Properties.Settings.Default.LogMaxDataPointsAdd, dataObject.MaxDataPoints, "MaxDataPoints");
 
-            var getFromStore = capServerObject.Function.Where(n => n.Name.EndsWith(Functions.GetFromStore.ToString())).ToArray();
-            Assert.IsNotNull(getFromStore);
-            var logDataObject = getFromStore.FirstOrDefault()?.DataObject.Where(d => d.Value == ObjectTypes.Trajectory).ToArray();
-            Assert.IsNotNull(logDataObject);
-            Assert.AreEqual(Properties.Settings.Default.TrajectoryMaxDataNodesGet, logDataObject.FirstOrDefault()?.MaxDataNodes, "MaxDataNodes");
+                            var propertyNameMaxDataNodeAdd = dataObject.Value.ToPascalCase() + "MaxDataNodesAdd";
+                            Assert.AreEqual(Properties.Settings.Default[propertyNameMaxDataNodeAdd], dataObject.MaxDataNodes, propertyNameMaxDataNodeAdd);
+                        }
+                    });
+        }
+
+        [TestMethod]
+        public void CapServer141Provider_ToXml_Can_Get_Server_Capabilities_For_UpdateInStore_With_Object_Contraints_For_GrowingObjects()
+        {
+            var capServerObject = GetCapServerObject();
+
+            var updateInStore = capServerObject.Function.Where(n => n.Name.EndsWith(Functions.UpdateInStore.ToString())).ToArray();
+            Assert.IsNotNull(updateInStore);
+
+            updateInStore.FirstOrDefault()?.DataObject.ForEach(
+                    dataObject =>
+                    {
+                        if (ObjectTypes.IsGrowingDataObject(dataObject.Value))
+                        {
+                            if (dataObject.Value == ObjectTypes.Log)
+                                Assert.AreEqual(Properties.Settings.Default.LogMaxDataPointsUpdate, dataObject.MaxDataPoints, "MaxDataPoints");
+
+                            var propertyNameMaxDataNodeUpdate = dataObject.Value.ToPascalCase() + "MaxDataNodesUpdate";
+                            Assert.AreEqual(Properties.Settings.Default[propertyNameMaxDataNodeUpdate], dataObject.MaxDataNodes, propertyNameMaxDataNodeUpdate);
+                        }
+                    });
+        }
+
+        [TestMethod]
+        public void CapServer141Provider_ToXml_Can_Get_Server_Capabilities_For_DeleteFromStore_With_Object_Contraints_For_GrowingObjects()
+        {
+            var capServerObject = GetCapServerObject();
+
+            var deleteFromStore = capServerObject.Function.Where(n => n.Name.EndsWith(Functions.DeleteFromStore.ToString())).ToArray();
+            Assert.IsNotNull(deleteFromStore);
+
+            deleteFromStore.FirstOrDefault()?.DataObject.ForEach(
+                    dataObject =>
+                    {
+                        if (ObjectTypes.IsGrowingDataObject(dataObject.Value))
+                        {
+                            if (dataObject.Value == ObjectTypes.Log)
+                                Assert.AreEqual(Properties.Settings.Default.LogMaxDataPointsDelete, dataObject.MaxDataPoints, "MaxDataPoints");
+
+                            var propertyNameMaxDataNodeDelete = dataObject.Value.ToPascalCase() + "MaxDataNodesDelete";
+                            Assert.AreEqual(Properties.Settings.Default[propertyNameMaxDataNodeDelete], dataObject.MaxDataNodes, propertyNameMaxDataNodeDelete);
+                        }
+                    });
         }
 
         [TestMethod]
         public void CapServer141Provider_IsSupported_AddToStore_Can_Check_Supported_Object_Type()
         {
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.AddToStore, ObjectTypes.Well), ObjectTypes.Well);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.AddToStore, ObjectTypes.Wellbore), ObjectTypes.Wellbore);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.AddToStore, ObjectTypes.Message), ObjectTypes.Message);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.AddToStore, ObjectTypes.Log), ObjectTypes.Log);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.AddToStore, ObjectTypes.Rig), ObjectTypes.Rig);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.AddToStore, ObjectTypes.Trajectory), ObjectTypes.Trajectory);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.AddToStore, ObjectTypes.WbGeometry), ObjectTypes.WbGeometry);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.AddToStore, ObjectTypes.Attachment), ObjectTypes.Attachment);
+            var capServerObject = GetCapServerObject();
+
+            var addToStore = capServerObject.Function.Where(n => n.Name.EndsWith(Functions.AddToStore.ToString())).ToArray();
+            Assert.IsNotNull(addToStore);
+
+            addToStore.FirstOrDefault()?.DataObject.ForEach(
+                    dataObject =>
+                    {
+                        Assert.IsTrue(_capServer141Provider.IsSupported(Functions.AddToStore, dataObject.Value), dataObject.Value);
+                    });
+
+            Assert.IsFalse(_capServer141Provider.IsSupported(Functions.AddToStore, ObjectTypes.Unknown), ObjectTypes.Unknown);
         }
 
         [TestMethod]
         public void CapServer141Provider_IsSupported_GetFromStore_Can_Check_Supported_Object_Type()
         {
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.GetFromStore, ObjectTypes.Well), ObjectTypes.Well);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.GetFromStore, ObjectTypes.Wellbore), ObjectTypes.Wellbore);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.GetFromStore, ObjectTypes.Message), ObjectTypes.Message);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.GetFromStore, ObjectTypes.Log), ObjectTypes.Log);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.GetFromStore, ObjectTypes.Rig), ObjectTypes.Rig);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.GetFromStore, ObjectTypes.Trajectory), ObjectTypes.Trajectory);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.GetFromStore, ObjectTypes.WbGeometry), ObjectTypes.WbGeometry);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.GetFromStore, ObjectTypes.Attachment), ObjectTypes.Attachment);
+            var capServerObject = GetCapServerObject();
+
+            var getFromStore = capServerObject.Function.Where(n => n.Name.EndsWith(Functions.GetFromStore.ToString())).ToArray();
+            Assert.IsNotNull(getFromStore);
+
+            getFromStore.FirstOrDefault()?.DataObject.ForEach(
+                    dataObject =>
+                    {
+                        Assert.IsTrue(_capServer141Provider.IsSupported(Functions.GetFromStore, dataObject.Value), dataObject.Value);
+                    });
+
+            Assert.IsFalse(_capServer141Provider.IsSupported(Functions.GetFromStore, ObjectTypes.Unknown), ObjectTypes.Unknown);
         }
 
         [TestMethod]
         public void CapServer141Provider_IsSupported_UpdateInStore_Can_Check_Supported_Object_Type()
         {
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.UpdateInStore, ObjectTypes.Well), ObjectTypes.Well);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.UpdateInStore, ObjectTypes.Wellbore), ObjectTypes.Wellbore);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.UpdateInStore, ObjectTypes.Message), ObjectTypes.Message);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.UpdateInStore, ObjectTypes.Log), ObjectTypes.Log);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.UpdateInStore, ObjectTypes.Rig), ObjectTypes.Rig);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.UpdateInStore, ObjectTypes.Trajectory), ObjectTypes.Trajectory);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.UpdateInStore, ObjectTypes.WbGeometry), ObjectTypes.WbGeometry);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.UpdateInStore, ObjectTypes.Attachment), ObjectTypes.Attachment);
+            var capServerObject = GetCapServerObject();
+
+            var updateInStore = capServerObject.Function.Where(n => n.Name.EndsWith(Functions.UpdateInStore.ToString())).ToArray();
+            Assert.IsNotNull(updateInStore);
+
+            updateInStore.FirstOrDefault()?.DataObject.ForEach(
+                    dataObject =>
+                    {
+                        Assert.IsTrue(_capServer141Provider.IsSupported(Functions.UpdateInStore, dataObject.Value), dataObject.Value);
+                    });
+
+            Assert.IsFalse(_capServer141Provider.IsSupported(Functions.UpdateInStore, ObjectTypes.Unknown), ObjectTypes.Unknown);
         }
 
         [TestMethod]
         public void CapServer141Provider_IsSupported_DeleteFromStore_Can_Check_Supported_Object_Type()
         {
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.DeleteFromStore, ObjectTypes.Well), ObjectTypes.Well);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.DeleteFromStore, ObjectTypes.Wellbore), ObjectTypes.Wellbore);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.DeleteFromStore, ObjectTypes.Message), ObjectTypes.Message);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.DeleteFromStore, ObjectTypes.Log), ObjectTypes.Log);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.DeleteFromStore, ObjectTypes.Rig), ObjectTypes.Rig);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.DeleteFromStore, ObjectTypes.Trajectory), ObjectTypes.Trajectory);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.DeleteFromStore, ObjectTypes.WbGeometry), ObjectTypes.WbGeometry);
-            Assert.IsTrue(_capServer141Provider.IsSupported(Functions.DeleteFromStore, ObjectTypes.Attachment), ObjectTypes.Attachment);
+            var capServerObject = GetCapServerObject();
+
+            var deleteFromStore = capServerObject.Function.Where(n => n.Name.EndsWith(Functions.DeleteFromStore.ToString())).ToArray();
+            Assert.IsNotNull(deleteFromStore);
+
+            deleteFromStore.FirstOrDefault()?.DataObject.ForEach(
+                    dataObject =>
+                    {
+                        Assert.IsTrue(_capServer141Provider.IsSupported(Functions.DeleteFromStore, dataObject.Value), dataObject.Value);
+                    });
+
+            Assert.IsFalse(_capServer141Provider.IsSupported(Functions.DeleteFromStore, ObjectTypes.Unknown), ObjectTypes.Unknown);
         }
 
         [TestCleanup]
         public void TestCleanUp()
         {
             _devKit = null;
+        }
+
+        private CapServer GetCapServerObject()
+        {
+            var capServerXml = _capServer141Provider.ToXml();
+
+            return Energistics.DataAccess.EnergisticsConverter.XmlToObject<CapServers>(capServerXml).CapServer;
         }
     }
 }
