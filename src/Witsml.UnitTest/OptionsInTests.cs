@@ -29,7 +29,15 @@ namespace PDS.Witsml
     public class OptionsInTests
     {
         [TestMethod]
-        public void OptionsIn_Parse_returns_empty_dictionary()
+        public void OptionsIn_Equals_Checks_If_Values_Are_Equal()
+        {
+            OptionsIn allOption = OptionsIn.ReturnElements.All;
+            Assert.IsFalse(OptionsIn.CompressionMethod.None.Equals(allOption.Value));
+            Assert.IsTrue(OptionsIn.ReturnElements.All.Equals(allOption.Value));            
+        }
+
+        [TestMethod]
+        public void OptionsIn_Parse_Returns_Empty_Dictionary()
         {
             var parseNull = OptionsIn.Parse(null);
             Assert.IsNotNull(parseNull);
@@ -41,7 +49,7 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
-        public void OptionsIn_Parse_returns_single_item()
+        public void OptionsIn_Parse_Returns_Single_Item()
         {
             var actual = OptionsIn.Parse("returnElements=all");
             Assert.IsNotNull(actual);
@@ -51,7 +59,7 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
-        public void OptionsIn_GetValue_returns_default_value()
+        public void OptionsIn_GetValue_Returns_Default_Value()
         {
             var returnElementsAll = OptionsIn.Parse("returnElements=all");
             var nullValue = OptionsIn.GetValue(returnElementsAll, null);
@@ -68,7 +76,7 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
-        public void OptionsIn_Join_concatenates_multiple_options_into_single_string()
+        public void OptionsIn_Join_Concatenates_Multiple_Options_Into_Single_String()
         {
             Assert.AreEqual(
                 "maxReturnNodes=1;requestLatestValues=2",
@@ -85,10 +93,14 @@ namespace PDS.Witsml
             Assert.AreEqual(
                 "requestPrivateGroupOnly=false;requestPrivateGroupOnly=true",
                 OptionsIn.Join(OptionsIn.RequestPrivateGroupOnly.GetValues().ToArray<OptionsIn>()));
+
+            Assert.AreEqual(
+                "dataVersion=1.3.1.1;dataVersion=1.4.1.1;dataVersion=2.0",
+                OptionsIn.Join(OptionsIn.DataVersion.Version131, OptionsIn.DataVersion.Version141, OptionsIn.DataVersion.Version200));
         }
 
         [TestMethod]
-        public void OptionsIn_string_operator_performs_implicit_conversion()
+        public void OptionsIn_String_Operator_Performs_Implicit_Conversion()
         {
             OptionsIn nullOption = null;
             string nullString = nullOption;
@@ -100,7 +112,7 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
-        public void OptionsIn_dictionary_operator_performs_implicit_conversion()
+        public void OptionsIn_Dictionary_Operator_Performs_Implicit_Conversion()
         {
             OptionsIn allOption = OptionsIn.ReturnElements.All;
             Dictionary<string, string> actual = allOption;
