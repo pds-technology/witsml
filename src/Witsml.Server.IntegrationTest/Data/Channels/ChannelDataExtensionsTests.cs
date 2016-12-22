@@ -20,17 +20,17 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Framework;
+using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Data.Logs;
-using PDS.Witsml.Server;
 using PDS.Witsml.Server.Configuration;
 using Shouldly;
 using Witsml131 = Energistics.DataAccess.WITSML131;
 using Witsml141 = Energistics.DataAccess.WITSML141;
 using Witsml200 = Energistics.DataAccess.WITSML200;
 
-namespace PDS.Witsml.Data.Channels
+namespace PDS.Witsml.Server.Data.Channels
 {
-    [TestClass()]
+    [TestClass]
     public class ChannelDataExtensionsTests
     {
         private Log200Generator _log20Generator;
@@ -49,7 +49,7 @@ namespace PDS.Witsml.Data.Channels
         {
             var result = ChannelDataExtensions.GetDataDelimiterOrDefault(string.Empty);
             Assert.IsNotNull(result);
-            Assert.AreEqual(",",",");
+            Assert.AreEqual(",", ",");
 
             result = ChannelDataExtensions.GetDataDelimiterOrDefault("|");
             Assert.IsNotNull(result);
@@ -268,7 +268,7 @@ namespace PDS.Witsml.Data.Channels
 
             log = null;
             var readers = log.GetReaders();
-            Assert.AreEqual(0,readers.Count());
+            Assert.AreEqual(0, readers.Count());
 
             log = new Witsml141.Log();
             readers = log.GetReaders();
@@ -319,7 +319,7 @@ namespace PDS.Witsml.Data.Channels
                     UnitList = "m,ft,m/h"
                 }
             };
-            
+
             readers = log.GetReaders();
             var listOfReaders = readers.ToList();
             Assert.AreEqual(1, listOfReaders.Count);
