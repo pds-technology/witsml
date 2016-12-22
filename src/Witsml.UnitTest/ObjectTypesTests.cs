@@ -39,7 +39,7 @@ namespace PDS.Witsml
             "</wells>";
 
         [TestMethod]
-        public void ObjectTypes_GetObjectType_returns_valid_witsml_type_for_Well()
+        public void ObjectTypes_GetObjectType_Returns_Valid_Witsml_Type_For_Well()
         {
             const string expected = ObjectTypes.Well;
 
@@ -50,7 +50,7 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
-        public void ObjectTypes_GetObjectType_returns_valid_witsml_type_for_Wellbore()
+        public void ObjectTypes_GetObjectType_Returns_Valid_Witsml_Type_For_Wellbore()
         {
             const string expected = ObjectTypes.Wellbore;
 
@@ -60,7 +60,7 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
-        public void ObjectTypes_GetObjectType_returns_null_for_invalid_witsml_type()
+        public void ObjectTypes_GetObjectType_Returns_Null_For_Invalid_Witsml_Type()
         {
             Should.Throw<ArgumentException>(() =>
             {
@@ -69,7 +69,7 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
-        public void ObjectTypes_GetObjectType_returns_correct_WbGeometry_type_for_131()
+        public void ObjectTypes_GetObjectType_Returns_Correct_WbGeometry_Type_For_131()
         {
             var objectType = ObjectTypes.GetObjectType(ObjectTypes.WbGeometry, WMLSVersion.WITSML131);
             Assert.AreEqual(typeof(Witsml131.StandAloneWellboreGeometry), objectType);
@@ -79,7 +79,7 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
-        public void ObjectTypes_GetObjectType_returns_correct_WbGeometry_type_for_141()
+        public void ObjectTypes_GetObjectType_Returns_Correct_WbGeometry_Type_For_141()
         {
             var objectType = ObjectTypes.GetObjectType(ObjectTypes.WbGeometry, WMLSVersion.WITSML141);
             Assert.AreEqual(typeof(Witsml141.StandAloneWellboreGeometry), objectType);
@@ -89,7 +89,7 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
-        public void ObjectTypes_GetObjectType_returns_correct_WbGeometry_type_for_200()
+        public void ObjectTypes_GetObjectType_Returns_Correct_WbGeometry_Type_For_200()
         {
             var objectType = ObjectTypes.GetObjectType(ObjectTypes.WbGeometry, OptionsIn.DataVersion.Version200.Value);
             Assert.IsNull(objectType);
@@ -99,7 +99,7 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
-        public void ObjectTypes_GetObjectType_returns_type_for_valid_xml()
+        public void ObjectTypes_GetObjectType_Returns_Type_For_Valid_Xml()
         {
             var document = WitsmlParser.Parse(_wellsXml);
             var typeFound = ObjectTypes.GetObjectType(document.Root);
@@ -107,14 +107,14 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
-        public void ObjectTypes_GetObjectType_returns_unknown_for_invalid_xml()
+        public void ObjectTypes_GetObjectType_Returns_Unknown_For_Invalid_Xml()
         {
             var typeFound = ObjectTypes.GetObjectType((XElement)null);
             Assert.AreEqual(ObjectTypes.Unknown, typeFound);
         }
 
         [TestMethod]
-        public void ObjectTypes_GetObjectTypeFromGroup_returns_type_for_valid_xml()
+        public void ObjectTypes_GetObjectTypeFromGroup_Returns_Type_For_Valid_Xml()
         {
             var document = WitsmlParser.Parse(_wellsXml);
             var typeFound = ObjectTypes.GetObjectTypeFromGroup(document.Root);
@@ -122,14 +122,14 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
-        public void ObjectTypes_GetObjectTypeFromGroup_returns_unknown_for_invalid_xml()
+        public void ObjectTypes_GetObjectTypeFromGroup_Returns_Unknown_For_Invalid_Xml()
         {
             var typeFound = ObjectTypes.GetObjectTypeFromGroup(null);
             Assert.AreEqual(ObjectTypes.Unknown, typeFound);
         }
 
         [TestMethod]
-        public void ObjectTypes_GetObjectTypeListProperty_returns_property_name_for_WellList()
+        public void ObjectTypes_GetObjectTypeListProperty_Returns_Property_Name_For_WellList()
         {
             var propertyName = ObjectTypes.GetObjectTypeListProperty(ObjectTypes.Well, OptionsIn.DataVersion.Version141);
             Assert.AreEqual("Well", propertyName);
@@ -138,7 +138,7 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
-        public void ObjectTypes_GetObjectTypeListPropertyInfo_returns_PropertyInfo_for_WellList()
+        public void ObjectTypes_GetObjectTypeListPropertyInfo_Returns_PropertyInfo_For_WellList()
         {
             var property = ObjectTypes.GetObjectTypeListPropertyInfo(ObjectTypes.Well, OptionsIn.DataVersion.Version141);
             Assert.AreEqual("Well", property.Name);
@@ -148,7 +148,7 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
-        public void ObjectTypes_GetObjectGroupType_returns_correct_WbGeometry_type_for_131()
+        public void ObjectTypes_GetObjectGroupType_Returns_Correct_WbGeometry_Type_For_131()
         {
             var objectType = ObjectTypes.GetObjectGroupType(ObjectTypes.WbGeometry, WMLSVersion.WITSML131);
             Assert.AreEqual(typeof(Witsml131.WellboreGeometryList), objectType);
@@ -156,14 +156,14 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
-        public void ObjectTypes_GetObjectGroupType_returns_correct_WbGeometry_type_for_141()
+        public void ObjectTypes_GetObjectGroupType_Returns_Correct_WbGeometry_Type_For_141()
         {
             var objectType = ObjectTypes.GetObjectGroupType(ObjectTypes.WbGeometry, OptionsIn.DataVersion.Version141);
             Assert.AreEqual(typeof(Witsml141.WellboreGeometryList), objectType);
         }
 
         [TestMethod]
-        public void ObjectTypes_GetSchemaType_returns_data_object_xsd_type_name()
+        public void ObjectTypes_GetSchemaType_Returns_Data_Object_Xsd_Type_Name()
         {
             Assert.AreEqual("obj_well", ObjectTypes.GetSchemaType(new Witsml141.Well()));
             Assert.AreEqual("Well", ObjectTypes.GetSchemaType(typeof(Witsml200.Well)));
@@ -171,7 +171,7 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
-        public void ObjectTypes_GetVersion_returns_version_from_valid_xml()
+        public void ObjectTypes_GetVersion_Returns_Version_From_Valid_Xml()
         {
             var document = WitsmlParser.Parse(_wellsXml);
             var version = ObjectTypes.GetVersion(document.Root);
@@ -179,14 +179,14 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
-        public void ObjectTypes_GetVersion_returns_empty_version_from_invalid_xml()
+        public void ObjectTypes_GetVersion_Returns_Empty_Version_From_Invalid_Xml()
         {
             var version = ObjectTypes.GetVersion((XElement)null);
             Assert.AreEqual(string.Empty, version);
         }
 
         [TestMethod]
-        public void ObjectTypes_GetVersion_returns_version_from_type()
+        public void ObjectTypes_GetVersion_Returns_Version_From_Type()
         {
             Assert.AreEqual(OptionsIn.DataVersion.Version131.Value, ObjectTypes.GetVersion(typeof(Witsml131.WellList)));
             Assert.AreEqual(OptionsIn.DataVersion.Version141.Value, ObjectTypes.GetVersion(typeof(Witsml141.Well)));
@@ -194,7 +194,7 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
-        public void ObjectTypes_GetGrowingObjectType_returns_growing_part_type()
+        public void ObjectTypes_GetGrowingObjectType_Returns_Growing_Part_Type()
         {
             Assert.AreEqual(ObjectTypes.LogCurveInfo, ObjectTypes.GetGrowingObjectType(ObjectTypes.Log));
             Assert.AreEqual(ObjectTypes.TrajectoryStation, ObjectTypes.GetGrowingObjectType(ObjectTypes.Trajectory));
@@ -203,7 +203,7 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
-        public void ObjectTypes_SingleToPlural_adds_s_to_all_data_object_types()
+        public void ObjectTypes_SingleToPlural_Adds_s_To_all_Data_Object_Types()
         {
             Assert.AreEqual("wells", ObjectTypes.SingleToPlural(ObjectTypes.Well));
             Assert.AreEqual("logs", ObjectTypes.SingleToPlural(ObjectTypes.Log));
@@ -212,7 +212,7 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
-        public void ObjectTypes_PluralToSingle_adds_s_to_all_data_object_types()
+        public void ObjectTypes_PluralToSingle_adds_s_To_All_Data_Object_Types()
         {
             Assert.AreEqual(ObjectTypes.Well, ObjectTypes.PluralToSingle("wells"));
             Assert.AreEqual(ObjectTypes.Log, ObjectTypes.PluralToSingle("logs"));
