@@ -189,7 +189,7 @@ namespace PDS.Witsml.Data.Logs
                 Citation = CreateCitation(citationName),
                 Mnemonic = mnemonic,
                 Uom = uom,
-                ChannelClass = ToPropertyKind(channelClass),
+                ChannelClass = ToPropertyKindReference(channelClass),
                 LoggingMethod = log.LoggingMethod,
                 LoggingCompanyName = log.LoggingCompanyName,
                 Source = log.LoggingMethod.ToString(),
