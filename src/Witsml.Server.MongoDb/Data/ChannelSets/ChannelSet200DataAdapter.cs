@@ -781,7 +781,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             return new ChannelIndex
             {
                 Mnemonic = indexInfo.Mnemonic,
-                Uom = indexInfo.Unit.GetUnitOfMeasure(),
+                Uom = Units.GetUnitOfMeasure(indexInfo.Unit),
                 IndexType = indexInfo.IsTimeIndex ? ChannelIndexType.datetime : ChannelIndexType.measureddepth,
                 Direction = indexInfo.Increasing ? IndexDirection.increasing : IndexDirection.decreasing,
                 DatumReference = "MSL"
@@ -799,7 +799,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                 Mnemonic = mnemonic,
                 DataType = etpDataTypeExists ? etpDataType : EtpDataType.@double,
                 GrowingStatus = ChannelStatus.active,
-                Uom = unit.GetUnitOfMeasure(),
+                Uom = Units.GetUnitOfMeasure(unit),
                 TimeDepth = isTimeIndex ? "time" : "depth",
                 ChannelClass = new PropertyKind
                 {
