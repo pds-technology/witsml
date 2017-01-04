@@ -774,9 +774,9 @@ namespace PDS.Witsml.Properties {
         /// <summary>
         ///   Looks up a localized string similar to A non-empty value must be defined for WMLtypeIn..
         /// </summary>
-        internal static string MissingWMLtypeIn {
+        internal static string MissingWmlTypeIn {
             get {
-                return ResourceManager.GetString("MissingWMLtypeIn", resourceCulture);
+                return ResourceManager.GetString("MissingWmlTypeIn", resourceCulture);
             }
         }
         

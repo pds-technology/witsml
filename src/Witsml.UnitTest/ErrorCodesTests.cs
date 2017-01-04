@@ -13,18 +13,19 @@ namespace PDS.Witsml
     public class ErrorCodesTests
     {
         [TestMethod]
-        public void ErrorCodesTests_Validate_errorCode_with_Resources()
+        public void ErrorCodes_GetDescription_Validate_errorCode_with_Resources()
         {
             var errorCodes = Enum.GetNames(typeof(ErrorCodes));
             Properties.Resources.Culture = null;
 
             foreach (var errorCode in errorCodes)
             {
-                var property = typeof(Properties.Resources).GetProperty(errorCode, BindingFlags.Static | BindingFlags.NonPublic);
-                var errorCodeDescription = property?.GetValue(null);
+                var property = typeof(Properties.Resources).GetProperty(errorCode, BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.IgnoreCase);
+                Assert.IsNotNull(property, errorCode);
+                var errorCodeDescription = property.GetValue(null);
                 ErrorCodes errorCodeEnum;
                 Enum.TryParse(errorCode, out errorCodeEnum);
-                Assert.IsNotNull(errorCodeEnum);
+                Assert.IsNotNull(errorCodeEnum, errorCode);
                 Assert.AreEqual(errorCodeEnum.GetDescription(), errorCodeDescription);
             }
         }
