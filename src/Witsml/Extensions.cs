@@ -247,15 +247,5 @@ namespace PDS.Witsml
                 ? ErrorCodes.MissingUnitForMeasureData
                 : ErrorCodes.EmptyUomSpecified;
         }
-
-        /// <summary>
-        /// Gets the enum UnitOfMeasure from a string.
-        /// </summary>
-        /// <param name="uom">The uom.</param>
-        /// <returns>The UnitOfMeasure</returns>
-        public static UnitOfMeasure? GetUnitOfMeasure(this string uom)
-        {
-            return string.IsNullOrWhiteSpace(uom) ? null : (UnitOfMeasure?)Enum.Parse(typeof(UnitOfMeasure), uom);
-        }
     }
 }

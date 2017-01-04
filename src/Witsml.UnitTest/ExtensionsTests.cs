@@ -341,18 +341,5 @@ namespace PDS.Witsml
             Assert.IsNotNull(result);
             Assert.AreEqual(ErrorCodes.EmptyUomSpecified, result);
         }
-
-        [TestMethod]
-        public void Extensions_GetUnitOfMeasure_Returns_UnitOfMeasure()
-        {
-            var uom = string.Empty;
-            var result = uom.GetUnitOfMeasure();
-            Assert.IsNull(result);
-
-            uom = "m";
-            result = uom.GetUnitOfMeasure();
-            Assert.IsNotNull(result);
-            Assert.AreEqual(UnitOfMeasure.m, result);
-        }
     }
 }

@@ -117,6 +117,7 @@
     <Compile Include="OptionsInTests.cs" />
     <Compile Include="EtpUrisTests.cs" />
     <Compile Include="TextFieldParserTests.cs" />
+    <Compile Include="UnitsTests.cs" />
     <Compile Include="WitsmlParserTests.cs" />
     <Compile Include="RangeTests.cs" />
     <Compile Include="Data\Channels\ChannelDataBlockTests.cs" />

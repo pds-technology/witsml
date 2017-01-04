@@ -16,6 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using Energistics.DataAccess.WITSML200.ReferenceData;
+
 namespace PDS.Witsml
 {
     /// <summary>
@@ -36,6 +39,16 @@ namespace PDS.Witsml
         public static string GetUnit(string uom)
         {
             return !string.IsNullOrWhiteSpace(uom) ? uom : None;
+        }
+
+        /// <summary>
+        /// Gets the enum UnitOfMeasure from a string.
+        /// </summary>
+        /// <param name="uom">The uom.</param>
+        /// <returns>The UnitOfMeasure if not null or empty; value null if otherwise</returns>
+        public static UnitOfMeasure? GetUnitOfMeasure(string uom)
+        {
+            return string.IsNullOrWhiteSpace(uom) ? null : (UnitOfMeasure?)Enum.Parse(typeof(UnitOfMeasure), uom);
         }
     }
 }
