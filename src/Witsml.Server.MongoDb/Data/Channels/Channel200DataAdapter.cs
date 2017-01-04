@@ -123,7 +123,7 @@ namespace PDS.Witsml.Server.Data.Channels
                 Description = channel.Citation != null ? channel.Citation.Description ?? channel.Mnemonic : channel.Mnemonic,
                 ChannelName = channel.Mnemonic,
                 Uom = Units.GetUnit(channel.Uom.ToString()),
-                MeasureClass = channel.ChannelClass?.QuantityClass?.ToString() ?? ObjectTypes.Unknown,
+                MeasureClass = channel.ChannelClass?.Title ?? ObjectTypes.Unknown,
                 Source = channel.Source ?? ObjectTypes.Unknown,
                 Uuid = channel.Mnemonic,
                 DomainObject = dataObject,

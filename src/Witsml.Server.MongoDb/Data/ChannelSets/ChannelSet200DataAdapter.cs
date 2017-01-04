@@ -27,6 +27,7 @@ using Energistics.Datatypes.ChannelData;
 using Energistics.Datatypes.Object;
 using MongoDB.Driver;
 using PDS.Framework;
+using PDS.Witsml.Data;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Server.Configuration;
@@ -483,7 +484,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                 Description = channel.Citation != null ? channel.Citation.Description ?? channel.Mnemonic : channel.Mnemonic,
                 ChannelName = channel.Mnemonic,
                 Uom = Units.GetUnit(channel.Uom.ToString()),
-                MeasureClass = channel.ChannelClass?.QuantityClass?.ToString() ?? ObjectTypes.Unknown,
+                MeasureClass = channel.ChannelClass?.Title ?? ObjectTypes.Unknown,
                 Source = channel.Source ?? ObjectTypes.Unknown,
                 Uuid = channel.Mnemonic,
                 DomainObject = dataObject,
@@ -793,6 +794,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             EtpDataType etpDataType;
 
             var etpDataTypeExists = Enum.TryParse(dataType, out etpDataType);
+            var dataGenerator = new DataGenerator();
 
             var channel = new Channel
             {
@@ -801,13 +803,10 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                 GrowingStatus = ChannelStatus.active,
                 Uom = Units.GetUnitOfMeasure(unit),
                 TimeDepth = isTimeIndex ? "time" : "depth",
-                ChannelClass = new PropertyKind
-                {
-                    SchemaVersion = uri.Version,
-                    QuantityClass = isTimeIndex
-                        ? QuantityClassKind.time
-                        : (QuantityClassKind?)null
-                },
+                ChannelClass = dataGenerator.ToPropertyKindReference(
+                    isTimeIndex
+                        ? QuantityClassKind.time.ToString()
+                        : QuantityClassKind.unitless.ToString()),
                 Index = indexes
             };
 
@@ -815,9 +814,6 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             channel.Citation = channel.Citation.Create();
             channel.Citation.Title = mnemonic;
             channel.SchemaVersion = uri.Version;
-            channel.ChannelClass.Uuid = channel.ChannelClass.NewUuid();
-            channel.ChannelClass.Citation = channel.ChannelClass.Citation.Create();
-            channel.ChannelClass.Citation.Title = channel.ChannelClass.QuantityClass?.ToString() ?? ObjectTypes.Unknown;
 
             return channel;
         }
