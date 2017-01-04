@@ -118,7 +118,7 @@ namespace PDS.Witsml.Server.Data
     public static class MongoDbExtensions<TParent, TChild>
     {
         /// <summary>
-        /// Creates a regular expression filter to perform a case-insensitive search.
+        /// Creates a pull filter update definition expression.
         /// </summary>
         /// <param name="propertyPath">The property path.</param>
         /// <param name="childFilter">The child filter.</param>
