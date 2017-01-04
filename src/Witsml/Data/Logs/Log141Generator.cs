@@ -107,31 +107,7 @@ namespace PDS.Witsml.Data.Logs
                 Unit = unit
             };
         }
-
-        /// <summary>
-        /// Gets the units in the specified list of <see cref="LogCurveInfo"/>.
-        /// </summary>
-        /// <param name="infoList">The information list.</param>
-        /// <returns></returns>
-        public string Units(List<LogCurveInfo> infoList)
-        {
-            return infoList != null
-                ? String.Join(",", infoList.Select(x => x.Unit ?? string.Empty))
-                : string.Empty;
-        }
-
-        /// <summary>
-        /// Gets the mnemonicses in the specified list of <see cref="LogCurveInfo"/>.
-        /// </summary>
-        /// <param name="infoList">The information list.</param>
-        /// <returns></returns>
-        public string Mnemonics(List<LogCurveInfo> infoList)
-        {
-            return infoList != null
-                ? String.Join(",", infoList.Select(x => x.Mnemonic))
-                : string.Empty;
-        }
-
+        
         /// <summary>
         /// Generates the log data.
         /// </summary>

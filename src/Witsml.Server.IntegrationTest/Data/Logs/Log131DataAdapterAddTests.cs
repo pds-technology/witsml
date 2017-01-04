@@ -161,7 +161,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 NameWell = Well.Name,
                 UidWellbore = response.SuppMsgOut,
                 NameWellbore = Wellbore.Name,
-                Name = DevKit.Name("Log 01")
+                Name = DevKit.Name()
             };
 
             DevKit.InitHeader(log, LogIndexType.measureddepth);
