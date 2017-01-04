@@ -120,27 +120,6 @@ namespace PDS.Witsml.Server.Logging
         }
 
         /// <summary>
-        /// Converts the request to a message suitable for logging.
-        /// </summary>
-        /// <param name="request">The request object.</param>
-        /// <param name="isEnabled">if set to <c>true</c> the message is created.</param>
-        /// <returns>The string representation of the request.</returns>
-        public static string ToLogMessage(this WMLS_GetFromStoreRequest request, bool isEnabled = false)
-        {
-            if (!_log.IsDebugEnabled && !isEnabled)
-                return string.Empty;
-
-            return string.Format(
-                "{0}: Type: {1}; Options: {2}; CapClient:{5}{3}{5}XML:{5}{4}{5}",
-                request.GetType().Name,
-                request.WMLtypeIn,
-                request.OptionsIn,
-                request.CapabilitiesIn,
-                Format(request.QueryIn),
-                Environment.NewLine);
-        }
-
-        /// <summary>
         /// Converts the response to a message suitable for logging.
         /// </summary>
         /// <param name="response">The response object.</param>
@@ -163,27 +142,6 @@ namespace PDS.Witsml.Server.Logging
                 response.Result,
                 response.SuppMsgOut,
                 xmlOut,
-                Environment.NewLine);
-        }
-
-        /// <summary>
-        /// Converts the request to a message suitable for logging.
-        /// </summary>
-        /// <param name="request">The request object.</param>
-        /// <param name="isEnabled">if set to <c>true</c> the message is created.</param>
-        /// <returns>The string representation of the request.</returns>
-        public static string ToLogMessage(this WMLS_AddToStoreRequest request, bool isEnabled = false)
-        {
-            if (!_log.IsDebugEnabled && !isEnabled)
-                return string.Empty;
-
-            return string.Format(
-                "{0}: Type: {1}; Options: {2}; CapClient:{5}{3}{5}XML:{5}{4}{5}",
-                request.GetType().Name,
-                request.WMLtypeIn,
-                request.OptionsIn,
-                request.CapabilitiesIn,
-                Format(request.XMLin),
                 Environment.NewLine);
         }
 
