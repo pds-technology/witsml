@@ -18,9 +18,7 @@
 
 using System;
 using System.Collections.Generic;
-using Energistics.DataAccess.WITSML200;
-using Energistics.DataAccess.WITSML200.ReferenceData;
-using PDS.Witsml.Data.Logs;
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
 
 namespace PDS.Witsml.Data
 {
@@ -68,24 +66,17 @@ namespace PDS.Witsml.Data
         }
 
         /// <summary>
-        /// Converts the specified curve class string to a <see cref="PropertyKind"/> instance.
+        /// Converts the specified curve class string to a <see cref="DataObjectReference"/> instance.
         /// </summary>
         /// <param name="curveClass">The curve class.</param>
-        /// <returns>A new <see cref="PropertyKind"/> instance.</returns>
-        public PropertyKind ToPropertyKind(string curveClass)
+        /// <returns>A new <see cref="DataObjectReference"/> instance.</returns>
+        public DataObjectReference ToPropertyKindReference(string curveClass)
         {
-            QuantityClassKind quantityClass;
-
-            if (!Enum.TryParse(curveClass, out quantityClass))
-                quantityClass = QuantityClassKind.dimensionless;
-
-            var logGenerator = new Log200Generator();
-            return new PropertyKind
+            return new DataObjectReference
             {
-                QuantityClass = quantityClass,
-                Citation = logGenerator.CreateCitation("ChannelClass"),
-                SchemaVersion = "2.0",
-                Uuid = Uid()
+                ContentType = "application/x-eml+xml;version=2.1;type=PropertyKind",
+                Uuid = Uid(),
+                Title = curveClass,
             };
         }
     }
