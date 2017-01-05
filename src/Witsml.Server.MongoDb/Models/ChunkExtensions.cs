@@ -89,31 +89,5 @@ namespace PDS.Witsml.Server.Models
                 }
             }
         }
-
-        /// <summary>
-        /// Determines whether the records in the chunk should be reversed based on the fastest
-        /// route of evaluation.
-        /// </summary>
-        /// <param name="chunk">The chunk.</param>
-        /// <param name="range">The range.</param>
-        /// <returns>
-        ///   <c>true</c> if reversing the records optimal; otherwise, <c>false</c>.
-        /// </returns>
-        private static bool IsReverseOptimal(this ChannelDataChunk chunk, Range<double?>? range)
-        {
-            var start = chunk.Indices[0].Start;
-            var end = chunk.Indices[0].End;
-            bool reverse = false;
-
-            // If start is defined or start and end are defined then evaluate if the records
-            // should be reversed for fastest evaluation.
-            if (range?.Start != null || (range?.Start != null && range?.End != null))
-            {
-                reverse = Math.Abs(start - (double)range?.Start.Value) >
-                          Math.Abs(end - (double)range?.Start.Value);
-            }
-
-            return reverse;
-        }
     }
 }
