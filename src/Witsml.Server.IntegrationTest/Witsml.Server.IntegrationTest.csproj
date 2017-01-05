@@ -790,6 +790,7 @@
     <Compile Include="Data\Wells\Well200ValidatorTests.generated.cs">
       <DependentUpon>Well200ValidatorTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\WitsmlExtensionsTests.cs" />
     <Compile Include="Data\WitsmlQueryTemplateTests.cs" />
     <Compile Include="Data\WitsmlQueryParserTests.cs" />
     <Compile Include="IntegrationTestBase.cs" />
