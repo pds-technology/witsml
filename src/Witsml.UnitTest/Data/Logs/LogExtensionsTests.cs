@@ -43,7 +43,7 @@ namespace PDS.Witsml.Data.Logs
         }
 
         [TestMethod]
-        public void LogExtensions_Can_Return_Null_Values_In_The_Order_Of_Mnemonics()
+        public void LogExtensions_141_GetNullValues_Can_Return_Null_Values_In_The_Order_Of_Mnemonics()
         {
             var log = new Witsml141.Log
             {
@@ -74,7 +74,7 @@ namespace PDS.Witsml.Data.Logs
         }
 
         [TestMethod]
-        public void LogExtensions_Has_Null_Indicator_Can_Return_Null_Values_In_The_Order_Of_Mnemonics()
+        public void LogExtensions_141_GetNullValues_Has_Null_Indicator_Can_Return_Null_Values_In_The_Order_Of_Mnemonics()
         {
             var log = new Witsml141.Log
             {
@@ -134,7 +134,7 @@ namespace PDS.Witsml.Data.Logs
         }
 
         [TestMethod]
-        public void LogExtensions_IsValidDataDelimiter_Validation_Fail_Tests()
+        public void LogExtensions_141_IsValidDataDelimiter_Validation_Fail_Tests()
         {
             var log = new Witsml141.Log
             {
@@ -168,7 +168,7 @@ namespace PDS.Witsml.Data.Logs
         }
 
         [TestMethod]
-        public void LogExtensions_Data_Delimiter_Validation_Pass_Tests()
+        public void LogExtensions_141_IsValidDataDelimiter_Data_Delimiter_Validation_Pass_Tests()
         {
             var log = new Witsml141.Log();
 
@@ -269,7 +269,7 @@ namespace PDS.Witsml.Data.Logs
         }
 
         [TestMethod]
-        public void LogExtensions_GetDataDelimiterOrDefault_When_Log_Is_Null()
+        public void LogExtensions_141_GetDataDelimiterOrDefault_When_Log_Is_Null()
         {
             var log = new Witsml141.Log();
 
