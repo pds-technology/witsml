@@ -75,11 +75,11 @@ namespace PDS.Witsml.Server
             _client = CreateClient();
 
             // Register server handlers
-            _server.Register(() => container.Resolve<IDiscoveryStore>());
+            //_server.Register(() => container.Resolve<IDiscoveryStore>());
             _server.Register(() => container.Resolve<IStoreStore>());
 
             // Register client handlers
-            _client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();
+            //_client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();
             _client.Register<IStoreCustomer, StoreCustomerHandler>();
         }
 
