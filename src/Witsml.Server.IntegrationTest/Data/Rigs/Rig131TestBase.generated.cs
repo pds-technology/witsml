@@ -33,7 +33,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Server.Data.Rigs
 {
-    public abstract partial class Rig131TestBase
+    public abstract partial class Rig131TestBase : IntegrationTestBase
     {
         public const string QueryMissingNamespace = "<rigs version=\"1.3.1.1\"><rig /></rigs>";
         public const string QueryInvalidNamespace = "<rigs xmlns=\"www.witsml.org/schemas/123\" version=\"1.3.1.1\"></rigs>";
@@ -41,6 +41,7 @@ namespace PDS.Witsml.Server.Data.Rigs
         public const string QueryEmptyRoot = "<rigs xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"></rigs>";
         public const string QueryEmptyObject = "<rigs xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><rig /></rigs>";
         public const string BasicXMLTemplate = "<rigs xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><rig uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</rig></rigs>";
+
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public Rig Rig { get; set; }
@@ -92,6 +93,7 @@ namespace PDS.Witsml.Server.Data.Rigs
         {
             AfterEachTest();
             OnTestCleanUp();
+            DevKit.Container.Dispose();
             DevKit = null;
         }
 

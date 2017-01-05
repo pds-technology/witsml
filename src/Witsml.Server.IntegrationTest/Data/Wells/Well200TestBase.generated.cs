@@ -33,9 +33,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
-    public abstract partial class Well200TestBase
+    public abstract partial class Well200TestBase : IntegrationTestBase
     {
         public const string BasicXMLTemplate = "<wells xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><well uid=\"{0}\">{1}</well></wells>";
+
         public Well Well { get; set; }
         public DevKit200Aspect DevKit { get; set; }
         public TestContext TestContext { get; set; }
@@ -51,7 +52,7 @@ namespace PDS.Witsml.Server.Data.Wells
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Well"),
                 GeographicLocationWGS84 = DevKit.Location(),
-				SchemaVersion = "2.0",
+                SchemaVersion = "2.0",
                 TimeZone = DevKit.TimeZone
             };
 
@@ -66,6 +67,7 @@ namespace PDS.Witsml.Server.Data.Wells
         {
             AfterEachTest();
             OnTestCleanUp();
+            DevKit.Container.Dispose();
             DevKit = null;
         }
 

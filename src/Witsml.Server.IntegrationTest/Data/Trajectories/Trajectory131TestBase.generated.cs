@@ -33,7 +33,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
-    public abstract partial class Trajectory131TestBase
+    public abstract partial class Trajectory131TestBase : IntegrationTestBase
     {
         public const string QueryMissingNamespace = "<trajectorys version=\"1.3.1.1\"><trajectory /></trajectorys>";
         public const string QueryInvalidNamespace = "<trajectorys xmlns=\"www.witsml.org/schemas/123\" version=\"1.3.1.1\"></trajectorys>";
@@ -41,6 +41,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         public const string QueryEmptyRoot = "<trajectorys xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"></trajectorys>";
         public const string QueryEmptyObject = "<trajectorys xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><trajectory /></trajectorys>";
         public const string BasicXMLTemplate = "<trajectorys xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><trajectory uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</trajectory></trajectorys>";
+
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public Trajectory Trajectory { get; set; }
@@ -92,6 +93,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             AfterEachTest();
             OnTestCleanUp();
+            DevKit.Container.Dispose();
             DevKit = null;
         }
 

@@ -33,9 +33,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Server.Data.Attachments
 {
-    public abstract partial class Attachment200TestBase
+    public abstract partial class Attachment200TestBase : IntegrationTestBase
     {
         public const string BasicXMLTemplate = "<attachments xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><attachment uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</attachment></attachments>";
+
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public Attachment Attachment { get; set; }
@@ -53,7 +54,7 @@ namespace PDS.Witsml.Server.Data.Attachments
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Well"),
                 GeographicLocationWGS84 = DevKit.Location(),
-				SchemaVersion = "2.0",
+                SchemaVersion = "2.0",
                 TimeZone = DevKit.TimeZone
             };
             Wellbore = new Wellbore
@@ -61,14 +62,14 @@ namespace PDS.Witsml.Server.Data.Attachments
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Wellbore"),
                 Well = DevKit.DataObjectReference(Well),
-				SchemaVersion = "2.0"
+                SchemaVersion = "2.0"
             };
             Attachment = new Attachment
             {
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Attachment"),
                 Wellbore = DevKit.DataObjectReference(Wellbore),
-				SchemaVersion = "2.0"
+                SchemaVersion = "2.0"
             };
 
             QueryEmptyList = DevKit.List(new Attachment());
@@ -82,6 +83,7 @@ namespace PDS.Witsml.Server.Data.Attachments
         {
             AfterEachTest();
             OnTestCleanUp();
+            DevKit.Container.Dispose();
             DevKit = null;
         }
 

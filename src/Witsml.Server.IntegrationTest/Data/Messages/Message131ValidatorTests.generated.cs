@@ -105,21 +105,21 @@ namespace PDS.Witsml.Server.Data.Messages
 
         #endregion Error -403
 
-		#region Error -405
+        #region Error -405
 
-		[TestMethod]
+        [TestMethod]
         public void Message131Validator_AddToStore_Error_405_Message_Already_Exists()
         {
             AddParents();
             DevKit.AddAndAssert<MessageList, Message>(Message);
-			DevKit.AddAndAssert<MessageList, Message>(Message, ErrorCodes.DataObjectUidAlreadyExists);
+            DevKit.AddAndAssert<MessageList, Message>(Message, ErrorCodes.DataObjectUidAlreadyExists);
         }
 
-		#endregion Error -405
+        #endregion Error -405
 
         #region Error -406
 
-		[TestMethod]
+        [TestMethod]
         public void Message131Validator_AddToStore_Error_406_Message_Missing_Parent_Uid()
         {
             AddParents();
@@ -128,37 +128,37 @@ namespace PDS.Witsml.Server.Data.Messages
             DevKit.AddAndAssert(Message, ErrorCodes.MissingElementUidForAdd);
         }
 
-		#endregion Error -406
+        #endregion Error -406
 
         #region Error -407
 
-		[TestMethod]
+        [TestMethod]
         public void Message131Validator_UpdateInStore_Error_407_Message_Missing_Witsml_Object_Type()
         {
             AddParents();
             DevKit.AddAndAssert<MessageList, Message>(Message);
-			var response = DevKit.Update<MessageList, Message>(Message, string.Empty);
+            var response = DevKit.Update<MessageList, Message>(Message, string.Empty);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.MissingWmlTypeIn, response.Result);
         }
 
-		#endregion Error -407
+        #endregion Error -407
 
         #region Error -408
 
-		[TestMethod]
+        [TestMethod]
         public void Message131Validator_UpdateInStore_Error_408_Message_Empty_QueryIn()
         {
-			var response = DevKit.UpdateInStore(ObjectTypes.Message, string.Empty, null, null);
+            var response = DevKit.UpdateInStore(ObjectTypes.Message, string.Empty, null, null);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.MissingInputTemplate, response.Result);
         }
 
-		#endregion Error -408
+        #endregion Error -408
 
         #region Error -409
 
-		[TestMethod]
+        [TestMethod]
         public void Message131Validator_UpdateInStore_Error_409_Message_QueryIn_Must_Conform_To_Schema()
         {
             AddParents();
@@ -171,24 +171,24 @@ namespace PDS.Witsml.Server.Data.Messages
             Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
         }
 
-		#endregion Error -409
+        #endregion Error -409
 
         #region Error -415
 
-		[TestMethod]
+        [TestMethod]
         public void Message131Validator_UpdateInStore_Error_415_Message_Update_Without_Specifing_UID()
         {
             AddParents();
             DevKit.AddAndAssert<MessageList, Message>(Message);
             Message.Uid = string.Empty;
-			DevKit.UpdateAndAssert<MessageList, Message>(Message, ErrorCodes.DataObjectUidMissing);
+            DevKit.UpdateAndAssert<MessageList, Message>(Message, ErrorCodes.DataObjectUidMissing);
         }
 
-		#endregion Error -415
+        #endregion Error -415
 
         #region Error -420
 
-		[TestMethod]
+        [TestMethod]
         public void Message131Validator_DeleteFromStore_Error_420_Message_Specifying_A_Non_Recuring_Element_That_Is_Required()
         {
 
@@ -205,22 +205,22 @@ namespace PDS.Witsml.Server.Data.Messages
             Assert.AreEqual((short)ErrorCodes.EmptyMandatoryNodeSpecified, results.Result);
         }
 
-		#endregion Error -420
+        #endregion Error -420
 
         #region Error -433
 
-		[TestMethod]
+        [TestMethod]
         public void Message131Validator_UpdateInStore_Error_433_Message_Does_Not_Exist()
         {
             AddParents();
-			DevKit.UpdateAndAssert<MessageList, Message>(Message, ErrorCodes.DataObjectNotExist);
+            DevKit.UpdateAndAssert<MessageList, Message>(Message, ErrorCodes.DataObjectNotExist);
         }
 
-		#endregion Error -433
+        #endregion Error -433
 
         #region Error -444
 
-		[TestMethod]
+        [TestMethod]
         public void Message131Validator_UpdateInStore_Error_444_Message_Updating_More_Than_One_Data_Object()
         {
             AddParents();
@@ -233,11 +233,11 @@ namespace PDS.Witsml.Server.Data.Messages
             Assert.AreEqual((short)ErrorCodes.InputTemplateMultipleDataObjects, response.Result);
         }
 
-		#endregion Error -444
+        #endregion Error -444
 
         #region Error -468
 
-		[TestMethod]
+        [TestMethod]
         public void Message131Validator_UpdateInStore_Error_468_Message_No_Schema_Version_Declared()
         {
 
@@ -247,11 +247,11 @@ namespace PDS.Witsml.Server.Data.Messages
             Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
         }
 
-		#endregion Error -468
+        #endregion Error -468
 
         #region Error -478
 
-		[TestMethod]
+        [TestMethod]
         public void Message131Validator_AddToStore_Error_478_Message_Parent_Uid_Case_Not_Matching()
         {
 
@@ -265,21 +265,21 @@ namespace PDS.Witsml.Server.Data.Messages
             DevKit.AddAndAssert(Message, ErrorCodes.IncorrectCaseParentUid);
         }
 
-		#endregion Error -478
+        #endregion Error -478
 
         #region Error -481
 
-		[TestMethod]
+        [TestMethod]
         public void Message131Validator_AddToStore_Error_481_Message_Parent_Does_Not_Exist()
         {
             DevKit.AddAndAssert(Message, ErrorCodes.MissingParentDataObject);
         }
 
-		#endregion Error -481
+        #endregion Error -481
 
         #region Error -483
 
-		[TestMethod]
+        [TestMethod]
         public void Message131Validator_UpdateInStore_Error_483_Message_Update_With_Non_Conforming_Template()
         {
             AddParents();
@@ -288,11 +288,11 @@ namespace PDS.Witsml.Server.Data.Messages
             Assert.AreEqual((short)ErrorCodes.UpdateTemplateNonConforming, response.Result);
         }
 
-		#endregion Error -483
+        #endregion Error -483
 
         #region Error -484
 
-		[TestMethod]
+        [TestMethod]
         public void Message131Validator_UpdateInStore_Error_484_Message_Update_Will_Delete_Required_Element()
         {
 
@@ -306,11 +306,11 @@ namespace PDS.Witsml.Server.Data.Messages
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);
         }
 
-		#endregion Error -484
+        #endregion Error -484
 
         #region Error -486
 
-		[TestMethod]
+        [TestMethod]
         public void Message131Validator_AddToStore_Error_486_Message_Data_Object_Types_Dont_Match()
         {
 
@@ -323,7 +323,7 @@ namespace PDS.Witsml.Server.Data.Messages
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
 
-		#endregion Error -486
+        #endregion Error -486
 
     }
 }

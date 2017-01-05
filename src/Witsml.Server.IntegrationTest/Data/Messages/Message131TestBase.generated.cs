@@ -33,7 +33,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Server.Data.Messages
 {
-    public abstract partial class Message131TestBase
+    public abstract partial class Message131TestBase : IntegrationTestBase
     {
         public const string QueryMissingNamespace = "<messages version=\"1.3.1.1\"><message /></messages>";
         public const string QueryInvalidNamespace = "<messages xmlns=\"www.witsml.org/schemas/123\" version=\"1.3.1.1\"></messages>";
@@ -41,6 +41,7 @@ namespace PDS.Witsml.Server.Data.Messages
         public const string QueryEmptyRoot = "<messages xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"></messages>";
         public const string QueryEmptyObject = "<messages xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><message /></messages>";
         public const string BasicXMLTemplate = "<messages xmlns=\"http://www.witsml.org/schemas/131\" version=\"1.3.1.1\"><message uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</message></messages>";
+
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public Message Message { get; set; }
@@ -92,6 +93,7 @@ namespace PDS.Witsml.Server.Data.Messages
         {
             AfterEachTest();
             OnTestCleanUp();
+            DevKit.Container.Dispose();
             DevKit = null;
         }
 

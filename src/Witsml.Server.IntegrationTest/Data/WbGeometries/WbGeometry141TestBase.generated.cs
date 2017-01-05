@@ -36,7 +36,7 @@ using WbGeometryList = Energistics.DataAccess.WITSML141.WellboreGeometryList;
 
 namespace PDS.Witsml.Server.Data.WbGeometries
 {
-    public abstract partial class WbGeometry141TestBase
+    public abstract partial class WbGeometry141TestBase : IntegrationTestBase
     {
         public const string QueryMissingNamespace = "<wbGeometrys version=\"1.4.1.1\"><wbGeometry /></wbGeometrys>";
         public const string QueryInvalidNamespace = "<wbGeometrys xmlns=\"www.witsml.org/schemas/123\" version=\"1.4.1.1\"></wbGeometrys>";
@@ -44,6 +44,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
         public const string QueryEmptyRoot = "<wbGeometrys xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"></wbGeometrys>";
         public const string QueryEmptyObject = "<wbGeometrys xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><wbGeometry /></wbGeometrys>";
         public const string BasicXMLTemplate = "<wbGeometrys xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\"><wbGeometry uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</wbGeometry></wbGeometrys>";
+
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public WbGeometry WbGeometry { get; set; }
@@ -95,6 +96,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
         {
             AfterEachTest();
             OnTestCleanUp();
+            DevKit.Container.Dispose();
             DevKit = null;
         }
 

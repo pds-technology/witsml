@@ -108,21 +108,21 @@ namespace PDS.Witsml.Server.Data.WbGeometries
 
         #endregion Error -403
 
-		#region Error -405
+        #region Error -405
 
-		[TestMethod]
+        [TestMethod]
         public void WbGeometry131Validator_AddToStore_Error_405_WbGeometry_Already_Exists()
         {
             AddParents();
             DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
-			DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry, ErrorCodes.DataObjectUidAlreadyExists);
+            DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry, ErrorCodes.DataObjectUidAlreadyExists);
         }
 
-		#endregion Error -405
+        #endregion Error -405
 
         #region Error -406
 
-		[TestMethod]
+        [TestMethod]
         public void WbGeometry131Validator_AddToStore_Error_406_WbGeometry_Missing_Parent_Uid()
         {
             AddParents();
@@ -131,37 +131,37 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             DevKit.AddAndAssert(WbGeometry, ErrorCodes.MissingElementUidForAdd);
         }
 
-		#endregion Error -406
+        #endregion Error -406
 
         #region Error -407
 
-		[TestMethod]
+        [TestMethod]
         public void WbGeometry131Validator_UpdateInStore_Error_407_WbGeometry_Missing_Witsml_Object_Type()
         {
             AddParents();
             DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
-			var response = DevKit.Update<WbGeometryList, WbGeometry>(WbGeometry, string.Empty);
+            var response = DevKit.Update<WbGeometryList, WbGeometry>(WbGeometry, string.Empty);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.MissingWmlTypeIn, response.Result);
         }
 
-		#endregion Error -407
+        #endregion Error -407
 
         #region Error -408
 
-		[TestMethod]
+        [TestMethod]
         public void WbGeometry131Validator_UpdateInStore_Error_408_WbGeometry_Empty_QueryIn()
         {
-			var response = DevKit.UpdateInStore(ObjectTypes.WbGeometry, string.Empty, null, null);
+            var response = DevKit.UpdateInStore(ObjectTypes.WbGeometry, string.Empty, null, null);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.MissingInputTemplate, response.Result);
         }
 
-		#endregion Error -408
+        #endregion Error -408
 
         #region Error -409
 
-		[TestMethod]
+        [TestMethod]
         public void WbGeometry131Validator_UpdateInStore_Error_409_WbGeometry_QueryIn_Must_Conform_To_Schema()
         {
             AddParents();
@@ -174,24 +174,24 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
         }
 
-		#endregion Error -409
+        #endregion Error -409
 
         #region Error -415
 
-		[TestMethod]
+        [TestMethod]
         public void WbGeometry131Validator_UpdateInStore_Error_415_WbGeometry_Update_Without_Specifing_UID()
         {
             AddParents();
             DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
             WbGeometry.Uid = string.Empty;
-			DevKit.UpdateAndAssert<WbGeometryList, WbGeometry>(WbGeometry, ErrorCodes.DataObjectUidMissing);
+            DevKit.UpdateAndAssert<WbGeometryList, WbGeometry>(WbGeometry, ErrorCodes.DataObjectUidMissing);
         }
 
-		#endregion Error -415
+        #endregion Error -415
 
         #region Error -420
 
-		[TestMethod]
+        [TestMethod]
         public void WbGeometry131Validator_DeleteFromStore_Error_420_WbGeometry_Specifying_A_Non_Recuring_Element_That_Is_Required()
         {
 
@@ -208,22 +208,22 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             Assert.AreEqual((short)ErrorCodes.EmptyMandatoryNodeSpecified, results.Result);
         }
 
-		#endregion Error -420
+        #endregion Error -420
 
         #region Error -433
 
-		[TestMethod]
+        [TestMethod]
         public void WbGeometry131Validator_UpdateInStore_Error_433_WbGeometry_Does_Not_Exist()
         {
             AddParents();
-			DevKit.UpdateAndAssert<WbGeometryList, WbGeometry>(WbGeometry, ErrorCodes.DataObjectNotExist);
+            DevKit.UpdateAndAssert<WbGeometryList, WbGeometry>(WbGeometry, ErrorCodes.DataObjectNotExist);
         }
 
-		#endregion Error -433
+        #endregion Error -433
 
         #region Error -444
 
-		[TestMethod]
+        [TestMethod]
         public void WbGeometry131Validator_UpdateInStore_Error_444_WbGeometry_Updating_More_Than_One_Data_Object()
         {
             AddParents();
@@ -236,11 +236,11 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             Assert.AreEqual((short)ErrorCodes.InputTemplateMultipleDataObjects, response.Result);
         }
 
-		#endregion Error -444
+        #endregion Error -444
 
         #region Error -468
 
-		[TestMethod]
+        [TestMethod]
         public void WbGeometry131Validator_UpdateInStore_Error_468_WbGeometry_No_Schema_Version_Declared()
         {
 
@@ -250,11 +250,11 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
         }
 
-		#endregion Error -468
+        #endregion Error -468
 
         #region Error -478
 
-		[TestMethod]
+        [TestMethod]
         public void WbGeometry131Validator_AddToStore_Error_478_WbGeometry_Parent_Uid_Case_Not_Matching()
         {
 
@@ -268,21 +268,21 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             DevKit.AddAndAssert(WbGeometry, ErrorCodes.IncorrectCaseParentUid);
         }
 
-		#endregion Error -478
+        #endregion Error -478
 
         #region Error -481
 
-		[TestMethod]
+        [TestMethod]
         public void WbGeometry131Validator_AddToStore_Error_481_WbGeometry_Parent_Does_Not_Exist()
         {
             DevKit.AddAndAssert(WbGeometry, ErrorCodes.MissingParentDataObject);
         }
 
-		#endregion Error -481
+        #endregion Error -481
 
         #region Error -483
 
-		[TestMethod]
+        [TestMethod]
         public void WbGeometry131Validator_UpdateInStore_Error_483_WbGeometry_Update_With_Non_Conforming_Template()
         {
             AddParents();
@@ -291,11 +291,11 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             Assert.AreEqual((short)ErrorCodes.UpdateTemplateNonConforming, response.Result);
         }
 
-		#endregion Error -483
+        #endregion Error -483
 
         #region Error -484
 
-		[TestMethod]
+        [TestMethod]
         public void WbGeometry131Validator_UpdateInStore_Error_484_WbGeometry_Update_Will_Delete_Required_Element()
         {
 
@@ -309,11 +309,11 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);
         }
 
-		#endregion Error -484
+        #endregion Error -484
 
         #region Error -486
 
-		[TestMethod]
+        [TestMethod]
         public void WbGeometry131Validator_AddToStore_Error_486_WbGeometry_Data_Object_Types_Dont_Match()
         {
 
@@ -326,7 +326,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
 
-		#endregion Error -486
+        #endregion Error -486
 
     }
 }

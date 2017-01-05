@@ -33,9 +33,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
-    public abstract partial class Wellbore200TestBase
+    public abstract partial class Wellbore200TestBase : IntegrationTestBase
     {
         public const string BasicXMLTemplate = "<wellbores xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><wellbore uidWell=\"{0}\" uid=\"{1}\">{2}</wellbore></wellbores>";
+
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public DevKit200Aspect DevKit { get; set; }
@@ -52,7 +53,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Well"),
                 GeographicLocationWGS84 = DevKit.Location(),
-				SchemaVersion = "2.0",
+                SchemaVersion = "2.0",
                 TimeZone = DevKit.TimeZone
             };
             Wellbore = new Wellbore
@@ -60,7 +61,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Wellbore"),
                 Well = DevKit.DataObjectReference(Well),
-				SchemaVersion = "2.0"
+                SchemaVersion = "2.0"
             };
 
             QueryEmptyList = DevKit.List(new Wellbore());
@@ -74,6 +75,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         {
             AfterEachTest();
             OnTestCleanUp();
+            DevKit.Container.Dispose();
             DevKit = null;
         }
 

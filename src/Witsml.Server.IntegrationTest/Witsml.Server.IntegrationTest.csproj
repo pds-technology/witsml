@@ -132,6 +132,10 @@
     <Compile Include="Data\Attachments\Attachment141DataAdapterUpdateTests.generated.cs">
       <DependentUpon>Attachment141DataAdapterUpdateTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\Attachments\Attachment141EtpTests.cs" />
+    <Compile Include="Data\Attachments\Attachment141EtpTests.generated.cs">
+      <DependentUpon>Attachment141EtpTests.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Attachments\Attachment141TestBase.cs" />
     <Compile Include="Data\Attachments\Attachment141TestBase.generated.cs">
       <DependentUpon>Attachment141TestBase.cs</DependentUpon>
@@ -156,6 +160,10 @@
     <Compile Include="Data\Attachments\Attachment200DataAdapterUpdateTests.generated.cs">
       <DependentUpon>Attachment200DataAdapterUpdateTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\Attachments\Attachment200EtpTests.cs" />
+    <Compile Include="Data\Attachments\Attachment200EtpTests.generated.cs">
+      <DependentUpon>Attachment200EtpTests.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Attachments\Attachment200TestBase.cs" />
     <Compile Include="Data\Attachments\Attachment200TestBase.generated.cs">
       <DependentUpon>Attachment200TestBase.cs</DependentUpon>
@@ -175,6 +183,10 @@
     </Compile>
     <Compile Include="Data\ChannelSets\ChannelSet200DataAdapterUpdateTests.generated.cs">
       <DependentUpon>ChannelSet200DataAdapterUpdateTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ChannelSets\ChannelSet200EtpTests.cs" />
+    <Compile Include="Data\ChannelSets\ChannelSet200EtpTests.generated.cs">
+      <DependentUpon>ChannelSet200EtpTests.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\ChannelSets\ChannelSet200TestBase.cs" />
     <Compile Include="Data\ChannelSets\ChannelSet200TestBase.generated.cs">
@@ -198,6 +210,10 @@
     <Compile Include="Data\Channels\Channel200DataAdapterUpdateTests.cs" />
     <Compile Include="Data\Channels\Channel200DataAdapterUpdateTests.generated.cs">
       <DependentUpon>Channel200DataAdapterUpdateTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Channels\Channel200EtpTests.cs" />
+    <Compile Include="Data\Channels\Channel200EtpTests.generated.cs">
+      <DependentUpon>Channel200EtpTests.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Channels\Channel200TestBase.cs" />
     <Compile Include="Data\Channels\Channel200TestBase.generated.cs">
@@ -229,6 +245,10 @@
     <Compile Include="Data\Logs\Log131DataAdapterUpdateTests.generated.cs">
       <DependentUpon>Log131DataAdapterUpdateTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\Logs\Log131EtpTests.cs" />
+    <Compile Include="Data\Logs\Log131EtpTests.generated.cs">
+      <DependentUpon>Log131EtpTests.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Logs\Log131TestBase.cs" />
     <Compile Include="Data\Logs\Log131TestBase.generated.cs">
       <DependentUpon>Log131TestBase.cs</DependentUpon>
@@ -254,6 +274,10 @@
     <Compile Include="Data\Logs\Log141DataAdapterUpdateTests.generated.cs">
       <DependentUpon>Log141DataAdapterUpdateTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\Logs\Log141EtpTests.cs" />
+    <Compile Include="Data\Logs\Log141EtpTests.generated.cs">
+      <DependentUpon>Log141EtpTests.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Logs\Log141TestBase.cs" />
     <Compile Include="Data\Logs\Log141TestBase.generated.cs">
       <DependentUpon>Log141TestBase.cs</DependentUpon>
@@ -277,6 +301,10 @@
     <Compile Include="Data\Logs\Log200DataAdapterUpdateTests.cs" />
     <Compile Include="Data\Logs\Log200DataAdapterUpdateTests.generated.cs">
       <DependentUpon>Log200DataAdapterUpdateTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Logs\Log200EtpTests.cs" />
+    <Compile Include="Data\Logs\Log200EtpTests.generated.cs">
+      <DependentUpon>Log200EtpTests.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Logs\Log200TestBase.cs" />
     <Compile Include="Data\Logs\Log200TestBase.generated.cs">
@@ -302,6 +330,10 @@
     <Compile Include="Data\Messages\Message131DataAdapterUpdateTests.generated.cs">
       <DependentUpon>Message131DataAdapterUpdateTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\Messages\Message131EtpTests.cs" />
+    <Compile Include="Data\Messages\Message131EtpTests.generated.cs">
+      <DependentUpon>Message131EtpTests.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Messages\Message131TestBase.cs" />
     <Compile Include="Data\Messages\Message131TestBase.generated.cs">
       <DependentUpon>Message131TestBase.cs</DependentUpon>
@@ -325,6 +357,10 @@
     <Compile Include="Data\Messages\Message141DataAdapterUpdateTests.cs" />
     <Compile Include="Data\Messages\Message141DataAdapterUpdateTests.generated.cs">
       <DependentUpon>Message141DataAdapterUpdateTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Messages\Message141EtpTests.cs" />
+    <Compile Include="Data\Messages\Message141EtpTests.generated.cs">
+      <DependentUpon>Message141EtpTests.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Messages\Message141TestBase.cs" />
     <Compile Include="Data\Messages\Message141TestBase.generated.cs">
@@ -350,6 +386,10 @@
     <Compile Include="Data\Rigs\Rig131DataAdapterUpdateTests.generated.cs">
       <DependentUpon>Rig131DataAdapterUpdateTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\Rigs\Rig131EtpTests.cs" />
+    <Compile Include="Data\Rigs\Rig131EtpTests.generated.cs">
+      <DependentUpon>Rig131EtpTests.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Rigs\Rig131TestBase.cs" />
     <Compile Include="Data\Rigs\Rig131TestBase.generated.cs">
       <DependentUpon>Rig131TestBase.cs</DependentUpon>
@@ -373,6 +413,10 @@
     <Compile Include="Data\Rigs\Rig141DataAdapterUpdateTests.cs" />
     <Compile Include="Data\Rigs\Rig141DataAdapterUpdateTests.generated.cs">
       <DependentUpon>Rig141DataAdapterUpdateTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Rigs\Rig141EtpTests.cs" />
+    <Compile Include="Data\Rigs\Rig141EtpTests.generated.cs">
+      <DependentUpon>Rig141EtpTests.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Rigs\Rig141TestBase.cs" />
     <Compile Include="Data\Rigs\Rig141TestBase.generated.cs">
@@ -398,6 +442,10 @@
     <Compile Include="Data\Rigs\Rig200DataAdapterUpdateTests.generated.cs">
       <DependentUpon>Rig200DataAdapterUpdateTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\Rigs\Rig200EtpTests.cs" />
+    <Compile Include="Data\Rigs\Rig200EtpTests.generated.cs">
+      <DependentUpon>Rig200EtpTests.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Rigs\Rig200TestBase.cs" />
     <Compile Include="Data\Rigs\Rig200TestBase.generated.cs">
       <DependentUpon>Rig200TestBase.cs</DependentUpon>
@@ -421,6 +469,10 @@
     <Compile Include="Data\RigUtilizations\RigUtilization200DataAdapterUpdateTests.cs" />
     <Compile Include="Data\RigUtilizations\RigUtilization200DataAdapterUpdateTests.generated.cs">
       <DependentUpon>RigUtilization200DataAdapterUpdateTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\RigUtilizations\RigUtilization200EtpTests.cs" />
+    <Compile Include="Data\RigUtilizations\RigUtilization200EtpTests.generated.cs">
+      <DependentUpon>RigUtilization200EtpTests.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\RigUtilizations\RigUtilization200TestBase.cs" />
     <Compile Include="Data\RigUtilizations\RigUtilization200TestBase.generated.cs">
@@ -446,6 +498,10 @@
     <Compile Include="Data\Trajectories\Trajectory131DataAdapterUpdateTests.generated.cs">
       <DependentUpon>Trajectory131DataAdapterUpdateTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\Trajectories\Trajectory131EtpTests.cs" />
+    <Compile Include="Data\Trajectories\Trajectory131EtpTests.generated.cs">
+      <DependentUpon>Trajectory131EtpTests.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Trajectories\Trajectory131TestBase.cs" />
     <Compile Include="Data\Trajectories\Trajectory131TestBase.generated.cs">
       <DependentUpon>Trajectory131TestBase.cs</DependentUpon>
@@ -469,6 +525,10 @@
     <Compile Include="Data\Trajectories\Trajectory141DataAdapterUpdateTests.cs" />
     <Compile Include="Data\Trajectories\Trajectory141DataAdapterUpdateTests.generated.cs">
       <DependentUpon>Trajectory141DataAdapterUpdateTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Trajectories\Trajectory141EtpTests.cs" />
+    <Compile Include="Data\Trajectories\Trajectory141EtpTests.generated.cs">
+      <DependentUpon>Trajectory141EtpTests.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Trajectories\Trajectory141TestBase.cs" />
     <Compile Include="Data\Trajectories\Trajectory141TestBase.generated.cs">
@@ -494,6 +554,10 @@
     <Compile Include="Data\Trajectories\Trajectory200DataAdapterUpdateTests.generated.cs">
       <DependentUpon>Trajectory200DataAdapterUpdateTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\Trajectories\Trajectory200EtpTests.cs" />
+    <Compile Include="Data\Trajectories\Trajectory200EtpTests.generated.cs">
+      <DependentUpon>Trajectory200EtpTests.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Trajectories\Trajectory200TestBase.cs" />
     <Compile Include="Data\Trajectories\Trajectory200TestBase.generated.cs">
       <DependentUpon>Trajectory200TestBase.cs</DependentUpon>
@@ -517,6 +581,10 @@
     <Compile Include="Data\WbGeometries\WbGeometry131DataAdapterUpdateTests.cs" />
     <Compile Include="Data\WbGeometries\WbGeometry131DataAdapterUpdateTests.generated.cs">
       <DependentUpon>WbGeometry131DataAdapterUpdateTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\WbGeometries\WbGeometry131EtpTests.cs" />
+    <Compile Include="Data\WbGeometries\WbGeometry131EtpTests.generated.cs">
+      <DependentUpon>WbGeometry131EtpTests.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\WbGeometries\WbGeometry131TestBase.cs" />
     <Compile Include="Data\WbGeometries\WbGeometry131TestBase.generated.cs">
@@ -542,6 +610,10 @@
     <Compile Include="Data\WbGeometries\WbGeometry141DataAdapterUpdateTests.generated.cs">
       <DependentUpon>WbGeometry141DataAdapterUpdateTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\WbGeometries\WbGeometry141EtpTests.cs" />
+    <Compile Include="Data\WbGeometries\WbGeometry141EtpTests.generated.cs">
+      <DependentUpon>WbGeometry141EtpTests.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\WbGeometries\WbGeometry141TestBase.cs" />
     <Compile Include="Data\WbGeometries\WbGeometry141TestBase.generated.cs">
       <DependentUpon>WbGeometry141TestBase.cs</DependentUpon>
@@ -565,6 +637,10 @@
     <Compile Include="Data\Wellbores\Wellbore131DataAdapterUpdateTests.cs" />
     <Compile Include="Data\Wellbores\Wellbore131DataAdapterUpdateTests.generated.cs">
       <DependentUpon>Wellbore131DataAdapterUpdateTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wellbores\Wellbore131EtpTests.cs" />
+    <Compile Include="Data\Wellbores\Wellbore131EtpTests.generated.cs">
+      <DependentUpon>Wellbore131EtpTests.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Wellbores\Wellbore131TestBase.cs" />
     <Compile Include="Data\Wellbores\Wellbore131TestBase.generated.cs">
@@ -590,6 +666,10 @@
     <Compile Include="Data\Wellbores\Wellbore141DataAdapterUpdateTests.generated.cs">
       <DependentUpon>Wellbore141DataAdapterUpdateTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\Wellbores\Wellbore141EtpTests.cs" />
+    <Compile Include="Data\Wellbores\Wellbore141EtpTests.generated.cs">
+      <DependentUpon>Wellbore141EtpTests.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Wellbores\Wellbore141TestBase.cs" />
     <Compile Include="Data\Wellbores\Wellbore141TestBase.generated.cs">
       <DependentUpon>Wellbore141TestBase.cs</DependentUpon>
@@ -612,6 +692,10 @@
     </Compile>
     <Compile Include="Data\Wellbores\Wellbore200DataAdapterUpdateTests.generated.cs">
       <DependentUpon>Wellbore200DataAdapterUpdateTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wellbores\Wellbore200EtpTests.cs" />
+    <Compile Include="Data\Wellbores\Wellbore200EtpTests.generated.cs">
+      <DependentUpon>Wellbore200EtpTests.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Wellbores\Wellbore200TestBase.cs" />
     <Compile Include="Data\Wellbores\Wellbore200TestBase.generated.cs">
@@ -638,6 +722,10 @@
     <Compile Include="Data\Wells\Well131DataAdapterUpdateTests.generated.cs">
       <DependentUpon>Well131DataAdapterUpdateTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\Wells\Well131EtpTests.cs" />
+    <Compile Include="Data\Wells\Well131EtpTests.generated.cs">
+      <DependentUpon>Well131EtpTests.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Wells\Well131TestBase.cs" />
     <Compile Include="Data\Wells\Well131TestBase.generated.cs">
       <DependentUpon>Well131TestBase.cs</DependentUpon>
@@ -662,6 +750,10 @@
     <Compile Include="Data\Wells\Well141DataAdapterUpdateTests.generated.cs">
       <DependentUpon>Well141DataAdapterUpdateTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\Wells\Well141EtpTests.cs" />
+    <Compile Include="Data\Wells\Well141EtpTests.generated.cs">
+      <DependentUpon>Well141EtpTests.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Wells\Well141TestBase.cs" />
     <Compile Include="Data\Wells\Well141TestBase.generated.cs">
       <DependentUpon>Well141TestBase.cs</DependentUpon>
@@ -684,6 +776,10 @@
     </Compile>
     <Compile Include="Data\Wells\Well200DataAdapterUpdateTests.generated.cs">
       <DependentUpon>Well200DataAdapterUpdateTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Wells\Well200EtpTests.cs" />
+    <Compile Include="Data\Wells\Well200EtpTests.generated.cs">
+      <DependentUpon>Well200EtpTests.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Wells\Well200TestBase.cs" />
     <Compile Include="Data\Wells\Well200TestBase.generated.cs">

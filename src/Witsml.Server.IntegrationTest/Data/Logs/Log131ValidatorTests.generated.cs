@@ -105,21 +105,21 @@ namespace PDS.Witsml.Server.Data.Logs
 
         #endregion Error -403
 
-		#region Error -405
+        #region Error -405
 
-		[TestMethod]
+        [TestMethod]
         public void Log131Validator_AddToStore_Error_405_Log_Already_Exists()
         {
             AddParents();
             DevKit.AddAndAssert<LogList, Log>(Log);
-			DevKit.AddAndAssert<LogList, Log>(Log, ErrorCodes.DataObjectUidAlreadyExists);
+            DevKit.AddAndAssert<LogList, Log>(Log, ErrorCodes.DataObjectUidAlreadyExists);
         }
 
-		#endregion Error -405
+        #endregion Error -405
 
         #region Error -406
 
-		[TestMethod]
+        [TestMethod]
         public void Log131Validator_AddToStore_Error_406_Log_Missing_Parent_Uid()
         {
             AddParents();
@@ -128,37 +128,37 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.AddAndAssert(Log, ErrorCodes.MissingElementUidForAdd);
         }
 
-		#endregion Error -406
+        #endregion Error -406
 
         #region Error -407
 
-		[TestMethod]
+        [TestMethod]
         public void Log131Validator_UpdateInStore_Error_407_Log_Missing_Witsml_Object_Type()
         {
             AddParents();
             DevKit.AddAndAssert<LogList, Log>(Log);
-			var response = DevKit.Update<LogList, Log>(Log, string.Empty);
+            var response = DevKit.Update<LogList, Log>(Log, string.Empty);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.MissingWmlTypeIn, response.Result);
         }
 
-		#endregion Error -407
+        #endregion Error -407
 
         #region Error -408
 
-		[TestMethod]
+        [TestMethod]
         public void Log131Validator_UpdateInStore_Error_408_Log_Empty_QueryIn()
         {
-			var response = DevKit.UpdateInStore(ObjectTypes.Log, string.Empty, null, null);
+            var response = DevKit.UpdateInStore(ObjectTypes.Log, string.Empty, null, null);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.MissingInputTemplate, response.Result);
         }
 
-		#endregion Error -408
+        #endregion Error -408
 
         #region Error -409
 
-		[TestMethod]
+        [TestMethod]
         public void Log131Validator_UpdateInStore_Error_409_Log_QueryIn_Must_Conform_To_Schema()
         {
             AddParents();
@@ -171,24 +171,24 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
         }
 
-		#endregion Error -409
+        #endregion Error -409
 
         #region Error -415
 
-		[TestMethod]
+        [TestMethod]
         public void Log131Validator_UpdateInStore_Error_415_Log_Update_Without_Specifing_UID()
         {
             AddParents();
             DevKit.AddAndAssert<LogList, Log>(Log);
             Log.Uid = string.Empty;
-			DevKit.UpdateAndAssert<LogList, Log>(Log, ErrorCodes.DataObjectUidMissing);
+            DevKit.UpdateAndAssert<LogList, Log>(Log, ErrorCodes.DataObjectUidMissing);
         }
 
-		#endregion Error -415
+        #endregion Error -415
 
         #region Error -420
 
-		[TestMethod]
+        [TestMethod]
         public void Log131Validator_DeleteFromStore_Error_420_Log_Specifying_A_Non_Recuring_Element_That_Is_Required()
         {
 
@@ -205,22 +205,22 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.EmptyMandatoryNodeSpecified, results.Result);
         }
 
-		#endregion Error -420
+        #endregion Error -420
 
         #region Error -433
 
-		[TestMethod]
+        [TestMethod]
         public void Log131Validator_UpdateInStore_Error_433_Log_Does_Not_Exist()
         {
             AddParents();
-			DevKit.UpdateAndAssert<LogList, Log>(Log, ErrorCodes.DataObjectNotExist);
+            DevKit.UpdateAndAssert<LogList, Log>(Log, ErrorCodes.DataObjectNotExist);
         }
 
-		#endregion Error -433
+        #endregion Error -433
 
         #region Error -444
 
-		[TestMethod]
+        [TestMethod]
         public void Log131Validator_UpdateInStore_Error_444_Log_Updating_More_Than_One_Data_Object()
         {
             AddParents();
@@ -233,11 +233,11 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.InputTemplateMultipleDataObjects, response.Result);
         }
 
-		#endregion Error -444
+        #endregion Error -444
 
         #region Error -468
 
-		[TestMethod]
+        [TestMethod]
         public void Log131Validator_UpdateInStore_Error_468_Log_No_Schema_Version_Declared()
         {
 
@@ -247,11 +247,11 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
         }
 
-		#endregion Error -468
+        #endregion Error -468
 
         #region Error -478
 
-		[TestMethod]
+        [TestMethod]
         public void Log131Validator_AddToStore_Error_478_Log_Parent_Uid_Case_Not_Matching()
         {
 
@@ -265,21 +265,21 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.AddAndAssert(Log, ErrorCodes.IncorrectCaseParentUid);
         }
 
-		#endregion Error -478
+        #endregion Error -478
 
         #region Error -481
 
-		[TestMethod]
+        [TestMethod]
         public void Log131Validator_AddToStore_Error_481_Log_Parent_Does_Not_Exist()
         {
             DevKit.AddAndAssert(Log, ErrorCodes.MissingParentDataObject);
         }
 
-		#endregion Error -481
+        #endregion Error -481
 
         #region Error -483
 
-		[TestMethod]
+        [TestMethod]
         public void Log131Validator_UpdateInStore_Error_483_Log_Update_With_Non_Conforming_Template()
         {
             AddParents();
@@ -288,11 +288,11 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.UpdateTemplateNonConforming, response.Result);
         }
 
-		#endregion Error -483
+        #endregion Error -483
 
         #region Error -484
 
-		[TestMethod]
+        [TestMethod]
         public void Log131Validator_UpdateInStore_Error_484_Log_Update_Will_Delete_Required_Element()
         {
 
@@ -306,11 +306,11 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);
         }
 
-		#endregion Error -484
+        #endregion Error -484
 
         #region Error -486
 
-		[TestMethod]
+        [TestMethod]
         public void Log131Validator_AddToStore_Error_486_Log_Data_Object_Types_Dont_Match()
         {
 
@@ -323,7 +323,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
 
-		#endregion Error -486
+        #endregion Error -486
 
     }
 }

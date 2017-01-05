@@ -105,21 +105,21 @@ namespace PDS.Witsml.Server.Data.Rigs
 
         #endregion Error -403
 
-		#region Error -405
+        #region Error -405
 
-		[TestMethod]
+        [TestMethod]
         public void Rig131Validator_AddToStore_Error_405_Rig_Already_Exists()
         {
             AddParents();
             DevKit.AddAndAssert<RigList, Rig>(Rig);
-			DevKit.AddAndAssert<RigList, Rig>(Rig, ErrorCodes.DataObjectUidAlreadyExists);
+            DevKit.AddAndAssert<RigList, Rig>(Rig, ErrorCodes.DataObjectUidAlreadyExists);
         }
 
-		#endregion Error -405
+        #endregion Error -405
 
         #region Error -406
 
-		[TestMethod]
+        [TestMethod]
         public void Rig131Validator_AddToStore_Error_406_Rig_Missing_Parent_Uid()
         {
             AddParents();
@@ -128,37 +128,37 @@ namespace PDS.Witsml.Server.Data.Rigs
             DevKit.AddAndAssert(Rig, ErrorCodes.MissingElementUidForAdd);
         }
 
-		#endregion Error -406
+        #endregion Error -406
 
         #region Error -407
 
-		[TestMethod]
+        [TestMethod]
         public void Rig131Validator_UpdateInStore_Error_407_Rig_Missing_Witsml_Object_Type()
         {
             AddParents();
             DevKit.AddAndAssert<RigList, Rig>(Rig);
-			var response = DevKit.Update<RigList, Rig>(Rig, string.Empty);
+            var response = DevKit.Update<RigList, Rig>(Rig, string.Empty);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.MissingWmlTypeIn, response.Result);
         }
 
-		#endregion Error -407
+        #endregion Error -407
 
         #region Error -408
 
-		[TestMethod]
+        [TestMethod]
         public void Rig131Validator_UpdateInStore_Error_408_Rig_Empty_QueryIn()
         {
-			var response = DevKit.UpdateInStore(ObjectTypes.Rig, string.Empty, null, null);
+            var response = DevKit.UpdateInStore(ObjectTypes.Rig, string.Empty, null, null);
             Assert.IsNotNull(response);
             Assert.AreEqual((short)ErrorCodes.MissingInputTemplate, response.Result);
         }
 
-		#endregion Error -408
+        #endregion Error -408
 
         #region Error -409
 
-		[TestMethod]
+        [TestMethod]
         public void Rig131Validator_UpdateInStore_Error_409_Rig_QueryIn_Must_Conform_To_Schema()
         {
             AddParents();
@@ -171,24 +171,24 @@ namespace PDS.Witsml.Server.Data.Rigs
             Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
         }
 
-		#endregion Error -409
+        #endregion Error -409
 
         #region Error -415
 
-		[TestMethod]
+        [TestMethod]
         public void Rig131Validator_UpdateInStore_Error_415_Rig_Update_Without_Specifing_UID()
         {
             AddParents();
             DevKit.AddAndAssert<RigList, Rig>(Rig);
             Rig.Uid = string.Empty;
-			DevKit.UpdateAndAssert<RigList, Rig>(Rig, ErrorCodes.DataObjectUidMissing);
+            DevKit.UpdateAndAssert<RigList, Rig>(Rig, ErrorCodes.DataObjectUidMissing);
         }
 
-		#endregion Error -415
+        #endregion Error -415
 
         #region Error -420
 
-		[TestMethod]
+        [TestMethod]
         public void Rig131Validator_DeleteFromStore_Error_420_Rig_Specifying_A_Non_Recuring_Element_That_Is_Required()
         {
 
@@ -205,22 +205,22 @@ namespace PDS.Witsml.Server.Data.Rigs
             Assert.AreEqual((short)ErrorCodes.EmptyMandatoryNodeSpecified, results.Result);
         }
 
-		#endregion Error -420
+        #endregion Error -420
 
         #region Error -433
 
-		[TestMethod]
+        [TestMethod]
         public void Rig131Validator_UpdateInStore_Error_433_Rig_Does_Not_Exist()
         {
             AddParents();
-			DevKit.UpdateAndAssert<RigList, Rig>(Rig, ErrorCodes.DataObjectNotExist);
+            DevKit.UpdateAndAssert<RigList, Rig>(Rig, ErrorCodes.DataObjectNotExist);
         }
 
-		#endregion Error -433
+        #endregion Error -433
 
         #region Error -444
 
-		[TestMethod]
+        [TestMethod]
         public void Rig131Validator_UpdateInStore_Error_444_Rig_Updating_More_Than_One_Data_Object()
         {
             AddParents();
@@ -233,11 +233,11 @@ namespace PDS.Witsml.Server.Data.Rigs
             Assert.AreEqual((short)ErrorCodes.InputTemplateMultipleDataObjects, response.Result);
         }
 
-		#endregion Error -444
+        #endregion Error -444
 
         #region Error -468
 
-		[TestMethod]
+        [TestMethod]
         public void Rig131Validator_UpdateInStore_Error_468_Rig_No_Schema_Version_Declared()
         {
 
@@ -247,11 +247,11 @@ namespace PDS.Witsml.Server.Data.Rigs
             Assert.AreEqual((short)ErrorCodes.MissingDataSchemaVersion, response.Result);
         }
 
-		#endregion Error -468
+        #endregion Error -468
 
         #region Error -478
 
-		[TestMethod]
+        [TestMethod]
         public void Rig131Validator_AddToStore_Error_478_Rig_Parent_Uid_Case_Not_Matching()
         {
 
@@ -265,21 +265,21 @@ namespace PDS.Witsml.Server.Data.Rigs
             DevKit.AddAndAssert(Rig, ErrorCodes.IncorrectCaseParentUid);
         }
 
-		#endregion Error -478
+        #endregion Error -478
 
         #region Error -481
 
-		[TestMethod]
+        [TestMethod]
         public void Rig131Validator_AddToStore_Error_481_Rig_Parent_Does_Not_Exist()
         {
             DevKit.AddAndAssert(Rig, ErrorCodes.MissingParentDataObject);
         }
 
-		#endregion Error -481
+        #endregion Error -481
 
         #region Error -483
 
-		[TestMethod]
+        [TestMethod]
         public void Rig131Validator_UpdateInStore_Error_483_Rig_Update_With_Non_Conforming_Template()
         {
             AddParents();
@@ -288,11 +288,11 @@ namespace PDS.Witsml.Server.Data.Rigs
             Assert.AreEqual((short)ErrorCodes.UpdateTemplateNonConforming, response.Result);
         }
 
-		#endregion Error -483
+        #endregion Error -483
 
         #region Error -484
 
-		[TestMethod]
+        [TestMethod]
         public void Rig131Validator_UpdateInStore_Error_484_Rig_Update_Will_Delete_Required_Element()
         {
 
@@ -306,11 +306,11 @@ namespace PDS.Witsml.Server.Data.Rigs
             Assert.AreEqual((short)ErrorCodes.MissingRequiredData, response.Result);
         }
 
-		#endregion Error -484
+        #endregion Error -484
 
         #region Error -486
 
-		[TestMethod]
+        [TestMethod]
         public void Rig131Validator_AddToStore_Error_486_Rig_Data_Object_Types_Dont_Match()
         {
 
@@ -323,7 +323,7 @@ namespace PDS.Witsml.Server.Data.Rigs
             Assert.AreEqual((short)ErrorCodes.DataObjectTypesDontMatch, response.Result);
         }
 
-		#endregion Error -486
+        #endregion Error -486
 
     }
 }

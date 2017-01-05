@@ -33,9 +33,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Server.Data.RigUtilizations
 {
-    public abstract partial class RigUtilization200TestBase
+    public abstract partial class RigUtilization200TestBase : IntegrationTestBase
     {
         public const string BasicXMLTemplate = "<rigUtilizations xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><rigUtilization uidWell=\"{0}\" uidWellbore=\"{1}\" uid=\"{2}\">{3}</rigUtilization></rigUtilizations>";
+
         public Well Well { get; set; }
         public Wellbore Wellbore { get; set; }
         public RigUtilization RigUtilization { get; set; }
@@ -53,7 +54,7 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Well"),
                 GeographicLocationWGS84 = DevKit.Location(),
-				SchemaVersion = "2.0",
+                SchemaVersion = "2.0",
                 TimeZone = DevKit.TimeZone
             };
             Wellbore = new Wellbore
@@ -61,14 +62,14 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Wellbore"),
                 Well = DevKit.DataObjectReference(Well),
-				SchemaVersion = "2.0"
+                SchemaVersion = "2.0"
             };
             RigUtilization = new RigUtilization
             {
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("RigUtilization"),
                 Wellbore = DevKit.DataObjectReference(Wellbore),
-				SchemaVersion = "2.0"
+                SchemaVersion = "2.0"
             };
 
             QueryEmptyList = DevKit.List(new RigUtilization());
@@ -82,6 +83,7 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
         {
             AfterEachTest();
             OnTestCleanUp();
+            DevKit.Container.Dispose();
             DevKit = null;
         }
 

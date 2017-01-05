@@ -33,9 +33,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Server.Data.Rigs
 {
-    public abstract partial class Rig200TestBase
+    public abstract partial class Rig200TestBase : IntegrationTestBase
     {
         public const string BasicXMLTemplate = "<rigs xmlns=\"http://www.energistics.org/energyml/data/witsmlv2\" version=\"2.0\"><rig uid=\"{0}\">{1}</rig></rigs>";
+
         public Rig Rig { get; set; }
         public DevKit200Aspect DevKit { get; set; }
         public TestContext TestContext { get; set; }
@@ -48,7 +49,7 @@ namespace PDS.Witsml.Server.Data.Rigs
 
             Rig = new Rig
             {
-				SchemaVersion = "2.0",
+                SchemaVersion = "2.0",
                 Uuid = DevKit.Uid(),
                 Citation = DevKit.Citation("Rig")
             };
@@ -64,6 +65,7 @@ namespace PDS.Witsml.Server.Data.Rigs
         {
             AfterEachTest();
             OnTestCleanUp();
+            DevKit.Container.Dispose();
             DevKit = null;
         }
 
