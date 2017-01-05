@@ -696,12 +696,20 @@
     </Compile>
     <Compile Include="Data\WitsmlQueryTemplateTests.cs" />
     <Compile Include="Data\WitsmlQueryParserTests.cs" />
+    <Compile Include="IntegrationTestBase.cs" />
     <Compile Include="ITestContextProvider.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
     <Compile Include="SampleDataTests.cs" />
     <Compile Include="DevKit131Aspect.cs" />
     <Compile Include="DevKit141Aspect.cs" />
     <Compile Include="DevKit200Aspect.cs" />
     <Compile Include="DevKitAspect.cs" />
+    <Compile Include="TestExtensions.cs" />
+    <Compile Include="TestSettings.cs" />
     <Compile Include="WitsmlStore131ProxyTests.cs" />
     <Compile Include="WitsmlStore141ProxyTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -757,6 +765,11 @@
     </Content>
     <None Include="packages.config">
       <SubType>Designer</SubType>
+    </None>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>PDS.Witsml.Server.IntegrationTest</CustomToolNamespace>
     </None>
     <None Include="Witsml.Server.IntegrationTest.nuspec" />
   </ItemGroup>

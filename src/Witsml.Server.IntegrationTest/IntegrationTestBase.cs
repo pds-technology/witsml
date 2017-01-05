@@ -1,0 +1,538 @@
+﻿//----------------------------------------------------------------------- 
+// PDS.Witsml.Server, 2016.1
+//
+// Copyright 2016 Petrotechnical Data Systems
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//   
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//-----------------------------------------------------------------------
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Avro.Specific;
+using Energistics;
+using Energistics.Common;
+using Energistics.DataAccess;
+using Energistics.DataAccess.WITSML200;
+using Energistics.Datatypes;
+using Energistics.Datatypes.Object;
+using Energistics.Protocol;
+using Energistics.Protocol.Core;
+using Energistics.Protocol.Discovery;
+using Energistics.Protocol.Store;
+using Energistics.Security;
+using log4net;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Framework;
+
+namespace PDS.Witsml.Server
+{
+    /// <summary>
+    /// Common base class for all ETP integration tests.
+    /// </summary>
+    public abstract class IntegrationTestBase
+    {
+        protected CancellationTokenSource _tokenSource;
+        protected EtpSocketServer _server;
+        protected EtpClient _client;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IntegrationTestBase"/> class.
+        /// </summary>
+        protected IntegrationTestBase()
+        {
+            Logger = LogManager.GetLogger(GetType());
+        }
+
+        /// <summary>
+        /// Gets the logger associated with the current type.
+        /// </summary>
+        /// <value>The logger.</value>
+        protected ILog Logger { get; }
+
+        /// <summary>
+        /// Initializes common resources.
+        /// </summary>
+        /// <param name="container">The composition container.</param>
+        protected void EtpSetUp(IContainer container)
+        {
+            _server?.Dispose();
+            _server = CreateServer();
+
+            _client?.Dispose();
+            _client = CreateClient();
+
+            // Register server handlers
+            _server.Register(() => container.Resolve<IDiscoveryStore>());
+            _server.Register(() => container.Resolve<IStoreStore>());
+
+            // Register client handlers
+            _client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();
+            _client.Register<IStoreCustomer, StoreCustomerHandler>();
+        }
+
+        /// <summary>
+        /// Disposes common resources.
+        /// </summary>
+        protected void EtpCleanUp()
+        {
+            TestSettings.Reset();
+            _client.Dispose();
+            _server.Dispose();
+        }
+
+        /// <summary>
+        /// Creates an <see cref="EtpSocketServer"/> instance.
+        /// </summary>
+        /// <returns>A new <see cref="EtpSocketServer"/> instance.</returns>
+        protected EtpSocketServer CreateServer()
+        {
+            var version = GetType().Assembly.GetName().Version.ToString();
+            var port = new Uri(TestSettings.EtpServerUrl).Port;
+
+            var server = new EtpSocketServer(port, GetType().AssemblyQualifiedName, version);
+            server.Output = server.Logger.Info;
+            return server;
+        }
+
+        /// <summary>
+        /// Creates an <see cref="EtpClient"/> instance configurated with the
+        /// current connection and authorization parameters.
+        /// </summary>
+        /// <returns>A new <see cref="EtpClient"/> instance.</returns>
+        protected EtpClient CreateClient()
+        {
+            var version = GetType().Assembly.GetName().Version.ToString();
+            var headers = Authorization.Basic(TestSettings.Username, TestSettings.Password);
+
+            var client = new EtpClient(TestSettings.EtpServerUrl, GetType().AssemblyQualifiedName, version, headers);
+            client.Output = client.Logger.Info;
+            return client;
+        }
+
+        /// <summary>
+        /// Handles an event asynchronously and waits for it to complete.
+        /// </summary>
+        /// <typeparam name="T">The type of ETP message.</typeparam>
+        /// <param name="action">The action to execute.</param>
+        /// <param name="milliseconds">The timeout in milliseconds.</param>
+        /// <returns>An awaitable task.</returns>
+        protected async Task<ProtocolEventArgs<T>> HandleAsync<T>(
+            Action<ProtocolEventHandler<T>> action,
+            int? milliseconds = null)
+            where T : ISpecificRecord
+        {
+            ProtocolEventArgs<T> args = null;
+            var task = new Task<ProtocolEventArgs<T>>(() => args);
+
+            action((s, e) =>
+            {
+                args = e;
+
+                if (task.Status == TaskStatus.Created)
+                    task.Start();
+            });
+
+            return await task.WaitAsync(milliseconds);
+        }
+
+        /// <summary>
+        /// Handles an event asynchronously and waits for it to complete.
+        /// </summary>
+        /// <typeparam name="T">The type of ETP message.</typeparam>
+        /// <typeparam name="TContext">The type of the context.</typeparam>
+        /// <param name="action">The action to execute.</param>
+        /// <param name="milliseconds">The timeout in milliseconds.</param>
+        /// <returns>An awaitable task.</returns>
+        protected async Task<ProtocolEventArgs<T, TContext>> HandleAsync<T, TContext>(
+            Action<ProtocolEventHandler<T, TContext>> action,
+            int? milliseconds = null)
+            where T : ISpecificRecord
+        {
+            ProtocolEventArgs<T, TContext> args = null;
+            var task = new Task<ProtocolEventArgs<T, TContext>>(() => args);
+
+            action((s, e) =>
+            {
+                args = e;
+
+                if (task.Status == TaskStatus.Created)
+                    task.Start();
+            });
+
+            return await task.WaitAsync(milliseconds);
+        }
+
+        /// <summary>
+        /// Handles a multi-part event asynchronously and waits for it to complete.
+        /// </summary>
+        /// <typeparam name="T">The type of ETP message.</typeparam>
+        /// <param name="action">The action to execute.</param>
+        /// <param name="maxMultiPartsToReturn">The maximum count of multi-part messages to return.</param>
+        /// <param name="milliseconds">The timeout in milliseconds.</param>
+        /// <returns>An awaitable task.</returns>
+        protected async Task<List<ProtocolEventArgs<T>>> HandleMultiPartAsync<T>(
+            Action<ProtocolEventHandler<T>> action,
+            int maxMultiPartsToReturn = 0,
+            int? milliseconds = null)
+            where T : ISpecificRecord
+        {
+            var args = new List<ProtocolEventArgs<T>>();
+            var task = new Task<List<ProtocolEventArgs<T>>>(() => args);
+
+            action((s, e) =>
+            {
+                args.Add(e);
+
+                if (task.Status == TaskStatus.Created &&
+                    (e.Header.MessageFlags == (int)MessageFlags.FinalPart ||
+                    (maxMultiPartsToReturn > 0 && args.Count >= maxMultiPartsToReturn)))
+                    task.Start();
+            });
+
+            return await task.WaitAsync(milliseconds ?? TestSettings.DefaultTimeoutInMilliseconds * 5);
+        }
+
+        /// <summary>
+        /// Handles a multi-part event asynchronously and waits for it to complete.
+        /// </summary>
+        /// <typeparam name="T">The type of ETP message.</typeparam>
+        /// <typeparam name="TContext">The type of the context.</typeparam>
+        /// <param name="action">The action to execute.</param>
+        /// <param name="maxMultiPartsToReturn">The maximum count of multi-part messages to return.</param>
+        /// <param name="milliseconds">The timeout in milliseconds.</param>
+        /// <returns>An awaitable task.</returns>
+        protected async Task<List<ProtocolEventArgs<T, TContext>>> HandleMultiPartAsync<T, TContext>(
+            Action<ProtocolEventHandler<T, TContext>> action,
+            int maxMultiPartsToReturn = 0,
+            int? milliseconds = null)
+            where T : ISpecificRecord
+        {
+            var args = new List<ProtocolEventArgs<T, TContext>>();
+            var task = new Task<List<ProtocolEventArgs<T, TContext>>>(() => args);
+
+            action((s, e) =>
+            {
+                args.Add(e);
+
+                if (task.Status == TaskStatus.Created &&
+                    (e.Header.MessageFlags == (int)MessageFlags.FinalPart ||
+                    (maxMultiPartsToReturn > 0 && args.Count >= maxMultiPartsToReturn)))
+                    task.Start();
+            });
+
+            return await task.WaitAsync(milliseconds ?? TestSettings.DefaultTimeoutInMilliseconds * 5);
+        }
+
+        protected DataObject CreateDataObject<TList, TObject>(EtpUri uri, TObject instance) where TList : IEnergisticsCollection
+        {
+            var type = typeof(TObject);
+            var list = typeof(TList).GetProperty(type.Name);
+            var name = type.GetProperty("Name");
+
+            var dataObject = new DataObject()
+            {
+                Resource = new Resource()
+                {
+                    Uri = uri,
+                    ContentType = uri.ContentType,
+                    Name = $"{name.GetValue(instance)}",
+                    ResourceType = ResourceTypes.DataObject.ToString(),
+                    CustomData = new Dictionary<string, string>(),
+                    HasChildren = -1
+                }
+            };
+
+            var collection = Activator.CreateInstance<TList>();
+            list.SetValue(collection, new List<TObject> { instance });
+            dataObject.SetXml(EnergisticsConverter.ObjectToXml(collection));
+
+            return dataObject;
+        }
+
+        protected DataObject CreateDataObject<TObject>(EtpUri uri, TObject instance) where TObject : AbstractObject
+        {
+            var dataObject = new DataObject()
+            {
+                Resource = new Resource()
+                {
+                    Uri = uri,
+                    ContentType = uri.ContentType,
+                    Name = $"{instance.Citation?.Title}",
+                    ResourceType = ResourceTypes.DataObject.ToString(),
+                    CustomData = new Dictionary<string, string>(),
+                    HasChildren = -1
+                }
+            };
+
+            dataObject.SetXml(EnergisticsConverter.ObjectToXml(instance));
+
+            return dataObject;
+        }
+
+        protected TObject Parse<TList, TObject>(string xml) where TList : IEnergisticsCollection
+        {
+            var collection = EnergisticsConverter.XmlToObject<TList>(xml);
+            Assert.IsNotNull(collection);
+
+            var dataObject = collection.Items.Cast<TObject>().FirstOrDefault();
+            Assert.IsNotNull(dataObject);
+
+            return dataObject;
+        }
+
+        protected TObject Parse<TObject>(string xml) where TObject : AbstractObject
+        {
+            var dataObject = EnergisticsConverter.XmlToObject<TObject>(xml);
+            Assert.IsNotNull(dataObject);
+            return dataObject;
+        }
+
+        /// <summary>
+        /// Gets the dataObject from the URI and asserts.
+        /// </summary>
+        /// <param name="handler">The handler.</param>
+        /// <param name="uri">The URI.</param>
+        /// <param name="errorCode">The error code.</param>
+        /// <returns>The ProtocolEventArgs.</returns>
+        protected async Task<ProtocolEventArgs<Energistics.Protocol.Store.Object>> GetAndAssert(IStoreCustomer handler, EtpUri uri, EtpErrorCodes? errorCode = null)
+        {
+            // Register event handler for root URI
+            var onObject = HandleAsync<Energistics.Protocol.Store.Object>(x => handler.OnObject += x);
+
+            // Register exception hanlder
+            var onProtocolException = HandleAsync<ProtocolException>(x => handler.OnProtocolException += x);
+
+            // Send GetObject for non-existant URI
+            handler.GetObject(uri);
+            ProtocolEventArgs<Energistics.Protocol.Store.Object> args = null;
+
+            // Create CancellationTokenSource
+            _tokenSource = new CancellationTokenSource();
+
+            var taskList = new List<Task>()
+            {
+                WaitFor(onObject),
+                WaitFor(onProtocolException)
+            };
+
+            // Start each event
+            taskList.ForEach(task => task.Start());
+
+            // Wait for a task to finish
+            await Task.WhenAny(taskList);
+
+            // Cancel the rest of the task
+            _tokenSource.Cancel();
+
+            // Wait for the rest to be finished
+            await Task.WhenAll(taskList);
+
+            if (onObject.Status == TaskStatus.RanToCompletion)
+            {
+                args = onObject.Result;
+
+                // Check for DataObject
+                Assert.IsNotNull(args?.Message.DataObject);
+            }
+            if (onProtocolException.Status == TaskStatus.RanToCompletion)
+            {
+                var exceptionArgs = onProtocolException.Result;
+
+                // Assert exception details
+                Assert.IsNotNull(errorCode);
+                Assert.IsNotNull(exceptionArgs?.Message);
+                Assert.AreEqual((int)errorCode, exceptionArgs.Message.ErrorCode);
+            }
+            return args;
+        }
+
+        /// <summary>
+        /// Puts the dataObject and asserts.
+        /// </summary>
+        /// <param name="handler">The handler.</param>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="errorCode">The error code.</param>
+        /// <returns>The task.</returns>
+        protected async Task PutAndAssert(IStoreCustomer handler, DataObject dataObject, EtpErrorCodes? errorCode = null)
+        {
+            // Register event handler for Acknowledge response
+            var onAcknowledge = HandleAsync<Acknowledge>(x => handler.OnAcknowledge += x);
+
+            // Register exception hanlder
+            var onProtocolException = HandleAsync<ProtocolException>(x => handler.OnProtocolException += x);
+
+            // Send PutObject message for new data object
+            var messageId = handler.PutObject(dataObject);
+
+            // Create CancellationTokenSource
+            _tokenSource = new CancellationTokenSource();
+
+            var taskList = new List<Task>
+            {
+                WaitFor(onAcknowledge),
+                WaitFor(onProtocolException)
+            };
+
+            // Start each event
+            taskList.ForEach(task => task.Start());
+
+            // Wait for a task to finish
+            await Task.WhenAny(taskList);
+
+            // Cancel the rest of the task
+            _tokenSource.Cancel();
+
+            // Wait for the rest to be finished
+            await Task.WhenAll(taskList);
+
+            // Check error code
+            if (onProtocolException.Status == TaskStatus.RanToCompletion)
+            {
+                var exceptionArgs = onProtocolException.Result;
+
+                // Assert exception details
+                Assert.IsNotNull(errorCode);
+                Assert.IsNotNull(exceptionArgs?.Message);
+                Assert.AreEqual((int)errorCode, exceptionArgs.Message.ErrorCode);
+            }
+            // Check for valid acknowledgement
+            else
+            {
+                var acknowledge = onAcknowledge.Result;
+
+                // Assert acknowledgement and messageId
+                VerifyCorrelationId(acknowledge, messageId);
+            }
+        }
+
+        /// <summary>
+        /// Deletes the dataObject from the URI and asserts.
+        /// </summary>
+        /// <param name="handler">The handler.</param>
+        /// <param name="uri">The URI.</param>
+        /// <param name="errorCode">The error code.</param>
+        /// <returns>The ProtocolEventArgs.</returns>
+        protected async Task DeleteAndAssert(IStoreCustomer handler, EtpUri uri, EtpErrorCodes? errorCode = null)
+        {
+            // Register event handler for Acknowledge response
+            var onAcknowledge = HandleAsync<Acknowledge>(x => handler.OnAcknowledge += x);
+
+            // Register exception hanlder
+            var onProtocolException = HandleAsync<ProtocolException>(x => handler.OnProtocolException += x);
+
+            // Send GetObject for non-existant URI
+            var messageId = handler.DeleteObject(uri);
+
+            // Create CancellationTokenSource
+            _tokenSource = new CancellationTokenSource();
+
+            var taskList = new List<Task>
+            {
+                WaitFor(onAcknowledge),
+                WaitFor(onProtocolException)
+            };
+
+            // Start each event
+            taskList.ForEach(task => task.Start());
+
+            // Wait for a task to finish
+            await Task.WhenAny(taskList);
+
+            // Cancel the rest of the task
+            _tokenSource.Cancel();
+
+            // Wait for the rest to be finished
+            await Task.WhenAll(taskList);
+
+            if (onAcknowledge.Status == TaskStatus.RanToCompletion)
+            {
+                var acknowledge = onAcknowledge.Result;
+
+                // Assert acknowledgement and messageId
+                VerifyCorrelationId(acknowledge, messageId);
+            }
+            if (onProtocolException.Status == TaskStatus.RanToCompletion)
+            {
+                var exceptionArgs = onProtocolException.Result;
+
+                // Assert exception details
+                Assert.IsNotNull(errorCode);
+                Assert.IsNotNull(exceptionArgs?.Message);
+                Assert.AreEqual((int)errorCode, exceptionArgs.Message.ErrorCode);
+            }
+        }
+
+        protected Task WaitFor(Task task)
+        {
+            return new Task(() =>
+            {
+                try
+                {
+                    task.Wait(_tokenSource.Token);
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
+            });
+        }
+
+        protected void VerifyCorrelationId<TMessage>(ProtocolEventArgs<TMessage> args, long messageId) where TMessage : ISpecificRecord
+        {
+            // Verify Correlation ID
+            Assert.IsNotNull(args?.Header);
+            Assert.AreEqual(messageId, args.Header.CorrelationId);
+        }
+
+        protected void VerifyProtocolException(ProtocolEventArgs<ProtocolException> args, long messageId, EtpErrorCodes errorCode)
+        {
+            VerifyCorrelationId(args, messageId);
+
+            // Verify Error Code
+            Assert.IsNotNull(args?.Message);
+            Assert.AreEqual((int)errorCode, args.Message.ErrorCode);
+        }
+
+        protected void VerifySessionWithProtcols(ProtocolEventArgs<OpenSession> args, params Protocols[] requestedProtocols)
+        {
+            // Verify OpenSession response
+            Assert.IsNotNull(args?.Message?.SessionId);
+            var message = args.Message;
+
+            // Verify Session ID
+            Guid sessionId;
+            Assert.IsNotNull(message.SessionId);
+            Assert.IsTrue(Guid.TryParse(message.SessionId, out sessionId));
+            Assert.IsNotNull(sessionId);
+
+            // Verify count of Supported Protocols
+            var supportedProtocols = message.SupportedProtocols;
+            Assert.IsTrue(supportedProtocols.Count <= requestedProtocols.Length);
+
+            // Verify Supported Protocols
+            foreach (var protocol in supportedProtocols)
+            {
+                var version = protocol.ProtocolVersion;
+
+                // Verify against requested protocols
+                Assert.IsTrue(requestedProtocols.Any(x => protocol.Protocol == (int)x));
+
+                // Verify protocol versions
+                Assert.AreEqual(TestSettings.EtpVersion, $"{version.Major}.{version.Minor}");
+            }
+        }
+    }
+}
