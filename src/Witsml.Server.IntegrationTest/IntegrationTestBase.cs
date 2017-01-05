@@ -236,26 +236,26 @@ namespace PDS.Witsml.Server
             return await task.WaitAsync(milliseconds ?? TestSettings.DefaultTimeoutInMilliseconds * 5);
         }
 
-        protected DataObject CreateDataObject<TList, TObject>(EtpUri uri, TObject instance) where TList : IEnergisticsCollection
+        protected DataObject CreateDataObject<TList, TObject>(EtpUri uri, TObject instance)
+            where TList : IEnergisticsCollection
+            where TObject : IDataObject
         {
-            var type = typeof(TObject);
-            var list = typeof(TList).GetProperty(type.Name);
-            var name = type.GetProperty("Name");
-
             var dataObject = new DataObject()
             {
                 Resource = new Resource()
                 {
                     Uri = uri,
                     ContentType = uri.ContentType,
-                    Name = $"{name.GetValue(instance)}",
+                    Name = instance.Name,
                     ResourceType = ResourceTypes.DataObject.ToString(),
                     CustomData = new Dictionary<string, string>(),
                     HasChildren = -1
                 }
             };
 
+            var list = ObjectTypes.GetObjectTypeListPropertyInfo(uri.ObjectType, uri.Version);
             var collection = Activator.CreateInstance<TList>();
+
             list.SetValue(collection, new List<TObject> { instance });
             dataObject.SetXml(EnergisticsConverter.ObjectToXml(collection));
 
