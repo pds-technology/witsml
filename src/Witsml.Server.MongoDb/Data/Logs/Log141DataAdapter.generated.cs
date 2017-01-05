@@ -38,29 +38,22 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Log" />
     /// </summary>
-
     /// <seealso cref="PDS.Witsml.Server.Data.Logs.LogDataAdapter{Log,LogCurveInfo}" />
-
     [Export(typeof(IWitsmlDataAdapter<Log>))]
-
     [Export(typeof(IWitsml141Configuration))]
-
     [PartCreationPolicy(CreationPolicy.Shared)]
     public partial class Log141DataAdapter : LogDataAdapter<Log, LogCurveInfo>, IWitsml141Configuration
-
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Log141DataAdapter" /> class.
         /// </summary>
         /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
-
         [ImportingConstructor]
         public Log141DataAdapter(IContainer container, IDatabaseProvider databaseProvider)
             : base(container, databaseProvider, ObjectNames.Log141)
         {
             Logger.Debug("Instance created.");
-
         }
 
         /// <summary>
@@ -75,7 +68,6 @@ namespace PDS.Witsml.Server.Data.Logs
             capServer.Add(Functions.AddToStore, ObjectTypes.Log, WitsmlSettings.LogMaxDataNodesAdd, WitsmlSettings.LogMaxDataPointsAdd);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Log, WitsmlSettings.LogMaxDataNodesUpdate, WitsmlSettings.LogMaxDataPointsUpdate);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.Log, WitsmlSettings.LogMaxDataNodesDelete, WitsmlSettings.LogMaxDataPointsDelete);
-
         }
 
         /// <summary>
@@ -90,7 +82,6 @@ namespace PDS.Witsml.Server.Data.Logs
             return GetAllQuery(parentUri)
                 .OrderBy(x => x.Name)
                 .ToList();
-
         }
 
         /// <summary>
@@ -104,7 +95,6 @@ namespace PDS.Witsml.Server.Data.Logs
 
             if (parentUri != null)
             {
-
                 var ids = parentUri.Value.GetObjectIds().ToDictionary(x => x.ObjectType, y => y.ObjectId, StringComparer.CurrentCultureIgnoreCase);
                 var uidWellbore = ids[ObjectTypes.Wellbore];
                 var uidWell = ids[ObjectTypes.Well];
