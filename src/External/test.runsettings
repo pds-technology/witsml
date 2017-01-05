@@ -22,6 +22,7 @@
                 <ModulePath>.*LinqExtender.*</ModulePath>  
                 <ModulePath>.*PDS.*Test\.dll$</ModulePath>  
                 <ModulePath>.*PDS\.Framework\.Web\.dll$</ModulePath>  
+                <ModulePath>.*super.*socket.*</ModulePath>  
               </Exclude>  
             </ModulePaths>  
           </CodeCoverage>  
