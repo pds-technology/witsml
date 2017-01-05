@@ -795,6 +795,8 @@
     <Compile Include="Data\WitsmlQueryParserTests.cs" />
     <Compile Include="IntegrationTestBase.cs" />
     <Compile Include="ITestContextProvider.cs" />
+    <Compile Include="Linq\Witsml131ContextTests.cs" />
+    <Compile Include="Linq\Witsml141ContextTests.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>

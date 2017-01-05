@@ -35,7 +35,7 @@ namespace PDS.Witsml.Linq
         /// <returns>A data object of the specified type</returns>
         public static T GetByUid<T>(this IWitsmlQuery<T> query, string uid) where T : IDataObject
         {
-            return query.FirstOrDefault(x => x.Uid == uid);
+            return query.Where(x => x.Uid == uid).FirstOrDefault();
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace PDS.Witsml.Linq
         /// <returns>A data object of the specified type</returns>
         public static T GetByUid<T>(this IWitsmlQuery<T> query, string uidWell, string uid) where T : IWellObject
         {
-            return query.FirstOrDefault(x => x.UidWell == uidWell && x.Uid == uid);
+            return query.Where(x => x.UidWell == uidWell && x.Uid == uid).FirstOrDefault();
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace PDS.Witsml.Linq
         /// <returns>A data object of the specified type</returns>
         public static T GetByUid<T>(this IWitsmlQuery<T> query, string uidWell, string uidWellbore, string uid) where T : IWellboreObject
         {
-            return query.FirstOrDefault(x => x.UidWell == uidWell && x.UidWellbore == uidWellbore && x.Uid == uid);
+            return query.Where(x => x.UidWell == uidWell && x.UidWellbore == uidWellbore && x.Uid == uid).FirstOrDefault();
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace PDS.Witsml.Linq
         /// <returns>A data object of the specified type</returns>
         public static T GetByName<T>(this IWitsmlQuery<T> query, string name) where T : IDataObject
         {
-            return query.FirstOrDefault(x => x.Name == name);
+            return query.Where(x => x.Name == name).FirstOrDefault();
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace PDS.Witsml.Linq
         /// <returns>A data object of the specified type</returns>
         public static T GetByName<T>(this IWitsmlQuery<T> query, string nameWell, string name) where T : IWellObject
         {
-            return query.FirstOrDefault(x => x.NameWell == nameWell && x.Name == name);
+            return query.Where(x => x.NameWell == nameWell && x.Name == name).FirstOrDefault();
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace PDS.Witsml.Linq
         /// <returns>A data object of the specified type</returns>
         public static T GetByName<T>(this IWitsmlQuery<T> query, string nameWell, string nameWellbore, string name) where T : IWellboreObject
         {
-            return query.FirstOrDefault(x => x.NameWell == nameWell && x.NameWellbore == nameWellbore && x.Name == name);
+            return query.Where(x => x.NameWell == nameWell && x.NameWellbore == nameWellbore && x.Name == name).FirstOrDefault();
         }
     }
 }
