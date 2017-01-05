@@ -116,6 +116,7 @@
     <Compile Include="Configuration\WitsmlValidator131Tests.cs" />
     <Compile Include="Configuration\CapServer141ProviderTests.cs" />
     <Compile Include="Configuration\WitsmlValidator141Tests.cs" />
+    <Compile Include="ContainerTests.cs" />
     <Compile Include="Data\Attachments\Attachment141DataAdapterAddTests.cs" />
     <Compile Include="Data\Attachments\Attachment141DataAdapterAddTests.generated.cs">
       <DependentUpon>Attachment141DataAdapterAddTests.cs</DependentUpon>
