@@ -17,7 +17,6 @@
 //-----------------------------------------------------------------------
 
 using Energistics.DataAccess.WITSML200;
-using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Energistics.Datatypes;
 
@@ -36,19 +35,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         partial void SetAdditionalDefaultValues(Trajectory dataObject, EtpUri uri)
         {
             dataObject.GrowingStatus = dataObject.GrowingStatus ?? ChannelStatus.inactive;
-
-            if (dataObject.Wellbore == null)
-            {
-                var wellboreType = new Wellbore().GetUri().ContentType;
-                var wellboreUri = uri.Parent;
-
-                dataObject.Wellbore = new DataObjectReference
-                {
-                    ContentType = wellboreType,
-                    Uuid = wellboreUri.ObjectId ?? string.Empty,
-                    Title = wellboreUri.ObjectId ?? string.Empty
-                };
-            }
+            dataObject.Wellbore = dataObject.Wellbore.Create<Wellbore>(uri.Parent);
         }
     }
 }

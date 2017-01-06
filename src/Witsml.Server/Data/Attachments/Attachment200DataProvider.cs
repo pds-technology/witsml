@@ -34,6 +34,7 @@ namespace PDS.Witsml.Server.Data.Attachments
         partial void SetAdditionalDefaultValues(Attachment dataObject, EtpUri uri)
         {
             dataObject.Content = dataObject.Content ?? new byte[] { 0 };
+            dataObject.Wellbore = dataObject.Wellbore.Create<Wellbore>(uri.Parent);
         }
     }
 }

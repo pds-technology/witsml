@@ -17,7 +17,6 @@
 //-----------------------------------------------------------------------
 
 using Energistics.DataAccess.WITSML200;
-using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.Datatypes;
 
 namespace PDS.Witsml.Server.Data.RigUtilizations
@@ -37,29 +36,8 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
             var rigUri = uri.Parent;
             var wellboreUri = rigUri.Parent;
 
-            if (dataObject.Rig == null)
-            {
-                var rigType = new Rig().GetUri().ContentType;
-
-                dataObject.Wellbore = new DataObjectReference
-                {
-                    ContentType = rigType,
-                    Uuid = rigUri.ObjectId ?? string.Empty,
-                    Title = rigUri.ObjectId ?? string.Empty
-                };
-            }
-
-            if (dataObject.Wellbore == null)
-            {
-                var wellboreType = new Wellbore().GetUri().ContentType;
-
-                dataObject.Wellbore = new DataObjectReference
-                {
-                    ContentType = wellboreType,
-                    Uuid = wellboreUri.ObjectId ?? string.Empty,
-                    Title = wellboreUri.ObjectId ?? string.Empty
-                };
-            }
+            dataObject.Rig = dataObject.Rig.Create<Rig>(rigUri);
+            dataObject.Wellbore = dataObject.Wellbore.Create<Wellbore>(wellboreUri);
         }
     }
 }

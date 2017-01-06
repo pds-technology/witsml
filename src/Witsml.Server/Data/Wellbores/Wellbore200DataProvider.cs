@@ -17,7 +17,6 @@
 //-----------------------------------------------------------------------
 
 using Energistics.DataAccess.WITSML200;
-using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.Datatypes;
 
 namespace PDS.Witsml.Server.Data.Wellbores
@@ -34,18 +33,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// <param name="uri">The URI.</param>
         partial void SetAdditionalDefaultValues(Wellbore dataObject, EtpUri uri)
         {
-            if (dataObject.Well == null)
-            {
-                var wellType = new Well().GetUri().ContentType;
-                var wellUri = uri.Parent;
-
-                dataObject.Well = new DataObjectReference
-                {
-                    ContentType = wellType,
-                    Uuid = wellUri.ObjectId ?? string.Empty,
-                    Title = wellUri.ObjectId ?? string.Empty
-                };
-            }
+            dataObject.Well = dataObject.Well.Create<Well>(uri.Parent);
         }
     }
 }

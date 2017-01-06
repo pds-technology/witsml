@@ -18,7 +18,6 @@
 
 using System.Collections.Generic;
 using Energistics.DataAccess.WITSML200;
-using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.Datatypes;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -38,18 +37,7 @@ namespace PDS.Witsml.Server.Data.Logs
             if (dataObject.ChannelSet == null)
                 dataObject.ChannelSet = new List<ChannelSet>();
 
-            if (dataObject.Wellbore == null)
-            {
-                var wellboreType = new Wellbore().GetUri().ContentType;
-                var wellboreUri = uri.Parent;
-
-                dataObject.Wellbore = new DataObjectReference
-                {
-                    ContentType = wellboreType,
-                    Uuid = wellboreUri.ObjectId ?? string.Empty,
-                    Title = wellboreUri.ObjectId ?? string.Empty
-                };
-            }
+            dataObject.Wellbore = dataObject.Wellbore.Create<Wellbore>(uri.Parent);
         }
     }
 }

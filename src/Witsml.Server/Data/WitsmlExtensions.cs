@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using Energistics.DataAccess;
+using Energistics.Datatypes;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 using Witsml131 = Energistics.DataAccess.WITSML131;
@@ -180,6 +181,30 @@ namespace PDS.Witsml.Server.Data
             citation.Format = typeof(WitsmlExtensions).Assembly.FullName;
 
             return citation;
+        }
+
+        /// <summary>
+        /// Creates a <see cref="Witsml200Schemas.DataObjectReference" /> for the specified URI.
+        /// </summary>
+        /// <typeparam name="TObject">The data object type.</typeparam>
+        /// <param name="reference">The data object reference.</param>
+        /// <param name="uri">The URI.</param>
+        /// <returns>A <see cref="Witsml200Schemas.DataObjectReference" /> instance.</returns>
+        public static Witsml200Schemas.DataObjectReference Create<TObject>(this Witsml200Schemas.DataObjectReference reference, EtpUri uri) where TObject : Witsml200.AbstractObject, new()
+        {
+            if (reference != null) return reference;
+
+            var objectType = ObjectTypes.GetObjectType<TObject>();
+
+            if (!objectType.EqualsIgnoreCase(uri.ObjectType))
+                uri = new TObject().GetUri();
+
+            return new Witsml200Schemas.DataObjectReference
+            {
+                ContentType = uri.ContentType,
+                Uuid = uri.ObjectId ?? string.Empty,
+                Title = uri.ObjectId ?? ObjectTypes.Unknown
+            };
         }
 
         /// <summary>
