@@ -35,6 +35,13 @@ namespace PDS.Witsml.Server.Data
         void GetSupportedObjects(IList<EtpContentType> contentTypes);
 
         /// <summary>
+        /// Determines whether the data object exists in the data store.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        /// <returns>true if the data object exists; otherwise, false</returns>
+        bool Exists(EtpUri uri);
+
+        /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>

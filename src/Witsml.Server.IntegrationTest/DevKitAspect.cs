@@ -251,6 +251,25 @@ namespace PDS.Witsml.Server
         }
 
         /// <summary>
+        /// Ensures the data object and assert.
+        /// </summary>
+        /// <typeparam name="TList">The type of the container.</typeparam>
+        /// <typeparam name="TObject">The type of the data object.</typeparam>
+        /// <param name="dataObject">The data object.</param>
+        public void EnsureAndAssert<TList, TObject>(TObject dataObject) where TList : IEnergisticsCollection where TObject : IDataObject
+        {
+            var uri = dataObject.GetUri();
+            var dataProvider = Container.Resolve<IEtpDataProvider<TObject>>();
+            dataProvider.Ensure(uri);
+
+            var exists = dataProvider.Exists(uri);
+            Assert.IsTrue(exists);
+
+            var current = dataProvider.Get(dataObject.GetUri());
+            Assert.AreEqual(uri, current.GetUri());
+        }
+
+        /// <summary>
         /// Creates an id-only query from the specified data object.
         /// </summary>
         /// <typeparam name="TObject">The type of the object.</typeparam>
