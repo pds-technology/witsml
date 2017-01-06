@@ -17,7 +17,6 @@
 //-----------------------------------------------------------------------
 
 using Energistics.DataAccess.WITSML200;
-using Energistics.Datatypes;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
@@ -26,14 +25,5 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// </summary>
     public partial class Wellbore200DataProvider
     {
-        /// <summary>
-        /// Sets the additional default values.
-        /// </summary>
-        /// <param name="dataObject">The data object.</param>
-        /// <param name="uri">The URI.</param>
-        partial void SetAdditionalDefaultValues(Wellbore dataObject, EtpUri uri)
-        {
-            dataObject.Well = dataObject.Well.Create<Well>(uri.Parent);
-        }
     }
 }

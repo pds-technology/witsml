@@ -35,7 +35,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
         partial void SetAdditionalDefaultValues(Trajectory dataObject, EtpUri uri)
         {
             dataObject.GrowingStatus = dataObject.GrowingStatus ?? ChannelStatus.inactive;
-            dataObject.Wellbore = dataObject.Wellbore.Create<Wellbore>(uri.Parent);
         }
     }
 }

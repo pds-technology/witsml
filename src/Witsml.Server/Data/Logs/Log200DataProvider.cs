@@ -36,8 +36,6 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             if (dataObject.ChannelSet == null)
                 dataObject.ChannelSet = new List<ChannelSet>();
-
-            dataObject.Wellbore = dataObject.Wellbore.Create<Wellbore>(uri.Parent);
         }
     }
 }
