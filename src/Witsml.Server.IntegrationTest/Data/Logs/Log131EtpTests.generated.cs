@@ -148,7 +148,7 @@ namespace PDS.Witsml.Server.Data.Logs
             // Remove Comment from Data Object
             result.CommonData.Comments = null;
 
-            var updateDataObject = CreateDataObject<LogList, Log>(uri, Log);
+            var updateDataObject = CreateDataObject<LogList, Log>(uri, result);
 
             // Put Object for Update
             await PutAndAssert(handler, updateDataObject);

@@ -148,7 +148,7 @@ namespace PDS.Witsml.Server.Data.Attachments
             // Remove Comment from Data Object
             result.CommonData.Comments = null;
 
-            var updateDataObject = CreateDataObject<AttachmentList, Attachment>(uri, Attachment);
+            var updateDataObject = CreateDataObject<AttachmentList, Attachment>(uri, result);
 
             // Put Object for Update
             await PutAndAssert(handler, updateDataObject);

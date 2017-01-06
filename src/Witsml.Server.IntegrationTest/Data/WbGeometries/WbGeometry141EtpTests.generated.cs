@@ -151,7 +151,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             // Remove Comment from Data Object
             result.CommonData.Comments = null;
 
-            var updateDataObject = CreateDataObject<WbGeometryList, WbGeometry>(uri, WbGeometry);
+            var updateDataObject = CreateDataObject<WbGeometryList, WbGeometry>(uri, result);
 
             // Put Object for Update
             await PutAndAssert(handler, updateDataObject);

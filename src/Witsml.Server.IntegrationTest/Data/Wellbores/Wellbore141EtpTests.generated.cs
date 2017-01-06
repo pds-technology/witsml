@@ -148,7 +148,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             // Remove Comment from Data Object
             result.CommonData.Comments = null;
 
-            var updateDataObject = CreateDataObject<WellboreList, Wellbore>(uri, Wellbore);
+            var updateDataObject = CreateDataObject<WellboreList, Wellbore>(uri, result);
 
             // Put Object for Update
             await PutAndAssert(handler, updateDataObject);

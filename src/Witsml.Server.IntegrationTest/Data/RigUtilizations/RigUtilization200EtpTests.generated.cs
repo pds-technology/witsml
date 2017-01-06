@@ -147,7 +147,7 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
             // Remove Comment from Data Object
             result.ExtensionNameValue.Clear();
 
-            var updateDataObject = CreateDataObject(uri, RigUtilization);
+            var updateDataObject = CreateDataObject(uri, result);
 
             // Put Object for Update
             await PutAndAssert(handler, updateDataObject);

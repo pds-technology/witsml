@@ -148,7 +148,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             // Remove Comment from Data Object
             result.CommonData.Comments = null;
 
-            var updateDataObject = CreateDataObject<TrajectoryList, Trajectory>(uri, Trajectory);
+            var updateDataObject = CreateDataObject<TrajectoryList, Trajectory>(uri, result);
 
             // Put Object for Update
             await PutAndAssert(handler, updateDataObject);

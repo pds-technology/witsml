@@ -148,7 +148,7 @@ namespace PDS.Witsml.Server.Data.Wells
             // Remove Comment from Data Object
             result.CommonData.Comments = null;
 
-            var updateDataObject = CreateDataObject<WellList, Well>(uri, Well);
+            var updateDataObject = CreateDataObject<WellList, Well>(uri, result);
 
             // Put Object for Update
             await PutAndAssert(handler, updateDataObject);
