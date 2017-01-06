@@ -16,7 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using Energistics.DataAccess.WITSML200;
+using Energistics.DataAccess.WITSML200.ComponentSchemas;
+using Energistics.DataAccess.WITSML200.ReferenceData;
+using Energistics.Datatypes;
+using PDS.Witsml.Data;
 
 namespace PDS.Witsml.Server.Data.Channels
 {
@@ -25,5 +30,23 @@ namespace PDS.Witsml.Server.Data.Channels
     /// </summary>
     public partial class Channel200DataProvider
     {
+        /// <summary>
+        /// Sets the additional default values.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The URI.</param>
+        partial void SetAdditionalDefaultValues(Channel dataObject, EtpUri uri)
+        {
+            var dataGenerator = new DataGenerator();
+
+            dataObject.ChannelClass = dataObject.ChannelClass ?? dataGenerator.ToPropertyKindReference(QuantityClassKind.unitless.ToString());
+            dataObject.DataType = dataObject.DataType ?? EtpDataType.@double;
+            dataObject.GrowingStatus = dataObject.GrowingStatus ?? ChannelStatus.inactive;
+            dataObject.Index = dataObject.Index ?? new List<ChannelIndex>();
+            dataObject.Mnemonic = dataObject.Mnemonic ?? uri.ObjectId;
+            dataObject.LoggingCompanyName = dataObject.LoggingCompanyName ?? ObjectTypes.Unknown;
+            dataObject.TimeDepth = dataObject.TimeDepth ?? ObjectTypes.Unknown;
+            dataObject.Uom = dataObject.Uom ?? UnitOfMeasure.m;
+        }
     }
 }

@@ -16,6 +16,10 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using Energistics.DataAccess.WITSML131;
+using Energistics.Datatypes;
+
 namespace PDS.Witsml.Server.Data.WbGeometries
 {
     /// <summary>
@@ -23,5 +27,14 @@ namespace PDS.Witsml.Server.Data.WbGeometries
     /// </summary>
     public partial class WbGeometry131DataProvider
     {
+        /// <summary>
+        /// Sets the additional default values.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The URI.</param>
+        partial void SetAdditionalDefaultValues(StandAloneWellboreGeometry dataObject, EtpUri uri)
+        {
+            dataObject.DateTimeReport = dataObject.DateTimeReport ?? DateTimeOffset.UtcNow;
+        }
     }
 }

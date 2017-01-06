@@ -16,6 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Energistics.DataAccess.WITSML200;
+using Energistics.Datatypes;
+
 namespace PDS.Witsml.Server.Data.Attachments
 {
     /// <summary>
@@ -23,5 +26,14 @@ namespace PDS.Witsml.Server.Data.Attachments
     /// </summary>
     public partial class Attachment200DataProvider
     {
+        /// <summary>
+        /// Sets the additional default values.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The URI.</param>
+        partial void SetAdditionalDefaultValues(Attachment dataObject, EtpUri uri)
+        {
+            dataObject.Content = dataObject.Content ?? new byte[] { 0 };
+        }
     }
 }
