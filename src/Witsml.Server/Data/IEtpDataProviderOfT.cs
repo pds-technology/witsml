@@ -28,6 +28,13 @@ namespace PDS.Witsml.Server.Data
     public interface IEtpDataProvider<T>
     {
         /// <summary>
+        /// Determines whether the data object exists in the data store.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        /// <returns>true if the data object exists; otherwise, false</returns>
+        bool Exists(EtpUri uri);
+
+        /// <summary>
         /// Gets a collection of data objects related to the specified URI.
         /// </summary>
         /// <param name="parentUri">The parent URI.</param>
@@ -52,5 +59,11 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <param name="uri">The data object URI.</param>
         void Delete(EtpUri uri);
+
+        /// <summary>
+        /// Ensures the data object exists with the specified URI, otherwise, it is created.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        void Ensure(EtpUri uri);
     }
 }

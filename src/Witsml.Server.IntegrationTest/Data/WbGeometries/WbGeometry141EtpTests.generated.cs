@@ -60,6 +60,12 @@ namespace PDS.Witsml.Server.Data.WbGeometries
         }
 
         [TestMethod]
+        public void WbGeometry141_Ensure_Creates_WbGeometry_With_Default_Values()
+        {
+            DevKit.EnsureAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
+        }
+
+        [TestMethod]
         public async Task WbGeometry141_PutObject_Can_Add_WbGeometry()
         {
             AddParents();

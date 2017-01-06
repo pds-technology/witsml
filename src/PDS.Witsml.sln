@@ -15,8 +15,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.UnitTest", "Witsml.U
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Server.IntegrationTest", "Witsml.Server.IntegrationTest\Witsml.Server.IntegrationTest.csproj", "{C050AB68-0543-4A23-870C-2D07F872484B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.IntegrationTest", "Witsml.IntegrationTest\Witsml.IntegrationTest.csproj", "{C86299AE-B7E9-4DF6-97CF-8DCF910E5E70}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Server.Web", "Witsml.Server.Web\Witsml.Server.Web.csproj", "{5FF377F4-56C5-49D9-BA0A-1955A33C4902}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{28C18AAD-FD80-4AFD-9B42-B78D6409C955}"
@@ -56,10 +54,6 @@ Global
 		{C050AB68-0543-4A23-870C-2D07F872484B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C050AB68-0543-4A23-870C-2D07F872484B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C050AB68-0543-4A23-870C-2D07F872484B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C86299AE-B7E9-4DF6-97CF-8DCF910E5E70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C86299AE-B7E9-4DF6-97CF-8DCF910E5E70}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C86299AE-B7E9-4DF6-97CF-8DCF910E5E70}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C86299AE-B7E9-4DF6-97CF-8DCF910E5E70}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5FF377F4-56C5-49D9-BA0A-1955A33C4902}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5FF377F4-56C5-49D9-BA0A-1955A33C4902}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5FF377F4-56C5-49D9-BA0A-1955A33C4902}.Release|Any CPU.ActiveCfg = Release|Any CPU

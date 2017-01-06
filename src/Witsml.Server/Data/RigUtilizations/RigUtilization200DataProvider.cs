@@ -16,6 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Energistics.DataAccess.WITSML200;
+using Energistics.Datatypes;
+
 namespace PDS.Witsml.Server.Data.RigUtilizations
 {
     /// <summary>
@@ -23,5 +26,18 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
     /// </summary>
     public partial class RigUtilization200DataProvider
     {
+        /// <summary>
+        /// Sets the additional default values.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The URI.</param>
+        partial void SetAdditionalDefaultValues(RigUtilization dataObject, EtpUri uri)
+        {
+            var rigUri = uri.Parent;
+            var wellboreUri = rigUri.Parent;
+
+            dataObject.Rig = dataObject.Rig.Create<Rig>(rigUri);
+            dataObject.Wellbore = dataObject.Wellbore.Create<Wellbore>(wellboreUri);
+        }
     }
 }

@@ -57,6 +57,12 @@ namespace PDS.Witsml.Server.Data.Rigs
         }
 
         [TestMethod]
+        public void Rig200_Ensure_Creates_Rig_With_Default_Values()
+        {
+            DevKit.EnsureAndAssert(Rig);
+        }
+
+        [TestMethod]
         public async Task Rig200_PutObject_Can_Add_Rig()
         {
             AddParents();

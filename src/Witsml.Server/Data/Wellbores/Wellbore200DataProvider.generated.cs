@@ -72,16 +72,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             base.SetDefaultValues(dataObject, uri);
 
             // Well
-            var parentUri = uri.Parent;
-            if (ObjectTypes.Well.EqualsIgnoreCase(parentUri.ObjectType))
-            {
-                dataObject.Well = new DataObjectReference
-                {
-                    ContentType = parentUri.ContentType,
-                    Title = parentUri.ObjectId,
-                    Uuid = parentUri.ObjectId
-                };
-            }
+            dataObject.Well = dataObject.Well.Create<Well>(uri.Parent);
 
             SetAdditionalDefaultValues(dataObject, uri);
         }

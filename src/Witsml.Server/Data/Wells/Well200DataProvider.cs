@@ -33,7 +33,7 @@ namespace PDS.Witsml.Server.Data.Wells
         /// <param name="uri">The URI.</param>
         partial void SetAdditionalDefaultValues(Well dataObject, EtpUri uri)
         {
-            dataObject.TimeZone = "Z";
+            dataObject.TimeZone = dataObject.TimeZone ?? "Z";
         }
     }
 }

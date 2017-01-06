@@ -294,5 +294,18 @@ namespace PDS.Witsml.Server
             var exists = dataAdapter.Exists(uri);
             Assert.IsFalse(exists);
         }
+
+        public void EnsureAndAssert<T>(T dataObject) where T : AbstractObject
+        {
+            var uri = dataObject.GetUri();
+            var dataProvider = Container.Resolve<IEtpDataProvider<T>>();
+            dataProvider.Ensure(uri);
+
+            var exists = dataProvider.Exists(uri);
+            Assert.IsTrue(exists);
+
+            var current = dataProvider.Get(dataObject.GetUri());
+            Assert.AreEqual(uri, current.GetUri());
+        }
     }
 }

@@ -57,6 +57,12 @@ namespace PDS.Witsml.Server.Data.Attachments
         }
 
         [TestMethod]
+        public void Attachment200_Ensure_Creates_Attachment_With_Default_Values()
+        {
+            DevKit.EnsureAndAssert(Attachment);
+        }
+
+        [TestMethod]
         public async Task Attachment200_PutObject_Can_Add_Attachment()
         {
             AddParents();

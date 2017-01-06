@@ -17,6 +17,8 @@
 //-----------------------------------------------------------------------
 
 using Energistics.DataAccess.WITSML200;
+using Energistics.DataAccess.WITSML200.ReferenceData;
+using Energistics.Datatypes;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
@@ -25,5 +27,14 @@ namespace PDS.Witsml.Server.Data.Trajectories
     /// </summary>
     public partial class Trajectory200DataProvider
     {
+        /// <summary>
+        /// Sets the additional default values.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The URI.</param>
+        partial void SetAdditionalDefaultValues(Trajectory dataObject, EtpUri uri)
+        {
+            dataObject.GrowingStatus = dataObject.GrowingStatus ?? ChannelStatus.inactive;
+        }
     }
 }

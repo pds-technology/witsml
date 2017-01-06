@@ -57,6 +57,12 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
         }
 
         [TestMethod]
+        public void RigUtilization200_Ensure_Creates_RigUtilization_With_Default_Values()
+        {
+            DevKit.EnsureAndAssert(RigUtilization);
+        }
+
+        [TestMethod]
         public async Task RigUtilization200_PutObject_Can_Add_RigUtilization()
         {
             AddParents();

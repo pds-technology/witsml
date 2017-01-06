@@ -57,6 +57,12 @@ namespace PDS.Witsml.Server.Data.Messages
         }
 
         [TestMethod]
+        public void Message141_Ensure_Creates_Message_With_Default_Values()
+        {
+            DevKit.EnsureAndAssert<MessageList, Message>(Message);
+        }
+
+        [TestMethod]
         public async Task Message141_PutObject_Can_Add_Message()
         {
             AddParents();

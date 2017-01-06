@@ -16,7 +16,10 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using Energistics.DataAccess.WITSML131;
+using Energistics.DataAccess.WITSML131.ReferenceData;
+using Energistics.Datatypes;
 
 namespace PDS.Witsml.Server.Data.Messages
 {
@@ -25,5 +28,15 @@ namespace PDS.Witsml.Server.Data.Messages
     /// </summary>
     public partial class Message131DataProvider
     {
+        /// <summary>
+        /// Sets the additional default values.
+        /// </summary>
+        /// <param name="dataObject">The data object.</param>
+        /// <param name="uri">The URI.</param>
+        partial void SetAdditionalDefaultValues(Message dataObject, EtpUri uri)
+        {
+            dataObject.DateTime = dataObject.DateTime ?? DateTimeOffset.UtcNow;
+            dataObject.TypeMessage = dataObject.TypeMessage ?? MessageType.unknown;
+        }
     }
 }

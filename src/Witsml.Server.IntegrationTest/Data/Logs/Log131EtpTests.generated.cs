@@ -57,6 +57,12 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
+        public void Log131_Ensure_Creates_Log_With_Default_Values()
+        {
+            DevKit.EnsureAndAssert<LogList, Log>(Log);
+        }
+
+        [TestMethod]
         public async Task Log131_PutObject_Can_Add_Log()
         {
             AddParents();
