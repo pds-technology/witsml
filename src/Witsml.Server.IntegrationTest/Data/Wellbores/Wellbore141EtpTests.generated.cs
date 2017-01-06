@@ -23,6 +23,8 @@
 // </auto-generated>
 // ----------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Energistics.Common;
 using Energistics.DataAccess;
@@ -59,7 +61,9 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod]
         public void Wellbore141_Ensure_Creates_Wellbore_With_Default_Values()
         {
+
             DevKit.EnsureAndAssert<WellboreList, Wellbore>(Wellbore);
+
         }
 
         [TestMethod]
@@ -94,7 +98,75 @@ namespace PDS.Witsml.Server.Data.Wellbores
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<WellboreList, Wellbore>(xml);
+
             Assert.IsNotNull(result);
+        }
+
+        [TestMethod]
+        public async Task Wellbore141_PutObject_Can_Update_Wellbore()
+        {
+            AddParents();
+
+            var handler = _client.Handler<IStoreCustomer>();
+            var uri = Wellbore.GetUri();
+
+            // Add a Comment to Data Object            
+            Wellbore.CommonData = new CommonData()
+            {
+                Comments = "Test PutObject"
+            };
+
+            var dataObject = CreateDataObject<WellboreList, Wellbore>(uri, Wellbore);
+
+            // Wait for Open connection
+            var isOpen = await _client.OpenAsync();
+            Assert.IsTrue(isOpen);
+
+            // Get Object
+            var args = await GetAndAssert(handler, uri);
+
+            // Check for message flag indicating No Data
+            Assert.IsNotNull(args?.Header);
+            Assert.AreEqual((int)MessageFlags.NoData, args.Header.MessageFlags);
+
+            // Put Object for Add
+            await PutAndAssert(handler, dataObject);
+
+            // Get Added Object
+            args = await GetAndAssert(handler, uri);
+
+            // Check Added Data Object XML
+            Assert.IsNotNull(args?.Message.DataObject);
+            var xml = args.Message.DataObject.GetXml();
+
+            var result = Parse<WellboreList, Wellbore>(xml);
+
+            Assert.IsNotNull(result);
+
+            Assert.IsNotNull(result.CommonData.Comments);
+
+            // Remove Comment from Data Object
+            result.CommonData.Comments = null;
+
+            var updateDataObject = CreateDataObject<WellboreList, Wellbore>(uri, Wellbore);
+
+            // Put Object for Update
+            await PutAndAssert(handler, updateDataObject);
+
+            // Get Updated Object
+            args = await GetAndAssert(handler, uri);
+
+            // Check Added Data Object XML
+            Assert.IsNotNull(args?.Message.DataObject);
+            var updateXml = args.Message.DataObject.GetXml();
+
+            result = Parse<WellboreList, Wellbore>(updateXml);
+
+            Assert.IsNotNull(result);
+
+            // Test Data Object overwrite
+            Assert.IsNull(result.CommonData.Comments);
+
         }
     }
 }

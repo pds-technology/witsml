@@ -23,6 +23,8 @@
 // </auto-generated>
 // ----------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Energistics.Common;
 using Energistics.DataAccess;
@@ -59,7 +61,9 @@ namespace PDS.Witsml.Server.Data.Trajectories
         [TestMethod]
         public void Trajectory200_Ensure_Creates_Trajectory_With_Default_Values()
         {
+
             DevKit.EnsureAndAssert(Trajectory);
+
         }
 
         [TestMethod]
@@ -94,7 +98,74 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<Trajectory>(xml);
+
             Assert.IsNotNull(result);
+        }
+
+        [TestMethod]
+        public async Task Trajectory200_PutObject_Can_Update_Trajectory()
+        {
+            AddParents();
+
+            var handler = _client.Handler<IStoreCustomer>();
+            var uri = Trajectory.GetUri();
+
+            // Add a ExtensionNameValue to Data Object
+            var envName = "TestPutObject";
+            var env = DevKit.ExtensionNameValue(envName, envName);
+            Trajectory.ExtensionNameValue = new List<ExtensionNameValue>() {env};
+
+            var dataObject = CreateDataObject(uri, Trajectory);
+
+            // Wait for Open connection
+            var isOpen = await _client.OpenAsync();
+            Assert.IsTrue(isOpen);
+
+            // Get Object
+            var args = await GetAndAssert(handler, uri);
+
+            // Check for message flag indicating No Data
+            Assert.IsNotNull(args?.Header);
+            Assert.AreEqual((int)MessageFlags.NoData, args.Header.MessageFlags);
+
+            // Put Object for Add
+            await PutAndAssert(handler, dataObject);
+
+            // Get Added Object
+            args = await GetAndAssert(handler, uri);
+
+            // Check Added Data Object XML
+            Assert.IsNotNull(args?.Message.DataObject);
+            var xml = args.Message.DataObject.GetXml();
+
+            var result = Parse<Trajectory>(xml);
+
+            Assert.IsNotNull(result);
+
+            Assert.IsNotNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
+
+            // Remove Comment from Data Object
+            result.ExtensionNameValue.Clear();
+
+            var updateDataObject = CreateDataObject(uri, Trajectory);
+
+            // Put Object for Update
+            await PutAndAssert(handler, updateDataObject);
+
+            // Get Updated Object
+            args = await GetAndAssert(handler, uri);
+
+            // Check Added Data Object XML
+            Assert.IsNotNull(args?.Message.DataObject);
+            var updateXml = args.Message.DataObject.GetXml();
+
+            result = Parse<Trajectory>(updateXml);
+
+            Assert.IsNotNull(result);
+
+            // Test Data Object overwrite
+            Assert.IsNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
+
         }
     }
 }

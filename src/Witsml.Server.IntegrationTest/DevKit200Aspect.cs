@@ -200,6 +200,21 @@ namespace PDS.Witsml.Server
         }
 
         /// <summary>
+        /// Creates an ExtensionNameValue object.
+        /// </summary>
+        /// <param name="name">The name to be assigned to the ExtensionNameValue.</param>
+        /// <param name="value">The value to be assigned to the ExtensionNameValue.</param>
+        /// <returns>An ExtensionNameValue object with the specified name and value</returns>
+        public ExtensionNameValue ExtensionNameValue(string name, string value)
+        {
+            return new ExtensionNameValue()
+            {
+                Name = name,
+                Value = new StringMeasure() { Value = value }
+            };
+        }
+
+        /// <summary>
         /// Creates the log.
         /// </summary>
         /// <param name="indexType">Type of the index.</param>
