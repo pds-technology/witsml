@@ -26,6 +26,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace PDS.Witsml.Server.Data.Logs
 {
     [TestClass]
+    [Ignore] //Tests have been moved to witsml.Server.IntegrationTest.Data.Wells.Log141ValidatorTests
     public class Log141MongoDataAdapterValidationTests
     {
         private DevKit141Aspect _devKit;
