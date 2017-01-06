@@ -202,7 +202,7 @@ namespace PDS.Witsml.Server.Data
             return new Witsml200Schemas.DataObjectReference
             {
                 ContentType = uri.ContentType,
-                Uuid = uri.ObjectId ?? string.Empty,
+                Uuid = uri.ObjectId ?? Guid.Empty.ToString(),
                 Title = uri.ObjectId ?? ObjectTypes.Unknown
             };
         }
