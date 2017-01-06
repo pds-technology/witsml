@@ -240,7 +240,7 @@ namespace PDS.Witsml.Server.Data.Wells
 
         [TestMethod]
         public void WitsmlValidator_GetFromStore_Error_439_Recurring_Elements_Empty_Value()
-        {          
+        {
             var crs1 = DevKit.WellCRS("geog1", string.Empty);
             var crs2 = DevKit.WellCRS("proj1", "ED50 / UTM Zone 31N");
             var query = new Well { Uid = "", WellCRS = DevKit.List(crs1, crs2) };
@@ -398,7 +398,7 @@ namespace PDS.Witsml.Server.Data.Wells
             AddWell(Well);
 
             // Update Well has modified uid that does not exist
-            var updateWell = new Well() { Country = "test", Uid = Well.Uid + "x"};
+            var updateWell = new Well() { Country = "test", Uid = Well.Uid + "x" };
             var updateResponse = DevKit.Update<WellList, Well>(updateWell);
 
             // Assert that the update well does not exist
@@ -413,8 +413,8 @@ namespace PDS.Witsml.Server.Data.Wells
             AddWell(Well, "WellTest448");
 
             // Add a reference point without a uid
-            Well.ReferencePoint = new List<ReferencePoint> {new ReferencePoint() {Name = "rpName"} };
-            Well.ReferencePoint[0].Location = new List<Location> {new Location()};
+            Well.ReferencePoint = new List<ReferencePoint> { new ReferencePoint() { Name = "rpName" } };
+            Well.ReferencePoint[0].Location = new List<Location> { new Location() };
 
             // Update and Assert MissingElementUid
             var updateResponse = DevKit.Update<WellList, Well>(Well, ObjectTypes.Well);
@@ -512,6 +512,156 @@ namespace PDS.Witsml.Server.Data.Wells
         public void DataObjectValidator_UpdateInStore_Error_453_Missing_Uom_For_MeasureData()
         {
             ValidateUpdateUom("WellTest453", string.Empty, ErrorCodes.MissingUnitForMeasureData);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_UpdateInStore_Error_445_Empty_New_Element()
+        {
+            AddWell(Well, "Well1Test445");
+
+            var update = new Well
+            {
+                Uid = Well.Uid,
+                WellPublicLandSurveySystemLocation = new PublicLandSurveySystem
+                {
+                    QuarterTownship = string.Empty,
+                    Township = 1,
+                }
+            };
+
+            var response = DevKit.Update<WellList, Well>(update);
+            Assert.AreEqual((short)ErrorCodes.EmptyNewElementsOrAttributes, response.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_UpdateInStore_Error_445_Empty_New_Attribute()
+        {
+            AddWell(Well, "Well2Test445");
+
+            var update = new Well
+            {
+                Uid = Well.Uid,
+                WellheadElevation = new WellElevationCoord
+                {
+                    Uom = WellVerticalCoordinateUom.m,
+                    Value = 1,
+                    Datum = string.Empty
+                }
+            };
+
+            var response = DevKit.Update<WellList, Well>(update);
+            Assert.AreEqual((short)ErrorCodes.EmptyNewElementsOrAttributes, response.Result);
+        }
+
+        [TestMethod, Description("When adding a new element has nested uom and value, uom should not be specified if there is no value")]
+        public void WitsmlValidator_UpdateInStore_Error_446_Uom_Exist_Without_Value_Nested_Element()
+        {
+            AddWell(Well, "Well1Test446");
+
+            var updateXml = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                "<well uid=\"" + Well.Uid + "\">" + Environment.NewLine +
+                "<wellheadElevation uom=\"m\" datum=\"KB\"></wellheadElevation>" + Environment.NewLine +
+                "</well>" + Environment.NewLine +
+                "</wells>";
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Well, updateXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.MissingMeasureDataForUnit, response.Result);
+        }
+
+        [TestMethod, Description("When adding a new recurring element has nested uom and value, uom should not be specified if there is no value")]
+        public void WitsmlValidator_UpdateInStore_Error_446_Uom_Exist_Without_Value_Array_Element()
+        {
+            AddWell(Well, "Well2Test446");
+
+            var updateXml = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                "<well uid=\"" + Well.Uid + "\">" + Environment.NewLine +
+                    "<wellDatum uid=\"KB\" >" + Environment.NewLine +
+                        "<name>Kelly Bushing</name>" + Environment.NewLine +
+                        "<code>KB</code>" + Environment.NewLine +
+                        "<elevation uom=\"ft\"/>" + Environment.NewLine +
+                    "</wellDatum>" + Environment.NewLine +
+                    "<wellDatum uid=\"DF\" >" + Environment.NewLine +
+                        "<name>Derrick Floor</name>" + Environment.NewLine +
+                        "<code>DF</code>" + Environment.NewLine +
+                    "</wellDatum>" + Environment.NewLine +
+                "</well>" + Environment.NewLine +
+                "</wells>";
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Well, updateXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.MissingMeasureDataForUnit, response.Result);
+        }
+
+        [TestMethod, Description("When adding a new recurring element has nested recurring element with uom and value, uom should not be specified if there is no value")]
+        public void WitsmlValidator_UpdateInStore_Error_446_Uom_Exist_Without_Value_Nested_Array_Element()
+        {
+            Well = DevKit.CreateFullWell();
+            Well.Uid = DevKit.Uid();
+            Well.ReferencePoint = null;
+            AddWell(Well, "Well3Test446");
+
+            var updateXml = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                "<well uid=\"" + Well.Uid + "\">" + Environment.NewLine +
+                    "<referencePoint uid=\"abc\" >" + Environment.NewLine +
+                    "<name>abc</name>" + Environment.NewLine +
+                    "<type>abc</type>" + Environment.NewLine +
+                    "<elevation uom=\"m\" datum=\"KB\">1</elevation>" + Environment.NewLine +
+                    "<measuredDepth uom=\"m\" datum=\"KB\">1</measuredDepth>" + Environment.NewLine +
+                    "<location uid=\"abc\">" + Environment.NewLine +
+                        "<wellCRS uidRef=\"epsg\">abc</wellCRS>" + Environment.NewLine +
+                        "<latitude uom=\"rad\">1</latitude>" + Environment.NewLine +
+                        "<longitude uom=\"rad\" />" + Environment.NewLine +
+                        "<original>false</original>" + Environment.NewLine +
+                        "<description>abc</description>" + Environment.NewLine +
+                    "</location>" + Environment.NewLine +
+                    "<description>abc</description>" + Environment.NewLine +
+                    "</referencePoint>" + Environment.NewLine +
+                    "</well>" + Environment.NewLine +
+                "</wells>";
+
+            var response = DevKit.UpdateInStore(ObjectTypes.Well, updateXml, null, null);
+            Assert.AreEqual((short)ErrorCodes.MissingMeasureDataForUnit, response.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_UpdateInStore_Error_446_Uom_With_Null_Measure_Data()
+        {
+            // Add well
+            Well = DevKit.CreateFullWell();
+            Well.Uid = DevKit.Uid();
+            AddWell(Well, "Well4Test446");
+
+            var xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                           "   <well uid=\"" + Well.Uid + "\">" + Environment.NewLine +
+                           "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
+                           "     <wellheadElevation uom=\"ft\"></wellheadElevation>" + Environment.NewLine +
+                           "   </well>" + Environment.NewLine +
+                           "</wells>";
+
+            var updateResponse = DevKit.UpdateInStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.MissingMeasureDataForUnit, updateResponse.Result);
+        }
+
+        [TestMethod]
+        public void WitsmlValidator_UpdateInStore_Error_446_Uom_With_NaN_Measure_Data()
+        {
+            // Add well
+            Well = DevKit.CreateFullWell();
+            Well.Uid = DevKit.Uid();
+            AddWell(Well, "Well5Test446");
+
+            var xmlIn = "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +
+                           "   <well uid=\"" + Well.Uid + "\">" + Environment.NewLine +
+                           "     <timeZone>-06:00</timeZone>" + Environment.NewLine +
+                           "     <wellheadElevation uom=\"ft\">NaN</wellheadElevation>" + Environment.NewLine +
+                           "   </well>" + Environment.NewLine +
+                           "</wells>";
+
+            var updateResponse = DevKit.UpdateInStore(ObjectTypes.Well, xmlIn, null, null);
+
+            Assert.IsNotNull(updateResponse);
+            Assert.AreEqual((short)ErrorCodes.MissingMeasureDataForUnit, updateResponse.Result);
         }
 
         private void ValidateUpdateUom(string wellName, string uom, ErrorCodes expectedUpdateResult)

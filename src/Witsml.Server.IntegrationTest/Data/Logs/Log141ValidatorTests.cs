@@ -74,7 +74,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var mnemonics = logData.MnemonicList.Split(',');
             mnemonics[2] = mnemonics[1];
-            
+
             logData.MnemonicList = string.Join(",", mnemonics);
 
             var response = DevKit.Add<LogList, Log>(Log);
@@ -351,7 +351,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var updateResponse = DevKit.Update<LogList, Log>(update);
             Assert.AreEqual((short)ErrorCodes.MissingElementUidForUpdate, updateResponse.Result);
         }
-       
+
         [TestMethod]
         public void Log141Validator_UpdateInStore_Error_480_Adding_Updating_Curves_Simultaneously()
         {
@@ -1105,7 +1105,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var response = DevKit.Add<LogList, Log>(Log);
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
-            
+
             var update = new Log
             {
                 Uid = Log.Uid,
@@ -1145,6 +1145,80 @@ namespace PDS.Witsml.Server.Data.Logs
                 optionsIn: $"requestLatestValues={WitsmlSettings.MaxRequestLatestValues + 1}");
 
             Assert.AreEqual((short)ErrorCodes.InvalidRequestLatestValue, result.Result);
+        }
+
+        [TestMethod]
+        public void Log141Validator_GetFromStore_Error_475_No_Subset_When_Getting_Growing_Object()
+        {
+            AddParents();
+
+            // Add first log
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            var response = DevKit.Add<LogList, Log>(Log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Add second log
+            var log2 = DevKit.CreateLog(null, DevKit.Name("Log 02"), Log.UidWell, Log.NameWell, Log.UidWellbore,
+                Log.NameWellbore);
+            DevKit.InitHeader(log2, LogIndexType.measureddepth);
+
+            response = DevKit.Add<LogList, Log>(log2);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            // Query
+            var query = DevKit.CreateLog(null, null, log2.UidWell, null, log2.UidWellbore, null);
+
+            var result = DevKit.Get<LogList, Log>(DevKit.List(query), ObjectTypes.Log, null,
+                OptionsIn.ReturnElements.DataOnly);
+            Assert.AreEqual((short)ErrorCodes.MissingSubsetOfGrowingDataObject, result.Result);
+        }
+
+        [TestMethod]
+        public void Log141Validator_UpdateInStore_Error_484_Empty_Value_For_Mandatory_Field()
+        {
+            AddParents();
+
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+
+            var response = DevKit.Add<LogList, Log>(Log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var uidLog = response.SuppMsgOut;
+
+            var xmlIn = "<logs version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" +
+                "<log uidWell=\"" + Log.UidWell + "\" uidWellbore=\"" + Log.UidWellbore + "\" uid=\"" + uidLog + "\">" +
+                    "<nameWell />" +
+                "</log>" +
+                "</logs>";
+
+            var updateResponse = DevKit.UpdateInStore(ObjectTypes.Log, xmlIn, null, null);
+            Assert.AreEqual((short)ErrorCodes.MissingRequiredData, updateResponse.Result);
+        }
+
+        [TestMethod]
+        public void Log141Validator_UpdateInStore_Error_445_Empty_New_Element()
+        {
+            AddParents();
+
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+
+            var response = DevKit.Add<LogList, Log>(Log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var update = new Log()
+            {
+                Uid = Log.Uid,
+                UidWell = Log.UidWell,
+                UidWellbore = Log.UidWellbore
+            };
+
+            update.LogCurveInfo = new List<LogCurveInfo>
+            {
+                new LogCurveInfo { Uid = "ExtraCurve" }
+            };
+
+            var updateResponse = DevKit.Update<LogList, Log>(update);
+            Assert.AreEqual((short)ErrorCodes.EmptyNewElementsOrAttributes, updateResponse.Result);
         }
 
         #region Helper Methods
