@@ -57,6 +57,12 @@ namespace PDS.Witsml.Server.Data.Wellbores
         }
 
         [TestMethod]
+        public void Wellbore141_Ensure_Creates_Wellbore_With_Default_Values()
+        {
+            DevKit.EnsureAndAssert<WellboreList, Wellbore>(Wellbore);
+        }
+
+        [TestMethod]
         public async Task Wellbore141_PutObject_Can_Add_Wellbore()
         {
             AddParents();

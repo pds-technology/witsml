@@ -57,6 +57,12 @@ namespace PDS.Witsml.Server.Data.Channels
         }
 
         [TestMethod]
+        public void Channel200_Ensure_Creates_Channel_With_Default_Values()
+        {
+            DevKit.EnsureAndAssert(Channel);
+        }
+
+        [TestMethod]
         public async Task Channel200_PutObject_Can_Add_Channel()
         {
             AddParents();

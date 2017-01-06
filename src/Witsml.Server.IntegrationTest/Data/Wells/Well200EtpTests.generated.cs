@@ -57,6 +57,12 @@ namespace PDS.Witsml.Server.Data.Wells
         }
 
         [TestMethod]
+        public void Well200_Ensure_Creates_Well_With_Default_Values()
+        {
+            DevKit.EnsureAndAssert(Well);
+        }
+
+        [TestMethod]
         public async Task Well200_PutObject_Can_Add_Well()
         {
             AddParents();

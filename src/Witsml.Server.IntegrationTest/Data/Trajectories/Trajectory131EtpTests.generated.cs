@@ -57,6 +57,12 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
+        public void Trajectory131_Ensure_Creates_Trajectory_With_Default_Values()
+        {
+            DevKit.EnsureAndAssert<TrajectoryList, Trajectory>(Trajectory);
+        }
+
+        [TestMethod]
         public async Task Trajectory131_PutObject_Can_Add_Trajectory()
         {
             AddParents();
