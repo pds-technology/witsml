@@ -42,7 +42,7 @@ namespace PDS.Witsml.Server.Linq
             //var url = "http://localhost:5050/WitsmlStore.svc"; // TestApp
 
             DevKit = new DevKit141Aspect(TestContext, url);
-            Context = new Witsml141Context(url);
+            Context = new Witsml141Context(DevKit.ConnectionUrl);
 
             Well = new Well() { Name = DevKit.Name("Well 01"), TimeZone = DevKit.TimeZone, Uid = DevKit.Uid() };
             Wellbore = new Wellbore() { UidWell = Well.Uid, NameWell = Well.Name, Name = DevKit.Name("Wellbore 01-01"), Uid = DevKit.Uid() };
