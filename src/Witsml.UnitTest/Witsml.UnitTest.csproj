@@ -116,6 +116,7 @@
     <Compile Include="FrameworkExtensionsTests.cs" />
     <Compile Include="OptionsInTests.cs" />
     <Compile Include="EtpUrisTests.cs" />
+    <Compile Include="TaskRunnerTests.cs" />
     <Compile Include="TextFieldParserTests.cs" />
     <Compile Include="UnitsTests.cs" />
     <Compile Include="WitsmlParserTests.cs" />

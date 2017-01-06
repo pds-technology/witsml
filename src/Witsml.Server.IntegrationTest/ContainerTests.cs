@@ -19,7 +19,6 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Framework;
-using PDS.Witsml.Server.Data;
 using Shouldly;
 
 namespace PDS.Witsml.Server
