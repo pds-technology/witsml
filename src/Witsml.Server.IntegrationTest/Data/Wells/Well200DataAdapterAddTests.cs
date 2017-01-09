@@ -16,68 +16,32 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-/*
 using System;
 using System.Linq;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML200;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MongoDB.Driver;
-using PDS.Framework;
-using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
-    [TestClass]
-    public class Well200DataAdapterAddTests
+    public partial class Well200DataAdapterAddTests
     {
-        private DevKit200Aspect DevKit;
-        private IDatabaseProvider Provider;
-        private IWitsmlDataAdapter<Well> WellAdapter;
-
-        private Well Well1;
-        private Well Well2;
-
-        [TestInitialize]
-        public void TestSetUp()
-        {
-            var container = ContainerFactory.Create();
-            DevKit = new DevKit200Aspect();
-            Provider = new DatabaseProvider(container, new MongoDbClassMapper());
-
-            WellAdapter = new Well200DataAdapter(Provider);
-
-            Well1 = new Well()
-            {
-                Citation = DevKit.Citation("Well 01"),
-                GeographicLocationWGS84 = DevKit.Location(),
-                TimeZone = DevKit.TimeZone,
-                Uuid = DevKit.Uid(),
-            };
-
-            Well2 = new Well()
-            {
-                Citation = DevKit.Citation("Well 02"),
-                GeographicLocationWGS84 = DevKit.Location(),
-                TimeZone = DevKit.TimeZone,
-            };
-        }
-
         [TestMethod]
-        public void Well_can_be_serialized_to_xml()
+        public void Well200DataAdapter_Well_Can_Be_Serialized_To_Xml()
         {
-            var xml = EnergisticsConverter.ObjectToXml(Well1);
+            var xml = EnergisticsConverter.ObjectToXml(Well);
             Console.WriteLine(xml);
             Assert.IsNotNull(xml);
         }
 
         [TestMethod]
-        public void Well_can_be_parsed_and_validated()
+        public void Well200DataAdapter_Well_Can_Be_Parsed_And_Validated()
         {
-            const string xml = @"<?xml version=""1.0""?>
+            var wellTitle = "Well 01 - 160316-000508-840";
+            string xml = @"<?xml version=""1.0""?>
                 <Well xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" uuid=""81f60891-b69c-4515-870f-0d1954dcac11"" xmlns=""http://www.energistics.org/energyml/data/witsmlv2"">
                     <Citation xmlns=""http://www.energistics.org/energyml/data/commonv2"">
-                        <Title>Well 01 - 160316-000508-840</Title>
+                        <Title>" + wellTitle + @"</Title>
                         <Originator>DevKit200Aspect</Originator>
                         <Creation>2016-03-16T05:05:08.8416296Z</Creation>
                         <Format>PDS.Witsml.Server.IntegrationTest, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</Format>
@@ -85,40 +49,28 @@ namespace PDS.Witsml.Server.Data.Wells
                     <PcInterest uom=""%"">100</PcInterest>
                     <TimeZone>-06:00</TimeZone>
                     <GeographicLocationWGS84>
-                        <Latitude>28.5597</Latitude>
-                        <Longitude>-90.6671</Longitude>
+                        <Latitude uom=""dega"">28.5597</Latitude>
+                        <Longitude uom=""dega"">-90.6671</Longitude>
                         <Crs xmlns:q1=""http://www.energistics.org/energyml/data/commonv2"" xsi:type=""q1:GeodeticEpsgCrs"">
                             <q1:EpsgCode>26914</q1:EpsgCode>
                         </Crs>
                     </GeographicLocationWGS84>
                 </Well>";
 
-            var context = new RequestContext(Functions.AddToStore, ObjectTypes.Well, xml, null, null);
-            var parser = new WitsmlQueryParser(context);
-
-            //WellAdapter.Validate(parser);
+            var document = WitsmlParser.Parse(xml);
+            var well = WitsmlParser.Parse<Well>(document.Root);
+            Assert.IsNotNull(well);
+            Assert.AreEqual(wellTitle, well.Citation.Title);
         }
 
         [TestMethod]
-        public void CanAddAndGetSingleWellWithUuid()
+        public void Well200DataAdapter_Can_Add_And_Get_Well()
         {
-            WellAdapter.Add(DevKit.Parser(Well1), Well1);
+            AddParents();
+            DevKit.AddAndAssert(Well);
 
-            var well1 = WellAdapter.Get(Well1.GetUri());
-
-            Assert.AreEqual(Well1.Citation.Title, well1.Citation.Title);
-        }
-
-        [TestMethod]
-        public void CanAddAndGetSingleWellWithoutUuid()
-        {
-            WellAdapter.Add(DevKit.Parser(Well2), Well2);
-
-            var well2 = Provider.GetDatabase().GetCollection<Well>(ObjectNames.Well200).AsQueryable()
-                .First(x => x.Citation.Title == Well2.Citation.Title);
-
-            Assert.AreEqual(Well2.Citation.Title, well2.Citation.Title);
+            var addedWellbore = DevKit.GetAndAssert(Well);
+            Assert.AreEqual(Well.Citation.Title, addedWellbore.Citation.Title);
         }
     }
 }
-*/

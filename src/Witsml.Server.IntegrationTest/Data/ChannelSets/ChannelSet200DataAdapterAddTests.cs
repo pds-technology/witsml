@@ -16,72 +16,70 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-/*
+using System.Collections.Generic;
 using System.Linq;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Framework;
-using PDS.Witsml.Data.Logs;
+using PDS.Witsml.Data;
+using PDS.Witsml.Data.Channels;
+using PDS.Witsml.Server.Data.Channels;
 
 namespace PDS.Witsml.Server.Data.ChannelSets
 {
-    [TestClass]
-    public class ChannelSet200DataAdapterAddTests
+    public partial class ChannelSet200DataAdapterAddTests
     {
-        private DevKit200Aspect DevKit;
-        private Log200Generator LogGenerator;
-        private IDatabaseProvider Provider;
-        private IWitsmlDataAdapter<ChannelSet> ChannelSetAdapter;
-        private ChannelDataChunkAdapter ChunkAdapter;
+        private IChannelDataProvider _channelDataProvider;
 
-        [TestInitialize]
-        public void TestSetUp()
+        partial void BeforeEachTest()
         {
-            var container = ContainerFactory.Create();
-            DevKit = new DevKit200Aspect();
-            LogGenerator = new Log200Generator();
-            Provider = new DatabaseProvider(container, new MongoDbClassMapper());
-
-            ChunkAdapter = new ChannelDataChunkAdapter(Provider);
-            ChannelSetAdapter = new ChannelSet200DataAdapter(Provider, ChunkAdapter);
-
-            var log = new Log();
-            var mdChannelIndex = LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
-            DevKit.InitHeader(log, LoggingMethod.MWD, mdChannelIndex);
-
-            ChannelSet = log.ChannelSet.First();
+            _channelDataProvider = DevKit.Container.Resolve<IWitsmlDataAdapter<ChannelSet>>() as IChannelDataProvider;
         }
 
         [TestMethod]
-        [Ignore, Description("Move tests to the MongoDb.IntegrationTest library")]
-        public void ChannelSet_can_be_added_with_depth_data()
+        public void ChannelSet200DataAdapter_Can_Add_ChannelSet_With_Depth_Data()
         {
-            ChannelSetAdapter.Add(DevKit.Parser(ChannelSet), ChannelSet);
-        }
+            var dataGenerator = new DataGenerator();
 
-        [TestMethod]
-        [Ignore, Description("Move tests to the MongoDb.IntegrationTest library")]
-        public void ChannelSet_can_be_updated_with_middle_depth_data()
-        {
-            // Create
-            ChannelSetAdapter.Add(DevKit.Parser(ChannelSet), ChannelSet);
+            var channelIndex = new ChannelIndex { Direction = IndexDirection.increasing, IndexType = ChannelIndexType.measureddepth, Mnemonic = "MD", Uom = UnitOfMeasure.m };
+            ChannelSet.Index = dataGenerator.List(channelIndex);
+            ChannelSet.Channel = new List<Channel>
+            {
+                new Channel()
+                {
+                    Uuid = dataGenerator.Uid(),
+                    Citation = new Citation {Title = dataGenerator.Name("ChannelSetTest")},
+                    Mnemonic = "MSG",
+                    Uom = null,
+                    ChannelClass = dataGenerator.ToPropertyKindReference("velocity"),
+                    DataType = EtpDataType.@long,
+                    GrowingStatus = ChannelStatus.active,
+                    Index = ChannelSet.Index,
+                    StartIndex = new DepthIndexValue(),
+                    EndIndex = new DepthIndexValue(),
+                    SchemaVersion = OptionsIn.DataVersion.Version200.Value
+                }
+            };
 
             ChannelSet.Data = new ChannelData();
 
-            // Add data that will update in the middle
-            ChannelSet.Data.Data = @"[
-                            [ [0.11 ], [ [ 1.11, false ], null, 3.11 ] ],
-                            [ [100.11 ], [ [ 1.11, false ], null, 3.11 ] ],
-                            [ [150.11 ], [ [ 1.11, false ], null, 3.11 ] ],
-                            [ [200.11 ], [ [ 1.11, false ], null, 3.11 ] ],
-                            [ [250.11 ], [ [ 1.11, false ], null, 3.11 ] ],
-                        ]";
+            ChannelSet.SetData(@"[
+                [ [0 ], [ 3.11 ] ],
+                [ [100 ], [ 3.12 ] ],
+                [ [150 ], [ 3.14 ] ],
+                [ [200 ], [ 3.15 ] ],
+            ]");
 
-            // Update
-            ChannelSetAdapter.Update(DevKit.Parser(ChannelSet), ChannelSet);
+            DevKit.AddAndAssert(ChannelSet);
+
+            var mnemonics = ChannelSet.Index.Select(i => i.Mnemonic).Concat(ChannelSet.Channel.Select(c => c.Mnemonic)).ToList();
+            var dataOut = _channelDataProvider.GetChannelData(ChannelSet.GetUri(), new Range<double?>(0, null), mnemonics, null);
+
+            Assert.AreEqual(4, dataOut.Count);
+            Assert.AreEqual(2, dataOut[1].Count);
+            Assert.AreEqual(3.14, dataOut[2][1][0]);
         }
     }
 }
-*/

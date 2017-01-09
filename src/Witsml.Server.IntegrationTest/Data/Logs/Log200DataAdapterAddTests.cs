@@ -16,7 +16,10 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
+using System.IO;
 using System.Linq;
+using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -88,6 +91,132 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(5, dataOut[0][1].Count);
             Assert.AreEqual(msgValue, dataOut[0][1][3]);
             Assert.IsTrue(flushRate > 1000);
+        }
+
+        [TestMethod]
+        public void Log200DataAdapter_Can_Add_And_Get_Log()
+        {
+            AddParents();
+
+            var mdChannelIndex = LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
+            DevKit.InitHeader(Log, LoggingMethod.MWD, mdChannelIndex);
+
+            DevKit.AddAndAssert(Log);
+            var log = DevKit.GetAndAssert(Log);
+
+            Assert.AreEqual(Log.Citation.Title, log.Citation.Title);
+            Assert.AreEqual(Log.Uuid, log.Uuid);
+        }
+
+        [TestMethod]
+        public void Log200DataAdapter_Log_Can_Be_Added_With_Secondary_Index()
+        {
+            AddParents();
+
+            var mdChannelIndex = DevKit.LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
+            DevKit.InitHeader(Log, LoggingMethod.MWD, mdChannelIndex);
+            var secondaryIndex = DevKit.LogGenerator.CreateDateTimeIndex();
+            var channelSet = Log.ChannelSet.First();
+            channelSet.Index.Add(secondaryIndex);
+            DevKit.CreateMockChannelSetData(channelSet, channelSet.Index);
+
+            File.WriteAllText("TestData/DepthLogWithSecondaryIndex-2.0-Well.xml", WitsmlParser.ToXml(Well));
+            File.WriteAllText("TestData/DepthLogWithSecondaryIndex-2.0-Wellbore.xml", WitsmlParser.ToXml(Wellbore));
+            File.WriteAllText("TestData/DepthLogWithSecondaryIndex-2.0.xml", WitsmlParser.ToXml(Log));
+
+            DevKit.AddAndAssert(Log);
+            var log = DevKit.GetAndAssert(Log);
+            Assert.AreEqual(Log.Citation.Title, log.Citation.Title);
+            Assert.AreEqual(Log.Uuid, log.Uuid);
+        }
+
+        [TestMethod]
+        public void Log200DataAdapter_Log_Can_Be_Added_With_Increasing_Log_Data()
+        {
+            AddParents();
+
+            var numDataValue = 20;
+            var mdChannelIndex = DevKit.LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
+            DevKit.InitHeader(Log, LoggingMethod.MWD, mdChannelIndex);
+            var secondaryIndex = DevKit.LogGenerator.CreateDateTimeIndex();
+            var channelSet = Log.ChannelSet.First();
+            channelSet.Index.Add(secondaryIndex);
+
+            // Generate rows of data
+            DevKit.LogGenerator.GenerateChannelData(Log.ChannelSet, numDataValue);
+
+            File.WriteAllText("TestData/DepthLog-2.0-Well.xml", EnergisticsConverter.ObjectToXml(Well));
+            File.WriteAllText("TestData/DepthLog-2.0-Wellbore.xml", EnergisticsConverter.ObjectToXml(Wellbore));
+            File.WriteAllText("TestData/DepthLog-2.0.xml", EnergisticsConverter.ObjectToXml(Log));
+
+            DevKit.AddAndAssert(Log);
+
+            var mnemonics = channelSet.Index.Select(i => i.Mnemonic).Concat(channelSet.Channel.Select(c => c.Mnemonic)).ToList();
+            var logData = _channelDataProvider.GetChannelData(channelSet.GetUri(), new Range<double?>(0, null), mnemonics, null);
+
+            // Test that the rows of data before and after are the same.
+            Assert.AreEqual(numDataValue, logData.Count);
+
+            var start = logData[0][0][0];
+            var end = logData[numDataValue - 1][0][0];
+
+            Assert.IsTrue(double.Parse(end.ToString()) > double.Parse(start.ToString()));
+        }
+
+        [TestMethod]
+        public void Log200DataAdapter_Log_Can_Be_Added_With_Decreasing_Log_Data()
+        {
+            AddParents();
+
+            var numDataValue = 20;
+            var secondaryIndex = DevKit.LogGenerator.CreateDateTimeIndex();
+
+            var mdChannelIndexDecreasing = DevKit.LogGenerator.CreateMeasuredDepthIndex(IndexDirection.decreasing);
+            DevKit.InitHeader(Log, LoggingMethod.surface, mdChannelIndexDecreasing);
+            var channelSet = Log.ChannelSet.First();
+            channelSet.Index.Add(secondaryIndex);
+
+            // Generate rows of data
+            DevKit.LogGenerator.GenerateChannelData(Log.ChannelSet, numDataValue);
+            DevKit.AddAndAssert(Log);
+            var log = DevKit.GetAndAssert(Log);
+
+            var mnemonics = channelSet.Index.Select(i => i.Mnemonic).Concat(channelSet.Channel.Select(c => c.Mnemonic)).ToList();
+            var logData = _channelDataProvider.GetChannelData(channelSet.GetUri(), new Range<double?>(null, null), mnemonics, null);
+
+            // Test that the rows of data before and after are the same.
+            Assert.AreEqual(numDataValue, logData.Count);
+
+            var start = logData[0][0][0];
+            var end = logData[numDataValue - 1][0][0];
+
+            // Test the log is still decreasing
+            Assert.IsTrue(double.Parse(end.ToString()) < double.Parse(start.ToString()));
+        }
+
+        [TestMethod]
+        public void Log200DataAdapter_Log_Can_Be_Added_With_Increasing_Time_Data()
+        {
+            AddParents();
+
+            var numDataValue = 150;
+            var dtChannelIndex = DevKit.LogGenerator.CreateDateTimeIndex();
+            DevKit.InitHeader(Log, LoggingMethod.surface, dtChannelIndex);
+            var secondaryIndex = DevKit.LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
+            var channelSet = Log.ChannelSet.First();
+            channelSet.Index.Add(secondaryIndex);
+
+            // Generate 150 rows of data
+            DevKit.LogGenerator.GenerateChannelData(Log.ChannelSet, numDataValue);
+
+            File.WriteAllText("TestData/TimeLog-2.0-Well.xml", EnergisticsConverter.ObjectToXml(Well));
+            File.WriteAllText("TestData/TimeLog-2.0-Wellbore.xml", EnergisticsConverter.ObjectToXml(Wellbore));
+            File.WriteAllText("TestData/TimeLog-2.0.xml", EnergisticsConverter.ObjectToXml(Log));
+
+            DevKit.AddAndAssert(Log);
+            var log = DevKit.GetAndAssert(Log);
+            Assert.AreEqual(Log.Citation.Title, log.Citation.Title);
+            Assert.AreEqual(Log.Uuid, log.Uuid);
         }
     }
 }
