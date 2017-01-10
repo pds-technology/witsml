@@ -20,9 +20,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
+using System.Xml.Serialization;
 using PDS.Framework.Properties;
 
 namespace PDS.Framework
@@ -160,6 +162,37 @@ namespace PDS.Framework
             return attribute != null
                 ? attribute.Description
                 : value.ToString();
+        }
+
+        /// <summary>
+        /// Parses the enum.
+        /// </summary>
+        /// <param name="enumType">Type of the enum.</param>
+        /// <param name="enumValue">The enum value.</param>
+        /// <returns></returns>
+        public static object ParseEnum(this Type enumType, string enumValue)
+        {
+            if (Enum.IsDefined(enumType, enumValue))
+            {
+                return Enum.Parse(enumType, enumValue);
+            }
+
+            var enumMember = enumType.GetMembers().FirstOrDefault(x =>
+            {
+                if (x.Name.EqualsIgnoreCase(enumValue))
+                    return true;
+
+                var xmlEnumAttrib = x.GetCustomAttribute<XmlEnumAttribute>();
+                return xmlEnumAttrib != null && xmlEnumAttrib.Name.EqualsIgnoreCase(enumValue);
+            });
+
+            // must be a valid enumeration member
+            if (!enumType.IsEnum || enumMember == null)
+            {
+                throw new ArgumentException();
+            }
+
+            return Enum.Parse(enumType, enumMember.Name);
         }
 
         /// <summary>

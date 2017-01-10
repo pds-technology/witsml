@@ -49,6 +49,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Reflection.Context" />
     <Reference Include="System.Security" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\External\GlobalAssemblyInfo.cs">

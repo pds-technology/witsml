@@ -782,27 +782,14 @@ namespace PDS.Witsml.Data
         /// <exception cref="WitsmlException"></exception>
         protected object ParseEnum(Type enumType, string enumValue)
         {
-            if (Enum.IsDefined(enumType, enumValue))
+            try
             {
-                return Enum.Parse(enumType, enumValue);
+                return enumType.ParseEnum(enumValue);
             }
-
-            var enumMember = enumType.GetMembers().FirstOrDefault(x =>
+            catch (ArgumentException ex)
             {
-                if (x.Name.EqualsIgnoreCase(enumValue))
-                    return true;
-
-                var xmlEnumAttrib = x.GetCustomAttribute<XmlEnumAttribute>();
-                return xmlEnumAttrib != null && xmlEnumAttrib.Name.EqualsIgnoreCase(enumValue);
-            });
-
-            // must be a valid enumeration member
-            if (!enumType.IsEnum || enumMember == null)
-            {
-                throw new WitsmlException(ErrorCodes.InvalidUnitOfMeasure);
+                throw new WitsmlException(ErrorCodes.InvalidUnitOfMeasure, ex);
             }
-
-            return Enum.Parse(enumType, enumMember.Name);
         }
 
         /// <summary>
