@@ -315,6 +315,56 @@ namespace PDS.Witsml.Server
         }
 
         /// <summary>
+        /// Gets the resources and asserts.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="exist">if set to <c>true</c> resources exist; otherwise, <c>false</c>.</param>
+        /// <returns>A collection of resources.</returns>
+        protected async Task<List<ProtocolEventArgs<GetResourcesResponse, string>>> GetResourcesAndAssert(EtpUri uri, bool exist = true)
+        {
+            var handler = _client.Handler<IDiscoveryCustomer>();
+
+            // Register event handler for OpenSession response
+            var onOpenSession = HandleAsync<OpenSession>(
+                x => _client.Handler<ICoreClient>().OnOpenSession += x);
+
+            // Wait for Open connection
+            var isOpen = await _client.OpenAsync();
+            Assert.IsTrue(isOpen);
+
+            // Wait for OpenSession
+            var openArgs = await onOpenSession;
+
+            // Verify OpenSession and Supported Protocols
+            VerifySessionWithProtcols(openArgs, Protocols.Discovery, Protocols.Store);
+
+            // Register event handler for GetResourcesResponse
+            var onGetResourcesResponse = HandleMultiPartAsync<GetResourcesResponse, string>(
+                x => handler.OnGetResourcesResponse += x);
+
+            // Send GetResources message for specified URI
+            var messageId = handler.GetResources(uri);
+
+            // Wait for GetResourcesResponse
+            var args = await onGetResourcesResponse;
+            Assert.IsNotNull(args);
+            Assert.AreEqual(exist, args.Any());
+
+            // Check Resource URIs
+            foreach (var arg in args)
+            {
+                VerifyCorrelationId(arg, messageId);
+                Assert.IsNotNull(arg?.Message?.Resource?.Uri);
+
+                var resourceUri = new EtpUri(arg.Message.Resource.Uri);
+                Assert.AreEqual(uri.Family, resourceUri.Family);
+                Assert.AreEqual(uri.Version, resourceUri.Version);
+            }
+
+            return args;
+        }
+
+        /// <summary>
         /// Gets the dataObject from the URI and asserts.
         /// </summary>
         /// <param name="handler">The handler.</param>

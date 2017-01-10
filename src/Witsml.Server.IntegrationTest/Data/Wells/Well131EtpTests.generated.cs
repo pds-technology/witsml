@@ -31,7 +31,10 @@ using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
+using Energistics.Datatypes;
 using Energistics.Protocol;
+using Energistics.Protocol.Core;
+using Energistics.Protocol.Discovery;
 using Energistics.Protocol.Store;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -64,6 +67,18 @@ namespace PDS.Witsml.Server.Data.Wells
 
             DevKit.EnsureAndAssert<WellList, Well>(Well);
 
+        }
+
+        [TestMethod]
+        public async Task Well131_GetResources_Can_Get_All_Well_Resources()
+        {
+            AddParents();
+            DevKit.AddAndAssert<WellList, Well>(Well);
+
+            var uri = Well.GetUri();
+            var folderUri = uri.Parent.Append(uri.ObjectType);
+
+            await GetResourcesAndAssert(folderUri);
         }
 
         [TestMethod]
@@ -165,6 +180,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
+
             Assert.IsNull(result.CommonData.Comments);
 
         }

@@ -31,7 +31,10 @@ using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML200;
 using Energistics.DataAccess.WITSML200.ComponentSchemas;
 using Energistics.DataAccess.WITSML200.ReferenceData;
+using Energistics.Datatypes;
 using Energistics.Protocol;
+using Energistics.Protocol.Core;
+using Energistics.Protocol.Discovery;
 using Energistics.Protocol.Store;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -64,6 +67,18 @@ namespace PDS.Witsml.Server.Data.Logs
 
             DevKit.EnsureAndAssert(Log);
 
+        }
+
+        [TestMethod]
+        public async Task Log200_GetResources_Can_Get_All_Log_Resources()
+        {
+            AddParents();
+            DevKit.AddAndAssert(Log);
+
+            var uri = Log.GetUri();
+            var folderUri = uri.Parent.Append(uri.ObjectType);
+
+            await GetResourcesAndAssert(folderUri);
         }
 
         [TestMethod]
@@ -164,6 +179,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
+
             Assert.IsNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
 
         }
