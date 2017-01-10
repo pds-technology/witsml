@@ -19,6 +19,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Avro.Specific;
@@ -32,7 +34,6 @@ using Energistics.Protocol;
 using Energistics.Protocol.Core;
 using Energistics.Protocol.Discovery;
 using Energistics.Protocol.Store;
-using Energistics.Security;
 using log4net;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Framework;
@@ -44,7 +45,6 @@ namespace PDS.Witsml.Server
     /// </summary>
     public abstract class IntegrationTestBase
     {
-        protected CancellationTokenSource _tokenSource;
         protected EtpSocketServer _server;
         protected EtpClient _client;
 
@@ -68,18 +68,32 @@ namespace PDS.Witsml.Server
         /// <param name="container">The composition container.</param>
         protected void EtpSetUp(IContainer container)
         {
+            // Get next available port number
+            var listener = new TcpListener(IPAddress.Loopback, 0);
+            listener.Start();
+            var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+            listener.Stop();
+
+            // Update EtpServerUrl setting
+            var uri = new Uri(TestSettings.EtpServerUrl);
+            var url = TestSettings.EtpServerUrl.Replace($":{uri.Port}", $":{port}");
+
             _server?.Dispose();
-            _server = CreateServer();
+            _server = CreateServer(port);
 
             _client?.Dispose();
-            _client = CreateClient();
+            _client = CreateClient(url);
+
+            // Resolve dependencies early to avoid object disposed
+            var discovery = container.Resolve<IDiscoveryStore>();
+            var store = container.Resolve<IStoreStore>();
 
             // Register server handlers
-            //_server.Register(() => container.Resolve<IDiscoveryStore>());
-            _server.Register(() => container.Resolve<IStoreStore>());
+            _server.Register(() => discovery);
+            _server.Register(() => store);
 
             // Register client handlers
-            //_client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();
+            _client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();
             _client.Register<IStoreCustomer, StoreCustomerHandler>();
         }
 
@@ -96,12 +110,11 @@ namespace PDS.Witsml.Server
         /// <summary>
         /// Creates an <see cref="EtpSocketServer"/> instance.
         /// </summary>
+        /// <param name="port">The port number.</param>
         /// <returns>A new <see cref="EtpSocketServer"/> instance.</returns>
-        protected EtpSocketServer CreateServer()
+        protected EtpSocketServer CreateServer(int port)
         {
             var version = GetType().Assembly.GetName().Version.ToString();
-            var port = new Uri(TestSettings.EtpServerUrl).Port;
-
             var server = new EtpSocketServer(port, GetType().AssemblyQualifiedName, version);
             server.Output = server.Logger.Info;
             return server;
@@ -111,13 +124,14 @@ namespace PDS.Witsml.Server
         /// Creates an <see cref="EtpClient"/> instance configurated with the
         /// current connection and authorization parameters.
         /// </summary>
+        /// <param name="url">The WebSocket URL.</param>
         /// <returns>A new <see cref="EtpClient"/> instance.</returns>
-        protected EtpClient CreateClient()
+        protected EtpClient CreateClient(string url)
         {
             var version = GetType().Assembly.GetName().Version.ToString();
-            var headers = Authorization.Basic(TestSettings.Username, TestSettings.Password);
+            var headers = Energistics.Security.Authorization.Basic(TestSettings.Username, TestSettings.Password);
 
-            var client = new EtpClient(TestSettings.EtpServerUrl, GetType().AssemblyQualifiedName, version, headers);
+            var client = new EtpClient(url ?? TestSettings.EtpServerUrl, GetType().AssemblyQualifiedName, version, headers);
             client.Output = client.Logger.Info;
             return client;
         }
@@ -319,13 +333,12 @@ namespace PDS.Witsml.Server
             handler.GetObject(uri);
             ProtocolEventArgs<Energistics.Protocol.Store.Object> args = null;
 
-            // Create CancellationTokenSource
-            _tokenSource = new CancellationTokenSource();
+            var tokenSource = new CancellationTokenSource();
 
             var taskList = new List<Task>()
             {
-                WaitFor(onObject),
-                WaitFor(onProtocolException)
+                WaitFor(onObject, tokenSource.Token),
+                WaitFor(onProtocolException, tokenSource.Token)
             };
 
             // Start each event
@@ -335,7 +348,7 @@ namespace PDS.Witsml.Server
             await Task.WhenAny(taskList);
 
             // Cancel the rest of the task
-            _tokenSource.Cancel();
+            tokenSource.Cancel();
 
             // Wait for the rest to be finished
             await Task.WhenAll(taskList);
@@ -356,6 +369,7 @@ namespace PDS.Witsml.Server
                 Assert.IsNotNull(exceptionArgs?.Message);
                 Assert.AreEqual((int)errorCode, exceptionArgs.Message.ErrorCode);
             }
+
             return args;
         }
 
@@ -377,13 +391,12 @@ namespace PDS.Witsml.Server
             // Send PutObject message for new data object
             var messageId = handler.PutObject(dataObject);
 
-            // Create CancellationTokenSource
-            _tokenSource = new CancellationTokenSource();
+            var tokenSource = new CancellationTokenSource();
 
             var taskList = new List<Task>
             {
-                WaitFor(onAcknowledge),
-                WaitFor(onProtocolException)
+                WaitFor(onAcknowledge, tokenSource.Token),
+                WaitFor(onProtocolException, tokenSource.Token)
             };
 
             // Start each event
@@ -393,7 +406,7 @@ namespace PDS.Witsml.Server
             await Task.WhenAny(taskList);
 
             // Cancel the rest of the task
-            _tokenSource.Cancel();
+            tokenSource.Cancel();
 
             // Wait for the rest to be finished
             await Task.WhenAll(taskList);
@@ -436,13 +449,12 @@ namespace PDS.Witsml.Server
             // Send GetObject for non-existant URI
             var messageId = handler.DeleteObject(uri);
 
-            // Create CancellationTokenSource
-            _tokenSource = new CancellationTokenSource();
+            var tokenSource = new CancellationTokenSource();
 
             var taskList = new List<Task>
             {
-                WaitFor(onAcknowledge),
-                WaitFor(onProtocolException)
+                WaitFor(onAcknowledge, tokenSource.Token),
+                WaitFor(onProtocolException, tokenSource.Token)
             };
 
             // Start each event
@@ -452,7 +464,7 @@ namespace PDS.Witsml.Server
             await Task.WhenAny(taskList);
 
             // Cancel the rest of the task
-            _tokenSource.Cancel();
+            tokenSource.Cancel();
 
             // Wait for the rest to be finished
             await Task.WhenAll(taskList);
@@ -475,13 +487,13 @@ namespace PDS.Witsml.Server
             }
         }
 
-        protected Task WaitFor(Task task)
+        protected Task WaitFor(Task task, CancellationToken token)
         {
             return new Task(() =>
             {
                 try
                 {
-                    task.Wait(_tokenSource.Token);
+                    task.Wait(token);
                 }
                 catch (Exception)
                 {
