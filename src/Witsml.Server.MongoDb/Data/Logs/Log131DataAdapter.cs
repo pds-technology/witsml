@@ -161,7 +161,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns></returns>
         protected override LogCurveInfo CreateLogCurveInfo(ChannelIndexInfo indexInfo)
         {
-            return CreateLogCurveInfo(indexInfo.Mnemonic, indexInfo.Unit, indexInfo.DataType, indexInfo.IsTimeIndex, 0);
+            var indexDataType = indexInfo.IsTimeIndex ? LogDataType.datetime.ToString() : LogDataType.@double.ToString();
+            return CreateLogCurveInfo(indexInfo.Mnemonic, indexInfo.Unit, indexDataType, indexInfo.IsTimeIndex, 0);
         }
 
         /// <summary>
@@ -176,9 +177,8 @@ namespace PDS.Witsml.Server.Data.Logs
         protected override LogCurveInfo CreateLogCurveInfo(string mnemonic, string unit, string dataType, bool isTimeIndex, int columnIndex)
         {
             LogDataType logDataType;
-
-            if (!Enum.TryParse(dataType, out logDataType))
-                logDataType = isTimeIndex ? LogDataType.datetime : LogDataType.@double;
+            var logDataTypeExists = Enum.TryParse<LogDataType>(dataType, out logDataType);
+            logDataType = logDataTypeExists ? logDataType : LogDataType.@double;
 
             return new LogCurveInfo
             {
