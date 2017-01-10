@@ -341,9 +341,10 @@ namespace PDS.Witsml.Server
         /// Gets the resources and asserts.
         /// </summary>
         /// <param name="uri">The URI.</param>
+        /// <param name="errorCode">The error code.</param>
         /// <param name="exist">if set to <c>true</c> resources exist; otherwise, <c>false</c>.</param>
         /// <returns>A collection of resources.</returns>
-        protected async Task<List<ProtocolEventArgs<GetResourcesResponse, string>>> GetResourcesAndAssert(EtpUri uri, bool exist = true)
+        protected async Task<List<ProtocolEventArgs<GetResourcesResponse, string>>> GetResourcesAndAssert(EtpUri uri, EtpErrorCodes? errorCode = null, bool exist = true)
         {
             var handler = _client.Handler<IDiscoveryCustomer>();
 
@@ -351,31 +352,67 @@ namespace PDS.Witsml.Server
             var onGetResourcesResponse = HandleMultiPartAsync<GetResourcesResponse, string>(
                 x => handler.OnGetResourcesResponse += x);
 
+            // Register exception hanlder
+            var onProtocolException = HandleAsync<ProtocolException>(x => handler.OnProtocolException += x);
+
             // Send GetResources message for specified URI
             var messageId = handler.GetResources(uri);
+            List<ProtocolEventArgs<GetResourcesResponse, string>> args = null;
 
-            // Wait for GetResourcesResponse
-            var args = await onGetResourcesResponse;
-            Assert.IsNotNull(args);
-            Assert.AreEqual(exist, args.Any());
+            var tokenSource = new CancellationTokenSource();
 
-            // Check Resource URIs
-            foreach (var arg in args)
+            var taskList = new List<Task>()
             {
-                VerifyCorrelationId(arg, messageId);
-                Assert.IsNotNull(arg?.Message?.Resource?.Uri);
+                WaitFor(onGetResourcesResponse, tokenSource.Token),
+                WaitFor(onProtocolException, tokenSource.Token)
+            };
 
-                var resourceUri = new EtpUri(arg.Message.Resource.Uri);
+            // Start each event
+            taskList.ForEach(task => task.Start());
 
-                if (uri == EtpUri.RootUri)
+            // Wait for a task to finish
+            await Task.WhenAny(taskList);
+
+            // Cancel the rest of the task
+            tokenSource.Cancel();
+
+            // Wait for the rest to be finished
+            await Task.WhenAll(taskList);
+
+            if (onGetResourcesResponse.Status == TaskStatus.RanToCompletion)
+            {
+                // Wait for GetResourcesResponse
+                args = await onGetResourcesResponse;
+                Assert.IsNotNull(args);
+                Assert.AreEqual(exist, args.Any());
+
+                // Check Resource URIs
+                foreach (var arg in args)
                 {
-                    Assert.IsTrue(uri.IsBaseUri);
+                    VerifyCorrelationId(arg, messageId);
+                    Assert.IsNotNull(arg?.Message?.Resource?.Uri);
+
+                    var resourceUri = new EtpUri(arg.Message.Resource.Uri);
+
+                    if (uri == EtpUri.RootUri)
+                    {
+                        Assert.IsTrue(uri.IsBaseUri);
+                    }
+                    else
+                    {
+                        Assert.AreEqual(uri.Family, resourceUri.Family);
+                        Assert.AreEqual(uri.Version, resourceUri.Version);
+                    }
                 }
-                else
-                {
-                    Assert.AreEqual(uri.Family, resourceUri.Family);
-                    Assert.AreEqual(uri.Version, resourceUri.Version);
-                }
+            }
+            if (onProtocolException.Status == TaskStatus.RanToCompletion)
+            {
+                var exceptionArgs = onProtocolException.Result;
+
+                // Assert exception details
+                Assert.IsNotNull(errorCode);
+                Assert.IsNotNull(exceptionArgs?.Message);
+                Assert.AreEqual((int)errorCode, exceptionArgs.Message.ErrorCode);
             }
 
             return args;

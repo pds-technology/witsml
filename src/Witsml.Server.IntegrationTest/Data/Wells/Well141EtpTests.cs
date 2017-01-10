@@ -17,8 +17,10 @@
 //-----------------------------------------------------------------------
 
 using System.Threading.Tasks;
+using Energistics;
 using Energistics.DataAccess.WITSML141;
 using Energistics.Datatypes;
+using Energistics.Protocol.Store;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Server.Data.Wells
@@ -36,6 +38,38 @@ namespace PDS.Witsml.Server.Data.Wells
 
             await RequestSessionAndAssert();
             await GetResourcesAndAssert(new EtpUri(EtpUri.RootUri));
+        }
+
+        [TestMethod]
+        public async Task Well141_GetResources_Can_Detect_Invalid_Uris()
+        {
+            await RequestSessionAndAssert();
+
+            await GetResourcesAndAssert(new EtpUri("eml://unknown141"), EtpErrorCodes.InvalidUri);
+            await GetResourcesAndAssert(new EtpUri("eml://witsml141"));
+            await GetResourcesAndAssert(new EtpUri("eml://witsml141/ChannelSet"));
+        }
+
+        [TestMethod]
+        public async Task Well141_GetObject_Can_Detect_Invalid_Uris()
+        {
+            await RequestSessionAndAssert();
+
+            var handler = _client.Handler<IStoreCustomer>();
+
+            // Get Invalid Object
+            await GetAndAssert(handler, new EtpUri("eml://unknown141/wellz(123)"), EtpErrorCodes.InvalidUri);
+        }
+
+        [TestMethod]
+        public async Task Well141_DeleteObject_Can_Detect_Invalid_Uris()
+        {
+            await RequestSessionAndAssert();
+
+            var handler = _client.Handler<IStoreCustomer>();
+
+            // Get Invalid Object
+            await DeleteAndAssert(handler, new EtpUri("eml://unknown141/wellz(123)"), EtpErrorCodes.InvalidUri);
         }
     }
 }
