@@ -124,21 +124,27 @@ namespace PDS.Witsml.Server.Linq
         [TestMethod]
         public void Witsml131Context_Rig_Can_Query_For_All_Rigs()
         {
-            //AddParents();
+            AddParents();
+            var rig = new Rig { Uid = DevKit.Uid(), Name = DevKit.Name("Rig"), UidWell = Well.Uid, NameWell = Well.Name, UidWellbore = Wellbore.Uid, NameWellbore = Wellbore.Name };
+            DevKit.Proxy.Write(DevKit.New<RigList>(x => x.Rig = DevKit.List(rig)));
+
             var witsmlQuery = Context.Rigs.With(OptionsIn.ReturnElements.IdOnly);
             var rigs = witsmlQuery.ToList();
-            Assert.IsTrue(rigs.Count == 0);
-            //Assert.IsNotNull(rigs.FirstOrDefault(r => r.Uid == Rig.Uid));
+            Assert.IsTrue(rigs.Count > 0);
+            Assert.IsNotNull(rigs.FirstOrDefault(r => r.Uid == rig.Uid));
         }
 
         [TestMethod]
         public void Witsml131Context_Trajectory_Can_Query_For_All_Trajectories()
         {
-            //AddParents();
+            AddParents();
+            var trajectory = new Trajectory { Uid = DevKit.Uid(), Name = DevKit.Name("Trajectory"), UidWell = Well.Uid, NameWell = Well.Name, UidWellbore = Wellbore.Uid, NameWellbore = Wellbore.Name };
+            DevKit.Proxy.Write(DevKit.New<TrajectoryList>(x => x.Trajectory = DevKit.List(trajectory)));
+
             var witsmlQuery = Context.Trajectories.With(OptionsIn.ReturnElements.IdOnly);
             var trajectories = witsmlQuery.ToList();
-            Assert.IsTrue(trajectories.Count == 0);
-            //Assert.IsNotNull(trajectories.FirstOrDefault(t => t.Uid == Trajectory.Uid));
+            Assert.IsTrue(trajectories.Count > 0);
+            Assert.IsNotNull(trajectories.FirstOrDefault(t => t.Uid == trajectory.Uid));
         }
 
         [TestMethod]
