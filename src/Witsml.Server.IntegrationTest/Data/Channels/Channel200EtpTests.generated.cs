@@ -64,18 +64,26 @@ namespace PDS.Witsml.Server.Data.Channels
         [TestMethod]
         public void Channel200_Ensure_Creates_Channel_With_Default_Values()
         {
+
             DevKit.EnsureAndAssert(Channel);
+
         }
 
         [TestMethod]
         public async Task Channel200_GetResources_Can_Get_All_Channel_Resources()
         {
             AddParents();
+
             DevKit.AddAndAssert(Channel);
+
             await RequestSessionAndAssert();
 
             var uri = Channel.GetUri();
-            var folderUri = uri.Parent.Append(uri.ObjectType);
+            var parentUri = uri.Parent;
+
+            await GetResourcesAndAssert(Channel.Wellbore.GetUri());
+
+            var folderUri = parentUri.Append(uri.ObjectType);
             await GetResourcesAndAssert(folderUri);
         }
 
@@ -108,6 +116,7 @@ namespace PDS.Witsml.Server.Data.Channels
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<Channel>(xml);
+
             Assert.IsNotNull(result);
         }
 
@@ -145,7 +154,9 @@ namespace PDS.Witsml.Server.Data.Channels
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<Channel>(xml);
+
             Assert.IsNotNull(result);
+
             Assert.IsNotNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
 
             // Remove Comment from Data Object
@@ -164,10 +175,13 @@ namespace PDS.Witsml.Server.Data.Channels
             var updateXml = args.Message.DataObject.GetXml();
 
             result = Parse<Channel>(updateXml);
+
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
+
             Assert.IsNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
+
         }
     }
 }

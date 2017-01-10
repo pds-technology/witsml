@@ -67,18 +67,26 @@ namespace PDS.Witsml.Server.Data.WbGeometries
         [TestMethod]
         public void WbGeometry131_Ensure_Creates_WbGeometry_With_Default_Values()
         {
+
             DevKit.EnsureAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
+
         }
 
         [TestMethod]
         public async Task WbGeometry131_GetResources_Can_Get_All_WbGeometry_Resources()
         {
             AddParents();
+
             DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
+
             await RequestSessionAndAssert();
 
             var uri = WbGeometry.GetUri();
-            var folderUri = uri.Parent.Append(uri.ObjectType);
+            var parentUri = uri.Parent;
+
+            await GetResourcesAndAssert(parentUri);
+
+            var folderUri = parentUri.Append(uri.ObjectType);
             await GetResourcesAndAssert(folderUri);
         }
 
@@ -111,6 +119,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<WbGeometryList, WbGeometry>(xml);
+
             Assert.IsNotNull(result);
         }
 
@@ -149,7 +158,9 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<WbGeometryList, WbGeometry>(xml);
+
             Assert.IsNotNull(result);
+
             Assert.IsNotNull(result.CommonData.Comments);
 
             // Remove Comment from Data Object
@@ -168,10 +179,13 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             var updateXml = args.Message.DataObject.GetXml();
 
             result = Parse<WbGeometryList, WbGeometry>(updateXml);
+
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
+
             Assert.IsNull(result.CommonData.Comments);
+
         }
     }
 }

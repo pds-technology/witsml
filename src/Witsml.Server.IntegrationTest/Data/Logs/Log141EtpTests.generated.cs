@@ -64,20 +64,26 @@ namespace PDS.Witsml.Server.Data.Logs
         [TestMethod]
         public void Log141_Ensure_Creates_Log_With_Default_Values()
         {
+
             DevKit.EnsureAndAssert<LogList, Log>(Log);
+
         }
 
         [TestMethod]
         public async Task Log141_GetResources_Can_Get_All_Log_Resources()
         {
             AddParents();
+
             DevKit.AddAndAssert<LogList, Log>(Log);
+
             await RequestSessionAndAssert();
 
             var uri = Log.GetUri();
-            await GetResourcesAndAssert(uri);
+            var parentUri = uri.Parent;
 
-            var folderUri = uri.Parent.Append(uri.ObjectType);
+            await GetResourcesAndAssert(parentUri);
+
+            var folderUri = parentUri.Append(uri.ObjectType);
             await GetResourcesAndAssert(folderUri);
         }
 
@@ -110,6 +116,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<LogList, Log>(xml);
+
             Assert.IsNotNull(result);
         }
 
@@ -148,7 +155,9 @@ namespace PDS.Witsml.Server.Data.Logs
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<LogList, Log>(xml);
+
             Assert.IsNotNull(result);
+
             Assert.IsNotNull(result.CommonData.Comments);
 
             // Remove Comment from Data Object
@@ -167,10 +176,13 @@ namespace PDS.Witsml.Server.Data.Logs
             var updateXml = args.Message.DataObject.GetXml();
 
             result = Parse<LogList, Log>(updateXml);
+
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
+
             Assert.IsNull(result.CommonData.Comments);
+
         }
     }
 }

@@ -64,18 +64,26 @@ namespace PDS.Witsml.Server.Data.Attachments
         [TestMethod]
         public void Attachment200_Ensure_Creates_Attachment_With_Default_Values()
         {
+
             DevKit.EnsureAndAssert(Attachment);
+
         }
 
         [TestMethod]
         public async Task Attachment200_GetResources_Can_Get_All_Attachment_Resources()
         {
             AddParents();
+
             DevKit.AddAndAssert(Attachment);
+
             await RequestSessionAndAssert();
 
             var uri = Attachment.GetUri();
-            var folderUri = uri.Parent.Append(uri.ObjectType);
+            var parentUri = uri.Parent;
+
+            await GetResourcesAndAssert(Attachment.Wellbore.GetUri());
+
+            var folderUri = parentUri.Append(uri.ObjectType);
             await GetResourcesAndAssert(folderUri);
         }
 
@@ -108,6 +116,7 @@ namespace PDS.Witsml.Server.Data.Attachments
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<Attachment>(xml);
+
             Assert.IsNotNull(result);
         }
 
@@ -145,7 +154,9 @@ namespace PDS.Witsml.Server.Data.Attachments
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<Attachment>(xml);
+
             Assert.IsNotNull(result);
+
             Assert.IsNotNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
 
             // Remove Comment from Data Object
@@ -164,10 +175,13 @@ namespace PDS.Witsml.Server.Data.Attachments
             var updateXml = args.Message.DataObject.GetXml();
 
             result = Parse<Attachment>(updateXml);
+
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
+
             Assert.IsNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
+
         }
     }
 }

@@ -49,7 +49,7 @@ namespace PDS.Witsml
         /// Gets the <see cref="EtpUri"/> for a given type namespace.
         /// </summary>
         /// <param name="type">The type from which the namespace is derived.</param>
-        /// <returns>The <see cref="EtpUri"/> instance.</returns>
+        /// <returns>An <see cref="EtpUri"/> instance.</returns>
         public static EtpUri GetUriFamily(Type type)
         {
             if (type?.Namespace == null)
@@ -66,7 +66,7 @@ namespace PDS.Witsml
         /// Gets the <see cref="EtpUri"/> for a given <see cref="IDataObject"/> entity.
         /// </summary>
         /// <param name="entity">The <see cref="IDataObject"/> entity.</param>
-        /// <returns>The <see cref="EtpUri"/> instance.</returns>
+        /// <returns>An <see cref="EtpUri"/> instance.</returns>
         public static EtpUri GetUriFamily(this IDataObject entity)
         {
             return GetUriFamily(entity.GetType());
@@ -76,7 +76,7 @@ namespace PDS.Witsml
         /// Gets the <see cref="EtpUri"/> for a given <see cref="IDataObject"/>.
         /// </summary>
         /// <param name="entity">The <see cref="IDataObject"/> entity.</param>
-        /// <returns>The <see cref="EtpUri"/> type</returns>
+        /// <returns>An <see cref="EtpUri"/> instance.</returns>
         public static EtpUri GetUri(this IDataObject entity)
         {
             return (entity as IWellboreObject)?.GetUri()
@@ -89,7 +89,7 @@ namespace PDS.Witsml
         /// Gets the <see cref="EtpUri"/> for a given <see cref="IWellObject"/>.
         /// </summary>
         /// <param name="entity">The <see cref="IWellObject"/> entity.</param>
-        /// <returns>The <see cref="EtpUri"/> instance</returns>
+        /// <returns>An <see cref="EtpUri"/> instance.</returns>
         public static EtpUri GetUri(this IWellObject entity)
         {
             return (entity as IWellboreObject)?.GetUri()
@@ -102,7 +102,7 @@ namespace PDS.Witsml
         /// Gets the <see cref="EtpUri"/> for a given <see cref="IWellboreObject"/>.
         /// </summary>
         /// <param name="entity">The <see cref="IWellboreObject"/> entity.</param>
-        /// <returns>The <see cref="EtpUri"/> instance</returns>
+        /// <returns>An <see cref="EtpUri"/> instance.</returns>
         public static EtpUri GetUri(this IWellboreObject entity)
         {
             return entity.GetUriFamily()
@@ -115,7 +115,7 @@ namespace PDS.Witsml
         /// Gets the <see cref="EtpUri"/> for a given <see cref="Energistics.DataAccess.WITSML200.AbstractObject"/>.
         /// </summary>
         /// <param name="entity">The <see cref="Energistics.DataAccess.WITSML200.AbstractObject"/> entity.</param>
-        /// <returns>The <see cref="EtpUri"/> type</returns>
+        /// <returns>An <see cref="EtpUri"/> instance.</returns>
         public static EtpUri GetUri(this Witsml200.AbstractObject entity)
         {
             return Witsml200
@@ -123,11 +123,25 @@ namespace PDS.Witsml
         }
 
         /// <summary>
+        /// Gets the <see cref="EtpUri"/> for a given <see cref="Energistics.DataAccess.WITSML200.ComponentSchemas.DataObjectReference"/>.
+        /// </summary>
+        /// <param name="reference">The data object reference.</param>
+        /// <returns>An <see cref="EtpUri"/> instance.</returns>
+        public static EtpUri GetUri(this Witsml200.ComponentSchemas.DataObjectReference reference)
+        {
+            var contentType = new EtpContentType(reference.ContentType);
+
+            return string.IsNullOrWhiteSpace(reference.Uri)
+                ? Witsml200.Append(contentType.ObjectType, reference.Uuid)
+                : new EtpUri(reference.Uri);
+        }
+
+        /// <summary>
         /// Gets the <see cref="EtpUri"/> for a given <see cref="Energistics.DataAccess.WITSML131.ComponentSchemas.LogCurveInfo"/>.
         /// </summary>
         /// <param name="entity">The <see cref="Energistics.DataAccess.WITSML131.ComponentSchemas.LogCurveInfo"/> entity.</param>
         /// <param name="log">The log.</param>
-        /// <returns>A <see cref="EtpUri"/> instance.</returns>
+        /// <returns>An <see cref="EtpUri"/> instance.</returns>
         public static EtpUri GetUri(this Witsml131.ComponentSchemas.LogCurveInfo entity, Witsml131.Log log)
         {
             return log.GetUri()
@@ -139,7 +153,7 @@ namespace PDS.Witsml
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="log">The log.</param>
-        /// <returns>A <see cref="EtpUri"/> instance.</returns>
+        /// <returns>An <see cref="EtpUri"/> instance.</returns>
         public static EtpUri GetUri(this Witsml141.ComponentSchemas.LogCurveInfo entity, Witsml141.Log log)
         {
             return log.GetUri()
@@ -151,7 +165,7 @@ namespace PDS.Witsml
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="log">The log.</param>
-        /// <returns>A <see cref="EtpUri"/> instance</returns>
+        /// <returns>An <see cref="EtpUri"/> instance.</returns>
         public static EtpUri GetUri(this Witsml200.ChannelSet entity, Witsml200.Log log)
         {
             return log.GetUri()
@@ -163,7 +177,7 @@ namespace PDS.Witsml
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="channelSet">The channel set.</param>
-        /// <returns>A <see cref="EtpUri"/> instance</returns>
+        /// <returns>An <see cref="EtpUri"/> instance.</returns>
         public static EtpUri GetUri(this Witsml200.Channel entity, Witsml200.ChannelSet channelSet)
         {
             return channelSet.GetUri()
@@ -176,7 +190,7 @@ namespace PDS.Witsml
         /// <param name="entity">The entity.</param>
         /// <param name="log">The log.</param>
         /// <param name="channelSet">The channel set.</param>
-        /// <returns>A <see cref="EtpUri"/> instance</returns>
+        /// <returns>An <see cref="EtpUri"/> instance.</returns>
         public static EtpUri GetUri(this Witsml200.Channel entity, Witsml200.Log log, Witsml200.ChannelSet channelSet)
         {
             return channelSet.GetUri(log)
@@ -188,7 +202,7 @@ namespace PDS.Witsml
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="channel">The channel.</param>
-        /// <returns>A <see cref="EtpUri"/> instance.</returns>
+        /// <returns>An <see cref="EtpUri"/> instance.</returns>
         public static EtpUri GetUri(this Witsml200.ComponentSchemas.ChannelIndex entity, Witsml200.Channel channel)
         {
             return channel.GetUri()
@@ -200,7 +214,7 @@ namespace PDS.Witsml
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="channelSet">The channel set.</param>
-        /// <returns>A <see cref="EtpUri"/> instance.</returns>
+        /// <returns>An <see cref="EtpUri"/> instance.</returns>
         public static EtpUri GetUri(this Witsml200.ComponentSchemas.ChannelIndex entity, Witsml200.ChannelSet channelSet)
         {
             return channelSet.GetUri()
@@ -213,7 +227,7 @@ namespace PDS.Witsml
         /// <param name="entity">The entity.</param>
         /// <param name="log">The log.</param>
         /// <param name="channelSet">The channel set.</param>
-        /// <returns>A <see cref="EtpUri"/> instance.</returns>
+        /// <returns>An <see cref="EtpUri"/> instance.</returns>
         public static EtpUri GetUri(this Witsml200.ComponentSchemas.ChannelIndex entity, Witsml200.Log log, Witsml200.ChannelSet channelSet)
         {
             return channelSet.GetUri(log)

@@ -64,20 +64,26 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well200_Ensure_Creates_Well_With_Default_Values()
         {
+
             DevKit.EnsureAndAssert(Well);
+
         }
 
         [TestMethod]
         public async Task Well200_GetResources_Can_Get_All_Well_Resources()
         {
             AddParents();
+
             DevKit.AddAndAssert(Well);
+
             await RequestSessionAndAssert();
 
             var uri = Well.GetUri();
-            await GetResourcesAndAssert(uri);
+            var parentUri = uri.Parent;
 
-            var folderUri = uri.Parent.Append(uri.ObjectType);
+            await GetResourcesAndAssert(parentUri);
+
+            var folderUri = parentUri.Append(uri.ObjectType);
             await GetResourcesAndAssert(folderUri);
         }
 
@@ -110,6 +116,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<Well>(xml);
+
             Assert.IsNotNull(result);
         }
 
@@ -147,7 +154,9 @@ namespace PDS.Witsml.Server.Data.Wells
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<Well>(xml);
+
             Assert.IsNotNull(result);
+
             Assert.IsNotNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
 
             // Remove Comment from Data Object
@@ -166,10 +175,13 @@ namespace PDS.Witsml.Server.Data.Wells
             var updateXml = args.Message.DataObject.GetXml();
 
             result = Parse<Well>(updateXml);
+
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
+
             Assert.IsNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
+
         }
     }
 }

@@ -64,18 +64,26 @@ namespace PDS.Witsml.Server.Data.Trajectories
         [TestMethod]
         public void Trajectory200_Ensure_Creates_Trajectory_With_Default_Values()
         {
+
             DevKit.EnsureAndAssert(Trajectory);
+
         }
 
         [TestMethod]
         public async Task Trajectory200_GetResources_Can_Get_All_Trajectory_Resources()
         {
             AddParents();
+
             DevKit.AddAndAssert(Trajectory);
+
             await RequestSessionAndAssert();
 
             var uri = Trajectory.GetUri();
-            var folderUri = uri.Parent.Append(uri.ObjectType);
+            var parentUri = uri.Parent;
+
+            await GetResourcesAndAssert(Trajectory.Wellbore.GetUri());
+
+            var folderUri = parentUri.Append(uri.ObjectType);
             await GetResourcesAndAssert(folderUri);
         }
 
@@ -108,6 +116,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<Trajectory>(xml);
+
             Assert.IsNotNull(result);
         }
 
@@ -145,7 +154,9 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<Trajectory>(xml);
+
             Assert.IsNotNull(result);
+
             Assert.IsNotNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
 
             // Remove Comment from Data Object
@@ -164,10 +175,13 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var updateXml = args.Message.DataObject.GetXml();
 
             result = Parse<Trajectory>(updateXml);
+
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
+
             Assert.IsNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
+
         }
     }
 }

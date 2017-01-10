@@ -64,18 +64,26 @@ namespace PDS.Witsml.Server.Data.Messages
         [TestMethod]
         public void Message131_Ensure_Creates_Message_With_Default_Values()
         {
+
             DevKit.EnsureAndAssert<MessageList, Message>(Message);
+
         }
 
         [TestMethod]
         public async Task Message131_GetResources_Can_Get_All_Message_Resources()
         {
             AddParents();
+
             DevKit.AddAndAssert<MessageList, Message>(Message);
+
             await RequestSessionAndAssert();
 
             var uri = Message.GetUri();
-            var folderUri = uri.Parent.Append(uri.ObjectType);
+            var parentUri = uri.Parent;
+
+            await GetResourcesAndAssert(parentUri);
+
+            var folderUri = parentUri.Append(uri.ObjectType);
             await GetResourcesAndAssert(folderUri);
         }
 
@@ -108,6 +116,7 @@ namespace PDS.Witsml.Server.Data.Messages
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<MessageList, Message>(xml);
+
             Assert.IsNotNull(result);
         }
 
@@ -146,7 +155,9 @@ namespace PDS.Witsml.Server.Data.Messages
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<MessageList, Message>(xml);
+
             Assert.IsNotNull(result);
+
             Assert.IsNotNull(result.CommonData.Comments);
 
             // Remove Comment from Data Object
@@ -165,10 +176,13 @@ namespace PDS.Witsml.Server.Data.Messages
             var updateXml = args.Message.DataObject.GetXml();
 
             result = Parse<MessageList, Message>(updateXml);
+
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
+
             Assert.IsNull(result.CommonData.Comments);
+
         }
     }
 }

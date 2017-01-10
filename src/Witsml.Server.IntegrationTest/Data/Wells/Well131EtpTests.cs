@@ -16,10 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Threading.Tasks;
-using Energistics.DataAccess.WITSML131;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 namespace PDS.Witsml.Server.Data.Wells
 {
     /// <summary>
@@ -27,14 +23,5 @@ namespace PDS.Witsml.Server.Data.Wells
     /// </summary>
     public partial class Well131EtpTests
     {
-        [TestMethod]
-        public async Task Well131_GetResources_Can_Get_Root_Level_Resources()
-        {
-            AddParents();
-            DevKit.AddAndAssert<WellList, Well>(Well);
-
-            await RequestSessionAndAssert();
-            await GetResourcesAndAssert(EtpUris.Witsml131);
-        }
     }
 }

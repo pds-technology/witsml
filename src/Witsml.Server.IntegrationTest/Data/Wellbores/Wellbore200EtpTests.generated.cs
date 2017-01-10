@@ -64,20 +64,26 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod]
         public void Wellbore200_Ensure_Creates_Wellbore_With_Default_Values()
         {
+
             DevKit.EnsureAndAssert(Wellbore);
+
         }
 
         [TestMethod]
         public async Task Wellbore200_GetResources_Can_Get_All_Wellbore_Resources()
         {
             AddParents();
+
             DevKit.AddAndAssert(Wellbore);
+
             await RequestSessionAndAssert();
 
             var uri = Wellbore.GetUri();
-            await GetResourcesAndAssert(uri);
+            var parentUri = uri.Parent;
 
-            var folderUri = uri.Parent.Append(uri.ObjectType);
+            await GetResourcesAndAssert(Wellbore.Well.GetUri());
+
+            var folderUri = parentUri.Append(uri.ObjectType);
             await GetResourcesAndAssert(folderUri);
         }
 
@@ -110,6 +116,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<Wellbore>(xml);
+
             Assert.IsNotNull(result);
         }
 
@@ -147,7 +154,9 @@ namespace PDS.Witsml.Server.Data.Wellbores
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<Wellbore>(xml);
+
             Assert.IsNotNull(result);
+
             Assert.IsNotNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
 
             // Remove Comment from Data Object
@@ -166,10 +175,13 @@ namespace PDS.Witsml.Server.Data.Wellbores
             var updateXml = args.Message.DataObject.GetXml();
 
             result = Parse<Wellbore>(updateXml);
+
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
+
             Assert.IsNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
+
         }
     }
 }

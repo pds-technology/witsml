@@ -64,18 +64,24 @@ namespace PDS.Witsml.Server.Data.Rigs
         [TestMethod]
         public void Rig200_Ensure_Creates_Rig_With_Default_Values()
         {
+
             DevKit.EnsureAndAssert(Rig);
+
         }
 
         [TestMethod]
         public async Task Rig200_GetResources_Can_Get_All_Rig_Resources()
         {
             AddParents();
+
             DevKit.AddAndAssert(Rig);
+
             await RequestSessionAndAssert();
 
             var uri = Rig.GetUri();
-            var folderUri = uri.Parent.Append(uri.ObjectType);
+            var parentUri = uri.Parent;
+
+            var folderUri = parentUri.Append(uri.ObjectType);
             await GetResourcesAndAssert(folderUri);
         }
 
@@ -108,6 +114,7 @@ namespace PDS.Witsml.Server.Data.Rigs
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<Rig>(xml);
+
             Assert.IsNotNull(result);
         }
 
@@ -145,7 +152,9 @@ namespace PDS.Witsml.Server.Data.Rigs
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<Rig>(xml);
+
             Assert.IsNotNull(result);
+
             Assert.IsNotNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
 
             // Remove Comment from Data Object
@@ -164,10 +173,13 @@ namespace PDS.Witsml.Server.Data.Rigs
             var updateXml = args.Message.DataObject.GetXml();
 
             result = Parse<Rig>(updateXml);
+
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
+
             Assert.IsNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
+
         }
     }
 }

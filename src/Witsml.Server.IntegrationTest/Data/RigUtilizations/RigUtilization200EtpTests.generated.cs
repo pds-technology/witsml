@@ -64,18 +64,26 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
         [TestMethod]
         public void RigUtilization200_Ensure_Creates_RigUtilization_With_Default_Values()
         {
+
             DevKit.EnsureAndAssert(RigUtilization);
+
         }
 
         [TestMethod]
         public async Task RigUtilization200_GetResources_Can_Get_All_RigUtilization_Resources()
         {
             AddParents();
+
             DevKit.AddAndAssert(RigUtilization);
+
             await RequestSessionAndAssert();
 
             var uri = RigUtilization.GetUri();
-            var folderUri = uri.Parent.Append(uri.ObjectType);
+            var parentUri = uri.Parent;
+
+            await GetResourcesAndAssert(RigUtilization.Wellbore.GetUri());
+
+            var folderUri = parentUri.Append(uri.ObjectType);
             await GetResourcesAndAssert(folderUri);
         }
 
@@ -108,6 +116,7 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<RigUtilization>(xml);
+
             Assert.IsNotNull(result);
         }
 
@@ -145,7 +154,9 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<RigUtilization>(xml);
+
             Assert.IsNotNull(result);
+
             Assert.IsNotNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
 
             // Remove Comment from Data Object
@@ -164,10 +175,13 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
             var updateXml = args.Message.DataObject.GetXml();
 
             result = Parse<RigUtilization>(updateXml);
+
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
+
             Assert.IsNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
+
         }
     }
 }

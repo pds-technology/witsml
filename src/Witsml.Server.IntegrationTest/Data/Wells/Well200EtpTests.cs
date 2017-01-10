@@ -16,9 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 namespace PDS.Witsml.Server.Data.Wells
 {
     /// <summary>
@@ -26,14 +23,5 @@ namespace PDS.Witsml.Server.Data.Wells
     /// </summary>
     public partial class Well200EtpTests
     {
-        [TestMethod]
-        public async Task Well200_GetResources_Can_Get_Root_Level_Resources()
-        {
-            AddParents();
-            DevKit.AddAndAssert(Well);
-
-            await RequestSessionAndAssert();
-            await GetResourcesAndAssert(EtpUris.Witsml200);
-        }
     }
 }

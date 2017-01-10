@@ -36,7 +36,6 @@ namespace PDS.Witsml.Server.Data.Wells
 
             await RequestSessionAndAssert();
             await GetResourcesAndAssert(new EtpUri(EtpUri.RootUri));
-            await GetResourcesAndAssert(EtpUris.Witsml141);
         }
     }
 }
