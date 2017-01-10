@@ -51,15 +51,8 @@ namespace PDS.Witsml.Server.Data
             Register3<ChannelDataChunk>();
             Register3<MongoDbTransaction>();
 
-            try
-            {
-                BsonSerializer.RegisterSerializer(new TimestampSerializer());
-            }
-            catch (BsonSerializationException)
-            {
-                // Ignoring exception because there is no clean way to check if a specific type of serializer is already registered. 
-                // Calling BsonSerializer.LookupSerializer<Timestamp>() will create the wrong default serializer.
-            }
+            Register(new TimestampSerializer());
+            Register(new XmlElementSerializer());
         }
 
         private void Register<T>() where T : IDataObject
@@ -107,6 +100,19 @@ namespace PDS.Witsml.Server.Data
                     cm.AutoMap();
                     cm.MapIdProperty(propertyName).SetIdGenerator(UidGenerator.Instance);
                 });
+            }
+        }
+
+        private void Register<T>(IBsonSerializer<T> serializer)
+        {
+            try
+            {
+                BsonSerializer.RegisterSerializer(serializer);
+            }
+            catch (BsonSerializationException)
+            {
+                // Ignoring exception because there is no clean way to check if a specific type of serializer is already registered. 
+                // Calling BsonSerializer.LookupSerializer<Timestamp>() will create the wrong default serializer.
             }
         }
     }

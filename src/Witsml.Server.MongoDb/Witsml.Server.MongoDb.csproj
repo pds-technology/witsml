@@ -258,6 +258,7 @@
     <Compile Include="Data\Wells\Well200DataAdapter.generated.cs">
       <DependentUpon>Well200DataAdapter.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\XmlElementSerializer.cs" />
     <Compile Include="Models\ChannelDataChunk.cs" />
     <Compile Include="Models\ChunkExtensions.cs" />
     <Compile Include="Data\Transactions\MongoDbTransaction.cs" />
