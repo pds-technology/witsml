@@ -187,5 +187,46 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             Assert.IsNull(result.CommonData.Comments);
 
         }
+
+        [TestMethod]
+        public async Task WbGeometry141_DeleteObject_Can_Delete_WbGeometry()
+        {
+            AddParents();
+			await RequestSessionAndAssert();
+
+            var handler = _client.Handler<IStoreCustomer>();
+            var uri = WbGeometry.GetUri();
+
+            var dataObject = CreateDataObject<WbGeometryList, WbGeometry>(uri, WbGeometry);
+
+            // Get Object
+            var args = await GetAndAssert(handler, uri);
+
+            // Check for message flag indicating No Data
+            Assert.IsNotNull(args?.Header);
+            Assert.AreEqual((int)MessageFlags.NoData, args.Header.MessageFlags);
+
+            // Put Object
+            await PutAndAssert(handler, dataObject);
+
+            // Get Object
+            args = await GetAndAssert(handler, uri);
+
+            // Check Data Object XML
+            Assert.IsNotNull(args?.Message.DataObject);
+            var xml = args.Message.DataObject.GetXml();
+
+            var result = Parse<WbGeometryList, WbGeometry>(xml);
+            Assert.IsNotNull(result);
+
+            // Delete Object
+            await DeleteAndAssert(handler, uri);
+
+            // Get Object
+            args = await GetAndAssert(handler, uri);
+
+            // Check Data Object doesn't exist
+            Assert.AreEqual(0, args?.Message?.DataObject?.Data?.Length ?? 0);
+        }
     }
 }
