@@ -928,6 +928,10 @@ namespace PDS.Witsml.Data
                 }
             }
 
+            // Ignore CustomData child elements
+            if (ObjectTypes.CustomData.EqualsIgnoreCase(ObjectTypes.GetObjectTypeFromGroup(element)))
+                return;
+
             foreach (var child in element.Elements())
             {
                 var childInfo = GetPropertyInfoForAnElement(properties, child.Name.LocalName);

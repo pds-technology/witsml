@@ -64,6 +64,11 @@ namespace PDS.Witsml
         public const string DocumentInfo = "documentInfo";
 
         /// <summary>
+        /// The ObjectType identifier for a CustomData.
+        /// </summary>
+        public const string CustomData = "customData";
+
+        /// <summary>
         /// The ObjectType identifier for a FileCreationInformation.
         /// </summary>
         public const string FileCreationInformation = "fileCreationInformation";
