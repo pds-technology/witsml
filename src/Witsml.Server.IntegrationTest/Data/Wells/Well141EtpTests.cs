@@ -56,9 +56,10 @@ namespace PDS.Witsml.Server.Data.Wells
             await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
-
+        
             // Get Invalid Object
             await GetAndAssert(handler, new EtpUri("eml://unknown141/wellz(123)"), EtpErrorCodes.InvalidUri);
+            await GetAndAssert(handler, new EtpUri("eml://witsml141"), EtpErrorCodes.UnsupportedObject);
         }
 
         [TestMethod]
@@ -68,8 +69,9 @@ namespace PDS.Witsml.Server.Data.Wells
 
             var handler = _client.Handler<IStoreCustomer>();
 
-            // Get Invalid Object
+            // Delete Invalid Object
             await DeleteAndAssert(handler, new EtpUri("eml://unknown141/wellz(123)"), EtpErrorCodes.InvalidUri);
+            await DeleteAndAssert(handler, new EtpUri("eml://witsml141"), EtpErrorCodes.UnsupportedObject);
         }
     }
 }
