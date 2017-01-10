@@ -64,9 +64,7 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well200_Ensure_Creates_Well_With_Default_Values()
         {
-
             DevKit.EnsureAndAssert(Well);
-
         }
 
         [TestMethod]
@@ -74,10 +72,12 @@ namespace PDS.Witsml.Server.Data.Wells
         {
             AddParents();
             DevKit.AddAndAssert(Well);
+            await RequestSessionAndAssert();
 
             var uri = Well.GetUri();
-            var folderUri = uri.Parent.Append(uri.ObjectType);
+            await GetResourcesAndAssert(uri);
 
+            var folderUri = uri.Parent.Append(uri.ObjectType);
             await GetResourcesAndAssert(folderUri);
         }
 
@@ -85,15 +85,12 @@ namespace PDS.Witsml.Server.Data.Wells
         public async Task Well200_PutObject_Can_Add_Well()
         {
             AddParents();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = Well.GetUri();
 
             var dataObject = CreateDataObject(uri, Well);
-
-            // Wait for Open connection
-            var isOpen = await _client.OpenAsync();
-            Assert.IsTrue(isOpen);
 
             // Get Object
             var args = await GetAndAssert(handler, uri);
@@ -113,7 +110,6 @@ namespace PDS.Witsml.Server.Data.Wells
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<Well>(xml);
-
             Assert.IsNotNull(result);
         }
 
@@ -121,6 +117,7 @@ namespace PDS.Witsml.Server.Data.Wells
         public async Task Well200_PutObject_Can_Update_Well()
         {
             AddParents();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = Well.GetUri();
@@ -131,10 +128,6 @@ namespace PDS.Witsml.Server.Data.Wells
             Well.ExtensionNameValue = new List<ExtensionNameValue>() {env};
 
             var dataObject = CreateDataObject(uri, Well);
-
-            // Wait for Open connection
-            var isOpen = await _client.OpenAsync();
-            Assert.IsTrue(isOpen);
 
             // Get Object
             var args = await GetAndAssert(handler, uri);
@@ -154,9 +147,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<Well>(xml);
-
             Assert.IsNotNull(result);
-
             Assert.IsNotNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
 
             // Remove Comment from Data Object
@@ -175,13 +166,10 @@ namespace PDS.Witsml.Server.Data.Wells
             var updateXml = args.Message.DataObject.GetXml();
 
             result = Parse<Well>(updateXml);
-
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
-
             Assert.IsNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
-
         }
     }
 }

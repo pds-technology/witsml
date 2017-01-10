@@ -104,7 +104,7 @@ namespace PDS.Witsml.Server.Providers.Discovery
             {
                 return;
             }
-            if (uri.IsBaseUri)
+            if (uri.IsBaseUri || (string.IsNullOrWhiteSpace(uri.ObjectId) && ObjectTypes.Well.EqualsIgnoreCase(uri.ObjectType)))
             {
                 _wellDataProvider.GetAll(uri)
                     .ForEach(x => args.Context.Add(ToResource(x)));

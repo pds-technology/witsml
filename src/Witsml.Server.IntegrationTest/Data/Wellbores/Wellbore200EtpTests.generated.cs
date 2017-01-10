@@ -64,9 +64,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         [TestMethod]
         public void Wellbore200_Ensure_Creates_Wellbore_With_Default_Values()
         {
-
             DevKit.EnsureAndAssert(Wellbore);
-
         }
 
         [TestMethod]
@@ -74,10 +72,12 @@ namespace PDS.Witsml.Server.Data.Wellbores
         {
             AddParents();
             DevKit.AddAndAssert(Wellbore);
+            await RequestSessionAndAssert();
 
             var uri = Wellbore.GetUri();
-            var folderUri = uri.Parent.Append(uri.ObjectType);
+            await GetResourcesAndAssert(uri);
 
+            var folderUri = uri.Parent.Append(uri.ObjectType);
             await GetResourcesAndAssert(folderUri);
         }
 
@@ -85,15 +85,12 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public async Task Wellbore200_PutObject_Can_Add_Wellbore()
         {
             AddParents();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = Wellbore.GetUri();
 
             var dataObject = CreateDataObject(uri, Wellbore);
-
-            // Wait for Open connection
-            var isOpen = await _client.OpenAsync();
-            Assert.IsTrue(isOpen);
 
             // Get Object
             var args = await GetAndAssert(handler, uri);
@@ -113,7 +110,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<Wellbore>(xml);
-
             Assert.IsNotNull(result);
         }
 
@@ -121,6 +117,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public async Task Wellbore200_PutObject_Can_Update_Wellbore()
         {
             AddParents();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = Wellbore.GetUri();
@@ -131,10 +128,6 @@ namespace PDS.Witsml.Server.Data.Wellbores
             Wellbore.ExtensionNameValue = new List<ExtensionNameValue>() {env};
 
             var dataObject = CreateDataObject(uri, Wellbore);
-
-            // Wait for Open connection
-            var isOpen = await _client.OpenAsync();
-            Assert.IsTrue(isOpen);
 
             // Get Object
             var args = await GetAndAssert(handler, uri);
@@ -154,9 +147,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<Wellbore>(xml);
-
             Assert.IsNotNull(result);
-
             Assert.IsNotNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
 
             // Remove Comment from Data Object
@@ -175,13 +166,10 @@ namespace PDS.Witsml.Server.Data.Wellbores
             var updateXml = args.Message.DataObject.GetXml();
 
             result = Parse<Wellbore>(updateXml);
-
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
-
             Assert.IsNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
-
         }
     }
 }

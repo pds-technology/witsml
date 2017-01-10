@@ -67,9 +67,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
         [TestMethod]
         public void WbGeometry131_Ensure_Creates_WbGeometry_With_Default_Values()
         {
-
             DevKit.EnsureAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
-
         }
 
         [TestMethod]
@@ -77,10 +75,10 @@ namespace PDS.Witsml.Server.Data.WbGeometries
         {
             AddParents();
             DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
+            await RequestSessionAndAssert();
 
             var uri = WbGeometry.GetUri();
             var folderUri = uri.Parent.Append(uri.ObjectType);
-
             await GetResourcesAndAssert(folderUri);
         }
 
@@ -88,15 +86,12 @@ namespace PDS.Witsml.Server.Data.WbGeometries
         public async Task WbGeometry131_PutObject_Can_Add_WbGeometry()
         {
             AddParents();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = WbGeometry.GetUri();
 
             var dataObject = CreateDataObject<WbGeometryList, WbGeometry>(uri, WbGeometry);
-
-            // Wait for Open connection
-            var isOpen = await _client.OpenAsync();
-            Assert.IsTrue(isOpen);
 
             // Get Object
             var args = await GetAndAssert(handler, uri);
@@ -116,7 +111,6 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<WbGeometryList, WbGeometry>(xml);
-
             Assert.IsNotNull(result);
         }
 
@@ -124,6 +118,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
         public async Task WbGeometry131_PutObject_Can_Update_WbGeometry()
         {
             AddParents();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = WbGeometry.GetUri();
@@ -135,10 +130,6 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             };
 
             var dataObject = CreateDataObject<WbGeometryList, WbGeometry>(uri, WbGeometry);
-
-            // Wait for Open connection
-            var isOpen = await _client.OpenAsync();
-            Assert.IsTrue(isOpen);
 
             // Get Object
             var args = await GetAndAssert(handler, uri);
@@ -158,9 +149,7 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<WbGeometryList, WbGeometry>(xml);
-
             Assert.IsNotNull(result);
-
             Assert.IsNotNull(result.CommonData.Comments);
 
             // Remove Comment from Data Object
@@ -179,13 +168,10 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             var updateXml = args.Message.DataObject.GetXml();
 
             result = Parse<WbGeometryList, WbGeometry>(updateXml);
-
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
-
             Assert.IsNull(result.CommonData.Comments);
-
         }
     }
 }

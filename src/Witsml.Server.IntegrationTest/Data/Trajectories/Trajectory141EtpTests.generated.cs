@@ -64,9 +64,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         [TestMethod]
         public void Trajectory141_Ensure_Creates_Trajectory_With_Default_Values()
         {
-
             DevKit.EnsureAndAssert<TrajectoryList, Trajectory>(Trajectory);
-
         }
 
         [TestMethod]
@@ -74,10 +72,10 @@ namespace PDS.Witsml.Server.Data.Trajectories
         {
             AddParents();
             DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
+            await RequestSessionAndAssert();
 
             var uri = Trajectory.GetUri();
             var folderUri = uri.Parent.Append(uri.ObjectType);
-
             await GetResourcesAndAssert(folderUri);
         }
 
@@ -85,15 +83,12 @@ namespace PDS.Witsml.Server.Data.Trajectories
         public async Task Trajectory141_PutObject_Can_Add_Trajectory()
         {
             AddParents();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = Trajectory.GetUri();
 
             var dataObject = CreateDataObject<TrajectoryList, Trajectory>(uri, Trajectory);
-
-            // Wait for Open connection
-            var isOpen = await _client.OpenAsync();
-            Assert.IsTrue(isOpen);
 
             // Get Object
             var args = await GetAndAssert(handler, uri);
@@ -113,7 +108,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<TrajectoryList, Trajectory>(xml);
-
             Assert.IsNotNull(result);
         }
 
@@ -121,6 +115,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         public async Task Trajectory141_PutObject_Can_Update_Trajectory()
         {
             AddParents();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = Trajectory.GetUri();
@@ -132,10 +127,6 @@ namespace PDS.Witsml.Server.Data.Trajectories
             };
 
             var dataObject = CreateDataObject<TrajectoryList, Trajectory>(uri, Trajectory);
-
-            // Wait for Open connection
-            var isOpen = await _client.OpenAsync();
-            Assert.IsTrue(isOpen);
 
             // Get Object
             var args = await GetAndAssert(handler, uri);
@@ -155,9 +146,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<TrajectoryList, Trajectory>(xml);
-
             Assert.IsNotNull(result);
-
             Assert.IsNotNull(result.CommonData.Comments);
 
             // Remove Comment from Data Object
@@ -176,13 +165,10 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var updateXml = args.Message.DataObject.GetXml();
 
             result = Parse<TrajectoryList, Trajectory>(updateXml);
-
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
-
             Assert.IsNull(result.CommonData.Comments);
-
         }
     }
 }

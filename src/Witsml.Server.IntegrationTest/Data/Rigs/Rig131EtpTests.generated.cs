@@ -64,9 +64,7 @@ namespace PDS.Witsml.Server.Data.Rigs
         [TestMethod]
         public void Rig131_Ensure_Creates_Rig_With_Default_Values()
         {
-
             DevKit.EnsureAndAssert<RigList, Rig>(Rig);
-
         }
 
         [TestMethod]
@@ -74,10 +72,10 @@ namespace PDS.Witsml.Server.Data.Rigs
         {
             AddParents();
             DevKit.AddAndAssert<RigList, Rig>(Rig);
+            await RequestSessionAndAssert();
 
             var uri = Rig.GetUri();
             var folderUri = uri.Parent.Append(uri.ObjectType);
-
             await GetResourcesAndAssert(folderUri);
         }
 
@@ -85,15 +83,12 @@ namespace PDS.Witsml.Server.Data.Rigs
         public async Task Rig131_PutObject_Can_Add_Rig()
         {
             AddParents();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = Rig.GetUri();
 
             var dataObject = CreateDataObject<RigList, Rig>(uri, Rig);
-
-            // Wait for Open connection
-            var isOpen = await _client.OpenAsync();
-            Assert.IsTrue(isOpen);
 
             // Get Object
             var args = await GetAndAssert(handler, uri);
@@ -113,7 +108,6 @@ namespace PDS.Witsml.Server.Data.Rigs
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<RigList, Rig>(xml);
-
             Assert.IsNotNull(result);
         }
 
@@ -121,6 +115,7 @@ namespace PDS.Witsml.Server.Data.Rigs
         public async Task Rig131_PutObject_Can_Update_Rig()
         {
             AddParents();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = Rig.GetUri();
@@ -132,10 +127,6 @@ namespace PDS.Witsml.Server.Data.Rigs
             };
 
             var dataObject = CreateDataObject<RigList, Rig>(uri, Rig);
-
-            // Wait for Open connection
-            var isOpen = await _client.OpenAsync();
-            Assert.IsTrue(isOpen);
 
             // Get Object
             var args = await GetAndAssert(handler, uri);
@@ -155,9 +146,7 @@ namespace PDS.Witsml.Server.Data.Rigs
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<RigList, Rig>(xml);
-
             Assert.IsNotNull(result);
-
             Assert.IsNotNull(result.CommonData.Comments);
 
             // Remove Comment from Data Object
@@ -176,13 +165,10 @@ namespace PDS.Witsml.Server.Data.Rigs
             var updateXml = args.Message.DataObject.GetXml();
 
             result = Parse<RigList, Rig>(updateXml);
-
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
-
             Assert.IsNull(result.CommonData.Comments);
-
         }
     }
 }

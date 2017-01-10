@@ -64,9 +64,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         [TestMethod]
         public void ChannelSet200_Ensure_Creates_ChannelSet_With_Default_Values()
         {
-
             DevKit.EnsureAndAssert(ChannelSet);
-
         }
 
         [TestMethod]
@@ -74,10 +72,12 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         {
             AddParents();
             DevKit.AddAndAssert(ChannelSet);
+            await RequestSessionAndAssert();
 
             var uri = ChannelSet.GetUri();
-            var folderUri = uri.Parent.Append(uri.ObjectType);
+            await GetResourcesAndAssert(uri);
 
+            var folderUri = uri.Parent.Append(uri.ObjectType);
             await GetResourcesAndAssert(folderUri);
         }
 
@@ -85,15 +85,12 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         public async Task ChannelSet200_PutObject_Can_Add_ChannelSet()
         {
             AddParents();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = ChannelSet.GetUri();
 
             var dataObject = CreateDataObject(uri, ChannelSet);
-
-            // Wait for Open connection
-            var isOpen = await _client.OpenAsync();
-            Assert.IsTrue(isOpen);
 
             // Get Object
             var args = await GetAndAssert(handler, uri);
@@ -113,7 +110,6 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<ChannelSet>(xml);
-
             Assert.IsNotNull(result);
         }
 
@@ -121,6 +117,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         public async Task ChannelSet200_PutObject_Can_Update_ChannelSet()
         {
             AddParents();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = ChannelSet.GetUri();
@@ -131,10 +128,6 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             ChannelSet.ExtensionNameValue = new List<ExtensionNameValue>() {env};
 
             var dataObject = CreateDataObject(uri, ChannelSet);
-
-            // Wait for Open connection
-            var isOpen = await _client.OpenAsync();
-            Assert.IsTrue(isOpen);
 
             // Get Object
             var args = await GetAndAssert(handler, uri);
@@ -154,9 +147,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<ChannelSet>(xml);
-
             Assert.IsNotNull(result);
-
             Assert.IsNotNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
 
             // Remove Comment from Data Object
@@ -175,13 +166,10 @@ namespace PDS.Witsml.Server.Data.ChannelSets
             var updateXml = args.Message.DataObject.GetXml();
 
             result = Parse<ChannelSet>(updateXml);
-
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
-
             Assert.IsNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
-
         }
     }
 }

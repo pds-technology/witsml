@@ -64,9 +64,7 @@ namespace PDS.Witsml.Server.Data.Messages
         [TestMethod]
         public void Message131_Ensure_Creates_Message_With_Default_Values()
         {
-
             DevKit.EnsureAndAssert<MessageList, Message>(Message);
-
         }
 
         [TestMethod]
@@ -74,10 +72,10 @@ namespace PDS.Witsml.Server.Data.Messages
         {
             AddParents();
             DevKit.AddAndAssert<MessageList, Message>(Message);
+            await RequestSessionAndAssert();
 
             var uri = Message.GetUri();
             var folderUri = uri.Parent.Append(uri.ObjectType);
-
             await GetResourcesAndAssert(folderUri);
         }
 
@@ -85,15 +83,12 @@ namespace PDS.Witsml.Server.Data.Messages
         public async Task Message131_PutObject_Can_Add_Message()
         {
             AddParents();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = Message.GetUri();
 
             var dataObject = CreateDataObject<MessageList, Message>(uri, Message);
-
-            // Wait for Open connection
-            var isOpen = await _client.OpenAsync();
-            Assert.IsTrue(isOpen);
 
             // Get Object
             var args = await GetAndAssert(handler, uri);
@@ -113,7 +108,6 @@ namespace PDS.Witsml.Server.Data.Messages
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<MessageList, Message>(xml);
-
             Assert.IsNotNull(result);
         }
 
@@ -121,6 +115,7 @@ namespace PDS.Witsml.Server.Data.Messages
         public async Task Message131_PutObject_Can_Update_Message()
         {
             AddParents();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = Message.GetUri();
@@ -132,10 +127,6 @@ namespace PDS.Witsml.Server.Data.Messages
             };
 
             var dataObject = CreateDataObject<MessageList, Message>(uri, Message);
-
-            // Wait for Open connection
-            var isOpen = await _client.OpenAsync();
-            Assert.IsTrue(isOpen);
 
             // Get Object
             var args = await GetAndAssert(handler, uri);
@@ -155,9 +146,7 @@ namespace PDS.Witsml.Server.Data.Messages
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<MessageList, Message>(xml);
-
             Assert.IsNotNull(result);
-
             Assert.IsNotNull(result.CommonData.Comments);
 
             // Remove Comment from Data Object
@@ -176,13 +165,10 @@ namespace PDS.Witsml.Server.Data.Messages
             var updateXml = args.Message.DataObject.GetXml();
 
             result = Parse<MessageList, Message>(updateXml);
-
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
-
             Assert.IsNull(result.CommonData.Comments);
-
         }
     }
 }

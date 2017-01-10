@@ -64,9 +64,7 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
         [TestMethod]
         public void RigUtilization200_Ensure_Creates_RigUtilization_With_Default_Values()
         {
-
             DevKit.EnsureAndAssert(RigUtilization);
-
         }
 
         [TestMethod]
@@ -74,10 +72,10 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
         {
             AddParents();
             DevKit.AddAndAssert(RigUtilization);
+            await RequestSessionAndAssert();
 
             var uri = RigUtilization.GetUri();
             var folderUri = uri.Parent.Append(uri.ObjectType);
-
             await GetResourcesAndAssert(folderUri);
         }
 
@@ -85,15 +83,12 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
         public async Task RigUtilization200_PutObject_Can_Add_RigUtilization()
         {
             AddParents();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = RigUtilization.GetUri();
 
             var dataObject = CreateDataObject(uri, RigUtilization);
-
-            // Wait for Open connection
-            var isOpen = await _client.OpenAsync();
-            Assert.IsTrue(isOpen);
 
             // Get Object
             var args = await GetAndAssert(handler, uri);
@@ -113,7 +108,6 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<RigUtilization>(xml);
-
             Assert.IsNotNull(result);
         }
 
@@ -121,6 +115,7 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
         public async Task RigUtilization200_PutObject_Can_Update_RigUtilization()
         {
             AddParents();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = RigUtilization.GetUri();
@@ -131,10 +126,6 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
             RigUtilization.ExtensionNameValue = new List<ExtensionNameValue>() {env};
 
             var dataObject = CreateDataObject(uri, RigUtilization);
-
-            // Wait for Open connection
-            var isOpen = await _client.OpenAsync();
-            Assert.IsTrue(isOpen);
 
             // Get Object
             var args = await GetAndAssert(handler, uri);
@@ -154,9 +145,7 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<RigUtilization>(xml);
-
             Assert.IsNotNull(result);
-
             Assert.IsNotNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
 
             // Remove Comment from Data Object
@@ -175,13 +164,10 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
             var updateXml = args.Message.DataObject.GetXml();
 
             result = Parse<RigUtilization>(updateXml);
-
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
-
             Assert.IsNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
-
         }
     }
 }

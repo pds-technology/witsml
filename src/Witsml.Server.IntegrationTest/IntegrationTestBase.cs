@@ -315,15 +315,11 @@ namespace PDS.Witsml.Server
         }
 
         /// <summary>
-        /// Gets the resources and asserts.
+        /// Requests a new session and asserts.
         /// </summary>
-        /// <param name="uri">The URI.</param>
-        /// <param name="exist">if set to <c>true</c> resources exist; otherwise, <c>false</c>.</param>
-        /// <returns>A collection of resources.</returns>
-        protected async Task<List<ProtocolEventArgs<GetResourcesResponse, string>>> GetResourcesAndAssert(EtpUri uri, bool exist = true)
+        /// <returns>The <see cref="OpenSession" /> message args.</returns>
+        protected async Task<ProtocolEventArgs<OpenSession>> RequestSessionAndAssert()
         {
-            var handler = _client.Handler<IDiscoveryCustomer>();
-
             // Register event handler for OpenSession response
             var onOpenSession = HandleAsync<OpenSession>(
                 x => _client.Handler<ICoreClient>().OnOpenSession += x);
@@ -337,6 +333,19 @@ namespace PDS.Witsml.Server
 
             // Verify OpenSession and Supported Protocols
             VerifySessionWithProtcols(openArgs, Protocols.Discovery, Protocols.Store);
+
+            return openArgs;
+        }
+
+        /// <summary>
+        /// Gets the resources and asserts.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="exist">if set to <c>true</c> resources exist; otherwise, <c>false</c>.</param>
+        /// <returns>A collection of resources.</returns>
+        protected async Task<List<ProtocolEventArgs<GetResourcesResponse, string>>> GetResourcesAndAssert(EtpUri uri, bool exist = true)
+        {
+            var handler = _client.Handler<IDiscoveryCustomer>();
 
             // Register event handler for GetResourcesResponse
             var onGetResourcesResponse = HandleMultiPartAsync<GetResourcesResponse, string>(
@@ -357,8 +366,16 @@ namespace PDS.Witsml.Server
                 Assert.IsNotNull(arg?.Message?.Resource?.Uri);
 
                 var resourceUri = new EtpUri(arg.Message.Resource.Uri);
-                Assert.AreEqual(uri.Family, resourceUri.Family);
-                Assert.AreEqual(uri.Version, resourceUri.Version);
+
+                if (uri == EtpUri.RootUri)
+                {
+                    Assert.IsTrue(uri.IsBaseUri);
+                }
+                else
+                {
+                    Assert.AreEqual(uri.Family, resourceUri.Family);
+                    Assert.AreEqual(uri.Version, resourceUri.Version);
+                }
             }
 
             return args;

@@ -64,9 +64,7 @@ namespace PDS.Witsml.Server.Data.Attachments
         [TestMethod]
         public void Attachment200_Ensure_Creates_Attachment_With_Default_Values()
         {
-
             DevKit.EnsureAndAssert(Attachment);
-
         }
 
         [TestMethod]
@@ -74,10 +72,10 @@ namespace PDS.Witsml.Server.Data.Attachments
         {
             AddParents();
             DevKit.AddAndAssert(Attachment);
+            await RequestSessionAndAssert();
 
             var uri = Attachment.GetUri();
             var folderUri = uri.Parent.Append(uri.ObjectType);
-
             await GetResourcesAndAssert(folderUri);
         }
 
@@ -85,15 +83,12 @@ namespace PDS.Witsml.Server.Data.Attachments
         public async Task Attachment200_PutObject_Can_Add_Attachment()
         {
             AddParents();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = Attachment.GetUri();
 
             var dataObject = CreateDataObject(uri, Attachment);
-
-            // Wait for Open connection
-            var isOpen = await _client.OpenAsync();
-            Assert.IsTrue(isOpen);
 
             // Get Object
             var args = await GetAndAssert(handler, uri);
@@ -113,7 +108,6 @@ namespace PDS.Witsml.Server.Data.Attachments
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<Attachment>(xml);
-
             Assert.IsNotNull(result);
         }
 
@@ -121,6 +115,7 @@ namespace PDS.Witsml.Server.Data.Attachments
         public async Task Attachment200_PutObject_Can_Update_Attachment()
         {
             AddParents();
+            await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
             var uri = Attachment.GetUri();
@@ -131,10 +126,6 @@ namespace PDS.Witsml.Server.Data.Attachments
             Attachment.ExtensionNameValue = new List<ExtensionNameValue>() {env};
 
             var dataObject = CreateDataObject(uri, Attachment);
-
-            // Wait for Open connection
-            var isOpen = await _client.OpenAsync();
-            Assert.IsTrue(isOpen);
 
             // Get Object
             var args = await GetAndAssert(handler, uri);
@@ -154,9 +145,7 @@ namespace PDS.Witsml.Server.Data.Attachments
             var xml = args.Message.DataObject.GetXml();
 
             var result = Parse<Attachment>(xml);
-
             Assert.IsNotNull(result);
-
             Assert.IsNotNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
 
             // Remove Comment from Data Object
@@ -175,13 +164,10 @@ namespace PDS.Witsml.Server.Data.Attachments
             var updateXml = args.Message.DataObject.GetXml();
 
             result = Parse<Attachment>(updateXml);
-
             Assert.IsNotNull(result);
 
             // Test Data Object overwrite
-
             Assert.IsNull(result.ExtensionNameValue.FirstOrDefault(e => e.Name.Equals(envName)));
-
         }
     }
 }

@@ -16,6 +16,9 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace PDS.Witsml.Server.Data.Logs
 {
     /// <summary>
@@ -23,5 +26,23 @@ namespace PDS.Witsml.Server.Data.Logs
     /// </summary>
     public partial class Log200EtpTests
     {
+        [TestMethod]
+        public async Task Log200_GetResources_Can_Get_Log_Folder_Resources()
+        {
+            AddParents();
+            DevKit.AddAndAssert(Log);
+
+            await RequestSessionAndAssert();
+
+            var uri = Log.GetUri();
+            var folderUri = uri.Parent.Append(ObjectFolders.Logs);
+            await GetResourcesAndAssert(folderUri);
+
+            var timeLogUri = folderUri.Append(ObjectFolders.Time);
+            await GetResourcesAndAssert(timeLogUri);
+
+            var depthLogUri = folderUri.Append(ObjectFolders.Depth);
+            await GetResourcesAndAssert(depthLogUri);
+        }
     }
 }
