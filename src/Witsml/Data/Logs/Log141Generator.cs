@@ -164,7 +164,7 @@ namespace PDS.Witsml.Data.Logs
                 // channel values
                 for (int k = 1; k < log.LogCurveInfo.Count; k++)
                 {
-                    row += ", ";
+                    row += ",";
 
                     if (_random.Next(10) % 9 == 0)
                     {
@@ -194,7 +194,7 @@ namespace PDS.Witsml.Data.Logs
                         case LogDataType.@double:
                         case LogDataType.@float:                       
                         {
-                            row += _random.NextDouble().ToString();
+                            row += _random.NextDouble().ToString().Trim();
                             break;
                         }
                         case LogDataType.@int:

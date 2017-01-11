@@ -887,6 +887,70 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.Success, response.Result);
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_AddToStore_With_Non_Double_Data_Types()
+        {
+            AddParents();
+
+            // Initialize Log Header
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+
+            // Add Log Curves with double, datetime, long and string data types
+            Log.LogCurveInfo.Clear();
+            Log.LogCurveInfo.AddRange(new List<LogCurveInfo>()
+            {
+                DevKit.LogGenerator.CreateLogCurveInfo("MD", "m", LogDataType.@double),
+                DevKit.LogGenerator.CreateLogCurveInfo("ROP", "m/h", LogDataType.@double),
+                DevKit.LogGenerator.CreateLogCurveInfo("TS", "s", LogDataType.datetime),
+                DevKit.LogGenerator.CreateLogCurveInfo("CNT", "m", LogDataType.@long),
+                DevKit.LogGenerator.CreateLogCurveInfo("MSG", "", LogDataType.@string)
+            });
+
+            // Generated the data
+            var numRows = 5;
+            DevKit.LogGenerator.GenerateLogData(Log, numRows);
+            var mnemonics = string.Join(",", Log.LogCurveInfo.Select(l => l.Mnemonic.Value));
+            var units = string.Join(",", Log.LogCurveInfo.Select(l => l.Unit));
+
+            Log.LogData[0].MnemonicList = mnemonics;
+            Log.LogData[0].UnitList = units;
+
+            var response = DevKit.Add<LogList, Log>(Log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var result = GetLog(Log);
+
+            // Assert that Data Types match before and after
+            for (var i = 0; i < Log.LogCurveInfo.Count; i++)
+            {
+                Assert.IsNotNull(Log.LogCurveInfo[i].TypeLogData);
+                Assert.IsNotNull(result.LogCurveInfo[i].TypeLogData);
+                Assert.AreEqual(Log.LogCurveInfo[i].TypeLogData.Value, result.LogCurveInfo[i].TypeLogData.Value);
+            }
+
+            // Assert data matches before and after
+            var logData = Log.LogData[0].Data;
+            var logDataAdded = result.LogData[0].Data;
+            Assert.AreEqual(logData.Count, logDataAdded.Count);
+
+            // For each row of data
+            for (int i = 0; i < logData.Count; i++)
+            {
+                var data = logData[i].Split(',');
+                var dataAdded = logDataAdded[i].Split(',');
+                Assert.AreEqual(data.Length, dataAdded.Length);
+
+                // Check that the string data matches
+                for (int j = 0; j < data.Length; j++)
+                {
+                    if (Log.LogCurveInfo[j].TypeLogData.Value == LogDataType.@string)
+                    {
+                        Assert.AreEqual(data[j], dataAdded[j]);
+                    }
+                }
+            }
+        }
+
         #region Helper Methods
 
         private Log GetLog(Log log)
