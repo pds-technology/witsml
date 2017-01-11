@@ -175,11 +175,11 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                 var records = GetChannelData(uri, indexChannel?.Mnemonic, range, increasing, requestLatestValues);
 
                 // Get a reader to process the log's channel data records
-                var reader = records.GetReader(mnemonicIndexes.Values.ToArray(), units, dataTypes, nullValues);
+                var reader = records.GetReader();
 
                 // Get the data from the reader based on the context and mnemonicIndexes (slices)
                 Dictionary<string, Range<double?>> ranges;
-                logData = reader.GetData(context, mnemonicIndexes, units, dataTypes, nullValues, out ranges);
+                logData = reader.GetData(context, mnemonicIndexes, queryMnemonics, units, dataTypes, nullValues, out ranges);
 
 
                 // Test if we're finished reading data
