@@ -893,10 +893,10 @@ namespace PDS.Witsml.Server.Data.Logs
                 var records = GetChannelData(uri, mnemonicIndexes[0], range, IsIncreasing(entity), requestLatestValues);
 
                 // Get a reader to process the log's channel data records
-                using (var reader = records.GetReader(mnemonicFilter, units, dataTypes, nullValues))
+                using (var reader = records.GetReader())
                 {
                     // Get the data from the reader based on the context and mnemonicIndexes (slices)
-                    logData = reader.GetData(context, mnemonicIndexes, units, dataTypes, nullValues, out ranges);
+                    logData = reader.GetData(context, mnemonicIndexes, mnemonicFilter, units, dataTypes, nullValues, out ranges);
                 }
 
                 // Test if we're finished reading data
