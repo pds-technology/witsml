@@ -255,34 +255,6 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
-        /// Sets the custom data elements with the correct namespace.
-        /// </summary>
-        /// <typeparam name="T">The data object type.</typeparam>
-        /// <param name="dataObject">The data object.</param>
-        /// <param name="parser">The query parser.</param>
-        /// <returns>The data object instance.</returns>
-        public static T SetCustomDataNamespace<T>(this T dataObject, WitsmlQueryParser parser) where T : IEnergisticsCollection
-        {
-            foreach (var item in dataObject.Items)
-            {
-                var property = item.GetType().GetProperty("CustomData");
-                if (property == null)
-                    continue;
-                var value = property.GetValue(item);
-                var version = ObjectTypes.GetVersion(typeof(T));
-                if (OptionsIn.DataVersion.Version131.Equals(version))
-                {
-                    CreateCustomDataElements131(value);
-                }
-                else
-                {
-                    CreateCustomDataElements141(value);
-                }
-            }
-            return dataObject;
-        }
-
-        /// <summary>
         /// Determines whether the logs total data points are valid for the specified function.
         /// </summary>
         /// <param name="function">The function.</param>
@@ -484,55 +456,6 @@ namespace PDS.Witsml.Server.Data
             return fileCreationElement == null
                 || fileCreationElement.IsEmpty
                 || fileCreationElement.Elements(ns + "fileCreator").Any();
-        }
-
-
-        private static void CreateCustomDataElements131(object value)
-        {
-            var customData = value as Witsml131Schemas.CustomData;
-
-            if (customData == null)
-                return;
-
-            var newFields = new List<XmlElement>();
-            var doc = new XmlDocument();
-            var ns = "http://www.witsml.org/schemas/131";
-
-            foreach (var field in customData.Any)
-            {
-                var el = doc.CreateElement(field.Name, ns);
-                el.InnerText = field.InnerText;
-                newFields.Add(el);
-            }
-
-            while (customData.Any.Count > 0)
-                customData.Any.RemoveAt(0);
-
-            customData.Any.AddRange(newFields);
-        }
-
-        private static void CreateCustomDataElements141(object value)
-        {
-            var customData = value as Witsml141Schemas.CustomData;
-
-            if (customData == null)
-                return;
-
-            var newFields = new List<XmlElement>();
-            var doc = new XmlDocument();
-            var ns = "http://www.witsml.org/schemas/1series";
-
-            foreach (var field in customData.Any)
-            {
-                var el = doc.CreateElement(field.Name, ns);
-                el.InnerText = field.InnerText;
-                newFields.Add(el);
-            }
-
-            while (customData.Any.Count > 0)
-                customData.Any.RemoveAt(0);
-
-            customData.Any.AddRange(newFields);
         }
     }
 }
