@@ -24,11 +24,20 @@ using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Witsml.Data.Channels;
+using PDS.Witsml.Server.Data.Channels;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
     public partial class Log131DataAdapterAddTests
     {
+        private IChannelDataProvider _channelDataProvider;
+
+        partial void BeforeEachTest()
+        {
+            _channelDataProvider = DevKit.Container.Resolve<IChannelDataProvider>(ObjectNames.Log131);
+        }
+
         [TestMethod]
         public void Log131DataAdapter_AddToStore_Add_DepthLog_Header()
         {
@@ -108,7 +117,7 @@ namespace PDS.Witsml.Server.Data.Logs
             // Add 40 more mnemonics
             for (int i = 0; i < 40; i++)
             {
-                Log.LogCurveInfo.Add(DevKit.LogGenerator.CreateDoubleLogCurveInfo($"Curve{i}", "m"));
+                Log.LogCurveInfo.Add(DevKit.LogGenerator.CreateDoubleLogCurveInfo($"Curve{i}", "m", (short)i));
             }
 
             // Set column indexes
@@ -325,6 +334,70 @@ namespace PDS.Witsml.Server.Data.Logs
             Log.IndexCurve = null;
             var response = DevKit.Add<LogList, Log>(Log);
             Assert.AreEqual((short)ErrorCodes.InputTemplateNonConforming, response.Result);
+        }
+
+        [TestMethod]
+        public void Log131DataAdapter_AddToStore_With_Non_Double_Data_Types()
+        {
+            AddParents();
+
+            // Initialize Log Header
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+
+            // Add Log Curves with double, datetime, long and string data types
+            Log.LogCurveInfo.Clear();
+            Log.LogCurveInfo.AddRange(new List<LogCurveInfo>()
+            {
+                DevKit.LogGenerator.CreateLogCurveInfo("MD", "m", LogDataType.@double, 0),
+                DevKit.LogGenerator.CreateLogCurveInfo("ROP", "m/h", LogDataType.@double, 1),
+                DevKit.LogGenerator.CreateLogCurveInfo("TS", "s", LogDataType.datetime, 2),
+                DevKit.LogGenerator.CreateLogCurveInfo("CNT", "m", LogDataType.@long, 3),
+                DevKit.LogGenerator.CreateLogCurveInfo("MSG", "unitless", LogDataType.@string, 4)
+            });
+
+            // Generated the data
+            var numRows = 5;
+            DevKit.LogGenerator.GenerateLogData(Log, numRows);
+
+            var response = DevKit.Add<LogList, Log>(Log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var result = GetLog(Log);
+
+            // Assert that Data Types match before and after
+            for (var i = 0; i < Log.LogCurveInfo.Count; i++)
+            {
+                Assert.IsNotNull(Log.LogCurveInfo[i].TypeLogData);
+                Assert.IsNotNull(result.LogCurveInfo[i].TypeLogData);
+                Assert.AreEqual(Log.LogCurveInfo[i].TypeLogData.Value, result.LogCurveInfo[i].TypeLogData.Value);
+            }
+
+            // Assert data matches before and after
+            var logData = Log.LogData;
+            var logDataAdded = result.LogData;
+            Assert.AreEqual(logData.Count, logDataAdded.Count);
+
+            // For each row of data
+            for (int i = 0; i < logData.Count; i++)
+            {
+                var data = logData[i].Split(',');
+                var dataAdded = logDataAdded[i].Split(',');
+                Assert.AreEqual(data.Length, dataAdded.Length);
+
+                // Check that the string data matches
+                for (int j = 0; j < data.Length; j++)
+                {
+                    if (Log.LogCurveInfo[j].TypeLogData.Value == LogDataType.@string)
+                    {
+                        Assert.AreEqual(data[j], dataAdded[j]);
+                    }
+                }
+            }
+        }
+
+        private Log GetLog(Log log)
+        {
+            return DevKit.GetAndAssert(log);
         }
     }
 }

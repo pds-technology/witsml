@@ -58,53 +58,58 @@ namespace PDS.Witsml.Data.Logs
         }
 
         /// <summary>
-        /// Creates the datetime type <see cref="LogCurveInfo"/>.
+        /// Creates the datetime type <see cref="LogCurveInfo" />.
         /// </summary>
         /// <param name="name">The name.</param>
         /// <param name="unit">The unit.</param>
+        /// <param name="columnIndex">Index of the column.</param>
         /// <returns></returns>
-        public LogCurveInfo CreateDateTimeLogCurveInfo(string name, string unit)
+        public LogCurveInfo CreateDateTimeLogCurveInfo(string name, string unit, short columnIndex)
         {
-            return CreateLogCurveInfo(name, unit, LogDataType.datetime);
+            return CreateLogCurveInfo(name, unit, LogDataType.datetime, columnIndex);
         }
 
         /// <summary>
-        /// Creates the double type <see cref="LogCurveInfo"/>.
+        /// Creates the double type <see cref="LogCurveInfo" />.
         /// </summary>
         /// <param name="name">The name.</param>
         /// <param name="unit">The unit.</param>
+        /// <param name="columnIndex">Index of the column.</param>
         /// <returns></returns>
-        public LogCurveInfo CreateDoubleLogCurveInfo(string name, string unit)
+        public LogCurveInfo CreateDoubleLogCurveInfo(string name, string unit, short columnIndex)
         {
-            return CreateLogCurveInfo(name, unit, LogDataType.@double);
+            return CreateLogCurveInfo(name, unit, LogDataType.@double, columnIndex);
         }
 
         /// <summary>
-        /// Creates the string type <see cref="LogCurveInfo"/>.
+        /// Creates the string type <see cref="LogCurveInfo" />.
         /// </summary>
         /// <param name="name">The name.</param>
         /// <param name="unit">The unit.</param>
+        /// <param name="columnIndex">Index of the column.</param>
         /// <returns></returns>
-        public LogCurveInfo CreateStringLogCurveInfo(string name, string unit)
+        public LogCurveInfo CreateStringLogCurveInfo(string name, string unit, short columnIndex)
         {
-            return CreateLogCurveInfo(name, unit, LogDataType.@string);
+            return CreateLogCurveInfo(name, unit, LogDataType.@string, columnIndex);
         }
 
         /// <summary>
-        /// Creates the <see cref="LogCurveInfo"/>
+        /// Creates the <see cref="LogCurveInfo" />
         /// </summary>
         /// <param name="name">The name.</param>
         /// <param name="unit">The unit.</param>
         /// <param name="type">The type.</param>
+        /// <param name="columnIndex">Index of the column.</param>
         /// <returns></returns>
-        public LogCurveInfo CreateLogCurveInfo(string name, string unit, LogDataType type)
+        public LogCurveInfo CreateLogCurveInfo(string name, string unit, LogDataType type, short columnIndex)
         {
             return new LogCurveInfo()
             {
                 Uid = name,
                 Mnemonic = name,
                 TypeLogData = type,
-                Unit = unit
+                Unit = unit,
+                ColumnIndex = columnIndex
             };
         }
         
@@ -158,7 +163,7 @@ namespace PDS.Witsml.Data.Logs
                 // channel values
                 for (int k = 1; k < log.LogCurveInfo.Count; k++)
                 {
-                    row += ", ";
+                    row += ",";
 
                     if (_random.Next(10) % 9 == 0)
                     {
@@ -188,7 +193,7 @@ namespace PDS.Witsml.Data.Logs
                         case LogDataType.@double:
                         //case LogDataType.@float:                       
                         {
-                            row += _random.NextDouble().ToString();
+                            row += _random.NextDouble().ToString().Trim();
                             break;
                         }
                         //case LogDataType.@int:
