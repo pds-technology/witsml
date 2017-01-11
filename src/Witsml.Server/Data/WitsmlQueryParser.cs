@@ -246,6 +246,15 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Determines whether the query contains a customData element.
+        /// </summary>
+        /// <returns>True if the query contains a customData element.</returns>
+        public bool HasCustomData()
+        {
+            return _element?.Elements(_namespace + ObjectTypes.CustomData).Any() ?? false;
+        }
+
+        /// <summary>
         /// Gets the documents information element.
         /// </summary>
         /// <returns></returns>

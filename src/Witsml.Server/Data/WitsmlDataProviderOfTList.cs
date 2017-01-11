@@ -77,6 +77,11 @@ namespace PDS.Witsml.Server.Data
             if (collection.Items.Count > 0 && parser.HasDocumentInfo())
                 collection.SetDocumentInfo(parser, op.User);
 
+            // Set CustomData namespace, if requested
+            if (collection.Items.Count > 0 &&
+                (parser.HasCustomData() || OptionsIn.ReturnElements.All.Equals(parser.ReturnElements())))
+                collection.SetCustomDataNamespace(parser);
+
             return new WitsmlResult<IEnergisticsCollection>(
                 responseContext.DataTruncated 
                     ? op.Warnings.Any() ? ErrorCodes.PartialSuccessWithWarnings : ErrorCodes.ParialSuccess 
