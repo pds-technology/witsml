@@ -50,14 +50,10 @@ namespace PDS.Witsml.Data.Channels
         /// Gets a ChannelDataReader for an <see cref="IEnumerable{IChannelDataRecord}"/>.
         /// </summary>
         /// <param name="records">The records.</param>
-        /// <param name="queryMnemonics">The query mnemonics</param>
-        /// <param name="units">The channel units for the query.</param>
-        /// <param name="dataTypes">The data types for the query.</param>        
-        /// <param name="nullValues">The null values for the query.</param>
         /// <returns>A <see cref="ChannelDataReader"/></returns>
-        public static ChannelDataReader GetReader(this IEnumerable<IChannelDataRecord> records, string[] queryMnemonics, IDictionary<int, string> units, IDictionary<int, string> dataTypes, IDictionary<int, string> nullValues)
+        public static ChannelDataReader GetReader(this IEnumerable<IChannelDataRecord> records)
         {
-            return new ChannelDataReader(records, queryMnemonics, units, dataTypes, nullValues);
+            return new ChannelDataReader(records);
         }
 
         /// <summary>
