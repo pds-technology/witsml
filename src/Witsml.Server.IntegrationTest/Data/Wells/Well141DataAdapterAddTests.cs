@@ -241,8 +241,7 @@ namespace PDS.Witsml.Server.Data.Wells
             var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
             var well = result.FirstOrDefault();
 
-            Assert.IsNotNull(well);
-            Assert.IsNotNull(well.CustomData);
+            Assert.IsNotNull(well?.CustomData);
             Assert.AreEqual(2, well.CustomData.Any.Count);
 
             Assert.AreEqual(element1.LocalName, well.CustomData.Any[0].LocalName);

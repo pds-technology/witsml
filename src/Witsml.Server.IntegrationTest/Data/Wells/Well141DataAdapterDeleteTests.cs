@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
@@ -662,6 +663,63 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.IsNotNull(queryWell.CommonData);
             Assert.IsNotNull(queryWell.CommonData.AcquisitionTimeZone);
             Assert.AreEqual(0, queryWell.CommonData.AcquisitionTimeZone.Count);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_DeleteFromStore_Can_Remove_CustomData_Elements()
+        {
+            var doc = new XmlDocument();
+
+            var element1 = doc.CreateElement("FirstItem", "http://www.witsml.org/schemas/1series");
+            element1.InnerText = "123.45";
+
+            var element2 = doc.CreateElement("LastItem", element1.NamespaceURI);
+            element2.InnerText = "987.65";
+
+            Well.CustomData = new CustomData
+            {
+                Any = DevKit.List(element1, element2)
+            };
+
+            DevKit.AddAndAssert<WellList, Well>(Well);
+
+            // Query
+            var query = new Well { Uid = Well.Uid };
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+            var well = result.FirstOrDefault();
+
+            Assert.IsNotNull(well?.CustomData);
+            Assert.AreEqual(2, well.CustomData.Any.Count);
+
+            Assert.AreEqual(element1.LocalName, well.CustomData.Any[0].LocalName);
+            Assert.AreEqual(element1.InnerText, well.CustomData.Any[0].InnerText);
+
+            Assert.AreEqual(element2.LocalName, well.CustomData.Any[1].LocalName);
+            Assert.AreEqual(element2.InnerText, well.CustomData.Any[1].InnerText);
+
+            // Partial delete
+            element2.InnerText = string.Empty;
+
+            well = new Well
+            {
+                Uid = Well.Uid,
+                CustomData = new CustomData
+                {
+                    Any = DevKit.List(element2)
+                }
+            };
+
+            DevKit.DeleteAndAssert<WellList, Well>(well, partialDelete: true);
+
+            // Query
+            result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+            well = result.FirstOrDefault();
+
+            Assert.IsNotNull(well?.CustomData);
+            Assert.AreEqual(1, well.CustomData.Any.Count);
+
+            Assert.AreEqual(element1.LocalName, well.CustomData.Any[0].LocalName);
+            Assert.AreEqual(element1.InnerText, well.CustomData.Any[0].InnerText);
         }
     }
 }
