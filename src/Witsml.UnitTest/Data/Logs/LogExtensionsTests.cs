@@ -116,13 +116,13 @@ namespace PDS.Witsml.Data.Logs
                 LogCurveInfo = new List<Witsml131.ComponentSchemas.LogCurveInfo>()
             };
 
-            var lci0 = _log131Generator.CreateDoubleLogCurveInfo("DEPTH", "m");
+            var lci0 = _log131Generator.CreateDoubleLogCurveInfo("DEPTH", "m", 0);
             lci0.NullValue = "-1000.00";
             log.LogCurveInfo.Add(lci0);
-            var lci1 = _log131Generator.CreateDoubleLogCurveInfo("CH1", "m/h");
+            var lci1 = _log131Generator.CreateDoubleLogCurveInfo("CH1", "m/h", 1);
             lci1.NullValue = "-1111.11";
             log.LogCurveInfo.Add(lci1);
-            var lci2 = _log131Generator.CreateDoubleLogCurveInfo("CH2", "gAPI");
+            var lci2 = _log131Generator.CreateDoubleLogCurveInfo("CH2", "gAPI", 2);
             log.LogCurveInfo.Add(lci2);
 
             string[] mnemonic = new string[] { "DEPTH", "CH2", "CH1" };
@@ -353,10 +353,10 @@ namespace PDS.Witsml.Data.Logs
 
             // Add curves
             log.LogCurveInfo = new List<Witsml131.ComponentSchemas.LogCurveInfo>();
-            var lci0 = _log131Generator.CreateDoubleLogCurveInfo("DEPTH", "m");
+            var lci0 = _log131Generator.CreateDoubleLogCurveInfo("DEPTH", "m", 0);
             lci0.NullValue = "-1000.00";
             log.LogCurveInfo.Add(lci0);
-            var lci1 = _log131Generator.CreateDoubleLogCurveInfo("CH1", "m/h");
+            var lci1 = _log131Generator.CreateDoubleLogCurveInfo("CH1", "m/h", 1);
             lci1.NullValue = "-1111.11";
             log.LogCurveInfo.Add(lci1);
 
@@ -440,10 +440,10 @@ namespace PDS.Witsml.Data.Logs
 
             // Add curves
             log.LogCurveInfo = new List<Witsml131.ComponentSchemas.LogCurveInfo>();
-            var lci0 = _log131Generator.CreateDoubleLogCurveInfo("DEPTH", "m");
+            var lci0 = _log131Generator.CreateDoubleLogCurveInfo("DEPTH", "m", 0);
             lci0.NullValue = "-1000.00";
             log.LogCurveInfo.Add(lci0);
-            var lci1 = _log131Generator.CreateDoubleLogCurveInfo("CH1", "m/h");
+            var lci1 = _log131Generator.CreateDoubleLogCurveInfo("CH1", "m/h", 1);
             lci1.NullValue = "-1111.11";
             log.LogCurveInfo.Add(lci1);
 
@@ -533,7 +533,7 @@ namespace PDS.Witsml.Data.Logs
             Assert.IsNull(result.End);
 
             // Add logCurveInfo with just start index
-            var lci0 = _log131Generator.CreateDoubleLogCurveInfo("DEPTH", "m");
+            var lci0 = _log131Generator.CreateDoubleLogCurveInfo("DEPTH", "m", 0);
             lci0.NullValue = "-1000.00";
             lci0.MinDateTimeIndex = start;
             log.LogCurveInfo.Add(lci0);
@@ -591,7 +591,7 @@ namespace PDS.Witsml.Data.Logs
             Assert.IsNull(result.End);
 
             // Add logCurveInfo with just start index
-            var lci0 = _log131Generator.CreateDoubleLogCurveInfo("DEPTH", "m");
+            var lci0 = _log131Generator.CreateDoubleLogCurveInfo("DEPTH", "m", 0);
             lci0.NullValue = "-1000.00";
             lci0.MinIndex = new Witsml131.ComponentSchemas.GenericMeasure(start, "m");
             log.LogCurveInfo.Add(lci0);
