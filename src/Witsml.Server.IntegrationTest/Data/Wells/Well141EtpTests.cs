@@ -16,10 +16,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Energistics;
+using Energistics.Common;
 using Energistics.DataAccess.WITSML141;
 using Energistics.Datatypes;
+using Energistics.Datatypes.Object;
 using Energistics.Protocol.Store;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -46,8 +49,8 @@ namespace PDS.Witsml.Server.Data.Wells
             await RequestSessionAndAssert();
 
             await GetResourcesAndAssert(new EtpUri("eml://unknown141"), EtpErrorCodes.InvalidUri);
-            await GetResourcesAndAssert(new EtpUri("eml://witsml141"));
             await GetResourcesAndAssert(new EtpUri("eml://witsml141/ChannelSet"));
+            await GetResourcesAndAssert(new EtpUri("eml://witsml141"));
         }
 
         [TestMethod]
@@ -56,9 +59,10 @@ namespace PDS.Witsml.Server.Data.Wells
             await RequestSessionAndAssert();
 
             var handler = _client.Handler<IStoreCustomer>();
-        
+
             // Get Invalid Object
             await GetAndAssert(handler, new EtpUri("eml://unknown141/wellz(123)"), EtpErrorCodes.InvalidUri);
+            await GetAndAssert(handler, new EtpUri("eml://witsml141/ChannelSet"), EtpErrorCodes.UnsupportedObject);
             await GetAndAssert(handler, new EtpUri("eml://witsml141"), EtpErrorCodes.UnsupportedObject);
         }
 
@@ -71,7 +75,55 @@ namespace PDS.Witsml.Server.Data.Wells
 
             // Delete Invalid Object
             await DeleteAndAssert(handler, new EtpUri("eml://unknown141/wellz(123)"), EtpErrorCodes.InvalidUri);
+            await DeleteAndAssert(handler, new EtpUri("eml://witsml141/ChannelSet"), EtpErrorCodes.UnsupportedObject);
             await DeleteAndAssert(handler, new EtpUri("eml://witsml141"), EtpErrorCodes.UnsupportedObject);
+        }
+
+        [TestMethod]
+        public async Task Well141_PutObject_Can_Detect_Invalid_Data_Objects()
+        {
+            await RequestSessionAndAssert();
+
+            var handler = _client.Handler<IStoreCustomer>();
+
+            // Put Invalid Object
+            await PutAndAssert(handler, ToDataObject(EtpUris.Witsml141, BasicXMLTemplate), EtpErrorCodes.InvalidObject);
+            await PutAndAssert(handler, ToDataObject("eml://unknown141/wellz(123)"), EtpErrorCodes.InvalidUri);
+            await PutAndAssert(handler, ToDataObject("eml://witsml141/ChannelSet"), EtpErrorCodes.UnsupportedObject);
+            await PutAndAssert(handler, ToDataObject("eml://witsml141"), EtpErrorCodes.UnsupportedObject);
+        }
+
+        private DataObject ToDataObject(string uri, string templateXml = null)
+        {
+            var uuid = DevKit.Uid();
+
+            var dataObject = new DataObject
+            {
+                Resource = new Resource
+                {
+                    ContentType = EtpContentTypes.Witsml141,
+                    ResourceType = ResourceTypes.DataObject.ToString(),
+                    CustomData = new Dictionary<string, string>(),
+                    Uuid = DevKit.Uid(),
+                    Name = DevKit.Name(),
+                    HasChildren = -1,
+                    Uri = uri
+                },
+                ContentEncoding = string.Empty,
+                Data = new byte[0]
+            };
+
+            if (!string.IsNullOrWhiteSpace(templateXml))
+            {
+                // Update data object XML
+                var xml = string.Format(templateXml, uuid, string.Empty);
+                dataObject.SetXml(xml);
+
+                // Update resource URI
+                dataObject.Resource.Uri = EtpUris.Witsml141.Append(ObjectTypes.Well, uuid);
+            }
+
+            return dataObject;
         }
     }
 }
