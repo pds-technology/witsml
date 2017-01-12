@@ -836,10 +836,18 @@
     </Content>
     <Content Include="TestData\EnergisticsWell2016-B_Well.xml" />
     <Content Include="TestData\EnergisticsWellbore2016-B_Wellbore.xml" />
-    <Content Include="TestData\L-3610902-MD_log.xml" />
-    <Content Include="TestData\L-3610902-Time-Dec_log.xml" />
-    <Content Include="TestData\L-3610903-MD-Dec_log.xml" />
-    <Content Include="TestData\L-3610903-Time_log.xml" />
+    <Content Include="TestData\L-3610902-MD_log.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\L-3610902-Time-Dec_log.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\L-3610903-MD-Dec_log.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\L-3610903-Time_log.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="TestData\Test-exceed-max-doc-size-log-0001.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
