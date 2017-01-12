@@ -31,6 +31,7 @@ using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using Energistics.Protocol;
+using Energistics.Protocol.ChannelStreaming;
 using Energistics.Protocol.Core;
 using Energistics.Protocol.Discovery;
 using Energistics.Protocol.Store;
@@ -85,14 +86,17 @@ namespace PDS.Witsml.Server
             _client = CreateClient(url);
 
             // Resolve dependencies early to avoid object disposed
+            var streaming = container.Resolve<IChannelStreamingProducer>();
             var discovery = container.Resolve<IDiscoveryStore>();
             var store = container.Resolve<IStoreStore>();
 
             // Register server handlers
+            _server.Register(() => streaming);
             _server.Register(() => discovery);
             _server.Register(() => store);
 
             // Register client handlers
+            _client.Register<IChannelStreamingConsumer, ChannelStreamingConsumerHandler>();
             _client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();
             _client.Register<IStoreCustomer, StoreCustomerHandler>();
         }
@@ -332,7 +336,7 @@ namespace PDS.Witsml.Server
             var openArgs = await onOpenSession;
 
             // Verify OpenSession and Supported Protocols
-            VerifySessionWithProtcols(openArgs, Protocols.Discovery, Protocols.Store);
+            VerifySessionWithProtcols(openArgs, Protocols.ChannelStreaming, Protocols.Discovery, Protocols.Store);
 
             return openArgs;
         }
