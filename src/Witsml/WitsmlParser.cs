@@ -149,7 +149,7 @@ namespace PDS.Witsml
                 RemoveEmptyElements(element);
             }
 
-            return root.ToString();
+            return root.ToString(SaveOptions.OmitDuplicateNamespaces);
         }
 
         /// <summary>
