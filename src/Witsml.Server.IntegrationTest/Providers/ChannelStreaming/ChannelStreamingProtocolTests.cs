@@ -198,6 +198,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         }
 
         [TestMethod]
+        [Ignore]
         //[TestCategory("ChannelStreaming")]
         [Description("Verifying that issuing a ChannelRangeRequest with invalid range returns a single error from the server")]
         public async Task IChannelStreamingProducer_ProtocolException_Returned_Once_For_Invalid_Range_On_ChannelRangeRequest()
