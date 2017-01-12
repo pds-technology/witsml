@@ -22,7 +22,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
+using System.Xml;
 using System.Xml.Linq;
+using System.Xml.Serialization;
 using Energistics.Datatypes;
 using MongoDB.Driver;
 using PDS.Framework;
@@ -116,6 +118,12 @@ namespace PDS.Witsml.Server.Data
         /// <returns>true if the special case was handled, false otherwise</returns>
         protected override bool HandleSpecialCase(PropertyInfo propertyInfo, List<XElement> elementList, string parentPath, string elementName)
         {
+            if (HasXmlAnyElement(propertyInfo.PropertyType))
+            {
+                var propertyValue = Context.PropertyValues.Last();
+                UpdateXmlAnyElements(elementList, propertyInfo, propertyValue, parentPath);
+                return true;
+            }
             if (!IsSpecialCase(propertyInfo))
             {
                 return base.HandleSpecialCase(propertyInfo, elementList, parentPath, elementName);
@@ -128,7 +136,7 @@ namespace PDS.Witsml.Server.Data
             var args = propertyType.GetGenericArguments();
             var childType = args.FirstOrDefault() ?? propertyType.GetElementType();
 
-            if (childType != typeof(string))
+            if (childType != null && childType != typeof(string))
             {
                 var version = ObjectTypes.GetVersion(childType);
                 var validator = Container.Resolve<IRecurringElementValidator>(new ObjectName(childType.Name, version));
@@ -307,6 +315,52 @@ namespace PDS.Witsml.Server.Data
 
                     var filter = filterBuilder.And(filters);
                     return new UpdateOneModel<T>(filter, update);
+                })
+                .Where(x => x != null)
+                .ToList();
+
+            if (updateList.Count > 0)
+                Collection.BulkWrite(updateList);
+        }
+
+        private void UpdateXmlAnyElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, string parentPath)
+        {
+            if (elements.Count < 1 || propertyInfo == null) return;
+            var element = elements.First();
+
+            if (!element.HasElements)
+            {
+                UnsetProperty(propertyInfo, parentPath);
+                return;
+            }
+
+            Logger.DebugFormat($"Updating XmlAnyElements: {parentPath} {propertyInfo?.Name}");
+
+            var anyPropertyInfo = propertyInfo.PropertyType.GetProperties()
+                .First(x => x.IsDefined(typeof(XmlAnyElementAttribute), false));
+
+            var propertyPath = GetPropertyPath(GetPropertyPath(parentPath, propertyInfo.Name), anyPropertyInfo.Name);
+            var items = (IList<XmlElement>)anyPropertyInfo.GetValue(propertyValue);
+            var names = items.Select(x => x.LocalName).ToList();
+
+            var updateBuilder = Builders<T>.Update;
+
+            var updateList = element
+                .Elements()
+                .Select(x =>
+                {
+                    if (Context.ValidationOnly)
+                        return null;
+
+                    var position = names.IndexOf(x.Name.LocalName);
+                    var positionPath = propertyPath + "." + position;
+                    var item = x.ToXmlElement();
+
+                    var update = position > -1
+                        ? updateBuilder.Set(positionPath, item)
+                        : updateBuilder.Push(propertyPath, item);
+
+                    return new UpdateOneModel<T>(_entityFilter, update);
                 })
                 .Where(x => x != null)
                 .ToList();

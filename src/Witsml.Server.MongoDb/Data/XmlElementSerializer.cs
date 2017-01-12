@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System.Xml;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using Newtonsoft.Json;
@@ -29,6 +30,8 @@ namespace PDS.Witsml.Server.Data
     /// <seealso cref="MongoDB.Bson.Serialization.Serializers.SerializerBase{XmlElement}" />
     public class XmlElementSerializer : SerializerBase<XmlElement>
     {
+        private const string Xmlns = "xmlns";
+
         /// <summary>
         /// Serializes a value.
         /// </summary>
@@ -45,6 +48,11 @@ namespace PDS.Witsml.Server.Data
                 return;
             }
 
+            if (!string.IsNullOrWhiteSpace(value.NamespaceURI) && !value.HasAttribute(Xmlns))
+            {
+                value.SetAttribute(Xmlns, value.NamespaceURI);
+            }
+
             var json = JsonConvert.SerializeXmlNode(value);
             writer.WriteJavaScript(json);
         }
@@ -58,6 +66,12 @@ namespace PDS.Witsml.Server.Data
         public override XmlElement Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
         {
             var reader = context.Reader;
+
+            if (reader.GetCurrentBsonType() == BsonType.Null)
+            {
+                return null;
+            }
+
             var json = reader.ReadJavaScript();
 
             if (string.IsNullOrWhiteSpace(json) || json == JsonConvert.Null)

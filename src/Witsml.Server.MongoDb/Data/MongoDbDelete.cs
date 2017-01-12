@@ -22,7 +22,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
+using System.Xml;
 using System.Xml.Linq;
+using System.Xml.Serialization;
 using Energistics.Datatypes;
 using MongoDB.Driver;
 using PDS.Framework;
@@ -180,20 +182,26 @@ namespace PDS.Witsml.Server.Data
         /// <returns>true if the special case was handled, false otherwise</returns>
         protected override bool HandleSpecialCase(PropertyInfo propertyInfo, List<XElement> elementList, string parentPath, string elementName)
         {
-            if (IsSpecialCase(propertyInfo))
+            if (HasXmlAnyElement(propertyInfo.PropertyType))
             {
-                var items = Context.PropertyValues.Last() as IEnumerable;
-                var propertyPath = GetPropertyPath(parentPath, propertyInfo.Name);
-
-                if (items != null && elementList.Any(e => string.IsNullOrWhiteSpace(e.Value)))
-                {
-                    UnsetProperty(propertyInfo, propertyPath);
-                }
-
+                var propertyValue = Context.PropertyValues.Last();
+                PartialDeleteXmlAnyElements(elementList, propertyInfo, propertyValue, parentPath);
                 return true;
             }
+            if (!IsSpecialCase(propertyInfo))
+            {
+                return base.HandleSpecialCase(propertyInfo, elementList, parentPath, elementName);
+            }
 
-            return base.HandleSpecialCase(propertyInfo, elementList, parentPath, elementName);
+            var items = Context.PropertyValues.Last() as IEnumerable;
+            var propertyPath = GetPropertyPath(parentPath, propertyInfo.Name);
+
+            if (items != null && elementList.Any(e => string.IsNullOrWhiteSpace(e.Value)))
+            {
+                UnsetProperty(propertyInfo, propertyPath);
+            }
+
+            return true;
         }
 
         private void BuildPartialDelete(XElement element)
@@ -257,6 +265,55 @@ namespace PDS.Witsml.Server.Data
             if (property != null && property.CanWrite)
             {
                 Context.Update = Context.Update.Set(propertyPath + "Specified", specified);
+            }
+        }
+
+        private void PartialDeleteXmlAnyElements(List<XElement> elements, PropertyInfo propertyInfo, object propertyValue, string parentPath)
+        {
+            if (elements.Count < 1 || propertyInfo == null) return;
+            var element = elements.First();
+
+            if (!element.HasElements)
+            {
+                UnsetProperty(propertyInfo, parentPath);
+                return;
+            }
+
+            Logger.DebugFormat($"Updating XmlAnyElements: {parentPath} {propertyInfo?.Name}");
+
+            var anyPropertyInfo = propertyInfo.PropertyType.GetProperties()
+                .First(x => x.IsDefined(typeof(XmlAnyElementAttribute), false));
+
+            var propertyPath = GetPropertyPath(GetPropertyPath(parentPath, propertyInfo.Name), anyPropertyInfo.Name);
+            var items = (IList<XmlElement>)anyPropertyInfo.GetValue(propertyValue);
+            var names = items.Select(x => x.LocalName).ToList();
+
+            var updateBuilder = Builders<T>.Update;
+
+            var updateList = element
+                .Elements()
+                .Select(x =>
+                {
+                    var position = names.IndexOf(x.Name.LocalName);
+                    var positionPath = propertyPath + "." + position;
+
+                    if (position == -1)
+                        return null;
+
+                    // Set position to null
+                    var update = updateBuilder.Unset(positionPath);
+                    return new UpdateOneModel<T>(_entityFilter, update);
+                })
+                .Where(x => x != null)
+                .ToList();
+
+            if (updateList.Count > 0)
+            {
+                // Remove all null items
+                var update = updateBuilder.PullAll(propertyPath, new object[] { null });
+                updateList.Add(new UpdateOneModel<T>(_entityFilter, update));
+
+                _collection.BulkWrite(updateList);
             }
         }
 
