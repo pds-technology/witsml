@@ -396,6 +396,9 @@ namespace PDS.Witsml.Server.Data.Wells
         [TestMethod]
         public void Well141DataAdapter_UpdateInStore_Can_Update_CustomData_Elements()
         {
+            DevKit.AddAndAssert<WellList, Well>(Well);
+
+            // Update with New Data
             var doc = new XmlDocument();
 
             var element1 = doc.CreateElement("FirstItem", "http://www.witsml.org/schemas/1series");
@@ -409,7 +412,7 @@ namespace PDS.Witsml.Server.Data.Wells
                 Any = DevKit.List(element1, element2)
             };
 
-            DevKit.AddAndAssert<WellList, Well>(Well);
+            DevKit.UpdateAndAssert<WellList, Well>(Well);
 
             // Query
             var query = new Well { Uid = Well.Uid };
@@ -425,7 +428,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual(element2.LocalName, well.CustomData.Any[1].LocalName);
             Assert.AreEqual(element2.InnerText, well.CustomData.Any[1].InnerText);
 
-            // Update
+            // Partial Update
             well.CustomData.Any[1].InnerText = "0.0";
 
             var element3 = doc.CreateElement("NewItem", element1.NamespaceURI);
@@ -445,7 +448,7 @@ namespace PDS.Witsml.Server.Data.Wells
             Assert.AreEqual(element1.InnerText, well.CustomData.Any[0].InnerText);
 
             Assert.AreEqual(element2.LocalName, well.CustomData.Any[1].LocalName);
-            Assert.AreEqual(element2.InnerText, well.CustomData.Any[1].InnerText);
+            Assert.AreEqual("0.0", well.CustomData.Any[1].InnerText);
 
             Assert.AreEqual(element3.LocalName, well.CustomData.Any[2].LocalName);
             Assert.AreEqual(element3.InnerText, well.CustomData.Any[2].InnerText);

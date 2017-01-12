@@ -143,7 +143,7 @@ namespace PDS.Witsml.Data
                 if (propertyInfo != null)
                 {
                     NavigateElementGroup(propertyInfo, group, parentPath);
-                } 
+                }
                 else
                 {
                     HandleInvalidElementGroup(group.Key);
@@ -886,6 +886,16 @@ namespace PDS.Witsml.Data
         protected virtual bool HasSimpleContent(Type type)
         {
             return type.GetProperties().Any(x => x.IsDefined(typeof(XmlTextAttribute), false));
+        }
+
+        /// <summary>
+        /// Determines whether the specified type supports any XML element.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns><c>true</c> if the type supports any XML elements; otherwise, <c>false</c>.</returns>
+        protected virtual bool HasXmlAnyElement(Type type)
+        {
+            return type.GetProperties().Any(x => x.IsDefined(typeof(XmlAnyElementAttribute), false));
         }
 
         private bool IsNumeric(Type propertyType)

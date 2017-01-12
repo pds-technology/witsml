@@ -24,6 +24,8 @@ using System.Reflection;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
+using System.Xml;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 using PDS.Framework.Properties;
 
@@ -286,5 +288,5 @@ namespace PDS.Framework
 
             return null;
         }
-    }
+        /// <summary>        /// Converts an <see cref="XElement"/> to an <see cref="XmlElement"/>.        /// </summary>        /// <param name="element">The element.</param>        /// <returns>An <see cref="XmlElement"/> instance.</returns>        public static XmlElement ToXmlElement(this XElement element)        {            using (var reader = element.CreateReader())            {                var doc = new XmlDocument();                doc.Load(reader);                return doc.DocumentElement;            }        }    }
 }
