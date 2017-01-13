@@ -101,7 +101,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 // Remove previous log data
                 ChannelDataChunkAdapter.Delete(uri);
                 // Separate log header and log data
-                var readers = ExtractDataReaders(dataObject, GetEntity(uri));
+                var readers = ExtractDataReaders(dataObject);
                 // Replace log header
                 ReplaceEntity(dataObject, uri);
                 // Update log data and index ranges
