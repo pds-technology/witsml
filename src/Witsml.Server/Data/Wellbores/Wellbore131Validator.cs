@@ -90,6 +90,19 @@ namespace PDS.Witsml.Server.Data.Wellbores
         {
             var uri = DataObject.GetUri();
             yield return ValidateObjectExistence(uri);
+
+            if (!Parser.HasElements() && !Parser.CascadedDelete())
+            {
+                // Validate that there are no child data-objects if cascading deletes are not invoked.
+                foreach (var dataAdapter in Providers.Cast<IWitsmlDataAdapter>())
+                {
+                    if (dataAdapter.DataObjectType == typeof(Well) || dataAdapter.DataObjectType == typeof(Wellbore))
+                        continue;
+
+                    if (dataAdapter.Any(uri))
+                        yield return new ValidationResult(ErrorCodes.NotBottomLevelDataObject.ToString());
+                }
+            }
         }
 
         private ValidationResult ValidateObjectExistence(EtpUri uri)
