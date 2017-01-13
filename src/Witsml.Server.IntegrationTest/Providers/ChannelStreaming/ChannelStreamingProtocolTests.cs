@@ -65,7 +65,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             EtpCleanUp();
         }
 
-        [Ignore]
         [TestMethod]
         //[TestCategory("ChannelStreaming"), TestProperty("TestID", "11a")]
         [Description("Verifying that issuing a ChannelRangeRequest returns the correct ChannelData objects ( i.e. range and index order )")]
@@ -147,7 +146,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             }
         }
 
-        [Ignore]
         [TestMethod]
         //[TestCategory("ChannelStreaming"), TestProperty("TestID", "11b")]
         [Description("Verifying that issuing a ChannelRangeRequest with invalid channelId returns an error from the server")]
@@ -199,7 +197,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             Assert.AreEqual((int)EtpErrorCodes.InvalidArgument, args.Message.ErrorCode);
         }
 
-        [Ignore]
         [TestMethod]
         //[TestCategory("ChannelStreaming")]
         [Description("Verifying that issuing a ChannelRangeRequest with invalid range returns a single error from the server")]
@@ -256,7 +253,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             await Should.ThrowAsync<TimeoutException>(moreExceptions);
         }
 
-        [Ignore]
         [TestMethod]
         //[TestCategory("ChannelStreaming"), TestProperty("TestID", "61")]
         [Description("Verify a producer sends correct ChannelMetadata for increasing and decreasing time and depth channels")]
@@ -322,7 +318,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             }
         }
 
-        [Ignore]
         [TestMethod]
         //[TestCategory("ChannelStreaming"), TestProperty("TestID", "62")]
         [Description("Verify a producer sends one ChannelData in response to ChannelStreamingStart for non-growing logs with a StreamingStartIndex of null (latestValue)")]
@@ -519,7 +514,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             await Should.ThrowAsync<TimeoutException>(onMoreChannelData);
         }
 
-        [Ignore]
         [TestMethod]
         //[TestCategory("ChannelStreaming"), TestProperty("TestID", "64")]
         [Description("Verify a producer sends 10 data points in ChannelData message(s) in response to ChannelStreamingStart for non-growing logs with a StreamingStartIndex indexValue of the 10th to the last value in the channel")]
@@ -624,7 +618,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             await Should.ThrowAsync<TimeoutException>(onMoreChannelData);
         }
 
-        [Ignore]
         [TestMethod]
         //[TestCategory("ChannelStreaming"), TestProperty("TestID", "68")]
         [Description("Verify a Server/Consumer responds with error when receiving a ChannelRangeRequest with to/from indexes not in index order of underlying Log.")]
@@ -675,7 +668,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             Assert.AreEqual((int)EtpErrorCodes.InvalidArgument, args.Message.ErrorCode);
         }
 
-        [Ignore]
         [TestMethod]
         //[TestCategory("ChannelStreaming"), TestProperty("TestID", "Benchmark")]
         [Description("Verify a producer sends one ChannelData in less than 2 seconds")]

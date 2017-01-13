@@ -67,5 +67,14 @@ namespace PDS.Witsml.Server.IntegrationTest {
                 return ((int)(this["DefaultTimeoutInMilliseconds"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("ws://localhost/witsml.web/api/etp")]
+        public string FallbackServerUrl {
+            get {
+                return ((string)(this["FallbackServerUrl"]));
+            }
+        }
     }
 }
