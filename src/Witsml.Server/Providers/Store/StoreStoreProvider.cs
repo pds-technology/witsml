@@ -190,7 +190,7 @@ namespace PDS.Witsml.Server.Providers.Store
             }
             catch (WitsmlException ex)
             {
-                if (ex.ErrorCode.Equals((short) ErrorCodes.NotBottomLevelDataObject))
+                if (ex.ErrorCode.Equals(ErrorCodes.NotBottomLevelDataObject))
                 {
                     this.NoCascadeDelete(uri, header.MessageId);
                 }
