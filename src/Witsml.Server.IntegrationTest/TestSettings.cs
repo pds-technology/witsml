@@ -31,6 +31,11 @@ namespace PDS.Witsml.Server
         /// <summary>
         /// The default ETP server URL
         /// </summary>
+        public static string FallbackServerUrl = Settings.Default.FallbackServerUrl;
+
+        /// <summary>
+        /// The default ETP server URL
+        /// </summary>
         public static string EtpServerUrl = Settings.Default.EtpServerUrl;
 
         /// <summary>
@@ -65,6 +70,7 @@ namespace PDS.Witsml.Server
 
             //ServerCapabilitiesUrl = $"{settings["ServerCapabilitiesUrl"]}";
             //AuthTokenUrl = $"{settings["AuthTokenUrl"]}";
+            FallbackServerUrl = $"{settings["FallbackServerUrl"]}";
             EtpServerUrl = $"{settings["EtpServerUrl"]}";
             //SoapServerUrl = $"{settings["SoapServerUrl"]}";
             Username = $"{settings["Username"]}";
@@ -96,6 +102,7 @@ namespace PDS.Witsml.Server
 
             //ServerCapabilitiesUrl = Settings.Default.ServerCapabilitiesUrl;
             //AuthTokenUrl = Settings.Default.AuthTokenUrl;
+            FallbackServerUrl = Settings.Default.FallbackServerUrl;
             EtpServerUrl = Settings.Default.EtpServerUrl;
             //SoapServerUrl = Settings.Default.SoapServerUrl;
             Username = Settings.Default.Username;

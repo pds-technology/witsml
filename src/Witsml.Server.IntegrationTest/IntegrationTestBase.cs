@@ -46,6 +46,7 @@ namespace PDS.Witsml.Server
     /// </summary>
     public abstract class IntegrationTestBase
     {
+        private IContainer _container;
         protected EtpSocketServer _server;
         protected EtpClient _client;
 
@@ -69,6 +70,8 @@ namespace PDS.Witsml.Server
         /// <param name="container">The composition container.</param>
         protected void EtpSetUp(IContainer container)
         {
+            _container = container;
+
             // Get next available port number
             var listener = new TcpListener(IPAddress.Loopback, 0);
             listener.Start();
@@ -83,7 +86,7 @@ namespace PDS.Witsml.Server
             _server = CreateServer(port);
 
             _client?.Dispose();
-            _client = CreateClient(url);
+            _client = InitClient(CreateClient(url));
 
             // Resolve dependencies early to avoid object disposed
             var streaming = container.Resolve<IChannelStreamingProducer>();
@@ -94,11 +97,6 @@ namespace PDS.Witsml.Server
             _server.Register(() => streaming);
             _server.Register(() => discovery);
             _server.Register(() => store);
-
-            // Register client handlers
-            _client.Register<IChannelStreamingConsumer, ChannelStreamingConsumerHandler>();
-            _client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();
-            _client.Register<IStoreCustomer, StoreCustomerHandler>();
         }
 
         /// <summary>
@@ -137,6 +135,21 @@ namespace PDS.Witsml.Server
 
             var client = new EtpClient(url ?? TestSettings.EtpServerUrl, GetType().AssemblyQualifiedName, version, headers);
             client.Output = client.Logger.Info;
+            return client;
+        }
+
+        /// <summary>
+        /// Initializes the client.
+        /// </summary>
+        /// <param name="client">The ETP client.</param>
+        /// <returns>The ETP client.</returns>
+        protected EtpClient InitClient(EtpClient client)
+        {
+            // Register client handlers
+            client.Register<IChannelStreamingConsumer, ChannelStreamingConsumerHandler>();
+            client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();
+            client.Register<IStoreCustomer, StoreCustomerHandler>();
+
             return client;
         }
 
@@ -321,24 +334,44 @@ namespace PDS.Witsml.Server
         /// <summary>
         /// Requests a new session and asserts.
         /// </summary>
+        /// <param name="retries">The number of retries.</param>
         /// <returns>The <see cref="OpenSession" /> message args.</returns>
-        protected async Task<ProtocolEventArgs<OpenSession>> RequestSessionAndAssert()
+        protected async Task<ProtocolEventArgs<OpenSession>> RequestSessionAndAssert(int retries = 2)
         {
-            // Register event handler for OpenSession response
-            var onOpenSession = HandleAsync<OpenSession>(
-                x => _client.Handler<ICoreClient>().OnOpenSession += x);
+            try
+            {
+                // Register event handler for OpenSession response
+                var onOpenSession = HandleAsync<OpenSession>(
+                    x => _client.Handler<ICoreClient>().OnOpenSession += x);
 
-            // Wait for Open connection
-            var isOpen = await _client.OpenAsync();
-            Assert.IsTrue(isOpen);
+                // Wait for Open connection
+                var isOpen = await _client.OpenAsync();
+                Assert.IsTrue(isOpen);
 
-            // Wait for OpenSession
-            var openArgs = await onOpenSession;
+                // Wait for OpenSession
+                var openArgs = await onOpenSession;
 
-            // Verify OpenSession and Supported Protocols
-            VerifySessionWithProtcols(openArgs, Protocols.ChannelStreaming, Protocols.Discovery, Protocols.Store);
+                // Verify OpenSession and Supported Protocols
+                VerifySessionWithProtcols(openArgs, Protocols.ChannelStreaming, Protocols.Discovery, Protocols.Store);
 
-            return openArgs;
+                return openArgs;
+            }
+            catch (TimeoutException)
+            {
+                if (retries < 1) throw;
+
+                if (retries == 1)
+                {
+                    _client?.Dispose();
+                    _client = InitClient(CreateClient(TestSettings.FallbackServerUrl));
+                }
+                else
+                {
+                    EtpSetUp(_container);
+                }
+
+                return await RequestSessionAndAssert(retries - 1);
+            }
         }
 
         /// <summary>
