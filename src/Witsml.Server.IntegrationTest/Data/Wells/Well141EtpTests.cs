@@ -125,5 +125,42 @@ namespace PDS.Witsml.Server.Data.Wells
 
             return dataObject;
         }
+
+        [TestMethod]
+        public async Task Well141_DeleteObject_Cannot_Delete_Well_With_Child_Wellbore()
+        {
+            AddParents();
+            await RequestSessionAndAssert();
+
+            var handler = _client.Handler<IStoreCustomer>();
+            var uri = Well.GetUri();
+
+            var dataObject = CreateDataObject<WellList, Well>(uri, Well);
+
+            // Put Object
+            await PutAndAssert(handler, dataObject);
+
+            var wellbore = new Wellbore()
+            {
+                UidWell = Well.Uid,
+                Uid = DevKit.Uid(),
+                NameWell = Well.Name,
+                Name = DevKit.Name("Wellbore")
+            };
+
+            var wellboreObject = CreateDataObject<WellboreList, Wellbore>(wellbore.GetUri(), wellbore);
+
+            // Put Wellbore
+            await PutAndAssert(handler, wellboreObject);
+
+            // Delete Well
+            await DeleteAndAssert(handler, uri, EtpErrorCodes.NoCascadeDelete);
+
+            // Delete Wellbore
+            await DeleteAndAssert(handler, wellbore.GetUri());
+
+            // Delete Well
+            await DeleteAndAssert(handler, uri);
+        }
     }
 }

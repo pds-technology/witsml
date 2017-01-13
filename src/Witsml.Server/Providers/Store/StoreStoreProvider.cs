@@ -176,8 +176,7 @@ namespace PDS.Witsml.Server.Providers.Store
                 if (!etpUri.IsValid) return;
                 if (!this.ValidateUriObjectType(etpUri, header.MessageId)) return;
 
-                WitsmlOperationContext.Current.Request = new RequestContext(Functions.DeleteObject, etpUri.ObjectType,
-                    null, null, null);
+                WitsmlOperationContext.Current.Request = new RequestContext(Functions.DeleteObject, etpUri.ObjectType, null, null, null);
 
                 var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(etpUri.ObjectType, etpUri.Version));
                 dataAdapter.Delete(etpUri);
