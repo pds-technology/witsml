@@ -460,5 +460,17 @@ namespace PDS.Witsml.Server.Data
         {
             return Fork(Elements(), ObjectType);
         }
+
+        /// <summary>
+        /// Removes the sub elements from the first element.
+        /// </summary>
+        public void RemoveSubElements()
+        {
+            var objectElement = Element();
+            if (objectElement != null && objectElement.HasElements)
+            {
+                objectElement.RemoveNodes();
+            }
+        }
     }
 }
