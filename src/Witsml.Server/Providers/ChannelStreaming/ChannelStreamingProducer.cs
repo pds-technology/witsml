@@ -22,7 +22,6 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Energistics;
 using Energistics.Common;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
@@ -72,6 +71,27 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         /// </summary>
         /// <value>The request message header.</value>
         public MessageHeader Request { get; private set; }
+
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposing">
+        ///   <c>true</c> to release both managed and unmanaged resources; 
+        ///   <c>false</c> to release only unmanaged resources.
+        /// </param>
+        protected override void Dispose(bool disposing)
+        {
+            if (_tokenSource != null)
+            {
+                using (_tokenSource)
+                {
+                    _tokenSource.Cancel();
+                    _tokenSource = null;
+                }
+            }
+
+            base.Dispose(disposing);
+        }
 
         /// <summary>
         /// Handles the channel describe.
@@ -379,7 +399,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 // Get channel data
                 var mnemonics = contextList.Select(c => c.ChannelMetadata.ChannelName).ToList();
                 var dataProvider = GetDataProvider(parentUri);
-                var optimiseStart = channelStreamingType == ChannelStreamingTypes.IndexValue ? true : false;
+                var optimiseStart = channelStreamingType == ChannelStreamingTypes.IndexValue;
                 var channelData = dataProvider.GetChannelData(parentUri, new Range<double?>(minStartIndex, maxEndIndex), mnemonics, requestLatestValues, optimiseStart);
 
                 // Stream the channel data
