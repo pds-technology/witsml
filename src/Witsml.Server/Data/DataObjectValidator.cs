@@ -95,6 +95,9 @@ namespace PDS.Witsml.Server.Data
             Context.RemoveNaNElements = true;
             Context.Function = function;
 
+            if (function == Functions.DeleteFromStore && !root.HasElements)
+                return root;
+
             if (function == Functions.AddToStore || function == Functions.UpdateInStore || function == Functions.DeleteFromStore || function == Functions.PutObject)
                 Navigate(root.Elements().FirstOrDefault());
 

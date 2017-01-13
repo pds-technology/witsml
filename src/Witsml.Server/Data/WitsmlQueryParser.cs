@@ -466,11 +466,7 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         public void RemoveSubElements()
         {
-            var objectElement = Element();
-            if (objectElement != null && objectElement.HasElements)
-            {
-                objectElement.RemoveNodes();
-            }
+            Element()?.RemoveNodes();
         }
     }
 }

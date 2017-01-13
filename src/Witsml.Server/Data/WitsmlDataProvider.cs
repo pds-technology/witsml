@@ -183,13 +183,14 @@ namespace PDS.Witsml.Server.Data
                 // Create an empty dataObject to use for delete with parser
                 var dataObject = Activator.CreateInstance<TObject>();
                 SetDefaultValues(dataObject, uri);
-                var parser = CreateQueryParser(dataObject);
 
-                // We only need the first Element in the Root to perform a Delete
+                var parser = CreateQueryParser(dataObject);
                 parser.RemoveSubElements();
 
-                Delete(parser);
+                var context = WitsmlOperationContext.Current;
+                context.Document = parser.Root.Document;
 
+                Delete(parser);
                 transaction.Commit();
             }
         }
