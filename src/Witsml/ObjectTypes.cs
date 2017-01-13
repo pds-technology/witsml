@@ -287,9 +287,12 @@ namespace PDS.Witsml
         {
             var objectGroupType = GetObjectGroupType(objectType, version);
 
-            return objectGroupType?.GetProperties()
-                .FirstOrDefault(
-                    x => x.GetCustomAttribute<XmlElementAttribute>().ElementName.EqualsIgnoreCase(objectType));
+            return objectGroupType?
+                .GetProperties()
+                .Select(x => new { Property = x, Attribute = x.GetCustomAttribute<XmlElementAttribute>() })
+                .Where(x => objectType.EqualsIgnoreCase(x.Attribute?.ElementName))
+                .Select(x => x.Property)
+                .FirstOrDefault();
         }
 
         /// <summary>
