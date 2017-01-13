@@ -4,7 +4,8 @@
   <!-- Parameters used by tests at runtime -->
   <TestRunParameters>
     <Parameter name="MongoDbConnection" value="mongodb://localhost:27017" />
-    <Parameter name="WitsmlStoreUrl" value="http://localhost/Witsml.Web/api/soap" />
+    <Parameter name="FallbackServerUrl" value="ws://localhost/witsml.web/api/etp" />
+    <Parameter name="WitsmlStoreUrl" value="http://localhost/witsml.web/api/soap" />
     <Parameter name="WitsmlStoreUsername" value="" />
     <Parameter name="WitsmlStorePassword" value="" />
   </TestRunParameters>
