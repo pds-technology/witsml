@@ -176,7 +176,8 @@ namespace PDS.Witsml.Server.Providers.Store
                 if (!etpUri.IsValid) return;
                 if (!this.ValidateUriObjectType(etpUri, header.MessageId)) return;
 
-                WitsmlOperationContext.Current.Request = new RequestContext(Functions.DeleteObject, etpUri.ObjectType, null, null, null);
+                WitsmlOperationContext.Current.Request = new RequestContext(Functions.DeleteObject, etpUri.ObjectType,
+                    null, null, null);
 
                 var dataAdapter = Container.Resolve<IEtpDataProvider>(new ObjectName(etpUri.ObjectType, etpUri.Version));
                 dataAdapter.Delete(etpUri);
@@ -186,6 +187,17 @@ namespace PDS.Witsml.Server.Providers.Store
             catch (ContainerException ex)
             {
                 this.UnsupportedObject(ex, uri, header.MessageId);
+            }
+            catch (WitsmlException ex)
+            {
+                if (ex.ErrorCode.Equals((short) ErrorCodes.NotBottomLevelDataObject))
+                {
+                    this.NoCascadeDelete(uri, header.MessageId);
+                }
+                else
+                {
+                    this.InvalidObject(ex, uri, header.MessageId);
+                }
             }
         }
     }
