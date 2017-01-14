@@ -336,13 +336,15 @@ namespace PDS.Witsml.Server
         /// </summary>
         /// <param name="retries">The number of retries.</param>
         /// <returns>The <see cref="OpenSession" /> message args.</returns>
-        protected async Task<ProtocolEventArgs<OpenSession>> RequestSessionAndAssert(int retries = 2)
+        protected async Task<ProtocolEventArgs<OpenSession>> RequestSessionAndAssert(int retries = 10)
         {
             try
             {
+                var client = _client;
+
                 // Register event handler for OpenSession response
                 var onOpenSession = HandleAsync<OpenSession>(
-                    x => _client.Handler<ICoreClient>().OnOpenSession += x);
+                    x => client.Handler<ICoreClient>().OnOpenSession += x);
 
                 // Wait for Open connection
                 var isOpen = await _client.OpenAsync();
@@ -359,6 +361,9 @@ namespace PDS.Witsml.Server
             catch (TimeoutException)
             {
                 if (retries < 1) throw;
+
+                await Task.Delay(TestSettings.DefaultTimeoutInMilliseconds);
+                Logger.Warn("Retrying connection attempt after timeout");
 
                 if (retries == 1)
                 {
