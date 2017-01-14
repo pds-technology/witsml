@@ -72,6 +72,10 @@ namespace PDS.Witsml.Server
         {
             _container = container;
 
+            // Clean up any remaining resources
+            _client?.Dispose();
+            _server?.Dispose();
+
             // Get next available port number
             var listener = new TcpListener(IPAddress.Loopback, 0);
             listener.Start();
@@ -82,10 +86,8 @@ namespace PDS.Witsml.Server
             var uri = new Uri(TestSettings.EtpServerUrl);
             var url = TestSettings.EtpServerUrl.Replace($":{uri.Port}", $":{port}");
 
-            _server?.Dispose();
+            // Create server and client instances
             _server = CreateServer(port);
-
-            _client?.Dispose();
             _client = InitClient(CreateClient(url));
 
             // Resolve dependencies early to avoid object disposed
