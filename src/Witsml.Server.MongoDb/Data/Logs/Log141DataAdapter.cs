@@ -255,7 +255,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns></returns>
         protected override string GetMnemonic(LogCurveInfo curve)
         {
-            Logger.DebugFormat("Getting logCurveInfo mnemonic: {0}", curve?.Mnemonic?.Value);
+            //Logger.DebugFormat("Getting logCurveInfo mnemonic: {0}", curve?.Mnemonic?.Value);
             return curve?.Mnemonic?.Value;
         }
 
@@ -266,7 +266,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns></returns>
         protected override string GetIndexCurveMnemonic(Log log)
         {
-            Logger.DebugFormat("Getting log index curve mnemonic: {0}", log.IndexCurve);
+            //Logger.DebugFormat("Getting log index curve mnemonic: {0}", log.IndexCurve);
             return log.IndexCurve;
         }
 
@@ -339,7 +339,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="units">The units.</param>
         protected override void SetLogDataValues(Log log, List<string> logDataValues, IEnumerable<string> mnemonics, IEnumerable<string> units)
         {
-            Logger.Debug("Settings logData values.");
+            Logger.Debug("Setting logData values.");
 
             if (log.LogData == null)
                 log.LogData = new List<LogData>();
