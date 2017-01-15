@@ -387,7 +387,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 Assert.AreEqual(1, messageData.Count, $"The Message does not have the expected number of data points for channelId {channelId}.");
             }
 
-            
             // Isolate data by channel
             var channelRopiData = GetChannelData(argsData, channelRopi.ChannelId);
             var channelPesdData = GetChannelData(argsData, channelPesd.ChannelId);
@@ -465,7 +464,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             // Verify that at least 4 ChannelData messages are received, at least one for each log channel.
             Assert.IsTrue(argsData.Count >= 4);
 
-
             foreach (var arg in argsData)
             {
                 // Verify for each ChannelData message that the correlationId is 0.
@@ -514,7 +512,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             await Should.ThrowAsync<TimeoutException>(onMoreChannelData);
         }
 
-        [Ignore]
         [TestMethod]
         //[TestCategory("ChannelStreaming"), TestProperty("TestID", "64")]
         [Description("Verify a producer sends 10 data points in ChannelData message(s) in response to ChannelStreamingStart for non-growing logs with a StreamingStartIndex indexValue of the 10th to the last value in the channel")]
@@ -669,7 +666,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             Assert.AreEqual((int)EtpErrorCodes.InvalidArgument, args.Message.ErrorCode);
         }
 
-        [Ignore]
         [TestMethod]
         //[TestCategory("ChannelStreaming"), TestProperty("TestID", "Benchmark")]
         [Description("Verify a producer sends one ChannelData in less than 2 seconds")]
@@ -710,6 +706,8 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
             // Send ChannelStreamingStart message
             handler.ChannelStreamingStart(channelStreamingInfos);
+
+            // Start stopwatch timer
             var sw = new System.Diagnostics.Stopwatch();
             sw.Restart();
 
