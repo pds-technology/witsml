@@ -1140,7 +1140,8 @@ namespace PDS.Witsml.Data.Channels
         /// </returns>
         public int GetValues(object[] values)
         {
-            _log.DebugFormat("Getting the values for row: {0}", _current);
+            // NOTE: logging here is too verbose!
+            //_log.DebugFormat("Getting the values for row: {0}", _current);
 
             // Slice the results of GetRowValues
             var rowValues = GetRowValues(_current)
@@ -1212,7 +1213,8 @@ namespace PDS.Witsml.Data.Channels
         /// <returns>true if the current row has values, false otherwise.</returns>
         public bool HasValues()
         {
-            _log.DebugFormat("Checking if the current row has any values: {0}", _current);
+            // NOTE: logging here is too verbose!
+            //_log.DebugFormat("Checking if the current row has any values: {0}", _current);
 
             return GetChannelValuesByOrdinal(_current)
                 .Any(x => !IsNull(x.Value, x.Key));
@@ -1225,7 +1227,8 @@ namespace PDS.Witsml.Data.Channels
         /// <returns>true if the current row has values, false otherwise.</returns>
         public bool HasValues(IEnumerable<object> rowValues)
         {
-            _log.DebugFormat("Checking if the row has any values.");
+            // NOTE: logging here is too verbose!
+            //_log.DebugFormat("Checking if the row has any values.");
 
             return rowValues
                 .Select((x, i) => new { Index = i, Value = x })
@@ -1243,7 +1246,8 @@ namespace PDS.Witsml.Data.Channels
             if (IsClosed)
                 return null;
 
-            _log.Debug("Serializing the current row in json format.");
+            // NOTE: logging here is too verbose!
+            //_log.Debug("Serializing the current row in json format.");
 
             return JsonConvert.SerializeObject(_records[_current]);
         }
@@ -1732,7 +1736,8 @@ namespace PDS.Witsml.Data.Channels
             if (IsClosed)
                 return Enumerable.Empty<object>();
 
-            _log.DebugFormat("Getting index values for row: {0}", row);
+            // NOTE: logging here is too verbose!
+            //_log.DebugFormat("Getting index values for row: {0}", row);
 
             return _records
                 .Skip(row)
@@ -1750,7 +1755,8 @@ namespace PDS.Witsml.Data.Channels
             if (IsClosed)
                 return new Dictionary<int, object>();
 
-            _log.DebugFormat("Getting channel values for row: {0}", row);
+            // NOTE: logging here is too verbose!
+            //_log.DebugFormat("Getting channel values for row: {0}", row);
 
             // Slice row
             return _records
@@ -1791,7 +1797,8 @@ namespace PDS.Witsml.Data.Channels
         /// <returns>The channel index range.</returns>
         private Range<double?> CalculateChannelIndexRanges(int i, bool isTimeIndex)
         {
-            _log.DebugFormat("Calculating channel index range: {0}", i);
+            // NOTE: logging here is too verbose!
+            //_log.DebugFormat("Calculating channel index range: {0}", i);
 
             var valueIndex = i - Depth;
             object start = null;

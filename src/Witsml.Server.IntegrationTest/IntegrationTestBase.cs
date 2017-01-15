@@ -381,6 +381,7 @@ namespace PDS.Witsml.Server
                 else
                 {
                     EtpSetUp(_container);
+                    _server.Start();
                 }
 
                 return await RequestSessionAndAssert(retries - 1);
