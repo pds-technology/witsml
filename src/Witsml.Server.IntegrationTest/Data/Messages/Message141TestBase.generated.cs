@@ -46,12 +46,12 @@ namespace PDS.Witsml.Server.Data.Messages
         public Wellbore Wellbore { get; set; }
         public Message Message { get; set; }
         public DevKit141Aspect DevKit { get; set; }
-        public TestContext TestContext { get; set; }
         public List<Message> QueryEmptyList { get; set; }
 
         [TestInitialize]
         public void TestSetUp()
         {
+            Logger.Debug($"Executing {TestContext.TestName}");
             DevKit = new DevKit141Aspect(TestContext);
 
             DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders

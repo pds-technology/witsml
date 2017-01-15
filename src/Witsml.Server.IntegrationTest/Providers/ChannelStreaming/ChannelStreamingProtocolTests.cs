@@ -40,7 +40,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
     public class ChannelStreamingProtocolTests : IntegrationTestBase
     {
         public DevKit141Aspect DevKit { get; set; }
-        public TestContext TestContext { get; set; }
 
         [ClassInitialize]
         public static void ClassSetUp(TestContext context)
@@ -52,6 +51,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         [TestInitialize]
         public void TestSetUp()
         {
+            Logger.Debug($"Executing {TestContext.TestName}");
             DevKit = new DevKit141Aspect(TestContext);
 
             EtpSetUp(DevKit.Container);

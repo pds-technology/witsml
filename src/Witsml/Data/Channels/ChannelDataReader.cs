@@ -1097,7 +1097,8 @@ namespace PDS.Witsml.Data.Channels
         {
             if (!SliceExists(i)) return null;
 
-            _log.DebugFormat("Getting the value at row: {0}, col: {1}", _current, i);
+            // NOTE: logging here is too verbose!
+            //_log.DebugFormat("Getting the value at row: {0}, col: {1}", _current, i);
 
             var rowValues = GetRowValues(_current);
             return GetValue(rowValues, i);
@@ -1712,7 +1713,8 @@ namespace PDS.Witsml.Data.Channels
             if (IsClosed)
                 return Enumerable.Empty<object>();
 
-            _log.DebugFormat("Getting all values for row: {0}", row);
+            // NOTE: logging here is too verbose!
+            //_log.DebugFormat("Getting all values for row: {0}", row);
 
             return _records
                 .Skip(row)

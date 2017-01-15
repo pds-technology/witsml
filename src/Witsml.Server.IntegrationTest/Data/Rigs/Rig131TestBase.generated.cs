@@ -46,12 +46,12 @@ namespace PDS.Witsml.Server.Data.Rigs
         public Wellbore Wellbore { get; set; }
         public Rig Rig { get; set; }
         public DevKit131Aspect DevKit { get; set; }
-        public TestContext TestContext { get; set; }
         public List<Rig> QueryEmptyList { get; set; }
 
         [TestInitialize]
         public void TestSetUp()
         {
+            Logger.Debug($"Executing {TestContext.TestName}");
             DevKit = new DevKit131Aspect(TestContext);
 
             DevKit.Store.CapServerProviders = DevKit.Store.CapServerProviders

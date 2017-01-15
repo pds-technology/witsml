@@ -59,6 +59,12 @@ namespace PDS.Witsml.Server
         }
 
         /// <summary>
+        /// Gets or sets the test context.
+        /// </summary>
+        /// <value>The test context.</value>
+        public TestContext TestContext { get; set; }
+
+        /// <summary>
         /// Gets the logger associated with the current type.
         /// </summary>
         /// <value>The logger.</value>
