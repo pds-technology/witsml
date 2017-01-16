@@ -78,6 +78,28 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Gets the connection string.
+        /// </summary>
+        /// <value>
+        /// The connection string.
+        /// </value>
+        public string ConnectionString
+        {
+            get { return _connectionString; }
+        }
+
+        /// <summary>
+        /// Gets the name of the database.
+        /// </summary>
+        /// <value>
+        /// The name of the database.
+        /// </value>
+        public string DatabaseName
+        {
+            get { return _databaseName; }
+        }
+
+        /// <summary>
         /// Gets the MongoDb database interface.
         /// </summary>
         /// <returns>The database interface.</returns>

@@ -16,26 +16,31 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.IO;
-using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
 using log4net.Config;
+using Hangfire.Mongo;
 using PDS.Framework;
 using PDS.Framework.Web;
 using PDS.Witsml.Server;
 using PDS.Witsml.Server.Configuration;
+using PDS.Witsml.Server.Data;
+using PDS.Witsml.Server.Jobs.Configuration;
 using PDS.Witsml.Web.Controllers;
 
 namespace PDS.Witsml.Web
 {
     public class WebApiApplication : System.Web.HttpApplication
     {
+        private IDisposable _hangfire;
+
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
-            GlobalConfiguration.Configure(WebApiConfig.Register);
+            System.Web.Http.GlobalConfiguration.Configure(WebApiConfig.Register);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
@@ -46,9 +51,21 @@ namespace PDS.Witsml.Web
             if (string.IsNullOrWhiteSpace(WitsmlSettings.OverrideServerVersion))
                 WitsmlSettings.OverrideServerVersion = typeof(EtpController).GetAssemblyVersion();
 
+            var container = (IContainer)System.Web.Http.GlobalConfiguration.Configuration.DependencyResolver.GetService(typeof(IContainer));
+            var databaseProvider = container.Resolve<IDatabaseProvider>();
+
             // pre-init IWitsmlStore dependencies
-            var store = (IWitsmlStore) GlobalConfiguration.Configuration.DependencyResolver.GetService(typeof(IWitsmlStore));
+            var store = container.Resolve<IWitsmlStore>();
             store.WMLS_GetCap(new WMLS_GetCapRequest(OptionsIn.DataVersion.Version141));
+
+            Hangfire.GlobalConfiguration.Configuration.UseMongoStorage(databaseProvider.ConnectionString, databaseProvider.DatabaseName);
+
+            _hangfire = HangfireConfig.Register(container);
+        }
+
+        protected void Application_End(object sender, EventArgs e)
+        {
+            _hangfire.Dispose();
         }
     }
 }
