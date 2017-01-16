@@ -32,6 +32,22 @@ namespace PDS.Witsml.Server.Data
         IMongoClient Client { get; }
 
         /// <summary>
+        /// Gets the connection string.
+        /// </summary>
+        /// <value>
+        /// The connection string.
+        /// </value>
+        string ConnectionString{ get; }
+
+        /// <summary>
+        /// Gets the name of the database.
+        /// </summary>
+        /// <value>
+        /// The name of the database.
+        /// </value>
+        string DatabaseName{ get; }
+
+        /// <summary>
         /// Gets the MongoDb database interface.
         /// </summary>
         /// <returns>The database interface.</returns>
