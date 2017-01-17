@@ -332,7 +332,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="uri">The URI.</param>
         /// <param name="readers">The readers.</param>
         /// <returns>true if any index ranges were extended beyond current min/max, false otherwise.</returns>
-        protected bool UpdateLogDataAndIndexRange(EtpUri uri, IEnumerable<ChannelDataReader> readers)
+        protected void UpdateLogDataAndIndexRange(EtpUri uri, IEnumerable<ChannelDataReader> readers)
         {
             Logger.DebugFormat("Updating log data and index for log uri '{0}'.", uri.Uri);
 
@@ -389,10 +389,8 @@ namespace PDS.Witsml.Server.Data.Logs
             // Update index range
             if (updateIndexRanges)
             {
-                UpdateIndexRange(uri, current, ranges, updateMnemonics, IsTimeLog(current), indexUnit, offset);
+                UpdateIndexRange(uri, current, ranges, updateMnemonics, IsTimeLog(current), indexUnit, offset, rangeExtended);
             }
-
-            return rangeExtended;
         }
 
         /// <summary>
@@ -613,24 +611,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         /// <summary>
-        /// Updates the object growing field of a logs.
-        /// </summary>
-        /// <param name="uri">The URI.</param>
-        /// <param name="isGrowing">if set to <c>true</c> [is growing].</param>
-        protected void UpdateObjectGrowing(EtpUri uri, bool isGrowing)
-        {
-            var entity = GetEntity(uri);
-            Logger.DebugFormat("Updating objectGrowing for uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
-
-            // Update ObjectGrowing
-            var logHeaderUpdate = MongoDbUtility.BuildUpdate<T>(null, "ObjectGrowing", isGrowing);
-            var mongoUpdate = new MongoDbUpdate<T>(Container, GetCollection(), null);
-            var filter = MongoDbUtility.GetEntityFilter<T>(uri);
-
-            mongoUpdate.UpdateFields(filter, logHeaderUpdate);
-        }
-
-        /// <summary>
         /// Updates the index range.
         /// </summary>
         /// <param name="uri">The URI.</param>
@@ -640,8 +620,9 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="isTimeLog">if set to <c>true</c> [is time log].</param>
         /// <param name="indexUnit">The index unit.</param>
         /// <param name="offset">The offset.</param>
+        /// <param name="rangeExtended">if set to <c>true</c> an index range was extended beyond the min/max.</param>
         /// <param name="isDelete">True if for delete log data.</param>
-        protected void UpdateIndexRange(EtpUri uri, T entity, Dictionary<string, Range<double?>> ranges, IEnumerable<string> mnemonics, bool isTimeLog, string indexUnit, TimeSpan? offset, bool isDelete = false)
+        protected void UpdateIndexRange(EtpUri uri, T entity, Dictionary<string, Range<double?>> ranges, IEnumerable<string> mnemonics, bool isTimeLog, string indexUnit, TimeSpan? offset, bool rangeExtended, bool isDelete = false)
         {
             Logger.DebugFormat("Updating index range with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
 
@@ -671,10 +652,23 @@ namespace PDS.Witsml.Server.Data.Logs
 
             logHeaderUpdate = UpdateCommonData(logHeaderUpdate, entity, offset);
 
+            var updateOjectGrowing = rangeExtended && WitsmlOperationContext.Current.Request.Function != Functions.AddToStore;
+
+            if (updateOjectGrowing)
+            {
+                logHeaderUpdate = MongoDbUtility.BuildUpdate(logHeaderUpdate, "ObjectGrowing", true);
+            }
+
             if (logHeaderUpdate != null)
             {
                 mongoUpdate.UpdateFields(filter, logHeaderUpdate);
             }
+
+            if (updateOjectGrowing)
+            {
+                // TODO: Update dbGrowingObject
+            }
+
         }
 
         /// <summary>

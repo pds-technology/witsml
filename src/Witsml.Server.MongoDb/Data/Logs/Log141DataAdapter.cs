@@ -79,22 +79,9 @@ namespace PDS.Witsml.Server.Data.Logs
                 // Separate log header and log data
                 var readers = ExtractDataReaders(dataObject, GetEntity(uri));
                 // Update log data and index ranges
-                var appendingData = UpdateLogDataAndIndexRange(uri, readers);
+                UpdateLogDataAndIndexRange(uri, readers);
                 // Validate log header result
                 ValidateUpdatedEntity(Functions.PutObject, uri);
-
-                if (appendingData)
-                {
-                    // TODO: Update dbGrowingObject
-
-                    // Set ObjectGrowing if not already true
-                    if (!dataObject.ObjectGrowing.HasValue || !dataObject.ObjectGrowing.Value)
-                    {
-                        // Update ObjectGrowing to true
-                        UpdateObjectGrowing(uri, true);
-                    }
-                }
-
                 // Commit transaction
                 transaction.Commit();
             }
