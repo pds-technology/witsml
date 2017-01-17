@@ -563,7 +563,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 ChannelDataChunkAdapter.PartialDeleteLogData(uri, indexCurve, current.IsIncreasing(), isTimeLog, deletedChannels, ranges, updatedRanges);
             }
 
-            UpdateIndexRange(uri, current, updatedRanges, updatedRanges.Keys.ToList(), current.IsTimeLog(), indexChannel?.Unit, offset, true);
+            UpdateIndexRange(uri, current, updatedRanges, updatedRanges.Keys.ToList(), current.IsTimeLog(), indexChannel?.Unit, offset, false, true);
         }
 
         private List<string> GetDeletedChannels(Log current, Dictionary<string, string> uidToMnemonics)

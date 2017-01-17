@@ -389,7 +389,7 @@ namespace PDS.Witsml.Server.Data.Logs
             // Update index range
             if (updateIndexRanges)
             {
-                UpdateIndexRange(uri, current, ranges, updateMnemonics, IsTimeLog(current), indexUnit, offset, rangeExtended);
+                UpdateIndexRange(uri, current, ranges, updateMnemonics, IsTimeLog(current), indexUnit, offset, rangeExtended, false);
             }
         }
 
@@ -622,7 +622,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="offset">The offset.</param>
         /// <param name="rangeExtended">if set to <c>true</c> an index range was extended beyond the min/max.</param>
         /// <param name="isDelete">True if for delete log data.</param>
-        protected void UpdateIndexRange(EtpUri uri, T entity, Dictionary<string, Range<double?>> ranges, IEnumerable<string> mnemonics, bool isTimeLog, string indexUnit, TimeSpan? offset, bool rangeExtended, bool isDelete = false)
+        protected void UpdateIndexRange(EtpUri uri, T entity, Dictionary<string, Range<double?>> ranges, IEnumerable<string> mnemonics, bool isTimeLog, string indexUnit, TimeSpan? offset, bool rangeExtended, bool isDelete)
         {
             Logger.DebugFormat("Updating index range with uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
 
