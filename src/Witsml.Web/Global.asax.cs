@@ -58,8 +58,8 @@ namespace PDS.Witsml.Web
             var store = container.Resolve<IWitsmlStore>();
             store.WMLS_GetCap(new WMLS_GetCapRequest(OptionsIn.DataVersion.Version141));
 
+            // Configure and register Hangfire jobs
             Hangfire.GlobalConfiguration.Configuration.UseMongoStorage(databaseProvider.ConnectionString, databaseProvider.DatabaseName);
-
             _hangfire = HangfireConfig.Register(container);
         }
 

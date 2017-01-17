@@ -32,6 +32,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Server.Web", "..\ext
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.UnitTest", "..\ext\witsml\src\Witsml.UnitTest\Witsml.UnitTest.csproj", "{750F795F-0C36-4CB3-9372-C4A5A716C635}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Server.Jobs", "..\ext\witsml\src\Witsml.Server.Jobs\Witsml.Server.Jobs.csproj", "{006F1A29-952B-4264-8E91-0D445F74B183}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -78,6 +80,10 @@ Global
 		{750F795F-0C36-4CB3-9372-C4A5A716C635}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{750F795F-0C36-4CB3-9372-C4A5A716C635}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{750F795F-0C36-4CB3-9372-C4A5A716C635}.Release|Any CPU.Build.0 = Release|Any CPU
+		{006F1A29-952B-4264-8E91-0D445F74B183}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{006F1A29-952B-4264-8E91-0D445F74B183}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{006F1A29-952B-4264-8E91-0D445F74B183}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{006F1A29-952B-4264-8E91-0D445F74B183}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -90,5 +96,6 @@ Global
 		{C050AB68-0543-4A23-870C-2D07F872484B} = {A5268269-F5F0-4B28-A9B5-A2A86D45C916}
 		{5FF377F4-56C5-49D9-BA0A-1955A33C4902} = {A5268269-F5F0-4B28-A9B5-A2A86D45C916}
 		{750F795F-0C36-4CB3-9372-C4A5A716C635} = {A5268269-F5F0-4B28-A9B5-A2A86D45C916}
+		{006F1A29-952B-4264-8E91-0D445F74B183} = {A5268269-F5F0-4B28-A9B5-A2A86D45C916}
 	EndGlobalSection
 EndGlobal
