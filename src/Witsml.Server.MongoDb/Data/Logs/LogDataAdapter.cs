@@ -331,9 +331,12 @@ namespace PDS.Witsml.Server.Data.Logs
         /// </summary>
         /// <param name="uri">The URI.</param>
         /// <param name="readers">The readers.</param>
-        protected void UpdateLogDataAndIndexRange(EtpUri uri, IEnumerable<ChannelDataReader> readers)
+        /// <returns>true if any index ranges were extended beyond current min/max, false otherwise.</returns>
+        protected bool UpdateLogDataAndIndexRange(EtpUri uri, IEnumerable<ChannelDataReader> readers)
         {
             Logger.DebugFormat("Updating log data and index for log uri '{0}'.", uri.Uri);
+
+            var rangeExtended = false;
 
             // Get Updated Log
             var current = GetEntity(uri);
@@ -376,7 +379,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 }
 
                 // Update index range for each logData element
-                GetUpdatedIndexRange(reader, updateMnemonics.ToArray(), ranges, IsIncreasing(current));
+                rangeExtended = rangeExtended || GetUpdatedIndexRange(reader, updateMnemonics.ToArray(), ranges, IsIncreasing(current));
 
                 // Update log data
                 ChannelDataChunkAdapter.Merge(reader);
@@ -388,6 +391,8 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 UpdateIndexRange(uri, current, ranges, updateMnemonics, IsTimeLog(current), indexUnit, offset);
             }
+
+            return rangeExtended;
         }
 
         /// <summary>
@@ -601,6 +606,24 @@ namespace PDS.Witsml.Server.Data.Logs
             // Update CommonData
             logHeaderUpdate = UpdateCommonData(logHeaderUpdate, entity, offset);
 
+            var mongoUpdate = new MongoDbUpdate<T>(Container, GetCollection(), null);
+            var filter = MongoDbUtility.GetEntityFilter<T>(uri);
+
+            mongoUpdate.UpdateFields(filter, logHeaderUpdate);
+        }
+
+        /// <summary>
+        /// Updates the object growing field of a logs.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="isGrowing">if set to <c>true</c> [is growing].</param>
+        protected void UpdateObjectGrowing(EtpUri uri, bool isGrowing)
+        {
+            var entity = GetEntity(uri);
+            Logger.DebugFormat("Updating objectGrowing for uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
+
+            // Update ObjectGrowing
+            var logHeaderUpdate = MongoDbUtility.BuildUpdate<T>(null, "ObjectGrowing", isGrowing);
             var mongoUpdate = new MongoDbUpdate<T>(Container, GetCollection(), null);
             var filter = MongoDbUtility.GetEntityFilter<T>(uri);
 
@@ -1298,9 +1321,11 @@ namespace PDS.Witsml.Server.Data.Logs
             logCurves?.RemoveAll(x => !mnemonics.Contains(GetMnemonic(x)));
         }
 
-        private void GetUpdatedIndexRange(ChannelDataReader reader, string[] mnemonics, Dictionary<string, Range<double?>> ranges, bool increasing = true)
+        private bool GetUpdatedIndexRange(ChannelDataReader reader, string[] mnemonics, Dictionary<string, Range<double?>> ranges, bool increasing = true)
         {
             Logger.Debug("Getting updated index ranges for all logCurveInfos.");
+
+            var rangeExtended = false;
 
             for (var i = 0; i < mnemonics.Length; i++)
             {
@@ -1317,14 +1342,22 @@ namespace PDS.Witsml.Server.Data.Logs
                 var end = current.End;
 
                 if (!start.HasValue || !update.StartsAfter(start.Value, increasing))
+                {
                     start = update.Start;
+                    rangeExtended = true;
+                }
 
                 if (!end.HasValue || !update.EndsBefore(end.Value, increasing))
+                {
                     end = update.End;
+                    rangeExtended = true;
+                }
 
                 Logger.DebugFormat("Updated '{0}' index range - start: {1}, end: {2}.", mnemonic, start, end);
                 ranges[mnemonic] = new Range<double?>(start, end);
             }
+
+            return rangeExtended;
         }
 
 
