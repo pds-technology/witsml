@@ -560,6 +560,16 @@ namespace PDS.Witsml.Server.Data.Logs
             return channel.GetUri(entity);
         }
 
+        /// <summary>
+        /// Updates the IsActive field of a wellbore.
+        /// </summary>
+        /// <param name="logUri">The Log URI.</param>
+        /// <param name="isActive">If set to <c>true</c> [is active].</param>
+        protected override void UpdateWellboreIsActive(EtpUri logUri, bool isActive)
+        {
+            
+        }
+
         private List<string> GetDeletedChannels(Log current, Dictionary<string, string> uidToMnemonics)
         {
             var uids = current.LogCurveInfo.Select(l => l.Uid).ToList();
