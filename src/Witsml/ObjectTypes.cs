@@ -49,6 +49,11 @@ namespace PDS.Witsml
         public const string Uuid = "Uuid";
 
         /// <summary>
+        /// The ObjectType identifier for a Uri.
+        /// </summary>
+        public const string Uri = "Uri";
+
+        /// <summary>
         /// The ObjectType identifier for a Name.
         /// </summary>
         public const string NameProperty = "Name";
