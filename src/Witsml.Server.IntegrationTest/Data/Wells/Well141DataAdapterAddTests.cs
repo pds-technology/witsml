@@ -22,6 +22,7 @@ using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
+using System.Xml;
 using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
@@ -215,6 +216,39 @@ namespace PDS.Witsml.Server.Data.Wells
             };
 
             DevKit.AddAndAssert(Well, ErrorCodes.InputTemplateNonConforming);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_AddToStore_Saves_And_Retrieves_CustomData_Elements()
+        {
+            var doc = new XmlDocument();
+
+            var element1 = doc.CreateElement("FirstItem", "http://www.witsml.org/schemas/1series");
+            element1.InnerText = "123.45";
+
+            var element2 = doc.CreateElement("LastItem", element1.NamespaceURI);
+            element2.InnerText = "987.65";
+
+            Well.CustomData = new CustomData
+            {
+                Any = DevKit.List(element1, element2)
+            };
+
+            DevKit.AddAndAssert<WellList, Well>(Well);
+
+            // Query
+            var query = new Well { Uid = Well.Uid };
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+            var well = result.FirstOrDefault();
+
+            Assert.IsNotNull(well?.CustomData);
+            Assert.AreEqual(2, well.CustomData.Any.Count);
+
+            Assert.AreEqual(element1.LocalName, well.CustomData.Any[0].LocalName);
+            Assert.AreEqual(element1.InnerText, well.CustomData.Any[0].InnerText);
+
+            Assert.AreEqual(element2.LocalName, well.CustomData.Any[1].LocalName);
+            Assert.AreEqual(element2.InnerText, well.CustomData.Any[1].InnerText);
         }
     }
 }

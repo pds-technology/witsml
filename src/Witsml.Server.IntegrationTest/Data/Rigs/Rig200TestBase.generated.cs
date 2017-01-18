@@ -39,12 +39,12 @@ namespace PDS.Witsml.Server.Data.Rigs
 
         public Rig Rig { get; set; }
         public DevKit200Aspect DevKit { get; set; }
-        public TestContext TestContext { get; set; }
         public List<Rig> QueryEmptyList { get; set; }
 
         [TestInitialize]
         public void TestSetUp()
         {
+            Logger.Debug($"Executing {TestContext.TestName}");
             DevKit = new DevKit200Aspect(TestContext);
 
             Rig = new Rig

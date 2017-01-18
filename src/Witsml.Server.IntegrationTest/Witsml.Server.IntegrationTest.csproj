@@ -47,7 +47,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="ETP.DevKit, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\ETP.DevKit-PDS.1.1.20161213.1\lib\net452\ETP.DevKit.dll</HintPath>
+      <HintPath>$(SolutionDir)\packages\ETP.DevKit-PDS.1.1.20170114.1\lib\net452\ETP.DevKit.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ETP.Messages, Version=1.5.0.0, Culture=neutral, PublicKeyToken=c2b7028481fb2795, processorArchitecture=MSIL">
@@ -803,6 +803,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Providers\ChannelStreaming\ChannelStreamingProtocolTests.cs" />
     <Compile Include="SampleDataTests.cs" />
     <Compile Include="DevKit131Aspect.cs" />
     <Compile Include="DevKit141Aspect.cs" />
@@ -831,6 +832,24 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="TestData\49025109020000_13346_Slicing_Time_Log.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\EnergisticsWell2016-B_Well.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\EnergisticsWellbore2016-B_Wellbore.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\L-3610902-MD_log.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\L-3610902-Time-Dec_log.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\L-3610903-MD-Dec_log.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\L-3610903-Time_log.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="TestData\Test-exceed-max-doc-size-log-0001.xml">

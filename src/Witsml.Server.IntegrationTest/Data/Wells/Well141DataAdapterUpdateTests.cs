@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
@@ -390,6 +391,67 @@ namespace PDS.Witsml.Server.Data.Wells
 
             // Update and Assert for error
             DevKit.UpdateAndAssert(updateWell, ErrorCodes.UpdateTemplateNonConforming);
+        }
+
+        [TestMethod]
+        public void Well141DataAdapter_UpdateInStore_Can_Update_CustomData_Elements()
+        {
+            DevKit.AddAndAssert<WellList, Well>(Well);
+
+            // Update with New Data
+            var doc = new XmlDocument();
+
+            var element1 = doc.CreateElement("FirstItem", "http://www.witsml.org/schemas/1series");
+            element1.InnerText = "123.45";
+
+            var element2 = doc.CreateElement("LastItem", element1.NamespaceURI);
+            element2.InnerText = "987.65";
+
+            Well.CustomData = new CustomData
+            {
+                Any = DevKit.List(element1, element2)
+            };
+
+            DevKit.UpdateAndAssert<WellList, Well>(Well);
+
+            // Query
+            var query = new Well { Uid = Well.Uid };
+            var result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+            var well = result.FirstOrDefault();
+
+            Assert.IsNotNull(well?.CustomData);
+            Assert.AreEqual(2, well.CustomData.Any.Count);
+
+            Assert.AreEqual(element1.LocalName, well.CustomData.Any[0].LocalName);
+            Assert.AreEqual(element1.InnerText, well.CustomData.Any[0].InnerText);
+
+            Assert.AreEqual(element2.LocalName, well.CustomData.Any[1].LocalName);
+            Assert.AreEqual(element2.InnerText, well.CustomData.Any[1].InnerText);
+
+            // Partial Update
+            well.CustomData.Any[1].InnerText = "0.0";
+
+            var element3 = doc.CreateElement("NewItem", element1.NamespaceURI);
+            element3.InnerText = "abc";
+            well.CustomData.Any.Add(element3);
+
+            DevKit.UpdateAndAssert<WellList, Well>(well);
+
+            // Query
+            result = DevKit.Query<WellList, Well>(query, ObjectTypes.Well, null, optionsIn: OptionsIn.ReturnElements.All);
+            well = result.FirstOrDefault();
+
+            Assert.IsNotNull(well?.CustomData);
+            Assert.AreEqual(3, well.CustomData.Any.Count);
+
+            Assert.AreEqual(element1.LocalName, well.CustomData.Any[0].LocalName);
+            Assert.AreEqual(element1.InnerText, well.CustomData.Any[0].InnerText);
+
+            Assert.AreEqual(element2.LocalName, well.CustomData.Any[1].LocalName);
+            Assert.AreEqual("0.0", well.CustomData.Any[1].InnerText);
+
+            Assert.AreEqual(element3.LocalName, well.CustomData.Any[2].LocalName);
+            Assert.AreEqual(element3.InnerText, well.CustomData.Any[2].InnerText);
         }
     }
 }

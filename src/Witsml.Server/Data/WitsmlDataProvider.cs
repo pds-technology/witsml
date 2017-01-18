@@ -179,7 +179,18 @@ namespace PDS.Witsml.Server.Data
             using (var transaction = GetTransaction())
             {
                 transaction.SetContext(uri);
-                DataAdapter.Delete(uri);
+
+                // Create an empty dataObject to use for delete with parser
+                var dataObject = Activator.CreateInstance<TObject>();
+                SetDefaultValues(dataObject, uri);
+
+                var parser = CreateQueryParser(dataObject);
+                parser.RemoveSubElements();
+
+                var context = WitsmlOperationContext.Current;
+                context.Document = parser.Root.Document;
+
+                Delete(parser);
                 transaction.Commit();
             }
         }

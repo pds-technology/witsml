@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wells xmlns="http://www.witsml.org/schemas/1series" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.4.1.1">
+	<well uid="b04e88c7-72c1-443e-aecc-8ea3c6">
+		<name>EnergisticsWell2016-B</name>
+		<timeZone>+01:00</timeZone>
+		<statusWell>drilling</statusWell>
+		<purposeWell>unknown</purposeWell>
+		<wellDatum uid="SL">
+			<name>Mean Sea Level</name>
+			<code>SL</code>
+		</wellDatum>
+		<commonData>
+			<dTimCreation>2016-04-04T22:58:59.152Z</dTimCreation>
+			<dTimLastChange>2016-04-05T11:32:34.002Z</dTimLastChange>
+		</commonData>
+	</well>
+</wells>

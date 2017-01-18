@@ -41,12 +41,12 @@ namespace PDS.Witsml.Server.Data.RigUtilizations
         public Wellbore Wellbore { get; set; }
         public RigUtilization RigUtilization { get; set; }
         public DevKit200Aspect DevKit { get; set; }
-        public TestContext TestContext { get; set; }
         public List<RigUtilization> QueryEmptyList { get; set; }
 
         [TestInitialize]
         public void TestSetUp()
         {
+            Logger.Debug($"Executing {TestContext.TestName}");
             DevKit = new DevKit200Aspect(TestContext);
 
             Well = new Well

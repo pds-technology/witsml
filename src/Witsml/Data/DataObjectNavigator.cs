@@ -143,7 +143,7 @@ namespace PDS.Witsml.Data
                 if (propertyInfo != null)
                 {
                     NavigateElementGroup(propertyInfo, group, parentPath);
-                } 
+                }
                 else
                 {
                     HandleInvalidElementGroup(group.Key);
@@ -782,27 +782,14 @@ namespace PDS.Witsml.Data
         /// <exception cref="WitsmlException"></exception>
         protected object ParseEnum(Type enumType, string enumValue)
         {
-            if (Enum.IsDefined(enumType, enumValue))
+            try
             {
-                return Enum.Parse(enumType, enumValue);
+                return enumType.ParseEnum(enumValue);
             }
-
-            var enumMember = enumType.GetMembers().FirstOrDefault(x =>
+            catch (ArgumentException ex)
             {
-                if (x.Name.EqualsIgnoreCase(enumValue))
-                    return true;
-
-                var xmlEnumAttrib = x.GetCustomAttribute<XmlEnumAttribute>();
-                return xmlEnumAttrib != null && xmlEnumAttrib.Name.EqualsIgnoreCase(enumValue);
-            });
-
-            // must be a valid enumeration member
-            if (!enumType.IsEnum || enumMember == null)
-            {
-                throw new WitsmlException(ErrorCodes.InvalidUnitOfMeasure);
+                throw new WitsmlException(ErrorCodes.InvalidUnitOfMeasure, ex);
             }
-
-            return Enum.Parse(enumType, enumMember.Name);
         }
 
         /// <summary>
@@ -901,6 +888,16 @@ namespace PDS.Witsml.Data
             return type.GetProperties().Any(x => x.IsDefined(typeof(XmlTextAttribute), false));
         }
 
+        /// <summary>
+        /// Determines whether the specified type supports any XML element.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns><c>true</c> if the type supports any XML elements; otherwise, <c>false</c>.</returns>
+        protected virtual bool HasXmlAnyElement(Type type)
+        {
+            return type.GetProperties().Any(x => x.IsDefined(typeof(XmlAnyElementAttribute), false));
+        }
+
         private bool IsNumeric(Type propertyType)
         {
             var type = propertyType;
@@ -940,6 +937,10 @@ namespace PDS.Witsml.Data
                     HandleInvalidAttribute(attribute);
                 }
             }
+
+            // Ignore CustomData child elements
+            if (ObjectTypes.CustomData.EqualsIgnoreCase(ObjectTypes.GetObjectTypeFromGroup(element)))
+                return;
 
             foreach (var child in element.Elements())
             {

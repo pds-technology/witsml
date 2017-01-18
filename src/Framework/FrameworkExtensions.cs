@@ -20,9 +20,13 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
+using System.Xml;
+using System.Xml.Linq;
+using System.Xml.Serialization;
 using PDS.Framework.Properties;
 
 namespace PDS.Framework
@@ -163,6 +167,37 @@ namespace PDS.Framework
         }
 
         /// <summary>
+        /// Parses the enum.
+        /// </summary>
+        /// <param name="enumType">Type of the enum.</param>
+        /// <param name="enumValue">The enum value.</param>
+        /// <returns></returns>
+        public static object ParseEnum(this Type enumType, string enumValue)
+        {
+            if (Enum.IsDefined(enumType, enumValue))
+            {
+                return Enum.Parse(enumType, enumValue);
+            }
+
+            var enumMember = enumType.GetMembers().FirstOrDefault(x =>
+            {
+                if (x.Name.EqualsIgnoreCase(enumValue))
+                    return true;
+
+                var xmlEnumAttrib = x.GetCustomAttribute<XmlEnumAttribute>();
+                return xmlEnumAttrib != null && xmlEnumAttrib.Name.EqualsIgnoreCase(enumValue);
+            });
+
+            // must be a valid enumeration member
+            if (!enumType.IsEnum || enumMember == null)
+            {
+                throw new ArgumentException();
+            }
+
+            return Enum.Parse(enumType, enumMember.Name);
+        }
+
+        /// <summary>
         /// Determines whether the specified type is numeric.
         /// </summary>
         /// <param name="type">The type.</param>
@@ -253,5 +288,5 @@ namespace PDS.Framework
 
             return null;
         }
-    }
+        /// <summary>        /// Converts an <see cref="XElement"/> to an <see cref="XmlElement"/>.        /// </summary>        /// <param name="element">The element.</param>        /// <returns>An <see cref="XmlElement"/> instance.</returns>        public static XmlElement ToXmlElement(this XElement element)        {            using (var reader = element.CreateReader())            {                var doc = new XmlDocument();                doc.Load(reader);                return doc.DocumentElement;            }        }    }
 }

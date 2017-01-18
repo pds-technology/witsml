@@ -41,12 +41,12 @@ namespace PDS.Witsml.Server.Data.Attachments
         public Wellbore Wellbore { get; set; }
         public Attachment Attachment { get; set; }
         public DevKit200Aspect DevKit { get; set; }
-        public TestContext TestContext { get; set; }
         public List<Attachment> QueryEmptyList { get; set; }
 
         [TestInitialize]
         public void TestSetUp()
         {
+            Logger.Debug($"Executing {TestContext.TestName}");
             DevKit = new DevKit200Aspect(TestContext);
 
             Well = new Well

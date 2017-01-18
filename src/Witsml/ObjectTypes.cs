@@ -64,6 +64,11 @@ namespace PDS.Witsml
         public const string DocumentInfo = "documentInfo";
 
         /// <summary>
+        /// The ObjectType identifier for a CustomData.
+        /// </summary>
+        public const string CustomData = "customData";
+
+        /// <summary>
         /// The ObjectType identifier for a FileCreationInformation.
         /// </summary>
         public const string FileCreationInformation = "fileCreationInformation";
@@ -282,9 +287,12 @@ namespace PDS.Witsml
         {
             var objectGroupType = GetObjectGroupType(objectType, version);
 
-            return objectGroupType?.GetProperties()
-                .FirstOrDefault(
-                    x => x.GetCustomAttribute<XmlElementAttribute>().ElementName.EqualsIgnoreCase(objectType));
+            return objectGroupType?
+                .GetProperties()
+                .Select(x => new { Property = x, Attribute = x.GetCustomAttribute<XmlElementAttribute>() })
+                .Where(x => objectType.EqualsIgnoreCase(x.Attribute?.ElementName))
+                .Select(x => x.Property)
+                .FirstOrDefault();
         }
 
         /// <summary>

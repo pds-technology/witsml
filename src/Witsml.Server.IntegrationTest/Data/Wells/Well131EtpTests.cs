@@ -16,6 +16,13 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Threading.Tasks;
+using Energistics;
+using Energistics.Common;
+using Energistics.DataAccess.WITSML131;
+using Energistics.Protocol.Store;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace PDS.Witsml.Server.Data.Wells
 {
     /// <summary>
@@ -23,5 +30,42 @@ namespace PDS.Witsml.Server.Data.Wells
     /// </summary>
     public partial class Well131EtpTests
     {
+
+        [TestMethod]
+        public async Task Well131_DeleteObject_Cannot_Delete_Well_With_Child_Wellbore()
+        {
+            AddParents();
+            await RequestSessionAndAssert();
+
+            var handler = _client.Handler<IStoreCustomer>();
+            var uri = Well.GetUri();
+
+            var dataObject = CreateDataObject<WellList, Well>(uri, Well);
+
+            // Put Object
+            await PutAndAssert(handler, dataObject);
+
+            var wellbore = new Wellbore()
+            {
+                UidWell = Well.Uid,
+                Uid = DevKit.Uid(),
+                NameWell = Well.Name,
+                Name = DevKit.Name("Wellbore")
+            };
+
+            var wellboreObject = CreateDataObject<WellboreList, Wellbore>(wellbore.GetUri(), wellbore);
+
+            // Put Wellbore
+            await PutAndAssert(handler, wellboreObject);
+
+            // Delete Well
+            await DeleteAndAssert(handler, uri, EtpErrorCodes.NoCascadeDelete);
+
+            // Delete Wellbore
+            await DeleteAndAssert(handler, wellbore.GetUri());
+
+            // Delete Well
+            await DeleteAndAssert(handler, uri);
+        }
     }
 }

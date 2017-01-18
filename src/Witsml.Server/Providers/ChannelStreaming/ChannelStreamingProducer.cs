@@ -22,7 +22,6 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Energistics;
 using Energistics.Common;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
@@ -74,6 +73,27 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         public MessageHeader Request { get; private set; }
 
         /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposing">
+        ///   <c>true</c> to release both managed and unmanaged resources; 
+        ///   <c>false</c> to release only unmanaged resources.
+        /// </param>
+        protected override void Dispose(bool disposing)
+        {
+            if (_tokenSource != null)
+            {
+                using (_tokenSource)
+                {
+                    _tokenSource.Cancel();
+                    _tokenSource = null;
+                }
+            }
+
+            base.Dispose(disposing);
+        }
+
+        /// <summary>
         /// Handles the channel describe.
         /// </summary>
         /// <param name="args">The <see cref="ProtocolEventArgs{T}"/> instance containing the event data.</param>
@@ -116,8 +136,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         /// <param name="channelStreamingStart">The channel streaming start.</param>
         protected override void HandleChannelStreamingStart(MessageHeader header, ChannelStreamingStart channelStreamingStart)
         {
-            // TODO: Send ChannelStatusChanged if the receiveChangeNotification field is true
-
             // no action needed if streaming already started
             //if (_tokenSource != null)
             //    return;
@@ -379,7 +397,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 // Get channel data
                 var mnemonics = contextList.Select(c => c.ChannelMetadata.ChannelName).ToList();
                 var dataProvider = GetDataProvider(parentUri);
-                var optimiseStart = channelStreamingType == ChannelStreamingTypes.IndexValue ? true : false;
+                var optimiseStart = channelStreamingType == ChannelStreamingTypes.IndexValue;
                 var channelData = dataProvider.GetChannelData(parentUri, new Range<double?>(minStartIndex, maxEndIndex), mnemonics, requestLatestValues, optimiseStart);
 
                 // Stream the channel data
@@ -405,11 +423,8 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                             c.StartIndex >= c.EndIndex))
                     .ToArray();
 
-
                 // Remove any contexts from the list that have completed returning all data
-                completedContexts
-                    .ForEach(c => contextList.Remove(c));
-
+                completedContexts.ForEach(c =>                {                    // Notify consumer if the ReceiveChangeNotification field is true                    if (c.ChannelMetadata.Status != ChannelStatuses.Active && c.ReceiveChangeNotification)                    {                        // TODO: Decide which message shoud be sent...                        // ChannelStatusChange(c.ChannelId, c.ChannelMetadata.Status);                        // ChannelRemove(c.ChannelId);                    }                   contextList.Remove(c);                });
                 // Delay to prevent CPU overhead
                 await Task.Delay(WitsmlSettings.StreamChannelDataDelayMilliseconds, token);
             }

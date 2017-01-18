@@ -187,6 +187,17 @@ namespace PDS.Witsml.Server.Providers.Store
             {
                 this.UnsupportedObject(ex, uri, header.MessageId);
             }
+            catch (WitsmlException ex)
+            {
+                if (ex.ErrorCode.Equals(ErrorCodes.NotBottomLevelDataObject))
+                {
+                    this.NoCascadeDelete(uri, header.MessageId);
+                }
+                else
+                {
+                    this.InvalidObject(ex, uri, header.MessageId);
+                }
+            }
         }
     }
 }

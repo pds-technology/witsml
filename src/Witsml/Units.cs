@@ -18,6 +18,7 @@
 
 using System;
 using Energistics.DataAccess.WITSML200.ReferenceData;
+using PDS.Framework;
 
 namespace PDS.Witsml
 {
@@ -48,7 +49,7 @@ namespace PDS.Witsml
         /// <returns>The UnitOfMeasure if not null or empty; value null if otherwise</returns>
         public static UnitOfMeasure? GetUnitOfMeasure(string uom)
         {
-            return string.IsNullOrWhiteSpace(uom) ? null : (UnitOfMeasure?)Enum.Parse(typeof(UnitOfMeasure), uom);
+            return string.IsNullOrWhiteSpace(uom) ? null : (UnitOfMeasure?)typeof(UnitOfMeasure).ParseEnum(uom);
         }
     }
 }

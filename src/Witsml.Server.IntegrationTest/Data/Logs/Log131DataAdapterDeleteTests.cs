@@ -415,7 +415,7 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.InitHeader(Log, LogIndexType.measureddepth);
 
             // Add another curve
-            var newCurve = DevKit.LogGenerator.CreateDoubleLogCurveInfo("RPM", "c/s");
+            var newCurve = DevKit.LogGenerator.CreateDoubleLogCurveInfo("RPM", "c/s", 0);
             newCurve.ColumnIndex = 4;
             Log.LogCurveInfo.Add(newCurve);
 

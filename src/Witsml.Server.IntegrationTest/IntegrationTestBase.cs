@@ -31,6 +31,7 @@ using Energistics.DataAccess.WITSML200;
 using Energistics.Datatypes;
 using Energistics.Datatypes.Object;
 using Energistics.Protocol;
+using Energistics.Protocol.ChannelStreaming;
 using Energistics.Protocol.Core;
 using Energistics.Protocol.Discovery;
 using Energistics.Protocol.Store;
@@ -45,6 +46,7 @@ namespace PDS.Witsml.Server
     /// </summary>
     public abstract class IntegrationTestBase
     {
+        private IContainer _container;
         protected EtpSocketServer _server;
         protected EtpClient _client;
 
@@ -55,6 +57,12 @@ namespace PDS.Witsml.Server
         {
             Logger = LogManager.GetLogger(GetType());
         }
+
+        /// <summary>
+        /// Gets or sets the test context.
+        /// </summary>
+        /// <value>The test context.</value>
+        public TestContext TestContext { get; set; }
 
         /// <summary>
         /// Gets the logger associated with the current type.
@@ -68,6 +76,12 @@ namespace PDS.Witsml.Server
         /// <param name="container">The composition container.</param>
         protected void EtpSetUp(IContainer container)
         {
+            _container = container;
+
+            // Clean up any remaining resources
+            _client?.Dispose();
+            _server?.Dispose();
+
             // Get next available port number
             var listener = new TcpListener(IPAddress.Loopback, 0);
             listener.Start();
@@ -78,23 +92,19 @@ namespace PDS.Witsml.Server
             var uri = new Uri(TestSettings.EtpServerUrl);
             var url = TestSettings.EtpServerUrl.Replace($":{uri.Port}", $":{port}");
 
-            _server?.Dispose();
+            // Create server and client instances
             _server = CreateServer(port);
-
-            _client?.Dispose();
-            _client = CreateClient(url);
+            _client = InitClient(CreateClient(url));
 
             // Resolve dependencies early to avoid object disposed
+            var streaming = container.Resolve<IChannelStreamingProducer>();
             var discovery = container.Resolve<IDiscoveryStore>();
             var store = container.Resolve<IStoreStore>();
 
             // Register server handlers
+            _server.Register(() => streaming);
             _server.Register(() => discovery);
             _server.Register(() => store);
-
-            // Register client handlers
-            _client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();
-            _client.Register<IStoreCustomer, StoreCustomerHandler>();
         }
 
         /// <summary>
@@ -133,6 +143,21 @@ namespace PDS.Witsml.Server
 
             var client = new EtpClient(url ?? TestSettings.EtpServerUrl, GetType().AssemblyQualifiedName, version, headers);
             client.Output = client.Logger.Info;
+            return client;
+        }
+
+        /// <summary>
+        /// Initializes the client.
+        /// </summary>
+        /// <param name="client">The ETP client.</param>
+        /// <returns>The ETP client.</returns>
+        protected EtpClient InitClient(EtpClient client)
+        {
+            // Register client handlers
+            client.Register<IChannelStreamingConsumer, ChannelStreamingConsumerHandler>();
+            client.Register<IDiscoveryCustomer, DiscoveryCustomerHandler>();
+            client.Register<IStoreCustomer, StoreCustomerHandler>();
+
             return client;
         }
 
@@ -317,33 +342,60 @@ namespace PDS.Witsml.Server
         /// <summary>
         /// Requests a new session and asserts.
         /// </summary>
+        /// <param name="retries">The number of retries.</param>
         /// <returns>The <see cref="OpenSession" /> message args.</returns>
-        protected async Task<ProtocolEventArgs<OpenSession>> RequestSessionAndAssert()
+        protected async Task<ProtocolEventArgs<OpenSession>> RequestSessionAndAssert(int retries = 10)
         {
-            // Register event handler for OpenSession response
-            var onOpenSession = HandleAsync<OpenSession>(
-                x => _client.Handler<ICoreClient>().OnOpenSession += x);
+            try
+            {
+                var client = _client;
 
-            // Wait for Open connection
-            var isOpen = await _client.OpenAsync();
-            Assert.IsTrue(isOpen);
+                // Register event handler for OpenSession response
+                var onOpenSession = HandleAsync<OpenSession>(
+                    x => client.Handler<ICoreClient>().OnOpenSession += x);
 
-            // Wait for OpenSession
-            var openArgs = await onOpenSession;
+                // Wait for Open connection
+                var isOpen = await _client.OpenAsync();
+                Assert.IsTrue(isOpen);
 
-            // Verify OpenSession and Supported Protocols
-            VerifySessionWithProtcols(openArgs, Protocols.Discovery, Protocols.Store);
+                // Wait for OpenSession
+                var openArgs = await onOpenSession;
 
-            return openArgs;
+                // Verify OpenSession and Supported Protocols
+                VerifySessionWithProtcols(openArgs, Protocols.ChannelStreaming, Protocols.Discovery, Protocols.Store);
+
+                return openArgs;
+            }
+            catch (TimeoutException)
+            {
+                if (retries < 1) throw;
+
+                await Task.Delay(TestSettings.DefaultTimeoutInMilliseconds);
+                Logger.Warn("Retrying connection attempt after timeout");
+
+                if (retries == 1)
+                {
+                    _client?.Dispose();
+                    _client = InitClient(CreateClient(TestSettings.FallbackServerUrl));
+                }
+                else
+                {
+                    EtpSetUp(_container);
+                    _server.Start();
+                }
+
+                return await RequestSessionAndAssert(retries - 1);
+            }
         }
 
         /// <summary>
         /// Gets the resources and asserts.
         /// </summary>
         /// <param name="uri">The URI.</param>
+        /// <param name="errorCode">The error code.</param>
         /// <param name="exist">if set to <c>true</c> resources exist; otherwise, <c>false</c>.</param>
         /// <returns>A collection of resources.</returns>
-        protected async Task<List<ProtocolEventArgs<GetResourcesResponse, string>>> GetResourcesAndAssert(EtpUri uri, bool exist = true)
+        protected async Task<List<ProtocolEventArgs<GetResourcesResponse, string>>> GetResourcesAndAssert(EtpUri uri, EtpErrorCodes? errorCode = null, bool exist = true)
         {
             var handler = _client.Handler<IDiscoveryCustomer>();
 
@@ -351,31 +403,67 @@ namespace PDS.Witsml.Server
             var onGetResourcesResponse = HandleMultiPartAsync<GetResourcesResponse, string>(
                 x => handler.OnGetResourcesResponse += x);
 
+            // Register exception hanlder
+            var onProtocolException = HandleAsync<ProtocolException>(x => handler.OnProtocolException += x);
+
             // Send GetResources message for specified URI
             var messageId = handler.GetResources(uri);
+            List<ProtocolEventArgs<GetResourcesResponse, string>> args = null;
 
-            // Wait for GetResourcesResponse
-            var args = await onGetResourcesResponse;
-            Assert.IsNotNull(args);
-            Assert.AreEqual(exist, args.Any());
+            var tokenSource = new CancellationTokenSource();
 
-            // Check Resource URIs
-            foreach (var arg in args)
+            var taskList = new List<Task>()
             {
-                VerifyCorrelationId(arg, messageId);
-                Assert.IsNotNull(arg?.Message?.Resource?.Uri);
+                WaitFor(onGetResourcesResponse, tokenSource.Token),
+                WaitFor(onProtocolException, tokenSource.Token)
+            };
 
-                var resourceUri = new EtpUri(arg.Message.Resource.Uri);
+            // Start each event
+            taskList.ForEach(task => task.Start());
 
-                if (uri == EtpUri.RootUri)
+            // Wait for a task to finish
+            await Task.WhenAny(taskList);
+
+            // Cancel the rest of the task
+            tokenSource.Cancel();
+
+            // Wait for the rest to be finished
+            await Task.WhenAll(taskList);
+
+            if (onGetResourcesResponse.Status == TaskStatus.RanToCompletion)
+            {
+                // Wait for GetResourcesResponse
+                args = await onGetResourcesResponse;
+                Assert.IsNotNull(args);
+                Assert.AreEqual(exist, args.Any());
+
+                // Check Resource URIs
+                foreach (var arg in args)
                 {
-                    Assert.IsTrue(uri.IsBaseUri);
+                    VerifyCorrelationId(arg, messageId);
+                    Assert.IsNotNull(arg?.Message?.Resource?.Uri);
+
+                    var resourceUri = new EtpUri(arg.Message.Resource.Uri);
+
+                    if (uri == EtpUri.RootUri)
+                    {
+                        Assert.IsTrue(uri.IsBaseUri);
+                    }
+                    else
+                    {
+                        Assert.AreEqual(uri.Family, resourceUri.Family);
+                        Assert.AreEqual(uri.Version, resourceUri.Version);
+                    }
                 }
-                else
-                {
-                    Assert.AreEqual(uri.Family, resourceUri.Family);
-                    Assert.AreEqual(uri.Version, resourceUri.Version);
-                }
+            }
+            if (onProtocolException.Status == TaskStatus.RanToCompletion)
+            {
+                var exceptionArgs = onProtocolException.Result;
+
+                // Assert exception details
+                Assert.IsNotNull(errorCode);
+                Assert.IsNotNull(exceptionArgs?.Message);
+                Assert.AreEqual((int)errorCode, exceptionArgs.Message.ErrorCode);
             }
 
             return args;

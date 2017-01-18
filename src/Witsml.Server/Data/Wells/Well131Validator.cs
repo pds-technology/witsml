@@ -19,6 +19,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Energistics.DataAccess.WITSML131;
+using Energistics.Datatypes;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
@@ -48,7 +49,8 @@ namespace PDS.Witsml.Server.Data.Wells
         /// <returns>A collection of validation results.</returns>
         protected override IEnumerable<ValidationResult> ValidateForUpdate()
         {
-            return ValidateObjectExistence();
+            var uri = DataObject.GetUri();
+            yield return ValidateObjectExistence(uri);
         }
 
         /// <summary>
@@ -57,23 +59,31 @@ namespace PDS.Witsml.Server.Data.Wells
         /// <returns>A collection of validation results.</returns>
         protected override IEnumerable<ValidationResult> ValidateForDelete()
         {
-            return ValidateObjectExistence();
+            var uri = DataObject.GetUri();
+            yield return ValidateObjectExistence(uri);
+
+            // Validate that there are no child data-objects if cascading deletes are not invoked.
+            if (!Parser.HasElements() && !Parser.CascadedDelete() && _wellboreDataAdapter.Any(uri))
+            {
+                yield return new ValidationResult(ErrorCodes.NotBottomLevelDataObject.ToString());
+            }
         }
 
-        private IEnumerable<ValidationResult> ValidateObjectExistence()
+        private ValidationResult ValidateObjectExistence(EtpUri uri)
         {
-            var uri = DataObject.GetUri();
 
             // Validate that a Uid was provided
             if (string.IsNullOrWhiteSpace(DataObject.Uid))
             {
-                yield return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] {"Uid"});
+                return new ValidationResult(ErrorCodes.DataObjectUidMissing.ToString(), new[] {"Uid"});
             }
             // Validate that a well for the Uid exists
             else if (!_wellDataAdapter.Exists(uri))
             {
-                yield return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] {"Uid"});
+                return new ValidationResult(ErrorCodes.DataObjectNotExist.ToString(), new[] {"Uid"});
             }
+
+            return null;
         }
     }
 }
