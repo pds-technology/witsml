@@ -105,7 +105,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             using (var transaction = GetTransaction())
             {
                 transaction.SetContext(dataObject.GetUri());
-                SetIndexRange(dataObject);
+                SetIndexRange(dataObject, parser);
                 UpdateMongoFile(dataObject, false);
                 InsertEntity(dataObject);
                 transaction.Commit();
@@ -331,7 +331,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             }
 
             FormatStationData(entity, stations, parser);
-            SetIndexRange(entity);
+            SetIndexRange(entity, parser, false);
         }
 
         private List<TChild> GetMongoFileStationData(string uri)
@@ -430,7 +430,9 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// Sets the MD index ranges.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-        protected abstract void SetIndexRange(T dataObject);
+        /// <param name="parser">The parser.</param>
+        /// <param name="force">if set to <c>true</c> force the index range update.</param>
+        protected abstract void SetIndexRange(T dataObject, WitsmlQueryParser parser, bool force = true);
 
         /// <summary>
         /// Sorts the stations by MD.
@@ -488,7 +490,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                     DeleteMongoFile(bucket, uri);
                 }
 
-                SetIndexRange(dataObject);
+                SetIndexRange(dataObject, parser);
                 UpdateMongoFile(dataObject, false);
                 ReplaceEntity(dataObject, uri);
                 transaction.Commit();
@@ -519,7 +521,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
                     DeleteMongoFile(bucket, uri);
                 }
 
-                SetIndexRange(current);
+                SetIndexRange(current, parser);
                 UpdateMongoFile(current, false);
                 ReplaceEntity(current, uri);
                 transaction.Commit();

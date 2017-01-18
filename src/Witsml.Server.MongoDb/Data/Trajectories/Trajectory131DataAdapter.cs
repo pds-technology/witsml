@@ -88,7 +88,9 @@ namespace PDS.Witsml.Server.Data.Trajectories
         /// Sets the MD index ranges.
         /// </summary>
         /// <param name="dataObject">The data object.</param>
-        protected override void SetIndexRange(Trajectory dataObject)
+        /// <param name="parser">The parser.</param>
+        /// <param name="force">if set to <c>true</c> force the index range update.</param>
+        protected override void SetIndexRange(Trajectory dataObject, WitsmlQueryParser parser, bool force = true)
         {
             Logger.Debug("Set trajectory MD ranges.");
 
@@ -101,8 +103,16 @@ namespace PDS.Witsml.Server.Data.Trajectories
 
             SortStationData(dataObject);
 
-            dataObject.MDMin = dataObject.TrajectoryStation.FirstOrDefault()?.MD;
-            dataObject.MDMax = dataObject.TrajectoryStation.LastOrDefault()?.MD;
+            var returnElements = parser.ReturnElements();
+            var alwaysInclude = force ||
+                                OptionsIn.ReturnElements.All.Equals(returnElements) ||
+                                OptionsIn.ReturnElements.HeaderOnly.Equals(returnElements);
+
+            if (alwaysInclude || parser.Contains("mdMn"))
+                dataObject.MDMin = dataObject.TrajectoryStation.FirstOrDefault()?.MD;
+
+            if (alwaysInclude || parser.Contains("mdMx"))
+                dataObject.MDMax = dataObject.TrajectoryStation.LastOrDefault()?.MD;
         }
 
         /// <summary>
