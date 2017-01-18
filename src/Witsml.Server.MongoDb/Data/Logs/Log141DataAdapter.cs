@@ -30,6 +30,7 @@ using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Data.Logs;
 using PDS.Witsml.Server.Data.Channels;
+using PDS.Witsml.Server.Data.Wellbores;
 using PDS.Witsml.Server.Providers.Store;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -426,6 +427,17 @@ namespace PDS.Witsml.Server.Data.Logs
             }
 
             return logHeaderUpdate;
+        }
+
+        /// <summary>
+        /// Updates the IsActive field of a wellbore.
+        /// </summary>
+        /// <param name="logUri">The Log URI.</param>
+        /// <param name="isActive">if set to <c>true</c> [is active].</param>
+        protected override void UpdateWellboreIsActive(EtpUri logUri, bool isActive)
+        {
+            var dataAdapter = Container.Resolve<IWitsmlDataAdapter<Wellbore>>() as Wellbore141DataAdapter;
+            dataAdapter?.UpdateIsActive(logUri.Parent, true);
         }
 
         /// <summary>

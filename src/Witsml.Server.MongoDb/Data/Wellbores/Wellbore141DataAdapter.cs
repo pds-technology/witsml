@@ -18,6 +18,7 @@
 
 using System.Collections.Generic;
 using Energistics.DataAccess.WITSML141;
+using Energistics.Datatypes;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
@@ -34,6 +35,24 @@ namespace PDS.Witsml.Server.Data.Wellbores
         protected override List<string> GetIgnoredElementNamesForUpdate(WitsmlQueryParser parser)
         {
             return new List<string> { "isActive" };
+        }
+
+        /// <summary>
+        /// Updates the IsActive field of a wellbore.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="isActive">if set to <c>true</c> [is active].</param>
+        public void UpdateIsActive(EtpUri uri, bool isActive)
+        {
+            var wellboreEntity = GetEntity(uri);
+            Logger.DebugFormat("Updating wellbore isActive for uid '{0}' and name '{1}'.", wellboreEntity.Uid, wellboreEntity.Name);
+
+            // Update isActive
+            var mongoUpdate = new MongoDbUpdate<Wellbore>(Container, GetCollection(), null);
+            var filter = MongoDbUtility.GetEntityFilter<Wellbore>(uri);
+            var wellboreUpdate = MongoDbUtility.BuildUpdate<Wellbore>(null, "IsActive", isActive);
+
+            mongoUpdate.UpdateFields(filter, wellboreUpdate);
         }
     }
 }

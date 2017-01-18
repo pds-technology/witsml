@@ -272,7 +272,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 ChannelDataChunkAdapter.Delete(uri);
                 transaction.Commit();
             }
-        }
+        }        
 
         /// <summary>
         /// Gets a list of the property names to project during a query.
@@ -667,6 +667,7 @@ namespace PDS.Witsml.Server.Data.Logs
             if (updateOjectGrowing)
             {
                 // TODO: Update dbGrowingObject
+                UpdateWellboreIsActive(uri, true);
             }
 
         }
@@ -861,6 +862,13 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="entity">The data object.</param>
         /// <returns>The channel URI.</returns>
         protected abstract EtpUri GetChannelUri(TChild channel, T entity);
+
+        /// <summary>
+        /// Updates the IsActive field of a wellbore.
+        /// </summary>
+        /// <param name="logUri">The Log URI.</param>
+        /// <param name="isActive">if set to <c>true</c> [is active].</param>
+        protected abstract void UpdateWellboreIsActive(EtpUri logUri, bool isActive);
 
         /// <summary>
         /// Gets the log data delimiter.
