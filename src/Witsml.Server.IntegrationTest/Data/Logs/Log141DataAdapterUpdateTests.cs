@@ -1957,6 +1957,26 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(1.0, stepIncrement.Value);
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_UpdateInStore_AppendLog_Data_Set_ObjectGrowing_And_IsActive_State()
+        {
+            Log.StartIndex = new GenericMeasure(5, "m");
+            AddLogWithData(Log, LogIndexType.measureddepth, 10);
+
+            var addedLog = DevKit.GetAndAssert(Log);
+            Assert.IsFalse(addedLog.ObjectGrowing.GetValueOrDefault());
+            Assert.IsFalse(Wellbore.IsActive.GetValueOrDefault());
+
+            var update = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure(17, "m"), 6);
+            DevKit.UpdateAndAssert(update);
+
+            var result = DevKit.GetAndAssert(Log);
+            var wellboreResult = DevKit.GetAndAssert(Wellbore);
+
+            Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault());
+            Assert.IsTrue(wellboreResult.IsActive.GetValueOrDefault());
+        }
+
         #region Helper Functions
 
         private Log AddAnEmptyLogWithFourCurves()
