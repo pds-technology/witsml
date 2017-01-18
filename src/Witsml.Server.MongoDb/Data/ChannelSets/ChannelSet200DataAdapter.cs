@@ -489,6 +489,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
                 Uuid = channel.Mnemonic,
                 DomainObject = dataObject,
                 Status = ChannelStatuses.Active,
+                //Status = (ChannelStatuses)(int)channel.GrowingStatus.GetValueOrDefault(ChannelStatus.inactive),
                 StartIndex = primaryIndex == null ? null : curveIndexes[channel.Mnemonic].Start.IndexToScale(primaryIndex.Scale, isTimeLog),
                 EndIndex = primaryIndex == null ? null : curveIndexes[channel.Mnemonic].End.IndexToScale(primaryIndex.Scale, isTimeLog),
                 Indexes = indexMetadata,

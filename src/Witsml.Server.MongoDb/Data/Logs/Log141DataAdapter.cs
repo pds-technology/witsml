@@ -482,7 +482,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 Source = curve.DataSource ?? ObjectTypes.Unknown,
                 Uuid = curve.Mnemonic.Value,
                 DomainObject = dataObject,
-                Status = ChannelStatuses.Active,
+                Status = entity.ObjectGrowing.GetValueOrDefault() ? ChannelStatuses.Active : ChannelStatuses.Inactive,
                 StartIndex = curveIndexes[curve.Mnemonic.Value].Start.IndexToScale(indexMetadata.Scale, isTimeLog),
                 EndIndex = curveIndexes[curve.Mnemonic.Value].End.IndexToScale(indexMetadata.Scale, isTimeLog),
                 Indexes = new List<IndexMetadataRecord>()
