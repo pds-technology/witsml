@@ -136,8 +136,6 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
         /// <param name="channelStreamingStart">The channel streaming start.</param>
         protected override void HandleChannelStreamingStart(MessageHeader header, ChannelStreamingStart channelStreamingStart)
         {
-            // TODO: Send ChannelStatusChanged if the receiveChangeNotification field is true
-
             // no action needed if streaming already started
             //if (_tokenSource != null)
             //    return;
@@ -425,11 +423,8 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                             c.StartIndex >= c.EndIndex))
                     .ToArray();
 
-
                 // Remove any contexts from the list that have completed returning all data
-                completedContexts
-                    .ForEach(c => contextList.Remove(c));
-
+                completedContexts.ForEach(c =>                {                    // Notify consumer if the ReceiveChangeNotification field is true                    if (c.ChannelMetadata.Status != ChannelStatuses.Active && c.ReceiveChangeNotification)                    {                        // TODO: Decide which message shoud be sent...                        // ChannelStatusChange(c.ChannelId, c.ChannelMetadata.Status);                        // ChannelRemove(c.ChannelId);                    }                   contextList.Remove(c);                });
                 // Delay to prevent CPU overhead
                 await Task.Delay(WitsmlSettings.StreamChannelDataDelayMilliseconds, token);
             }
