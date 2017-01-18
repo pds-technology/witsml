@@ -23,6 +23,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using PDS.Witsml.Server.Models;
 using PDS.Witsml.Server.Data.Transactions;
+using PDS.Witsml.Server.GrowingObjects;
 
 namespace PDS.Witsml.Server.Data
 {
@@ -50,6 +51,7 @@ namespace PDS.Witsml.Server.Data
             // Custom
             Register3<ChannelDataChunk>();
             Register3<MongoDbTransaction>();
+            Register3<DbGrowingObject>();
 
             Register(new TimestampSerializer());
             Register(new XmlElementSerializer());

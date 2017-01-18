@@ -28,6 +28,7 @@ using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
+using PDS.Witsml.Server.GrowingObjects;
 using PDS.Witsml.Server.Models;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -57,6 +58,15 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <value>The channel data chunk adapter.</value>
         [Import]
         public ChannelDataChunkAdapter ChannelDataChunkAdapter { get; set; }
+
+        /// <summary>
+        /// Gets or sets the database growing object adapter.
+        /// </summary>
+        /// <value>
+        /// The database growing object adapter.
+        /// </value>
+        [Import]
+        public DbGrowingObjectAdapter DbGrowingObjectAdapter { get; set; }
 
         /// <summary>
         /// Retrieves data objects from the data store using the specified parser.
@@ -666,10 +676,11 @@ namespace PDS.Witsml.Server.Data.Logs
 
             if (updateOjectGrowing)
             {
-                // TODO: Update dbGrowingObject
+                // Update dbGrowingObject
+                DbGrowingObjectAdapter.UpdateLastAppendDateTime(uri, uri.Parent);
+                // Update Wellbore isActive
                 UpdateWellboreIsActive(uri, true);
             }
-
         }
 
         /// <summary>
