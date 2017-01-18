@@ -49,7 +49,6 @@ namespace PDS.Witsml.Server.Configuration
         }
 
         [TestMethod]
-        [Ignore, Description("Not Implemented")]
         public void WitsmlValidator_GetFromStore_ReturnElement_StationLocationOnly_For_Trajectory()
         {
             var query = new Trajectory { Uid = "", Name = "" };

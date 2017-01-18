@@ -23,7 +23,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
     public partial class Trajectory131DataAdapterAddTests
     {
         [TestMethod]
-        public void Trajectory141DataAdapter_AddToStore_AddTrajectory_Header()
+        public void Trajectory131DataAdapter_AddToStore_AddTrajectory_Header()
         {
             // Add well and wellbore
             AddParents();
@@ -36,7 +36,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
         }
 
         [TestMethod]
-        public void Trajectory141DataAdapter_AddToStore_AddTrajectory_With_Stations()
+        public void Trajectory131DataAdapter_AddToStore_AddTrajectory_With_Stations()
         {
             // Add well and wellbore
             AddParents();
