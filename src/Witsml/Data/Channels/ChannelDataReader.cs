@@ -318,7 +318,9 @@ namespace PDS.Witsml.Data.Channels
         /// <returns></returns>
         public static string[] Split(string value)
         {
-            return string.IsNullOrWhiteSpace(value) ? _empty : value.Split(',');
+            return string.IsNullOrWhiteSpace(value)
+                ? _empty
+                : value.Split(',').Select(i => i.Trim()).ToArray();
         }
 
         /// <summary>
@@ -1364,6 +1366,9 @@ namespace PDS.Witsml.Data.Channels
                     nullValues.Remove(k);
                 });
             }
+
+            // After slicing set the allNullValues context for next getData
+            _allNullValues = Mnemonics.Select(m => allNulls[allOrdinals[m]]).ToArray();
         }
 
         /// <summary>
