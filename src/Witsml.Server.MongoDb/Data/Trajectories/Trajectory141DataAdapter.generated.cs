@@ -68,6 +68,14 @@ namespace PDS.Witsml.Server.Data.Trajectories
             capServer.Add(Functions.AddToStore, ObjectTypes.Trajectory, WitsmlSettings.TrajectoryMaxDataNodesAdd);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Trajectory, WitsmlSettings.TrajectoryMaxDataNodesUpdate);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.Trajectory, WitsmlSettings.TrajectoryMaxDataNodesDelete);
+
+            var growingTimeoutPeriod = new GrowingTimeoutPeriod(WitsmlSettings.TrajectoryGrowingTimeoutPeriod);
+            growingTimeoutPeriod.DataObject = ObjectTypes.Trajectory;
+
+            if (capServer.GrowingTimeoutPeriod == null)
+                capServer.GrowingTimeoutPeriod = new List<GrowingTimeoutPeriod> { growingTimeoutPeriod };
+            else 
+                capServer.GrowingTimeoutPeriod.Add(growingTimeoutPeriod);
         }
 
         /// <summary>

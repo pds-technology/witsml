@@ -68,6 +68,14 @@ namespace PDS.Witsml.Server.Data.Logs
             capServer.Add(Functions.AddToStore, ObjectTypes.Log, WitsmlSettings.LogMaxDataNodesAdd, WitsmlSettings.LogMaxDataPointsAdd);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Log, WitsmlSettings.LogMaxDataNodesUpdate, WitsmlSettings.LogMaxDataPointsUpdate);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.Log, WitsmlSettings.LogMaxDataNodesDelete, WitsmlSettings.LogMaxDataPointsDelete);
+
+            var growingTimeoutPeriod = new GrowingTimeoutPeriod(WitsmlSettings.LogGrowingTimeoutPeriod);
+            growingTimeoutPeriod.DataObject = ObjectTypes.Log;
+
+            if (capServer.GrowingTimeoutPeriod == null)
+                capServer.GrowingTimeoutPeriod = new List<GrowingTimeoutPeriod> { growingTimeoutPeriod };
+            else 
+                capServer.GrowingTimeoutPeriod.Add(growingTimeoutPeriod);
         }
 
         /// <summary>
