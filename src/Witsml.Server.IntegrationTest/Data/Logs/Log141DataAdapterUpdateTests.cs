@@ -1977,6 +1977,34 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsTrue(wellboreResult.IsActive.GetValueOrDefault());
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_UpdateInStore_UpdateLog_Unchanged_ObjectGrowing_And_IsActive_State()
+        {
+            Log.StartIndex = new GenericMeasure(5, "m");
+            AddLogWithData(Log, LogIndexType.measureddepth, 10);
+
+            var addedLog = DevKit.GetAndAssert(Log);
+            Assert.IsFalse(addedLog.ObjectGrowing.GetValueOrDefault());
+            Assert.IsFalse(Wellbore.IsActive.GetValueOrDefault());
+
+            // Update
+            var updateLog = DevKit.CreateLog(addedLog.Uid, addedLog.Name, addedLog.UidWell, addedLog.NameWell, addedLog.UidWellbore, addedLog.NameWellbore);
+            updateLog.LogData = DevKit.List(new LogData { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = addedLog.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = addedLog.LogData.First().UnitList;
+            var logData = updateLog.LogData.First();
+            logData.Data.Add("10.1,25");
+            logData.Data.Add("10.5,11");
+
+            DevKit.UpdateAndAssert(updateLog);
+
+            var result = DevKit.GetAndAssert(updateLog);
+            var wellboreResult = DevKit.GetAndAssert(Wellbore);
+
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault());
+            Assert.IsFalse(wellboreResult.IsActive.GetValueOrDefault());
+        }
+
         #region Helper Functions
 
         private Log AddAnEmptyLogWithFourCurves()
