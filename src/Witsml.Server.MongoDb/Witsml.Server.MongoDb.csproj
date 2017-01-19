@@ -259,8 +259,8 @@
       <DependentUpon>Well200DataAdapter.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\XmlElementSerializer.cs" />
-    <Compile Include="GrowingObjects\DbGrowingObject.cs" />
-    <Compile Include="GrowingObjects\DbGrowingObjectAdapter.cs" />
+    <Compile Include="Data\GrowingObjects\DbGrowingObject.cs" />
+    <Compile Include="Data\GrowingObjects\DbGrowingObjectAdapter.cs" />
     <Compile Include="Models\ChannelDataChunk.cs" />
     <Compile Include="Models\ChunkExtensions.cs" />
     <Compile Include="Data\Transactions\MongoDbTransaction.cs" />
@@ -301,6 +301,7 @@
       <Name>Witsml</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>

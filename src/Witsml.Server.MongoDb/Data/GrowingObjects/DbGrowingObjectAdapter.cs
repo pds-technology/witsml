@@ -22,11 +22,9 @@ using Energistics.Datatypes;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using PDS.Framework;
-using PDS.Witsml.Server.Data;
-using PDS.Witsml.Server.Data.GrowingObjects;
 using PDS.Witsml.Server.Data.Transactions;
 
-namespace PDS.Witsml.Server.GrowingObjects
+namespace PDS.Witsml.Server.Data.GrowingObjects
 {
     /// <summary>
     /// Manages storage of DbGrowingDataObject in the Mongo Db
