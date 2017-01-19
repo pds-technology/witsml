@@ -2058,6 +2058,35 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual((short)ErrorCodes.RecurringItemsEmptySelection, responseError.Result);
         }
 
+        [TestMethod]
+        public void Log141DataAdapter_GetFromStore_Can_Get_Data_With_WhiteSpace_In_MnemonicList()
+        {
+            new SampleDataTests()
+                .AddSampleData(TestContext);
+
+            var queryIn = @"
+                           <logs xmlns =""http://www.witsml.org/schemas/1series"" version=""1.4.1.1"">
+                                <log uidWell=""490251090200"" uidWellbore=""62-TpX-11"" uid=""490251090200_13346"">
+                                    <logData>
+                                        <mnemonicList>TIME,  SSAS ,  WDSSA,RCBROP  ,
+                                        BAS,WDBA
+                                        </mnemonicList>
+                                    </logData>
+                                </log>
+                           </logs>";
+
+            var results = DevKit.GetFromStore(ObjectTypes.Log, queryIn, null, "returnElements=data-only");
+            Assert.AreEqual((short)ErrorCodes.Success, results.Result);
+
+            var logList = EnergisticsConverter.XmlToObject<LogList>(results.XMLout);
+            Assert.AreEqual(1, logList.Log.Count);
+
+            var logData = logList.Log[0].LogData;
+            Assert.AreEqual(1, logData.Count);
+            Assert.AreEqual(6, logData[0].MnemonicList.Split(',').Length);
+            Assert.AreEqual(510, logData[0].Data.Count);
+        }
+
         #region Helper Methods
 
         private WMLS_AddToStoreResponse AddSetupWellWellboreLog(int numRows, bool isDepthLog, bool hasEmptyChannel, bool increasing)
