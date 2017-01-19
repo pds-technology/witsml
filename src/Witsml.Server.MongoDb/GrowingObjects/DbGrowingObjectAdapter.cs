@@ -23,6 +23,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Server.Data;
+using PDS.Witsml.Server.Data.GrowingObjects;
 using PDS.Witsml.Server.Data.Transactions;
 
 namespace PDS.Witsml.Server.GrowingObjects
@@ -30,9 +31,9 @@ namespace PDS.Witsml.Server.GrowingObjects
     /// <summary>
     /// Manages storage of DbGrowingDataObject in the Mongo Db
     /// </summary>
-    [Export]
+    [Export(typeof(IGrowingObjectDataProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public class DbGrowingObjectAdapter : MongoDbDataAdapter<DbGrowingObject>
+    public class DbGrowingObjectAdapter : MongoDbDataAdapter<DbGrowingObject>, IGrowingObjectDataProvider
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DbGrowingObjectAdapter"/> class.
@@ -79,6 +80,19 @@ namespace PDS.Witsml.Server.GrowingObjects
                 Transaction.Save();
                 ReplaceEntity(growingObject, uri);
             }
+        }
+
+        /// <summary>
+        /// Expires the growing objects for the specified objectType and expiredDateTime.
+        /// Any growing object of the specified type will have its objectGrowing flag set
+        /// to false if its lastAppendDateTime is older than the expireDateTime.
+        /// </summary>
+        /// <param name="objectType">Type of the groing object.</param>
+        /// <param name="expiredDateTime">The expired date time.</param>
+        /// <exception cref="System.NotImplementedException"></exception>
+        public void ExpireGrowingObjects(string objectType, DateTime expiredDateTime)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>

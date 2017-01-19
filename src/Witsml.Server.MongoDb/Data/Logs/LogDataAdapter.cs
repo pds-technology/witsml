@@ -28,6 +28,7 @@ using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
+using PDS.Witsml.Server.Data.GrowingObjects;
 using PDS.Witsml.Server.GrowingObjects;
 using PDS.Witsml.Server.Models;
 
@@ -66,7 +67,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// The database growing object adapter.
         /// </value>
         [Import]
-        public DbGrowingObjectAdapter DbGrowingObjectAdapter { get; set; }
+        public IGrowingObjectDataProvider DbGrowingObjectAdapter { get; set; }
 
         /// <summary>
         /// Retrieves data objects from the data store using the specified parser.
