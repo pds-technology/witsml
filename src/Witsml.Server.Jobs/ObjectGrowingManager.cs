@@ -20,6 +20,7 @@ using System.ComponentModel.Composition;
 using System.Threading.Tasks;
 using log4net;
 using PDS.Framework;
+using PDS.Witsml.Server.Data.GrowingObjects;
 
 namespace PDS.Witsml.Server.Jobs
 {
@@ -32,13 +33,15 @@ namespace PDS.Witsml.Server.Jobs
         private static readonly ILog _log = LogManager.GetLogger(typeof(ObjectGrowingManager));
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ObjectGrowingManager"/> class.
+        /// Initializes a new instance of the <see cref="ObjectGrowingManager" /> class.
         /// </summary>
         /// <param name="container">The container.</param>
+        /// <param name="growingObjectDataProvider">The growing object data provider.</param>
         [ImportingConstructor]
-        public ObjectGrowingManager(IContainer container)
+        public ObjectGrowingManager(IContainer container, IGrowingObjectDataProvider growingObjectDataProvider)
         {
             Container = container;
+            GrowingObjectDataProvider = growingObjectDataProvider;
         }
 
         /// <summary>
@@ -48,6 +51,14 @@ namespace PDS.Witsml.Server.Jobs
         /// The container.
         /// </value>
         public IContainer Container { get; }
+
+        /// <summary>
+        /// Gets the growing object data provider.
+        /// </summary>
+        /// <value>
+        /// The growing object data provider.
+        /// </value>
+        public IGrowingObjectDataProvider GrowingObjectDataProvider { get; }
 
         /// <summary>
         /// Starts the process to verify the object growing status of growing objects.
