@@ -356,5 +356,41 @@ namespace PDS.Witsml.Server.Properties {
                 return ((int)(this["MaxRequestLatestValues"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("60")]
+        public int ChangeDetectionPeriod {
+            get {
+                return ((int)(this["ChangeDetectionPeriod"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("3600")]
+        public int LogGrowingTimeoutPeriod {
+            get {
+                return ((int)(this["LogGrowingTimeoutPeriod"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("3600")]
+        public int MudLogGrowingTimeoutPeriod {
+            get {
+                return ((int)(this["MudLogGrowingTimeoutPeriod"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("3600")]
+        public int TrajectoryGrowingTimeoutPeriod {
+            get {
+                return ((int)(this["TrajectoryGrowingTimeoutPeriod"]));
+            }
+        }
     }
 }

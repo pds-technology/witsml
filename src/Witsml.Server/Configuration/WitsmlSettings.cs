@@ -194,6 +194,26 @@ namespace PDS.Witsml.Server.Configuration
         public static int StreamChannelDataDelayMilliseconds = Properties.Settings.Default.StreamChannelDataDelayMilliseconds;
 
         /// <summary>
+        /// The change detection period in seconds
+        /// </summary>
+        public static int ChangeDetectionPeriod = Properties.Settings.Default.ChangeDetectionPeriod;
+
+        /// <summary>
+        /// The Log growing timeout period in seconds
+        /// </summary>
+        public static int LogGrowingTimeoutPeriod = Properties.Settings.Default.LogGrowingTimeoutPeriod;
+
+        /// <summary>
+        /// The MudLog growing timeout period in seconds
+        /// </summary>
+        public static int MudLogGrowingTimeoutPeriod = Properties.Settings.Default.MudLogGrowingTimeoutPeriod;
+
+        /// <summary>
+        /// The Trajectory growing timeout period in seconds
+        /// </summary>
+        public static int TrajectoryGrowingTimeoutPeriod = Properties.Settings.Default.TrajectoryGrowingTimeoutPeriod;
+
+        /// <summary>
         /// Gets the size of the range.
         /// </summary>
         /// <param name="isTimeIndex"><c>true</c> if is time index.</param>

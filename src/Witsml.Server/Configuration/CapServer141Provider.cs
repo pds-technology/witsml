@@ -142,6 +142,7 @@ namespace PDS.Witsml.Server.Configuration
             capServer.SupportUomConversion = false; // TODO: update after UoM conversion implemented
             capServer.CompressionMethod = OptionsIn.CompressionMethod.None.Value; // TODO: update when compression is supported
             capServer.MaxRequestLatestValues = WitsmlSettings.MaxRequestLatestValues;
+            capServer.ChangeDetectionPeriod = WitsmlSettings.ChangeDetectionPeriod;
 
             capServer.Name = WitsmlSettings.DefaultServerName;
             capServer.Version = WitsmlSettings.OverrideServerVersion;
@@ -152,7 +153,7 @@ namespace PDS.Witsml.Server.Configuration
                 Name = Settings.Default.DefaultContactName,
                 Email = Settings.Default.DefaultContactEmail,
                 Phone = Settings.Default.DefaultContactPhone
-            };
+            };            
 
             return new Witsml141.CapServers()
             {
