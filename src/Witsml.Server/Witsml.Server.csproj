@@ -156,6 +156,7 @@
     <Compile Include="Data\DataObjectValidator.cs" />
     <Compile Include="Configuration\ICapServerProvider.cs" />
     <Compile Include="Data\DataObjectValidatorOfT.cs" />
+    <Compile Include="Data\GrowingObjects\IGrowingObjectDataProvider.cs" />
     <Compile Include="Data\IEtpDataProviderOfT.cs" />
     <Compile Include="Data\IWitsmlDataAdapter.cs" />
     <Compile Include="Data\Logs\Log131DataProvider.generated.cs">
