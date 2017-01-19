@@ -216,7 +216,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
                 : OptionsIn.ReturnElements.StationLocationOnly.Equals(returnElements)
                 ? new List<string>
                 {
-                    IdPropertyName, "UidWell", "UidWellbore", "TrajectoryStation.DateTimeStn", "TrajectoryStation.TypeTrajStation",
+                    IdPropertyName, "UidWell", "UidWellbore", "TrajectoryStation.Uid",
+                    "TrajectoryStation.DateTimeStn", "TrajectoryStation.TypeTrajStation",
                     "TrajectoryStation.MD", "TrajectoryStation.Tvd", "TrajectoryStation.Incl", "TrajectoryStation.Azi",
                     "TrajectoryStation.Location"
                 }
