@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
@@ -28,6 +29,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Configuration;
+using PDS.Witsml.Server.Jobs;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -50,10 +52,10 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             AddParents();
             // Add log
-            Log.BhaRunNumber = 123;          
-            
+            Log.BhaRunNumber = 123;
+
             DevKit.InitHeader(Log, LogIndexType.measureddepth);
-            DevKit.InitDataMany(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), 3, hasEmptyChannel:false);
+            DevKit.InitDataMany(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), 3, hasEmptyChannel: false);
 
             Log.LogCurveInfo[0].ClassIndex = 1;
             Log.LogCurveInfo[1].ClassIndex = 2;
@@ -64,13 +66,13 @@ namespace PDS.Witsml.Server.Data.Logs
             var xmlIn = "<?xml version=\"1.0\"?>" + Environment.NewLine +
                 "<logs xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:dc=\"http://purl.org/dc/terms/\" " +
                 "xmlns:gml=\"http://www.opengis.net/gml/3.2\" version=\"1.4.1.1\" xmlns=\"http://www.witsml.org/schemas/1series\">" + Environment.NewLine +
-                    "<log uid=\"" + Log.Uid + "\" uidWell=\"" + Log.UidWell + "\" uidWellbore=\"" + Log.UidWellbore + "\">" + Environment.NewLine +                        
-                        "<bhaRunNumber>NaN</bhaRunNumber>" + Environment.NewLine +                       
-                        "<logCurveInfo uid=\"MD\">" + Environment.NewLine +                                            
-                        "  <classIndex>NaN</classIndex>" + Environment.NewLine +                       
+                    "<log uid=\"" + Log.Uid + "\" uidWell=\"" + Log.UidWell + "\" uidWellbore=\"" + Log.UidWellbore + "\">" + Environment.NewLine +
+                        "<bhaRunNumber>NaN</bhaRunNumber>" + Environment.NewLine +
+                        "<logCurveInfo uid=\"MD\">" + Environment.NewLine +
+                        "  <classIndex>NaN</classIndex>" + Environment.NewLine +
                         "</logCurveInfo>" + Environment.NewLine +
-                        "<logCurveInfo uid=\"ROP\">" + Environment.NewLine +                                       
-                        "  <classIndex>NaN</classIndex>" + Environment.NewLine +                       
+                        "<logCurveInfo uid=\"ROP\">" + Environment.NewLine +
+                        "  <classIndex>NaN</classIndex>" + Environment.NewLine +
                         "</logCurveInfo>" + Environment.NewLine +
                     "</log>" + Environment.NewLine +
                "</logs>";
@@ -125,7 +127,7 @@ namespace PDS.Witsml.Server.Data.Logs
             };
 
             DevKit.InitHeader(update, LogIndexType.measureddepth);
-            logData = update.LogData.First();          
+            logData = update.LogData.First();
             logData.Data.Add("17,17.1,17.2");
             logData.Data.Add("21,21.1,21.2");
             logData.Data.Add("21,22.1,22.2");
@@ -189,7 +191,7 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.AreEqual(6, result.LogData[0].Data.Count);
             Assert.AreEqual(2, result.LogData[0].MnemonicList.Split(',').Length);
 
-            var resultLogData = result.LogData[0].Data;          
+            var resultLogData = result.LogData[0].Data;
             double index = 17;
             foreach (var row in resultLogData)
             {
@@ -368,7 +370,7 @@ namespace PDS.Witsml.Server.Data.Logs
         public void Log141DataAdapter_UpdateInStore_Structural_Ranges_Ignored()
         {
             AddLogHeader(Log, LogIndexType.measureddepth);
-            
+
             var result = DevKit.GetAndAssert(Log);
             Assert.IsNull(result.StartIndex);
             Assert.IsNull(result.EndIndex);
@@ -657,7 +659,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var channel1 = curves[1];
             var channel2 = curves[2];
             var channel3 = curves[3];
-            
+
             var update = DevKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
 
             // Update 2rd channel
@@ -667,7 +669,7 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 MnemonicList = indexCurve.Mnemonic.Value + "," + channel2.Mnemonic.Value,
                 UnitList = indexCurve.Unit + "," + channel2.Unit
-            };           
+            };
             var data = new List<string> {"1,1.2", "2,2.2"};
             logData.Data = data;
             update.LogData.Add(logData);
@@ -770,7 +772,7 @@ namespace PDS.Witsml.Server.Data.Logs
             DevKit.UpdateAndAssert(update);
 
             // Update 2rd channel with a different chunk
-            update = DevKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);           
+            update = DevKit.CreateLog(log.Uid, null, log.UidWell, null, log.UidWellbore, null);
             update.LogData = new List<LogData>();
 
             logData = new LogData
@@ -1076,7 +1078,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
         [TestMethod]
         public void Log141DataAdapter_UpdateInStore_Update_OverlappingLog_Data()
-        {           
+        {
             Log.StartIndex = new GenericMeasure(1, "m");
             AddLogWithData(Log, LogIndexType.measureddepth, 8);
 
@@ -1163,7 +1165,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
         [TestMethod]
         public void Log141DataAdapter_UpdateInStore_OverwriteLog_Data_Chunk()
-        {       
+        {
             Log.StartIndex = new GenericMeasure(17, "m");
             AddLogWithData(Log, LogIndexType.measureddepth, 6);
 
@@ -1964,8 +1966,8 @@ namespace PDS.Witsml.Server.Data.Logs
             AddLogWithData(Log, LogIndexType.measureddepth, 10);
 
             var addedLog = DevKit.GetAndAssert(Log);
-            Assert.IsFalse(addedLog.ObjectGrowing.GetValueOrDefault());
-            Assert.IsFalse(Wellbore.IsActive.GetValueOrDefault());
+            Assert.IsFalse(addedLog.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            Assert.IsFalse(Wellbore.IsActive.GetValueOrDefault(), "IsActive");
 
             var update = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure(17, "m"), 6);
             DevKit.UpdateAndAssert(update);
@@ -1973,8 +1975,8 @@ namespace PDS.Witsml.Server.Data.Logs
             var result = DevKit.GetAndAssert(Log);
             var wellboreResult = DevKit.GetAndAssert(Wellbore);
 
-            Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault());
-            Assert.IsTrue(wellboreResult.IsActive.GetValueOrDefault());
+            Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            Assert.IsTrue(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
         }
 
         [TestMethod]
@@ -2001,8 +2003,40 @@ namespace PDS.Witsml.Server.Data.Logs
             var result = DevKit.GetAndAssert(updateLog);
             var wellboreResult = DevKit.GetAndAssert(Wellbore);
 
-            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault());
-            Assert.IsFalse(wellboreResult.IsActive.GetValueOrDefault());
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            Assert.IsFalse(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_UpdateInStore_AppendLog_Data_ExpireGrowingObjects_Job()
+        {
+            Log.StartIndex = new GenericMeasure(5, "m");
+            AddLogWithData(Log, LogIndexType.measureddepth, 10);
+
+            var addedLog = DevKit.GetAndAssert(Log);
+            Assert.IsFalse(addedLog.ObjectGrowing.GetValueOrDefault());
+            Assert.IsFalse(Wellbore.IsActive.GetValueOrDefault());
+
+            var update = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure(17, "m"), 6);
+            DevKit.UpdateAndAssert(update);
+
+            var result = DevKit.GetAndAssert(Log);
+            var wellboreResult = DevKit.GetAndAssert(Wellbore);
+
+            Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault());
+            Assert.IsTrue(wellboreResult.IsActive.GetValueOrDefault());
+
+            var growingTimeoutPeriod = 30;
+            WitsmlSettings.LogGrowingTimeoutPeriod = growingTimeoutPeriod;
+            Thread.Sleep((growingTimeoutPeriod + 10) * 1000);
+
+            DevKit.Container.Resolve<ObjectGrowingManager>().ExpireGrowingObjects();
+
+            result = DevKit.GetAndAssert(Log);
+            wellboreResult = DevKit.GetAndAssert(Wellbore);
+
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            //Assert.IsFalse(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");            
         }
 
         #region Helper Functions

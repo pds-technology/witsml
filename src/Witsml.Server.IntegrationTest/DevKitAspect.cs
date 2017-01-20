@@ -52,6 +52,9 @@ namespace PDS.Witsml.Server
         public static readonly int DefaultMudLogMaxDataNodesUpdate = WitsmlSettings.MudLogMaxDataNodesUpdate;
         public static readonly int DefaultMudLogMaxDataNodesDelete = WitsmlSettings.MudLogMaxDataNodesDelete;
         public static readonly int DefaultMaxStationCount = WitsmlSettings.MaxStationCount;
+        public static readonly int DefaultLogGrowingTimeoutPeriod = WitsmlSettings.LogGrowingTimeoutPeriod;
+        public static readonly int DefaultTrajectoryGrowingTimeoutPeriod = WitsmlSettings.TrajectoryGrowingTimeoutPeriod;
+        public static readonly int DefaultMudLogGrowingTimeoutPeriod = WitsmlSettings.MudLogGrowingTimeoutPeriod;
 
         public readonly string TimeZone = "-06:00";
 

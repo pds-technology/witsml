@@ -821,6 +821,10 @@
       <Project>{fae228aa-4917-4b02-b239-0a24df883898}</Project>
       <Name>Framework</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Witsml.Server.Jobs\Witsml.Server.Jobs.csproj">
+      <Project>{006F1A29-952B-4264-8E91-0D445F74B183}</Project>
+      <Name>Witsml.Server.Jobs</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Witsml.Server\Witsml.Server.csproj">
       <Project>{93faae2f-13aa-46df-a94b-36155b51ebfa}</Project>
       <Name>Witsml.Server</Name>
