@@ -110,17 +110,22 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
                     }
 
                     var uri = new EtpUri(dbGrowingObject.Uri);
-                  
-                    // Set expired growing object to objectGrowing = false;
-                    dataAdapter.UpdateObjectGrowing(uri, false);
 
-                    // Delete the dbGrowingObject record
-                    DeleteEntity(new EtpUri(dbGrowingObject.Uri));
+                    //using (var transaction = GetTransaction())
+                    //{
+                        //transaction.SetContext(uri);
+
+                        // Set expired growing object to objectGrowing = false;
+                        dataAdapter.UpdateObjectGrowing(uri, false);
+
+                        // Delete the dbGrowingObject record
+                        DeleteEntity(new EtpUri(dbGrowingObject.Uri));
+
+                        // Commit transaction
+                        //transaction.Commit();
+                    //}
                 }
             }
-            //dataByVersion
-            //ObjectName
-            //EtpUri
         }
 
         private FilterDefinition<DbGrowingObject> BuildDataFilter(string objectType, DateTime expiredDateTime)
