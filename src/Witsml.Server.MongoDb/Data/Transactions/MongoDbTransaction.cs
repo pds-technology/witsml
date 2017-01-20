@@ -35,7 +35,13 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// Gets or sets the transaction record identifier.
         /// </summary>
         /// <value>The transaction record identifier.</value>
-        public string Uid { get; set; }
+        public string Uri { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the identifier property.
+        /// </summary>
+        /// <value>The name of the identifier property.</value>
+        public string IdPropertyName { get; set; }
 
         /// <summary>
         /// Gets or sets the MongoDb collection name.

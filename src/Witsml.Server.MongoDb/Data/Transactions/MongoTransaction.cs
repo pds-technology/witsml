@@ -118,9 +118,10 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// </summary>
         /// <param name="action">The MongoDb operation, e.g. add.</param>
         /// <param name="collection">The MongoDb collection name.</param>
+        /// <param name="idPropertyName">Name of the identifier property.</param>
         /// <param name="document">The data obejct in BsonDocument format.</param>
         /// <param name="uri">The URI.</param>
-        public void Attach(MongoDbAction action, string collection, BsonDocument document, EtpUri? uri = null)
+        public void Attach(MongoDbAction action, string collection, string idPropertyName, BsonDocument document, EtpUri? uri = null)
         {
             _log.Debug($"Attaching transaction for MongoDb collection {collection} with URI: {uri}");
 
@@ -128,12 +129,13 @@ namespace PDS.Witsml.Server.Data.Transactions
             {
                 TransactionId = Id,
                 Collection = collection,
+                IdPropertyName = idPropertyName,
                 Action = action,
                 Status = TransactionStatus.Created
             };
 
             if (uri.HasValue)
-                transaction.Uid = uri.Value;
+                transaction.Uri = uri.Value;
 
             if (document != null)
                 transaction.Value = document;          
@@ -208,22 +210,20 @@ namespace PDS.Witsml.Server.Data.Transactions
         private void Update(MongoDbTransaction transaction)
         {
             var collection = Database.GetCollection<BsonDocument>(transaction.Collection);
-            var filter = GetDocumentFilter(new EtpUri(transaction.Uid));
+            var filter = GetDocumentFilter(new EtpUri(transaction.Uri), transaction.IdPropertyName);
             collection.ReplaceOne(filter, transaction.Value);
         }
 
         private void Delete(MongoDbTransaction transaction)
         {
             var collection = Database.GetCollection<BsonDocument>(transaction.Collection);
-            var filter = GetDocumentFilter(new EtpUri(transaction.Uid));
+            var filter = GetDocumentFilter(new EtpUri(transaction.Uri), transaction.IdPropertyName);
             collection.DeleteOne(filter);
         }
 
-        private FilterDefinition<BsonDocument> GetDocumentFilter(EtpUri uri)
+        private FilterDefinition<BsonDocument> GetDocumentFilter(EtpUri uri, string idPropertyName)
         {
-            return uri.Version == EtpUris.Witsml200.Version
-                ? MongoDbUtility.GetEntityFilter<BsonDocument>(uri, ObjectTypes.Uuid)
-                : MongoDbUtility.GetEntityFilter<BsonDocument>(uri);
+            return MongoDbUtility.GetEntityFilter<BsonDocument>(uri, idPropertyName);
         }
 
         /// <summary>

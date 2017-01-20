@@ -293,7 +293,7 @@ namespace PDS.Witsml.Server.Data.Channels
                         if (transaction != null)
                         {
                             var chunk = new ChannelDataChunk { Uid = dc.Uid };
-                            transaction.Attach(MongoDbAction.Add, DbCollectionName, chunk.ToBsonDocument());
+                            transaction.Attach(MongoDbAction.Add, DbCollectionName, IdPropertyName, chunk.ToBsonDocument());
                         }
 
                         UpdateMongoFile(dc);
@@ -303,7 +303,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
                     if (dc.Indices != null)
                     {
-                        transaction?.Attach(MongoDbAction.Update, DbCollectionName, dc.ToBsonDocument());
+                        transaction?.Attach(MongoDbAction.Update, DbCollectionName, IdPropertyName, dc.ToBsonDocument());
 
                         var filter = Builders<ChannelDataChunk>.Filter;
                         var update = Builders<ChannelDataChunk>.Update;
@@ -322,7 +322,7 @@ namespace PDS.Witsml.Server.Data.Channels
                     }
 
                     // Delete data chunk
-                    transaction?.Attach(MongoDbAction.Delete, DbCollectionName, dc.ToBsonDocument(), new EtpUri(dc.Uri));
+                    transaction?.Attach(MongoDbAction.Delete, DbCollectionName, IdPropertyName, dc.ToBsonDocument(), new EtpUri(dc.Uri));
 
                     var chunkFilter = Builders<ChannelDataChunk>.Filter;
                     var mongoFileFilter = Builders<ChannelDataChunk>.Filter.Eq("Uri", dc.Uri);

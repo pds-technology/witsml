@@ -436,7 +436,7 @@ namespace PDS.Witsml.Server.Data
                 var transaction = Transaction;
                 if (transaction == null) return;
 
-                transaction.Attach(MongoDbAction.Add, dbCollectionName, null, uri);
+                transaction.Attach(MongoDbAction.Add, dbCollectionName, IdPropertyName, null, uri);
                 transaction.Save();
             }
             catch (MongoException ex)
@@ -481,7 +481,7 @@ namespace PDS.Witsml.Server.Data
                 var transaction = Transaction;
                 if (transaction == null) return;
 
-                transaction.Attach(MongoDbAction.Update, dbCollectionName, current.ToBsonDocument(), uri);
+                transaction.Attach(MongoDbAction.Update, dbCollectionName, IdPropertyName, current.ToBsonDocument(), uri);
                 transaction.Save();
             }
             catch (MongoException ex)
@@ -529,7 +529,7 @@ namespace PDS.Witsml.Server.Data
                 var transaction = Transaction;
                 if (transaction == null) return;
 
-                transaction.Attach(MongoDbAction.Update, dbCollectionName, current.ToBsonDocument(), uri);
+                transaction.Attach(MongoDbAction.Update, dbCollectionName, IdPropertyName, current.ToBsonDocument(), uri);
                 transaction.Save();
             }
             catch (MongoException ex)
@@ -617,7 +617,7 @@ namespace PDS.Witsml.Server.Data
                 if (transaction != null)
                 {
                     //var document = MongoDbUtility.GetDocumentId(current);
-                    transaction.Attach(MongoDbAction.Delete, dbCollectionName, null, uri);
+                    transaction.Attach(MongoDbAction.Delete, dbCollectionName, IdPropertyName, null, uri);
                     transaction.Save();
                 }
                 else
@@ -668,7 +668,7 @@ namespace PDS.Witsml.Server.Data
                 var transaction = Transaction;
                 if (transaction == null) return;
 
-                transaction.Attach(MongoDbAction.Update, dbCollectionName, current.ToBsonDocument(), uri);
+                transaction.Attach(MongoDbAction.Update, dbCollectionName, IdPropertyName, current.ToBsonDocument(), uri);
                 transaction.Save();
             }
             catch (MongoException ex)

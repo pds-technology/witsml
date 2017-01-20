@@ -45,6 +45,11 @@ namespace PDS.Witsml.Server.Data
         {
             var builder = Builders<T>.Filter;
 
+            if (ObjectTypes.Uri.EqualsIgnoreCase(idPropertyName) || !uri.IsValid)
+            {
+                return builder.EqIgnoreCase(idPropertyName, uri.Uri);
+            }
+
             // Uuid filter
             if (ObjectTypes.Uuid.Equals(idPropertyName))
             {

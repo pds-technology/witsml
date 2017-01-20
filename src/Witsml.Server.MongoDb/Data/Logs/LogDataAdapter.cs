@@ -23,12 +23,14 @@ using System.Linq;
 using Energistics.DataAccess;
 using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Server.Data.GrowingObjects;
+using PDS.Witsml.Server.Data.Transactions;
 using PDS.Witsml.Server.Models;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -629,6 +631,10 @@ namespace PDS.Witsml.Server.Data.Logs
         {
             var entity = GetEntity(uri);
             Logger.DebugFormat("Updating objectGrowing for uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
+
+            // Join existing Transaction
+            Transaction.Attach(MongoDbAction.Update, DbCollectionName, IdPropertyName, entity.ToBsonDocument(), uri);
+            Transaction.Save();
 
             // Update ObjectGrowing
             var logHeaderUpdate = MongoDbUtility.BuildUpdate<T>(null, "ObjectGrowing", isGrowing);

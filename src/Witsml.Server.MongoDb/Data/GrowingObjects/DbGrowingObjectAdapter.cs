@@ -43,7 +43,7 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
         public DbGrowingObjectAdapter(IContainer container, IDatabaseProvider databaseProvider) : 
-            base(container, databaseProvider, "dbGrowingObject", ObjectTypes.Uid)
+            base(container, databaseProvider, "dbGrowingObject", ObjectTypes.Uri)
         {
             
         }
@@ -64,22 +64,22 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
             {
                 growingObject = new DbGrowingObject()
                 {
-                    Uid = Guid.NewGuid().ToString(),
+                    //Uid = Guid.NewGuid().ToString(),
                     Uri = uri,
                     ObjectType = uri.ObjectType,
                     WellboreUri = wellboreUri,
                     LastAppendDateTime = lastAppendDateTime
                 };
 
-                Transaction.Attach(MongoDbAction.Add, DbCollectionName, growingObject.ToBsonDocument(), uri);
-                Transaction.Save();
+                //Transaction.Attach(MongoDbAction.Add, DbCollectionName, growingObject.ToBsonDocument(), uri);
+                //Transaction.Save();
                 InsertEntity(growingObject);
             }
             else
             {
+                //Transaction.Attach(MongoDbAction.Update, DbCollectionName, growingObject.ToBsonDocument(), uri);
+                //Transaction.Save();
                 growingObject.LastAppendDateTime = lastAppendDateTime;
-                Transaction.Attach(MongoDbAction.Update, DbCollectionName, growingObject.ToBsonDocument(), uri);
-                Transaction.Save();
                 ReplaceEntity(growingObject, uri);
             }
         }
@@ -95,36 +95,30 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         public void ExpireGrowingObjects(string objectType, DateTime expiredDateTime)
         {
             // Get dbGrowingObject for object type that are expired.
-            var dataByVersion = GetExpiredGrowingObjects(objectType, expiredDateTime).GroupBy(g => (new EtpUri(g.Uri)).Version);
-            IGrowingObjectDataAdapter dataAdapter;
+            var dataByVersion = GetExpiredGrowingObjects(objectType, expiredDateTime)
+                .Select(x => new {Uri = new EtpUri(x.Uri), DataObject = x})
+                .GroupBy(g => g.Uri.Version);
 
             foreach (var group in dataByVersion)
             {
-                dataAdapter = null;
-                foreach (var dbGrowingObject in group)
+                var objectName = new ObjectName(objectType, group.Key);
+                var dataAdapter = Container.Resolve<IGrowingObjectDataAdapter>(objectName);
+
+                foreach (var item in group)
                 {
-                    var objectName = new ObjectName(dbGrowingObject.ObjectType, new EtpUri(dbGrowingObject.Uri).Version);
-                    Console.WriteLine(objectName);
-                    if (dataAdapter == null)
+                    using (var transaction = GetTransaction())
                     {
-                        dataAdapter = Container.Resolve<IGrowingObjectDataAdapter>(objectName);
-                    }
-
-                    var uri = new EtpUri(dbGrowingObject.Uri);
-
-                    //using (var transaction = GetTransaction())
-                    //{
-                        //transaction.SetContext(uri);
+                        transaction.SetContext(item.Uri);
 
                         // Set expired growing object to objectGrowing = false;
-                        //dataAdapter.UpdateObjectGrowing(uri, false);
+                        dataAdapter.UpdateObjectGrowing(item.Uri, false);
 
                         // Delete the dbGrowingObject record
-                        DeleteEntity(GetUri(dbGrowingObject));                  
+                        DeleteEntity(item.Uri);
 
                         // Commit transaction
-                        //transaction.Commit();
-                    //}
+                        transaction.Commit();
+                    }
                 }
             }
         }
@@ -158,21 +152,17 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         /// </returns>
         protected override EtpUri GetUri(DbGrowingObject instance)
         {
-            return new EtpUri(instance.Uid);
+            return new EtpUri(instance.Uri);
         }
 
-        /// <summary>
-        /// Gets the entity filter for the specified URI.
-        /// </summary>
-        /// <typeparam name="TObject">The type of the object.</typeparam>
-        /// <param name="uri">The URI.</param>
-        /// <param name="idPropertyName">Name of the identifier property.</param>
-        /// <returns>
-        /// The entity filter.
-        /// </returns>
-        protected override FilterDefinition<TObject> GetEntityFilter<TObject>(EtpUri uri, string idPropertyName)
-        {
-            return Builders<TObject>.Filter.Eq(ObjectTypes.Uid, uri.ToString());
-        }
+        //protected override FilterDefinition<TObject> GetEntityFilter<TObject>(EtpUri uri, string idPropertyName)
+        //{
+        //    if (uri.IsValid)
+        //    {
+        //        return Builders<TObject>.Filter.Eq(ObjectTypes.Uri, uri.ToString());
+        //    }
+
+        //    return base.GetEntityFilter<TObject>(uri, idPropertyName);
+        //}
     }
 }
