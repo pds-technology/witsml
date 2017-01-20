@@ -19,6 +19,8 @@
 using System.Collections.Generic;
 using Energistics.DataAccess.WITSML141;
 using Energistics.Datatypes;
+using MongoDB.Bson;
+using PDS.Witsml.Server.Data.Transactions;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
@@ -47,12 +49,10 @@ namespace PDS.Witsml.Server.Data.Wellbores
             var wellboreEntity = GetEntity(uri);
             Logger.DebugFormat("Updating wellbore isActive for uid '{0}' and name '{1}'.", wellboreEntity.Uid, wellboreEntity.Name);
 
-            // Update isActive
-            var mongoUpdate = new MongoDbUpdate<Wellbore>(Container, GetCollection(), null);
-            var filter = MongoDbUtility.GetEntityFilter<Wellbore>(uri);
-            var wellboreUpdate = MongoDbUtility.BuildUpdate<Wellbore>(null, "IsActive", isActive);
-
-            mongoUpdate.UpdateFields(filter, wellboreUpdate);
+            wellboreEntity.IsActive = isActive;
+            Transaction.Attach(MongoDbAction.Update, DbCollectionName, wellboreEntity.ToBsonDocument(), uri);
+            Transaction.Save();
+            ReplaceEntity(wellboreEntity, uri);           
         }
     }
 }
