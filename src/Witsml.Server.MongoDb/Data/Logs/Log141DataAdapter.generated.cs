@@ -43,7 +43,7 @@ namespace PDS.Witsml.Server.Data.Logs
     [Export(typeof(IWitsmlDataAdapter<Log>))]
     [Export(typeof(IWitsml141Configuration))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public partial class Log141DataAdapter : LogDataAdapter<Log, LogCurveInfo>, IWitsml141Configuration, IGrowingObjectDataAdapter
+    public partial class Log141DataAdapter : LogDataAdapter<Log, LogCurveInfo>, IWitsml141Configuration
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Log141DataAdapter" /> class.

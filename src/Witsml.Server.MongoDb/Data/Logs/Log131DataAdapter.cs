@@ -40,7 +40,7 @@ namespace PDS.Witsml.Server.Data.Logs
     /// </summary>
     [Export131(ObjectTypes.Log, typeof(IGrowingObjectDataAdapter))]
     [Export131(ObjectTypes.Log, typeof(IChannelDataProvider))]
-    public partial class Log131DataAdapter
+    public partial class Log131DataAdapter: IGrowingObjectDataAdapter
     {
         /// <summary>
         /// Adds a <see cref="Log" /> entity to the data store.

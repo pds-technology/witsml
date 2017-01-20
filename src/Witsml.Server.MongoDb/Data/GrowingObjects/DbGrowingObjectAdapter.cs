@@ -43,7 +43,7 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
         public DbGrowingObjectAdapter(IContainer container, IDatabaseProvider databaseProvider) : 
-            base(container, databaseProvider, "dbGrowingObject", ObjectTypes.Uri)
+            base(container, databaseProvider, "dbGrowingObject", ObjectTypes.Uid)
         {
             
         }
@@ -64,6 +64,7 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
             {
                 growingObject = new DbGrowingObject()
                 {
+                    Uid = Guid.NewGuid().ToString(),
                     Uri = uri,
                     ObjectType = uri.ObjectType,
                     WellboreUri = wellboreUri,
@@ -116,10 +117,10 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
                         //transaction.SetContext(uri);
 
                         // Set expired growing object to objectGrowing = false;
-                        dataAdapter.UpdateObjectGrowing(uri, false);
+                        //dataAdapter.UpdateObjectGrowing(uri, false);
 
                         // Delete the dbGrowingObject record
-                        DeleteEntity(new EtpUri(dbGrowingObject.Uri));
+                        DeleteEntity(GetUri(dbGrowingObject));                  
 
                         // Commit transaction
                         //transaction.Commit();
@@ -157,7 +158,7 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         /// </returns>
         protected override EtpUri GetUri(DbGrowingObject instance)
         {
-            return new EtpUri(instance.Uri);
+            return new EtpUri(instance.Uid);
         }
 
         /// <summary>
@@ -171,7 +172,7 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         /// </returns>
         protected override FilterDefinition<TObject> GetEntityFilter<TObject>(EtpUri uri, string idPropertyName)
         {
-            return Builders<TObject>.Filter.Eq(IdPropertyName, uri.ToString());
+            return Builders<TObject>.Filter.Eq(ObjectTypes.Uid, uri.ToString());
         }
     }
 }

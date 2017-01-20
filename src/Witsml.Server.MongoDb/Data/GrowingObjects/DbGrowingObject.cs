@@ -55,5 +55,13 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         /// The last append date time.
         /// </value>
         public DateTime LastAppendDateTime { get; set; }
+
+        /// <summary>
+        /// Gets or sets the uid.
+        /// </summary>
+        /// <value>
+        /// The uid.
+        /// </value>
+        public string Uid { get; set; }
     }
 }
