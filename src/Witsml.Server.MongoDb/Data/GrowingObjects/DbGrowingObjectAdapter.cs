@@ -17,11 +17,14 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
 using Energistics.Datatypes;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using PDS.Framework;
+using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Server.Data.Transactions;
 
 namespace PDS.Witsml.Server.Data.GrowingObjects
@@ -90,8 +93,55 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         /// <exception cref="System.NotImplementedException"></exception>
         public void ExpireGrowingObjects(string objectType, DateTime expiredDateTime)
         {
-            throw new NotImplementedException();
+            // Get dbGrowingObject for object type that are expired.
+            var dataByVersion = GetExpiredGrowingObjects(objectType, expiredDateTime).GroupBy(g => (new EtpUri(g.Uri)).Version);
+            IGrowingObjectDataAdapter dataAdapter;
+
+            foreach (var group in dataByVersion)
+            {
+                dataAdapter = null;
+                foreach (var dbGrowingObject in group)
+                {
+                    var objectName = new ObjectName(dbGrowingObject.ObjectType, new EtpUri(dbGrowingObject.Uri).Version);
+                    Console.WriteLine(objectName);
+                    if (dataAdapter == null)
+                    {
+                        dataAdapter = Container.Resolve<IGrowingObjectDataAdapter>(objectName);
+                    }
+
+                    var uri = new EtpUri(dbGrowingObject.Uri);
+                  
+                    // Set expired growing object to objectGrowing = false;
+                    dataAdapter.UpdateObjectGrowing(uri, false);
+
+                    // Delete the dbGrowingObject record
+                    DeleteEntity(new EtpUri(dbGrowingObject.Uri));
+                }
+            }
+            //dataByVersion
+            //ObjectName
+            //EtpUri
         }
+
+        private FilterDefinition<DbGrowingObject> BuildDataFilter(string objectType, DateTime expiredDateTime)
+        {
+            var builder = Builders<DbGrowingObject>.Filter;
+            var filters = new List<FilterDefinition<DbGrowingObject>>
+            {
+                builder.Eq("ObjectType", objectType),
+                builder.Lt("LastAppendDateTime", expiredDateTime)
+            };
+
+            return builder.And(filters);
+        }
+
+        private List<DbGrowingObject> GetExpiredGrowingObjects(string objectType, DateTime expiredDateTime)
+        {
+            return GetCollection()
+                .Find(BuildDataFilter(objectType, expiredDateTime) ?? "{}")
+                .ToList();
+        }
+
 
         /// <summary>
         /// Gets the URI for the specified data object.
