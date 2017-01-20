@@ -75,7 +75,6 @@ namespace PDS.Witsml.Server.Jobs
             await Task.Delay(_changeDetectionPeriod * 1000);
         }
 
-
         /// <summary>
         /// Expires the growing objects for the specified objectType and expiredDateTime
         /// </summary>
