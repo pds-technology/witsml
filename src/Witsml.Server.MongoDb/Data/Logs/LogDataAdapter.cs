@@ -29,7 +29,6 @@ using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
 using PDS.Witsml.Server.Data.GrowingObjects;
-using PDS.Witsml.Server.GrowingObjects;
 using PDS.Witsml.Server.Models;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -615,6 +614,24 @@ namespace PDS.Witsml.Server.Data.Logs
             // Update CommonData
             logHeaderUpdate = UpdateCommonData(logHeaderUpdate, entity, offset);
 
+            var mongoUpdate = new MongoDbUpdate<T>(Container, GetCollection(), null);
+            var filter = MongoDbUtility.GetEntityFilter<T>(uri);
+
+            mongoUpdate.UpdateFields(filter, logHeaderUpdate);
+        }
+
+        /// <summary>
+        /// Updates the object growing field of a logs.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="isGrowing">if set to <c>true</c> [is growing].</param>
+        public void UpdateObjectGrowing(EtpUri uri, bool isGrowing)
+        {
+            var entity = GetEntity(uri);
+            Logger.DebugFormat("Updating objectGrowing for uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
+
+            // Update ObjectGrowing
+            var logHeaderUpdate = MongoDbUtility.BuildUpdate<T>(null, "ObjectGrowing", isGrowing);
             var mongoUpdate = new MongoDbUpdate<T>(Container, GetCollection(), null);
             var filter = MongoDbUtility.GetEntityFilter<T>(uri);
 

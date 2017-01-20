@@ -32,6 +32,7 @@ using Energistics.Datatypes;
 using LinqToQuerystring;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
+using PDS.Witsml.Server.Data.GrowingObjects;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -42,7 +43,7 @@ namespace PDS.Witsml.Server.Data.Logs
     [Export(typeof(IWitsmlDataAdapter<Log>))]
     [Export(typeof(IWitsml141Configuration))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public partial class Log141DataAdapter : LogDataAdapter<Log, LogCurveInfo>, IWitsml141Configuration
+    public partial class Log141DataAdapter : LogDataAdapter<Log, LogCurveInfo>, IWitsml141Configuration, IGrowingObjectDataAdapter
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Log141DataAdapter" /> class.

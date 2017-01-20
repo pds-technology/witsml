@@ -23,7 +23,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using PDS.Witsml.Server.Models;
 using PDS.Witsml.Server.Data.Transactions;
-using PDS.Witsml.Server.GrowingObjects;
+using PDS.Witsml.Server.Data.GrowingObjects;
 
 namespace PDS.Witsml.Server.Data
 {

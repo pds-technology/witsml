@@ -18,7 +18,7 @@
 
 using System;
 
-namespace PDS.Witsml.Server.GrowingObjects
+namespace PDS.Witsml.Server.Data.GrowingObjects
 {
     /// <summary>
     /// Metadata on the growing status of WITSML growing objects.
