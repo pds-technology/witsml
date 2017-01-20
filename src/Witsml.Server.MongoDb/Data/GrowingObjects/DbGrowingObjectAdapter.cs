@@ -146,15 +146,5 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         {
             return new EtpUri(instance.Uri);
         }
-
-        //protected override FilterDefinition<TObject> GetEntityFilter<TObject>(EtpUri uri, string idPropertyName)
-        //{
-        //    if (uri.IsValid)
-        //    {
-        //        return Builders<TObject>.Filter.Eq(ObjectTypes.Uri, uri.ToString());
-        //    }
-
-        //    return base.GetEntityFilter<TObject>(uri, idPropertyName);
-        //}
     }
 }
