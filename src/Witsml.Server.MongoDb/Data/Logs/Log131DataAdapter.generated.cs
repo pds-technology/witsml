@@ -32,7 +32,6 @@ using Energistics.Datatypes;
 using LinqToQuerystring;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
-using PDS.Witsml.Server.Data.GrowingObjects;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -69,7 +68,7 @@ namespace PDS.Witsml.Server.Data.Logs
             capServer.Add(Functions.AddToStore, ObjectTypes.Log);
             capServer.Add(Functions.UpdateInStore, ObjectTypes.Log);
             capServer.Add(Functions.DeleteFromStore, ObjectTypes.Log);
-        }
+      }
 
         /// <summary>
         /// Gets a collection of data objects related to the specified URI.
