@@ -156,7 +156,6 @@
     <Compile Include="Data\Channels\ChannelDataChunkAdapter.cs" />
     <Compile Include="Data\ChannelSets\ChannelSet200DataAdapter.cs" />
     <Compile Include="Data\DatabaseProvider.cs" />
-    <Compile Include="Data\GrowingObjects\IGrowingObjectDataAdapter.cs" />
     <Compile Include="Data\IDatabaseProvider.cs" />
     <Compile Include="Data\Logs\Log131DataAdapter.cs" />
     <Compile Include="Data\Logs\Log131DataAdapter.generated.cs">
