@@ -72,7 +72,18 @@ namespace PDS.Witsml.Server.Jobs
         {
             _log.Debug("Starting Object Growing Expiration Job");
             GrowingObjectDataProvider.ExpireGrowingObjects("log", DateTime.UtcNow.AddSeconds(-1 * _logGrowingTimeoutPeriod));
-            await Task.Delay(_changeDetectionPeriod * 1000);           
+            await Task.Delay(_changeDetectionPeriod * 1000);
+        }
+
+
+        /// <summary>
+        /// Expires the growing objects for the specified objectType and expiredDateTime
+        /// </summary>
+        /// <returns></returns>
+        internal void ExpireGrowingObjects()
+        {
+            _log.Debug("Starting Object Growing Expiration Job");
+            GrowingObjectDataProvider.ExpireGrowingObjects(ObjectTypes.Log, DateTime.UtcNow.AddSeconds(-1 * WitsmlSettings.LogGrowingTimeoutPeriod));
         }
     }
 }
