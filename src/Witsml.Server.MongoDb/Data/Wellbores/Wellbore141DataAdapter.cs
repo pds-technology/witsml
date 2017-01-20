@@ -47,12 +47,17 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public void UpdateIsActive(EtpUri uri, bool isActive)
         {
             var wellboreEntity = GetEntity(uri);
-            Logger.DebugFormat("Updating wellbore isActive for uid '{0}' and name '{1}'.", wellboreEntity.Uid, wellboreEntity.Name);
+
+            if (wellboreEntity.IsActive.GetValueOrDefault() == isActive)
+                return;
+
+            Logger.DebugFormat("Updating wellbore isActive for uid '{0}' and name '{1}'.", wellboreEntity.Uid,
+                wellboreEntity.Name);
 
             wellboreEntity.IsActive = isActive;
             Transaction.Attach(MongoDbAction.Update, DbCollectionName, wellboreEntity.ToBsonDocument(), uri);
             Transaction.Save();
-            ReplaceEntity(wellboreEntity, uri);           
+            ReplaceEntity(wellboreEntity, uri);
         }
     }
 }
