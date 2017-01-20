@@ -21,11 +21,8 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using Energistics.Datatypes;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using PDS.Framework;
-using PDS.Witsml.Server.Data.Channels;
-using PDS.Witsml.Server.Data.Transactions;
 
 namespace PDS.Witsml.Server.Data.GrowingObjects
 {
@@ -64,21 +61,16 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
             {
                 growingObject = new DbGrowingObject()
                 {
-                    //Uid = Guid.NewGuid().ToString(),
                     Uri = uri,
                     ObjectType = uri.ObjectType,
                     WellboreUri = wellboreUri,
                     LastAppendDateTime = lastAppendDateTime
                 };
 
-                //Transaction.Attach(MongoDbAction.Add, DbCollectionName, growingObject.ToBsonDocument(), uri);
-                //Transaction.Save();
                 InsertEntity(growingObject);
             }
             else
             {
-                //Transaction.Attach(MongoDbAction.Update, DbCollectionName, growingObject.ToBsonDocument(), uri);
-                //Transaction.Save();
                 growingObject.LastAppendDateTime = lastAppendDateTime;
                 ReplaceEntity(growingObject, uri);
             }
