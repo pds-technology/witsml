@@ -293,7 +293,7 @@ namespace PDS.Witsml.Server.Data.Channels
                         if (transaction != null)
                         {
                             var chunk = new ChannelDataChunk { Uid = dc.Uid };
-                            transaction.Attach(MongoDbAction.Add, DbCollectionName, IdPropertyName, chunk.ToBsonDocument());
+                            transaction.Attach(MongoDbAction.Add, DbCollectionName, IdPropertyName, chunk.ToBsonDocument(), new EtpUri(dc.Uid));
                         }
 
                         UpdateMongoFile(dc);
@@ -303,7 +303,7 @@ namespace PDS.Witsml.Server.Data.Channels
 
                     if (dc.Indices != null)
                     {
-                        transaction?.Attach(MongoDbAction.Update, DbCollectionName, IdPropertyName, dc.ToBsonDocument());
+                        transaction?.Attach(MongoDbAction.Update, DbCollectionName, IdPropertyName, dc.ToBsonDocument(), new EtpUri(dc.Uid));
 
                         var filter = Builders<ChannelDataChunk>.Filter;
                         var update = Builders<ChannelDataChunk>.Update;
