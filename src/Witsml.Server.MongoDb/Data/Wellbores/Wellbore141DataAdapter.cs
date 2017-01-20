@@ -53,10 +53,13 @@ namespace PDS.Witsml.Server.Data.Wellbores
 
             Logger.DebugFormat("Updating wellbore isActive for uid '{0}' and name '{1}'.", wellboreEntity.Uid, wellboreEntity.Name);
 
-            wellboreEntity.IsActive = isActive;
             Transaction.Attach(MongoDbAction.Update, DbCollectionName, IdPropertyName, wellboreEntity.ToBsonDocument(), uri);
             Transaction.Save();
-            ReplaceEntity(wellboreEntity, uri);
+
+            var filter = MongoDbUtility.GetEntityFilter<Wellbore>(uri);
+            var wellboreUpdate = MongoDbUtility.BuildUpdate<Wellbore>(null, "IsActive", isActive);
+            var mongoUpdate = new MongoDbUpdate<Wellbore>(Container, GetCollection(), null);
+            mongoUpdate.UpdateFields(filter, wellboreUpdate);
         }
     }
 }
