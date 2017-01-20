@@ -16,10 +16,12 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using System.ComponentModel.Composition;
 using System.Threading.Tasks;
 using log4net;
 using PDS.Framework;
+using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.GrowingObjects;
 
 namespace PDS.Witsml.Server.Jobs
@@ -31,6 +33,8 @@ namespace PDS.Witsml.Server.Jobs
     public class ObjectGrowingManager
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ObjectGrowingManager));
+        private static readonly int _changeDetectionPeriod = WitsmlSettings.ChangeDetectionPeriod;
+        private static readonly int _logGrowingTimeoutPeriod = WitsmlSettings.LogGrowingTimeoutPeriod;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ObjectGrowingManager" /> class.
@@ -66,8 +70,9 @@ namespace PDS.Witsml.Server.Jobs
         /// <returns></returns>
         public async Task Start()
         {
-            _log.Debug("Starting Object Growing");
-            await Task.Delay(1000);
+            _log.Debug("Starting Object Growing Expiration Job");
+            GrowingObjectDataProvider.ExpireGrowingObjects("log", DateTime.UtcNow.AddSeconds(-1 * _logGrowingTimeoutPeriod));
+            await Task.Delay(_changeDetectionPeriod * 1000);           
         }
     }
 }
