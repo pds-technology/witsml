@@ -135,6 +135,25 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Set growing timeout period for growing object type in the capServer instance.
+        /// </summary>
+        /// <param name="capServer">The capServer instance.</param>
+        /// <param name="objectType">The object type.</param>
+        /// <param name="seconds">The growing timeout period in seconds.</param>
+        public static void SetGrowingTimeoutPeriod(this Witsml141.CapServer capServer, string objectType, int seconds)
+        {
+            var growingTimeoutPeriod = new Witsml141Schemas.GrowingTimeoutPeriod(seconds)
+            {
+                DataObject = objectType
+            };
+
+            if (capServer.GrowingTimeoutPeriod == null)
+                capServer.GrowingTimeoutPeriod = new List<Witsml141Schemas.GrowingTimeoutPeriod> { growingTimeoutPeriod };
+            else
+                capServer.GrowingTimeoutPeriod.Add(growingTimeoutPeriod);
+        }
+
+        /// <summary>
         /// Updates the dTimCreation and dTimLastChange properties in common data.
         /// </summary>
         /// <param name="commonData">The common data.</param>
