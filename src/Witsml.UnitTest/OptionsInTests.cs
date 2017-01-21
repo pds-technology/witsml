@@ -59,6 +59,16 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
+        public void OptionsIn_Parse_Duplicate_Keys_Returns_Single_Item()
+        {
+            var actual = OptionsIn.Parse("returnElements=all;returnElements=all");
+            Assert.IsNotNull(actual);
+            Assert.AreEqual(1, actual.Count);
+            Assert.AreEqual("returnElements", actual.Keys.Single());
+            Assert.AreEqual("all", actual.Values.Single());
+        }
+
+        [TestMethod]
         public void OptionsIn_GetValue_Returns_Default_Value()
         {
             var returnElementsAll = OptionsIn.Parse("returnElements=all");
