@@ -156,7 +156,7 @@ namespace PDS.Witsml.Data.Logs
         /// <returns></returns>
         public ChannelIndex CreateDateTimeIndex()
         {
-            return CreateChannelIndex(ChannelIndexType.datetime, IndexDirection.increasing, "TIME", UnitOfMeasure.s, "MSL");
+            return CreateChannelIndex(ChannelIndexType.datetime, IndexDirection.increasing, "TIME", UnitOfMeasure.us, "MSL");
         }
 
         /// <summary>

@@ -16,7 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
 using Energistics.DataAccess.WITSML200.ReferenceData;
 using PDS.Framework;
 
@@ -36,10 +35,30 @@ namespace PDS.Witsml
         /// Gets the unit.
         /// </summary>
         /// <param name="uom">The uom.</param>
-        /// <returns>The original uom if not null or empty; value none if otherwise</returns>
+        /// <returns>The original uom if not null or empty; otherwise, a value of "none"</returns>
         public static string GetUnit(string uom)
         {
             return !string.IsNullOrWhiteSpace(uom) ? uom : None;
+        }
+
+        /// <summary>
+        /// Gets the unit.
+        /// </summary>
+        /// <param name="uom">The uom.</param>
+        /// <returns>The unit of measure enumeration name.</returns>
+        public static string GetUnit(UnitOfMeasure uom)
+        {
+            return uom.GetName();
+        }
+
+        /// <summary>
+        /// Gets the unit.
+        /// </summary>
+        /// <param name="uom">The uom.</param>
+        /// <returns>The unit of measure enumeration name if not null; otherwise, a value of "none"</returns>
+        public static string GetUnit(UnitOfMeasure? uom)
+        {
+            return uom.HasValue ? GetUnit(uom.Value) : None;
         }
 
         /// <summary>
@@ -49,7 +68,7 @@ namespace PDS.Witsml
         /// <returns>The UnitOfMeasure if not null or empty; value null if otherwise</returns>
         public static UnitOfMeasure? GetUnitOfMeasure(string uom)
         {
-            return string.IsNullOrWhiteSpace(uom) ? null : (UnitOfMeasure?)typeof(UnitOfMeasure).ParseEnum(uom);
+            return (UnitOfMeasure?) typeof(UnitOfMeasure).ParseEnum(uom);
         }
     }
 }

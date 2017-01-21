@@ -44,6 +44,22 @@ namespace PDS.Witsml
         }
 
         [TestMethod]
+        public void Extensions_GetUnit_Returns_Original_UnitOfMeasure()
+        {
+            var nullUom = default(UnitOfMeasure?);
+            var result = Units.GetUnit(nullUom);
+
+            Assert.IsFalse(string.IsNullOrWhiteSpace(result));
+            Assert.AreEqual(Units.None, result);
+
+            var uom = UnitOfMeasure.mh;
+            result = Units.GetUnit(uom);
+
+            Assert.IsFalse(string.IsNullOrWhiteSpace(result));
+            Assert.AreEqual("m/h", result);
+        }
+
+        [TestMethod]
         public void Extensions_GetUnitOfMeasure_Returns_UnitOfMeasure()
         {
             var uom = string.Empty;

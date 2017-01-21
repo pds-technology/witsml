@@ -154,16 +154,42 @@ namespace PDS.Framework
         /// </returns>
         public static string GetDescription(this Enum value)
         {
-            var enumType = value.GetType();
-            var fieldInfo = enumType.GetField(Enum.GetName(enumType, value));
-
-            var attribute = fieldInfo?.GetCustomAttributes(typeof(DescriptionAttribute), true)
-                .Cast<DescriptionAttribute>()
-                .FirstOrDefault();
+            var attribute = value.GetAttribute<DescriptionAttribute>();
 
             return attribute != null
                 ? attribute.Description
                 : value.ToString();
+        }
+
+        /// <summary>
+        /// Gets the name for the specified enumeration member.
+        /// </summary>
+        /// <param name="value">The enumeration value.</param>
+        /// <returns>
+        /// The name from the <see cref="XmlEnumAttribute"/> when available;
+        /// otherwise, the value's ToString() representation.
+        /// </returns>
+        public static string GetName(this Enum value)
+        {
+            var attribute = value.GetAttribute<XmlEnumAttribute>();
+
+            return attribute != null
+                ? attribute.Name
+                : value.ToString();
+        }
+
+        /// <summary>
+        /// Gets the custom attribute defined for the specified enumeration member.
+        /// </summary>
+        /// <typeparam name="TAttribute">The type of the attribute.</typeparam>
+        /// <param name="value">The enumeration value.</param>
+        /// <returns>The defined attribute, or null.</returns>
+        public static TAttribute GetAttribute<TAttribute>(this Enum value) where TAttribute : Attribute
+        {
+            var enumType = value.GetType();
+            var fieldInfo = enumType.GetField(Enum.GetName(enumType, value));
+
+            return fieldInfo?.GetCustomAttribute<TAttribute>(true);
         }
 
         /// <summary>
@@ -174,6 +200,8 @@ namespace PDS.Framework
         /// <returns></returns>
         public static object ParseEnum(this Type enumType, string enumValue)
         {
+            if (string.IsNullOrWhiteSpace(enumValue)) return null;
+
             if (Enum.IsDefined(enumType, enumValue))
             {
                 return Enum.Parse(enumType, enumValue);
