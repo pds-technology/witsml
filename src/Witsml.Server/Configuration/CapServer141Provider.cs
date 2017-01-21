@@ -69,8 +69,14 @@ namespace PDS.Witsml.Server.Configuration
 
             if (request.Function == Functions.GetFromStore)
             {
-                ValidateKeywords(optionsIn, OptionsIn.ReturnElements.Keyword, OptionsIn.RequestObjectSelectionCapability.Keyword, OptionsIn.RequestPrivateGroupOnly.Keyword, 
-                                 OptionsIn.CompressionMethod.Keyword, OptionsIn.MaxReturnNodes.Keyword, OptionsIn.RequestLatestValues.Keyword);
+                ValidateKeywords(optionsIn,
+                    OptionsIn.ReturnElements.Keyword,
+                    OptionsIn.MaxReturnNodes.Keyword,
+                    OptionsIn.RequestLatestValues.Keyword,
+                    OptionsIn.RequestPrivateGroupOnly.Keyword,
+                    OptionsIn.RequestObjectSelectionCapability.Keyword,
+                    OptionsIn.CompressionMethod.Keyword,
+                    OptionsIn.DataVersion.Keyword);
                 ValidateRequestMaxReturnNodes(optionsIn);
                 ValidateRequestRequestLatestValue(optionsIn);
                 ValidateRequestObjectSelectionCapability(optionsIn, request.ObjectType, document);
@@ -80,21 +86,21 @@ namespace PDS.Witsml.Server.Configuration
             }
             else if (request.Function == Functions.AddToStore)
             {
-                ValidateKeywords(optionsIn, OptionsIn.CompressionMethod.Keyword);
+                ValidateKeywords(optionsIn, OptionsIn.CompressionMethod.Keyword, OptionsIn.DataVersion.Keyword);
                 ValidateCompressionMethod(optionsIn, GetCapServer().CapServer.CompressionMethod);
                 ValidateEmptyRootElement(request.ObjectType, document);
                 ValidateSingleChildElement(request.ObjectType, document);
             }
             else if (request.Function == Functions.UpdateInStore)
             {
-                ValidateKeywords(optionsIn, OptionsIn.CompressionMethod.Keyword);
+                ValidateKeywords(optionsIn, OptionsIn.CompressionMethod.Keyword, OptionsIn.DataVersion.Keyword);
                 ValidateCompressionMethod(optionsIn, GetCapServer().CapServer.CompressionMethod);
                 ValidateEmptyRootElement(request.ObjectType, document);
                 ValidateSingleChildElement(request.ObjectType, document);
             }
             else if (request.Function == Functions.DeleteFromStore)
             {
-                ValidateKeywords(optionsIn, OptionsIn.CascadedDelete.Keyword);
+                ValidateKeywords(optionsIn, OptionsIn.CascadedDelete.Keyword, OptionsIn.DataVersion.Keyword);
                 ValidateCascadedDelete(optionsIn, GetCapServer().CapServer.CascadedDelete.GetValueOrDefault());
                 ValidateEmptyRootElement(request.ObjectType, document);
                 ValidateSingleChildElement(request.ObjectType, document);
