@@ -398,7 +398,8 @@ namespace PDS.Witsml
 
             return options.Split(';')
                 .Select(x => x.Split('='))
-                .ToDictionary(x => x.First(), x => x.Last());
+                .ToLookup(x => x.First(), x => x.Last())
+                .ToDictionary(x => x.Key, x => x.First());
         }
 
         /// <summary>
