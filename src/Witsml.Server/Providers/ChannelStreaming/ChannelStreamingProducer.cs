@@ -522,7 +522,8 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 if (!mnemonics.Contains(channel.ChannelName))
                     continue;
 
-                var value = FormatValue(values[Array.IndexOf(mnemonics, channel.ChannelName)]);
+                var attributes = new List<object>();
+                var value = FormatValue(values[Array.IndexOf(mnemonics, channel.ChannelName)], attributes);
 
                 // Filter null or empty data values
                 if (value == null || string.IsNullOrWhiteSpace($"{value}"))
@@ -533,7 +534,16 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
                 {
                     ChannelId = context.ChannelId,
                     Indexes = indexValues.ToArray(),
-                    ValueAttributes = new DataAttribute[0],
+                    ValueAttributes = attributes
+                        .Select((x, i) => new DataAttribute
+                        {
+                            AttributeId = i,
+                            AttributeValue = new DataValue
+                            {
+                                Item = x
+                            }
+                        })
+                        .ToArray(),
                     Value = new DataValue()
                     {
                         Item = value
@@ -567,7 +577,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             };
         }
 
-        private object FormatValue(object value)
+        private object FormatValue(object value, List<object> attributes)
         {
             if (value is DateTime)
             {
@@ -584,7 +594,12 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             else if (value is JArray)
             {
                 var array = value as JArray;
-                return array.Count > 0 ? array[0].ToString() : null;
+                var list = new List<object>();
+
+                // Handle array values for Channels with PointMetadata
+                attributes.AddRange(array.Skip(1).Select(x => FormatValue(x, list)));
+
+                return FormatValue(array.FirstOrDefault(), list);
             }
 
             return value;
