@@ -16,12 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace PDS.Witsml.Server.Data.Channels
 {
     /// <summary>
     /// Channel200DataAdapterUpdateTests
     /// </summary>
-    public partial class Channel200DataAdapterUpdateTests
+    [TestClass]
+    public partial class Channel200DataAdapterUpdateTests : Channel200TestBase
     {
     }
 }

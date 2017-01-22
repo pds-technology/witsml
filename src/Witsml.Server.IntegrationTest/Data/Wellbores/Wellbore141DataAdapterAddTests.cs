@@ -25,7 +25,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// <summary>
     /// Wellbore141DataAdapter Add tests.
     /// </summary>
-    public partial class Wellbore141DataAdapterAddTests
+    [TestClass]
+    public partial class Wellbore141DataAdapterAddTests : Wellbore141TestBase
     {
         [TestMethod]
         public void Wellbore141DataAdapter_AddToStore_Can_AddWellbore()

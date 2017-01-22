@@ -29,7 +29,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// <summary>
     /// Wellbore141DataAdapter Delete tests.
     /// </summary>
-    public partial class Wellbore141DataAdapterDeleteTests
+    [TestClass]
+    public partial class Wellbore141DataAdapterDeleteTests : Wellbore141TestBase
     {
         [TestMethod]
         public void Wellbore141DataAdapter_DeleteFromStore_Can_Delete_FullWellbore()

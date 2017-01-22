@@ -27,7 +27,8 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Log131DataAdapter Update tests.
     /// </summary>
-    public partial class Log131DataAdapterUpdateTests
+    [TestClass]
+    public partial class Log131DataAdapterUpdateTests : Log131TestBase
     {
         [TestMethod]
         public void Log131DataAdapter_UpdateInStore_AppendLog_Data()

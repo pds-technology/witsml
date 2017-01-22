@@ -32,11 +32,12 @@ namespace PDS.Witsml.Server.Data.ChannelSets
     /// <summary>
     /// ChannelSet200DataAdapter Update tests.
     /// </summary>
-    public partial class ChannelSet200DataAdapterUpdateTests
+    [TestClass]
+    public partial class ChannelSet200DataAdapterUpdateTests : ChannelSet200TestBase
     {
         private IChannelDataProvider _channelDataProvider;
 
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
             _channelDataProvider = DevKit.Container.Resolve<IWitsmlDataAdapter<ChannelSet>>() as IChannelDataProvider;
         }

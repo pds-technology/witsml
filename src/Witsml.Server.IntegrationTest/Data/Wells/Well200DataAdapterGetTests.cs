@@ -23,7 +23,8 @@ namespace PDS.Witsml.Server.Data.Wells
     /// <summary>
     /// Well200DataAdapter Get tests.
     /// </summary>
-    public partial class Well200DataAdapterGetTests
+    [TestClass]
+    public partial class Well200DataAdapterGetTests : Well200TestBase
     {
         //[TestMethod]
         //public void Well200DataAdapter_MethodName_ExpectedBehavior()

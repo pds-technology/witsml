@@ -21,7 +21,8 @@ using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
-    public partial class Trajectory141DataAdapterAddTests
+    [TestClass]
+    public partial class Trajectory141DataAdapterAddTests : Trajectory141TestBase
     {
         [TestMethod]
         public void Trajectory141DataAdapter_AddToStore_AddTrajectory_Header()

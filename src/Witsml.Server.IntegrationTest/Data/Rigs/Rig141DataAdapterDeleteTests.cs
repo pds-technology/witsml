@@ -16,12 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace PDS.Witsml.Server.Data.Rigs
 {
     /// <summary>
     /// Rig141DataAdapterDeleteTests
     /// </summary>
-    public partial class Rig141DataAdapterDeleteTests
+    [TestClass]
+    public partial class Rig141DataAdapterDeleteTests : Rig141TestBase
     {
     }
 }

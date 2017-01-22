@@ -16,12 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace PDS.Witsml.Server.Data.Rigs
 {
     /// <summary>
     /// Rig131DataAdapterGetTests
     /// </summary>
-    public partial class Rig131DataAdapterGetTests
+    [TestClass]
+    public partial class Rig131DataAdapterGetTests : Rig131TestBase
     {
     }
 }

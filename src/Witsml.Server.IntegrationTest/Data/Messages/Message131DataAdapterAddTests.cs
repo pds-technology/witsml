@@ -16,12 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace PDS.Witsml.Server.Data.Messages
 {
     /// <summary>
     /// Message131DataAdapterAddTests
     /// </summary>
-    public partial class Message131DataAdapterAddTests
+    [TestClass]
+    public partial class Message131DataAdapterAddTests : Message131TestBase
     {
     }
 }

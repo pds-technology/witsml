@@ -29,9 +29,10 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Log131DataAdapter Get tests.
     /// </summary>
-    public partial class Log131DataAdapterGetTests
+    [TestClass]
+    public partial class Log131DataAdapterGetTests : Log131TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
             // Sets the depth and time chunk size
             WitsmlSettings.DepthRangeSize = 1000;

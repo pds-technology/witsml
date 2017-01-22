@@ -23,7 +23,8 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Log200DataAdapter Update tests.
     /// </summary>
-    public partial class Log200DataAdapterUpdateTests
+    [TestClass]
+    public partial class Log200DataAdapterUpdateTests : Log200TestBase
     {
         //[TestMethod]
         //public void Log200DataAdapter_MethodName_ExpectedBehavior()

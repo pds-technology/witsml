@@ -20,7 +20,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Server.Data.Trajectories
 {
-    public partial class Trajectory131DataAdapterAddTests
+    [TestClass]
+    public partial class Trajectory131DataAdapterAddTests : Trajectory131TestBase
     {
         [TestMethod]
         public void Trajectory131DataAdapter_AddToStore_AddTrajectory_Header()

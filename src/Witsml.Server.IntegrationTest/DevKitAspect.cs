@@ -388,7 +388,7 @@ namespace PDS.Witsml.Server
             return Store.WMLS_UpdateInStore(request);
         }
 
-        private void SetupParameters<TList, TObject>(List<TObject> entityList, string wmlTypeIn, out string typeIn, out string queryIn) where TList : IEnergisticsCollection
+        public void SetupParameters<TList, TObject>(List<TObject> entityList, string wmlTypeIn, out string typeIn, out string queryIn) where TList : IEnergisticsCollection
         {
             var objectType = ObjectTypes.GetObjectType<TList>();
             var version = ObjectTypes.GetVersion(typeof(TList));

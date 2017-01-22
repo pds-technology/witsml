@@ -24,7 +24,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
-    public partial class Well200DataAdapterAddTests
+    [TestClass]
+    public partial class Well200DataAdapterAddTests : Well200TestBase
     {
         [TestMethod]
         public void Well200DataAdapter_Well_Can_Be_Serialized_To_Xml()

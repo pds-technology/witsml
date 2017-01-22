@@ -23,7 +23,8 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Log200DataAdapter Delete tests.
     /// </summary>
-    public partial class Log200DataAdapterDeleteTests
+    [TestClass]
+    public partial class Log200DataAdapterDeleteTests : Log200TestBase
     {
         //[TestMethod]
         //public void Log200DataAdapter_MethodName_ExpectedBehavior()

@@ -30,7 +30,8 @@ using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
-    public partial class Well141DataAdapterGetTests
+    [TestClass]
+    public partial class Well141DataAdapterGetTests : Well141TestBase
     {
         private static readonly string _inputXmlTemplate =
             "<wells xmlns=\"http://www.witsml.org/schemas/1series\" version=\"1.4.1.1\">" + Environment.NewLine +

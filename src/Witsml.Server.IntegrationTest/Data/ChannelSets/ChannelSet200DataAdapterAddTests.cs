@@ -29,11 +29,12 @@ using PDS.Witsml.Server.Data.Channels;
 
 namespace PDS.Witsml.Server.Data.ChannelSets
 {
-    public partial class ChannelSet200DataAdapterAddTests
+    [TestClass]
+    public partial class ChannelSet200DataAdapterAddTests : ChannelSet200TestBase
     {
         private IChannelDataProvider _channelDataProvider;
 
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
             _channelDataProvider = DevKit.Container.Resolve<IWitsmlDataAdapter<ChannelSet>>() as IChannelDataProvider;
         }

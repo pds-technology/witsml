@@ -16,12 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace PDS.Witsml.Server.Data.Attachments
 {
     /// <summary>
     /// Attachment141DataAdapterDeleteTests
     /// </summary>
-    public partial class Attachment141DataAdapterDeleteTests
+    [TestClass]
+    public partial class Attachment141DataAdapterDeleteTests : Attachment141TestBase
     {
     }
 }

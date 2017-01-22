@@ -28,7 +28,8 @@ namespace PDS.Witsml.Server.Data.Wells
     /// <summary>
     /// Well131DataAdapterGetTests
     /// </summary>
-    public partial class Well131DataAdapterGetTests
+    [TestClass]
+    public partial class Well131DataAdapterGetTests : Well131TestBase
     {
         [TestMethod]
         public void Well131DataAdapter_GetFromStore_Selection_Not_Equal_Comparison_dTimLastChange()
