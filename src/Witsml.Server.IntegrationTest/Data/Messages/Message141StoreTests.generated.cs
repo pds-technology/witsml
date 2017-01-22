@@ -80,5 +80,28 @@ namespace PDS.Witsml.Server.Data.Messages
             DevKit.DeleteAndAssert<MessageList, Message>(Message);
             DevKit.GetAndAssert<MessageList, Message>(Message, isNotNull: false);
         }
+
+        [TestMethod]
+        public void Message141WitsmlStore_GetFromStore_Can_Transform_Message()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<MessageList, Message>(Message);
+
+            string typeIn, queryIn;
+            var query = DevKit.List(DevKit.CreateQuery(Message));
+            DevKit.SetupParameters<MessageList, Message>(query, ObjectTypes.Message, out typeIn, out queryIn);
+
+            var options = OptionsIn.Join(OptionsIn.ReturnElements.All, OptionsIn.DataVersion.Version131);
+            var request = new WMLS_GetFromStoreRequest(typeIn, queryIn, options, null);
+            var response = DevKit.Store.WMLS_GetFromStore(request);
+
+            Assert.IsFalse(string.IsNullOrWhiteSpace(response.XMLout));
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var result = WitsmlParser.Parse(response.XMLout);
+            var version = ObjectTypes.GetVersion(result.Root);
+            Assert.AreEqual(OptionsIn.DataVersion.Version131.Value, version);
+        }
     }
 }

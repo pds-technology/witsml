@@ -80,5 +80,28 @@ namespace PDS.Witsml.Server.Data.Wellbores
             DevKit.DeleteAndAssert<WellboreList, Wellbore>(Wellbore);
             DevKit.GetAndAssert<WellboreList, Wellbore>(Wellbore, isNotNull: false);
         }
+
+        [TestMethod]
+        public void Wellbore141WitsmlStore_GetFromStore_Can_Transform_Wellbore()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+
+            string typeIn, queryIn;
+            var query = DevKit.List(DevKit.CreateQuery(Wellbore));
+            DevKit.SetupParameters<WellboreList, Wellbore>(query, ObjectTypes.Wellbore, out typeIn, out queryIn);
+
+            var options = OptionsIn.Join(OptionsIn.ReturnElements.All, OptionsIn.DataVersion.Version131);
+            var request = new WMLS_GetFromStoreRequest(typeIn, queryIn, options, null);
+            var response = DevKit.Store.WMLS_GetFromStore(request);
+
+            Assert.IsFalse(string.IsNullOrWhiteSpace(response.XMLout));
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var result = WitsmlParser.Parse(response.XMLout);
+            var version = ObjectTypes.GetVersion(result.Root);
+            Assert.AreEqual(OptionsIn.DataVersion.Version131.Value, version);
+        }
     }
 }

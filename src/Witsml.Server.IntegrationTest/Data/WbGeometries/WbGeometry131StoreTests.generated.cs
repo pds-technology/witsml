@@ -83,5 +83,28 @@ namespace PDS.Witsml.Server.Data.WbGeometries
             DevKit.DeleteAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
             DevKit.GetAndAssert<WbGeometryList, WbGeometry>(WbGeometry, isNotNull: false);
         }
+
+        [TestMethod]
+        public void WbGeometry131WitsmlStore_GetFromStore_Can_Transform_WbGeometry()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
+
+            string typeIn, queryIn;
+            var query = DevKit.List(DevKit.CreateQuery(WbGeometry));
+            DevKit.SetupParameters<WbGeometryList, WbGeometry>(query, ObjectTypes.WbGeometry, out typeIn, out queryIn);
+
+            var options = OptionsIn.Join(OptionsIn.ReturnElements.All, OptionsIn.DataVersion.Version141);
+            var request = new WMLS_GetFromStoreRequest(typeIn, queryIn, options, null);
+            var response = DevKit.Store.WMLS_GetFromStore(request);
+
+            Assert.IsFalse(string.IsNullOrWhiteSpace(response.XMLout));
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var result = WitsmlParser.Parse(response.XMLout);
+            var version = ObjectTypes.GetVersion(result.Root);
+            Assert.AreEqual(OptionsIn.DataVersion.Version141.Value, version);
+        }
     }
 }

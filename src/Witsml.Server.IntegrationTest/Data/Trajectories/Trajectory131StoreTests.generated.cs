@@ -80,5 +80,28 @@ namespace PDS.Witsml.Server.Data.Trajectories
             DevKit.DeleteAndAssert<TrajectoryList, Trajectory>(Trajectory);
             DevKit.GetAndAssert<TrajectoryList, Trajectory>(Trajectory, isNotNull: false);
         }
+
+        [TestMethod]
+        public void Trajectory131WitsmlStore_GetFromStore_Can_Transform_Trajectory()
+        {
+            AddParents();
+
+            DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
+
+            string typeIn, queryIn;
+            var query = DevKit.List(DevKit.CreateQuery(Trajectory));
+            DevKit.SetupParameters<TrajectoryList, Trajectory>(query, ObjectTypes.Trajectory, out typeIn, out queryIn);
+
+            var options = OptionsIn.Join(OptionsIn.ReturnElements.All, OptionsIn.DataVersion.Version141, OptionsIn.MaxReturnNodes.Eq(10));
+            var request = new WMLS_GetFromStoreRequest(typeIn, queryIn, options, null);
+            var response = DevKit.Store.WMLS_GetFromStore(request);
+
+            Assert.IsFalse(string.IsNullOrWhiteSpace(response.XMLout));
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var result = WitsmlParser.Parse(response.XMLout);
+            var version = ObjectTypes.GetVersion(result.Root);
+            Assert.AreEqual(OptionsIn.DataVersion.Version141.Value, version);
+        }
     }
 }
