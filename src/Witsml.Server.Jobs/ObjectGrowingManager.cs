@@ -70,9 +70,13 @@ namespace PDS.Witsml.Server.Jobs
         /// <returns></returns>
         public async Task Start()
         {
-            _log.Debug("Starting Object Growing Expiration Job");
-            GrowingObjectDataProvider.ExpireGrowingObjects("log", DateTime.UtcNow.AddSeconds(-1 * _logGrowingTimeoutPeriod));
-            await Task.Delay(_changeDetectionPeriod * 1000);
+            // TODO: Implement a way to pause/restart the job at runtime.
+            while (true)
+            {
+                _log.Debug("Starting Object Growing Expiration Job");
+                ExpireGrowingObjects();
+                await Task.Delay(_changeDetectionPeriod*1000);
+            }
         }
 
         /// <summary>
@@ -81,8 +85,11 @@ namespace PDS.Witsml.Server.Jobs
         /// <returns></returns>
         internal void ExpireGrowingObjects()
         {
-            _log.Debug("Starting Object Growing Expiration Job");
-            GrowingObjectDataProvider.ExpireGrowingObjects(ObjectTypes.Log, DateTime.UtcNow.AddSeconds(-1 * WitsmlSettings.LogGrowingTimeoutPeriod));
+            if (!GrowingObjectDataProvider.IsExpiringGrowingObjects)
+            {
+                GrowingObjectDataProvider.ExpireGrowingObjects(ObjectTypes.Log,
+                    DateTime.UtcNow.AddSeconds(-1*WitsmlSettings.LogGrowingTimeoutPeriod));
+            }
         }
     }
 }

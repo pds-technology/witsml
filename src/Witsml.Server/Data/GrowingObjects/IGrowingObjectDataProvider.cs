@@ -27,6 +27,14 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
     public interface IGrowingObjectDataProvider
     {
         /// <summary>
+        /// Gets a value indicating whether this instance is expiring growing objects.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is expiring growing objects; otherwise, <c>false</c>.
+        /// </value>
+        bool IsExpiringGrowingObjects { get; }
+
+        /// <summary>
         /// Updates the last append date time for a growing object for the specified uri.
         /// </summary>
         /// <param name="uri">The URI.</param>

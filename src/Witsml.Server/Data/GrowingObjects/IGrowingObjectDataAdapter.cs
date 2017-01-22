@@ -21,15 +21,15 @@ using Energistics.Datatypes;
 namespace PDS.Witsml.Server.Data.GrowingObjects
 {
     /// <summary>
-    /// Provides a method API specific to growing object data adapters.
+    /// Defines methods specific to growing object data adapters.
     /// </summary>
     public interface IGrowingObjectDataAdapter
     {
         /// <summary>
-        /// Updates the object growing.
+        /// Updates the objectGrowing flag for a growing object.
         /// </summary>
         /// <param name="uri">The URI.</param>
-        /// <param name="isGrowing">if set to <c>true</c> [is growing].</param>
+        /// <param name="isGrowing">The objectGrowing flag of a growing object is set to this value.</param>
         void UpdateObjectGrowing(EtpUri uri, bool isGrowing);
     }
 }
