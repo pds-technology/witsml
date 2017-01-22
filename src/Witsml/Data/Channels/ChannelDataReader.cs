@@ -352,6 +352,24 @@ namespace PDS.Witsml.Data.Channels
         }
 
         /// <summary>
+        /// Reads the supplied channel data value to resolve any json.net data types to primitive types.
+        /// </summary>
+        /// <param name="value">The channel data value.</param>
+        /// <returns>A single value or a collection of values.</returns>
+        public static object ReadValue(object value)
+        {
+            var jValue = value as JValue;
+            var jArray = value as JArray;
+
+            if (jValue == null && jArray == null)
+                return value;
+
+            return jValue == null
+                ? jArray.Select(ReadValue).ToArray()
+                : jValue.Value;
+        }
+
+        /// <summary>
         /// Closes the <see cref="T:System.Data.IDataReader" /> Object.
         /// </summary>
         public void Close()

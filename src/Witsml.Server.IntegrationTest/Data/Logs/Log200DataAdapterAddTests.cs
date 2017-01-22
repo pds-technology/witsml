@@ -16,7 +16,6 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-using System;
 using System.IO;
 using System.Linq;
 using Energistics.DataAccess;
@@ -109,28 +108,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log200DataAdapter_Log_Can_Be_Added_With_Secondary_Index()
-        {
-            AddParents();
-
-            var mdChannelIndex = DevKit.LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
-            DevKit.InitHeader(Log, LoggingMethod.MWD, mdChannelIndex);
-            var secondaryIndex = DevKit.LogGenerator.CreateDateTimeIndex();
-            var channelSet = Log.ChannelSet.First();
-            channelSet.Index.Add(secondaryIndex);
-            DevKit.CreateMockChannelSetData(channelSet, channelSet.Index);
-
-            File.WriteAllText("TestData/DepthLogWithSecondaryIndex-2.0-Well.xml", WitsmlParser.ToXml(Well));
-            File.WriteAllText("TestData/DepthLogWithSecondaryIndex-2.0-Wellbore.xml", WitsmlParser.ToXml(Wellbore));
-            File.WriteAllText("TestData/DepthLogWithSecondaryIndex-2.0.xml", WitsmlParser.ToXml(Log));
-
-            DevKit.AddAndAssert(Log);
-            var log = DevKit.GetAndAssert(Log);
-            Assert.AreEqual(Log.Citation.Title, log.Citation.Title);
-            Assert.AreEqual(Log.Uuid, log.Uuid);
-        }
-
-        [TestMethod]
         public void Log200DataAdapter_Log_Can_Be_Added_With_Increasing_Log_Data()
         {
             AddParents();
@@ -138,6 +115,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var numDataValue = 20;
             var mdChannelIndex = DevKit.LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
             DevKit.InitHeader(Log, LoggingMethod.MWD, mdChannelIndex);
+
             var secondaryIndex = DevKit.LogGenerator.CreateDateTimeIndex();
             var channelSet = Log.ChannelSet.First();
             channelSet.Index.Add(secondaryIndex);
@@ -150,6 +128,10 @@ namespace PDS.Witsml.Server.Data.Logs
             File.WriteAllText("TestData/DepthLog-2.0.xml", EnergisticsConverter.ObjectToXml(Log));
 
             DevKit.AddAndAssert(Log);
+            var log = DevKit.GetAndAssert(Log);
+
+            Assert.AreEqual(Log.Citation.Title, log.Citation.Title);
+            Assert.AreEqual(Log.Uuid, log.Uuid);
 
             var mnemonics = channelSet.Index.Select(i => i.Mnemonic).Concat(channelSet.Channel.Select(c => c.Mnemonic)).ToList();
             var logData = _channelDataProvider.GetChannelData(channelSet.GetUri(), new Range<double?>(0, null), mnemonics, null);
@@ -161,6 +143,20 @@ namespace PDS.Witsml.Server.Data.Logs
             var end = logData[numDataValue - 1][0][0];
 
             Assert.IsTrue(double.Parse(end.ToString()) > double.Parse(start.ToString()));
+
+            // Check PointMetadata values
+            foreach (var row in logData)
+            {
+                var ropValues = ChannelDataReader.ReadValue(row[1][0]) as object[];
+                var hkldValues = ChannelDataReader.ReadValue(row[1][1]) as object[];
+
+                Assert.IsNull(hkldValues);
+                if (ropValues == null) continue;
+
+                Assert.AreEqual(2, ropValues.Length);
+                Assert.IsTrue(ropValues[0] == null || ropValues[0] is double);
+                Assert.IsTrue(ropValues[1] == null || ropValues[1] is bool);
+            }
         }
 
         [TestMethod]
@@ -170,16 +166,24 @@ namespace PDS.Witsml.Server.Data.Logs
 
             var numDataValue = 20;
             var secondaryIndex = DevKit.LogGenerator.CreateDateTimeIndex();
-
             var mdChannelIndexDecreasing = DevKit.LogGenerator.CreateMeasuredDepthIndex(IndexDirection.decreasing);
             DevKit.InitHeader(Log, LoggingMethod.surface, mdChannelIndexDecreasing);
+
             var channelSet = Log.ChannelSet.First();
             channelSet.Index.Add(secondaryIndex);
 
             // Generate rows of data
             DevKit.LogGenerator.GenerateChannelData(Log.ChannelSet, numDataValue);
+
+            File.WriteAllText("TestData/DecreasingDepthLog-2.0-Well.xml", EnergisticsConverter.ObjectToXml(Well));
+            File.WriteAllText("TestData/DecreasingDepthLog-2.0-Wellbore.xml", EnergisticsConverter.ObjectToXml(Wellbore));
+            File.WriteAllText("TestData/DecreasingDepthLog-2.0.xml", EnergisticsConverter.ObjectToXml(Log));
+
             DevKit.AddAndAssert(Log);
-            var log = DevKit.GetAndAssert(Log);
+           var log = DevKit.GetAndAssert(Log);
+
+            Assert.AreEqual(Log.Citation.Title, log.Citation.Title);
+            Assert.AreEqual(Log.Uuid, log.Uuid);
 
             var mnemonics = channelSet.Index.Select(i => i.Mnemonic).Concat(channelSet.Channel.Select(c => c.Mnemonic)).ToList();
             var logData = _channelDataProvider.GetChannelData(channelSet.GetUri(), new Range<double?>(null, null), mnemonics, null);
@@ -192,6 +196,20 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Test the log is still decreasing
             Assert.IsTrue(double.Parse(end.ToString()) < double.Parse(start.ToString()));
+
+            // Check PointMetadata values
+            foreach (var row in logData)
+            {
+                var ropValues = ChannelDataReader.ReadValue(row[1][0]) as object[];
+                var hkldValues = ChannelDataReader.ReadValue(row[1][1]) as object[];
+
+                Assert.IsNull(hkldValues);
+                if (ropValues == null) continue;
+
+                Assert.AreEqual(2, ropValues.Length);
+                Assert.IsTrue(ropValues[0] == null || ropValues[0] is double);
+                Assert.IsTrue(ropValues[1] == null || ropValues[1] is bool);
+            }
         }
 
         [TestMethod]
@@ -202,6 +220,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var numDataValue = 150;
             var dtChannelIndex = DevKit.LogGenerator.CreateDateTimeIndex();
             DevKit.InitHeader(Log, LoggingMethod.surface, dtChannelIndex);
+
             var secondaryIndex = DevKit.LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
             var channelSet = Log.ChannelSet.First();
             channelSet.Index.Add(secondaryIndex);
@@ -215,6 +234,33 @@ namespace PDS.Witsml.Server.Data.Logs
 
             DevKit.AddAndAssert(Log);
             var log = DevKit.GetAndAssert(Log);
+
+            Assert.AreEqual(Log.Citation.Title, log.Citation.Title);
+            Assert.AreEqual(Log.Uuid, log.Uuid);
+        }
+
+        [TestMethod]
+        public void Log200DataAdapter_Log_Can_Be_Added_With_Secondary_Index()
+        {
+            AddParents();
+
+            var mdChannelIndex = DevKit.LogGenerator.CreateMeasuredDepthIndex(IndexDirection.increasing);
+            DevKit.InitHeader(Log, LoggingMethod.MWD, mdChannelIndex);
+
+            var secondaryIndex = DevKit.LogGenerator.CreateDateTimeIndex();
+            var channelSet = Log.ChannelSet.First();
+            channelSet.Index.Add(secondaryIndex);
+
+            // Generate mock data
+            DevKit.CreateMockChannelSetData(channelSet, channelSet.Index);
+
+            File.WriteAllText("TestData/DepthLogWithSecondaryIndex-2.0-Well.xml", WitsmlParser.ToXml(Well));
+            File.WriteAllText("TestData/DepthLogWithSecondaryIndex-2.0-Wellbore.xml", WitsmlParser.ToXml(Wellbore));
+            File.WriteAllText("TestData/DepthLogWithSecondaryIndex-2.0.xml", WitsmlParser.ToXml(Log));
+
+            DevKit.AddAndAssert(Log);
+            var log = DevKit.GetAndAssert(Log);
+
             Assert.AreEqual(Log.Citation.Title, log.Citation.Title);
             Assert.AreEqual(Log.Uuid, log.Uuid);
         }

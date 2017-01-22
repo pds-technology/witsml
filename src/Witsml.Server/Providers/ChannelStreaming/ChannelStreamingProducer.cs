@@ -27,8 +27,8 @@ using Energistics.Datatypes;
 using Energistics.Datatypes.ChannelData;
 using Energistics.Protocol;
 using Energistics.Protocol.ChannelStreaming;
-using Newtonsoft.Json.Linq;
 using PDS.Framework;
+using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data.Channels;
 
@@ -579,27 +579,29 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
 
         private object FormatValue(object value, List<object> attributes)
         {
+            value = ChannelDataReader.ReadValue(value);
+            var data = value as object[];
+
+            if (data == null)
+            {
+                return FormatValue(value);
+            }
+
+            // Separate PointMetadata values
+            attributes.AddRange(data.Skip(1).Select(FormatValue));
+
+            return FormatValue(data.FirstOrDefault());
+        }
+
+        private object FormatValue(object value)
+        {
             if (value is DateTime)
             {
                 return ((DateTime)value).ToString("o");
             }
-            else if (value is DateTimeOffset)
+            if (value is DateTimeOffset)
             {
                 return ((DateTimeOffset)value).ToString("o");
-            }
-            else if (value is JValue)
-            {
-                return ((JValue)value).Value;
-            }
-            else if (value is JArray)
-            {
-                var array = value as JArray;
-                var list = new List<object>();
-
-                // Handle array values for Channels with PointMetadata
-                attributes.AddRange(array.Skip(1).Select(x => FormatValue(x, list)));
-
-                return FormatValue(array.FirstOrDefault(), list);
             }
 
             return value;

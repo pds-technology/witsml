@@ -443,7 +443,7 @@ namespace PDS.Witsml.Data.Logs
             bool setToNull = (random.Next() % 5 == 0);
             if (setToNull && !isChannelValue)
             {
-                return string.Empty;
+                return "null";
             }
 
             switch (etpDataType)
@@ -482,7 +482,7 @@ namespace PDS.Witsml.Data.Logs
                     }
                 case EtpDataType.vector:
                     {
-                        column = "(1.1, 1.2, 1.3)";
+                        column = "[1.1, 1.2, 1.3]";
                         break;
                     }
                 default:
