@@ -45,6 +45,19 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
             
         }
 
+        private bool _isExpiringGrowingObjects = false;
+
+        /// <summary>
+        /// Gets a value indicating whether this instance is expiring growing objects.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance is expiring growing objects; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsExpiringGrowingObjects
+        {
+            get { return _isExpiringGrowingObjects; }             
+        }
+
         /// <summary>
         /// Growings the object append.
         /// </summary>
@@ -86,32 +99,41 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         /// <exception cref="System.NotImplementedException"></exception>
         public void ExpireGrowingObjects(string objectType, DateTime expiredDateTime)
         {
-            // Get dbGrowingObject for object type that are expired.
-            var dataByVersion = GetExpiredGrowingObjects(objectType, expiredDateTime)
-                .Select(x => new {Uri = new EtpUri(x.Uri), DataObject = x})
-                .GroupBy(g => g.Uri.Version);
-
-            foreach (var group in dataByVersion)
+            try
             {
-                var objectName = new ObjectName(objectType, group.Key);
-                var dataAdapter = Container.Resolve<IGrowingObjectDataAdapter>(objectName);
+                _isExpiringGrowingObjects = true;
 
-                foreach (var item in group)
+                // Get dbGrowingObject for object type that are expired.
+                var dataByVersion = GetExpiredGrowingObjects(objectType, expiredDateTime)
+                    .Select(x => new {Uri = new EtpUri(x.Uri), DataObject = x})
+                    .GroupBy(g => g.Uri.Version);
+
+                foreach (var group in dataByVersion)
                 {
-                    using (var transaction = GetTransaction())
+                    var objectName = new ObjectName(objectType, group.Key);
+                    var dataAdapter = Container.Resolve<IGrowingObjectDataAdapter>(objectName);
+
+                    foreach (var item in group)
                     {
-                        transaction.SetContext(item.Uri);
+                        using (var transaction = GetTransaction())
+                        {
+                            transaction.SetContext(item.Uri);
 
-                        // Set expired growing object to objectGrowing = false;
-                        dataAdapter.UpdateObjectGrowing(item.Uri, false);
+                            // Set expired growing object to objectGrowing = false;
+                            dataAdapter.UpdateObjectGrowing(item.Uri, false);
 
-                        // Delete the dbGrowingObject record
-                        DeleteEntity(item.Uri);
+                            // Delete the dbGrowingObject record
+                            DeleteEntity(item.Uri);
 
-                        // Commit transaction
-                        transaction.Commit();
+                            // Commit transaction
+                            transaction.Commit();
+                        }
                     }
                 }
+            }
+            finally
+            {
+                _isExpiringGrowingObjects = false;
             }
         }
 
