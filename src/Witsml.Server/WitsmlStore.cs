@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.ServiceModel.Web;
+using Energistics.DataAccess;
 using log4net;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
@@ -147,9 +148,7 @@ namespace PDS.Witsml.Server
 
                 var response = new WMLS_GetFromStoreResponse(
                     (short)result.Code,
-                    result.Results != null
-                        ? WitsmlParser.ToXml(result.Results)
-                        : string.Empty,
+                    GetXmlOut(request, result.Results),
                     result.Message);
 
                 _log.Debug(response.ToLogMessage());
@@ -325,6 +324,30 @@ namespace PDS.Witsml.Server
             }
 
             return new WMLS_GetBaseMsgResponse(message);
+        }
+
+        /// <summary>
+        /// Converts a data object collection to XML and optionally converts to a requested version.
+        /// </summary>
+        /// <param name="request">The GetFromStore request.</param>
+        /// <param name="collection">The data object collection.</param>
+        /// <returns></returns>
+        private string GetXmlOut(WMLS_GetFromStoreRequest request, IEnergisticsCollection collection)
+        {
+            if (collection == null) return string.Empty;
+
+            var optionsIn = OptionsIn.Parse(request.OptionsIn);
+            string requestedVersion;
+
+            // Attempt transformation if client requested a different version
+            if (optionsIn.TryGetValue(OptionsIn.DataVersion.Keyword, out requestedVersion) &&
+                _capServerMap.ContainsKey(requestedVersion) &&
+                collection.GetVersion() != requestedVersion)
+            {
+                collection = WitsmlParser.Transform(collection, requestedVersion);
+            }
+
+            return WitsmlParser.ToXml(collection);
         }
 
         /// <summary>

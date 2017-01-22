@@ -34,6 +34,19 @@ namespace PDS.Witsml
     public class WitsmlParser : DataObjectNavigator<WitsmlParserContext>
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(WitsmlParser));
+        private static readonly MethodInfo _upgradeMethod;
+        private static readonly MethodInfo _parseMethod;
+
+        /// <summary>
+        /// Initializes the <see cref="WitsmlParser"/> class.
+        /// </summary>
+        static WitsmlParser()
+        {
+            _upgradeMethod = typeof(EnergisticsConverter).GetMethod("UpgradeVersion", BindingFlags.Public | BindingFlags.Static);
+
+            _parseMethod = typeof(WitsmlParser).GetMethods(BindingFlags.Public | BindingFlags.Static)
+                .FirstOrDefault(x => x.Name == "Parse" && x.GetGenericArguments().Any());
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WitsmlParser"/> class.
@@ -41,6 +54,31 @@ namespace PDS.Witsml
         /// <param name="context">The context.</param>
         private WitsmlParser(WitsmlParserContext context) : base(null, context)
         {
+        }
+
+        /// <summary>
+        /// Transforms the supplied data object to the specified version.
+        /// </summary>
+        /// <param name="collection">The data object collection.</param>
+        /// <param name="dataVersion">The data schema version.</param>
+        /// <returns>The transformed data object, if successful; otherwise, the original data object.</returns>
+        public static IEnergisticsCollection Transform(IEnergisticsCollection collection, string dataVersion)
+        {
+            var objectType = ObjectTypes.GetObjectType(collection);
+            var listType = ObjectTypes.GetObjectGroupType(objectType, dataVersion);
+            var converter = _upgradeMethod.MakeGenericMethod(collection.GetType(), listType);
+
+            try
+            {
+                collection = (IEnergisticsCollection)converter.Invoke(null, new object[] { collection });
+                collection.SetVersion(dataVersion);
+            }
+            catch (Exception ex)
+            {
+                _log.Warn($"Unable to convert to data schema version: {dataVersion}", ex);
+            }
+
+            return collection;
         }
 
         /// <summary>
@@ -111,12 +149,9 @@ namespace PDS.Witsml
         /// <exception cref="WitsmlException"></exception>
         public static object Parse(Type type, XElement element, bool removeNaN = true)
         {
-            var method = typeof(WitsmlParser).GetMethods(BindingFlags.Public | BindingFlags.Static)
-                .FirstOrDefault(x => x.Name == "Parse" && x.GetGenericArguments().Any());
-
             try
             {
-                return method?.MakeGenericMethod(type)
+                return _parseMethod?.MakeGenericMethod(type)
                     .Invoke(null, new object[] { element, removeNaN });
             }
             catch (Exception ex)
