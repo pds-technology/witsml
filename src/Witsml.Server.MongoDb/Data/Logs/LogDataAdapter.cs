@@ -124,6 +124,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             foreach (var entity in entities)
             {
+                Logger.Debug($"Getting channel metadata for URI: {entity.GetUri()}");
                 metadata.AddRange(GetChannelMetadataForAnEntity(entity, uris));
             }
 
@@ -138,6 +139,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>A collection of channel data.</returns>
         public IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, Range<double?> range)
         {
+            Logger.Debug($"Getting channel data for URI: {uri}");
             var entity = GetEntity(uri);
             var mnemonics = GetLogHeaderMnemonics(entity);
             var increasing = IsIncreasing(entity);
@@ -157,7 +159,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <returns>A collection of channel data.</returns>
         public List<List<List<object>>> GetChannelData(EtpUri uri, Range<double?> range, List<string> mnemonics, int? requestLatestValues, bool optimizeStart = false)
         {
-
+            Logger.Debug($"Getting channel data for URI: {uri}");
             var entity = GetEntity(uri);
             var queryMnemonics = mnemonics.ToArray();
             var allMnemonics = GetLogHeaderMnemonics(entity);
@@ -217,6 +219,8 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="reader">The update reader.</param>
         public void UpdateChannelData(EtpUri uri, ChannelDataReader reader)
         {
+            Logger.Debug($"Updating channel data for URI: {uri}");
+
             // Capture primary index info when auto-creating data object
             var indexInfo = Exists(uri) ? null : reader.Indices.FirstOrDefault();
             var offset = reader.Indices.Select(x => x.IsTimeIndex).FirstOrDefault()

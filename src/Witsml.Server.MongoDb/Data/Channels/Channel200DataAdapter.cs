@@ -52,6 +52,7 @@ namespace PDS.Witsml.Server.Data.Channels
             var channels = GetChannelsByUris(uris);
             foreach (var channel in channels)
             {
+                Logger.Debug($"Getting channel metadata for URI: {channel.GetUri()}");
                 var indexMetadata = channel.Index
                     .Select(x => ToIndexMetadataRecord(channel, x))
                     .ToList();
