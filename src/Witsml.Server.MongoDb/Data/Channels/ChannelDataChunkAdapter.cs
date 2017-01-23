@@ -172,6 +172,9 @@ namespace PDS.Witsml.Server.Data.Channels
                 var filter = BuildDataFilter(reader.Uri, indexChannel.Mnemonic, existingRange, increasing);
                 var results = GetData(filter, increasing);
 
+                // Backup existing chunks for the transaction
+                AttachChunks(results);
+
                 try
                 {
                     BulkWriteChunks(
@@ -198,6 +201,14 @@ namespace PDS.Witsml.Server.Data.Channels
             }
         }
 
+        private void AttachChunks(List<ChannelDataChunk> chunks)
+        {
+            chunks.ForEach(cdc =>
+                Transaction?.Attach(MongoDbAction.Update, DbCollectionName, IdPropertyName, cdc.ToBsonDocument(),
+                    new EtpUri(cdc.Uid)));
+            Transaction?.Save();
+        }
+
         /// <summary>
         /// Deletes all <see cref="ChannelDataChunk"/> entries for the data object represented by the specified URI.
         /// </summary>
@@ -220,12 +231,12 @@ namespace PDS.Witsml.Server.Data.Channels
         }
 
         /// <summary>
-        /// Partials the delete log data.
+        /// Partially deletes log data for specified channels and ranges.
         /// </summary>
         /// <param name="uri">The URI.</param>
         /// <param name="indexCurve">The index curve.</param>
-        /// <param name="increasing">if set to <c>true</c> [increasing].</param>
-        /// <param name="isTimeLog">if set to <c>true</c> [is time log].</param>
+        /// <param name="increasing">if set to <c>true</c> if the log data is increasing.</param>
+        /// <param name="isTimeLog">if set to <c>true</c> the log is time indexed.</param>
         /// <param name="deletedChannels">The deleted channels.</param>
         /// <param name="ranges">The ranges.</param>
         /// <param name="updatedRanges">The updated ranges.</param>
@@ -236,6 +247,9 @@ namespace PDS.Witsml.Server.Data.Channels
                 // Get DataChannelChunk list from database for the log
                 var filter = BuildDataFilter(uri, indexCurve, new Range<double?>(null, null), increasing);
                 var results = GetData(filter, increasing);
+
+                // Backup existing chunks for the transaction
+                AttachChunks(results);
 
                 var channelRanges = new Dictionary<string, List<double?>>();
                 foreach (var range in ranges)
@@ -303,8 +317,6 @@ namespace PDS.Witsml.Server.Data.Channels
 
                     if (dc.Indices != null)
                     {
-                        transaction?.Attach(MongoDbAction.Update, DbCollectionName, IdPropertyName, dc.ToBsonDocument(), new EtpUri(dc.Uid));
-
                         var filter = Builders<ChannelDataChunk>.Filter;
                         var update = Builders<ChannelDataChunk>.Update;
 
