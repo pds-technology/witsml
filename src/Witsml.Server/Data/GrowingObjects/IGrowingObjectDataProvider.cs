@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using Energistics.Datatypes;
 
 namespace PDS.Witsml.Server.Data.GrowingObjects
@@ -40,6 +41,13 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         /// </summary>
         /// <param name="objectType">Type of the groing object.</param>
         /// <param name="expiredDateTime">The expired date time.</param>
-        void ExpireGrowingObjects(string objectType, DateTime expiredDateTime);
+        /// <returns>A list of wellbore uri of expired growing objects.</returns>
+        List<string> ExpireGrowingObjects(string objectType, DateTime expiredDateTime);
+
+        /// <summary>
+        /// Sets isActive flag of wellbore to false if none of its children are growing
+        /// </summary>
+        /// <param name="wellboreUris">The list of wellbore uris to check for growing children objects.</param>
+        void ExpireWellboreObjects(List<string> wellboreUris);
     }
 }

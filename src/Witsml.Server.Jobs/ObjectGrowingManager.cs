@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Threading.Tasks;
 using log4net;
@@ -91,11 +92,24 @@ namespace PDS.Witsml.Server.Jobs
         /// <returns></returns>
         internal void ExpireGrowingObjects()
         {
+            var wellboreUris = new List<string>();
             try
             {
                 _isExpiringGrowingObjects = true;
-                GrowingObjectDataProvider.ExpireGrowingObjects(ObjectTypes.Log,
-                    DateTime.UtcNow.AddSeconds(-1*WitsmlSettings.LogGrowingTimeoutPeriod));
+
+                var logWellboreUris = GrowingObjectDataProvider.ExpireGrowingObjects(ObjectTypes.Log,
+                    DateTime.UtcNow.AddSeconds(-1 * WitsmlSettings.LogGrowingTimeoutPeriod));
+                wellboreUris.AddRange(logWellboreUris);
+
+                //var trajectoryWellboreUris = GrowingObjectDataProvider.ExpireGrowingObjects(ObjectTypes.Trajectory,
+                //    DateTime.UtcNow.AddSeconds(-1 * WitsmlSettings.TrajectoryGrowingTimeoutPeriod));
+                //wellboreUris.AddRange(trajectoryWellboreUris);
+
+                //var mudLogWellboreUris = GrowingObjectDataProvider.ExpireGrowingObjects(ObjectTypes.MudLog,
+                //    DateTime.UtcNow.AddSeconds(-1 * WitsmlSettings.MudLogGrowingTimeoutPeriod));
+                //wellboreUris.AddRange(mudLogWellboreUris);
+
+                GrowingObjectDataProvider.ExpireWellboreObjects(wellboreUris);
             }
             finally
             {
