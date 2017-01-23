@@ -125,5 +125,8 @@
     <Setting Name="TrajectoryGrowingTimeoutPeriod" Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">3600</Value>
     </Setting>
+    <Setting Name="IsUserAuthorizationEnabled" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

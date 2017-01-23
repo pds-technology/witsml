@@ -28,6 +28,7 @@ using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data;
 using PDS.Witsml.Server.Logging;
 using PDS.Witsml.Server.Properties;
+using PDS.Witsml.Server.Security;
 
 namespace PDS.Witsml.Server
 {
@@ -61,6 +62,13 @@ namespace PDS.Witsml.Server
         public IContainer Container { get; set; }
 
         /// <summary>
+        /// Gets or sets the user authorization provider.
+        /// </summary>
+        /// <value>The user authorization provider.</value>
+        [Import]
+        public IUserAuthorizationProvider UserAuthorizationProvider { get; set; }
+
+        /// <summary>
         /// Gets or sets the cap server providers.
         /// </summary>
         /// <value>The cap server providers.</value>
@@ -74,10 +82,13 @@ namespace PDS.Witsml.Server
         /// <returns>A comma-separated list of Data Schema Versions (without spaces) that the server supports.</returns>
         public WMLS_GetVersionResponse WMLS_GetVersion(WMLS_GetVersionRequest request)
         {
+            WitsmlOperationContext.Current.Request = request.ToContext();
             EnsureCapServerProviders();
 
             _log.Debug(WebOperationContext.Current.ToLogMessage());
             _log.Debug(request.ToLogMessage());
+
+            UserAuthorizationProvider.CheckAccess();
 
             var response = new WMLS_GetVersionResponse(_supportedVersions);
             _log.Debug(response.ToLogMessage());
@@ -93,10 +104,13 @@ namespace PDS.Witsml.Server
         {
             try
             {
+                WitsmlOperationContext.Current.Request = request.ToContext();
                 EnsureCapServerProviders();
 
                 _log.Debug(WebOperationContext.Current.ToLogMessage());
                 _log.Debug(request.ToLogMessage());
+
+                UserAuthorizationProvider.CheckAccess();
 
                 var options = OptionsIn.Parse(request.OptionsIn);
                 var version = OptionsIn.GetValue(options, new OptionsIn.DataVersion(_defaultDataSchemaVersion));
@@ -141,6 +155,7 @@ namespace PDS.Witsml.Server
                 _log.Debug(WebOperationContext.Current.ToLogMessage());
                 _log.Debug(context);
 
+                UserAuthorizationProvider.CheckAccess();
                 WitsmlValidator.ValidateRequest(CapServerProviders, out version);
 
                 var dataProvider = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
@@ -187,6 +202,7 @@ namespace PDS.Witsml.Server
                 _log.Debug(WebOperationContext.Current.ToLogMessage());
                 _log.Debug(context);
 
+                UserAuthorizationProvider.CheckAccess();
                 WitsmlValidator.ValidateRequest(CapServerProviders, out version);
 
                 var dataWriter = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
@@ -228,6 +244,7 @@ namespace PDS.Witsml.Server
                 _log.Debug(WebOperationContext.Current.ToLogMessage());
                 _log.Debug(context);
 
+                UserAuthorizationProvider.CheckAccess();
                 WitsmlValidator.ValidateRequest(CapServerProviders, out version);
 
                 var dataWriter = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
@@ -269,6 +286,7 @@ namespace PDS.Witsml.Server
                 _log.Debug(WebOperationContext.Current.ToLogMessage());
                 _log.Debug(context);
 
+                UserAuthorizationProvider.CheckAccess();
                 WitsmlValidator.ValidateRequest(CapServerProviders, out version);
 
                 var dataWriter = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
@@ -302,7 +320,10 @@ namespace PDS.Witsml.Server
         /// <returns>The fixed descriptive message text associated with the Return Value.</returns>
         public WMLS_GetBaseMsgResponse WMLS_GetBaseMsg(WMLS_GetBaseMsgRequest request)
         {
+            WitsmlOperationContext.Current.Request = request.ToContext();
             _log.Debug(WebOperationContext.Current.ToLogMessage());
+
+            UserAuthorizationProvider.CheckAccess();
             string message;
 
             if (request.ReturnValueIn == (short)ErrorCodes.Unset)

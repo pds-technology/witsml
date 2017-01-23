@@ -392,5 +392,14 @@ namespace PDS.Witsml.Server.Properties {
                 return ((int)(this["TrajectoryGrowingTimeoutPeriod"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsUserAuthorizationEnabled {
+            get {
+                return ((bool)(this["IsUserAuthorizationEnabled"]));
+            }
+        }
     }
 }

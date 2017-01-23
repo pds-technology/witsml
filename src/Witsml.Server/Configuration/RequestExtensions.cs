@@ -26,6 +26,36 @@ namespace PDS.Witsml.Server.Configuration
         /// <summary>
         /// Converts a specific request object into a common structure.
         /// </summary>
+        /// <param name="request">The GetVersion request object.</param>
+        /// <returns>The request context instance.</returns>
+        public static RequestContext ToContext(this WMLS_GetVersionRequest request)
+        {
+            return new RequestContext(
+                function: Functions.GetVersion,
+                objectType: null,
+                xml: null,
+                options: null,
+                capabilities: null);
+        }
+
+        /// <summary>
+        /// Converts a specific request object into a common structure.
+        /// </summary>
+        /// <param name="request">The GetCap request object.</param>
+        /// <returns>The request context instance.</returns>
+        public static RequestContext ToContext(this WMLS_GetCapRequest request)
+        {
+            return new RequestContext(
+                function: Functions.GetCap,
+                objectType: null,
+                xml: null,
+                options: request.OptionsIn,
+                capabilities: null);
+        }
+
+        /// <summary>
+        /// Converts a specific request object into a common structure.
+        /// </summary>
         /// <param name="request">The GetFromStore request object.</param>
         /// <returns>The request context instance.</returns>
         public static RequestContext ToContext(this WMLS_GetFromStoreRequest request)
@@ -81,6 +111,21 @@ namespace PDS.Witsml.Server.Configuration
                 xml: request.QueryIn,
                 options: request.OptionsIn,
                 capabilities: request.CapabilitiesIn);
+        }
+
+        /// <summary>
+        /// Converts a specific request object into a common structure.
+        /// </summary>
+        /// <param name="request">The GetBaseMsg request object.</param>
+        /// <returns>The request context instance.</returns>
+        public static RequestContext ToContext(this WMLS_GetBaseMsgRequest request)
+        {
+            return new RequestContext(
+                function: Functions.GetBaseMsg,
+                objectType: null,
+                xml: null,
+                options: null,
+                capabilities: null);
         }
     }
 }
