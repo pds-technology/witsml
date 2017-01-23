@@ -40,6 +40,7 @@ namespace PDS.Witsml.Server.Data.Logs
     public partial class Log141DataAdapterUpdateTests : Log141TestBase
     {
         private const int MicrosecondsPerSecond = 1000000;
+        private const int GrowingTimeoutPeriod = 10;
         private string _dataDir;
 
         protected override void OnTestSetUp()
@@ -2009,7 +2010,7 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        public void Log141DataAdapter_UpdateInStore_AppendLog_Data_ExpireGrowingObjects_Job()
+        public void Log141DataAdapter_UpdateInStore_AppendLog_Data_ExpireGrowingObjects()
         {
             Log.StartIndex = new GenericMeasure(5, "m");
             AddLogWithData(Log, LogIndexType.measureddepth, 10);
@@ -2027,9 +2028,8 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault());
             Assert.IsTrue(wellboreResult.IsActive.GetValueOrDefault());
 
-            var growingTimeoutPeriod = 30;
-            WitsmlSettings.LogGrowingTimeoutPeriod = growingTimeoutPeriod;
-            Thread.Sleep((growingTimeoutPeriod + 10) * 1000);
+            WitsmlSettings.LogGrowingTimeoutPeriod = GrowingTimeoutPeriod;
+            Thread.Sleep(GrowingTimeoutPeriod * 1000);
 
             DevKit.Container.Resolve<ObjectGrowingManager>().ExpireGrowingObjects();
 
@@ -2037,7 +2037,77 @@ namespace PDS.Witsml.Server.Data.Logs
             wellboreResult = DevKit.GetAndAssert(Wellbore);
 
             Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
-            //Assert.IsFalse(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");            
+            Assert.IsFalse(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_UpdateInStore_AppendLogs_ExpireGrowingObjects()
+        {
+            //Add log
+            Log.StartIndex = new GenericMeasure(5, "m");
+            AddLogWithData(Log, LogIndexType.measureddepth, 10);
+
+            var addedLog = DevKit.GetAndAssert(Log);
+            Assert.IsFalse(addedLog.ObjectGrowing.GetValueOrDefault());
+            Assert.IsFalse(Wellbore.IsActive.GetValueOrDefault());
+
+            var update = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure(17, "m"), 6);
+            DevKit.UpdateAndAssert(update);
+
+            var resultLog = DevKit.GetAndAssert(Log);
+            var wellboreResult = DevKit.GetAndAssert(Wellbore);
+
+            Assert.IsTrue(resultLog.ObjectGrowing.GetValueOrDefault());
+            Assert.IsTrue(wellboreResult.IsActive.GetValueOrDefault());
+
+            //Change settings and wait
+            WitsmlSettings.LogGrowingTimeoutPeriod = GrowingTimeoutPeriod;
+            Thread.Sleep(GrowingTimeoutPeriod * 1000);
+
+            //Add log2
+            var log2 = new Log { Uid = DevKit.Uid(), Name = DevKit.Name("Log2"), UidWell = Well.Uid, NameWell = Well.Name, UidWellbore = Wellbore.Uid, NameWellbore = Wellbore.Name };
+            Log.StartIndex = new GenericMeasure(5, "m");
+            DevKit.InitHeader(log2, LogIndexType.measureddepth);
+            DevKit.InitDataMany(log2, DevKit.Mnemonics(log2), DevKit.Units(log2), 5);
+            DevKit.AddAndAssert(log2);
+
+            var addedLog2 = DevKit.GetAndAssert(log2);
+            Assert.IsFalse(addedLog2.ObjectGrowing.GetValueOrDefault());
+            Assert.IsTrue(wellboreResult.IsActive.GetValueOrDefault());
+
+            var updateLog2 = CreateLogDataUpdate(log2, LogIndexType.measureddepth, new GenericMeasure(10, "m"), 6);
+            DevKit.UpdateAndAssert(updateLog2);
+
+            var resultLog2 = DevKit.GetAndAssert(log2);
+            wellboreResult = DevKit.GetAndAssert(Wellbore);
+
+            Assert.IsTrue(resultLog2.ObjectGrowing.GetValueOrDefault());
+            Assert.IsTrue(wellboreResult.IsActive.GetValueOrDefault());
+
+            //Expire objects
+            DevKit.Container.Resolve<ObjectGrowingManager>().ExpireGrowingObjects();
+
+            resultLog = DevKit.GetAndAssert(Log);
+            resultLog2 = DevKit.GetAndAssert(log2);
+            wellboreResult = DevKit.GetAndAssert(Wellbore);
+
+            Assert.IsFalse(resultLog.ObjectGrowing.GetValueOrDefault(), "Log ObjectGrowing");
+            Assert.IsTrue(resultLog2.ObjectGrowing.GetValueOrDefault(), "Log2 ObjectGrowing");
+            Assert.IsTrue(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+
+            WitsmlSettings.LogGrowingTimeoutPeriod = GrowingTimeoutPeriod;
+            Thread.Sleep(GrowingTimeoutPeriod * 1000);
+
+            //Expire objects again
+            DevKit.Container.Resolve<ObjectGrowingManager>().ExpireGrowingObjects();
+
+            resultLog = DevKit.GetAndAssert(Log);
+            resultLog2 = DevKit.GetAndAssert(log2);
+            wellboreResult = DevKit.GetAndAssert(Wellbore);
+
+            Assert.IsFalse(resultLog.ObjectGrowing.GetValueOrDefault(), "Log ObjectGrowing");
+            Assert.IsFalse(resultLog2.ObjectGrowing.GetValueOrDefault(), "Log2 ObjectGrowing");
+            Assert.IsFalse(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
         }
 
         #region Helper Functions
