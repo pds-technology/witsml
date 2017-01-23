@@ -77,6 +77,10 @@ namespace PDS.Witsml.Server.Jobs
                 {
                     ExpireGrowingObjects();
                 }
+                else
+                {
+                    _log.Warn("Previous Object Growing Expiration Job Is Still Running");
+                }
                 await Task.Delay(WitsmlSettings.ChangeDetectionPeriod * 1000);
             }
         }
