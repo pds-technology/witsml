@@ -16,12 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace PDS.Witsml.Server.Data.WbGeometries
 {
     /// <summary>
     /// WbGeometry131DataAdapterDeleteTests
     /// </summary>
-    public partial class WbGeometry131DataAdapterDeleteTests
+    [TestClass]
+    public partial class WbGeometry131DataAdapterDeleteTests : WbGeometry131TestBase
     {
     }
 }

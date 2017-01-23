@@ -28,7 +28,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
     /// <summary>
     /// Trajectory131DataAdapterDeleteTests
     /// </summary>
-    public partial class Trajectory131DataAdapterDeleteTests
+    [TestClass]
+    public partial class Trajectory131DataAdapterDeleteTests : Trajectory131TestBase
     {
 
         [TestMethod]

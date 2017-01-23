@@ -23,7 +23,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// <summary>
     /// Wellbore200DataAdapter Delete tests.
     /// </summary>
-    public partial class Wellbore200DataAdapterDeleteTests
+    [TestClass]
+    public partial class Wellbore200DataAdapterDeleteTests : Wellbore200TestBase
     {
         //[TestMethod]
         //public void Wellbore200DataAdapter_MethodName_ExpectedBehavior()

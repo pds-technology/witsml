@@ -16,12 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace PDS.Witsml.Server.Data.Attachments
 {
     /// <summary>
     /// Attachment141DataAdapterGetTests
     /// </summary>
-    public partial class Attachment141DataAdapterGetTests
+    [TestClass]
+    public partial class Attachment141DataAdapterGetTests : Attachment141TestBase
     {
     }
 }

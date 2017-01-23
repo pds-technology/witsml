@@ -16,12 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace PDS.Witsml.Server.Data.Trajectories
 {
     /// <summary>
     /// Trajectory200DataAdapterAddTests
     /// </summary>
-    public partial class Trajectory200DataAdapterAddTests
+    [TestClass]
+    public partial class Trajectory200DataAdapterAddTests : Trajectory200TestBase
     {
     }
 }

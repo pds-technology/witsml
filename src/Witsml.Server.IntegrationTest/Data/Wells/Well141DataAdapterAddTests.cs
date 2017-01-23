@@ -27,7 +27,8 @@ using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Wells
 {
-    public partial class Well141DataAdapterAddTests
+    [TestClass]
+    public partial class Well141DataAdapterAddTests : Well141TestBase
     {
         [TestMethod]
         public void Well141DataAdapter_AddToStore_Can_AddWell()

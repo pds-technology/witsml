@@ -29,7 +29,8 @@ using PDS.Witsml.Server.Configuration;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
-    public partial class Log141DataAdapterGetTests
+    [TestClass]
+    public partial class Log141DataAdapterGetTests : Log141TestBase
     {
         [TestMethod]
         public void Log141DataAdapter_GetFromStore_Can_Be_Retrieved_With_All_Data()

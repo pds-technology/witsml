@@ -30,7 +30,8 @@ namespace PDS.Witsml.Server.Data.Wells
     /// <summary>
     /// Well141DataAdapter Delete tests.
     /// </summary>
-    public partial class Well141DataAdapterDeleteTests
+    [TestClass]
+    public partial class Well141DataAdapterDeleteTests : Well141TestBase
     {
         [TestMethod]
         public void Well141DataAdapter_DeleteFromStore_Can_Delete_FullWell()

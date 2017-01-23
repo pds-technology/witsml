@@ -29,11 +29,12 @@ using PDS.Witsml.Server.Data.Channels;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
-    public partial class Log131DataAdapterAddTests
+    [TestClass]
+    public partial class Log131DataAdapterAddTests : Log131TestBase
     {
         private IChannelDataProvider _channelDataProvider;
 
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
             _channelDataProvider = DevKit.Container.Resolve<IChannelDataProvider>(ObjectNames.Log131);
         }

@@ -30,7 +30,8 @@ namespace PDS.Witsml.Server.Data.Wells
     /// <summary>
     /// Well141DataAdapter Update tests.
     /// </summary>
-    public partial class Well141DataAdapterUpdateTests
+    [TestClass]
+    public partial class Well141DataAdapterUpdateTests : Well141TestBase
     {
         [TestMethod]
         public void Well141DataAdapter_UpdateInStore_Update_A_List_Element()

@@ -16,12 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace PDS.Witsml.Server.Data.Wells
 {
     /// <summary>
     /// Well131DataAdapterDeleteTests
     /// </summary>
-    public partial class Well131DataAdapterDeleteTests
+    [TestClass]
+    public partial class Well131DataAdapterDeleteTests : Well131TestBase
     {
     }
 }

@@ -25,9 +25,10 @@ namespace PDS.Witsml.Server.Data.Attachments
     /// <summary>
     /// Attachment141DataAdapterUpdateTests
     /// </summary>
-    public partial class Attachment141DataAdapterUpdateTests
+    [TestClass]
+    public partial class Attachment141DataAdapterUpdateTests : Attachment141TestBase
     {
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
             Attachment.FileName = "image.png";
             Attachment.FileType = "image/png";

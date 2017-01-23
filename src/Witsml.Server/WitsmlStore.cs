@@ -335,6 +335,7 @@ namespace PDS.Witsml.Server
         private string GetXmlOut(WMLS_GetFromStoreRequest request, IEnergisticsCollection collection)
         {
             if (collection == null) return string.Empty;
+            EnsureCapServerProviders();
 
             var optionsIn = OptionsIn.Parse(request.OptionsIn);
             string requestedVersion;
@@ -344,6 +345,7 @@ namespace PDS.Witsml.Server
                 _capServerMap.ContainsKey(requestedVersion) &&
                 collection.GetVersion() != requestedVersion)
             {
+                _log.Debug($"Transforming XMLOut to data schema version {requestedVersion}");
                 collection = WitsmlParser.Transform(collection, requestedVersion);
             }
 

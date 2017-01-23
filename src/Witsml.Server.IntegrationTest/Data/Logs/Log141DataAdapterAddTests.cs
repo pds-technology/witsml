@@ -28,7 +28,8 @@ using PDS.Witsml.Data.Channels;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
-    public partial class Log141DataAdapterAddTests
+    [TestClass]
+    public partial class Log141DataAdapterAddTests : Log141TestBase
     {
         private const int MicrosecondsPerSecond = 1000000;
 

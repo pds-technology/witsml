@@ -25,12 +25,13 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// <summary>
     /// Wellbore141DataAdapter Get tests.
     /// </summary>
-    public partial class Wellbore141DataAdapterGetTests
+    [TestClass]
+    public partial class Wellbore141DataAdapterGetTests : Wellbore141TestBase
     {
         private Wellbore _wellboreQuery;
         private Wellbore _wellboreQueryUid;
 
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
             Wellbore.Number = "123";
             Wellbore.NumGovt = "Gov 123";

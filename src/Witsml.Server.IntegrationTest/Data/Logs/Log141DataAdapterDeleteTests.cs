@@ -30,7 +30,8 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Log141DataAdapter Delete tests.
     /// </summary>
-    public partial class Log141DataAdapterDeleteTests
+    [TestClass]
+    public partial class Log141DataAdapterDeleteTests : Log141TestBase
     {
         [TestMethod]
         public void Log141DataAdapter_DeleteFromStore_Can_DeleteLog_With_No_Data()

@@ -16,12 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace PDS.Witsml.Server.Data.Wellbores
 {
     /// <summary>
     /// Wellbore131DataAdapterGetTests
     /// </summary>
-    public partial class Wellbore131DataAdapterGetTests
+    [TestClass]
+    public partial class Wellbore131DataAdapterGetTests : Wellbore131TestBase
     {
     }
 }

@@ -36,12 +36,13 @@ namespace PDS.Witsml.Server.Data.Logs
     /// <summary>
     /// Log141DataAdapter Update tests.
     /// </summary>
-    public partial class Log141DataAdapterUpdateTests
+    [TestClass]
+    public partial class Log141DataAdapterUpdateTests : Log141TestBase
     {
         private const int MicrosecondsPerSecond = 1000000;
         private string _dataDir;
 
-        partial void BeforeEachTest()
+        protected override void OnTestSetUp()
         {
             // Test data directory
             _dataDir = new DirectoryInfo(@".\TestData").FullName;

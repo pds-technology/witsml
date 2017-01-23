@@ -21,7 +21,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
-    public partial class Wellbore200DataAdapterAddTests
+    [TestClass]
+    public partial class Wellbore200DataAdapterAddTests : Wellbore200TestBase
     {
         [TestMethod]
         public void Wellbore200DataAdapter_Can_Add_And_Get_Wellbore()

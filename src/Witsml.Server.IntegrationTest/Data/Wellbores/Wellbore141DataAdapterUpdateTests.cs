@@ -29,7 +29,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// <summary>
     /// Wellbore141DataAdapter Update tests.
     /// </summary>
-    public partial class Wellbore141DataAdapterUpdateTests
+    [TestClass]
+    public partial class Wellbore141DataAdapterUpdateTests : Wellbore141TestBase
     {
         [TestMethod, Description("Tests updating an existing element with UpdateInStore")]
         public void Wellbore141DataAdapter_UpdateInStore_Update_A_List_Element()

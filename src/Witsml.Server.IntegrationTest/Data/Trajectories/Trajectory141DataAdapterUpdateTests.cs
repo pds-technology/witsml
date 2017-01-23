@@ -30,7 +30,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
     /// <summary>
     /// Trajectory141DataAdapterUpdateTests
     /// </summary>
-    public partial class Trajectory141DataAdapterUpdateTests
+    [TestClass]
+    public partial class Trajectory141DataAdapterUpdateTests : Trajectory141TestBase
     {
         [TestMethod]
         public void Trajectory141DataAdapter_UpdateInStore_Update_Trajectory_Header()

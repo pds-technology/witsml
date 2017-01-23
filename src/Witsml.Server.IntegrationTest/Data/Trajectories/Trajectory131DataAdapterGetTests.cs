@@ -29,7 +29,8 @@ namespace PDS.Witsml.Server.Data.Trajectories
     /// <summary>
     /// Trajectory131DataAdapterGetTests
     /// </summary>
-    public partial class Trajectory131DataAdapterGetTests
+    [TestClass]
+    public partial class Trajectory131DataAdapterGetTests : Trajectory131TestBase
     {
         [TestMethod]
         public void Trajectory131DataAdapter_GetFromStore_Can_Retrieve_Header_Return_Elements_All()
