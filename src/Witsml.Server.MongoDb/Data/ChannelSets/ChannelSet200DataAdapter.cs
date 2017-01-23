@@ -99,6 +99,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         /// <returns>A collection of channel data.</returns>
         public IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, Range<double?> range)
         {
+            Logger.Debug($"Getting channel data for URI: {uri}");
             var entity = GetEntity(uri);
             var indexChannel = entity.Index.FirstOrDefault();
             var increasing = indexChannel.IsIncreasing();
@@ -118,6 +119,7 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         /// <returns>A collection of channel data.</returns>
         public List<List<List<object>>> GetChannelData(EtpUri uri, Range<double?> range, List<string> mnemonics, int? requestLatestValues, bool optimizeStart = false)
         {
+            Logger.Debug($"Getting channel data for URI: {uri}");
             List<List<List<object>>> logData;
 
             var entity = GetEntity(uri);
@@ -232,6 +234,8 @@ namespace PDS.Witsml.Server.Data.ChannelSets
         /// <param name="reader">The update reader.</param>
         public void UpdateChannelData(EtpUri uri, ChannelDataReader reader)
         {
+            Logger.Debug($"Updating channel data for URI: {uri}");
+
             // Capture primary index info when auto-creating data object
             var indexInfos = Exists(uri) ? null : reader.Indices;
             var offset = reader.Indices.Take(1).Select(x => x.IsTimeIndex).FirstOrDefault()
