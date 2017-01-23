@@ -17,13 +17,40 @@
 //-----------------------------------------------------------------------
 
 using Energistics.DataAccess.WITSML200;
+using Energistics.Datatypes;
+using MongoDB.Bson;
+using PDS.Witsml.Server.Data.GrowingObjects;
+using PDS.Witsml.Server.Data.Transactions;
 
 namespace PDS.Witsml.Server.Data.Wellbores
 {
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Wellbore" />
     /// </summary>
-    public partial class Wellbore200DataAdapter
+    [Export200(typeof(IWellboreDataAdapter))]
+    public partial class Wellbore200DataAdapter : IWellboreDataAdapter
     {
+        /// <summary>
+        /// Updates the IsActive field of a wellbore.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="isActive">IsActive flag on wellbore is set to the value.</param>
+        public void UpdateIsActive(EtpUri uri, bool isActive)
+        {
+            var wellboreEntity = GetEntity(uri);
+
+            if (wellboreEntity.IsActive.GetValueOrDefault() == isActive)
+                return;
+
+            Logger.DebugFormat("Updating wellbore isActive for uid '{0}' and name '{1}'.", wellboreEntity.Uuid, wellboreEntity.Citation.Title);
+
+            Transaction.Attach(MongoDbAction.Update, DbCollectionName, IdPropertyName, wellboreEntity.ToBsonDocument(), uri);
+            Transaction.Save();
+
+            var filter = MongoDbUtility.GetEntityFilter<Wellbore>(uri);
+            var wellboreUpdate = MongoDbUtility.BuildUpdate<Wellbore>(null, "IsActive", isActive);
+            var mongoUpdate = new MongoDbUpdate<Wellbore>(Container, GetCollection(), null);
+            mongoUpdate.UpdateFields(filter, wellboreUpdate);
+        }
     }
 }
