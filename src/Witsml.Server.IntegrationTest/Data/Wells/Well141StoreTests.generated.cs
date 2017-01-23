@@ -85,8 +85,11 @@ namespace PDS.Witsml.Server.Data.Wells
         public void Well141WitsmlStore_GetFromStore_Can_Transform_Well()
         {
             AddParents();
-
             DevKit.AddAndAssert<WellList, Well>(Well);
+
+            // Re-initialize all capServer providers
+            DevKit.Store.CapServerProviders = null;
+            DevKit.Container.BuildUp(DevKit.Store);
 
             string typeIn, queryIn;
             var query = DevKit.List(DevKit.CreateQuery(Well));

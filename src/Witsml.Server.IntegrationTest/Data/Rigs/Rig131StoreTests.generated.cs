@@ -85,8 +85,11 @@ namespace PDS.Witsml.Server.Data.Rigs
         public void Rig131WitsmlStore_GetFromStore_Can_Transform_Rig()
         {
             AddParents();
-
             DevKit.AddAndAssert<RigList, Rig>(Rig);
+
+            // Re-initialize all capServer providers
+            DevKit.Store.CapServerProviders = null;
+            DevKit.Container.BuildUp(DevKit.Store);
 
             string typeIn, queryIn;
             var query = DevKit.List(DevKit.CreateQuery(Rig));

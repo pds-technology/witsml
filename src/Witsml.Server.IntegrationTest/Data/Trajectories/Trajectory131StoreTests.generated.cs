@@ -85,8 +85,11 @@ namespace PDS.Witsml.Server.Data.Trajectories
         public void Trajectory131WitsmlStore_GetFromStore_Can_Transform_Trajectory()
         {
             AddParents();
-
             DevKit.AddAndAssert<TrajectoryList, Trajectory>(Trajectory);
+
+            // Re-initialize all capServer providers
+            DevKit.Store.CapServerProviders = null;
+            DevKit.Container.BuildUp(DevKit.Store);
 
             string typeIn, queryIn;
             var query = DevKit.List(DevKit.CreateQuery(Trajectory));

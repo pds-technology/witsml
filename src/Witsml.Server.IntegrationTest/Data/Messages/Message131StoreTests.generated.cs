@@ -85,8 +85,11 @@ namespace PDS.Witsml.Server.Data.Messages
         public void Message131WitsmlStore_GetFromStore_Can_Transform_Message()
         {
             AddParents();
-
             DevKit.AddAndAssert<MessageList, Message>(Message);
+
+            // Re-initialize all capServer providers
+            DevKit.Store.CapServerProviders = null;
+            DevKit.Container.BuildUp(DevKit.Store);
 
             string typeIn, queryIn;
             var query = DevKit.List(DevKit.CreateQuery(Message));

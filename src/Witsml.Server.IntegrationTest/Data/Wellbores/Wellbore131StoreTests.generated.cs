@@ -85,8 +85,11 @@ namespace PDS.Witsml.Server.Data.Wellbores
         public void Wellbore131WitsmlStore_GetFromStore_Can_Transform_Wellbore()
         {
             AddParents();
-
             DevKit.AddAndAssert<WellboreList, Wellbore>(Wellbore);
+
+            // Re-initialize all capServer providers
+            DevKit.Store.CapServerProviders = null;
+            DevKit.Container.BuildUp(DevKit.Store);
 
             string typeIn, queryIn;
             var query = DevKit.List(DevKit.CreateQuery(Wellbore));

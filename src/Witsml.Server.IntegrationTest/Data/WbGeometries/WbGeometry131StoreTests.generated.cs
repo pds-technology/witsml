@@ -88,8 +88,11 @@ namespace PDS.Witsml.Server.Data.WbGeometries
         public void WbGeometry131WitsmlStore_GetFromStore_Can_Transform_WbGeometry()
         {
             AddParents();
-
             DevKit.AddAndAssert<WbGeometryList, WbGeometry>(WbGeometry);
+
+            // Re-initialize all capServer providers
+            DevKit.Store.CapServerProviders = null;
+            DevKit.Container.BuildUp(DevKit.Store);
 
             string typeIn, queryIn;
             var query = DevKit.List(DevKit.CreateQuery(WbGeometry));
