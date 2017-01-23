@@ -61,6 +61,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
             foreach (var log in logs)
             {
+                Logger.Debug($"Getting channel metadata for URI: {log.GetUri()}");
                 channelUris.AddRange(log.ChannelSet
                     .Select(x => x.GetUri())
                     .Where(u => !channelUris.Contains(u))
@@ -79,6 +80,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <exception cref="WitsmlException">IChannelDataProvider not configured.</exception>
         public IEnumerable<IChannelDataRecord> GetChannelData(EtpUri uri, Range<double?> range)
         {
+            Logger.Debug($"Getting channel data for URI: {uri}");
             var adapter = ChannelSetDataAdapter as IChannelDataProvider;
 
             if (adapter == null)
