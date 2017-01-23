@@ -158,6 +158,7 @@
     <Compile Include="Data\DataObjectValidatorOfT.cs" />
     <Compile Include="Data\GrowingObjects\IGrowingObjectDataAdapter.cs" />
     <Compile Include="Data\GrowingObjects\IGrowingObjectDataProvider.cs" />
+    <Compile Include="Data\GrowingObjects\IWellboreDataAdapter.cs" />
     <Compile Include="Data\IEtpDataProviderOfT.cs" />
     <Compile Include="Data\IWitsmlDataAdapter.cs" />
     <Compile Include="Data\Logs\Log131DataProvider.generated.cs">
