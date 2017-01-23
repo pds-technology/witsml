@@ -95,7 +95,7 @@ namespace PDS.Witsml.Server.Data.Logs
             var query = DevKit.List(DevKit.CreateQuery(Log));
             DevKit.SetupParameters<LogList, Log>(query, ObjectTypes.Log, out typeIn, out queryIn);
 
-            var options = OptionsIn.Join(OptionsIn.ReturnElements.All, OptionsIn.DataVersion.Version141, OptionsIn.MaxReturnNodes.Eq(10));
+            var options = OptionsIn.Join(OptionsIn.ReturnElements.All, OptionsIn.DataVersion.Version141);
             var request = new WMLS_GetFromStoreRequest(typeIn, queryIn, options, null);
             var response = DevKit.Store.WMLS_GetFromStore(request);
 

@@ -95,7 +95,7 @@ namespace PDS.Witsml.Server.Data.Trajectories
             var query = DevKit.List(DevKit.CreateQuery(Trajectory));
             DevKit.SetupParameters<TrajectoryList, Trajectory>(query, ObjectTypes.Trajectory, out typeIn, out queryIn);
 
-            var options = OptionsIn.Join(OptionsIn.ReturnElements.All, OptionsIn.DataVersion.Version131, OptionsIn.MaxReturnNodes.Eq(10));
+            var options = OptionsIn.Join(OptionsIn.ReturnElements.All, OptionsIn.DataVersion.Version131);
             var request = new WMLS_GetFromStoreRequest(typeIn, queryIn, options, null);
             var response = DevKit.Store.WMLS_GetFromStore(request);
 
