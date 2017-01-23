@@ -33,8 +33,7 @@ namespace PDS.Witsml.Server.Jobs
     public class ObjectGrowingManager
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(ObjectGrowingManager));
-        private static readonly int _changeDetectionPeriod = WitsmlSettings.ChangeDetectionPeriod;
-        private static readonly int _logGrowingTimeoutPeriod = WitsmlSettings.LogGrowingTimeoutPeriod;
+        private static bool _isExpiringGrowingObjects = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ObjectGrowingManager" /> class.
@@ -74,8 +73,11 @@ namespace PDS.Witsml.Server.Jobs
             while (true)
             {
                 _log.Debug("Starting Object Growing Expiration Job");
-                ExpireGrowingObjects();
-                await Task.Delay(_changeDetectionPeriod*1000);
+                if (!_isExpiringGrowingObjects)
+                {
+                    ExpireGrowingObjects();
+                }
+                await Task.Delay(WitsmlSettings.ChangeDetectionPeriod * 1000);
             }
         }
 
@@ -85,10 +87,15 @@ namespace PDS.Witsml.Server.Jobs
         /// <returns></returns>
         internal void ExpireGrowingObjects()
         {
-            if (!GrowingObjectDataProvider.IsExpiringGrowingObjects)
+            try
             {
+                _isExpiringGrowingObjects = true;
                 GrowingObjectDataProvider.ExpireGrowingObjects(ObjectTypes.Log,
                     DateTime.UtcNow.AddSeconds(-1*WitsmlSettings.LogGrowingTimeoutPeriod));
+            }
+            finally
+            {
+                _isExpiringGrowingObjects = false;
             }
         }
     }
