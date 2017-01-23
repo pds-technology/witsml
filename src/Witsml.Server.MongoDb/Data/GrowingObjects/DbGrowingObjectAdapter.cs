@@ -33,6 +33,9 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class DbGrowingObjectAdapter : MongoDbDataAdapter<DbGrowingObject>, IGrowingObjectDataProvider
     {
+        private readonly IWellboreDataAdapter _wellbore141DataAdapter;
+        private readonly IWellboreDataAdapter _wellbore200DataAdapter;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DbGrowingObjectAdapter"/> class.
         /// </summary>
@@ -42,7 +45,8 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         public DbGrowingObjectAdapter(IContainer container, IDatabaseProvider databaseProvider) : 
             base(container, databaseProvider, "dbGrowingObject", ObjectTypes.Uri)
         {
-            
+            _wellbore141DataAdapter = Container.Resolve<IWellboreDataAdapter>(new ObjectName(OptionsIn.DataVersion.Version141.Value));
+            _wellbore200DataAdapter = Container.Resolve<IWellboreDataAdapter>(new ObjectName(OptionsIn.DataVersion.Version200.Value));
         }
 
         /// <summary>
@@ -83,9 +87,11 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         /// </summary>
         /// <param name="objectType">Type of the groing object.</param>
         /// <param name="expiredDateTime">The expired date time.</param>
-        /// <exception cref="System.NotImplementedException"></exception>
-        public void ExpireGrowingObjects(string objectType, DateTime expiredDateTime)
+        /// <returns>A list of wellbore uris of expired growing objects.</returns>
+        public List<string> ExpireGrowingObjects(string objectType, DateTime expiredDateTime)
         {
+            var wellboreUris = new List<string>();
+
             // Get dbGrowingObject for object type that are expired.
             var dataByVersion = GetExpiredGrowingObjects(objectType, expiredDateTime)
                 .Select(x => new { Uri = new EtpUri(x.Uri), DataObject = x })
@@ -103,14 +109,49 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
                         transaction.SetContext(item.Uri);
 
                         // Set expired growing object to objectGrowing = false;
-                        dataAdapter.UpdateObjectGrowing(item.Uri, false);
+                        dataAdapter.UpdateObjectGrowing(item.Uri, false);                        
 
                         // Delete the dbGrowingObject record
                         DeleteEntity(item.Uri);
 
+                        // Add wellbore uri of expired object to the list
+                        if(!wellboreUris.Contains(item.DataObject.WellboreUri))
+                            wellboreUris.Add(item.DataObject.WellboreUri);
+
                         // Commit transaction
                         transaction.Commit();
                     }
+                }
+            }
+
+            return wellboreUris;
+        }
+
+        /// <summary>
+        /// Sets isActive flag of wellbore to false if none of its children are growing
+        /// </summary>
+        /// <param name="wellboreUris">List of wellbore uris of expired growing objects</param>
+        public void ExpireWellboreObjects(List<string> wellboreUris)
+        {
+            //Set wellbore isActive flag to false if none of its children are growing
+            foreach (var uri in wellboreUris)
+            {
+                using (var transaction = GetTransaction())
+                {
+                    var etpUri = new EtpUri(uri);
+
+                    transaction.SetContext(etpUri);
+
+                    //check for other growing objects of wellbore
+                    if (GetActiveWellboreCount(uri) != 0)
+                        continue;
+
+                    if (OptionsIn.DataVersion.Version141.Equals(etpUri.Version))
+                        _wellbore141DataAdapter.UpdateIsActive(etpUri, false);
+                    else if (OptionsIn.DataVersion.Version200.Value.Equals(etpUri.Version))
+                        _wellbore200DataAdapter.UpdateIsActive(etpUri, false);
+
+                    transaction.Commit();
                 }
             }
         }
@@ -134,6 +175,11 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
                 .ToList();
         }
 
+        private long GetActiveWellboreCount(string wellboreUri)
+        {
+            var filter = MongoDbUtility.BuildFilter<DbGrowingObject>("WellboreUri", wellboreUri);
+            return GetCollection().Count(filter);
+        }
 
         /// <summary>
         /// Gets the URI for the specified data object.
