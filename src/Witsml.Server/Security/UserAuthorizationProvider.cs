@@ -28,7 +28,7 @@ namespace PDS.Witsml.Server.Security
     /// <seealso cref="PDS.Witsml.Server.Security.IUserAuthorizationProvider" />
     [Export(typeof(IUserAuthorizationProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
-    public abstract class UserAuthorizationProvider : IUserAuthorizationProvider
+    public class UserAuthorizationProvider : IUserAuthorizationProvider
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(UserAuthorizationProvider));
 
