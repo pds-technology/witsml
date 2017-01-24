@@ -17,10 +17,13 @@
 //-----------------------------------------------------------------------
 
 using System.Linq;
+using System.Threading;
 using Energistics.DataAccess.WITSML131;
 using Energistics.DataAccess.WITSML131.ComponentSchemas;
 using Energistics.DataAccess.WITSML131.ReferenceData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PDS.Witsml.Server.Configuration;
+using PDS.Witsml.Server.Jobs;
 
 namespace PDS.Witsml.Server.Data.Logs
 {
@@ -30,13 +33,15 @@ namespace PDS.Witsml.Server.Data.Logs
     [TestClass]
     public partial class Log131DataAdapterUpdateTests : Log131TestBase
     {
+        private const int GrowingTimeoutPeriod = 10;
+
         [TestMethod]
         public void Log131DataAdapter_UpdateInStore_AppendLog_Data()
         {
             Log.StartIndex = new GenericMeasure(5, "m");
             AddLogWithData(Log, LogIndexType.measureddepth, 10);
 
-            var update = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure(17, "m"), 6);          
+            var update = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure(17, "m"), 6);
             UpdateLogData(update);
 
             var result = GetLog(Log);
@@ -136,7 +141,7 @@ namespace PDS.Witsml.Server.Data.Logs
             // Make sure there are 3 curves
             var lciUids = Log.LogCurveInfo.Select(l => l.Uid).ToArray();
             Assert.AreEqual(3, lciUids.Length);
-           
+
             var logAdded = GetLog(Log);
             Assert.IsNotNull(logAdded);
             Assert.AreEqual(15, logAdded.StartIndex.Value);
@@ -193,6 +198,64 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsNotNull(curve3);
             Assert.AreEqual(15, curve3.MinIndex.Value);
             Assert.AreEqual(23, curve3.MaxIndex.Value);
+        }
+
+        [TestMethod]
+        public void Log131DataAdapter_UpdateInStore_AppendLog_Data_Set_ObjectGrowing_And_IsActive_State()
+        {
+            Log.StartIndex = new GenericMeasure(5, "m");
+            AddLogWithData(Log, LogIndexType.measureddepth, 10);
+
+            var addedLog = DevKit.GetAndAssert(Log);
+            Assert.IsFalse(addedLog.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+
+            var update = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure(17, "m"), 6);
+            DevKit.UpdateAndAssert(update);
+
+            var result = DevKit.GetAndAssert(Log);
+            Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+        }
+
+        [TestMethod]
+        [Ignore]
+        public void Log131DataAdapter_UpdateInStore_UpdateLog_Unchanged_ObjectGrowing_And_IsActive_State()
+        {
+            Log.StartIndex = new GenericMeasure(5, "m");
+            AddLogWithData(Log, LogIndexType.measureddepth, 10);
+
+            var addedLog = DevKit.GetAndAssert(Log);
+            Assert.IsFalse(addedLog.ObjectGrowing.GetValueOrDefault());
+
+            // Update
+            var updateLog = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure(8, "m"), 3, 0.2);
+            DevKit.UpdateAndAssert(updateLog);
+
+            var result = DevKit.GetAndAssert(updateLog);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+        }
+
+        [TestMethod]
+        public void Log131DataAdapter_UpdateInStore_AppendLog_Data_ExpireGrowingObjects()
+        {
+            Log.StartIndex = new GenericMeasure(5, "m");
+            AddLogWithData(Log, LogIndexType.measureddepth, 10);
+
+            var addedLog = DevKit.GetAndAssert(Log);
+            Assert.IsFalse(addedLog.ObjectGrowing.GetValueOrDefault());
+
+            var update = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure(17, "m"), 6);
+            DevKit.UpdateAndAssert(update);
+
+            var result = DevKit.GetAndAssert(Log);
+            Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault());
+
+            WitsmlSettings.LogGrowingTimeoutPeriod = GrowingTimeoutPeriod;
+            Thread.Sleep(GrowingTimeoutPeriod * 1000);
+
+            DevKit.Container.Resolve<ObjectGrowingManager>().ExpireGrowingObjects();
+
+            result = DevKit.GetAndAssert(Log);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
         }
 
         #region Helper Functions
