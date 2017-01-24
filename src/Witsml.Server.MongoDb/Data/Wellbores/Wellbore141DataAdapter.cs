@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using Energistics.DataAccess.WITSML141;
 using Energistics.Datatypes;
 using MongoDB.Bson;
+using PDS.Witsml.Server.Data.GrowingObjects;
 using PDS.Witsml.Server.Data.Transactions;
 
 namespace PDS.Witsml.Server.Data.Wellbores
@@ -27,7 +28,8 @@ namespace PDS.Witsml.Server.Data.Wellbores
     /// <summary>
     /// Data adapter that encapsulates CRUD functionality for <see cref="Wellbore" />.
     /// </summary>
-    public partial class Wellbore141DataAdapter
+    [Export141(typeof(IWellboreDataAdapter))]
+    public partial class Wellbore141DataAdapter : IWellboreDataAdapter
     {
         /// <summary>
         /// Gets a list of the element names to ignore during an update.
@@ -43,7 +45,7 @@ namespace PDS.Witsml.Server.Data.Wellbores
         /// Updates the IsActive field of a wellbore.
         /// </summary>
         /// <param name="uri">The URI.</param>
-        /// <param name="isActive">if set to <c>true</c> [is active].</param>
+        /// <param name="isActive">IsActive flag on wellbore is set to the value.</param>
         public void UpdateIsActive(EtpUri uri, bool isActive)
         {
             var wellboreEntity = GetEntity(uri);
