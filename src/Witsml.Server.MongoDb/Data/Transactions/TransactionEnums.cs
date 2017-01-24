@@ -28,7 +28,9 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// <summary>An update operation.</summary>
         Update,
         /// <summary>A delete operation.</summary>
-        Delete
+        Delete,
+        /// <summary></summary>
+        Context
     }
 
     /// <summary>

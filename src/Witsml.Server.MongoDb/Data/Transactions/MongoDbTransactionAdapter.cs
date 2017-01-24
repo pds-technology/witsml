@@ -41,7 +41,7 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// <param name="container">The composition container.</param>
         /// <param name="databaseProvider">The database provider.</param>
         [ImportingConstructor]
-        public MongoDbTransactionAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, MongoDbTransaction, ObjectTypes.Uid)
+        public MongoDbTransactionAdapter(IContainer container, IDatabaseProvider databaseProvider) : base(container, databaseProvider, MongoDbTransaction, ObjectTypes.Uri)
         {
             Logger.Debug("Creating instance.");
         }

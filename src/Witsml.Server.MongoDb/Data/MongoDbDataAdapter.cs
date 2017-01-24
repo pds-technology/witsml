@@ -91,7 +91,7 @@ namespace PDS.Witsml.Server.Data
         /// <returns>The data object instance.</returns>
         public override T Get(EtpUri uri, params string[] fields)
         {
-            return GetEntity(uri);
+            return GetEntity(uri, fields);
         }
 
         /// <summary>

@@ -39,7 +39,6 @@ namespace PDS.Witsml.Server.Data.Transactions
     public class MongoTransaction : WitsmlTransaction
     {
         private static readonly ILog _log = LogManager.GetLogger(typeof(MongoTransaction));
-
         internal static readonly int DefaultInterval = Settings.Default.DefaultTransactionWaitInterval;
         internal static readonly int MaximumAttempt = Settings.Default.DefaultMaximumTransactionAttempt;
 
@@ -90,11 +89,7 @@ namespace PDS.Witsml.Server.Data.Transactions
         {
             var root = WitsmlOperationContext.Current.Transaction;
             base.SetContext(uri);
-
-            if (root == null || !root.Uri.Equals(uri))
-            {
-                Wait(uri);
-            }
+            Wait(uri);
         }
 
         /// <summary>
@@ -232,15 +227,40 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// <param name="uri">The uri of the data object.</param>
         private void Wait(EtpUri uri)
         {
+            var message = $"Transaction Id: {Id}; URI: {uri}; Thread Id: {Thread.CurrentThread.ManagedThreadId};";
+            object locker = string.Intern($"{GetType().FullName}-{uri.Uri}");
             var count = MaximumAttempt;
+            
+            var transaction = Adapter.Get(uri);
+            if (transaction == null)
+            {
+                _log.Debug($"{message} waiting for lock");
+                lock (locker)
+                {
+                    _log.Debug($"{message} acquired lock");
+                    transaction = Adapter.Get(uri);
+                    if (transaction == null)
+                    {
+                        _log.Debug($"{message} created context");
+                        Attach(MongoDbAction.Context, "dbTransaction", "Uri", null, uri);
+                        Save();
+                        return;
+                    }
+                }
+            }
+
+            var root = (MongoTransaction)WitsmlOperationContext.Current.Transaction;
+            if (transaction.TransactionId.Equals(root.Id)) return;
 
             while (Adapter.Exists(uri))
             {
+                _log.Debug($"{message} waiting");
+
                 Thread.Sleep(DefaultInterval);
                 count--;
 
                 if (count > 0) continue;
-                var message = $"Transaction deadlock on data object with URI: {uri}";
+                message = $"Transaction deadlock on data object with URI: {uri}";
                 throw new WitsmlException(ErrorCodes.ErrorTransactionDeadlock, message);
             }
         }
