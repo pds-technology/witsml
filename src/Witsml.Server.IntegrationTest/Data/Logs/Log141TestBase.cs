@@ -16,6 +16,8 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.Linq;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
 using Energistics.DataAccess.WITSML141.ReferenceData;
 using PDS.Witsml.Server.Configuration;
@@ -47,6 +49,19 @@ namespace PDS.Witsml.Server.Data.Logs
             WitsmlSettings.LogMaxDataNodesDelete = DevKitAspect.DefaultLogMaxDataNodesDelete;
             WitsmlSettings.LogGrowingTimeoutPeriod = DevKitAspect.DefaultLogGrowingTimeoutPeriod;
             WitsmlOperationContext.Current = null;
+        }
+
+        public static List<LogData> GenerateSparseLogData(double indexValue, string indexCurve, List<LogCurveInfo> logCurveInfos)
+        {
+            return logCurveInfos.Select((t, i) => new LogData()
+            {
+                MnemonicList = $"{indexCurve},{t.Mnemonic.Value}",
+                UnitList = $"m,{t.Unit}",
+                Data = new List<string>()
+                {
+                    $"{indexValue - i},{i}"
+                }
+            }).ToList();
         }
     }
 }

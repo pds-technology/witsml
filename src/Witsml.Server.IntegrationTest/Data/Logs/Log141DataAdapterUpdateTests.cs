@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Energistics.DataAccess;
 using Energistics.DataAccess.WITSML141;
 using Energistics.DataAccess.WITSML141.ComponentSchemas;
@@ -2108,6 +2109,90 @@ namespace PDS.Witsml.Server.Data.Logs
             Assert.IsFalse(resultLog.ObjectGrowing.GetValueOrDefault(), "Log ObjectGrowing");
             Assert.IsFalse(resultLog2.ObjectGrowing.GetValueOrDefault(), "Log2 ObjectGrowing");
             Assert.IsFalse(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+        }
+
+        [TestMethod]
+        public async Task Log141DataAdapter_UpdateInStore_Sparsely_Update_Log_Curves_With_Multiple_Threads()
+        {
+            AddAnEmptyLogWithFourCurves();
+
+            var iterations = 10;
+            var indexValue = 10.0;
+            var logCount = 10;
+            var logs = new List<Log>();
+
+            for (var i = 0; i < logCount; i++)
+            {
+                var clone = new Log()
+                {
+                    Uid = Log.Uid,
+                    UidWell = Log.UidWell,
+                    UidWellbore = Log.UidWellbore,
+                    Name = Log.Name,
+                    NameWell = Log.NameWell,
+                    NameWellbore = Log.NameWellbore,
+                    IndexCurve = Log.IndexCurve,
+                    IndexType = Log.IndexType,
+                    LogCurveInfo = Log.LogCurveInfo
+                };
+                clone.Uid = $"Log-{i}";
+                logs.Add(clone);
+            }
+
+            logs.ForEach(x =>
+            {
+                DevKit.AddAndAssert(x);
+                x.LogCurveInfo = new List<LogCurveInfo>();
+            });
+
+            var counter = 0;
+            while (counter < iterations)
+            {
+                indexValue += 0.1;
+                var tasks = new List<Task>();
+                var value = indexValue;
+
+                logs.ForEach((x, i) =>
+                {
+                    var indexCurve = Log.IndexCurve;
+                    var mnemonics = Log.LogCurveInfo.Where(c => c.Mnemonic.Value != indexCurve).ToList();
+                    var logDatas = GenerateSparseLogData(value, indexCurve, mnemonics);
+
+                    x.LogData = new List<LogData>() { logDatas[0], logDatas[1] };
+                    tasks.Add(new Task(() => DevKit.UpdateAndAssert(x)));
+
+                    var clone = new Log
+                    {
+                        Uid = x.Uid,
+                        UidWell = x.UidWell,
+                        UidWellbore = x.UidWellbore,
+                        LogData = new List<LogData>() { logDatas[0], logDatas[2] }
+                    };
+                    tasks.Add(new Task(() => DevKit.UpdateAndAssert(clone)));
+                });
+
+                tasks.ForEach(x => x.Start());
+                await Task.WhenAll(tasks);
+                counter++;
+            }
+
+            // Assert all data was written
+            logs.ForEach(x =>
+            {
+                var result = DevKit.GetAndAssert(x);
+                Assert.IsNotNull(result);
+                Assert.AreEqual(4, result.LogCurveInfo.Count);
+                Assert.AreEqual(1, result.LogData.Count);
+                Assert.AreEqual(30, result.LogData[0].Data.Count);
+                Assert.AreEqual(8.1, result.LogCurveInfo[0].MinIndex.Value);
+                Assert.AreEqual(11, result.LogCurveInfo[0].MaxIndex.Value);
+                Assert.AreEqual(10.1, result.LogCurveInfo[1].MinIndex.Value);
+                Assert.AreEqual(11, result.LogCurveInfo[1].MaxIndex.Value);
+                Assert.AreEqual(9.1, result.LogCurveInfo[2].MinIndex.Value);
+                Assert.AreEqual(10, result.LogCurveInfo[2].MaxIndex.Value);
+                Assert.AreEqual(8.1, result.LogCurveInfo[3].MinIndex.Value);
+                Assert.AreEqual(9, result.LogCurveInfo[3].MaxIndex.Value);
+            });
         }
 
         #region Helper Functions
