@@ -22,6 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{28
 		External\GlobalAssemblyInfo.cs = External\GlobalAssemblyInfo.cs
 		..\NOTICE.txt = ..\NOTICE.txt
 		..\README.md = ..\README.md
+		External\UpdatePackageHintPaths.ps1 = External\UpdatePackageHintPaths.ps1
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Witsml.Server.Jobs", "Witsml.Server.Jobs\Witsml.Server.Jobs.csproj", "{006F1A29-952B-4264-8E91-0D445F74B183}"
