@@ -385,6 +385,7 @@ namespace PDS.Witsml.Server.Data.Logs
             TimeSpan? offset = null;
             var isTimeLog = IsTimeLog(current, true);
             var updateMnemonics = new List<string>();
+            var allUpdateMnemonics = new List<string>();
             var indexUnit = string.Empty;
             var updateIndexRanges = false;
             var checkOffset = true;
@@ -417,17 +418,18 @@ namespace PDS.Witsml.Server.Data.Logs
                 }
 
                 // Update index range for each logData element
-                rangeExtended = rangeExtended || GetUpdatedIndexRange(reader, updateMnemonics.ToArray(), ranges, IsIncreasing(current));
+                rangeExtended = GetUpdatedIndexRange(reader, updateMnemonics.ToArray(), ranges, IsIncreasing(current)) || rangeExtended;
 
                 // Update log data
                 ChannelDataChunkAdapter.Merge(reader);
                 updateIndexRanges = true;
+                allUpdateMnemonics.AddRange(updateMnemonics.Where(m=> !allUpdateMnemonics.ContainsIgnoreCase(m)));
             }
 
             // Update index range
             if (updateIndexRanges)
             {
-                UpdateIndexRange(uri, current, ranges, updateMnemonics, IsTimeLog(current), indexUnit, offset, rangeExtended, false);
+                UpdateIndexRange(uri, current, ranges, allUpdateMnemonics, IsTimeLog(current), indexUnit, offset, rangeExtended, false);
             }
         }
 
