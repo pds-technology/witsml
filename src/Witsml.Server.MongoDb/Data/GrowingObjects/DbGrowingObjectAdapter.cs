@@ -132,8 +132,7 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         /// </summary>
         /// <param name="wellboreUris">List of wellbore uris of expired growing objects</param>
         public void ExpireWellboreObjects(List<string> wellboreUris)
-        {
-            //Set wellbore isActive flag to false if none of its children are growing
+        {            
             foreach (var uri in wellboreUris)
             {
                 using (var transaction = GetTransaction())
@@ -148,7 +147,7 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
 
                     if (OptionsIn.DataVersion.Version141.Equals(etpUri.Version))
                         _wellbore141DataAdapter.UpdateIsActive(etpUri, false);
-                    else if (OptionsIn.DataVersion.Version200.Value.Equals(etpUri.Version))
+                    else if (OptionsIn.DataVersion.Version200.Equals(etpUri.Version))
                         _wellbore200DataAdapter.UpdateIsActive(etpUri, false);
 
                     transaction.Commit();
