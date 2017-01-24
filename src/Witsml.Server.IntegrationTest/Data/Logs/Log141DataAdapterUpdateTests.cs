@@ -432,7 +432,7 @@ namespace PDS.Witsml.Server.Data.Logs
             const int count = 10;
             AddLogWithData(Log, LogIndexType.measureddepth, 10, false);
 
-            var update = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure {Uom = "m", Value = 11}, count, hasEmptyChannel: false);
+            var update = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure { Uom = "m", Value = 11 }, count, hasEmptyChannel: false);
             DevKit.UpdateAndAssert(update);
 
             var result = DevKit.GetAndAssert(Log);
@@ -673,7 +673,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 MnemonicList = indexCurve.Mnemonic.Value + "," + channel2.Mnemonic.Value,
                 UnitList = indexCurve.Unit + "," + channel2.Unit
             };
-            var data = new List<string> {"1,1.2", "2,2.2"};
+            var data = new List<string> { "1,1.2", "2,2.2" };
             logData.Data = data;
             update.LogData.Add(logData);
 
@@ -995,7 +995,7 @@ namespace PDS.Witsml.Server.Data.Logs
             {
                 MnemonicList = $"{indexCurve?.Mnemonic.Value},{channel1.Mnemonic.Value}",
                 UnitList = $"{indexCurve?.Unit},{channel1.Unit}",
-                Data = new List<string> { "2,2.11"}
+                Data = new List<string> { "2,2.11" }
             };
 
             var logData2 = new LogData
@@ -1005,7 +1005,7 @@ namespace PDS.Witsml.Server.Data.Logs
                 Data = new List<string> { "3,3.21" }
             };
 
-            update.LogData = new List<LogData> {logData1, logData2};
+            update.LogData = new List<LogData> { logData1, logData2 };
 
             DevKit.UpdateAndAssert(update);
 
@@ -1958,7 +1958,7 @@ namespace PDS.Witsml.Server.Data.Logs
             }
             var stepIncrement = logUpdated.StepIncrement;
             Assert.IsNotNull(stepIncrement);
-            Assert.AreEqual("m",stepIncrement.Uom);
+            Assert.AreEqual("m", stepIncrement.Uom);
             Assert.AreEqual(1.0, stepIncrement.Value);
         }
 
@@ -1980,6 +1980,24 @@ namespace PDS.Witsml.Server.Data.Logs
 
             Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
             Assert.IsTrue(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+        }
+
+        [TestMethod]
+        [Ignore]
+        public void Log141DataAdapter_UpdateInStore_UpdateLog_Empty_Channel_Unchanged_ObjectGrowing_And_IsActive_State()
+        {
+            Log.StartIndex = new GenericMeasure(5, "m");
+            AddLogWithData(Log, LogIndexType.measureddepth, 10);
+
+            var addedLog = DevKit.GetAndAssert(Log);
+            Assert.IsFalse(addedLog.ObjectGrowing.GetValueOrDefault());
+
+            // Update
+            var updateLog = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure(8, "m"), 3, 0.2);
+            DevKit.UpdateAndAssert(updateLog);
+
+            var result = DevKit.GetAndAssert(updateLog);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
         }
 
         [TestMethod]
@@ -2260,7 +2278,7 @@ namespace PDS.Witsml.Server.Data.Logs
             AddParents();
 
             DevKit.InitHeader(log, indexType);
-            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), numOfRows, hasEmptyChannel:hasEmptyChannel);
+            DevKit.InitDataMany(log, DevKit.Mnemonics(log), DevKit.Units(log), numOfRows, hasEmptyChannel: hasEmptyChannel);
 
             DevKit.AddAndAssert(Log);
         }
@@ -2271,7 +2289,7 @@ namespace PDS.Witsml.Server.Data.Logs
             update.StartIndex = startIndex;
 
             DevKit.InitHeader(update, indexType);
-            DevKit.InitDataMany(update, DevKit.Mnemonics(update), DevKit.Units(update), numOfRows, factor, hasEmptyChannel:hasEmptyChannel);
+            DevKit.InitDataMany(update, DevKit.Mnemonics(update), DevKit.Units(update), numOfRows, factor, hasEmptyChannel: hasEmptyChannel);
 
             return update;
         }

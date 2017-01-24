@@ -218,7 +218,7 @@ namespace PDS.Witsml.Server.Data.Logs
 
         [TestMethod]
         [Ignore]
-        public void Log131DataAdapter_UpdateInStore_UpdateLog_Unchanged_ObjectGrowing_And_IsActive_State()
+        public void Log131DataAdapter_UpdateInStore_UpdateLog_Empty_Channel_Unchanged_ObjectGrowing_And_IsActive_State()
         {
             Log.StartIndex = new GenericMeasure(5, "m");
             AddLogWithData(Log, LogIndexType.measureddepth, 10);
@@ -228,6 +228,39 @@ namespace PDS.Witsml.Server.Data.Logs
 
             // Update
             var updateLog = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure(8, "m"), 3, 0.2);
+            DevKit.UpdateAndAssert(updateLog);
+
+            var result = DevKit.GetAndAssert(updateLog);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+        }
+
+        [TestMethod]
+        public void Log131DataAdapter_UpdateInStore_UpdateLog_Unchanged_ObjectGrowing_And_IsActive_State()
+        {
+            AddParents();
+            DevKit.InitHeader(Log, LogIndexType.measureddepth);
+            DevKit.InitDataMany(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), 5);
+
+            var logData = Log.LogData;
+            logData.Clear();
+            logData.Add("1,11.1,10");
+            logData.Add("2,13.1,11");
+            logData.Add("3,13.1,11");
+            logData.Add("4,13.1,11");
+
+            var response = DevKit.Add<LogList, Log>(Log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var addedLog = DevKit.GetAndAssert(Log);
+            Assert.IsFalse(addedLog.ObjectGrowing.GetValueOrDefault());
+
+            // Update
+            var updateLog = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure(8, "m"), 3, 0.2);
+            logData = updateLog.LogData;
+            logData.Clear();
+
+            logData.Add("2.1,11.1,10");
+            logData.Add("2.2,13.1,11");
             DevKit.UpdateAndAssert(updateLog);
 
             var result = DevKit.GetAndAssert(updateLog);
