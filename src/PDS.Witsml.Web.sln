@@ -14,6 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{B0
 		External\GlobalAssemblyInfo.cs = External\GlobalAssemblyInfo.cs
 		..\NOTICE.txt = ..\NOTICE.txt
 		..\README.md = ..\README.md
+		External\UpdatePackageHintPaths.ps1 = External\UpdatePackageHintPaths.ps1
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PDS.Witsml", "PDS.Witsml", "{A5268269-F5F0-4B28-A9B5-A2A86D45C916}"
