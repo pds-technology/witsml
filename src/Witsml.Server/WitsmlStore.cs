@@ -26,9 +26,9 @@ using log4net;
 using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 using PDS.Witsml.Server.Data;
+using PDS.Witsml.Server.Data.Security;
 using PDS.Witsml.Server.Logging;
 using PDS.Witsml.Server.Properties;
-using PDS.Witsml.Server.Security;
 
 namespace PDS.Witsml.Server
 {
@@ -82,17 +82,26 @@ namespace PDS.Witsml.Server
         /// <returns>A comma-separated list of Data Schema Versions (without spaces) that the server supports.</returns>
         public WMLS_GetVersionResponse WMLS_GetVersion(WMLS_GetVersionRequest request)
         {
-            WitsmlOperationContext.Current.Request = request.ToContext();
-            EnsureCapServerProviders();
+            try
+            {
+                WitsmlOperationContext.Current.Request = request.ToContext();
+                EnsureCapServerProviders();
 
-            _log.Debug(WebOperationContext.Current.ToLogMessage());
-            _log.Debug(request.ToLogMessage());
+                _log.Debug(WebOperationContext.Current.ToLogMessage());
+                _log.Debug(request.ToLogMessage());
 
-            UserAuthorizationProvider.CheckAccess();
+                UserAuthorizationProvider.CheckSoapAccess();
 
-            var response = new WMLS_GetVersionResponse(_supportedVersions);
-            _log.Debug(response.ToLogMessage());
-            return response;
+                var response = new WMLS_GetVersionResponse(_supportedVersions);
+                _log.Debug(response.ToLogMessage());
+                return response;
+            }
+            catch (WitsmlException ex)
+            {
+                var response = new WMLS_GetVersionResponse(ex.Message);
+                _log.Error(response.ToLogMessage(_log.IsWarnEnabled));
+                return response;
+            }
         }
 
         /// <summary>
@@ -110,7 +119,7 @@ namespace PDS.Witsml.Server
                 _log.Debug(WebOperationContext.Current.ToLogMessage());
                 _log.Debug(request.ToLogMessage());
 
-                UserAuthorizationProvider.CheckAccess();
+                UserAuthorizationProvider.CheckSoapAccess();
 
                 var options = OptionsIn.Parse(request.OptionsIn);
                 var version = OptionsIn.GetValue(options, new OptionsIn.DataVersion(_defaultDataSchemaVersion));
@@ -155,7 +164,7 @@ namespace PDS.Witsml.Server
                 _log.Debug(WebOperationContext.Current.ToLogMessage());
                 _log.Debug(context);
 
-                UserAuthorizationProvider.CheckAccess();
+                UserAuthorizationProvider.CheckSoapAccess();
                 WitsmlValidator.ValidateRequest(CapServerProviders, out version);
 
                 var dataProvider = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
@@ -202,7 +211,7 @@ namespace PDS.Witsml.Server
                 _log.Debug(WebOperationContext.Current.ToLogMessage());
                 _log.Debug(context);
 
-                UserAuthorizationProvider.CheckAccess();
+                UserAuthorizationProvider.CheckSoapAccess();
                 WitsmlValidator.ValidateRequest(CapServerProviders, out version);
 
                 var dataWriter = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
@@ -244,7 +253,7 @@ namespace PDS.Witsml.Server
                 _log.Debug(WebOperationContext.Current.ToLogMessage());
                 _log.Debug(context);
 
-                UserAuthorizationProvider.CheckAccess();
+                UserAuthorizationProvider.CheckSoapAccess();
                 WitsmlValidator.ValidateRequest(CapServerProviders, out version);
 
                 var dataWriter = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
@@ -286,7 +295,7 @@ namespace PDS.Witsml.Server
                 _log.Debug(WebOperationContext.Current.ToLogMessage());
                 _log.Debug(context);
 
-                UserAuthorizationProvider.CheckAccess();
+                UserAuthorizationProvider.CheckSoapAccess();
                 WitsmlValidator.ValidateRequest(CapServerProviders, out version);
 
                 var dataWriter = Container.Resolve<IWitsmlDataProvider>(new ObjectName(context.ObjectType, version));
@@ -323,7 +332,7 @@ namespace PDS.Witsml.Server
             WitsmlOperationContext.Current.Request = request.ToContext();
             _log.Debug(WebOperationContext.Current.ToLogMessage());
 
-            UserAuthorizationProvider.CheckAccess();
+            UserAuthorizationProvider.CheckSoapAccess();
             string message;
 
             if (request.ReturnValueIn == (short)ErrorCodes.Unset)

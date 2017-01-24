@@ -49,7 +49,7 @@ namespace PDS.Framework
         /// <returns>A composition container instance.</returns>
         public static IContainer Create(ComposablePartCatalog catalog)
         {
-            var container = new CompositionContainer(catalog);
+            var container = new CompositionContainer(catalog, true);
             var instance = new Container(container);
 
             container.ComposeExportedValue<IContainer>(instance);

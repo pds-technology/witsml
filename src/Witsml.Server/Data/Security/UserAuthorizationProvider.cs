@@ -16,16 +16,19 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Linq;
 using log4net;
+using PDS.Framework;
 using PDS.Witsml.Server.Configuration;
 
-namespace PDS.Witsml.Server.Security
+namespace PDS.Witsml.Server.Data.Security
 {
     /// <summary>
     /// Provides a base implementation of <see cref="IUserAuthorizationProvider"/>.
     /// </summary>
-    /// <seealso cref="PDS.Witsml.Server.Security.IUserAuthorizationProvider" />
+    /// <seealso cref="PDS.Witsml.Server.Data.Security.IUserAuthorizationProvider" />
     [Export(typeof(IUserAuthorizationProvider))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class UserAuthorizationProvider : IUserAuthorizationProvider
@@ -33,11 +36,29 @@ namespace PDS.Witsml.Server.Security
         private static readonly ILog _log = LogManager.GetLogger(typeof(UserAuthorizationProvider));
 
         /// <summary>
-        /// Verifies that the current user is authorized to execute the requested action.
+        /// Gets or sets the user authorization adapters.
         /// </summary>
-        public void CheckAccess()
+        /// <value>The user authorization adapters.</value>
+        [ImportMany]
+        public List<IUserAuthorizationAdapter> UserAuthorizationAdapters { get; set; }
+
+        /// <summary>
+        /// Verifies that the current user is authorized to execute the requested ETP action.
+        /// </summary>
+        public void CheckEtpAccess()
         {
-            if (!IsAuthorized())
+            if (!IsAuthorized(WitsmlEndpointTypes.Etp))
+            {
+                throw new WitsmlException(ErrorCodes.InsufficientOperationRights);
+            }
+        }
+
+        /// <summary>
+        /// Verifies that the current user is authorized to execute the requested SOAP action.
+        /// </summary>
+        public void CheckSoapAccess()
+        {
+            if (!IsAuthorized(WitsmlEndpointTypes.Soap))
             {
                 throw new WitsmlException(ErrorCodes.InsufficientOperationRights);
             }
@@ -46,19 +67,23 @@ namespace PDS.Witsml.Server.Security
         /// <summary>
         /// Determines whether the current user is authorized to execute the requested action.
         /// </summary>
+        /// <param name="endpointType">The type of endpoint.</param>
         /// <returns><c>true</c> if the current user is authorized; otherwise, <c>false</c>.</returns>
-        public bool IsAuthorized()
+        private bool IsAuthorized(WitsmlEndpointTypes endpointType)
         {
             if (!WitsmlSettings.IsUserAuthorizationEnabled)
                 return true;
 
             var context = WitsmlOperationContext.Current;
+            var endpoint = endpointType.GetDescription();
             var username = context.User;
             var request = context.Request;
 
-            _log.Error($"Verifying authorization for user: {username}; function: {request.Function}");
+            _log.Debug($"Verifying authorization for user: {username}; endpoint: {endpoint}; function: {request.Function}");
 
-            return false;
+            return UserAuthorizationAdapters
+                .Select(x => x.IsAuthorized(username, request, endpointType))
+                .FirstOrDefault();
         }
     }
 }

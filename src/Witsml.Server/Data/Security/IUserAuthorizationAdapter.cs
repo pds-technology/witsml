@@ -16,23 +16,23 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace PDS.Witsml.Server.Security
+using PDS.Witsml.Server.Configuration;
+
+namespace PDS.Witsml.Server.Data.Security
 {
     /// <summary>
-    /// Defines methods that can be used to determine if a user is authorized to execute
-    /// the requested actions and has access to any requested data objects.
+    /// Defines methods that can be used to retrieve user authorization
+    /// information from the underlying data store.
     /// </summary>
-    public interface IUserAuthorizationProvider
+    public interface IUserAuthorizationAdapter
     {
         /// <summary>
-        /// Verifies that the current user is authorized to execute the requested action.
+        /// Determines whether the specified user is authorized to execute the function.
         /// </summary>
-        void CheckAccess();
-
-        /// <summary>
-        /// Determines whether the current user is authorized to execute the requested action.
-        /// </summary>
-        /// <returns><c>true</c> if the current user is authorized; otherwise, <c>false</c>.</returns>
-        bool IsAuthorized();
+        /// <param name="username">The username.</param>
+        /// <param name="request">The request context.</param>
+        /// <param name="endpointType">The type of endpoint.</param>
+        /// <returns><c>true</c> if the user is authorized; otherwise, <c>false</c>.</returns>
+        bool IsAuthorized(string username, RequestContext request, WitsmlEndpointTypes endpointType);
     }
 }
