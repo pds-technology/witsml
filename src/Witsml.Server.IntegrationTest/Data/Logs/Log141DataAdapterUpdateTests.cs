@@ -30,6 +30,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PDS.Framework;
 using PDS.Witsml.Data.Channels;
 using PDS.Witsml.Server.Configuration;
+using PDS.Witsml.Server.Data.GrowingObjects;
 using PDS.Witsml.Server.Jobs;
 
 namespace PDS.Witsml.Server.Data.Logs
@@ -2056,6 +2057,48 @@ namespace PDS.Witsml.Server.Data.Logs
 
             Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
             Assert.IsFalse(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_UpdateInStore_Can_Expire_Growing_Object_After_Delete()
+        {
+            // Add a Log with data
+            Log.StartIndex = new GenericMeasure(5, "m");
+            AddLogWithData(Log, LogIndexType.measureddepth, 10);
+
+            // Veryify that Object Growing is false after an Add with Log data
+            var addedLog = DevKit.GetAndAssert(Log);
+            Assert.IsFalse(addedLog.ObjectGrowing.GetValueOrDefault());
+            Assert.IsFalse(Wellbore.IsActive.GetValueOrDefault());
+
+            // Append data to the log
+            var update = CreateLogDataUpdate(Log, LogIndexType.measureddepth, new GenericMeasure(17, "m"), 6);
+            DevKit.UpdateAndAssert(update);
+
+            var result = DevKit.GetAndAssert(Log);
+            var uri = addedLog.GetUri();
+            var wellboreResult = DevKit.GetAndAssert(Wellbore);
+
+            // Verify that the append set the objectGrowing flag to true.
+            Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault());
+            Assert.IsTrue(wellboreResult.IsActive.GetValueOrDefault());
+            Assert.IsTrue(DevKit.Container.Resolve<IGrowingObjectDataProvider>().Exists(uri));
+
+            // Delete the growing object
+            var deleteLog = DevKit.CreateLog(result.Uid, result.Name, result.UidWell, result.NameWell,
+                result.UidWellbore, result.NameWellbore);
+            DevKit.DeleteAndAssert(deleteLog);
+
+            // Wait until we're past the GrowingTimeoutPeriod
+            WitsmlSettings.LogGrowingTimeoutPeriod = GrowingTimeoutPeriod;
+            Thread.Sleep(GrowingTimeoutPeriod * 1000);
+
+            // Expire the growing objects.  By calling this after the delete of the log 
+            //... we're testing that an Exception wasn't raised.
+            DevKit.Container.Resolve<ObjectGrowingManager>().ExpireGrowingObjects();
+
+            // The dbGrowingObject should have been deleted regardless of
+            Assert.IsFalse(DevKit.Container.Resolve<IGrowingObjectDataProvider>().Exists(uri));
         }
 
         [TestMethod]

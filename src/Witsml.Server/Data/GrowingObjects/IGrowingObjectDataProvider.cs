@@ -49,5 +49,12 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         /// </summary>
         /// <param name="wellboreUris">The list of wellbore uris to check for growing children objects.</param>
         void ExpireWellboreObjects(List<string> wellboreUris);
+
+        /// <summary>
+        /// Checks for the existance of a dbGrowingObject for the specified uri.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <returns>true of a dbGrowingObject exists for the specified uri, false otherwise.</returns>
+        bool Exists(EtpUri uri);
     }
 }
