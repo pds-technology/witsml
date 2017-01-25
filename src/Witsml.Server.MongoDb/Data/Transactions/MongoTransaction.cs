@@ -276,7 +276,7 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// if the current transaction is nested within a transaction with the specified id.
         /// </summary>
         /// <param name="transactionId">The transaction identifier.</param>
-        /// <returns><c>true</c> if this instance is part of the same transaction; otherwise <c>fakse</c>.</returns>
+        /// <returns><c>true</c> if this instance is part of the same transaction; otherwise <c>false</c>.</returns>
         private bool IsSameTransaction(string transactionId)
         {
             var transaction = this;
