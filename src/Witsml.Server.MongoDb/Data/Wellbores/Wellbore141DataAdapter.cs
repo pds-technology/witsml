@@ -50,6 +50,12 @@ namespace PDS.Witsml.Server.Data.Wellbores
         {
             var wellboreEntity = GetEntity(uri);
 
+            if (wellboreEntity == null)
+            {
+                Logger.DebugFormat("Wellbore not found with uri '{0}'", uri);
+                return;
+            }
+
             if (wellboreEntity.IsActive.GetValueOrDefault() == isActive)
                 return;
 
