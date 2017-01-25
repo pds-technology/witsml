@@ -29,7 +29,7 @@ namespace PDS.Witsml.Server.Data.Transactions
         Update,
         /// <summary>A delete operation.</summary>
         Delete,
-        /// <summary></summary>
+        /// <summary>The context for the whole operation.</summary>
         Context
     }
 
