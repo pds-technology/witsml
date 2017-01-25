@@ -414,9 +414,8 @@ namespace PDS.Witsml.Server.Data.Logs
 
                 updateMnemonics.Clear();
                 updateMnemonics.Add(indexCurve.Mnemonic);
-
-                updateMnemonics.AddRange(reader.Mnemonics
-                    .Where(m => !updateMnemonics.Contains(m)));
+                updateMnemonics.AddRange(reader.Mnemonics.Where(m => !updateMnemonics.Contains(m)));
+                allUpdateMnemonics.AddRange(updateMnemonics.Where(m => !allUpdateMnemonics.ContainsIgnoreCase(m)));
 
                 if (isTimeLog && checkOffset)
                 {
@@ -430,7 +429,6 @@ namespace PDS.Witsml.Server.Data.Logs
                 // Update log data
                 ChannelDataChunkAdapter.Merge(reader);
                 updateIndexRanges = true;
-                allUpdateMnemonics.AddRange(updateMnemonics.Where(m=> !allUpdateMnemonics.ContainsIgnoreCase(m)));
             }
 
             // Update index range
