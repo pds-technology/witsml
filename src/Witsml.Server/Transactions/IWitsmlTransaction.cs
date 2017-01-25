@@ -33,6 +33,11 @@ namespace PDS.Witsml.Server.Transactions
         EtpUri Uri { get; }
 
         /// <summary>
+        /// Gets or sets a reference to the parent transaction.
+        /// </summary>
+        IWitsmlTransaction Parent { get; }
+
+        /// <summary>
         /// Sets the context for the root transaction.
         /// </summary>
         /// <param name="uri">The URI.</param>

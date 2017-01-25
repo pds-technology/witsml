@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using Energistics.Datatypes;
 using log4net;
@@ -33,10 +34,18 @@ namespace PDS.Witsml.Server.Transactions
         [ThreadStatic]
         private static int _transactionLevel;
 
+        [ThreadStatic]
+        private static ConcurrentStack<IWitsmlTransaction> _stack;
+
         /// <summary>
         /// Gets the URI associated with the transaction.
         /// </summary>
         public EtpUri Uri { get; private set; }
+
+        /// <summary>
+        /// Gets or sets a reference to the parent transaction.
+        /// </summary>
+        public IWitsmlTransaction Parent { get; private set; }
 
         /// <summary>
         /// Sets the context for the root transaction.
@@ -60,11 +69,23 @@ namespace PDS.Witsml.Server.Transactions
         protected void InitializeRootTransaction()
         {
             var context = WitsmlOperationContext.Current;
+            IWitsmlTransaction parent;
 
+            // Keep a stack of nested transactions
+            _stack = _stack ?? new ConcurrentStack<IWitsmlTransaction>();
+
+            // Get parent transaction
+            if (_stack.TryPeek(out parent))
+                Parent = parent;
+
+            // Add current transaction to the stack
+            _stack.Push(this);
+
+            // Initialize root transaction
             if (context.Transaction == null)
             {
-                Initialize();
                 context.Transaction = this;
+                Initialize();
             }
 
             _log.Debug("Incrementing transaction level");
@@ -111,6 +132,10 @@ namespace PDS.Witsml.Server.Transactions
             _log.Debug("Decrementing transaction level");
             Interlocked.Decrement(ref _transactionLevel);
 
+            // Remove the current transaction from the stack
+            IWitsmlTransaction transaction;
+            _stack.TryPop(out transaction);
+
             if (_transactionLevel < 1 && !Committed)
             {
                 Rollback();
@@ -120,6 +145,7 @@ namespace PDS.Witsml.Server.Transactions
             if (this == context.Transaction)
             {
                 context.Transaction = null;
+                _stack.Clear();
             }
 
             if (disposing)
