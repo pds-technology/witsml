@@ -217,7 +217,6 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
-        [Ignore]
         public void Log131DataAdapter_UpdateInStore_UpdateLog_Empty_Channel_Unchanged_ObjectGrowing_And_IsActive_State()
         {
             Log.StartIndex = new GenericMeasure(5, "m");
