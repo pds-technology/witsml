@@ -252,6 +252,13 @@ namespace PDS.Witsml.Server.Data.Logs
         public void UpdateObjectGrowing(EtpUri uri, bool isGrowing)
         {
             var entity = GetEntity(uri);
+
+            if (entity == null)
+            {
+                Logger.DebugFormat("Log not found with uri '{0}'.", uri);
+                return;
+            }
+
             Logger.DebugFormat("Updating objectGrowing for uid '{0}' and name '{1}'.", entity.Uid, entity.Name);
 
             // Join existing Transaction
@@ -1384,13 +1391,13 @@ namespace PDS.Witsml.Server.Data.Logs
                 var start = current.Start;
                 var end = current.End;
 
-                if (!start.HasValue || !update.StartsAfter(start.Value, increasing))
+                if ((update.Start.HasValue) && (!start.HasValue || !update.StartsAfter(start.Value, increasing)))
                 {
                     start = update.Start;
                     rangeExtended = true;
                 }
 
-                if (!end.HasValue || !update.EndsBefore(end.Value, increasing))
+                if ((update.End.HasValue) && (!end.HasValue || !update.EndsBefore(end.Value, increasing)))
                 {
                     end = update.End;
                     rangeExtended = true;
