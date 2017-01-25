@@ -218,9 +218,19 @@ namespace PDS.Witsml.Server.Data
         }
 
         /// <summary>
+        /// Gets the <see cref="IMongoDatabase"/> associated with the current transaction, if available; 
+        /// otherwise, a new <see cref="IMongoDatabase"/> instance is requested.
+        /// </summary>
+        /// <returns>An <see cref="IMongoDatabase"/> instance.</returns>
+        protected IMongoDatabase GetDatabase()
+        {
+            return Transaction?.Database ?? DatabaseProvider.GetDatabase();
+        }
+
+        /// <summary>
         /// Gets the default collection.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>An <see cref="IMongoCollection{T}"/> instance.</returns>
         protected IMongoCollection<T> GetCollection()
         {
             return GetCollection<T>(DbCollectionName);
@@ -231,7 +241,7 @@ namespace PDS.Witsml.Server.Data
         /// </summary>
         /// <typeparam name="TObject">The type of the object.</typeparam>
         /// <param name="dbCollectionName">Name of the database collection.</param>
-        /// <returns></returns>
+        /// <returns>An <see cref="IMongoCollection{TObject}"/> instance.</returns>
         protected IMongoCollection<TObject> GetCollection<TObject>(string dbCollectionName)
         {
             return GetDatabase().GetCollection<TObject>(dbCollectionName);
@@ -280,7 +290,7 @@ namespace PDS.Witsml.Server.Data
         {
             try
             {
-                Logger.DebugFormat("Querying {0} MongoDb collection; uid: {1}", dbCollectionName, uri.ObjectId);
+                Logger.DebugFormat("Querying {0} MongoDb collection; {1}: {2}", dbCollectionName, IdPropertyName, uri.ObjectId);
 
                 var filter = GetEntityFilter<TObject>(uri, IdPropertyName);
 
@@ -298,6 +308,7 @@ namespace PDS.Witsml.Server.Data
                         .Limit(1)
                         .FirstOrDefault();
                 }
+
                 // Otherwise retrieve the full document
                 return GetCollection<TObject>(dbCollectionName)
                     .Find(filter)
@@ -697,16 +708,6 @@ namespace PDS.Witsml.Server.Data
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// Gets the <see cref="IMongoDatabase"/> associated with the current transaction, if available; 
-        /// otherwise, a new <see cref="IMongoDatabase"/> instance is requested.
-        /// </summary>
-        /// <returns></returns>
-        protected IMongoDatabase GetDatabase()
-        {
-            return Transaction?.Database ?? DatabaseProvider.GetDatabase();
         }
     }
 }

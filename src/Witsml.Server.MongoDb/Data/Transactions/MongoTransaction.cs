@@ -87,7 +87,6 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// <param name="uri">The URI.</param>
         public override void SetContext(EtpUri uri)
         {
-            var root = WitsmlOperationContext.Current.Transaction;
             base.SetContext(uri);
             Wait(uri);
         }
@@ -249,12 +248,16 @@ namespace PDS.Witsml.Server.Data.Transactions
                 }
             }
 
-            var root = (MongoTransaction)WitsmlOperationContext.Current.Transaction;
-            if (transaction.TransactionId.Equals(root.Id)) return;
+            // No need to wait if part of the same transaction
+            if (IsSameTransaction(transaction.TransactionId))
+            {
+                _log.Debug($"{message} joining transaction: {transaction.TransactionId}");
+                return;
+            }
 
             while (Adapter.Exists(uri))
             {
-                _log.Debug($"{message} waiting");
+                _log.Debug($"{message} waiting for pending transaction");
 
                 Thread.Sleep(DefaultInterval);
                 count--;
@@ -263,6 +266,30 @@ namespace PDS.Witsml.Server.Data.Transactions
                 message = $"Transaction deadlock on data object with URI: {uri}";
                 throw new WitsmlException(ErrorCodes.ErrorTransactionDeadlock, message);
             }
+
+            // Call Wait again to ensure new Context entry is created
+            Wait(uri);
+        }
+
+        /// <summary>
+        /// Determines whether the current transaction has the specified transaction id or
+        /// if the current transaction is nested within a transaction with the specified id.
+        /// </summary>
+        /// <param name="transactionId">The transaction identifier.</param>
+        /// <returns><c>true</c> if this instance is part of the same transaction; otherwise <c>fakse</c>.</returns>
+        private bool IsSameTransaction(string transactionId)
+        {
+            var transaction = this;
+
+            while (transaction != null)
+            {
+                if (transactionId.Equals(transaction.Id))
+                    return true;
+
+                transaction = transaction.Parent as MongoTransaction;
+            }
+
+            return false;
         }
     }
 }
