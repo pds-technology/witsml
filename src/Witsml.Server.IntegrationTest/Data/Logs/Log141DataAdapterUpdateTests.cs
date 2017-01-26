@@ -2029,6 +2029,97 @@ namespace PDS.Witsml.Server.Data.Logs
         }
 
         [TestMethod]
+        public void Log141DataAdapter_UpdateInStore_Update_TimeLog_Data_Unchanged_ObjectGrowing_And_IsActive_State()
+        {
+            AddParents();
+            Log.StartDateTimeIndex = new Timestamp();
+            Log.EndDateTimeIndex = new Timestamp();
+
+            Log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            var logData = Log.LogData.First();
+            logData.Data.Add("2016-04-13T15:31:42.0000000-05:00,32.1,32.2");
+            logData.Data.Add("2016-04-13T15:32:42.0000000-05:00,31.1,31.2");
+            logData.Data.Add("2016-04-13T15:38:42.0000000-05:00,30.1,30.2");
+
+            DevKit.InitHeader(Log, LogIndexType.datetime, false);
+
+            DevKit.AddAndAssert(Log);
+            var addedLog = DevKit.GetAndAssert(Log);
+            Assert.IsFalse(addedLog.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            Assert.IsFalse(Wellbore.IsActive.GetValueOrDefault(), "IsActive");
+
+            // Update
+            var updateLog = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = Log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = Log.LogData.First().UnitList;
+            logData = updateLog.LogData.First();
+            logData.Data.Add("2016-04-13T15:35:42.0000000-05:00,35.1,35.2");
+            logData.Data.Add("2016-04-13T15:34:42.0000000-05:00,34.1,34.2");
+            logData.Data.Add("2016-04-13T15:33:42.0000000-05:00,33.1,33.2");
+            logData.Data.Add("2016-04-13T15:36:42.0000000-05:00,36.1,36.2");
+
+            DevKit.UpdateAndAssert(updateLog);
+
+            var result = DevKit.GetAndAssert(Log);
+            var wellboreResult = DevKit.GetAndAssert(Wellbore);
+
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            Assert.IsFalse(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+        }
+
+        [TestMethod]
+        public void Log141DataAdapter_UpdateInStore_Append_TimeLog_Data_Set_ObjectGrowing_And_IsActive_State_ExpireGrowingObjects()
+        {
+            AddParents();
+            Log.StartDateTimeIndex = new Timestamp();
+            Log.EndDateTimeIndex = new Timestamp();
+
+            Log.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            var logData = Log.LogData.First();
+            logData.Data.Add("2016-04-13T15:31:42.0000000-05:00,32.1,32.2");
+            logData.Data.Add("2016-04-13T15:32:42.0000000-05:00,31.1,31.2");
+            logData.Data.Add("2016-04-13T15:38:42.0000000-05:00,30.1,30.2");
+
+            DevKit.InitHeader(Log, LogIndexType.datetime, false);
+
+            DevKit.AddAndAssert(Log);
+            var addedLog = DevKit.GetAndAssert(Log);
+            Assert.IsFalse(addedLog.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            Assert.IsFalse(Wellbore.IsActive.GetValueOrDefault(), "IsActive");
+
+            // Update
+            var updateLog = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
+            updateLog.LogData = DevKit.List(new LogData() { Data = DevKit.List<string>() });
+            updateLog.LogData[0].MnemonicList = Log.LogData.First().MnemonicList;
+            updateLog.LogData[0].UnitList = Log.LogData.First().UnitList;
+            logData = updateLog.LogData.First();
+            logData.Data.Add("2016-04-15T15:35:42.0000000-05:00,35.1,35.2");
+            logData.Data.Add("2016-04-15T15:34:42.0000000-05:00,34.1,34.2");
+            logData.Data.Add("2016-04-15T15:33:42.0000000-05:00,33.1,33.2");
+            logData.Data.Add("2016-04-15T15:36:42.0000000-05:00,36.1,36.2");
+
+            DevKit.UpdateAndAssert(updateLog);
+
+            var result = DevKit.GetAndAssert(Log);
+            var wellboreResult = DevKit.GetAndAssert(Wellbore);
+
+            Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            Assert.IsTrue(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+
+            WitsmlSettings.LogGrowingTimeoutPeriod = GrowingTimeoutPeriod;
+            Thread.Sleep(GrowingTimeoutPeriod * 1000);
+
+            DevKit.Container.Resolve<ObjectGrowingManager>().ExpireGrowingObjects();
+
+            result = DevKit.GetAndAssert(Log);
+            wellboreResult = DevKit.GetAndAssert(Wellbore);
+
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+            Assert.IsFalse(wellboreResult.IsActive.GetValueOrDefault(), "IsActive");
+        }
+
+        [TestMethod]
         public void Log141DataAdapter_UpdateInStore_AppendLog_Data_ExpireGrowingObjects()
         {
             Log.StartIndex = new GenericMeasure(5, "m");
