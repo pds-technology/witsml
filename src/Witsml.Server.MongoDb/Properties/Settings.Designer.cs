@@ -58,5 +58,14 @@ namespace PDS.Witsml.Server.MongoDb {
                 return ((int)(this["DefaultMaximumTransactionAttempt"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public int DefaultServerTimeoutMinutes {
+            get {
+                return ((int)(this["DefaultServerTimeoutMinutes"]));
+            }
+        }
     }
 }

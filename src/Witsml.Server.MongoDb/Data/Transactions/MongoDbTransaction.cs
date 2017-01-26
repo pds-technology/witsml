@@ -16,6 +16,7 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
+using System;
 using MongoDB.Bson;
 
 namespace PDS.Witsml.Server.Data.Transactions
@@ -66,5 +67,11 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// </summary>
         /// <value>The data object value in BsonDocumnet format.</value>
         public BsonDocument Value { get; set; }
+
+        /// <summary>
+        /// Gets or sets the transaction record created date time.
+        /// </summary>
+        /// <value>The transaction created date time.</value>
+        public DateTime CreatedDateTime { get; set; }
     }
 }

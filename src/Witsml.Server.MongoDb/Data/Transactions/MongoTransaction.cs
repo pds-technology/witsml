@@ -41,6 +41,7 @@ namespace PDS.Witsml.Server.Data.Transactions
         private static readonly ILog _log = LogManager.GetLogger(typeof(MongoTransaction));
         internal static readonly int DefaultInterval = Settings.Default.DefaultTransactionWaitInterval;
         internal static readonly int MaximumAttempt = Settings.Default.DefaultMaximumTransactionAttempt;
+        internal static readonly int ServerTimeoutMinutes = Settings.Default.DefaultServerTimeoutMinutes;
 
         private IDatabaseProvider _databaseProvider;
 
@@ -125,7 +126,8 @@ namespace PDS.Witsml.Server.Data.Transactions
                 Collection = collection,
                 IdPropertyName = idPropertyName,
                 Action = action,
-                Status = TransactionStatus.Created
+                Status = TransactionStatus.Created,
+                CreatedDateTime = DateTime.Now
             };
 
             if (uri.HasValue)
@@ -230,14 +232,14 @@ namespace PDS.Witsml.Server.Data.Transactions
             object locker = string.Intern($"{GetType().FullName}-{uri.Uri}");
             var count = MaximumAttempt;
             
-            var transaction = Adapter.Get(uri);
+            var transaction = GetActiveTransaction(uri);
             if (transaction == null)
             {
                 _log.Debug($"{message} waiting for lock");
                 lock (locker)
                 {
                     _log.Debug($"{message} acquired lock");
-                    transaction = Adapter.Get(uri);
+                    transaction = GetActiveTransaction(uri);
                     if (transaction == null)
                     {
                         _log.Debug($"{message} created context");
@@ -255,7 +257,7 @@ namespace PDS.Witsml.Server.Data.Transactions
                 return;
             }
 
-            while (Adapter.Exists(uri))
+            while (GetActiveTransaction(uri) != null)
             {
                 _log.Debug($"{message} waiting for pending transaction");
 
@@ -290,6 +292,25 @@ namespace PDS.Witsml.Server.Data.Transactions
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Gets the active transaction.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <returns>Returns an <see cref="MongoDbTransaction" /> instance.</returns>
+        private MongoDbTransaction GetActiveTransaction(EtpUri uri)
+        {
+            var database = Database ?? _databaseProvider.GetDatabase();
+            var collection = database.GetCollection<MongoDbTransaction>("dbTransaction");
+            var builder = Builders<MongoDbTransaction>.Filter;
+            
+            var filter = builder.Eq("Uri", uri.Uri) & builder.Gt("CreatedDateTime", DateTime.UtcNow.AddMinutes(-1 * ServerTimeoutMinutes));
+
+            return collection
+                .Find(filter)
+                .Limit(1)
+                .FirstOrDefault();
         }
     }
 }
