@@ -341,10 +341,10 @@ namespace PDS.Witsml.Server.Data.Logs
             Thread.Sleep(GrowingTimeoutPeriod * 1000);
 
             // Expire the growing objects.  By calling this after the delete of the log 
-            //... we're testing that an Exception wasn't raised.
+            // ... we're testing that an Exception wasn't raised.
             DevKit.Container.Resolve<ObjectGrowingManager>().ExpireGrowingObjects();
 
-            // The dbGrowingObject should have been deleted regardless of
+            // The dbGrowingObject should have been deleted regardless of the growing objects existence.
             Assert.IsFalse(DevKit.Container.Resolve<IGrowingObjectDataProvider>().Exists(uri));
         }
 
