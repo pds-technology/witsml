@@ -336,6 +336,9 @@ namespace PDS.Witsml.Server.Data.Logs
                 result.UidWellbore, result.NameWellbore);
             DevKit.DeleteAndAssert(deleteLog);
 
+            // The dbGrowingObject should have been deleted after the Log was deleted.
+            Assert.IsFalse(DevKit.Container.Resolve<IGrowingObjectDataProvider>().Exists(uri));
+
             // Wait until we're past the GrowingTimeoutPeriod
             WitsmlSettings.LogGrowingTimeoutPeriod = GrowingTimeoutPeriod;
             Thread.Sleep(GrowingTimeoutPeriod * 1000);
@@ -343,9 +346,6 @@ namespace PDS.Witsml.Server.Data.Logs
             // Expire the growing objects.  By calling this after the delete of the log 
             // ... we're testing that an Exception wasn't raised.
             DevKit.Container.Resolve<ObjectGrowingManager>().ExpireGrowingObjects();
-
-            // The dbGrowingObject should have been deleted regardless of the growing objects existence.
-            Assert.IsFalse(DevKit.Container.Resolve<IGrowingObjectDataProvider>().Exists(uri));
         }
 
         [TestMethod]
