@@ -488,7 +488,7 @@ namespace PDS.Witsml.Server.Providers.ChannelStreaming
             for (var i = 0; i < indexes.Count; i++)
             {
                 var indexValue = isTimeIndex[i]
-                    ? new DateTimeOffset(DateTime.Parse(indexes[i].ToString())).ToUnixTimeMicroseconds()
+                    ? DateTimeOffset.Parse(indexes[i].ToString()).ToUnixTimeMicroseconds()
                     : ((double)indexes[i]).IndexToScale(scale);
                 indexValues.Add(indexValue);
             }
