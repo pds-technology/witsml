@@ -56,5 +56,11 @@ namespace PDS.Witsml.Server.Data.GrowingObjects
         /// <param name="uri">The URI.</param>
         /// <returns>true of a dbGrowingObject exists for the specified uri, false otherwise.</returns>
         bool Exists(EtpUri uri);
+
+        /// <summary>
+        /// Deletes a dbGrowingObject for the specified identifier.
+        /// </summary>
+        /// <param name="uri">The data object URI.</param>
+        void Delete(EtpUri uri);
     }
 }

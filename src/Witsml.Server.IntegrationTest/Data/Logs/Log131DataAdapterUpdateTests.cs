@@ -344,8 +344,90 @@ namespace PDS.Witsml.Server.Data.Logs
             // ... we're testing that an Exception wasn't raised.
             DevKit.Container.Resolve<ObjectGrowingManager>().ExpireGrowingObjects();
 
-            // The dbGrowingObject should have been deleted regardless of the growing objects existence.
+            // The dbGrowingObject should have been deleted after the Log was deleted.
             Assert.IsFalse(DevKit.Container.Resolve<IGrowingObjectDataProvider>().Exists(uri));
+        }
+
+        [TestMethod]
+        public void Log131DataAdapter_UpdateInStore_Update_TimeLog_Data_Unchanged_ObjectGrowing_And_IsActive_State()
+        {
+            AddParents();
+            DevKit.InitHeader(Log, LogIndexType.datetime);
+            DevKit.InitDataMany(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), 5, 1, false, false);
+
+            var logData = Log.LogData;
+            logData.Clear();
+            logData.Add("2016-04-13T15:31:42.0000000-05:00,32.1,32.2");
+            logData.Add("2016-04-13T15:32:42.0000000-05:00,31.1,31.2");
+            logData.Add("2016-04-13T15:38:42.0000000-05:00,30.1,30.2");
+
+            var response = DevKit.Add<LogList, Log>(Log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var addedLog = DevKit.GetAndAssert(Log);
+            Assert.IsFalse(addedLog.ObjectGrowing.GetValueOrDefault());
+
+            // Update
+            var updateLog = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
+            DevKit.InitHeader(updateLog, LogIndexType.datetime);
+            DevKit.InitDataMany(updateLog, DevKit.Mnemonics(Log), DevKit.Units(Log), 5, 1, false, false);
+
+            logData = updateLog.LogData;
+            logData.Clear();
+            logData.Add("2016-04-13T15:35:42.0000000-05:00,35.1,35.2");
+            logData.Add("2016-04-13T15:34:42.0000000-05:00,34.1,34.2");
+            logData.Add("2016-04-13T15:33:42.0000000-05:00,33.1,33.2");
+            logData.Add("2016-04-13T15:36:42.0000000-05:00,36.1,36.2");
+
+            DevKit.UpdateAndAssert(updateLog);
+
+            var result = DevKit.GetAndAssert(updateLog);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+        }
+
+        [TestMethod]
+        public void Log131DataAdapter_UpdateInStore_Append_TimeLog_Data_Set_ObjectGrowing_And_IsActive_State_ExpireGrowingObjects()
+        {
+            AddParents();
+            DevKit.InitHeader(Log, LogIndexType.datetime);
+            DevKit.InitDataMany(Log, DevKit.Mnemonics(Log), DevKit.Units(Log), 5, 1, false, false);
+
+            var logData = Log.LogData;
+            logData.Clear();
+            logData.Add("2016-04-13T15:31:42.0000000-05:00,32.1,32.2");
+            logData.Add("2016-04-13T15:32:42.0000000-05:00,31.1,31.2");
+            logData.Add("2016-04-13T15:38:42.0000000-05:00,30.1,30.2");
+
+            var response = DevKit.Add<LogList, Log>(Log);
+            Assert.AreEqual((short)ErrorCodes.Success, response.Result);
+
+            var addedLog = DevKit.GetAndAssert(Log);
+            Assert.IsFalse(addedLog.ObjectGrowing.GetValueOrDefault());
+
+            // Update
+            var updateLog = DevKit.CreateLog(Log.Uid, null, Log.UidWell, null, Log.UidWellbore, null);
+            DevKit.InitHeader(updateLog, LogIndexType.datetime);
+            DevKit.InitDataMany(updateLog, DevKit.Mnemonics(Log), DevKit.Units(Log), 5, 1, false, false);
+
+            logData = updateLog.LogData;
+            logData.Clear();
+            logData.Add("2016-04-13T15:30:42.0000000-05:00,35.1,35.2");
+            logData.Add("2016-04-13T15:34:42.0000000-05:00,34.1,34.2");
+            logData.Add("2016-04-13T15:33:42.0000000-05:00,33.1,33.2");
+            logData.Add("2016-04-13T15:39:42.0000000-05:00,36.1,36.2");
+
+            DevKit.UpdateAndAssert(updateLog);
+
+            var result = DevKit.GetAndAssert(updateLog);
+            Assert.IsTrue(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
+
+            WitsmlSettings.LogGrowingTimeoutPeriod = GrowingTimeoutPeriod;
+            Thread.Sleep(GrowingTimeoutPeriod * 1000);
+
+            DevKit.Container.Resolve<ObjectGrowingManager>().ExpireGrowingObjects();
+
+            result = DevKit.GetAndAssert(Log);
+            Assert.IsFalse(result.ObjectGrowing.GetValueOrDefault(), "ObjectGrowing");
         }
 
         #region Helper Functions
