@@ -127,7 +127,7 @@ namespace PDS.Witsml.Server.Data.Transactions
                 IdPropertyName = idPropertyName,
                 Action = action,
                 Status = TransactionStatus.Created,
-                CreatedDateTime = DateTime.Now
+                CreatedDateTime = DateTime.UtcNow
             };
 
             if (uri.HasValue)
@@ -301,16 +301,11 @@ namespace PDS.Witsml.Server.Data.Transactions
         /// <returns>Returns an <see cref="MongoDbTransaction" /> instance.</returns>
         private MongoDbTransaction GetActiveTransaction(EtpUri uri)
         {
-            var database = Database ?? _databaseProvider.GetDatabase();
-            var collection = database.GetCollection<MongoDbTransaction>("dbTransaction");
-            var builder = Builders<MongoDbTransaction>.Filter;
-            
-            var filter = builder.Eq("Uri", uri.Uri) & builder.Gt("CreatedDateTime", DateTime.UtcNow.AddMinutes(-1 * ServerTimeoutMinutes));
+            var timeout = DateTime.UtcNow.AddMinutes(-1 * ServerTimeoutMinutes);
 
-            return collection
-                .Find(filter)
-                .Limit(1)
-                .FirstOrDefault();
+            var queryUri = new EtpUri($"{uri}?$filter=CreatedDateTime gt datetime'{timeout:s}Z'");
+
+            return Adapter.GetAll(queryUri).FirstOrDefault();
         }
     }
 }
