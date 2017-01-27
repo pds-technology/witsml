@@ -219,6 +219,7 @@ namespace PDS.Witsml.Server.Data.Logs
         /// <param name="reader">The update reader.</param>
         public void UpdateChannelData(EtpUri uri, ChannelDataReader reader)
         {
+            // TODO: Transaction support needed here
             Logger.Debug($"Updating channel data for URI: {uri}");
 
             // Capture primary index info when auto-creating data object
